@@ -1,0 +1,415 @@
+[
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_BlenderbotForConditionalGeneration_inference/region_006_var_mean_90dcf3bdf8f8_7576d2a6.py",
+    "triton": 25,
+    "cpp": 0,
+    "error": null,
+    "total": 25
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_BlenderbotForCausalLM_inference/region_005_var_mean_90dcf3bdf8f8_91f35bd5.py",
+    "triton": 25,
+    "cpp": 0,
+    "error": null,
+    "total": 25
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_DebertaV2ForMaskedLM_inference/region_011_pointwise_7bbf2ae6d717_d7517139.py",
+    "triton": 24,
+    "cpp": 0,
+    "error": null,
+    "total": 24
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_BartForCausalLM_inference/region_006_var_mean_730a0c330dc3_e3b14c1a.py",
+    "triton": 13,
+    "cpp": 0,
+    "error": null,
+    "total": 13
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_MBartForCausalLM_inference/region_006_var_mean_730a0c330dc3_e3b14c1a.py",
+    "triton": 13,
+    "cpp": 0,
+    "error": null,
+    "total": 13
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_PegasusForCausalLM_inference/region_006_var_mean_c6eaeeacf224_80b21efa.py",
+    "triton": 13,
+    "cpp": 0,
+    "error": null,
+    "total": 13
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_M2M100ForConditionalGeneration_inference/region_006_pointwise_3710970c7549_d7517139.py",
+    "triton": 12,
+    "cpp": 0,
+    "error": null,
+    "total": 12
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_PLBartForCausalLM_inference/region_006_var_mean_66d2a3a30578_1a7afcd0.py",
+    "triton": 7,
+    "cpp": 0,
+    "error": null,
+    "total": 7
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_Qwen_Qwen3-0.6B_inference/region_015_mean_e78bb40350dd_4e6ccf57.py",
+    "triton": 6,
+    "cpp": 0,
+    "error": null,
+    "total": 6
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Qwen/Qwen3-0.6B_inference/region_008_mean_e78bb40350dd_5719658f.py",
+    "triton": 6,
+    "cpp": 0,
+    "error": null,
+    "total": 6
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_DistillGPT2_inference/region_006_var_mean_845b0e25aa9d_da0e57c4.py",
+    "triton": 4,
+    "cpp": 0,
+    "error": null,
+    "total": 4
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_GPT2ForSequenceClassification_inference/region_006_var_mean_845b0e25aa9d_726c16e2.py",
+    "triton": 4,
+    "cpp": 0,
+    "error": null,
+    "total": 4
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_mistralai_Mistral-7B-Instruct-v0.3_inference/region_014_pointwise_f3c6cfe72279_ea461ebf.py",
+    "triton": 4,
+    "cpp": 0,
+    "error": null,
+    "total": 4
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_Qwen_Qwen3-30B-A3B_inference/region_014_any_sum_5af670b2fa5e_20bce9e1.py",
+    "triton": 4,
+    "cpp": 0,
+    "error": null,
+    "total": 4
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_DistilBertForMaskedLM_inference/region_000_amax_sum_471404b70a9a_e0699204.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_DistillGPT2_inference/region_008_amax_sum_4cc1548fbf82_da67baef.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_ElectraForCausalLM_inference/region_000_amax_sum_9de015237f48_0a6affde.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_mistralai_Mistral-7B-Instruct-v0.3_inference/region_011_pointwise_108892bc6e62_8f1de50a.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_deepseek-ai_DeepSeek-V3_inference/region_001_pointwise_672682f95253_7337c280.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_BertForMaskedLM_inference/region_000_amax_sum_471404b70a9a_ef250ee2.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_openai_gpt-oss-20b_inference/region_013_pointwise_1b8e92f2de8a_3af1681a.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_openai_gpt-oss-20b_inference/region_020_pointwise_cf54f177af3d_b579c38e.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_Qwen_Qwen3-0.6B_inference/region_011_mean_c0e8d7954fcb_5c36fc60.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_Qwen_Qwen3-30B-A3B_inference/region_001_pointwise_672682f95253_7337c280.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_Qwen_Qwen3-30B-A3B_inference/region_010_mean_c0e8d7954fcb_adfe3604.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_GoogleFnet_inference/region_000_amax_sum_eb4fe3ac03e0_23f019ef.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_LayoutLMForMaskedLM_inference/region_000_amax_sum_471404b70a9a_ef250ee2.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_MobileBertForMaskedLM_inference/region_000_amax_sum_5f47ac5a111e_6580daad.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_PLBartForCausalLM_inference/region_000_amax_sum_471404b70a9a_843277f4.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_PegasusForCausalLM_inference/region_000_amax_sum_471404b70a9a_700a973c.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Reformer_inference/region_023_pointwise_9045d29b840d_c4926903.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Reformer_inference/region_024_amax_sum_8bfe7a40743d_ac7e5877.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Reformer_inference/region_031_amax_sum_eb4fe3ac03e0_8ec7f98d.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_RobertaForCausalLM_inference/region_000_amax_sum_9de015237f48_7dd627fd.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Qwen/Qwen3-0.6B_inference/region_005_mean_c0e8d7954fcb_fcbe8ae0.py",
+    "triton": 3,
+    "cpp": 0,
+    "error": null,
+    "total": 3
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_BlenderbotForConditionalGeneration_inference/region_000_amax_sum_ad9e8381f100_f54a7225.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_DebertaV2ForMaskedLM_inference/region_000_amax_sum_eb4fe3ac03e0_f773c9d8.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_GPT2ForSequenceClassification_inference/region_000_amax_argmax_sum_cec6d715258d_03f102c9.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_AlbertForMaskedLM_inference/region_000_amax_sum_eb4fe3ac03e0_d46ab65d.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_AllenaiLongformerBase_inference/region_012_pointwise_8584b267cedb_6f022578.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_AllenaiLongformerBase_inference/region_014_pointwise_fa4b806919cc_6f022578.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_AllenaiLongformerBase_inference/region_015_pointwise_e3762f6e3345_6f022578.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_AllenaiLongformerBase_inference/region_019_amax_sum_471404b70a9a_9fabe7a2.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_BartForCausalLM_inference/region_000_amax_sum_471404b70a9a_9fabe7a2.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_BlenderbotForCausalLM_inference/region_000_amax_sum_eb4fe3ac03e0_9d47d10e.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_openai_gpt-oss-20b_inference/region_004_mean_f8893e7c0621_33f7488e.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/vllm_openai_gpt-oss-20b_inference/region_011_amax_sum_c0c1b95fe65e_63302950.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_GPTNeoForCausalLM_inference/region_000_amax_sum_9de015237f48_dacea998.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_GPTNeoForSequenceClassification_inference/region_000_amax_argmax_sum_cec6d715258d_7127cf2c.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_M2M100ForConditionalGeneration_inference/region_000_amax_sum_eb4fe3ac03e0_248255b1.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_MBartForCausalLM_inference/region_000_amax_sum_471404b70a9a_9fabe7a2.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_MT5ForConditionalGeneration_inference/region_000_amax_sum_eb4fe3ac03e0_b644f816.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_MegatronBertForCausalLM_inference/region_000_amax_sum_8134ec8b7263_ea1a5acb.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_OPTForCausalLM_inference/region_000_amax_sum_8134ec8b7263_6de12afb.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Reformer_inference/region_005_max_ad5a08069afb_a9daf673.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Reformer_inference/region_016_pointwise_f6c9d8c5f32b_4c0ed329.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Reformer_inference/region_025_mean_e22765c9c98c_eeefc40a.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Reformer_inference/region_026_argmax_09f9e9c2268d_79ca7511.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/output/aten_repros/dynamo_Qwen/Qwen3-0.6B_inference/region_000_amax_sum_436745ec8e1e_42e893c1.py",
+    "triton": 2,
+    "cpp": 0,
+    "error": null,
+    "total": 2
+  }
+]

@@ -1,0 +1,816 @@
+[
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4096, 1), (151936, 4096)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4096, 1), (151936, 4096)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_Qwen3-0.6B_inference__region_000_amax_sum_436745ec8e1e_42e893c1.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4096, 1), (30000, 4096)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4096, 1), (30000, 4096)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_AlbertForMaskedLM_inference__region_000_amax_sum_eb4fe3ac03e0_d46ab65d.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 2,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_AllenaiLongformerBase_inference__region_012_pointwise_8584b267cedb_6f022578.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 2,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_AllenaiLongformerBase_inference__region_014_pointwise_fa4b806919cc_6f022578.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 2,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_AllenaiLongformerBase_inference__region_015_pointwise_e3762f6e3345_6f022578.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (8192, 1), (50265, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (8192, 1), (50265, 8192)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_AllenaiLongformerBase_inference__region_019_amax_sum_471404b70a9a_9fabe7a2.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (8192, 1), (50265, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (8192, 1), (50265, 8192)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_BartForCausalLM_inference__region_000_amax_sum_471404b70a9a_9fabe7a2.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4096, 1), (8008, 4096)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4096, 1), (8008, 4096)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_BlenderbotForCausalLM_inference__region_000_amax_sum_eb4fe3ac03e0_9d47d10e.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (2048, 1), (8008, 2048)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (2048, 1), (8008, 2048)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_BlenderbotForConditionalGeneration_inference__region_000_amax_sum_ad9e8381f100_f54a7225.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4096, 1), (128100, 4096)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4096, 1), (128100, 4096)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_DebertaV2ForMaskedLM_inference__region_000_amax_sum_eb4fe3ac03e0_f773c9d8.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (8, 1), (1024, 8)",
+      "[DEBUG]:cannot fuse opN with opN_opN_opN: numel/rnumel mismatch (reduce) (8, 1), (1024, 8)"
+    ],
+    "reason_count": 3,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 4 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_GPT2ForSequenceClassification_inference__region_000_amax_argmax_sum_cec6d715258d_03f102c9.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4096, 1), (50257, 4096)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4096, 1), (50257, 4096)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_GPTNeoForCausalLM_inference__region_000_amax_sum_9de015237f48_dacea998.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (32, 1), (128, 32)",
+      "[DEBUG]:cannot fuse opN with opN_opN_opN: numel/rnumel mismatch (reduce) (32, 1), (128, 32)"
+    ],
+    "reason_count": 3,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 4 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_GPTNeoForSequenceClassification_inference__region_000_amax_argmax_sum_cec6d715258d_7127cf2c.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (8192, 1), (128112, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (8192, 1), (128112, 8192)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_M2M100ForConditionalGeneration_inference__region_000_amax_sum_eb4fe3ac03e0_248255b1.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (8192, 1), (50265, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (8192, 1), (50265, 8192)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_MBartForCausalLM_inference__region_000_amax_sum_471404b70a9a_9fabe7a2.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4096, 1), (250112, 4096)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4096, 1), (250112, 4096)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_MT5ForConditionalGeneration_inference__region_000_amax_sum_eb4fe3ac03e0_b644f816.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (8192, 1), (29056, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (8192, 1), (29056, 8192)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_MegatronBertForCausalLM_inference__region_000_amax_sum_8134ec8b7263_ea1a5acb.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (8192, 1), (50272, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (8192, 1), (50272, 8192)"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 5 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_OPTForCausalLM_inference__region_000_amax_sum_8134ec8b7263_6de12afb.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4, 1), (8192, 4)"
+    ],
+    "reason_count": 2,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_Reformer_inference__region_005_max_ad5a08069afb_a9daf673.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 2,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_Reformer_inference__region_016_pointwise_f6c9d8c5f32b_4c0ed329.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN: no shared data"
+    ],
+    "reason_count": 13,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 8 nodes into 6 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 6 nodes into 6 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_Reformer_inference__region_025_mean_e22765c9c98c_eeefc40a.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 8 nodes into 5 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 5 nodes into 5 nodes"
+    ],
+    "error": null,
+    "file": "k02_dynamo_Reformer_inference__region_026_argmax_09f9e9c2268d_79ca7511.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN: no shared data"
+    ],
+    "reason_count": 3,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 3 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_vllm_openai_gpt-oss-20b_inference__region_004_mean_f8893e7c0621_33f7488e.py"
+  },
+  {
+    "kernels": 2,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: nodes numel incompatibility",
+      "[DEBUG]:cannot fuse opN with opN_opN: nodes numel incompatibility"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 3 nodes into 2 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 2 nodes into 2 nodes"
+    ],
+    "error": null,
+    "file": "k02_vllm_openai_gpt-oss-20b_inference__region_011_amax_sum_c0c1b95fe65e_63302950.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: intermediate nodes between node1 & node2",
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN_opN_opN: no shared data"
+    ],
+    "reason_count": 9,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_Qwen3-0.6B_inference__region_005_mean_c0e8d7954fcb_fcbe8ae0.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (16384, 2), (30522, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_BertForMaskedLM_inference__region_000_amax_sum_471404b70a9a_ef250ee2.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4, 1), (8192, 4)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (32768, 4), (30522, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4, 1), (8192, 4)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_DistilBertForMaskedLM_inference__region_000_amax_sum_471404b70a9a_e0699204.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (16384, 2), (50257, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_DistillGPT2_inference__region_008_amax_sum_4cc1548fbf82_da67baef.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4, 1), (8192, 4)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (32768, 4), (30522, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4, 1), (8192, 4)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_ElectraForCausalLM_inference__region_000_amax_sum_9de015237f48_0a6affde.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (16384, 2), (32000, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_GoogleFnet_inference__region_000_amax_sum_eb4fe3ac03e0_23f019ef.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (16384, 2), (30522, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_LayoutLMForMaskedLM_inference__region_000_amax_sum_471404b70a9a_ef250ee2.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4, 1), (8192, 4)",
+      "[DEBUG]:cannot fuse opN_opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (32768, 4), (30522, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4, 1), (8192, 4)"
+    ],
+    "reason_count": 14,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 8 nodes into 4 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 4 nodes into 4 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_MobileBertForMaskedLM_inference__region_000_amax_sum_5f47ac5a111e_6580daad.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (16384, 2), (50005, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_PLBartForCausalLM_inference__region_000_amax_sum_471404b70a9a_843277f4.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (16384, 2), (50265, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_PegasusForCausalLM_inference__region_000_amax_sum_471404b70a9a_700a973c.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 4 nodes into 4 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_Reformer_inference__region_023_pointwise_9045d29b840d_c4926903.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: intermediate nodes between node1 & node2",
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN_opN_opN: intermediate nodes between node1 & node2",
+      "[DEBUG]:cannot fuse opN with opN_opN_opN: no shared data"
+    ],
+    "reason_count": 14,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 6 nodes into 4 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 4 nodes into 4 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_Reformer_inference__region_024_amax_sum_8bfe7a40743d_ac7e5877.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (4, 1), (8192, 4)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (32768, 4), (320, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (4, 1), (8192, 4)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_Reformer_inference__region_031_amax_sum_eb4fe3ac03e0_8ec7f98d.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: numel/rnumel mismatch (reduce) (16384, 2), (50265, 8192)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)"
+    ],
+    "reason_count": 8,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_dynamo_RobertaForCausalLM_inference__region_000_amax_sum_9de015237f48_7dd627fd.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: intermediate nodes between node1 & node2",
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN_opN_opN: no shared data"
+    ],
+    "reason_count": 9,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_vllm_Qwen_Qwen3-0.6B_inference__region_011_mean_c0e8d7954fcb_5c36fc60.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 2,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 4 nodes into 4 nodes"
+    ],
+    "error": null,
+    "file": "k03_vllm_Qwen_Qwen3-30B-A3B_inference__region_001_pointwise_672682f95253_7337c280.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: intermediate nodes between node1 & node2",
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN_opN_opN: no shared data"
+    ],
+    "reason_count": 9,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 3 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_vllm_Qwen_Qwen3-30B-A3B_inference__region_010_mean_c0e8d7954fcb_adfe3604.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 2,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 4 nodes into 4 nodes"
+    ],
+    "error": null,
+    "file": "k03_vllm_deepseek-ai_DeepSeek-V3_inference__region_001_pointwise_672682f95253_7337c280.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_vllm_mistralai_Mistral-7B-Instruct-v0.3_inference__region_011_pointwise_108892bc6e62_8f1de50a.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_vllm_openai_gpt-oss-20b_inference__region_013_pointwise_1b8e92f2de8a_3af1681a.py"
+  },
+  {
+    "kernels": 3,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 4,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 3 nodes into 3 nodes"
+    ],
+    "error": null,
+    "file": "k03_vllm_openai_gpt-oss-20b_inference__region_020_pointwise_cf54f177af3d_b579c38e.py"
+  },
+  {
+    "kernels": 4,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 5 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 5 nodes into 5 nodes"
+    ],
+    "error": null,
+    "file": "k04_dynamo_DistillGPT2_inference__region_006_var_mean_845b0e25aa9d_da0e57c4.py"
+  },
+  {
+    "kernels": 4,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 7 nodes into 5 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 5 nodes into 5 nodes"
+    ],
+    "error": null,
+    "file": "k04_dynamo_GPT2ForSequenceClassification_inference__region_006_var_mean_845b0e25aa9d_726c16e2.py"
+  },
+  {
+    "kernels": 4,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN with opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN with opN_opN_opN: numel/rnumel mismatch (reduce) (2, 1), (8192, 2)"
+    ],
+    "reason_count": 10,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 10 nodes into 4 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 4 nodes into 4 nodes"
+    ],
+    "error": null,
+    "file": "k04_vllm_Qwen_Qwen3-30B-A3B_inference__region_014_any_sum_5af670b2fa5e_20bce9e1.py"
+  },
+  {
+    "kernels": 4,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: no shared data"
+    ],
+    "reason_count": 1,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 6 nodes into 6 nodes"
+    ],
+    "error": null,
+    "file": "k04_vllm_mistralai_Mistral-7B-Instruct-v0.3_inference__region_014_pointwise_f3c6cfe72279_ea461ebf.py"
+  },
+  {
+    "kernels": 6,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: intermediate nodes between node1 & node2",
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN_opN_opN: no shared data"
+    ],
+    "reason_count": 11,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 11 nodes into 7 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 7 nodes into 7 nodes"
+    ],
+    "error": null,
+    "file": "k06_Qwen3-0.6B_inference__region_008_mean_e78bb40350dd_5719658f.py"
+  },
+  {
+    "kernels": 6,
+    "reasons": [
+      "[DEBUG]:cannot fuse opN with opN: intermediate nodes between node1 & node2",
+      "[DEBUG]:cannot fuse opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN: no shared data",
+      "[DEBUG]:cannot fuse opN_opN_opN with opN_opN_opN: no shared data"
+    ],
+    "reason_count": 11,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 11 nodes into 7 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 7 nodes into 7 nodes"
+    ],
+    "error": null,
+    "file": "k06_vllm_Qwen_Qwen3-0.6B_inference__region_015_mean_e78bb40350dd_4e6ccf57.py"
+  },
+  {
+    "kernels": 7,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 9 nodes into 7 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 7 nodes into 7 nodes"
+    ],
+    "error": null,
+    "file": "k07_dynamo_PLBartForCausalLM_inference__region_006_var_mean_66d2a3a30578_1a7afcd0.py"
+  },
+  {
+    "kernels": 12,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 12 nodes into 12 nodes"
+    ],
+    "error": null,
+    "file": "k12_dynamo_M2M100ForConditionalGeneration_inference__region_006_pointwise_3710970c7549_d7517139.py"
+  },
+  {
+    "kernels": 13,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 15 nodes into 13 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 13 nodes into 13 nodes"
+    ],
+    "error": null,
+    "file": "k13_dynamo_BartForCausalLM_inference__region_006_var_mean_730a0c330dc3_e3b14c1a.py"
+  },
+  {
+    "kernels": 13,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 15 nodes into 13 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 13 nodes into 13 nodes"
+    ],
+    "error": null,
+    "file": "k13_dynamo_MBartForCausalLM_inference__region_006_var_mean_730a0c330dc3_e3b14c1a.py"
+  },
+  {
+    "kernels": 13,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 15 nodes into 13 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 13 nodes into 13 nodes"
+    ],
+    "error": null,
+    "file": "k13_dynamo_PegasusForCausalLM_inference__region_006_var_mean_c6eaeeacf224_80b21efa.py"
+  },
+  {
+    "kernels": 24,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 24 nodes into 24 nodes"
+    ],
+    "error": null,
+    "file": "k24_dynamo_DebertaV2ForMaskedLM_inference__region_011_pointwise_7bbf2ae6d717_d7517139.py"
+  },
+  {
+    "kernels": 25,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 27 nodes into 25 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 25 nodes into 25 nodes"
+    ],
+    "error": null,
+    "file": "k25_dynamo_BlenderbotForCausalLM_inference__region_005_var_mean_90dcf3bdf8f8_91f35bd5.py"
+  },
+  {
+    "kernels": 25,
+    "reasons": [],
+    "reason_count": 0,
+    "fused_into": [
+      "[DEBUG]:completed fusion round (1/10): fused 27 nodes into 25 nodes",
+      "[DEBUG]:completed fusion round (2/10): fused 25 nodes into 25 nodes"
+    ],
+    "error": null,
+    "file": "k25_dynamo_BlenderbotForConditionalGeneration_inference__region_006_var_mean_90dcf3bdf8f8_7576d2a6.py"
+  }
+]
