@@ -1,0 +1,54 @@
+"""Inspect subblocks of the LoopBody."""
+import sys
+sys.path.insert(0, "/tmp/pytorch-work")
+import torch
+import torch._inductor.config as cfg
+cfg.force_disable_caches = True
+cfg.prefer_concat_kernel_shared_reads = False
+
+B, S, H, D = 4, 512, 32, 128
+D_HALF = D // 2
+
+class LlamaRoPE(torch.nn.Module):
+    def forward(self, x, cos, sin):
+        cos_e = cos.unsqueeze(0).unsqueeze(0)
+        sin_e = sin.unsqueeze(0).unsqueeze(0)
+        x2 = x[..., D_HALF:]
+        x1 = x[..., :D_HALF]
+        rotated = torch.cat([-x2, x1], dim=-1)
+        return x * cos_e + rotated * sin_e
+
+x = torch.randn(B, H, S, D, dtype=torch.bfloat16, device='cuda')
+cos = torch.randn(S, D, dtype=torch.bfloat16, device='cuda')
+sin = torch.randn(S, D, dtype=torch.bfloat16, device='cuda')
+
+from torch._inductor import scheduler as sched_mod
+
+def my_pre_fusion_pass(nodes):
+    for node in nodes:
+        if not isinstance(node, sched_mod.SchedulerNode):
+            continue
+        if not hasattr(node, '_body'):
+            continue
+        body = node._body
+        print(f"Node: {node.get_name()}, sizes={node._sizes}")
+        print(f"\nSubblocks:")
+        for name, sb in body.subblocks.items():
+            print(f"  {name}:")
+            print(f"    {sb.graph}")
+        print(f"\nSubmodules (non-get_index):")
+        for name, sm in body.submodules.items():
+            if name != 'get_index':
+                print(f"  {name}: {sm}")
+        print(f"\nMemory usage:")
+        for key, entries in body.memory_usage.items():
+            if entries:
+                print(f"  {key}: {entries}")
+    return nodes
+
+cfg._pre_fusion_custom_pass = my_pre_fusion_pass
+
+torch._dynamo.reset()
+compiled = torch.compile(LlamaRoPE().cuda())
+with torch.no_grad():
+    out = compiled(x, cos, sin)
