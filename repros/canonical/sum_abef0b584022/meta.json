@@ -18,10 +18,11 @@
     "prims.convert_element_type.default",
     "prims.fma.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "dynamo_MT5ForConditionalGeneration",
     "dynamo_T5ForConditionalGeneration",
-    "dynamo_T5Small"
+    "dynamo_T5Small",
+    "hf_t5_base_train"
   ]
 }

@@ -29,8 +29,10 @@
     "aten.sub.Tensor",
     "aten.tanh.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "dynamo_AlbertForMaskedLM"
+    "dynamo_AlbertForMaskedLM",
+    "hf_DistillGPT2_training",
+    "hf_GPT2ForSequenceClassification_training"
   ]
 }

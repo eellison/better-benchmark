@@ -14,9 +14,11 @@
     "aten.slice.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
     "dynamo_DistilBertForMaskedLM",
-    "dynamo_DistilBertForMaskedLM_inference"
+    "dynamo_DistilBertForMaskedLM_inference",
+    "hf_DistilBertForMaskedLM_inference",
+    "hf_DistilBertForMaskedLM_training"
   ]
 }

@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "a478cc89108b",
+  "configs": {
+    "hf_bartforcausallm_training_d7517139": {
+      "inputs": [],
+      "source_models": [
+        "hf_BartForCausalLM_training"
+      ],
+      "shape_hash": "d7517139"
+    },
+    "hf_blenderbotforcausallm_training_d7517139": {
+      "inputs": [],
+      "source_models": [
+        "hf_BlenderbotForCausalLM_training"
+      ],
+      "shape_hash": "d7517139"
+    },
+    "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_training_d7517139": {
+      "inputs": [],
+      "source_models": [
+        "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_training"
+      ],
+      "shape_hash": "d7517139"
+    }
+  }
+}

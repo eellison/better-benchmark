@@ -105,6 +105,41 @@
         "qwen2_0.5b_inference"
       ],
       "shape_hash": "6be633b6"
+    },
+    "genai_patterns_7a1e675a": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8192,
+            11008
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8192,
+            11008
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            11008
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_patterns"
+      ],
+      "shape_hash": "7a1e675a"
     }
   }
 }

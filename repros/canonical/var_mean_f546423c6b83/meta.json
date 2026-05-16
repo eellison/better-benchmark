@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "f546423c6b83",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.mul.Tensor",
+    "aten.var_mean.correction",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_BlenderbotForCausalLM_inference"
+  ]
+}

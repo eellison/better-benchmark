@@ -20,10 +20,11 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "dynamo_AllenaiLongformerBase",
     "dynamo_AllenaiLongformerBase_inference",
-    "hf_AllenaiLongformerBase_inference"
+    "hf_AllenaiLongformerBase_inference",
+    "hf_AllenaiLongformerBase_training"
   ]
 }

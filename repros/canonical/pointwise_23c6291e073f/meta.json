@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "23c6291e073f",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_BartForCausalLM_training"
+  ]
+}

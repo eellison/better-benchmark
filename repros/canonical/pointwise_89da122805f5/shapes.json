@@ -17,6 +17,24 @@
         "tlparse_torchbench_s8_g21"
       ],
       "shape_hash": "55f85091"
+    },
+    "genai_patterns_08cb3aa0": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            2048,
+            8192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_patterns"
+      ],
+      "shape_hash": "08cb3aa0"
     }
   }
 }

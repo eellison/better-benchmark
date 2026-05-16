@@ -1,0 +1,41 @@
+{
+  "pattern_hash": "24cd1d7c75a9",
+  "configs": {
+    "hf_bartforcausallm_inference_e3b14c1a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            50265,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1026,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_BartForCausalLM_inference"
+      ],
+      "shape_hash": "e3b14c1a"
+    }
+  }
+}

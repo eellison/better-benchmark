@@ -30,8 +30,10 @@
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
+    "hf_BartForCausalLM_inference",
+    "hf_BlenderbotForCausalLM_inference",
     "tlparse_huggingface_s1_g5"
   ]
 }

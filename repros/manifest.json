@@ -19832,6 +19832,71 @@
           "pattern_hash": "0a44c4081351",
           "shape_config": "hf_albertformaskedlm_inference_fe10a6a0",
           "original_file": "region_012_var_mean_0a44c4081351_fe10a6a0.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_inference_14dcab86",
+          "original_file": "region_000_pointwise_741c0d7d8d11_14dcab86.py"
+        },
+        {
+          "pattern_hash": "757a32aa7b72",
+          "shape_config": "hf_albertformaskedlm_inference_8405719f",
+          "original_file": "region_001_var_mean_757a32aa7b72_8405719f.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_inference_34217606",
+          "original_file": "region_002_pointwise_741c0d7d8d11_34217606.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_albertformaskedlm_inference_369a51f8",
+          "original_file": "region_003_var_mean_a7cbd072693b_369a51f8.py"
+        },
+        {
+          "pattern_hash": "8a65d293af2c",
+          "shape_config": "hf_albertformaskedlm_inference_6a76fd57",
+          "original_file": "region_004_pointwise_8a65d293af2c_6a76fd57.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_inference_25ab4759",
+          "original_file": "region_005_pointwise_741c0d7d8d11_25ab4759.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_albertformaskedlm_inference_b64ee112",
+          "original_file": "region_006_pointwise_5d11bd189324_b64ee112.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "hf_albertformaskedlm_inference_3813eb92",
+          "original_file": "region_007_amax_any_sum_caf9c95ee549_3813eb92.py"
+        },
+        {
+          "pattern_hash": "b260987d88be",
+          "shape_config": "hf_albertformaskedlm_inference_840e3665",
+          "original_file": "region_008_pointwise_b260987d88be_840e3665.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "hf_albertformaskedlm_inference_95a1eb23",
+          "original_file": "region_009_pointwise_16e058489060_95a1eb23.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "hf_albertformaskedlm_inference_e47c6e69",
+          "original_file": "region_010_amax_any_sum_7c0d8ceb3e2b_e47c6e69.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_inference_f21127e6",
+          "original_file": "region_011_pointwise_741c0d7d8d11_f21127e6.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_albertformaskedlm_inference_fe10a6a0",
+          "original_file": "region_012_var_mean_0a44c4081351_fe10a6a0.py"
         }
       ]
     },
@@ -20458,6 +20523,161 @@
           "pattern_hash": "907390853538",
           "shape_config": "hf_albertformaskedlm_training_4133cae9",
           "original_file": "region_030_sum_907390853538_4133cae9.py"
+        },
+        {
+          "pattern_hash": "5d00adc93963",
+          "shape_config": "hf_albertformaskedlm_training_9f284891",
+          "original_file": "region_000_amax_sum_5d00adc93963_9f284891.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_training_14dcab86",
+          "original_file": "region_001_pointwise_741c0d7d8d11_14dcab86.py"
+        },
+        {
+          "pattern_hash": "757a32aa7b72",
+          "shape_config": "hf_albertformaskedlm_training_8405719f",
+          "original_file": "region_002_var_mean_757a32aa7b72_8405719f.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_training_34217606",
+          "original_file": "region_003_pointwise_741c0d7d8d11_34217606.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_albertformaskedlm_training_369a51f8",
+          "original_file": "region_004_var_mean_a7cbd072693b_369a51f8.py"
+        },
+        {
+          "pattern_hash": "a87f35a59ad4",
+          "shape_config": "hf_albertformaskedlm_training_9f96617c",
+          "original_file": "region_005_pointwise_a87f35a59ad4_9f96617c.py"
+        },
+        {
+          "pattern_hash": "86432a5d8e65",
+          "shape_config": "hf_albertformaskedlm_training_bce56cb6",
+          "original_file": "region_006_pointwise_86432a5d8e65_bce56cb6.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_albertformaskedlm_training_f63b52c1",
+          "original_file": "region_007_pointwise_35deec51cf28_f63b52c1.py"
+        },
+        {
+          "pattern_hash": "410aa50553dc",
+          "shape_config": "hf_albertformaskedlm_training_8754488e",
+          "original_file": "region_008_amax_any_sum_410aa50553dc_8754488e.py"
+        },
+        {
+          "pattern_hash": "9bfbb9b03de3",
+          "shape_config": "hf_albertformaskedlm_training_5d62b8b9",
+          "original_file": "region_009_pointwise_9bfbb9b03de3_5d62b8b9.py"
+        },
+        {
+          "pattern_hash": "8a65d293af2c",
+          "shape_config": "hf_albertformaskedlm_training_6a76fd57",
+          "original_file": "region_010_pointwise_8a65d293af2c_6a76fd57.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_training_25ab4759",
+          "original_file": "region_011_pointwise_741c0d7d8d11_25ab4759.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_albertformaskedlm_training_b64ee112",
+          "original_file": "region_012_pointwise_5d11bd189324_b64ee112.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "hf_albertformaskedlm_training_e47c6e69",
+          "original_file": "region_013_amax_any_sum_7c0d8ceb3e2b_e47c6e69.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "hf_albertformaskedlm_training_9dc9810c",
+          "original_file": "region_014_pointwise_6bc663ef619c_9dc9810c.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_training_f21127e6",
+          "original_file": "region_015_pointwise_741c0d7d8d11_f21127e6.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_albertformaskedlm_training_fe10a6a0",
+          "original_file": "region_016_var_mean_0a44c4081351_fe10a6a0.py"
+        },
+        {
+          "pattern_hash": "44437330b41d",
+          "shape_config": "hf_albertformaskedlm_training_8269d65b",
+          "original_file": "region_017_sum_44437330b41d_8269d65b.py"
+        },
+        {
+          "pattern_hash": "6f77da90df51",
+          "shape_config": "hf_albertformaskedlm_training_3fed70cc",
+          "original_file": "region_018_pointwise_6f77da90df51_3fed70cc.py"
+        },
+        {
+          "pattern_hash": "ea60513b483f",
+          "shape_config": "hf_albertformaskedlm_training_686ebba1",
+          "original_file": "region_019_pointwise_ea60513b483f_686ebba1.py"
+        },
+        {
+          "pattern_hash": "c2ee9c72bf0f",
+          "shape_config": "hf_albertformaskedlm_training_88016393",
+          "original_file": "region_020_sum_c2ee9c72bf0f_88016393.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_albertformaskedlm_training_6f365176",
+          "original_file": "region_021_pointwise_35deec51cf28_6f365176.py"
+        },
+        {
+          "pattern_hash": "eb1e62b4f15c",
+          "shape_config": "hf_albertformaskedlm_training_09e879e9",
+          "original_file": "region_022_sum_eb1e62b4f15c_09e879e9.py"
+        },
+        {
+          "pattern_hash": "4715c8aa933a",
+          "shape_config": "hf_albertformaskedlm_training_6a76fd57",
+          "original_file": "region_023_pointwise_4715c8aa933a_6a76fd57.py"
+        },
+        {
+          "pattern_hash": "8d5ae4b07d24",
+          "shape_config": "hf_albertformaskedlm_training_11b7efad",
+          "original_file": "region_024_sum_8d5ae4b07d24_11b7efad.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "hf_albertformaskedlm_training_26906a14",
+          "original_file": "region_025_pointwise_5542dd403943_26906a14.py"
+        },
+        {
+          "pattern_hash": "fdabe6e09a94",
+          "shape_config": "hf_albertformaskedlm_training_d0c8f988",
+          "original_file": "region_026_sum_fdabe6e09a94_d0c8f988.py"
+        },
+        {
+          "pattern_hash": "f12cf175e991",
+          "shape_config": "hf_albertformaskedlm_training_cc8cb662",
+          "original_file": "region_027_pointwise_f12cf175e991_cc8cb662.py"
+        },
+        {
+          "pattern_hash": "1435d60b2b68",
+          "shape_config": "hf_albertformaskedlm_training_682c9572",
+          "original_file": "region_028_sum_1435d60b2b68_682c9572.py"
+        },
+        {
+          "pattern_hash": "65117864cc0d",
+          "shape_config": "hf_albertformaskedlm_training_cdbdd9b1",
+          "original_file": "region_029_sum_65117864cc0d_cdbdd9b1.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_albertformaskedlm_training_4133cae9",
+          "original_file": "region_030_sum_907390853538_4133cae9.py"
         }
       ]
     },
@@ -20542,6 +20762,3378 @@
           "pattern_hash": "0a1bc21703bb",
           "shape_config": "hf_allenailongformerbase_inference_a4155d35",
           "original_file": "region_015_var_mean_0a1bc21703bb_a4155d35.py"
+        },
+        {
+          "pattern_hash": "f92f9bc9e359",
+          "shape_config": "hf_allenailongformerbase_inference_41fe5c52",
+          "original_file": "region_000_pointwise_f92f9bc9e359_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "310825c3fc14",
+          "shape_config": "hf_allenailongformerbase_inference_1c474c92",
+          "original_file": "region_001_var_mean_310825c3fc14_1c474c92.py"
+        },
+        {
+          "pattern_hash": "de5792c05f72",
+          "shape_config": "hf_allenailongformerbase_inference_0931dbc0",
+          "original_file": "region_002_pointwise_de5792c05f72_0931dbc0.py"
+        },
+        {
+          "pattern_hash": "47f307d449f8",
+          "shape_config": "hf_allenailongformerbase_inference_0a3b54e6",
+          "original_file": "region_003_any_47f307d449f8_0a3b54e6.py"
+        },
+        {
+          "pattern_hash": "7b4ab1f25235",
+          "shape_config": "hf_allenailongformerbase_inference_41fe5c52",
+          "original_file": "region_004_pointwise_7b4ab1f25235_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_allenailongformerbase_inference_40b93261",
+          "original_file": "region_005_var_mean_a7cbd072693b_40b93261.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_allenailongformerbase_inference_69c9e065",
+          "original_file": "region_006_pointwise_983a9e1e3bcd_69c9e065.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_allenailongformerbase_inference_1fe93c0c",
+          "original_file": "region_007_pointwise_741c0d7d8d11_1fe93c0c.py"
+        },
+        {
+          "pattern_hash": "585215b2d3df",
+          "shape_config": "hf_allenailongformerbase_inference_8dfe6e75",
+          "original_file": "region_008_var_mean_585215b2d3df_8dfe6e75.py"
+        },
+        {
+          "pattern_hash": "1972f8627203",
+          "shape_config": "hf_allenailongformerbase_inference_b2d771a1",
+          "original_file": "region_009_pointwise_1972f8627203_b2d771a1.py"
+        },
+        {
+          "pattern_hash": "72e4203bc120",
+          "shape_config": "hf_allenailongformerbase_inference_e2da0436",
+          "original_file": "region_010_amax_sum_72e4203bc120_e2da0436.py"
+        },
+        {
+          "pattern_hash": "7a52d2b39d46",
+          "shape_config": "hf_allenailongformerbase_inference_73e1af17",
+          "original_file": "region_011_pointwise_7a52d2b39d46_73e1af17.py"
+        },
+        {
+          "pattern_hash": "03d0fed4f87d",
+          "shape_config": "hf_allenailongformerbase_inference_56bddb67",
+          "original_file": "region_012_pointwise_03d0fed4f87d_56bddb67.py"
+        },
+        {
+          "pattern_hash": "fa3f1bab3fdf",
+          "shape_config": "hf_allenailongformerbase_inference_9b7fe6ae",
+          "original_file": "region_013_pointwise_fa3f1bab3fdf_9b7fe6ae.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_allenailongformerbase_inference_ea48c63a",
+          "original_file": "region_014_pointwise_741c0d7d8d11_ea48c63a.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_allenailongformerbase_inference_a4155d35",
+          "original_file": "region_015_var_mean_0a1bc21703bb_a4155d35.py"
+        }
+      ]
+    },
+    "hf_AllenaiLongformerBase_training": {
+      "repros": [
+        {
+          "pattern_hash": "86a7bf7127b6",
+          "shape_config": "hf_allenailongformerbase_training_41fe5c52",
+          "original_file": "region_000_pointwise_86a7bf7127b6_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "310825c3fc14",
+          "shape_config": "hf_allenailongformerbase_training_1c474c92",
+          "original_file": "region_001_var_mean_310825c3fc14_1c474c92.py"
+        },
+        {
+          "pattern_hash": "de5792c05f72",
+          "shape_config": "hf_allenailongformerbase_training_0931dbc0",
+          "original_file": "region_002_pointwise_de5792c05f72_0931dbc0.py"
+        },
+        {
+          "pattern_hash": "47f307d449f8",
+          "shape_config": "hf_allenailongformerbase_training_0a3b54e6",
+          "original_file": "region_003_any_47f307d449f8_0a3b54e6.py"
+        },
+        {
+          "pattern_hash": "b20fde10c078",
+          "shape_config": "hf_allenailongformerbase_training_fb339042",
+          "original_file": "region_004_pointwise_b20fde10c078_fb339042.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_allenailongformerbase_training_31a723d2",
+          "original_file": "region_005_var_mean_a41dace406c0_31a723d2.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_allenailongformerbase_training_69c9e065",
+          "original_file": "region_006_pointwise_983a9e1e3bcd_69c9e065.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_allenailongformerbase_training_1fe93c0c",
+          "original_file": "region_007_pointwise_741c0d7d8d11_1fe93c0c.py"
+        },
+        {
+          "pattern_hash": "91ebe95fc9a1",
+          "shape_config": "hf_allenailongformerbase_training_31824441",
+          "original_file": "region_008_var_mean_91ebe95fc9a1_31824441.py"
+        },
+        {
+          "pattern_hash": "1972f8627203",
+          "shape_config": "hf_allenailongformerbase_training_b2d771a1",
+          "original_file": "region_009_pointwise_1972f8627203_b2d771a1.py"
+        },
+        {
+          "pattern_hash": "46a9ad66e602",
+          "shape_config": "hf_allenailongformerbase_training_f2fae170",
+          "original_file": "region_010_amax_sum_46a9ad66e602_f2fae170.py"
+        },
+        {
+          "pattern_hash": "6fd2e7e81344",
+          "shape_config": "hf_allenailongformerbase_training_5d81550e",
+          "original_file": "region_011_pointwise_6fd2e7e81344_5d81550e.py"
+        },
+        {
+          "pattern_hash": "902b077e023a",
+          "shape_config": "hf_allenailongformerbase_training_56bddb67",
+          "original_file": "region_012_pointwise_902b077e023a_56bddb67.py"
+        },
+        {
+          "pattern_hash": "8f57e3556aea",
+          "shape_config": "hf_allenailongformerbase_training_e2da0436",
+          "original_file": "region_013_amax_sum_8f57e3556aea_e2da0436.py"
+        },
+        {
+          "pattern_hash": "c867fa050a60",
+          "shape_config": "hf_allenailongformerbase_training_9b7fe6ae",
+          "original_file": "region_014_pointwise_c867fa050a60_9b7fe6ae.py"
+        },
+        {
+          "pattern_hash": "1e2fa4dc55ba",
+          "shape_config": "hf_allenailongformerbase_training_bdf402fe",
+          "original_file": "region_015_amax_sum_1e2fa4dc55ba_bdf402fe.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_allenailongformerbase_training_ea48c63a",
+          "original_file": "region_016_pointwise_741c0d7d8d11_ea48c63a.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_allenailongformerbase_training_a4155d35",
+          "original_file": "region_017_var_mean_0a1bc21703bb_a4155d35.py"
+        },
+        {
+          "pattern_hash": "a57bc5a8a744",
+          "shape_config": "hf_allenailongformerbase_training_4fc67c63",
+          "original_file": "region_018_sum_a57bc5a8a744_4fc67c63.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_allenailongformerbase_training_c9ccbd3d",
+          "original_file": "region_019_sum_08bd81f4d8b9_c9ccbd3d.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_allenailongformerbase_training_51a24e51",
+          "original_file": "region_020_sum_907390853538_51a24e51.py"
+        },
+        {
+          "pattern_hash": "fe168b5c74d7",
+          "shape_config": "hf_allenailongformerbase_training_9950b0b0",
+          "original_file": "region_021_sum_fe168b5c74d7_9950b0b0.py"
+        },
+        {
+          "pattern_hash": "39fa027d311c",
+          "shape_config": "hf_allenailongformerbase_training_0b2ed45d",
+          "original_file": "region_022_pointwise_39fa027d311c_0b2ed45d.py"
+        },
+        {
+          "pattern_hash": "ea5ab2cb8d55",
+          "shape_config": "hf_allenailongformerbase_training_bb3bb760",
+          "original_file": "region_023_sum_ea5ab2cb8d55_bb3bb760.py"
+        },
+        {
+          "pattern_hash": "e0b5999b896c",
+          "shape_config": "hf_allenailongformerbase_training_a4155d35",
+          "original_file": "region_024_pointwise_e0b5999b896c_a4155d35.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "hf_allenailongformerbase_training_4b759c1f",
+          "original_file": "region_025_sum_2da3a1f29398_4b759c1f.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_allenailongformerbase_training_3cd993ce",
+          "original_file": "region_026_pointwise_15b0dd73a2f4_3cd993ce.py"
+        },
+        {
+          "pattern_hash": "4c302ae2f18b",
+          "shape_config": "hf_allenailongformerbase_training_a0e67515",
+          "original_file": "region_027_sum_4c302ae2f18b_a0e67515.py"
+        },
+        {
+          "pattern_hash": "9eae6d314e14",
+          "shape_config": "hf_allenailongformerbase_training_cca37664",
+          "original_file": "region_028_pointwise_9eae6d314e14_cca37664.py"
+        },
+        {
+          "pattern_hash": "48cedeef94a1",
+          "shape_config": "hf_allenailongformerbase_training_096e2b52",
+          "original_file": "region_029_sum_48cedeef94a1_096e2b52.py"
+        },
+        {
+          "pattern_hash": "ee3df9282bc5",
+          "shape_config": "hf_allenailongformerbase_training_0aa2f9fc",
+          "original_file": "region_030_sum_ee3df9282bc5_0aa2f9fc.py"
+        },
+        {
+          "pattern_hash": "0efa91cd19ba",
+          "shape_config": "hf_allenailongformerbase_training_6e66b7cd",
+          "original_file": "region_031_sum_0efa91cd19ba_6e66b7cd.py"
+        },
+        {
+          "pattern_hash": "86a7bf7127b6",
+          "shape_config": "hf_allenailongformerbase_training_41fe5c52",
+          "original_file": "region_000_pointwise_86a7bf7127b6_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "310825c3fc14",
+          "shape_config": "hf_allenailongformerbase_training_1c474c92",
+          "original_file": "region_001_var_mean_310825c3fc14_1c474c92.py"
+        },
+        {
+          "pattern_hash": "de5792c05f72",
+          "shape_config": "hf_allenailongformerbase_training_0931dbc0",
+          "original_file": "region_002_pointwise_de5792c05f72_0931dbc0.py"
+        },
+        {
+          "pattern_hash": "47f307d449f8",
+          "shape_config": "hf_allenailongformerbase_training_0a3b54e6",
+          "original_file": "region_003_any_47f307d449f8_0a3b54e6.py"
+        },
+        {
+          "pattern_hash": "b20fde10c078",
+          "shape_config": "hf_allenailongformerbase_training_fb339042",
+          "original_file": "region_004_pointwise_b20fde10c078_fb339042.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_allenailongformerbase_training_31a723d2",
+          "original_file": "region_005_var_mean_a41dace406c0_31a723d2.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_allenailongformerbase_training_69c9e065",
+          "original_file": "region_006_pointwise_983a9e1e3bcd_69c9e065.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_allenailongformerbase_training_1fe93c0c",
+          "original_file": "region_007_pointwise_741c0d7d8d11_1fe93c0c.py"
+        },
+        {
+          "pattern_hash": "91ebe95fc9a1",
+          "shape_config": "hf_allenailongformerbase_training_31824441",
+          "original_file": "region_008_var_mean_91ebe95fc9a1_31824441.py"
+        },
+        {
+          "pattern_hash": "1972f8627203",
+          "shape_config": "hf_allenailongformerbase_training_b2d771a1",
+          "original_file": "region_009_pointwise_1972f8627203_b2d771a1.py"
+        },
+        {
+          "pattern_hash": "46a9ad66e602",
+          "shape_config": "hf_allenailongformerbase_training_f2fae170",
+          "original_file": "region_010_amax_sum_46a9ad66e602_f2fae170.py"
+        },
+        {
+          "pattern_hash": "6fd2e7e81344",
+          "shape_config": "hf_allenailongformerbase_training_5d81550e",
+          "original_file": "region_011_pointwise_6fd2e7e81344_5d81550e.py"
+        },
+        {
+          "pattern_hash": "902b077e023a",
+          "shape_config": "hf_allenailongformerbase_training_56bddb67",
+          "original_file": "region_012_pointwise_902b077e023a_56bddb67.py"
+        },
+        {
+          "pattern_hash": "8f57e3556aea",
+          "shape_config": "hf_allenailongformerbase_training_e2da0436",
+          "original_file": "region_013_amax_sum_8f57e3556aea_e2da0436.py"
+        },
+        {
+          "pattern_hash": "c867fa050a60",
+          "shape_config": "hf_allenailongformerbase_training_9b7fe6ae",
+          "original_file": "region_014_pointwise_c867fa050a60_9b7fe6ae.py"
+        },
+        {
+          "pattern_hash": "1e2fa4dc55ba",
+          "shape_config": "hf_allenailongformerbase_training_bdf402fe",
+          "original_file": "region_015_amax_sum_1e2fa4dc55ba_bdf402fe.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_allenailongformerbase_training_ea48c63a",
+          "original_file": "region_016_pointwise_741c0d7d8d11_ea48c63a.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_allenailongformerbase_training_a4155d35",
+          "original_file": "region_017_var_mean_0a1bc21703bb_a4155d35.py"
+        },
+        {
+          "pattern_hash": "a57bc5a8a744",
+          "shape_config": "hf_allenailongformerbase_training_4fc67c63",
+          "original_file": "region_018_sum_a57bc5a8a744_4fc67c63.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_allenailongformerbase_training_c9ccbd3d",
+          "original_file": "region_019_sum_08bd81f4d8b9_c9ccbd3d.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_allenailongformerbase_training_51a24e51",
+          "original_file": "region_020_sum_907390853538_51a24e51.py"
+        },
+        {
+          "pattern_hash": "fe168b5c74d7",
+          "shape_config": "hf_allenailongformerbase_training_9950b0b0",
+          "original_file": "region_021_sum_fe168b5c74d7_9950b0b0.py"
+        },
+        {
+          "pattern_hash": "39fa027d311c",
+          "shape_config": "hf_allenailongformerbase_training_0b2ed45d",
+          "original_file": "region_022_pointwise_39fa027d311c_0b2ed45d.py"
+        },
+        {
+          "pattern_hash": "ea5ab2cb8d55",
+          "shape_config": "hf_allenailongformerbase_training_bb3bb760",
+          "original_file": "region_023_sum_ea5ab2cb8d55_bb3bb760.py"
+        },
+        {
+          "pattern_hash": "e0b5999b896c",
+          "shape_config": "hf_allenailongformerbase_training_a4155d35",
+          "original_file": "region_024_pointwise_e0b5999b896c_a4155d35.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "hf_allenailongformerbase_training_4b759c1f",
+          "original_file": "region_025_sum_2da3a1f29398_4b759c1f.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_allenailongformerbase_training_3cd993ce",
+          "original_file": "region_026_pointwise_15b0dd73a2f4_3cd993ce.py"
+        },
+        {
+          "pattern_hash": "4c302ae2f18b",
+          "shape_config": "hf_allenailongformerbase_training_a0e67515",
+          "original_file": "region_027_sum_4c302ae2f18b_a0e67515.py"
+        },
+        {
+          "pattern_hash": "9eae6d314e14",
+          "shape_config": "hf_allenailongformerbase_training_cca37664",
+          "original_file": "region_028_pointwise_9eae6d314e14_cca37664.py"
+        },
+        {
+          "pattern_hash": "48cedeef94a1",
+          "shape_config": "hf_allenailongformerbase_training_096e2b52",
+          "original_file": "region_029_sum_48cedeef94a1_096e2b52.py"
+        },
+        {
+          "pattern_hash": "ee3df9282bc5",
+          "shape_config": "hf_allenailongformerbase_training_0aa2f9fc",
+          "original_file": "region_030_sum_ee3df9282bc5_0aa2f9fc.py"
+        },
+        {
+          "pattern_hash": "0efa91cd19ba",
+          "shape_config": "hf_allenailongformerbase_training_6e66b7cd",
+          "original_file": "region_031_sum_0efa91cd19ba_6e66b7cd.py"
+        }
+      ]
+    },
+    "hf_BartForCausalLM_inference": {
+      "repros": [
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bartforcausallm_inference_fa9ef2d5",
+          "original_file": "region_000_pointwise_741c0d7d8d11_fa9ef2d5.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_bartforcausallm_inference_e1be0823",
+          "original_file": "region_001_var_mean_a7cbd072693b_e1be0823.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_bartforcausallm_inference_e5259d2b",
+          "original_file": "region_002_pointwise_983a9e1e3bcd_e5259d2b.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bartforcausallm_inference_29a0cfcb",
+          "original_file": "region_003_pointwise_741c0d7d8d11_29a0cfcb.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "hf_bartforcausallm_inference_8d26a7f9",
+          "original_file": "region_004_pointwise_9e288ad6925e_8d26a7f9.py"
+        },
+        {
+          "pattern_hash": "ee81fd3073f2",
+          "shape_config": "hf_bartforcausallm_inference_6034edbf",
+          "original_file": "region_005_pointwise_ee81fd3073f2_6034edbf.py"
+        },
+        {
+          "pattern_hash": "54f88ef3631e",
+          "shape_config": "hf_bartforcausallm_inference_eab956eb",
+          "original_file": "region_006_pointwise_54f88ef3631e_eab956eb.py"
+        },
+        {
+          "pattern_hash": "24cd1d7c75a9",
+          "shape_config": "hf_bartforcausallm_inference_e3b14c1a",
+          "original_file": "region_007_var_mean_24cd1d7c75a9_e3b14c1a.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bartforcausallm_inference_fa9ef2d5",
+          "original_file": "region_000_pointwise_741c0d7d8d11_fa9ef2d5.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_bartforcausallm_inference_e1be0823",
+          "original_file": "region_001_var_mean_a7cbd072693b_e1be0823.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_bartforcausallm_inference_e5259d2b",
+          "original_file": "region_002_pointwise_983a9e1e3bcd_e5259d2b.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bartforcausallm_inference_29a0cfcb",
+          "original_file": "region_003_pointwise_741c0d7d8d11_29a0cfcb.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "hf_bartforcausallm_inference_8d26a7f9",
+          "original_file": "region_004_pointwise_9e288ad6925e_8d26a7f9.py"
+        },
+        {
+          "pattern_hash": "ee81fd3073f2",
+          "shape_config": "hf_bartforcausallm_inference_6034edbf",
+          "original_file": "region_005_pointwise_ee81fd3073f2_6034edbf.py"
+        },
+        {
+          "pattern_hash": "54f88ef3631e",
+          "shape_config": "hf_bartforcausallm_inference_eab956eb",
+          "original_file": "region_006_pointwise_54f88ef3631e_eab956eb.py"
+        },
+        {
+          "pattern_hash": "24cd1d7c75a9",
+          "shape_config": "hf_bartforcausallm_inference_e3b14c1a",
+          "original_file": "region_007_var_mean_24cd1d7c75a9_e3b14c1a.py"
+        }
+      ]
+    },
+    "hf_BartForCausalLM_training": {
+      "repros": [
+        {
+          "pattern_hash": "45039e85eb2e",
+          "shape_config": "hf_bartforcausallm_training_8fd18384",
+          "original_file": "region_000_pointwise_45039e85eb2e_8fd18384.py"
+        },
+        {
+          "pattern_hash": "90bf9bb70313",
+          "shape_config": "hf_bartforcausallm_training_0a3b54e6",
+          "original_file": "region_001_pointwise_90bf9bb70313_0a3b54e6.py"
+        },
+        {
+          "pattern_hash": "a478cc89108b",
+          "shape_config": "hf_bartforcausallm_training_d7517139",
+          "original_file": "region_002_pointwise_a478cc89108b_d7517139.py"
+        },
+        {
+          "pattern_hash": "23c6291e073f",
+          "shape_config": "hf_bartforcausallm_training_1009e89b",
+          "original_file": "region_003_pointwise_23c6291e073f_1009e89b.py"
+        },
+        {
+          "pattern_hash": "442665c4fed5",
+          "shape_config": "hf_bartforcausallm_training_798c8fb5",
+          "original_file": "region_004_pointwise_442665c4fed5_798c8fb5.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_bartforcausallm_training_721ed0f3",
+          "original_file": "region_005_var_mean_a41dace406c0_721ed0f3.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_bartforcausallm_training_e5259d2b",
+          "original_file": "region_006_pointwise_983a9e1e3bcd_e5259d2b.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bartforcausallm_training_29a0cfcb",
+          "original_file": "region_007_pointwise_741c0d7d8d11_29a0cfcb.py"
+        },
+        {
+          "pattern_hash": "f0635c70e184",
+          "shape_config": "hf_bartforcausallm_training_e1be0823",
+          "original_file": "region_008_var_mean_f0635c70e184_e1be0823.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "hf_bartforcausallm_training_8d26a7f9",
+          "original_file": "region_009_pointwise_9e288ad6925e_8d26a7f9.py"
+        },
+        {
+          "pattern_hash": "1e2fa4dc55ba",
+          "shape_config": "hf_bartforcausallm_training_bdf402fe",
+          "original_file": "region_010_amax_sum_1e2fa4dc55ba_bdf402fe.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_bartforcausallm_training_45f8ca74",
+          "original_file": "region_011_sum_907390853538_45f8ca74.py"
+        },
+        {
+          "pattern_hash": "33a75b705b09",
+          "shape_config": "hf_bartforcausallm_training_91a24a50",
+          "original_file": "region_012_sum_33a75b705b09_91a24a50.py"
+        },
+        {
+          "pattern_hash": "298a455d5e05",
+          "shape_config": "hf_bartforcausallm_training_0b93bcf5",
+          "original_file": "region_013_sum_298a455d5e05_0b93bcf5.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_bartforcausallm_training_3c1f1bfc",
+          "original_file": "region_014_pointwise_15b0dd73a2f4_3c1f1bfc.py"
+        },
+        {
+          "pattern_hash": "ee3df9282bc5",
+          "shape_config": "hf_bartforcausallm_training_40a4edab",
+          "original_file": "region_015_sum_ee3df9282bc5_40a4edab.py"
+        },
+        {
+          "pattern_hash": "d8a1e37973d3",
+          "shape_config": "hf_bartforcausallm_training_214c859f",
+          "original_file": "region_016_pointwise_d8a1e37973d3_214c859f.py"
+        },
+        {
+          "pattern_hash": "63bb48fde67e",
+          "shape_config": "hf_bartforcausallm_training_fd472ddc",
+          "original_file": "region_017_pointwise_63bb48fde67e_fd472ddc.py"
+        },
+        {
+          "pattern_hash": "45039e85eb2e",
+          "shape_config": "hf_bartforcausallm_training_8fd18384",
+          "original_file": "region_000_pointwise_45039e85eb2e_8fd18384.py"
+        },
+        {
+          "pattern_hash": "90bf9bb70313",
+          "shape_config": "hf_bartforcausallm_training_0a3b54e6",
+          "original_file": "region_001_pointwise_90bf9bb70313_0a3b54e6.py"
+        },
+        {
+          "pattern_hash": "a478cc89108b",
+          "shape_config": "hf_bartforcausallm_training_d7517139",
+          "original_file": "region_002_pointwise_a478cc89108b_d7517139.py"
+        },
+        {
+          "pattern_hash": "23c6291e073f",
+          "shape_config": "hf_bartforcausallm_training_1009e89b",
+          "original_file": "region_003_pointwise_23c6291e073f_1009e89b.py"
+        },
+        {
+          "pattern_hash": "442665c4fed5",
+          "shape_config": "hf_bartforcausallm_training_798c8fb5",
+          "original_file": "region_004_pointwise_442665c4fed5_798c8fb5.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_bartforcausallm_training_721ed0f3",
+          "original_file": "region_005_var_mean_a41dace406c0_721ed0f3.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_bartforcausallm_training_e5259d2b",
+          "original_file": "region_006_pointwise_983a9e1e3bcd_e5259d2b.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bartforcausallm_training_29a0cfcb",
+          "original_file": "region_007_pointwise_741c0d7d8d11_29a0cfcb.py"
+        },
+        {
+          "pattern_hash": "f0635c70e184",
+          "shape_config": "hf_bartforcausallm_training_e1be0823",
+          "original_file": "region_008_var_mean_f0635c70e184_e1be0823.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "hf_bartforcausallm_training_8d26a7f9",
+          "original_file": "region_009_pointwise_9e288ad6925e_8d26a7f9.py"
+        },
+        {
+          "pattern_hash": "1e2fa4dc55ba",
+          "shape_config": "hf_bartforcausallm_training_bdf402fe",
+          "original_file": "region_010_amax_sum_1e2fa4dc55ba_bdf402fe.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_bartforcausallm_training_45f8ca74",
+          "original_file": "region_011_sum_907390853538_45f8ca74.py"
+        },
+        {
+          "pattern_hash": "33a75b705b09",
+          "shape_config": "hf_bartforcausallm_training_91a24a50",
+          "original_file": "region_012_sum_33a75b705b09_91a24a50.py"
+        },
+        {
+          "pattern_hash": "298a455d5e05",
+          "shape_config": "hf_bartforcausallm_training_0b93bcf5",
+          "original_file": "region_013_sum_298a455d5e05_0b93bcf5.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_bartforcausallm_training_3c1f1bfc",
+          "original_file": "region_014_pointwise_15b0dd73a2f4_3c1f1bfc.py"
+        },
+        {
+          "pattern_hash": "ee3df9282bc5",
+          "shape_config": "hf_bartforcausallm_training_40a4edab",
+          "original_file": "region_015_sum_ee3df9282bc5_40a4edab.py"
+        },
+        {
+          "pattern_hash": "d8a1e37973d3",
+          "shape_config": "hf_bartforcausallm_training_214c859f",
+          "original_file": "region_016_pointwise_d8a1e37973d3_214c859f.py"
+        },
+        {
+          "pattern_hash": "63bb48fde67e",
+          "shape_config": "hf_bartforcausallm_training_fd472ddc",
+          "original_file": "region_017_pointwise_63bb48fde67e_fd472ddc.py"
+        }
+      ]
+    },
+    "hf_BertForMaskedLM_inference": {
+      "repros": [
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_inference_1e87486c",
+          "original_file": "region_000_pointwise_741c0d7d8d11_1e87486c.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_bertformaskedlm_inference_13b20d0d",
+          "original_file": "region_001_var_mean_0a1bc21703bb_13b20d0d.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_inference_78090119",
+          "original_file": "region_002_pointwise_741c0d7d8d11_78090119.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_bertformaskedlm_inference_3f7da3f3",
+          "original_file": "region_003_var_mean_a7cbd072693b_3f7da3f3.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_bertformaskedlm_inference_d6fa3c73",
+          "original_file": "region_004_pointwise_983a9e1e3bcd_d6fa3c73.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_inference_42c7d4af",
+          "original_file": "region_005_pointwise_741c0d7d8d11_42c7d4af.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_bertformaskedlm_inference_e51bc1f0",
+          "original_file": "region_006_pointwise_5d11bd189324_e51bc1f0.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "hf_bertformaskedlm_inference_b487ad1b",
+          "original_file": "region_007_amax_any_sum_caf9c95ee549_b487ad1b.py"
+        },
+        {
+          "pattern_hash": "b260987d88be",
+          "shape_config": "hf_bertformaskedlm_inference_a7ace331",
+          "original_file": "region_008_pointwise_b260987d88be_a7ace331.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "hf_bertformaskedlm_inference_89078cdd",
+          "original_file": "region_009_pointwise_16e058489060_89078cdd.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "hf_bertformaskedlm_inference_1e16978b",
+          "original_file": "region_010_amax_any_sum_7c0d8ceb3e2b_1e16978b.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_bertformaskedlm_inference_d9e962ac",
+          "original_file": "region_011_var_mean_0a44c4081351_d9e962ac.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_inference_1e87486c",
+          "original_file": "region_000_pointwise_741c0d7d8d11_1e87486c.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_bertformaskedlm_inference_13b20d0d",
+          "original_file": "region_001_var_mean_0a1bc21703bb_13b20d0d.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_inference_78090119",
+          "original_file": "region_002_pointwise_741c0d7d8d11_78090119.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_bertformaskedlm_inference_3f7da3f3",
+          "original_file": "region_003_var_mean_a7cbd072693b_3f7da3f3.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_bertformaskedlm_inference_d6fa3c73",
+          "original_file": "region_004_pointwise_983a9e1e3bcd_d6fa3c73.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_inference_42c7d4af",
+          "original_file": "region_005_pointwise_741c0d7d8d11_42c7d4af.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_bertformaskedlm_inference_e51bc1f0",
+          "original_file": "region_006_pointwise_5d11bd189324_e51bc1f0.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "hf_bertformaskedlm_inference_b487ad1b",
+          "original_file": "region_007_amax_any_sum_caf9c95ee549_b487ad1b.py"
+        },
+        {
+          "pattern_hash": "b260987d88be",
+          "shape_config": "hf_bertformaskedlm_inference_a7ace331",
+          "original_file": "region_008_pointwise_b260987d88be_a7ace331.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "hf_bertformaskedlm_inference_89078cdd",
+          "original_file": "region_009_pointwise_16e058489060_89078cdd.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "hf_bertformaskedlm_inference_1e16978b",
+          "original_file": "region_010_amax_any_sum_7c0d8ceb3e2b_1e16978b.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_bertformaskedlm_inference_d9e962ac",
+          "original_file": "region_011_var_mean_0a44c4081351_d9e962ac.py"
+        }
+      ]
+    },
+    "hf_BertForMaskedLM_training": {
+      "repros": [
+        {
+          "pattern_hash": "dae6073360b8",
+          "shape_config": "hf_bertformaskedlm_training_b8130a68",
+          "original_file": "region_000_amax_sum_dae6073360b8_b8130a68.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_training_1e87486c",
+          "original_file": "region_001_pointwise_741c0d7d8d11_1e87486c.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_bertformaskedlm_training_13b20d0d",
+          "original_file": "region_002_var_mean_0a1bc21703bb_13b20d0d.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_training_78090119",
+          "original_file": "region_003_pointwise_741c0d7d8d11_78090119.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_bertformaskedlm_training_e95ac53e",
+          "original_file": "region_004_var_mean_a41dace406c0_e95ac53e.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_bertformaskedlm_training_d6fa3c73",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_d6fa3c73.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_training_42c7d4af",
+          "original_file": "region_006_pointwise_741c0d7d8d11_42c7d4af.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_bertformaskedlm_training_e51bc1f0",
+          "original_file": "region_007_pointwise_5d11bd189324_e51bc1f0.py"
+        },
+        {
+          "pattern_hash": "b9b543f9e1e3",
+          "shape_config": "hf_bertformaskedlm_training_902e0166",
+          "original_file": "region_008_amax_any_sum_b9b543f9e1e3_902e0166.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "hf_bertformaskedlm_training_e7b720d5",
+          "original_file": "region_009_pointwise_6bc663ef619c_e7b720d5.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "hf_bertformaskedlm_training_89078cdd",
+          "original_file": "region_010_pointwise_1ecc9387d6bd_89078cdd.py"
+        },
+        {
+          "pattern_hash": "e788afc14f3d",
+          "shape_config": "hf_bertformaskedlm_training_ea1aa84a",
+          "original_file": "region_011_amax_any_sum_e788afc14f3d_ea1aa84a.py"
+        },
+        {
+          "pattern_hash": "7350c064b026",
+          "shape_config": "hf_bertformaskedlm_training_89078cdd",
+          "original_file": "region_012_pointwise_7350c064b026_89078cdd.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_bertformaskedlm_training_d9e962ac",
+          "original_file": "region_013_var_mean_0a44c4081351_d9e962ac.py"
+        },
+        {
+          "pattern_hash": "095b207c507f",
+          "shape_config": "hf_bertformaskedlm_training_ae0aa798",
+          "original_file": "region_014_sum_095b207c507f_ae0aa798.py"
+        },
+        {
+          "pattern_hash": "56f587cdce23",
+          "shape_config": "hf_bertformaskedlm_training_f1083bcb",
+          "original_file": "region_015_pointwise_56f587cdce23_f1083bcb.py"
+        },
+        {
+          "pattern_hash": "61a7becdb42d",
+          "shape_config": "hf_bertformaskedlm_training_ab68fd7c",
+          "original_file": "region_016_sum_61a7becdb42d_ab68fd7c.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_bertformaskedlm_training_13b20d0d",
+          "original_file": "region_017_pointwise_35deec51cf28_13b20d0d.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "hf_bertformaskedlm_training_e7b70c74",
+          "original_file": "region_018_sum_2da3a1f29398_e7b70c74.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_bertformaskedlm_training_44021567",
+          "original_file": "region_019_pointwise_15b0dd73a2f4_44021567.py"
+        },
+        {
+          "pattern_hash": "5a0090810fdb",
+          "shape_config": "hf_bertformaskedlm_training_4f166a41",
+          "original_file": "region_020_sum_5a0090810fdb_4f166a41.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "hf_bertformaskedlm_training_37ceb313",
+          "original_file": "region_021_pointwise_5542dd403943_37ceb313.py"
+        },
+        {
+          "pattern_hash": "f2b19635d2cc",
+          "shape_config": "hf_bertformaskedlm_training_2076e2c4",
+          "original_file": "region_022_sum_f2b19635d2cc_2076e2c4.py"
+        },
+        {
+          "pattern_hash": "008540c58720",
+          "shape_config": "hf_bertformaskedlm_training_6a08ef05",
+          "original_file": "region_023_sum_008540c58720_6a08ef05.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_bertformaskedlm_training_22b30da9",
+          "original_file": "region_024_sum_08bd81f4d8b9_22b30da9.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_bertformaskedlm_training_01c1d789",
+          "original_file": "region_025_sum_907390853538_01c1d789.py"
+        },
+        {
+          "pattern_hash": "dae6073360b8",
+          "shape_config": "hf_bertformaskedlm_training_b8130a68",
+          "original_file": "region_000_amax_sum_dae6073360b8_b8130a68.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_training_1e87486c",
+          "original_file": "region_001_pointwise_741c0d7d8d11_1e87486c.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_bertformaskedlm_training_13b20d0d",
+          "original_file": "region_002_var_mean_0a1bc21703bb_13b20d0d.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_training_78090119",
+          "original_file": "region_003_pointwise_741c0d7d8d11_78090119.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_bertformaskedlm_training_e95ac53e",
+          "original_file": "region_004_var_mean_a41dace406c0_e95ac53e.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_bertformaskedlm_training_d6fa3c73",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_d6fa3c73.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bertformaskedlm_training_42c7d4af",
+          "original_file": "region_006_pointwise_741c0d7d8d11_42c7d4af.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_bertformaskedlm_training_e51bc1f0",
+          "original_file": "region_007_pointwise_5d11bd189324_e51bc1f0.py"
+        },
+        {
+          "pattern_hash": "b9b543f9e1e3",
+          "shape_config": "hf_bertformaskedlm_training_902e0166",
+          "original_file": "region_008_amax_any_sum_b9b543f9e1e3_902e0166.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "hf_bertformaskedlm_training_e7b720d5",
+          "original_file": "region_009_pointwise_6bc663ef619c_e7b720d5.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "hf_bertformaskedlm_training_89078cdd",
+          "original_file": "region_010_pointwise_1ecc9387d6bd_89078cdd.py"
+        },
+        {
+          "pattern_hash": "e788afc14f3d",
+          "shape_config": "hf_bertformaskedlm_training_ea1aa84a",
+          "original_file": "region_011_amax_any_sum_e788afc14f3d_ea1aa84a.py"
+        },
+        {
+          "pattern_hash": "7350c064b026",
+          "shape_config": "hf_bertformaskedlm_training_89078cdd",
+          "original_file": "region_012_pointwise_7350c064b026_89078cdd.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_bertformaskedlm_training_d9e962ac",
+          "original_file": "region_013_var_mean_0a44c4081351_d9e962ac.py"
+        },
+        {
+          "pattern_hash": "095b207c507f",
+          "shape_config": "hf_bertformaskedlm_training_ae0aa798",
+          "original_file": "region_014_sum_095b207c507f_ae0aa798.py"
+        },
+        {
+          "pattern_hash": "56f587cdce23",
+          "shape_config": "hf_bertformaskedlm_training_f1083bcb",
+          "original_file": "region_015_pointwise_56f587cdce23_f1083bcb.py"
+        },
+        {
+          "pattern_hash": "61a7becdb42d",
+          "shape_config": "hf_bertformaskedlm_training_ab68fd7c",
+          "original_file": "region_016_sum_61a7becdb42d_ab68fd7c.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_bertformaskedlm_training_13b20d0d",
+          "original_file": "region_017_pointwise_35deec51cf28_13b20d0d.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "hf_bertformaskedlm_training_e7b70c74",
+          "original_file": "region_018_sum_2da3a1f29398_e7b70c74.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_bertformaskedlm_training_44021567",
+          "original_file": "region_019_pointwise_15b0dd73a2f4_44021567.py"
+        },
+        {
+          "pattern_hash": "5a0090810fdb",
+          "shape_config": "hf_bertformaskedlm_training_4f166a41",
+          "original_file": "region_020_sum_5a0090810fdb_4f166a41.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "hf_bertformaskedlm_training_37ceb313",
+          "original_file": "region_021_pointwise_5542dd403943_37ceb313.py"
+        },
+        {
+          "pattern_hash": "f2b19635d2cc",
+          "shape_config": "hf_bertformaskedlm_training_2076e2c4",
+          "original_file": "region_022_sum_f2b19635d2cc_2076e2c4.py"
+        },
+        {
+          "pattern_hash": "008540c58720",
+          "shape_config": "hf_bertformaskedlm_training_6a08ef05",
+          "original_file": "region_023_sum_008540c58720_6a08ef05.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_bertformaskedlm_training_22b30da9",
+          "original_file": "region_024_sum_08bd81f4d8b9_22b30da9.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_bertformaskedlm_training_01c1d789",
+          "original_file": "region_025_sum_907390853538_01c1d789.py"
+        }
+      ]
+    },
+    "hf_BlenderbotForCausalLM_inference": {
+      "repros": [
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_blenderbotforcausallm_inference_dad54c57",
+          "original_file": "region_000_pointwise_741c0d7d8d11_dad54c57.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_blenderbotforcausallm_inference_afd1799f",
+          "original_file": "region_001_var_mean_a7cbd072693b_afd1799f.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_blenderbotforcausallm_inference_1f556d26",
+          "original_file": "region_002_pointwise_983a9e1e3bcd_1f556d26.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_blenderbotforcausallm_inference_8a93e32e",
+          "original_file": "region_003_pointwise_741c0d7d8d11_8a93e32e.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "hf_blenderbotforcausallm_inference_7f5026f2",
+          "original_file": "region_004_pointwise_9e288ad6925e_7f5026f2.py"
+        },
+        {
+          "pattern_hash": "ee81fd3073f2",
+          "shape_config": "hf_blenderbotforcausallm_inference_608c4872",
+          "original_file": "region_005_pointwise_ee81fd3073f2_608c4872.py"
+        },
+        {
+          "pattern_hash": "54f88ef3631e",
+          "shape_config": "hf_blenderbotforcausallm_inference_56cd7a76",
+          "original_file": "region_006_pointwise_54f88ef3631e_56cd7a76.py"
+        },
+        {
+          "pattern_hash": "f546423c6b83",
+          "shape_config": "hf_blenderbotforcausallm_inference_f6f96253",
+          "original_file": "region_007_var_mean_f546423c6b83_f6f96253.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_blenderbotforcausallm_inference_dad54c57",
+          "original_file": "region_000_pointwise_741c0d7d8d11_dad54c57.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_blenderbotforcausallm_inference_afd1799f",
+          "original_file": "region_001_var_mean_a7cbd072693b_afd1799f.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_blenderbotforcausallm_inference_1f556d26",
+          "original_file": "region_002_pointwise_983a9e1e3bcd_1f556d26.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_blenderbotforcausallm_inference_8a93e32e",
+          "original_file": "region_003_pointwise_741c0d7d8d11_8a93e32e.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "hf_blenderbotforcausallm_inference_7f5026f2",
+          "original_file": "region_004_pointwise_9e288ad6925e_7f5026f2.py"
+        },
+        {
+          "pattern_hash": "ee81fd3073f2",
+          "shape_config": "hf_blenderbotforcausallm_inference_608c4872",
+          "original_file": "region_005_pointwise_ee81fd3073f2_608c4872.py"
+        },
+        {
+          "pattern_hash": "54f88ef3631e",
+          "shape_config": "hf_blenderbotforcausallm_inference_56cd7a76",
+          "original_file": "region_006_pointwise_54f88ef3631e_56cd7a76.py"
+        },
+        {
+          "pattern_hash": "f546423c6b83",
+          "shape_config": "hf_blenderbotforcausallm_inference_f6f96253",
+          "original_file": "region_007_var_mean_f546423c6b83_f6f96253.py"
+        }
+      ]
+    },
+    "hf_BlenderbotForCausalLM_training": {
+      "repros": [
+        {
+          "pattern_hash": "45039e85eb2e",
+          "shape_config": "hf_blenderbotforcausallm_training_24eb9301",
+          "original_file": "region_000_pointwise_45039e85eb2e_24eb9301.py"
+        },
+        {
+          "pattern_hash": "90bf9bb70313",
+          "shape_config": "hf_blenderbotforcausallm_training_baee1e2d",
+          "original_file": "region_001_pointwise_90bf9bb70313_baee1e2d.py"
+        },
+        {
+          "pattern_hash": "a478cc89108b",
+          "shape_config": "hf_blenderbotforcausallm_training_d7517139",
+          "original_file": "region_002_pointwise_a478cc89108b_d7517139.py"
+        },
+        {
+          "pattern_hash": "ab1e67c6cb77",
+          "shape_config": "hf_blenderbotforcausallm_training_d999c84a",
+          "original_file": "region_003_pointwise_ab1e67c6cb77_d999c84a.py"
+        },
+        {
+          "pattern_hash": "fefa00731fa2",
+          "shape_config": "hf_blenderbotforcausallm_training_fa1f1db3",
+          "original_file": "region_004_pointwise_fefa00731fa2_fa1f1db3.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_blenderbotforcausallm_training_1f556d26",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_1f556d26.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_blenderbotforcausallm_training_8a93e32e",
+          "original_file": "region_006_pointwise_741c0d7d8d11_8a93e32e.py"
+        },
+        {
+          "pattern_hash": "f0635c70e184",
+          "shape_config": "hf_blenderbotforcausallm_training_afd1799f",
+          "original_file": "region_007_var_mean_f0635c70e184_afd1799f.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "hf_blenderbotforcausallm_training_7f5026f2",
+          "original_file": "region_008_pointwise_9e288ad6925e_7f5026f2.py"
+        },
+        {
+          "pattern_hash": "4b8cf99dc78e",
+          "shape_config": "hf_blenderbotforcausallm_training_608c4872",
+          "original_file": "region_009_pointwise_4b8cf99dc78e_608c4872.py"
+        },
+        {
+          "pattern_hash": "f88be5a1875f",
+          "shape_config": "hf_blenderbotforcausallm_training_a1475ee2",
+          "original_file": "region_010_var_mean_f88be5a1875f_a1475ee2.py"
+        },
+        {
+          "pattern_hash": "1e2fa4dc55ba",
+          "shape_config": "hf_blenderbotforcausallm_training_ab77ef62",
+          "original_file": "region_011_amax_sum_1e2fa4dc55ba_ab77ef62.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_blenderbotforcausallm_training_d2c725b3",
+          "original_file": "region_012_sum_907390853538_d2c725b3.py"
+        },
+        {
+          "pattern_hash": "38aa97d594e5",
+          "shape_config": "hf_blenderbotforcausallm_training_84bc7b61",
+          "original_file": "region_013_sum_38aa97d594e5_84bc7b61.py"
+        },
+        {
+          "pattern_hash": "298a455d5e05",
+          "shape_config": "hf_blenderbotforcausallm_training_7fc75e4e",
+          "original_file": "region_014_sum_298a455d5e05_7fc75e4e.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_blenderbotforcausallm_training_55f68205",
+          "original_file": "region_015_pointwise_15b0dd73a2f4_55f68205.py"
+        },
+        {
+          "pattern_hash": "961faded9fc6",
+          "shape_config": "hf_blenderbotforcausallm_training_52912670",
+          "original_file": "region_016_pointwise_961faded9fc6_52912670.py"
+        },
+        {
+          "pattern_hash": "d8a1e37973d3",
+          "shape_config": "hf_blenderbotforcausallm_training_d999c84a",
+          "original_file": "region_017_pointwise_d8a1e37973d3_d999c84a.py"
+        },
+        {
+          "pattern_hash": "63bb48fde67e",
+          "shape_config": "hf_blenderbotforcausallm_training_bdec2138",
+          "original_file": "region_018_pointwise_63bb48fde67e_bdec2138.py"
+        },
+        {
+          "pattern_hash": "45039e85eb2e",
+          "shape_config": "hf_blenderbotforcausallm_training_24eb9301",
+          "original_file": "region_000_pointwise_45039e85eb2e_24eb9301.py"
+        },
+        {
+          "pattern_hash": "90bf9bb70313",
+          "shape_config": "hf_blenderbotforcausallm_training_baee1e2d",
+          "original_file": "region_001_pointwise_90bf9bb70313_baee1e2d.py"
+        },
+        {
+          "pattern_hash": "a478cc89108b",
+          "shape_config": "hf_blenderbotforcausallm_training_d7517139",
+          "original_file": "region_002_pointwise_a478cc89108b_d7517139.py"
+        },
+        {
+          "pattern_hash": "ab1e67c6cb77",
+          "shape_config": "hf_blenderbotforcausallm_training_d999c84a",
+          "original_file": "region_003_pointwise_ab1e67c6cb77_d999c84a.py"
+        },
+        {
+          "pattern_hash": "fefa00731fa2",
+          "shape_config": "hf_blenderbotforcausallm_training_fa1f1db3",
+          "original_file": "region_004_pointwise_fefa00731fa2_fa1f1db3.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_blenderbotforcausallm_training_1f556d26",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_1f556d26.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_blenderbotforcausallm_training_8a93e32e",
+          "original_file": "region_006_pointwise_741c0d7d8d11_8a93e32e.py"
+        },
+        {
+          "pattern_hash": "f0635c70e184",
+          "shape_config": "hf_blenderbotforcausallm_training_afd1799f",
+          "original_file": "region_007_var_mean_f0635c70e184_afd1799f.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "hf_blenderbotforcausallm_training_7f5026f2",
+          "original_file": "region_008_pointwise_9e288ad6925e_7f5026f2.py"
+        },
+        {
+          "pattern_hash": "4b8cf99dc78e",
+          "shape_config": "hf_blenderbotforcausallm_training_608c4872",
+          "original_file": "region_009_pointwise_4b8cf99dc78e_608c4872.py"
+        },
+        {
+          "pattern_hash": "f88be5a1875f",
+          "shape_config": "hf_blenderbotforcausallm_training_a1475ee2",
+          "original_file": "region_010_var_mean_f88be5a1875f_a1475ee2.py"
+        },
+        {
+          "pattern_hash": "1e2fa4dc55ba",
+          "shape_config": "hf_blenderbotforcausallm_training_ab77ef62",
+          "original_file": "region_011_amax_sum_1e2fa4dc55ba_ab77ef62.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_blenderbotforcausallm_training_d2c725b3",
+          "original_file": "region_012_sum_907390853538_d2c725b3.py"
+        },
+        {
+          "pattern_hash": "38aa97d594e5",
+          "shape_config": "hf_blenderbotforcausallm_training_84bc7b61",
+          "original_file": "region_013_sum_38aa97d594e5_84bc7b61.py"
+        },
+        {
+          "pattern_hash": "298a455d5e05",
+          "shape_config": "hf_blenderbotforcausallm_training_7fc75e4e",
+          "original_file": "region_014_sum_298a455d5e05_7fc75e4e.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_blenderbotforcausallm_training_55f68205",
+          "original_file": "region_015_pointwise_15b0dd73a2f4_55f68205.py"
+        },
+        {
+          "pattern_hash": "961faded9fc6",
+          "shape_config": "hf_blenderbotforcausallm_training_52912670",
+          "original_file": "region_016_pointwise_961faded9fc6_52912670.py"
+        },
+        {
+          "pattern_hash": "d8a1e37973d3",
+          "shape_config": "hf_blenderbotforcausallm_training_d999c84a",
+          "original_file": "region_017_pointwise_d8a1e37973d3_d999c84a.py"
+        },
+        {
+          "pattern_hash": "63bb48fde67e",
+          "shape_config": "hf_blenderbotforcausallm_training_bdec2138",
+          "original_file": "region_018_pointwise_63bb48fde67e_bdec2138.py"
+        }
+      ]
+    },
+    "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_inference": {
+      "repros": [
+        {
+          "pattern_hash": "49aa72a89409",
+          "shape_config": "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_inference_d4b88f30",
+          "original_file": "region_000_pointwise_49aa72a89409_d4b88f30.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "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_inference_dad54c57",
+          "original_file": "region_001_pointwise_741c0d7d8d11_dad54c57.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "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_inference_afd1799f",
+          "original_file": "region_002_var_mean_a7cbd072693b_afd1799f.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "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_inference_1f556d26",
+          "original_file": "region_003_pointwise_983a9e1e3bcd_1f556d26.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "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_inference_8a93e32e",
+          "original_file": "region_004_pointwise_741c0d7d8d11_8a93e32e.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "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_inference_740f113b",
+          "original_file": "region_005_pointwise_5d11bd189324_740f113b.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "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_inference_0a16bd27",
+          "original_file": "region_006_amax_any_sum_caf9c95ee549_0a16bd27.py"
+        },
+        {
+          "pattern_hash": "b260987d88be",
+          "shape_config": "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_inference_91ff4a17",
+          "original_file": "region_007_pointwise_b260987d88be_91ff4a17.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "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_inference_61671f9f",
+          "original_file": "region_008_pointwise_16e058489060_61671f9f.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "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_inference_7f5026f2",
+          "original_file": "region_009_pointwise_9e288ad6925e_7f5026f2.py"
+        },
+        {
+          "pattern_hash": "ee81fd3073f2",
+          "shape_config": "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_inference_608c4872",
+          "original_file": "region_010_pointwise_ee81fd3073f2_608c4872.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "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_inference_3c088b54",
+          "original_file": "region_011_amax_any_sum_7c0d8ceb3e2b_3c088b54.py"
+        },
+        {
+          "pattern_hash": "5ce296ed6d3f",
+          "shape_config": "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_inference_e32ee600",
+          "original_file": "region_012_pointwise_5ce296ed6d3f_e32ee600.py"
+        },
+        {
+          "pattern_hash": "712283a5b777",
+          "shape_config": "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_inference_9a702c34",
+          "original_file": "region_013_var_mean_712283a5b777_9a702c34.py"
+        },
+        {
+          "pattern_hash": "6c4322b86251",
+          "shape_config": "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_inference_0ceadf73",
+          "original_file": "region_014_pointwise_6c4322b86251_0ceadf73.py"
+        },
+        {
+          "pattern_hash": "085d381a91ec",
+          "shape_config": "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_inference_cc9c160c",
+          "original_file": "region_015_pointwise_085d381a91ec_cc9c160c.py"
+        },
+        {
+          "pattern_hash": "3dd146ae491a",
+          "shape_config": "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_inference_10164687",
+          "original_file": "region_016_var_mean_3dd146ae491a_10164687.py"
+        },
+        {
+          "pattern_hash": "97cb8c361330",
+          "shape_config": "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_inference_faa34c72",
+          "original_file": "region_017_var_mean_97cb8c361330_faa34c72.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "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_inference_6517d1ca",
+          "original_file": "region_018_pointwise_16e058489060_6517d1ca.py"
+        },
+        {
+          "pattern_hash": "f84fdc60f8f7",
+          "shape_config": "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_inference_f6f96253",
+          "original_file": "region_019_var_mean_f84fdc60f8f7_f6f96253.py"
+        },
+        {
+          "pattern_hash": "49aa72a89409",
+          "shape_config": "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_inference_d4b88f30",
+          "original_file": "region_000_pointwise_49aa72a89409_d4b88f30.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "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_inference_dad54c57",
+          "original_file": "region_001_pointwise_741c0d7d8d11_dad54c57.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "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_inference_afd1799f",
+          "original_file": "region_002_var_mean_a7cbd072693b_afd1799f.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "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_inference_1f556d26",
+          "original_file": "region_003_pointwise_983a9e1e3bcd_1f556d26.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "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_inference_8a93e32e",
+          "original_file": "region_004_pointwise_741c0d7d8d11_8a93e32e.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "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_inference_740f113b",
+          "original_file": "region_005_pointwise_5d11bd189324_740f113b.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "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_inference_0a16bd27",
+          "original_file": "region_006_amax_any_sum_caf9c95ee549_0a16bd27.py"
+        },
+        {
+          "pattern_hash": "b260987d88be",
+          "shape_config": "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_inference_91ff4a17",
+          "original_file": "region_007_pointwise_b260987d88be_91ff4a17.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "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_inference_61671f9f",
+          "original_file": "region_008_pointwise_16e058489060_61671f9f.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "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_inference_7f5026f2",
+          "original_file": "region_009_pointwise_9e288ad6925e_7f5026f2.py"
+        },
+        {
+          "pattern_hash": "ee81fd3073f2",
+          "shape_config": "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_inference_608c4872",
+          "original_file": "region_010_pointwise_ee81fd3073f2_608c4872.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "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_inference_3c088b54",
+          "original_file": "region_011_amax_any_sum_7c0d8ceb3e2b_3c088b54.py"
+        },
+        {
+          "pattern_hash": "5ce296ed6d3f",
+          "shape_config": "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_inference_e32ee600",
+          "original_file": "region_012_pointwise_5ce296ed6d3f_e32ee600.py"
+        },
+        {
+          "pattern_hash": "712283a5b777",
+          "shape_config": "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_inference_9a702c34",
+          "original_file": "region_013_var_mean_712283a5b777_9a702c34.py"
+        },
+        {
+          "pattern_hash": "6c4322b86251",
+          "shape_config": "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_inference_0ceadf73",
+          "original_file": "region_014_pointwise_6c4322b86251_0ceadf73.py"
+        },
+        {
+          "pattern_hash": "085d381a91ec",
+          "shape_config": "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_inference_cc9c160c",
+          "original_file": "region_015_pointwise_085d381a91ec_cc9c160c.py"
+        },
+        {
+          "pattern_hash": "3dd146ae491a",
+          "shape_config": "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_inference_10164687",
+          "original_file": "region_016_var_mean_3dd146ae491a_10164687.py"
+        },
+        {
+          "pattern_hash": "97cb8c361330",
+          "shape_config": "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_inference_faa34c72",
+          "original_file": "region_017_var_mean_97cb8c361330_faa34c72.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "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_inference_6517d1ca",
+          "original_file": "region_018_pointwise_16e058489060_6517d1ca.py"
+        },
+        {
+          "pattern_hash": "f84fdc60f8f7",
+          "shape_config": "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_inference_f6f96253",
+          "original_file": "region_019_var_mean_f84fdc60f8f7_f6f96253.py"
+        }
+      ]
+    },
+    "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_training": {
+      "repros": [
+        {
+          "pattern_hash": "45039e85eb2e",
+          "shape_config": "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_training_24eb9301",
+          "original_file": "region_000_pointwise_45039e85eb2e_24eb9301.py"
+        },
+        {
+          "pattern_hash": "084d7062469a",
+          "shape_config": "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_training_12ea8e76",
+          "original_file": "region_001_pointwise_084d7062469a_12ea8e76.py"
+        },
+        {
+          "pattern_hash": "a478cc89108b",
+          "shape_config": "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_training_d7517139",
+          "original_file": "region_002_pointwise_a478cc89108b_d7517139.py"
+        },
+        {
+          "pattern_hash": "8a1dd5cd002c",
+          "shape_config": "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_training_b5c4b1ff",
+          "original_file": "region_003_pointwise_8a1dd5cd002c_b5c4b1ff.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "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_training_1f556d26",
+          "original_file": "region_004_pointwise_983a9e1e3bcd_1f556d26.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "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_training_8a93e32e",
+          "original_file": "region_005_pointwise_741c0d7d8d11_8a93e32e.py"
+        },
+        {
+          "pattern_hash": "f0635c70e184",
+          "shape_config": "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_training_afd1799f",
+          "original_file": "region_006_var_mean_f0635c70e184_afd1799f.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "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_training_740f113b",
+          "original_file": "region_007_pointwise_5d11bd189324_740f113b.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "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_training_0a16bd27",
+          "original_file": "region_008_amax_any_sum_caf9c95ee549_0a16bd27.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "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_training_fbd54303",
+          "original_file": "region_009_pointwise_6bc663ef619c_fbd54303.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "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_training_6517d1ca",
+          "original_file": "region_010_pointwise_1ecc9387d6bd_6517d1ca.py"
+        },
+        {
+          "pattern_hash": "f88be5a1875f",
+          "shape_config": "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_training_a1475ee2",
+          "original_file": "region_011_var_mean_f88be5a1875f_a1475ee2.py"
+        },
+        {
+          "pattern_hash": "90bf9bb70313",
+          "shape_config": "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_training_baee1e2d",
+          "original_file": "region_012_pointwise_90bf9bb70313_baee1e2d.py"
+        },
+        {
+          "pattern_hash": "ab1e67c6cb77",
+          "shape_config": "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_training_d999c84a",
+          "original_file": "region_013_pointwise_ab1e67c6cb77_d999c84a.py"
+        },
+        {
+          "pattern_hash": "3205bf501074",
+          "shape_config": "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_training_b0063428",
+          "original_file": "region_014_pointwise_3205bf501074_b0063428.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "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_training_526a7dc8",
+          "original_file": "region_015_var_mean_a41dace406c0_526a7dc8.py"
+        },
+        {
+          "pattern_hash": "c9e746e00507",
+          "shape_config": "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_training_37af4e1c",
+          "original_file": "region_016_amax_any_sum_c9e746e00507_37af4e1c.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "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_training_61671f9f",
+          "original_file": "region_017_pointwise_16e058489060_61671f9f.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "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_training_7f5026f2",
+          "original_file": "region_018_pointwise_9e288ad6925e_7f5026f2.py"
+        },
+        {
+          "pattern_hash": "4b8cf99dc78e",
+          "shape_config": "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_training_608c4872",
+          "original_file": "region_019_pointwise_4b8cf99dc78e_608c4872.py"
+        },
+        {
+          "pattern_hash": "921891f5f368",
+          "shape_config": "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_training_c1178309",
+          "original_file": "region_020_amax_sum_921891f5f368_c1178309.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "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_training_d2c725b3",
+          "original_file": "region_021_sum_907390853538_d2c725b3.py"
+        },
+        {
+          "pattern_hash": "e0def9b310b0",
+          "shape_config": "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_training_0db4afbc",
+          "original_file": "region_022_sum_e0def9b310b0_0db4afbc.py"
+        },
+        {
+          "pattern_hash": "5c1cd5bd35e5",
+          "shape_config": "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_training_e6fa2778",
+          "original_file": "region_023_pointwise_5c1cd5bd35e5_e6fa2778.py"
+        },
+        {
+          "pattern_hash": "298a455d5e05",
+          "shape_config": "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_training_7fc75e4e",
+          "original_file": "region_024_sum_298a455d5e05_7fc75e4e.py"
+        },
+        {
+          "pattern_hash": "69fbd64c6e6b",
+          "shape_config": "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_training_740f113b",
+          "original_file": "region_025_pointwise_69fbd64c6e6b_740f113b.py"
+        },
+        {
+          "pattern_hash": "15cb6a8569fa",
+          "shape_config": "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_training_d5ec7f79",
+          "original_file": "region_026_sum_15cb6a8569fa_d5ec7f79.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "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_training_83d112f1",
+          "original_file": "region_027_pointwise_35deec51cf28_83d112f1.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "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_training_36da251b",
+          "original_file": "region_028_sum_2da3a1f29398_36da251b.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "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_training_55f68205",
+          "original_file": "region_029_pointwise_15b0dd73a2f4_55f68205.py"
+        },
+        {
+          "pattern_hash": "961faded9fc6",
+          "shape_config": "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_training_52912670",
+          "original_file": "region_030_pointwise_961faded9fc6_52912670.py"
+        },
+        {
+          "pattern_hash": "d8a1e37973d3",
+          "shape_config": "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_training_d999c84a",
+          "original_file": "region_031_pointwise_d8a1e37973d3_d999c84a.py"
+        },
+        {
+          "pattern_hash": "63bb48fde67e",
+          "shape_config": "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_training_bdec2138",
+          "original_file": "region_032_pointwise_63bb48fde67e_bdec2138.py"
+        },
+        {
+          "pattern_hash": "72282b413812",
+          "shape_config": "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_training_805a852d",
+          "original_file": "region_033_sum_72282b413812_805a852d.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "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_training_b2791e8c",
+          "original_file": "region_034_pointwise_5542dd403943_b2791e8c.py"
+        },
+        {
+          "pattern_hash": "c2ee9c72bf0f",
+          "shape_config": "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_training_d5ec7f79",
+          "original_file": "region_035_sum_c2ee9c72bf0f_d5ec7f79.py"
+        },
+        {
+          "pattern_hash": "45039e85eb2e",
+          "shape_config": "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_training_24eb9301",
+          "original_file": "region_000_pointwise_45039e85eb2e_24eb9301.py"
+        },
+        {
+          "pattern_hash": "084d7062469a",
+          "shape_config": "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_training_12ea8e76",
+          "original_file": "region_001_pointwise_084d7062469a_12ea8e76.py"
+        },
+        {
+          "pattern_hash": "a478cc89108b",
+          "shape_config": "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_training_d7517139",
+          "original_file": "region_002_pointwise_a478cc89108b_d7517139.py"
+        },
+        {
+          "pattern_hash": "8a1dd5cd002c",
+          "shape_config": "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_training_b5c4b1ff",
+          "original_file": "region_003_pointwise_8a1dd5cd002c_b5c4b1ff.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "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_training_1f556d26",
+          "original_file": "region_004_pointwise_983a9e1e3bcd_1f556d26.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "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_training_8a93e32e",
+          "original_file": "region_005_pointwise_741c0d7d8d11_8a93e32e.py"
+        },
+        {
+          "pattern_hash": "f0635c70e184",
+          "shape_config": "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_training_afd1799f",
+          "original_file": "region_006_var_mean_f0635c70e184_afd1799f.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "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_training_740f113b",
+          "original_file": "region_007_pointwise_5d11bd189324_740f113b.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "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_training_0a16bd27",
+          "original_file": "region_008_amax_any_sum_caf9c95ee549_0a16bd27.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "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_training_fbd54303",
+          "original_file": "region_009_pointwise_6bc663ef619c_fbd54303.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "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_training_6517d1ca",
+          "original_file": "region_010_pointwise_1ecc9387d6bd_6517d1ca.py"
+        },
+        {
+          "pattern_hash": "f88be5a1875f",
+          "shape_config": "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_training_a1475ee2",
+          "original_file": "region_011_var_mean_f88be5a1875f_a1475ee2.py"
+        },
+        {
+          "pattern_hash": "90bf9bb70313",
+          "shape_config": "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_training_baee1e2d",
+          "original_file": "region_012_pointwise_90bf9bb70313_baee1e2d.py"
+        },
+        {
+          "pattern_hash": "ab1e67c6cb77",
+          "shape_config": "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_training_d999c84a",
+          "original_file": "region_013_pointwise_ab1e67c6cb77_d999c84a.py"
+        },
+        {
+          "pattern_hash": "3205bf501074",
+          "shape_config": "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_training_b0063428",
+          "original_file": "region_014_pointwise_3205bf501074_b0063428.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "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_training_526a7dc8",
+          "original_file": "region_015_var_mean_a41dace406c0_526a7dc8.py"
+        },
+        {
+          "pattern_hash": "c9e746e00507",
+          "shape_config": "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_training_37af4e1c",
+          "original_file": "region_016_amax_any_sum_c9e746e00507_37af4e1c.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "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_training_61671f9f",
+          "original_file": "region_017_pointwise_16e058489060_61671f9f.py"
+        },
+        {
+          "pattern_hash": "9e288ad6925e",
+          "shape_config": "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_training_7f5026f2",
+          "original_file": "region_018_pointwise_9e288ad6925e_7f5026f2.py"
+        },
+        {
+          "pattern_hash": "4b8cf99dc78e",
+          "shape_config": "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_training_608c4872",
+          "original_file": "region_019_pointwise_4b8cf99dc78e_608c4872.py"
+        },
+        {
+          "pattern_hash": "921891f5f368",
+          "shape_config": "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_training_c1178309",
+          "original_file": "region_020_amax_sum_921891f5f368_c1178309.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "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_training_d2c725b3",
+          "original_file": "region_021_sum_907390853538_d2c725b3.py"
+        },
+        {
+          "pattern_hash": "e0def9b310b0",
+          "shape_config": "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_training_0db4afbc",
+          "original_file": "region_022_sum_e0def9b310b0_0db4afbc.py"
+        },
+        {
+          "pattern_hash": "5c1cd5bd35e5",
+          "shape_config": "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_training_e6fa2778",
+          "original_file": "region_023_pointwise_5c1cd5bd35e5_e6fa2778.py"
+        },
+        {
+          "pattern_hash": "298a455d5e05",
+          "shape_config": "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_training_7fc75e4e",
+          "original_file": "region_024_sum_298a455d5e05_7fc75e4e.py"
+        },
+        {
+          "pattern_hash": "69fbd64c6e6b",
+          "shape_config": "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_training_740f113b",
+          "original_file": "region_025_pointwise_69fbd64c6e6b_740f113b.py"
+        },
+        {
+          "pattern_hash": "15cb6a8569fa",
+          "shape_config": "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_training_d5ec7f79",
+          "original_file": "region_026_sum_15cb6a8569fa_d5ec7f79.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "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_training_83d112f1",
+          "original_file": "region_027_pointwise_35deec51cf28_83d112f1.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "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_training_36da251b",
+          "original_file": "region_028_sum_2da3a1f29398_36da251b.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "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_training_55f68205",
+          "original_file": "region_029_pointwise_15b0dd73a2f4_55f68205.py"
+        },
+        {
+          "pattern_hash": "961faded9fc6",
+          "shape_config": "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_training_52912670",
+          "original_file": "region_030_pointwise_961faded9fc6_52912670.py"
+        },
+        {
+          "pattern_hash": "d8a1e37973d3",
+          "shape_config": "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_training_d999c84a",
+          "original_file": "region_031_pointwise_d8a1e37973d3_d999c84a.py"
+        },
+        {
+          "pattern_hash": "63bb48fde67e",
+          "shape_config": "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_training_bdec2138",
+          "original_file": "region_032_pointwise_63bb48fde67e_bdec2138.py"
+        },
+        {
+          "pattern_hash": "72282b413812",
+          "shape_config": "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_training_805a852d",
+          "original_file": "region_033_sum_72282b413812_805a852d.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "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_training_b2791e8c",
+          "original_file": "region_034_pointwise_5542dd403943_b2791e8c.py"
+        },
+        {
+          "pattern_hash": "c2ee9c72bf0f",
+          "shape_config": "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_training_d5ec7f79",
+          "original_file": "region_035_sum_c2ee9c72bf0f_d5ec7f79.py"
+        }
+      ]
+    },
+    "hf_DebertaV2ForMaskedLM_inference": {
+      "repros": [
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_debertav2formaskedlm_inference_6fc8ddc3",
+          "original_file": "region_000_pointwise_741c0d7d8d11_6fc8ddc3.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_debertav2formaskedlm_inference_73729168",
+          "original_file": "region_001_var_mean_0a1bc21703bb_73729168.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_debertav2formaskedlm_inference_b607280a",
+          "original_file": "region_002_pointwise_741c0d7d8d11_b607280a.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_debertav2formaskedlm_inference_fbaba926",
+          "original_file": "region_003_var_mean_a7cbd072693b_fbaba926.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_debertav2formaskedlm_inference_505814ce",
+          "original_file": "region_004_pointwise_983a9e1e3bcd_505814ce.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_debertav2formaskedlm_inference_54f5adeb",
+          "original_file": "region_005_pointwise_741c0d7d8d11_54f5adeb.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_debertav2formaskedlm_inference_906ff581",
+          "original_file": "region_006_pointwise_5d11bd189324_906ff581.py"
+        },
+        {
+          "pattern_hash": "ddf5a54b87b1",
+          "shape_config": "hf_debertav2formaskedlm_inference_f878ed61",
+          "original_file": "region_007_amax_sum_ddf5a54b87b1_f878ed61.py"
+        },
+        {
+          "pattern_hash": "9c93ea943097",
+          "shape_config": "hf_debertav2formaskedlm_inference_4e50c7ab",
+          "original_file": "region_008_pointwise_9c93ea943097_4e50c7ab.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "hf_debertav2formaskedlm_inference_2f165b2f",
+          "original_file": "region_009_pointwise_16e058489060_2f165b2f.py"
+        },
+        {
+          "pattern_hash": "bb15d1c6e33c",
+          "shape_config": "hf_debertav2formaskedlm_inference_0fceceb9",
+          "original_file": "region_010_pointwise_bb15d1c6e33c_0fceceb9.py"
+        },
+        {
+          "pattern_hash": "cf1ebaa3e2bd",
+          "shape_config": "hf_debertav2formaskedlm_inference_3ed4e2e0",
+          "original_file": "region_011_var_mean_cf1ebaa3e2bd_3ed4e2e0.py"
+        }
+      ]
+    },
+    "hf_DebertaV2ForMaskedLM_training": {
+      "repros": [
+        {
+          "pattern_hash": "2776cb70afd3",
+          "shape_config": "hf_debertav2formaskedlm_training_25bce691",
+          "original_file": "region_000_amax_sum_2776cb70afd3_25bce691.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_debertav2formaskedlm_training_6fc8ddc3",
+          "original_file": "region_001_pointwise_741c0d7d8d11_6fc8ddc3.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_debertav2formaskedlm_training_73729168",
+          "original_file": "region_002_var_mean_0a1bc21703bb_73729168.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_debertav2formaskedlm_training_b607280a",
+          "original_file": "region_003_pointwise_741c0d7d8d11_b607280a.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_debertav2formaskedlm_training_8d610106",
+          "original_file": "region_004_var_mean_a41dace406c0_8d610106.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_debertav2formaskedlm_training_505814ce",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_505814ce.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_debertav2formaskedlm_training_54f5adeb",
+          "original_file": "region_006_pointwise_741c0d7d8d11_54f5adeb.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_debertav2formaskedlm_training_906ff581",
+          "original_file": "region_007_pointwise_5d11bd189324_906ff581.py"
+        },
+        {
+          "pattern_hash": "6b1ce2a6969f",
+          "shape_config": "hf_debertav2formaskedlm_training_791256ea",
+          "original_file": "region_008_amax_sum_6b1ce2a6969f_791256ea.py"
+        },
+        {
+          "pattern_hash": "838f717eb5dd",
+          "shape_config": "hf_debertav2formaskedlm_training_20f54267",
+          "original_file": "region_009_pointwise_838f717eb5dd_20f54267.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "hf_debertav2formaskedlm_training_2f165b2f",
+          "original_file": "region_010_pointwise_1ecc9387d6bd_2f165b2f.py"
+        },
+        {
+          "pattern_hash": "da2cf9a25d48",
+          "shape_config": "hf_debertav2formaskedlm_training_5da5141f",
+          "original_file": "region_011_amax_sum_da2cf9a25d48_5da5141f.py"
+        },
+        {
+          "pattern_hash": "1f0668744418",
+          "shape_config": "hf_debertav2formaskedlm_training_a9861ad4",
+          "original_file": "region_012_pointwise_1f0668744418_a9861ad4.py"
+        },
+        {
+          "pattern_hash": "7350c064b026",
+          "shape_config": "hf_debertav2formaskedlm_training_2f165b2f",
+          "original_file": "region_013_pointwise_7350c064b026_2f165b2f.py"
+        },
+        {
+          "pattern_hash": "cf1ebaa3e2bd",
+          "shape_config": "hf_debertav2formaskedlm_training_3ed4e2e0",
+          "original_file": "region_014_var_mean_cf1ebaa3e2bd_3ed4e2e0.py"
+        },
+        {
+          "pattern_hash": "a80c8048023f",
+          "shape_config": "hf_debertav2formaskedlm_training_cf39dc8d",
+          "original_file": "region_015_sum_a80c8048023f_cf39dc8d.py"
+        },
+        {
+          "pattern_hash": "ca6e15bac858",
+          "shape_config": "hf_debertav2formaskedlm_training_19c4bafe",
+          "original_file": "region_016_pointwise_ca6e15bac858_19c4bafe.py"
+        },
+        {
+          "pattern_hash": "8dc4e9dc439f",
+          "shape_config": "hf_debertav2formaskedlm_training_45f8da07",
+          "original_file": "region_017_sum_8dc4e9dc439f_45f8da07.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_debertav2formaskedlm_training_73729168",
+          "original_file": "region_018_pointwise_35deec51cf28_73729168.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "hf_debertav2formaskedlm_training_c0a11f17",
+          "original_file": "region_019_sum_2da3a1f29398_c0a11f17.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_debertav2formaskedlm_training_35a2b9d9",
+          "original_file": "region_020_pointwise_15b0dd73a2f4_35a2b9d9.py"
+        },
+        {
+          "pattern_hash": "5a0090810fdb",
+          "shape_config": "hf_debertav2formaskedlm_training_339ed63b",
+          "original_file": "region_021_sum_5a0090810fdb_339ed63b.py"
+        },
+        {
+          "pattern_hash": "f4158dd9dd08",
+          "shape_config": "hf_debertav2formaskedlm_training_b5a04b51",
+          "original_file": "region_022_pointwise_f4158dd9dd08_b5a04b51.py"
+        },
+        {
+          "pattern_hash": "5b8850791d8f",
+          "shape_config": "hf_debertav2formaskedlm_training_1eb17c1d",
+          "original_file": "region_023_sum_5b8850791d8f_1eb17c1d.py"
+        },
+        {
+          "pattern_hash": "1526d0ba3972",
+          "shape_config": "hf_debertav2formaskedlm_training_ddac2662",
+          "original_file": "region_024_pointwise_1526d0ba3972_ddac2662.py"
+        },
+        {
+          "pattern_hash": "e57b0d267a9f",
+          "shape_config": "hf_debertav2formaskedlm_training_cf8de827",
+          "original_file": "region_025_sum_e57b0d267a9f_cf8de827.py"
+        },
+        {
+          "pattern_hash": "008540c58720",
+          "shape_config": "hf_debertav2formaskedlm_training_c56fb055",
+          "original_file": "region_026_sum_008540c58720_c56fb055.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_debertav2formaskedlm_training_9a5e8a2a",
+          "original_file": "region_027_sum_08bd81f4d8b9_9a5e8a2a.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_debertav2formaskedlm_training_815382ff",
+          "original_file": "region_028_sum_907390853538_815382ff.py"
+        }
+      ]
+    },
+    "hf_DistilBertForMaskedLM_inference": {
+      "repros": [
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distilbertformaskedlm_inference_f08f5a47",
+          "original_file": "region_000_pointwise_741c0d7d8d11_f08f5a47.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_distilbertformaskedlm_inference_f08cde25",
+          "original_file": "region_001_var_mean_0a1bc21703bb_f08cde25.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distilbertformaskedlm_inference_bbeeec84",
+          "original_file": "region_002_pointwise_741c0d7d8d11_bbeeec84.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_distilbertformaskedlm_inference_90411801",
+          "original_file": "region_003_var_mean_a7cbd072693b_90411801.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_distilbertformaskedlm_inference_b27530d7",
+          "original_file": "region_004_pointwise_983a9e1e3bcd_b27530d7.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distilbertformaskedlm_inference_64f8e38d",
+          "original_file": "region_005_pointwise_741c0d7d8d11_64f8e38d.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_distilbertformaskedlm_inference_e3f922d4",
+          "original_file": "region_006_pointwise_5d11bd189324_e3f922d4.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "hf_distilbertformaskedlm_inference_aaf0853e",
+          "original_file": "region_007_amax_any_sum_caf9c95ee549_aaf0853e.py"
+        },
+        {
+          "pattern_hash": "b260987d88be",
+          "shape_config": "hf_distilbertformaskedlm_inference_3d0d0f1d",
+          "original_file": "region_008_pointwise_b260987d88be_3d0d0f1d.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "hf_distilbertformaskedlm_inference_59b294db",
+          "original_file": "region_009_pointwise_16e058489060_59b294db.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "hf_distilbertformaskedlm_inference_275c068c",
+          "original_file": "region_010_amax_any_sum_7c0d8ceb3e2b_275c068c.py"
+        },
+        {
+          "pattern_hash": "cc48567019ee",
+          "shape_config": "hf_distilbertformaskedlm_inference_ec0e2c4d",
+          "original_file": "region_011_var_mean_cc48567019ee_ec0e2c4d.py"
+        }
+      ]
+    },
+    "hf_DistilBertForMaskedLM_training": {
+      "repros": [
+        {
+          "pattern_hash": "395f78e6e206",
+          "shape_config": "hf_distilbertformaskedlm_training_c835ce5d",
+          "original_file": "region_000_amax_sum_395f78e6e206_c835ce5d.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distilbertformaskedlm_training_f08f5a47",
+          "original_file": "region_001_pointwise_741c0d7d8d11_f08f5a47.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_distilbertformaskedlm_training_f08cde25",
+          "original_file": "region_002_var_mean_0a1bc21703bb_f08cde25.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distilbertformaskedlm_training_bbeeec84",
+          "original_file": "region_003_pointwise_741c0d7d8d11_bbeeec84.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_distilbertformaskedlm_training_a346d910",
+          "original_file": "region_004_var_mean_a41dace406c0_a346d910.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_distilbertformaskedlm_training_b27530d7",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_b27530d7.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distilbertformaskedlm_training_64f8e38d",
+          "original_file": "region_006_pointwise_741c0d7d8d11_64f8e38d.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_distilbertformaskedlm_training_90411801",
+          "original_file": "region_007_var_mean_a7cbd072693b_90411801.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_distilbertformaskedlm_training_e3f922d4",
+          "original_file": "region_008_pointwise_5d11bd189324_e3f922d4.py"
+        },
+        {
+          "pattern_hash": "b9b543f9e1e3",
+          "shape_config": "hf_distilbertformaskedlm_training_f20a76c9",
+          "original_file": "region_009_amax_any_sum_b9b543f9e1e3_f20a76c9.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "hf_distilbertformaskedlm_training_c0bbe21a",
+          "original_file": "region_010_pointwise_6bc663ef619c_c0bbe21a.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "hf_distilbertformaskedlm_training_59b294db",
+          "original_file": "region_011_pointwise_1ecc9387d6bd_59b294db.py"
+        },
+        {
+          "pattern_hash": "e788afc14f3d",
+          "shape_config": "hf_distilbertformaskedlm_training_76ac8c40",
+          "original_file": "region_012_amax_any_sum_e788afc14f3d_76ac8c40.py"
+        },
+        {
+          "pattern_hash": "7350c064b026",
+          "shape_config": "hf_distilbertformaskedlm_training_59b294db",
+          "original_file": "region_013_pointwise_7350c064b026_59b294db.py"
+        },
+        {
+          "pattern_hash": "cc48567019ee",
+          "shape_config": "hf_distilbertformaskedlm_training_ec0e2c4d",
+          "original_file": "region_014_var_mean_cc48567019ee_ec0e2c4d.py"
+        },
+        {
+          "pattern_hash": "54778c120192",
+          "shape_config": "hf_distilbertformaskedlm_training_6ee6170a",
+          "original_file": "region_015_sum_54778c120192_6ee6170a.py"
+        },
+        {
+          "pattern_hash": "56f587cdce23",
+          "shape_config": "hf_distilbertformaskedlm_training_e417fc7a",
+          "original_file": "region_016_pointwise_56f587cdce23_e417fc7a.py"
+        },
+        {
+          "pattern_hash": "61a7becdb42d",
+          "shape_config": "hf_distilbertformaskedlm_training_e18ef845",
+          "original_file": "region_017_sum_61a7becdb42d_e18ef845.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_distilbertformaskedlm_training_f08cde25",
+          "original_file": "region_018_pointwise_35deec51cf28_f08cde25.py"
+        },
+        {
+          "pattern_hash": "fdabe6e09a94",
+          "shape_config": "hf_distilbertformaskedlm_training_31b726ea",
+          "original_file": "region_019_sum_fdabe6e09a94_31b726ea.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_distilbertformaskedlm_training_1df18cd6",
+          "original_file": "region_020_pointwise_15b0dd73a2f4_1df18cd6.py"
+        },
+        {
+          "pattern_hash": "5a0090810fdb",
+          "shape_config": "hf_distilbertformaskedlm_training_4e34ef27",
+          "original_file": "region_021_sum_5a0090810fdb_4e34ef27.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "hf_distilbertformaskedlm_training_655d42c8",
+          "original_file": "region_022_pointwise_5542dd403943_655d42c8.py"
+        },
+        {
+          "pattern_hash": "f2b19635d2cc",
+          "shape_config": "hf_distilbertformaskedlm_training_921e9b27",
+          "original_file": "region_023_sum_f2b19635d2cc_921e9b27.py"
+        },
+        {
+          "pattern_hash": "008540c58720",
+          "shape_config": "hf_distilbertformaskedlm_training_c45d6172",
+          "original_file": "region_024_sum_008540c58720_c45d6172.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_distilbertformaskedlm_training_719c27ca",
+          "original_file": "region_025_sum_08bd81f4d8b9_719c27ca.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_distilbertformaskedlm_training_35ed822c",
+          "original_file": "region_026_sum_907390853538_35ed822c.py"
+        }
+      ]
+    },
+    "hf_DistillGPT2_inference": {
+      "repros": [
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distillgpt2_inference_29d34729",
+          "original_file": "region_000_pointwise_741c0d7d8d11_29d34729.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_distillgpt2_inference_3f7da3f3",
+          "original_file": "region_001_var_mean_a7cbd072693b_3f7da3f3.py"
+        },
+        {
+          "pattern_hash": "a87f35a59ad4",
+          "shape_config": "hf_distillgpt2_inference_83bbb1be",
+          "original_file": "region_002_pointwise_a87f35a59ad4_83bbb1be.py"
+        },
+        {
+          "pattern_hash": "86432a5d8e65",
+          "shape_config": "hf_distillgpt2_inference_d3a4508d",
+          "original_file": "region_003_pointwise_86432a5d8e65_d3a4508d.py"
+        },
+        {
+          "pattern_hash": "f516f32a662d",
+          "shape_config": "hf_distillgpt2_inference_d475d2cb",
+          "original_file": "region_004_pointwise_f516f32a662d_d475d2cb.py"
+        },
+        {
+          "pattern_hash": "0c95f1e9b371",
+          "shape_config": "hf_distillgpt2_inference_2c917d76",
+          "original_file": "region_005_pointwise_0c95f1e9b371_2c917d76.py"
+        },
+        {
+          "pattern_hash": "33e3e98d18bf",
+          "shape_config": "hf_distillgpt2_inference_a363368a",
+          "original_file": "region_006_pointwise_33e3e98d18bf_a363368a.py"
+        },
+        {
+          "pattern_hash": "94da6bd0ff78",
+          "shape_config": "hf_distillgpt2_inference_756fa9f4",
+          "original_file": "region_007_pointwise_94da6bd0ff78_756fa9f4.py"
+        },
+        {
+          "pattern_hash": "92086c85001b",
+          "shape_config": "hf_distillgpt2_inference_5be42438",
+          "original_file": "region_008_var_mean_92086c85001b_5be42438.py"
+        }
+      ]
+    },
+    "hf_DistillGPT2_training": {
+      "repros": [
+        {
+          "pattern_hash": "96abbec14346",
+          "shape_config": "hf_distillgpt2_training_98c2a8c0",
+          "original_file": "region_000_pointwise_96abbec14346_98c2a8c0.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distillgpt2_training_29d34729",
+          "original_file": "region_001_pointwise_741c0d7d8d11_29d34729.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_distillgpt2_training_84423a5e",
+          "original_file": "region_002_var_mean_a41dace406c0_84423a5e.py"
+        },
+        {
+          "pattern_hash": "a87f35a59ad4",
+          "shape_config": "hf_distillgpt2_training_83bbb1be",
+          "original_file": "region_003_pointwise_a87f35a59ad4_83bbb1be.py"
+        },
+        {
+          "pattern_hash": "86432a5d8e65",
+          "shape_config": "hf_distillgpt2_training_d3a4508d",
+          "original_file": "region_004_pointwise_86432a5d8e65_d3a4508d.py"
+        },
+        {
+          "pattern_hash": "0c95f1e9b371",
+          "shape_config": "hf_distillgpt2_training_2c917d76",
+          "original_file": "region_005_pointwise_0c95f1e9b371_2c917d76.py"
+        },
+        {
+          "pattern_hash": "37ee1971d401",
+          "shape_config": "hf_distillgpt2_training_47185dfb",
+          "original_file": "region_006_pointwise_37ee1971d401_47185dfb.py"
+        },
+        {
+          "pattern_hash": "94da6bd0ff78",
+          "shape_config": "hf_distillgpt2_training_756fa9f4",
+          "original_file": "region_007_pointwise_94da6bd0ff78_756fa9f4.py"
+        },
+        {
+          "pattern_hash": "521dcf2ed2b9",
+          "shape_config": "hf_distillgpt2_training_5be42438",
+          "original_file": "region_008_var_mean_521dcf2ed2b9_5be42438.py"
+        },
+        {
+          "pattern_hash": "8b884f5aa8d1",
+          "shape_config": "hf_distillgpt2_training_c1756e28",
+          "original_file": "region_009_amax_sum_8b884f5aa8d1_c1756e28.py"
+        },
+        {
+          "pattern_hash": "d8a8edde46e9",
+          "shape_config": "hf_distillgpt2_training_e464751a",
+          "original_file": "region_010_sum_d8a8edde46e9_e464751a.py"
+        },
+        {
+          "pattern_hash": "45ace8213b20",
+          "shape_config": "hf_distillgpt2_training_c72f7090",
+          "original_file": "region_011_sum_45ace8213b20_c72f7090.py"
+        },
+        {
+          "pattern_hash": "0ce5123bcacc",
+          "shape_config": "hf_distillgpt2_training_c80337f5",
+          "original_file": "region_012_pointwise_0ce5123bcacc_c80337f5.py"
+        },
+        {
+          "pattern_hash": "45a5cf42796f",
+          "shape_config": "hf_distillgpt2_training_e7b70c74",
+          "original_file": "region_013_sum_45a5cf42796f_e7b70c74.py"
+        },
+        {
+          "pattern_hash": "091128b179c4",
+          "shape_config": "hf_distillgpt2_training_c5428ec2",
+          "original_file": "region_014_pointwise_091128b179c4_c5428ec2.py"
+        },
+        {
+          "pattern_hash": "45a5cf42796f",
+          "shape_config": "hf_distillgpt2_training_f03994d6",
+          "original_file": "region_015_sum_45a5cf42796f_f03994d6.py"
+        },
+        {
+          "pattern_hash": "3d66f039c2f4",
+          "shape_config": "hf_distillgpt2_training_f8719309",
+          "original_file": "region_016_pointwise_3d66f039c2f4_f8719309.py"
+        }
+      ]
+    },
+    "hf_ElectraForCausalLM_inference": {
+      "repros": [
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_inference_0848159c",
+          "original_file": "region_000_pointwise_741c0d7d8d11_0848159c.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_electraforcausallm_inference_8405719f",
+          "original_file": "region_001_var_mean_0a1bc21703bb_8405719f.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_inference_6b8376ed",
+          "original_file": "region_002_pointwise_741c0d7d8d11_6b8376ed.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_electraforcausallm_inference_dc9bcfac",
+          "original_file": "region_003_var_mean_a7cbd072693b_dc9bcfac.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_electraforcausallm_inference_6203b143",
+          "original_file": "region_004_pointwise_983a9e1e3bcd_6203b143.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_inference_5626799c",
+          "original_file": "region_005_pointwise_741c0d7d8d11_5626799c.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_electraforcausallm_inference_9f6fae77",
+          "original_file": "region_006_pointwise_5d11bd189324_9f6fae77.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "hf_electraforcausallm_inference_2f9c2b54",
+          "original_file": "region_007_amax_any_sum_caf9c95ee549_2f9c2b54.py"
+        },
+        {
+          "pattern_hash": "b260987d88be",
+          "shape_config": "hf_electraforcausallm_inference_0a9fc19b",
+          "original_file": "region_008_pointwise_b260987d88be_0a9fc19b.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "hf_electraforcausallm_inference_7396a115",
+          "original_file": "region_009_pointwise_16e058489060_7396a115.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "hf_electraforcausallm_inference_acd074f0",
+          "original_file": "region_010_amax_any_sum_7c0d8ceb3e2b_acd074f0.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_inference_f49d3e71",
+          "original_file": "region_011_pointwise_741c0d7d8d11_f49d3e71.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_electraforcausallm_inference_cab56dc3",
+          "original_file": "region_012_var_mean_0a44c4081351_cab56dc3.py"
+        }
+      ]
+    },
+    "hf_ElectraForCausalLM_training": {
+      "repros": [
+        {
+          "pattern_hash": "44fab2c4eb07",
+          "shape_config": "hf_electraforcausallm_training_ad000c86",
+          "original_file": "region_000_amax_sum_44fab2c4eb07_ad000c86.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_training_0848159c",
+          "original_file": "region_001_pointwise_741c0d7d8d11_0848159c.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_electraforcausallm_training_8405719f",
+          "original_file": "region_002_var_mean_0a1bc21703bb_8405719f.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_training_6b8376ed",
+          "original_file": "region_003_pointwise_741c0d7d8d11_6b8376ed.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_electraforcausallm_training_2bebfb07",
+          "original_file": "region_004_var_mean_a41dace406c0_2bebfb07.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_electraforcausallm_training_6203b143",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_6203b143.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_training_5626799c",
+          "original_file": "region_006_pointwise_741c0d7d8d11_5626799c.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_electraforcausallm_training_9f6fae77",
+          "original_file": "region_007_pointwise_5d11bd189324_9f6fae77.py"
+        },
+        {
+          "pattern_hash": "b9b543f9e1e3",
+          "shape_config": "hf_electraforcausallm_training_98dd8aa0",
+          "original_file": "region_008_amax_any_sum_b9b543f9e1e3_98dd8aa0.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "hf_electraforcausallm_training_1251c178",
+          "original_file": "region_009_pointwise_6bc663ef619c_1251c178.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "hf_electraforcausallm_training_7396a115",
+          "original_file": "region_010_pointwise_1ecc9387d6bd_7396a115.py"
+        },
+        {
+          "pattern_hash": "e788afc14f3d",
+          "shape_config": "hf_electraforcausallm_training_e28d9ac1",
+          "original_file": "region_011_amax_any_sum_e788afc14f3d_e28d9ac1.py"
+        },
+        {
+          "pattern_hash": "3ea1b27af5ae",
+          "shape_config": "hf_electraforcausallm_training_f49d3e71",
+          "original_file": "region_012_pointwise_3ea1b27af5ae_f49d3e71.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_electraforcausallm_training_cab56dc3",
+          "original_file": "region_013_var_mean_0a44c4081351_cab56dc3.py"
+        },
+        {
+          "pattern_hash": "8f9f5403ed7a",
+          "shape_config": "hf_electraforcausallm_training_8b6bea3c",
+          "original_file": "region_014_sum_8f9f5403ed7a_8b6bea3c.py"
+        },
+        {
+          "pattern_hash": "4ebf9d42032c",
+          "shape_config": "hf_electraforcausallm_training_0998765f",
+          "original_file": "region_015_pointwise_4ebf9d42032c_0998765f.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "hf_electraforcausallm_training_0454ea95",
+          "original_file": "region_016_pointwise_5542dd403943_0454ea95.py"
+        },
+        {
+          "pattern_hash": "61a7becdb42d",
+          "shape_config": "hf_electraforcausallm_training_f23df11d",
+          "original_file": "region_017_sum_61a7becdb42d_f23df11d.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_electraforcausallm_training_73308d67",
+          "original_file": "region_018_pointwise_35deec51cf28_73308d67.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "hf_electraforcausallm_training_8fa415cc",
+          "original_file": "region_019_sum_2da3a1f29398_8fa415cc.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_electraforcausallm_training_ba979a00",
+          "original_file": "region_020_pointwise_15b0dd73a2f4_ba979a00.py"
+        },
+        {
+          "pattern_hash": "5a0090810fdb",
+          "shape_config": "hf_electraforcausallm_training_f3d62b86",
+          "original_file": "region_021_sum_5a0090810fdb_f3d62b86.py"
+        },
+        {
+          "pattern_hash": "f2b19635d2cc",
+          "shape_config": "hf_electraforcausallm_training_c0757972",
+          "original_file": "region_022_sum_f2b19635d2cc_c0757972.py"
+        },
+        {
+          "pattern_hash": "008540c58720",
+          "shape_config": "hf_electraforcausallm_training_1606446b",
+          "original_file": "region_023_sum_008540c58720_1606446b.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_electraforcausallm_training_9e65fb5d",
+          "original_file": "region_024_sum_08bd81f4d8b9_9e65fb5d.py"
+        },
+        {
+          "pattern_hash": "e7b045ba8f22",
+          "shape_config": "hf_electraforcausallm_training_900fe239",
+          "original_file": "region_025_sum_e7b045ba8f22_900fe239.py"
+        }
+      ]
+    },
+    "hf_GPT2ForSequenceClassification_inference": {
+      "repros": [
+        {
+          "pattern_hash": "a38b5e12c295",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_0da1f411",
+          "original_file": "region_000_argmax_a38b5e12c295_0da1f411.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_b5589cae",
+          "original_file": "region_001_pointwise_741c0d7d8d11_b5589cae.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_40b93261",
+          "original_file": "region_002_var_mean_a7cbd072693b_40b93261.py"
+        },
+        {
+          "pattern_hash": "a87f35a59ad4",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_126c56cd",
+          "original_file": "region_003_pointwise_a87f35a59ad4_126c56cd.py"
+        },
+        {
+          "pattern_hash": "86432a5d8e65",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_41fe5c52",
+          "original_file": "region_004_pointwise_86432a5d8e65_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "f516f32a662d",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_046ab747",
+          "original_file": "region_005_pointwise_f516f32a662d_046ab747.py"
+        },
+        {
+          "pattern_hash": "0c95f1e9b371",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_1dc8a174",
+          "original_file": "region_006_pointwise_0c95f1e9b371_1dc8a174.py"
+        },
+        {
+          "pattern_hash": "33e3e98d18bf",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_eb618c7a",
+          "original_file": "region_007_pointwise_33e3e98d18bf_eb618c7a.py"
+        },
+        {
+          "pattern_hash": "94da6bd0ff78",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_dd6d40ad",
+          "original_file": "region_008_pointwise_94da6bd0ff78_dd6d40ad.py"
+        },
+        {
+          "pattern_hash": "92086c85001b",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_726c16e2",
+          "original_file": "region_009_var_mean_92086c85001b_726c16e2.py"
+        }
+      ]
+    },
+    "hf_GPT2ForSequenceClassification_training": {
+      "repros": [
+        {
+          "pattern_hash": "7a884d027d80",
+          "shape_config": "hf_gpt2forsequenceclassification_training_4a275495",
+          "original_file": "region_000_amax_argmax_sum_7a884d027d80_4a275495.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_gpt2forsequenceclassification_training_b5589cae",
+          "original_file": "region_001_pointwise_741c0d7d8d11_b5589cae.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_gpt2forsequenceclassification_training_c78f8973",
+          "original_file": "region_002_var_mean_a41dace406c0_c78f8973.py"
+        },
+        {
+          "pattern_hash": "a87f35a59ad4",
+          "shape_config": "hf_gpt2forsequenceclassification_training_126c56cd",
+          "original_file": "region_003_pointwise_a87f35a59ad4_126c56cd.py"
+        },
+        {
+          "pattern_hash": "86432a5d8e65",
+          "shape_config": "hf_gpt2forsequenceclassification_training_41fe5c52",
+          "original_file": "region_004_pointwise_86432a5d8e65_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "0c95f1e9b371",
+          "shape_config": "hf_gpt2forsequenceclassification_training_1dc8a174",
+          "original_file": "region_005_pointwise_0c95f1e9b371_1dc8a174.py"
+        },
+        {
+          "pattern_hash": "37ee1971d401",
+          "shape_config": "hf_gpt2forsequenceclassification_training_8aeaa54c",
+          "original_file": "region_006_pointwise_37ee1971d401_8aeaa54c.py"
+        },
+        {
+          "pattern_hash": "94da6bd0ff78",
+          "shape_config": "hf_gpt2forsequenceclassification_training_dd6d40ad",
+          "original_file": "region_007_pointwise_94da6bd0ff78_dd6d40ad.py"
+        },
+        {
+          "pattern_hash": "521dcf2ed2b9",
+          "shape_config": "hf_gpt2forsequenceclassification_training_726c16e2",
+          "original_file": "region_008_var_mean_521dcf2ed2b9_726c16e2.py"
+        },
+        {
+          "pattern_hash": "1d7af42a76c8",
+          "shape_config": "hf_gpt2forsequenceclassification_training_a5612c08",
+          "original_file": "region_009_sum_1d7af42a76c8_a5612c08.py"
+        },
+        {
+          "pattern_hash": "3d66f039c2f4",
+          "shape_config": "hf_gpt2forsequenceclassification_training_00e0609f",
+          "original_file": "region_010_pointwise_3d66f039c2f4_00e0609f.py"
+        },
+        {
+          "pattern_hash": "45a5cf42796f",
+          "shape_config": "hf_gpt2forsequenceclassification_training_4b759c1f",
+          "original_file": "region_011_sum_45a5cf42796f_4b759c1f.py"
+        },
+        {
+          "pattern_hash": "091128b179c4",
+          "shape_config": "hf_gpt2forsequenceclassification_training_8d1da404",
+          "original_file": "region_012_pointwise_091128b179c4_8d1da404.py"
+        },
+        {
+          "pattern_hash": "45a5cf42796f",
+          "shape_config": "hf_gpt2forsequenceclassification_training_cb1eac89",
+          "original_file": "region_013_sum_45a5cf42796f_cb1eac89.py"
+        },
+        {
+          "pattern_hash": "6cb8a3fa015d",
+          "shape_config": "hf_gpt2forsequenceclassification_training_8563db5e",
+          "original_file": "region_014_sum_6cb8a3fa015d_8563db5e.py"
+        },
+        {
+          "pattern_hash": "0396ad338ed6",
+          "shape_config": "hf_gpt2forsequenceclassification_training_c2c75b65",
+          "original_file": "region_015_amax_sum_0396ad338ed6_c2c75b65.py"
+        }
+      ]
+    },
+    "hf_bert_large_train": {
+      "repros": [
+        {
+          "pattern_hash": "5c8833037b8e",
+          "shape_config": "hf_bert_large_train_7a01bf86",
+          "original_file": "region_000_amax_sum_5c8833037b8e_7a01bf86.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bert_large_train_3a8b0de3",
+          "original_file": "region_001_pointwise_741c0d7d8d11_3a8b0de3.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_bert_large_train_6ab23c32",
+          "original_file": "region_002_var_mean_0a1bc21703bb_6ab23c32.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bert_large_train_586c6432",
+          "original_file": "region_003_pointwise_741c0d7d8d11_586c6432.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_bert_large_train_e6850406",
+          "original_file": "region_004_var_mean_a41dace406c0_e6850406.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_bert_large_train_b64d4354",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_b64d4354.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_bert_large_train_0d81ae74",
+          "original_file": "region_006_pointwise_741c0d7d8d11_0d81ae74.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_bert_large_train_21712c58",
+          "original_file": "region_007_pointwise_5d11bd189324_21712c58.py"
+        },
+        {
+          "pattern_hash": "b9b543f9e1e3",
+          "shape_config": "hf_bert_large_train_06462c1c",
+          "original_file": "region_008_amax_any_sum_b9b543f9e1e3_06462c1c.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "hf_bert_large_train_9a5e1b23",
+          "original_file": "region_009_pointwise_6bc663ef619c_9a5e1b23.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "hf_bert_large_train_bec97ffa",
+          "original_file": "region_010_pointwise_1ecc9387d6bd_bec97ffa.py"
+        },
+        {
+          "pattern_hash": "e788afc14f3d",
+          "shape_config": "hf_bert_large_train_7ea60ece",
+          "original_file": "region_011_amax_any_sum_e788afc14f3d_7ea60ece.py"
+        },
+        {
+          "pattern_hash": "7350c064b026",
+          "shape_config": "hf_bert_large_train_bec97ffa",
+          "original_file": "region_012_pointwise_7350c064b026_bec97ffa.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_bert_large_train_23359106",
+          "original_file": "region_013_var_mean_0a44c4081351_23359106.py"
+        },
+        {
+          "pattern_hash": "6b730b98ce8a",
+          "shape_config": "hf_bert_large_train_0f75645f",
+          "original_file": "region_014_sum_6b730b98ce8a_0f75645f.py"
+        },
+        {
+          "pattern_hash": "56f587cdce23",
+          "shape_config": "hf_bert_large_train_6c4d33a5",
+          "original_file": "region_015_pointwise_56f587cdce23_6c4d33a5.py"
+        },
+        {
+          "pattern_hash": "61a7becdb42d",
+          "shape_config": "hf_bert_large_train_8ec46bda",
+          "original_file": "region_016_sum_61a7becdb42d_8ec46bda.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_bert_large_train_6ab23c32",
+          "original_file": "region_017_pointwise_35deec51cf28_6ab23c32.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "hf_bert_large_train_3e20e2c7",
+          "original_file": "region_018_sum_2da3a1f29398_3e20e2c7.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_bert_large_train_9a9d89f6",
+          "original_file": "region_019_pointwise_15b0dd73a2f4_9a9d89f6.py"
+        },
+        {
+          "pattern_hash": "5a0090810fdb",
+          "shape_config": "hf_bert_large_train_bc0af459",
+          "original_file": "region_020_sum_5a0090810fdb_bc0af459.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "hf_bert_large_train_7b439bf1",
+          "original_file": "region_021_pointwise_5542dd403943_7b439bf1.py"
+        },
+        {
+          "pattern_hash": "f2b19635d2cc",
+          "shape_config": "hf_bert_large_train_f6b8d49c",
+          "original_file": "region_022_sum_f2b19635d2cc_f6b8d49c.py"
+        },
+        {
+          "pattern_hash": "008540c58720",
+          "shape_config": "hf_bert_large_train_958d739b",
+          "original_file": "region_023_sum_008540c58720_958d739b.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_bert_large_train_46507f56",
+          "original_file": "region_024_sum_08bd81f4d8b9_46507f56.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_bert_large_train_ede2058b",
+          "original_file": "region_025_sum_907390853538_ede2058b.py"
+        }
+      ]
+    },
+    "hf_distilbert_train": {
+      "repros": [
+        {
+          "pattern_hash": "395f78e6e206",
+          "shape_config": "hf_distilbert_train_cef9df60",
+          "original_file": "region_000_amax_sum_395f78e6e206_cef9df60.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distilbert_train_671ba523",
+          "original_file": "region_001_pointwise_741c0d7d8d11_671ba523.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_distilbert_train_0e7f33e1",
+          "original_file": "region_002_var_mean_0a1bc21703bb_0e7f33e1.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distilbert_train_9a2d3eb8",
+          "original_file": "region_003_pointwise_741c0d7d8d11_9a2d3eb8.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_distilbert_train_fad2fe16",
+          "original_file": "region_004_var_mean_a41dace406c0_fad2fe16.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_distilbert_train_27556896",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_27556896.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distilbert_train_3cb8ab02",
+          "original_file": "region_006_pointwise_741c0d7d8d11_3cb8ab02.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_distilbert_train_de774af5",
+          "original_file": "region_007_var_mean_a7cbd072693b_de774af5.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_distilbert_train_a229943c",
+          "original_file": "region_008_pointwise_5d11bd189324_a229943c.py"
+        },
+        {
+          "pattern_hash": "b9b543f9e1e3",
+          "shape_config": "hf_distilbert_train_6fe37143",
+          "original_file": "region_009_amax_any_sum_b9b543f9e1e3_6fe37143.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "hf_distilbert_train_daf2bc2d",
+          "original_file": "region_010_pointwise_6bc663ef619c_daf2bc2d.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "hf_distilbert_train_a068d5ad",
+          "original_file": "region_011_pointwise_1ecc9387d6bd_a068d5ad.py"
+        },
+        {
+          "pattern_hash": "e788afc14f3d",
+          "shape_config": "hf_distilbert_train_05a523fd",
+          "original_file": "region_012_amax_any_sum_e788afc14f3d_05a523fd.py"
+        },
+        {
+          "pattern_hash": "7350c064b026",
+          "shape_config": "hf_distilbert_train_a068d5ad",
+          "original_file": "region_013_pointwise_7350c064b026_a068d5ad.py"
+        },
+        {
+          "pattern_hash": "cf1ebaa3e2bd",
+          "shape_config": "hf_distilbert_train_614f2d3d",
+          "original_file": "region_014_var_mean_cf1ebaa3e2bd_614f2d3d.py"
+        },
+        {
+          "pattern_hash": "51bd19b08294",
+          "shape_config": "hf_distilbert_train_5eb07afe",
+          "original_file": "region_015_sum_51bd19b08294_5eb07afe.py"
+        },
+        {
+          "pattern_hash": "56f587cdce23",
+          "shape_config": "hf_distilbert_train_bee95d83",
+          "original_file": "region_016_pointwise_56f587cdce23_bee95d83.py"
+        },
+        {
+          "pattern_hash": "61a7becdb42d",
+          "shape_config": "hf_distilbert_train_5b7743f8",
+          "original_file": "region_017_sum_61a7becdb42d_5b7743f8.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_distilbert_train_0e7f33e1",
+          "original_file": "region_018_pointwise_35deec51cf28_0e7f33e1.py"
+        },
+        {
+          "pattern_hash": "fdabe6e09a94",
+          "shape_config": "hf_distilbert_train_a5703216",
+          "original_file": "region_019_sum_fdabe6e09a94_a5703216.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_distilbert_train_a208dc8f",
+          "original_file": "region_020_pointwise_15b0dd73a2f4_a208dc8f.py"
+        },
+        {
+          "pattern_hash": "5a0090810fdb",
+          "shape_config": "hf_distilbert_train_6257060b",
+          "original_file": "region_021_sum_5a0090810fdb_6257060b.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "hf_distilbert_train_03dd8bb1",
+          "original_file": "region_022_pointwise_5542dd403943_03dd8bb1.py"
+        },
+        {
+          "pattern_hash": "f2b19635d2cc",
+          "shape_config": "hf_distilbert_train_fa913322",
+          "original_file": "region_023_sum_f2b19635d2cc_fa913322.py"
+        },
+        {
+          "pattern_hash": "008540c58720",
+          "shape_config": "hf_distilbert_train_7189d4ea",
+          "original_file": "region_024_sum_008540c58720_7189d4ea.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_distilbert_train_edcbf30f",
+          "original_file": "region_025_sum_08bd81f4d8b9_edcbf30f.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_distilbert_train_a6857aab",
+          "original_file": "region_026_sum_907390853538_a6857aab.py"
+        }
+      ]
+    },
+    "genai_patterns": {
+      "repros": [
+        {
+          "pattern_hash": "e37b8ca72db3",
+          "shape_config": "genai_patterns_17eb7221",
+          "original_file": "region_000_pointwise_e37b8ca72db3_17eb7221.py"
+        },
+        {
+          "pattern_hash": "89da122805f5",
+          "shape_config": "genai_patterns_08cb3aa0",
+          "original_file": "region_001_pointwise_89da122805f5_08cb3aa0.py"
+        },
+        {
+          "pattern_hash": "d1ac77b5eb39",
+          "shape_config": "genai_patterns_17eb7221",
+          "original_file": "region_002_pointwise_d1ac77b5eb39_17eb7221.py"
+        },
+        {
+          "pattern_hash": "9d5fcd3a6ed4",
+          "shape_config": "genai_patterns_e61d44f6",
+          "original_file": "region_003_pointwise_9d5fcd3a6ed4_e61d44f6.py"
+        },
+        {
+          "pattern_hash": "6c5a53075222",
+          "shape_config": "genai_patterns_40db775a",
+          "original_file": "region_004_mean_6c5a53075222_40db775a.py"
+        },
+        {
+          "pattern_hash": "d378e3cce262",
+          "shape_config": "genai_patterns_d839864d",
+          "original_file": "region_005_mean_d378e3cce262_d839864d.py"
+        },
+        {
+          "pattern_hash": "f227f95bf6bc",
+          "shape_config": "genai_patterns_4f537d16",
+          "original_file": "region_006_pointwise_f227f95bf6bc_4f537d16.py"
+        },
+        {
+          "pattern_hash": "75b8163c7b9c",
+          "shape_config": "genai_patterns_a2a123c0",
+          "original_file": "region_007_amax_sum_75b8163c7b9c_a2a123c0.py"
+        },
+        {
+          "pattern_hash": "b430273ac746",
+          "shape_config": "genai_patterns_7a1e675a",
+          "original_file": "region_008_pointwise_b430273ac746_7a1e675a.py"
+        }
+      ]
+    },
+    "hf_t5_base_train": {
+      "repros": [
+        {
+          "pattern_hash": "8b424d3b29c5",
+          "shape_config": "hf_t5_base_train_f1adc8c8",
+          "original_file": "region_000_mean_8b424d3b29c5_f1adc8c8.py"
+        },
+        {
+          "pattern_hash": "b088bded9ec8",
+          "shape_config": "hf_t5_base_train_47a5e051",
+          "original_file": "region_001_pointwise_b088bded9ec8_47a5e051.py"
+        },
+        {
+          "pattern_hash": "0a3030a186ee",
+          "shape_config": "hf_t5_base_train_7cbf623b",
+          "original_file": "region_002_mean_0a3030a186ee_7cbf623b.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_t5_base_train_a229943c",
+          "original_file": "region_003_pointwise_5d11bd189324_a229943c.py"
+        },
+        {
+          "pattern_hash": "75833531334a",
+          "shape_config": "hf_t5_base_train_ba359421",
+          "original_file": "region_004_amax_sum_75833531334a_ba359421.py"
+        },
+        {
+          "pattern_hash": "26178cdd79b9",
+          "shape_config": "hf_t5_base_train_daf2bc2d",
+          "original_file": "region_005_pointwise_26178cdd79b9_daf2bc2d.py"
+        },
+        {
+          "pattern_hash": "d5cc84b7eea8",
+          "shape_config": "hf_t5_base_train_dd7c53d3",
+          "original_file": "region_006_mean_d5cc84b7eea8_dd7c53d3.py"
+        },
+        {
+          "pattern_hash": "c5d375fea46f",
+          "shape_config": "hf_t5_base_train_dd04437c",
+          "original_file": "region_007_amax_sum_c5d375fea46f_dd04437c.py"
+        },
+        {
+          "pattern_hash": "58150647e58f",
+          "shape_config": "hf_t5_base_train_6c8325c9",
+          "original_file": "region_008_mean_58150647e58f_6c8325c9.py"
+        },
+        {
+          "pattern_hash": "ab1e67c6cb77",
+          "shape_config": "hf_t5_base_train_d88d65a9",
+          "original_file": "region_009_pointwise_ab1e67c6cb77_d88d65a9.py"
+        },
+        {
+          "pattern_hash": "89793f1853c4",
+          "shape_config": "hf_t5_base_train_8ec4462e",
+          "original_file": "region_010_mean_89793f1853c4_8ec4462e.py"
+        },
+        {
+          "pattern_hash": "b088bded9ec8",
+          "shape_config": "hf_t5_base_train_78ee5de9",
+          "original_file": "region_011_pointwise_b088bded9ec8_78ee5de9.py"
+        },
+        {
+          "pattern_hash": "0a3030a186ee",
+          "shape_config": "hf_t5_base_train_927dad5d",
+          "original_file": "region_012_mean_0a3030a186ee_927dad5d.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_t5_base_train_d752ef69",
+          "original_file": "region_013_pointwise_5d11bd189324_d752ef69.py"
+        },
+        {
+          "pattern_hash": "75833531334a",
+          "shape_config": "hf_t5_base_train_912c4def",
+          "original_file": "region_014_amax_sum_75833531334a_912c4def.py"
+        },
+        {
+          "pattern_hash": "26178cdd79b9",
+          "shape_config": "hf_t5_base_train_99983960",
+          "original_file": "region_015_pointwise_26178cdd79b9_99983960.py"
+        },
+        {
+          "pattern_hash": "d5cc84b7eea8",
+          "shape_config": "hf_t5_base_train_ea8e1899",
+          "original_file": "region_016_mean_d5cc84b7eea8_ea8e1899.py"
+        },
+        {
+          "pattern_hash": "75833531334a",
+          "shape_config": "hf_t5_base_train_3df51a85",
+          "original_file": "region_017_amax_sum_75833531334a_3df51a85.py"
+        },
+        {
+          "pattern_hash": "26178cdd79b9",
+          "shape_config": "hf_t5_base_train_a4f79b36",
+          "original_file": "region_018_pointwise_26178cdd79b9_a4f79b36.py"
+        },
+        {
+          "pattern_hash": "4f8e3904a50d",
+          "shape_config": "hf_t5_base_train_3f70aaf1",
+          "original_file": "region_019_amax_sum_4f8e3904a50d_3f70aaf1.py"
+        },
+        {
+          "pattern_hash": "1284e8ebe9f6",
+          "shape_config": "hf_t5_base_train_212bec72",
+          "original_file": "region_020_mean_1284e8ebe9f6_212bec72.py"
+        },
+        {
+          "pattern_hash": "2f69908c5920",
+          "shape_config": "hf_t5_base_train_256999cd",
+          "original_file": "region_021_amax_sum_2f69908c5920_256999cd.py"
+        },
+        {
+          "pattern_hash": "88312d2575d1",
+          "shape_config": "hf_t5_base_train_cf4b343f",
+          "original_file": "region_022_mean_88312d2575d1_cf4b343f.py"
+        },
+        {
+          "pattern_hash": "1e2fa4dc55ba",
+          "shape_config": "hf_t5_base_train_40ab814c",
+          "original_file": "region_023_amax_sum_1e2fa4dc55ba_40ab814c.py"
+        },
+        {
+          "pattern_hash": "a45454119949",
+          "shape_config": "hf_t5_base_train_5e595c5e",
+          "original_file": "region_024_pointwise_a45454119949_5e595c5e.py"
+        },
+        {
+          "pattern_hash": "a45454119949",
+          "shape_config": "hf_t5_base_train_c2bfdb30",
+          "original_file": "region_025_pointwise_a45454119949_c2bfdb30.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_t5_base_train_ffee8a4b",
+          "original_file": "region_026_sum_907390853538_ffee8a4b.py"
+        },
+        {
+          "pattern_hash": "3be5624028ba",
+          "shape_config": "hf_t5_base_train_e5d7ed1c",
+          "original_file": "region_027_sum_3be5624028ba_e5d7ed1c.py"
+        },
+        {
+          "pattern_hash": "614292c5c828",
+          "shape_config": "hf_t5_base_train_70142a7c",
+          "original_file": "region_028_pointwise_614292c5c828_70142a7c.py"
+        },
+        {
+          "pattern_hash": "abef0b584022",
+          "shape_config": "hf_t5_base_train_d2e0c8f2",
+          "original_file": "region_029_sum_abef0b584022_d2e0c8f2.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_t5_base_train_81f90883",
+          "original_file": "region_030_pointwise_35deec51cf28_81f90883.py"
+        },
+        {
+          "pattern_hash": "2455c16b099f",
+          "shape_config": "hf_t5_base_train_228f66fa",
+          "original_file": "region_031_sum_2455c16b099f_228f66fa.py"
+        },
+        {
+          "pattern_hash": "85542453e3ba",
+          "shape_config": "hf_t5_base_train_d752ef69",
+          "original_file": "region_032_pointwise_85542453e3ba_d752ef69.py"
+        },
+        {
+          "pattern_hash": "f2b19635d2cc",
+          "shape_config": "hf_t5_base_train_ceb832d1",
+          "original_file": "region_033_sum_f2b19635d2cc_ceb832d1.py"
+        },
+        {
+          "pattern_hash": "1cf07a639a4f",
+          "shape_config": "hf_t5_base_train_3ea364c6",
+          "original_file": "region_034_pointwise_1cf07a639a4f_3ea364c6.py"
+        },
+        {
+          "pattern_hash": "6a1d60acd06d",
+          "shape_config": "hf_t5_base_train_3451cca9",
+          "original_file": "region_035_sum_6a1d60acd06d_3451cca9.py"
+        },
+        {
+          "pattern_hash": "430488e4e020",
+          "shape_config": "hf_t5_base_train_8f523fed",
+          "original_file": "region_036_pointwise_430488e4e020_8f523fed.py"
+        },
+        {
+          "pattern_hash": "c008401e680b",
+          "shape_config": "hf_t5_base_train_252d19c2",
+          "original_file": "region_037_pointwise_c008401e680b_252d19c2.py"
+        },
+        {
+          "pattern_hash": "278800ebb100",
+          "shape_config": "hf_t5_base_train_d9fb0745",
+          "original_file": "region_038_sum_278800ebb100_d9fb0745.py"
+        },
+        {
+          "pattern_hash": "d8a1e37973d3",
+          "shape_config": "hf_t5_base_train_4f1e5d4d",
+          "original_file": "region_039_pointwise_d8a1e37973d3_4f1e5d4d.py"
+        },
+        {
+          "pattern_hash": "3797f1076843",
+          "shape_config": "hf_t5_base_train_5200f7bf",
+          "original_file": "region_040_sum_3797f1076843_5200f7bf.py"
+        },
+        {
+          "pattern_hash": "a79905349179",
+          "shape_config": "hf_t5_base_train_03dd8bb1",
+          "original_file": "region_041_pointwise_a79905349179_03dd8bb1.py"
+        },
+        {
+          "pattern_hash": "abef0b584022",
+          "shape_config": "hf_t5_base_train_fa913322",
+          "original_file": "region_042_sum_abef0b584022_fa913322.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_t5_base_train_0e7f33e1",
+          "original_file": "region_043_pointwise_35deec51cf28_0e7f33e1.py"
+        },
+        {
+          "pattern_hash": "2455c16b099f",
+          "shape_config": "hf_t5_base_train_a5e1d4e1",
+          "original_file": "region_044_sum_2455c16b099f_a5e1d4e1.py"
+        },
+        {
+          "pattern_hash": "1cf07a639a4f",
+          "shape_config": "hf_t5_base_train_6bf97e0e",
+          "original_file": "region_045_pointwise_1cf07a639a4f_6bf97e0e.py"
+        },
+        {
+          "pattern_hash": "6a1d60acd06d",
+          "shape_config": "hf_t5_base_train_6257060b",
+          "original_file": "region_046_sum_6a1d60acd06d_6257060b.py"
+        },
+        {
+          "pattern_hash": "c008401e680b",
+          "shape_config": "hf_t5_base_train_0955d938",
+          "original_file": "region_047_pointwise_c008401e680b_0955d938.py"
+        },
+        {
+          "pattern_hash": "278800ebb100",
+          "shape_config": "hf_t5_base_train_c21553da",
+          "original_file": "region_048_sum_278800ebb100_c21553da.py"
         }
       ]
     }

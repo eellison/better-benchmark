@@ -1,0 +1,41 @@
+{
+  "pattern_hash": "d1ac77b5eb39",
+  "configs": {
+    "genai_patterns_17eb7221": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            2048,
+            4096
+          ],
+          "stride": [
+            16777216,
+            8192,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            2048,
+            4096
+          ],
+          "stride": [
+            16777216,
+            8192,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "genai_patterns"
+      ],
+      "shape_hash": "17eb7221"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "7350c064b026",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 15,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default"
+  ],
+  "n_models": 5,
+  "models": [
+    "hf_BertForMaskedLM_training",
+    "hf_DebertaV2ForMaskedLM_training",
+    "hf_DistilBertForMaskedLM_training",
+    "hf_bert_large_train",
+    "hf_distilbert_train"
+  ]
+}

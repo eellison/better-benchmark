@@ -17,6 +17,23 @@
         "hf_AllenaiLongformerBase_inference"
       ],
       "shape_hash": "0a3b54e6"
+    },
+    "hf_allenailongformerbase_training_0a3b54e6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AllenaiLongformerBase_training"
+      ],
+      "shape_hash": "0a3b54e6"
     }
   }
 }

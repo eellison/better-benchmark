@@ -1,0 +1,56 @@
+{
+  "pattern_hash": "90bf9bb70313",
+  "configs": {
+    "hf_bartforcausallm_training_0a3b54e6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_BartForCausalLM_training"
+      ],
+      "shape_hash": "0a3b54e6"
+    },
+    "hf_blenderbotforcausallm_training_baee1e2d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_BlenderbotForCausalLM_training"
+      ],
+      "shape_hash": "baee1e2d"
+    },
+    "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_training_baee1e2d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "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_training"
+      ],
+      "shape_hash": "baee1e2d"
+    }
+  }
+}

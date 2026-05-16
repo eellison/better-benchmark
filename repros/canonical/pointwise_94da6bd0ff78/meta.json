@@ -18,8 +18,12 @@
     "aten.sub.Tensor",
     "aten.sub.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 6,
   "models": [
+    "hf_DistillGPT2_inference",
+    "hf_DistillGPT2_training",
+    "hf_GPT2ForSequenceClassification_inference",
+    "hf_GPT2ForSequenceClassification_training",
     "tlparse_huggingface_s2_g21",
     "tlparse_huggingface_s2_g83"
   ]

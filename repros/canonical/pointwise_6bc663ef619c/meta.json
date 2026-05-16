@@ -21,8 +21,14 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 1,
+  "n_models": 7,
   "models": [
-    "hf_AlbertForMaskedLM_training"
+    "hf_AlbertForMaskedLM_training",
+    "hf_BertForMaskedLM_training",
+    "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_training",
+    "hf_DistilBertForMaskedLM_training",
+    "hf_ElectraForCausalLM_training",
+    "hf_bert_large_train",
+    "hf_distilbert_train"
   ]
 }

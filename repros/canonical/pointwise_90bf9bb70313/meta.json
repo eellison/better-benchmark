@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "90bf9bb70313",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 21,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.bitwise_and.Tensor",
+    "aten.bitwise_and.Tensor",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.index.Tensor",
+    "aten.le.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf_BartForCausalLM_training",
+    "hf_BlenderbotForCausalLM_training",
+    "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_training"
+  ]
+}

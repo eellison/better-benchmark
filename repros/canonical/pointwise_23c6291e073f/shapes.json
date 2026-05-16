@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "23c6291e073f",
+  "configs": {
+    "hf_bartforcausallm_training_1009e89b": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1026,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_BartForCausalLM_training"
+      ],
+      "shape_hash": "1009e89b"
+    }
+  }
+}

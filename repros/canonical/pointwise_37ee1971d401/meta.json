@@ -30,8 +30,10 @@
     "aten.where.self",
     "prims.iota.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "hf_DistillGPT2_training",
+    "hf_GPT2ForSequenceClassification_training",
     "tlparse_huggingface_s2_g21",
     "tlparse_huggingface_s2_g83"
   ]

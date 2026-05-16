@@ -10,7 +10,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 20,
+  "n_models": 28,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_AlbertForMaskedLM_inference",
@@ -28,6 +28,14 @@
     "dynamo_T5Small",
     "dynamo_XGLMForCausalLM",
     "hf_AlbertForMaskedLM_training",
+    "hf_BertForMaskedLM_training",
+    "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_training",
+    "hf_DebertaV2ForMaskedLM_training",
+    "hf_DistilBertForMaskedLM_training",
+    "hf_ElectraForCausalLM_training",
+    "hf_bert_large_train",
+    "hf_distilbert_train",
+    "hf_t5_base_train",
     "tlparse_huggingface_s4_g35",
     "tlparse_torchbench_s3_g174",
     "vllm_openai_gpt-oss-20b",

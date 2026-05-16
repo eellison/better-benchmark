@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "f0635c70e184",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.var_mean.correction",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf_BartForCausalLM_training",
+    "hf_BlenderbotForCausalLM_training",
+    "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_training"
+  ]
+}

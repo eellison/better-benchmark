@@ -8,8 +8,9 @@
     "<built-in function getitem>",
     "aten.split.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "genai_patterns",
     "tlparse_torchbench_s8_g21"
   ]
 }

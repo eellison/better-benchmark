@@ -10,9 +10,11 @@
     "<built-in function getitem>",
     "aten.var_mean.correction"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
     "dynamo_Reformer",
-    "dynamo_Reformer_inference"
+    "dynamo_Reformer_inference",
+    "hf_BlenderbotForCausalLM_training",
+    "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_training"
   ]
 }

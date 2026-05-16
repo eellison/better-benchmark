@@ -1,0 +1,135 @@
+{
+  "pattern_hash": "3d66f039c2f4",
+  "configs": {
+    "hf_distillgpt2_training_f8719309": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            512,
+            64
+          ],
+          "stride": [
+            393216,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            512,
+            64
+          ],
+          "stride": [
+            393216,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            512,
+            64
+          ],
+          "stride": [
+            393216,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_DistillGPT2_training"
+      ],
+      "shape_hash": "f8719309"
+    },
+    "hf_gpt2forsequenceclassification_training_00e0609f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            1024,
+            64
+          ],
+          "stride": [
+            786432,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            1024,
+            64
+          ],
+          "stride": [
+            786432,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            1024,
+            64
+          ],
+          "stride": [
+            786432,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_GPT2ForSequenceClassification_training"
+      ],
+      "shape_hash": "00e0609f"
+    }
+  }
+}

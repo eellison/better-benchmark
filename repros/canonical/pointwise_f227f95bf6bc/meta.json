@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "f227f95bf6bc",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "genai_patterns"
+  ]
+}

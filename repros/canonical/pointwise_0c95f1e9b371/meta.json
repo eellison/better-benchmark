@@ -10,12 +10,16 @@
     "aten.reshape.default",
     "aten.split.Tensor"
   ],
-  "n_models": 6,
+  "n_models": 10,
   "models": [
     "dynamo_DistillGPT2",
     "dynamo_DistillGPT2_inference",
     "dynamo_GPT2ForSequenceClassification",
     "dynamo_GPT2ForSequenceClassification_inference",
+    "hf_DistillGPT2_inference",
+    "hf_DistillGPT2_training",
+    "hf_GPT2ForSequenceClassification_inference",
+    "hf_GPT2ForSequenceClassification_training",
     "tlparse_huggingface_s2_g21",
     "tlparse_huggingface_s2_g83"
   ]

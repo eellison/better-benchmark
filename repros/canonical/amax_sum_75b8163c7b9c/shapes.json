@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "75b8163c7b9c",
+  "configs": {
+    "genai_patterns_a2a123c0": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            128,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            32,
+            512,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_patterns"
+      ],
+      "shape_hash": "a2a123c0"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "45039e85eb2e",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.embedding.default",
+    "aten.mul.Tensor"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf_BartForCausalLM_training",
+    "hf_BlenderbotForCausalLM_training",
+    "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_training"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "ee81fd3073f2",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf_BartForCausalLM_inference",
+    "hf_BlenderbotForCausalLM_inference",
+    "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_inference"
+  ]
+}

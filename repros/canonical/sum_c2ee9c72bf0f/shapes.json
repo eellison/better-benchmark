@@ -29,6 +29,35 @@
         "hf_AlbertForMaskedLM_training"
       ],
       "shape_hash": "88016393"
+    },
+    "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_training_d5ec7f79": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            256,
+            128,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "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_training"
+      ],
+      "shape_hash": "d5ec7f79"
     }
   }
 }

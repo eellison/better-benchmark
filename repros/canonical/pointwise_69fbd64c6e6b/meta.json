@@ -13,8 +13,9 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "dynamo_AlbertForMaskedLM"
+    "dynamo_AlbertForMaskedLM",
+    "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_training"
   ]
 }

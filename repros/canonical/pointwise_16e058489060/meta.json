@@ -15,8 +15,14 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 7,
   "models": [
-    "hf_AlbertForMaskedLM_inference"
+    "hf_AlbertForMaskedLM_inference",
+    "hf_BertForMaskedLM_inference",
+    "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_inference",
+    "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_training",
+    "hf_DebertaV2ForMaskedLM_inference",
+    "hf_DistilBertForMaskedLM_inference",
+    "hf_ElectraForCausalLM_inference"
   ]
 }

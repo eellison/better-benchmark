@@ -13,9 +13,12 @@
     "aten.embedding.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 2,
+  "n_models": 5,
   "models": [
     "dynamo_DebertaV2ForMaskedLM",
-    "dynamo_DebertaV2ForMaskedLM_inference"
+    "dynamo_DebertaV2ForMaskedLM_inference",
+    "hf_DebertaV2ForMaskedLM_inference",
+    "hf_DebertaV2ForMaskedLM_training",
+    "hf_distilbert_train"
   ]
 }

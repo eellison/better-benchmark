@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "a38b5e12c295",
+  "kind": "reduction",
+  "reduction_types": [
+    "argmax"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.argmax.default",
+    "aten.index.Tensor",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.reshape.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_GPT2ForSequenceClassification_inference"
+  ]
+}
