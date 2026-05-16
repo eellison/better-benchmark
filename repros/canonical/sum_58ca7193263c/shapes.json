@@ -1,0 +1,135 @@
+{
+  "pattern_hash": "58ca7193263c",
+  "configs": {
+    "hf_pythia_410m_train_62034d3a": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            513
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            50304
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            50304
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            50304,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_pythia_410m_train"
+      ],
+      "shape_hash": "62034d3a"
+    },
+    "hf_qwen2_0.5b_train_bdc98bb7": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            513
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            151936
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            151936
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            151936,
+            896
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_qwen2_0.5b_train"
+      ],
+      "shape_hash": "bdc98bb7"
+    }
+  }
+}

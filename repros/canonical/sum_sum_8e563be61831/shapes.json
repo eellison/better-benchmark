@@ -1,0 +1,108 @@
+{
+  "pattern_hash": "8e563be61831",
+  "configs": {
+    "hf_qwen2_0.5b_train_ce539f14": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            14,
+            512,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            2,
+            512,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            14,
+            512,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            2,
+            512,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            14,
+            512,
+            64
+          ],
+          "stride": [
+            458752,
+            64,
+            896,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            128,
+            896
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            128,
+            896
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            896,
+            896
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_qwen2_0.5b_train"
+      ],
+      "shape_hash": "ce539f14"
+    }
+  }
+}

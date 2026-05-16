@@ -46,6 +46,52 @@
         "pythia_410m_inference"
       ],
       "shape_hash": "cd59ce37"
+    },
+    "hf_pythia_410m_train_cd59ce37": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            16,
+            512,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            1024,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_pythia_410m_train"
+      ],
+      "shape_hash": "cd59ce37"
     }
   }
 }

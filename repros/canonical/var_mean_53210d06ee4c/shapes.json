@@ -81,6 +81,33 @@
         "phi_2_inference"
       ],
       "shape_hash": "84a87105"
+    },
+    "hf_pythia_410m_train_8947a5e6": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            50304,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_pythia_410m_train"
+      ],
+      "shape_hash": "8947a5e6"
     }
   }
 }

@@ -1,0 +1,62 @@
+{
+  "pattern_hash": "0ba24f2f512d",
+  "configs": {
+    "hf_qwen2_0.5b_train_17e069db": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            896
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            512,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            512,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_qwen2_0.5b_train"
+      ],
+      "shape_hash": "17e069db"
+    }
+  }
+}

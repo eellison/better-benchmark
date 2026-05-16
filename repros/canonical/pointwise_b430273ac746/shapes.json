@@ -140,6 +140,41 @@
         "genai_patterns"
       ],
       "shape_hash": "7a1e675a"
+    },
+    "hf_qwen2_0.5b_train_6d6a428d": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            4864
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            4864
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            896,
+            4864
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_qwen2_0.5b_train"
+      ],
+      "shape_hash": "6d6a428d"
     }
   }
 }
