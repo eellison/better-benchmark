@@ -1,0 +1,26 @@
+{
+  "B200": {
+    "initial": {
+      "default": {
+        "compiled_us": 6.142317020665043,
+        "coord_descent_us": null,
+        "memcopy_sol_us": 9.052561720184618,
+        "total_bytes": 10321920,
+        "gap_default": 0.6785169999967453,
+        "gap_cd": null,
+        "timestamp": "2026-05-16T16:03:18"
+      }
+    },
+    "v2_920": {
+      "default": {
+        "compiled_us": 6.290236158630539,
+        "coord_descent_us": null,
+        "memcopy_sol_us": 9.084605513271605,
+        "total_bytes": 10321920,
+        "gap_default": 0.6924060873574751,
+        "gap_cd": null,
+        "timestamp": "2026-05-16T16:59:10"
+      }
+    }
+  }
+}
