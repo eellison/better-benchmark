@@ -15,7 +15,7 @@ Note: HF CI coverage is thin — only ~5 models per shard from tlparse, not the 
 3. Run torchbench suite locally
 4. vLLM models (already have some from B200 local)
 5. GenAI benchmark from pytorch/pytorch (`benchmarks/dynamo/gen_ai_bench.py`)
-6. Triton benchmark kernels (`triton/python/triton/testing.py` bench suite)
+6. tritonbench (`github.com/meta-pytorch/tritonbench`) — standalone kernel benchmarks with multiple operator implementations (flash attention, GEMM, layernorm, softmax, etc.)
 7. Helion kernels (once available)
 
 ## Capture Methods
@@ -41,7 +41,7 @@ Note: HF CI coverage is thin — only ~5 models per shard from tlparse, not the 
 - [ ] Full HF suite (local, training mode) — expected ~200 new patterns
 - [ ] Full timm suite (local, channels-last, postfusion hook) — expected ~100 new patterns
 - [ ] GenAI bench (gen_ai_bench.py) — targeted LLM patterns
-- [ ] Triton benchmark kernels — reference implementations
+- [ ] tritonbench (meta-pytorch/tritonbench) — reference impls + additional patterns
 - [ ] Helion kernels — alternative implementations for impls/ dirs
 - [ ] H100 CI full run (all 21 shards, not just the extracted subset)
 - [ ] A100 CI run — cross-hardware comparison
@@ -79,10 +79,16 @@ python ingest_tlparse.py --artifact-dir /path/to/ci/artifacts/ \
   --output-dir repros/ci_ingest/
 ```
 
-### Triton benchmark kernels
+### tritonbench (meta-pytorch/tritonbench)
 ```bash
-python capture_triton_bench.py --suite triton/python/triton/testing.py \
-  --output-dir repros/triton_bench/
+# Clone tritonbench and use its operator benchmarks as reference impls
+git clone https://github.com/meta-pytorch/tritonbench
+# Operators available: flash_attention, softmax, layernorm, gemm, jagged, etc.
+# These can serve as:
+# 1. Alternative impls for existing repros (put in impls/ dirs)
+# 2. Additional repro patterns we don't yet cover
+# 3. Reference "best known" kernels to compare inductor against
+python tritonbench/run.py --op softmax --mode fwd --device cuda
 ```
 
 ## Expansion Log
