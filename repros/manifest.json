@@ -23667,11 +23667,161 @@
           "pattern_hash": "3d66f039c2f4",
           "shape_config": "hf_distillgpt2_training_f8719309",
           "original_file": "region_016_pointwise_3d66f039c2f4_f8719309.py"
+        },
+        {
+          "pattern_hash": "96abbec14346",
+          "shape_config": "hf_distillgpt2_training_98c2a8c0",
+          "original_file": "region_000_pointwise_96abbec14346_98c2a8c0.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_distillgpt2_training_29d34729",
+          "original_file": "region_001_pointwise_741c0d7d8d11_29d34729.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_distillgpt2_training_84423a5e",
+          "original_file": "region_002_var_mean_a41dace406c0_84423a5e.py"
+        },
+        {
+          "pattern_hash": "a87f35a59ad4",
+          "shape_config": "hf_distillgpt2_training_83bbb1be",
+          "original_file": "region_003_pointwise_a87f35a59ad4_83bbb1be.py"
+        },
+        {
+          "pattern_hash": "86432a5d8e65",
+          "shape_config": "hf_distillgpt2_training_d3a4508d",
+          "original_file": "region_004_pointwise_86432a5d8e65_d3a4508d.py"
+        },
+        {
+          "pattern_hash": "0c95f1e9b371",
+          "shape_config": "hf_distillgpt2_training_2c917d76",
+          "original_file": "region_005_pointwise_0c95f1e9b371_2c917d76.py"
+        },
+        {
+          "pattern_hash": "37ee1971d401",
+          "shape_config": "hf_distillgpt2_training_47185dfb",
+          "original_file": "region_006_pointwise_37ee1971d401_47185dfb.py"
+        },
+        {
+          "pattern_hash": "94da6bd0ff78",
+          "shape_config": "hf_distillgpt2_training_756fa9f4",
+          "original_file": "region_007_pointwise_94da6bd0ff78_756fa9f4.py"
+        },
+        {
+          "pattern_hash": "521dcf2ed2b9",
+          "shape_config": "hf_distillgpt2_training_5be42438",
+          "original_file": "region_008_var_mean_521dcf2ed2b9_5be42438.py"
+        },
+        {
+          "pattern_hash": "8b884f5aa8d1",
+          "shape_config": "hf_distillgpt2_training_c1756e28",
+          "original_file": "region_009_amax_sum_8b884f5aa8d1_c1756e28.py"
+        },
+        {
+          "pattern_hash": "d8a8edde46e9",
+          "shape_config": "hf_distillgpt2_training_e464751a",
+          "original_file": "region_010_sum_d8a8edde46e9_e464751a.py"
+        },
+        {
+          "pattern_hash": "45ace8213b20",
+          "shape_config": "hf_distillgpt2_training_c72f7090",
+          "original_file": "region_011_sum_45ace8213b20_c72f7090.py"
+        },
+        {
+          "pattern_hash": "0ce5123bcacc",
+          "shape_config": "hf_distillgpt2_training_c80337f5",
+          "original_file": "region_012_pointwise_0ce5123bcacc_c80337f5.py"
+        },
+        {
+          "pattern_hash": "45a5cf42796f",
+          "shape_config": "hf_distillgpt2_training_e7b70c74",
+          "original_file": "region_013_sum_45a5cf42796f_e7b70c74.py"
+        },
+        {
+          "pattern_hash": "091128b179c4",
+          "shape_config": "hf_distillgpt2_training_c5428ec2",
+          "original_file": "region_014_pointwise_091128b179c4_c5428ec2.py"
+        },
+        {
+          "pattern_hash": "45a5cf42796f",
+          "shape_config": "hf_distillgpt2_training_f03994d6",
+          "original_file": "region_015_sum_45a5cf42796f_f03994d6.py"
+        },
+        {
+          "pattern_hash": "3d66f039c2f4",
+          "shape_config": "hf_distillgpt2_training_f8719309",
+          "original_file": "region_016_pointwise_3d66f039c2f4_f8719309.py"
         }
       ]
     },
     "hf_ElectraForCausalLM_inference": {
       "repros": [
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_inference_0848159c",
+          "original_file": "region_000_pointwise_741c0d7d8d11_0848159c.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_electraforcausallm_inference_8405719f",
+          "original_file": "region_001_var_mean_0a1bc21703bb_8405719f.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_inference_6b8376ed",
+          "original_file": "region_002_pointwise_741c0d7d8d11_6b8376ed.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_electraforcausallm_inference_dc9bcfac",
+          "original_file": "region_003_var_mean_a7cbd072693b_dc9bcfac.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_electraforcausallm_inference_6203b143",
+          "original_file": "region_004_pointwise_983a9e1e3bcd_6203b143.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_inference_5626799c",
+          "original_file": "region_005_pointwise_741c0d7d8d11_5626799c.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_electraforcausallm_inference_9f6fae77",
+          "original_file": "region_006_pointwise_5d11bd189324_9f6fae77.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "hf_electraforcausallm_inference_2f9c2b54",
+          "original_file": "region_007_amax_any_sum_caf9c95ee549_2f9c2b54.py"
+        },
+        {
+          "pattern_hash": "b260987d88be",
+          "shape_config": "hf_electraforcausallm_inference_0a9fc19b",
+          "original_file": "region_008_pointwise_b260987d88be_0a9fc19b.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "hf_electraforcausallm_inference_7396a115",
+          "original_file": "region_009_pointwise_16e058489060_7396a115.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "hf_electraforcausallm_inference_acd074f0",
+          "original_file": "region_010_amax_any_sum_7c0d8ceb3e2b_acd074f0.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_inference_f49d3e71",
+          "original_file": "region_011_pointwise_741c0d7d8d11_f49d3e71.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_electraforcausallm_inference_cab56dc3",
+          "original_file": "region_012_var_mean_0a44c4081351_cab56dc3.py"
+        },
         {
           "pattern_hash": "741c0d7d8d11",
           "shape_config": "hf_electraforcausallm_inference_0848159c",
@@ -23870,6 +24020,136 @@
           "pattern_hash": "e7b045ba8f22",
           "shape_config": "hf_electraforcausallm_training_900fe239",
           "original_file": "region_025_sum_e7b045ba8f22_900fe239.py"
+        },
+        {
+          "pattern_hash": "44fab2c4eb07",
+          "shape_config": "hf_electraforcausallm_training_ad000c86",
+          "original_file": "region_000_amax_sum_44fab2c4eb07_ad000c86.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_training_0848159c",
+          "original_file": "region_001_pointwise_741c0d7d8d11_0848159c.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_electraforcausallm_training_8405719f",
+          "original_file": "region_002_var_mean_0a1bc21703bb_8405719f.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_training_6b8376ed",
+          "original_file": "region_003_pointwise_741c0d7d8d11_6b8376ed.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_electraforcausallm_training_2bebfb07",
+          "original_file": "region_004_var_mean_a41dace406c0_2bebfb07.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_electraforcausallm_training_6203b143",
+          "original_file": "region_005_pointwise_983a9e1e3bcd_6203b143.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_electraforcausallm_training_5626799c",
+          "original_file": "region_006_pointwise_741c0d7d8d11_5626799c.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_electraforcausallm_training_9f6fae77",
+          "original_file": "region_007_pointwise_5d11bd189324_9f6fae77.py"
+        },
+        {
+          "pattern_hash": "b9b543f9e1e3",
+          "shape_config": "hf_electraforcausallm_training_98dd8aa0",
+          "original_file": "region_008_amax_any_sum_b9b543f9e1e3_98dd8aa0.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "hf_electraforcausallm_training_1251c178",
+          "original_file": "region_009_pointwise_6bc663ef619c_1251c178.py"
+        },
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "hf_electraforcausallm_training_7396a115",
+          "original_file": "region_010_pointwise_1ecc9387d6bd_7396a115.py"
+        },
+        {
+          "pattern_hash": "e788afc14f3d",
+          "shape_config": "hf_electraforcausallm_training_e28d9ac1",
+          "original_file": "region_011_amax_any_sum_e788afc14f3d_e28d9ac1.py"
+        },
+        {
+          "pattern_hash": "3ea1b27af5ae",
+          "shape_config": "hf_electraforcausallm_training_f49d3e71",
+          "original_file": "region_012_pointwise_3ea1b27af5ae_f49d3e71.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_electraforcausallm_training_cab56dc3",
+          "original_file": "region_013_var_mean_0a44c4081351_cab56dc3.py"
+        },
+        {
+          "pattern_hash": "8f9f5403ed7a",
+          "shape_config": "hf_electraforcausallm_training_8b6bea3c",
+          "original_file": "region_014_sum_8f9f5403ed7a_8b6bea3c.py"
+        },
+        {
+          "pattern_hash": "4ebf9d42032c",
+          "shape_config": "hf_electraforcausallm_training_0998765f",
+          "original_file": "region_015_pointwise_4ebf9d42032c_0998765f.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "hf_electraforcausallm_training_0454ea95",
+          "original_file": "region_016_pointwise_5542dd403943_0454ea95.py"
+        },
+        {
+          "pattern_hash": "61a7becdb42d",
+          "shape_config": "hf_electraforcausallm_training_f23df11d",
+          "original_file": "region_017_sum_61a7becdb42d_f23df11d.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_electraforcausallm_training_73308d67",
+          "original_file": "region_018_pointwise_35deec51cf28_73308d67.py"
+        },
+        {
+          "pattern_hash": "2da3a1f29398",
+          "shape_config": "hf_electraforcausallm_training_8fa415cc",
+          "original_file": "region_019_sum_2da3a1f29398_8fa415cc.py"
+        },
+        {
+          "pattern_hash": "15b0dd73a2f4",
+          "shape_config": "hf_electraforcausallm_training_ba979a00",
+          "original_file": "region_020_pointwise_15b0dd73a2f4_ba979a00.py"
+        },
+        {
+          "pattern_hash": "5a0090810fdb",
+          "shape_config": "hf_electraforcausallm_training_f3d62b86",
+          "original_file": "region_021_sum_5a0090810fdb_f3d62b86.py"
+        },
+        {
+          "pattern_hash": "f2b19635d2cc",
+          "shape_config": "hf_electraforcausallm_training_c0757972",
+          "original_file": "region_022_sum_f2b19635d2cc_c0757972.py"
+        },
+        {
+          "pattern_hash": "008540c58720",
+          "shape_config": "hf_electraforcausallm_training_1606446b",
+          "original_file": "region_023_sum_008540c58720_1606446b.py"
+        },
+        {
+          "pattern_hash": "08bd81f4d8b9",
+          "shape_config": "hf_electraforcausallm_training_9e65fb5d",
+          "original_file": "region_024_sum_08bd81f4d8b9_9e65fb5d.py"
+        },
+        {
+          "pattern_hash": "e7b045ba8f22",
+          "shape_config": "hf_electraforcausallm_training_900fe239",
+          "original_file": "region_025_sum_e7b045ba8f22_900fe239.py"
         }
       ]
     },
@@ -23924,11 +24204,141 @@
           "pattern_hash": "92086c85001b",
           "shape_config": "hf_gpt2forsequenceclassification_inference_726c16e2",
           "original_file": "region_009_var_mean_92086c85001b_726c16e2.py"
+        },
+        {
+          "pattern_hash": "a38b5e12c295",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_0da1f411",
+          "original_file": "region_000_argmax_a38b5e12c295_0da1f411.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_b5589cae",
+          "original_file": "region_001_pointwise_741c0d7d8d11_b5589cae.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_40b93261",
+          "original_file": "region_002_var_mean_a7cbd072693b_40b93261.py"
+        },
+        {
+          "pattern_hash": "a87f35a59ad4",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_126c56cd",
+          "original_file": "region_003_pointwise_a87f35a59ad4_126c56cd.py"
+        },
+        {
+          "pattern_hash": "86432a5d8e65",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_41fe5c52",
+          "original_file": "region_004_pointwise_86432a5d8e65_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "f516f32a662d",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_046ab747",
+          "original_file": "region_005_pointwise_f516f32a662d_046ab747.py"
+        },
+        {
+          "pattern_hash": "0c95f1e9b371",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_1dc8a174",
+          "original_file": "region_006_pointwise_0c95f1e9b371_1dc8a174.py"
+        },
+        {
+          "pattern_hash": "33e3e98d18bf",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_eb618c7a",
+          "original_file": "region_007_pointwise_33e3e98d18bf_eb618c7a.py"
+        },
+        {
+          "pattern_hash": "94da6bd0ff78",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_dd6d40ad",
+          "original_file": "region_008_pointwise_94da6bd0ff78_dd6d40ad.py"
+        },
+        {
+          "pattern_hash": "92086c85001b",
+          "shape_config": "hf_gpt2forsequenceclassification_inference_726c16e2",
+          "original_file": "region_009_var_mean_92086c85001b_726c16e2.py"
         }
       ]
     },
     "hf_GPT2ForSequenceClassification_training": {
       "repros": [
+        {
+          "pattern_hash": "7a884d027d80",
+          "shape_config": "hf_gpt2forsequenceclassification_training_4a275495",
+          "original_file": "region_000_amax_argmax_sum_7a884d027d80_4a275495.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_gpt2forsequenceclassification_training_b5589cae",
+          "original_file": "region_001_pointwise_741c0d7d8d11_b5589cae.py"
+        },
+        {
+          "pattern_hash": "a41dace406c0",
+          "shape_config": "hf_gpt2forsequenceclassification_training_c78f8973",
+          "original_file": "region_002_var_mean_a41dace406c0_c78f8973.py"
+        },
+        {
+          "pattern_hash": "a87f35a59ad4",
+          "shape_config": "hf_gpt2forsequenceclassification_training_126c56cd",
+          "original_file": "region_003_pointwise_a87f35a59ad4_126c56cd.py"
+        },
+        {
+          "pattern_hash": "86432a5d8e65",
+          "shape_config": "hf_gpt2forsequenceclassification_training_41fe5c52",
+          "original_file": "region_004_pointwise_86432a5d8e65_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "0c95f1e9b371",
+          "shape_config": "hf_gpt2forsequenceclassification_training_1dc8a174",
+          "original_file": "region_005_pointwise_0c95f1e9b371_1dc8a174.py"
+        },
+        {
+          "pattern_hash": "37ee1971d401",
+          "shape_config": "hf_gpt2forsequenceclassification_training_8aeaa54c",
+          "original_file": "region_006_pointwise_37ee1971d401_8aeaa54c.py"
+        },
+        {
+          "pattern_hash": "94da6bd0ff78",
+          "shape_config": "hf_gpt2forsequenceclassification_training_dd6d40ad",
+          "original_file": "region_007_pointwise_94da6bd0ff78_dd6d40ad.py"
+        },
+        {
+          "pattern_hash": "521dcf2ed2b9",
+          "shape_config": "hf_gpt2forsequenceclassification_training_726c16e2",
+          "original_file": "region_008_var_mean_521dcf2ed2b9_726c16e2.py"
+        },
+        {
+          "pattern_hash": "1d7af42a76c8",
+          "shape_config": "hf_gpt2forsequenceclassification_training_a5612c08",
+          "original_file": "region_009_sum_1d7af42a76c8_a5612c08.py"
+        },
+        {
+          "pattern_hash": "3d66f039c2f4",
+          "shape_config": "hf_gpt2forsequenceclassification_training_00e0609f",
+          "original_file": "region_010_pointwise_3d66f039c2f4_00e0609f.py"
+        },
+        {
+          "pattern_hash": "45a5cf42796f",
+          "shape_config": "hf_gpt2forsequenceclassification_training_4b759c1f",
+          "original_file": "region_011_sum_45a5cf42796f_4b759c1f.py"
+        },
+        {
+          "pattern_hash": "091128b179c4",
+          "shape_config": "hf_gpt2forsequenceclassification_training_8d1da404",
+          "original_file": "region_012_pointwise_091128b179c4_8d1da404.py"
+        },
+        {
+          "pattern_hash": "45a5cf42796f",
+          "shape_config": "hf_gpt2forsequenceclassification_training_cb1eac89",
+          "original_file": "region_013_sum_45a5cf42796f_cb1eac89.py"
+        },
+        {
+          "pattern_hash": "6cb8a3fa015d",
+          "shape_config": "hf_gpt2forsequenceclassification_training_8563db5e",
+          "original_file": "region_014_sum_6cb8a3fa015d_8563db5e.py"
+        },
+        {
+          "pattern_hash": "0396ad338ed6",
+          "shape_config": "hf_gpt2forsequenceclassification_training_c2c75b65",
+          "original_file": "region_015_amax_sum_0396ad338ed6_c2c75b65.py"
+        },
         {
           "pattern_hash": "7a884d027d80",
           "shape_config": "hf_gpt2forsequenceclassification_training_4a275495",
@@ -24752,6 +25162,261 @@
           "pattern_hash": "58ca7193263c",
           "shape_config": "hf_qwen2_0.5b_train_bdc98bb7",
           "original_file": "region_017_sum_58ca7193263c_bdc98bb7.py"
+        }
+      ]
+    },
+    "genai_swiglu_decode": {
+      "repros": [
+        {
+          "pattern_hash": "e37b8ca72db3",
+          "shape_config": "genai_swiglu_decode_c7e06629",
+          "original_file": "region_000_pointwise_e37b8ca72db3_c7e06629.py"
+        },
+        {
+          "pattern_hash": "89da122805f5",
+          "shape_config": "genai_swiglu_decode_5d73f110",
+          "original_file": "region_001_pointwise_89da122805f5_5d73f110.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_decode": {
+      "repros": [
+        {
+          "pattern_hash": "d378e3cce262",
+          "shape_config": "genai_rmsnorm_decode_760713e7",
+          "original_file": "region_000_mean_d378e3cce262_760713e7.py"
+        }
+      ]
+    },
+    "genai_rope_decode": {
+      "repros": [
+        {
+          "pattern_hash": "f227f95bf6bc",
+          "shape_config": "genai_rope_decode_55e7af0b",
+          "original_file": "region_000_pointwise_f227f95bf6bc_55e7af0b.py"
+        }
+      ]
+    },
+    "genai_causal_attn_decode": {
+      "repros": [
+        {
+          "pattern_hash": "c863d61c6ee8",
+          "shape_config": "genai_causal_attn_decode_5514944f",
+          "original_file": "region_000_amax_sum_c863d61c6ee8_5514944f.py"
+        }
+      ]
+    },
+    "genai_gqa_decode": {
+      "repros": [
+        {
+          "pattern_hash": "0e92e1c207b5",
+          "shape_config": "genai_gqa_decode_cc4e903d",
+          "original_file": "region_000_amax_sum_0e92e1c207b5_cc4e903d.py"
+        },
+        {
+          "pattern_hash": "30ec15fa75c3",
+          "shape_config": "genai_gqa_decode_d2d094a8",
+          "original_file": "region_001_pointwise_30ec15fa75c3_d2d094a8.py"
+        }
+      ]
+    },
+    "genai_swiglu_short_prefill": {
+      "repros": [
+        {
+          "pattern_hash": "e37b8ca72db3",
+          "shape_config": "genai_swiglu_short_prefill_b22d0597",
+          "original_file": "region_000_pointwise_e37b8ca72db3_b22d0597.py"
+        },
+        {
+          "pattern_hash": "89da122805f5",
+          "shape_config": "genai_swiglu_short_prefill_fe1ef17e",
+          "original_file": "region_001_pointwise_89da122805f5_fe1ef17e.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_short_prefill": {
+      "repros": [
+        {
+          "pattern_hash": "d378e3cce262",
+          "shape_config": "genai_rmsnorm_short_prefill_941ad87f",
+          "original_file": "region_000_mean_d378e3cce262_941ad87f.py"
+        }
+      ]
+    },
+    "genai_rope_short_prefill": {
+      "repros": [
+        {
+          "pattern_hash": "f227f95bf6bc",
+          "shape_config": "genai_rope_short_prefill_593e3f7b",
+          "original_file": "region_000_pointwise_f227f95bf6bc_593e3f7b.py"
+        }
+      ]
+    },
+    "genai_causal_attn_short_prefill": {
+      "repros": [
+        {
+          "pattern_hash": "75b8163c7b9c",
+          "shape_config": "genai_causal_attn_short_prefill_0589ae93",
+          "original_file": "region_000_amax_sum_75b8163c7b9c_0589ae93.py"
+        }
+      ]
+    },
+    "genai_gqa_short_prefill": {
+      "repros": [
+        {
+          "pattern_hash": "9d5fcd3a6ed4",
+          "shape_config": "genai_gqa_short_prefill_3e6e9abf",
+          "original_file": "region_000_pointwise_9d5fcd3a6ed4_3e6e9abf.py"
+        }
+      ]
+    },
+    "genai_swiglu_long_context": {
+      "repros": [
+        {
+          "pattern_hash": "e37b8ca72db3",
+          "shape_config": "genai_swiglu_long_context_5fe60eab",
+          "original_file": "region_000_pointwise_e37b8ca72db3_5fe60eab.py"
+        },
+        {
+          "pattern_hash": "89da122805f5",
+          "shape_config": "genai_swiglu_long_context_fa7d33a0",
+          "original_file": "region_001_pointwise_89da122805f5_fa7d33a0.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_long_context": {
+      "repros": [
+        {
+          "pattern_hash": "d378e3cce262",
+          "shape_config": "genai_rmsnorm_long_context_fd8d16f8",
+          "original_file": "region_000_mean_d378e3cce262_fd8d16f8.py"
+        }
+      ]
+    },
+    "genai_rope_long_context": {
+      "repros": [
+        {
+          "pattern_hash": "f227f95bf6bc",
+          "shape_config": "genai_rope_long_context_20e3f767",
+          "original_file": "region_000_pointwise_f227f95bf6bc_20e3f767.py"
+        }
+      ]
+    },
+    "genai_causal_attn_long_context": {
+      "repros": [
+        {
+          "pattern_hash": "75b8163c7b9c",
+          "shape_config": "genai_causal_attn_long_context_1eaeb7b6",
+          "original_file": "region_000_amax_sum_75b8163c7b9c_1eaeb7b6.py"
+        }
+      ]
+    },
+    "genai_gqa_long_context": {
+      "repros": [
+        {
+          "pattern_hash": "9d5fcd3a6ed4",
+          "shape_config": "genai_gqa_long_context_54bc96df",
+          "original_file": "region_000_pointwise_9d5fcd3a6ed4_54bc96df.py"
+        }
+      ]
+    },
+    "genai_swiglu_small_model": {
+      "repros": [
+        {
+          "pattern_hash": "e37b8ca72db3",
+          "shape_config": "genai_swiglu_small_model_e5aa3ef6",
+          "original_file": "region_000_pointwise_e37b8ca72db3_e5aa3ef6.py"
+        },
+        {
+          "pattern_hash": "89da122805f5",
+          "shape_config": "genai_swiglu_small_model_003dbf8f",
+          "original_file": "region_001_pointwise_89da122805f5_003dbf8f.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_small_model": {
+      "repros": [
+        {
+          "pattern_hash": "d378e3cce262",
+          "shape_config": "genai_rmsnorm_small_model_fa277f40",
+          "original_file": "region_000_mean_d378e3cce262_fa277f40.py"
+        }
+      ]
+    },
+    "genai_rope_small_model": {
+      "repros": [
+        {
+          "pattern_hash": "f227f95bf6bc",
+          "shape_config": "genai_rope_small_model_9de55516",
+          "original_file": "region_000_pointwise_f227f95bf6bc_9de55516.py"
+        }
+      ]
+    },
+    "genai_causal_attn_small_model": {
+      "repros": [
+        {
+          "pattern_hash": "75b8163c7b9c",
+          "shape_config": "genai_causal_attn_small_model_f80d138c",
+          "original_file": "region_000_amax_sum_75b8163c7b9c_f80d138c.py"
+        }
+      ]
+    },
+    "genai_gqa_small_model": {
+      "repros": [
+        {
+          "pattern_hash": "9d5fcd3a6ed4",
+          "shape_config": "genai_gqa_small_model_35f442ff",
+          "original_file": "region_000_pointwise_9d5fcd3a6ed4_35f442ff.py"
+        }
+      ]
+    },
+    "genai_swiglu_large_model": {
+      "repros": [
+        {
+          "pattern_hash": "e37b8ca72db3",
+          "shape_config": "genai_swiglu_large_model_b5ba146f",
+          "original_file": "region_000_pointwise_e37b8ca72db3_b5ba146f.py"
+        },
+        {
+          "pattern_hash": "89da122805f5",
+          "shape_config": "genai_swiglu_large_model_97d78101",
+          "original_file": "region_001_pointwise_89da122805f5_97d78101.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_large_model": {
+      "repros": [
+        {
+          "pattern_hash": "d378e3cce262",
+          "shape_config": "genai_rmsnorm_large_model_dc924846",
+          "original_file": "region_000_mean_d378e3cce262_dc924846.py"
+        }
+      ]
+    },
+    "genai_rope_large_model": {
+      "repros": [
+        {
+          "pattern_hash": "f227f95bf6bc",
+          "shape_config": "genai_rope_large_model_b6c5a578",
+          "original_file": "region_000_pointwise_f227f95bf6bc_b6c5a578.py"
+        }
+      ]
+    },
+    "genai_causal_attn_large_model": {
+      "repros": [
+        {
+          "pattern_hash": "75b8163c7b9c",
+          "shape_config": "genai_causal_attn_large_model_a69f4538",
+          "original_file": "region_000_amax_sum_75b8163c7b9c_a69f4538.py"
+        }
+      ]
+    },
+    "genai_gqa_large_model": {
+      "repros": [
+        {
+          "pattern_hash": "9d5fcd3a6ed4",
+          "shape_config": "genai_gqa_large_model_54bc96df",
+          "original_file": "region_000_pointwise_9d5fcd3a6ed4_54bc96df.py"
         }
       ]
     }

@@ -1,11 +1,11 @@
 {
-  "pattern_hash": "75b8163c7b9c",
+  "pattern_hash": "c863d61c6ee8",
   "kind": "reduction",
   "reduction_types": [
     "amax",
     "sum"
   ],
-  "n_ops": 23,
+  "n_ops": 28,
   "origin_ops": [
     "aten.amax.default",
     "aten.div.Tensor",
@@ -17,6 +17,8 @@
     "aten.full.default",
     "aten.ge.Scalar",
     "aten.logical_and.default",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
     "aten.reshape.default",
     "aten.reshape.default",
     "aten.reshape.default",
@@ -28,15 +30,14 @@
     "aten.where.self",
     "prims.convert_element_type.default",
     "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 5,
+  "n_models": 1,
   "models": [
-    "genai_causal_attn_large_model",
-    "genai_causal_attn_long_context",
-    "genai_causal_attn_short_prefill",
-    "genai_causal_attn_small_model",
-    "genai_patterns"
+    "genai_causal_attn_decode"
   ]
 }

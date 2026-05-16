@@ -13,8 +13,12 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 5,
   "models": [
+    "genai_gqa_large_model",
+    "genai_gqa_long_context",
+    "genai_gqa_short_prefill",
+    "genai_gqa_small_model",
     "genai_patterns"
   ]
 }

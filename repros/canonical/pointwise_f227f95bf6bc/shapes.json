@@ -41,6 +41,211 @@
         "genai_patterns"
       ],
       "shape_hash": "4f537d16"
+    },
+    "genai_rope_decode_55e7af0b": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32,
+            32,
+            1,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            1,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            1,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_rope_decode"
+      ],
+      "shape_hash": "55e7af0b"
+    },
+    "genai_rope_short_prefill_593e3f7b": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            32,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            128,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_rope_short_prefill"
+      ],
+      "shape_hash": "593e3f7b"
+    },
+    "genai_rope_long_context_20e3f767": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            32,
+            8192,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            8192,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            8192,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_rope_long_context"
+      ],
+      "shape_hash": "20e3f767"
+    },
+    "genai_rope_small_model_9de55516": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            512,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            512,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            512,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_rope_small_model"
+      ],
+      "shape_hash": "9de55516"
+    },
+    "genai_rope_large_model_b6c5a578": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            64,
+            2048,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            2048,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            2048,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_rope_large_model"
+      ],
+      "shape_hash": "b6c5a578"
     }
   }
 }

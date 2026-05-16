@@ -35,6 +35,96 @@
         "genai_patterns"
       ],
       "shape_hash": "08cb3aa0"
+    },
+    "genai_swiglu_decode_5d73f110": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32,
+            1,
+            8192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_swiglu_decode"
+      ],
+      "shape_hash": "5d73f110"
+    },
+    "genai_swiglu_short_prefill_fe1ef17e": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            128,
+            8192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_swiglu_short_prefill"
+      ],
+      "shape_hash": "fe1ef17e"
+    },
+    "genai_swiglu_long_context_fa7d33a0": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            8192,
+            8192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_swiglu_long_context"
+      ],
+      "shape_hash": "fa7d33a0"
+    },
+    "genai_swiglu_small_model_003dbf8f": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            8192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_swiglu_small_model"
+      ],
+      "shape_hash": "003dbf8f"
+    },
+    "genai_swiglu_large_model_97d78101": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            2048,
+            16384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_swiglu_large_model"
+      ],
+      "shape_hash": "97d78101"
     }
   }
 }

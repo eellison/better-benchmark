@@ -30,6 +30,126 @@
         "genai_patterns"
       ],
       "shape_hash": "e61d44f6"
+    },
+    "genai_gqa_short_prefill_3e6e9abf": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            8,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            8,
+            128,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_gqa_short_prefill"
+      ],
+      "shape_hash": "3e6e9abf"
+    },
+    "genai_gqa_long_context_54bc96df": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            8,
+            2048,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            8,
+            2048,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_gqa_long_context"
+      ],
+      "shape_hash": "54bc96df"
+    },
+    "genai_gqa_small_model_35f442ff": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            8,
+            512,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            8,
+            512,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_gqa_small_model"
+      ],
+      "shape_hash": "35f442ff"
+    },
+    "genai_gqa_large_model_54bc96df": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            8,
+            2048,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            8,
+            2048,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_gqa_large_model"
+      ],
+      "shape_hash": "54bc96df"
     }
   }
 }

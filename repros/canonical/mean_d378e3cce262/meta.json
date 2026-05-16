@@ -14,8 +14,13 @@
     "aten.rsqrt.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 6,
   "models": [
-    "genai_patterns"
+    "genai_patterns",
+    "genai_rmsnorm_decode",
+    "genai_rmsnorm_large_model",
+    "genai_rmsnorm_long_context",
+    "genai_rmsnorm_short_prefill",
+    "genai_rmsnorm_small_model"
   ]
 }

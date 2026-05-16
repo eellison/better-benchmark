@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "c863d61c6ee8",
+  "configs": {
+    "genai_causal_attn_decode_5514944f": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32,
+            32,
+            1,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_causal_attn_decode"
+      ],
+      "shape_hash": "5514944f"
+    }
+  }
+}

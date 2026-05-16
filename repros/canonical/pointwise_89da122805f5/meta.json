@@ -8,9 +8,14 @@
     "<built-in function getitem>",
     "aten.split.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 7,
   "models": [
     "genai_patterns",
+    "genai_swiglu_decode",
+    "genai_swiglu_large_model",
+    "genai_swiglu_long_context",
+    "genai_swiglu_short_prefill",
+    "genai_swiglu_small_model",
     "tlparse_torchbench_s8_g21"
   ]
 }

@@ -12,8 +12,13 @@
     "aten.slice.Tensor",
     "aten.slice.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 6,
   "models": [
-    "genai_patterns"
+    "genai_patterns",
+    "genai_rope_decode",
+    "genai_rope_large_model",
+    "genai_rope_long_context",
+    "genai_rope_short_prefill",
+    "genai_rope_small_model"
   ]
 }
