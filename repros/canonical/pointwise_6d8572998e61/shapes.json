@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "6d8572998e61",
+  "configs": {
+    "tlparse_huggingface_s4_g20_4f8f301c": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            32,
+            1024,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s4_g20"
+      ],
+      "shape_hash": "4f8f301c"
+    }
+  }
+}

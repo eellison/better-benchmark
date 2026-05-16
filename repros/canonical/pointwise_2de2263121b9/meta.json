@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "2de2263121b9",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_convnext_tiny"
+  ]
+}

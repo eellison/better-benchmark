@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "e7f1be00fc37",
+  "configs": {
+    "tlparse_torchbench_s8_g27_5fe738e0": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            256,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            256,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_torchbench_s8_g27"
+      ],
+      "shape_hash": "5fe738e0"
+    }
+  }
+}

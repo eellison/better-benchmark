@@ -1,0 +1,72 @@
+{
+  "pattern_hash": "2cde22fa6425",
+  "configs": {
+    "tlparse_huggingface_s5_g11_d339fbc9": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1000,
+            2048
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1000,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1000,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1000,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1000,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            1000,
+            1000
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s5_g11"
+      ],
+      "shape_hash": "d339fbc9"
+    }
+  }
+}

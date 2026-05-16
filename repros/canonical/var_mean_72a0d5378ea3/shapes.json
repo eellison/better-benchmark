@@ -1,0 +1,62 @@
+{
+  "pattern_hash": "72a0d5378ea3",
+  "configs": {
+    "tlparse_timm_s6_g10_617d24de": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            64,
+            240,
+            8,
+            8
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s6_g10"
+      ],
+      "shape_hash": "617d24de"
+    },
+    "tlparse_timm_s6_g10_e00944f5": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            64,
+            192,
+            16,
+            16
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s6_g10"
+      ],
+      "shape_hash": "e00944f5"
+    },
+    "tlparse_timm_s6_g10_b0d1205d": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            64,
+            144,
+            32,
+            32
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s6_g10"
+      ],
+      "shape_hash": "b0d1205d"
+    }
+  }
+}

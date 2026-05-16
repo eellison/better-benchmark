@@ -13,8 +13,9 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "dynamo_DistillGPT2"
+    "dynamo_DistillGPT2",
+    "timm_convnext_tiny"
   ]
 }

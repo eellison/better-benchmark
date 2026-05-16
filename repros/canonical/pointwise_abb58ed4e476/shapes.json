@@ -1,0 +1,12 @@
+{
+  "pattern_hash": "abb58ed4e476",
+  "configs": {
+    "tlparse_torchbench_s9_g77_214ebe81": {
+      "inputs": [],
+      "source_models": [
+        "tlparse_torchbench_s9_g77"
+      ],
+      "shape_hash": "214ebe81"
+    }
+  }
+}

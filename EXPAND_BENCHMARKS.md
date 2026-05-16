@@ -47,6 +47,12 @@ Note: HF CI coverage is thin — only ~5 models per shard from tlparse, not the 
 - [ ] A100 CI run — cross-hardware comparison
 - [ ] Backward/training graphs (capture with grad enabled)
 
+## Notes
+
+- Capture (compile + extract) doesn't need precise GPU timing, so it's safe to run without the benchmark lock
+- Don't run `bench_parallel.py` (timing-sensitive) concurrently with capture on the same GPU
+- If both need to run in parallel, assign different GPUs (e.g., capture on GPU 1, bench on GPU 0)
+
 ## Commands
 
 ### Full HF suite (local)

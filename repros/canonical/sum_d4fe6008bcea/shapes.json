@@ -1,0 +1,98 @@
+{
+  "pattern_hash": "d4fe6008bcea",
+  "configs": {
+    "tlparse_huggingface_s3_g36_5e875a8c": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 100
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            512,
+            30522
+          ],
+          "stride": [
+            30528,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s3_g36"
+      ],
+      "shape_hash": "5e875a8c"
+    },
+    "tlparse_huggingface_s4_g35_7a4c6a68": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null,
+          "max_val": 100
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            32128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s4_g35"
+      ],
+      "shape_hash": "7a4c6a68"
+    }
+  }
+}

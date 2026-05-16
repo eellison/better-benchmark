@@ -1,0 +1,145 @@
+{
+  "pattern_hash": "37ee1971d401",
+  "configs": {
+    "tlparse_huggingface_s2_g21_934b90da": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024
+          ],
+          "stride": null,
+          "max_val": 100
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null,
+          "max_val": 100
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024,
+            768
+          ],
+          "stride": [
+            2359296,
+            2304,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024,
+            768
+          ],
+          "stride": [
+            2359296,
+            2304,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024,
+            768
+          ],
+          "stride": [
+            2359296,
+            2304,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s2_g21"
+      ],
+      "shape_hash": "934b90da"
+    },
+    "tlparse_huggingface_s2_g83_934b90da": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024
+          ],
+          "stride": null,
+          "max_val": 100
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null,
+          "max_val": 100
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024,
+            768
+          ],
+          "stride": [
+            2359296,
+            2304,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024,
+            768
+          ],
+          "stride": [
+            2359296,
+            2304,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024,
+            768
+          ],
+          "stride": [
+            2359296,
+            2304,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s2_g83"
+      ],
+      "shape_hash": "934b90da"
+    }
+  }
+}

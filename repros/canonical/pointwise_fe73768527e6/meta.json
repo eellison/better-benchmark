@@ -6,10 +6,11 @@
   "origin_ops": [
     "aten.relu.default"
   ],
-  "n_models": 7,
+  "n_models": 8,
   "models": [
     "dynamo_OPTForCausalLM",
     "dynamo_OPTForCausalLM_inference",
+    "timm_mobilenetv3",
     "tlparse_timm_s4_g10",
     "tlparse_timm_s5_g10",
     "tlparse_torchbench_s6_g10",

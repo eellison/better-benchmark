@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "818690bf8db1",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.neg.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_efficientnet_b0"
+  ]
+}

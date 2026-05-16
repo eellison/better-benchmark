@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "0d59c86501d5",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 4,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.permute.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_convnext_tiny"
+  ]
+}

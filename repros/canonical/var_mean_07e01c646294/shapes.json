@@ -1,0 +1,113 @@
+{
+  "pattern_hash": "07e01c646294",
+  "configs": {
+    "tlparse_huggingface_s1_g5_f89bd9c8": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s1_g5"
+      ],
+      "shape_hash": "f89bd9c8"
+    },
+    "tlparse_timm_s6_g10_cea48c51": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            240
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            256,
+            16,
+            240
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s6_g10"
+      ],
+      "shape_hash": "cea48c51"
+    },
+    "tlparse_timm_s6_g10_2f903327": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            16384,
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            256,
+            64,
+            192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s6_g10"
+      ],
+      "shape_hash": "2f903327"
+    },
+    "tlparse_timm_s6_g10_c4e0f918": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            65536,
+            144
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            256,
+            256,
+            144
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s6_g10"
+      ],
+      "shape_hash": "c4e0f918"
+    }
+  }
+}

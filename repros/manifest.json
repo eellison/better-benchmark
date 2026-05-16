@@ -19005,6 +19005,766 @@
           "original_file": "region_009_pointwise_928985a288cd_214ebe81.py"
         }
       ]
+    },
+    "timm_resnet50": {
+      "repros": [
+        {
+          "pattern_hash": "0c55f62bec2f",
+          "shape_config": "timm_resnet50_9e368c21",
+          "original_file": "region_000_mean_0c55f62bec2f_9e368c21.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_resnet50_b3c9a1e5",
+          "original_file": "region_001_pointwise_94420fefae3b_b3c9a1e5.py"
+        },
+        {
+          "pattern_hash": "bab925b45a1c",
+          "shape_config": "timm_resnet50_ab9a0c21",
+          "original_file": "region_002_pointwise_bab925b45a1c_ab9a0c21.py"
+        },
+        {
+          "pattern_hash": "93e4e0ba0bef",
+          "shape_config": "timm_resnet50_c24e094d",
+          "original_file": "region_003_pointwise_93e4e0ba0bef_c24e094d.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_resnet50_6307500f",
+          "original_file": "region_004_pointwise_94420fefae3b_6307500f.py"
+        },
+        {
+          "pattern_hash": "bab925b45a1c",
+          "shape_config": "timm_resnet50_9e703f69",
+          "original_file": "region_005_pointwise_bab925b45a1c_9e703f69.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_resnet50_38e332a6",
+          "original_file": "region_006_pointwise_94420fefae3b_38e332a6.py"
+        },
+        {
+          "pattern_hash": "93e4e0ba0bef",
+          "shape_config": "timm_resnet50_95168aba",
+          "original_file": "region_007_pointwise_93e4e0ba0bef_95168aba.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_resnet50_4097854f",
+          "original_file": "region_008_pointwise_94420fefae3b_4097854f.py"
+        },
+        {
+          "pattern_hash": "bab925b45a1c",
+          "shape_config": "timm_resnet50_a0baeedb",
+          "original_file": "region_009_pointwise_bab925b45a1c_a0baeedb.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_resnet50_d655c6eb",
+          "original_file": "region_010_pointwise_94420fefae3b_d655c6eb.py"
+        },
+        {
+          "pattern_hash": "93e4e0ba0bef",
+          "shape_config": "timm_resnet50_8d2c1c93",
+          "original_file": "region_011_pointwise_93e4e0ba0bef_8d2c1c93.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_resnet50_acfb2b41",
+          "original_file": "region_012_pointwise_94420fefae3b_acfb2b41.py"
+        },
+        {
+          "pattern_hash": "bab925b45a1c",
+          "shape_config": "timm_resnet50_6ab63410",
+          "original_file": "region_013_pointwise_bab925b45a1c_6ab63410.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_resnet50_8c805046",
+          "original_file": "region_014_pointwise_94420fefae3b_8c805046.py"
+        },
+        {
+          "pattern_hash": "93e4e0ba0bef",
+          "shape_config": "timm_resnet50_c95184b3",
+          "original_file": "region_015_pointwise_93e4e0ba0bef_c95184b3.py"
+        },
+        {
+          "pattern_hash": "beaecb9b4f18",
+          "shape_config": "timm_resnet50_05d1506a",
+          "original_file": "region_016_pointwise_beaecb9b4f18_05d1506a.py"
+        }
+      ]
+    },
+    "timm_efficientnet_b0": {
+      "repros": [
+        {
+          "pattern_hash": "d968523507e2",
+          "shape_config": "timm_efficientnet_b0_ffdd16b1",
+          "original_file": "region_000_mean_d968523507e2_ffdd16b1.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_efficientnet_b0_04f27d1b",
+          "original_file": "region_001_pointwise_71cb2717ce5b_04f27d1b.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_3b5ca59e",
+          "original_file": "region_002_pointwise_b76cd296cd55_3b5ca59e.py"
+        },
+        {
+          "pattern_hash": "818690bf8db1",
+          "shape_config": "timm_efficientnet_b0_e0478824",
+          "original_file": "region_003_pointwise_818690bf8db1_e0478824.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_b1bf0650",
+          "original_file": "region_004_mean_f3d7b4c44889_b1bf0650.py"
+        },
+        {
+          "pattern_hash": "0b2a59eebcb6",
+          "shape_config": "timm_efficientnet_b0_b1bf0650",
+          "original_file": "region_005_pointwise_0b2a59eebcb6_b1bf0650.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_efficientnet_b0_ba23efe7",
+          "original_file": "region_006_pointwise_c14231299e3e_ba23efe7.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_efficientnet_b0_2a010206",
+          "original_file": "region_007_pointwise_71cb2717ce5b_2a010206.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_5d744bcb",
+          "original_file": "region_008_pointwise_b76cd296cd55_5d744bcb.py"
+        },
+        {
+          "pattern_hash": "818690bf8db1",
+          "shape_config": "timm_efficientnet_b0_a15fba88",
+          "original_file": "region_009_pointwise_818690bf8db1_a15fba88.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_9a18bc61",
+          "original_file": "region_010_mean_f3d7b4c44889_9a18bc61.py"
+        },
+        {
+          "pattern_hash": "0b2a59eebcb6",
+          "shape_config": "timm_efficientnet_b0_cd058719",
+          "original_file": "region_011_pointwise_0b2a59eebcb6_cd058719.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_efficientnet_b0_7bd968b4",
+          "original_file": "region_012_pointwise_c14231299e3e_7bd968b4.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_ed097238",
+          "original_file": "region_013_pointwise_b76cd296cd55_ed097238.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_cd058719",
+          "original_file": "region_014_mean_f3d7b4c44889_cd058719.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_efficientnet_b0_ea6cc16e",
+          "original_file": "region_015_pointwise_71cb2717ce5b_ea6cc16e.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_b75a1437",
+          "original_file": "region_016_pointwise_b76cd296cd55_b75a1437.py"
+        },
+        {
+          "pattern_hash": "818690bf8db1",
+          "shape_config": "timm_efficientnet_b0_8d51d4da",
+          "original_file": "region_017_pointwise_818690bf8db1_8d51d4da.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_3d76b9f6",
+          "original_file": "region_018_mean_f3d7b4c44889_3d76b9f6.py"
+        },
+        {
+          "pattern_hash": "0b2a59eebcb6",
+          "shape_config": "timm_efficientnet_b0_3d76b9f6",
+          "original_file": "region_019_pointwise_0b2a59eebcb6_3d76b9f6.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_efficientnet_b0_9105b63d",
+          "original_file": "region_020_pointwise_c14231299e3e_9105b63d.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_efficientnet_b0_4544536c",
+          "original_file": "region_021_pointwise_71cb2717ce5b_4544536c.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_9f9b2aa4",
+          "original_file": "region_022_pointwise_b76cd296cd55_9f9b2aa4.py"
+        },
+        {
+          "pattern_hash": "818690bf8db1",
+          "shape_config": "timm_efficientnet_b0_e190d101",
+          "original_file": "region_023_pointwise_818690bf8db1_e190d101.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_fdea712d",
+          "original_file": "region_024_mean_f3d7b4c44889_fdea712d.py"
+        },
+        {
+          "pattern_hash": "0b2a59eebcb6",
+          "shape_config": "timm_efficientnet_b0_e7354c94",
+          "original_file": "region_025_pointwise_0b2a59eebcb6_e7354c94.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_efficientnet_b0_dd71c5af",
+          "original_file": "region_026_pointwise_c14231299e3e_dd71c5af.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_78885e7e",
+          "original_file": "region_027_pointwise_b76cd296cd55_78885e7e.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_e7354c94",
+          "original_file": "region_028_mean_f3d7b4c44889_e7354c94.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_efficientnet_b0_cbf161fa",
+          "original_file": "region_029_pointwise_71cb2717ce5b_cbf161fa.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_54cd413b",
+          "original_file": "region_030_pointwise_b76cd296cd55_54cd413b.py"
+        },
+        {
+          "pattern_hash": "818690bf8db1",
+          "shape_config": "timm_efficientnet_b0_76155cff",
+          "original_file": "region_031_pointwise_818690bf8db1_76155cff.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_55262ea4",
+          "original_file": "region_032_mean_f3d7b4c44889_55262ea4.py"
+        },
+        {
+          "pattern_hash": "0b2a59eebcb6",
+          "shape_config": "timm_efficientnet_b0_679096ec",
+          "original_file": "region_033_pointwise_0b2a59eebcb6_679096ec.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_efficientnet_b0_e1833399",
+          "original_file": "region_034_pointwise_c14231299e3e_e1833399.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_593a83a6",
+          "original_file": "region_035_pointwise_b76cd296cd55_593a83a6.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_679096ec",
+          "original_file": "region_036_mean_f3d7b4c44889_679096ec.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_efficientnet_b0_9bbb73ae",
+          "original_file": "region_037_pointwise_71cb2717ce5b_9bbb73ae.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_c44731e1",
+          "original_file": "region_038_pointwise_b76cd296cd55_c44731e1.py"
+        },
+        {
+          "pattern_hash": "818690bf8db1",
+          "shape_config": "timm_efficientnet_b0_48cbc837",
+          "original_file": "region_039_pointwise_818690bf8db1_48cbc837.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_b7d2c9d1",
+          "original_file": "region_040_mean_f3d7b4c44889_b7d2c9d1.py"
+        },
+        {
+          "pattern_hash": "0b2a59eebcb6",
+          "shape_config": "timm_efficientnet_b0_051a5fb0",
+          "original_file": "region_041_pointwise_0b2a59eebcb6_051a5fb0.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_efficientnet_b0_8c65761d",
+          "original_file": "region_042_pointwise_71cb2717ce5b_8c65761d.py"
+        },
+        {
+          "pattern_hash": "b76cd296cd55",
+          "shape_config": "timm_efficientnet_b0_752c8a79",
+          "original_file": "region_043_pointwise_b76cd296cd55_752c8a79.py"
+        },
+        {
+          "pattern_hash": "818690bf8db1",
+          "shape_config": "timm_efficientnet_b0_05a9a9e7",
+          "original_file": "region_044_pointwise_818690bf8db1_05a9a9e7.py"
+        },
+        {
+          "pattern_hash": "f3d7b4c44889",
+          "shape_config": "timm_efficientnet_b0_b4b7aa4c",
+          "original_file": "region_045_mean_f3d7b4c44889_b4b7aa4c.py"
+        },
+        {
+          "pattern_hash": "0b2a59eebcb6",
+          "shape_config": "timm_efficientnet_b0_b4b7aa4c",
+          "original_file": "region_046_pointwise_0b2a59eebcb6_b4b7aa4c.py"
+        }
+      ]
+    },
+    "timm_mobilenetv3": {
+      "repros": [
+        {
+          "pattern_hash": "b0b08b5a0c75",
+          "shape_config": "timm_mobilenetv3_13139fde",
+          "original_file": "region_000_pointwise_b0b08b5a0c75_13139fde.py"
+        },
+        {
+          "pattern_hash": "491b463979bf",
+          "shape_config": "timm_mobilenetv3_f8623f95",
+          "original_file": "region_001_mean_491b463979bf_f8623f95.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_mobilenetv3_9d08d64a",
+          "original_file": "region_002_pointwise_c14231299e3e_9d08d64a.py"
+        },
+        {
+          "pattern_hash": "1034eb483b09",
+          "shape_config": "timm_mobilenetv3_06208314",
+          "original_file": "region_003_pointwise_1034eb483b09_06208314.py"
+        },
+        {
+          "pattern_hash": "fe73768527e6",
+          "shape_config": "timm_mobilenetv3_4d6b9914",
+          "original_file": "region_004_pointwise_fe73768527e6_4d6b9914.py"
+        },
+        {
+          "pattern_hash": "d1c8711365a9",
+          "shape_config": "timm_mobilenetv3_f8623f95",
+          "original_file": "region_005_mean_d1c8711365a9_f8623f95.py"
+        },
+        {
+          "pattern_hash": "6f9aa59889f5",
+          "shape_config": "timm_mobilenetv3_f8623f95",
+          "original_file": "region_006_pointwise_6f9aa59889f5_f8623f95.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_mobilenetv3_ce53b64a",
+          "original_file": "region_007_pointwise_71cb2717ce5b_ce53b64a.py"
+        },
+        {
+          "pattern_hash": "1034eb483b09",
+          "shape_config": "timm_mobilenetv3_5d744bcb",
+          "original_file": "region_008_pointwise_1034eb483b09_5d744bcb.py"
+        },
+        {
+          "pattern_hash": "fe73768527e6",
+          "shape_config": "timm_mobilenetv3_790fa6ed",
+          "original_file": "region_009_pointwise_fe73768527e6_790fa6ed.py"
+        },
+        {
+          "pattern_hash": "d1c8711365a9",
+          "shape_config": "timm_mobilenetv3_9a18bc61",
+          "original_file": "region_010_mean_d1c8711365a9_9a18bc61.py"
+        },
+        {
+          "pattern_hash": "6f9aa59889f5",
+          "shape_config": "timm_mobilenetv3_cd058719",
+          "original_file": "region_011_pointwise_6f9aa59889f5_cd058719.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_mobilenetv3_7bd968b4",
+          "original_file": "region_012_pointwise_c14231299e3e_7bd968b4.py"
+        },
+        {
+          "pattern_hash": "1034eb483b09",
+          "shape_config": "timm_mobilenetv3_ed097238",
+          "original_file": "region_013_pointwise_1034eb483b09_ed097238.py"
+        },
+        {
+          "pattern_hash": "d1c8711365a9",
+          "shape_config": "timm_mobilenetv3_cd058719",
+          "original_file": "region_014_mean_d1c8711365a9_cd058719.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_mobilenetv3_ea6cc16e",
+          "original_file": "region_015_pointwise_71cb2717ce5b_ea6cc16e.py"
+        },
+        {
+          "pattern_hash": "1034eb483b09",
+          "shape_config": "timm_mobilenetv3_b75a1437",
+          "original_file": "region_016_pointwise_1034eb483b09_b75a1437.py"
+        },
+        {
+          "pattern_hash": "fe73768527e6",
+          "shape_config": "timm_mobilenetv3_6fdb4d1c",
+          "original_file": "region_017_pointwise_fe73768527e6_6fdb4d1c.py"
+        },
+        {
+          "pattern_hash": "d1c8711365a9",
+          "shape_config": "timm_mobilenetv3_3d76b9f6",
+          "original_file": "region_018_mean_d1c8711365a9_3d76b9f6.py"
+        },
+        {
+          "pattern_hash": "6f9aa59889f5",
+          "shape_config": "timm_mobilenetv3_3d76b9f6",
+          "original_file": "region_019_pointwise_6f9aa59889f5_3d76b9f6.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_mobilenetv3_9105b63d",
+          "original_file": "region_020_pointwise_c14231299e3e_9105b63d.py"
+        },
+        {
+          "pattern_hash": "6f9aa59889f5",
+          "shape_config": "timm_mobilenetv3_feacd66e",
+          "original_file": "region_021_pointwise_6f9aa59889f5_feacd66e.py"
+        },
+        {
+          "pattern_hash": "6f9aa59889f5",
+          "shape_config": "timm_mobilenetv3_f8dc466a",
+          "original_file": "region_022_pointwise_6f9aa59889f5_f8dc466a.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_mobilenetv3_4544536c",
+          "original_file": "region_023_pointwise_71cb2717ce5b_4544536c.py"
+        },
+        {
+          "pattern_hash": "6f9aa59889f5",
+          "shape_config": "timm_mobilenetv3_fdea712d",
+          "original_file": "region_024_pointwise_6f9aa59889f5_fdea712d.py"
+        },
+        {
+          "pattern_hash": "6f9aa59889f5",
+          "shape_config": "timm_mobilenetv3_e7354c94",
+          "original_file": "region_025_pointwise_6f9aa59889f5_e7354c94.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_mobilenetv3_dd71c5af",
+          "original_file": "region_026_pointwise_c14231299e3e_dd71c5af.py"
+        },
+        {
+          "pattern_hash": "1034eb483b09",
+          "shape_config": "timm_mobilenetv3_c2976ab4",
+          "original_file": "region_027_pointwise_1034eb483b09_c2976ab4.py"
+        },
+        {
+          "pattern_hash": "fe73768527e6",
+          "shape_config": "timm_mobilenetv3_c2665d5b",
+          "original_file": "region_028_pointwise_fe73768527e6_c2665d5b.py"
+        },
+        {
+          "pattern_hash": "972d836a0646",
+          "shape_config": "timm_mobilenetv3_15561b44",
+          "original_file": "region_029_mean_972d836a0646_15561b44.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_mobilenetv3_15561b44",
+          "original_file": "region_030_pointwise_94420fefae3b_15561b44.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_mobilenetv3_cbf161fa",
+          "original_file": "region_031_pointwise_71cb2717ce5b_cbf161fa.py"
+        },
+        {
+          "pattern_hash": "1034eb483b09",
+          "shape_config": "timm_mobilenetv3_35021f7f",
+          "original_file": "region_032_pointwise_1034eb483b09_35021f7f.py"
+        },
+        {
+          "pattern_hash": "fe73768527e6",
+          "shape_config": "timm_mobilenetv3_4f5c6515",
+          "original_file": "region_033_pointwise_fe73768527e6_4f5c6515.py"
+        },
+        {
+          "pattern_hash": "972d836a0646",
+          "shape_config": "timm_mobilenetv3_3d2b3cb2",
+          "original_file": "region_034_mean_972d836a0646_3d2b3cb2.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_mobilenetv3_3277af70",
+          "original_file": "region_035_pointwise_94420fefae3b_3277af70.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_mobilenetv3_e1833399",
+          "original_file": "region_036_pointwise_c14231299e3e_e1833399.py"
+        },
+        {
+          "pattern_hash": "71cb2717ce5b",
+          "shape_config": "timm_mobilenetv3_9bbb73ae",
+          "original_file": "region_037_pointwise_71cb2717ce5b_9bbb73ae.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_mobilenetv3_8c805046",
+          "original_file": "region_038_pointwise_94420fefae3b_8c805046.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_mobilenetv3_05d1506a",
+          "original_file": "region_039_pointwise_94420fefae3b_05d1506a.py"
+        },
+        {
+          "pattern_hash": "c14231299e3e",
+          "shape_config": "timm_mobilenetv3_9efaf80d",
+          "original_file": "region_040_pointwise_c14231299e3e_9efaf80d.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_mobilenetv3_8c65761d",
+          "original_file": "region_041_pointwise_94420fefae3b_8c65761d.py"
+        },
+        {
+          "pattern_hash": "6f9aa59889f5",
+          "shape_config": "timm_mobilenetv3_8c65761d",
+          "original_file": "region_042_pointwise_6f9aa59889f5_8c65761d.py"
+        }
+      ]
+    },
+    "timm_convnext_tiny": {
+      "repros": [
+        {
+          "pattern_hash": "1ecc9387d6bd",
+          "shape_config": "timm_convnext_tiny_d07a0b32",
+          "original_file": "region_000_pointwise_1ecc9387d6bd_d07a0b32.py"
+        },
+        {
+          "pattern_hash": "d87cfbe3f2ec",
+          "shape_config": "timm_convnext_tiny_9fabf890",
+          "original_file": "region_001_mean_var_mean_d87cfbe3f2ec_9fabf890.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "timm_convnext_tiny_a17f9610",
+          "original_file": "region_002_pointwise_983a9e1e3bcd_a17f9610.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "timm_convnext_tiny_9ba17f7c",
+          "original_file": "region_003_pointwise_741c0d7d8d11_9ba17f7c.py"
+        },
+        {
+          "pattern_hash": "0d59c86501d5",
+          "shape_config": "timm_convnext_tiny_7a8af858",
+          "original_file": "region_004_var_mean_0d59c86501d5_7a8af858.py"
+        },
+        {
+          "pattern_hash": "479f302dff9a",
+          "shape_config": "timm_convnext_tiny_9fabf890",
+          "original_file": "region_005_pointwise_479f302dff9a_9fabf890.py"
+        },
+        {
+          "pattern_hash": "2de2263121b9",
+          "shape_config": "timm_convnext_tiny_ee975090",
+          "original_file": "region_006_pointwise_2de2263121b9_ee975090.py"
+        },
+        {
+          "pattern_hash": "7f6ba07dcaee",
+          "shape_config": "timm_convnext_tiny_03d7fd65",
+          "original_file": "region_007_var_mean_7f6ba07dcaee_03d7fd65.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "timm_convnext_tiny_57113388",
+          "original_file": "region_008_pointwise_983a9e1e3bcd_57113388.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "timm_convnext_tiny_2cfc52de",
+          "original_file": "region_009_pointwise_741c0d7d8d11_2cfc52de.py"
+        },
+        {
+          "pattern_hash": "0d59c86501d5",
+          "shape_config": "timm_convnext_tiny_6b3e7c45",
+          "original_file": "region_010_var_mean_0d59c86501d5_6b3e7c45.py"
+        },
+        {
+          "pattern_hash": "479f302dff9a",
+          "shape_config": "timm_convnext_tiny_03d7fd65",
+          "original_file": "region_011_pointwise_479f302dff9a_03d7fd65.py"
+        },
+        {
+          "pattern_hash": "2de2263121b9",
+          "shape_config": "timm_convnext_tiny_50e7c874",
+          "original_file": "region_012_pointwise_2de2263121b9_50e7c874.py"
+        },
+        {
+          "pattern_hash": "7f6ba07dcaee",
+          "shape_config": "timm_convnext_tiny_2d39e940",
+          "original_file": "region_013_var_mean_7f6ba07dcaee_2d39e940.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "timm_convnext_tiny_c33cd46d",
+          "original_file": "region_014_pointwise_983a9e1e3bcd_c33cd46d.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "timm_convnext_tiny_d8dc6b6a",
+          "original_file": "region_015_pointwise_741c0d7d8d11_d8dc6b6a.py"
+        },
+        {
+          "pattern_hash": "0d59c86501d5",
+          "shape_config": "timm_convnext_tiny_c7aee410",
+          "original_file": "region_016_var_mean_0d59c86501d5_c7aee410.py"
+        },
+        {
+          "pattern_hash": "479f302dff9a",
+          "shape_config": "timm_convnext_tiny_2d39e940",
+          "original_file": "region_017_pointwise_479f302dff9a_2d39e940.py"
+        },
+        {
+          "pattern_hash": "2de2263121b9",
+          "shape_config": "timm_convnext_tiny_4a0a3b93",
+          "original_file": "region_018_pointwise_2de2263121b9_4a0a3b93.py"
+        },
+        {
+          "pattern_hash": "7f6ba07dcaee",
+          "shape_config": "timm_convnext_tiny_f0e7a77b",
+          "original_file": "region_019_var_mean_7f6ba07dcaee_f0e7a77b.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "timm_convnext_tiny_4f66e3eb",
+          "original_file": "region_020_pointwise_983a9e1e3bcd_4f66e3eb.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "timm_convnext_tiny_f9333797",
+          "original_file": "region_021_pointwise_741c0d7d8d11_f9333797.py"
+        },
+        {
+          "pattern_hash": "0d59c86501d5",
+          "shape_config": "timm_convnext_tiny_434cde94",
+          "original_file": "region_022_var_mean_0d59c86501d5_434cde94.py"
+        },
+        {
+          "pattern_hash": "479f302dff9a",
+          "shape_config": "timm_convnext_tiny_f0e7a77b",
+          "original_file": "region_023_pointwise_479f302dff9a_f0e7a77b.py"
+        }
+      ]
+    },
+    "timm_regnetx_032": {
+      "repros": [
+        {
+          "pattern_hash": "0c55f62bec2f",
+          "shape_config": "timm_regnetx_032_a836c441",
+          "original_file": "region_000_mean_0c55f62bec2f_a836c441.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_regnetx_032_9a623e57",
+          "original_file": "region_001_pointwise_94420fefae3b_9a623e57.py"
+        },
+        {
+          "pattern_hash": "93e4e0ba0bef",
+          "shape_config": "timm_regnetx_032_cba58fe3",
+          "original_file": "region_002_pointwise_93e4e0ba0bef_cba58fe3.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_regnetx_032_2f1452b5",
+          "original_file": "region_003_pointwise_94420fefae3b_2f1452b5.py"
+        },
+        {
+          "pattern_hash": "bab925b45a1c",
+          "shape_config": "timm_regnetx_032_64b32d56",
+          "original_file": "region_004_pointwise_bab925b45a1c_64b32d56.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_regnetx_032_0178bf3f",
+          "original_file": "region_005_pointwise_94420fefae3b_0178bf3f.py"
+        },
+        {
+          "pattern_hash": "93e4e0ba0bef",
+          "shape_config": "timm_regnetx_032_2432e47c",
+          "original_file": "region_006_pointwise_93e4e0ba0bef_2432e47c.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_regnetx_032_fdc220fc",
+          "original_file": "region_007_pointwise_94420fefae3b_fdc220fc.py"
+        },
+        {
+          "pattern_hash": "bab925b45a1c",
+          "shape_config": "timm_regnetx_032_1605c436",
+          "original_file": "region_008_pointwise_bab925b45a1c_1605c436.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_regnetx_032_8a0080f3",
+          "original_file": "region_009_pointwise_94420fefae3b_8a0080f3.py"
+        },
+        {
+          "pattern_hash": "93e4e0ba0bef",
+          "shape_config": "timm_regnetx_032_19304591",
+          "original_file": "region_010_pointwise_93e4e0ba0bef_19304591.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_regnetx_032_3effcd03",
+          "original_file": "region_011_pointwise_94420fefae3b_3effcd03.py"
+        },
+        {
+          "pattern_hash": "bab925b45a1c",
+          "shape_config": "timm_regnetx_032_828cfbd4",
+          "original_file": "region_012_pointwise_bab925b45a1c_828cfbd4.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_regnetx_032_b7d2c9d1",
+          "original_file": "region_013_pointwise_94420fefae3b_b7d2c9d1.py"
+        },
+        {
+          "pattern_hash": "93e4e0ba0bef",
+          "shape_config": "timm_regnetx_032_93d51b29",
+          "original_file": "region_014_pointwise_93e4e0ba0bef_93d51b29.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_regnetx_032_051a5fb0",
+          "original_file": "region_015_pointwise_94420fefae3b_051a5fb0.py"
+        },
+        {
+          "pattern_hash": "94420fefae3b",
+          "shape_config": "timm_regnetx_032_b4b7aa4c",
+          "original_file": "region_016_pointwise_94420fefae3b_b4b7aa4c.py"
+        }
+      ]
     }
   }
 }

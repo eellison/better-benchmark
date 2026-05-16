@@ -1,0 +1,109 @@
+{
+  "pattern_hash": "983a9e1e3bcd",
+  "configs": {
+    "timm_convnext_tiny_a17f9610": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            392,
+            3072
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_convnext_tiny"
+      ],
+      "shape_hash": "a17f9610"
+    },
+    "timm_convnext_tiny_57113388": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1568,
+            1536
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384,
+            1536
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_convnext_tiny"
+      ],
+      "shape_hash": "57113388"
+    },
+    "timm_convnext_tiny_c33cd46d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            6272,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_convnext_tiny"
+      ],
+      "shape_hash": "c33cd46d"
+    },
+    "timm_convnext_tiny_4f66e3eb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25088,
+            384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96,
+            384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_convnext_tiny"
+      ],
+      "shape_hash": "4f66e3eb"
+    }
+  }
+}

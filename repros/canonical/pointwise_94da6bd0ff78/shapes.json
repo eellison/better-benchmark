@@ -1,0 +1,59 @@
+{
+  "pattern_hash": "94da6bd0ff78",
+  "configs": {
+    "tlparse_huggingface_s2_g21_ed806e6b": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024
+          ],
+          "stride": null,
+          "max_val": 100
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s2_g21"
+      ],
+      "shape_hash": "ed806e6b"
+    },
+    "tlparse_huggingface_s2_g83_ed806e6b": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024
+          ],
+          "stride": null,
+          "max_val": 100
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s2_g83"
+      ],
+      "shape_hash": "ed806e6b"
+    }
+  }
+}

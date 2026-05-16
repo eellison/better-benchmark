@@ -1,0 +1,12 @@
+{
+  "pattern_hash": "eb64eda15269",
+  "configs": {
+    "tlparse_huggingface_s2_g53_fed7106f": {
+      "inputs": [],
+      "source_models": [
+        "tlparse_huggingface_s2_g53"
+      ],
+      "shape_hash": "fed7106f"
+    }
+  }
+}
