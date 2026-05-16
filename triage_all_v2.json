@@ -1,0 +1,2034 @@
+[
+  {
+    "name": "pointwise_39fa027d311c",
+    "gap": 275.68,
+    "bytes": 530055168,
+    "ops": 44,
+    "category": "longformer_special",
+    "note": "sliding window attention with scatter/index_put"
+  },
+  {
+    "name": "sum_sum_sum_c24846693ddc",
+    "gap": 53.32,
+    "bytes": 1751914500,
+    "ops": 329,
+    "category": "combo_kernel",
+    "note": "277 ops including 4 scatter/index_put"
+  },
+  {
+    "name": "mean_b820cb5c6494",
+    "gap": 45.62,
+    "bytes": 8062336,
+    "ops": 2067,
+    "category": "combo_kernel",
+    "note": "copy_ ops, many small kernels (1342 ops)"
+  },
+  {
+    "name": "pointwise_4589a681b729",
+    "gap": 44.08,
+    "bytes": 8039620,
+    "ops": 11,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 4 total"
+  },
+  {
+    "name": "pointwise_9dedf4182701",
+    "gap": 39.62,
+    "bytes": 8056260,
+    "ops": 11,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 4 total"
+  },
+  {
+    "name": "pointwise_ed7f629de0d2",
+    "gap": 39.47,
+    "bytes": 8039876,
+    "ops": 10,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 4 total"
+  },
+  {
+    "name": "sum_sum_sum_8074906319b7",
+    "gap": 22.13,
+    "bytes": 4515171332,
+    "ops": 85,
+    "category": "combo_kernel",
+    "note": "51 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "pointwise_30ed971a3cbe",
+    "gap": 21.32,
+    "bytes": 205828800,
+    "ops": 608,
+    "category": "combo_kernel",
+    "note": "copy_ ops, many small kernels (608 ops)"
+  },
+  {
+    "name": "pointwise_d34320128246",
+    "gap": 21.01,
+    "bytes": 4199620,
+    "ops": 13,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 7 total"
+  },
+  {
+    "name": "mean_9c51bd39249d",
+    "gap": 18.93,
+    "bytes": 44894144,
+    "ops": 1059,
+    "category": "combo_kernel",
+    "note": "copy_ ops, many small kernels (690 ops)"
+  },
+  {
+    "name": "sum_fcb4b2ce3e9b",
+    "gap": 16.47,
+    "bytes": 104240648,
+    "ops": 27,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 3 total"
+  },
+  {
+    "name": "sum_c3c627c381a1",
+    "gap": 14.3,
+    "bytes": 129799688,
+    "ops": 26,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 3 total"
+  },
+  {
+    "name": "pointwise_509a05eca994",
+    "gap": 10.66,
+    "bytes": 42532864,
+    "ops": 9,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 6 total"
+  },
+  {
+    "name": "pointwise_22b61ae3e8fe",
+    "gap": 9.26,
+    "bytes": 113645568,
+    "ops": 81,
+    "category": "combo_kernel",
+    "note": "49 ops with cat barriers"
+  },
+  {
+    "name": "sum_sum_sum_3797f1076843",
+    "gap": 8.81,
+    "bytes": 2399051268,
+    "ops": 221,
+    "category": "combo_kernel",
+    "note": "113 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "sum_sum_sum_f0394a99a1e5",
+    "gap": 8.51,
+    "bytes": 69669380,
+    "ops": 34,
+    "category": "scatter_inherent",
+    "note": "3 scatter/index_put ops among 26 total"
+  },
+  {
+    "name": "amax_sum_8f57e3556aea",
+    "gap": 8.04,
+    "bytes": 704687104,
+    "ops": 197,
+    "category": "longformer_special",
+    "note": "sliding window attention pattern"
+  },
+  {
+    "name": "amax_sum_b978f41418bc",
+    "gap": 7.16,
+    "bytes": 142607872,
+    "ops": 58,
+    "category": "combo_kernel",
+    "note": "31 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_8f5247db9049",
+    "gap": 7.12,
+    "bytes": 604020736,
+    "ops": 235,
+    "category": "longformer_special",
+    "note": "sliding window attention pattern"
+  },
+  {
+    "name": "mean_amax_sum_6ef723c3f65e",
+    "gap": 6.63,
+    "bytes": 174083592,
+    "ops": 64,
+    "category": "combo_kernel",
+    "note": "38 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_16427862d66c",
+    "gap": 6.43,
+    "bytes": 1026287232,
+    "ops": 694,
+    "category": "combo_kernel",
+    "note": "copy_ ops, many small kernels (672 ops)"
+  },
+  {
+    "name": "amax_sum_72e4203bc120",
+    "gap": 6.39,
+    "bytes": 704687104,
+    "ops": 246,
+    "category": "longformer_special",
+    "note": "sliding window attention pattern"
+  },
+  {
+    "name": "argmax_09f9e9c2268d",
+    "gap": 6.25,
+    "bytes": 106954752,
+    "ops": 20,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (9 ops)"
+  },
+  {
+    "name": "mean_2949fb044264",
+    "gap": 5.48,
+    "bytes": 42287104,
+    "ops": 126,
+    "category": "combo_kernel",
+    "note": "76 ops with cat barriers"
+  },
+  {
+    "name": "sum_9292de0b9be9",
+    "gap": 5.41,
+    "bytes": 169517600,
+    "ops": 109,
+    "category": "combo_kernel",
+    "note": "62 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_35525501b882",
+    "gap": 5.24,
+    "bytes": 159384064,
+    "ops": 25,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 2 reductions in 12 ops"
+  },
+  {
+    "name": "pointwise_94263b2bcee2",
+    "gap": 5.15,
+    "bytes": 2228736,
+    "ops": 5,
+    "category": "reduction_heuristic",
+    "note": "topk reduction with 3 compute ops"
+  },
+  {
+    "name": "amax_sum_46a9ad66e602",
+    "gap": 5.05,
+    "bytes": 1188162852,
+    "ops": 91,
+    "category": "longformer_special",
+    "note": "sliding window attention pattern"
+  },
+  {
+    "name": "sum_sum_sum_fb2a28eb81be",
+    "gap": 5.03,
+    "bytes": 870129900,
+    "ops": 437,
+    "category": "combo_kernel",
+    "note": "347 ops including 9 scatter/index_put"
+  },
+  {
+    "name": "pointwise_5dcd159fff4a",
+    "gap": 4.9,
+    "bytes": 2293760,
+    "ops": 11,
+    "category": "scatter_inherent",
+    "note": "topk + scatter.value routing pattern"
+  },
+  {
+    "name": "sum_sum_sum_efb5551a7c94",
+    "gap": 4.82,
+    "bytes": 1900332548,
+    "ops": 571,
+    "category": "combo_kernel",
+    "note": "465 ops including 1 scatter/index_put"
+  },
+  {
+    "name": "sum_sum_sum_52f7882ed4b0",
+    "gap": 4.68,
+    "bytes": 1203098528,
+    "ops": 403,
+    "category": "combo_kernel",
+    "note": "319 ops including 3 scatter/index_put"
+  },
+  {
+    "name": "sum_sum_sum_c29bd793820d",
+    "gap": 4.56,
+    "bytes": 1036833216,
+    "ops": 281,
+    "category": "combo_kernel",
+    "note": "128 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_b3f8078cef30",
+    "gap": 4.49,
+    "bytes": 175616004,
+    "ops": 21,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 8 total"
+  },
+  {
+    "name": "sum_sum_sum_ae9be4f5b30b",
+    "gap": 4.29,
+    "bytes": 259409540,
+    "ops": 91,
+    "category": "combo_kernel",
+    "note": "57 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "pointwise_f5a5f8826d00",
+    "gap": 4.13,
+    "bytes": 45741760,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_2c26938323d4",
+    "gap": 4.02,
+    "bytes": 591994884,
+    "ops": 64,
+    "category": "combo_kernel",
+    "note": "52 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "amax_sum_sum_a28463f10193",
+    "gap": 3.93,
+    "bytes": 102965250,
+    "ops": 27,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_295d30fcd2e1",
+    "gap": 3.92,
+    "bytes": 291119108,
+    "ops": 65,
+    "category": "combo_kernel",
+    "note": "53 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "pointwise_2c8c0be46f75",
+    "gap": 3.9,
+    "bytes": 67125248,
+    "ops": 123,
+    "category": "combo_kernel",
+    "note": "75 ops with cat barriers"
+  },
+  {
+    "name": "amax_sum_sum_436745ec8e1e",
+    "gap": 3.68,
+    "bytes": 622346244,
+    "ops": 28,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "max_c4bf986c7d26",
+    "gap": 3.65,
+    "bytes": 268964096,
+    "ops": 22,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (11 ops)"
+  },
+  {
+    "name": "max_c3205815ab1d",
+    "gap": 3.61,
+    "bytes": 268964096,
+    "ops": 16,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (7 ops)"
+  },
+  {
+    "name": "sum_sum_sum_cd4360587211",
+    "gap": 3.58,
+    "bytes": 71053312,
+    "ops": 85,
+    "category": "combo_kernel",
+    "note": "39 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_mean_590318f4803d",
+    "gap": 3.51,
+    "bytes": 349997568,
+    "ops": 41,
+    "category": "combo_kernel",
+    "note": "23 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_be702b976884",
+    "gap": 3.5,
+    "bytes": 554230788,
+    "ops": 44,
+    "category": "combo_kernel",
+    "note": "31 ops including 3 scatter/index_put"
+  },
+  {
+    "name": "amax_sum_6b1ce2a6969f",
+    "gap": 3.49,
+    "bytes": 455082572,
+    "ops": 18,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 2 reductions in 11 ops"
+  },
+  {
+    "name": "amax_sum_c5d375fea46f",
+    "gap": 3.48,
+    "bytes": 113248144,
+    "ops": 55,
+    "category": "combo_kernel",
+    "note": "31 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_sum_f704996f5f22",
+    "gap": 3.47,
+    "bytes": 206061572,
+    "ops": 26,
+    "category": "combo_kernel",
+    "note": "4 independent reductions in 14 compute ops"
+  },
+  {
+    "name": "pointwise_c0b2590bfdf4",
+    "gap": 3.44,
+    "bytes": 369491968,
+    "ops": 28,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (12 ops)"
+  },
+  {
+    "name": "pointwise_7e58baf677e4",
+    "gap": 3.41,
+    "bytes": 68612192,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "amax_sum_5cbe925f22c7",
+    "gap": 3.35,
+    "bytes": 49359296,
+    "ops": 17,
+    "category": "reduction_heuristic",
+    "note": "2 reductions among 7 compute ops"
+  },
+  {
+    "name": "sum_sum_sum_54778c120192",
+    "gap": 3.19,
+    "bytes": 759246060,
+    "ops": 190,
+    "category": "combo_kernel",
+    "note": "107 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "sum_sum_sum_12f67c7a6336",
+    "gap": 3.12,
+    "bytes": 1961371140,
+    "ops": 416,
+    "category": "combo_kernel",
+    "note": "195 ops including 4 scatter/index_put"
+  },
+  {
+    "name": "pointwise_2522ec736c14",
+    "gap": 3.11,
+    "bytes": 117485568,
+    "ops": 51,
+    "category": "combo_kernel",
+    "note": "18 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_3be5624028ba",
+    "gap": 3.09,
+    "bytes": 1035662852,
+    "ops": 359,
+    "category": "combo_kernel",
+    "note": "169 ops including 1 scatter/index_put"
+  },
+  {
+    "name": "pointwise_4cd3cdc730d7",
+    "gap": 3.06,
+    "bytes": 41947136,
+    "ops": 41,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (25 ops)"
+  },
+  {
+    "name": "max_09687140bf0c",
+    "gap": 3.02,
+    "bytes": 273154304,
+    "ops": 7,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (4 ops)"
+  },
+  {
+    "name": "pointwise_d8d9e20492d5",
+    "gap": 3.02,
+    "bytes": 66662400,
+    "ops": 26,
+    "category": "combo_kernel",
+    "note": "14 compute ops, each gets own kernel"
+  },
+  {
+    "name": "var_mean_var_mean_var_mean_e91c69d33ef5",
+    "gap": 2.99,
+    "bytes": 57811968,
+    "ops": 6,
+    "category": "reduction_heuristic",
+    "note": "3 reductions, bad tiling/split"
+  },
+  {
+    "name": "sum_sum_sum_dc592a62e259",
+    "gap": 2.99,
+    "bytes": 453567492,
+    "ops": 40,
+    "category": "scatter_inherent",
+    "note": "3 scatter/index_put ops among 29 total"
+  },
+  {
+    "name": "pointwise_7bbf2ae6d717",
+    "gap": 2.98,
+    "bytes": 50331648,
+    "ops": 30,
+    "category": "loop_order",
+    "note": "1 compute ops, suboptimal iteration order"
+  },
+  {
+    "name": "pointwise_e6befa69b424",
+    "gap": 2.96,
+    "bytes": 2178240036,
+    "ops": 524,
+    "category": "combo_kernel",
+    "note": "copy_ ops, many small kernels (524 ops)"
+  },
+  {
+    "name": "sum_sum_sum_9226ddcba6e0",
+    "gap": 2.95,
+    "bytes": 35236352,
+    "ops": 32,
+    "category": "scatter_inherent",
+    "note": "3 scatter/index_put ops among 23 total"
+  },
+  {
+    "name": "pointwise_f3c6cfe72279",
+    "gap": 2.94,
+    "bytes": 54528256,
+    "ops": 55,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (22 ops)"
+  },
+  {
+    "name": "pointwise_e57525535739",
+    "gap": 2.94,
+    "bytes": 46750576,
+    "ops": 85,
+    "category": "combo_kernel",
+    "note": "30 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_526ae8b77052",
+    "gap": 2.93,
+    "bytes": 35236356,
+    "ops": 31,
+    "category": "scatter_inherent",
+    "note": "3 scatter/index_put ops among 23 total"
+  },
+  {
+    "name": "pointwise_7f5c97a29b76",
+    "gap": 2.93,
+    "bytes": 698708016,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "mean_mean_e78bb40350dd",
+    "gap": 2.91,
+    "bytes": 29362944,
+    "ops": 71,
+    "category": "combo_kernel",
+    "note": "38 ops with cat barriers"
+  },
+  {
+    "name": "pointwise_6dd8dcfeb24e",
+    "gap": 2.9,
+    "bytes": 182489856,
+    "ops": 21,
+    "category": "reduction_heuristic",
+    "note": "1 reductions in 10 op kernel"
+  },
+  {
+    "name": "pointwise_69f78021fcfb",
+    "gap": 2.88,
+    "bytes": 225687488,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "amax_sum_75833531334a",
+    "gap": 2.87,
+    "bytes": 163578256,
+    "ops": 20,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 2 reductions in 11 ops"
+  },
+  {
+    "name": "sum_sum_sum_e55ceeb289b0",
+    "gap": 2.86,
+    "bytes": 718519300,
+    "ops": 39,
+    "category": "scatter_inherent",
+    "note": "2 scatter/index_put ops among 30 total"
+  },
+  {
+    "name": "sum_sum_sum_db7893bbd6b2",
+    "gap": 2.84,
+    "bytes": 117489664,
+    "ops": 25,
+    "category": "combo_kernel",
+    "note": "17 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_9eae6d314e14",
+    "gap": 2.83,
+    "bytes": 240648192,
+    "ops": 54,
+    "category": "longformer_special",
+    "note": "sliding window attention with scatter/index_put"
+  },
+  {
+    "name": "sum_sum_sum_975b257d274a",
+    "gap": 2.83,
+    "bytes": 209764352,
+    "ops": 34,
+    "category": "combo_kernel",
+    "note": "18 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_8cc9a276310b",
+    "gap": 2.8,
+    "bytes": 1409290240,
+    "ops": 22,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 10 total"
+  },
+  {
+    "name": "pointwise_d29c743812ff",
+    "gap": 2.79,
+    "bytes": 1210223312,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "pointwise_eb1d58ae0860",
+    "gap": 2.76,
+    "bytes": 901283504,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "amax_sum_1009570465bd",
+    "gap": 2.75,
+    "bytes": 56640256,
+    "ops": 68,
+    "category": "combo_kernel",
+    "note": "30 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_95aad6bd93e1",
+    "gap": 2.74,
+    "bytes": 92280832,
+    "ops": 41,
+    "category": "combo_kernel",
+    "note": "19 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_2ad4fa0019f6",
+    "gap": 2.73,
+    "bytes": 132516864,
+    "ops": 41,
+    "category": "combo_kernel",
+    "note": "19 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_8aa4f46ea799",
+    "gap": 2.73,
+    "bytes": 5445986844,
+    "ops": 1204,
+    "category": "combo_kernel",
+    "note": "copy_ ops, many small kernels (1204 ops)"
+  },
+  {
+    "name": "sum_sum_sum_ffd4a6f6aae5",
+    "gap": 2.72,
+    "bytes": 693636482,
+    "ops": 77,
+    "category": "combo_kernel",
+    "note": "43 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_f9a16eb02e03",
+    "gap": 2.67,
+    "bytes": 2077473440,
+    "ops": 277,
+    "category": "combo_kernel",
+    "note": "127 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_b28959e028ac",
+    "gap": 2.66,
+    "bytes": 81833984,
+    "ops": 20,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_bd64a4228bc6",
+    "gap": 2.65,
+    "bytes": 19272192,
+    "ops": 14,
+    "category": "reduction_heuristic",
+    "note": "2 reductions among 8 compute ops"
+  },
+  {
+    "name": "sum_68c1d76d5051",
+    "gap": 2.63,
+    "bytes": 100666368,
+    "ops": 10,
+    "category": "reduction_heuristic",
+    "note": "1 reductions, bad tiling/split"
+  },
+  {
+    "name": "sum_sum_cebde8068bc5",
+    "gap": 2.62,
+    "bytes": 643330052,
+    "ops": 35,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 28 total"
+  },
+  {
+    "name": "sum_sum_sum_5bebe69ffbf3",
+    "gap": 2.62,
+    "bytes": 176242688,
+    "ops": 28,
+    "category": "combo_kernel",
+    "note": "22 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_fd3cd1ed5e66",
+    "gap": 2.57,
+    "bytes": 698706776,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_f7af1f8f310d",
+    "gap": 2.56,
+    "bytes": 314650624,
+    "ops": 25,
+    "category": "combo_kernel",
+    "note": "18 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_c25f97f8bb7a",
+    "gap": 2.56,
+    "bytes": 151138304,
+    "ops": 34,
+    "category": "combo_kernel",
+    "note": "29 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_a1cb85e9c103",
+    "gap": 2.55,
+    "bytes": 67371008,
+    "ops": 35,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (10 ops)"
+  },
+  {
+    "name": "pointwise_143c347072e7",
+    "gap": 2.55,
+    "bytes": 4055763408,
+    "ops": 824,
+    "category": "combo_kernel",
+    "note": "copy_ ops, many small kernels (824 ops)"
+  },
+  {
+    "name": "mean_mean_2b5ca50e6ca8",
+    "gap": 2.54,
+    "bytes": 36704768,
+    "ops": 41,
+    "category": "combo_kernel",
+    "note": "29 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_83571d60a272",
+    "gap": 2.52,
+    "bytes": 484055088,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_48d1f3daac51",
+    "gap": 2.51,
+    "bytes": 29256128,
+    "ops": 21,
+    "category": "combo_kernel",
+    "note": "13 compute ops, each gets own kernel"
+  },
+  {
+    "name": "pointwise_aa19a2421e93",
+    "gap": 2.48,
+    "bytes": 3144176772,
+    "ops": 620,
+    "category": "combo_kernel",
+    "note": "copy_ ops, many small kernels (620 ops)"
+  },
+  {
+    "name": "amax_sum_1bd8efc1d999",
+    "gap": 2.47,
+    "bytes": 276824576,
+    "ops": 23,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 2 reductions in 11 ops"
+  },
+  {
+    "name": "sum_sum_sum_628c60474fa2",
+    "gap": 2.47,
+    "bytes": 2738774020,
+    "ops": 549,
+    "category": "combo_kernel",
+    "note": "376 ops including 1 scatter/index_put"
+  },
+  {
+    "name": "pointwise_6345105648e1",
+    "gap": 2.47,
+    "bytes": 995533136,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_eceb9dacdab4",
+    "gap": 2.45,
+    "bytes": 554173444,
+    "ops": 47,
+    "category": "combo_kernel",
+    "note": "23 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_42f3493209fa",
+    "gap": 2.45,
+    "bytes": 100712448,
+    "ops": 17,
+    "category": "combo_kernel",
+    "note": "5 independent reductions in 13 compute ops"
+  },
+  {
+    "name": "sum_sum_sum_030624bd788e",
+    "gap": 2.44,
+    "bytes": 163655680,
+    "ops": 20,
+    "category": "combo_kernel",
+    "note": "5 independent reductions in 15 compute ops"
+  },
+  {
+    "name": "var_mean_f67bac0170d8",
+    "gap": 2.43,
+    "bytes": 157813760,
+    "ops": 21,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (14 ops)"
+  },
+  {
+    "name": "var_mean_var_mean_50db0aab6f24",
+    "gap": 2.43,
+    "bytes": 35346432,
+    "ops": 4,
+    "category": "reduction_heuristic",
+    "note": "2 reductions, bad tiling/split"
+  },
+  {
+    "name": "sum_sum_sum_7d1fe7ff3b8f",
+    "gap": 2.41,
+    "bytes": 6326272,
+    "ops": 42,
+    "category": "combo_kernel",
+    "note": "37 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_4911eb998875",
+    "gap": 2.4,
+    "bytes": 201596932,
+    "ops": 24,
+    "category": "combo_kernel",
+    "note": "19 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_sum_8b884f5aa8d1",
+    "gap": 2.39,
+    "bytes": 823443460,
+    "ops": 24,
+    "category": "combo_kernel",
+    "note": "4 independent reductions in 14 compute ops"
+  },
+  {
+    "name": "sum_sum_sum_57c5e3ecd58f",
+    "gap": 2.38,
+    "bytes": 539494658,
+    "ops": 52,
+    "category": "combo_kernel",
+    "note": "29 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_bffd1578a089",
+    "gap": 2.37,
+    "bytes": 264318976,
+    "ops": 21,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "var_mean_var_mean_4d7aec4343d1",
+    "gap": 2.37,
+    "bytes": 6324224,
+    "ops": 14,
+    "category": "reduction_heuristic",
+    "note": "2 reductions among 8 compute ops"
+  },
+  {
+    "name": "amax_sum_sum_1e2fa4dc55ba",
+    "gap": 2.36,
+    "bytes": 1647149060,
+    "ops": 22,
+    "category": "longformer_special",
+    "note": "sliding window attention pattern"
+  },
+  {
+    "name": "amax_sum_sum_971f0d797d9d",
+    "gap": 2.34,
+    "bytes": 525139972,
+    "ops": 47,
+    "category": "combo_kernel",
+    "note": "39 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_da2cf9a25d48",
+    "gap": 2.33,
+    "bytes": 452985416,
+    "ops": 20,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 2 reductions in 11 ops"
+  },
+  {
+    "name": "amax_sum_any_e788afc14f3d",
+    "gap": 2.31,
+    "bytes": 226492712,
+    "ops": 36,
+    "category": "combo_kernel",
+    "note": "19 compute ops, many independent kernels"
+  },
+  {
+    "name": "var_mean_f0635c70e184",
+    "gap": 2.27,
+    "bytes": 67174400,
+    "ops": 9,
+    "category": "reduction_heuristic",
+    "note": "1 reductions among 7 compute ops"
+  },
+  {
+    "name": "pointwise_1b6e8b05ef3b",
+    "gap": 2.26,
+    "bytes": 39846400,
+    "ops": 12,
+    "category": "loop_order",
+    "note": "6 pointwise ops, suboptimal memory access"
+  },
+  {
+    "name": "amax_sum_any_b9b543f9e1e3",
+    "gap": 2.26,
+    "bytes": 335544616,
+    "ops": 25,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_d9dfc798c5f5",
+    "gap": 2.25,
+    "bytes": 37748736,
+    "ops": 8,
+    "category": "loop_order",
+    "note": "dropout pattern (5 compute ops), single kernel"
+  },
+  {
+    "name": "amax_sum_sum_471404b70a9a",
+    "gap": 2.24,
+    "bytes": 1647247364,
+    "ops": 25,
+    "category": "longformer_special",
+    "note": "sliding window attention pattern"
+  },
+  {
+    "name": "pointwise_03d33b650fb5",
+    "gap": 2.24,
+    "bytes": 49807872,
+    "ops": 19,
+    "category": "loop_order",
+    "note": "6 pointwise ops, suboptimal memory access"
+  },
+  {
+    "name": "amax_sum_7f6d501ade3d",
+    "gap": 2.23,
+    "bytes": 49366912,
+    "ops": 22,
+    "category": "reduction_heuristic",
+    "note": "2 reductions in 9 op kernel"
+  },
+  {
+    "name": "var_mean_ca2ce4eebd07",
+    "gap": 2.23,
+    "bytes": 2577920,
+    "ops": 7,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (3 ops)"
+  },
+  {
+    "name": "pointwise_f3cd1cb10701",
+    "gap": 2.23,
+    "bytes": 9437200,
+    "ops": 8,
+    "category": "loop_order",
+    "note": "6 pointwise ops, suboptimal memory access"
+  },
+  {
+    "name": "sum_sum_sum_51bd19b08294",
+    "gap": 2.21,
+    "bytes": 1329794284,
+    "ops": 189,
+    "category": "combo_kernel",
+    "note": "107 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "sum_sum_sum_8f9f5403ed7a",
+    "gap": 2.2,
+    "bytes": 1660725484,
+    "ops": 333,
+    "category": "combo_kernel",
+    "note": "176 ops including 3 scatter/index_put"
+  },
+  {
+    "name": "amax_sum_996ed26857a5",
+    "gap": 2.2,
+    "bytes": 226492712,
+    "ops": 21,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 2 reductions in 12 ops"
+  },
+  {
+    "name": "pointwise_2c048e3bbc7a",
+    "gap": 2.19,
+    "bytes": 1966080,
+    "ops": 2,
+    "category": "loop_order",
+    "note": "native_dropout, single kernel suboptimal tiling"
+  },
+  {
+    "name": "pointwise_c707798eb4e4",
+    "gap": 2.18,
+    "bytes": 56822784,
+    "ops": 40,
+    "category": "combo_kernel",
+    "note": "18 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_22d34c01b407",
+    "gap": 2.18,
+    "bytes": 142651392,
+    "ops": 21,
+    "category": "combo_kernel",
+    "note": "4 independent reductions in 15 compute ops"
+  },
+  {
+    "name": "amax_sum_sum_4cc1548fbf82",
+    "gap": 2.17,
+    "bytes": 3293773828,
+    "ops": 27,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_8e54951e5edc",
+    "gap": 2.16,
+    "bytes": 163580928,
+    "ops": 39,
+    "category": "combo_kernel",
+    "note": "23 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_0c20b48a17c4",
+    "gap": 2.16,
+    "bytes": 255233024,
+    "ops": 40,
+    "category": "scatter_inherent",
+    "note": "3 scatter/index_put ops among 29 total"
+  },
+  {
+    "name": "sum_sum_sum_bda35395b9d4",
+    "gap": 2.15,
+    "bytes": 56668160,
+    "ops": 19,
+    "category": "combo_kernel",
+    "note": "5 independent reductions in 15 compute ops"
+  },
+  {
+    "name": "pointwise_ae7f284d9f9d",
+    "gap": 2.14,
+    "bytes": 38281472,
+    "ops": 84,
+    "category": "combo_kernel",
+    "note": "31 ops with cat barriers"
+  },
+  {
+    "name": "pointwise_cf54f177af3d",
+    "gap": 2.13,
+    "bytes": 104857728,
+    "ops": 40,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (20 ops)"
+  },
+  {
+    "name": "pointwise_18ef0ce47f4d",
+    "gap": 2.13,
+    "bytes": 6310912,
+    "ops": 8,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 5 total"
+  },
+  {
+    "name": "sum_sum_sum_3c33416b5686",
+    "gap": 2.12,
+    "bytes": 67110912,
+    "ops": 12,
+    "category": "reduction_heuristic",
+    "note": "3 reductions, bad tiling/split"
+  },
+  {
+    "name": "pointwise_03175854b672",
+    "gap": 2.1,
+    "bytes": 1210220904,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_63ae99ae244c",
+    "gap": 2.1,
+    "bytes": 1439159810,
+    "ops": 53,
+    "category": "combo_kernel",
+    "note": "29 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_45ace8213b20",
+    "gap": 2.09,
+    "bytes": 1487172608,
+    "ops": 144,
+    "category": "combo_kernel",
+    "note": "90 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "pointwise_9d2c61e0cb6c",
+    "gap": 2.08,
+    "bytes": 338536800,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "pointwise_5c59d10d394b",
+    "gap": 2.07,
+    "bytes": 114349536,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_6b730b98ce8a",
+    "gap": 2.04,
+    "bytes": 5010414828,
+    "ops": 623,
+    "category": "combo_kernel",
+    "note": "322 ops including 3 scatter/index_put"
+  },
+  {
+    "name": "sum_7a471c769903",
+    "gap": 2.03,
+    "bytes": 2482507776,
+    "ops": 20,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 10 total"
+  },
+  {
+    "name": "pointwise_aad37b9594ee",
+    "gap": 2.01,
+    "bytes": 45740544,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "pointwise_ea6e9f9dac2a",
+    "gap": 2.01,
+    "bytes": 225686816,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_d4fe6008bcea",
+    "gap": 2.0,
+    "bytes": 62517256,
+    "ops": 27,
+    "category": "combo_kernel",
+    "note": "15 compute ops, each gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_a927b12b8a31",
+    "gap": 2.0,
+    "bytes": 1009124356,
+    "ops": 35,
+    "category": "scatter_inherent",
+    "note": "2 scatter/index_put ops among 27 total"
+  },
+  {
+    "name": "var_mean_72a0d5378ea3",
+    "gap": 1.99,
+    "bytes": 1998848,
+    "ops": 9,
+    "category": "reduction_heuristic",
+    "note": "1 reductions, bad tiling/split"
+  },
+  {
+    "name": "sum_sum_57f87d58a5df",
+    "gap": 1.96,
+    "bytes": 8001805552,
+    "ops": 31,
+    "category": "combo_kernel",
+    "note": "17 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_86a7bf7127b6",
+    "gap": 1.96,
+    "bytes": 50468864,
+    "ops": 16,
+    "category": "longformer_special",
+    "note": "sliding window attention pattern"
+  },
+  {
+    "name": "sum_sum_sum_98f794d3747c",
+    "gap": 1.93,
+    "bytes": 201404416,
+    "ops": 21,
+    "category": "combo_kernel",
+    "note": "18 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_b786be827613",
+    "gap": 1.93,
+    "bytes": 163598336,
+    "ops": 57,
+    "category": "combo_kernel",
+    "note": "35 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_sum_9de015237f48",
+    "gap": 1.92,
+    "bytes": 4001103876,
+    "ops": 28,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_sum_eb4fe3ac03e0",
+    "gap": 1.92,
+    "bytes": 491552772,
+    "ops": 24,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_ee71239236e8",
+    "gap": 1.91,
+    "bytes": 16003227376,
+    "ops": 32,
+    "category": "combo_kernel",
+    "note": "17 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_ba065f95dbd8",
+    "gap": 1.9,
+    "bytes": 201375744,
+    "ops": 22,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "amax_sum_sum_8134ec8b7263",
+    "gap": 1.9,
+    "bytes": 952172548,
+    "ops": 27,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_31c57d11fb3d",
+    "gap": 1.89,
+    "bytes": 242618372,
+    "ops": 34,
+    "category": "scatter_inherent",
+    "note": "2 scatter/index_put ops among 29 total"
+  },
+  {
+    "name": "pointwise_2b8032162651",
+    "gap": 1.89,
+    "bytes": 4479890172,
+    "ops": 596,
+    "category": "combo_kernel",
+    "note": "copy_ ops, many small kernels (596 ops)"
+  },
+  {
+    "name": "amax_sum_sum_ad9e8381f100",
+    "gap": 1.89,
+    "bytes": 65649956,
+    "ops": 25,
+    "category": "combo_kernel",
+    "note": "17 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_2ba3a6b6c03d",
+    "gap": 1.88,
+    "bytes": 75497472,
+    "ops": 120,
+    "category": "intermediate_materialization",
+    "note": "only reshape/clone/permute, unnecessary buffer writes"
+  },
+  {
+    "name": "pointwise_97e5561d8ec6",
+    "gap": 1.87,
+    "bytes": 1210222108,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "pointwise_62d0705e9367",
+    "gap": 1.87,
+    "bytes": 225686144,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "amax_sum_4f8e3904a50d",
+    "gap": 1.86,
+    "bytes": 37750360,
+    "ops": 25,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 2 reductions in 14 ops"
+  },
+  {
+    "name": "sum_sum_sum_da77ecbc7688",
+    "gap": 1.84,
+    "bytes": 7379976,
+    "ops": 12,
+    "category": "reduction_heuristic",
+    "note": "3 reductions, bad tiling/split"
+  },
+  {
+    "name": "sum_sum_9c98fa8754c9",
+    "gap": 1.84,
+    "bytes": 33948160,
+    "ops": 37,
+    "category": "combo_kernel",
+    "note": "22 compute ops, many independent kernels"
+  },
+  {
+    "name": "var_mean_var_mean_712283a5b777",
+    "gap": 1.83,
+    "bytes": 41959424,
+    "ops": 6,
+    "category": "reduction_heuristic",
+    "note": "2 reductions, bad tiling/split"
+  },
+  {
+    "name": "sum_sum_sum_f5708f51e0e7",
+    "gap": 1.83,
+    "bytes": 213987328,
+    "ops": 21,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_f411c2fe78f9",
+    "gap": 1.82,
+    "bytes": 12002385136,
+    "ops": 25,
+    "category": "combo_kernel",
+    "note": "14 compute ops, each gets own kernel"
+  },
+  {
+    "name": "sum_sum_5ebd82bcf7a3",
+    "gap": 1.81,
+    "bytes": 12595200,
+    "ops": 24,
+    "category": "combo_kernel",
+    "note": "15 compute ops, each gets own kernel"
+  },
+  {
+    "name": "pointwise_77951e9b7e5b",
+    "gap": 1.81,
+    "bytes": 17842304,
+    "ops": 79,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (27 ops)"
+  },
+  {
+    "name": "sum_sum_sum_9a57d603a769",
+    "gap": 1.8,
+    "bytes": 42140928,
+    "ops": 102,
+    "category": "combo_kernel",
+    "note": "50 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_bf4de310f71f",
+    "gap": 1.8,
+    "bytes": 402796544,
+    "ops": 18,
+    "category": "combo_kernel",
+    "note": "5 independent reductions in 14 compute ops"
+  },
+  {
+    "name": "pointwise_b5207b2b8417",
+    "gap": 1.8,
+    "bytes": 1746765080,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_155d60c01fa7",
+    "gap": 1.8,
+    "bytes": 3293806856,
+    "ops": 31,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_41360130eef6",
+    "gap": 1.79,
+    "bytes": 251732992,
+    "ops": 16,
+    "category": "combo_kernel",
+    "note": "4 independent reductions in 14 compute ops"
+  },
+  {
+    "name": "pointwise_8ee3fc0ad5a6",
+    "gap": 1.77,
+    "bytes": 17825920,
+    "ops": 62,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (21 ops)"
+  },
+  {
+    "name": "pointwise_d8763ad0ce9b",
+    "gap": 1.77,
+    "bytes": 564213344,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "pointwise_4ef882a876a7",
+    "gap": 1.77,
+    "bytes": 100663296,
+    "ops": 66,
+    "category": "intermediate_materialization",
+    "note": "only reshape/clone/permute, unnecessary buffer writes"
+  },
+  {
+    "name": "pointwise_4b23f512dcb6",
+    "gap": 1.76,
+    "bytes": 28311552,
+    "ops": 22,
+    "category": "loop_order",
+    "note": "0 compute ops, suboptimal iteration order"
+  },
+  {
+    "name": "var_mean_a41dace406c0",
+    "gap": 1.76,
+    "bytes": 100794472,
+    "ops": 8,
+    "category": "reduction_heuristic",
+    "note": "1 reductions among 7 compute ops"
+  },
+  {
+    "name": "pointwise_c733c587ac28",
+    "gap": 1.76,
+    "bytes": 100866048,
+    "ops": 9,
+    "category": "loop_order",
+    "note": "layer norm fused kernel (7 ops), suboptimal tiling"
+  },
+  {
+    "name": "pointwise_de34bca379fa",
+    "gap": 1.76,
+    "bytes": 1802560416,
+    "ops": 1,
+    "category": "loop_order",
+    "note": "1 compute ops, suboptimal iteration order"
+  },
+  {
+    "name": "pointwise_7b4ab1f25235",
+    "gap": 1.76,
+    "bytes": 100931584,
+    "ops": 30,
+    "category": "longformer_special",
+    "note": "sliding window attention pattern"
+  },
+  {
+    "name": "sum_sum_4e98a67edb86",
+    "gap": 1.75,
+    "bytes": 100671488,
+    "ops": 18,
+    "category": "reduction_heuristic",
+    "note": "2 reductions, bad tiling/split"
+  },
+  {
+    "name": "sum_sum_8e563be61831",
+    "gap": 1.75,
+    "bytes": 20906112,
+    "ops": 70,
+    "category": "combo_kernel",
+    "note": "24 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_b67c2aa08ad4",
+    "gap": 1.74,
+    "bytes": 404815876,
+    "ops": 24,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 10 total"
+  },
+  {
+    "name": "var_mean_709a36953a9b",
+    "gap": 1.74,
+    "bytes": 3035520,
+    "ops": 7,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (3 ops)"
+  },
+  {
+    "name": "pointwise_5e0cdfa267ca",
+    "gap": 1.73,
+    "bytes": 564212672,
+    "ops": 170,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_68c0b2a52dba",
+    "gap": 1.73,
+    "bytes": 415313920,
+    "ops": 29,
+    "category": "combo_kernel",
+    "note": "20 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_336749472a48",
+    "gap": 1.72,
+    "bytes": 901281856,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_2491eaca4cc8",
+    "gap": 1.72,
+    "bytes": 3759511044,
+    "ops": 659,
+    "category": "combo_kernel",
+    "note": "292 ops including 1 scatter/index_put"
+  },
+  {
+    "name": "amax_sum_sum_921891f5f368",
+    "gap": 1.71,
+    "bytes": 32840996,
+    "ops": 23,
+    "category": "combo_kernel",
+    "note": "4 independent reductions in 15 compute ops"
+  },
+  {
+    "name": "pointwise_cf96937968b4",
+    "gap": 1.71,
+    "bytes": 484054040,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "pointwise_03c6ef78c960",
+    "gap": 1.71,
+    "bytes": 100663296,
+    "ops": 7,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (1 ops)"
+  },
+  {
+    "name": "amax_sum_c0c1b95fe65e",
+    "gap": 1.7,
+    "bytes": 537919488,
+    "ops": 10,
+    "category": "reduction_heuristic",
+    "note": "2 reductions among 6 compute ops"
+  },
+  {
+    "name": "sum_sum_sum_3c4186227a06",
+    "gap": 1.7,
+    "bytes": 1712592900,
+    "ops": 37,
+    "category": "scatter_inherent",
+    "note": "2 scatter/index_put ops among 30 total"
+  },
+  {
+    "name": "pointwise_8414097a5e76",
+    "gap": 1.69,
+    "bytes": 995531944,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "amax_sum_mean_afdd1f51ebcc",
+    "gap": 1.69,
+    "bytes": 19925664,
+    "ops": 34,
+    "category": "combo_kernel",
+    "note": "22 compute ops, many independent kernels"
+  },
+  {
+    "name": "any_amax_sum_73ef6edcdd43",
+    "gap": 1.69,
+    "bytes": 25166592,
+    "ops": 57,
+    "category": "combo_kernel",
+    "note": "30 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_3e6393c7164c",
+    "gap": 1.69,
+    "bytes": 3549184,
+    "ops": 7,
+    "category": "loop_order",
+    "note": "layer norm fused kernel (7 ops), suboptimal tiling"
+  },
+  {
+    "name": "sum_sum_sum_e0def9b310b0",
+    "gap": 1.68,
+    "bytes": 430129152,
+    "ops": 63,
+    "category": "combo_kernel",
+    "note": "35 compute ops, many independent kernels"
+  },
+  {
+    "name": "mean_amax_sum_94862dd871f9",
+    "gap": 1.68,
+    "bytes": 137434624,
+    "ops": 30,
+    "category": "combo_kernel",
+    "note": "3 independent reductions in 13 compute ops"
+  },
+  {
+    "name": "pointwise_3ea1b27af5ae",
+    "gap": 1.67,
+    "bytes": 4490240,
+    "ops": 14,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 0 reductions in 11 ops"
+  },
+  {
+    "name": "sum_sum_183024b77d7e",
+    "gap": 1.66,
+    "bytes": 58757120,
+    "ops": 27,
+    "category": "combo_kernel",
+    "note": "20 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_11045cae77f9",
+    "gap": 1.65,
+    "bytes": 3025548648,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_a89df8d0cd58",
+    "gap": 1.65,
+    "bytes": 100667904,
+    "ops": 27,
+    "category": "combo_kernel",
+    "note": "6 independent reductions in 14 compute ops"
+  },
+  {
+    "name": "pointwise_a69e6368596a",
+    "gap": 1.64,
+    "bytes": 14137440,
+    "ops": 16,
+    "category": "loop_order",
+    "note": "layer norm fused kernel (6 ops), suboptimal tiling"
+  },
+  {
+    "name": "var_mean_8da395803e57",
+    "gap": 1.64,
+    "bytes": 16797696,
+    "ops": 5,
+    "category": "reduction_heuristic",
+    "note": "1 reductions, bad tiling/split"
+  },
+  {
+    "name": "pointwise_beaecb9b4f18",
+    "gap": 1.63,
+    "bytes": 32113664,
+    "ops": 18,
+    "category": "reduction_heuristic",
+    "note": "1 reductions in 10 op kernel"
+  },
+  {
+    "name": "mean_mean_44005a17e78f",
+    "gap": 1.63,
+    "bytes": 15733408,
+    "ops": 35,
+    "category": "combo_kernel",
+    "note": "29 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_8d0610e6a6f9",
+    "gap": 1.63,
+    "bytes": 698707396,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_095b207c507f",
+    "gap": 1.63,
+    "bytes": 4128136428,
+    "ops": 335,
+    "category": "combo_kernel",
+    "note": "178 ops including 3 scatter/index_put"
+  },
+  {
+    "name": "pointwise_449dab34cbc6",
+    "gap": 1.62,
+    "bytes": 9456640,
+    "ops": 14,
+    "category": "loop_order",
+    "note": "layer norm fused kernel (6 ops), suboptimal tiling"
+  },
+  {
+    "name": "pointwise_7350c064b026",
+    "gap": 1.62,
+    "bytes": 34641920,
+    "ops": 15,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 0 reductions in 11 ops"
+  },
+  {
+    "name": "pointwise_c21ecfc36315",
+    "gap": 1.62,
+    "bytes": 45741152,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_72282b413812",
+    "gap": 1.61,
+    "bytes": 272781312,
+    "ops": 42,
+    "category": "combo_kernel",
+    "note": "27 compute ops, many independent kernels"
+  },
+  {
+    "name": "any_amax_sum_24631cb87507",
+    "gap": 1.61,
+    "bytes": 25166592,
+    "ops": 41,
+    "category": "combo_kernel",
+    "note": "26 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_557e0462a8aa",
+    "gap": 1.6,
+    "bytes": 260083712,
+    "ops": 49,
+    "category": "combo_kernel",
+    "note": "31 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_aae73434451d",
+    "gap": 1.6,
+    "bytes": 2937612292,
+    "ops": 186,
+    "category": "combo_kernel",
+    "note": "125 ops including 3 scatter/index_put"
+  },
+  {
+    "name": "sum_sum_sum_cdeeeaa9b34f",
+    "gap": 1.59,
+    "bytes": 2483109888,
+    "ops": 106,
+    "category": "combo_kernel",
+    "note": "91 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_1f49961132c7",
+    "gap": 1.59,
+    "bytes": 2617327616,
+    "ops": 110,
+    "category": "combo_kernel",
+    "note": "93 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_27e13128f815",
+    "gap": 1.59,
+    "bytes": 52449280,
+    "ops": 28,
+    "category": "combo_kernel",
+    "note": "20 compute ops, many independent kernels"
+  },
+  {
+    "name": "var_mean_91ebe95fc9a1",
+    "gap": 1.58,
+    "bytes": 50400544,
+    "ops": 9,
+    "category": "longformer_special",
+    "note": "sliding window attention pattern"
+  },
+  {
+    "name": "pointwise_e75a1a0b9675",
+    "gap": 1.58,
+    "bytes": 91478656,
+    "ops": 1,
+    "category": "loop_order",
+    "note": "1 compute ops, suboptimal iteration order"
+  },
+  {
+    "name": "amax_sum_80c9d3be398c",
+    "gap": 1.57,
+    "bytes": 71369216,
+    "ops": 17,
+    "category": "reduction_heuristic",
+    "note": "2 reductions among 7 compute ops"
+  },
+  {
+    "name": "var_mean_670d2df8b892",
+    "gap": 1.57,
+    "bytes": 18907336,
+    "ops": 9,
+    "category": "reduction_heuristic",
+    "note": "1 reductions among 7 compute ops"
+  },
+  {
+    "name": "pointwise_89ca58cf6ccb",
+    "gap": 1.57,
+    "bytes": 1815335632,
+    "ops": 3,
+    "category": "combo_kernel",
+    "note": "foreach ops (3), each tensor gets own kernel"
+  },
+  {
+    "name": "pointwise_0cc5a889d527",
+    "gap": 1.57,
+    "bytes": 8832000,
+    "ops": 13,
+    "category": "reduction_heuristic",
+    "note": "1 reductions among 8 compute ops"
+  },
+  {
+    "name": "mean_225751eaf77e",
+    "gap": 1.56,
+    "bytes": 19925504,
+    "ops": 20,
+    "category": "reduction_heuristic",
+    "note": "dropout+softmax pattern, 1 reductions in 12 ops"
+  },
+  {
+    "name": "sum_sum_ddef22ba6a08",
+    "gap": 1.56,
+    "bytes": 44060672,
+    "ops": 26,
+    "category": "combo_kernel",
+    "note": "19 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_1d7af42a76c8",
+    "gap": 1.55,
+    "bytes": 4773076996,
+    "ops": 251,
+    "category": "combo_kernel",
+    "note": "149 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "sum_d8a8edde46e9",
+    "gap": 1.55,
+    "bytes": 1646886984,
+    "ops": 26,
+    "category": "combo_kernel",
+    "note": "15 compute ops, each gets own kernel"
+  },
+  {
+    "name": "sum_sum_sum_03ef63c6de01",
+    "gap": 1.55,
+    "bytes": 597394436,
+    "ops": 33,
+    "category": "scatter_inherent",
+    "note": "2 scatter/index_put ops among 26 total"
+  },
+  {
+    "name": "sum_sum_f5db9f0037cb",
+    "gap": 1.55,
+    "bytes": 35672064,
+    "ops": 24,
+    "category": "combo_kernel",
+    "note": "18 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_693bb9306334",
+    "gap": 1.54,
+    "bytes": 20983808,
+    "ops": 27,
+    "category": "combo_kernel",
+    "note": "17 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_61a0e02731bd",
+    "gap": 1.54,
+    "bytes": 1867022376,
+    "ops": 31,
+    "category": "combo_kernel",
+    "note": "16 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_2f778a10b403",
+    "gap": 1.54,
+    "bytes": 29380608,
+    "ops": 26,
+    "category": "combo_kernel",
+    "note": "19 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_812bda4cdb34",
+    "gap": 1.54,
+    "bytes": 25231360,
+    "ops": 44,
+    "category": "combo_kernel",
+    "note": "18 compute ops, many independent kernels"
+  },
+  {
+    "name": "mean_amax_sum_d06844b6733a",
+    "gap": 1.54,
+    "bytes": 24253864,
+    "ops": 59,
+    "category": "combo_kernel",
+    "note": "38 compute ops, many independent kernels"
+  },
+  {
+    "name": "any_mean_mean_aeeb8daeeac5",
+    "gap": 1.53,
+    "bytes": 22809600,
+    "ops": 33,
+    "category": "combo_kernel",
+    "note": "20 compute ops, many independent kernels"
+  },
+  {
+    "name": "pointwise_401e01c76176",
+    "gap": 1.53,
+    "bytes": 38666240,
+    "ops": 36,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (11 ops)"
+  },
+  {
+    "name": "pointwise_6357d5751809",
+    "gap": 1.53,
+    "bytes": 3025547444,
+    "ops": 303,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "pointwise_63bb48fde67e",
+    "gap": 1.52,
+    "bytes": 239505408,
+    "ops": 7,
+    "category": "scatter_inherent",
+    "note": "1 scatter/index_put ops among 4 total"
+  },
+  {
+    "name": "sum_sum_sum_8935c2eedb95",
+    "gap": 1.52,
+    "bytes": 5314372612,
+    "ops": 466,
+    "category": "combo_kernel",
+    "note": "243 ops including 2 scatter/index_put"
+  },
+  {
+    "name": "pointwise_df2a28d985ff",
+    "gap": 1.51,
+    "bytes": 901282680,
+    "ops": 2,
+    "category": "combo_kernel",
+    "note": "foreach ops (2), each tensor gets own kernel"
+  },
+  {
+    "name": "pointwise_0ba24f2f512d",
+    "gap": 1.51,
+    "bytes": 15859712,
+    "ops": 31,
+    "category": "cat_barrier",
+    "note": "cat preventing kernel fusion (10 ops)"
+  },
+  {
+    "name": "sum_sum_sum_80f9cd2f5f8c",
+    "gap": 1.51,
+    "bytes": 50333696,
+    "ops": 11,
+    "category": "reduction_heuristic",
+    "note": "3 reductions, bad tiling/split"
+  },
+  {
+    "name": "sum_sum_9de1441e8dec",
+    "gap": 1.5,
+    "bytes": 25178112,
+    "ops": 29,
+    "category": "combo_kernel",
+    "note": "18 compute ops, many independent kernels"
+  },
+  {
+    "name": "sum_sum_sum_37e256b8b271",
+    "gap": 1.5,
+    "bytes": 352396288,
+    "ops": 15,
+    "category": "combo_kernel",
+    "note": "4 independent reductions in 14 compute ops"
+  }
+]

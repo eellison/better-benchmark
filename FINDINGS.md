@@ -202,18 +202,16 @@
 
 ## Full Issue Distribution (from 663 repros, ~110 triaged in detail)
 
-| Category | Est. Count | Gap Range | Fix Effort | Priority |
-|----------|-----------|-----------|------------|----------|
-| At SOL (<1.1x) | 299 (45%) | — | None needed | — |
-| combo_kernel/foreach | ~100 (15%) | 1.5-53x | Medium | P0 |
-| Reduction heuristics (tiling, split, MixOrder) | ~80 (12%) | 1.3-9x | Low-Medium | P0 |
-| Loop order / tiling | ~50 (8%) | 1.1-1.8x | Medium-Hard | P1 |
-| ConcatKernel / cat barrier | ~40 (6%) | 2-6x | High | P1 |
-| Scatter (inherent) | ~30 (5%) | 2-11x | N/A | Won't fix |
-| Benchmark artifact (randint bounds) | ~40 (6%) | overstated | Fix measurement | — |
-| Rotary embed cat (rotate_half) | ~15 (2%) | 2.9-3.4x | Medium | P1 |
-| Duplicate scatter buffers | ~5 (1%) | 3-4x | Medium | P2 |
-| Persistent reduction warps | ~20 (3%) | 3-7x | Low | P0 |
+| Category | Count (of 254 with gap>1.5x) | % | Fix Effort | Priority |
+|----------|------------------------------|---|------------|----------|
+| At SOL (<1.1x) | 509 of 993 total | 51% | None needed | — |
+| **combo_kernel/foreach** | **153** | **60%** | Config flip + threshold | **P0** |
+| Reduction heuristics | 33 | 13% | Threshold changes | P0 |
+| Scatter (inherent) | 25 | 10% | N/A | Won't fix |
+| ConcatKernel / cat barrier | 17 | 7% | Codegen change | P1 |
+| Loop order / tiling | 13 | 5% | ND grid codegen | P1 |
+| Longformer special | 11 | 4% | Algorithmic (upstream) | Won't fix |
+| Intermediate materialization | 2 | 1% | Graph pass | P2 |
 
 ## Top Priority Fixes (ordered by impact × breadth) — ALL VERIFIED WITH BENCHMARKS
 
