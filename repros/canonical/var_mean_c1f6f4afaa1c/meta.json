@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "c1f6f4afaa1c",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 4,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_torchbench_s2_g20"
+  ]
+}

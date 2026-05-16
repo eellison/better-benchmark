@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "ab1e67c6cb77",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.embedding.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_Reformer",
+    "dynamo_Reformer_inference"
+  ]
+}

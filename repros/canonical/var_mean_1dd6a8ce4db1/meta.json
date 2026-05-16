@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "1dd6a8ce4db1",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_timm_s3_g20"
+  ]
+}

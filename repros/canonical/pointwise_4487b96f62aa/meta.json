@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "4487b96f62aa",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.mul.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "dynamo_MT5ForConditionalGeneration",
+    "dynamo_MT5ForConditionalGeneration_inference",
+    "dynamo_T5ForConditionalGeneration",
+    "dynamo_T5Small"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "1b8e92f2de8a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "vllm_openai_gpt-oss-20b",
+    "vllm_openai_gpt-oss-20b_inference"
+  ]
+}

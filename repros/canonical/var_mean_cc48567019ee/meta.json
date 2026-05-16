@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "cc48567019ee",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.slice.Tensor",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_DistilBertForMaskedLM",
+    "dynamo_DistilBertForMaskedLM_inference"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "1c629e1a11a7",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.constant_pad_nd.default",
+    "aten.constant_pad_nd.default",
+    "aten.constant_pad_nd.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_timm_s6_g10"
+  ]
+}

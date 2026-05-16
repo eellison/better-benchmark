@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "39278da4f184",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.select.int",
+    "aten.select.int"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_AllenaiLongformerBase",
+    "dynamo_AllenaiLongformerBase_inference"
+  ]
+}

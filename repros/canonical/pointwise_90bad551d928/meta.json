@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "90bad551d928",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.full.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_DebertaV2ForMaskedLM",
+    "dynamo_DebertaV2ForMaskedLM_inference"
+  ]
+}

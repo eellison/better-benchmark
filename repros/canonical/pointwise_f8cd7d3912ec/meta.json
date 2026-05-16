@@ -1,0 +1,37 @@
+{
+  "pattern_hash": "f8cd7d3912ec",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.constant_pad_nd.default",
+    "aten.expand.default",
+    "aten.index.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims.iota.default",
+    "prims.iota.default",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "dynamo_YituTechConvBert"
+  ]
+}

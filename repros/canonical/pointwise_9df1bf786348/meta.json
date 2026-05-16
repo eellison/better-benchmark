@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "9df1bf786348",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 14,
+  "models": [
+    "dynamo_ElectraForCausalLM",
+    "dynamo_ElectraForCausalLM_inference",
+    "dynamo_LayoutLMForMaskedLM",
+    "dynamo_LayoutLMForMaskedLM_inference",
+    "dynamo_MT5ForConditionalGeneration",
+    "dynamo_MT5ForConditionalGeneration_inference",
+    "dynamo_MegatronBertForCausalLM",
+    "dynamo_MegatronBertForCausalLM_inference",
+    "dynamo_MobileBertForMaskedLM",
+    "dynamo_MobileBertForMaskedLM_inference",
+    "dynamo_T5ForConditionalGeneration",
+    "dynamo_T5Small",
+    "dynamo_TrOCRForCausalLM",
+    "vllm_deepseek-ai_DeepSeek-V3_inference"
+  ]
+}

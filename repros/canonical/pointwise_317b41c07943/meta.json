@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "317b41c07943",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.add.Tensor"
+  ],
+  "n_models": 5,
+  "models": [
+    "dynamo_Reformer",
+    "dynamo_Reformer_inference",
+    "vllm_Qwen_Qwen3-30B-A3B_inference",
+    "vllm_deepseek-ai_DeepSeek-V3_inference",
+    "vllm_openai_gpt-oss-20b"
+  ]
+}

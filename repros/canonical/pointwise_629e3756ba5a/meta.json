@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "629e3756ba5a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_Reformer",
+    "dynamo_Reformer_inference"
+  ]
+}

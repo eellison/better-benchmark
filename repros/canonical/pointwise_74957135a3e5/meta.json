@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "74957135a3e5",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "vllm_Qwen_Qwen3-0.6B",
+    "vllm_Qwen_Qwen3-0.6B_inference",
+    "vllm_Qwen_Qwen3-30B-A3B_inference",
+    "vllm_mistralai_Mistral-7B-Instruct-v0.3_inference"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "83f179fd0c25",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.gather.default",
+    "aten.mul.Tensor",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "vllm_deepseek-ai_DeepSeek-V3_inference"
+  ]
+}

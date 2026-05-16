@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "94d9ad74b3d3",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 4,
+  "models": [
+    "dynamo_DistilBertForMaskedLM",
+    "dynamo_M2M100ForConditionalGeneration",
+    "dynamo_PegasusForCausalLM",
+    "hf_bert"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "6f49fe215404",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 6,
+  "models": [
+    "dynamo_AllenaiLongformerBase",
+    "dynamo_AllenaiLongformerBase_inference",
+    "dynamo_OPTForCausalLM",
+    "dynamo_OPTForCausalLM_inference",
+    "dynamo_Reformer",
+    "dynamo_Reformer_inference"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "0a44c4081351",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.gather.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 4,
+  "models": [
+    "dynamo_AlbertForMaskedLM",
+    "dynamo_AlbertForMaskedLM_inference",
+    "dynamo_BertForMaskedLM",
+    "dynamo_BertForMaskedLM_inference"
+  ]
+}

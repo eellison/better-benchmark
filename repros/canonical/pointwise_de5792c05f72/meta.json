@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "de5792c05f72",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.ne.Scalar",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 5,
+  "models": [
+    "dynamo_AllenaiLongformerBase",
+    "dynamo_AllenaiLongformerBase_inference",
+    "dynamo_M2M100ForConditionalGeneration",
+    "dynamo_M2M100ForConditionalGeneration_inference",
+    "dynamo_RobertaForCausalLM_inference"
+  ]
+}

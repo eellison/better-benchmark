@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "49aa72a89409",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.reshape.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "dynamo_Reformer",
+    "dynamo_Reformer_inference",
+    "vllm_deepseek-ai_DeepSeek-V3_inference"
+  ]
+}

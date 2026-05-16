@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "2f37f670c87d",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.mul.Tensor",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "vllm_facebook_opt-125m_inference"
+  ]
+}

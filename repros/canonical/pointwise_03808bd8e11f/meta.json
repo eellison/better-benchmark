@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "03808bd8e11f",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.constant_pad_nd.default",
+    "aten.permute.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_MobileBertForMaskedLM",
+    "dynamo_MobileBertForMaskedLM_inference"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "cbc07db93de1",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 5,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.relu.default",
+    "aten.reshape.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_MobileBertForMaskedLM",
+    "dynamo_MobileBertForMaskedLM_inference"
+  ]
+}

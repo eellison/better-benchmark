@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "dd054684d981",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.le.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_torchbench_s8_g27"
+  ]
+}

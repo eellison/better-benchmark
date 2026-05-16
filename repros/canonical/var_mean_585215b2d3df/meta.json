@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "585215b2d3df",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 6,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.reshape.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_AllenaiLongformerBase",
+    "dynamo_AllenaiLongformerBase_inference"
+  ]
+}

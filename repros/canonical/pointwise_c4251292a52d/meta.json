@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "c4251292a52d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 19,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reciprocal.default",
+    "aten.sqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "tlparse_timm_s4_g10",
+    "tlparse_timm_s5_g10",
+    "tlparse_timm_s6_g10",
+    "tlparse_torchbench_s6_g10"
+  ]
+}

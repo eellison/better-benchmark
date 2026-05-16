@@ -1,0 +1,39 @@
+{
+  "pattern_hash": "e90d302edc1d",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 17,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.erf.default",
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 9,
+  "models": [
+    "dynamo_BertForMaskedLM",
+    "dynamo_DebertaV2ForMaskedLM",
+    "dynamo_DistilBertForMaskedLM",
+    "dynamo_ElectraForCausalLM",
+    "dynamo_LayoutLMForMaskedLM",
+    "dynamo_MegatronBertForCausalLM",
+    "dynamo_PegasusForCausalLM",
+    "dynamo_YituTechConvBert",
+    "hf_bert"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "test_gpu": {
+    "default": {
+      "compiled_us": 29.86553883949644,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 28.95686537483517,
+      "total_bytes": 134250496,
+      "n_kernels": 1,
+      "gap_default": 1.031380242747233,
+      "gap_cd": null,
+      "timestamp": "2026-05-13T20:39:20"
+    }
+  },
+  "B200": {
+    "default": {
+      "compiled_us": 29.945157054569332,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 29.191641841287638,
+      "total_bytes": 134250496,
+      "gap_default": 1.0258127041081995,
+      "gap_cd": null,
+      "timestamp": "2026-05-15T17:48:18"
+    },
+    "baseline": {
+      "default": {
+        "compiled_us": 30.518112836045237,
+        "coord_descent_us": null,
+        "memcopy_sol_us": 29.10729654919562,
+        "total_bytes": 134250496,
+        "gap_default": 1.0484695060726485,
+        "gap_cd": null,
+        "timestamp": "2026-05-15T19:54:13"
+      }
+    },
+    "my_fix": {
+      "default": {
+        "compiled_us": 30.517384219880498,
+        "coord_descent_us": null,
+        "memcopy_sol_us": 28.965035670904943,
+        "total_bytes": 134250496,
+        "gap_default": 1.0535938766522863,
+        "gap_cd": null,
+        "timestamp": "2026-05-15T19:54:27"
+      }
+    }
+  }
+}

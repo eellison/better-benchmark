@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "962a553f5660",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "vllm_openai_gpt-oss-20b",
+    "vllm_openai_gpt-oss-20b_inference"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "94da6bd0ff78",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 13,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.cat.default",
+    "aten.expand.default",
+    "aten.ne.Scalar",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.split.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 2,
+  "models": [
+    "tlparse_huggingface_s2_g21",
+    "tlparse_huggingface_s2_g83"
+  ]
+}

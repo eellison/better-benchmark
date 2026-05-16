@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "80f9cd2f5f8c",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "dynamo_MobileBertForMaskedLM"
+  ]
+}

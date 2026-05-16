@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "5976db735a15",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.expand.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "dynamo_DistilBertForMaskedLM",
+    "dynamo_GPT2ForSequenceClassification",
+    "dynamo_PegasusForCausalLM",
+    "dynamo_Reformer"
+  ]
+}

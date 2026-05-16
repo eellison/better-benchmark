@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "0a9eb60f758b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 24,
+  "models": [
+    "dynamo_BartForCausalLM",
+    "dynamo_BlenderbotForCausalLM",
+    "dynamo_BlenderbotForConditionalGeneration",
+    "dynamo_DistilBertForMaskedLM",
+    "dynamo_ElectraForCausalLM",
+    "dynamo_GPT2ForSequenceClassification",
+    "dynamo_M2M100ForConditionalGeneration",
+    "dynamo_MBartForCausalLM",
+    "dynamo_MT5ForConditionalGeneration",
+    "dynamo_MegatronBertForCausalLM",
+    "dynamo_MobileBertForMaskedLM",
+    "dynamo_OPTForCausalLM",
+    "dynamo_PLBartForCausalLM",
+    "dynamo_PegasusForCausalLM",
+    "dynamo_Reformer",
+    "dynamo_T5ForConditionalGeneration",
+    "dynamo_T5Small",
+    "dynamo_YituTechConvBert",
+    "vllm_Qwen_Qwen3-0.6B",
+    "vllm_Qwen_Qwen3-0.6B_inference",
+    "vllm_Qwen_Qwen3-30B-A3B_inference",
+    "vllm_facebook_opt-125m",
+    "vllm_facebook_opt-125m_inference",
+    "vllm_mistralai_Mistral-7B-Instruct-v0.3_inference"
+  ]
+}

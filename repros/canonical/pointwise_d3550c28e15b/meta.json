@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "d3550c28e15b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_AllenaiLongformerBase",
+    "dynamo_AllenaiLongformerBase_inference"
+  ]
+}

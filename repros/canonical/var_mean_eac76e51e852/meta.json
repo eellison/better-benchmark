@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "eac76e51e852",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.expand.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 7,
+  "models": [
+    "dynamo_ElectraForCausalLM",
+    "dynamo_ElectraForCausalLM_inference",
+    "dynamo_GoogleFnet",
+    "dynamo_GoogleFnet_inference",
+    "dynamo_YituTechConvBert",
+    "hf_albert",
+    "hf_bert"
+  ]
+}

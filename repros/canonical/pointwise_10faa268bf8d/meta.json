@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "10faa268bf8d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "dynamo_YituTechConvBert"
+  ]
+}

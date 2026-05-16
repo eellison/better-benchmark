@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "e588040b0470",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.full.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_MegatronBertForCausalLM",
+    "dynamo_MegatronBertForCausalLM_inference"
+  ]
+}

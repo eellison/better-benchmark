@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "f22e30e46975",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.expand.default",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_torchbench_s3_g62"
+  ]
+}

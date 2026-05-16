@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "e7c350d5ece6",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.relu.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_timm_s4_g10"
+  ]
+}

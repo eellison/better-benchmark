@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "a20b9ef36486",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.permute.default"
+  ],
+  "n_models": 18,
+  "models": [
+    "dynamo_DebertaV2ForMaskedLM",
+    "dynamo_DistilBertForMaskedLM",
+    "dynamo_ElectraForCausalLM",
+    "dynamo_GPT2ForSequenceClassification",
+    "dynamo_GPTNeoForCausalLM",
+    "dynamo_GPTNeoForSequenceClassification",
+    "dynamo_GoogleFnet",
+    "dynamo_LayoutLMForMaskedLM",
+    "dynamo_M2M100ForConditionalGeneration",
+    "dynamo_MT5ForConditionalGeneration",
+    "dynamo_MegatronBertForCausalLM",
+    "dynamo_MobileBertForMaskedLM",
+    "dynamo_PegasusForCausalLM",
+    "dynamo_T5ForConditionalGeneration",
+    "dynamo_T5Small",
+    "dynamo_XLNetLMHeadModel",
+    "dynamo_YituTechConvBert",
+    "vllm_Qwen_Qwen3-0.6B"
+  ]
+}

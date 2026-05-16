@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "fe73768527e6",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.relu.default"
+  ],
+  "n_models": 7,
+  "models": [
+    "dynamo_OPTForCausalLM",
+    "dynamo_OPTForCausalLM_inference",
+    "tlparse_timm_s4_g10",
+    "tlparse_timm_s5_g10",
+    "tlparse_torchbench_s6_g10",
+    "vllm_facebook_opt-125m",
+    "vllm_facebook_opt-125m_inference"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "d7e7355ed222",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 15,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.bitwise_and.Tensor",
+    "aten.bitwise_and.Tensor",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.gt.Tensor",
+    "aten.le.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.where.self",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "vllm_openai_gpt-oss-20b"
+  ]
+}

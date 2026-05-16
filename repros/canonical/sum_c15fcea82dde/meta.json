@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "c15fcea82dde",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "dynamo_GPT2ForSequenceClassification"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "5af670b2fa5e",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "any",
+    "any"
+  ],
+  "n_ops": 17,
+  "origin_ops": [
+    "aten._assert_async.msg",
+    "aten._assert_async.msg",
+    "aten.any.dims",
+    "aten.any.dims",
+    "aten.eq.Tensor",
+    "aten.ge.Scalar",
+    "aten.gt.Scalar",
+    "aten.logical_not.default",
+    "aten.logical_not.default",
+    "aten.logical_not.default",
+    "aten.logical_not.default",
+    "aten.lt.Scalar",
+    "aten.permute.default",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "vllm_Qwen_Qwen3-30B-A3B_inference",
+    "vllm_openai_gpt-oss-20b"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "0c95f1e9b371",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.reshape.default",
+    "aten.split.Tensor"
+  ],
+  "n_models": 6,
+  "models": [
+    "dynamo_DistillGPT2",
+    "dynamo_DistillGPT2_inference",
+    "dynamo_GPT2ForSequenceClassification",
+    "dynamo_GPT2ForSequenceClassification_inference",
+    "tlparse_huggingface_s2_g21",
+    "tlparse_huggingface_s2_g83"
+  ]
+}

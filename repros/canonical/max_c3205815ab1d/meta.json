@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "c3205815ab1d",
+  "kind": "reduction",
+  "reduction_types": [
+    "max"
+  ],
+  "n_ops": 17,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.le.Tensor",
+    "aten.max.dim",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.where.self",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "vllm_openai_gpt-oss-20b_inference"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "df4d1b85af51",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 5,
+  "models": [
+    "dynamo_ElectraForCausalLM",
+    "dynamo_LayoutLMForMaskedLM",
+    "dynamo_MegatronBertForCausalLM",
+    "dynamo_MobileBertForMaskedLM",
+    "dynamo_YituTechConvBert"
+  ]
+}

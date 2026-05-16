@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "741c0d7d8d11",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "dynamo_DistillGPT2"
+  ]
+}

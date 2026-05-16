@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "8170a0157567",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_M2M100ForConditionalGeneration",
+    "dynamo_PegasusForCausalLM"
+  ]
+}

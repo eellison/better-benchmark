@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "7faae51233bc",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 5,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.select.int",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_GoogleFnet",
+    "dynamo_GoogleFnet_inference"
+  ]
+}

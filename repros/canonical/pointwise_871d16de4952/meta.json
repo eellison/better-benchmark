@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "871d16de4952",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_MobileBertForMaskedLM",
+    "dynamo_MobileBertForMaskedLM_inference"
+  ]
+}

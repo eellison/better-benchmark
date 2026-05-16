@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "50db0aab6f24",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean",
+    "var_mean"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.var_mean.correction",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_timm_s7_g20"
+  ]
+}

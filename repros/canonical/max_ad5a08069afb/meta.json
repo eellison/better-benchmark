@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "ad5a08069afb",
+  "kind": "reduction",
+  "reduction_types": [
+    "max"
+  ],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.max.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_Reformer",
+    "dynamo_Reformer_inference"
+  ]
+}

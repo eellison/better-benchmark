@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "ddcaa719eb49",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 4,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 3,
+  "models": [
+    "dynamo_Reformer",
+    "dynamo_Reformer_inference",
+    "tlparse_huggingface_s3_g21"
+  ]
+}

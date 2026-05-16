@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "f6c9d8c5f32b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 13,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.cat.default",
+    "aten.div.Tensor",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_Reformer",
+    "dynamo_Reformer_inference"
+  ]
+}

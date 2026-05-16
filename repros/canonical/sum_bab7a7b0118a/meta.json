@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "bab7a7b0118a",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.mul.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "dynamo_BertForMaskedLM"
+  ]
+}

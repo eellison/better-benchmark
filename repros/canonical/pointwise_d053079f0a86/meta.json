@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "d053079f0a86",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.clamp_max.default",
+    "aten.clamp_min.default",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_torchbench_s6_g10"
+  ]
+}

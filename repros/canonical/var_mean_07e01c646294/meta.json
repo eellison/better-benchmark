@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "07e01c646294",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 6,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.reshape.default",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "tlparse_huggingface_s1_g5",
+    "tlparse_timm_s6_g10",
+    "vllm_facebook_opt-125m_inference"
+  ]
+}

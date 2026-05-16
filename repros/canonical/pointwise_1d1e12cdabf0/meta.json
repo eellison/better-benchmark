@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "1d1e12cdabf0",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_torchbench_s9_g20"
+  ]
+}

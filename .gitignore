@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.log
+output/
+repo/
+ci_artifacts/
+torch_compile_debug/
+deepseek/
+fixes/
+*.egg-info/

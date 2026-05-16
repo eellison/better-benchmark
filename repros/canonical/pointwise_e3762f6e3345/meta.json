@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "e3762f6e3345",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.as_strided.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_AllenaiLongformerBase",
+    "dynamo_AllenaiLongformerBase_inference"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "f2b19635d2cc",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.fma.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "dynamo_BertForMaskedLM"
+  ]
+}

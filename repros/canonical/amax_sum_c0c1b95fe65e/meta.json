@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "c0c1b95fe65e",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 2,
+  "models": [
+    "vllm_openai_gpt-oss-20b",
+    "vllm_openai_gpt-oss-20b_inference"
+  ]
+}

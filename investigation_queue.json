@@ -1,0 +1,1622 @@
+[
+  {
+    "rank": 1,
+    "name": "mean_b820cb5c6494",
+    "gap": 53.29,
+    "total_bytes": 8062336,
+    "compiled_us": 506.4,
+    "sol_us": 9.5,
+    "repro_path": "repros/canonical/mean_b820cb5c6494/repro.py"
+  },
+  {
+    "rank": 2,
+    "name": "sum_sum_sum_c24846693ddc",
+    "gap": 53.23,
+    "total_bytes": 1751914500,
+    "compiled_us": 14883.6,
+    "sol_us": 279.6,
+    "repro_path": "repros/canonical/sum_sum_sum_c24846693ddc/repro.py"
+  },
+  {
+    "rank": 3,
+    "name": "pointwise_9dedf4182701",
+    "gap": 43.39,
+    "total_bytes": 8056260,
+    "compiled_us": 440.5,
+    "sol_us": 10.2,
+    "repro_path": "repros/canonical/pointwise_9dedf4182701/repro.py"
+  },
+  {
+    "rank": 4,
+    "name": "pointwise_4589a681b729",
+    "gap": 41.94,
+    "total_bytes": 8039620,
+    "compiled_us": 436.2,
+    "sol_us": 10.4,
+    "repro_path": "repros/canonical/pointwise_4589a681b729/repro.py"
+  },
+  {
+    "rank": 5,
+    "name": "pointwise_ed7f629de0d2",
+    "gap": 39.26,
+    "total_bytes": 8039876,
+    "compiled_us": 438.1,
+    "sol_us": 11.2,
+    "repro_path": "repros/canonical/pointwise_ed7f629de0d2/repro.py"
+  },
+  {
+    "rank": 6,
+    "name": "sum_sum_sum_8074906319b7",
+    "gap": 23.58,
+    "total_bytes": 4515171332,
+    "compiled_us": 16612.9,
+    "sol_us": 704.6,
+    "repro_path": "repros/canonical/sum_sum_sum_8074906319b7/repro.py"
+  },
+  {
+    "rank": 7,
+    "name": "pointwise_30ed971a3cbe",
+    "gap": 21.27,
+    "total_bytes": 205828800,
+    "compiled_us": 893.4,
+    "sol_us": 42.0,
+    "repro_path": "repros/canonical/pointwise_30ed971a3cbe/repro.py"
+  },
+  {
+    "rank": 8,
+    "name": "pointwise_d34320128246",
+    "gap": 21.12,
+    "total_bytes": 4199620,
+    "compiled_us": 194.6,
+    "sol_us": 9.2,
+    "repro_path": "repros/canonical/pointwise_d34320128246/repro.py"
+  },
+  {
+    "rank": 9,
+    "name": "mean_9c51bd39249d",
+    "gap": 18.24,
+    "total_bytes": 44894144,
+    "compiled_us": 297.8,
+    "sol_us": 16.3,
+    "repro_path": "repros/canonical/mean_9c51bd39249d/repro.py"
+  },
+  {
+    "rank": 10,
+    "name": "pointwise_509a05eca994",
+    "gap": 11.12,
+    "total_bytes": 42532864,
+    "compiled_us": 148.0,
+    "sol_us": 13.3,
+    "repro_path": "repros/canonical/pointwise_509a05eca994/repro.py"
+  },
+  {
+    "rank": 11,
+    "name": "pointwise_22b61ae3e8fe",
+    "gap": 9.31,
+    "total_bytes": 113645568,
+    "compiled_us": 255.8,
+    "sol_us": 27.5,
+    "repro_path": "repros/canonical/pointwise_22b61ae3e8fe/repro.py"
+  },
+  {
+    "rank": 12,
+    "name": "sum_sum_sum_f0394a99a1e5",
+    "gap": 8.74,
+    "total_bytes": 69669380,
+    "compiled_us": 180.3,
+    "sol_us": 20.6,
+    "repro_path": "repros/canonical/sum_sum_sum_f0394a99a1e5/repro.py"
+  },
+  {
+    "rank": 13,
+    "name": "amax_sum_b978f41418bc",
+    "gap": 7.25,
+    "total_bytes": 142607872,
+    "compiled_us": 230.3,
+    "sol_us": 31.8,
+    "repro_path": "repros/canonical/amax_sum_b978f41418bc/repro.py"
+  },
+  {
+    "rank": 14,
+    "name": "mean_amax_sum_6ef723c3f65e",
+    "gap": 7.22,
+    "total_bytes": 174083592,
+    "compiled_us": 266.0,
+    "sol_us": 36.8,
+    "repro_path": "repros/canonical/mean_amax_sum_6ef723c3f65e/repro.py"
+  },
+  {
+    "rank": 15,
+    "name": "argmax_09f9e9c2268d",
+    "gap": 6.18,
+    "total_bytes": 106954752,
+    "compiled_us": 152.2,
+    "sol_us": 24.6,
+    "repro_path": "repros/canonical/argmax_09f9e9c2268d/repro.py"
+  },
+  {
+    "rank": 16,
+    "name": "amax_sum_8f5247db9049",
+    "gap": 5.85,
+    "total_bytes": 604020736,
+    "compiled_us": 605.2,
+    "sol_us": 103.4,
+    "repro_path": "repros/canonical/amax_sum_8f5247db9049/repro.py"
+  },
+  {
+    "rank": 17,
+    "name": "pointwise_16427862d66c",
+    "gap": 5.6,
+    "total_bytes": 1026287232,
+    "compiled_us": 945.1,
+    "sol_us": 168.8,
+    "repro_path": "repros/canonical/pointwise_16427862d66c/repro.py"
+  },
+  {
+    "rank": 18,
+    "name": "mean_2949fb044264",
+    "gap": 5.46,
+    "total_bytes": 42287104,
+    "compiled_us": 73.7,
+    "sol_us": 13.5,
+    "repro_path": "repros/canonical/mean_2949fb044264/repro.py"
+  },
+  {
+    "rank": 19,
+    "name": "sum_9292de0b9be9",
+    "gap": 5.38,
+    "total_bytes": 169517600,
+    "compiled_us": 193.9,
+    "sol_us": 36.0,
+    "repro_path": "repros/canonical/sum_9292de0b9be9/repro.py"
+  },
+  {
+    "rank": 20,
+    "name": "pointwise_94263b2bcee2",
+    "gap": 5.09,
+    "total_bytes": 2228736,
+    "compiled_us": 46.9,
+    "sol_us": 9.2,
+    "repro_path": "repros/canonical/pointwise_94263b2bcee2/repro.py"
+  },
+  {
+    "rank": 21,
+    "name": "pointwise_5dcd159fff4a",
+    "gap": 4.87,
+    "total_bytes": 2293760,
+    "compiled_us": 34.8,
+    "sol_us": 7.1,
+    "repro_path": "repros/canonical/pointwise_5dcd159fff4a/repro.py"
+  },
+  {
+    "rank": 22,
+    "name": "sum_sum_sum_fb2a28eb81be",
+    "gap": 4.86,
+    "total_bytes": 870129900,
+    "compiled_us": 701.5,
+    "sol_us": 144.4,
+    "repro_path": "repros/canonical/sum_sum_sum_fb2a28eb81be/repro.py"
+  },
+  {
+    "rank": 23,
+    "name": "sum_sum_sum_efb5551a7c94",
+    "gap": 4.75,
+    "total_bytes": 1900332548,
+    "compiled_us": 1434.9,
+    "sol_us": 302.4,
+    "repro_path": "repros/canonical/sum_sum_sum_efb5551a7c94/repro.py"
+  },
+  {
+    "rank": 24,
+    "name": "sum_sum_sum_52f7882ed4b0",
+    "gap": 4.57,
+    "total_bytes": 1203098528,
+    "compiled_us": 898.7,
+    "sol_us": 196.6,
+    "repro_path": "repros/canonical/sum_sum_sum_52f7882ed4b0/repro.py"
+  },
+  {
+    "rank": 25,
+    "name": "pointwise_b3f8078cef30",
+    "gap": 4.49,
+    "total_bytes": 175616004,
+    "compiled_us": 170.2,
+    "sol_us": 37.9,
+    "repro_path": "repros/canonical/pointwise_b3f8078cef30/repro.py"
+  },
+  {
+    "rank": 26,
+    "name": "sum_sum_sum_c29bd793820d",
+    "gap": 4.49,
+    "total_bytes": 1036833216,
+    "compiled_us": 766.2,
+    "sol_us": 170.7,
+    "repro_path": "repros/canonical/sum_sum_sum_c29bd793820d/repro.py"
+  },
+  {
+    "rank": 27,
+    "name": "amax_sum_2db92b37f274",
+    "gap": 4.31,
+    "total_bytes": 720896,
+    "compiled_us": 30.1,
+    "sol_us": 7.0,
+    "repro_path": "repros/canonical/amax_sum_2db92b37f274/repro.py"
+  },
+  {
+    "rank": 28,
+    "name": "sum_sum_sum_ae9be4f5b30b",
+    "gap": 4.23,
+    "total_bytes": 259409540,
+    "compiled_us": 212.4,
+    "sol_us": 50.2,
+    "repro_path": "repros/canonical/sum_sum_sum_ae9be4f5b30b/repro.py"
+  },
+  {
+    "rank": 29,
+    "name": "sum_sum_sum_2c26938323d4",
+    "gap": 4.02,
+    "total_bytes": 591994884,
+    "compiled_us": 407.3,
+    "sol_us": 101.4,
+    "repro_path": "repros/canonical/sum_sum_sum_2c26938323d4/repro.py"
+  },
+  {
+    "rank": 30,
+    "name": "amax_sum_sum_a28463f10193",
+    "gap": 4.01,
+    "total_bytes": 102965250,
+    "compiled_us": 96.0,
+    "sol_us": 23.9,
+    "repro_path": "repros/canonical/amax_sum_sum_a28463f10193/repro.py"
+  },
+  {
+    "rank": 31,
+    "name": "amax_sum_sum_436745ec8e1e",
+    "gap": 3.83,
+    "total_bytes": 622346244,
+    "compiled_us": 399.8,
+    "sol_us": 104.3,
+    "repro_path": "repros/canonical/amax_sum_sum_436745ec8e1e/repro.py"
+  },
+  {
+    "rank": 32,
+    "name": "pointwise_2c8c0be46f75",
+    "gap": 3.83,
+    "total_bytes": 67125248,
+    "compiled_us": 67.6,
+    "sol_us": 17.7,
+    "repro_path": "repros/canonical/pointwise_2c8c0be46f75/repro.py"
+  },
+  {
+    "rank": 33,
+    "name": "amax_sum_35525501b882",
+    "gap": 3.8,
+    "total_bytes": 159384064,
+    "compiled_us": 131.2,
+    "sol_us": 34.5,
+    "repro_path": "repros/canonical/amax_sum_35525501b882/repro.py"
+  },
+  {
+    "rank": 34,
+    "name": "pointwise_f5a5f8826d00",
+    "gap": 3.73,
+    "total_bytes": 45741760,
+    "compiled_us": 57.6,
+    "sol_us": 15.4,
+    "repro_path": "repros/canonical/pointwise_f5a5f8826d00/repro.py"
+  },
+  {
+    "rank": 35,
+    "name": "sum_sum_sum_cd4360587211",
+    "gap": 3.69,
+    "total_bytes": 71053312,
+    "compiled_us": 72.9,
+    "sol_us": 19.7,
+    "repro_path": "repros/canonical/sum_sum_sum_cd4360587211/repro.py"
+  },
+  {
+    "rank": 36,
+    "name": "amax_sum_mean_590318f4803d",
+    "gap": 3.62,
+    "total_bytes": 349997568,
+    "compiled_us": 233.7,
+    "sol_us": 64.5,
+    "repro_path": "repros/canonical/amax_sum_mean_590318f4803d/repro.py"
+  },
+  {
+    "rank": 37,
+    "name": "pointwise_7e58baf677e4",
+    "gap": 3.44,
+    "total_bytes": 68612192,
+    "compiled_us": 67.7,
+    "sol_us": 19.7,
+    "repro_path": "repros/canonical/pointwise_7e58baf677e4/repro.py"
+  },
+  {
+    "rank": 38,
+    "name": "pointwise_c0b2590bfdf4",
+    "gap": 3.43,
+    "total_bytes": 369491968,
+    "compiled_us": 225.3,
+    "sol_us": 65.7,
+    "repro_path": "repros/canonical/pointwise_c0b2590bfdf4/repro.py"
+  },
+  {
+    "rank": 39,
+    "name": "sum_sum_sum_9a57d603a769",
+    "gap": 3.32,
+    "total_bytes": 42140928,
+    "compiled_us": 51.2,
+    "sol_us": 15.4,
+    "repro_path": "repros/canonical/sum_sum_sum_9a57d603a769/repro.py"
+  },
+  {
+    "rank": 40,
+    "name": "var_mean_var_mean_var_mean_e91c69d33ef5",
+    "gap": 3.3,
+    "total_bytes": 57811968,
+    "compiled_us": 58.6,
+    "sol_us": 17.7,
+    "repro_path": "repros/canonical/var_mean_var_mean_var_mean_e91c69d33ef5/repro.py"
+  },
+  {
+    "rank": 41,
+    "name": "sum_sum_sum_9226ddcba6e0",
+    "gap": 3.25,
+    "total_bytes": 35236352,
+    "compiled_us": 43.4,
+    "sol_us": 13.3,
+    "repro_path": "repros/canonical/sum_sum_sum_9226ddcba6e0/repro.py"
+  },
+  {
+    "rank": 42,
+    "name": "pointwise_e57525535739",
+    "gap": 3.12,
+    "total_bytes": 46750576,
+    "compiled_us": 50.7,
+    "sol_us": 16.2,
+    "repro_path": "repros/canonical/pointwise_e57525535739/repro.py"
+  },
+  {
+    "rank": 43,
+    "name": "sum_sum_sum_e55ceeb289b0",
+    "gap": 3.09,
+    "total_bytes": 718519300,
+    "compiled_us": 375.5,
+    "sol_us": 121.4,
+    "repro_path": "repros/canonical/sum_sum_sum_e55ceeb289b0/repro.py"
+  },
+  {
+    "rank": 44,
+    "name": "pointwise_4cd3cdc730d7",
+    "gap": 3.07,
+    "total_bytes": 41947136,
+    "compiled_us": 47.1,
+    "sol_us": 15.4,
+    "repro_path": "repros/canonical/pointwise_4cd3cdc730d7/repro.py"
+  },
+  {
+    "rank": 45,
+    "name": "sum_sum_sum_dc592a62e259",
+    "gap": 3.03,
+    "total_bytes": 453567492,
+    "compiled_us": 245.1,
+    "sol_us": 80.9,
+    "repro_path": "repros/canonical/sum_sum_sum_dc592a62e259/repro.py"
+  },
+  {
+    "rank": 46,
+    "name": "sum_sum_sum_526ae8b77052",
+    "gap": 2.98,
+    "total_bytes": 35236356,
+    "compiled_us": 45.0,
+    "sol_us": 15.1,
+    "repro_path": "repros/canonical/sum_sum_sum_526ae8b77052/repro.py"
+  },
+  {
+    "rank": 47,
+    "name": "pointwise_f3c6cfe72279",
+    "gap": 2.95,
+    "total_bytes": 54528256,
+    "compiled_us": 51.3,
+    "sol_us": 17.4,
+    "repro_path": "repros/canonical/pointwise_f3c6cfe72279/repro.py"
+  },
+  {
+    "rank": 48,
+    "name": "pointwise_e6befa69b424",
+    "gap": 2.94,
+    "total_bytes": 2178240036,
+    "compiled_us": 1013.8,
+    "sol_us": 345.1,
+    "repro_path": "repros/canonical/pointwise_e6befa69b424/repro.py"
+  },
+  {
+    "rank": 49,
+    "name": "pointwise_7bbf2ae6d717",
+    "gap": 2.94,
+    "total_bytes": 50331648,
+    "compiled_us": 45.0,
+    "sol_us": 15.3,
+    "repro_path": "repros/canonical/pointwise_7bbf2ae6d717/repro.py"
+  },
+  {
+    "rank": 50,
+    "name": "pointwise_69f78021fcfb",
+    "gap": 2.94,
+    "total_bytes": 225687488,
+    "compiled_us": 133.2,
+    "sol_us": 45.4,
+    "repro_path": "repros/canonical/pointwise_69f78021fcfb/repro.py"
+  },
+  {
+    "rank": 51,
+    "name": "pointwise_7f5c97a29b76",
+    "gap": 2.93,
+    "total_bytes": 698708016,
+    "compiled_us": 345.2,
+    "sol_us": 117.8,
+    "repro_path": "repros/canonical/pointwise_7f5c97a29b76/repro.py"
+  },
+  {
+    "rank": 52,
+    "name": "pointwise_6dd8dcfeb24e",
+    "gap": 2.92,
+    "total_bytes": 182489856,
+    "compiled_us": 113.4,
+    "sol_us": 38.8,
+    "repro_path": "repros/canonical/pointwise_6dd8dcfeb24e/repro.py"
+  },
+  {
+    "rank": 53,
+    "name": "mean_mean_e78bb40350dd",
+    "gap": 2.9,
+    "total_bytes": 29362944,
+    "compiled_us": 38.8,
+    "sol_us": 13.4,
+    "repro_path": "repros/canonical/mean_mean_e78bb40350dd/repro.py"
+  },
+  {
+    "rank": 54,
+    "name": "pointwise_95aad6bd93e1",
+    "gap": 2.85,
+    "total_bytes": 92280832,
+    "compiled_us": 67.1,
+    "sol_us": 23.6,
+    "repro_path": "repros/canonical/pointwise_95aad6bd93e1/repro.py"
+  },
+  {
+    "rank": 55,
+    "name": "sum_8cc9a276310b",
+    "gap": 2.81,
+    "total_bytes": 1409290240,
+    "compiled_us": 638.7,
+    "sol_us": 226.9,
+    "repro_path": "repros/canonical/sum_8cc9a276310b/repro.py"
+  },
+  {
+    "rank": 56,
+    "name": "pointwise_2ad4fa0019f6",
+    "gap": 2.81,
+    "total_bytes": 132516864,
+    "compiled_us": 83.9,
+    "sol_us": 29.9,
+    "repro_path": "repros/canonical/pointwise_2ad4fa0019f6/repro.py"
+  },
+  {
+    "rank": 57,
+    "name": "sum_sum_eceb9dacdab4",
+    "gap": 2.79,
+    "total_bytes": 554173444,
+    "compiled_us": 267.1,
+    "sol_us": 95.6,
+    "repro_path": "repros/canonical/sum_sum_eceb9dacdab4/repro.py"
+  },
+  {
+    "rank": 58,
+    "name": "pointwise_d29c743812ff",
+    "gap": 2.79,
+    "total_bytes": 1210223312,
+    "compiled_us": 551.0,
+    "sol_us": 197.5,
+    "repro_path": "repros/canonical/pointwise_d29c743812ff/repro.py"
+  },
+  {
+    "rank": 59,
+    "name": "pointwise_eb1d58ae0860",
+    "gap": 2.76,
+    "total_bytes": 901283504,
+    "compiled_us": 411.2,
+    "sol_us": 148.9,
+    "repro_path": "repros/canonical/pointwise_eb1d58ae0860/repro.py"
+  },
+  {
+    "rank": 60,
+    "name": "sum_sum_sum_be702b976884",
+    "gap": 2.75,
+    "total_bytes": 554230788,
+    "compiled_us": 262.0,
+    "sol_us": 95.3,
+    "repro_path": "repros/canonical/sum_sum_sum_be702b976884/repro.py"
+  },
+  {
+    "rank": 61,
+    "name": "sum_sum_sum_31c57d11fb3d",
+    "gap": 2.72,
+    "total_bytes": 242618372,
+    "compiled_us": 130.7,
+    "sol_us": 48.1,
+    "repro_path": "repros/canonical/sum_sum_sum_31c57d11fb3d/repro.py"
+  },
+  {
+    "rank": 62,
+    "name": "sum_sum_sum_975b257d274a",
+    "gap": 2.7,
+    "total_bytes": 209764352,
+    "compiled_us": 111.1,
+    "sol_us": 41.2,
+    "repro_path": "repros/canonical/sum_sum_sum_975b257d274a/repro.py"
+  },
+  {
+    "rank": 63,
+    "name": "amax_sum_bd64a4228bc6",
+    "gap": 2.7,
+    "total_bytes": 19272192,
+    "compiled_us": 30.9,
+    "sol_us": 11.5,
+    "repro_path": "repros/canonical/amax_sum_bd64a4228bc6/repro.py"
+  },
+  {
+    "rank": 64,
+    "name": "sum_sum_sum_f9a16eb02e03",
+    "gap": 2.68,
+    "total_bytes": 2077473440,
+    "compiled_us": 886.1,
+    "sol_us": 330.6,
+    "repro_path": "repros/canonical/sum_sum_sum_f9a16eb02e03/repro.py"
+  },
+  {
+    "rank": 65,
+    "name": "sum_sum_sum_295d30fcd2e1",
+    "gap": 2.68,
+    "total_bytes": 291119108,
+    "compiled_us": 143.2,
+    "sol_us": 53.5,
+    "repro_path": "repros/canonical/sum_sum_sum_295d30fcd2e1/repro.py"
+  },
+  {
+    "rank": 66,
+    "name": "pointwise_a1cb85e9c103",
+    "gap": 2.62,
+    "total_bytes": 67371008,
+    "compiled_us": 46.4,
+    "sol_us": 17.7,
+    "repro_path": "repros/canonical/pointwise_a1cb85e9c103/repro.py"
+  },
+  {
+    "rank": 67,
+    "name": "sum_sum_cebde8068bc5",
+    "gap": 2.62,
+    "total_bytes": 643330052,
+    "compiled_us": 286.7,
+    "sol_us": 109.6,
+    "repro_path": "repros/canonical/sum_sum_cebde8068bc5/repro.py"
+  },
+  {
+    "rank": 68,
+    "name": "pointwise_fd3cd1ed5e66",
+    "gap": 2.59,
+    "total_bytes": 698706776,
+    "compiled_us": 304.7,
+    "sol_us": 117.8,
+    "repro_path": "repros/canonical/pointwise_fd3cd1ed5e66/repro.py"
+  },
+  {
+    "rank": 69,
+    "name": "sum_sum_sum_7d1fe7ff3b8f",
+    "gap": 2.56,
+    "total_bytes": 6326272,
+    "compiled_us": 24.6,
+    "sol_us": 9.6,
+    "repro_path": "repros/canonical/sum_sum_sum_7d1fe7ff3b8f/repro.py"
+  },
+  {
+    "rank": 70,
+    "name": "sum_sum_sum_db7893bbd6b2",
+    "gap": 2.53,
+    "total_bytes": 117489664,
+    "compiled_us": 65.7,
+    "sol_us": 26.0,
+    "repro_path": "repros/canonical/sum_sum_sum_db7893bbd6b2/repro.py"
+  },
+  {
+    "rank": 71,
+    "name": "mean_mean_2b5ca50e6ca8",
+    "gap": 2.53,
+    "total_bytes": 36704768,
+    "compiled_us": 38.9,
+    "sol_us": 15.4,
+    "repro_path": "repros/canonical/mean_mean_2b5ca50e6ca8/repro.py"
+  },
+  {
+    "rank": 72,
+    "name": "pointwise_83571d60a272",
+    "gap": 2.52,
+    "total_bytes": 484055088,
+    "compiled_us": 214.2,
+    "sol_us": 85.0,
+    "repro_path": "repros/canonical/pointwise_83571d60a272/repro.py"
+  },
+  {
+    "rank": 73,
+    "name": "sum_sum_sum_b28959e028ac",
+    "gap": 2.51,
+    "total_bytes": 81833984,
+    "compiled_us": 54.2,
+    "sol_us": 21.6,
+    "repro_path": "repros/canonical/sum_sum_sum_b28959e028ac/repro.py"
+  },
+  {
+    "rank": 74,
+    "name": "sum_sum_sum_f7af1f8f310d",
+    "gap": 2.5,
+    "total_bytes": 314650624,
+    "compiled_us": 147.6,
+    "sol_us": 59.1,
+    "repro_path": "repros/canonical/sum_sum_sum_f7af1f8f310d/repro.py"
+  },
+  {
+    "rank": 75,
+    "name": "sum_sum_sum_ffd4a6f6aae5",
+    "gap": 2.5,
+    "total_bytes": 693636482,
+    "compiled_us": 293.9,
+    "sol_us": 117.7,
+    "repro_path": "repros/canonical/sum_sum_sum_ffd4a6f6aae5/repro.py"
+  },
+  {
+    "rank": 76,
+    "name": "amax_sum_1bd8efc1d999",
+    "gap": 2.49,
+    "total_bytes": 276824576,
+    "compiled_us": 131.6,
+    "sol_us": 52.9,
+    "repro_path": "repros/canonical/amax_sum_1bd8efc1d999/repro.py"
+  },
+  {
+    "rank": 77,
+    "name": "sum_sum_sum_5bebe69ffbf3",
+    "gap": 2.48,
+    "total_bytes": 176242688,
+    "compiled_us": 88.4,
+    "sol_us": 35.6,
+    "repro_path": "repros/canonical/sum_sum_sum_5bebe69ffbf3/repro.py"
+  },
+  {
+    "rank": 78,
+    "name": "sum_sum_sum_bda35395b9d4",
+    "gap": 2.48,
+    "total_bytes": 56668160,
+    "compiled_us": 45.0,
+    "sol_us": 18.1,
+    "repro_path": "repros/canonical/sum_sum_sum_bda35395b9d4/repro.py"
+  },
+  {
+    "rank": 79,
+    "name": "pointwise_aa19a2421e93",
+    "gap": 2.48,
+    "total_bytes": 3144176772,
+    "compiled_us": 1227.3,
+    "sol_us": 494.4,
+    "repro_path": "repros/canonical/pointwise_aa19a2421e93/repro.py"
+  },
+  {
+    "rank": 80,
+    "name": "pointwise_8aa4f46ea799",
+    "gap": 2.48,
+    "total_bytes": 5445986844,
+    "compiled_us": 2102.9,
+    "sol_us": 849.3,
+    "repro_path": "repros/canonical/pointwise_8aa4f46ea799/repro.py"
+  },
+  {
+    "rank": 81,
+    "name": "pointwise_6345105648e1",
+    "gap": 2.47,
+    "total_bytes": 995533136,
+    "compiled_us": 404.7,
+    "sol_us": 163.6,
+    "repro_path": "repros/canonical/pointwise_6345105648e1/repro.py"
+  },
+  {
+    "rank": 82,
+    "name": "sum_sum_sum_57c5e3ecd58f",
+    "gap": 2.46,
+    "total_bytes": 539494658,
+    "compiled_us": 229.3,
+    "sol_us": 93.2,
+    "repro_path": "repros/canonical/sum_sum_sum_57c5e3ecd58f/repro.py"
+  },
+  {
+    "rank": 83,
+    "name": "sum_sum_sum_c25f97f8bb7a",
+    "gap": 2.42,
+    "total_bytes": 151138304,
+    "compiled_us": 81.9,
+    "sol_us": 33.8,
+    "repro_path": "repros/canonical/sum_sum_sum_c25f97f8bb7a/repro.py"
+  },
+  {
+    "rank": 84,
+    "name": "var_mean_var_mean_4d7aec4343d1",
+    "gap": 2.41,
+    "total_bytes": 6324224,
+    "compiled_us": 19.6,
+    "sol_us": 8.1,
+    "repro_path": "repros/canonical/var_mean_var_mean_4d7aec4343d1/repro.py"
+  },
+  {
+    "rank": 85,
+    "name": "var_mean_var_mean_50db0aab6f24",
+    "gap": 2.41,
+    "total_bytes": 35346432,
+    "compiled_us": 36.9,
+    "sol_us": 15.3,
+    "repro_path": "repros/canonical/var_mean_var_mean_50db0aab6f24/repro.py"
+  },
+  {
+    "rank": 86,
+    "name": "amax_sum_sum_471404b70a9a",
+    "gap": 2.33,
+    "total_bytes": 1647247364,
+    "compiled_us": 612.8,
+    "sol_us": 262.5,
+    "repro_path": "repros/canonical/amax_sum_sum_471404b70a9a/repro.py"
+  },
+  {
+    "rank": 87,
+    "name": "pointwise_143c347072e7",
+    "gap": 2.32,
+    "total_bytes": 4055763408,
+    "compiled_us": 1472.6,
+    "sol_us": 634.1,
+    "repro_path": "repros/canonical/pointwise_143c347072e7/repro.py"
+  },
+  {
+    "rank": 88,
+    "name": "sum_sum_sum_4911eb998875",
+    "gap": 2.31,
+    "total_bytes": 201596932,
+    "compiled_us": 92.0,
+    "sol_us": 39.8,
+    "repro_path": "repros/canonical/sum_sum_sum_4911eb998875/repro.py"
+  },
+  {
+    "rank": 89,
+    "name": "var_mean_ca2ce4eebd07",
+    "gap": 2.3,
+    "total_bytes": 2577920,
+    "compiled_us": 21.2,
+    "sol_us": 9.2,
+    "repro_path": "repros/canonical/var_mean_ca2ce4eebd07/repro.py"
+  },
+  {
+    "rank": 90,
+    "name": "pointwise_03d33b650fb5",
+    "gap": 2.28,
+    "total_bytes": 49807872,
+    "compiled_us": 39.1,
+    "sol_us": 17.2,
+    "repro_path": "repros/canonical/pointwise_03d33b650fb5/repro.py"
+  },
+  {
+    "rank": 91,
+    "name": "amax_sum_sum_4cc1548fbf82",
+    "gap": 2.28,
+    "total_bytes": 3293773828,
+    "compiled_us": 1177.1,
+    "sol_us": 517.3,
+    "repro_path": "repros/canonical/amax_sum_sum_4cc1548fbf82/repro.py"
+  },
+  {
+    "rank": 92,
+    "name": "pointwise_1b6e8b05ef3b",
+    "gap": 2.26,
+    "total_bytes": 39846400,
+    "compiled_us": 34.8,
+    "sol_us": 15.4,
+    "repro_path": "repros/canonical/pointwise_1b6e8b05ef3b/repro.py"
+  },
+  {
+    "rank": 93,
+    "name": "pointwise_aad37b9594ee",
+    "gap": 2.24,
+    "total_bytes": 45740544,
+    "compiled_us": 34.8,
+    "sol_us": 15.5,
+    "repro_path": "repros/canonical/pointwise_aad37b9594ee/repro.py"
+  },
+  {
+    "rank": 94,
+    "name": "sum_sum_sum_030624bd788e",
+    "gap": 2.2,
+    "total_bytes": 163655680,
+    "compiled_us": 78.9,
+    "sol_us": 35.8,
+    "repro_path": "repros/canonical/sum_sum_sum_030624bd788e/repro.py"
+  },
+  {
+    "rank": 95,
+    "name": "sum_sum_sum_42f3493209fa",
+    "gap": 2.19,
+    "total_bytes": 100712448,
+    "compiled_us": 51.2,
+    "sol_us": 23.4,
+    "repro_path": "repros/canonical/sum_sum_sum_42f3493209fa/repro.py"
+  },
+  {
+    "rank": 96,
+    "name": "pointwise_2c048e3bbc7a",
+    "gap": 2.19,
+    "total_bytes": 1966080,
+    "compiled_us": 15.5,
+    "sol_us": 7.1,
+    "repro_path": "repros/canonical/pointwise_2c048e3bbc7a/repro.py"
+  },
+  {
+    "rank": 97,
+    "name": "sum_sum_sum_8e54951e5edc",
+    "gap": 2.18,
+    "total_bytes": 163580928,
+    "compiled_us": 77.8,
+    "sol_us": 35.8,
+    "repro_path": "repros/canonical/sum_sum_sum_8e54951e5edc/repro.py"
+  },
+  {
+    "rank": 98,
+    "name": "sum_sum_sum_f5708f51e0e7",
+    "gap": 2.17,
+    "total_bytes": 213987328,
+    "compiled_us": 95.4,
+    "sol_us": 43.9,
+    "repro_path": "repros/canonical/sum_sum_sum_f5708f51e0e7/repro.py"
+  },
+  {
+    "rank": 99,
+    "name": "pointwise_cf54f177af3d",
+    "gap": 2.14,
+    "total_bytes": 104857728,
+    "compiled_us": 55.3,
+    "sol_us": 25.8,
+    "repro_path": "repros/canonical/pointwise_cf54f177af3d/repro.py"
+  },
+  {
+    "rank": 100,
+    "name": "sum_sum_sum_63ae99ae244c",
+    "gap": 2.14,
+    "total_bytes": 1439159810,
+    "compiled_us": 496.4,
+    "sol_us": 232.4,
+    "repro_path": "repros/canonical/sum_sum_sum_63ae99ae244c/repro.py"
+  },
+  {
+    "rank": 101,
+    "name": "sum_sum_sum_0c20b48a17c4",
+    "gap": 2.12,
+    "total_bytes": 255233024,
+    "compiled_us": 106.6,
+    "sol_us": 50.2,
+    "repro_path": "repros/canonical/sum_sum_sum_0c20b48a17c4/repro.py"
+  },
+  {
+    "rank": 102,
+    "name": "pointwise_03175854b672",
+    "gap": 2.12,
+    "total_bytes": 1210220904,
+    "compiled_us": 416.2,
+    "sol_us": 196.7,
+    "repro_path": "repros/canonical/pointwise_03175854b672/repro.py"
+  },
+  {
+    "rank": 103,
+    "name": "pointwise_c707798eb4e4",
+    "gap": 2.1,
+    "total_bytes": 56822784,
+    "compiled_us": 38.9,
+    "sol_us": 18.5,
+    "repro_path": "repros/canonical/pointwise_c707798eb4e4/repro.py"
+  },
+  {
+    "rank": 104,
+    "name": "pointwise_9d2c61e0cb6c",
+    "gap": 2.1,
+    "total_bytes": 338536800,
+    "compiled_us": 130.9,
+    "sol_us": 62.5,
+    "repro_path": "repros/canonical/pointwise_9d2c61e0cb6c/repro.py"
+  },
+  {
+    "rank": 105,
+    "name": "sum_sum_sum_22d34c01b407",
+    "gap": 2.05,
+    "total_bytes": 142651392,
+    "compiled_us": 65.4,
+    "sol_us": 31.8,
+    "repro_path": "repros/canonical/sum_sum_sum_22d34c01b407/repro.py"
+  },
+  {
+    "rank": 106,
+    "name": "sum_7a471c769903",
+    "gap": 2.03,
+    "total_bytes": 2482507776,
+    "compiled_us": 795.8,
+    "sol_us": 392.2,
+    "repro_path": "repros/canonical/sum_7a471c769903/repro.py"
+  },
+  {
+    "rank": 107,
+    "name": "amax_sum_sum_eb4fe3ac03e0",
+    "gap": 2.0,
+    "total_bytes": 491552772,
+    "compiled_us": 167.5,
+    "sol_us": 83.6,
+    "repro_path": "repros/canonical/amax_sum_sum_eb4fe3ac03e0/repro.py"
+  },
+  {
+    "rank": 108,
+    "name": "sum_d4fe6008bcea",
+    "gap": 2.0,
+    "total_bytes": 62517256,
+    "compiled_us": 39.0,
+    "sol_us": 19.5,
+    "repro_path": "repros/canonical/sum_d4fe6008bcea/repro.py"
+  },
+  {
+    "rank": 109,
+    "name": "pointwise_ea6e9f9dac2a",
+    "gap": 2.0,
+    "total_bytes": 225686816,
+    "compiled_us": 90.1,
+    "sol_us": 45.0,
+    "repro_path": "repros/canonical/pointwise_ea6e9f9dac2a/repro.py"
+  },
+  {
+    "rank": 110,
+    "name": "amax_sum_sum_8134ec8b7263",
+    "gap": 1.98,
+    "total_bytes": 952172548,
+    "compiled_us": 307.1,
+    "sol_us": 154.9,
+    "repro_path": "repros/canonical/amax_sum_sum_8134ec8b7263/repro.py"
+  },
+  {
+    "rank": 111,
+    "name": "amax_sum_sum_9de015237f48",
+    "gap": 1.97,
+    "total_bytes": 4001103876,
+    "compiled_us": 1230.3,
+    "sol_us": 624.4,
+    "repro_path": "repros/canonical/amax_sum_sum_9de015237f48/repro.py"
+  },
+  {
+    "rank": 112,
+    "name": "pointwise_18ef0ce47f4d",
+    "gap": 1.97,
+    "total_bytes": 6310912,
+    "compiled_us": 18.5,
+    "sol_us": 9.4,
+    "repro_path": "repros/canonical/pointwise_18ef0ce47f4d/repro.py"
+  },
+  {
+    "rank": 113,
+    "name": "sum_sum_57f87d58a5df",
+    "gap": 1.96,
+    "total_bytes": 8001805552,
+    "compiled_us": 2435.7,
+    "sol_us": 1240.6,
+    "repro_path": "repros/canonical/sum_sum_57f87d58a5df/repro.py"
+  },
+  {
+    "rank": 114,
+    "name": "sum_sum_sum_bffd1578a089",
+    "gap": 1.95,
+    "total_bytes": 264318976,
+    "compiled_us": 100.2,
+    "sol_us": 51.5,
+    "repro_path": "repros/canonical/sum_sum_sum_bffd1578a089/repro.py"
+  },
+  {
+    "rank": 115,
+    "name": "pointwise_5c59d10d394b",
+    "gap": 1.95,
+    "total_bytes": 114349536,
+    "compiled_us": 53.8,
+    "sol_us": 27.7,
+    "repro_path": "repros/canonical/pointwise_5c59d10d394b/repro.py"
+  },
+  {
+    "rank": 116,
+    "name": "sum_sum_sum_3c4186227a06",
+    "gap": 1.92,
+    "total_bytes": 1712592900,
+    "compiled_us": 526.2,
+    "sol_us": 273.7,
+    "repro_path": "repros/canonical/sum_sum_sum_3c4186227a06/repro.py"
+  },
+  {
+    "rank": 117,
+    "name": "sum_sum_sum_a927b12b8a31",
+    "gap": 1.92,
+    "total_bytes": 1009124356,
+    "compiled_us": 316.8,
+    "sol_us": 165.0,
+    "repro_path": "repros/canonical/sum_sum_sum_a927b12b8a31/repro.py"
+  },
+  {
+    "rank": 118,
+    "name": "amax_sum_sum_ad9e8381f100",
+    "gap": 1.91,
+    "total_bytes": 65649956,
+    "compiled_us": 37.2,
+    "sol_us": 19.5,
+    "repro_path": "repros/canonical/amax_sum_sum_ad9e8381f100/repro.py"
+  },
+  {
+    "rank": 119,
+    "name": "sum_sum_ee71239236e8",
+    "gap": 1.9,
+    "total_bytes": 16003227376,
+    "compiled_us": 4699.1,
+    "sol_us": 2476.2,
+    "repro_path": "repros/canonical/sum_sum_ee71239236e8/repro.py"
+  },
+  {
+    "rank": 120,
+    "name": "sum_sum_sum_da77ecbc7688",
+    "gap": 1.88,
+    "total_bytes": 7379976,
+    "compiled_us": 20.5,
+    "sol_us": 10.9,
+    "repro_path": "repros/canonical/sum_sum_sum_da77ecbc7688/repro.py"
+  },
+  {
+    "rank": 121,
+    "name": "pointwise_62d0705e9367",
+    "gap": 1.87,
+    "total_bytes": 225686144,
+    "compiled_us": 86.0,
+    "sol_us": 46.0,
+    "repro_path": "repros/canonical/pointwise_62d0705e9367/repro.py"
+  },
+  {
+    "rank": 122,
+    "name": "pointwise_97e5561d8ec6",
+    "gap": 1.86,
+    "total_bytes": 1210222108,
+    "compiled_us": 367.2,
+    "sol_us": 197.4,
+    "repro_path": "repros/canonical/pointwise_97e5561d8ec6/repro.py"
+  },
+  {
+    "rank": 123,
+    "name": "sum_sum_sum_68c0b2a52dba",
+    "gap": 1.85,
+    "total_bytes": 415313920,
+    "compiled_us": 137.8,
+    "sol_us": 74.7,
+    "repro_path": "repros/canonical/sum_sum_sum_68c0b2a52dba/repro.py"
+  },
+  {
+    "rank": 124,
+    "name": "var_mean_f67bac0170d8",
+    "gap": 1.84,
+    "total_bytes": 157813760,
+    "compiled_us": 62.6,
+    "sol_us": 34.0,
+    "repro_path": "repros/canonical/var_mean_f67bac0170d8/repro.py"
+  },
+  {
+    "rank": 125,
+    "name": "sum_sum_f411c2fe78f9",
+    "gap": 1.82,
+    "total_bytes": 12002385136,
+    "compiled_us": 3370.4,
+    "sol_us": 1854.7,
+    "repro_path": "repros/canonical/sum_sum_f411c2fe78f9/repro.py"
+  },
+  {
+    "rank": 126,
+    "name": "sum_sum_5ebd82bcf7a3",
+    "gap": 1.81,
+    "total_bytes": 12595200,
+    "compiled_us": 20.4,
+    "sol_us": 11.3,
+    "repro_path": "repros/canonical/sum_sum_5ebd82bcf7a3/repro.py"
+  },
+  {
+    "rank": 127,
+    "name": "max_09687140bf0c",
+    "gap": 1.81,
+    "total_bytes": 273154304,
+    "compiled_us": 94.3,
+    "sol_us": 52.2,
+    "repro_path": "repros/canonical/max_09687140bf0c/repro.py"
+  },
+  {
+    "rank": 128,
+    "name": "sum_155d60c01fa7",
+    "gap": 1.8,
+    "total_bytes": 3293806856,
+    "compiled_us": 933.4,
+    "sol_us": 517.3,
+    "repro_path": "repros/canonical/sum_155d60c01fa7/repro.py"
+  },
+  {
+    "rank": 129,
+    "name": "sum_sum_sum_41360130eef6",
+    "gap": 1.8,
+    "total_bytes": 251732992,
+    "compiled_us": 89.7,
+    "sol_us": 49.8,
+    "repro_path": "repros/canonical/sum_sum_sum_41360130eef6/repro.py"
+  },
+  {
+    "rank": 130,
+    "name": "pointwise_b5207b2b8417",
+    "gap": 1.8,
+    "total_bytes": 1746765080,
+    "compiled_us": 503.1,
+    "sol_us": 279.5,
+    "repro_path": "repros/canonical/pointwise_b5207b2b8417/repro.py"
+  },
+  {
+    "rank": 131,
+    "name": "var_mean_a41dace406c0",
+    "gap": 1.78,
+    "total_bytes": 100794472,
+    "compiled_us": 45.1,
+    "sol_us": 25.3,
+    "repro_path": "repros/canonical/var_mean_a41dace406c0/repro.py"
+  },
+  {
+    "rank": 132,
+    "name": "var_mean_709a36953a9b",
+    "gap": 1.78,
+    "total_bytes": 3035520,
+    "compiled_us": 16.4,
+    "sol_us": 9.2,
+    "repro_path": "repros/canonical/var_mean_709a36953a9b/repro.py"
+  },
+  {
+    "rank": 133,
+    "name": "sum_sum_9c98fa8754c9",
+    "gap": 1.78,
+    "total_bytes": 33948160,
+    "compiled_us": 25.2,
+    "sol_us": 14.2,
+    "repro_path": "repros/canonical/sum_sum_9c98fa8754c9/repro.py"
+  },
+  {
+    "rank": 134,
+    "name": "sum_sum_4e98a67edb86",
+    "gap": 1.78,
+    "total_bytes": 100671488,
+    "compiled_us": 41.3,
+    "sol_us": 23.2,
+    "repro_path": "repros/canonical/sum_sum_4e98a67edb86/repro.py"
+  },
+  {
+    "rank": 135,
+    "name": "pointwise_d8763ad0ce9b",
+    "gap": 1.77,
+    "total_bytes": 564213344,
+    "compiled_us": 172.1,
+    "sol_us": 97.3,
+    "repro_path": "repros/canonical/pointwise_d8763ad0ce9b/repro.py"
+  },
+  {
+    "rank": 136,
+    "name": "sum_sum_sum_98f794d3747c",
+    "gap": 1.75,
+    "total_bytes": 201404416,
+    "compiled_us": 72.7,
+    "sol_us": 41.6,
+    "repro_path": "repros/canonical/sum_sum_sum_98f794d3747c/repro.py"
+  },
+  {
+    "rank": 137,
+    "name": "pointwise_5e0cdfa267ca",
+    "gap": 1.74,
+    "total_bytes": 564212672,
+    "compiled_us": 169.6,
+    "sol_us": 97.3,
+    "repro_path": "repros/canonical/pointwise_5e0cdfa267ca/repro.py"
+  },
+  {
+    "rank": 138,
+    "name": "pointwise_4ef882a876a7",
+    "gap": 1.74,
+    "total_bytes": 100663296,
+    "compiled_us": 41.2,
+    "sol_us": 23.6,
+    "repro_path": "repros/canonical/pointwise_4ef882a876a7/repro.py"
+  },
+  {
+    "rank": 139,
+    "name": "var_mean_1dd6a8ce4db1",
+    "gap": 1.74,
+    "total_bytes": 9987584,
+    "compiled_us": 18.4,
+    "sol_us": 10.6,
+    "repro_path": "repros/canonical/var_mean_1dd6a8ce4db1/repro.py"
+  },
+  {
+    "rank": 140,
+    "name": "pointwise_b67c2aa08ad4",
+    "gap": 1.73,
+    "total_bytes": 404815876,
+    "compiled_us": 123.1,
+    "sol_us": 71.0,
+    "repro_path": "repros/canonical/pointwise_b67c2aa08ad4/repro.py"
+  },
+  {
+    "rank": 141,
+    "name": "pointwise_2b8032162651",
+    "gap": 1.73,
+    "total_bytes": 4479890172,
+    "compiled_us": 1208.9,
+    "sol_us": 699.5,
+    "repro_path": "repros/canonical/pointwise_2b8032162651/repro.py"
+  },
+  {
+    "rank": 142,
+    "name": "pointwise_a69e6368596a",
+    "gap": 1.73,
+    "total_bytes": 14137440,
+    "compiled_us": 19.5,
+    "sol_us": 11.3,
+    "repro_path": "repros/canonical/pointwise_a69e6368596a/repro.py"
+  },
+  {
+    "rank": 143,
+    "name": "sum_sum_sum_ba065f95dbd8",
+    "gap": 1.72,
+    "total_bytes": 201375744,
+    "compiled_us": 68.2,
+    "sol_us": 39.6,
+    "repro_path": "repros/canonical/sum_sum_sum_ba065f95dbd8/repro.py"
+  },
+  {
+    "rank": 144,
+    "name": "pointwise_336749472a48",
+    "gap": 1.72,
+    "total_bytes": 901281856,
+    "compiled_us": 256.2,
+    "sol_us": 148.9,
+    "repro_path": "repros/canonical/pointwise_336749472a48/repro.py"
+  },
+  {
+    "rank": 145,
+    "name": "pointwise_cf96937968b4",
+    "gap": 1.71,
+    "total_bytes": 484054040,
+    "compiled_us": 145.4,
+    "sol_us": 85.0,
+    "repro_path": "repros/canonical/pointwise_cf96937968b4/repro.py"
+  },
+  {
+    "rank": 146,
+    "name": "sum_sum_sum_bf4de310f71f",
+    "gap": 1.71,
+    "total_bytes": 402796544,
+    "compiled_us": 124.3,
+    "sol_us": 72.7,
+    "repro_path": "repros/canonical/sum_sum_sum_bf4de310f71f/repro.py"
+  },
+  {
+    "rank": 147,
+    "name": "amax_sum_c0c1b95fe65e",
+    "gap": 1.71,
+    "total_bytes": 537919488,
+    "compiled_us": 156.1,
+    "sol_us": 91.3,
+    "repro_path": "repros/canonical/amax_sum_c0c1b95fe65e/repro.py"
+  },
+  {
+    "rank": 148,
+    "name": "pointwise_c21ecfc36315",
+    "gap": 1.71,
+    "total_bytes": 45741152,
+    "compiled_us": 28.0,
+    "sol_us": 16.4,
+    "repro_path": "repros/canonical/pointwise_c21ecfc36315/repro.py"
+  },
+  {
+    "rank": 149,
+    "name": "any_amax_sum_73ef6edcdd43",
+    "gap": 1.7,
+    "total_bytes": 25166592,
+    "compiled_us": 22.6,
+    "sol_us": 13.3,
+    "repro_path": "repros/canonical/any_amax_sum_73ef6edcdd43/repro.py"
+  },
+  {
+    "rank": 150,
+    "name": "sum_sum_sum_78d342d14669",
+    "gap": 1.69,
+    "total_bytes": 21299712,
+    "compiled_us": 20.5,
+    "sol_us": 12.1,
+    "repro_path": "repros/canonical/sum_sum_sum_78d342d14669/repro.py"
+  },
+  {
+    "rank": 151,
+    "name": "pointwise_8414097a5e76",
+    "gap": 1.69,
+    "total_bytes": 995531944,
+    "compiled_us": 276.5,
+    "sol_us": 163.8,
+    "repro_path": "repros/canonical/pointwise_8414097a5e76/repro.py"
+  },
+  {
+    "rank": 152,
+    "name": "pointwise_3e6393c7164c",
+    "gap": 1.68,
+    "total_bytes": 3549184,
+    "compiled_us": 15.5,
+    "sol_us": 9.2,
+    "repro_path": "repros/canonical/pointwise_3e6393c7164c/repro.py"
+  },
+  {
+    "rank": 153,
+    "name": "pointwise_11045cae77f9",
+    "gap": 1.65,
+    "total_bytes": 3025548648,
+    "compiled_us": 788.6,
+    "sol_us": 476.5,
+    "repro_path": "repros/canonical/pointwise_11045cae77f9/repro.py"
+  },
+  {
+    "rank": 154,
+    "name": "sum_sum_183024b77d7e",
+    "gap": 1.65,
+    "total_bytes": 58757120,
+    "compiled_us": 30.7,
+    "sol_us": 18.6,
+    "repro_path": "repros/canonical/sum_sum_183024b77d7e/repro.py"
+  },
+  {
+    "rank": 155,
+    "name": "mean_225751eaf77e",
+    "gap": 1.64,
+    "total_bytes": 19925504,
+    "compiled_us": 18.5,
+    "sol_us": 11.3,
+    "repro_path": "repros/canonical/mean_225751eaf77e/repro.py"
+  },
+  {
+    "rank": 156,
+    "name": "sum_sum_693bb9306334",
+    "gap": 1.63,
+    "total_bytes": 20983808,
+    "compiled_us": 18.8,
+    "sol_us": 11.5,
+    "repro_path": "repros/canonical/sum_sum_693bb9306334/repro.py"
+  },
+  {
+    "rank": 157,
+    "name": "pointwise_8d0610e6a6f9",
+    "gap": 1.63,
+    "total_bytes": 698707396,
+    "compiled_us": 192.4,
+    "sol_us": 117.8,
+    "repro_path": "repros/canonical/pointwise_8d0610e6a6f9/repro.py"
+  },
+  {
+    "rank": 158,
+    "name": "pointwise_4b23f512dcb6",
+    "gap": 1.63,
+    "total_bytes": 28311552,
+    "compiled_us": 18.5,
+    "sol_us": 11.3,
+    "repro_path": "repros/canonical/pointwise_4b23f512dcb6/repro.py"
+  },
+  {
+    "rank": 159,
+    "name": "sum_sum_sum_1f49961132c7",
+    "gap": 1.63,
+    "total_bytes": 2617327616,
+    "compiled_us": 671.1,
+    "sol_us": 412.9,
+    "repro_path": "repros/canonical/sum_sum_sum_1f49961132c7/repro.py"
+  },
+  {
+    "rank": 160,
+    "name": "sum_sum_sum_a89df8d0cd58",
+    "gap": 1.62,
+    "total_bytes": 100667904,
+    "compiled_us": 41.4,
+    "sol_us": 25.6,
+    "repro_path": "repros/canonical/sum_sum_sum_a89df8d0cd58/repro.py"
+  },
+  {
+    "rank": 161,
+    "name": "sum_sum_sum_cdeeeaa9b34f",
+    "gap": 1.61,
+    "total_bytes": 2483109888,
+    "compiled_us": 630.7,
+    "sol_us": 392.2,
+    "repro_path": "repros/canonical/sum_sum_sum_cdeeeaa9b34f/repro.py"
+  },
+  {
+    "rank": 162,
+    "name": "sum_sum_sum_37e256b8b271",
+    "gap": 1.6,
+    "total_bytes": 352396288,
+    "compiled_us": 103.6,
+    "sol_us": 64.5,
+    "repro_path": "repros/canonical/sum_sum_sum_37e256b8b271/repro.py"
+  },
+  {
+    "rank": 163,
+    "name": "pointwise_0cc5a889d527",
+    "gap": 1.6,
+    "total_bytes": 8832000,
+    "compiled_us": 16.5,
+    "sol_us": 10.3,
+    "repro_path": "repros/canonical/pointwise_0cc5a889d527/repro.py"
+  },
+  {
+    "rank": 164,
+    "name": "sum_sum_27e13128f815",
+    "gap": 1.59,
+    "total_bytes": 52449280,
+    "compiled_us": 27.7,
+    "sol_us": 17.4,
+    "repro_path": "repros/canonical/sum_sum_27e13128f815/repro.py"
+  },
+  {
+    "rank": 165,
+    "name": "sum_sum_9de1441e8dec",
+    "gap": 1.58,
+    "total_bytes": 25178112,
+    "compiled_us": 20.5,
+    "sol_us": 13.0,
+    "repro_path": "repros/canonical/sum_sum_9de1441e8dec/repro.py"
+  },
+  {
+    "rank": 166,
+    "name": "sum_sum_f5db9f0037cb",
+    "gap": 1.58,
+    "total_bytes": 35672064,
+    "compiled_us": 24.0,
+    "sol_us": 15.2,
+    "repro_path": "repros/canonical/sum_sum_f5db9f0037cb/repro.py"
+  },
+  {
+    "rank": 167,
+    "name": "sum_sum_ddef22ba6a08",
+    "gap": 1.57,
+    "total_bytes": 44060672,
+    "compiled_us": 24.3,
+    "sol_us": 15.4,
+    "repro_path": "repros/canonical/sum_sum_ddef22ba6a08/repro.py"
+  },
+  {
+    "rank": 168,
+    "name": "pointwise_e75a1a0b9675",
+    "gap": 1.57,
+    "total_bytes": 91478656,
+    "compiled_us": 37.0,
+    "sol_us": 23.6,
+    "repro_path": "repros/canonical/pointwise_e75a1a0b9675/repro.py"
+  },
+  {
+    "rank": 169,
+    "name": "max_c4bf986c7d26",
+    "gap": 1.56,
+    "total_bytes": 268964096,
+    "compiled_us": 81.3,
+    "sol_us": 52.1,
+    "repro_path": "repros/canonical/max_c4bf986c7d26/repro.py"
+  },
+  {
+    "rank": 170,
+    "name": "mean_e0ff03782e73",
+    "gap": 1.56,
+    "total_bytes": 115476992,
+    "compiled_us": 43.2,
+    "sol_us": 27.7,
+    "repro_path": "repros/canonical/mean_e0ff03782e73/repro.py"
+  },
+  {
+    "rank": 171,
+    "name": "pointwise_89ca58cf6ccb",
+    "gap": 1.56,
+    "total_bytes": 1815335632,
+    "compiled_us": 452.3,
+    "sol_us": 289.8,
+    "repro_path": "repros/canonical/pointwise_89ca58cf6ccb/repro.py"
+  },
+  {
+    "rank": 172,
+    "name": "sum_61a0e02731bd",
+    "gap": 1.56,
+    "total_bytes": 1867022376,
+    "compiled_us": 464.1,
+    "sol_us": 297.9,
+    "repro_path": "repros/canonical/sum_61a0e02731bd/repro.py"
+  },
+  {
+    "rank": 173,
+    "name": "pointwise_1c629e1a11a7",
+    "gap": 1.55,
+    "total_bytes": 12189696,
+    "compiled_us": 11.6,
+    "sol_us": 7.5,
+    "repro_path": "repros/canonical/pointwise_1c629e1a11a7/repro.py"
+  },
+  {
+    "rank": 174,
+    "name": "sum_793e6888e80a",
+    "gap": 1.54,
+    "total_bytes": 6424832,
+    "compiled_us": 14.3,
+    "sol_us": 9.3,
+    "repro_path": "repros/canonical/sum_793e6888e80a/repro.py"
+  },
+  {
+    "rank": 175,
+    "name": "mean_mean_c0e8d7954fcb",
+    "gap": 1.54,
+    "total_bytes": 29622784,
+    "compiled_us": 20.5,
+    "sol_us": 13.3,
+    "repro_path": "repros/canonical/mean_mean_c0e8d7954fcb/repro.py"
+  },
+  {
+    "rank": 176,
+    "name": "pointwise_63bb48fde67e",
+    "gap": 1.54,
+    "total_bytes": 239505408,
+    "compiled_us": 71.9,
+    "sol_us": 46.8,
+    "repro_path": "repros/canonical/pointwise_63bb48fde67e/repro.py"
+  },
+  {
+    "rank": 177,
+    "name": "sum_sum_2f778a10b403",
+    "gap": 1.53,
+    "total_bytes": 29380608,
+    "compiled_us": 20.5,
+    "sol_us": 13.3,
+    "repro_path": "repros/canonical/sum_sum_2f778a10b403/repro.py"
+  },
+  {
+    "rank": 178,
+    "name": "pointwise_df2a28d985ff",
+    "gap": 1.53,
+    "total_bytes": 901282680,
+    "compiled_us": 227.5,
+    "sol_us": 148.9,
+    "repro_path": "repros/canonical/pointwise_df2a28d985ff/repro.py"
+  },
+  {
+    "rank": 179,
+    "name": "pointwise_6357d5751809",
+    "gap": 1.53,
+    "total_bytes": 3025547444,
+    "compiled_us": 726.4,
+    "sol_us": 476.1,
+    "repro_path": "repros/canonical/pointwise_6357d5751809/repro.py"
+  },
+  {
+    "rank": 180,
+    "name": "pointwise_0adaf527dc55",
+    "gap": 1.51,
+    "total_bytes": 35462912,
+    "compiled_us": 21.0,
+    "sol_us": 13.9,
+    "repro_path": "repros/canonical/pointwise_0adaf527dc55/repro.py"
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "845b0e25aa9d",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 16,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.expand.default",
+    "aten.ne.Scalar",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction",
+    "prims.iota.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "dynamo_GPT2ForSequenceClassification",
+    "hf_gpt2"
+  ]
+}

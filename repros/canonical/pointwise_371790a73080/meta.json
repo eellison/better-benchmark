@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "371790a73080",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.embedding.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "vllm_facebook_opt-125m"
+  ]
+}

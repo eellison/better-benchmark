@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "3cb8fa01166a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "dynamo_GoogleFnet",
+    "dynamo_GoogleFnet_inference",
+    "vllm_facebook_opt-125m",
+    "vllm_facebook_opt-125m_inference"
+  ]
+}

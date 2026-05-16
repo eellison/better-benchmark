@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "578b224ea8ef",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.tanh.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "tlparse_torchbench_s7_g10",
+    "tlparse_torchbench_s8_g51"
+  ]
+}

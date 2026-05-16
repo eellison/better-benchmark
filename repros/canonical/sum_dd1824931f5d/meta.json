@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "dd1824931f5d",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.div.Tensor",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "vllm_Qwen_Qwen3-30B-A3B_inference"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "2c048e3bbc7a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.native_dropout.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_huggingface_s3_g21"
+  ]
+}

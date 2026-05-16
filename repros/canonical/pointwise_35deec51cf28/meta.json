@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "35deec51cf28",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 19,
+  "models": [
+    "dynamo_AlbertForMaskedLM",
+    "dynamo_AlbertForMaskedLM_inference",
+    "dynamo_BertForMaskedLM",
+    "dynamo_BertForMaskedLM_inference",
+    "dynamo_DebertaV2ForMaskedLM",
+    "dynamo_DebertaV2ForMaskedLM_inference",
+    "dynamo_GPTNeoForCausalLM",
+    "dynamo_GPTNeoForCausalLM_inference",
+    "dynamo_GPTNeoForSequenceClassification",
+    "dynamo_GPTNeoForSequenceClassification_inference",
+    "dynamo_MT5ForConditionalGeneration",
+    "dynamo_MT5ForConditionalGeneration_inference",
+    "dynamo_T5ForConditionalGeneration",
+    "dynamo_T5Small",
+    "dynamo_XGLMForCausalLM",
+    "tlparse_huggingface_s4_g35",
+    "tlparse_torchbench_s3_g174",
+    "vllm_openai_gpt-oss-20b",
+    "vllm_openai_gpt-oss-20b_inference"
+  ]
+}

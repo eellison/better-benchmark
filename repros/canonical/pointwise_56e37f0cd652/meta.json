@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "56e37f0cd652",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.reshape.default"
+  ],
+  "n_models": 13,
+  "models": [
+    "dynamo_AllenaiLongformerBase",
+    "dynamo_MT5ForConditionalGeneration",
+    "dynamo_Reformer",
+    "dynamo_T5ForConditionalGeneration",
+    "dynamo_T5Small",
+    "vllm_Qwen_Qwen3-0.6B_inference",
+    "vllm_Qwen_Qwen3-30B-A3B_inference",
+    "vllm_deepseek-ai_DeepSeek-V3_inference",
+    "vllm_facebook_opt-125m",
+    "vllm_facebook_opt-125m_inference",
+    "vllm_mistralai_Mistral-7B-Instruct-v0.3_inference",
+    "vllm_openai_gpt-oss-20b",
+    "vllm_openai_gpt-oss-20b_inference"
+  ]
+}

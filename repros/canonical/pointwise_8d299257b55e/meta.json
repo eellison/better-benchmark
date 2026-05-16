@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "8d299257b55e",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "tlparse_torchbench_s5_g53"
+  ]
+}
