@@ -1,0 +1,24 @@
+{
+  "experiment": "num_warps_fix_persistent_reduction",
+  "description": "Remove num_warps=1,min_num_warps=1 override for CUDA persistent INNER reductions",
+  "file_patched": "torch/_inductor/runtime/triton_heuristics.py",
+  "line": "4114",
+  "original": "num_warps, min_num_warps = 1, 1",
+  "patched": "num_warps, min_num_warps = None, None",
+  "hardware": "NVIDIA B200",
+  "results": {
+    "amax_sum_b978f41418bc (attention+dropout, 7.3x gap)": {
+      "before_us": 230.21258974897452,
+      "after_us": 230.40890764143015,
+      "speedup": 0.9991479587553049,
+      "repro_path": "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_b978f41418bc/repro.py"
+    },
+    "amax_sum_35525501b882 (softmax+dropout, 3.8x gap)": {
+      "before_us": 131.8970895288536,
+      "after_us": 131.9092507291044,
+      "speedup": 0.9999078063124187,
+      "repro_path": "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_35525501b882/repro.py"
+    }
+  },
+  "timestamp": "2026-05-16T15:48:11"
+}
