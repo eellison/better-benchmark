@@ -10,11 +10,20 @@
     "<built-in function getitem>",
     "aten.var_mean.correction"
   ],
-  "n_models": 4,
+  "n_models": 13,
   "models": [
     "dynamo_Reformer",
     "dynamo_Reformer_inference",
     "hf_BlenderbotForCausalLM_training",
-    "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_training"
+    "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_training",
+    "hf_M2M100ForConditionalGeneration_training",
+    "hf_MBartForCausalLM_training",
+    "torchvision_densenet121_training",
+    "torchvision_efficientnet_b0_training",
+    "torchvision_mobilenet_v2_training",
+    "torchvision_resnet18_training",
+    "torchvision_resnet50_training",
+    "torchvision_resnext50_32x4d_training",
+    "torchvision_wide_resnet50_2_training"
   ]
 }

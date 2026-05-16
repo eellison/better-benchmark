@@ -215,6 +215,49 @@
         "hf_ElectraForCausalLM_inference"
       ],
       "shape_hash": "2f9c2b54"
+    },
+    "hf_m2m100forconditionalgeneration_inference_1c578ec2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            128,
+            128
+          ],
+          "stride": [
+            0,
+            128,
+            1,
+            0
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_M2M100ForConditionalGeneration_inference"
+      ],
+      "shape_hash": "1c578ec2"
     }
   }
 }

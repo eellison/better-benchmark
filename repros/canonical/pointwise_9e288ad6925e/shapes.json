@@ -341,6 +341,202 @@
         "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_training"
       ],
       "shape_hash": "7f5026f2"
+    },
+    "hf_m2m100forconditionalgeneration_inference_e3597c9c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            128,
+            128
+          ],
+          "stride": [
+            0,
+            16384,
+            128,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "hf_M2M100ForConditionalGeneration_inference"
+      ],
+      "shape_hash": "e3597c9c"
+    },
+    "hf_m2m100forconditionalgeneration_training_e3597c9c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            128,
+            128
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_M2M100ForConditionalGeneration_training"
+      ],
+      "shape_hash": "e3597c9c"
+    },
+    "hf_mbartforcausallm_inference_8d26a7f9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            1024,
+            1024
+          ],
+          "stride": [
+            0,
+            1048576,
+            1024,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "hf_MBartForCausalLM_inference"
+      ],
+      "shape_hash": "8d26a7f9"
+    },
+    "hf_mbartforcausallm_training_8d26a7f9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            1024,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_MBartForCausalLM_training"
+      ],
+      "shape_hash": "8d26a7f9"
     }
   }
 }

@@ -25,13 +25,16 @@
     "aten.sum.dim_IntList",
     "prims.convert_element_type.default"
   ],
-  "n_models": 6,
+  "n_models": 9,
   "models": [
     "hf_AllenaiLongformerBase_training",
     "hf_BertForMaskedLM_training",
     "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_training",
     "hf_DebertaV2ForMaskedLM_training",
     "hf_ElectraForCausalLM_training",
+    "hf_LayoutLMForMaskedLM_training",
+    "hf_M2M100ForConditionalGeneration_training",
+    "hf_MegatronBertForCausalLM_training",
     "hf_bert_large_train"
   ]
 }

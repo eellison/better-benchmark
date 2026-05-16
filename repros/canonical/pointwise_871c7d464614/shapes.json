@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "871c7d464614",
+  "configs": {
+    "torchvision_swin_t_inference_1bbed59f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            49,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_swin_t_inference"
+      ],
+      "shape_hash": "1bbed59f"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "53687b864150",
+  "configs": {
+    "hf_layoutlmformaskedlm_inference_1e16978b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_LayoutLMForMaskedLM_inference"
+      ],
+      "shape_hash": "1e16978b"
+    }
+  }
+}

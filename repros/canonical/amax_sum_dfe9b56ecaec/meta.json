@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "dfe9b56ecaec",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 18,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.index.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.select.int",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchvision_swin_t_inference",
+    "torchvision_swin_t_training"
+  ]
+}

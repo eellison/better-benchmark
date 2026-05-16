@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "0b16190d48f9",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.reshape.default",
+    "aten.split.Tensor"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_GPTJForQuestionAnswering_inference",
+    "hf_GPTJForQuestionAnswering_training"
+  ]
+}

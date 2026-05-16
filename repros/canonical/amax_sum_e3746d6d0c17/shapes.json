@@ -1,0 +1,52 @@
+{
+  "pattern_hash": "e3746d6d0c17",
+  "configs": {
+    "hf_mt5forconditionalgeneration_training_272aee4c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            48,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            84
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_MT5ForConditionalGeneration_training"
+      ],
+      "shape_hash": "272aee4c"
+    }
+  }
+}

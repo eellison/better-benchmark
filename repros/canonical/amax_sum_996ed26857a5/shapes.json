@@ -1,0 +1,41 @@
+{
+  "pattern_hash": "996ed26857a5",
+  "configs": {
+    "hf_layoutlmformaskedlm_training_ea1aa84a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            37
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_LayoutLMForMaskedLM_training"
+      ],
+      "shape_hash": "ea1aa84a"
+    }
+  }
+}

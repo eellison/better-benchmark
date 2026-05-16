@@ -1,0 +1,42 @@
+{
+  "pattern_hash": "373d3b85fc04",
+  "configs": {
+    "torchvision_swin_t_training_f9a6c221": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            196,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            22
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            7,
+            7,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_swin_t_training"
+      ],
+      "shape_hash": "f9a6c221"
+    }
+  }
+}

@@ -36,6 +36,42 @@
         "hf_AllenaiLongformerBase_training"
       ],
       "shape_hash": "0931dbc0"
+    },
+    "hf_m2m100forconditionalgeneration_inference_f18b7be0": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            128
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_M2M100ForConditionalGeneration_inference"
+      ],
+      "shape_hash": "f18b7be0"
+    },
+    "hf_m2m100forconditionalgeneration_training_f18b7be0": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            128
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_M2M100ForConditionalGeneration_training"
+      ],
+      "shape_hash": "f18b7be0"
     }
   }
 }

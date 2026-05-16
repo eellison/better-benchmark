@@ -84,6 +84,62 @@
         "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_training"
       ],
       "shape_hash": "bdec2138"
+    },
+    "hf_m2m100forconditionalgeneration_training_91f93cae": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            128
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_M2M100ForConditionalGeneration_training"
+      ],
+      "shape_hash": "91f93cae"
+    },
+    "hf_mbartforcausallm_training_fd472ddc": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_MBartForCausalLM_training"
+      ],
+      "shape_hash": "fd472ddc"
     }
   }
 }

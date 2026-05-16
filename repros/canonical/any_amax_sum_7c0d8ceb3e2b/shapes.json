@@ -135,6 +135,33 @@
         "hf_ElectraForCausalLM_inference"
       ],
       "shape_hash": "acd074f0"
+    },
+    "hf_m2m100forconditionalgeneration_inference_08aa5681": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_M2M100ForConditionalGeneration_inference"
+      ],
+      "shape_hash": "08aa5681"
     }
   }
 }

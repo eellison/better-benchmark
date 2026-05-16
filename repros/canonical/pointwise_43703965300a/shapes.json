@@ -1,0 +1,42 @@
+{
+  "pattern_hash": "43703965300a",
+  "configs": {
+    "hf_m2m100forconditionalgeneration_training_d150ca1d": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            128
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.int32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1026,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_M2M100ForConditionalGeneration_training"
+      ],
+      "shape_hash": "d150ca1d"
+    }
+  }
+}

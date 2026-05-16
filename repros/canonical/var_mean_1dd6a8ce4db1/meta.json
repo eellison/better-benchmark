@@ -15,8 +15,10 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "tlparse_timm_s3_g20"
+    "tlparse_timm_s3_g20",
+    "torchvision_vit_b_16_inference",
+    "torchvision_vit_b_16_training"
   ]
 }

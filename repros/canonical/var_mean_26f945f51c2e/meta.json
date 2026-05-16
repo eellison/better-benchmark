@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "26f945f51c2e",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchvision_vit_b_16_training"
+  ]
+}

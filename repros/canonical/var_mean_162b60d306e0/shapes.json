@@ -1,0 +1,43 @@
+{
+  "pattern_hash": "162b60d306e0",
+  "configs": {
+    "torchvision_swin_t_inference_0b6ea462": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            96,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_swin_t_inference"
+      ],
+      "shape_hash": "0b6ea462"
+    },
+    "torchvision_swin_t_training_a3ecfd3d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            96,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_swin_t_training"
+      ],
+      "shape_hash": "a3ecfd3d"
+    }
+  }
+}

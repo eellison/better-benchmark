@@ -1,0 +1,105 @@
+{
+  "pattern_hash": "fe98f845049a",
+  "configs": {
+    "hf_gptneoforcausallm_inference_adecc250": {
+      "inputs": [
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            2048,
+            2048
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            2048
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_GPTNeoForCausalLM_inference"
+      ],
+      "shape_hash": "adecc250"
+    },
+    "hf_gptneoforsequenceclassification_inference_adecc250": {
+      "inputs": [
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            2048,
+            2048
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            2048
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_GPTNeoForSequenceClassification_inference"
+      ],
+      "shape_hash": "adecc250"
+    }
+  }
+}

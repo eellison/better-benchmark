@@ -21,7 +21,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 10,
+  "n_models": 15,
   "models": [
     "hf_AllenaiLongformerBase_training",
     "hf_BartForCausalLM_training",
@@ -31,7 +31,12 @@
     "hf_DebertaV2ForMaskedLM_training",
     "hf_DistilBertForMaskedLM_training",
     "hf_ElectraForCausalLM_training",
+    "hf_LayoutLMForMaskedLM_training",
+    "hf_MBartForCausalLM_training",
+    "hf_MegatronBertForCausalLM_training",
     "hf_bert_large_train",
-    "hf_distilbert_train"
+    "hf_distilbert_train",
+    "torchvision_swin_t_training",
+    "torchvision_vit_b_16_training"
   ]
 }

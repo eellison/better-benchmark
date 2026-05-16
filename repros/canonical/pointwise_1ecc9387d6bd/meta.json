@@ -14,15 +14,21 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 8,
+  "n_models": 14,
   "models": [
     "hf_BertForMaskedLM_training",
     "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_training",
     "hf_DebertaV2ForMaskedLM_training",
     "hf_DistilBertForMaskedLM_training",
     "hf_ElectraForCausalLM_training",
+    "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_training",
+    "hf_LayoutLMForMaskedLM_training",
+    "hf_M2M100ForConditionalGeneration_training",
+    "hf_MegatronBertForCausalLM_training",
     "hf_bert_large_train",
     "hf_distilbert_train",
-    "timm_convnext_tiny"
+    "timm_convnext_tiny",
+    "torchvision_vit_b_16_inference"
   ]
 }

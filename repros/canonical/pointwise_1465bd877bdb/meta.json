@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "1465bd877bdb",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.le.Scalar",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchvision_vgg16_training"
+  ]
+}

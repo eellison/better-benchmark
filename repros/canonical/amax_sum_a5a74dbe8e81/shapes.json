@@ -1,0 +1,167 @@
+{
+  "pattern_hash": "a5a74dbe8e81",
+  "configs": {
+    "torchvision_swin_t_inference_18b20907": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            48,
+            49,
+            49
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            169,
+            12
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            2401
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            3,
+            4,
+            12,
+            49,
+            32
+          ],
+          "stride": [
+            384,
+            56448,
+            32,
+            1152,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "torchvision_swin_t_inference"
+      ],
+      "shape_hash": "18b20907"
+    },
+    "torchvision_swin_t_inference_f741a7cb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96,
+            49,
+            49
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            169,
+            6
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            2401
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            3,
+            16,
+            6,
+            49,
+            32
+          ],
+          "stride": [
+            192,
+            28224,
+            32,
+            576,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "torchvision_swin_t_inference"
+      ],
+      "shape_hash": "f741a7cb"
+    },
+    "torchvision_swin_t_inference_c07edbc8": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192,
+            49,
+            49
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            169,
+            3
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            2401
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            3,
+            64,
+            3,
+            49,
+            32
+          ],
+          "stride": [
+            96,
+            14112,
+            32,
+            288,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "torchvision_swin_t_inference"
+      ],
+      "shape_hash": "c07edbc8"
+    }
+  }
+}

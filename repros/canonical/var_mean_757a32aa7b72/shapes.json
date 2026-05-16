@@ -34,6 +34,40 @@
         "hf_AlbertForMaskedLM_training"
       ],
       "shape_hash": "8405719f"
+    },
+    "hf_googlefnet_inference_13b20d0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_GoogleFnet_inference"
+      ],
+      "shape_hash": "13b20d0d"
+    },
+    "hf_googlefnet_training_13b20d0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_GoogleFnet_training"
+      ],
+      "shape_hash": "13b20d0d"
     }
   }
 }

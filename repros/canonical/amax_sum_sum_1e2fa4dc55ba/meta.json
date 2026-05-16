@@ -32,11 +32,13 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 4,
+  "n_models": 6,
   "models": [
     "hf_AllenaiLongformerBase_training",
     "hf_BartForCausalLM_training",
     "hf_BlenderbotForCausalLM_training",
+    "hf_M2M100ForConditionalGeneration_training",
+    "hf_MBartForCausalLM_training",
     "hf_t5_base_train"
   ]
 }

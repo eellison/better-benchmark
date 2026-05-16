@@ -40,12 +40,13 @@
     "aten.where.self",
     "prims.iota.default"
   ],
-  "n_models": 5,
+  "n_models": 6,
   "models": [
     "hf_AlbertForMaskedLM_inference",
     "hf_BertForMaskedLM_inference",
     "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_inference",
     "hf_DistilBertForMaskedLM_inference",
-    "hf_ElectraForCausalLM_inference"
+    "hf_ElectraForCausalLM_inference",
+    "hf_M2M100ForConditionalGeneration_inference"
   ]
 }

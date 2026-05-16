@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "871c7d464614",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.select.int",
+    "aten.select.int"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchvision_swin_t_inference"
+  ]
+}

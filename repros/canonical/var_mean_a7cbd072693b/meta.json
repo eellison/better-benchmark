@@ -12,7 +12,7 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 70,
+  "n_models": 82,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_AlbertForMaskedLM_inference",
@@ -76,6 +76,15 @@
     "hf_DistillGPT2_inference",
     "hf_ElectraForCausalLM_inference",
     "hf_GPT2ForSequenceClassification_inference",
+    "hf_GPTNeoForCausalLM_inference",
+    "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_inference",
+    "hf_GPTNeoForSequenceClassification_training",
+    "hf_GoogleFnet_inference",
+    "hf_LayoutLMForMaskedLM_inference",
+    "hf_M2M100ForConditionalGeneration_inference",
+    "hf_MBartForCausalLM_inference",
+    "hf_MegatronBertForCausalLM_inference",
     "hf_albert",
     "hf_bert",
     "hf_distilbert_train",
@@ -83,7 +92,10 @@
     "hf_opt",
     "tlparse_timm_s2_g20",
     "tlparse_timm_s3_g20",
-    "tlparse_torchbench_s3_g62"
+    "tlparse_torchbench_s3_g62",
+    "torchvision_swin_t_inference",
+    "torchvision_swin_t_training",
+    "torchvision_vit_b_16_inference"
   ],
   "perf": {
     "B200": {

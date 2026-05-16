@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "5f8c035ef07e",
+  "configs": {
+    "torchvision_vit_b_16_inference_59955a39": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            197,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_vit_b_16_inference"
+      ],
+      "shape_hash": "59955a39"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "83548ae99ee6",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 17,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.full.default",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.select_scatter.default",
+    "aten.select_scatter.default",
+    "aten.select_scatter.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchvision_swin_t_training"
+  ]
+}

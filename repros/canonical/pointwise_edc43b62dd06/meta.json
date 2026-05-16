@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "edc43b62dd06",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchvision_vit_b_16_training"
+  ]
+}

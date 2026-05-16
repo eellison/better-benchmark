@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "fa65bc10e324",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchvision_vit_b_16_training"
+  ]
+}

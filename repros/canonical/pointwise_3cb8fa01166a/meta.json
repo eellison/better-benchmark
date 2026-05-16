@@ -12,10 +12,12 @@
     "aten.sub.Tensor",
     "prims.convert_element_type.default"
   ],
-  "n_models": 4,
+  "n_models": 6,
   "models": [
     "dynamo_GoogleFnet",
     "dynamo_GoogleFnet_inference",
+    "hf_GoogleFnet_inference",
+    "hf_GoogleFnet_training",
     "vllm_facebook_opt-125m",
     "vllm_facebook_opt-125m_inference"
   ]

@@ -15,7 +15,7 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 7,
+  "n_models": 13,
   "models": [
     "hf_AlbertForMaskedLM_inference",
     "hf_BertForMaskedLM_inference",
@@ -23,6 +23,12 @@
     "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_training",
     "hf_DebertaV2ForMaskedLM_inference",
     "hf_DistilBertForMaskedLM_inference",
-    "hf_ElectraForCausalLM_inference"
+    "hf_ElectraForCausalLM_inference",
+    "hf_GPTNeoForCausalLM_inference",
+    "hf_GPTNeoForSequenceClassification_inference",
+    "hf_LayoutLMForMaskedLM_inference",
+    "hf_M2M100ForConditionalGeneration_inference",
+    "hf_M2M100ForConditionalGeneration_training",
+    "hf_MegatronBertForCausalLM_inference"
   ]
 }

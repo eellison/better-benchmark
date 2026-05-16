@@ -16,10 +16,16 @@
     "aten.reshape.default",
     "aten.tanh.default"
   ],
-  "n_models": 3,
+  "n_models": 9,
   "models": [
     "dynamo_DistillGPT2",
     "hf_AlbertForMaskedLM_inference",
-    "hf_AlbertForMaskedLM_training"
+    "hf_AlbertForMaskedLM_training",
+    "hf_GPTNeoForCausalLM_inference",
+    "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_inference",
+    "hf_GPTNeoForSequenceClassification_training",
+    "hf_GoogleFnet_inference",
+    "hf_GoogleFnet_training"
   ]
 }

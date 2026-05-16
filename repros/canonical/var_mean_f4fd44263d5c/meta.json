@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "f4fd44263d5c",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 4,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.avg_pool2d.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchvision_densenet121_training"
+  ]
+}

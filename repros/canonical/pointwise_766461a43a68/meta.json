@@ -1,0 +1,37 @@
+{
+  "pattern_hash": "766461a43a68",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 22,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.rsqrt.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "torchvision_resnet18_training",
+    "torchvision_resnet50_training",
+    "torchvision_resnext50_32x4d_training",
+    "torchvision_wide_resnet50_2_training"
+  ]
+}

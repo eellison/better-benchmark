@@ -11,7 +11,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 23,
+  "n_models": 37,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_GPTNeoForCausalLM",
@@ -32,9 +32,23 @@
     "hf_DistilBertForMaskedLM_training",
     "hf_ElectraForCausalLM_inference",
     "hf_ElectraForCausalLM_training",
+    "hf_GPTNeoForCausalLM_inference",
+    "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_inference",
+    "hf_GPTNeoForSequenceClassification_training",
+    "hf_LayoutLMForMaskedLM_inference",
+    "hf_LayoutLMForMaskedLM_training",
+    "hf_M2M100ForConditionalGeneration_inference",
+    "hf_M2M100ForConditionalGeneration_training",
+    "hf_MT5ForConditionalGeneration_inference",
+    "hf_MT5ForConditionalGeneration_training",
+    "hf_MegatronBertForCausalLM_inference",
+    "hf_MegatronBertForCausalLM_training",
     "hf_bert_large_train",
     "hf_distilbert_train",
     "hf_t5_base_train",
-    "t5_base_inference"
+    "t5_base_inference",
+    "torchvision_swin_t_inference",
+    "torchvision_swin_t_training"
   ]
 }

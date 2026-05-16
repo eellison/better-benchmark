@@ -1,0 +1,40 @@
+{
+  "pattern_hash": "2661f443ea29",
+  "configs": {
+    "hf_mt5forconditionalgeneration_inference_544bc73f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MT5ForConditionalGeneration_inference"
+      ],
+      "shape_hash": "544bc73f"
+    }
+  }
+}

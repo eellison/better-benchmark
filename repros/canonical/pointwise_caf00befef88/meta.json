@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "caf00befef88",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten._adaptive_avg_pool2d.default",
+    "aten.permute.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchvision_vgg16_inference",
+    "torchvision_vgg16_training"
+  ]
+}

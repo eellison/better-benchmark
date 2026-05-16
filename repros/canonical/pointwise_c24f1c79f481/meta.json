@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "c24f1c79f481",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 14,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims._low_memory_max_pool_with_offsets.default"
+  ],
+  "n_models": 5,
+  "models": [
+    "torchvision_densenet121_training",
+    "torchvision_resnet18_training",
+    "torchvision_resnet50_training",
+    "torchvision_resnext50_32x4d_training",
+    "torchvision_wide_resnet50_2_training"
+  ]
+}

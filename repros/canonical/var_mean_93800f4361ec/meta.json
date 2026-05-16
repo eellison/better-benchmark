@@ -35,8 +35,9 @@
     "aten.sub.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_LayoutLMForMaskedLM_training",
     "tlparse_huggingface_s3_g21"
   ]
 }

@@ -1,0 +1,276 @@
+{
+  "pattern_hash": "5c0ff7e50403",
+  "configs": {
+    "torchvision_vgg16_training_cbdb1860": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            64,
+            112,
+            112
+          ],
+          "stride": [
+            802816,
+            1,
+            7168,
+            64
+          ]
+        },
+        {
+          "dtype": "torch.int8",
+          "device": "cuda",
+          "shape": [
+            4,
+            64,
+            112,
+            112
+          ],
+          "stride": [
+            802816,
+            1,
+            7168,
+            64
+          ],
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            4,
+            64,
+            224,
+            224
+          ],
+          "stride": [
+            3211264,
+            1,
+            14336,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "cbdb1860"
+    },
+    "torchvision_vgg16_training_788d40b6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            128,
+            56,
+            56
+          ],
+          "stride": [
+            401408,
+            1,
+            7168,
+            128
+          ]
+        },
+        {
+          "dtype": "torch.int8",
+          "device": "cuda",
+          "shape": [
+            4,
+            128,
+            56,
+            56
+          ],
+          "stride": [
+            401408,
+            1,
+            7168,
+            128
+          ],
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            4,
+            128,
+            112,
+            112
+          ],
+          "stride": [
+            1605632,
+            1,
+            14336,
+            128
+          ]
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "788d40b6"
+    },
+    "torchvision_vgg16_training_aa0b5e7d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            256,
+            28,
+            28
+          ],
+          "stride": [
+            200704,
+            1,
+            7168,
+            256
+          ]
+        },
+        {
+          "dtype": "torch.int8",
+          "device": "cuda",
+          "shape": [
+            4,
+            256,
+            28,
+            28
+          ],
+          "stride": [
+            200704,
+            1,
+            7168,
+            256
+          ],
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            4,
+            256,
+            56,
+            56
+          ],
+          "stride": [
+            802816,
+            1,
+            14336,
+            256
+          ]
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "aa0b5e7d"
+    },
+    "torchvision_vgg16_training_d7329710": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            14,
+            14
+          ],
+          "stride": [
+            100352,
+            1,
+            7168,
+            512
+          ]
+        },
+        {
+          "dtype": "torch.int8",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            14,
+            14
+          ],
+          "stride": [
+            100352,
+            1,
+            7168,
+            512
+          ],
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            28,
+            28
+          ],
+          "stride": [
+            401408,
+            1,
+            14336,
+            512
+          ]
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "d7329710"
+    },
+    "torchvision_vgg16_training_f89fc3b6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            7,
+            7
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int8",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            7,
+            7
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            14,
+            14
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "f89fc3b6"
+    }
+  }
+}

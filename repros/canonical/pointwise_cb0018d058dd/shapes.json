@@ -1,0 +1,100 @@
+{
+  "pattern_hash": "cb0018d058dd",
+  "configs": {
+    "torchvision_vgg16_training_39f7bde6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "39f7bde6"
+    },
+    "torchvision_vgg16_training_fcbb7663": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "fcbb7663"
+    },
+    "torchvision_vgg16_training_3e85916e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            256,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "3e85916e"
+    },
+    "torchvision_vgg16_training_4db2f480": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            128,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "4db2f480"
+    },
+    "torchvision_vgg16_training_93a4ac40": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            64,
+            224,
+            224
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "torchvision_vgg16_training"
+      ],
+      "shape_hash": "93a4ac40"
+    }
+  }
+}

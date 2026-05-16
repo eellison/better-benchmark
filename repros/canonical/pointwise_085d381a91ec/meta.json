@@ -38,8 +38,9 @@
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "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_inference"
+    "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_inference",
+    "hf_M2M100ForConditionalGeneration_inference"
   ]
 }

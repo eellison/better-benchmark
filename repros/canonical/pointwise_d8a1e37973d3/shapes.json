@@ -108,6 +108,34 @@
         "hf_t5_base_train"
       ],
       "shape_hash": "4f1e5d4d"
+    },
+    "hf_mbartforcausallm_training_214c859f": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MBartForCausalLM_training"
+      ],
+      "shape_hash": "214c859f"
     }
   }
 }

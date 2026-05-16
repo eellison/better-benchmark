@@ -13,7 +13,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 19,
+  "n_models": 29,
   "models": [
     "hf_AllenaiLongformerBase_inference",
     "hf_AllenaiLongformerBase_training",
@@ -31,8 +31,18 @@
     "hf_DistilBertForMaskedLM_training",
     "hf_ElectraForCausalLM_inference",
     "hf_ElectraForCausalLM_training",
+    "hf_LayoutLMForMaskedLM_inference",
+    "hf_LayoutLMForMaskedLM_training",
+    "hf_MBartForCausalLM_inference",
+    "hf_MBartForCausalLM_training",
+    "hf_MegatronBertForCausalLM_inference",
+    "hf_MegatronBertForCausalLM_training",
     "hf_bert_large_train",
     "hf_distilbert_train",
-    "timm_convnext_tiny"
+    "timm_convnext_tiny",
+    "torchvision_swin_t_inference",
+    "torchvision_swin_t_training",
+    "torchvision_vit_b_16_inference",
+    "torchvision_vit_b_16_training"
   ]
 }

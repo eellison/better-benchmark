@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "162b60d306e0",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 5,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchvision_swin_t_inference",
+    "torchvision_swin_t_training"
+  ]
+}

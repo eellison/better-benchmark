@@ -32,8 +32,9 @@
     "aten.where.self",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_GPT2ForSequenceClassification_training"
+    "hf_GPT2ForSequenceClassification_training",
+    "hf_GPTNeoForSequenceClassification_training"
   ]
 }

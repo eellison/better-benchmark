@@ -13,7 +13,7 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 26,
+  "n_models": 48,
   "models": [
     "dynamo_DistillGPT2",
     "hf_AlbertForMaskedLM_inference",
@@ -38,8 +38,30 @@
     "hf_ElectraForCausalLM_training",
     "hf_GPT2ForSequenceClassification_inference",
     "hf_GPT2ForSequenceClassification_training",
+    "hf_GPTJForCausalLM_inference",
+    "hf_GPTJForCausalLM_training",
+    "hf_GPTJForQuestionAnswering_inference",
+    "hf_GPTJForQuestionAnswering_training",
+    "hf_GPTNeoForCausalLM_inference",
+    "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_inference",
+    "hf_GPTNeoForSequenceClassification_training",
+    "hf_GoogleFnet_inference",
+    "hf_GoogleFnet_training",
+    "hf_LayoutLMForMaskedLM_inference",
+    "hf_LayoutLMForMaskedLM_training",
+    "hf_M2M100ForConditionalGeneration_inference",
+    "hf_M2M100ForConditionalGeneration_training",
+    "hf_MBartForCausalLM_inference",
+    "hf_MBartForCausalLM_training",
+    "hf_MegatronBertForCausalLM_inference",
+    "hf_MegatronBertForCausalLM_training",
     "hf_bert_large_train",
     "hf_distilbert_train",
-    "timm_convnext_tiny"
+    "timm_convnext_tiny",
+    "torchvision_swin_t_inference",
+    "torchvision_swin_t_training",
+    "torchvision_vit_b_16_inference",
+    "torchvision_vit_b_16_training"
   ]
 }

@@ -1,0 +1,40 @@
+{
+  "pattern_hash": "2545588020b0",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 28,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.select_scatter.default",
+    "aten.select_scatter.default",
+    "aten.select_scatter.default",
+    "aten.squeeze.dim",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchvision_vit_b_16_training"
+  ]
+}

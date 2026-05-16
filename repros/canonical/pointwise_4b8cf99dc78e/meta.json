@@ -15,9 +15,11 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
     "hf_BlenderbotForCausalLM_training",
-    "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_training"
+    "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_training",
+    "hf_M2M100ForConditionalGeneration_training",
+    "hf_MBartForCausalLM_training"
   ]
 }

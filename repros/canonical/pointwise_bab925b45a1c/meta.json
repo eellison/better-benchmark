@@ -23,9 +23,13 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 6,
   "models": [
     "timm_regnetx_032",
-    "timm_resnet50"
+    "timm_resnet50",
+    "torchvision_resnet18_inference",
+    "torchvision_resnet50_inference",
+    "torchvision_resnext50_32x4d_inference",
+    "torchvision_wide_resnet50_2_inference"
   ]
 }

@@ -16,9 +16,13 @@
     "aten.var_mean.correction",
     "prims.iota.default"
   ],
-  "n_models": 2,
+  "n_models": 6,
   "models": [
     "hf_DistillGPT2_inference",
-    "hf_GPT2ForSequenceClassification_inference"
+    "hf_GPT2ForSequenceClassification_inference",
+    "hf_GPTNeoForCausalLM_inference",
+    "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_inference",
+    "hf_GPTNeoForSequenceClassification_training"
   ]
 }

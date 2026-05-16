@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "6bba1857ce49",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean",
+    "var_mean"
+  ],
+  "n_ops": 6,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.var_mean.correction",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 4,
+  "models": [
+    "torchvision_resnet18_training",
+    "torchvision_resnet50_training",
+    "torchvision_resnext50_32x4d_training",
+    "torchvision_wide_resnet50_2_training"
+  ]
+}
