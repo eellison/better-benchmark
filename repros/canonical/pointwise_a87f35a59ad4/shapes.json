@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "a87f35a59ad4",
+  "configs": {
+    "hf_albertformaskedlm_training_9f96617c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            16384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AlbertForMaskedLM_training"
+      ],
+      "shape_hash": "9f96617c"
+    }
+  }
+}

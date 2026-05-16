@@ -16,8 +16,10 @@
     "aten.reshape.default",
     "aten.tanh.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "dynamo_DistillGPT2"
+    "dynamo_DistillGPT2",
+    "hf_AlbertForMaskedLM_inference",
+    "hf_AlbertForMaskedLM_training"
   ]
 }

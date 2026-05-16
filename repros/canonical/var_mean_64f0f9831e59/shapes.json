@@ -17,6 +17,40 @@
         "tlparse_huggingface_s3_g21"
       ],
       "shape_hash": "07b94259"
+    },
+    "bert_large_inference_e74dc31e": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "bert_large_inference"
+      ],
+      "shape_hash": "e74dc31e"
+    },
+    "distilbert_inference_b9ee2365": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "distilbert_inference"
+      ],
+      "shape_hash": "b9ee2365"
     }
   }
 }

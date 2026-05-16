@@ -18,8 +18,11 @@
     "aten.sub.Tensor",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 4,
   "models": [
+    "bert_large_inference",
+    "distilbert_inference",
+    "phi_2_inference",
     "tlparse_huggingface_s1_g5"
   ]
 }

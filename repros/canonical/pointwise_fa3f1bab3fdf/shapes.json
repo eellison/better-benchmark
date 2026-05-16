@@ -1,0 +1,41 @@
+{
+  "pattern_hash": "fa3f1bab3fdf",
+  "configs": {
+    "hf_allenailongformerbase_inference_9b7fe6ae": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AllenaiLongformerBase_inference"
+      ],
+      "shape_hash": "9b7fe6ae"
+    }
+  }
+}

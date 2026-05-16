@@ -19765,6 +19765,785 @@
           "original_file": "region_016_pointwise_94420fefae3b_b4b7aa4c.py"
         }
       ]
+    },
+    "hf_AlbertForMaskedLM_inference": {
+      "repros": [
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_inference_14dcab86",
+          "original_file": "region_000_pointwise_741c0d7d8d11_14dcab86.py"
+        },
+        {
+          "pattern_hash": "757a32aa7b72",
+          "shape_config": "hf_albertformaskedlm_inference_8405719f",
+          "original_file": "region_001_var_mean_757a32aa7b72_8405719f.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_inference_34217606",
+          "original_file": "region_002_pointwise_741c0d7d8d11_34217606.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_albertformaskedlm_inference_369a51f8",
+          "original_file": "region_003_var_mean_a7cbd072693b_369a51f8.py"
+        },
+        {
+          "pattern_hash": "8a65d293af2c",
+          "shape_config": "hf_albertformaskedlm_inference_6a76fd57",
+          "original_file": "region_004_pointwise_8a65d293af2c_6a76fd57.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_inference_25ab4759",
+          "original_file": "region_005_pointwise_741c0d7d8d11_25ab4759.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_albertformaskedlm_inference_b64ee112",
+          "original_file": "region_006_pointwise_5d11bd189324_b64ee112.py"
+        },
+        {
+          "pattern_hash": "caf9c95ee549",
+          "shape_config": "hf_albertformaskedlm_inference_3813eb92",
+          "original_file": "region_007_amax_any_sum_caf9c95ee549_3813eb92.py"
+        },
+        {
+          "pattern_hash": "b260987d88be",
+          "shape_config": "hf_albertformaskedlm_inference_840e3665",
+          "original_file": "region_008_pointwise_b260987d88be_840e3665.py"
+        },
+        {
+          "pattern_hash": "16e058489060",
+          "shape_config": "hf_albertformaskedlm_inference_95a1eb23",
+          "original_file": "region_009_pointwise_16e058489060_95a1eb23.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "hf_albertformaskedlm_inference_e47c6e69",
+          "original_file": "region_010_amax_any_sum_7c0d8ceb3e2b_e47c6e69.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_inference_f21127e6",
+          "original_file": "region_011_pointwise_741c0d7d8d11_f21127e6.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_albertformaskedlm_inference_fe10a6a0",
+          "original_file": "region_012_var_mean_0a44c4081351_fe10a6a0.py"
+        }
+      ]
+    },
+    "pythia_410m_inference": {
+      "repros": [
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "pythia_410m_inference_123d99b9",
+          "original_file": "region_000_pointwise_287090d98877_123d99b9.py"
+        },
+        {
+          "pattern_hash": "65633e5584ac",
+          "shape_config": "pythia_410m_inference_530df824",
+          "original_file": "region_001_var_mean_65633e5584ac_530df824.py"
+        },
+        {
+          "pattern_hash": "0da603295bf8",
+          "shape_config": "pythia_410m_inference_cd59ce37",
+          "original_file": "region_002_pointwise_0da603295bf8_cd59ce37.py"
+        },
+        {
+          "pattern_hash": "90c63cc59595",
+          "shape_config": "pythia_410m_inference_3db44227",
+          "original_file": "region_003_pointwise_90c63cc59595_3db44227.py"
+        },
+        {
+          "pattern_hash": "dd396af139e8",
+          "shape_config": "pythia_410m_inference_11253b6c",
+          "original_file": "region_004_var_mean_dd396af139e8_11253b6c.py"
+        },
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "pythia_410m_inference_c94c8632",
+          "original_file": "region_005_pointwise_287090d98877_c94c8632.py"
+        },
+        {
+          "pattern_hash": "218460063cdc",
+          "shape_config": "pythia_410m_inference_685ab584",
+          "original_file": "region_006_pointwise_218460063cdc_685ab584.py"
+        },
+        {
+          "pattern_hash": "53210d06ee4c",
+          "shape_config": "pythia_410m_inference_8947a5e6",
+          "original_file": "region_007_var_mean_53210d06ee4c_8947a5e6.py"
+        }
+      ]
+    },
+    "falcon_rw_1b_inference": {
+      "repros": [
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "falcon_rw_1b_inference_fc19009f",
+          "original_file": "region_000_pointwise_287090d98877_fc19009f.py"
+        },
+        {
+          "pattern_hash": "8da395803e57",
+          "shape_config": "falcon_rw_1b_inference_686e0070",
+          "original_file": "region_001_var_mean_8da395803e57_686e0070.py"
+        },
+        {
+          "pattern_hash": "584e372a4996",
+          "shape_config": "falcon_rw_1b_inference_cea8b91e",
+          "original_file": "region_002_pointwise_584e372a4996_cea8b91e.py"
+        },
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "falcon_rw_1b_inference_9b82f62a",
+          "original_file": "region_003_pointwise_287090d98877_9b82f62a.py"
+        },
+        {
+          "pattern_hash": "40b65c29b64f",
+          "shape_config": "falcon_rw_1b_inference_1f750f3c",
+          "original_file": "region_004_pointwise_40b65c29b64f_1f750f3c.py"
+        },
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "falcon_rw_1b_inference_0034df1f",
+          "original_file": "region_005_pointwise_287090d98877_0034df1f.py"
+        },
+        {
+          "pattern_hash": "2522ec736c14",
+          "shape_config": "falcon_rw_1b_inference_81b49207",
+          "original_file": "region_006_pointwise_2522ec736c14_81b49207.py"
+        },
+        {
+          "pattern_hash": "53210d06ee4c",
+          "shape_config": "falcon_rw_1b_inference_a3ef2b4a",
+          "original_file": "region_007_var_mean_53210d06ee4c_a3ef2b4a.py"
+        },
+        {
+          "pattern_hash": "f75f7ac37fa0",
+          "shape_config": "falcon_rw_1b_inference_e841b48c",
+          "original_file": "region_008_pointwise_f75f7ac37fa0_e841b48c.py"
+        }
+      ]
+    },
+    "phi_2_inference": {
+      "repros": [
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "phi_2_inference_3d8b3699",
+          "original_file": "region_000_pointwise_287090d98877_3d8b3699.py"
+        },
+        {
+          "pattern_hash": "65633e5584ac",
+          "shape_config": "phi_2_inference_1c6cff02",
+          "original_file": "region_001_var_mean_65633e5584ac_1c6cff02.py"
+        },
+        {
+          "pattern_hash": "04e4333bea12",
+          "shape_config": "phi_2_inference_199a8655",
+          "original_file": "region_002_pointwise_04e4333bea12_199a8655.py"
+        },
+        {
+          "pattern_hash": "ebaa3d5099e0",
+          "shape_config": "phi_2_inference_b7da36a3",
+          "original_file": "region_003_pointwise_ebaa3d5099e0_b7da36a3.py"
+        },
+        {
+          "pattern_hash": "38d5f8e025b9",
+          "shape_config": "phi_2_inference_5cb44bad",
+          "original_file": "region_004_pointwise_38d5f8e025b9_5cb44bad.py"
+        },
+        {
+          "pattern_hash": "49bbef364da9",
+          "shape_config": "phi_2_inference_4805da02",
+          "original_file": "region_005_pointwise_49bbef364da9_4805da02.py"
+        },
+        {
+          "pattern_hash": "53210d06ee4c",
+          "shape_config": "phi_2_inference_84a87105",
+          "original_file": "region_006_var_mean_53210d06ee4c_84a87105.py"
+        }
+      ]
+    },
+    "bert_large_inference": {
+      "repros": [
+        {
+          "pattern_hash": "c0f0885a79c6",
+          "shape_config": "bert_large_inference_bc95c35e",
+          "original_file": "region_000_pointwise_c0f0885a79c6_bc95c35e.py"
+        },
+        {
+          "pattern_hash": "64f0f9831e59",
+          "shape_config": "bert_large_inference_e74dc31e",
+          "original_file": "region_001_var_mean_64f0f9831e59_e74dc31e.py"
+        },
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "bert_large_inference_ed505e31",
+          "original_file": "region_002_pointwise_287090d98877_ed505e31.py"
+        },
+        {
+          "pattern_hash": "07e01c646294",
+          "shape_config": "bert_large_inference_37a6a2cd",
+          "original_file": "region_003_var_mean_07e01c646294_37a6a2cd.py"
+        },
+        {
+          "pattern_hash": "e33a6a92ae86",
+          "shape_config": "bert_large_inference_2d2e8c03",
+          "original_file": "region_004_pointwise_e33a6a92ae86_2d2e8c03.py"
+        },
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "bert_large_inference_a42c9e1d",
+          "original_file": "region_005_pointwise_287090d98877_a42c9e1d.py"
+        },
+        {
+          "pattern_hash": "d195a5865427",
+          "shape_config": "bert_large_inference_e40f32c1",
+          "original_file": "region_006_pointwise_d195a5865427_e40f32c1.py"
+        },
+        {
+          "pattern_hash": "38d5f8e025b9",
+          "shape_config": "bert_large_inference_6cb9abed",
+          "original_file": "region_007_pointwise_38d5f8e025b9_6cb9abed.py"
+        },
+        {
+          "pattern_hash": "fdaebd1347c8",
+          "shape_config": "bert_large_inference_1a358e7d",
+          "original_file": "region_008_pointwise_fdaebd1347c8_1a358e7d.py"
+        },
+        {
+          "pattern_hash": "e05348da8948",
+          "shape_config": "bert_large_inference_26654cf7",
+          "original_file": "region_009_var_mean_e05348da8948_26654cf7.py"
+        }
+      ]
+    },
+    "t5_base_inference": {
+      "repros": [
+        {
+          "pattern_hash": "f8d3365f446a",
+          "shape_config": "t5_base_inference_634dcaae",
+          "original_file": "region_000_mean_f8d3365f446a_634dcaae.py"
+        },
+        {
+          "pattern_hash": "a8e741d0b164",
+          "shape_config": "t5_base_inference_0195c3bb",
+          "original_file": "region_001_pointwise_a8e741d0b164_0195c3bb.py"
+        },
+        {
+          "pattern_hash": "f78fd8c860dc",
+          "shape_config": "t5_base_inference_a1035eb8",
+          "original_file": "region_002_mean_f78fd8c860dc_a1035eb8.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "t5_base_inference_819a2f47",
+          "original_file": "region_003_pointwise_5d11bd189324_819a2f47.py"
+        },
+        {
+          "pattern_hash": "71627b72f7df",
+          "shape_config": "t5_base_inference_7dd9eabd",
+          "original_file": "region_004_amax_sum_71627b72f7df_7dd9eabd.py"
+        },
+        {
+          "pattern_hash": "c9af7485968d",
+          "shape_config": "t5_base_inference_7c5e140f",
+          "original_file": "region_005_pointwise_c9af7485968d_7c5e140f.py"
+        },
+        {
+          "pattern_hash": "14337b35d74b",
+          "shape_config": "t5_base_inference_b96385a3",
+          "original_file": "region_006_mean_14337b35d74b_b96385a3.py"
+        },
+        {
+          "pattern_hash": "71627b72f7df",
+          "shape_config": "t5_base_inference_1eff078a",
+          "original_file": "region_007_amax_sum_71627b72f7df_1eff078a.py"
+        },
+        {
+          "pattern_hash": "c9af7485968d",
+          "shape_config": "t5_base_inference_fca28e6a",
+          "original_file": "region_008_pointwise_c9af7485968d_fca28e6a.py"
+        },
+        {
+          "pattern_hash": "14337b35d74b",
+          "shape_config": "t5_base_inference_c0ad1fd0",
+          "original_file": "region_009_mean_14337b35d74b_c0ad1fd0.py"
+        },
+        {
+          "pattern_hash": "14337b35d74b",
+          "shape_config": "t5_base_inference_ee03345f",
+          "original_file": "region_010_mean_14337b35d74b_ee03345f.py"
+        },
+        {
+          "pattern_hash": "373da4e241e2",
+          "shape_config": "t5_base_inference_e51604d0",
+          "original_file": "region_011_any_mean_373da4e241e2_e51604d0.py"
+        },
+        {
+          "pattern_hash": "88089a145079",
+          "shape_config": "t5_base_inference_b97dbdcb",
+          "original_file": "region_012_amax_sum_88089a145079_b97dbdcb.py"
+        },
+        {
+          "pattern_hash": "aeeb8daeeac5",
+          "shape_config": "t5_base_inference_6e3005ec",
+          "original_file": "region_013_any_mean_aeeb8daeeac5_6e3005ec.py"
+        },
+        {
+          "pattern_hash": "b289146af8df",
+          "shape_config": "t5_base_inference_8df90a86",
+          "original_file": "region_014_pointwise_b289146af8df_8df90a86.py"
+        },
+        {
+          "pattern_hash": "fb04621860d4",
+          "shape_config": "t5_base_inference_27b5cea6",
+          "original_file": "region_015_amax_mean_sum_fb04621860d4_27b5cea6.py"
+        },
+        {
+          "pattern_hash": "4e64fc5e6afb",
+          "shape_config": "t5_base_inference_4ed8336b",
+          "original_file": "region_016_pointwise_4e64fc5e6afb_4ed8336b.py"
+        },
+        {
+          "pattern_hash": "94862dd871f9",
+          "shape_config": "t5_base_inference_b11ee5a0",
+          "original_file": "region_017_amax_mean_sum_94862dd871f9_b11ee5a0.py"
+        },
+        {
+          "pattern_hash": "c9af7485968d",
+          "shape_config": "t5_base_inference_7bad0d4d",
+          "original_file": "region_018_pointwise_c9af7485968d_7bad0d4d.py"
+        },
+        {
+          "pattern_hash": "14337b35d74b",
+          "shape_config": "t5_base_inference_1a85b317",
+          "original_file": "region_019_mean_14337b35d74b_1a85b317.py"
+        },
+        {
+          "pattern_hash": "a8e741d0b164",
+          "shape_config": "t5_base_inference_4bc0f59c",
+          "original_file": "region_020_pointwise_a8e741d0b164_4bc0f59c.py"
+        },
+        {
+          "pattern_hash": "f78fd8c860dc",
+          "shape_config": "t5_base_inference_26a89002",
+          "original_file": "region_021_mean_f78fd8c860dc_26a89002.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "t5_base_inference_5c4b8db8",
+          "original_file": "region_022_pointwise_5d11bd189324_5c4b8db8.py"
+        },
+        {
+          "pattern_hash": "71627b72f7df",
+          "shape_config": "t5_base_inference_8b4f7844",
+          "original_file": "region_023_amax_sum_71627b72f7df_8b4f7844.py"
+        },
+        {
+          "pattern_hash": "14337b35d74b",
+          "shape_config": "t5_base_inference_e1887382",
+          "original_file": "region_024_mean_14337b35d74b_e1887382.py"
+        },
+        {
+          "pattern_hash": "373da4e241e2",
+          "shape_config": "t5_base_inference_91da7d20",
+          "original_file": "region_025_any_mean_373da4e241e2_91da7d20.py"
+        },
+        {
+          "pattern_hash": "1009570465bd",
+          "shape_config": "t5_base_inference_4881d264",
+          "original_file": "region_026_amax_sum_1009570465bd_4881d264.py"
+        },
+        {
+          "pattern_hash": "6c499887ef17",
+          "shape_config": "t5_base_inference_a605342c",
+          "original_file": "region_027_mean_6c499887ef17_a605342c.py"
+        }
+      ]
+    },
+    "distilbert_inference": {
+      "repros": [
+        {
+          "pattern_hash": "c0f0885a79c6",
+          "shape_config": "distilbert_inference_f660bb6d",
+          "original_file": "region_000_pointwise_c0f0885a79c6_f660bb6d.py"
+        },
+        {
+          "pattern_hash": "64f0f9831e59",
+          "shape_config": "distilbert_inference_b9ee2365",
+          "original_file": "region_001_var_mean_64f0f9831e59_b9ee2365.py"
+        },
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "distilbert_inference_569e2c84",
+          "original_file": "region_002_pointwise_287090d98877_569e2c84.py"
+        },
+        {
+          "pattern_hash": "07e01c646294",
+          "shape_config": "distilbert_inference_88086b4c",
+          "original_file": "region_003_var_mean_07e01c646294_88086b4c.py"
+        },
+        {
+          "pattern_hash": "e33a6a92ae86",
+          "shape_config": "distilbert_inference_5b4872ac",
+          "original_file": "region_004_pointwise_e33a6a92ae86_5b4872ac.py"
+        },
+        {
+          "pattern_hash": "287090d98877",
+          "shape_config": "distilbert_inference_75a330bd",
+          "original_file": "region_005_pointwise_287090d98877_75a330bd.py"
+        },
+        {
+          "pattern_hash": "d195a5865427",
+          "shape_config": "distilbert_inference_76a5a2c9",
+          "original_file": "region_006_pointwise_d195a5865427_76a5a2c9.py"
+        },
+        {
+          "pattern_hash": "38d5f8e025b9",
+          "shape_config": "distilbert_inference_bae9172e",
+          "original_file": "region_007_pointwise_38d5f8e025b9_bae9172e.py"
+        },
+        {
+          "pattern_hash": "fdaebd1347c8",
+          "shape_config": "distilbert_inference_c24800db",
+          "original_file": "region_008_pointwise_fdaebd1347c8_c24800db.py"
+        },
+        {
+          "pattern_hash": "2395fae4602c",
+          "shape_config": "distilbert_inference_9241065e",
+          "original_file": "region_009_var_mean_2395fae4602c_9241065e.py"
+        }
+      ]
+    },
+    "mistral_7b_inference": {
+      "repros": [
+        {
+          "pattern_hash": "a852fda9fbc1",
+          "shape_config": "mistral_7b_inference_a6d520c6",
+          "original_file": "region_000_mean_a852fda9fbc1_a6d520c6.py"
+        },
+        {
+          "pattern_hash": "b430273ac746",
+          "shape_config": "mistral_7b_inference_798f4ddf",
+          "original_file": "region_001_pointwise_b430273ac746_798f4ddf.py"
+        },
+        {
+          "pattern_hash": "51281ced2106",
+          "shape_config": "mistral_7b_inference_bbeb41cf",
+          "original_file": "region_002_mean_51281ced2106_bbeb41cf.py"
+        },
+        {
+          "pattern_hash": "3fe857584168",
+          "shape_config": "mistral_7b_inference_d360b309",
+          "original_file": "region_003_pointwise_3fe857584168_d360b309.py"
+        },
+        {
+          "pattern_hash": "401e01c76176",
+          "shape_config": "mistral_7b_inference_38b8462a",
+          "original_file": "region_004_pointwise_401e01c76176_38b8462a.py"
+        },
+        {
+          "pattern_hash": "a3a7fba6c952",
+          "shape_config": "mistral_7b_inference_7e37e3bf",
+          "original_file": "region_005_mean_a3a7fba6c952_7e37e3bf.py"
+        },
+        {
+          "pattern_hash": "ae7f284d9f9d",
+          "shape_config": "mistral_7b_inference_8c961f8b",
+          "original_file": "region_006_pointwise_ae7f284d9f9d_8c961f8b.py"
+        },
+        {
+          "pattern_hash": "ae3127dad50b",
+          "shape_config": "mistral_7b_inference_0a267800",
+          "original_file": "region_007_mean_ae3127dad50b_0a267800.py"
+        }
+      ]
+    },
+    "qwen2_0.5b_inference": {
+      "repros": [
+        {
+          "pattern_hash": "a852fda9fbc1",
+          "shape_config": "qwen2_0.5b_inference_88aaf8e8",
+          "original_file": "region_000_mean_a852fda9fbc1_88aaf8e8.py"
+        },
+        {
+          "pattern_hash": "b430273ac746",
+          "shape_config": "qwen2_0.5b_inference_6be633b6",
+          "original_file": "region_001_pointwise_b430273ac746_6be633b6.py"
+        },
+        {
+          "pattern_hash": "51281ced2106",
+          "shape_config": "qwen2_0.5b_inference_83892add",
+          "original_file": "region_002_mean_51281ced2106_83892add.py"
+        },
+        {
+          "pattern_hash": "401e01c76176",
+          "shape_config": "qwen2_0.5b_inference_210cb348",
+          "original_file": "region_003_pointwise_401e01c76176_210cb348.py"
+        },
+        {
+          "pattern_hash": "a3a7fba6c952",
+          "shape_config": "qwen2_0.5b_inference_af09e149",
+          "original_file": "region_004_mean_a3a7fba6c952_af09e149.py"
+        },
+        {
+          "pattern_hash": "77951e9b7e5b",
+          "shape_config": "qwen2_0.5b_inference_6d04ec0c",
+          "original_file": "region_005_pointwise_77951e9b7e5b_6d04ec0c.py"
+        },
+        {
+          "pattern_hash": "ae3127dad50b",
+          "shape_config": "qwen2_0.5b_inference_ec139c0e",
+          "original_file": "region_006_mean_ae3127dad50b_ec139c0e.py"
+        }
+      ]
+    },
+    "hf_AlbertForMaskedLM_training": {
+      "repros": [
+        {
+          "pattern_hash": "5d00adc93963",
+          "shape_config": "hf_albertformaskedlm_training_9f284891",
+          "original_file": "region_000_amax_sum_5d00adc93963_9f284891.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_training_14dcab86",
+          "original_file": "region_001_pointwise_741c0d7d8d11_14dcab86.py"
+        },
+        {
+          "pattern_hash": "757a32aa7b72",
+          "shape_config": "hf_albertformaskedlm_training_8405719f",
+          "original_file": "region_002_var_mean_757a32aa7b72_8405719f.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_training_34217606",
+          "original_file": "region_003_pointwise_741c0d7d8d11_34217606.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_albertformaskedlm_training_369a51f8",
+          "original_file": "region_004_var_mean_a7cbd072693b_369a51f8.py"
+        },
+        {
+          "pattern_hash": "a87f35a59ad4",
+          "shape_config": "hf_albertformaskedlm_training_9f96617c",
+          "original_file": "region_005_pointwise_a87f35a59ad4_9f96617c.py"
+        },
+        {
+          "pattern_hash": "86432a5d8e65",
+          "shape_config": "hf_albertformaskedlm_training_bce56cb6",
+          "original_file": "region_006_pointwise_86432a5d8e65_bce56cb6.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_albertformaskedlm_training_f63b52c1",
+          "original_file": "region_007_pointwise_35deec51cf28_f63b52c1.py"
+        },
+        {
+          "pattern_hash": "410aa50553dc",
+          "shape_config": "hf_albertformaskedlm_training_8754488e",
+          "original_file": "region_008_amax_any_sum_410aa50553dc_8754488e.py"
+        },
+        {
+          "pattern_hash": "9bfbb9b03de3",
+          "shape_config": "hf_albertformaskedlm_training_5d62b8b9",
+          "original_file": "region_009_pointwise_9bfbb9b03de3_5d62b8b9.py"
+        },
+        {
+          "pattern_hash": "8a65d293af2c",
+          "shape_config": "hf_albertformaskedlm_training_6a76fd57",
+          "original_file": "region_010_pointwise_8a65d293af2c_6a76fd57.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_training_25ab4759",
+          "original_file": "region_011_pointwise_741c0d7d8d11_25ab4759.py"
+        },
+        {
+          "pattern_hash": "5d11bd189324",
+          "shape_config": "hf_albertformaskedlm_training_b64ee112",
+          "original_file": "region_012_pointwise_5d11bd189324_b64ee112.py"
+        },
+        {
+          "pattern_hash": "7c0d8ceb3e2b",
+          "shape_config": "hf_albertformaskedlm_training_e47c6e69",
+          "original_file": "region_013_amax_any_sum_7c0d8ceb3e2b_e47c6e69.py"
+        },
+        {
+          "pattern_hash": "6bc663ef619c",
+          "shape_config": "hf_albertformaskedlm_training_9dc9810c",
+          "original_file": "region_014_pointwise_6bc663ef619c_9dc9810c.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_albertformaskedlm_training_f21127e6",
+          "original_file": "region_015_pointwise_741c0d7d8d11_f21127e6.py"
+        },
+        {
+          "pattern_hash": "0a44c4081351",
+          "shape_config": "hf_albertformaskedlm_training_fe10a6a0",
+          "original_file": "region_016_var_mean_0a44c4081351_fe10a6a0.py"
+        },
+        {
+          "pattern_hash": "44437330b41d",
+          "shape_config": "hf_albertformaskedlm_training_8269d65b",
+          "original_file": "region_017_sum_44437330b41d_8269d65b.py"
+        },
+        {
+          "pattern_hash": "6f77da90df51",
+          "shape_config": "hf_albertformaskedlm_training_3fed70cc",
+          "original_file": "region_018_pointwise_6f77da90df51_3fed70cc.py"
+        },
+        {
+          "pattern_hash": "ea60513b483f",
+          "shape_config": "hf_albertformaskedlm_training_686ebba1",
+          "original_file": "region_019_pointwise_ea60513b483f_686ebba1.py"
+        },
+        {
+          "pattern_hash": "c2ee9c72bf0f",
+          "shape_config": "hf_albertformaskedlm_training_88016393",
+          "original_file": "region_020_sum_c2ee9c72bf0f_88016393.py"
+        },
+        {
+          "pattern_hash": "35deec51cf28",
+          "shape_config": "hf_albertformaskedlm_training_6f365176",
+          "original_file": "region_021_pointwise_35deec51cf28_6f365176.py"
+        },
+        {
+          "pattern_hash": "eb1e62b4f15c",
+          "shape_config": "hf_albertformaskedlm_training_09e879e9",
+          "original_file": "region_022_sum_eb1e62b4f15c_09e879e9.py"
+        },
+        {
+          "pattern_hash": "4715c8aa933a",
+          "shape_config": "hf_albertformaskedlm_training_6a76fd57",
+          "original_file": "region_023_pointwise_4715c8aa933a_6a76fd57.py"
+        },
+        {
+          "pattern_hash": "8d5ae4b07d24",
+          "shape_config": "hf_albertformaskedlm_training_11b7efad",
+          "original_file": "region_024_sum_8d5ae4b07d24_11b7efad.py"
+        },
+        {
+          "pattern_hash": "5542dd403943",
+          "shape_config": "hf_albertformaskedlm_training_26906a14",
+          "original_file": "region_025_pointwise_5542dd403943_26906a14.py"
+        },
+        {
+          "pattern_hash": "fdabe6e09a94",
+          "shape_config": "hf_albertformaskedlm_training_d0c8f988",
+          "original_file": "region_026_sum_fdabe6e09a94_d0c8f988.py"
+        },
+        {
+          "pattern_hash": "f12cf175e991",
+          "shape_config": "hf_albertformaskedlm_training_cc8cb662",
+          "original_file": "region_027_pointwise_f12cf175e991_cc8cb662.py"
+        },
+        {
+          "pattern_hash": "1435d60b2b68",
+          "shape_config": "hf_albertformaskedlm_training_682c9572",
+          "original_file": "region_028_sum_1435d60b2b68_682c9572.py"
+        },
+        {
+          "pattern_hash": "65117864cc0d",
+          "shape_config": "hf_albertformaskedlm_training_cdbdd9b1",
+          "original_file": "region_029_sum_65117864cc0d_cdbdd9b1.py"
+        },
+        {
+          "pattern_hash": "907390853538",
+          "shape_config": "hf_albertformaskedlm_training_4133cae9",
+          "original_file": "region_030_sum_907390853538_4133cae9.py"
+        }
+      ]
+    },
+    "hf_AllenaiLongformerBase_inference": {
+      "repros": [
+        {
+          "pattern_hash": "f92f9bc9e359",
+          "shape_config": "hf_allenailongformerbase_inference_41fe5c52",
+          "original_file": "region_000_pointwise_f92f9bc9e359_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "310825c3fc14",
+          "shape_config": "hf_allenailongformerbase_inference_1c474c92",
+          "original_file": "region_001_var_mean_310825c3fc14_1c474c92.py"
+        },
+        {
+          "pattern_hash": "de5792c05f72",
+          "shape_config": "hf_allenailongformerbase_inference_0931dbc0",
+          "original_file": "region_002_pointwise_de5792c05f72_0931dbc0.py"
+        },
+        {
+          "pattern_hash": "47f307d449f8",
+          "shape_config": "hf_allenailongformerbase_inference_0a3b54e6",
+          "original_file": "region_003_any_47f307d449f8_0a3b54e6.py"
+        },
+        {
+          "pattern_hash": "7b4ab1f25235",
+          "shape_config": "hf_allenailongformerbase_inference_41fe5c52",
+          "original_file": "region_004_pointwise_7b4ab1f25235_41fe5c52.py"
+        },
+        {
+          "pattern_hash": "a7cbd072693b",
+          "shape_config": "hf_allenailongformerbase_inference_40b93261",
+          "original_file": "region_005_var_mean_a7cbd072693b_40b93261.py"
+        },
+        {
+          "pattern_hash": "983a9e1e3bcd",
+          "shape_config": "hf_allenailongformerbase_inference_69c9e065",
+          "original_file": "region_006_pointwise_983a9e1e3bcd_69c9e065.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_allenailongformerbase_inference_1fe93c0c",
+          "original_file": "region_007_pointwise_741c0d7d8d11_1fe93c0c.py"
+        },
+        {
+          "pattern_hash": "585215b2d3df",
+          "shape_config": "hf_allenailongformerbase_inference_8dfe6e75",
+          "original_file": "region_008_var_mean_585215b2d3df_8dfe6e75.py"
+        },
+        {
+          "pattern_hash": "1972f8627203",
+          "shape_config": "hf_allenailongformerbase_inference_b2d771a1",
+          "original_file": "region_009_pointwise_1972f8627203_b2d771a1.py"
+        },
+        {
+          "pattern_hash": "72e4203bc120",
+          "shape_config": "hf_allenailongformerbase_inference_e2da0436",
+          "original_file": "region_010_amax_sum_72e4203bc120_e2da0436.py"
+        },
+        {
+          "pattern_hash": "7a52d2b39d46",
+          "shape_config": "hf_allenailongformerbase_inference_73e1af17",
+          "original_file": "region_011_pointwise_7a52d2b39d46_73e1af17.py"
+        },
+        {
+          "pattern_hash": "03d0fed4f87d",
+          "shape_config": "hf_allenailongformerbase_inference_56bddb67",
+          "original_file": "region_012_pointwise_03d0fed4f87d_56bddb67.py"
+        },
+        {
+          "pattern_hash": "fa3f1bab3fdf",
+          "shape_config": "hf_allenailongformerbase_inference_9b7fe6ae",
+          "original_file": "region_013_pointwise_fa3f1bab3fdf_9b7fe6ae.py"
+        },
+        {
+          "pattern_hash": "741c0d7d8d11",
+          "shape_config": "hf_allenailongformerbase_inference_ea48c63a",
+          "original_file": "region_014_pointwise_741c0d7d8d11_ea48c63a.py"
+        },
+        {
+          "pattern_hash": "0a1bc21703bb",
+          "shape_config": "hf_allenailongformerbase_inference_a4155d35",
+          "original_file": "region_015_var_mean_0a1bc21703bb_a4155d35.py"
+        }
+      ]
     }
   }
 }

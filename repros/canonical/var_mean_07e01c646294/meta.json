@@ -13,8 +13,10 @@
     "aten.var_mean.correction",
     "prims.convert_element_type.default"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
+    "bert_large_inference",
+    "distilbert_inference",
     "tlparse_huggingface_s1_g5",
     "tlparse_timm_s6_g10",
     "vllm_facebook_opt-125m_inference"

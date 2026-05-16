@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "f75f7ac37fa0",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.full.default",
+    "aten.lift_fresh_copy.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "falcon_rw_1b_inference"
+  ]
+}

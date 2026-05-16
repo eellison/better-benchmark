@@ -19,12 +19,14 @@
     "aten.tanh.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 5,
+  "n_models": 7,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_AlbertForMaskedLM_inference",
     "dynamo_GoogleFnet",
     "dynamo_GoogleFnet_inference",
+    "hf_AlbertForMaskedLM_inference",
+    "hf_AlbertForMaskedLM_training",
     "hf_albert"
   ]
 }

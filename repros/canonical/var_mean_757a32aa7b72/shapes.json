@@ -1,0 +1,39 @@
+{
+  "pattern_hash": "757a32aa7b72",
+  "configs": {
+    "hf_albertformaskedlm_inference_8405719f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AlbertForMaskedLM_inference"
+      ],
+      "shape_hash": "8405719f"
+    },
+    "hf_albertformaskedlm_training_8405719f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AlbertForMaskedLM_training"
+      ],
+      "shape_hash": "8405719f"
+    }
+  }
+}

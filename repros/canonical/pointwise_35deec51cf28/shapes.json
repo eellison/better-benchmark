@@ -52,6 +52,41 @@
         "tlparse_torchbench_s3_g174"
       ],
       "shape_hash": "02f1d8f3"
+    },
+    "hf_albertformaskedlm_training_f63b52c1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            512,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AlbertForMaskedLM_training"
+      ],
+      "shape_hash": "f63b52c1"
+    },
+    "hf_albertformaskedlm_training_6f365176": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AlbertForMaskedLM_training"
+      ],
+      "shape_hash": "6f365176"
     }
   }
 }

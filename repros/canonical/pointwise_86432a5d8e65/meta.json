@@ -12,7 +12,7 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 51,
+  "n_models": 52,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_AlbertForMaskedLM_inference",
@@ -64,6 +64,7 @@
     "dynamo_TrOCRForCausalLM",
     "dynamo_XGLMForCausalLM",
     "dynamo_XLNetLMHeadModel",
-    "dynamo_YituTechConvBert"
+    "dynamo_YituTechConvBert",
+    "hf_AlbertForMaskedLM_training"
   ]
 }

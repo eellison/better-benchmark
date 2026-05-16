@@ -1,0 +1,49 @@
+{
+  "pattern_hash": "aeeb8daeeac5",
+  "kind": "reduction",
+  "reduction_types": [
+    "any",
+    "mean",
+    "mean"
+  ],
+  "n_ops": 33,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.any.default",
+    "aten.clamp_max.Tensor",
+    "aten.clamp_min.Tensor",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.isinf.default",
+    "aten.mean.dim",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.pow.Tensor_Scalar",
+    "aten.pow.Tensor_Scalar",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.rsqrt.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "t5_base_inference"
+  ]
+}

@@ -13,9 +13,12 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 5,
   "models": [
     "dynamo_DistillGPT2",
+    "hf_AlbertForMaskedLM_inference",
+    "hf_AlbertForMaskedLM_training",
+    "hf_AllenaiLongformerBase_inference",
     "timm_convnext_tiny"
   ]
 }

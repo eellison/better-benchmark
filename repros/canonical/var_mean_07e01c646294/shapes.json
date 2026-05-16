@@ -108,6 +108,60 @@
         "tlparse_timm_s6_g10"
       ],
       "shape_hash": "c4e0f918"
+    },
+    "bert_large_inference_37a6a2cd": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "bert_large_inference"
+      ],
+      "shape_hash": "37a6a2cd"
+    },
+    "distilbert_inference_88086b4c": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "distilbert_inference"
+      ],
+      "shape_hash": "88086b4c"
     }
   }
 }

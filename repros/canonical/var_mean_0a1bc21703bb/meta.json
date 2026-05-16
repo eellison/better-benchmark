@@ -16,7 +16,7 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 17,
+  "n_models": 18,
   "models": [
     "dynamo_AllenaiLongformerBase",
     "dynamo_AllenaiLongformerBase_inference",
@@ -34,6 +34,7 @@
     "dynamo_MegatronBertForCausalLM_inference",
     "dynamo_RobertaForCausalLM_inference",
     "dynamo_YituTechConvBert",
+    "hf_AllenaiLongformerBase_inference",
     "hf_bert"
   ]
 }

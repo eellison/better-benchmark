@@ -11,7 +11,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 7,
+  "n_models": 10,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_GPTNeoForCausalLM",
@@ -19,6 +19,9 @@
     "dynamo_MT5ForConditionalGeneration",
     "dynamo_T5ForConditionalGeneration",
     "dynamo_T5Small",
-    "dynamo_XGLMForCausalLM"
+    "dynamo_XGLMForCausalLM",
+    "hf_AlbertForMaskedLM_inference",
+    "hf_AlbertForMaskedLM_training",
+    "t5_base_inference"
   ]
 }

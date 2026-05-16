@@ -1,0 +1,48 @@
+{
+  "pattern_hash": "caf9c95ee549",
+  "configs": {
+    "hf_albertformaskedlm_inference_3813eb92": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            512,
+            512
+          ],
+          "stride": [
+            0,
+            512,
+            1,
+            0
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AlbertForMaskedLM_inference"
+      ],
+      "shape_hash": "3813eb92"
+    }
+  }
+}

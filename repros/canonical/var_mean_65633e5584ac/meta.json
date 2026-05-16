@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "65633e5584ac",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "phi_2_inference",
+    "pythia_410m_inference"
+  ]
+}

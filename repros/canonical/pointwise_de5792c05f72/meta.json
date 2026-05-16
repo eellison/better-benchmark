@@ -7,12 +7,13 @@
     "aten.ne.Scalar",
     "prims.convert_element_type.default"
   ],
-  "n_models": 5,
+  "n_models": 6,
   "models": [
     "dynamo_AllenaiLongformerBase",
     "dynamo_AllenaiLongformerBase_inference",
     "dynamo_M2M100ForConditionalGeneration",
     "dynamo_M2M100ForConditionalGeneration_inference",
-    "dynamo_RobertaForCausalLM_inference"
+    "dynamo_RobertaForCausalLM_inference",
+    "hf_AllenaiLongformerBase_inference"
   ]
 }

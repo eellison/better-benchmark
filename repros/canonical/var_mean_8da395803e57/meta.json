@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "8da395803e57",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.reshape.default",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "falcon_rw_1b_inference"
+  ]
+}
