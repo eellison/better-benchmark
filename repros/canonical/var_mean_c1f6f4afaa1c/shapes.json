@@ -703,6 +703,74 @@
         "tlparse_torchbench_s2_g20"
       ],
       "shape_hash": "cb49997c"
+    },
+    "tritonbench_layer_norm_4096x1024_7dae326a": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_layer_norm_4096x1024"
+      ],
+      "shape_hash": "7dae326a"
+    },
+    "tritonbench_layer_norm_4096x4096_fcfb87e6": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_layer_norm_4096x4096"
+      ],
+      "shape_hash": "fcfb87e6"
+    },
+    "tritonbench_layer_norm_4096x8192_9f564cd4": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            8192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_layer_norm_4096x8192"
+      ],
+      "shape_hash": "9f564cd4"
+    },
+    "tritonbench_layer_norm_8192x2048_842e3bdd": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            8192,
+            2048
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_layer_norm_8192x2048"
+      ],
+      "shape_hash": "842e3bdd"
     }
   }
 }

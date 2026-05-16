@@ -15,8 +15,12 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 6,
   "models": [
+    "tritonbench_rms_norm_2048x4096",
+    "tritonbench_rms_norm_2048x8192",
+    "tritonbench_rms_norm_4096x4096",
+    "tritonbench_rms_norm_8192x4096",
     "vllm_Qwen_Qwen3-30B-A3B_inference",
     "vllm_deepseek-ai_DeepSeek-V3_inference"
   ]

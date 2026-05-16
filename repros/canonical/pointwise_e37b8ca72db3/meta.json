@@ -12,7 +12,7 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 8,
+  "n_models": 11,
   "models": [
     "genai_patterns",
     "genai_swiglu_decode",
@@ -20,6 +20,9 @@
     "genai_swiglu_long_context",
     "genai_swiglu_short_prefill",
     "genai_swiglu_small_model",
+    "tritonbench_swiglu_B4_T2048_H11008",
+    "tritonbench_swiglu_B4_T4096_H11008",
+    "tritonbench_swiglu_B8_T1024_H11008",
     "vllm_Qwen_Qwen3-30B-A3B_inference",
     "vllm_deepseek-ai_DeepSeek-V3_inference"
   ]

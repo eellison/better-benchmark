@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "4504b145fc76",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.tanh.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "tritonbench_bias_gelu_2048x8192",
+    "tritonbench_bias_gelu_4096x11008",
+    "tritonbench_bias_gelu_8192x4096"
+  ]
+}

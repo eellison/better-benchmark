@@ -1,0 +1,95 @@
+{
+  "pattern_hash": "e6697b63eeec",
+  "configs": {
+    "tritonbench_fused_softmax_b2_s2048_h32_5cd6ce18": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            2,
+            2048,
+            32,
+            2048
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            1,
+            2048
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_fused_softmax_B2_S2048_H32"
+      ],
+      "shape_hash": "5cd6ce18"
+    },
+    "tritonbench_fused_softmax_b4_s1024_h16_e9858a64": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024,
+            16,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            1,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_fused_softmax_B4_S1024_H16"
+      ],
+      "shape_hash": "e9858a64"
+    },
+    "tritonbench_fused_softmax_b8_s512_h16_28a83eac": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            16,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            1,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_fused_softmax_B8_S512_H16"
+      ],
+      "shape_hash": "28a83eac"
+    }
+  }
+}

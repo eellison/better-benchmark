@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "e6697b63eeec",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "tritonbench_fused_softmax_B2_S2048_H32",
+    "tritonbench_fused_softmax_B4_S1024_H16",
+    "tritonbench_fused_softmax_B8_S512_H16"
+  ]
+}

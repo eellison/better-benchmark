@@ -8,11 +8,14 @@
   "origin_ops": [
     "aten.mean.dim"
   ],
-  "n_models": 4,
+  "n_models": 7,
   "models": [
     "timm_dm_nfnet_f0_inference",
     "timm_dm_nfnet_f0_training",
     "timm_nfnet_l0_inference",
-    "timm_nfnet_l0_training"
+    "timm_nfnet_l0_training",
+    "tritonbench_mean_dim1_32768x1024",
+    "tritonbench_mean_dim1_4096x4096",
+    "tritonbench_mean_dim1_8192x8192"
   ]
 }

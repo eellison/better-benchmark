@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "59824f89a34d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 3,
+  "models": [
+    "tritonbench_rope_B1_S2048_H32_D128",
+    "tritonbench_rope_B1_S4096_H32_D128",
+    "tritonbench_rope_B4_S2048_H32_D128"
+  ]
+}

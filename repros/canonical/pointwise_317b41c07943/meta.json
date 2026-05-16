@@ -6,7 +6,7 @@
   "origin_ops": [
     "aten.add.Tensor"
   ],
-  "n_models": 11,
+  "n_models": 13,
   "models": [
     "dynamo_Reformer",
     "dynamo_Reformer_inference",
@@ -16,6 +16,8 @@
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training",
     "timm_visformer_small_inference",
     "timm_visformer_small_training",
+    "tritonbench_vector_add_1048576",
+    "tritonbench_vector_add_16777216",
     "vllm_Qwen_Qwen3-30B-A3B_inference",
     "vllm_deepseek-ai_DeepSeek-V3_inference",
     "vllm_openai_gpt-oss-20b"

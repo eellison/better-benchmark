@@ -1,0 +1,80 @@
+{
+  "pattern_hash": "4504b145fc76",
+  "configs": {
+    "tritonbench_bias_gelu_2048x8192_519116f8": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            2048,
+            8192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_bias_gelu_2048x8192"
+      ],
+      "shape_hash": "519116f8"
+    },
+    "tritonbench_bias_gelu_4096x11008_6774843d": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            11008
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            11008
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_bias_gelu_4096x11008"
+      ],
+      "shape_hash": "6774843d"
+    },
+    "tritonbench_bias_gelu_8192x4096_17245619": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8192,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_bias_gelu_8192x4096"
+      ],
+      "shape_hash": "17245619"
+    }
+  }
+}

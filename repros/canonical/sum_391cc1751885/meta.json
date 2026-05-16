@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "391cc1751885",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.sum.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "tritonbench_sum_all_1048576",
+    "tritonbench_sum_all_16777216"
+  ]
+}

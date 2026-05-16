@@ -1,15 +1,98 @@
 {
-  "pattern_hash": "6c5a53075222",
+  "pattern_hash": "59824f89a34d",
   "configs": {
-    "genai_patterns_40db775a": {
+    "tritonbench_rope_b1_s2048_h32_d128_44402fcc": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            32,
+            2048,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            2048,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            2048,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_rope_B1_S2048_H32_D128"
+      ],
+      "shape_hash": "44402fcc"
+    },
+    "tritonbench_rope_b1_s4096_h32_d128_ebbcef7d": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            32,
+            4096,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            4096,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            4096,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_rope_B1_S4096_H32_D128"
+      ],
+      "shape_hash": "ebbcef7d"
+    },
+    "tritonbench_rope_b4_s2048_h32_d128_bcf44ff7": {
       "inputs": [
         {
           "dtype": "torch.bfloat16",
           "device": "cuda",
           "shape": [
             4,
+            32,
             2048,
-            4096
+            128
           ],
           "stride": null
         },
@@ -17,9 +100,10 @@
           "dtype": "torch.bfloat16",
           "device": "cuda",
           "shape": [
-            4,
+            1,
+            1,
             2048,
-            4096
+            64
           ],
           "stride": null
         },
@@ -27,117 +111,18 @@
           "dtype": "torch.bfloat16",
           "device": "cuda",
           "shape": [
-            4096
+            1,
+            1,
+            2048,
+            64
           ],
           "stride": null
         }
       ],
       "source_models": [
-        "genai_patterns"
+        "tritonbench_rope_B4_S2048_H32_D128"
       ],
-      "shape_hash": "40db775a"
-    },
-    "tritonbench_residual_rmsnorm_2048x4096_ef337afb": {
-      "inputs": [
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            2048,
-            4096
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            2048,
-            4096
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            4096
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "tritonbench_residual_rmsnorm_2048x4096"
-      ],
-      "shape_hash": "ef337afb"
-    },
-    "tritonbench_residual_rmsnorm_4096x8192_6526dc25": {
-      "inputs": [
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            4096,
-            8192
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            4096,
-            8192
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            8192
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "tritonbench_residual_rmsnorm_4096x8192"
-      ],
-      "shape_hash": "6526dc25"
-    },
-    "tritonbench_residual_rmsnorm_8192x4096_c6e0f584": {
-      "inputs": [
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            8192,
-            4096
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            8192,
-            4096
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            4096
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "tritonbench_residual_rmsnorm_8192x4096"
-      ],
-      "shape_hash": "c6e0f584"
+      "shape_hash": "bcf44ff7"
     }
   }
 }

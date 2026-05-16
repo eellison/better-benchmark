@@ -42979,6 +42979,494 @@
           "original_file": "region_022_pointwise_d42191940c91_d46a8339.py"
         }
       ]
+    },
+    "tritonbench_bias_gelu_2048x8192": {
+      "repros": [
+        {
+          "pattern_hash": "4504b145fc76",
+          "shape_config": "tritonbench_bias_gelu_2048x8192_519116f8",
+          "original_file": "region_000_pointwise_4504b145fc76_519116f8.py"
+        }
+      ]
+    },
+    "tritonbench_bias_gelu_4096x11008": {
+      "repros": [
+        {
+          "pattern_hash": "4504b145fc76",
+          "shape_config": "tritonbench_bias_gelu_4096x11008_6774843d",
+          "original_file": "region_000_pointwise_4504b145fc76_6774843d.py"
+        }
+      ]
+    },
+    "tritonbench_bias_gelu_8192x4096": {
+      "repros": [
+        {
+          "pattern_hash": "4504b145fc76",
+          "shape_config": "tritonbench_bias_gelu_8192x4096_17245619",
+          "original_file": "region_000_pointwise_4504b145fc76_17245619.py"
+        }
+      ]
+    },
+    "tritonbench_cross_entropy_16384x32768": {
+      "repros": [
+        {
+          "pattern_hash": "a502b9762d5e",
+          "shape_config": "tritonbench_cross_entropy_16384x32768_9632a028",
+          "original_file": "region_000_amax_sum_a502b9762d5e_9632a028.py"
+        }
+      ]
+    },
+    "tritonbench_cross_entropy_4096x50257": {
+      "repros": [
+        {
+          "pattern_hash": "a502b9762d5e",
+          "shape_config": "tritonbench_cross_entropy_4096x50257_917d35bb",
+          "original_file": "region_000_amax_sum_a502b9762d5e_917d35bb.py"
+        }
+      ]
+    },
+    "tritonbench_cross_entropy_8192x131072": {
+      "repros": [
+        {
+          "pattern_hash": "a502b9762d5e",
+          "shape_config": "tritonbench_cross_entropy_8192x131072_c4b4bb92",
+          "original_file": "region_000_amax_sum_a502b9762d5e_c4b4bb92.py"
+        }
+      ]
+    },
+    "tritonbench_dropout_4096x4096": {
+      "repros": [
+        {
+          "pattern_hash": "3bd023466743",
+          "shape_config": "tritonbench_dropout_4096x4096_fcfb87e6",
+          "original_file": "region_000_pointwise_3bd023466743_fcfb87e6.py"
+        }
+      ]
+    },
+    "tritonbench_dropout_8192x8192": {
+      "repros": [
+        {
+          "pattern_hash": "3bd023466743",
+          "shape_config": "tritonbench_dropout_8192x8192_1dd01484",
+          "original_file": "region_000_pointwise_3bd023466743_1dd01484.py"
+        }
+      ]
+    },
+    "tritonbench_fused_softmax_B2_S2048_H32": {
+      "repros": [
+        {
+          "pattern_hash": "e6697b63eeec",
+          "shape_config": "tritonbench_fused_softmax_b2_s2048_h32_5cd6ce18",
+          "original_file": "region_000_amax_sum_e6697b63eeec_5cd6ce18.py"
+        }
+      ]
+    },
+    "tritonbench_fused_softmax_B4_S1024_H16": {
+      "repros": [
+        {
+          "pattern_hash": "e6697b63eeec",
+          "shape_config": "tritonbench_fused_softmax_b4_s1024_h16_e9858a64",
+          "original_file": "region_000_amax_sum_e6697b63eeec_e9858a64.py"
+        }
+      ]
+    },
+    "tritonbench_fused_softmax_B8_S512_H16": {
+      "repros": [
+        {
+          "pattern_hash": "e6697b63eeec",
+          "shape_config": "tritonbench_fused_softmax_b8_s512_h16_28a83eac",
+          "original_file": "region_000_amax_sum_e6697b63eeec_28a83eac.py"
+        }
+      ]
+    },
+    "tritonbench_geglu_B4_T2048_H11008": {
+      "repros": [
+        {
+          "pattern_hash": "b374e9a57a10",
+          "shape_config": "tritonbench_geglu_b4_t2048_h11008_f0b1e6c8",
+          "original_file": "region_000_pointwise_b374e9a57a10_f0b1e6c8.py"
+        }
+      ]
+    },
+    "tritonbench_geglu_B8_T1024_H11008": {
+      "repros": [
+        {
+          "pattern_hash": "b374e9a57a10",
+          "shape_config": "tritonbench_geglu_b8_t1024_h11008_1964e7b7",
+          "original_file": "region_000_pointwise_b374e9a57a10_1964e7b7.py"
+        }
+      ]
+    },
+    "tritonbench_kl_div_4096x32768": {
+      "repros": [
+        {
+          "pattern_hash": "4e221e32dd02",
+          "shape_config": "tritonbench_kl_div_4096x32768_f2328034",
+          "original_file": "region_000_sum_4e221e32dd02_f2328034.py"
+        }
+      ]
+    },
+    "tritonbench_kl_div_4096x4096": {
+      "repros": [
+        {
+          "pattern_hash": "4e221e32dd02",
+          "shape_config": "tritonbench_kl_div_4096x4096_5d62b8b9",
+          "original_file": "region_000_sum_4e221e32dd02_5d62b8b9.py"
+        }
+      ]
+    },
+    "tritonbench_layer_norm_4096x1024": {
+      "repros": [
+        {
+          "pattern_hash": "3cb8fa01166a",
+          "shape_config": "tritonbench_layer_norm_4096x1024_34fbe137",
+          "original_file": "region_000_pointwise_3cb8fa01166a_34fbe137.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "tritonbench_layer_norm_4096x1024_7dae326a",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_7dae326a.py"
+        }
+      ]
+    },
+    "tritonbench_layer_norm_4096x4096": {
+      "repros": [
+        {
+          "pattern_hash": "3cb8fa01166a",
+          "shape_config": "tritonbench_layer_norm_4096x4096_c6773a7a",
+          "original_file": "region_000_pointwise_3cb8fa01166a_c6773a7a.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "tritonbench_layer_norm_4096x4096_fcfb87e6",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_fcfb87e6.py"
+        }
+      ]
+    },
+    "tritonbench_layer_norm_4096x8192": {
+      "repros": [
+        {
+          "pattern_hash": "3cb8fa01166a",
+          "shape_config": "tritonbench_layer_norm_4096x8192_3f8d7291",
+          "original_file": "region_000_pointwise_3cb8fa01166a_3f8d7291.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "tritonbench_layer_norm_4096x8192_9f564cd4",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_9f564cd4.py"
+        }
+      ]
+    },
+    "tritonbench_layer_norm_8192x2048": {
+      "repros": [
+        {
+          "pattern_hash": "3cb8fa01166a",
+          "shape_config": "tritonbench_layer_norm_8192x2048_ea0c350c",
+          "original_file": "region_000_pointwise_3cb8fa01166a_ea0c350c.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "tritonbench_layer_norm_8192x2048_842e3bdd",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_842e3bdd.py"
+        }
+      ]
+    },
+    "tritonbench_mean_dim1_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "305fdae2e5ef",
+          "shape_config": "tritonbench_mean_dim1_32768x1024_5ed612bf",
+          "original_file": "region_000_mean_305fdae2e5ef_5ed612bf.py"
+        }
+      ]
+    },
+    "tritonbench_mean_dim1_4096x4096": {
+      "repros": [
+        {
+          "pattern_hash": "305fdae2e5ef",
+          "shape_config": "tritonbench_mean_dim1_4096x4096_6f365176",
+          "original_file": "region_000_mean_305fdae2e5ef_6f365176.py"
+        }
+      ]
+    },
+    "tritonbench_mean_dim1_8192x8192": {
+      "repros": [
+        {
+          "pattern_hash": "305fdae2e5ef",
+          "shape_config": "tritonbench_mean_dim1_8192x8192_c8e62511",
+          "original_file": "region_000_mean_305fdae2e5ef_c8e62511.py"
+        }
+      ]
+    },
+    "tritonbench_residual_rmsnorm_2048x4096": {
+      "repros": [
+        {
+          "pattern_hash": "6c5a53075222",
+          "shape_config": "tritonbench_residual_rmsnorm_2048x4096_ef337afb",
+          "original_file": "region_000_mean_6c5a53075222_ef337afb.py"
+        }
+      ]
+    },
+    "tritonbench_residual_rmsnorm_4096x8192": {
+      "repros": [
+        {
+          "pattern_hash": "6c5a53075222",
+          "shape_config": "tritonbench_residual_rmsnorm_4096x8192_6526dc25",
+          "original_file": "region_000_mean_6c5a53075222_6526dc25.py"
+        }
+      ]
+    },
+    "tritonbench_residual_rmsnorm_8192x4096": {
+      "repros": [
+        {
+          "pattern_hash": "6c5a53075222",
+          "shape_config": "tritonbench_residual_rmsnorm_8192x4096_c6e0f584",
+          "original_file": "region_000_mean_6c5a53075222_c6e0f584.py"
+        }
+      ]
+    },
+    "tritonbench_rms_norm_2048x4096": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "tritonbench_rms_norm_2048x4096_75a2daff",
+          "original_file": "region_000_mean_bf5fef91b4d7_75a2daff.py"
+        }
+      ]
+    },
+    "tritonbench_rms_norm_2048x8192": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "tritonbench_rms_norm_2048x8192_519116f8",
+          "original_file": "region_000_mean_bf5fef91b4d7_519116f8.py"
+        }
+      ]
+    },
+    "tritonbench_rms_norm_4096x4096": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "tritonbench_rms_norm_4096x4096_260d8752",
+          "original_file": "region_000_mean_bf5fef91b4d7_260d8752.py"
+        }
+      ]
+    },
+    "tritonbench_rms_norm_8192x4096": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "tritonbench_rms_norm_8192x4096_17245619",
+          "original_file": "region_000_mean_bf5fef91b4d7_17245619.py"
+        }
+      ]
+    },
+    "tritonbench_rope_B1_S2048_H32_D128": {
+      "repros": [
+        {
+          "pattern_hash": "59824f89a34d",
+          "shape_config": "tritonbench_rope_b1_s2048_h32_d128_44402fcc",
+          "original_file": "region_000_pointwise_59824f89a34d_44402fcc.py"
+        }
+      ]
+    },
+    "tritonbench_rope_B1_S4096_H32_D128": {
+      "repros": [
+        {
+          "pattern_hash": "59824f89a34d",
+          "shape_config": "tritonbench_rope_b1_s4096_h32_d128_ebbcef7d",
+          "original_file": "region_000_pointwise_59824f89a34d_ebbcef7d.py"
+        }
+      ]
+    },
+    "tritonbench_rope_B4_S2048_H32_D128": {
+      "repros": [
+        {
+          "pattern_hash": "59824f89a34d",
+          "shape_config": "tritonbench_rope_b4_s2048_h32_d128_bcf44ff7",
+          "original_file": "region_000_pointwise_59824f89a34d_bcf44ff7.py"
+        }
+      ]
+    },
+    "tritonbench_softmax_2048x50257": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "tritonbench_softmax_2048x50257_44070737",
+          "original_file": "region_000_amax_sum_5a19f8539c85_44070737.py"
+        }
+      ]
+    },
+    "tritonbench_softmax_32768x256": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "tritonbench_softmax_32768x256_feefb67f",
+          "original_file": "region_000_amax_sum_5a19f8539c85_feefb67f.py"
+        }
+      ]
+    },
+    "tritonbench_softmax_4096x4096": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "tritonbench_softmax_4096x4096_fcfb87e6",
+          "original_file": "region_000_amax_sum_5a19f8539c85_fcfb87e6.py"
+        }
+      ]
+    },
+    "tritonbench_softmax_4096x8192": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "tritonbench_softmax_4096x8192_9f564cd4",
+          "original_file": "region_000_amax_sum_5a19f8539c85_9f564cd4.py"
+        }
+      ]
+    },
+    "tritonbench_softmax_8192x1024": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "tritonbench_softmax_8192x1024_07ba9275",
+          "original_file": "region_000_amax_sum_5a19f8539c85_07ba9275.py"
+        }
+      ]
+    },
+    "tritonbench_sum_all_1048576": {
+      "repros": [
+        {
+          "pattern_hash": "391cc1751885",
+          "shape_config": "tritonbench_sum_all_1048576_0474e40a",
+          "original_file": "region_000_sum_391cc1751885_0474e40a.py"
+        }
+      ]
+    },
+    "tritonbench_sum_all_16777216": {
+      "repros": [
+        {
+          "pattern_hash": "391cc1751885",
+          "shape_config": "tritonbench_sum_all_16777216_334b9259",
+          "original_file": "region_000_sum_391cc1751885_334b9259.py"
+        }
+      ]
+    },
+    "tritonbench_sum_dim1_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "e64257a2ec46",
+          "shape_config": "tritonbench_sum_dim1_32768x1024_5ed612bf",
+          "original_file": "region_000_sum_e64257a2ec46_5ed612bf.py"
+        }
+      ]
+    },
+    "tritonbench_sum_dim1_4096x4096": {
+      "repros": [
+        {
+          "pattern_hash": "e64257a2ec46",
+          "shape_config": "tritonbench_sum_dim1_4096x4096_6f365176",
+          "original_file": "region_000_sum_e64257a2ec46_6f365176.py"
+        }
+      ]
+    },
+    "tritonbench_sum_dim1_8192x8192": {
+      "repros": [
+        {
+          "pattern_hash": "e64257a2ec46",
+          "shape_config": "tritonbench_sum_dim1_8192x8192_c8e62511",
+          "original_file": "region_000_sum_e64257a2ec46_c8e62511.py"
+        }
+      ]
+    },
+    "tritonbench_swiglu_B4_T2048_H11008": {
+      "repros": [
+        {
+          "pattern_hash": "e37b8ca72db3",
+          "shape_config": "tritonbench_swiglu_b4_t2048_h11008_f0b1e6c8",
+          "original_file": "region_000_pointwise_e37b8ca72db3_f0b1e6c8.py"
+        }
+      ]
+    },
+    "tritonbench_swiglu_B4_T4096_H11008": {
+      "repros": [
+        {
+          "pattern_hash": "e37b8ca72db3",
+          "shape_config": "tritonbench_swiglu_b4_t4096_h11008_ede6dfa0",
+          "original_file": "region_000_pointwise_e37b8ca72db3_ede6dfa0.py"
+        }
+      ]
+    },
+    "tritonbench_swiglu_B8_T1024_H11008": {
+      "repros": [
+        {
+          "pattern_hash": "e37b8ca72db3",
+          "shape_config": "tritonbench_swiglu_b8_t1024_h11008_1964e7b7",
+          "original_file": "region_000_pointwise_e37b8ca72db3_1964e7b7.py"
+        }
+      ]
+    },
+    "tritonbench_vector_add_1048576": {
+      "repros": [
+        {
+          "pattern_hash": "317b41c07943",
+          "shape_config": "tritonbench_vector_add_1048576_38c42fea",
+          "original_file": "region_000_pointwise_317b41c07943_38c42fea.py"
+        }
+      ]
+    },
+    "tritonbench_vector_add_16777216": {
+      "repros": [
+        {
+          "pattern_hash": "317b41c07943",
+          "shape_config": "tritonbench_vector_add_16777216_94021b35",
+          "original_file": "region_000_pointwise_317b41c07943_94021b35.py"
+        }
+      ]
+    },
+    "tritonbench_vector_exp_1048576": {
+      "repros": [
+        {
+          "pattern_hash": "ff68a99d52a0",
+          "shape_config": "tritonbench_vector_exp_1048576_0474e40a",
+          "original_file": "region_000_pointwise_ff68a99d52a0_0474e40a.py"
+        }
+      ]
+    },
+    "tritonbench_vector_exp_16777216": {
+      "repros": [
+        {
+          "pattern_hash": "ff68a99d52a0",
+          "shape_config": "tritonbench_vector_exp_16777216_334b9259",
+          "original_file": "region_000_pointwise_ff68a99d52a0_334b9259.py"
+        }
+      ]
+    },
+    "tritonbench_welford_ln_262144x1024": {
+      "repros": [
+        {
+          "pattern_hash": "6f459d40ee4d",
+          "shape_config": "tritonbench_welford_ln_262144x1024_507054c1",
+          "original_file": "region_000_mean_6f459d40ee4d_507054c1.py"
+        }
+      ]
+    },
+    "tritonbench_welford_ln_262144x4096": {
+      "repros": [
+        {
+          "pattern_hash": "6f459d40ee4d",
+          "shape_config": "tritonbench_welford_ln_262144x4096_5ec6e460",
+          "original_file": "region_000_mean_6f459d40ee4d_5ec6e460.py"
+        }
+      ]
+    },
+    "tritonbench_welford_ln_65536x8192": {
+      "repros": [
+        {
+          "pattern_hash": "6f459d40ee4d",
+          "shape_config": "tritonbench_welford_ln_65536x8192_6728219c",
+          "original_file": "region_000_mean_6f459d40ee4d_6728219c.py"
+        }
+      ]
     }
   }
 }

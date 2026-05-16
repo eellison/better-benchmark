@@ -228,6 +228,57 @@
         "timm_nfnet_l0_training"
       ],
       "shape_hash": "f952816a"
+    },
+    "tritonbench_mean_dim1_32768x1024_5ed612bf": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32768,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_mean_dim1_32768x1024"
+      ],
+      "shape_hash": "5ed612bf"
+    },
+    "tritonbench_mean_dim1_4096x4096_6f365176": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_mean_dim1_4096x4096"
+      ],
+      "shape_hash": "6f365176"
+    },
+    "tritonbench_mean_dim1_8192x8192_c8e62511": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            8192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_mean_dim1_8192x8192"
+      ],
+      "shape_hash": "c8e62511"
     }
   }
 }

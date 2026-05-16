@@ -1,0 +1,57 @@
+{
+  "pattern_hash": "4e221e32dd02",
+  "configs": {
+    "tritonbench_kl_div_4096x32768_f2328034": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            32768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            32768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_kl_div_4096x32768"
+      ],
+      "shape_hash": "f2328034"
+    },
+    "tritonbench_kl_div_4096x4096_5d62b8b9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tritonbench_kl_div_4096x4096"
+      ],
+      "shape_hash": "5d62b8b9"
+    }
+  }
+}

@@ -11,8 +11,12 @@
     "aten.var_mean.correction",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 5,
   "models": [
-    "tlparse_torchbench_s2_g20"
+    "tlparse_torchbench_s2_g20",
+    "tritonbench_layer_norm_4096x1024",
+    "tritonbench_layer_norm_4096x4096",
+    "tritonbench_layer_norm_4096x8192",
+    "tritonbench_layer_norm_8192x2048"
   ]
 }

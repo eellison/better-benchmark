@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "ff68a99d52a0",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.exp.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "tritonbench_vector_exp_1048576",
+    "tritonbench_vector_exp_16777216"
+  ]
+}
