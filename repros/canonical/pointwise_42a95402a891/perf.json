@@ -10,6 +10,17 @@
         "gap_cd": null,
         "timestamp": "2026-05-16T16:59:10"
       }
+    },
+    "v3_full": {
+      "default": {
+        "compiled_us": 42.81790902186147,
+        "coord_descent_us": null,
+        "memcopy_sol_us": 5.7412927043185205,
+        "total_bytes": 1192,
+        "gap_default": 7.45788644248262,
+        "gap_cd": null,
+        "timestamp": "2026-05-16T18:41:32"
+      }
     }
   }
 }
