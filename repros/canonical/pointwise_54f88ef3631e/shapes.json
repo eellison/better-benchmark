@@ -140,6 +140,76 @@
         "hf_MBartForCausalLM_inference"
       ],
       "shape_hash": "eab956eb"
+    },
+    "hf_plbartforcausallm_inference_db0b7013": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_PLBartForCausalLM_inference"
+      ],
+      "shape_hash": "db0b7013"
+    },
+    "hf_pegasusforcausallm_inference_ac2573c4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_PegasusForCausalLM_inference"
+      ],
+      "shape_hash": "ac2573c4"
     }
   }
 }

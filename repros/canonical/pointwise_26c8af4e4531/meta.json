@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "26c8af4e4531",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_visformer_small_inference",
+    "timm_visformer_small_training"
+  ]
+}

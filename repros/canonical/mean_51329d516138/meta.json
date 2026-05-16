@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "51329d516138",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_swin_base_patch4_window7_224_inference"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "pattern_hash": "d17e1df5012e",
+  "configs": {
+    "hf_xlnetlmheadmodel_inference_99874ed5": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32000,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            16,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            16,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            16,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_XLNetLMHeadModel_inference"
+      ],
+      "shape_hash": "99874ed5"
+    }
+  }
+}

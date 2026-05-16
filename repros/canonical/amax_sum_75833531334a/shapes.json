@@ -198,6 +198,100 @@
         "hf_MT5ForConditionalGeneration_training"
       ],
       "shape_hash": "2f985055"
+    },
+    "hf_t5forconditionalgeneration_training_bbdeb10b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            64,
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            8,
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            64
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_T5ForConditionalGeneration_training"
+      ],
+      "shape_hash": "bbdeb10b"
+    },
+    "hf_t5small_training_bbdeb10b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            64,
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            8,
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            64
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_T5Small_training"
+      ],
+      "shape_hash": "bbdeb10b"
     }
   }
 }

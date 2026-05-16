@@ -6,8 +6,10 @@
   "origin_ops": [
     "aten.constant_pad_nd.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "dynamo_MobileBertForMaskedLM"
+    "dynamo_MobileBertForMaskedLM",
+    "timm_tf_efficientnet_b0_inference",
+    "timm_tf_efficientnet_b0_training"
   ]
 }

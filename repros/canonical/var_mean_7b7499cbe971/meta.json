@@ -11,8 +11,16 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 2,
+  "n_models": 10,
   "models": [
+    "timm_dm_nfnet_f0_inference",
+    "timm_dm_nfnet_f0_training",
+    "timm_nfnet_l0_inference",
+    "timm_nfnet_l0_training",
+    "timm_swin_base_patch4_window7_224_inference",
+    "timm_swin_base_patch4_window7_224_training",
+    "timm_vit_base_patch16_siglip_256_inference",
+    "timm_vit_base_patch16_siglip_256_training",
     "torchvision_swin_t_inference",
     "torchvision_swin_t_training"
   ]

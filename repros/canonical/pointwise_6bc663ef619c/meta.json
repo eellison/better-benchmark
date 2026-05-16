@@ -21,7 +21,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 8,
+  "n_models": 10,
   "models": [
     "hf_AlbertForMaskedLM_training",
     "hf_BertForMaskedLM_training",
@@ -29,6 +29,8 @@
     "hf_DistilBertForMaskedLM_training",
     "hf_ElectraForCausalLM_training",
     "hf_M2M100ForConditionalGeneration_training",
+    "hf_MobileBertForMaskedLM_training",
+    "hf_RobertaForCausalLM_training",
     "hf_bert_large_train",
     "hf_distilbert_train"
   ]

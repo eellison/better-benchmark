@@ -13,8 +13,10 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
+    "hf_T5ForConditionalGeneration_training",
+    "hf_T5Small_training",
     "hf_t5_base_train"
   ]
 }

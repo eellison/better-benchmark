@@ -1,0 +1,53 @@
+{
+  "pattern_hash": "cc3d08b79f6e",
+  "configs": {
+    "hf_reformer_inference_aa83b929": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            4096,
+            64
+          ],
+          "stride": [
+            3145728,
+            64,
+            768,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "hf_Reformer_inference"
+      ],
+      "shape_hash": "aa83b929"
+    },
+    "hf_reformer_training_aa83b929": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            4096,
+            64
+          ],
+          "stride": [
+            3145728,
+            64,
+            768,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "hf_Reformer_training"
+      ],
+      "shape_hash": "aa83b929"
+    }
+  }
+}

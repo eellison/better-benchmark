@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "89991ab608ac",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 13,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_mobilevit_s_inference",
+    "timm_mobilevit_s_training"
+  ]
+}

@@ -1,0 +1,245 @@
+{
+  "pattern_hash": "129c6a6b3273",
+  "configs": {
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference_2b1bedb9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            320,
+            18,
+            18
+          ],
+          "stride": [
+            103680,
+            1,
+            5760,
+            320
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            320,
+            18,
+            18
+          ],
+          "stride": [
+            103680,
+            1,
+            5760,
+            320
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference"
+      ],
+      "shape_hash": "2b1bedb9"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference_0e30c5c5": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            160,
+            36,
+            36
+          ],
+          "stride": [
+            207360,
+            1,
+            5760,
+            160
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            160,
+            36,
+            36
+          ],
+          "stride": [
+            207360,
+            1,
+            5760,
+            160
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference"
+      ],
+      "shape_hash": "0e30c5c5"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference_9819a328": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            80,
+            72,
+            72
+          ],
+          "stride": [
+            414720,
+            1,
+            5760,
+            80
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            80,
+            72,
+            72
+          ],
+          "stride": [
+            414720,
+            1,
+            5760,
+            80
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference"
+      ],
+      "shape_hash": "9819a328"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_70ead775": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            320,
+            14,
+            14
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            320
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            320,
+            14,
+            14
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            320
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+      ],
+      "shape_hash": "70ead775"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_aa9f3f29": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            160,
+            28,
+            28
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            160
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            160,
+            28,
+            28
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            160
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+      ],
+      "shape_hash": "aa9f3f29"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_40579aeb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            80,
+            56,
+            56
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            80
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            80,
+            56,
+            56
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            80
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+      ],
+      "shape_hash": "40579aeb"
+    }
+  }
+}

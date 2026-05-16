@@ -194,6 +194,142 @@
         "torchvision_swin_t_training"
       ],
       "shape_hash": "d82948c9"
+    },
+    "timm_swin_base_patch4_window7_224_training_52460560": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            4,
+            49,
+            49
+          ],
+          "stride": [
+            9728,
+            2432,
+            49,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            49,
+            49
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_training"
+      ],
+      "shape_hash": "52460560"
+    },
+    "timm_swin_base_patch4_window7_224_training_d533860d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            8,
+            49,
+            49
+          ],
+          "stride": [
+            19456,
+            2432,
+            49,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            49,
+            49
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_training"
+      ],
+      "shape_hash": "d533860d"
+    },
+    "timm_swin_base_patch4_window7_224_training_a4475e68": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16,
+            49,
+            49
+          ],
+          "stride": [
+            38912,
+            2432,
+            49,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            49,
+            49
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_training"
+      ],
+      "shape_hash": "a4475e68"
+    },
+    "timm_swin_base_patch4_window7_224_training_fcc2ec71": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            32,
+            49,
+            49
+          ],
+          "stride": [
+            77824,
+            2432,
+            49,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            49,
+            49
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_training"
+      ],
+      "shape_hash": "fcc2ec71"
     }
   }
 }

@@ -17,7 +17,7 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 17,
+  "n_models": 23,
   "models": [
     "dynamo_DistillGPT2",
     "hf_AllenaiLongformerBase_training",
@@ -33,6 +33,12 @@
     "hf_LayoutLMForMaskedLM_training",
     "hf_M2M100ForConditionalGeneration_training",
     "hf_MegatronBertForCausalLM_training",
+    "hf_PLBartForCausalLM_training",
+    "hf_RobertaForCausalLM_training",
+    "hf_TrOCRForCausalLM_training",
+    "hf_XGLMForCausalLM_training",
+    "hf_XLNetLMHeadModel_training",
+    "hf_YituTechConvBert_training",
     "hf_bert_large_train",
     "hf_distilbert_train",
     "hf_gpt2"

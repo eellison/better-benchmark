@@ -7,11 +7,13 @@
     "aten.add.Tensor",
     "aten.reshape.default"
   ],
-  "n_models": 4,
+  "n_models": 6,
   "models": [
     "dynamo_Reformer",
     "dynamo_Reformer_inference",
     "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_inference",
+    "hf_MobileBertForMaskedLM_inference",
+    "hf_Reformer_inference",
     "vllm_deepseek-ai_DeepSeek-V3_inference"
   ]
 }

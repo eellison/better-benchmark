@@ -11,13 +11,15 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 6,
+  "n_models": 8,
   "models": [
     "dynamo_AllenaiLongformerBase",
     "dynamo_AllenaiLongformerBase_inference",
     "dynamo_OPTForCausalLM",
     "dynamo_OPTForCausalLM_inference",
     "dynamo_Reformer",
-    "dynamo_Reformer_inference"
+    "dynamo_Reformer_inference",
+    "hf_Reformer_inference",
+    "hf_Reformer_training"
   ]
 }

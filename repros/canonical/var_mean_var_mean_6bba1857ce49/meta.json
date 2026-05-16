@@ -14,8 +14,12 @@
     "aten.var_mean.correction",
     "aten.var_mean.correction"
   ],
-  "n_models": 4,
+  "n_models": 8,
   "models": [
+    "timm_adv_inception_v3_training",
+    "timm_ghostnet_100_training",
+    "timm_inception_v3_training",
+    "timm_repvgg_a2_training",
     "torchvision_resnet18_training",
     "torchvision_resnet50_training",
     "torchvision_resnext50_32x4d_training",

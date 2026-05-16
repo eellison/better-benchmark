@@ -38,6 +38,82 @@
         "torchvision_swin_t_training"
       ],
       "shape_hash": "a3ecfd3d"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference_97f66d60": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            80,
+            72,
+            72
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference"
+      ],
+      "shape_hash": "97f66d60"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_e253f5ff": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            80,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+      ],
+      "shape_hash": "e253f5ff"
+    },
+    "timm_swin_base_patch4_window7_224_inference_4b33e9aa": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            128,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_inference"
+      ],
+      "shape_hash": "4b33e9aa"
+    },
+    "timm_swin_base_patch4_window7_224_training_4b33e9aa": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            128,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_training"
+      ],
+      "shape_hash": "4b33e9aa"
     }
   }
 }

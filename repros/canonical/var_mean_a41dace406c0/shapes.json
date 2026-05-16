@@ -576,6 +576,222 @@
         "hf_MegatronBertForCausalLM_training"
       ],
       "shape_hash": "538f175d"
+    },
+    "hf_plbartforcausallm_training_b2482ab4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            2
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_PLBartForCausalLM_training"
+      ],
+      "shape_hash": "b2482ab4"
+    },
+    "hf_robertaforcausallm_training_e95ac53e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            37
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_RobertaForCausalLM_training"
+      ],
+      "shape_hash": "e95ac53e"
+    },
+    "hf_trocrforcausallm_training_e33d0c39": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            2
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            256,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_TrOCRForCausalLM_training"
+      ],
+      "shape_hash": "e33d0c39"
+    },
+    "hf_xglmforcausallm_training_97ea4fbe": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            3
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_XGLMForCausalLM_training"
+      ],
+      "shape_hash": "97ea4fbe"
+    },
+    "hf_xlnetlmheadmodel_training_625ee890": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            99
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            8,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_XLNetLMHeadModel_training"
+      ],
+      "shape_hash": "625ee890"
+    },
+    "hf_yitutechconvbert_training_e95ac53e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            37
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_YituTechConvBert_training"
+      ],
+      "shape_hash": "e95ac53e"
     }
   }
 }

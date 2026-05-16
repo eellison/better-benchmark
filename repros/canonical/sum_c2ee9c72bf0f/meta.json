@@ -16,10 +16,11 @@
     "aten.sum.dim_IntList",
     "prims.fma.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "hf_AlbertForMaskedLM_training",
     "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_training",
+    "timm_swin_base_patch4_window7_224_training",
     "torchvision_swin_t_training"
   ]
 }

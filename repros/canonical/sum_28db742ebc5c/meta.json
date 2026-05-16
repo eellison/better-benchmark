@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "28db742ebc5c",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sigmoid.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_nfnet_l0_training"
+  ]
+}

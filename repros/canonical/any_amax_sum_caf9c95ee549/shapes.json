@@ -258,6 +258,92 @@
         "hf_M2M100ForConditionalGeneration_inference"
       ],
       "shape_hash": "1c578ec2"
+    },
+    "hf_mobilebertformaskedlm_inference_3ab219bb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            128,
+            128
+          ],
+          "stride": [
+            0,
+            128,
+            1,
+            0
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MobileBertForMaskedLM_inference"
+      ],
+      "shape_hash": "3ab219bb"
+    },
+    "hf_robertaforcausallm_inference_b487ad1b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            512,
+            512
+          ],
+          "stride": [
+            0,
+            512,
+            1,
+            0
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_RobertaForCausalLM_inference"
+      ],
+      "shape_hash": "b487ad1b"
     }
   }
 }

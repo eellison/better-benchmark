@@ -16,7 +16,7 @@
     "aten.expand.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 9,
+  "n_models": 11,
   "models": [
     "dynamo_ElectraForCausalLM",
     "dynamo_ElectraForCausalLM_inference",
@@ -25,6 +25,8 @@
     "dynamo_YituTechConvBert",
     "hf_GoogleFnet_inference",
     "hf_GoogleFnet_training",
+    "hf_YituTechConvBert_inference",
+    "hf_YituTechConvBert_training",
     "hf_albert",
     "hf_bert"
   ]

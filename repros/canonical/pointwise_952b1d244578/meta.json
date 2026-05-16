@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "952b1d244578",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 15,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reciprocal.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_mobilevit_s_training"
+  ]
+}

@@ -72,6 +72,42 @@
         "hf_M2M100ForConditionalGeneration_training"
       ],
       "shape_hash": "f18b7be0"
+    },
+    "hf_robertaforcausallm_inference_a2fe9c92": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_RobertaForCausalLM_inference"
+      ],
+      "shape_hash": "a2fe9c92"
+    },
+    "hf_robertaforcausallm_training_a2fe9c92": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_RobertaForCausalLM_training"
+      ],
+      "shape_hash": "a2fe9c92"
     }
   }
 }

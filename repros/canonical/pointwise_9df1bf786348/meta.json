@@ -9,7 +9,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 14,
+  "n_models": 16,
   "models": [
     "dynamo_ElectraForCausalLM",
     "dynamo_ElectraForCausalLM_inference",
@@ -24,6 +24,8 @@
     "dynamo_T5ForConditionalGeneration",
     "dynamo_T5Small",
     "dynamo_TrOCRForCausalLM",
+    "timm_visformer_small_inference",
+    "timm_visformer_small_training",
     "vllm_deepseek-ai_DeepSeek-V3_inference"
   ]
 }

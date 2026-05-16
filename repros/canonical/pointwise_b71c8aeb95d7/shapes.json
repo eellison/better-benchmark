@@ -1,0 +1,43 @@
+{
+  "pattern_hash": "b71c8aeb95d7",
+  "configs": {
+    "timm_tf_efficientnet_b0_inference_fca76436": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            3,
+            224,
+            224
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_inference"
+      ],
+      "shape_hash": "fca76436"
+    },
+    "timm_tf_efficientnet_b0_training_fca76436": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            3,
+            224,
+            224
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "fca76436"
+    }
+  }
+}

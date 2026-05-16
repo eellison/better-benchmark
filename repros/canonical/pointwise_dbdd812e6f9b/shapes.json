@@ -1,0 +1,42 @@
+{
+  "pattern_hash": "dbdd812e6f9b",
+  "configs": {
+    "hf_mobilebertformaskedlm_training_307600f7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MobileBertForMaskedLM_training"
+      ],
+      "shape_hash": "307600f7"
+    }
+  }
+}

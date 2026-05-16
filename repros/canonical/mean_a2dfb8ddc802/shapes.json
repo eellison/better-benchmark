@@ -44,6 +44,94 @@
         "hf_MT5ForConditionalGeneration_inference"
       ],
       "shape_hash": "9e1acdac"
+    },
+    "hf_t5forconditionalgeneration_inference_8c0ef316": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_T5ForConditionalGeneration_inference"
+      ],
+      "shape_hash": "8c0ef316"
+    },
+    "hf_t5small_inference_8c0ef316": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_T5Small_inference"
+      ],
+      "shape_hash": "8c0ef316"
     }
   }
 }

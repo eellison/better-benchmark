@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "003775067f08",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 13,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_nfnet_l0_inference",
+    "timm_nfnet_l0_training"
+  ]
+}

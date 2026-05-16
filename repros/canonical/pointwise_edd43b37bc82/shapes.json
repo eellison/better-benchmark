@@ -34,6 +34,23 @@
         "hf_MegatronBertForCausalLM_inference"
       ],
       "shape_hash": "615e3e6b"
+    },
+    "hf_yitutechconvbert_inference_236ec254": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            30522
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_YituTechConvBert_inference"
+      ],
+      "shape_hash": "236ec254"
     }
   }
 }

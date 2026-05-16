@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "b7a621812e84",
+  "configs": {
+    "hf_reformer_inference_8a72d84d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32768,
+            256
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_Reformer_inference"
+      ],
+      "shape_hash": "8a72d84d"
+    }
+  }
+}

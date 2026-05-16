@@ -33,13 +33,15 @@
     "aten.where.self",
     "aten.where.self"
   ],
-  "n_models": 6,
+  "n_models": 8,
   "models": [
     "hf_AlbertForMaskedLM_inference",
     "hf_BertForMaskedLM_inference",
     "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_inference",
     "hf_DistilBertForMaskedLM_inference",
     "hf_ElectraForCausalLM_inference",
-    "hf_M2M100ForConditionalGeneration_inference"
+    "hf_M2M100ForConditionalGeneration_inference",
+    "hf_MobileBertForMaskedLM_inference",
+    "hf_RobertaForCausalLM_inference"
   ]
 }

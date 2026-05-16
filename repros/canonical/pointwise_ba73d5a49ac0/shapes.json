@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "ba73d5a49ac0",
+  "configs": {
+    "hf_yitutechconvbert_training_13b20d0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_YituTechConvBert_training"
+      ],
+      "shape_hash": "13b20d0d"
+    }
+  }
+}

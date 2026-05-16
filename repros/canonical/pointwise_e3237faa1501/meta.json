@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "e3237faa1501",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_MobileBertForMaskedLM_inference",
+    "hf_MobileBertForMaskedLM_training"
+  ]
+}

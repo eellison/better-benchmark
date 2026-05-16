@@ -20,7 +20,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 7,
+  "n_models": 11,
   "models": [
     "hf_GPTNeoForCausalLM_inference",
     "hf_GPTNeoForSequenceClassification_inference",
@@ -28,6 +28,10 @@
     "hf_MT5ForConditionalGeneration_inference",
     "hf_MT5ForConditionalGeneration_training",
     "hf_MegatronBertForCausalLM_inference",
+    "hf_T5ForConditionalGeneration_inference",
+    "hf_T5ForConditionalGeneration_training",
+    "hf_T5Small_inference",
+    "hf_T5Small_training",
     "t5_base_inference"
   ]
 }

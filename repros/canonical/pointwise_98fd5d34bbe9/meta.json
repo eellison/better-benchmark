@@ -9,9 +9,11 @@
     "aten.reshape.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
     "dynamo_Reformer",
-    "dynamo_Reformer_inference"
+    "dynamo_Reformer_inference",
+    "hf_Reformer_inference",
+    "hf_Reformer_training"
   ]
 }

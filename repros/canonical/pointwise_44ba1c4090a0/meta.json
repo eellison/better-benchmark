@@ -12,8 +12,20 @@
     "aten.reshape.default",
     "aten.unbind.int"
   ],
-  "n_models": 3,
+  "n_models": 15,
   "models": [
+    "timm_deit_base_distilled_patch16_224_inference",
+    "timm_deit_base_distilled_patch16_224_training",
+    "timm_deit_tiny_patch16_224.fb_in1k_inference",
+    "timm_deit_tiny_patch16_224.fb_in1k_training",
+    "timm_mobilevit_s_inference",
+    "timm_mobilevit_s_training",
+    "timm_swin_base_patch4_window7_224_inference",
+    "timm_swin_base_patch4_window7_224_training",
+    "timm_vit_base_patch14_dinov2.lvd142m_inference",
+    "timm_vit_base_patch14_dinov2.lvd142m_training",
+    "timm_vit_base_patch16_siglip_256_inference",
+    "timm_vit_base_patch16_siglip_256_training",
     "tlparse_timm_s2_g20",
     "tlparse_timm_s3_g20",
     "tlparse_timm_s6_g10"

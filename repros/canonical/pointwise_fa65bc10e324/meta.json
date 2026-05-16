@@ -15,8 +15,9 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_XLNetLMHeadModel_inference",
     "torchvision_vit_b_16_training"
   ]
 }

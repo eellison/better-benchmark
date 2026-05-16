@@ -27,8 +27,9 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
+    "timm_repvgg_a2_training",
     "torchvision_resnet18_training",
     "torchvision_resnet50_training",
     "torchvision_resnext50_32x4d_training",

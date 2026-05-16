@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "c0b1932a1580",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 21,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.fmod.Scalar",
+    "aten.index.Tensor",
+    "aten.index.Tensor",
+    "aten.lt.Scalar",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_swin_base_patch4_window7_224_training"
+  ]
+}

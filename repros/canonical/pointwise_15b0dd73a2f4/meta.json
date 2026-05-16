@@ -21,7 +21,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 15,
+  "n_models": 27,
   "models": [
     "hf_AllenaiLongformerBase_training",
     "hf_BartForCausalLM_training",
@@ -34,8 +34,20 @@
     "hf_LayoutLMForMaskedLM_training",
     "hf_MBartForCausalLM_training",
     "hf_MegatronBertForCausalLM_training",
+    "hf_PLBartForCausalLM_training",
+    "hf_PegasusForCausalLM_training",
+    "hf_RobertaForCausalLM_training",
+    "hf_TrOCRForCausalLM_training",
+    "hf_XGLMForCausalLM_training",
+    "hf_YituTechConvBert_training",
     "hf_bert_large_train",
     "hf_distilbert_train",
+    "timm_beit_base_patch16_224_training",
+    "timm_deit_base_distilled_patch16_224_training",
+    "timm_deit_tiny_patch16_224.fb_in1k_training",
+    "timm_swin_base_patch4_window7_224_training",
+    "timm_vit_base_patch14_dinov2.lvd142m_training",
+    "timm_vit_base_patch16_siglip_256_training",
     "torchvision_swin_t_training",
     "torchvision_vit_b_16_training"
   ]

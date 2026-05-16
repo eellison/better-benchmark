@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "cc3d08b79f6e",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_Reformer_inference",
+    "hf_Reformer_training"
+  ]
+}

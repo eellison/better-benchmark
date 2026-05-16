@@ -1,0 +1,46 @@
+{
+  "pattern_hash": "4ad7db97d30d",
+  "configs": {
+    "hf_reformer_inference_c6ff54f3": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            4096
+          ],
+          "stride": [
+            0,
+            1
+          ],
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            64,
+            1,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            64,
+            192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_Reformer_inference"
+      ],
+      "shape_hash": "c6ff54f3"
+    }
+  }
+}

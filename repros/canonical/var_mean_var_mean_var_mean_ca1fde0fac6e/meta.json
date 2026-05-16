@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "ca1fde0fac6e",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean",
+    "var_mean",
+    "var_mean",
+    "var_mean",
+    "var_mean",
+    "var_mean"
+  ],
+  "n_ops": 18,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.var_mean.correction",
+    "aten.var_mean.correction",
+    "aten.var_mean.correction",
+    "aten.var_mean.correction",
+    "aten.var_mean.correction",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_adv_inception_v3_training",
+    "timm_inception_v3_training"
+  ]
+}

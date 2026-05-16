@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "2d80e96dafff",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.gt.Scalar",
+    "aten.lift_fresh_copy.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "prims.convert_element_type.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Reformer_training"
+  ]
+}

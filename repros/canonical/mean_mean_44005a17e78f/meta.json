@@ -43,8 +43,10 @@
     "prims.inductor_random.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "hf_MT5ForConditionalGeneration_training"
+    "hf_MT5ForConditionalGeneration_training",
+    "hf_T5ForConditionalGeneration_training",
+    "hf_T5Small_training"
   ]
 }

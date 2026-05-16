@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "4ad7db97d30d",
+  "kind": "reduction",
+  "reduction_types": [
+    "max"
+  ],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.max.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Reformer_inference"
+  ]
+}

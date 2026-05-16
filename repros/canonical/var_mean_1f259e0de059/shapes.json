@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "1f259e0de059",
+  "configs": {
+    "timm_swin_base_patch4_window7_224_inference_9efbf0ba": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1568,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            7,
+            7,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_inference"
+      ],
+      "shape_hash": "9efbf0ba"
+    }
+  }
+}

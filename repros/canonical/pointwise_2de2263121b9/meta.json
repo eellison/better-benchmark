@@ -12,8 +12,13 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 6,
   "models": [
-    "timm_convnext_tiny"
+    "hf_OPTForCausalLM_inference",
+    "hf_OPTForCausalLM_training",
+    "timm_beit_base_patch16_224_inference",
+    "timm_convnext_tiny",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
   ]
 }

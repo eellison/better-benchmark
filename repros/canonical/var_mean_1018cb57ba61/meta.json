@@ -17,8 +17,9 @@
     "aten.var_mean.correction",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "dynamo_TrOCRForCausalLM"
+    "dynamo_TrOCRForCausalLM",
+    "hf_TrOCRForCausalLM_inference"
   ]
 }

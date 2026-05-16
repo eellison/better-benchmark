@@ -1,0 +1,61 @@
+{
+  "pattern_hash": "3afc95688e1f",
+  "configs": {
+    "hf_xlnetlmheadmodel_inference_a5ccb5ef": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            512,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            16,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_XLNetLMHeadModel_inference"
+      ],
+      "shape_hash": "a5ccb5ef"
+    },
+    "hf_xlnetlmheadmodel_training_a5ccb5ef": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            512,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            16,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_XLNetLMHeadModel_training"
+      ],
+      "shape_hash": "a5ccb5ef"
+    }
+  }
+}

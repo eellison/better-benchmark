@@ -1,0 +1,85 @@
+{
+  "pattern_hash": "a6ab8c912995",
+  "configs": {
+    "hf_reformer_inference_d440f5eb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            6144,
+            64,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            4096
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            4096
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_Reformer_inference"
+      ],
+      "shape_hash": "d440f5eb"
+    },
+    "hf_reformer_training_d440f5eb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            6144,
+            64,
+            64
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            4096
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            4096
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_Reformer_training"
+      ],
+      "shape_hash": "d440f5eb"
+    }
+  }
+}

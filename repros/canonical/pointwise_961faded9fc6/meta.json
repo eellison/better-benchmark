@@ -11,11 +11,14 @@
     "aten.reshape.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 4,
+  "n_models": 7,
   "models": [
     "hf_BlenderbotForCausalLM_training",
     "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_training",
     "hf_M2M100ForConditionalGeneration_training",
-    "hf_MBartForCausalLM_training"
+    "hf_MBartForCausalLM_training",
+    "hf_OPTForCausalLM_training",
+    "hf_PegasusForCausalLM_training",
+    "hf_XGLMForCausalLM_training"
   ]
 }

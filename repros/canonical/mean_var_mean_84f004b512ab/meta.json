@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "84f004b512ab",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean",
+    "var_mean"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.as_strided.default",
+    "aten.mean.dim",
+    "aten.permute.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+  ]
+}

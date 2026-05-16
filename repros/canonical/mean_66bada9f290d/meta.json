@@ -19,8 +19,10 @@
     "aten.reshape.default",
     "aten.rsqrt.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "hf_MT5ForConditionalGeneration_inference"
+    "hf_MT5ForConditionalGeneration_inference",
+    "hf_T5ForConditionalGeneration_inference",
+    "hf_T5Small_inference"
   ]
 }

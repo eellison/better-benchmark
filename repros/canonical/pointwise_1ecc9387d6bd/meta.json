@@ -14,7 +14,7 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 14,
+  "n_models": 17,
   "models": [
     "hf_BertForMaskedLM_training",
     "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_training",
@@ -26,9 +26,12 @@
     "hf_LayoutLMForMaskedLM_training",
     "hf_M2M100ForConditionalGeneration_training",
     "hf_MegatronBertForCausalLM_training",
+    "hf_RobertaForCausalLM_training",
+    "hf_XGLMForCausalLM_training",
     "hf_bert_large_train",
     "hf_distilbert_train",
     "timm_convnext_tiny",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference",
     "torchvision_vit_b_16_inference"
   ]
 }

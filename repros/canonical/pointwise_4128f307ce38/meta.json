@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "4128f307ce38",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_TrOCRForCausalLM_inference",
+    "hf_TrOCRForCausalLM_training"
+  ]
+}

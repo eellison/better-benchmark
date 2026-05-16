@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "6b0bb9f58b5d",
+  "configs": {
+    "timm_ghostnet_100_training_bd518b66": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            1280
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            32,
+            1280,
+            1,
+            1
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "bd518b66"
+    }
+  }
+}

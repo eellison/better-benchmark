@@ -7,8 +7,12 @@
     "aten.le.Scalar",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 5,
   "models": [
+    "timm_dm_nfnet_f0_training",
+    "timm_ghostnet_100_training",
+    "timm_mobilenetv3_large_100_training",
+    "timm_nfnet_l0_training",
     "torchvision_vgg16_training"
   ]
 }

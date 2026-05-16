@@ -1,0 +1,42 @@
+{
+  "pattern_hash": "cdae6aa7cad7",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 30,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_beit_base_patch16_224_training"
+  ]
+}

@@ -35,6 +35,20 @@
         "hf_MBartForCausalLM_training"
       ],
       "shape_hash": "d7517139"
+    },
+    "hf_plbartforcausallm_training_d7517139": {
+      "inputs": [],
+      "source_models": [
+        "hf_PLBartForCausalLM_training"
+      ],
+      "shape_hash": "d7517139"
+    },
+    "hf_pegasusforcausallm_training_d7517139": {
+      "inputs": [],
+      "source_models": [
+        "hf_PegasusForCausalLM_training"
+      ],
+      "shape_hash": "d7517139"
     }
   }
 }

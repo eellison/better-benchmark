@@ -16,11 +16,13 @@
     "aten.sub.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 5,
+  "n_models": 7,
   "models": [
     "dynamo_MBartForCausalLM",
     "dynamo_MBartForCausalLM_inference",
     "hf_MBartForCausalLM_inference",
+    "timm_swin_base_patch4_window7_224_inference",
+    "timm_swin_base_patch4_window7_224_training",
     "torchvision_swin_t_inference",
     "torchvision_swin_t_training"
   ]

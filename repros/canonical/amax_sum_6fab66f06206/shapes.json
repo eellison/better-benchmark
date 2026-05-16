@@ -27,6 +27,60 @@
         "hf_MT5ForConditionalGeneration_inference"
       ],
       "shape_hash": "85280d32"
+    },
+    "hf_t5forconditionalgeneration_inference_d2e9b0f2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            64,
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_T5ForConditionalGeneration_inference"
+      ],
+      "shape_hash": "d2e9b0f2"
+    },
+    "hf_t5small_inference_d2e9b0f2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            64,
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_T5Small_inference"
+      ],
+      "shape_hash": "d2e9b0f2"
     }
   }
 }

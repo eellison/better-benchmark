@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "efa8faba14cb",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.bitwise_and.Tensor",
+    "aten.gt.Scalar",
+    "aten.lt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_ghostnet_100_training"
+  ]
+}

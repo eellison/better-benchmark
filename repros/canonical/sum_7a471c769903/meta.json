@@ -27,8 +27,9 @@
     "prims.convert_element_type.default",
     "prims.fma.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "dynamo_XLNetLMHeadModel"
+    "dynamo_XLNetLMHeadModel",
+    "hf_XLNetLMHeadModel_training"
   ]
 }

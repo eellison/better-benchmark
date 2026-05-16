@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "a82ab7a9f9d6",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 21,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.fmod.Scalar",
+    "aten.fmod.Scalar",
+    "aten.index.Tensor",
+    "aten.index.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_swin_base_patch4_window7_224_inference"
+  ]
+}

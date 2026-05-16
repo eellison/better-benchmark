@@ -272,6 +272,74 @@
         "hf_MegatronBertForCausalLM_training"
       ],
       "shape_hash": "120669b8"
+    },
+    "hf_robertaforcausallm_inference_13b20d0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_RobertaForCausalLM_inference"
+      ],
+      "shape_hash": "13b20d0d"
+    },
+    "hf_robertaforcausallm_training_13b20d0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_RobertaForCausalLM_training"
+      ],
+      "shape_hash": "13b20d0d"
+    },
+    "hf_yitutechconvbert_inference_13b20d0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_YituTechConvBert_inference"
+      ],
+      "shape_hash": "13b20d0d"
+    },
+    "hf_yitutechconvbert_training_13b20d0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_YituTechConvBert_training"
+      ],
+      "shape_hash": "13b20d0d"
     }
   }
 }

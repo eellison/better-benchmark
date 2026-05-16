@@ -37,10 +37,13 @@
     "aten.where.self",
     "prims.iota.default"
   ],
-  "n_models": 3,
+  "n_models": 6,
   "models": [
     "hf_ElectraForCausalLM_training",
     "hf_GPTNeoForCausalLM_training",
-    "hf_MegatronBertForCausalLM_training"
+    "hf_MegatronBertForCausalLM_training",
+    "hf_OPTForCausalLM_training",
+    "hf_RobertaForCausalLM_training",
+    "hf_XGLMForCausalLM_training"
   ]
 }

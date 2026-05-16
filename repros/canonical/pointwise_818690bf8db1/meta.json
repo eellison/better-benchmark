@@ -9,9 +9,11 @@
     "aten.exp.default",
     "aten.neg.default"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
     "timm_efficientnet_b0",
+    "timm_tf_efficientnet_b0_inference",
+    "timm_tf_efficientnet_b0_training",
     "torchvision_efficientnet_b0_inference",
     "torchvision_efficientnet_b0_training"
   ]

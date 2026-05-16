@@ -1,0 +1,37 @@
+{
+  "pattern_hash": "1405ceb65239",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 23,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Scalar",
+    "aten.div.Tensor",
+    "aten.eq.Tensor",
+    "aten.exp.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.lt.Tensor",
+    "aten.maximum.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.where.self",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.fma.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_XGLMForCausalLM_training"
+  ]
+}

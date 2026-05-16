@@ -15,8 +15,12 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 3,
+  "n_models": 7,
   "models": [
+    "timm_deit_tiny_patch16_224.fb_in1k_inference",
+    "timm_deit_tiny_patch16_224.fb_in1k_training",
+    "timm_vit_base_patch14_dinov2.lvd142m_inference",
+    "timm_vit_base_patch14_dinov2.lvd142m_training",
     "tlparse_timm_s3_g20",
     "torchvision_vit_b_16_inference",
     "torchvision_vit_b_16_training"

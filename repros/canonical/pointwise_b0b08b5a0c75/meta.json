@@ -12,8 +12,9 @@
     "aten.permute.default",
     "aten.reshape.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "timm_mobilenetv3"
+    "timm_mobilenetv3",
+    "timm_mobilenetv3_large_100_inference"
   ]
 }

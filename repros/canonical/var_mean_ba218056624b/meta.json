@@ -15,8 +15,9 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "dynamo_XLNetLMHeadModel"
+    "dynamo_XLNetLMHeadModel",
+    "hf_XLNetLMHeadModel_inference"
   ]
 }

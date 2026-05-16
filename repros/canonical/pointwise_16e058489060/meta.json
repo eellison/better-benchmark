@@ -15,7 +15,7 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 13,
+  "n_models": 17,
   "models": [
     "hf_AlbertForMaskedLM_inference",
     "hf_BertForMaskedLM_inference",
@@ -29,6 +29,10 @@
     "hf_LayoutLMForMaskedLM_inference",
     "hf_M2M100ForConditionalGeneration_inference",
     "hf_M2M100ForConditionalGeneration_training",
-    "hf_MegatronBertForCausalLM_inference"
+    "hf_MegatronBertForCausalLM_inference",
+    "hf_Reformer_inference",
+    "hf_Reformer_training",
+    "hf_RobertaForCausalLM_inference",
+    "hf_XGLMForCausalLM_inference"
   ]
 }

@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "6db03bb08ec1",
+  "configs": {
+    "hf_trocrforcausallm_training_02575374": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            514,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_TrOCRForCausalLM_training"
+      ],
+      "shape_hash": "02575374"
+    }
+  }
+}

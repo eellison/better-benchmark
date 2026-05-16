@@ -162,6 +162,60 @@
         "hf_M2M100ForConditionalGeneration_inference"
       ],
       "shape_hash": "08aa5681"
+    },
+    "hf_mobilebertformaskedlm_inference_4c3fc3a0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MobileBertForMaskedLM_inference"
+      ],
+      "shape_hash": "4c3fc3a0"
+    },
+    "hf_robertaforcausallm_inference_1e16978b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_RobertaForCausalLM_inference"
+      ],
+      "shape_hash": "1e16978b"
     }
   }
 }

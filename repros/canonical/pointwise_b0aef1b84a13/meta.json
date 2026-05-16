@@ -6,7 +6,7 @@
   "origin_ops": [
     "aten.full.default"
   ],
-  "n_models": 26,
+  "n_models": 27,
   "models": [
     "dynamo_AllenaiLongformerBase",
     "dynamo_AllenaiLongformerBase_inference",
@@ -27,6 +27,7 @@
     "dynamo_T5ForConditionalGeneration",
     "dynamo_T5Small",
     "dynamo_YituTechConvBert",
+    "hf_OPTForCausalLM_inference",
     "vllm_Qwen_Qwen3-0.6B",
     "vllm_Qwen_Qwen3-0.6B_inference",
     "vllm_Qwen_Qwen3-30B-A3B_inference",

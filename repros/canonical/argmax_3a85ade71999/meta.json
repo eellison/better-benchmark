@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "3a85ade71999",
+  "kind": "reduction",
+  "reduction_types": [
+    "argmax"
+  ],
+  "n_ops": 20,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.argmax.default",
+    "aten.cat.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.permute.default",
+    "aten.remainder.Scalar",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sort.default",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_Reformer_inference",
+    "hf_Reformer_training"
+  ]
+}
