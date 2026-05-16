@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nvidia-smi)",
+      "Bash(nvidia-smi *)",
+      "Bash(pip show *)",
+      "Bash(pip list *)"
+    ]
+  }
+}

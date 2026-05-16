@@ -1,0 +1,104 @@
+{
+  "weight_grad_sum": [
+    {
+      "label": "weight_grad_sum/region_025_sum_c25f97f8bb7a_72858422.py",
+      "script": "output/aten_repros/dynamo_BertForMaskedLM/region_025_sum_c25f97f8bb7a_72858422.py",
+      "compile_success": true,
+      "num_triton_kernels": 12,
+      "triton_code_lines": 646,
+      "stderr_lines": 771
+    },
+    {
+      "label": "weight_grad_sum/region_005_sum_94d9ad74b3d3_4d35693e.py",
+      "script": "output/aten_repros/dynamo_BertForMaskedLM/region_005_sum_94d9ad74b3d3_4d35693e.py",
+      "compile_success": true,
+      "num_triton_kernels": 12,
+      "triton_code_lines": 430,
+      "stderr_lines": 493
+    },
+    {
+      "label": "weight_grad_sum/region_016_sum_bab7a7b0118a_a53551b1.py",
+      "script": "output/aten_repros/dynamo_BertForMaskedLM/region_016_sum_bab7a7b0118a_a53551b1.py",
+      "compile_success": true,
+      "num_triton_kernels": 12,
+      "triton_code_lines": 470,
+      "stderr_lines": 537
+    },
+    {
+      "label": "weight_grad_sum/region_013_sum_c15fcea82dde_66ab4406.py",
+      "script": "output/aten_repros/dynamo_DistillGPT2/region_013_sum_c15fcea82dde_66ab4406.py",
+      "compile_success": true,
+      "num_triton_kernels": 12,
+      "triton_code_lines": 536,
+      "stderr_lines": 599
+    }
+  ],
+  "rope_attention_pointwise": [
+    {
+      "label": "rope_attention_pointwise/region_005_pointwise_108892bc6e62_2851ce74.py",
+      "script": "output/aten_repros/dynamo_meta-llama/Llama-3.2-1B_inference/region_005_pointwise_108892bc6e62_2851ce74.py",
+      "compile_success": true,
+      "num_triton_kernels": 4,
+      "triton_code_lines": 343,
+      "stderr_lines": 455
+    },
+    {
+      "label": "rope_attention_pointwise/region_007_pointwise_fc69a1a83866_a2fe9c92.py",
+      "script": "output/aten_repros/dynamo_meta-llama/Llama-3.2-1B_inference/region_007_pointwise_fc69a1a83866_a2fe9c92.py",
+      "compile_success": true,
+      "num_triton_kernels": 4,
+      "triton_code_lines": 416,
+      "stderr_lines": 615
+    },
+    {
+      "label": "rope_attention_pointwise/region_001_pointwise_86432a5d8e65_2381e209.py",
+      "script": "output/aten_repros/dynamo_OPTForCausalLM_inference/region_001_pointwise_86432a5d8e65_2381e209.py",
+      "compile_success": true,
+      "num_triton_kernels": 4,
+      "triton_code_lines": 260,
+      "stderr_lines": 335
+    },
+    {
+      "label": "rope_attention_pointwise/region_008_pointwise_35deec51cf28_d037e534.py",
+      "script": "output/aten_repros/vllm_openai_gpt-oss-20b_inference/region_008_pointwise_35deec51cf28_d037e534.py",
+      "compile_success": true,
+      "num_triton_kernels": 4,
+      "triton_code_lines": 200,
+      "stderr_lines": 265
+    }
+  ],
+  "moe_small_pointwise": [
+    {
+      "label": "moe_small_pointwise/region_006_pointwise_8206ef619f2b_dc9ab797.py",
+      "script": "output/aten_repros/vllm_openai_gpt-oss-20b_inference/region_006_pointwise_8206ef619f2b_dc9ab797.py",
+      "compile_success": true,
+      "num_triton_kernels": 0,
+      "triton_code_lines": 0,
+      "stderr_lines": 149
+    },
+    {
+      "label": "moe_small_pointwise/region_035_pointwise_863609bc9483_d029e068.py",
+      "script": "output/aten_repros/vllm_deepseek-ai_DeepSeek-V3_inference/region_035_pointwise_863609bc9483_d029e068.py",
+      "compile_success": true,
+      "num_triton_kernels": 4,
+      "triton_code_lines": 205,
+      "stderr_lines": 271
+    },
+    {
+      "label": "moe_small_pointwise/region_008_pointwise_9c3e580878a3_8713b6ea.py",
+      "script": "output/aten_repros/dynamo_DistillGPT2/region_008_pointwise_9c3e580878a3_8713b6ea.py",
+      "compile_success": true,
+      "num_triton_kernels": 8,
+      "triton_code_lines": 358,
+      "stderr_lines": 433
+    },
+    {
+      "label": "moe_small_pointwise/region_009_pointwise_74957135a3e5_6bfb868a.py",
+      "script": "output/aten_repros/vllm_Qwen_Qwen3-0.6B_inference/region_009_pointwise_74957135a3e5_6bfb868a.py",
+      "compile_success": true,
+      "num_triton_kernels": 4,
+      "triton_code_lines": 206,
+      "stderr_lines": 277
+    }
+  ]
+}

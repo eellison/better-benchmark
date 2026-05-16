@@ -1,0 +1,166 @@
+[
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vit_b_16_inference/region_000_pointwise_ea70ccc89d3f_e06d6fbc.py",
+    "kind": "pointwise",
+    "pattern_hash": "ea70ccc89d3f",
+    "shape_hash": "e06d6fbc",
+    "hash": "ea70ccc89d3f_e06d6fbc",
+    "reduction_types": [],
+    "n_ops": 8,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.rsqrt.default",
+      "aten.select.int",
+      "aten.sub.Tensor"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vit_b_16_inference/region_001_var_mean_a7cbd072693b_5ecad280.py",
+    "kind": "reduction",
+    "pattern_hash": "a7cbd072693b",
+    "shape_hash": "5ecad280",
+    "hash": "a7cbd072693b_5ecad280",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 5,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.reshape.default",
+      "aten.var_mean.correction"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vit_b_16_inference/region_002_pointwise_983a9e1e3bcd_07c252b4.py",
+    "kind": "pointwise",
+    "pattern_hash": "983a9e1e3bcd",
+    "shape_hash": "07c252b4",
+    "hash": "983a9e1e3bcd_07c252b4",
+    "reduction_types": [],
+    "n_ops": 8,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.erf.default",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vit_b_16_inference/region_003_pointwise_741c0d7d8d11_069ebc38.py",
+    "kind": "pointwise",
+    "pattern_hash": "741c0d7d8d11",
+    "shape_hash": "069ebc38",
+    "hash": "741c0d7d8d11_069ebc38",
+    "reduction_types": [],
+    "n_ops": 8,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vit_b_16_inference/region_004_var_mean_68ef208a46a1_5ecad280.py",
+    "kind": "reduction",
+    "pattern_hash": "68ef208a46a1",
+    "shape_hash": "5ecad280",
+    "hash": "68ef208a46a1_5ecad280",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 6,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.var_mean.correction"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vit_b_16_inference/region_005_pointwise_5f8c035ef07e_59955a39.py",
+    "kind": "pointwise",
+    "pattern_hash": "5f8c035ef07e",
+    "shape_hash": "59955a39",
+    "hash": "5f8c035ef07e_59955a39",
+    "reduction_types": [],
+    "n_ops": 18,
+    "origin_ops": [
+      "aten.clone.default",
+      "aten.permute.default",
+      "aten.permute.default",
+      "aten.permute.default",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.select.int",
+      "aten.select.int",
+      "aten.select.int",
+      "aten.squeeze.dim",
+      "aten.unsqueeze.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vit_b_16_inference/region_006_pointwise_1ecc9387d6bd_bae09006.py",
+    "kind": "pointwise",
+    "pattern_hash": "1ecc9387d6bd",
+    "shape_hash": "bae09006",
+    "hash": "1ecc9387d6bd_bae09006",
+    "reduction_types": [],
+    "n_ops": 9,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vit_b_16_inference/region_007_var_mean_1dd6a8ce4db1_4d2f83e7.py",
+    "kind": "reduction",
+    "pattern_hash": "1dd6a8ce4db1",
+    "shape_hash": "4d2f83e7",
+    "hash": "1dd6a8ce4db1_4d2f83e7",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 8,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.cat.default",
+      "aten.expand.default",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.var_mean.correction"
+    ]
+  }
+]

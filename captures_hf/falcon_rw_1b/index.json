@@ -1,0 +1,220 @@
+[
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_hf/falcon_rw_1b/region_000_pointwise_287090d98877_fc19009f.py",
+    "kind": "pointwise",
+    "pattern_hash": "287090d98877",
+    "shape_hash": "fc19009f",
+    "hash": "287090d98877_fc19009f",
+    "reduction_types": [],
+    "n_ops": 9,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "prims.convert_element_type.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_hf/falcon_rw_1b/region_001_var_mean_8da395803e57_686e0070.py",
+    "kind": "reduction",
+    "pattern_hash": "8da395803e57",
+    "shape_hash": "686e0070",
+    "hash": "8da395803e57_686e0070",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 7,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.reshape.default",
+      "aten.var_mean.correction",
+      "prims.convert_element_type.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_hf/falcon_rw_1b/region_002_pointwise_584e372a4996_cea8b91e.py",
+    "kind": "pointwise",
+    "pattern_hash": "584e372a4996",
+    "shape_hash": "cea8b91e",
+    "hash": "584e372a4996_cea8b91e",
+    "reduction_types": [],
+    "n_ops": 11,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.erf.default",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "prims.convert_element_type.default",
+      "prims.convert_element_type.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_hf/falcon_rw_1b/region_003_pointwise_287090d98877_9b82f62a.py",
+    "kind": "pointwise",
+    "pattern_hash": "287090d98877",
+    "shape_hash": "9b82f62a",
+    "hash": "287090d98877_9b82f62a",
+    "reduction_types": [],
+    "n_ops": 9,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "prims.convert_element_type.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_hf/falcon_rw_1b/region_004_pointwise_40b65c29b64f_1f750f3c.py",
+    "kind": "pointwise",
+    "pattern_hash": "40b65c29b64f",
+    "shape_hash": "1f750f3c",
+    "hash": "40b65c29b64f_1f750f3c",
+    "reduction_types": [],
+    "n_ops": 11,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.clone.default",
+      "aten.clone.default",
+      "aten.permute.default",
+      "aten.permute.default",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.select.int",
+      "aten.select.int",
+      "aten.select.int"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_hf/falcon_rw_1b/region_005_pointwise_287090d98877_0034df1f.py",
+    "kind": "pointwise",
+    "pattern_hash": "287090d98877",
+    "shape_hash": "0034df1f",
+    "hash": "287090d98877_0034df1f",
+    "reduction_types": [],
+    "n_ops": 9,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "prims.convert_element_type.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_hf/falcon_rw_1b/region_006_pointwise_2522ec736c14_81b49207.py",
+    "kind": "pointwise",
+    "pattern_hash": "2522ec736c14",
+    "shape_hash": "81b49207",
+    "hash": "2522ec736c14_81b49207",
+    "reduction_types": [],
+    "n_ops": 50,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.bitwise_and.Tensor",
+      "aten.bitwise_and.Tensor",
+      "aten.bitwise_and.Tensor",
+      "aten.bitwise_and.Tensor",
+      "aten.clone.default",
+      "aten.clone.default",
+      "aten.div.Tensor",
+      "aten.expand.default",
+      "aten.full.default",
+      "aten.full.default",
+      "aten.full.default",
+      "aten.full.default",
+      "aten.full.default",
+      "aten.full.default",
+      "aten.full.default",
+      "aten.index.Tensor",
+      "aten.le.Tensor",
+      "aten.lt.Scalar",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.permute.default",
+      "aten.permute.default",
+      "aten.pow.Tensor_Tensor",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.select.int",
+      "aten.select.int",
+      "aten.select.int",
+      "aten.sub.Tensor",
+      "aten.unsqueeze.default",
+      "aten.unsqueeze.default",
+      "aten.where.self",
+      "aten.where.self",
+      "prims.convert_element_type.default",
+      "prims.convert_element_type.default",
+      "prims.convert_element_type.default",
+      "prims.iota.default",
+      "prims.iota.default",
+      "prims.iota.default",
+      "prims.iota.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_hf/falcon_rw_1b/region_007_var_mean_53210d06ee4c_a3ef2b4a.py",
+    "kind": "reduction",
+    "pattern_hash": "53210d06ee4c",
+    "shape_hash": "a3ef2b4a",
+    "hash": "53210d06ee4c_a3ef2b4a",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 5,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.embedding.default",
+      "aten.var_mean.correction",
+      "prims.convert_element_type.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_hf/falcon_rw_1b/region_008_pointwise_f75f7ac37fa0_e841b48c.py",
+    "kind": "pointwise",
+    "pattern_hash": "f75f7ac37fa0",
+    "shape_hash": "e841b48c",
+    "hash": "f75f7ac37fa0_e841b48c",
+    "reduction_types": [],
+    "n_ops": 4,
+    "origin_ops": [
+      "aten.full.default",
+      "aten.full.default",
+      "aten.lift_fresh_copy.default",
+      "aten.reshape.default"
+    ]
+  }
+]

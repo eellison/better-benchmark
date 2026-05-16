@@ -1,0 +1,44 @@
+"""
+Standalone repro captured via capture_hook.
+Label: swin_t_inference
+Pattern hash: 5d11bd189324
+Shape hash: 4e55fc48
+"""
+import torch
+import torch._inductor.config as inductor_config
+from math import inf, nan
+from torch import device
+
+class Repro(torch.nn.Module):
+    def forward(self, bmm_19: "f32[48, 49, 32]", _shape_param_0, _shape_param_1, _shape_param_2, arg142_1: "f32[384, 384]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/swin_transformer.py:214 in shifted_window_attention, code: x = attn.matmul(v).transpose(1, 2).reshape(x.size(0), x.size(1), C)
+        reshape_default: "f32[4, 12, 49, 32]" = torch.ops.aten.reshape.default(bmm_19, _shape_param_0);  bmm_19 = _shape_param_0 = None
+        permute_default: "f32[4, 49, 12, 32]" = torch.ops.aten.permute.default(reshape_default, [0, 2, 1, 3]);  reshape_default = None
+        clone_default: "f32[4, 49, 12, 32]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
+        reshape_default_1: "f32[4, 49, 384]" = torch.ops.aten.reshape.default(clone_default, _shape_param_1);  clone_default = _shape_param_1 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/swin_transformer.py:215 in shifted_window_attention, code: x = F.linear(x, proj_weight, proj_bias)
+        reshape_default_2: "f32[196, 384]" = torch.ops.aten.reshape.default(reshape_default_1, _shape_param_2);  reshape_default_1 = _shape_param_2 = None
+        permute_default_1: "f32[384, 384]" = torch.ops.aten.permute.default(arg142_1, [1, 0]);  arg142_1 = None
+        return (reshape_default_2, permute_default_1)
+
+
+
+def make_inputs():
+    return [
+    torch.randn([48, 49, 32], dtype=torch.float32, device='cuda'),
+    [4, 12, 49, 32],  # _shape_param_0
+    [4, 49, 384],  # _shape_param_1
+    [196, 384],  # _shape_param_2
+    torch.randn([384, 384], dtype=torch.float32, device='cuda'),
+    ]
+
+
+if __name__ == "__main__":
+    mod = Repro()
+    inputs = make_inputs()
+    compiled = torch.compile(mod)
+    with torch.no_grad():
+        out = compiled(*inputs)
+        torch.cuda.synchronize()
+    print("OK")

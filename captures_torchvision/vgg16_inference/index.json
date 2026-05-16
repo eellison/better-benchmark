@@ -1,0 +1,172 @@
+[
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_000_pointwise_1452242c7662_aa505336.py",
+    "kind": "pointwise",
+    "pattern_hash": "1452242c7662",
+    "shape_hash": "aa505336",
+    "hash": "1452242c7662_aa505336",
+    "reduction_types": [],
+    "n_ops": 2,
+    "origin_ops": [
+      "aten.permute.default",
+      "aten.relu.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_001_pointwise_1452242c7662_be40d840.py",
+    "kind": "pointwise",
+    "pattern_hash": "1452242c7662",
+    "shape_hash": "be40d840",
+    "hash": "1452242c7662_be40d840",
+    "reduction_types": [],
+    "n_ops": 2,
+    "origin_ops": [
+      "aten.permute.default",
+      "aten.relu.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_002_pointwise_caf00befef88_0b087e78.py",
+    "kind": "pointwise",
+    "pattern_hash": "caf00befef88",
+    "shape_hash": "0b087e78",
+    "hash": "caf00befef88_0b087e78",
+    "reduction_types": [],
+    "n_ops": 3,
+    "origin_ops": [
+      "aten._adaptive_avg_pool2d.default",
+      "aten.permute.default",
+      "aten.reshape.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_003_pointwise_1128aaa6f6c7_a43b1211.py",
+    "kind": "pointwise",
+    "pattern_hash": "1128aaa6f6c7",
+    "shape_hash": "a43b1211",
+    "hash": "1128aaa6f6c7_a43b1211",
+    "reduction_types": [],
+    "n_ops": 3,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "aten.relu.default",
+      "prims._low_memory_max_pool_with_offsets.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_004_pointwise_fe73768527e6_a43b1211.py",
+    "kind": "pointwise",
+    "pattern_hash": "fe73768527e6",
+    "shape_hash": "a43b1211",
+    "hash": "fe73768527e6_a43b1211",
+    "reduction_types": [],
+    "n_ops": 1,
+    "origin_ops": [
+      "aten.relu.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_005_pointwise_1128aaa6f6c7_9eddb4d9.py",
+    "kind": "pointwise",
+    "pattern_hash": "1128aaa6f6c7",
+    "shape_hash": "9eddb4d9",
+    "hash": "1128aaa6f6c7_9eddb4d9",
+    "reduction_types": [],
+    "n_ops": 3,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "aten.relu.default",
+      "prims._low_memory_max_pool_with_offsets.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_006_pointwise_fe73768527e6_9eddb4d9.py",
+    "kind": "pointwise",
+    "pattern_hash": "fe73768527e6",
+    "shape_hash": "9eddb4d9",
+    "hash": "fe73768527e6_9eddb4d9",
+    "reduction_types": [],
+    "n_ops": 1,
+    "origin_ops": [
+      "aten.relu.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_007_pointwise_1128aaa6f6c7_29e901a1.py",
+    "kind": "pointwise",
+    "pattern_hash": "1128aaa6f6c7",
+    "shape_hash": "29e901a1",
+    "hash": "1128aaa6f6c7_29e901a1",
+    "reduction_types": [],
+    "n_ops": 3,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "aten.relu.default",
+      "prims._low_memory_max_pool_with_offsets.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_008_pointwise_fe73768527e6_29e901a1.py",
+    "kind": "pointwise",
+    "pattern_hash": "fe73768527e6",
+    "shape_hash": "29e901a1",
+    "hash": "fe73768527e6_29e901a1",
+    "reduction_types": [],
+    "n_ops": 1,
+    "origin_ops": [
+      "aten.relu.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_009_pointwise_1128aaa6f6c7_30ee8f8b.py",
+    "kind": "pointwise",
+    "pattern_hash": "1128aaa6f6c7",
+    "shape_hash": "30ee8f8b",
+    "hash": "1128aaa6f6c7_30ee8f8b",
+    "reduction_types": [],
+    "n_ops": 3,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "aten.relu.default",
+      "prims._low_memory_max_pool_with_offsets.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_010_pointwise_fe73768527e6_30ee8f8b.py",
+    "kind": "pointwise",
+    "pattern_hash": "fe73768527e6",
+    "shape_hash": "30ee8f8b",
+    "hash": "fe73768527e6_30ee8f8b",
+    "reduction_types": [],
+    "n_ops": 1,
+    "origin_ops": [
+      "aten.relu.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_011_pointwise_1128aaa6f6c7_f97cb1bc.py",
+    "kind": "pointwise",
+    "pattern_hash": "1128aaa6f6c7",
+    "shape_hash": "f97cb1bc",
+    "hash": "1128aaa6f6c7_f97cb1bc",
+    "reduction_types": [],
+    "n_ops": 3,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "aten.relu.default",
+      "prims._low_memory_max_pool_with_offsets.default"
+    ]
+  },
+  {
+    "file": "/tmp/scratch_space/better_benchmark/captures_torchvision/vgg16_inference/region_012_pointwise_fe73768527e6_f97cb1bc.py",
+    "kind": "pointwise",
+    "pattern_hash": "fe73768527e6",
+    "shape_hash": "f97cb1bc",
+    "hash": "fe73768527e6_f97cb1bc",
+    "reduction_types": [],
+    "n_ops": 1,
+    "origin_ops": [
+      "aten.relu.default"
+    ]
+  }
+]
