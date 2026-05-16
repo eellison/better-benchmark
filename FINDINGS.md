@@ -108,14 +108,27 @@
 
 ---
 
-### Issue 8: Loop order / tiling for permuted data (1.1-1.5x range)
-**Affects**: Attention reshape/permute/clone, LayerNorm with padding, strided pointwise
-**Gap**: 1.3-1.5x (10-50% improvement possible)
-**Root cause**: Single fused kernels where the iteration order doesn't match the memory layout after permute/reshape. The kernel reads non-contiguous data because the tiling follows logical rather than physical order.
-**Fix**: Better loop order selection in inductor's codegen after fusion — when a fused kernel includes permute/transpose, choose the iteration order that maximizes memory coalescing for the dominant data access pattern.
-**Files**: `torch/_inductor/codegen/simd.py` (loop ordering), `torch/_inductor/scheduler.py` (fusion decisions preserving layout)
+### Issue 8: Loop order / tiling for permute/transpose kernels (1.3-4.4x!)
+**Affects**: Attention head reshuffling (permute [B,H,S,D] → [B,S,H,D]), pure data movement kernels
+**Gap**: 1.3-1.7x in fused graphs, up to **4.4x** for standalone permute+clone
+**Root cause (deep-dived)**:
+1. Iteration follows OUTPUT layout, causing L2 cache thrashing on reads (128KB jumps every 64 elements)
+2. Modular indexing overhead: complex div/mod address computation (~10 int ops/element vs ~2 optimal)
+3. 1D tiling flattens everything — misses the opportunity for a 2D grid that separates transposed dims
 
-**Repros**: pointwise_5be548710b92, pointwise_126d2fcb5043, amax_sum_7f6d501ade3d, pointwise_b8c181d7cc8d
+**Measured performance:**
+- Inductor default: 289 GB/s
+- Optimal Triton (2D grid, no mod/div): 930 GB/s (3.2x faster)
+- Eager aten::copy_: 1281 GB/s (4.4x faster)
+
+**Fixes (ordered by impact):**
+1. **Multi-dim grid with direct addressing** for transpose patterns: detect read/write stride ratio > 4x, use 2D grid (program_id per transposed block), no mod/div indexing — **3.2x win**
+2. **Fix tie-breaker** in `scheduler.py:2881` `pick_loop_order` to favor read locality over write locality — 1.07x
+3. For fused kernels (permute + downstream compute): ensure the iteration order follows the dominant INPUT stride, not output
+
+**Files**: `scheduler.py:2846` (pick_loop_order), `ir.py:5107` (simplify_and_reorder), `tiling_utils.py:678` (analyze_memory_coalescing), `simd.py:2762` (compute_tiling_strategy)
+
+**Repros**: pointwise_4ef882a876a7, pointwise_126d2fcb5043, pointwise_5be548710b92, pointwise_4b23f512dcb6, pointwise_0a9eb60f758b
 
 ---
 
