@@ -102,3 +102,8 @@ python tritonbench/run.py --op softmax --mode fwd --device cuda
 | Date | Source | New Patterns | New Shapes | Hardware | Pass Rate | Notes |
 |------|--------|-------------|------------|----------|-----------|-------|
 | (initial) | B200 local + H100 CI | 675 | — | B200/H100 | baseline | — |
+| 2026-05-16 | timm channels-last (5 models) | 25 | 148 shapes | B200 | 100% | ResNet50, EfficientNet, MobileNet, ConvNeXt, RegNet |
+| 2026-05-16 | HF inference (8 models) | 38 | 87 regions | B200 | 100% | Pythia, Falcon, Phi-2, BERT-large, T5, DistilBERT, Mistral, Qwen2 |
+| 2026-05-16 | GenAI patterns (7 ops) | 8 | 9 regions | B200 | 100% | SwiGLU, GeGLU, GQA, RMSNorm, RoPE, causal attn, flash epilogue |
+| 2026-05-16 | GenAI varied shapes | 3 | 31 configs | B200 | 100% | decode/prefill/long-context/large-model shapes |
+| 2026-05-16 | HF training (5 models) | 56 | 135 regions | B200 | 100% | BERT, DistilBERT, T5, Pythia, Qwen2 backward passes |
