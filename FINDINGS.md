@@ -1,5 +1,9 @@
 # Kernel Investigation Findings
 
+**Status**: 1,158 canonical repros, 11 optimal kernels written, 13 systemic issues identified.
+**Coverage**: HF (8 models), timm (15 models), torchvision (10 models), torchbench (CI), vLLM, GenAI patterns.
+**Modes**: Inference + training backward. Shapes: decode (seq=1) through long-context (seq=8192).
+
 ## Summary of Systemic Issues
 
 ### Issue 1: Missing combo_kernel/foreach batching (HIGHEST IMPACT)
