@@ -12,7 +12,9 @@
 - Memcopy SOL per-shape baseline
 
 ### Next
-- [ ] Better index bounds in capture_hook: infer valid range from scatter/gather target dims during graph analysis
+- [x] ~~Better index bounds in capture_hook~~ (DONE: infer from scatter/gather/embedding target dims)
+- [ ] Separate compile from benchmark: compile N repros in parallel (CPU-bound), lock GPU only for timing. Would reduce wall time from compile-bound ~7s/repro to bench-bound ~0.5s/repro. Tricky with coord descent (also needs GPU). Consider: 8 compile workers + 1 bench worker per GPU.
+- [ ] Fix shapes.json to include S() shape param entries (currently --all-shapes breaks with lifted repros)
 - [ ] Compute-intensity metric: tag kernels as memory-bound vs compute-bound (FLOPs/byte ratio) so SOL gap is only reported when meaningful
 - [ ] Incremental results file (JSONL) during sweep — survive interrupts
 - [ ] Regression alerting: after a sweep, auto-flag any pattern that regressed >5% vs previous tag
