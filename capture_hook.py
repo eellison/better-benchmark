@@ -182,10 +182,73 @@ class _CaptureState:
         new_gm = fx.GraphModule(gm, new_graph)
         return new_gm, placeholder_info, shape_params
 
+    def _infer_index_bounds(self, gm, placeholder_info) -> dict[str, int]:
+        """Infer valid index bounds for int64 placeholders by inspecting consumers.
+
+        Looks one hop downstream: if a placeholder feeds directly into scatter,
+        gather, index_put, index_select, or embedding, the bound is the target
+        tensor's size along the scatter/gather dim.
+        """
+        _INDEX_CONSUMERS = {
+            torch.ops.aten.scatter.src: (0, 1),        # (target_arg, dim_arg)
+            torch.ops.aten.scatter.value: (0, 1),
+            torch.ops.aten.scatter_add.default: (0, 1),
+            torch.ops.aten.gather.default: (0, 1),
+            torch.ops.aten.index_put.default: (0, None),  # target is arg0, dim inferred
+            torch.ops.aten.index.Tensor: (0, None),
+            torch.ops.aten.index_select.default: (0, 1),
+            torch.ops.aten.embedding.default: (0, None),  # weight is arg0, bound = weight.shape[0]
+        }
+
+        bounds = {}
+        ph_nodes = {n.name: n for n in gm.graph.nodes if n.op == "placeholder"}
+
+        for name, node in ph_nodes.items():
+            info = placeholder_info.get(name, {})
+            if "int" not in info.get("dtype", ""):
+                continue
+
+            # Check all users of this placeholder
+            for user in node.users:
+                if user.op != "call_function":
+                    continue
+                target = user.target
+
+                if target == torch.ops.aten.embedding.default:
+                    # embedding(weight, indices) — bound is weight.shape[0]
+                    weight_arg = user.args[0] if user.args else None
+                    if weight_arg and hasattr(weight_arg, 'meta'):
+                        val = weight_arg.meta.get('val')
+                        if isinstance(val, torch.Tensor) and len(val.shape) > 0:
+                            bounds[name] = int(val.shape[0])
+                    break
+
+                if target in _INDEX_CONSUMERS:
+                    target_arg_idx, dim_arg_idx = _INDEX_CONSUMERS[target]
+                    if len(user.args) > target_arg_idx:
+                        target_node = user.args[target_arg_idx]
+                        if hasattr(target_node, 'meta'):
+                            val = target_node.meta.get('val')
+                            if isinstance(val, torch.Tensor):
+                                if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
+                                    dim = user.args[dim_arg_idx]
+                                    if isinstance(dim, int) and dim < len(val.shape):
+                                        bounds[name] = int(val.shape[dim])
+                                        break
+                                else:
+                                    # No explicit dim — use first dim as bound
+                                    bounds[name] = int(val.shape[0])
+                                    break
+
+        return bounds
+
     def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
         shape_params = shape_params or {}
         code = gm.print_readable(print_output=False)
         code = code.replace("class GraphModule(", "class Repro(", 1)
+
+        # Infer index bounds for int64 placeholders
+        index_bounds = self._infer_index_bounds(gm, placeholder_info)
 
         # Replace symbolic shape refs (s0, s1, ...) in annotations with concrete values
         import re
@@ -220,8 +283,9 @@ class _CaptureState:
                         s * (d - 1) for s, d in zip(stride, shape) if d > 1
                     ) + 1
                     if "int" in dtype:
+                        hi = index_bounds.get(name, 2)
                         input_lines.append(
-                            f"    torch.randint(0, 2, ({storage_size},), dtype={dtype}, device='{device}')"
+                            f"    torch.randint(0, {hi}, ({storage_size},), dtype={dtype}, device='{device}')"
                             f".as_strided({shape}, {stride}),  # {name}"
                         )
                     else:
@@ -231,8 +295,9 @@ class _CaptureState:
                         )
                 else:
                     if "int" in dtype:
+                        hi = index_bounds.get(name, 2)
                         input_lines.append(
-                            f"    torch.randint(0, 2, {shape}, dtype={dtype}, device='{device}'),"
+                            f"    torch.randint(0, {hi}, {shape}, dtype={dtype}, device='{device}'),"
                         )
                     elif "bool" in dtype:
                         input_lines.append(
