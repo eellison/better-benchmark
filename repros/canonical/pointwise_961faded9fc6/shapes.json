@@ -83,6 +83,44 @@
         "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_training"
       ],
       "shape_hash": "52912670"
+    },
+    "hf_blenderbotforcausallm_training_45835658": {
+      "inputs": [
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            4,
+            128,
+            2560
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            128,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2560,
+            10240
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_blenderbotforcausallm_training"
+      ],
+      "shape_hash": "45835658"
     }
   }
 }

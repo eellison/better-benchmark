@@ -243,6 +243,33 @@
         "hf_bartforcausallm_training"
       ],
       "shape_hash": "7ee0aeb3"
+    },
+    "hf_blenderbotforcausallm_training_7aa7b717": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8008,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            128
+          ],
+          "stride": null,
+          "max_val": 8008
+        }
+      ],
+      "source_models": [
+        "hf_blenderbotforcausallm_training"
+      ],
+      "shape_hash": "7aa7b717"
     }
   }
 }

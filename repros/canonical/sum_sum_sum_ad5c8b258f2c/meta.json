@@ -98,8 +98,9 @@
     "aten.where.self",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "timm_adv_inception_v3_training"
+    "timm_adv_inception_v3_training",
+    "timm_inception_v3_training"
   ]
 }

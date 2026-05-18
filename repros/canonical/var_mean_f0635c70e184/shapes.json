@@ -108,6 +108,33 @@
         "hf_bartforcausallm_training"
       ],
       "shape_hash": "06316a82"
+    },
+    "hf_blenderbotforcausallm_training_001976d4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            128,
+            2560
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_blenderbotforcausallm_training"
+      ],
+      "shape_hash": "001976d4"
     }
   }
 }

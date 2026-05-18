@@ -1,77 +1,70 @@
 {
-  "pattern_hash": "fefa00731fa2",
+  "pattern_hash": "15c487326d74",
   "configs": {
-    "hf_blenderbotforcausallm_training_fa1f1db3": {
+    "timm_mobilenetv2_100_inference_ffdd16b1": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            1024,
-            2560
+            1280
           ],
           "stride": null
-        },
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            2
-          ],
-          "stride": null,
-          "max_val": 2
         },
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
             8,
-            128,
-            2560
+            1280,
+            7,
+            7
           ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "hf_blenderbotforcausallm_training"
-      ],
-      "shape_hash": "fa1f1db3"
-    },
-    "hf_blenderbotforcausallm_training_2a53db6f": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            512,
-            2560
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            2
-          ],
-          "stride": null,
-          "max_val": 2
+          "stride": [
+            62720,
+            1,
+            8960,
+            1280
+          ]
         },
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            4,
-            128,
-            2560
+            1280
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1280
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1280
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1000,
+            1280
           ],
           "stride": null
         }
       ],
       "source_models": [
-        "hf_blenderbotforcausallm_training"
+        "timm_mobilenetv2_100_inference"
       ],
-      "shape_hash": "2a53db6f"
+      "shape_hash": "ffdd16b1"
     }
   }
 }

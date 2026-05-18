@@ -486,6 +486,33 @@
         "hf_distilbertformaskedlm_inference"
       ],
       "shape_hash": "90411801"
+    },
+    "hf_blenderbotforcausallm_inference_001976d4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            128,
+            2560
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_blenderbotforcausallm_inference"
+      ],
+      "shape_hash": "001976d4"
     }
   }
 }

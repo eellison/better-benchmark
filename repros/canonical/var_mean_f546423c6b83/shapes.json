@@ -72,6 +72,42 @@
         "hf_PegasusForCausalLM_inference"
       ],
       "shape_hash": "f03a303a"
+    },
+    "hf_blenderbotforcausallm_inference_1733a70d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8008,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            128
+          ],
+          "stride": null,
+          "max_val": 8008
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            2560
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_blenderbotforcausallm_inference"
+      ],
+      "shape_hash": "1733a70d"
     }
   }
 }
