@@ -32,6 +32,306 @@
         "gap_cd": null,
         "timestamp": "2026-05-16T18:41:32"
       }
+    },
+    "timm_mobilenetv3_06208314": {
+      "compiled_us": 19.75497301283004,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.220624082202555,
+      "total_bytes": 3041280,
+      "n_kernels": 1,
+      "gap_default": 2.142476782125914,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_5d744bcb": {
+      "compiled_us": 20.165258577679555,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.211618559458609,
+      "total_bytes": 2128896,
+      "n_kernels": 1,
+      "gap_default": 2.1891113323373133,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_ed097238": {
+      "compiled_us": 20.52880502009802,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 10.368232021206303,
+      "total_bytes": 8451072,
+      "n_kernels": 1,
+      "gap_default": 1.979971607320336,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_b75a1437": {
+      "compiled_us": 18.350885758946426,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 10.567722856742053,
+      "total_bytes": 6036480,
+      "n_kernels": 1,
+      "gap_default": 1.7365033136953272,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_c2976ab4": {
+      "compiled_us": 17.75759499987993,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.371807574978387,
+      "total_bytes": 6024960,
+      "n_kernels": 1,
+      "gap_default": 1.894788690208557,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_35021f7f": {
+      "compiled_us": 18.180840820719283,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.207985598823225,
+      "total_bytes": 3614976,
+      "n_kernels": 1,
+      "gap_default": 1.9744645151316031,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_inference_780611e4": {
+      "compiled_us": 18.71789012332729,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.176365566134493,
+      "total_bytes": 12165120,
+      "n_kernels": 1,
+      "gap_default": 2.039793422398725,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_inference_e0ee6577": {
+      "compiled_us": 19.186536032338804,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.859096518003524,
+      "total_bytes": 8515584,
+      "n_kernels": 1,
+      "gap_default": 1.9460744701406063,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_inference_8b993509": {
+      "compiled_us": 18.20930538204077,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 15.113404659873964,
+      "total_bytes": 33804288,
+      "n_kernels": 1,
+      "gap_default": 1.204844691969799,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_inference_e94cf2c4": {
+      "compiled_us": 19.222936285027608,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.320198372300636,
+      "total_bytes": 24145920,
+      "n_kernels": 1,
+      "gap_default": 1.4431418923160875,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_inference_c4e4c2ce": {
+      "compiled_us": 19.385008394220012,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.336347790938154,
+      "total_bytes": 24099840,
+      "n_kernels": 1,
+      "gap_default": 1.4535470053796762,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_inference_a3384c99": {
+      "compiled_us": 18.29019272041844,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 11.270261486389465,
+      "total_bytes": 14459904,
+      "n_kernels": 1,
+      "gap_default": 1.6228720817619535,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_training_780611e4": {
+      "compiled_us": 19.290618478081722,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.149247969811162,
+      "total_bytes": 12165120,
+      "n_kernels": 1,
+      "gap_default": 2.108437605116071,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_training_e0ee6577": {
+      "compiled_us": 19.4003855160297,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 11.204421899454323,
+      "total_bytes": 8515584,
+      "n_kernels": 1,
+      "gap_default": 1.7314936629594908,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_training_8b993509": {
+      "compiled_us": 18.724762211649086,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 15.097635149116117,
+      "total_bytes": 33804288,
+      "n_kernels": 1,
+      "gap_default": 1.2402447155934428,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_training_e94cf2c4": {
+      "compiled_us": 19.27136823438848,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.322151209785543,
+      "total_bytes": 24145920,
+      "n_kernels": 1,
+      "gap_default": 1.4465657933857594,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_training_c4e4c2ce": {
+      "compiled_us": 18.76877390749203,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.31976552458458,
+      "total_bytes": 24099840,
+      "n_kernels": 1,
+      "gap_default": 1.409091914782591,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_ghostnet_100_training_a3384c99": {
+      "compiled_us": 19.4541091789989,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 11.266936308029369,
+      "total_bytes": 14459904,
+      "n_kernels": 1,
+      "gap_default": 1.7266547575257838,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_inference_780611e4": {
+      "compiled_us": 18.954163744222953,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.187895254060896,
+      "total_bytes": 12165120,
+      "n_kernels": 1,
+      "gap_default": 2.062949480823209,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_inference_e0ee6577": {
+      "compiled_us": 19.02770005054276,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 11.199505851582796,
+      "total_bytes": 8515584,
+      "n_kernels": 1,
+      "gap_default": 1.698976749751296,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_inference_8b993509": {
+      "compiled_us": 18.355859460535683,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 15.114900798692176,
+      "total_bytes": 33804288,
+      "n_kernels": 1,
+      "gap_default": 1.2144214312093886,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_inference_e94cf2c4": {
+      "compiled_us": 19.98715780312315,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.323670007635288,
+      "total_bytes": 24145920,
+      "n_kernels": 1,
+      "gap_default": 1.500124049279911,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_inference_c4e4c2ce": {
+      "compiled_us": 19.045951895750374,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.320999962161295,
+      "total_bytes": 24099840,
+      "n_kernels": 1,
+      "gap_default": 1.4297689325013871,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_inference_a3384c99": {
+      "compiled_us": 19.300758570660008,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 11.272723133423193,
+      "total_bytes": 14459904,
+      "n_kernels": 1,
+      "gap_default": 1.7121646954526895,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_training_780611e4": {
+      "compiled_us": 19.439696020001165,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.186767112282775,
+      "total_bytes": 12165120,
+      "n_kernels": 1,
+      "gap_default": 2.1160540789164175,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_training_e0ee6577": {
+      "compiled_us": 19.12414855955701,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 11.208747476019758,
+      "total_bytes": 8515584,
+      "n_kernels": 1,
+      "gap_default": 1.706180695075131,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_training_8b993509": {
+      "compiled_us": 17.953349060434537,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 15.11390473492873,
+      "total_bytes": 33804288,
+      "n_kernels": 1,
+      "gap_default": 1.1878696720208748,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_training_e94cf2c4": {
+      "compiled_us": 18.74563301241798,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.320240374830194,
+      "total_bytes": 24145920,
+      "n_kernels": 1,
+      "gap_default": 1.407304409298766,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_training_c4e4c2ce": {
+      "compiled_us": 19.200589035778012,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.32310913514738,
+      "total_bytes": 24099840,
+      "n_kernels": 1,
+      "gap_default": 1.4411492723665673,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
+    },
+    "timm_mobilenetv3_large_100_training_a3384c99": {
+      "compiled_us": 18.64374582663515,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 11.27105336868533,
+      "total_bytes": 14459904,
+      "n_kernels": 1,
+      "gap_default": 1.6541263018444727,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T14:01:20"
     }
   }
 }

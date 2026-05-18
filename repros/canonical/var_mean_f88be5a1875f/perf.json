@@ -21,6 +21,26 @@
         "gap_cd": null,
         "timestamp": "2026-05-16T18:41:32"
       }
+    },
+    "0": {
+      "compiled_us": 21.52406879619958,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 12.90906664216891,
+      "total_bytes": 33816576,
+      "n_kernels": 1,
+      "gap_default": 1.6673605763168657,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T13:45:46"
+    },
+    "1": {
+      "compiled_us": 23.696539671574566,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 17.73544018783314,
+      "total_bytes": 67371008,
+      "n_kernels": 1,
+      "gap_default": 1.3361122938369951,
+      "gap_cd": null,
+      "timestamp": "2026-05-18T13:45:46"
     }
   }
 }
