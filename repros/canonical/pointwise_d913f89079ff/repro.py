@@ -19,7 +19,8 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deepseek_v3/modeling_deepseek_v3.py:145 in forward, code: router_logits = F.linear(hidden_states.type(torch.float32), self.weight.type(torch.float32))
         convert_element_type_default: "f32[256, 7168]" = torch.ops.prims.convert_element_type.default(arg1_1, torch.float32);  arg1_1 = None
         permute_default: "f32[7168, 256]" = torch.ops.aten.permute.default(convert_element_type_default, [1, 0]);  convert_element_type_default = None
-        return permute_default
+        _output_to_half_0: "bf16[7168, 256]" = torch.ops.prims.convert_element_type.default(permute_default, torch.bfloat16);  permute_default = None
+        return _output_to_half_0
 
 
 def _default_make_inputs():

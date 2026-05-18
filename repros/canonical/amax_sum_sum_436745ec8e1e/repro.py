@@ -67,7 +67,8 @@ class Repro(torch.nn.Module):
         sum_default_1: "i64[]" = torch.ops.aten.sum.default(ne_scalar_2);  ne_scalar_2 = None
         convert_element_type_default_1: "f32[]" = torch.ops.prims.convert_element_type.default(sum_default_1, torch.float32);  sum_default_1 = None
         div_tensor: "f32[]" = torch.ops.aten.div.Tensor(sum_default, convert_element_type_default_1);  sum_default = convert_element_type_default_1 = None
-        return div_tensor
+        _output_to_half_0: "bf16[]" = torch.ops.prims.convert_element_type.default(div_tensor, torch.bfloat16);  div_tensor = None
+        return _output_to_half_0
 
 
 def _default_make_inputs():

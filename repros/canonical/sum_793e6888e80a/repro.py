@@ -22,7 +22,10 @@ class Repro(torch.nn.Module):
         reshape_default: "f32[64]" = torch.ops.aten.reshape.default(sum_dim_int_list, [64]);  sum_dim_int_list = None
         convert_element_type_default: "f32[10000, 64]" = torch.ops.prims.convert_element_type.default(mm_1, torch.float32);  mm_1 = None
         convert_element_type_default_1: "f32[64, 64]" = torch.ops.prims.convert_element_type.default(mm, torch.float32);  mm = None
-        return (reshape_default, convert_element_type_default, convert_element_type_default_1)
+        _output_to_half_0: "f16[64]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float16);  reshape_default = None
+        _output_to_half_1: "f16[10000, 64]" = torch.ops.prims.convert_element_type.default(convert_element_type_default, torch.float16);  convert_element_type_default = None
+        _output_to_half_2: "f16[64, 64]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_1, torch.float16);  convert_element_type_default_1 = None
+        return (_output_to_half_0, _output_to_half_1, _output_to_half_2)
 
 
 def _default_make_inputs():

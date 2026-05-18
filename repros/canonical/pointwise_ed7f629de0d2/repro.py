@@ -28,7 +28,8 @@ class Repro(torch.nn.Module):
         full_default: "f32[10000, 64]" = torch.ops.aten.full.default([10000, 64], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         scatter_add_default: "f32[10000, 64]" = torch.ops.aten.scatter_add.default(full_default, 0, expand_default, mul_tensor);  full_default = expand_default = mul_tensor = None
         add_tensor: "f32[10000, 64]" = torch.ops.aten.add.Tensor(scatter_add_default, arg4_1);  scatter_add_default = arg4_1 = None
-        return add_tensor
+        _output_to_half_0: "f16[10000, 64]" = torch.ops.prims.convert_element_type.default(add_tensor, torch.float16);  add_tensor = None
+        return _output_to_half_0
 
 
 def _default_make_inputs():

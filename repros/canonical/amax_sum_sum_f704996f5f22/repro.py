@@ -56,7 +56,8 @@ class Repro(torch.nn.Module):
         convert_element_type_default_1: "f32[]" = torch.ops.prims.convert_element_type.default(sum_default, torch.float32);  sum_default = None
         sum_default_1: "f32[]" = torch.ops.aten.sum.default(where_self_1);  where_self_1 = None
         div_tensor: "f32[]" = torch.ops.aten.div.Tensor(sum_default_1, convert_element_type_default_1);  sum_default_1 = convert_element_type_default_1 = None
-        return div_tensor
+        _output_to_half_0: "f16[]" = torch.ops.prims.convert_element_type.default(div_tensor, torch.float16);  div_tensor = None
+        return _output_to_half_0
 
 
 def _default_make_inputs():

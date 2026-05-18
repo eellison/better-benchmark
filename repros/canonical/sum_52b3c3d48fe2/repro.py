@@ -21,7 +21,9 @@ class Repro(torch.nn.Module):
         sum_dim_int_list: "f32[1, 64]" = torch.ops.aten.sum.dim_IntList(arg3_1, [0], True, dtype = torch.float32);  arg3_1 = None
         reshape_default: "f32[64]" = torch.ops.aten.reshape.default(sum_dim_int_list, [64]);  sum_dim_int_list = None
         convert_element_type_default: "f32[64, 64]" = torch.ops.prims.convert_element_type.default(mm, torch.float32);  mm = None
-        return (reshape_default, convert_element_type_default)
+        _output_to_half_0: "f16[64]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float16);  reshape_default = None
+        _output_to_half_1: "f16[64, 64]" = torch.ops.prims.convert_element_type.default(convert_element_type_default, torch.float16);  convert_element_type_default = None
+        return (_output_to_half_0, _output_to_half_1)
 
 
 def _default_make_inputs():

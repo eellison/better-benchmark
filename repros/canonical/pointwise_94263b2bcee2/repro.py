@@ -29,7 +29,8 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deepseek_v3/modeling_deepseek_v3.py:128 in get_topk_indices, code: .topk(2, dim=-1)[0]
         topk_default = torch.ops.aten.topk.default(reshape_default, 2);  reshape_default = None
         getitem: "f32[2048, 8, 2]" = topk_default[0];  topk_default = None
-        return getitem
+        _output_to_half_0: "bf16[2048, 8, 2]" = torch.ops.prims.convert_element_type.default(getitem, torch.bfloat16);  getitem = None
+        return _output_to_half_0
 
 
 def _default_make_inputs():

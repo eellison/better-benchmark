@@ -38,7 +38,17 @@ class Repro(torch.nn.Module):
         reshape_default_4: "f16[16]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, [16]);  sum_dim_int_list_4 = None
         convert_element_type_default_8: "f32[16, 1]" = torch.ops.prims.convert_element_type.default(mm_7, torch.float32);  mm_7 = None
         convert_element_type_default_9: "f32[16]" = torch.ops.prims.convert_element_type.default(reshape_default_4, torch.float32);  reshape_default_4 = None
-        return (convert_element_type_default, convert_element_type_default_1, convert_element_type_default_2, convert_element_type_default_3, convert_element_type_default_4, convert_element_type_default_5, convert_element_type_default_6, convert_element_type_default_7, convert_element_type_default_8, convert_element_type_default_9)
+        _output_to_half_0: "f16[1, 16]" = torch.ops.prims.convert_element_type.default(convert_element_type_default, torch.float16);  convert_element_type_default = None
+        _output_to_half_1: "f16[1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_1, torch.float16);  convert_element_type_default_1 = None
+        _output_to_half_2: "f16[16, 16]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_2, torch.float16);  convert_element_type_default_2 = None
+        _output_to_half_3: "f16[16]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_3, torch.float16);  convert_element_type_default_3 = None
+        _output_to_half_4: "f16[16, 16]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_4, torch.float16);  convert_element_type_default_4 = None
+        _output_to_half_5: "f16[16]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_5, torch.float16);  convert_element_type_default_5 = None
+        _output_to_half_6: "f16[16, 16]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_6, torch.float16);  convert_element_type_default_6 = None
+        _output_to_half_7: "f16[16]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_7, torch.float16);  convert_element_type_default_7 = None
+        _output_to_half_8: "f16[16, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_8, torch.float16);  convert_element_type_default_8 = None
+        _output_to_half_9: "f16[16]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_9, torch.float16);  convert_element_type_default_9 = None
+        return (_output_to_half_0, _output_to_half_1, _output_to_half_2, _output_to_half_3, _output_to_half_4, _output_to_half_5, _output_to_half_6, _output_to_half_7, _output_to_half_8, _output_to_half_9)
 
 
 def _default_make_inputs():

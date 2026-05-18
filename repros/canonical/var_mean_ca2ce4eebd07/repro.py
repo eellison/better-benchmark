@@ -27,7 +27,9 @@ class Repro(torch.nn.Module):
         var_mean_correction = torch.ops.aten.var_mean.correction(add_tensor, [2], correction = 0, keepdim = True);  add_tensor = None
         getitem: "f32[32, 50, 1]" = var_mean_correction[0]
         getitem_1: "f32[32, 50, 1]" = var_mean_correction[1];  var_mean_correction = None
-        return (getitem, getitem_1)
+        _output_to_half_0: "f16[32, 50, 1]" = torch.ops.prims.convert_element_type.default(getitem, torch.float16);  getitem = None
+        _output_to_half_1: "f16[32, 50, 1]" = torch.ops.prims.convert_element_type.default(getitem_1, torch.float16);  getitem_1 = None
+        return (_output_to_half_0, _output_to_half_1)
 
 
 def _default_make_inputs():

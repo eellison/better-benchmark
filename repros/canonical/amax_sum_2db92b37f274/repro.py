@@ -31,7 +31,8 @@ class Repro(torch.nn.Module):
         topk_default = torch.ops.aten.topk.default(div_tensor, 8);  div_tensor = None
         getitem: "f32[2048, 8]" = topk_default[0]
         getitem_1: "i64[2048, 8]" = topk_default[1];  topk_default = None
-        return (getitem, getitem_1)
+        _output_to_half_0: "bf16[2048, 8]" = torch.ops.prims.convert_element_type.default(getitem, torch.bfloat16);  getitem = None
+        return (_output_to_half_0, getitem_1)
 
 
 def _default_make_inputs():

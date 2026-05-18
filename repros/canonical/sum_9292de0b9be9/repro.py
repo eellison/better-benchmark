@@ -127,7 +127,114 @@ class Repro(torch.nn.Module):
         convert_element_type_default_44: "f32[64, 3, 3, 3]" = torch.ops.prims.convert_element_type.default(getitem_127, torch.float32);  getitem_127 = None
         mul_tensor_60: "f32[64]" = torch.ops.aten.mul.Tensor(sum_123, arg66_1);  sum_123 = arg66_1 = None
         convert_element_type_default_45: "f32[64, 3, 1, 1]" = torch.ops.prims.convert_element_type.default(getitem_130, torch.float32);  getitem_130 = None
-        return (convert_element_type_default, convert_element_type_default_1, mul_tensor, convert_element_type_default_2, mul_tensor_1, convert_element_type_default_3, mul_tensor_2, convert_element_type_default_4, mul_tensor_3, convert_element_type_default_5, mul_tensor_4, mul_tensor_5, convert_element_type_default_6, mul_tensor_6, convert_element_type_default_7, mul_tensor_7, mul_tensor_8, convert_element_type_default_8, mul_tensor_9, convert_element_type_default_9, mul_tensor_10, mul_tensor_11, convert_element_type_default_10, mul_tensor_12, convert_element_type_default_11, mul_tensor_13, mul_tensor_14, convert_element_type_default_12, mul_tensor_15, convert_element_type_default_13, mul_tensor_16, mul_tensor_17, convert_element_type_default_14, mul_tensor_18, convert_element_type_default_15, mul_tensor_19, mul_tensor_20, convert_element_type_default_16, mul_tensor_21, convert_element_type_default_17, mul_tensor_22, mul_tensor_23, convert_element_type_default_18, mul_tensor_24, convert_element_type_default_19, mul_tensor_25, mul_tensor_26, convert_element_type_default_20, mul_tensor_27, convert_element_type_default_21, mul_tensor_28, mul_tensor_29, convert_element_type_default_22, mul_tensor_30, convert_element_type_default_23, mul_tensor_31, mul_tensor_32, convert_element_type_default_24, mul_tensor_33, convert_element_type_default_25, mul_tensor_34, mul_tensor_35, convert_element_type_default_26, mul_tensor_36, convert_element_type_default_27, mul_tensor_37, mul_tensor_38, convert_element_type_default_28, mul_tensor_39, convert_element_type_default_29, mul_tensor_40, mul_tensor_41, convert_element_type_default_30, mul_tensor_42, convert_element_type_default_31, mul_tensor_43, convert_element_type_default_32, mul_tensor_44, convert_element_type_default_33, mul_tensor_45, mul_tensor_46, convert_element_type_default_34, mul_tensor_47, convert_element_type_default_35, mul_tensor_48, mul_tensor_49, convert_element_type_default_36, mul_tensor_50, convert_element_type_default_37, mul_tensor_51, mul_tensor_52, convert_element_type_default_38, mul_tensor_53, convert_element_type_default_39, mul_tensor_54, convert_element_type_default_40, mul_tensor_55, convert_element_type_default_41, mul_tensor_56, mul_tensor_57, convert_element_type_default_42, mul_tensor_58, convert_element_type_default_43, mul_tensor_59, convert_element_type_default_44, mul_tensor_60, convert_element_type_default_45)
+        _output_to_half_0: "f16[1000, 1408]" = torch.ops.prims.convert_element_type.default(convert_element_type_default, torch.float16);  convert_element_type_default = None
+        _output_to_half_1: "f16[1000]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_1, torch.float16);  convert_element_type_default_1 = None
+        _output_to_half_2: "f16[1408]" = torch.ops.prims.convert_element_type.default(mul_tensor, torch.float16);  mul_tensor = None
+        _output_to_half_3: "f16[1408, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_2, torch.float16);  convert_element_type_default_2 = None
+        _output_to_half_4: "f16[1408]" = torch.ops.prims.convert_element_type.default(mul_tensor_1, torch.float16);  mul_tensor_1 = None
+        _output_to_half_5: "f16[1408, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_3, torch.float16);  convert_element_type_default_3 = None
+        _output_to_half_6: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_2, torch.float16);  mul_tensor_2 = None
+        _output_to_half_7: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_4, torch.float16);  convert_element_type_default_4 = None
+        _output_to_half_8: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_3, torch.float16);  mul_tensor_3 = None
+        _output_to_half_9: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_5, torch.float16);  convert_element_type_default_5 = None
+        _output_to_half_10: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_4, torch.float16);  mul_tensor_4 = None
+        _output_to_half_11: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_5, torch.float16);  mul_tensor_5 = None
+        _output_to_half_12: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_6, torch.float16);  convert_element_type_default_6 = None
+        _output_to_half_13: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_6, torch.float16);  mul_tensor_6 = None
+        _output_to_half_14: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_7, torch.float16);  convert_element_type_default_7 = None
+        _output_to_half_15: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_7, torch.float16);  mul_tensor_7 = None
+        _output_to_half_16: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_8, torch.float16);  mul_tensor_8 = None
+        _output_to_half_17: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_8, torch.float16);  convert_element_type_default_8 = None
+        _output_to_half_18: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_9, torch.float16);  mul_tensor_9 = None
+        _output_to_half_19: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_9, torch.float16);  convert_element_type_default_9 = None
+        _output_to_half_20: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_10, torch.float16);  mul_tensor_10 = None
+        _output_to_half_21: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_11, torch.float16);  mul_tensor_11 = None
+        _output_to_half_22: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_10, torch.float16);  convert_element_type_default_10 = None
+        _output_to_half_23: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_12, torch.float16);  mul_tensor_12 = None
+        _output_to_half_24: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_11, torch.float16);  convert_element_type_default_11 = None
+        _output_to_half_25: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_13, torch.float16);  mul_tensor_13 = None
+        _output_to_half_26: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_14, torch.float16);  mul_tensor_14 = None
+        _output_to_half_27: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_12, torch.float16);  convert_element_type_default_12 = None
+        _output_to_half_28: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_15, torch.float16);  mul_tensor_15 = None
+        _output_to_half_29: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_13, torch.float16);  convert_element_type_default_13 = None
+        _output_to_half_30: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_16, torch.float16);  mul_tensor_16 = None
+        _output_to_half_31: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_17, torch.float16);  mul_tensor_17 = None
+        _output_to_half_32: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_14, torch.float16);  convert_element_type_default_14 = None
+        _output_to_half_33: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_18, torch.float16);  mul_tensor_18 = None
+        _output_to_half_34: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_15, torch.float16);  convert_element_type_default_15 = None
+        _output_to_half_35: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_19, torch.float16);  mul_tensor_19 = None
+        _output_to_half_36: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_20, torch.float16);  mul_tensor_20 = None
+        _output_to_half_37: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_16, torch.float16);  convert_element_type_default_16 = None
+        _output_to_half_38: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_21, torch.float16);  mul_tensor_21 = None
+        _output_to_half_39: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_17, torch.float16);  convert_element_type_default_17 = None
+        _output_to_half_40: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_22, torch.float16);  mul_tensor_22 = None
+        _output_to_half_41: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_23, torch.float16);  mul_tensor_23 = None
+        _output_to_half_42: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_18, torch.float16);  convert_element_type_default_18 = None
+        _output_to_half_43: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_24, torch.float16);  mul_tensor_24 = None
+        _output_to_half_44: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_19, torch.float16);  convert_element_type_default_19 = None
+        _output_to_half_45: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_25, torch.float16);  mul_tensor_25 = None
+        _output_to_half_46: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_26, torch.float16);  mul_tensor_26 = None
+        _output_to_half_47: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_20, torch.float16);  convert_element_type_default_20 = None
+        _output_to_half_48: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_27, torch.float16);  mul_tensor_27 = None
+        _output_to_half_49: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_21, torch.float16);  convert_element_type_default_21 = None
+        _output_to_half_50: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_28, torch.float16);  mul_tensor_28 = None
+        _output_to_half_51: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_29, torch.float16);  mul_tensor_29 = None
+        _output_to_half_52: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_22, torch.float16);  convert_element_type_default_22 = None
+        _output_to_half_53: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_30, torch.float16);  mul_tensor_30 = None
+        _output_to_half_54: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_23, torch.float16);  convert_element_type_default_23 = None
+        _output_to_half_55: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_31, torch.float16);  mul_tensor_31 = None
+        _output_to_half_56: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_32, torch.float16);  mul_tensor_32 = None
+        _output_to_half_57: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_24, torch.float16);  convert_element_type_default_24 = None
+        _output_to_half_58: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_33, torch.float16);  mul_tensor_33 = None
+        _output_to_half_59: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_25, torch.float16);  convert_element_type_default_25 = None
+        _output_to_half_60: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_34, torch.float16);  mul_tensor_34 = None
+        _output_to_half_61: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_35, torch.float16);  mul_tensor_35 = None
+        _output_to_half_62: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_26, torch.float16);  convert_element_type_default_26 = None
+        _output_to_half_63: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_36, torch.float16);  mul_tensor_36 = None
+        _output_to_half_64: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_27, torch.float16);  convert_element_type_default_27 = None
+        _output_to_half_65: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_37, torch.float16);  mul_tensor_37 = None
+        _output_to_half_66: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_38, torch.float16);  mul_tensor_38 = None
+        _output_to_half_67: "f16[384, 384, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_28, torch.float16);  convert_element_type_default_28 = None
+        _output_to_half_68: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_39, torch.float16);  mul_tensor_39 = None
+        _output_to_half_69: "f16[384, 384, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_29, torch.float16);  convert_element_type_default_29 = None
+        _output_to_half_70: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_40, torch.float16);  mul_tensor_40 = None
+        _output_to_half_71: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_41, torch.float16);  mul_tensor_41 = None
+        _output_to_half_72: "f16[384, 192, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_30, torch.float16);  convert_element_type_default_30 = None
+        _output_to_half_73: "f16[384]" = torch.ops.prims.convert_element_type.default(mul_tensor_42, torch.float16);  mul_tensor_42 = None
+        _output_to_half_74: "f16[384, 192, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_31, torch.float16);  convert_element_type_default_31 = None
+        _output_to_half_75: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_43, torch.float16);  mul_tensor_43 = None
+        _output_to_half_76: "f16[192, 192, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_32, torch.float16);  convert_element_type_default_32 = None
+        _output_to_half_77: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_44, torch.float16);  mul_tensor_44 = None
+        _output_to_half_78: "f16[192, 192, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_33, torch.float16);  convert_element_type_default_33 = None
+        _output_to_half_79: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_45, torch.float16);  mul_tensor_45 = None
+        _output_to_half_80: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_46, torch.float16);  mul_tensor_46 = None
+        _output_to_half_81: "f16[192, 192, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_34, torch.float16);  convert_element_type_default_34 = None
+        _output_to_half_82: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_47, torch.float16);  mul_tensor_47 = None
+        _output_to_half_83: "f16[192, 192, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_35, torch.float16);  convert_element_type_default_35 = None
+        _output_to_half_84: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_48, torch.float16);  mul_tensor_48 = None
+        _output_to_half_85: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_49, torch.float16);  mul_tensor_49 = None
+        _output_to_half_86: "f16[192, 192, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_36, torch.float16);  convert_element_type_default_36 = None
+        _output_to_half_87: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_50, torch.float16);  mul_tensor_50 = None
+        _output_to_half_88: "f16[192, 192, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_37, torch.float16);  convert_element_type_default_37 = None
+        _output_to_half_89: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_51, torch.float16);  mul_tensor_51 = None
+        _output_to_half_90: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_52, torch.float16);  mul_tensor_52 = None
+        _output_to_half_91: "f16[192, 96, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_38, torch.float16);  convert_element_type_default_38 = None
+        _output_to_half_92: "f16[192]" = torch.ops.prims.convert_element_type.default(mul_tensor_53, torch.float16);  mul_tensor_53 = None
+        _output_to_half_93: "f16[192, 96, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_39, torch.float16);  convert_element_type_default_39 = None
+        _output_to_half_94: "f16[96]" = torch.ops.prims.convert_element_type.default(mul_tensor_54, torch.float16);  mul_tensor_54 = None
+        _output_to_half_95: "f16[96, 96, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_40, torch.float16);  convert_element_type_default_40 = None
+        _output_to_half_96: "f16[96]" = torch.ops.prims.convert_element_type.default(mul_tensor_55, torch.float16);  mul_tensor_55 = None
+        _output_to_half_97: "f16[96, 96, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_41, torch.float16);  convert_element_type_default_41 = None
+        _output_to_half_98: "f16[96]" = torch.ops.prims.convert_element_type.default(mul_tensor_56, torch.float16);  mul_tensor_56 = None
+        _output_to_half_99: "f16[96]" = torch.ops.prims.convert_element_type.default(mul_tensor_57, torch.float16);  mul_tensor_57 = None
+        _output_to_half_100: "f16[96, 64, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_42, torch.float16);  convert_element_type_default_42 = None
+        _output_to_half_101: "f16[96]" = torch.ops.prims.convert_element_type.default(mul_tensor_58, torch.float16);  mul_tensor_58 = None
+        _output_to_half_102: "f16[96, 64, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_43, torch.float16);  convert_element_type_default_43 = None
+        _output_to_half_103: "f16[64]" = torch.ops.prims.convert_element_type.default(mul_tensor_59, torch.float16);  mul_tensor_59 = None
+        _output_to_half_104: "f16[64, 3, 3, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_44, torch.float16);  convert_element_type_default_44 = None
+        _output_to_half_105: "f16[64]" = torch.ops.prims.convert_element_type.default(mul_tensor_60, torch.float16);  mul_tensor_60 = None
+        _output_to_half_106: "f16[64, 3, 1, 1]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_45, torch.float16);  convert_element_type_default_45 = None
+        return (_output_to_half_0, _output_to_half_1, _output_to_half_2, _output_to_half_3, _output_to_half_4, _output_to_half_5, _output_to_half_6, _output_to_half_7, _output_to_half_8, _output_to_half_9, _output_to_half_10, _output_to_half_11, _output_to_half_12, _output_to_half_13, _output_to_half_14, _output_to_half_15, _output_to_half_16, _output_to_half_17, _output_to_half_18, _output_to_half_19, _output_to_half_20, _output_to_half_21, _output_to_half_22, _output_to_half_23, _output_to_half_24, _output_to_half_25, _output_to_half_26, _output_to_half_27, _output_to_half_28, _output_to_half_29, _output_to_half_30, _output_to_half_31, _output_to_half_32, _output_to_half_33, _output_to_half_34, _output_to_half_35, _output_to_half_36, _output_to_half_37, _output_to_half_38, _output_to_half_39, _output_to_half_40, _output_to_half_41, _output_to_half_42, _output_to_half_43, _output_to_half_44, _output_to_half_45, _output_to_half_46, _output_to_half_47, _output_to_half_48, _output_to_half_49, _output_to_half_50, _output_to_half_51, _output_to_half_52, _output_to_half_53, _output_to_half_54, _output_to_half_55, _output_to_half_56, _output_to_half_57, _output_to_half_58, _output_to_half_59, _output_to_half_60, _output_to_half_61, _output_to_half_62, _output_to_half_63, _output_to_half_64, _output_to_half_65, _output_to_half_66, _output_to_half_67, _output_to_half_68, _output_to_half_69, _output_to_half_70, _output_to_half_71, _output_to_half_72, _output_to_half_73, _output_to_half_74, _output_to_half_75, _output_to_half_76, _output_to_half_77, _output_to_half_78, _output_to_half_79, _output_to_half_80, _output_to_half_81, _output_to_half_82, _output_to_half_83, _output_to_half_84, _output_to_half_85, _output_to_half_86, _output_to_half_87, _output_to_half_88, _output_to_half_89, _output_to_half_90, _output_to_half_91, _output_to_half_92, _output_to_half_93, _output_to_half_94, _output_to_half_95, _output_to_half_96, _output_to_half_97, _output_to_half_98, _output_to_half_99, _output_to_half_100, _output_to_half_101, _output_to_half_102, _output_to_half_103, _output_to_half_104, _output_to_half_105, _output_to_half_106)
 
 
 def _default_make_inputs():

@@ -29,7 +29,8 @@ class Repro(torch.nn.Module):
 
         # File: /tmp/scratch_space/better_benchmark/capture_genai_patterns.py:197 in rmsnorm_pattern, code: return (weight * hidden_states).to(hidden_states.dtype)
         mul_tensor_1: "f32[4, 2048, 4096]" = torch.ops.aten.mul.Tensor(arg1_1, mul_tensor);  arg1_1 = mul_tensor = None
-        return mul_tensor_1
+        _output_to_half_0: "bf16[4, 2048, 4096]" = torch.ops.prims.convert_element_type.default(mul_tensor_1, torch.bfloat16);  mul_tensor_1 = None
+        return _output_to_half_0
 
 
 def _default_make_inputs():

@@ -29,7 +29,9 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:89 in forward, code: hidden_states = self.wo(hidden_states)
         reshape_default_1: "f32[512, 3072]" = torch.ops.aten.reshape.default(convert_element_type_default, _shape_param_1);  convert_element_type_default = _shape_param_1 = None
         permute_default: "f32[3072, 768]" = torch.ops.aten.permute.default(arg258_1, [1, 0]);  arg258_1 = None
-        return (reshape_default_1, permute_default)
+        _output_to_half_0: "f16[512, 3072]" = torch.ops.prims.convert_element_type.default(reshape_default_1, torch.float16);  reshape_default_1 = None
+        _output_to_half_1: "f16[3072, 768]" = torch.ops.prims.convert_element_type.default(permute_default, torch.float16);  permute_default = None
+        return (_output_to_half_0, _output_to_half_1)
 
 
 def _default_make_inputs():

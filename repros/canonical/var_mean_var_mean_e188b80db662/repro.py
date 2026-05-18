@@ -31,7 +31,11 @@ class Repro(torch.nn.Module):
         var_mean_correction_1 = torch.ops.aten.var_mean.correction(permute_default, [2], correction = 0, keepdim = True);  permute_default = None
         getitem_2: "f32[32, 77, 1]" = var_mean_correction_1[0]
         getitem_3: "f32[32, 77, 1]" = var_mean_correction_1[1];  var_mean_correction_1 = None
-        return (getitem, getitem_1, getitem_2, getitem_3)
+        _output_to_half_0: "f16[32, 1]" = torch.ops.prims.convert_element_type.default(getitem, torch.float16);  getitem = None
+        _output_to_half_1: "f16[32, 1]" = torch.ops.prims.convert_element_type.default(getitem_1, torch.float16);  getitem_1 = None
+        _output_to_half_2: "f16[32, 77, 1]" = torch.ops.prims.convert_element_type.default(getitem_2, torch.float16);  getitem_2 = None
+        _output_to_half_3: "f16[32, 77, 1]" = torch.ops.prims.convert_element_type.default(getitem_3, torch.float16);  getitem_3 = None
+        return (_output_to_half_0, _output_to_half_1, _output_to_half_2, _output_to_half_3)
 
 
 def _default_make_inputs():

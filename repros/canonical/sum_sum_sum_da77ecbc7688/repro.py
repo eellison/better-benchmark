@@ -30,7 +30,13 @@ class Repro(torch.nn.Module):
         reshape_default_2: "f16[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_2, [1024]);  sum_dim_int_list_2 = None
         convert_element_type_default_4: "f32[1024, 3]" = torch.ops.prims.convert_element_type.default(mm_4, torch.float32);  mm_4 = None
         convert_element_type_default_5: "f32[1024]" = torch.ops.prims.convert_element_type.default(reshape_default_2, torch.float32);  reshape_default_2 = None
-        return (convert_element_type_default, convert_element_type_default_1, convert_element_type_default_2, convert_element_type_default_3, convert_element_type_default_4, convert_element_type_default_5)
+        _output_to_half_0: "f16[2, 1024]" = torch.ops.prims.convert_element_type.default(convert_element_type_default, torch.float16);  convert_element_type_default = None
+        _output_to_half_1: "f16[2]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_1, torch.float16);  convert_element_type_default_1 = None
+        _output_to_half_2: "f16[1024, 1024]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_2, torch.float16);  convert_element_type_default_2 = None
+        _output_to_half_3: "f16[1024]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_3, torch.float16);  convert_element_type_default_3 = None
+        _output_to_half_4: "f16[1024, 3]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_4, torch.float16);  convert_element_type_default_4 = None
+        _output_to_half_5: "f16[1024]" = torch.ops.prims.convert_element_type.default(convert_element_type_default_5, torch.float16);  convert_element_type_default_5 = None
+        return (_output_to_half_0, _output_to_half_1, _output_to_half_2, _output_to_half_3, _output_to_half_4, _output_to_half_5)
 
 
 def _default_make_inputs():
