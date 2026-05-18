@@ -24,8 +24,9 @@
     "aten.reshape.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_XLNetLMHeadModel_train",
     "hf_XLNetLMHeadModel_training"
   ]
 }

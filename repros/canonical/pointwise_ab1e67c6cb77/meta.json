@@ -6,12 +6,15 @@
   "origin_ops": [
     "aten.embedding.default"
   ],
-  "n_models": 8,
+  "n_models": 11,
   "models": [
     "dynamo_Reformer",
     "dynamo_Reformer_inference",
+    "hf_BlenderbotForCausalLM_train",
     "hf_BlenderbotForCausalLM_training",
+    "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_train",
     "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_training",
+    "hf_PegasusForCausalLM_train",
     "hf_PegasusForCausalLM_training",
     "hf_blenderbotforcausallm_training",
     "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_training",

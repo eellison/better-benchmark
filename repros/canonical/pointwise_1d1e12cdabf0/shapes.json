@@ -1,0 +1,79 @@
+{
+  "pattern_hash": "1d1e12cdabf0",
+  "configs": {
+    "tlparse_torchbench_s9_g20_a722b9ba": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            32,
+            12,
+            50,
+            64
+          ],
+          "stride": [
+            768,
+            64,
+            24576,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            32,
+            8,
+            77,
+            64
+          ],
+          "stride": [
+            512,
+            64,
+            16384,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_torchbench_s9_g20"
+      ],
+      "shape_hash": "a722b9ba"
+    }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "pattern_hash": "24cd1d7c75a9",
+  "configs": {
+    "hf_bartforcausallm_infer_e3b14c1a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            50265,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024
+          ],
+          "stride": null,
+          "max_val": 50265
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1026,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_BartForCausalLM_infer"
+      ],
+      "shape_hash": "e3b14c1a"
+    },
+    "hf_mbartforcausallm_infer_e3b14c1a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            50265,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024
+          ],
+          "stride": null,
+          "max_val": 50265
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1026,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MBartForCausalLM_infer"
+      ],
+      "shape_hash": "e3b14c1a"
+    },
+    "hf_plbartforcausallm_infer_1a7afcd0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            50005,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            16,
+            1024
+          ],
+          "stride": null,
+          "max_val": 50005
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1026,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_PLBartForCausalLM_infer"
+      ],
+      "shape_hash": "1a7afcd0"
+    }
+  }
+}

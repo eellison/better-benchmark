@@ -57,8 +57,9 @@
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_XLNetLMHeadModel_train",
     "hf_XLNetLMHeadModel_training"
   ]
 }

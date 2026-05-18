@@ -30,8 +30,9 @@
     "prims.convert_element_type.default",
     "prims.fma.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_XGLMForCausalLM_train",
     "hf_XGLMForCausalLM_training"
   ]
 }

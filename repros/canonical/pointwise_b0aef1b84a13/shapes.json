@@ -1,0 +1,12 @@
+{
+  "pattern_hash": "b0aef1b84a13",
+  "configs": {
+    "hf_optforcausallm_infer_d7517139": {
+      "inputs": [],
+      "source_models": [
+        "hf_OPTForCausalLM_infer"
+      ],
+      "shape_hash": "d7517139"
+    }
+  }
+}

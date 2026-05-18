@@ -125,8 +125,9 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "hf_MT5ForConditionalGeneration_train",
     "hf_MT5ForConditionalGeneration_training",
     "hf_mt5forconditionalgeneration_training"
   ]

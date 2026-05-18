@@ -1,0 +1,302 @@
+{
+  "pattern_hash": "c5de6395bc06",
+  "configs": {
+    "hf_layoutlmformaskedlm_infer_73991007": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            12,
+            512,
+            64
+          ],
+          "stride": [
+            393216,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_LayoutLMForMaskedLM_infer"
+      ],
+      "shape_hash": "73991007"
+    },
+    "hf_layoutlmformaskedlm_train_73991007": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            12,
+            512,
+            64
+          ],
+          "stride": [
+            393216,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_LayoutLMForMaskedLM_train"
+      ],
+      "shape_hash": "73991007"
+    },
+    "hf_mt5forconditionalgeneration_infer_264c340c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            6,
+            128,
+            64
+          ],
+          "stride": [
+            49152,
+            64,
+            384,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MT5ForConditionalGeneration_infer"
+      ],
+      "shape_hash": "264c340c"
+    },
+    "hf_megatronbertforcausallm_infer_844bd7fc": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            16,
+            512,
+            64
+          ],
+          "stride": [
+            524288,
+            64,
+            1024,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MegatronBertForCausalLM_infer"
+      ],
+      "shape_hash": "844bd7fc"
+    },
+    "hf_megatronbertforcausallm_train_844bd7fc": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            16,
+            512,
+            64
+          ],
+          "stride": [
+            524288,
+            64,
+            1024,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MegatronBertForCausalLM_train"
+      ],
+      "shape_hash": "844bd7fc"
+    },
+    "hf_t5forconditionalgeneration_infer_7d9e7ce2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            8,
+            1024,
+            64
+          ],
+          "stride": [
+            524288,
+            64,
+            512,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_T5ForConditionalGeneration_infer"
+      ],
+      "shape_hash": "7d9e7ce2"
+    },
+    "hf_t5small_infer_7d9e7ce2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            8,
+            1024,
+            64
+          ],
+          "stride": [
+            524288,
+            64,
+            512,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_T5Small_infer"
+      ],
+      "shape_hash": "7d9e7ce2"
+    },
+    "hf_trocrforcausallm_infer_8b26c5ca": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            64,
+            16,
+            256,
+            64
+          ],
+          "stride": [
+            262144,
+            64,
+            1024,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_TrOCRForCausalLM_infer"
+      ],
+      "shape_hash": "8b26c5ca"
+    },
+    "hf_trocrforcausallm_train_8b26c5ca": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            64,
+            16,
+            256,
+            64
+          ],
+          "stride": [
+            262144,
+            64,
+            1024,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_TrOCRForCausalLM_train"
+      ],
+      "shape_hash": "8b26c5ca"
+    }
+  }
+}

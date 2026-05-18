@@ -26,9 +26,11 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "hf_GPTNeoForCausalLM_train",
     "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_train",
     "hf_GPTNeoForSequenceClassification_training"
   ]
 }

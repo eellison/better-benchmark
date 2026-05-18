@@ -1,0 +1,12 @@
+{
+  "pattern_hash": "126ca61cb310",
+  "configs": {
+    "tlparse_timm_s2_g77_6db24246": {
+      "inputs": [],
+      "source_models": [
+        "tlparse_timm_s2_g77"
+      ],
+      "shape_hash": "6db24246"
+    }
+  }
+}

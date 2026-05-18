@@ -9,8 +9,9 @@
     "aten.squeeze.dim",
     "aten.squeeze.dim"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "hf_GPTJForQuestionAnswering_infer",
     "hf_GPTJForQuestionAnswering_inference",
     "hf_gptjforquestionanswering_inference"
   ]

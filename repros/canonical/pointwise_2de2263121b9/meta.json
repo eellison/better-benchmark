@@ -12,9 +12,11 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 11,
+  "n_models": 13,
   "models": [
+    "hf_OPTForCausalLM_infer",
     "hf_OPTForCausalLM_inference",
+    "hf_OPTForCausalLM_train",
     "hf_OPTForCausalLM_training",
     "timm_beit_base_patch16_224_infer",
     "timm_beit_base_patch16_224_inference",

@@ -11,14 +11,21 @@
     "aten.reshape.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 9,
+  "n_models": 16,
   "models": [
+    "hf_BlenderbotForCausalLM_train",
     "hf_BlenderbotForCausalLM_training",
+    "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_train",
     "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_training",
+    "hf_M2M100ForConditionalGeneration_train",
     "hf_M2M100ForConditionalGeneration_training",
+    "hf_MBartForCausalLM_train",
     "hf_MBartForCausalLM_training",
+    "hf_OPTForCausalLM_train",
     "hf_OPTForCausalLM_training",
+    "hf_PegasusForCausalLM_train",
     "hf_PegasusForCausalLM_training",
+    "hf_XGLMForCausalLM_train",
     "hf_XGLMForCausalLM_training",
     "hf_blenderbotforcausallm_training",
     "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_training"

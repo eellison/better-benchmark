@@ -13,9 +13,11 @@
     "aten.slice.Tensor",
     "aten.slice.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "hf_MobileBertForMaskedLM_infer",
     "hf_MobileBertForMaskedLM_inference",
+    "hf_MobileBertForMaskedLM_train",
     "hf_MobileBertForMaskedLM_training"
   ]
 }

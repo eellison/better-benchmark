@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "a1cee3914822",
+  "configs": {
+    "hf_xglmforcausallm_train_7e4611ca": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            128
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2050,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_XGLMForCausalLM_train"
+      ],
+      "shape_hash": "7e4611ca"
+    }
+  }
+}

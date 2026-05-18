@@ -39,10 +39,11 @@
     "aten.sub.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "dynamo_LayoutLMForMaskedLM",
     "dynamo_LayoutLMForMaskedLM_inference",
+    "hf_LayoutLMForMaskedLM_infer",
     "hf_LayoutLMForMaskedLM_inference"
   ]
 }

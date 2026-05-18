@@ -1,0 +1,91 @@
+{
+  "pattern_hash": "3715fb438343",
+  "configs": {
+    "hf_yitutechconvbert_infer_78303912": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            6,
+            512,
+            64
+          ],
+          "stride": [
+            196608,
+            64,
+            384,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            98304,
+            64,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_YituTechConvBert_infer"
+      ],
+      "shape_hash": "78303912"
+    },
+    "hf_yitutechconvbert_train_78303912": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            98304,
+            64,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            6,
+            512,
+            64
+          ],
+          "stride": [
+            196608,
+            64,
+            384,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_YituTechConvBert_train"
+      ],
+      "shape_hash": "78303912"
+    }
+  }
+}

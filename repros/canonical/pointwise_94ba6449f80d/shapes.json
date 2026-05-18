@@ -1,0 +1,12 @@
+{
+  "pattern_hash": "94ba6449f80d",
+  "configs": {
+    "tlparse_timm_s3_g70_ab3c8ab4": {
+      "inputs": [],
+      "source_models": [
+        "tlparse_timm_s3_g70"
+      ],
+      "shape_hash": "ab3c8ab4"
+    }
+  }
+}

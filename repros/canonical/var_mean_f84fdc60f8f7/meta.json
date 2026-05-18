@@ -15,10 +15,11 @@
     "aten.var_mean.correction",
     "prims.iota.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "dynamo_BlenderbotForConditionalGeneration",
     "dynamo_BlenderbotForConditionalGeneration_inference",
+    "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_infer",
     "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_inference",
     "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_inference"
   ]

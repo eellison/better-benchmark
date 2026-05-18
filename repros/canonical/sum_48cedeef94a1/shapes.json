@@ -1,0 +1,87 @@
+{
+  "pattern_hash": "48cedeef94a1",
+  "configs": {
+    "hf_allenailongformerbase_train_096e2b52": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384,
+            256,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024,
+            12,
+            513
+          ],
+          "stride": [
+            6422528,
+            6272,
+            513,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024,
+            12,
+            513
+          ],
+          "stride": [
+            6324224,
+            6176,
+            513,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            256,
+            1,
+            257
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            256,
+            1,
+            257
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AllenaiLongformerBase_train"
+      ],
+      "shape_hash": "096e2b52"
+    }
+  }
+}

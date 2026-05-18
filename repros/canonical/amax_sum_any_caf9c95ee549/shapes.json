@@ -1,0 +1,48 @@
+{
+  "pattern_hash": "caf9c95ee549",
+  "configs": {
+    "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_train_1dd2ba9e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            16,
+            1,
+            128,
+            128
+          ],
+          "stride": [
+            0,
+            128,
+            1,
+            0
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            128,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "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_train"
+      ],
+      "shape_hash": "1dd2ba9e"
+    }
+  }
+}

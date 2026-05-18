@@ -12,11 +12,13 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 12,
+  "n_models": 14,
   "models": [
     "dynamo_MobileBertForMaskedLM",
     "dynamo_MobileBertForMaskedLM_inference",
+    "hf_MobileBertForMaskedLM_infer",
     "hf_MobileBertForMaskedLM_inference",
+    "hf_MobileBertForMaskedLM_train",
     "hf_MobileBertForMaskedLM_training",
     "timm_dm_nfnet_f0_infer",
     "timm_dm_nfnet_f0_inference",

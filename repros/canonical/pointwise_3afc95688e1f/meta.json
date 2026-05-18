@@ -21,9 +21,11 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "hf_XLNetLMHeadModel_infer",
     "hf_XLNetLMHeadModel_inference",
+    "hf_XLNetLMHeadModel_train",
     "hf_XLNetLMHeadModel_training"
   ]
 }

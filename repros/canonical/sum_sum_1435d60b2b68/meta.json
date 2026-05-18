@@ -21,12 +21,17 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 10,
+  "n_models": 15,
   "models": [
+    "hf_AlbertForMaskedLM_train",
     "hf_AlbertForMaskedLM_training",
+    "hf_GPTJForCausalLM_train",
     "hf_GPTJForCausalLM_training",
+    "hf_GPTJForQuestionAnswering_train",
     "hf_GPTJForQuestionAnswering_training",
+    "hf_GPTNeoForCausalLM_train",
     "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_train",
     "hf_GPTNeoForSequenceClassification_training",
     "hf_albertformaskedlm_training",
     "hf_gptjforcausallm_training",

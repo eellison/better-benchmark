@@ -1,0 +1,60 @@
+{
+  "pattern_hash": "a398f5b56504",
+  "configs": {
+    "hf_megatronbertforcausallm_train_b9461cb5": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            29056,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            16,
+            512
+          ],
+          "stride": null,
+          "max_val": 29056
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 512
+        }
+      ],
+      "source_models": [
+        "hf_MegatronBertForCausalLM_train"
+      ],
+      "shape_hash": "b9461cb5"
+    }
+  }
+}

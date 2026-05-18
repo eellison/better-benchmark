@@ -22,8 +22,9 @@
     "aten.var_mean.correction",
     "prims.iota.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "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_infer",
     "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_inference",
     "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_inference"
   ]

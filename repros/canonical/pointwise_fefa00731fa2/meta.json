@@ -12,11 +12,15 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 6,
+  "n_models": 10,
   "models": [
+    "hf_BlenderbotForCausalLM_train",
     "hf_BlenderbotForCausalLM_training",
+    "hf_MBartForCausalLM_train",
     "hf_MBartForCausalLM_training",
+    "hf_OPTForCausalLM_train",
     "hf_OPTForCausalLM_training",
+    "hf_PegasusForCausalLM_train",
     "hf_PegasusForCausalLM_training",
     "hf_Reformer_training",
     "hf_blenderbotforcausallm_training"

@@ -1,0 +1,48 @@
+{
+  "pattern_hash": "81199804097e",
+  "configs": {
+    "tlparse_huggingface_s5_g11_557c1248": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1000,
+            2048
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1000,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            1000,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s5_g11"
+      ],
+      "shape_hash": "557c1248"
+    }
+  }
+}

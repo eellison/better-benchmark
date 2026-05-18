@@ -9,7 +9,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 18,
+  "n_models": 20,
   "models": [
     "dynamo_ElectraForCausalLM",
     "dynamo_ElectraForCausalLM_inference",
@@ -24,6 +24,8 @@
     "dynamo_T5ForConditionalGeneration",
     "dynamo_T5Small",
     "dynamo_TrOCRForCausalLM",
+    "hf_LayoutLMForMaskedLM_train",
+    "hf_MegatronBertForCausalLM_train",
     "timm_visformer_small_infer",
     "timm_visformer_small_inference",
     "timm_visformer_small_train",

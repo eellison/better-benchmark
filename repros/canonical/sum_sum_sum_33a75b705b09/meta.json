@@ -50,9 +50,11 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
+    "hf_BartForCausalLM_train",
     "hf_BartForCausalLM_training",
+    "hf_PLBartForCausalLM_train",
     "hf_PLBartForCausalLM_training",
     "hf_bartforcausallm_training"
   ]

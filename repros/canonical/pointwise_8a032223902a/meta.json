@@ -14,9 +14,10 @@
     "aten.squeeze.dim",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
     "dynamo_XLNetLMHeadModel",
+    "hf_XLNetLMHeadModel_train",
     "hf_XLNetLMHeadModel_training"
   ]
 }

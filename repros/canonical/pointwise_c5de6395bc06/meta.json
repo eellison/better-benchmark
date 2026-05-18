@@ -10,9 +10,18 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 2,
+  "n_models": 11,
   "models": [
+    "hf_LayoutLMForMaskedLM_infer",
+    "hf_LayoutLMForMaskedLM_train",
+    "hf_MT5ForConditionalGeneration_infer",
+    "hf_MegatronBertForCausalLM_infer",
+    "hf_MegatronBertForCausalLM_train",
+    "hf_T5ForConditionalGeneration_infer",
+    "hf_T5Small_infer",
+    "hf_TrOCRForCausalLM_infer",
     "hf_TrOCRForCausalLM_inference",
+    "hf_TrOCRForCausalLM_train",
     "hf_TrOCRForCausalLM_training"
   ]
 }

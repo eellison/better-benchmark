@@ -24,9 +24,11 @@
     "aten.sub.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
+    "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_infer",
     "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_inference",
+    "hf_M2M100ForConditionalGeneration_infer",
     "hf_M2M100ForConditionalGeneration_inference",
     "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_inference"
   ]

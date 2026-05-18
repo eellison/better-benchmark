@@ -19,9 +19,11 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "hf_TrOCRForCausalLM_infer",
     "hf_TrOCRForCausalLM_inference",
+    "hf_TrOCRForCausalLM_train",
     "hf_TrOCRForCausalLM_training"
   ]
 }

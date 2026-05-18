@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "ac4f9fbd56e6",
+  "configs": {
+    "hf_trocrforcausallm_train_d7517139": {
+      "inputs": [],
+      "source_models": [
+        "hf_TrOCRForCausalLM_train"
+      ],
+      "shape_hash": "d7517139"
+    },
+    "hf_xglmforcausallm_train_d7517139": {
+      "inputs": [],
+      "source_models": [
+        "hf_XGLMForCausalLM_train"
+      ],
+      "shape_hash": "d7517139"
+    }
+  }
+}

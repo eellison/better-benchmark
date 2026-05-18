@@ -28,10 +28,13 @@
     "aten.sum.dim_IntList",
     "prims.convert_element_type.default"
   ],
-  "n_models": 5,
+  "n_models": 8,
   "models": [
+    "hf_MT5ForConditionalGeneration_train",
     "hf_MT5ForConditionalGeneration_training",
+    "hf_T5ForConditionalGeneration_train",
     "hf_T5ForConditionalGeneration_training",
+    "hf_T5Small_train",
     "hf_T5Small_training",
     "hf_mt5forconditionalgeneration_training",
     "hf_t5_base_train"

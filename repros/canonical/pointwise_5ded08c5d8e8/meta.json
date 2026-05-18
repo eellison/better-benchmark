@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "5ded08c5d8e8",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 18,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_LayoutLMForMaskedLM_train",
+    "hf_MegatronBertForCausalLM_train"
+  ]
+}

@@ -2856,6 +2856,132 @@
         "timm_visformer_small_train"
       ],
       "shape_hash": "e3ab5e40"
+    },
+    "hf_blenderbotforcausallm_train_61da97f7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            128,
+            2560
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_BlenderbotForCausalLM_train"
+      ],
+      "shape_hash": "61da97f7"
+    },
+    "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_train_9ade150a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            128,
+            2560
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "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_train"
+      ],
+      "shape_hash": "9ade150a"
+    },
+    "hf_m2m100forconditionalgeneration_train_81d159cc": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            64,
+            128,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_M2M100ForConditionalGeneration_train"
+      ],
+      "shape_hash": "81d159cc"
+    },
+    "hf_mbartforcausallm_train_72667241": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1024,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MBartForCausalLM_train"
+      ],
+      "shape_hash": "72667241"
+    },
+    "hf_optforcausallm_train_d29d4935": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            2048,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_OPTForCausalLM_train"
+      ],
+      "shape_hash": "d29d4935"
+    },
+    "hf_pegasusforcausallm_train_93e5afe6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_PegasusForCausalLM_train"
+      ],
+      "shape_hash": "93e5afe6"
+    },
+    "hf_xglmforcausallm_train_e9c3f42c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            128,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_XGLMForCausalLM_train"
+      ],
+      "shape_hash": "e9c3f42c"
     }
   }
 }

@@ -14,11 +14,15 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 7,
+  "n_models": 11,
   "models": [
+    "hf_GPTJForCausalLM_infer",
     "hf_GPTJForCausalLM_inference",
+    "hf_GPTJForCausalLM_train",
     "hf_GPTJForCausalLM_training",
+    "hf_GPTJForQuestionAnswering_infer",
     "hf_GPTJForQuestionAnswering_inference",
+    "hf_GPTJForQuestionAnswering_train",
     "hf_GPTJForQuestionAnswering_training",
     "hf_gptjforcausallm_training",
     "hf_gptjforquestionanswering_inference",

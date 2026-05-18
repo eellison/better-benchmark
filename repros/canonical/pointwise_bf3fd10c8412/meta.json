@@ -14,8 +14,17 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 10,
   "models": [
+    "hf_BartForCausalLM_infer",
+    "hf_DistillGPT2_infer",
+    "hf_DistillGPT2_train",
+    "hf_GPTNeoForCausalLM_infer",
+    "hf_GPTNeoForCausalLM_train",
+    "hf_MBartForCausalLM_infer",
+    "hf_PLBartForCausalLM_infer",
+    "hf_PegasusForCausalLM_infer",
+    "hf_TrOCRForCausalLM_infer",
     "hf_TrOCRForCausalLM_inference"
   ]
 }

@@ -1,0 +1,77 @@
+{
+  "pattern_hash": "92cc85092323",
+  "configs": {
+    "hf_mobilebertformaskedlm_infer_0f05ac4a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            30522,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            256,
+            128
+          ],
+          "stride": null,
+          "max_val": 30522
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MobileBertForMaskedLM_infer"
+      ],
+      "shape_hash": "0f05ac4a"
+    },
+    "hf_mobilebertformaskedlm_train_0f05ac4a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            30522,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            256,
+            128
+          ],
+          "stride": null,
+          "max_val": 30522
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MobileBertForMaskedLM_train"
+      ],
+      "shape_hash": "0f05ac4a"
+    }
+  }
+}

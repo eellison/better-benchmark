@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "e0b5999b896c",
+  "configs": {
+    "hf_allenailongformerbase_train_a4155d35": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AllenaiLongformerBase_train"
+      ],
+      "shape_hash": "a4155d35"
+    }
+  }
+}

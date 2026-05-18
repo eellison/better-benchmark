@@ -21,8 +21,9 @@
     "prims.inductor_random.default",
     "prims.inductor_seeds.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_LayoutLMForMaskedLM_train",
     "hf_YituTechConvBert_training"
   ]
 }

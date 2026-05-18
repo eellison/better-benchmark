@@ -1,0 +1,117 @@
+{
+  "pattern_hash": "6d4787bb47eb",
+  "configs": {
+    "tlparse_timm_s2_g53_c51476ab": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            198,
+            64
+          ],
+          "stride": [
+            152064,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            198,
+            64
+          ],
+          "stride": [
+            152064,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            198,
+            64
+          ],
+          "stride": [
+            152064,
+            64,
+            768,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s2_g53"
+      ],
+      "shape_hash": "c51476ab"
+    },
+    "tlparse_timm_s3_g26_408d4c8e": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            128,
+            3,
+            197,
+            64
+          ],
+          "stride": [
+            37824,
+            64,
+            192,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            128,
+            3,
+            197,
+            64
+          ],
+          "stride": [
+            37824,
+            64,
+            192,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            128,
+            3,
+            197,
+            64
+          ],
+          "stride": [
+            37824,
+            64,
+            192,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s3_g26"
+      ],
+      "shape_hash": "408d4c8e"
+    }
+  }
+}

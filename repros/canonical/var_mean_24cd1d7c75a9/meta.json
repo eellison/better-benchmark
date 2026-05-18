@@ -18,10 +18,13 @@
     "aten.var_mean.correction",
     "prims.iota.default"
   ],
-  "n_models": 4,
+  "n_models": 7,
   "models": [
+    "hf_BartForCausalLM_infer",
     "hf_BartForCausalLM_inference",
+    "hf_MBartForCausalLM_infer",
     "hf_MBartForCausalLM_inference",
+    "hf_PLBartForCausalLM_infer",
     "hf_PLBartForCausalLM_inference",
     "hf_bartforcausallm_inference"
   ]

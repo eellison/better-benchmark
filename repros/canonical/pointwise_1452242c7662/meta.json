@@ -7,9 +7,11 @@
     "aten.permute.default",
     "aten.relu.default"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
+    "hf_OPTForCausalLM_infer",
     "hf_OPTForCausalLM_inference",
+    "hf_OPTForCausalLM_train",
     "hf_OPTForCausalLM_training",
     "torchvision_vgg16_inference"
   ]

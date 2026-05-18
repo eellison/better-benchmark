@@ -27,14 +27,19 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 9,
+  "n_models": 14,
   "models": [
+    "hf_GPTNeoForCausalLM_train",
     "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_train",
     "hf_GPTNeoForSequenceClassification_training",
     "hf_LayoutLMForMaskedLM_training",
+    "hf_MT5ForConditionalGeneration_train",
     "hf_MT5ForConditionalGeneration_training",
     "hf_MegatronBertForCausalLM_training",
+    "hf_T5ForConditionalGeneration_train",
     "hf_T5ForConditionalGeneration_training",
+    "hf_T5Small_train",
     "hf_T5Small_training",
     "hf_mt5forconditionalgeneration_training",
     "hf_t5_base_train"

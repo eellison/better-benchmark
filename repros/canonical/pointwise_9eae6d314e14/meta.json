@@ -59,8 +59,9 @@
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "hf_AllenaiLongformerBase_train",
     "hf_AllenaiLongformerBase_training",
     "hf_allenailongformerbase_training"
   ]

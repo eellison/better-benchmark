@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "307515c2f245",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 15,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.gather.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.repeat.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.split.Tensor",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_GPTJForCausalLM_train",
+    "hf_GPTJForQuestionAnswering_train"
+  ]
+}

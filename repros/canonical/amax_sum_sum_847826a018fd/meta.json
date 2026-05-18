@@ -35,9 +35,11 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "hf_OPTForCausalLM_train",
     "hf_OPTForCausalLM_training",
+    "hf_XGLMForCausalLM_train",
     "hf_XGLMForCausalLM_training"
   ]
 }

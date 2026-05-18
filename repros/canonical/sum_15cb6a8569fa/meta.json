@@ -13,9 +13,10 @@
     "aten.sum.dim_IntList",
     "prims.fma.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "dynamo_AlbertForMaskedLM",
+    "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_train",
     "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_training",
     "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_training"
   ]

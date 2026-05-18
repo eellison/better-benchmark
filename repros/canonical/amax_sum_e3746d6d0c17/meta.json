@@ -30,10 +30,13 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 4,
+  "n_models": 7,
   "models": [
+    "hf_MT5ForConditionalGeneration_train",
     "hf_MT5ForConditionalGeneration_training",
+    "hf_T5ForConditionalGeneration_train",
     "hf_T5ForConditionalGeneration_training",
+    "hf_T5Small_train",
     "hf_T5Small_training",
     "hf_mt5forconditionalgeneration_training"
   ]

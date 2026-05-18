@@ -120,6 +120,40 @@
         "timm_visformer_small_train"
       ],
       "shape_hash": "ae969c27"
+    },
+    "hf_layoutlmformaskedlm_train_e045a23d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16384,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_LayoutLMForMaskedLM_train"
+      ],
+      "shape_hash": "e045a23d"
+    },
+    "hf_megatronbertforcausallm_train_872d291e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_MegatronBertForCausalLM_train"
+      ],
+      "shape_hash": "872d291e"
     }
   }
 }

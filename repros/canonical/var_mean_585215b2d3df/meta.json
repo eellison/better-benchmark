@@ -13,10 +13,11 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "dynamo_AllenaiLongformerBase",
     "dynamo_AllenaiLongformerBase_inference",
+    "hf_AllenaiLongformerBase_infer",
     "hf_AllenaiLongformerBase_inference",
     "hf_allenailongformerbase_inference"
   ]

@@ -33,8 +33,9 @@
     "aten.sum.dim_IntList",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_OPTForCausalLM_train",
     "hf_OPTForCausalLM_training"
   ]
 }

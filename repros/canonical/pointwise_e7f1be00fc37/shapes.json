@@ -60,6 +60,32 @@
         "timm_nfnet_l0_train"
       ],
       "shape_hash": "7b090fc4"
+    },
+    "tlparse_torchbench_s8_g27_5fe738e0": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            256,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            256,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_torchbench_s8_g27"
+      ],
+      "shape_hash": "5fe738e0"
     }
   }
 }

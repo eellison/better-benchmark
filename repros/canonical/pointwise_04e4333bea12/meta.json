@@ -21,8 +21,12 @@
     "aten.reshape.default",
     "aten.tanh.default"
   ],
-  "n_models": 1,
+  "n_models": 5,
   "models": [
+    "hf_GPTJForCausalLM_infer",
+    "hf_GPTJForCausalLM_train",
+    "hf_GPTJForQuestionAnswering_infer",
+    "hf_GPTJForQuestionAnswering_train",
     "phi_2_inference"
   ]
 }

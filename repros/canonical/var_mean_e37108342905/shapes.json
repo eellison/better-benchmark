@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "e37108342905",
+  "configs": {
+    "hf_optforcausallm_train_68c6dbc3": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            2048,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_OPTForCausalLM_train"
+      ],
+      "shape_hash": "68c6dbc3"
+    }
+  }
+}

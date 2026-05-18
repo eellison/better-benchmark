@@ -14,11 +14,13 @@
     "aten.slice.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 6,
+  "n_models": 8,
   "models": [
     "dynamo_DistilBertForMaskedLM",
     "dynamo_DistilBertForMaskedLM_inference",
+    "hf_DistilBertForMaskedLM_infer",
     "hf_DistilBertForMaskedLM_inference",
+    "hf_DistilBertForMaskedLM_train",
     "hf_DistilBertForMaskedLM_training",
     "hf_distilbertformaskedlm_inference",
     "hf_distilbertformaskedlm_training"

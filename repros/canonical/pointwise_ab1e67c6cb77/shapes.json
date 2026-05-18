@@ -1,0 +1,83 @@
+{
+  "pattern_hash": "ab1e67c6cb77",
+  "configs": {
+    "hf_blenderbotforcausallm_train_d999c84a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            128
+          ],
+          "stride": null,
+          "max_val": 128
+        }
+      ],
+      "source_models": [
+        "hf_BlenderbotForCausalLM_train"
+      ],
+      "shape_hash": "d999c84a"
+    },
+    "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_train_d999c84a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            128
+          ],
+          "stride": null,
+          "max_val": 128
+        }
+      ],
+      "source_models": [
+        "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_train"
+      ],
+      "shape_hash": "d999c84a"
+    },
+    "hf_pegasusforcausallm_train_4494d7dc": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            128
+          ],
+          "stride": null,
+          "max_val": 1024
+        }
+      ],
+      "source_models": [
+        "hf_PegasusForCausalLM_train"
+      ],
+      "shape_hash": "4494d7dc"
+    }
+  }
+}

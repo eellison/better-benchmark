@@ -18,8 +18,9 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_XLNetLMHeadModel_train",
     "hf_XLNetLMHeadModel_training"
   ]
 }

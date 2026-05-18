@@ -1,0 +1,41 @@
+{
+  "pattern_hash": "1018cb57ba61",
+  "configs": {
+    "hf_trocrforcausallm_infer_4c29f81a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            50265,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            64,
+            256
+          ],
+          "stride": null,
+          "max_val": 50265
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            514,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_TrOCRForCausalLM_infer"
+      ],
+      "shape_hash": "4c29f81a"
+    }
+  }
+}

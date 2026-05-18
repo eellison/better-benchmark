@@ -28,9 +28,11 @@
     "aten.sub.Tensor",
     "aten.sub.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "hf_GPTNeoForCausalLM_infer",
     "hf_GPTNeoForCausalLM_inference",
+    "hf_GPTNeoForSequenceClassification_infer",
     "hf_GPTNeoForSequenceClassification_inference"
   ]
 }

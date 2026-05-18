@@ -1,0 +1,167 @@
+{
+  "pattern_hash": "94da6bd0ff78",
+  "configs": {
+    "tlparse_huggingface_s2_g21_ed806e6b": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s2_g21"
+      ],
+      "shape_hash": "ed806e6b"
+    },
+    "tlparse_huggingface_s2_g83_ed806e6b": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            4096,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_huggingface_s2_g83"
+      ],
+      "shape_hash": "ed806e6b"
+    },
+    "hf_distillgpt2_infer_79845ba8": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16384,
+            2304
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_DistillGPT2_infer"
+      ],
+      "shape_hash": "79845ba8"
+    },
+    "hf_distillgpt2_train_79845ba8": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16384,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_DistillGPT2_train"
+      ],
+      "shape_hash": "79845ba8"
+    },
+    "hf_gpt2forsequenceclassification_infer_dd6d40ad": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            2304
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_GPT2ForSequenceClassification_infer"
+      ],
+      "shape_hash": "dd6d40ad"
+    },
+    "hf_gpt2forsequenceclassification_train_dd6d40ad": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_GPT2ForSequenceClassification_train"
+      ],
+      "shape_hash": "dd6d40ad"
+    }
+  }
+}

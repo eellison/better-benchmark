@@ -19,8 +19,9 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "hf_DebertaV2ForMaskedLM_train",
     "hf_DebertaV2ForMaskedLM_training",
     "hf_debertav2formaskedlm_training"
   ]

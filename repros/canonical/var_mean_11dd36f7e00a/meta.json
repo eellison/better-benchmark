@@ -21,10 +21,11 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "dynamo_M2M100ForConditionalGeneration",
     "dynamo_M2M100ForConditionalGeneration_inference",
+    "hf_M2M100ForConditionalGeneration_infer",
     "hf_M2M100ForConditionalGeneration_inference"
   ]
 }

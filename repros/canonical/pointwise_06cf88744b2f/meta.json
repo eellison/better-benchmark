@@ -7,10 +7,11 @@
     "aten.reshape.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "dynamo_GoogleFnet",
     "dynamo_GoogleFnet_inference",
+    "hf_GoogleFnet_infer",
     "hf_GoogleFnet_inference",
     "vllm_deepseek-ai_DeepSeek-V3_inference"
   ]

@@ -28,9 +28,11 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 4,
+  "n_models": 6,
   "models": [
+    "hf_GPTJForCausalLM_train",
     "hf_GPTJForCausalLM_training",
+    "hf_GPTJForQuestionAnswering_train",
     "hf_GPTJForQuestionAnswering_training",
     "hf_gptjforcausallm_training",
     "hf_gptjforquestionanswering_training"

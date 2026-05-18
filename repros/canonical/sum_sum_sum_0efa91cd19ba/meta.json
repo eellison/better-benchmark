@@ -40,9 +40,10 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "dynamo_AllenaiLongformerBase",
+    "hf_AllenaiLongformerBase_train",
     "hf_AllenaiLongformerBase_training",
     "hf_allenailongformerbase_training"
   ]

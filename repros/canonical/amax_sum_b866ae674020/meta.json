@@ -44,9 +44,11 @@
     "aten.where.self",
     "prims.iota.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "hf_GPTNeoForCausalLM_train",
     "hf_GPTNeoForCausalLM_training",
+    "hf_GPTNeoForSequenceClassification_train",
     "hf_GPTNeoForSequenceClassification_training"
   ]
 }

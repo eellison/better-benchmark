@@ -1,0 +1,37 @@
+{
+  "pattern_hash": "b02956c5fbe9",
+  "configs": {
+    "hf_distillgpt2_train_da67baef": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            32,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32,
+            512,
+            50257
+          ],
+          "stride": [
+            25733120,
+            50260,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "hf_DistillGPT2_train"
+      ],
+      "shape_hash": "da67baef"
+    }
+  }
+}

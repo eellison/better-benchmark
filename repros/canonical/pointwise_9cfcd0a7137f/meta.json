@@ -11,8 +11,9 @@
     "aten.reshape.default",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_M2M100ForConditionalGeneration_train",
     "hf_M2M100ForConditionalGeneration_training"
   ]
 }

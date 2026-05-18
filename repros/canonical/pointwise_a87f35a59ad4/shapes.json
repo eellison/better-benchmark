@@ -1,0 +1,90 @@
+{
+  "pattern_hash": "a87f35a59ad4",
+  "configs": {
+    "hf_albertformaskedlm_train_9f96617c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            16384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_AlbertForMaskedLM_train"
+      ],
+      "shape_hash": "9f96617c"
+    },
+    "hf_distillgpt2_infer_59beeb25": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16384,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_DistillGPT2_infer"
+      ],
+      "shape_hash": "59beeb25"
+    },
+    "hf_distillgpt2_train_59beeb25": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16384,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_DistillGPT2_train"
+      ],
+      "shape_hash": "59beeb25"
+    },
+    "hf_gpt2forsequenceclassification_infer_126c56cd": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_GPT2ForSequenceClassification_infer"
+      ],
+      "shape_hash": "126c56cd"
+    },
+    "hf_gpt2forsequenceclassification_train_126c56cd": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_GPT2ForSequenceClassification_train"
+      ],
+      "shape_hash": "126c56cd"
+    }
+  }
+}

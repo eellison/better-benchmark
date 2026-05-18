@@ -13,8 +13,9 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_M2M100ForConditionalGeneration_infer",
     "hf_M2M100ForConditionalGeneration_inference"
   ]
 }

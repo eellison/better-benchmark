@@ -380,6 +380,291 @@
         "timm_mobilenetv3_large_100_train"
       ],
       "shape_hash": "8320e3d8"
+    },
+    "tlparse_timm_s4_g10_32ae78a9": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            240,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s4_g10"
+      ],
+      "shape_hash": "32ae78a9"
+    },
+    "tlparse_timm_s4_g10_30d997a5": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            168,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s4_g10"
+      ],
+      "shape_hash": "30d997a5"
+    },
+    "tlparse_timm_s4_g10_71a97bdb": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            120,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s4_g10"
+      ],
+      "shape_hash": "71a97bdb"
+    },
+    "tlparse_timm_s4_g10_a4e6acea": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s4_g10"
+      ],
+      "shape_hash": "a4e6acea"
+    },
+    "tlparse_timm_s4_g10_385239a7": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            20,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s4_g10"
+      ],
+      "shape_hash": "385239a7"
+    },
+    "tlparse_timm_s5_g10_32ae78a9": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            240,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s5_g10"
+      ],
+      "shape_hash": "32ae78a9"
+    },
+    "tlparse_timm_s5_g10_30d997a5": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            168,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s5_g10"
+      ],
+      "shape_hash": "30d997a5"
+    },
+    "tlparse_timm_s5_g10_71a97bdb": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            120,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s5_g10"
+      ],
+      "shape_hash": "71a97bdb"
+    },
+    "tlparse_timm_s5_g10_a4e6acea": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s5_g10"
+      ],
+      "shape_hash": "a4e6acea"
+    },
+    "tlparse_timm_s5_g10_3b2aafb9": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            8,
+            24,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s5_g10"
+      ],
+      "shape_hash": "3b2aafb9"
+    },
+    "tlparse_torchbench_s6_g10_989cb449": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32,
+            240,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_torchbench_s6_g10"
+      ],
+      "shape_hash": "989cb449"
+    },
+    "tlparse_torchbench_s6_g10_e6e99a98": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32,
+            168,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_torchbench_s6_g10"
+      ],
+      "shape_hash": "e6e99a98"
+    },
+    "tlparse_torchbench_s6_g10_1e73047c": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32,
+            120,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_torchbench_s6_g10"
+      ],
+      "shape_hash": "1e73047c"
+    },
+    "tlparse_torchbench_s6_g10_29c976be": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32,
+            32,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_torchbench_s6_g10"
+      ],
+      "shape_hash": "29c976be"
+    },
+    "tlparse_torchbench_s6_g10_82b09b25": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32,
+            24,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_torchbench_s6_g10"
+      ],
+      "shape_hash": "82b09b25"
     }
   }
 }

@@ -19,8 +19,9 @@
     "aten.var_mean.correction",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_XGLMForCausalLM_infer",
     "hf_XGLMForCausalLM_inference"
   ]
 }

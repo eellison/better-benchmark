@@ -16,9 +16,10 @@
     "aten.var_mean.correction",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
     "dynamo_OPTForCausalLM_inference",
+    "hf_OPTForCausalLM_infer",
     "hf_OPTForCausalLM_inference"
   ]
 }

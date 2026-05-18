@@ -18,11 +18,15 @@
     "aten.sub.Tensor",
     "aten.sub.Tensor"
   ],
-  "n_models": 10,
+  "n_models": 14,
   "models": [
+    "hf_DistillGPT2_infer",
     "hf_DistillGPT2_inference",
+    "hf_DistillGPT2_train",
     "hf_DistillGPT2_training",
+    "hf_GPT2ForSequenceClassification_infer",
     "hf_GPT2ForSequenceClassification_inference",
+    "hf_GPT2ForSequenceClassification_train",
     "hf_GPT2ForSequenceClassification_training",
     "hf_distillgpt2_inference",
     "hf_distillgpt2_training",

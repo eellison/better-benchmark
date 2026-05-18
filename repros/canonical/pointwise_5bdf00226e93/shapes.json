@@ -1,0 +1,87 @@
+{
+  "pattern_hash": "5bdf00226e93",
+  "configs": {
+    "tlparse_timm_s2_g20_5b0f1539": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            198,
+            64
+          ],
+          "stride": [
+            152064,
+            64,
+            768,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s2_g20"
+      ],
+      "shape_hash": "5b0f1539"
+    },
+    "tlparse_timm_s3_g20_812f0c93": {
+      "inputs": [
+        {
+          "dtype": "torch.float16",
+          "device": "cuda",
+          "shape": [
+            128,
+            3,
+            197,
+            64
+          ],
+          "stride": [
+            37824,
+            64,
+            192,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192,
+            192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "tlparse_timm_s3_g20"
+      ],
+      "shape_hash": "812f0c93"
+    }
+  }
+}

@@ -11,9 +11,10 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "hf_LayoutLMForMaskedLM_inference",
+    "hf_MegatronBertForCausalLM_infer",
     "hf_MegatronBertForCausalLM_inference",
     "hf_YituTechConvBert_inference",
     "hf_megatronbertforcausallm_inference"

@@ -12,11 +12,13 @@
     "aten.select.int",
     "aten.var_mean.correction"
   ],
-  "n_models": 4,
+  "n_models": 6,
   "models": [
     "dynamo_GoogleFnet",
     "dynamo_GoogleFnet_inference",
+    "hf_GoogleFnet_infer",
     "hf_GoogleFnet_inference",
+    "hf_GoogleFnet_train",
     "hf_GoogleFnet_training"
   ]
 }
