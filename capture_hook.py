@@ -71,12 +71,18 @@ class _CaptureState:
         env: dict[fx.Node, fx.Node] = {}
         placeholder_info: dict[str, dict] = {}
 
+        def _resolve_sym(x):
+            """Resolve SymInt/SymFloat to concrete int/float."""
+            if isinstance(x, (torch.SymInt, torch.SymFloat)):
+                return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
+            return int(x)
+
         def _record_placeholder(name: str, meta: dict) -> None:
             val = meta.get("val", None)
             if val is not None and isinstance(val, torch.Tensor):
                 placeholder_info[name] = {
-                    "shape": list(val.shape),
-                    "stride": list(val.stride()) if not val.is_contiguous() else [],
+                    "shape": [_resolve_sym(s) for s in val.shape],
+                    "stride": [_resolve_sym(s) for s in val.stride()] if not val.is_contiguous() else [],
                     "dtype": str(val.dtype),
                     "device": str(val.device),
                 }
@@ -178,6 +184,20 @@ class _CaptureState:
         shape_params = shape_params or {}
         code = gm.print_readable(print_output=False)
         code = code.replace("class GraphModule(", "class Repro(", 1)
+
+        # Replace symbolic shape refs (s0, s1, ...) in annotations with concrete values
+        import re
+        for name, info in placeholder_info.items():
+            if not info.get("shape"):
+                continue
+            ann_match = re.search(rf'{re.escape(name)}: "(\w+)\[([^\]]+)\]"', code)
+            if ann_match:
+                sym_dims = ann_match.group(2).split(", ")
+                concrete_dims = info["shape"]
+                if len(sym_dims) == len(concrete_dims):
+                    for sym, conc in zip(sym_dims, concrete_dims):
+                        if re.match(r's\d+', sym):
+                            code = re.sub(rf'\b{re.escape(sym)}\b', str(conc), code)
 
         input_lines = []
         ph_names = [n.name for n in gm.graph.nodes if n.op == "placeholder"]
