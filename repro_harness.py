@@ -20,20 +20,20 @@ import torch._inductor.config as inductor_config
 
 
 def load_shape_configs(repro_file: str) -> dict:
-    """Load shapes from shapes.txt (compact T() format) or shapes.json (legacy)."""
+    """Load shapes from shapes.json (with S() shape params) or shapes.txt (compact T() format)."""
     repro_dir = Path(repro_file).parent
 
-    # Prefer compact .txt format
-    shapes_txt = repro_dir / "shapes.txt"
-    if shapes_txt.exists():
-        return _parse_shapes_txt(shapes_txt)
-
-    # Fall back to legacy JSON
+    # Prefer shapes.json (has shape param entries)
     shapes_json = repro_dir / "shapes.json"
     if shapes_json.exists():
         with open(shapes_json) as f:
             data = json.load(f)
         return data.get("configs", {})
+
+    # Fall back to compact .txt format
+    shapes_txt = repro_dir / "shapes.txt"
+    if shapes_txt.exists():
+        return _parse_shapes_txt(shapes_txt)
 
     return {}
 
