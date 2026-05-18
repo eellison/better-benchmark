@@ -185,29 +185,52 @@ class _CaptureState:
     def _compute_dag_signature(self, gm) -> list:
         """Compute a DAG-structure signature for the graph.
 
-        Encodes: for each node in topological order, its op name and which
-        predecessor nodes feed each argument (by index). This guarantees that
-        two graphs with the same ops but different wiring get different hashes.
+        Encodes: for each node in topological order, its op name, which
+        predecessor nodes feed each argument (by index), and structural
+        literal args (list/tuple values like reduction dims, permute orders).
 
-        Placeholders are numbered by position. Shape params and tensor inputs
-        are both just "input_N" — the signature doesn't encode shapes, only structure.
+        Does NOT encode scalar int/float constants (e.g., mul by 3.0,
+        eps=1e-6) — those don't affect kernel structure.
         """
         nodes = list(gm.graph.nodes)
         node_to_idx = {n: i for i, n in enumerate(nodes)}
+
+        def _encode_arg(arg, arg_idx):
+            """Encode an argument for the signature."""
+            if isinstance(arg, torch.fx.Node) and arg in node_to_idx:
+                return ("node", node_to_idx[arg], arg_idx)
+            elif isinstance(arg, (list, tuple)):
+                # Structural args: reduction dims, permute orders, reshape targets
+                # Encode the structure (length + which are ints) but not concrete values
+                # EXCEPT for small int lists (dims) where the values matter
+                if all(isinstance(x, int) for x in arg):
+                    # This is a dim list like [0, 2, 1, 3] or [-1] — encode values
+                    return ("dims", list(arg), arg_idx)
+                return ("list", len(arg), arg_idx)
+            elif isinstance(arg, bool):
+                # Booleans like keepdim=True matter for output shape
+                return ("bool", arg, arg_idx)
+            # Scalar int/float constants — don't encode (same kernel regardless)
+            return None
 
         signature = []
         for node in nodes:
             if node.op == "placeholder":
                 signature.append(("input", node_to_idx[node]))
             elif node.op == "call_function":
-                # Record which nodes feed this op and at which arg position
-                arg_sources = []
+                encoded_args = []
                 for arg_idx, arg in enumerate(node.args):
-                    if isinstance(arg, torch.fx.Node) and arg in node_to_idx:
-                        arg_sources.append((node_to_idx[arg], arg_idx))
-                signature.append((str(node.target), arg_sources))
+                    enc = _encode_arg(arg, arg_idx)
+                    if enc is not None:
+                        encoded_args.append(enc)
+                # Also encode relevant kwargs (like correction, keepdim)
+                for kw, val in (node.kwargs or {}).items():
+                    if isinstance(val, bool):
+                        encoded_args.append(("kw_bool", kw, val))
+                    elif isinstance(val, (list, tuple)) and all(isinstance(x, int) for x in val):
+                        encoded_args.append(("kw_dims", kw, list(val)))
+                signature.append((str(node.target), encoded_args))
             elif node.op == "output":
-                # Record which nodes are outputs
                 def _collect_output_indices(x):
                     if isinstance(x, torch.fx.Node) and x in node_to_idx:
                         return node_to_idx[x]
