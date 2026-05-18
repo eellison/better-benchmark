@@ -16,7 +16,7 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 44,
+  "n_models": 48,
   "models": [
     "dynamo_AllenaiLongformerBase",
     "dynamo_AllenaiLongformerBase_inference",
@@ -61,6 +61,10 @@
     "hf_debertav2formaskedlm_inference",
     "hf_debertav2formaskedlm_training",
     "hf_distilbert_train",
-    "hf_distilbertformaskedlm_inference"
+    "hf_distilbertformaskedlm_inference",
+    "hf_distilbertformaskedlm_training",
+    "hf_electraforcausallm_inference",
+    "hf_electraforcausallm_training",
+    "hf_megatronbertforcausallm_inference"
   ]
 }

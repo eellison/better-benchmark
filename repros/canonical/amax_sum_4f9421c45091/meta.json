@@ -23,10 +23,11 @@
     "aten.sub.Tensor",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "hf_MT5ForConditionalGeneration_inference",
     "hf_T5ForConditionalGeneration_inference",
-    "hf_T5Small_inference"
+    "hf_T5Small_inference",
+    "hf_mt5forconditionalgeneration_inference"
   ]
 }

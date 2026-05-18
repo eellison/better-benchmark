@@ -67,9 +67,10 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
     "hf_DistilBertForMaskedLM_training",
-    "hf_distilbert_train"
+    "hf_distilbert_train",
+    "hf_distilbertformaskedlm_training"
   ]
 }

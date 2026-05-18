@@ -33,8 +33,9 @@
     "aten.where.self",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_DistillGPT2_training"
+    "hf_DistillGPT2_training",
+    "hf_distillgpt2_training"
   ]
 }

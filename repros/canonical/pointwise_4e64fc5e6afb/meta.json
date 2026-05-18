@@ -26,11 +26,12 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "hf_MT5ForConditionalGeneration_inference",
     "hf_T5ForConditionalGeneration_inference",
     "hf_T5Small_inference",
+    "hf_mt5forconditionalgeneration_inference",
     "t5_base_inference"
   ]
 }

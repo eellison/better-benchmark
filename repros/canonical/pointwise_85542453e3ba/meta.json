@@ -12,7 +12,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 10,
+  "n_models": 11,
   "models": [
     "dynamo_GPTNeoForCausalLM",
     "dynamo_GPTNeoForSequenceClassification",
@@ -23,6 +23,7 @@
     "hf_MobileBertForMaskedLM_training",
     "hf_T5ForConditionalGeneration_training",
     "hf_T5Small_training",
+    "hf_mt5forconditionalgeneration_training",
     "hf_t5_base_train"
   ]
 }

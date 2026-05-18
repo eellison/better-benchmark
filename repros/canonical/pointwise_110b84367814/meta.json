@@ -15,11 +15,12 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "hf_MT5ForConditionalGeneration_training",
     "hf_T5ForConditionalGeneration_training",
     "hf_T5Small_training",
+    "hf_mt5forconditionalgeneration_training",
     "tlparse_huggingface_s4_g35"
   ]
 }

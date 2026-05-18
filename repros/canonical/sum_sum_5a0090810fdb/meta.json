@@ -29,7 +29,7 @@
     "aten.sum.dim_IntList",
     "prims.convert_element_type.default"
   ],
-  "n_models": 11,
+  "n_models": 13,
   "models": [
     "hf_BertForMaskedLM_training",
     "hf_DebertaV2ForMaskedLM_training",
@@ -41,6 +41,8 @@
     "hf_bert_large_train",
     "hf_bertformaskedlm_training",
     "hf_debertav2formaskedlm_training",
-    "hf_distilbert_train"
+    "hf_distilbert_train",
+    "hf_distilbertformaskedlm_training",
+    "hf_electraforcausallm_training"
   ]
 }

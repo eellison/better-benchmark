@@ -13,7 +13,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 69,
+  "n_models": 73,
   "models": [
     "hf_AllenaiLongformerBase_inference",
     "hf_AllenaiLongformerBase_training",
@@ -65,6 +65,10 @@
     "hf_debertav2formaskedlm_training",
     "hf_distilbert_train",
     "hf_distilbertformaskedlm_inference",
+    "hf_distilbertformaskedlm_training",
+    "hf_electraforcausallm_inference",
+    "hf_electraforcausallm_training",
+    "hf_megatronbertforcausallm_inference",
     "timm_beit_base_patch16_224_inference",
     "timm_beit_base_patch16_224_training",
     "timm_convnext_tiny",

@@ -76,8 +76,9 @@
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_MT5ForConditionalGeneration_inference"
+    "hf_MT5ForConditionalGeneration_inference",
+    "hf_mt5forconditionalgeneration_inference"
   ]
 }

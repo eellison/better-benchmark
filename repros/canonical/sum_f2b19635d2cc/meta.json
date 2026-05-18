@@ -16,7 +16,7 @@
     "prims.convert_element_type.default",
     "prims.fma.default"
   ],
-  "n_models": 14,
+  "n_models": 17,
   "models": [
     "dynamo_BertForMaskedLM",
     "hf_BertForMaskedLM_training",
@@ -31,6 +31,9 @@
     "hf_bert_large_train",
     "hf_bertformaskedlm_training",
     "hf_distilbert_train",
+    "hf_distilbertformaskedlm_training",
+    "hf_electraforcausallm_training",
+    "hf_mt5forconditionalgeneration_training",
     "hf_t5_base_train"
   ]
 }

@@ -23,8 +23,9 @@
     "aten.sum.dim_IntList",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_GPT2ForSequenceClassification_training"
+    "hf_GPT2ForSequenceClassification_training",
+    "hf_gpt2forsequenceclassification_training"
   ]
 }

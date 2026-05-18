@@ -12,7 +12,7 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 108,
+  "n_models": 113,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_AlbertForMaskedLM_inference",
@@ -106,7 +106,12 @@
     "hf_debertav2formaskedlm_inference",
     "hf_distilbert_train",
     "hf_distilbertformaskedlm_inference",
+    "hf_distilbertformaskedlm_training",
+    "hf_distillgpt2_inference",
+    "hf_electraforcausallm_inference",
     "hf_gpt2",
+    "hf_gpt2forsequenceclassification_inference",
+    "hf_megatronbertforcausallm_inference",
     "hf_opt",
     "timm_deit_base_distilled_patch16_224_inference",
     "timm_deit_base_distilled_patch16_224_training",

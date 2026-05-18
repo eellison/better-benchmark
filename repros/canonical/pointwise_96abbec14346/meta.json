@@ -36,8 +36,9 @@
     "aten.permute.default",
     "aten.reshape.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_DistillGPT2_training"
+    "hf_DistillGPT2_training",
+    "hf_distillgpt2_training"
   ]
 }

@@ -16,10 +16,11 @@
     "aten.full.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "dynamo_MegatronBertForCausalLM",
     "dynamo_MegatronBertForCausalLM_inference",
-    "hf_MegatronBertForCausalLM_inference"
+    "hf_MegatronBertForCausalLM_inference",
+    "hf_megatronbertforcausallm_inference"
   ]
 }

@@ -19,8 +19,9 @@
     "prims.inductor_random.default",
     "prims.inductor_seeds.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_ElectraForCausalLM_training"
+    "hf_ElectraForCausalLM_training",
+    "hf_electraforcausallm_training"
   ]
 }

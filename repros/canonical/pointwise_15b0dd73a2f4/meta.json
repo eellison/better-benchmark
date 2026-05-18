@@ -21,7 +21,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 34,
+  "n_models": 36,
   "models": [
     "hf_AllenaiLongformerBase_training",
     "hf_BartForCausalLM_training",
@@ -48,6 +48,8 @@
     "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_training",
     "hf_debertav2formaskedlm_training",
     "hf_distilbert_train",
+    "hf_distilbertformaskedlm_training",
+    "hf_electraforcausallm_training",
     "timm_beit_base_patch16_224_training",
     "timm_deit_base_distilled_patch16_224_training",
     "timm_deit_tiny_patch16_224.fb_in1k_training",

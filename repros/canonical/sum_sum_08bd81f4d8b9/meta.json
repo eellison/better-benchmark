@@ -38,7 +38,7 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 14,
+  "n_models": 16,
   "models": [
     "hf_AllenaiLongformerBase_training",
     "hf_BertForMaskedLM_training",
@@ -53,6 +53,8 @@
     "hf_bert_large_train",
     "hf_bertformaskedlm_training",
     "hf_debertav2formaskedlm_training",
-    "hf_distilbert_train"
+    "hf_distilbert_train",
+    "hf_distilbertformaskedlm_training",
+    "hf_electraforcausallm_training"
   ]
 }

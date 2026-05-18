@@ -22,7 +22,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 12,
+  "n_models": 13,
   "models": [
     "hf_AlbertForMaskedLM_inference",
     "hf_BertForMaskedLM_inference",
@@ -35,6 +35,7 @@
     "hf_albertformaskedlm_inference",
     "hf_bertformaskedlm_inference",
     "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_inference",
-    "hf_distilbertformaskedlm_inference"
+    "hf_distilbertformaskedlm_inference",
+    "hf_electraforcausallm_inference"
   ]
 }

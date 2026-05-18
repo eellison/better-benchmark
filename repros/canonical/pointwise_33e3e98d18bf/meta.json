@@ -37,9 +37,11 @@
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
     "hf_DistillGPT2_inference",
-    "hf_GPT2ForSequenceClassification_inference"
+    "hf_GPT2ForSequenceClassification_inference",
+    "hf_distillgpt2_inference",
+    "hf_gpt2forsequenceclassification_inference"
   ]
 }
