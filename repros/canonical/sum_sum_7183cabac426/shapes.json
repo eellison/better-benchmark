@@ -1,0 +1,75 @@
+{
+  "pattern_hash": "7183cabac426",
+  "configs": {
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_57f88806": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            2560,
+            7,
+            7
+          ],
+          "stride": [
+            125440,
+            1,
+            17920,
+            2560
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            2560,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            2560,
+            7,
+            7
+          ],
+          "stride": [
+            125440,
+            1,
+            17920,
+            2560
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train"
+      ],
+      "shape_hash": "57f88806"
+    }
+  }
+}

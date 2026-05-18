@@ -1,0 +1,141 @@
+{
+  "pattern_hash": "7b7499cbe971",
+  "configs": {
+    "timm_swin_base_patch4_window7_224_infer_2e65f2fa": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            6272,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_infer"
+      ],
+      "shape_hash": "2e65f2fa"
+    },
+    "timm_swin_base_patch4_window7_224_infer_1c3cebff": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25088,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_infer"
+      ],
+      "shape_hash": "1c3cebff"
+    },
+    "timm_swin_base_patch4_window7_224_infer_8930758d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            100352,
+            256
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_infer"
+      ],
+      "shape_hash": "8930758d"
+    },
+    "timm_swin_base_patch4_window7_224_train_2e65f2fa": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            6272,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "2e65f2fa"
+    },
+    "timm_swin_base_patch4_window7_224_train_1c3cebff": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25088,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "1c3cebff"
+    },
+    "timm_swin_base_patch4_window7_224_train_8930758d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            100352,
+            256
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "8930758d"
+    },
+    "timm_vit_base_patch16_siglip_256_infer_bec85e89": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch16_siglip_256_infer"
+      ],
+      "shape_hash": "bec85e89"
+    },
+    "timm_vit_base_patch16_siglip_256_train_bec85e89": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch16_siglip_256_train"
+      ],
+      "shape_hash": "bec85e89"
+    }
+  }
+}

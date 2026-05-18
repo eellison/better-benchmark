@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "d42191940c91",
+  "configs": {
+    "timm_vit_base_patch16_siglip_256_train_62196cc7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch16_siglip_256_train"
+      ],
+      "shape_hash": "62196cc7"
+    }
+  }
+}

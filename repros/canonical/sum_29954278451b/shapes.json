@@ -1,0 +1,171 @@
+{
+  "pattern_hash": "29954278451b",
+  "configs": {
+    "timm_nfnet_l0_train_2998a8de": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            14,
+            14
+          ],
+          "stride": [
+            301056,
+            1,
+            21504,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            14,
+            14
+          ],
+          "stride": [
+            301056,
+            1,
+            21504,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            14,
+            14
+          ],
+          "stride": [
+            301056,
+            1,
+            21504,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            14,
+            14
+          ],
+          "stride": [
+            301056,
+            1,
+            21504,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "2998a8de"
+    },
+    "timm_nfnet_l0_train_8327bbde": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            7,
+            7
+          ],
+          "stride": [
+            75264,
+            1,
+            10752,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            7,
+            7
+          ],
+          "stride": [
+            75264,
+            1,
+            10752,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            7,
+            7
+          ],
+          "stride": [
+            75264,
+            1,
+            10752,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            7,
+            7
+          ],
+          "stride": [
+            75264,
+            1,
+            10752,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "8327bbde"
+    }
+  }
+}

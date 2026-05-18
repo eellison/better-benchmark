@@ -1,0 +1,379 @@
+{
+  "pattern_hash": "44ba1c4090a0",
+  "configs": {
+    "timm_deit_base_distilled_patch16_224_infer_1bfc418b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25344,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_base_distilled_patch16_224_infer"
+      ],
+      "shape_hash": "1bfc418b"
+    },
+    "timm_deit_base_distilled_patch16_224_train_1bfc418b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25344,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_base_distilled_patch16_224_train"
+      ],
+      "shape_hash": "1bfc418b"
+    },
+    "timm_deit_tiny_patch16_224.fb_in1k_infer_865e381b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25216,
+            576
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_tiny_patch16_224.fb_in1k_infer"
+      ],
+      "shape_hash": "865e381b"
+    },
+    "timm_deit_tiny_patch16_224.fb_in1k_train_865e381b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25216,
+            576
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_tiny_patch16_224.fb_in1k_train"
+      ],
+      "shape_hash": "865e381b"
+    },
+    "timm_mobilevit_s_infer_8ab1cb8c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            720
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_infer"
+      ],
+      "shape_hash": "8ab1cb8c"
+    },
+    "timm_mobilevit_s_infer_0096ab76": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32768,
+            576
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_infer"
+      ],
+      "shape_hash": "0096ab76"
+    },
+    "timm_mobilevit_s_infer_2916fe25": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            131072,
+            432
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_infer"
+      ],
+      "shape_hash": "2916fe25"
+    },
+    "timm_mobilevit_s_train_8ab1cb8c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8192,
+            720
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "8ab1cb8c"
+    },
+    "timm_mobilevit_s_train_0096ab76": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32768,
+            576
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "0096ab76"
+    },
+    "timm_mobilevit_s_train_2916fe25": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            131072,
+            432
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "2916fe25"
+    },
+    "timm_swin_base_patch4_window7_224_infer_70a8a66f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            6272,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_infer"
+      ],
+      "shape_hash": "70a8a66f"
+    },
+    "timm_swin_base_patch4_window7_224_infer_d172dee0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25088,
+            1536
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_infer"
+      ],
+      "shape_hash": "d172dee0"
+    },
+    "timm_swin_base_patch4_window7_224_infer_b0c54ae0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            100352,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_infer"
+      ],
+      "shape_hash": "b0c54ae0"
+    },
+    "timm_swin_base_patch4_window7_224_infer_43bf7e05": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            401408,
+            384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_infer"
+      ],
+      "shape_hash": "43bf7e05"
+    },
+    "timm_swin_base_patch4_window7_224_train_70a8a66f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            6272,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "70a8a66f"
+    },
+    "timm_swin_base_patch4_window7_224_train_d172dee0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25088,
+            1536
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "d172dee0"
+    },
+    "timm_swin_base_patch4_window7_224_train_b0c54ae0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            100352,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "b0c54ae0"
+    },
+    "timm_swin_base_patch4_window7_224_train_43bf7e05": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            401408,
+            384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "43bf7e05"
+    },
+    "timm_vit_base_patch14_dinov2.lvd142m_infer_64559150": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            175360,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch14_dinov2.lvd142m_infer"
+      ],
+      "shape_hash": "64559150"
+    },
+    "timm_vit_base_patch14_dinov2.lvd142m_train_64559150": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            175360,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch14_dinov2.lvd142m_train"
+      ],
+      "shape_hash": "64559150"
+    },
+    "timm_vit_base_patch16_siglip_256_infer_52ee260d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32768,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch16_siglip_256_infer"
+      ],
+      "shape_hash": "52ee260d"
+    },
+    "timm_vit_base_patch16_siglip_256_train_52ee260d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            32768,
+            2304
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch16_siglip_256_train"
+      ],
+      "shape_hash": "52ee260d"
+    }
+  }
+}

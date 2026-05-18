@@ -1,0 +1,56 @@
+{
+  "pattern_hash": "28db742ebc5c",
+  "configs": {
+    "timm_nfnet_l0_train_72af9b68": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            7,
+            7
+          ],
+          "stride": [
+            75264,
+            1,
+            10752,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            7,
+            7
+          ],
+          "stride": [
+            75264,
+            1,
+            10752,
+            1536
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1536,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "72af9b68"
+    }
+  }
+}

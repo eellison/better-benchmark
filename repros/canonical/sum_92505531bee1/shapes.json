@@ -1,0 +1,104 @@
+{
+  "pattern_hash": "92505531bee1",
+  "configs": {
+    "timm_dm_nfnet_f0_train_15368f5d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            256,
+            24,
+            24
+          ],
+          "stride": [
+            147456,
+            1,
+            6144,
+            256
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            256,
+            48,
+            48
+          ],
+          "stride": [
+            589824,
+            1,
+            12288,
+            256
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            256,
+            48,
+            48
+          ],
+          "stride": [
+            589824,
+            1,
+            12288,
+            256
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            256,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            256,
+            48,
+            48
+          ],
+          "stride": [
+            589824,
+            1,
+            12288,
+            256
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            256,
+            48,
+            48
+          ],
+          "stride": [
+            589824,
+            1,
+            12288,
+            256
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_train"
+      ],
+      "shape_hash": "15368f5d"
+    }
+  }
+}

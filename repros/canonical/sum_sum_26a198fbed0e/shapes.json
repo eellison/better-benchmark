@@ -1,0 +1,698 @@
+{
+  "pattern_hash": "26a198fbed0e",
+  "configs": {
+    "timm_ghostnet_100_train_b6ec6c6c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            16,
+            112,
+            112
+          ],
+          "stride": [
+            200704,
+            1,
+            1792,
+            16
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            8,
+            112,
+            112
+          ],
+          "stride": [
+            100352,
+            1,
+            896,
+            8
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            8,
+            112,
+            112
+          ],
+          "stride": [
+            100352,
+            1,
+            896,
+            8
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            8,
+            112,
+            112
+          ],
+          "stride": [
+            100352,
+            1,
+            896,
+            8
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            8,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "b6ec6c6c"
+    },
+    "timm_ghostnet_100_train_02dc45e7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            72,
+            56,
+            56
+          ],
+          "stride": [
+            225792,
+            1,
+            4032,
+            72
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            36,
+            56,
+            56
+          ],
+          "stride": [
+            112896,
+            1,
+            2016,
+            36
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            36,
+            56,
+            56
+          ],
+          "stride": [
+            112896,
+            1,
+            2016,
+            36
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            36,
+            56,
+            56
+          ],
+          "stride": [
+            112896,
+            1,
+            2016,
+            36
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            36,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            36
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            36
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "02dc45e7"
+    },
+    "timm_ghostnet_100_train_a1386e12": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            120,
+            28,
+            28
+          ],
+          "stride": [
+            94080,
+            1,
+            3360,
+            120
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            60,
+            28,
+            28
+          ],
+          "stride": [
+            47040,
+            1,
+            1680,
+            60
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            60,
+            28,
+            28
+          ],
+          "stride": [
+            47040,
+            1,
+            1680,
+            60
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            60,
+            28,
+            28
+          ],
+          "stride": [
+            47040,
+            1,
+            1680,
+            60
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            60,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            60
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            60
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "a1386e12"
+    },
+    "timm_ghostnet_100_train_0f977eb0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            200,
+            14,
+            14
+          ],
+          "stride": [
+            39200,
+            1,
+            2800,
+            200
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            100,
+            14,
+            14
+          ],
+          "stride": [
+            19600,
+            1,
+            1400,
+            100
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            100,
+            14,
+            14
+          ],
+          "stride": [
+            19600,
+            1,
+            1400,
+            100
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            100,
+            14,
+            14
+          ],
+          "stride": [
+            19600,
+            1,
+            1400,
+            100
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            100,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            100
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            100
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "0f977eb0"
+    },
+    "timm_ghostnet_100_train_47ff9d30": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            184,
+            14,
+            14
+          ],
+          "stride": [
+            36064,
+            1,
+            2576,
+            184
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            92,
+            14,
+            14
+          ],
+          "stride": [
+            18032,
+            1,
+            1288,
+            92
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            92,
+            14,
+            14
+          ],
+          "stride": [
+            18032,
+            1,
+            1288,
+            92
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            92,
+            14,
+            14
+          ],
+          "stride": [
+            18032,
+            1,
+            1288,
+            92
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            92,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            92
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            92
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "47ff9d30"
+    },
+    "timm_ghostnet_100_train_24daf5e0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            672,
+            14,
+            14
+          ],
+          "stride": [
+            131712,
+            1,
+            9408,
+            672
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            336,
+            14,
+            14
+          ],
+          "stride": [
+            65856,
+            1,
+            4704,
+            336
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            336,
+            14,
+            14
+          ],
+          "stride": [
+            65856,
+            1,
+            4704,
+            336
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            336,
+            14,
+            14
+          ],
+          "stride": [
+            65856,
+            1,
+            4704,
+            336
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            336,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            336
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            336
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "24daf5e0"
+    },
+    "timm_ghostnet_100_train_096a0b42": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            960,
+            7,
+            7
+          ],
+          "stride": [
+            47040,
+            1,
+            6720,
+            960
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            480,
+            7,
+            7
+          ],
+          "stride": [
+            23520,
+            1,
+            3360,
+            480
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            480,
+            7,
+            7
+          ],
+          "stride": [
+            23520,
+            1,
+            3360,
+            480
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            480,
+            7,
+            7
+          ],
+          "stride": [
+            23520,
+            1,
+            3360,
+            480
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            480,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            480
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            480
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "096a0b42"
+    }
+  }
+}
