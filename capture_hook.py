@@ -87,11 +87,13 @@ class _CaptureState:
                     "device": str(val.device),
                 }
             elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
+                hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)
                 placeholder_info[name] = {
                     "shape": [],
                     "stride": [],
                     "dtype": "symint",
                     "device": "cpu",
+                    "hint": hint,
                 }
 
         def _ensure_in_env(x: Any) -> Any:
@@ -240,6 +242,11 @@ class _CaptureState:
                         input_lines.append(
                             f"    torch.randn({shape}, dtype={dtype}, device='{device}'),"
                         )
+            elif info and info.get("dtype") == "symint":
+                # SymInt placeholder — emit the concrete hint value as a plain int
+                # This is a scalar dimension (like seq_len) passed to ops like iota/full
+                val = info.get("hint", 1)
+                input_lines.append(f"    {val},  # {name} (symbolic dim)")
             else:
                 input_lines.append(f"    torch.tensor(1),  # {name} (unknown shape)")
 
