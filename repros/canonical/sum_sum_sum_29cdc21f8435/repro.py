@@ -25,16 +25,16 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_286: "f32[8192, 1024]", mm_288: "f32[8192, 1024]", mm_290: "f32[8192, 1024]", primals_7: "f32[1024]", mul_3: "f32[16, 512, 1024]", div_123: "f32[16, 512, 1]", add_342: "f32[16, 512, 1024]", gt: "b8[16, 512, 1024]", primals_4: "i64[1, 512]", full_default_3: "f32[]", full_default: "i64[16, 512]", primals_2: "i64[16, 512]", mm_1: "f32[29056, 1024]"):
+    def forward(self, mm_286: "f32[8192, 1024]", mm_288: "f32[8192, 1024]", mm_290: "f32[8192, 1024]", primals_7: "f32[1024]", mul_3: "f32[16, 512, 1024]", div_123: "f32[16, 512, 1]", add_342: "f32[16, 512, 1024]", gt: "b8[16, 512, 1024]", primals_4: "i64[1, 512]", full_default_3: "f32[]", full_default: "i64[16, 512]", primals_2: "i64[16, 512]", mm_1: "f32[29056, 1024]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/megatron_bert/modeling_megatron_bert.py:249 in forward, code: value_layer = self.value(current_states)
-        reshape_default: "f32[16, 512, 1024]" = torch.ops.aten.reshape.default(mm_286, [16, 512, 1024]);  mm_286 = None
+        reshape_default: "f32[16, 512, 1024]" = torch.ops.aten.reshape.default(mm_286, _shape_param_0);  mm_286 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/megatron_bert/modeling_megatron_bert.py:245 in forward, code: key_layer = self.key(current_states)
-        reshape_default_1: "f32[16, 512, 1024]" = torch.ops.aten.reshape.default(mm_288, [16, 512, 1024]);  mm_288 = None
+        reshape_default_1: "f32[16, 512, 1024]" = torch.ops.aten.reshape.default(mm_288, _shape_param_1);  mm_288 = _shape_param_1 = None
         add_tensor: "f32[16, 512, 1024]" = torch.ops.aten.add.Tensor(reshape_default, reshape_default_1);  reshape_default = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/megatron_bert/modeling_megatron_bert.py:221 in forward, code: query_layer = self.query(hidden_states)
-        reshape_default_2: "f32[16, 512, 1024]" = torch.ops.aten.reshape.default(mm_290, [16, 512, 1024]);  mm_290 = None
+        reshape_default_2: "f32[16, 512, 1024]" = torch.ops.aten.reshape.default(mm_290, _shape_param_2);  mm_290 = _shape_param_2 = None
         add_tensor_1: "f32[16, 512, 1024]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_2);  add_tensor = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/megatron_bert/modeling_megatron_bert.py:365 in forward, code: ln_outputs = self.ln(hidden_states)
@@ -99,6 +99,9 @@ def _default_make_inputs():
     torch.tensor(1),  # full_default_6 (unknown shape)
     torch.randint(0, 2, [16, 512], dtype=torch.int64, device='cuda'),
     torch.randn([29056, 1024], dtype=torch.float32, device='cuda'),
+    [16, 512, 1024],  # _shape_param_0
+    [16, 512, 1024],  # _shape_param_1
+    [16, 512, 1024],  # _shape_param_2
     ]
 
 

@@ -25,20 +25,20 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_default: "f32[30524, 768]", mm_70: "f32[32768, 768]", mul_215: "f32[256, 128, 768]", mm_72: "f32[32768, 768]", mm_74: "f32[32768, 768]", gt: "b8[256, 128, 768]", primals_5: "f32[768]", embedding: "f32[256, 128, 768]", embedding_1: "f32[1, 128, 768]", getitem_1: "f32[256, 128, 1]", rsqrt: "f32[256, 128, 1]", primals_3: "i64[1, 512]", full_default_1: "f32[]", primals_1: "i64[256, 128]"):
+    def forward(self, mm_default: "f32[30524, 768]", mm_70: "f32[32768, 768]", mul_215: "f32[256, 128, 768]", mm_72: "f32[32768, 768]", mm_74: "f32[32768, 768]", gt: "b8[256, 128, 768]", primals_5: "f32[768]", embedding: "f32[256, 128, 768]", embedding_1: "f32[1, 128, 768]", getitem_1: "f32[256, 128, 1]", rsqrt: "f32[256, 128, 1]", primals_3: "i64[1, 512]", full_default_1: "f32[]", primals_1: "i64[256, 128]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:827 in forward, code: prediction_logits = self.vocab_projector(prediction_logits)  # (bs, seq_length, vocab_size)
         slice_tensor: "f32[30522, 768]" = torch.ops.aten.slice.Tensor(mm_default, 0, 0, -2);  mm_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:390 in forward, code: v = shape(self.v_lin(value))  # (bs, n_heads, k_length, dim_per_head)
-        reshape_default: "f32[256, 128, 768]" = torch.ops.aten.reshape.default(mm_70, [256, 128, 768]);  mm_70 = None
+        reshape_default: "f32[256, 128, 768]" = torch.ops.aten.reshape.default(mm_70, _shape_param_0);  mm_70 = _shape_param_0 = None
         add_tensor: "f32[256, 128, 768]" = torch.ops.aten.add.Tensor(mul_215, reshape_default);  mul_215 = reshape_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:389 in forward, code: k = shape(self.k_lin(key))  # (bs, n_heads, k_length, dim_per_head)
-        reshape_default_1: "f32[256, 128, 768]" = torch.ops.aten.reshape.default(mm_72, [256, 128, 768]);  mm_72 = None
+        reshape_default_1: "f32[256, 128, 768]" = torch.ops.aten.reshape.default(mm_72, _shape_param_1);  mm_72 = _shape_param_1 = None
         add_tensor_1: "f32[256, 128, 768]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_1);  add_tensor = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:388 in forward, code: q = shape(self.q_lin(query))  # (bs, n_heads, q_length, dim_per_head)
-        reshape_default_2: "f32[256, 128, 768]" = torch.ops.aten.reshape.default(mm_74, [256, 128, 768]);  mm_74 = None
+        reshape_default_2: "f32[256, 128, 768]" = torch.ops.aten.reshape.default(mm_74, _shape_param_2);  mm_74 = _shape_param_2 = None
         add_tensor_2: "f32[256, 128, 768]" = torch.ops.aten.add.Tensor(add_tensor_1, reshape_default_2);  add_tensor_1 = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:127 in forward, code: embeddings = self.dropout(embeddings)  # (bs, max_seq_length, dim)
@@ -107,6 +107,9 @@ def _default_make_inputs():
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [256, 128], dtype=torch.int64, device='cuda'),
+    [256, 128, 768],  # _shape_param_0
+    [256, 128, 768],  # _shape_param_1
+    [256, 128, 768],  # _shape_param_2
     ]
 
 

@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self):
+    def forward(self, _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15, _shape_param_16, _shape_param_17, _shape_param_18, _shape_param_19, _shape_param_20, _shape_param_21, _shape_param_22, _shape_param_23, _shape_param_24):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:604 in forward, code: attention_mask = torch.ones(inputs_embeds.shape[0], seq_length, device=inputs_embeds.device)
         full_default: "f32[4, 512]" = torch.ops.aten.full.default([4, 512], 1, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
 
@@ -50,7 +50,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:485 in _prepare_4d_causal_attention_mask_with_cache_position, code: causal_mask = causal_mask[None, None, :, :].expand(batch_size, 1, -1, -1)
         unsqueeze_default_2: "f32[1, 512, 512]" = torch.ops.aten.unsqueeze.default(mul_tensor, 0);  mul_tensor = None
         unsqueeze_default_3: "f32[1, 1, 512, 512]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_2, 1);  unsqueeze_default_2 = None
-        expand_default: "f32[4, 1, 512, 512]" = torch.ops.aten.expand.default(unsqueeze_default_3, [4, 1, -1, -1]);  unsqueeze_default_3 = None
+        expand_default: "f32[4, 1, 512, 512]" = torch.ops.aten.expand.default(unsqueeze_default_3, _shape_param_0);  unsqueeze_default_3 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:487 in _prepare_4d_causal_attention_mask_with_cache_position, code: causal_mask = causal_mask.clone()  # copy to contiguous memory for in-place edit
         clone_default: "f32[4, 1, 512, 512]" = torch.ops.aten.clone.default(expand_default);  expand_default = None
@@ -76,36 +76,60 @@ class Repro(torch.nn.Module):
         mul_tensor_1: "f32[4, 1, 512, 512]" = torch.ops.aten.mul.Tensor(where_self_1, bitwise_not_default);  where_self_1 = bitwise_not_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:96 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
-        expand_default_1: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_2: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_3: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_4: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_5: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_6: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_7: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_8: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_9: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_10: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_11: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_12: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_13: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_14: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_15: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_16: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_17: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_18: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_19: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_20: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_21: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_22: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_23: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512])
-        expand_default_24: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, [4, 16, 512, 512]);  mul_tensor_1 = None
+        expand_default_1: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_1);  _shape_param_1 = None
+        expand_default_2: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_2);  _shape_param_2 = None
+        expand_default_3: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_3);  _shape_param_3 = None
+        expand_default_4: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_4);  _shape_param_4 = None
+        expand_default_5: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_5);  _shape_param_5 = None
+        expand_default_6: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_6);  _shape_param_6 = None
+        expand_default_7: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_7);  _shape_param_7 = None
+        expand_default_8: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_8);  _shape_param_8 = None
+        expand_default_9: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_9);  _shape_param_9 = None
+        expand_default_10: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_10);  _shape_param_10 = None
+        expand_default_11: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_11);  _shape_param_11 = None
+        expand_default_12: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_12);  _shape_param_12 = None
+        expand_default_13: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_13);  _shape_param_13 = None
+        expand_default_14: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_14);  _shape_param_14 = None
+        expand_default_15: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_15);  _shape_param_15 = None
+        expand_default_16: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_16);  _shape_param_16 = None
+        expand_default_17: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_17);  _shape_param_17 = None
+        expand_default_18: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_18);  _shape_param_18 = None
+        expand_default_19: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_19);  _shape_param_19 = None
+        expand_default_20: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_20);  _shape_param_20 = None
+        expand_default_21: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_21);  _shape_param_21 = None
+        expand_default_22: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_22);  _shape_param_22 = None
+        expand_default_23: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_23);  _shape_param_23 = None
+        expand_default_24: "f32[4, 16, 512, 512]" = torch.ops.aten.expand.default(mul_tensor_1, _shape_param_24);  mul_tensor_1 = _shape_param_24 = None
         return (expand_default_1, expand_default_2, expand_default_3, expand_default_4, expand_default_5, expand_default_6, expand_default_7, expand_default_8, expand_default_9, expand_default_10, expand_default_11, expand_default_12, expand_default_13, expand_default_14, expand_default_15, expand_default_16, expand_default_17, expand_default_18, expand_default_19, expand_default_20, expand_default_21, expand_default_22, expand_default_23, expand_default_24)
 
 
 def _default_make_inputs():
     return [
-
+    [4, 1, -1, -1],  # _shape_param_0
+    [4, 16, 512, 512],  # _shape_param_1
+    [4, 16, 512, 512],  # _shape_param_2
+    [4, 16, 512, 512],  # _shape_param_3
+    [4, 16, 512, 512],  # _shape_param_4
+    [4, 16, 512, 512],  # _shape_param_5
+    [4, 16, 512, 512],  # _shape_param_6
+    [4, 16, 512, 512],  # _shape_param_7
+    [4, 16, 512, 512],  # _shape_param_8
+    [4, 16, 512, 512],  # _shape_param_9
+    [4, 16, 512, 512],  # _shape_param_10
+    [4, 16, 512, 512],  # _shape_param_11
+    [4, 16, 512, 512],  # _shape_param_12
+    [4, 16, 512, 512],  # _shape_param_13
+    [4, 16, 512, 512],  # _shape_param_14
+    [4, 16, 512, 512],  # _shape_param_15
+    [4, 16, 512, 512],  # _shape_param_16
+    [4, 16, 512, 512],  # _shape_param_17
+    [4, 16, 512, 512],  # _shape_param_18
+    [4, 16, 512, 512],  # _shape_param_19
+    [4, 16, 512, 512],  # _shape_param_20
+    [4, 16, 512, 512],  # _shape_param_21
+    [4, 16, 512, 512],  # _shape_param_22
+    [4, 16, 512, 512],  # _shape_param_23
+    [4, 16, 512, 512],  # _shape_param_24
     ]
 
 

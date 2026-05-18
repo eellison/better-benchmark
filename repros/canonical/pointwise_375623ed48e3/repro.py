@@ -15,12 +15,12 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_79: "f32[16384, 384]", convolution_23: "f32[32, 384, 512]", arg267_1: "f32[384, 1]"):
+    def forward(self, addmm_79: "f32[16384, 384]", convolution_23: "f32[32, 384, 512]", arg267_1: "f32[384, 1]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:349 in forward, code: mixed_query_layer = self.query(hidden_states)
-        reshape_default: "f32[32, 512, 384]" = torch.ops.aten.reshape.default(addmm_79, [32, 512, 384]);  addmm_79 = None
+        reshape_default: "f32[32, 512, 384]" = torch.ops.aten.reshape.default(addmm_79, _shape_param_0);  addmm_79 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:350 in forward, code: query_layer = mixed_query_layer.view(
-        reshape_default_1: "f32[32, 512, 6, 64]" = torch.ops.aten.reshape.default(reshape_default, [32, -1, 6, 64])
+        reshape_default_1: "f32[32, 512, 6, 64]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  _shape_param_1 = None
 
         # No stacktrace found for following nodes
         permute_default: "f32[32, 6, 512, 64]" = torch.ops.aten.permute.default(reshape_default_1, [0, 2, 1, 3]);  reshape_default_1 = None
@@ -36,7 +36,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:361 in forward, code: conv_kernel_layer = self.conv_kernel_layer(conv_attn_layer)
         clone_default: "f32[32, 512, 384]" = torch.ops.aten.clone.default(mul_tensor, memory_format = torch.contiguous_format);  mul_tensor = None
-        reshape_default_2: "f32[16384, 384]" = torch.ops.aten.reshape.default(clone_default, [16384, 384]);  clone_default = None
+        reshape_default_2: "f32[16384, 384]" = torch.ops.aten.reshape.default(clone_default, _shape_param_2);  clone_default = _shape_param_2 = None
         return (permute_default, reshape_default_2)
 
 
@@ -45,6 +45,9 @@ def _default_make_inputs():
     torch.randn([16384, 384], dtype=torch.float32, device='cuda'),
     torch.randn([32, 384, 512], dtype=torch.float32, device='cuda'),
     torch.randn([384, 1], dtype=torch.float32, device='cuda'),
+    [32, 512, 384],  # _shape_param_0
+    [32, -1, 6, 64],  # _shape_param_1
+    [16384, 384],  # _shape_param_2
     ]
 
 

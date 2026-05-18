@@ -18,7 +18,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, primals_2: "f32[50257, 768]", primals_1: "i64[8, 512]", primals_3: "f32[1024, 768]"):
+    def forward(self, primals_2: "f32[50257, 768]", primals_1: "i64[8, 512]", primals_3: "f32[1024, 768]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:855 in forward, code: inputs_embeds = self.wte(input_ids)
         embedding_default: "f32[8, 512, 768]" = torch.ops.aten.embedding.default(primals_2, primals_1);  primals_2 = primals_1 = None
 
@@ -35,7 +35,7 @@ class Repro(torch.nn.Module):
         add_tensor: "f32[8, 512, 768]" = torch.ops.aten.add.Tensor(embedding_default, embedding_default_1);  embedding_default = embedding_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:739 in _preprocess_mask_arguments, code: position_ids = position_ids.expand(batch_size, -1)
-        expand_default: "i64[8, 512]" = torch.ops.aten.expand.default(unsqueeze_default, [8, -1]);  unsqueeze_default = None
+        expand_default: "i64[8, 512]" = torch.ops.aten.expand.default(unsqueeze_default, _shape_param_0);  unsqueeze_default = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:655 in find_packed_sequence_indices, code: first_dummy_value = position_ids[:, :1] - 1  # We just need the diff on this first value to be 1
         slice_tensor: "i64[8, 1]" = torch.ops.aten.slice.Tensor(expand_default, 1, 0, 1)
@@ -72,6 +72,7 @@ def _default_make_inputs():
     torch.randn([50257, 768], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [8, 512], dtype=torch.int64, device='cuda'),
     torch.randn([1024, 768], dtype=torch.float32, device='cuda'),
+    [8, -1],  # _shape_param_0
     ]
 
 

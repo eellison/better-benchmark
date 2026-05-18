@@ -37,7 +37,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, view_649: "f32[32, 6, 128, 128]", view_702: "f32[32, 6, 128, 128]", view_755: "f32[32, 6, 128, 128]", view_808: "f32[32, 6, 128, 128]", view_861: "f32[32, 6, 128, 128]", view_914: "f32[32, 6, 128, 128]", view_967: "f32[32, 6, 128, 128]", bmm_109: "f32[192, 128, 128]", gt_37: "b8[32, 6, 128, 128]", ge: "b8[128, 129]", full_default_2: "f32[]", bmm_16: "f32[192, 128, 128]", embedding_3: "f32[128, 128, 6]", amax_8: "f32[32, 6, 128, 1]", sum_9: "f32[32, 6, 128, 1]", add_64: "i64[128, 128]", view_1051: "f32[32, 6, 128, 128]", view_1081: "f32[32, 6, 128, 128]", view_1111: "f32[32, 6, 128, 128]", view_1141: "f32[32, 6, 128, 128]", view_1171: "f32[32, 6, 128, 128]", view_1201: "f32[32, 6, 128, 128]", view_1231: "f32[32, 6, 128, 128]", bmm_141: "f32[192, 128, 128]", gt_2: "b8[32, 6, 128, 128]", bmm: "f32[192, 128, 128]", embedding_1: "f32[128, 128, 6]", amax: "f32[32, 6, 128, 1]", sum_1: "f32[32, 6, 128, 1]", add_4: "i64[128, 128]"):
+    def forward(self, view_649: "f32[32, 6, 128, 128]", view_702: "f32[32, 6, 128, 128]", view_755: "f32[32, 6, 128, 128]", view_808: "f32[32, 6, 128, 128]", view_861: "f32[32, 6, 128, 128]", view_914: "f32[32, 6, 128, 128]", view_967: "f32[32, 6, 128, 128]", bmm_109: "f32[192, 128, 128]", gt_37: "b8[32, 6, 128, 128]", ge: "b8[128, 129]", full_default_2: "f32[]", bmm_16: "f32[192, 128, 128]", embedding_3: "f32[128, 128, 6]", amax_8: "f32[32, 6, 128, 1]", sum_9: "f32[32, 6, 128, 1]", add_64: "i64[128, 128]", view_1051: "f32[32, 6, 128, 128]", view_1081: "f32[32, 6, 128, 128]", view_1111: "f32[32, 6, 128, 128]", view_1141: "f32[32, 6, 128, 128]", view_1171: "f32[32, 6, 128, 128]", view_1201: "f32[32, 6, 128, 128]", view_1231: "f32[32, 6, 128, 128]", bmm_141: "f32[192, 128, 128]", gt_2: "b8[32, 6, 128, 128]", bmm: "f32[192, 128, 128]", embedding_1: "f32[128, 128, 6]", amax: "f32[32, 6, 128, 1]", sum_1: "f32[32, 6, 128, 1]", add_4: "i64[128, 128]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:433 in forward, code: scores += position_bias_masked
         add_tensor: "f32[32, 6, 128, 128]" = torch.ops.aten.add.Tensor(view_649, view_702);  view_649 = view_702 = None
         add_tensor_1: "f32[32, 6, 128, 128]" = torch.ops.aten.add.Tensor(add_tensor, view_755);  add_tensor = view_755 = None
@@ -47,7 +47,7 @@ class Repro(torch.nn.Module):
         add_tensor_5: "f32[32, 6, 128, 128]" = torch.ops.aten.add.Tensor(add_tensor_4, view_967);  add_tensor_4 = view_967 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:443 in forward, code: attn_output = torch.matmul(attn_weights, value_states)
-        reshape_default: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_109, [32, 6, 128, 128]);  bmm_109 = None
+        reshape_default: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_109, _shape_param_0);  bmm_109 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:437 in forward, code: attn_weights = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
         convert_element_type_default: "f32[32, 6, 128, 128]" = torch.ops.prims.convert_element_type.default(gt_37, torch.float32);  gt_37 = None
@@ -70,7 +70,7 @@ class Repro(torch.nn.Module):
         mul_tensor_2: "f32[128, 129]" = torch.ops.aten.mul.Tensor(where_self, gt_tensor);  where_self = gt_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:404 in forward, code: scores = torch.matmul(query_states, key_states.transpose(3, 2))
-        reshape_default_2: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_16, [32, 6, 128, 128]);  bmm_16 = None
+        reshape_default_2: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_16, _shape_param_1);  bmm_16 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:340 in compute_bias, code: values = values.permute([2, 0, 1]).unsqueeze(0)  # shape (1, num_heads, query_length, key_length)
         permute_default: "f32[6, 128, 128]" = torch.ops.aten.permute.default(embedding_3, [2, 0, 1]);  embedding_3 = None
@@ -82,7 +82,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:423 in forward, code: causal_mask = mask[:, :, :, : key_states.shape[-2]]
         unsqueeze_default_1: "f32[1, 128, 129]" = torch.ops.aten.unsqueeze.default(mul_tensor_2, 0);  mul_tensor_2 = None
         unsqueeze_default_2: "f32[1, 1, 128, 129]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_1, 1);  unsqueeze_default_1 = None
-        expand_default: "f32[32, 1, 128, 129]" = torch.ops.aten.expand.default(unsqueeze_default_2, [32, 1, -1, -1]);  unsqueeze_default_2 = None
+        expand_default: "f32[32, 1, 128, 129]" = torch.ops.aten.expand.default(unsqueeze_default_2, _shape_param_2);  unsqueeze_default_2 = _shape_param_2 = None
         slice_tensor_1: "f32[32, 1, 128, 128]" = torch.ops.aten.slice.Tensor(expand_default, 3, 0, 128);  expand_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:424 in forward, code: position_bias = position_bias + causal_mask
@@ -101,9 +101,9 @@ class Repro(torch.nn.Module):
         fma_default: "f32[32, 6, 128, 128]" = torch.ops.prims.fma.default(neg_default, sum_dim_int_list, mul_tensor_3);  neg_default = sum_dim_int_list = mul_tensor_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:433 in forward, code: scores += position_bias_masked
-        reshape_default_3: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(fma_default, [192, 128, 128]);  fma_default = None
-        reshape_default_4: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_3, [32, 6, 128, 128]);  reshape_default_3 = None
-        reshape_default_5: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_4, [192, 128, 128])
+        reshape_default_3: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(fma_default, _shape_param_3);  fma_default = _shape_param_3 = None
+        reshape_default_4: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_3, _shape_param_4);  reshape_default_3 = _shape_param_4 = None
+        reshape_default_5: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_4, _shape_param_5);  _shape_param_5 = None
         add_tensor_8: "f32[32, 6, 128, 128]" = torch.ops.aten.add.Tensor(add_tensor_5, reshape_default_4);  add_tensor_5 = reshape_default_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:424 in forward, code: position_bias = position_bias + causal_mask
@@ -141,7 +141,7 @@ class Repro(torch.nn.Module):
         add_tensor_14: "f32[1, 6, 128, 128]" = torch.ops.aten.add.Tensor(add_tensor_13, sum_dim_int_list_8);  add_tensor_13 = sum_dim_int_list_8 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:443 in forward, code: attn_output = torch.matmul(attn_weights, value_states)
-        reshape_default_6: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_141, [32, 6, 128, 128]);  bmm_141 = None
+        reshape_default_6: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_141, _shape_param_6);  bmm_141 = _shape_param_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:437 in forward, code: attn_weights = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
         convert_element_type_default_1: "f32[32, 6, 128, 128]" = torch.ops.prims.convert_element_type.default(gt_2, torch.float32);  gt_2 = None
@@ -149,7 +149,7 @@ class Repro(torch.nn.Module):
         mul_tensor_5: "f32[32, 6, 128, 128]" = torch.ops.aten.mul.Tensor(reshape_default_6, mul_tensor_4);  reshape_default_6 = mul_tensor_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:404 in forward, code: scores = torch.matmul(query_states, key_states.transpose(3, 2))
-        reshape_default_7: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm, [32, 6, 128, 128]);  bmm = None
+        reshape_default_7: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm, _shape_param_7);  bmm = _shape_param_7 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:340 in compute_bias, code: values = values.permute([2, 0, 1]).unsqueeze(0)  # shape (1, num_heads, query_length, key_length)
         permute_default_2: "f32[6, 128, 128]" = torch.ops.aten.permute.default(embedding_1, [2, 0, 1]);  embedding_1 = None
@@ -171,9 +171,9 @@ class Repro(torch.nn.Module):
         fma_default_1: "f32[32, 6, 128, 128]" = torch.ops.prims.fma.default(neg_default_1, sum_dim_int_list_9, mul_tensor_6);  neg_default_1 = sum_dim_int_list_9 = mul_tensor_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:433 in forward, code: scores += position_bias_masked
-        reshape_default_8: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(fma_default_1, [192, 128, 128]);  fma_default_1 = None
-        reshape_default_9: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_8, [32, 6, 128, 128]);  reshape_default_8 = None
-        reshape_default_10: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_9, [192, 128, 128])
+        reshape_default_8: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(fma_default_1, _shape_param_8);  fma_default_1 = _shape_param_8 = None
+        reshape_default_9: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_8, _shape_param_9);  reshape_default_8 = _shape_param_9 = None
+        reshape_default_10: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_9, _shape_param_10);  _shape_param_10 = None
         sum_dim_int_list_10: "f32[1, 6, 128, 128]" = torch.ops.aten.sum.dim_IntList(reshape_default_9, [0], True);  reshape_default_9 = None
         add_tensor_16: "f32[1, 6, 128, 128]" = torch.ops.aten.add.Tensor(add_tensor_14, sum_dim_int_list_10);  add_tensor_14 = sum_dim_int_list_10 = None
 
@@ -225,6 +225,17 @@ def _default_make_inputs():
     torch.randn([32, 6, 128, 1], dtype=torch.float32, device='cuda'),
     torch.randn([32, 6, 128, 1], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [128, 128], dtype=torch.int64, device='cuda'),
+    [32, 6, 128, 128],  # _shape_param_0
+    [32, 6, 128, 128],  # _shape_param_1
+    [32, 1, -1, -1],  # _shape_param_2
+    [192, 128, 128],  # _shape_param_3
+    [32, 6, 128, 128],  # _shape_param_4
+    [192, 128, 128],  # _shape_param_5
+    [32, 6, 128, 128],  # _shape_param_6
+    [32, 6, 128, 128],  # _shape_param_7
+    [192, 128, 128],  # _shape_param_8
+    [32, 6, 128, 128],  # _shape_param_9
+    [192, 128, 128],  # _shape_param_10
     ]
 
 

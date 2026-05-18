@@ -15,9 +15,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_422: "f32[4096, 1024]", gt_4: "b8[32, 128, 1024]", mm_4: "f32[4096, 1024]", mm_5: "f32[4096, 1024]"):
+    def forward(self, mm_422: "f32[4096, 1024]", gt_4: "b8[32, 128, 1024]", mm_4: "f32[4096, 1024]", mm_5: "f32[4096, 1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:199 in forward, code: hidden_states = self.wo(hidden_states)
-        reshape_default: "f32[32, 128, 1024]" = torch.ops.aten.reshape.default(mm_422, [32, 128, 1024]);  mm_422 = None
+        reshape_default: "f32[32, 128, 1024]" = torch.ops.aten.reshape.default(mm_422, _shape_param_0);  mm_422 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:187 in forward, code: hidden_states = self.dropout(hidden_states)
         convert_element_type_default: "f32[32, 128, 1024]" = torch.ops.prims.convert_element_type.default(gt_4, torch.float32);  gt_4 = None
@@ -25,7 +25,7 @@ class Repro(torch.nn.Module):
         mul_tensor_1: "f32[32, 128, 1024]" = torch.ops.aten.mul.Tensor(reshape_default, mul_tensor);  reshape_default = mul_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:184 in forward, code: hidden_gelu = self.act(self.wi_0(hidden_states))
-        reshape_default_1: "f32[32, 128, 1024]" = torch.ops.aten.reshape.default(mm_4, [32, 128, 1024]);  mm_4 = None
+        reshape_default_1: "f32[32, 128, 1024]" = torch.ops.aten.reshape.default(mm_4, _shape_param_1);  mm_4 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/activations.py:62 in forward, code: return 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
         mul_tensor_2: "f32[32, 128, 1024]" = torch.ops.aten.mul.Tensor(reshape_default_1, 0.5)
@@ -41,13 +41,13 @@ class Repro(torch.nn.Module):
         mul_tensor_6: "f32[32, 128, 1024]" = torch.ops.aten.mul.Tensor(mul_tensor_1, mul_tensor_5);  mul_tensor_5 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:185 in forward, code: hidden_linear = self.wi_1(hidden_states)
-        reshape_default_2: "f32[32, 128, 1024]" = torch.ops.aten.reshape.default(mm_5, [32, 128, 1024]);  mm_5 = None
+        reshape_default_2: "f32[32, 128, 1024]" = torch.ops.aten.reshape.default(mm_5, _shape_param_2);  mm_5 = _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:186 in forward, code: hidden_states = hidden_gelu * hidden_linear
         mul_tensor_7: "f32[32, 128, 1024]" = torch.ops.aten.mul.Tensor(mul_tensor_1, reshape_default_2);  mul_tensor_1 = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:185 in forward, code: hidden_linear = self.wi_1(hidden_states)
-        reshape_default_3: "f32[4096, 1024]" = torch.ops.aten.reshape.default(mul_tensor_6, [4096, 1024]);  mul_tensor_6 = None
+        reshape_default_3: "f32[4096, 1024]" = torch.ops.aten.reshape.default(mul_tensor_6, _shape_param_3);  mul_tensor_6 = _shape_param_3 = None
         permute_default: "f32[1024, 4096]" = torch.ops.aten.permute.default(reshape_default_3, [1, 0]);  reshape_default_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/activations.py:62 in forward, code: return 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
@@ -66,7 +66,7 @@ class Repro(torch.nn.Module):
         add_tensor_3: "f32[32, 128, 1024]" = torch.ops.aten.add.Tensor(add_tensor_2, mul_tensor_15);  add_tensor_2 = mul_tensor_15 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:184 in forward, code: hidden_gelu = self.act(self.wi_0(hidden_states))
-        reshape_default_4: "f32[4096, 1024]" = torch.ops.aten.reshape.default(add_tensor_3, [4096, 1024]);  add_tensor_3 = None
+        reshape_default_4: "f32[4096, 1024]" = torch.ops.aten.reshape.default(add_tensor_3, _shape_param_4);  add_tensor_3 = _shape_param_4 = None
         permute_default_1: "f32[1024, 4096]" = torch.ops.aten.permute.default(reshape_default_4, [1, 0]);  reshape_default_4 = None
         return (permute_default, permute_default_1)
 
@@ -77,6 +77,11 @@ def _default_make_inputs():
     torch.randint(0, 2, [32, 128, 1024], dtype=torch.bool, device='cuda'),
     torch.randn([4096, 1024], dtype=torch.float32, device='cuda'),
     torch.randn([4096, 1024], dtype=torch.float32, device='cuda'),
+    [32, 128, 1024],  # _shape_param_0
+    [32, 128, 1024],  # _shape_param_1
+    [32, 128, 1024],  # _shape_param_2
+    [4096, 1024],  # _shape_param_3
+    [4096, 1024],  # _shape_param_4
     ]
 
 

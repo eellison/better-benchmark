@@ -18,14 +18,14 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm_69: "f32[512, 512, 512]", where_1: "f32[8, 64, 512, 512]"):
+    def forward(self, bmm_69: "f32[512, 512, 512]", where_1: "f32[8, 64, 512, 512]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
-        reshape_default: "f32[8, 64, 512, 512]" = torch.ops.aten.reshape.default(bmm_69, [8, 64, 512, 512]);  bmm_69 = None
+        reshape_default: "f32[8, 64, 512, 512]" = torch.ops.aten.reshape.default(bmm_69, _shape_param_0);  bmm_69 = _shape_param_0 = None
         mul_tensor: "f32[8, 64, 512, 512]" = torch.ops.aten.mul.Tensor(reshape_default, where_1);  reshape_default = None
         sum_dim_int_list: "f32[8, 64, 512, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [-1], True)
         neg_default: "f32[8, 64, 512, 512]" = torch.ops.aten.neg.default(where_1);  where_1 = None
         fma_default: "f32[8, 64, 512, 512]" = torch.ops.prims.fma.default(neg_default, sum_dim_int_list, mul_tensor);  neg_default = sum_dim_int_list = mul_tensor = None
-        reshape_default_1: "f32[512, 512, 512]" = torch.ops.aten.reshape.default(fma_default, [512, 512, 512]);  fma_default = None
+        reshape_default_1: "f32[512, 512, 512]" = torch.ops.aten.reshape.default(fma_default, _shape_param_1);  fma_default = _shape_param_1 = None
         return reshape_default_1
 
 
@@ -33,6 +33,8 @@ def _default_make_inputs():
     return [
     torch.randn([512, 512, 512], dtype=torch.float32, device='cuda'),
     torch.randn([8, 64, 512, 512], dtype=torch.float32, device='cuda'),
+    [8, 64, 512, 512],  # _shape_param_0
+    [512, 512, 512],  # _shape_param_1
     ]
 
 

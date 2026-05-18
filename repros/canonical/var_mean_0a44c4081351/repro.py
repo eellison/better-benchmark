@@ -18,7 +18,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg3_1: "f32[30000, 128]", arg0_1: "i64[8, 512]", arg2_1: "i64[1, 512]", arg1_1: "i64[1, 512]", arg4_1: "f32[2, 128]", arg5_1: "f32[512, 128]"):
+    def forward(self, arg3_1: "f32[30000, 128]", arg0_1: "i64[8, 512]", arg2_1: "i64[1, 512]", arg1_1: "i64[1, 512]", arg4_1: "f32[2, 128]", arg5_1: "f32[512, 128]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:101 in forward, code: inputs_embeds = self.word_embeddings(input_ids)
         embedding_default: "f32[8, 512, 128]" = torch.ops.aten.embedding.default(arg3_1, arg0_1, 0);  arg3_1 = arg0_1 = None
 
@@ -29,7 +29,7 @@ class Repro(torch.nn.Module):
         gather_default: "i64[1, 512]" = torch.ops.aten.gather.default(expand_default, 1, arg1_1);  expand_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:96 in forward, code: token_type_ids = buffered_token_type_ids.expand(batch_size, seq_length)
-        expand_default_1: "i64[8, 512]" = torch.ops.aten.expand.default(gather_default, [8, 512]);  gather_default = None
+        expand_default_1: "i64[8, 512]" = torch.ops.aten.expand.default(gather_default, _shape_param_0);  gather_default = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:102 in forward, code: token_type_embeddings = self.token_type_embeddings(token_type_ids)
         embedding_default_1: "f32[8, 512, 128]" = torch.ops.aten.embedding.default(arg4_1, expand_default_1);  arg4_1 = expand_default_1 = None
@@ -58,6 +58,7 @@ def _default_make_inputs():
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
     torch.randn([2, 128], dtype=torch.float32, device='cuda'),
     torch.randn([512, 128], dtype=torch.float32, device='cuda'),
+    [8, 512],  # _shape_param_0
     ]
 
 

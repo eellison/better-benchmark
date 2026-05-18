@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, convert_element_type_2: "f16[4, 768]", view_1: "f16[1904, 768]", view_5: "f16[1904, 3072]", view_8: "f16[1904, 768]", view_21: "f16[1904, 768]", view_24: "f16[1904, 768]", view_27: "f16[1904, 768]", view_30: "f16[1904, 768]", view_34: "f16[1904, 3072]", view_37: "f16[1904, 768]", view_50: "f16[1904, 768]", view_53: "f16[1904, 768]", view_56: "f16[1904, 768]", view_59: "f16[1904, 768]", view_63: "f16[1904, 3072]", view_66: "f16[1904, 768]", view_79: "f16[1904, 768]", view_82: "f16[1904, 768]", view_85: "f16[1904, 768]", view_88: "f16[1904, 768]", view_92: "f16[1904, 3072]", view_95: "f16[1904, 768]", view_108: "f16[1904, 768]", view_111: "f16[1904, 768]", view_114: "f16[1904, 768]", view_117: "f16[1904, 768]", view_121: "f16[1904, 3072]", view_124: "f16[1904, 768]", view_137: "f16[1904, 768]", view_140: "f16[1904, 768]", view_143: "f16[1904, 768]", view_146: "f16[1904, 768]", view_150: "f16[1904, 3072]", view_153: "f16[1904, 768]", view_166: "f16[1904, 768]", view_169: "f16[1904, 768]", view_172: "f16[1904, 768]", view_175: "f16[1904, 768]", view_179: "f16[1904, 3072]", view_182: "f16[1904, 768]", view_195: "f16[1904, 768]", view_198: "f16[1904, 768]", view_201: "f16[1904, 768]", view_204: "f16[1904, 768]", view_208: "f16[1904, 3072]", view_211: "f16[1904, 768]", view_224: "f16[1904, 768]", view_227: "f16[1904, 768]", view_230: "f16[1904, 768]", view_233: "f16[1904, 768]", view_237: "f16[1904, 3072]", view_240: "f16[1904, 768]", view_253: "f16[1904, 768]", view_256: "f16[1904, 768]", view_259: "f16[1904, 768]", view_262: "f16[1904, 768]", view_266: "f16[1904, 3072]", view_269: "f16[1904, 768]", view_282: "f16[1904, 768]", view_285: "f16[1904, 768]", view_288: "f16[1904, 768]", view_291: "f16[1904, 768]", view_295: "f16[1904, 3072]", view_298: "f16[1904, 768]", view_311: "f16[1904, 768]", view_314: "f16[1904, 768]", view_317: "f16[1904, 768]", view_320: "f16[1904, 768]", view_324: "f16[1904, 3072]", view_327: "f16[1904, 768]", bmm_44: "f16[48, 476, 64]", bmm_46: "f16[48, 64, 476]", bmm_47: "f16[48, 476, 64]"):
+    def forward(self, convert_element_type_2: "f16[4, 768]", view_1: "f16[1904, 768]", view_5: "f16[1904, 3072]", view_8: "f16[1904, 768]", view_21: "f16[1904, 768]", view_24: "f16[1904, 768]", view_27: "f16[1904, 768]", view_30: "f16[1904, 768]", view_34: "f16[1904, 3072]", view_37: "f16[1904, 768]", view_50: "f16[1904, 768]", view_53: "f16[1904, 768]", view_56: "f16[1904, 768]", view_59: "f16[1904, 768]", view_63: "f16[1904, 3072]", view_66: "f16[1904, 768]", view_79: "f16[1904, 768]", view_82: "f16[1904, 768]", view_85: "f16[1904, 768]", view_88: "f16[1904, 768]", view_92: "f16[1904, 3072]", view_95: "f16[1904, 768]", view_108: "f16[1904, 768]", view_111: "f16[1904, 768]", view_114: "f16[1904, 768]", view_117: "f16[1904, 768]", view_121: "f16[1904, 3072]", view_124: "f16[1904, 768]", view_137: "f16[1904, 768]", view_140: "f16[1904, 768]", view_143: "f16[1904, 768]", view_146: "f16[1904, 768]", view_150: "f16[1904, 3072]", view_153: "f16[1904, 768]", view_166: "f16[1904, 768]", view_169: "f16[1904, 768]", view_172: "f16[1904, 768]", view_175: "f16[1904, 768]", view_179: "f16[1904, 3072]", view_182: "f16[1904, 768]", view_195: "f16[1904, 768]", view_198: "f16[1904, 768]", view_201: "f16[1904, 768]", view_204: "f16[1904, 768]", view_208: "f16[1904, 3072]", view_211: "f16[1904, 768]", view_224: "f16[1904, 768]", view_227: "f16[1904, 768]", view_230: "f16[1904, 768]", view_233: "f16[1904, 768]", view_237: "f16[1904, 3072]", view_240: "f16[1904, 768]", view_253: "f16[1904, 768]", view_256: "f16[1904, 768]", view_259: "f16[1904, 768]", view_262: "f16[1904, 768]", view_266: "f16[1904, 3072]", view_269: "f16[1904, 768]", view_282: "f16[1904, 768]", view_285: "f16[1904, 768]", view_288: "f16[1904, 768]", view_291: "f16[1904, 768]", view_295: "f16[1904, 3072]", view_298: "f16[1904, 768]", view_311: "f16[1904, 768]", view_314: "f16[1904, 768]", view_317: "f16[1904, 768]", view_320: "f16[1904, 768]", view_324: "f16[1904, 3072]", view_327: "f16[1904, 768]", bmm_44: "f16[48, 476, 64]", bmm_46: "f16[48, 64, 476]", bmm_47: "f16[48, 476, 64]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8):
         # No stacktrace found for following nodes
         permute_default: "f16[768, 4]" = torch.ops.aten.permute.default(convert_element_type_2, [1, 0]);  convert_element_type_2 = None
         permute_default_1: "f16[768, 1904]" = torch.ops.aten.permute.default(view_1, [1, 0]);  view_1 = None
@@ -88,24 +88,24 @@ class Repro(torch.nn.Module):
         permute_default_67: "f16[768, 1904]" = torch.ops.aten.permute.default(view_320, [1, 0]);  view_320 = None
         permute_default_68: "f16[3072, 1904]" = torch.ops.aten.permute.default(view_324, [1, 0]);  view_324 = None
         permute_default_69: "f16[768, 1904]" = torch.ops.aten.permute.default(view_327, [1, 0]);  view_327 = None
-        reshape_default: "f16[4, 12, 476, 64]" = torch.ops.aten.reshape.default(bmm_44, [4, 12, 476, 64]);  bmm_44 = None
-        reshape_default_1: "f16[4, 12, 64, 476]" = torch.ops.aten.reshape.default(bmm_46, [4, 12, 64, 476]);  bmm_46 = None
-        reshape_default_2: "f16[4, 12, 476, 64]" = torch.ops.aten.reshape.default(bmm_47, [4, 12, 476, 64]);  bmm_47 = None
+        reshape_default: "f16[4, 12, 476, 64]" = torch.ops.aten.reshape.default(bmm_44, _shape_param_0);  bmm_44 = _shape_param_0 = None
+        reshape_default_1: "f16[4, 12, 64, 476]" = torch.ops.aten.reshape.default(bmm_46, _shape_param_1);  bmm_46 = _shape_param_1 = None
+        reshape_default_2: "f16[4, 12, 476, 64]" = torch.ops.aten.reshape.default(bmm_47, _shape_param_2);  bmm_47 = _shape_param_2 = None
         permute_default_70: "f16[4, 12, 476, 64]" = torch.ops.aten.permute.default(reshape_default_1, [0, 1, 3, 2]);  reshape_default_1 = None
         permute_default_71: "f16[4, 476, 12, 64]" = torch.ops.aten.permute.default(reshape_default, [0, 2, 1, 3]);  reshape_default = None
         clone_default: "f16[4, 476, 12, 64]" = torch.ops.aten.clone.default(permute_default_71, memory_format = torch.contiguous_format);  permute_default_71 = None
-        reshape_default_3: "f16[4, 476, 768]" = torch.ops.aten.reshape.default(clone_default, [4, 476, 768]);  clone_default = None
+        reshape_default_3: "f16[4, 476, 768]" = torch.ops.aten.reshape.default(clone_default, _shape_param_3);  clone_default = _shape_param_3 = None
         permute_default_72: "f16[4, 476, 12, 64]" = torch.ops.aten.permute.default(permute_default_70, [0, 2, 1, 3]);  permute_default_70 = None
-        reshape_default_4: "f16[4, 476, 768]" = torch.ops.aten.reshape.default(permute_default_72, [4, 476, 768]);  permute_default_72 = None
+        reshape_default_4: "f16[4, 476, 768]" = torch.ops.aten.reshape.default(permute_default_72, _shape_param_4);  permute_default_72 = _shape_param_4 = None
         permute_default_73: "f16[4, 476, 12, 64]" = torch.ops.aten.permute.default(reshape_default_2, [0, 2, 1, 3]);  reshape_default_2 = None
         clone_default_1: "f16[4, 476, 12, 64]" = torch.ops.aten.clone.default(permute_default_73, memory_format = torch.contiguous_format);  permute_default_73 = None
-        reshape_default_5: "f16[4, 476, 768]" = torch.ops.aten.reshape.default(clone_default_1, [4, 476, 768]);  clone_default_1 = None
-        reshape_default_6: "f16[1904, 768]" = torch.ops.aten.reshape.default(reshape_default_3, [1904, 768]);  reshape_default_3 = None
+        reshape_default_5: "f16[4, 476, 768]" = torch.ops.aten.reshape.default(clone_default_1, _shape_param_5);  clone_default_1 = _shape_param_5 = None
+        reshape_default_6: "f16[1904, 768]" = torch.ops.aten.reshape.default(reshape_default_3, _shape_param_6);  reshape_default_3 = _shape_param_6 = None
         permute_default_74: "f16[768, 1904]" = torch.ops.aten.permute.default(reshape_default_6, [1, 0]);  reshape_default_6 = None
         clone_default_2: "f16[4, 476, 768]" = torch.ops.aten.clone.default(reshape_default_4, memory_format = torch.contiguous_format);  reshape_default_4 = None
-        reshape_default_7: "f16[1904, 768]" = torch.ops.aten.reshape.default(clone_default_2, [1904, 768]);  clone_default_2 = None
+        reshape_default_7: "f16[1904, 768]" = torch.ops.aten.reshape.default(clone_default_2, _shape_param_7);  clone_default_2 = _shape_param_7 = None
         permute_default_75: "f16[768, 1904]" = torch.ops.aten.permute.default(reshape_default_7, [1, 0]);  reshape_default_7 = None
-        reshape_default_8: "f16[1904, 768]" = torch.ops.aten.reshape.default(reshape_default_5, [1904, 768]);  reshape_default_5 = None
+        reshape_default_8: "f16[1904, 768]" = torch.ops.aten.reshape.default(reshape_default_5, _shape_param_8);  reshape_default_5 = _shape_param_8 = None
         permute_default_76: "f16[768, 1904]" = torch.ops.aten.permute.default(reshape_default_8, [1, 0]);  reshape_default_8 = None
         return (permute_default, permute_default_1, permute_default_2, permute_default_3, permute_default_4, permute_default_5, permute_default_6, permute_default_7, permute_default_8, permute_default_9, permute_default_10, permute_default_11, permute_default_12, permute_default_13, permute_default_14, permute_default_15, permute_default_16, permute_default_17, permute_default_18, permute_default_19, permute_default_20, permute_default_21, permute_default_22, permute_default_23, permute_default_24, permute_default_25, permute_default_26, permute_default_27, permute_default_28, permute_default_29, permute_default_30, permute_default_31, permute_default_32, permute_default_33, permute_default_34, permute_default_35, permute_default_36, permute_default_37, permute_default_38, permute_default_39, permute_default_40, permute_default_41, permute_default_42, permute_default_43, permute_default_44, permute_default_45, permute_default_46, permute_default_47, permute_default_48, permute_default_49, permute_default_50, permute_default_51, permute_default_52, permute_default_53, permute_default_54, permute_default_55, permute_default_56, permute_default_57, permute_default_58, permute_default_59, permute_default_60, permute_default_61, permute_default_62, permute_default_63, permute_default_64, permute_default_65, permute_default_66, permute_default_67, permute_default_68, permute_default_69, permute_default_74, permute_default_75, permute_default_76)
 
@@ -185,6 +185,15 @@ def _default_make_inputs():
     torch.randn([48, 476, 64], dtype=torch.float16, device='cuda'),
     torch.randn([48, 64, 476], dtype=torch.float16, device='cuda'),
     torch.randn([48, 476, 64], dtype=torch.float16, device='cuda'),
+    [4, 12, 476, 64],  # _shape_param_0
+    [4, 12, 64, 476],  # _shape_param_1
+    [4, 12, 476, 64],  # _shape_param_2
+    [4, 476, 768],  # _shape_param_3
+    [4, 476, 768],  # _shape_param_4
+    [4, 476, 768],  # _shape_param_5
+    [1904, 768],  # _shape_param_6
+    [1904, 768],  # _shape_param_7
+    [1904, 768],  # _shape_param_8
     ]
 
 

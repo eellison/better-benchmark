@@ -26,9 +26,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_138: "f32[16384, 768]", mul_540: "f32[32, 512, 768]", primals_17: "f32[768]", mul_10: "f32[32, 512, 768]", div_38: "f32[32, 512, 1]", gt_2: "b8[32, 512, 768]"):
+    def forward(self, mm_138: "f32[16384, 768]", mul_540: "f32[32, 512, 768]", primals_17: "f32[768]", mul_10: "f32[32, 512, 768]", div_38: "f32[32, 512, 1]", gt_2: "b8[32, 512, 768]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:339 in forward, code: hidden_states = self.dense(hidden_states)
-        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_138, [32, 512, 768]);  mm_138 = None
+        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_138, _shape_param_0);  mm_138 = _shape_param_0 = None
         add_tensor: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(mul_540, reshape_default);  mul_540 = reshape_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:296 in forward, code: hidden_states = self.LayerNorm(hidden_states + input_tensor)
@@ -51,10 +51,10 @@ class Repro(torch.nn.Module):
         mul_tensor_7: "f32[32, 512, 768]" = torch.ops.aten.mul.Tensor(mul_tensor_4, mul_tensor_6);  mul_tensor_4 = mul_tensor_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:294 in forward, code: hidden_states = self.dense(hidden_states)
-        reshape_default_1: "f32[16384, 768]" = torch.ops.aten.reshape.default(mul_tensor_7, [16384, 768]);  mul_tensor_7 = None
+        reshape_default_1: "f32[16384, 768]" = torch.ops.aten.reshape.default(mul_tensor_7, _shape_param_1);  mul_tensor_7 = _shape_param_1 = None
         permute_default: "f32[768, 16384]" = torch.ops.aten.permute.default(reshape_default_1, [1, 0])
         sum_dim_int_list_4: "f32[1, 768]" = torch.ops.aten.sum.dim_IntList(reshape_default_1, [0], True);  reshape_default_1 = None
-        reshape_default_2: "f32[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, [768]);  sum_dim_int_list_4 = None
+        reshape_default_2: "f32[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, _shape_param_2);  sum_dim_int_list_4 = _shape_param_2 = None
         return (sum_dim_int_list_2, sum_dim_int_list_3, permute_default, reshape_default_2)
 
 
@@ -66,6 +66,9 @@ def _default_make_inputs():
     torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
     torch.randn([32, 512, 1], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [32, 512, 768], dtype=torch.bool, device='cuda'),
+    [32, 512, 768],  # _shape_param_0
+    [16384, 768],  # _shape_param_1
+    [768],  # _shape_param_2
     ]
 
 

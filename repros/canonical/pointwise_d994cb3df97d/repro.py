@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, unsqueeze: "i64[1, 512]", cumsum: "i64[32, 512]"):
+    def forward(self, unsqueeze: "i64[1, 512]", cumsum: "i64[32, 512]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:509 in sdpa_mask, code: batch_arange = torch.arange(batch_size, device=device)
         iota_default: "i64[32]" = torch.ops.prims.iota.default(32, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
 
@@ -51,13 +51,13 @@ class Repro(torch.nn.Module):
         bitwise_and_tensor_1: "b8[32, 1, 512, 512]" = torch.ops.aten.bitwise_and.Tensor(bitwise_and_tensor, eq_tensor);  bitwise_and_tensor = eq_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:520 in sdpa_mask, code: attention_mask = attention_mask.expand(batch_size, -1, q_length, kv_length)
-        expand_default: "b8[32, 1, 512, 512]" = torch.ops.aten.expand.default(bitwise_and_tensor_1, [32, -1, 512, 512]);  bitwise_and_tensor_1 = None
+        expand_default: "b8[32, 1, 512, 512]" = torch.ops.aten.expand.default(bitwise_and_tensor_1, _shape_param_0);  bitwise_and_tensor_1 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
         full_default_1: "f32[]" = torch.ops.aten.full.default([], -inf, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         full_default_2: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         where_self: "f32[32, 1, 512, 512]" = torch.ops.aten.where.self(expand_default, full_default_2, full_default_1);  expand_default = full_default_2 = full_default_1 = None
-        expand_default_1: "f32[32, 12, 512, 512]" = torch.ops.aten.expand.default(where_self, [32, 12, 512, 512]);  where_self = None
+        expand_default_1: "f32[32, 12, 512, 512]" = torch.ops.aten.expand.default(where_self, _shape_param_1);  where_self = _shape_param_1 = None
         return expand_default_1
 
 
@@ -65,6 +65,8 @@ def _default_make_inputs():
     return [
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [32, 512], dtype=torch.int64, device='cuda'),
+    [32, -1, 512, 512],  # _shape_param_0
+    [32, 12, 512, 512],  # _shape_param_1
     ]
 
 

@@ -16,12 +16,12 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_default: "f32[8192, 1024]", add_252: "f32[512, 16, 1024]"):
+    def forward(self, mm_default: "f32[8192, 1024]", add_252: "f32[512, 16, 1024]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:304 in post_attention, code: attn_out = torch.einsum("ibnd,hnd->ibh", attn_vec, self.o)
         unsqueeze_default: "f32[1, 8192, 1024]" = torch.ops.aten.unsqueeze.default(mm_default, 0);  mm_default = None
-        reshape_default: "f32[512, 16, 1, 1, 1024]" = torch.ops.aten.reshape.default(unsqueeze_default, [512, 16, 1, 1, 1024]);  unsqueeze_default = None
+        reshape_default: "f32[512, 16, 1, 1, 1024]" = torch.ops.aten.reshape.default(unsqueeze_default, _shape_param_0);  unsqueeze_default = _shape_param_0 = None
         permute_default: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.permute.default(reshape_default, [0, 1, 4, 2, 3]);  reshape_default = None
-        reshape_default_1: "f32[512, 16, 1024]" = torch.ops.aten.reshape.default(permute_default, [512, 16, 1024]);  permute_default = None
+        reshape_default_1: "f32[512, 16, 1024]" = torch.ops.aten.reshape.default(permute_default, _shape_param_1);  permute_default = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:308 in post_attention, code: attn_out = attn_out + h
         add_tensor: "f32[512, 16, 1024]" = torch.ops.aten.add.Tensor(reshape_default_1, add_252);  reshape_default_1 = add_252 = None
@@ -37,6 +37,8 @@ def _default_make_inputs():
     return [
     torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
     torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
+    [512, 16, 1, 1, 1024],  # _shape_param_0
+    [512, 16, 1024],  # _shape_param_1
     ]
 
 

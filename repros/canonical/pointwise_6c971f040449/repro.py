@@ -15,13 +15,13 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_66: "f32[8192, 768]"):
+    def forward(self, addmm_66: "f32[8192, 768]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:160 in forward, code: query_states = self.q_proj(hidden_states) * self.scaling
-        reshape_default: "f32[4, 2048, 768]" = torch.ops.aten.reshape.default(addmm_66, [4, 2048, 768]);  addmm_66 = None
+        reshape_default: "f32[4, 2048, 768]" = torch.ops.aten.reshape.default(addmm_66, _shape_param_0);  addmm_66 = _shape_param_0 = None
         mul_tensor: "f32[4, 2048, 768]" = torch.ops.aten.mul.Tensor(reshape_default, 0.125);  reshape_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:161 in forward, code: query_states = query_states.view(bsz, -1, self.num_heads, self.head_dim).transpose(1, 2)
-        reshape_default_1: "f32[4, 2048, 12, 64]" = torch.ops.aten.reshape.default(mul_tensor, [4, -1, 12, 64]);  mul_tensor = None
+        reshape_default_1: "f32[4, 2048, 12, 64]" = torch.ops.aten.reshape.default(mul_tensor, _shape_param_1);  mul_tensor = _shape_param_1 = None
         permute_default: "f32[4, 12, 2048, 64]" = torch.ops.aten.permute.default(reshape_default_1, [0, 2, 1, 3]);  reshape_default_1 = None
         return permute_default
 
@@ -29,6 +29,8 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randn([8192, 768], dtype=torch.float32, device='cuda'),
+    [4, 2048, 768],  # _shape_param_0
+    [4, -1, 12, 64],  # _shape_param_1
     ]
 
 

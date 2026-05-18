@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, _tensor_constant0: "f32[]"):
+    def forward(self, _tensor_constant0: "f32[]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/modeling_attn_mask_utils.py:196 in _expand_mask, code: inverted_mask = torch.tensor(1.0, dtype=dtype) - expanded_mask
         lift_fresh_copy_default: "f32[]" = torch.ops.aten.lift_fresh_copy.default(_tensor_constant0);  _tensor_constant0 = None
 
@@ -26,7 +26,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/modeling_attn_mask_utils.py:194 in _expand_mask, code: expanded_mask = mask[:, None, None, :].expand(bsz, 1, tgt_len, src_len).to(dtype)
         unsqueeze_default: "f32[256, 1, 128]" = torch.ops.aten.unsqueeze.default(full_default, 1);  full_default = None
         unsqueeze_default_1: "f32[256, 1, 1, 128]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, 2);  unsqueeze_default = None
-        expand_default: "f32[256, 1, 128, 128]" = torch.ops.aten.expand.default(unsqueeze_default_1, [256, 1, 128, 128]);  unsqueeze_default_1 = None
+        expand_default: "f32[256, 1, 128, 128]" = torch.ops.aten.expand.default(unsqueeze_default_1, _shape_param_0);  unsqueeze_default_1 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/modeling_attn_mask_utils.py:196 in _expand_mask, code: inverted_mask = torch.tensor(1.0, dtype=dtype) - expanded_mask
         sub_tensor: "f32[256, 1, 128, 128]" = torch.ops.aten.sub.Tensor(lift_fresh_copy_default, expand_default);  lift_fresh_copy_default = expand_default = None
@@ -37,18 +37,25 @@ class Repro(torch.nn.Module):
         where_self: "f32[256, 1, 128, 128]" = torch.ops.aten.where.self(convert_element_type_default, scalar_tensor_default, sub_tensor);  convert_element_type_default = scalar_tensor_default = sub_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:392 in forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
-        expand_default_1: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, [256, 12, 128, 128])
-        expand_default_2: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, [256, 12, 128, 128])
-        expand_default_3: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, [256, 12, 128, 128])
-        expand_default_4: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, [256, 12, 128, 128])
-        expand_default_5: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, [256, 12, 128, 128])
-        expand_default_6: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, [256, 12, 128, 128]);  where_self = None
+        expand_default_1: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, _shape_param_1);  _shape_param_1 = None
+        expand_default_2: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, _shape_param_2);  _shape_param_2 = None
+        expand_default_3: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, _shape_param_3);  _shape_param_3 = None
+        expand_default_4: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, _shape_param_4);  _shape_param_4 = None
+        expand_default_5: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, _shape_param_5);  _shape_param_5 = None
+        expand_default_6: "f32[256, 12, 128, 128]" = torch.ops.aten.expand.default(where_self, _shape_param_6);  where_self = _shape_param_6 = None
         return (expand_default_1, expand_default_2, expand_default_3, expand_default_4, expand_default_5, expand_default_6)
 
 
 def _default_make_inputs():
     return [
     torch.randn([], dtype=torch.float32, device='cpu'),
+    [256, 1, 128, 128],  # _shape_param_0
+    [256, 12, 128, 128],  # _shape_param_1
+    [256, 12, 128, 128],  # _shape_param_2
+    [256, 12, 128, 128],  # _shape_param_3
+    [256, 12, 128, 128],  # _shape_param_4
+    [256, 12, 128, 128],  # _shape_param_5
+    [256, 12, 128, 128],  # _shape_param_6
     ]
 
 

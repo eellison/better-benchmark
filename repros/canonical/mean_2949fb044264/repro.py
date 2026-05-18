@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg427_1: "bf16[320]", arg428_1: "bf16[320]", convolution_85: "bf16[128, 320, 8, 8]", arg429_1: "bf16[320]", arg430_1: "bf16[320]", arg437_1: "bf16[384]", arg438_1: "bf16[384]", convolution_87: "bf16[128, 384, 8, 8]", arg439_1: "bf16[384]", arg440_1: "bf16[384]", arg442_1: "bf16[384]", arg443_1: "bf16[384]", convolution_88: "bf16[128, 384, 8, 8]", arg444_1: "bf16[384]", arg445_1: "bf16[384]", arg457_1: "bf16[384]", arg458_1: "bf16[384]", convolution_91: "bf16[128, 384, 8, 8]", arg459_1: "bf16[384]", arg460_1: "bf16[384]", arg462_1: "bf16[384]", arg463_1: "bf16[384]", convolution_92: "bf16[128, 384, 8, 8]", arg464_1: "bf16[384]", arg465_1: "bf16[384]", arg467_1: "bf16[192]", arg468_1: "bf16[192]", convolution_93: "bf16[128, 192, 8, 8]", arg469_1: "bf16[192]", arg470_1: "bf16[192]", arg471_1: "bf16[1000, 2048]"):
+    def forward(self, arg427_1: "bf16[320]", arg428_1: "bf16[320]", convolution_85: "bf16[128, 320, 8, 8]", arg429_1: "bf16[320]", arg430_1: "bf16[320]", arg437_1: "bf16[384]", arg438_1: "bf16[384]", convolution_87: "bf16[128, 384, 8, 8]", arg439_1: "bf16[384]", arg440_1: "bf16[384]", arg442_1: "bf16[384]", arg443_1: "bf16[384]", convolution_88: "bf16[128, 384, 8, 8]", arg444_1: "bf16[384]", arg445_1: "bf16[384]", arg457_1: "bf16[384]", arg458_1: "bf16[384]", convolution_91: "bf16[128, 384, 8, 8]", arg459_1: "bf16[384]", arg460_1: "bf16[384]", arg462_1: "bf16[384]", arg463_1: "bf16[384]", convolution_92: "bf16[128, 384, 8, 8]", arg464_1: "bf16[384]", arg465_1: "bf16[384]", arg467_1: "bf16[192]", arg468_1: "bf16[192]", convolution_93: "bf16[128, 192, 8, 8]", arg469_1: "bf16[192]", arg470_1: "bf16[192]", arg471_1: "bf16[1000, 2048]", _shape_param_0):
         # No stacktrace found for following nodes
         convert_element_type_default: "f32[320]" = torch.ops.prims.convert_element_type.default(arg427_1, torch.float32);  arg427_1 = None
         convert_element_type_default_1: "f32[320]" = torch.ops.prims.convert_element_type.default(arg428_1, torch.float32);  arg428_1 = None
@@ -142,7 +142,7 @@ class Repro(torch.nn.Module):
         relu_default_5: "bf16[128, 192, 8, 8]" = torch.ops.aten.relu.default(convert_element_type_default_17);  convert_element_type_default_17 = None
         cat_default_2: "bf16[128, 2048, 8, 8]" = torch.ops.aten.cat.default([relu_default, cat_default, cat_default_1, relu_default_5], 1);  relu_default = cat_default = cat_default_1 = relu_default_5 = None
         mean_dim: "bf16[128, 2048, 1, 1]" = torch.ops.aten.mean.dim(cat_default_2, [-1, -2], True);  cat_default_2 = None
-        reshape_default: "bf16[128, 2048]" = torch.ops.aten.reshape.default(mean_dim, [128, 2048]);  mean_dim = None
+        reshape_default: "bf16[128, 2048]" = torch.ops.aten.reshape.default(mean_dim, _shape_param_0);  mean_dim = _shape_param_0 = None
         permute_default: "bf16[2048, 1000]" = torch.ops.aten.permute.default(arg471_1, [1, 0]);  arg471_1 = None
         return (reshape_default, permute_default)
 
@@ -180,6 +180,7 @@ def _default_make_inputs():
     torch.randn([192], dtype=torch.bfloat16, device='cuda'),
     torch.randn([192], dtype=torch.bfloat16, device='cuda'),
     torch.randn([1000, 2048], dtype=torch.bfloat16, device='cuda'),
+    [128, 2048],  # _shape_param_0
     ]
 
 

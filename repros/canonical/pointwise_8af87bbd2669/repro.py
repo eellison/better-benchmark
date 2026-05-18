@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, add_102: "f32[8, 512, 4096]", getitem_45: "f32[8, 512, 1]", getitem_44: "f32[8, 512, 1]", arg24_1: "f32[4096]", arg25_1: "f32[4096]"):
+    def forward(self, add_102: "f32[8, 512, 4096]", getitem_45: "f32[8, 512, 1]", getitem_44: "f32[8, 512, 1]", arg24_1: "f32[4096]", arg25_1: "f32[4096]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
         sub_tensor: "f32[8, 512, 4096]" = torch.ops.aten.sub.Tensor(add_102, getitem_45);  add_102 = getitem_45 = None
         add_tensor: "f32[8, 512, 1]" = torch.ops.aten.add.Tensor(getitem_44, 1e-12);  getitem_44 = None
@@ -27,13 +27,13 @@ class Repro(torch.nn.Module):
         add_tensor_1: "f32[8, 512, 4096]" = torch.ops.aten.add.Tensor(mul_tensor_1, arg25_1);  mul_tensor_1 = arg25_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:180 in forward, code: query_layer = self.query(hidden_states).view(*hidden_shape).transpose(1, 2)
-        reshape_default: "f32[4096, 4096]" = torch.ops.aten.reshape.default(add_tensor_1, [4096, 4096])
+        reshape_default: "f32[4096, 4096]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_0);  _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:181 in forward, code: key_layer = self.key(hidden_states).view(*hidden_shape).transpose(1, 2)
-        reshape_default_1: "f32[4096, 4096]" = torch.ops.aten.reshape.default(add_tensor_1, [4096, 4096])
+        reshape_default_1: "f32[4096, 4096]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_1);  _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:182 in forward, code: value_layer = self.value(hidden_states).view(*hidden_shape).transpose(1, 2)
-        reshape_default_2: "f32[4096, 4096]" = torch.ops.aten.reshape.default(add_tensor_1, [4096, 4096]);  add_tensor_1 = None
+        reshape_default_2: "f32[4096, 4096]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_2);  add_tensor_1 = _shape_param_2 = None
         return (reshape_default, reshape_default_1, reshape_default_2)
 
 
@@ -44,6 +44,9 @@ def _default_make_inputs():
     torch.randn([8, 512, 1], dtype=torch.float32, device='cuda'),
     torch.randn([4096], dtype=torch.float32, device='cuda'),
     torch.randn([4096], dtype=torch.float32, device='cuda'),
+    [4096, 4096],  # _shape_param_0
+    [4096, 4096],  # _shape_param_1
+    [4096, 4096],  # _shape_param_2
     ]
 
 

@@ -16,12 +16,12 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_91: "f32[8192, 3072]", addmm_2: "f32[8192, 3072]"):
+    def forward(self, mm_91: "f32[8192, 3072]", addmm_2: "f32[8192, 3072]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:122 in forward, code: x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
-        reshape_default: "f32[8, 1024, 3072]" = torch.ops.aten.reshape.default(mm_91, [8, 1024, 3072]);  mm_91 = None
+        reshape_default: "f32[8, 1024, 3072]" = torch.ops.aten.reshape.default(mm_91, _shape_param_0);  mm_91 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:123 in forward, code: x = x.view(size_out)
-        reshape_default_1: "f32[8, 1024, 3072]" = torch.ops.aten.reshape.default(addmm_2, [8, 1024, 3072]);  addmm_2 = None
+        reshape_default_1: "f32[8, 1024, 3072]" = torch.ops.aten.reshape.default(addmm_2, _shape_param_1);  addmm_2 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/activations.py:62 in forward, code: return 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
         mul_tensor: "f32[8, 1024, 3072]" = torch.ops.aten.mul.Tensor(reshape_default_1, 0.5)
@@ -46,11 +46,11 @@ class Repro(torch.nn.Module):
         add_tensor_3: "f32[8, 1024, 3072]" = torch.ops.aten.add.Tensor(add_tensor_2, mul_tensor_10);  add_tensor_2 = mul_tensor_10 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:123 in forward, code: x = x.view(size_out)
-        reshape_default_2: "f32[8192, 3072]" = torch.ops.aten.reshape.default(add_tensor_3, [8192, 3072]);  add_tensor_3 = None
+        reshape_default_2: "f32[8192, 3072]" = torch.ops.aten.reshape.default(add_tensor_3, _shape_param_2);  add_tensor_3 = _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:122 in forward, code: x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
         sum_dim_int_list: "f32[1, 3072]" = torch.ops.aten.sum.dim_IntList(reshape_default_2, [0], True);  reshape_default_2 = None
-        reshape_default_3: "f32[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list, [3072]);  sum_dim_int_list = None
+        reshape_default_3: "f32[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_3);  sum_dim_int_list = _shape_param_3 = None
         return reshape_default_3
 
 
@@ -58,6 +58,10 @@ def _default_make_inputs():
     return [
     torch.randn([8192, 3072], dtype=torch.float32, device='cuda'),
     torch.randn([8192, 3072], dtype=torch.float32, device='cuda'),
+    [8, 1024, 3072],  # _shape_param_0
+    [8, 1024, 3072],  # _shape_param_1
+    [8192, 3072],  # _shape_param_2
+    [3072],  # _shape_param_3
     ]
 
 

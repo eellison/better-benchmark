@@ -15,7 +15,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, convert_element_type_265: "f32[4, 512, 768]", getitem_157: "f32[4, 512, 1]", getitem_156: "f32[4, 512, 1]", arg195_1: "f16[768]", arg196_1: "f16[768]"):
+    def forward(self, convert_element_type_265: "f32[4, 512, 768]", getitem_157: "f32[4, 512, 1]", getitem_156: "f32[4, 512, 1]", arg195_1: "f16[768]", arg196_1: "f16[768]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:666 in forward, code: hidden_states = self.final_layer_norm(hidden_states)
         sub_tensor: "f32[4, 512, 768]" = torch.ops.aten.sub.Tensor(convert_element_type_265, getitem_157);  convert_element_type_265 = getitem_157 = None
         add_tensor: "f32[4, 512, 1]" = torch.ops.aten.add.Tensor(getitem_156, 1e-05);  getitem_156 = None
@@ -26,7 +26,7 @@ class Repro(torch.nn.Module):
         convert_element_type_default: "f16[4, 512, 768]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float16);  add_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:833 in forward, code: logits = self.lm_head(outputs[0]).contiguous()
-        reshape_default: "f16[2048, 768]" = torch.ops.aten.reshape.default(convert_element_type_default, [2048, 768]);  convert_element_type_default = None
+        reshape_default: "f16[2048, 768]" = torch.ops.aten.reshape.default(convert_element_type_default, _shape_param_0);  convert_element_type_default = _shape_param_0 = None
         return reshape_default
 
 
@@ -37,6 +37,7 @@ def _default_make_inputs():
     torch.randn([4, 512, 1], dtype=torch.float32, device='cuda'),
     torch.randn([768], dtype=torch.float16, device='cuda'),
     torch.randn([768], dtype=torch.float16, device='cuda'),
+    [2048, 768],  # _shape_param_0
     ]
 
 

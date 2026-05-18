@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, getitem_112: "f32[1, 512, 1]", add_84: "f32[1, 512, 768]", getitem_113: "f32[1, 512, 1]", arg185_1: "f32[768]", arg186_1: "f32[768]", arg188_1: "f32[768]", arg187_1: "f32[768, 768]", arg190_1: "f32[768]", arg189_1: "f32[768, 768]"):
+    def forward(self, getitem_112: "f32[1, 512, 1]", add_84: "f32[1, 512, 768]", getitem_113: "f32[1, 512, 1]", arg185_1: "f32[768]", arg186_1: "f32[768]", arg188_1: "f32[768]", arg187_1: "f32[768, 768]", arg190_1: "f32[768]", arg189_1: "f32[768, 768]", _shape_param_0):
         # No stacktrace found for following nodes
         add_tensor: "f32[1, 512, 1]" = torch.ops.aten.add.Tensor(getitem_112, 1e-12);  getitem_112 = None
         rsqrt_default: "f32[1, 512, 1]" = torch.ops.aten.rsqrt.default(add_tensor);  add_tensor = None
@@ -27,7 +27,7 @@ class Repro(torch.nn.Module):
         convert_element_type_default: "f16[768]" = torch.ops.prims.convert_element_type.default(arg188_1, torch.float16);  arg188_1 = None
         convert_element_type_default_1: "f16[768, 768]" = torch.ops.prims.convert_element_type.default(arg187_1, torch.float16);  arg187_1 = None
         convert_element_type_default_2: "f16[1, 512, 768]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float16);  add_tensor_1 = None
-        reshape_default: "f16[512, 768]" = torch.ops.aten.reshape.default(convert_element_type_default_2, [512, 768]);  convert_element_type_default_2 = None
+        reshape_default: "f16[512, 768]" = torch.ops.aten.reshape.default(convert_element_type_default_2, _shape_param_0);  convert_element_type_default_2 = _shape_param_0 = None
         permute_default: "f16[768, 768]" = torch.ops.aten.permute.default(convert_element_type_default_1, [1, 0]);  convert_element_type_default_1 = None
         convert_element_type_default_3: "f16[768]" = torch.ops.prims.convert_element_type.default(arg190_1, torch.float16);  arg190_1 = None
         convert_element_type_default_4: "f16[768, 768]" = torch.ops.prims.convert_element_type.default(arg189_1, torch.float16);  arg189_1 = None
@@ -46,6 +46,7 @@ def _default_make_inputs():
     torch.randn([768, 768], dtype=torch.float32, device='cuda'),
     torch.randn([768], dtype=torch.float32, device='cuda'),
     torch.randn([768, 768], dtype=torch.float32, device='cuda'),
+    [512, 768],  # _shape_param_0
     ]
 
 

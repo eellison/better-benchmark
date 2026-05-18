@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm_105: "f32[192, 128, 128]", gt_39: "b8[32, 6, 128, 128]", bmm_18: "f32[192, 128, 128]", amax_9: "f32[32, 6, 128, 1]", sum_10: "f32[32, 6, 128, 1]"):
+    def forward(self, bmm_105: "f32[192, 128, 128]", gt_39: "b8[32, 6, 128, 128]", bmm_18: "f32[192, 128, 128]", amax_9: "f32[32, 6, 128, 1]", sum_10: "f32[32, 6, 128, 1]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:443 in forward, code: attn_output = torch.matmul(attn_weights, value_states)
-        reshape_default: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_105, [32, 6, 128, 128]);  bmm_105 = None
+        reshape_default: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_105, _shape_param_0);  bmm_105 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:437 in forward, code: attn_weights = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
         convert_element_type_default: "f32[32, 6, 128, 128]" = torch.ops.prims.convert_element_type.default(gt_39, torch.float32);  gt_39 = None
@@ -26,7 +26,7 @@ class Repro(torch.nn.Module):
         mul_tensor_1: "f32[32, 6, 128, 128]" = torch.ops.aten.mul.Tensor(reshape_default, mul_tensor);  reshape_default = mul_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:433 in forward, code: scores += position_bias_masked
-        reshape_default_1: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_18, [32, 6, 128, 128]);  bmm_18 = None
+        reshape_default_1: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_18, _shape_param_1);  bmm_18 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:436 in forward, code: attn_weights = nn.functional.softmax(scores.float(), dim=-1).type_as(scores)
         sub_tensor: "f32[32, 6, 128, 128]" = torch.ops.aten.sub.Tensor(reshape_default_1, amax_9);  reshape_default_1 = amax_9 = None
@@ -38,7 +38,7 @@ class Repro(torch.nn.Module):
         fma_default: "f32[32, 6, 128, 128]" = torch.ops.prims.fma.default(neg_default, sum_dim_int_list, mul_tensor_2);  neg_default = sum_dim_int_list = mul_tensor_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:433 in forward, code: scores += position_bias_masked
-        reshape_default_2: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(fma_default, [192, 128, 128]);  fma_default = None
+        reshape_default_2: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(fma_default, _shape_param_2);  fma_default = _shape_param_2 = None
         return reshape_default_2
 
 
@@ -49,6 +49,9 @@ def _default_make_inputs():
     torch.randn([192, 128, 128], dtype=torch.float32, device='cuda'),
     torch.randn([32, 6, 128, 1], dtype=torch.float32, device='cuda'),
     torch.randn([32, 6, 128, 1], dtype=torch.float32, device='cuda'),
+    [32, 6, 128, 128],  # _shape_param_0
+    [32, 6, 128, 128],  # _shape_param_1
+    [192, 128, 128],  # _shape_param_2
     ]
 
 

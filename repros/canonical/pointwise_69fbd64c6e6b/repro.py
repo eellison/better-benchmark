@@ -17,17 +17,17 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm_66: "f32[512, 64, 512]"):
+    def forward(self, bmm_66: "f32[512, 64, 512]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
-        reshape_default: "f32[8, 64, 64, 512]" = torch.ops.aten.reshape.default(bmm_66, [8, 64, 64, 512]);  bmm_66 = None
+        reshape_default: "f32[8, 64, 64, 512]" = torch.ops.aten.reshape.default(bmm_66, _shape_param_0);  bmm_66 = _shape_param_0 = None
         mul_scalar: "f32[8, 64, 64, 512]" = torch.ops.aten.mul.Scalar(reshape_default, 0.3535533905932738);  reshape_default = None
         permute_default: "f32[8, 64, 512, 64]" = torch.ops.aten.permute.default(mul_scalar, [0, 1, 3, 2]);  mul_scalar = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:181 in forward, code: key_layer = self.key(hidden_states).view(*hidden_shape).transpose(1, 2)
         permute_default_1: "f32[8, 512, 64, 64]" = torch.ops.aten.permute.default(permute_default, [0, 2, 1, 3]);  permute_default = None
-        reshape_default_1: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(permute_default_1, [8, 512, 4096]);  permute_default_1 = None
+        reshape_default_1: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(permute_default_1, _shape_param_1);  permute_default_1 = _shape_param_1 = None
         clone_default: "f32[8, 512, 4096]" = torch.ops.aten.clone.default(reshape_default_1, memory_format = torch.contiguous_format);  reshape_default_1 = None
-        reshape_default_2: "f32[4096, 4096]" = torch.ops.aten.reshape.default(clone_default, [4096, 4096]);  clone_default = None
+        reshape_default_2: "f32[4096, 4096]" = torch.ops.aten.reshape.default(clone_default, _shape_param_2);  clone_default = _shape_param_2 = None
         permute_default_2: "f32[4096, 4096]" = torch.ops.aten.permute.default(reshape_default_2, [1, 0]);  reshape_default_2 = None
         return permute_default_2
 
@@ -35,6 +35,9 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randn([512, 64, 512], dtype=torch.float32, device='cuda'),
+    [8, 64, 64, 512],  # _shape_param_0
+    [8, 512, 4096],  # _shape_param_1
+    [4096, 4096],  # _shape_param_2
     ]
 
 

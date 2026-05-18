@@ -15,7 +15,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, add_261: "f32[512, 16, 1024]", getitem_95: "f32[512, 16, 1]", getitem_94: "f32[512, 16, 1]", arg360_1: "f32[1024]", arg361_1: "f32[1024]"):
+    def forward(self, add_261: "f32[512, 16, 1024]", getitem_95: "f32[512, 16, 1]", getitem_94: "f32[512, 16, 1]", arg360_1: "f32[1024]", arg361_1: "f32[1024]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:468 in forward, code: output = self.layer_norm(output + inp)
         sub_tensor: "f32[512, 16, 1024]" = torch.ops.aten.sub.Tensor(add_261, getitem_95);  add_261 = getitem_95 = None
         add_tensor: "f32[512, 16, 1]" = torch.ops.aten.add.Tensor(getitem_94, 1e-12);  getitem_94 = None
@@ -29,7 +29,7 @@ class Repro(torch.nn.Module):
         clone_default: "f32[16, 512, 1024]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:1633 in forward, code: logits = self.lm_loss(transformer_outputs[0])
-        reshape_default: "f32[8192, 1024]" = torch.ops.aten.reshape.default(clone_default, [8192, 1024]);  clone_default = None
+        reshape_default: "f32[8192, 1024]" = torch.ops.aten.reshape.default(clone_default, _shape_param_0);  clone_default = _shape_param_0 = None
         return reshape_default
 
 
@@ -40,6 +40,7 @@ def _default_make_inputs():
     torch.randn([512, 16, 1], dtype=torch.float32, device='cuda'),
     torch.randn([1024], dtype=torch.float32, device='cuda'),
     torch.randn([1024], dtype=torch.float32, device='cuda'),
+    [8192, 1024],  # _shape_param_0
     ]
 
 

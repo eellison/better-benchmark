@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_default_1: "f32[512, 30524]", mm_725: "f32[32768, 384]", primals_1: "i64[256, 128]", full_default_3: "f32[]"):
+    def forward(self, mm_default_1: "f32[512, 30524]", mm_725: "f32[32768, 384]", primals_1: "i64[256, 128]", full_default_3: "f32[]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:632 in forward, code: hidden_states = hidden_states.matmul(torch.cat([self.decoder.weight.t(), self.dense.weight], dim=0))
         slice_tensor: "f32[512, 30522]" = torch.ops.aten.slice.Tensor(mm_default_1, 1, 0, -2);  mm_default_1 = None
         slice_tensor_1: "f32[128, 30522]" = torch.ops.aten.slice.Tensor(slice_tensor, 0, 0, 128)
@@ -24,7 +24,7 @@ class Repro(torch.nn.Module):
         permute_default: "f32[30522, 128]" = torch.ops.aten.permute.default(slice_tensor_1, [1, 0]);  slice_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:208 in forward, code: inputs_embeds = self.embedding_transformation(inputs_embeds)
-        reshape_default: "f32[256, 128, 384]" = torch.ops.aten.reshape.default(mm_725, [256, 128, 384]);  mm_725 = None
+        reshape_default: "f32[256, 128, 384]" = torch.ops.aten.reshape.default(mm_725, _shape_param_0);  mm_725 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:199 in forward, code: inputs_embeds = torch.cat(
         slice_tensor_3: "f32[256, 128, 128]" = torch.ops.aten.slice.Tensor(reshape_default, 2, 0, 128)
@@ -62,6 +62,7 @@ def _default_make_inputs():
     torch.randn([32768, 384], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [256, 128], dtype=torch.int64, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
+    [256, 128, 384],  # _shape_param_0
     ]
 
 

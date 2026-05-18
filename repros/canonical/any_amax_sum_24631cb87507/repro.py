@@ -21,9 +21,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm_default_30: "f32[192, 128, 128]", arg6_1: "f32[32, 6]"):
+    def forward(self, bmm_default_30: "f32[192, 128, 128]", arg6_1: "f32[32, 6]", _shape_param_0, _shape_param_1, _shape_param_2):
         # No stacktrace found for following nodes
-        reshape_default: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_default_30, [32, 6, 128, 128]);  bmm_default_30 = None
+        reshape_default: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_default_30, _shape_param_0);  bmm_default_30 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:331 in compute_bias, code: memory_position = torch.arange(key_length, dtype=torch.long, device=device)[None, :]
         iota_default: "i64[128]" = torch.ops.prims.iota.default(128, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
@@ -96,8 +96,8 @@ class Repro(torch.nn.Module):
         sum_dim_int_list: "f32[32, 6, 128, 1]" = torch.ops.aten.sum.dim_IntList(exp_default, [-1], True)
         div_tensor_2: "f32[32, 6, 128, 128]" = torch.ops.aten.div.Tensor(exp_default, sum_dim_int_list);  exp_default = sum_dim_int_list = None
         where_self_1: "f32[32, 6, 128, 128]" = torch.ops.aten.where.self(logical_not_default_1, full_default_1, div_tensor_2);  logical_not_default_1 = full_default_1 = div_tensor_2 = None
-        expand_default: "f32[32, 6, 128, 128]" = torch.ops.aten.expand.default(where_self_1, [32, 6, 128, 128]);  where_self_1 = None
-        reshape_default_1: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(expand_default, [192, 128, 128]);  expand_default = None
+        expand_default: "f32[32, 6, 128, 128]" = torch.ops.aten.expand.default(where_self_1, _shape_param_1);  where_self_1 = _shape_param_1 = None
+        reshape_default_1: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(expand_default, _shape_param_2);  expand_default = _shape_param_2 = None
         return reshape_default_1
 
 
@@ -105,6 +105,9 @@ def _default_make_inputs():
     return [
     torch.randn([192, 128, 128], dtype=torch.float32, device='cuda'),
     torch.randn([32, 6], dtype=torch.float32, device='cuda'),
+    [32, 6, 128, 128],  # _shape_param_0
+    [32, 6, 128, 128],  # _shape_param_1
+    [192, 128, 128],  # _shape_param_2
     ]
 
 

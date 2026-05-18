@@ -25,9 +25,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_97: "f32[8192, 768]", primals_4: "f32[768]", embedding: "f32[8, 1024, 768]", embedding_1: "f32[1, 1024, 768]", gt: "b8[8, 1024, 768]", getitem_1: "f32[8, 1024, 1]", rsqrt: "f32[8, 1024, 1]", add_147: "f32[8, 1024, 768]", unsqueeze: "i64[1, 1024]", full_default_2: "f32[]", primals_1: "i64[8, 1024]"):
+    def forward(self, mm_97: "f32[8192, 768]", primals_4: "f32[768]", embedding: "f32[8, 1024, 768]", embedding_1: "f32[1, 1024, 768]", gt: "b8[8, 1024, 768]", getitem_1: "f32[8, 1024, 1]", rsqrt: "f32[8, 1024, 1]", add_147: "f32[8, 1024, 768]", unsqueeze: "i64[1, 1024]", full_default_2: "f32[]", primals_1: "i64[8, 1024]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:122 in forward, code: x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
-        reshape_default: "f32[8, 1024, 768]" = torch.ops.aten.reshape.default(mm_97, [8, 1024, 768]);  mm_97 = None
+        reshape_default: "f32[8, 1024, 768]" = torch.ops.aten.reshape.default(mm_97, _shape_param_0);  mm_97 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:412 in forward, code: hidden_states = self.ln_1(hidden_states)
         mul_tensor: "f32[8, 1024, 768]" = torch.ops.aten.mul.Tensor(reshape_default, primals_4);  primals_4 = None
@@ -93,6 +93,7 @@ def _default_make_inputs():
     torch.randint(0, 2, [1, 1024], dtype=torch.int64, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [8, 1024], dtype=torch.int64, device='cuda'),
+    [8, 1024, 768],  # _shape_param_0
     ]
 
 

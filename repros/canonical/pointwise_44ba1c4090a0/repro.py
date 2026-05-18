@@ -16,10 +16,10 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_44: "f16[1584, 2304]"):
+    def forward(self, addmm_44: "f16[1584, 2304]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
-        reshape_default: "f16[8, 198, 2304]" = torch.ops.aten.reshape.default(addmm_44, [8, 198, 2304]);  addmm_44 = None
-        reshape_default_1: "f16[8, 198, 3, 12, 64]" = torch.ops.aten.reshape.default(reshape_default, [8, 198, 3, 12, 64]);  reshape_default = None
+        reshape_default: "f16[8, 198, 2304]" = torch.ops.aten.reshape.default(addmm_44, _shape_param_0);  addmm_44 = _shape_param_0 = None
+        reshape_default_1: "f16[8, 198, 3, 12, 64]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
         permute_default: "f16[3, 8, 12, 198, 64]" = torch.ops.aten.permute.default(reshape_default_1, [2, 0, 3, 1, 4]);  reshape_default_1 = None
         unbind_int = torch.ops.aten.unbind.int(permute_default);  permute_default = None
         getitem: "f16[8, 12, 198, 64]" = unbind_int[0]
@@ -31,6 +31,8 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randn([1584, 2304], dtype=torch.float16, device='cuda'),
+    [8, 198, 2304],  # _shape_param_0
+    [8, 198, 3, 12, 64],  # _shape_param_1
     ]
 
 

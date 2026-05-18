@@ -23,9 +23,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_6: "f32[16384, 768]", mul_153: "f32[32, 512, 768]", primals_99: "f32[768]", mul_114: "f32[32, 512, 768]", div_4: "f32[32, 512, 1]"):
+    def forward(self, mm_6: "f32[16384, 768]", mul_153: "f32[32, 512, 768]", primals_99: "f32[768]", mul_114: "f32[32, 512, 768]", div_4: "f32[32, 512, 1]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/fnet/modeling_fnet.py:218 in forward, code: hidden_states = self.dense(hidden_states)
-        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_6, [32, 512, 768]);  mm_6 = None
+        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_6, _shape_param_0);  mm_6 = _shape_param_0 = None
         add_tensor: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(mul_153, reshape_default);  mul_153 = reshape_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/fnet/modeling_fnet.py:190 in forward, code: hidden_states = self.LayerNorm(input_tensor + hidden_states)
@@ -55,6 +55,7 @@ def _default_make_inputs():
     torch.randn([768], dtype=torch.float32, device='cuda'),
     torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
     torch.randn([32, 512, 1], dtype=torch.float32, device='cuda'),
+    [32, 512, 768],  # _shape_param_0
     ]
 
 

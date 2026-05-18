@@ -25,17 +25,17 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_142: "f32[4096, 768]", mul_451: "f32[8, 512, 768]", mm_144: "f32[4096, 768]", mm_146: "f32[4096, 768]", gt: "b8[8, 512, 768]", primals_7: "f32[768]", mul: "f32[8, 512, 768]", div_25: "f32[8, 512, 1]", primals_3: "i64[1, 512]", primals_2: "i64[1, 512]", primals_1: "i64[8, 512]", mm_1: "f32[30522, 768]"):
+    def forward(self, mm_142: "f32[4096, 768]", mul_451: "f32[8, 512, 768]", mm_144: "f32[4096, 768]", mm_146: "f32[4096, 768]", gt: "b8[8, 512, 768]", primals_7: "f32[768]", mul: "f32[8, 512, 768]", div_25: "f32[8, 512, 1]", primals_3: "i64[1, 512]", primals_2: "i64[1, 512]", primals_1: "i64[8, 512]", mm_1: "f32[30522, 768]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:392 in forward, code: self.value(current_states)
-        reshape_default: "f32[8, 512, 768]" = torch.ops.aten.reshape.default(mm_142, [8, 512, 768]);  mm_142 = None
+        reshape_default: "f32[8, 512, 768]" = torch.ops.aten.reshape.default(mm_142, _shape_param_0);  mm_142 = _shape_param_0 = None
         add_tensor: "f32[8, 512, 768]" = torch.ops.aten.add.Tensor(mul_451, reshape_default);  mul_451 = reshape_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:387 in forward, code: self.key(current_states)
-        reshape_default_1: "f32[8, 512, 768]" = torch.ops.aten.reshape.default(mm_144, [8, 512, 768]);  mm_144 = None
+        reshape_default_1: "f32[8, 512, 768]" = torch.ops.aten.reshape.default(mm_144, _shape_param_1);  mm_144 = _shape_param_1 = None
         add_tensor_1: "f32[8, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_1);  add_tensor = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:363 in forward, code: self.query(hidden_states).view(bsz, -1, self.num_attention_heads, self.attention_head_size).transpose(1, 2)
-        reshape_default_2: "f32[8, 512, 768]" = torch.ops.aten.reshape.default(mm_146, [8, 512, 768]);  mm_146 = None
+        reshape_default_2: "f32[8, 512, 768]" = torch.ops.aten.reshape.default(mm_146, _shape_param_2);  mm_146 = _shape_param_2 = None
         add_tensor_2: "f32[8, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor_1, reshape_default_2);  add_tensor_1 = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:187 in forward, code: embeddings = self.dropout(embeddings)
@@ -69,7 +69,7 @@ class Repro(torch.nn.Module):
         index_put_default: "f32[512, 768]" = torch.ops.aten.index_put.default(full_default_1, [primals_3], where_self, True);  full_default_1 = primals_3 = where_self = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:931 in forward, code: buffered_token_type_ids_expanded = buffered_token_type_ids.expand(batch_size, seq_length)
-        expand_default: "i64[8, 512]" = torch.ops.aten.expand.default(primals_2, [8, 512]);  primals_2 = None
+        expand_default: "i64[8, 512]" = torch.ops.aten.expand.default(primals_2, _shape_param_3);  primals_2 = _shape_param_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:180 in forward, code: token_type_embeddings = self.token_type_embeddings(token_type_ids)
         eq_scalar_1: "b8[8, 512]" = torch.ops.aten.eq.Scalar(expand_default, -1)
@@ -102,6 +102,10 @@ def _default_make_inputs():
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [8, 512], dtype=torch.int64, device='cuda'),
     torch.randn([30522, 768], dtype=torch.float32, device='cuda'),
+    [8, 512, 768],  # _shape_param_0
+    [8, 512, 768],  # _shape_param_1
+    [8, 512, 768],  # _shape_param_2
+    [8, 512],  # _shape_param_3
     ]
 
 

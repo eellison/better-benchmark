@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_188: "bf16[2048, 1024]", add_240: "bf16[4, 512, 1024]", arg300_1: "bf16[1024]"):
+    def forward(self, mm_188: "bf16[2048, 1024]", add_240: "bf16[4, 512, 1024]", arg300_1: "bf16[1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:82 in forward, code: down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
-        reshape_default: "bf16[4, 512, 1024]" = torch.ops.aten.reshape.default(mm_188, [4, 512, 1024]);  mm_188 = None
+        reshape_default: "bf16[4, 512, 1024]" = torch.ops.aten.reshape.default(mm_188, _shape_param_0);  mm_188 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:276 in forward, code: hidden_states = residual + hidden_states
         add_tensor: "bf16[4, 512, 1024]" = torch.ops.aten.add.Tensor(add_240, reshape_default);  add_240 = reshape_default = None
@@ -40,13 +40,13 @@ class Repro(torch.nn.Module):
         mul_tensor_1: "bf16[4, 512, 1024]" = torch.ops.aten.mul.Tensor(arg300_1, convert_element_type_default_1);  arg300_1 = convert_element_type_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:200 in forward, code: query_states = self.q_norm(self.q_proj(hidden_states).view(hidden_shape)).transpose(1, 2)
-        reshape_default_1: "bf16[2048, 1024]" = torch.ops.aten.reshape.default(mul_tensor_1, [2048, 1024])
+        reshape_default_1: "bf16[2048, 1024]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_1);  _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:201 in forward, code: key_states = self.k_norm(self.k_proj(hidden_states).view(hidden_shape)).transpose(1, 2)
-        reshape_default_2: "bf16[2048, 1024]" = torch.ops.aten.reshape.default(mul_tensor_1, [2048, 1024])
+        reshape_default_2: "bf16[2048, 1024]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_2);  _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:202 in forward, code: value_states = self.v_proj(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default_3: "bf16[2048, 1024]" = torch.ops.aten.reshape.default(mul_tensor_1, [2048, 1024]);  mul_tensor_1 = None
+        reshape_default_3: "bf16[2048, 1024]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_3);  mul_tensor_1 = _shape_param_3 = None
         return (reshape_default_1, reshape_default_2, reshape_default_3)
 
 
@@ -55,6 +55,10 @@ def _default_make_inputs():
     torch.randn([2048, 1024], dtype=torch.bfloat16, device='cuda'),
     torch.randn([4, 512, 1024], dtype=torch.bfloat16, device='cuda'),
     torch.randn([1024], dtype=torch.bfloat16, device='cuda'),
+    [4, 512, 1024],  # _shape_param_0
+    [2048, 1024],  # _shape_param_1
+    [2048, 1024],  # _shape_param_2
+    [2048, 1024],  # _shape_param_3
     ]
 
 

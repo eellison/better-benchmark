@@ -16,11 +16,11 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, convolution: "f16[128, 192, 14, 14]", arg5_1: "f32[1, 1, 192]", arg4_1: "f32[1, 197, 192]"):
+    def forward(self, convolution: "f16[128, 192, 14, 14]", arg5_1: "f32[1, 1, 192]", arg4_1: "f32[1, 197, 192]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
-        reshape_default: "f16[128, 192, 196]" = torch.ops.aten.reshape.default(convolution, [128, 192, 196]);  convolution = None
+        reshape_default: "f16[128, 192, 196]" = torch.ops.aten.reshape.default(convolution, _shape_param_0);  convolution = _shape_param_0 = None
         permute_default: "f16[128, 196, 192]" = torch.ops.aten.permute.default(reshape_default, [0, 2, 1]);  reshape_default = None
-        expand_default: "f32[128, 1, 192]" = torch.ops.aten.expand.default(arg5_1, [128, -1, -1]);  arg5_1 = None
+        expand_default: "f32[128, 1, 192]" = torch.ops.aten.expand.default(arg5_1, _shape_param_1);  arg5_1 = _shape_param_1 = None
         cat_default: "f32[128, 197, 192]" = torch.ops.aten.cat.default([expand_default, permute_default], 1);  expand_default = permute_default = None
         add_tensor: "f32[128, 197, 192]" = torch.ops.aten.add.Tensor(cat_default, arg4_1);  cat_default = arg4_1 = None
         var_mean_correction = torch.ops.aten.var_mean.correction(add_tensor, [2], correction = 0, keepdim = True);  add_tensor = None
@@ -36,6 +36,8 @@ def _default_make_inputs():
     torch.randn([128, 192, 14, 14], dtype=torch.float16, device='cuda'),
     torch.randn([1, 1, 192], dtype=torch.float32, device='cuda'),
     torch.randn([1, 197, 192], dtype=torch.float32, device='cuda'),
+    [128, 192, 196],  # _shape_param_0
+    [128, -1, -1],  # _shape_param_1
     ]
 
 

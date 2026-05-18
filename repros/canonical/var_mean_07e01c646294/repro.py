@@ -16,10 +16,10 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, view_168: "f16[2048, 768]", addmm_71: "f16[2048, 768]"):
+    def forward(self, view_168: "f16[2048, 768]", addmm_71: "f16[2048, 768]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:287 in forward, code: hidden_states = (residual + hidden_states).view(hidden_states_shape)
         add_tensor: "f16[2048, 768]" = torch.ops.aten.add.Tensor(view_168, addmm_71);  view_168 = addmm_71 = None
-        reshape_default: "f16[4, 512, 768]" = torch.ops.aten.reshape.default(add_tensor, [4, 512, 768]);  add_tensor = None
+        reshape_default: "f16[4, 512, 768]" = torch.ops.aten.reshape.default(add_tensor, _shape_param_0);  add_tensor = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:666 in forward, code: hidden_states = self.final_layer_norm(hidden_states)
         convert_element_type_default: "f32[4, 512, 768]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float32);  reshape_default = None
@@ -35,6 +35,7 @@ def _default_make_inputs():
     return [
     torch.randn([2048, 768], dtype=torch.float16, device='cuda'),
     torch.randn([2048, 768], dtype=torch.float16, device='cuda'),
+    [4, 512, 768],  # _shape_param_0
     ]
 
 

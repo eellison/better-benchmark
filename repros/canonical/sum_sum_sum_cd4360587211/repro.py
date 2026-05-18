@@ -16,10 +16,10 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm: "f16[128, 1408]", arg229_1: "f16[128, 1408, 7, 7]", arg230_1: "f32[1, 1408, 1, 1]", arg231_1: "f32[1, 1408, 1, 1]", arg59_1: "f32[1408]", arg60_1: "f32[1408]", arg233_1: "f16[128, 1408, 7, 7]", arg234_1: "f32[1, 1408, 1, 1]", arg235_1: "f32[1, 1408, 1, 1]", arg61_1: "f32[1408]", arg62_1: "f32[1408]"):
+    def forward(self, mm: "f16[128, 1408]", arg229_1: "f16[128, 1408, 7, 7]", arg230_1: "f32[1, 1408, 1, 1]", arg231_1: "f32[1, 1408, 1, 1]", arg59_1: "f32[1408]", arg60_1: "f32[1408]", arg233_1: "f16[128, 1408, 7, 7]", arg234_1: "f32[1, 1408, 1, 1]", arg235_1: "f32[1, 1408, 1, 1]", arg61_1: "f32[1408]", arg62_1: "f32[1408]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
-        reshape_default: "f16[128, 1408, 1, 1]" = torch.ops.aten.reshape.default(mm, [128, 1408, 1, 1]);  mm = None
-        expand_default: "f16[128, 1408, 7, 7]" = torch.ops.aten.expand.default(reshape_default, [128, 1408, 7, 7]);  reshape_default = None
+        reshape_default: "f16[128, 1408, 1, 1]" = torch.ops.aten.reshape.default(mm, _shape_param_0);  mm = _shape_param_0 = None
+        expand_default: "f16[128, 1408, 7, 7]" = torch.ops.aten.expand.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
         div_scalar: "f16[128, 1408, 7, 7]" = torch.ops.aten.div.Scalar(expand_default, 49);  expand_default = None
         sub_tensor: "f32[128, 1408, 7, 7]" = torch.ops.aten.sub.Tensor(arg229_1, arg230_1)
         mul_tensor: "f32[128, 1408, 7, 7]" = torch.ops.aten.mul.Tensor(sub_tensor, arg231_1);  sub_tensor = None
@@ -119,6 +119,8 @@ def _default_make_inputs():
     torch.randn([1, 1408, 1, 1], dtype=torch.float32, device='cuda'),
     torch.randn([1408], dtype=torch.float32, device='cuda'),
     torch.randn([1408], dtype=torch.float32, device='cuda'),
+    [128, 1408, 1, 1],  # _shape_param_0
+    [128, 1408, 7, 7],  # _shape_param_1
     ]
 
 

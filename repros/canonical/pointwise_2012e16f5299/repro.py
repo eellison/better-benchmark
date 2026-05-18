@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "i64[512]"):
+    def forward(self, arg0_1: "i64[512]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:379 in sdpa_mask_recent_torch, code: kv_arange = torch.arange(kv_length, device=cache_position.device)
         iota_default: "i64[512]" = torch.ops.prims.iota.default(512, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
 
@@ -24,12 +24,12 @@ class Repro(torch.nn.Module):
         add_tensor: "i64[512]" = torch.ops.aten.add.Tensor(iota_default, 0);  iota_default = None
 
         # File: /tmp/pytorch-work/torch/_dynamo/_trace_wrapped_higher_order_op.py:158 in __torch_function__, code: return func(*args, **(kwargs or {}))
-        reshape_default: "i64[512, 1]" = torch.ops.aten.reshape.default(arg0_1, [512, 1]);  arg0_1 = None
+        reshape_default: "i64[512, 1]" = torch.ops.aten.reshape.default(arg0_1, _shape_param_0);  arg0_1 = _shape_param_0 = None
         le_tensor: "b8[512, 512]" = torch.ops.aten.le.Tensor(add_tensor, reshape_default);  add_tensor = reshape_default = None
 
         # File: /tmp/pytorch-work/torch/_functorch/vmap.py:204 in _maybe_remove_batch_dim, code: return _remove_batch_dim(batched_output, vmap_level, batch_size, out_dim)
-        expand_default: "b8[1, 512, 512]" = torch.ops.aten.expand.default(le_tensor, [1, 512, 512]);  le_tensor = None
-        expand_default_1: "b8[4, 1, 512, 512]" = torch.ops.aten.expand.default(expand_default, [4, 1, 512, 512]);  expand_default = None
+        expand_default: "b8[1, 512, 512]" = torch.ops.aten.expand.default(le_tensor, _shape_param_1);  le_tensor = _shape_param_1 = None
+        expand_default_1: "b8[4, 1, 512, 512]" = torch.ops.aten.expand.default(expand_default, _shape_param_2);  expand_default = _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:521 in eager_mask, code: mask = torch.where(mask, torch.tensor(0.0, device=mask.device, dtype=dtype), min_dtype)
         full_default: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
@@ -41,6 +41,9 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randint(0, 2, [512], dtype=torch.int64, device='cuda'),
+    [512, 1],  # _shape_param_0
+    [1, 512, 512],  # _shape_param_1
+    [4, 1, 512, 512],  # _shape_param_2
     ]
 
 

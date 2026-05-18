@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg1_1: "f32[50005, 768]", arg0_1: "i64[16, 1024]", arg2_1: "f32[1026, 768]"):
+    def forward(self, arg1_1: "f32[50005, 768]", arg0_1: "i64[16, 1024]", arg2_1: "f32[1026, 768]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/plbart/modeling_plbart.py:71 in forward, code: return super().forward(input_ids) * self.embed_scale
         embedding_default: "f32[16, 1024, 768]" = torch.ops.aten.embedding.default(arg1_1, arg0_1, 1);  arg1_1 = arg0_1 = None
         mul_tensor: "f32[16, 1024, 768]" = torch.ops.aten.mul.Tensor(embedding_default, 27.712812921102035);  embedding_default = None
@@ -64,68 +64,68 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:73 in sdpa_attention_forward, code: attention_mask = attention_mask[:, :, :, : key.shape[-2]]
         unsqueeze_default_3: "f32[1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(mul_tensor_1, 0)
         unsqueeze_default_4: "f32[1, 1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_3, 1);  unsqueeze_default_3 = None
-        expand_default: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_4, [16, 1, -1, -1]);  unsqueeze_default_4 = None
+        expand_default: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_4, _shape_param_0);  unsqueeze_default_4 = _shape_param_0 = None
         slice_tensor: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(expand_default, 3, 0, 1024);  expand_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:96 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
         constant_pad_nd_default: "f32[16, 1, 1024, 1032]" = torch.ops.aten.constant_pad_nd.default(slice_tensor, [0, 8], 0.0);  slice_tensor = None
         slice_tensor_1: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(constant_pad_nd_default, -1, 0, 1024);  constant_pad_nd_default = None
-        expand_default_1: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_1, [16, 12, 1024, 1024]);  slice_tensor_1 = None
+        expand_default_1: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_1, _shape_param_1);  slice_tensor_1 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:73 in sdpa_attention_forward, code: attention_mask = attention_mask[:, :, :, : key.shape[-2]]
         unsqueeze_default_5: "f32[1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(mul_tensor_1, 0)
         unsqueeze_default_6: "f32[1, 1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_5, 1);  unsqueeze_default_5 = None
-        expand_default_2: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_6, [16, 1, -1, -1]);  unsqueeze_default_6 = None
+        expand_default_2: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_6, _shape_param_2);  unsqueeze_default_6 = _shape_param_2 = None
         slice_tensor_2: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(expand_default_2, 3, 0, 1024);  expand_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:96 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
         constant_pad_nd_default_1: "f32[16, 1, 1024, 1032]" = torch.ops.aten.constant_pad_nd.default(slice_tensor_2, [0, 8], 0.0);  slice_tensor_2 = None
         slice_tensor_3: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(constant_pad_nd_default_1, -1, 0, 1024);  constant_pad_nd_default_1 = None
-        expand_default_3: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_3, [16, 12, 1024, 1024]);  slice_tensor_3 = None
+        expand_default_3: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_3, _shape_param_3);  slice_tensor_3 = _shape_param_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:73 in sdpa_attention_forward, code: attention_mask = attention_mask[:, :, :, : key.shape[-2]]
         unsqueeze_default_7: "f32[1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(mul_tensor_1, 0)
         unsqueeze_default_8: "f32[1, 1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_7, 1);  unsqueeze_default_7 = None
-        expand_default_4: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_8, [16, 1, -1, -1]);  unsqueeze_default_8 = None
+        expand_default_4: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_8, _shape_param_4);  unsqueeze_default_8 = _shape_param_4 = None
         slice_tensor_4: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(expand_default_4, 3, 0, 1024);  expand_default_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:96 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
         constant_pad_nd_default_2: "f32[16, 1, 1024, 1032]" = torch.ops.aten.constant_pad_nd.default(slice_tensor_4, [0, 8], 0.0);  slice_tensor_4 = None
         slice_tensor_5: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(constant_pad_nd_default_2, -1, 0, 1024);  constant_pad_nd_default_2 = None
-        expand_default_5: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_5, [16, 12, 1024, 1024]);  slice_tensor_5 = None
+        expand_default_5: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_5, _shape_param_5);  slice_tensor_5 = _shape_param_5 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:73 in sdpa_attention_forward, code: attention_mask = attention_mask[:, :, :, : key.shape[-2]]
         unsqueeze_default_9: "f32[1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(mul_tensor_1, 0)
         unsqueeze_default_10: "f32[1, 1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_9, 1);  unsqueeze_default_9 = None
-        expand_default_6: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_10, [16, 1, -1, -1]);  unsqueeze_default_10 = None
+        expand_default_6: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_10, _shape_param_6);  unsqueeze_default_10 = _shape_param_6 = None
         slice_tensor_6: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(expand_default_6, 3, 0, 1024);  expand_default_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:96 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
         constant_pad_nd_default_3: "f32[16, 1, 1024, 1032]" = torch.ops.aten.constant_pad_nd.default(slice_tensor_6, [0, 8], 0.0);  slice_tensor_6 = None
         slice_tensor_7: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(constant_pad_nd_default_3, -1, 0, 1024);  constant_pad_nd_default_3 = None
-        expand_default_7: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_7, [16, 12, 1024, 1024]);  slice_tensor_7 = None
+        expand_default_7: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_7, _shape_param_7);  slice_tensor_7 = _shape_param_7 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:73 in sdpa_attention_forward, code: attention_mask = attention_mask[:, :, :, : key.shape[-2]]
         unsqueeze_default_11: "f32[1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(mul_tensor_1, 0)
         unsqueeze_default_12: "f32[1, 1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_11, 1);  unsqueeze_default_11 = None
-        expand_default_8: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_12, [16, 1, -1, -1]);  unsqueeze_default_12 = None
+        expand_default_8: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_12, _shape_param_8);  unsqueeze_default_12 = _shape_param_8 = None
         slice_tensor_8: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(expand_default_8, 3, 0, 1024);  expand_default_8 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:96 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
         constant_pad_nd_default_4: "f32[16, 1, 1024, 1032]" = torch.ops.aten.constant_pad_nd.default(slice_tensor_8, [0, 8], 0.0);  slice_tensor_8 = None
         slice_tensor_9: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(constant_pad_nd_default_4, -1, 0, 1024);  constant_pad_nd_default_4 = None
-        expand_default_9: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_9, [16, 12, 1024, 1024]);  slice_tensor_9 = None
+        expand_default_9: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_9, _shape_param_9);  slice_tensor_9 = _shape_param_9 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:73 in sdpa_attention_forward, code: attention_mask = attention_mask[:, :, :, : key.shape[-2]]
         unsqueeze_default_13: "f32[1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(mul_tensor_1, 0);  mul_tensor_1 = None
         unsqueeze_default_14: "f32[1, 1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_13, 1);  unsqueeze_default_13 = None
-        expand_default_10: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_14, [16, 1, -1, -1]);  unsqueeze_default_14 = None
+        expand_default_10: "f32[16, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_14, _shape_param_10);  unsqueeze_default_14 = _shape_param_10 = None
         slice_tensor_10: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(expand_default_10, 3, 0, 1024);  expand_default_10 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:96 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
         constant_pad_nd_default_5: "f32[16, 1, 1024, 1032]" = torch.ops.aten.constant_pad_nd.default(slice_tensor_10, [0, 8], 0.0);  slice_tensor_10 = None
         slice_tensor_11: "f32[16, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(constant_pad_nd_default_5, -1, 0, 1024);  constant_pad_nd_default_5 = None
-        expand_default_11: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_11, [16, 12, 1024, 1024]);  slice_tensor_11 = None
+        expand_default_11: "f32[16, 12, 1024, 1024]" = torch.ops.aten.expand.default(slice_tensor_11, _shape_param_11);  slice_tensor_11 = _shape_param_11 = None
         return (expand_default_1, expand_default_3, expand_default_5, expand_default_7, expand_default_9, expand_default_11, getitem, getitem_1)
 
 
@@ -134,6 +134,18 @@ def _default_make_inputs():
     torch.randn([50005, 768], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [16, 1024], dtype=torch.int64, device='cuda'),
     torch.randn([1026, 768], dtype=torch.float32, device='cuda'),
+    [16, 1, -1, -1],  # _shape_param_0
+    [16, 12, 1024, 1024],  # _shape_param_1
+    [16, 1, -1, -1],  # _shape_param_2
+    [16, 12, 1024, 1024],  # _shape_param_3
+    [16, 1, -1, -1],  # _shape_param_4
+    [16, 12, 1024, 1024],  # _shape_param_5
+    [16, 1, -1, -1],  # _shape_param_6
+    [16, 12, 1024, 1024],  # _shape_param_7
+    [16, 1, -1, -1],  # _shape_param_8
+    [16, 12, 1024, 1024],  # _shape_param_9
+    [16, 1, -1, -1],  # _shape_param_10
+    [16, 12, 1024, 1024],  # _shape_param_11
     ]
 
 

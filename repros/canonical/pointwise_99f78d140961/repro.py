@@ -15,9 +15,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, getitem_125: "f32[8, 1024, 768]"):
+    def forward(self, getitem_125: "f32[8, 1024, 768]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:316 in forward, code: value_states = value_states.view(shape_kv).transpose(1, 2)
-        reshape_default: "f32[8, 1024, 12, 64]" = torch.ops.aten.reshape.default(getitem_125, [8, 1024, -1, 64]);  getitem_125 = None
+        reshape_default: "f32[8, 1024, 12, 64]" = torch.ops.aten.reshape.default(getitem_125, _shape_param_0);  getitem_125 = _shape_param_0 = None
         permute_default: "f32[8, 12, 1024, 64]" = torch.ops.aten.permute.default(reshape_default, [0, 2, 1, 3]);  reshape_default = None
         return permute_default
 
@@ -25,6 +25,7 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randn([8, 1024, 768], dtype=torch.float32, device='cuda'),
+    [8, 1024, -1, 64],  # _shape_param_0
     ]
 
 

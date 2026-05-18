@@ -23,18 +23,18 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg1119_1: "i64[256, 128]", mm_default: "f32[32768, 30524]", arg1118_1: "f32[30522]"):
+    def forward(self, arg1119_1: "i64[256, 128]", mm_default: "f32[32768, 30524]", arg1118_1: "f32[30522]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:994 in forward, code: masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))
         reshape_default: "i64[32768]" = torch.ops.aten.reshape.default(arg1119_1, [-1]);  arg1119_1 = None
         ne_scalar: "b8[32768]" = torch.ops.aten.ne.Scalar(reshape_default, -100)
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:632 in forward, code: hidden_states = hidden_states.matmul(torch.cat([self.decoder.weight.t(), self.dense.weight], dim=0))
         slice_tensor: "f32[32768, 30522]" = torch.ops.aten.slice.Tensor(mm_default, 1, 0, -2);  mm_default = None
-        reshape_default_1: "f32[256, 128, 30522]" = torch.ops.aten.reshape.default(slice_tensor, [256, 128, 30522]);  slice_tensor = None
+        reshape_default_1: "f32[256, 128, 30522]" = torch.ops.aten.reshape.default(slice_tensor, _shape_param_0);  slice_tensor = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:633 in forward, code: hidden_states += self.decoder.bias
         add_tensor: "f32[256, 128, 30522]" = torch.ops.aten.add.Tensor(reshape_default_1, arg1118_1);  reshape_default_1 = arg1118_1 = None
-        reshape_default_2: "f32[32768, 30522]" = torch.ops.aten.reshape.default(add_tensor, [32768, 30522]);  add_tensor = None
+        reshape_default_2: "f32[32768, 30522]" = torch.ops.aten.reshape.default(add_tensor, _shape_param_1);  add_tensor = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:994 in forward, code: masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))
         amax_default: "f32[32768, 1]" = torch.ops.aten.amax.default(reshape_default_2, [1], True)
@@ -59,7 +59,7 @@ class Repro(torch.nn.Module):
         div_tensor: "f32[]" = torch.ops.aten.div.Tensor(sum_default, convert_element_type_default);  sum_default = convert_element_type_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:633 in forward, code: hidden_states += self.decoder.bias
-        reshape_default_3: "f32[256, 128, 30522]" = torch.ops.aten.reshape.default(reshape_default_2, [256, 128, 30522]);  reshape_default_2 = None
+        reshape_default_3: "f32[256, 128, 30522]" = torch.ops.aten.reshape.default(reshape_default_2, _shape_param_2);  reshape_default_2 = _shape_param_2 = None
         return (div_tensor, reshape_default_3)
 
 
@@ -68,6 +68,9 @@ def _default_make_inputs():
     torch.randint(0, 2, [256, 128], dtype=torch.int64, device='cuda'),
     torch.randn([32768, 30524], dtype=torch.float32, device='cuda'),
     torch.randn([30522], dtype=torch.float32, device='cuda'),
+    [256, 128, 30522],  # _shape_param_0
+    [32768, 30522],  # _shape_param_1
+    [256, 128, 30522],  # _shape_param_2
     ]
 
 

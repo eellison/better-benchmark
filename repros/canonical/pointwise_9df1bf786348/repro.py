@@ -15,22 +15,24 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, getitem_52: "f32[64, 4, 512, 64]"):
+    def forward(self, getitem_52: "f32[64, 4, 512, 64]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/electra/modeling_electra.py:325 in forward, code: context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
         permute_default: "f32[64, 512, 4, 64]" = torch.ops.aten.permute.default(getitem_52, [0, 2, 1, 3]);  getitem_52 = None
         clone_default: "f32[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/electra/modeling_electra.py:327 in forward, code: context_layer = context_layer.view(new_context_layer_shape)
-        reshape_default: "f32[64, 512, 256]" = torch.ops.aten.reshape.default(clone_default, [64, 512, 256]);  clone_default = None
+        reshape_default: "f32[64, 512, 256]" = torch.ops.aten.reshape.default(clone_default, _shape_param_0);  clone_default = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/electra/modeling_electra.py:341 in forward, code: hidden_states = self.dense(hidden_states)
-        reshape_default_1: "f32[32768, 256]" = torch.ops.aten.reshape.default(reshape_default, [32768, 256]);  reshape_default = None
+        reshape_default_1: "f32[32768, 256]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
         return reshape_default_1
 
 
 def _default_make_inputs():
     return [
     torch.randn([64, 4, 512, 64], dtype=torch.float32, device='cuda'),
+    [64, 512, 256],  # _shape_param_0
+    [32768, 256],  # _shape_param_1
     ]
 
 

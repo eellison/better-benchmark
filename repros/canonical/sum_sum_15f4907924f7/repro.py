@@ -20,9 +20,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_2: "f32[4096, 4096]", primals_25: "f32[4096]", mul_120: "f32[8, 512, 4096]", div_15: "f32[8, 512, 1]"):
+    def forward(self, mm_2: "f32[4096, 4096]", primals_25: "f32[4096]", mul_120: "f32[8, 512, 4096]", div_15: "f32[8, 512, 1]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:538 in forward, code: hidden_states = self.dense(hidden_states)
-        reshape_default: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_2, [8, 512, 4096]);  mm_2 = None
+        reshape_default: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_2, _shape_param_0);  mm_2 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
         mul_tensor: "f32[8, 512, 4096]" = torch.ops.aten.mul.Tensor(reshape_default, primals_25);  reshape_default = primals_25 = None
@@ -36,7 +36,7 @@ class Repro(torch.nn.Module):
         mul_tensor_4: "f32[8, 512, 4096]" = torch.ops.aten.mul.Tensor(div_15, sub_tensor_1);  div_15 = sub_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
-        reshape_default_1: "f32[4096, 4096]" = torch.ops.aten.reshape.default(mul_tensor_4, [4096, 4096]);  mul_tensor_4 = None
+        reshape_default_1: "f32[4096, 4096]" = torch.ops.aten.reshape.default(mul_tensor_4, _shape_param_1);  mul_tensor_4 = _shape_param_1 = None
         permute_default: "f32[4096, 4096]" = torch.ops.aten.permute.default(reshape_default_1, [1, 0]);  reshape_default_1 = None
         return permute_default
 
@@ -47,6 +47,8 @@ def _default_make_inputs():
     torch.randn([4096], dtype=torch.float32, device='cuda'),
     torch.randn([8, 512, 4096], dtype=torch.float32, device='cuda'),
     torch.randn([8, 512, 1], dtype=torch.float32, device='cuda'),
+    [8, 512, 4096],  # _shape_param_0
+    [4096, 4096],  # _shape_param_1
     ]
 
 

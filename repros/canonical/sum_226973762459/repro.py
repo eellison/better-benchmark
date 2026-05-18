@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, tangents_1: "f32[]", convert_element_type_6: "f32[]", primals_77: "i64[32, 128]", view_604: "f32[32, 128, 250112]", amax_24: "f32[4096, 1]", log_2: "f32[4096, 1]", tangents_2: "f32[32, 128, 250112]"):
+    def forward(self, tangents_1: "f32[]", convert_element_type_6: "f32[]", primals_77: "i64[32, 128]", view_604: "f32[32, 128, 250112]", amax_24: "f32[4096, 1]", log_2: "f32[4096, 1]", tangents_2: "f32[32, 128, 250112]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:1823 in forward, code: loss = loss_fct(lm_logits.view(-1, lm_logits.size(-1)), labels.view(-1))
         div_tensor: "f32[]" = torch.ops.aten.div.Tensor(tangents_1, convert_element_type_6);  tangents_1 = convert_element_type_6 = None
         reshape_default: "i64[4096]" = torch.ops.aten.reshape.default(primals_77, [-1]);  primals_77 = None
@@ -28,8 +28,8 @@ class Repro(torch.nn.Module):
 
         # No stacktrace found for following nodes
         iota_default: "i64[250112]" = torch.ops.prims.iota.default(250112, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
-        reshape_default_1: "i64[1, 250112]" = torch.ops.aten.reshape.default(iota_default, [1, 250112]);  iota_default = None
-        expand_default: "i64[4096, 250112]" = torch.ops.aten.expand.default(where_self, [4096, 250112]);  where_self = None
+        reshape_default_1: "i64[1, 250112]" = torch.ops.aten.reshape.default(iota_default, _shape_param_0);  iota_default = _shape_param_0 = None
+        expand_default: "i64[4096, 250112]" = torch.ops.aten.expand.default(where_self, _shape_param_1);  where_self = _shape_param_1 = None
         eq_tensor: "b8[4096, 250112]" = torch.ops.aten.eq.Tensor(expand_default, reshape_default_1);  expand_default = reshape_default_1 = None
         scalar_tensor_default: "f32[]" = torch.ops.aten.scalar_tensor.default(0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0))
         scalar_tensor_default_1: "f32[]" = torch.ops.aten.scalar_tensor.default(-1.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0))
@@ -43,18 +43,18 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:1823 in forward, code: loss = loss_fct(lm_logits.view(-1, lm_logits.size(-1)), labels.view(-1))
         where_self_2: "f32[4096, 1]" = torch.ops.aten.where.self(ne_scalar, div_tensor, full_default_1);  ne_scalar = div_tensor = full_default_1 = None
         mul_tensor: "f32[4096, 250112]" = torch.ops.aten.mul.Tensor(where_self_1, where_self_2);  where_self_1 = where_self_2 = None
-        reshape_default_2: "f32[4096, 250112]" = torch.ops.aten.reshape.default(view_604, [-1, 250112]);  view_604 = None
+        reshape_default_2: "f32[4096, 250112]" = torch.ops.aten.reshape.default(view_604, _shape_param_2);  view_604 = _shape_param_2 = None
         sub_tensor: "f32[4096, 250112]" = torch.ops.aten.sub.Tensor(reshape_default_2, amax_24);  reshape_default_2 = amax_24 = None
         sub_tensor_1: "f32[4096, 250112]" = torch.ops.aten.sub.Tensor(sub_tensor, log_2);  sub_tensor = log_2 = None
         exp_default: "f32[4096, 250112]" = torch.ops.aten.exp.default(sub_tensor_1);  sub_tensor_1 = None
         sum_dim_int_list: "f32[4096, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [1], True)
         mul_tensor_1: "f32[4096, 250112]" = torch.ops.aten.mul.Tensor(exp_default, sum_dim_int_list);  exp_default = sum_dim_int_list = None
         sub_tensor_2: "f32[4096, 250112]" = torch.ops.aten.sub.Tensor(mul_tensor, mul_tensor_1);  mul_tensor = mul_tensor_1 = None
-        reshape_default_3: "f32[32, 128, 250112]" = torch.ops.aten.reshape.default(sub_tensor_2, [32, 128, 250112]);  sub_tensor_2 = None
+        reshape_default_3: "f32[32, 128, 250112]" = torch.ops.aten.reshape.default(sub_tensor_2, _shape_param_3);  sub_tensor_2 = _shape_param_3 = None
         add_tensor: "f32[32, 128, 250112]" = torch.ops.aten.add.Tensor(tangents_2, reshape_default_3);  tangents_2 = reshape_default_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:1816 in forward, code: lm_logits = self.lm_head(sequence_output)
-        reshape_default_4: "f32[4096, 250112]" = torch.ops.aten.reshape.default(add_tensor, [4096, 250112]);  add_tensor = None
+        reshape_default_4: "f32[4096, 250112]" = torch.ops.aten.reshape.default(add_tensor, _shape_param_4);  add_tensor = _shape_param_4 = None
         permute_default: "f32[250112, 4096]" = torch.ops.aten.permute.default(reshape_default_4, [1, 0]);  reshape_default_4 = None
         return permute_default
 
@@ -68,6 +68,11 @@ def _default_make_inputs():
     torch.randn([4096, 1], dtype=torch.float32, device='cuda'),
     torch.randn([4096, 1], dtype=torch.float32, device='cuda'),
     torch.randn([32, 128, 250112], dtype=torch.float32, device='cuda'),
+    [1, 250112],  # _shape_param_0
+    [4096, 250112],  # _shape_param_1
+    [-1, 250112],  # _shape_param_2
+    [32, 128, 250112],  # _shape_param_3
+    [4096, 250112],  # _shape_param_4
     ]
 
 

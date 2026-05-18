@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_94: "f16[1584, 768]", arg2_1: "f32[768]", arg39_1: "f32[8, 198, 768]", arg260_1: "f32[8, 198, 1]", add_44: "f32[8, 198, 768]"):
+    def forward(self, mm_94: "f16[1584, 768]", arg2_1: "f32[768]", arg39_1: "f32[8, 198, 768]", arg260_1: "f32[8, 198, 1]", add_44: "f32[8, 198, 768]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
-        reshape_default: "f16[8, 198, 768]" = torch.ops.aten.reshape.default(mm_94, [8, 198, 768]);  mm_94 = None
+        reshape_default: "f16[8, 198, 768]" = torch.ops.aten.reshape.default(mm_94, _shape_param_0);  mm_94 = _shape_param_0 = None
         convert_element_type_default: "f32[8, 198, 768]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float32);  reshape_default = None
         mul_tensor: "f32[8, 198, 768]" = torch.ops.aten.mul.Tensor(convert_element_type_default, arg2_1);  convert_element_type_default = arg2_1 = None
         mul_tensor_1: "f32[8, 198, 768]" = torch.ops.aten.mul.Tensor(mul_tensor, 768)
@@ -31,7 +31,7 @@ class Repro(torch.nn.Module):
         mul_tensor_4: "f32[8, 198, 768]" = torch.ops.aten.mul.Tensor(arg260_1, sub_tensor_1);  arg260_1 = sub_tensor_1 = None
         add_tensor: "f32[8, 198, 768]" = torch.ops.aten.add.Tensor(add_44, mul_tensor_4);  add_44 = mul_tensor_4 = None
         convert_element_type_default_1: "f16[8, 198, 768]" = torch.ops.prims.convert_element_type.default(add_tensor, torch.float16);  add_tensor = None
-        reshape_default_1: "f16[1584, 768]" = torch.ops.aten.reshape.default(convert_element_type_default_1, [1584, 768]);  convert_element_type_default_1 = None
+        reshape_default_1: "f16[1584, 768]" = torch.ops.aten.reshape.default(convert_element_type_default_1, _shape_param_1);  convert_element_type_default_1 = _shape_param_1 = None
         return reshape_default_1
 
 
@@ -42,6 +42,8 @@ def _default_make_inputs():
     torch.randn([8, 198, 768], dtype=torch.float32, device='cuda'),
     torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
     torch.randn([8, 198, 768], dtype=torch.float32, device='cuda'),
+    [8, 198, 768],  # _shape_param_0
+    [1584, 768],  # _shape_param_1
     ]
 
 

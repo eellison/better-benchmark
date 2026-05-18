@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm_41: "f16[48, 476, 476]", arg41_1: "f32[4, 12, 476, 476]"):
+    def forward(self, bmm_41: "f16[48, 476, 476]", arg41_1: "f32[4, 12, 476, 476]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
-        reshape_default: "f16[4, 12, 476, 476]" = torch.ops.aten.reshape.default(bmm_41, [4, 12, 476, 476]);  bmm_41 = None
+        reshape_default: "f16[4, 12, 476, 476]" = torch.ops.aten.reshape.default(bmm_41, _shape_param_0);  bmm_41 = _shape_param_0 = None
         convert_element_type_default: "f32[4, 12, 476, 476]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float32);  reshape_default = None
         mul_tensor: "f32[4, 12, 476, 476]" = torch.ops.aten.mul.Tensor(convert_element_type_default, arg41_1);  convert_element_type_default = None
         sum_dim_int_list: "f32[4, 12, 476, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [-1], True)
@@ -26,14 +26,16 @@ class Repro(torch.nn.Module):
         fma_default: "f32[4, 12, 476, 476]" = torch.ops.prims.fma.default(neg_default, sum_dim_int_list, mul_tensor);  neg_default = sum_dim_int_list = mul_tensor = None
         convert_element_type_default_1: "f16[4, 12, 476, 476]" = torch.ops.prims.convert_element_type.default(fma_default, torch.float16);  fma_default = None
         div_tensor: "f16[4, 12, 476, 476]" = torch.ops.aten.div.Tensor(convert_element_type_default_1, 8.0);  convert_element_type_default_1 = None
-        reshape_default_1: "f16[48, 476, 476]" = torch.ops.aten.reshape.default(div_tensor, [48, 476, 476]);  div_tensor = None
+        reshape_default_1: "f16[48, 476, 476]" = torch.ops.aten.reshape.default(div_tensor, _shape_param_1);  div_tensor = _shape_param_1 = None
         return reshape_default_1
 
 
 def _default_make_inputs():
     return [
     torch.randn([48, 476, 476], dtype=torch.float16, device='cuda'),
-    torch.randn(10876400, dtype=torch.float32, device='cuda').as_strided([4, 12, 476, 476], [2719104, 226592, 476, 1]),  # arg41_1
+    torch.randn(10876400, dtype=torch.float32, device='cuda').as_strided([4, 12, 476, 476], [2719104, 226592, 476, 1]),  # arg41_1,
+    [4, 12, 476, 476],  # _shape_param_0
+    [48, 476, 476],  # _shape_param_1
     ]
 
 

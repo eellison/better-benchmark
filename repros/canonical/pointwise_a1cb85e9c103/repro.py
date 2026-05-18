@@ -15,12 +15,12 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "f32[8, 64, 64, 64]", arg1_1: "f32[8, 64, 64, 192]", arg2_1: "i64[8, 4096]"):
+    def forward(self, arg0_1: "f32[8, 64, 64, 64]", arg1_1: "f32[8, 64, 64, 192]", arg2_1: "i64[8, 4096]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:296 in torch_dynamo_resume_in_forward_at_292, code: position_encodings = torch.cat(
         cat_default: "f32[8, 64, 64, 256]" = torch.ops.aten.cat.default([arg0_1, arg1_1], -1);  arg0_1 = arg1_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:299 in torch_dynamo_resume_in_forward_at_292, code: position_encodings = torch.reshape(position_encodings, (batch_size, -1, position_encodings.shape[-1]))
-        reshape_default: "f32[8, 4096, 256]" = torch.ops.aten.reshape.default(cat_default, [8, -1, 256]);  cat_default = None
+        reshape_default: "f32[8, 4096, 256]" = torch.ops.aten.reshape.default(cat_default, _shape_param_0);  cat_default = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:304 in torch_dynamo_resume_in_forward_at_292, code: torch.index_select(position_encodings[i], 0, position_ids[i]).unsqueeze(0)
         select_int: "f32[4096, 256]" = torch.ops.aten.select.int(reshape_default, 0, 0)
@@ -66,6 +66,7 @@ def _default_make_inputs():
     torch.randn([8, 64, 64, 64], dtype=torch.float32, device='cuda'),
     torch.randn([8, 64, 64, 192], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [8, 4096], dtype=torch.int64, device='cuda'),
+    [8, -1, 256],  # _shape_param_0
     ]
 
 

@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm_141: "f32[512, 128, 128]", div: "f32[32, 16, 128, 128]", primals_9: "b8[1, 1, 2048, 2048]", full_default_1: "f32[]"):
+    def forward(self, bmm_141: "f32[512, 128, 128]", div: "f32[32, 16, 128, 128]", primals_9: "b8[1, 1, 2048, 2048]", full_default_1: "f32[]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:228 in _attn, code: attn_output = torch.matmul(attn_weights, value)
-        reshape_default: "f32[32, 16, 128, 128]" = torch.ops.aten.reshape.default(bmm_141, [32, 16, 128, 128]);  bmm_141 = None
+        reshape_default: "f32[32, 16, 128, 128]" = torch.ops.aten.reshape.default(bmm_141, _shape_param_0);  bmm_141 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:220 in _attn, code: attn_weights = nn.functional.softmax(attn_weights, dim=-1)
         mul_tensor: "f32[32, 16, 128, 128]" = torch.ops.aten.mul.Tensor(reshape_default, div);  reshape_default = None
@@ -34,7 +34,7 @@ class Repro(torch.nn.Module):
         where_self: "f32[32, 16, 128, 128]" = torch.ops.aten.where.self(slice_tensor_1, fma_default, full_default_1);  slice_tensor_1 = fma_default = full_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:205 in _attn, code: attn_weights = torch.matmul(query, key.transpose(-1, -2))
-        reshape_default_1: "f32[512, 128, 128]" = torch.ops.aten.reshape.default(where_self, [512, 128, 128]);  where_self = None
+        reshape_default_1: "f32[512, 128, 128]" = torch.ops.aten.reshape.default(where_self, _shape_param_1);  where_self = _shape_param_1 = None
         return reshape_default_1
 
 
@@ -44,6 +44,8 @@ def _default_make_inputs():
     torch.randn([32, 16, 128, 128], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [1, 1, 2048, 2048], dtype=torch.bool, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
+    [32, 16, 128, 128],  # _shape_param_0
+    [512, 128, 128],  # _shape_param_1
     ]
 
 

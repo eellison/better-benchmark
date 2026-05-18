@@ -17,9 +17,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm: "f32[256, 512, 512]", iota: "i64[512]", arg10_1: "f32[64]"):
+    def forward(self, bmm: "f32[256, 512, 512]", iota: "i64[512]", arg10_1: "f32[64]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:253 in eager_attention_forward, code: attn_weights = torch.matmul(query, key_states.transpose(2, 3)) * scaling
-        reshape_default: "f32[4, 64, 512, 512]" = torch.ops.aten.reshape.default(bmm, [4, 64, 512, 512]);  bmm = None
+        reshape_default: "f32[4, 64, 512, 512]" = torch.ops.aten.reshape.default(bmm, _shape_param_0);  bmm = _shape_param_0 = None
         mul_tensor: "f32[4, 64, 512, 512]" = torch.ops.aten.mul.Tensor(reshape_default, 0.125);  reshape_default = None
 
         # File: /tmp/pytorch-work/torch/_dynamo/_trace_wrapped_higher_order_op.py:158 in __torch_function__, code: return func(*args, **(kwargs or {}))
@@ -33,16 +33,16 @@ class Repro(torch.nn.Module):
 
         # File: /tmp/pytorch-work/torch/_dynamo/_trace_wrapped_higher_order_op.py:158 in __torch_function__, code: return func(*args, **(kwargs or {}))
         sub_tensor: "i64[512]" = torch.ops.aten.sub.Tensor(iota, 128)
-        reshape_default_1: "i64[512, 1]" = torch.ops.aten.reshape.default(sub_tensor, [512, 1]);  sub_tensor = None
+        reshape_default_1: "i64[512, 1]" = torch.ops.aten.reshape.default(sub_tensor, _shape_param_1);  sub_tensor = _shape_param_1 = None
         gt_tensor: "b8[512, 512]" = torch.ops.aten.gt.Tensor(add_tensor, reshape_default_1);  reshape_default_1 = None
         bitwise_and_tensor: "b8[512, 512]" = torch.ops.aten.bitwise_and.Tensor(full_default, gt_tensor);  full_default = gt_tensor = None
-        reshape_default_2: "i64[512, 1]" = torch.ops.aten.reshape.default(iota, [512, 1]);  iota = None
+        reshape_default_2: "i64[512, 1]" = torch.ops.aten.reshape.default(iota, _shape_param_2);  iota = _shape_param_2 = None
         le_tensor: "b8[512, 512]" = torch.ops.aten.le.Tensor(add_tensor, reshape_default_2);  add_tensor = reshape_default_2 = None
         bitwise_and_tensor_1: "b8[512, 512]" = torch.ops.aten.bitwise_and.Tensor(bitwise_and_tensor, le_tensor);  bitwise_and_tensor = le_tensor = None
 
         # File: /tmp/pytorch-work/torch/_functorch/vmap.py:204 in _maybe_remove_batch_dim, code: return _remove_batch_dim(batched_output, vmap_level, batch_size, out_dim)
-        expand_default: "b8[1, 512, 512]" = torch.ops.aten.expand.default(bitwise_and_tensor_1, [1, 512, 512]);  bitwise_and_tensor_1 = None
-        expand_default_1: "b8[4, 1, 512, 512]" = torch.ops.aten.expand.default(expand_default, [4, 1, 512, 512]);  expand_default = None
+        expand_default: "b8[1, 512, 512]" = torch.ops.aten.expand.default(bitwise_and_tensor_1, _shape_param_3);  bitwise_and_tensor_1 = _shape_param_3 = None
+        expand_default_1: "b8[4, 1, 512, 512]" = torch.ops.aten.expand.default(expand_default, _shape_param_4);  expand_default = _shape_param_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:521 in eager_mask, code: mask = torch.where(mask, torch.tensor(0.0, device=mask.device, dtype=dtype), min_dtype)
         full_default_1: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
@@ -54,7 +54,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:258 in eager_attention_forward, code: sinks = module.sinks.reshape(1, -1, 1, 1).expand(query.shape[0], -1, query.shape[-2], -1)
         reshape_default_3: "f32[1, 64, 1, 1]" = torch.ops.aten.reshape.default(arg10_1, [1, -1, 1, 1]);  arg10_1 = None
-        expand_default_2: "f32[4, 64, 512, 1]" = torch.ops.aten.expand.default(reshape_default_3, [4, -1, 512, -1]);  reshape_default_3 = None
+        expand_default_2: "f32[4, 64, 512, 1]" = torch.ops.aten.expand.default(reshape_default_3, _shape_param_5);  reshape_default_3 = _shape_param_5 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:259 in eager_attention_forward, code: combined_logits = torch.cat([attn_weights, sinks], dim=-1)
         cat_default: "f32[4, 64, 512, 513]" = torch.ops.aten.cat.default([add_tensor_1, expand_default_2], -1);  add_tensor_1 = expand_default_2 = None
@@ -70,6 +70,12 @@ def _default_make_inputs():
     torch.randn([256, 512, 512], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [512], dtype=torch.int64, device='cuda'),
     torch.randn([64], dtype=torch.float32, device='cuda'),
+    [4, 64, 512, 512],  # _shape_param_0
+    [512, 1],  # _shape_param_1
+    [512, 1],  # _shape_param_2
+    [1, 512, 512],  # _shape_param_3
+    [4, 1, 512, 512],  # _shape_param_4
+    [4, -1, 512, -1],  # _shape_param_5
     ]
 
 

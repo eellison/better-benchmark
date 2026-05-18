@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg2_1: "f32[128112, 1024]", arg1_1: "i64[64, 128]", cumsum_1: "i64[64, 128]", convert_element_type_3: "i32[64, 128]", arg198_1: "f32[1026, 1024]"):
+    def forward(self, arg2_1: "f32[128112, 1024]", arg1_1: "i64[64, 128]", cumsum_1: "i64[64, 128]", convert_element_type_3: "i32[64, 128]", arg198_1: "f32[1026, 1024]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:97 in forward, code: return super().forward(input_ids) * self.embed_scale
         embedding_default: "f32[64, 128, 1024]" = torch.ops.aten.embedding.default(arg2_1, arg1_1, 1);  arg2_1 = arg1_1 = None
         mul_tensor: "f32[64, 128, 1024]" = torch.ops.aten.mul.Tensor(embedding_default, 32.0);  embedding_default = None
@@ -33,7 +33,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:161 in forward, code: return self.weights.index_select(0, position_ids.view(-1)).view(bsz, seq_len, self.weights.shape[-1]).detach()
         reshape_default: "i64[8192]" = torch.ops.aten.reshape.default(add_tensor_1, [-1]);  add_tensor_1 = None
         index_tensor: "f32[8192, 1024]" = torch.ops.aten.index.Tensor(arg198_1, [reshape_default]);  arg198_1 = reshape_default = None
-        reshape_default_1: "f32[64, 128, 1024]" = torch.ops.aten.reshape.default(index_tensor, [64, 128, 1024]);  index_tensor = None
+        reshape_default_1: "f32[64, 128, 1024]" = torch.ops.aten.reshape.default(index_tensor, _shape_param_0);  index_tensor = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:1101 in forward, code: hidden_states = inputs_embeds + positions
         add_tensor_2: "f32[64, 128, 1024]" = torch.ops.aten.add.Tensor(mul_tensor, reshape_default_1);  mul_tensor = reshape_default_1 = None
@@ -52,6 +52,7 @@ def _default_make_inputs():
     torch.randint(0, 2, [64, 128], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [64, 128], dtype=torch.int32, device='cuda'),
     torch.randn([1026, 1024], dtype=torch.float32, device='cuda'),
+    [64, 128, 1024],  # _shape_param_0
     ]
 
 

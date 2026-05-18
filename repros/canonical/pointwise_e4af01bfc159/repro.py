@@ -16,13 +16,13 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, getitem_137: "bf16[256, 4, 16, 64]", arg253_1: "bf16[240, 240]"):
+    def forward(self, getitem_137: "bf16[256, 4, 16, 64]", arg253_1: "bf16[240, 240]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
         slice_tensor: "bf16[256, 4, 16, 60]" = torch.ops.aten.slice.Tensor(getitem_137, -1, 0, 60);  getitem_137 = None
         permute_default: "bf16[256, 16, 4, 60]" = torch.ops.aten.permute.default(slice_tensor, [0, 2, 1, 3]);  slice_tensor = None
         clone_default: "bf16[256, 16, 4, 60]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
-        reshape_default: "bf16[256, 16, 240]" = torch.ops.aten.reshape.default(clone_default, [256, 16, 240]);  clone_default = None
-        reshape_default_1: "bf16[4096, 240]" = torch.ops.aten.reshape.default(reshape_default, [4096, 240]);  reshape_default = None
+        reshape_default: "bf16[256, 16, 240]" = torch.ops.aten.reshape.default(clone_default, _shape_param_0);  clone_default = _shape_param_0 = None
+        reshape_default_1: "bf16[4096, 240]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
         permute_default_1: "bf16[240, 240]" = torch.ops.aten.permute.default(arg253_1, [1, 0]);  arg253_1 = None
         return (reshape_default_1, permute_default_1)
 
@@ -31,6 +31,8 @@ def _default_make_inputs():
     return [
     torch.randn([256, 4, 16, 64], dtype=torch.bfloat16, device='cuda'),
     torch.randn([240, 240], dtype=torch.bfloat16, device='cuda'),
+    [256, 16, 240],  # _shape_param_0
+    [4096, 240],  # _shape_param_1
     ]
 
 

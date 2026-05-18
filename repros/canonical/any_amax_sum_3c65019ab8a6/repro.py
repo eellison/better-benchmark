@@ -22,9 +22,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm: "f32[512, 512, 512]"):
+    def forward(self, bmm: "f32[512, 512, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
-        reshape_default: "f32[8, 64, 512, 512]" = torch.ops.aten.reshape.default(bmm, [8, 64, 512, 512]);  bmm = None
+        reshape_default: "f32[8, 64, 512, 512]" = torch.ops.aten.reshape.default(bmm, _shape_param_0);  bmm = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:511 in sdpa_mask, code: q_arange = torch.arange(q_length, device=device) + q_offset
         iota_default: "i64[512]" = torch.ops.prims.iota.default(512, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
@@ -39,7 +39,7 @@ class Repro(torch.nn.Module):
         ge_scalar: "b8[1, 1, 512, 1]" = torch.ops.aten.ge.Scalar(unsqueeze_default_2, 0);  unsqueeze_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:520 in sdpa_mask, code: attention_mask = attention_mask.expand(batch_size, -1, q_length, kv_length)
-        expand_default: "b8[8, 1, 512, 512]" = torch.ops.aten.expand.default(ge_scalar, [8, -1, 512, 512]);  ge_scalar = None
+        expand_default: "b8[8, 1, 512, 512]" = torch.ops.aten.expand.default(ge_scalar, _shape_param_1);  ge_scalar = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
         full_default: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
@@ -57,14 +57,18 @@ class Repro(torch.nn.Module):
         sum_dim_int_list: "f32[8, 64, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_default, [-1], True)
         div_tensor: "f32[8, 64, 512, 512]" = torch.ops.aten.div.Tensor(exp_default, sum_dim_int_list);  exp_default = sum_dim_int_list = None
         where_self_1: "f32[8, 64, 512, 512]" = torch.ops.aten.where.self(logical_not_default_1, full_default_2, div_tensor);  logical_not_default_1 = full_default_2 = div_tensor = None
-        expand_default_1: "f32[8, 64, 512, 512]" = torch.ops.aten.expand.default(where_self_1, [8, 64, 512, 512]);  where_self_1 = None
-        reshape_default_1: "f32[512, 512, 512]" = torch.ops.aten.reshape.default(expand_default_1, [512, 512, 512]);  expand_default_1 = None
+        expand_default_1: "f32[8, 64, 512, 512]" = torch.ops.aten.expand.default(where_self_1, _shape_param_2);  where_self_1 = _shape_param_2 = None
+        reshape_default_1: "f32[512, 512, 512]" = torch.ops.aten.reshape.default(expand_default_1, _shape_param_3);  expand_default_1 = _shape_param_3 = None
         return reshape_default_1
 
 
 def _default_make_inputs():
     return [
     torch.randn([512, 512, 512], dtype=torch.float32, device='cuda'),
+    [8, 64, 512, 512],  # _shape_param_0
+    [8, -1, 512, 512],  # _shape_param_1
+    [8, 64, 512, 512],  # _shape_param_2
+    [512, 512, 512],  # _shape_param_3
     ]
 
 

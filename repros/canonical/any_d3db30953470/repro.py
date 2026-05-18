@@ -16,12 +16,12 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "f32[8, 1024]"):
+    def forward(self, arg0_1: "f32[8, 1024]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:1240 in forward, code: is_index_global_attn = attention_mask > 0
         gt_scalar: "b8[8, 1024]" = torch.ops.aten.gt.Scalar(arg0_1, 0);  arg0_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:1243 in forward, code: is_global_attn = is_index_global_attn.flatten().any().item()
-        reshape_default: "b8[8192]" = torch.ops.aten.reshape.default(gt_scalar, [8192]);  gt_scalar = None
+        reshape_default: "b8[8192]" = torch.ops.aten.reshape.default(gt_scalar, _shape_param_0);  gt_scalar = _shape_param_0 = None
         any_default: "b8[]" = torch.ops.aten.any.default(reshape_default);  reshape_default = None
         return any_default
 
@@ -29,6 +29,7 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randn([8, 1024], dtype=torch.float32, device='cuda'),
+    [8192],  # _shape_param_0
     ]
 
 

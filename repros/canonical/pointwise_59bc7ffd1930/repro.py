@@ -15,10 +15,10 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_1: "f32[2048, 512]"):
+    def forward(self, addmm_1: "f32[2048, 512]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:314 in forward, code: key_states = self.k_proj(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default: "f32[4, 512, 512]" = torch.ops.aten.reshape.default(addmm_1, [4, 512, 512]);  addmm_1 = None
-        reshape_default_1: "f32[4, 512, 8, 64]" = torch.ops.aten.reshape.default(reshape_default, [4, 512, -1, 64]);  reshape_default = None
+        reshape_default: "f32[4, 512, 512]" = torch.ops.aten.reshape.default(addmm_1, _shape_param_0);  addmm_1 = _shape_param_0 = None
+        reshape_default_1: "f32[4, 512, 8, 64]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
         permute_default: "f32[4, 8, 512, 64]" = torch.ops.aten.permute.default(reshape_default_1, [0, 2, 1, 3]);  reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:227 in _apply_rotary_emb, code: first_half, second_half = torch.chunk(x, 2, dim=-1)
@@ -31,6 +31,8 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randn([2048, 512], dtype=torch.float32, device='cuda'),
+    [4, 512, 512],  # _shape_param_0
+    [4, 512, -1, 64],  # _shape_param_1
     ]
 
 

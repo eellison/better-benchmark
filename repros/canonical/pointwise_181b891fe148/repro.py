@@ -15,12 +15,12 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_351: "f32[32768, 128]", addmm_346: "f32[32768, 128]", arg1069_1: "f32[128]", arg1070_1: "f32[128]", arg1083_1: "f32[128]", arg1084_1: "f32[128]"):
+    def forward(self, addmm_351: "f32[32768, 128]", addmm_346: "f32[32768, 128]", arg1069_1: "f32[128]", arg1070_1: "f32[128]", arg1083_1: "f32[128]", arg1084_1: "f32[128]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:292 in forward, code: layer_outputs = self.dense(hidden_states)
-        reshape_default: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(addmm_351, [256, 128, 128]);  addmm_351 = None
+        reshape_default: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(addmm_351, _shape_param_0);  addmm_351 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:409 in forward, code: layer_input = self.dense(hidden_states)
-        reshape_default_1: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(addmm_346, [256, 128, 128]);  addmm_346 = None
+        reshape_default_1: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(addmm_346, _shape_param_1);  addmm_346 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:138 in forward, code: return input_tensor * self.weight + self.bias
         mul_tensor: "f32[256, 128, 128]" = torch.ops.aten.mul.Tensor(reshape_default_1, arg1069_1);  reshape_default_1 = arg1069_1 = None
@@ -34,7 +34,7 @@ class Repro(torch.nn.Module):
         add_tensor_2: "f32[256, 128, 128]" = torch.ops.aten.add.Tensor(mul_tensor_1, arg1084_1);  mul_tensor_1 = arg1084_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:359 in forward, code: hidden_states = self.dense(hidden_states)
-        reshape_default_2: "f32[32768, 128]" = torch.ops.aten.reshape.default(add_tensor_2, [32768, 128]);  add_tensor_2 = None
+        reshape_default_2: "f32[32768, 128]" = torch.ops.aten.reshape.default(add_tensor_2, _shape_param_2);  add_tensor_2 = _shape_param_2 = None
         return reshape_default_2
 
 
@@ -46,6 +46,9 @@ def _default_make_inputs():
     torch.randn([128], dtype=torch.float32, device='cuda'),
     torch.randn([128], dtype=torch.float32, device='cuda'),
     torch.randn([128], dtype=torch.float32, device='cuda'),
+    [256, 128, 128],  # _shape_param_0
+    [256, 128, 128],  # _shape_param_1
+    [32768, 128],  # _shape_param_2
     ]
 
 

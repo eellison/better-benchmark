@@ -16,11 +16,11 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg358_1: "f32[32, 1]", arg217_1: "f16[32, 512]", arg531_1: "f32[32, 512]"):
+    def forward(self, arg358_1: "f32[32, 1]", arg217_1: "f16[32, 512]", arg531_1: "f32[32, 512]", _shape_param_0):
         # No stacktrace found for following nodes
         full_default: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         clamp_min_default: "f32[32, 1]" = torch.ops.aten.clamp_min.default(arg358_1, 1e-12)
-        expand_default: "f32[32, 512]" = torch.ops.aten.expand.default(clamp_min_default, [32, 512]);  clamp_min_default = None
+        expand_default: "f32[32, 512]" = torch.ops.aten.expand.default(clamp_min_default, _shape_param_0);  clamp_min_default = _shape_param_0 = None
         div_tensor: "f32[32, 512]" = torch.ops.aten.div.Tensor(arg217_1, expand_default)
         div_tensor_1: "f32[32, 512]" = torch.ops.aten.div.Tensor(div_tensor, expand_default);  div_tensor = None
         neg_default: "f32[32, 512]" = torch.ops.aten.neg.default(arg531_1)
@@ -44,6 +44,7 @@ def _default_make_inputs():
     torch.randn([32, 1], dtype=torch.float32, device='cuda'),
     torch.randn([32, 512], dtype=torch.float16, device='cuda'),
     torch.randn([32, 512], dtype=torch.float32, device='cuda'),
+    [32, 512],  # _shape_param_0
     ]
 
 

@@ -25,20 +25,20 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_default: "f32[30524, 768]", mm_142: "f32[16384, 768]", mul_534: "f32[32, 512, 768]", mm_144: "f32[16384, 768]", mm_146: "f32[16384, 768]", gt: "b8[32, 512, 768]", primals_10: "f32[768]", mul_1: "f32[32, 512, 768]", div_39: "f32[32, 512, 1]", full_default_4: "f32[]", full_default: "i64[32, 512]", sub_2: "i64[32, 512]", sub_1: "i64[32, 512]", select_3: "i64[32, 512]", select_2: "i64[32, 512]", select_1: "i64[32, 512]", select: "i64[32, 512]", primals_3: "i64[1, 512]", primals_1: "i64[32, 512]"):
+    def forward(self, mm_default: "f32[30524, 768]", mm_142: "f32[16384, 768]", mul_534: "f32[32, 512, 768]", mm_144: "f32[16384, 768]", mm_146: "f32[16384, 768]", gt: "b8[32, 512, 768]", primals_10: "f32[768]", mul_1: "f32[32, 512, 768]", div_39: "f32[32, 512, 1]", full_default_4: "f32[]", full_default: "i64[32, 512]", sub_2: "i64[32, 512]", sub_1: "i64[32, 512]", select_3: "i64[32, 512]", select_2: "i64[32, 512]", select_1: "i64[32, 512]", select: "i64[32, 512]", primals_3: "i64[1, 512]", primals_1: "i64[32, 512]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/layoutlm/modeling_layoutlm.py:445 in forward, code: hidden_states = self.decoder(hidden_states)
         slice_tensor: "f32[30522, 768]" = torch.ops.aten.slice.Tensor(mm_default, 0, 0, -2);  mm_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/layoutlm/modeling_layoutlm.py:185 in forward, code: value_states = self.value(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_142, [32, 512, 768]);  mm_142 = None
+        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_142, _shape_param_0);  mm_142 = _shape_param_0 = None
         add_tensor: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(mul_534, reshape_default);  mul_534 = reshape_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/layoutlm/modeling_layoutlm.py:184 in forward, code: key_states = self.key(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default_1: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_144, [32, 512, 768]);  mm_144 = None
+        reshape_default_1: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_144, _shape_param_1);  mm_144 = _shape_param_1 = None
         add_tensor_1: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_1);  add_tensor = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/layoutlm/modeling_layoutlm.py:183 in forward, code: query_states = self.query(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default_2: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_146, [32, 512, 768]);  mm_146 = None
+        reshape_default_2: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_146, _shape_param_2);  mm_146 = _shape_param_2 = None
         add_tensor_2: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor_1, reshape_default_2);  add_tensor_1 = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/layoutlm/modeling_layoutlm.py:117 in forward, code: embeddings = self.dropout(embeddings)
@@ -147,6 +147,9 @@ def _default_make_inputs():
     torch.randint(0, 2, [32, 512], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [32, 512], dtype=torch.int64, device='cuda'),
+    [32, 512, 768],  # _shape_param_0
+    [32, 512, 768],  # _shape_param_1
+    [32, 512, 768],  # _shape_param_2
     ]
 
 

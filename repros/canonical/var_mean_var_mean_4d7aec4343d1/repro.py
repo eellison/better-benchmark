@@ -20,7 +20,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg2_1: "f16[4, 512, 768]", addmm_3: "f16[2048, 768]"):
+    def forward(self, arg2_1: "f16[4, 512, 768]", addmm_3: "f16[2048, 768]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:252 in forward, code: hidden_states = self.self_attn_layer_norm(hidden_states)
         convert_element_type_default: "f32[4, 512, 768]" = torch.ops.prims.convert_element_type.default(arg2_1, torch.float32)
         var_mean_correction = torch.ops.aten.var_mean.correction(convert_element_type_default, [2], correction = 0, keepdim = True);  convert_element_type_default = None
@@ -37,7 +37,7 @@ class Repro(torch.nn.Module):
         gt_scalar: "b8[4, 512, 768]" = torch.ops.aten.gt.Scalar(convert_element_type_default_1, 0.1);  convert_element_type_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:191 in forward, code: attn_output = self.out_proj(attn_output)
-        reshape_default: "f16[4, 512, 768]" = torch.ops.aten.reshape.default(addmm_3, [4, 512, 768]);  addmm_3 = None
+        reshape_default: "f16[4, 512, 768]" = torch.ops.aten.reshape.default(addmm_3, _shape_param_0);  addmm_3 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:265 in forward, code: hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
         mul_tensor: "f16[4, 512, 768]" = torch.ops.aten.mul.Tensor(gt_scalar, reshape_default);  gt_scalar = reshape_default = None
@@ -47,7 +47,7 @@ class Repro(torch.nn.Module):
         add_tensor: "f16[4, 512, 768]" = torch.ops.aten.add.Tensor(arg2_1, mul_tensor_1);  arg2_1 = mul_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:274 in forward, code: hidden_states = hidden_states.reshape(-1, hidden_states.size(-1))
-        reshape_default_1: "f16[2048, 768]" = torch.ops.aten.reshape.default(add_tensor, [-1, 768]);  add_tensor = None
+        reshape_default_1: "f16[2048, 768]" = torch.ops.aten.reshape.default(add_tensor, _shape_param_1);  add_tensor = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:279 in forward, code: hidden_states = self.final_layer_norm(hidden_states)
         convert_element_type_default_2: "f32[2048, 768]" = torch.ops.prims.convert_element_type.default(reshape_default_1, torch.float32);  reshape_default_1 = None
@@ -65,6 +65,8 @@ def _default_make_inputs():
     return [
     torch.randn([4, 512, 768], dtype=torch.float16, device='cuda'),
     torch.randn([2048, 768], dtype=torch.float16, device='cuda'),
+    [4, 512, 768],  # _shape_param_0
+    [-1, 768],  # _shape_param_1
     ]
 
 

@@ -23,7 +23,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "i64[16, 512]", addmm_145: "f32[8192, 29056]"):
+    def forward(self, arg0_1: "i64[16, 512]", addmm_145: "f32[8192, 29056]", _shape_param_0, _shape_param_1):
         # File: /tmp/pytorch-work/torch/nn/functional.py:5461 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
         constant_pad_nd_default: "i64[16, 513]" = torch.ops.aten.constant_pad_nd.default(arg0_1, [0, 1], -100.0);  arg0_1 = None
 
@@ -38,10 +38,10 @@ class Repro(torch.nn.Module):
         ne_scalar: "b8[8192]" = torch.ops.aten.ne.Scalar(reshape_default, -100)
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/megatron_bert/modeling_megatron_bert.py:633 in forward, code: hidden_states = self.decoder(hidden_states)
-        reshape_default_1: "f32[16, 512, 29056]" = torch.ops.aten.reshape.default(addmm_145, [16, 512, 29056]);  addmm_145 = None
+        reshape_default_1: "f32[16, 512, 29056]" = torch.ops.aten.reshape.default(addmm_145, _shape_param_0);  addmm_145 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:63 in ForCausalLMLoss, code: logits = logits.view(-1, vocab_size)
-        reshape_default_2: "f32[8192, 29056]" = torch.ops.aten.reshape.default(reshape_default_1, [-1, 29056]);  reshape_default_1 = None
+        reshape_default_2: "f32[8192, 29056]" = torch.ops.aten.reshape.default(reshape_default_1, _shape_param_1);  reshape_default_1 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:36 in fixed_cross_entropy, code: loss = nn.functional.cross_entropy(source, target, ignore_index=ignore_index, reduction=reduction)
         amax_default: "f32[8192, 1]" = torch.ops.aten.amax.default(reshape_default_2, [1], True)
@@ -71,6 +71,8 @@ def _default_make_inputs():
     return [
     torch.randint(0, 2, [16, 512], dtype=torch.int64, device='cuda'),
     torch.randn([8192, 29056], dtype=torch.float32, device='cuda'),
+    [16, 512, 29056],  # _shape_param_0
+    [-1, 29056],  # _shape_param_1
     ]
 
 

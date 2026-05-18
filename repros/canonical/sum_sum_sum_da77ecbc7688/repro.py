@@ -16,18 +16,18 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, cat: "f16[256, 2]", mm_1: "f16[2, 1024]", where: "f16[256, 1024]", mm_3: "f16[1024, 1024]", where_1: "f16[256, 1024]", mm_4: "f16[1024, 3]"):
+    def forward(self, cat: "f16[256, 2]", mm_1: "f16[2, 1024]", where: "f16[256, 1024]", mm_3: "f16[1024, 1024]", where_1: "f16[256, 1024]", mm_4: "f16[1024, 3]", _shape_param_0, _shape_param_1, _shape_param_2):
         # No stacktrace found for following nodes
         sum_dim_int_list: "f16[1, 2]" = torch.ops.aten.sum.dim_IntList(cat, [0], True);  cat = None
-        reshape_default: "f16[2]" = torch.ops.aten.reshape.default(sum_dim_int_list, [2]);  sum_dim_int_list = None
+        reshape_default: "f16[2]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_0);  sum_dim_int_list = _shape_param_0 = None
         convert_element_type_default: "f32[2, 1024]" = torch.ops.prims.convert_element_type.default(mm_1, torch.float32);  mm_1 = None
         convert_element_type_default_1: "f32[2]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float32);  reshape_default = None
         sum_dim_int_list_1: "f16[1, 1024]" = torch.ops.aten.sum.dim_IntList(where, [0], True);  where = None
-        reshape_default_1: "f16[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_1, [1024]);  sum_dim_int_list_1 = None
+        reshape_default_1: "f16[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_1, _shape_param_1);  sum_dim_int_list_1 = _shape_param_1 = None
         convert_element_type_default_2: "f32[1024, 1024]" = torch.ops.prims.convert_element_type.default(mm_3, torch.float32);  mm_3 = None
         convert_element_type_default_3: "f32[1024]" = torch.ops.prims.convert_element_type.default(reshape_default_1, torch.float32);  reshape_default_1 = None
         sum_dim_int_list_2: "f16[1, 1024]" = torch.ops.aten.sum.dim_IntList(where_1, [0], True);  where_1 = None
-        reshape_default_2: "f16[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_2, [1024]);  sum_dim_int_list_2 = None
+        reshape_default_2: "f16[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_2, _shape_param_2);  sum_dim_int_list_2 = _shape_param_2 = None
         convert_element_type_default_4: "f32[1024, 3]" = torch.ops.prims.convert_element_type.default(mm_4, torch.float32);  mm_4 = None
         convert_element_type_default_5: "f32[1024]" = torch.ops.prims.convert_element_type.default(reshape_default_2, torch.float32);  reshape_default_2 = None
         _output_to_half_0: "f16[2, 1024]" = torch.ops.prims.convert_element_type.default(convert_element_type_default, torch.float16);  convert_element_type_default = None
@@ -47,6 +47,9 @@ def _default_make_inputs():
     torch.randn([1024, 1024], dtype=torch.float16, device='cuda'),
     torch.randn([256, 1024], dtype=torch.float16, device='cuda'),
     torch.randn([1024, 3], dtype=torch.float16, device='cuda'),
+    [2],  # _shape_param_0
+    [1024],  # _shape_param_1
+    [1024],  # _shape_param_2
     ]
 
 

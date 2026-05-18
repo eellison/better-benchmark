@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_2: "f16[512, 768]", arg26_1: "f32[768]", arg193_1: "f32[1, 512, 768]", arg205_1: "f32[1, 512, 1]", arg192_1: "b8[1, 512, 768]"):
+    def forward(self, mm_2: "f16[512, 768]", arg26_1: "f32[768]", arg193_1: "f32[1, 512, 768]", arg205_1: "f32[1, 512, 1]", arg192_1: "b8[1, 512, 768]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
-        reshape_default: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(mm_2, [1, 512, 768]);  mm_2 = None
+        reshape_default: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(mm_2, _shape_param_0);  mm_2 = _shape_param_0 = None
         convert_element_type_default: "f32[1, 512, 768]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float32);  reshape_default = None
         mul_tensor: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(convert_element_type_default, arg26_1);  convert_element_type_default = arg26_1 = None
         mul_tensor_1: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(mul_tensor, 768)
@@ -33,7 +33,7 @@ class Repro(torch.nn.Module):
         convert_element_type_default_2: "f16[1, 512, 768]" = torch.ops.prims.convert_element_type.default(arg192_1, torch.float16);  arg192_1 = None
         mul_tensor_5: "f16[1, 512, 768]" = torch.ops.aten.mul.Tensor(convert_element_type_default_2, 1.1111111111111112);  convert_element_type_default_2 = None
         mul_tensor_6: "f16[1, 512, 768]" = torch.ops.aten.mul.Tensor(convert_element_type_default_1, mul_tensor_5);  convert_element_type_default_1 = mul_tensor_5 = None
-        reshape_default_1: "f16[512, 768]" = torch.ops.aten.reshape.default(mul_tensor_6, [512, 768]);  mul_tensor_6 = None
+        reshape_default_1: "f16[512, 768]" = torch.ops.aten.reshape.default(mul_tensor_6, _shape_param_1);  mul_tensor_6 = _shape_param_1 = None
         return reshape_default_1
 
 
@@ -44,6 +44,8 @@ def _default_make_inputs():
     torch.randn([1, 512, 768], dtype=torch.float32, device='cuda'),
     torch.randn([1, 512, 1], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [1, 512, 768], dtype=torch.bool, device='cuda'),
+    [1, 512, 768],  # _shape_param_0
+    [512, 768],  # _shape_param_1
     ]
 
 

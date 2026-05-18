@@ -15,7 +15,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, add_74: "f32[64, 128, 1024]", getitem_97: "f32[64, 128, 1]", getitem_96: "f32[64, 128, 1]", arg196_1: "f32[1024]", arg197_1: "f32[1024]"):
+    def forward(self, add_74: "f32[64, 128, 1024]", getitem_97: "f32[64, 128, 1]", getitem_96: "f32[64, 128, 1]", arg196_1: "f32[1024]", arg197_1: "f32[1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15, _shape_param_16, _shape_param_17, _shape_param_18, _shape_param_19, _shape_param_20, _shape_param_21, _shape_param_22, _shape_param_23):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:898 in forward, code: hidden_states = self.layer_norm(hidden_states)
         sub_tensor: "f32[64, 128, 1024]" = torch.ops.aten.sub.Tensor(add_74, getitem_97);  add_74 = getitem_97 = None
         add_tensor: "f32[64, 128, 1]" = torch.ops.aten.add.Tensor(getitem_96, 1e-05);  getitem_96 = None
@@ -25,76 +25,76 @@ class Repro(torch.nn.Module):
         add_tensor_1: "f32[64, 128, 1024]" = torch.ops.aten.add.Tensor(mul_tensor_1, arg197_1);  mul_tensor_1 = arg197_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_0);  _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_1: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_1: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_1);  _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_2: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_2: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_2);  _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_3: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_3: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_3);  _shape_param_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_4: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_4: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_4);  _shape_param_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_5: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_5: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_5);  _shape_param_5 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_6: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_6: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_6);  _shape_param_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_7: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_7: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_7);  _shape_param_7 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_8: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_8: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_8);  _shape_param_8 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_9: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_9: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_9);  _shape_param_9 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_10: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_10: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_10);  _shape_param_10 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_11: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_11: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_11);  _shape_param_11 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_12: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_12: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_12);  _shape_param_12 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_13: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_13: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_13);  _shape_param_13 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_14: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_14: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_14);  _shape_param_14 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_15: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_15: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_15);  _shape_param_15 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_16: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_16: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_16);  _shape_param_16 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_17: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_17: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_17);  _shape_param_17 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_18: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_18: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_18);  _shape_param_18 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_19: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_19: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_19);  _shape_param_19 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_20: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_20: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_20);  _shape_param_20 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_21: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_21: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_21);  _shape_param_21 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_22: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024])
+        reshape_default_22: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_22);  _shape_param_22 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default_23: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, [8192, 1024]);  add_tensor_1 = None
+        reshape_default_23: "f32[8192, 1024]" = torch.ops.aten.reshape.default(add_tensor_1, _shape_param_23);  add_tensor_1 = _shape_param_23 = None
         return (reshape_default, reshape_default_1, reshape_default_2, reshape_default_3, reshape_default_4, reshape_default_5, reshape_default_6, reshape_default_7, reshape_default_8, reshape_default_9, reshape_default_10, reshape_default_11, reshape_default_12, reshape_default_13, reshape_default_14, reshape_default_15, reshape_default_16, reshape_default_17, reshape_default_18, reshape_default_19, reshape_default_20, reshape_default_21, reshape_default_22, reshape_default_23)
 
 
@@ -105,6 +105,30 @@ def _default_make_inputs():
     torch.randn([64, 128, 1], dtype=torch.float32, device='cuda'),
     torch.randn([1024], dtype=torch.float32, device='cuda'),
     torch.randn([1024], dtype=torch.float32, device='cuda'),
+    [8192, 1024],  # _shape_param_0
+    [8192, 1024],  # _shape_param_1
+    [8192, 1024],  # _shape_param_2
+    [8192, 1024],  # _shape_param_3
+    [8192, 1024],  # _shape_param_4
+    [8192, 1024],  # _shape_param_5
+    [8192, 1024],  # _shape_param_6
+    [8192, 1024],  # _shape_param_7
+    [8192, 1024],  # _shape_param_8
+    [8192, 1024],  # _shape_param_9
+    [8192, 1024],  # _shape_param_10
+    [8192, 1024],  # _shape_param_11
+    [8192, 1024],  # _shape_param_12
+    [8192, 1024],  # _shape_param_13
+    [8192, 1024],  # _shape_param_14
+    [8192, 1024],  # _shape_param_15
+    [8192, 1024],  # _shape_param_16
+    [8192, 1024],  # _shape_param_17
+    [8192, 1024],  # _shape_param_18
+    [8192, 1024],  # _shape_param_19
+    [8192, 1024],  # _shape_param_20
+    [8192, 1024],  # _shape_param_21
+    [8192, 1024],  # _shape_param_22
+    [8192, 1024],  # _shape_param_23
     ]
 
 

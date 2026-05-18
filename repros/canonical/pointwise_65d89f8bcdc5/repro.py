@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self):
+    def forward(self, _shape_param_0):
         # No stacktrace found for following nodes
         inductor_seeds_default: "i64[1]" = torch.ops.prims.inductor_seeds.default(1, device(type='cuda', index=0))
 
@@ -28,13 +28,13 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:750 in _hash_vectors, code: rotated_vectors = torch.einsum("bmtd,mdhr->bmhtr", vectors, random_rotations)
         unsqueeze_default: "f32[12, 64, 1, 64, 1]" = torch.ops.aten.unsqueeze.default(inductor_random_default, 4);  inductor_random_default = None
         unsqueeze_default_1: "f32[12, 64, 1, 64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, 5);  unsqueeze_default = None
-        reshape_default: "f32[12, 64, 64]" = torch.ops.aten.reshape.default(unsqueeze_default_1, [12, 64, 64]);  unsqueeze_default_1 = None
+        reshape_default: "f32[12, 64, 64]" = torch.ops.aten.reshape.default(unsqueeze_default_1, _shape_param_0);  unsqueeze_default_1 = _shape_param_0 = None
         return reshape_default
 
 
 def _default_make_inputs():
     return [
-
+    [12, 64, 64],  # _shape_param_0
     ]
 
 

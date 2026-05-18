@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm: "f32[32768, 512]", arg2_1: "i64[1, 512]", arg5_1: "f32[512, 512]", arg6_1: "f32[2, 512]", arg7_1: "f32[512]", arg8_1: "f32[512]"):
+    def forward(self, addmm: "f32[32768, 512]", arg2_1: "i64[1, 512]", arg5_1: "f32[512, 512]", arg6_1: "f32[2, 512]", arg7_1: "f32[512]", arg8_1: "f32[512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:208 in forward, code: inputs_embeds = self.embedding_transformation(inputs_embeds)
-        reshape_default: "f32[256, 128, 512]" = torch.ops.aten.reshape.default(addmm, [256, 128, 512]);  addmm = None
+        reshape_default: "f32[256, 128, 512]" = torch.ops.aten.reshape.default(addmm, _shape_param_0);  addmm = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:184 in forward, code: position_ids = self.position_ids[:, :seq_length]
         slice_tensor: "i64[1, 128]" = torch.ops.aten.slice.Tensor(arg2_1, 1, 0, 128);  arg2_1 = None
@@ -43,13 +43,13 @@ class Repro(torch.nn.Module):
         add_tensor_2: "f32[256, 128, 512]" = torch.ops.aten.add.Tensor(mul_tensor, arg8_1);  mul_tensor = arg8_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:409 in forward, code: layer_input = self.dense(hidden_states)
-        reshape_default_1: "f32[32768, 512]" = torch.ops.aten.reshape.default(add_tensor_2, [32768, 512])
+        reshape_default_1: "f32[32768, 512]" = torch.ops.aten.reshape.default(add_tensor_2, _shape_param_1);  _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:255 in forward, code: self.value(value_tensor)
-        reshape_default_2: "f32[32768, 512]" = torch.ops.aten.reshape.default(add_tensor_2, [32768, 512])
+        reshape_default_2: "f32[32768, 512]" = torch.ops.aten.reshape.default(add_tensor_2, _shape_param_2);  _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:409 in forward, code: layer_input = self.dense(hidden_states)
-        reshape_default_3: "f32[32768, 512]" = torch.ops.aten.reshape.default(add_tensor_2, [32768, 512]);  add_tensor_2 = None
+        reshape_default_3: "f32[32768, 512]" = torch.ops.aten.reshape.default(add_tensor_2, _shape_param_3);  add_tensor_2 = _shape_param_3 = None
         return (reshape_default_1, reshape_default_2, reshape_default_3)
 
 
@@ -61,6 +61,10 @@ def _default_make_inputs():
     torch.randn([2, 512], dtype=torch.float32, device='cuda'),
     torch.randn([512], dtype=torch.float32, device='cuda'),
     torch.randn([512], dtype=torch.float32, device='cuda'),
+    [256, 128, 512],  # _shape_param_0
+    [32768, 512],  # _shape_param_1
+    [32768, 512],  # _shape_param_2
+    [32768, 512],  # _shape_param_3
     ]
 
 

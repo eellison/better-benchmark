@@ -92,7 +92,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, view_278: "f32[8, 512, 4096]", mul_120: "f32[8, 512, 4096]", view_279: "f32[4096, 4096]", add_126: "f32[8, 512, 4096]", mul_110: "f32[8, 512, 4096]", view_307: "f32[4096, 4096]", add_148: "f32[8, 512, 4096]", mul_100: "f32[8, 512, 4096]", view_335: "f32[4096, 4096]", add_170: "f32[8, 512, 4096]", mul_90: "f32[8, 512, 4096]", view_363: "f32[4096, 4096]", add_192: "f32[8, 512, 4096]", mul_80: "f32[8, 512, 4096]", view_391: "f32[4096, 4096]", add_214: "f32[8, 512, 4096]", mul_70: "f32[8, 512, 4096]", view_419: "f32[4096, 4096]", add_236: "f32[8, 512, 4096]", mul_60: "f32[8, 512, 4096]", view_447: "f32[4096, 4096]", add_258: "f32[8, 512, 4096]", mul_50: "f32[8, 512, 4096]", view_475: "f32[4096, 4096]", add_280: "f32[8, 512, 4096]", mul_40: "f32[8, 512, 4096]", view_503: "f32[4096, 4096]", add_302: "f32[8, 512, 4096]", mul_30: "f32[8, 512, 4096]", view_531: "f32[4096, 4096]", add_324: "f32[8, 512, 4096]", mul_20: "f32[8, 512, 4096]", view_559: "f32[4096, 4096]", mm_130: "f32[4096, 4096]", mul_427: "f32[8, 512, 4096]", mm_132: "f32[4096, 4096]", mm_134: "f32[4096, 4096]", primals_25: "f32[4096]", mul_10: "f32[8, 512, 4096]", div_37: "f32[8, 512, 1]"):
+    def forward(self, view_278: "f32[8, 512, 4096]", mul_120: "f32[8, 512, 4096]", view_279: "f32[4096, 4096]", add_126: "f32[8, 512, 4096]", mul_110: "f32[8, 512, 4096]", view_307: "f32[4096, 4096]", add_148: "f32[8, 512, 4096]", mul_100: "f32[8, 512, 4096]", view_335: "f32[4096, 4096]", add_170: "f32[8, 512, 4096]", mul_90: "f32[8, 512, 4096]", view_363: "f32[4096, 4096]", add_192: "f32[8, 512, 4096]", mul_80: "f32[8, 512, 4096]", view_391: "f32[4096, 4096]", add_214: "f32[8, 512, 4096]", mul_70: "f32[8, 512, 4096]", view_419: "f32[4096, 4096]", add_236: "f32[8, 512, 4096]", mul_60: "f32[8, 512, 4096]", view_447: "f32[4096, 4096]", add_258: "f32[8, 512, 4096]", mul_50: "f32[8, 512, 4096]", view_475: "f32[4096, 4096]", add_280: "f32[8, 512, 4096]", mul_40: "f32[8, 512, 4096]", view_503: "f32[4096, 4096]", add_302: "f32[8, 512, 4096]", mul_30: "f32[8, 512, 4096]", view_531: "f32[4096, 4096]", add_324: "f32[8, 512, 4096]", mul_20: "f32[8, 512, 4096]", view_559: "f32[4096, 4096]", mm_130: "f32[4096, 4096]", mul_427: "f32[8, 512, 4096]", mm_132: "f32[4096, 4096]", mm_134: "f32[4096, 4096]", primals_25: "f32[4096]", mul_10: "f32[8, 512, 4096]", div_37: "f32[8, 512, 1]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
         mul_tensor: "f32[8, 512, 4096]" = torch.ops.aten.mul.Tensor(view_278, mul_120);  mul_120 = None
         sum_dim_int_list: "f32[4096]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [0, 1]);  mul_tensor = None
@@ -100,7 +100,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_2: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_279, [0], True);  view_279 = None
-        reshape_default: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_2, [4096]);  sum_dim_int_list_2 = None
+        reshape_default: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_2, _shape_param_0);  sum_dim_int_list_2 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
         mul_tensor_1: "f32[8, 512, 4096]" = torch.ops.aten.mul.Tensor(add_126, mul_110);  mul_110 = None
@@ -111,7 +111,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_5: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_307, [0], True);  view_307 = None
-        reshape_default_1: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_5, [4096]);  sum_dim_int_list_5 = None
+        reshape_default_1: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_5, _shape_param_1);  sum_dim_int_list_5 = _shape_param_1 = None
         add_tensor_2: "f32[4096]" = torch.ops.aten.add.Tensor(reshape_default, reshape_default_1);  reshape_default = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -123,7 +123,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_8: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_335, [0], True);  view_335 = None
-        reshape_default_2: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_8, [4096]);  sum_dim_int_list_8 = None
+        reshape_default_2: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_8, _shape_param_2);  sum_dim_int_list_8 = _shape_param_2 = None
         add_tensor_5: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_2, reshape_default_2);  add_tensor_2 = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -135,7 +135,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_11: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_363, [0], True);  view_363 = None
-        reshape_default_3: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_11, [4096]);  sum_dim_int_list_11 = None
+        reshape_default_3: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_11, _shape_param_3);  sum_dim_int_list_11 = _shape_param_3 = None
         add_tensor_8: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_5, reshape_default_3);  add_tensor_5 = reshape_default_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -147,7 +147,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_14: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_391, [0], True);  view_391 = None
-        reshape_default_4: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_14, [4096]);  sum_dim_int_list_14 = None
+        reshape_default_4: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_14, _shape_param_4);  sum_dim_int_list_14 = _shape_param_4 = None
         add_tensor_11: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_8, reshape_default_4);  add_tensor_8 = reshape_default_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -159,7 +159,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_17: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_419, [0], True);  view_419 = None
-        reshape_default_5: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_17, [4096]);  sum_dim_int_list_17 = None
+        reshape_default_5: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_17, _shape_param_5);  sum_dim_int_list_17 = _shape_param_5 = None
         add_tensor_14: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_11, reshape_default_5);  add_tensor_11 = reshape_default_5 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -171,7 +171,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_20: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_447, [0], True);  view_447 = None
-        reshape_default_6: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_20, [4096]);  sum_dim_int_list_20 = None
+        reshape_default_6: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_20, _shape_param_6);  sum_dim_int_list_20 = _shape_param_6 = None
         add_tensor_17: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_14, reshape_default_6);  add_tensor_14 = reshape_default_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -183,7 +183,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_23: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_475, [0], True);  view_475 = None
-        reshape_default_7: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_23, [4096]);  sum_dim_int_list_23 = None
+        reshape_default_7: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_23, _shape_param_7);  sum_dim_int_list_23 = _shape_param_7 = None
         add_tensor_20: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_17, reshape_default_7);  add_tensor_17 = reshape_default_7 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -195,7 +195,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_26: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_503, [0], True);  view_503 = None
-        reshape_default_8: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_26, [4096]);  sum_dim_int_list_26 = None
+        reshape_default_8: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_26, _shape_param_8);  sum_dim_int_list_26 = _shape_param_8 = None
         add_tensor_23: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_20, reshape_default_8);  add_tensor_20 = reshape_default_8 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -207,7 +207,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_29: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_531, [0], True);  view_531 = None
-        reshape_default_9: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_29, [4096]);  sum_dim_int_list_29 = None
+        reshape_default_9: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_29, _shape_param_9);  sum_dim_int_list_29 = _shape_param_9 = None
         add_tensor_26: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_23, reshape_default_9);  add_tensor_23 = reshape_default_9 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -219,19 +219,19 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
         sum_dim_int_list_32: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(view_559, [0], True);  view_559 = None
-        reshape_default_10: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_32, [4096]);  sum_dim_int_list_32 = None
+        reshape_default_10: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_32, _shape_param_10);  sum_dim_int_list_32 = _shape_param_10 = None
         add_tensor_29: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_26, reshape_default_10);  add_tensor_26 = reshape_default_10 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:182 in forward, code: value_layer = self.value(hidden_states).view(*hidden_shape).transpose(1, 2)
-        reshape_default_11: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_130, [8, 512, 4096]);  mm_130 = None
+        reshape_default_11: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_130, _shape_param_11);  mm_130 = _shape_param_11 = None
         add_tensor_30: "f32[8, 512, 4096]" = torch.ops.aten.add.Tensor(mul_427, reshape_default_11);  mul_427 = reshape_default_11 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:181 in forward, code: key_layer = self.key(hidden_states).view(*hidden_shape).transpose(1, 2)
-        reshape_default_12: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_132, [8, 512, 4096]);  mm_132 = None
+        reshape_default_12: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_132, _shape_param_12);  mm_132 = _shape_param_12 = None
         add_tensor_31: "f32[8, 512, 4096]" = torch.ops.aten.add.Tensor(add_tensor_30, reshape_default_12);  add_tensor_30 = reshape_default_12 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:180 in forward, code: query_layer = self.query(hidden_states).view(*hidden_shape).transpose(1, 2)
-        reshape_default_13: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_134, [8, 512, 4096]);  mm_134 = None
+        reshape_default_13: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_134, _shape_param_13);  mm_134 = _shape_param_13 = None
         add_tensor_32: "f32[8, 512, 4096]" = torch.ops.aten.add.Tensor(add_tensor_31, reshape_default_13);  add_tensor_31 = reshape_default_13 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -251,10 +251,10 @@ class Repro(torch.nn.Module):
         add_tensor_34: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_28, sum_dim_int_list_36);  add_tensor_28 = sum_dim_int_list_36 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
-        reshape_default_14: "f32[4096, 4096]" = torch.ops.aten.reshape.default(mul_tensor_15, [4096, 4096]);  mul_tensor_15 = None
+        reshape_default_14: "f32[4096, 4096]" = torch.ops.aten.reshape.default(mul_tensor_15, _shape_param_14);  mul_tensor_15 = _shape_param_14 = None
         permute_default: "f32[4096, 4096]" = torch.ops.aten.permute.default(reshape_default_14, [1, 0])
         sum_dim_int_list_37: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(reshape_default_14, [0], True);  reshape_default_14 = None
-        reshape_default_15: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_37, [4096]);  sum_dim_int_list_37 = None
+        reshape_default_15: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list_37, _shape_param_15);  sum_dim_int_list_37 = _shape_param_15 = None
         add_tensor_35: "f32[4096]" = torch.ops.aten.add.Tensor(add_tensor_29, reshape_default_15);  add_tensor_29 = reshape_default_15 = None
         return (add_tensor_33, add_tensor_34, permute_default, add_tensor_35)
 
@@ -301,6 +301,22 @@ def _default_make_inputs():
     torch.randn([4096], dtype=torch.float32, device='cuda'),
     torch.randn([8, 512, 4096], dtype=torch.float32, device='cuda'),
     torch.randn([8, 512, 1], dtype=torch.float32, device='cuda'),
+    [4096],  # _shape_param_0
+    [4096],  # _shape_param_1
+    [4096],  # _shape_param_2
+    [4096],  # _shape_param_3
+    [4096],  # _shape_param_4
+    [4096],  # _shape_param_5
+    [4096],  # _shape_param_6
+    [4096],  # _shape_param_7
+    [4096],  # _shape_param_8
+    [4096],  # _shape_param_9
+    [4096],  # _shape_param_10
+    [8, 512, 4096],  # _shape_param_11
+    [8, 512, 4096],  # _shape_param_12
+    [8, 512, 4096],  # _shape_param_13
+    [4096, 4096],  # _shape_param_14
+    [4096],  # _shape_param_15
     ]
 
 

@@ -16,14 +16,14 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm_45: "f16[32, 1024, 1024]", arg132_1: "b8[4, 8, 1024, 1024]", arg127_1: "f16[32, 1024, 1024]", arg129_1: "f32[1024, 1024, 8]", arg123_1: "f32[4, 1, 1024, 1024]", arg130_1: "f32[4, 8, 1024, 1]", arg131_1: "f32[4, 8, 1024, 1]", bmm_69: "f16[32, 1024, 1024]", arg45_1: "b8[4, 8, 1024, 1024]", arg36_1: "b8[1, 1, 1024, 1]", full_1: "f32[]", arg40_1: "f16[32, 1024, 1024]", arg42_1: "f32[1024, 1024, 8]", arg43_1: "f32[4, 8, 1024, 1]", arg44_1: "f32[4, 8, 1024, 1]"):
+    def forward(self, bmm_45: "f16[32, 1024, 1024]", arg132_1: "b8[4, 8, 1024, 1024]", arg127_1: "f16[32, 1024, 1024]", arg129_1: "f32[1024, 1024, 8]", arg123_1: "f32[4, 1, 1024, 1024]", arg130_1: "f32[4, 8, 1024, 1]", arg131_1: "f32[4, 8, 1024, 1]", bmm_69: "f16[32, 1024, 1024]", arg45_1: "b8[4, 8, 1024, 1024]", arg36_1: "b8[1, 1, 1024, 1]", full_1: "f32[]", arg40_1: "f16[32, 1024, 1024]", arg42_1: "f32[1024, 1024, 8]", arg43_1: "f32[4, 8, 1024, 1]", arg44_1: "f32[4, 8, 1024, 1]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10):
         # No stacktrace found for following nodes
-        reshape_default: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_45, [4, 8, 1024, 1024]);  bmm_45 = None
+        reshape_default: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_45, _shape_param_0);  bmm_45 = _shape_param_0 = None
         convert_element_type_default: "f16[4, 8, 1024, 1024]" = torch.ops.prims.convert_element_type.default(arg132_1, torch.float16);  arg132_1 = None
         mul_tensor: "f16[4, 8, 1024, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_default, 1.1111111111111112);  convert_element_type_default = None
         mul_tensor_1: "f16[4, 8, 1024, 1024]" = torch.ops.aten.mul.Tensor(reshape_default, mul_tensor);  reshape_default = mul_tensor = None
         convert_element_type_default_1: "f32[4, 8, 1024, 1024]" = torch.ops.prims.convert_element_type.default(mul_tensor_1, torch.float32);  mul_tensor_1 = None
-        reshape_default_1: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(arg127_1, [4, 8, 1024, 1024]);  arg127_1 = None
+        reshape_default_1: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(arg127_1, _shape_param_1);  arg127_1 = _shape_param_1 = None
         permute_default: "f32[8, 1024, 1024]" = torch.ops.aten.permute.default(arg129_1, [2, 0, 1]);  arg129_1 = None
         unsqueeze_default: "f32[1, 8, 1024, 1024]" = torch.ops.aten.unsqueeze.default(permute_default, 0);  permute_default = None
         add_tensor: "f32[4, 8, 1024, 1024]" = torch.ops.aten.add.Tensor(unsqueeze_default, arg123_1);  unsqueeze_default = arg123_1 = None
@@ -37,18 +37,18 @@ class Repro(torch.nn.Module):
         neg_default: "f32[4, 8, 1024, 1024]" = torch.ops.aten.neg.default(div_tensor);  div_tensor = None
         fma_default: "f32[4, 8, 1024, 1024]" = torch.ops.prims.fma.default(neg_default, sum_dim_int_list, mul_tensor_2);  neg_default = sum_dim_int_list = mul_tensor_2 = None
         convert_element_type_default_3: "f16[4, 8, 1024, 1024]" = torch.ops.prims.convert_element_type.default(fma_default, torch.float16);  fma_default = None
-        reshape_default_2: "f16[32, 1024, 1024]" = torch.ops.aten.reshape.default(convert_element_type_default_3, [32, 1024, 1024]);  convert_element_type_default_3 = None
-        reshape_default_3: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_2, [4, 8, 1024, 1024]);  reshape_default_2 = None
-        reshape_default_4: "f16[32, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_3, [32, 1024, 1024]);  reshape_default_3 = None
-        reshape_default_5: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_69, [4, 8, 1024, 1024]);  bmm_69 = None
+        reshape_default_2: "f16[32, 1024, 1024]" = torch.ops.aten.reshape.default(convert_element_type_default_3, _shape_param_2);  convert_element_type_default_3 = _shape_param_2 = None
+        reshape_default_3: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_2, _shape_param_3);  reshape_default_2 = _shape_param_3 = None
+        reshape_default_4: "f16[32, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_3, _shape_param_4);  reshape_default_3 = _shape_param_4 = None
+        reshape_default_5: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_69, _shape_param_5);  bmm_69 = _shape_param_5 = None
         convert_element_type_default_4: "f16[4, 8, 1024, 1024]" = torch.ops.prims.convert_element_type.default(arg45_1, torch.float16);  arg45_1 = None
         mul_tensor_3: "f16[4, 8, 1024, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_default_4, 1.1111111111111112);  convert_element_type_default_4 = None
         mul_tensor_4: "f16[4, 8, 1024, 1024]" = torch.ops.aten.mul.Tensor(reshape_default_5, mul_tensor_3);  reshape_default_5 = mul_tensor_3 = None
         convert_element_type_default_5: "f32[4, 8, 1024, 1024]" = torch.ops.prims.convert_element_type.default(mul_tensor_4, torch.float32);  mul_tensor_4 = None
-        expand_default: "b8[4, 1, 1024, 1024]" = torch.ops.aten.expand.default(arg36_1, [4, -1, 1024, 1024]);  arg36_1 = None
+        expand_default: "b8[4, 1, 1024, 1024]" = torch.ops.aten.expand.default(arg36_1, _shape_param_6);  arg36_1 = _shape_param_6 = None
         full_default: "f32[]" = torch.ops.aten.full.default([], -3.4028234663852886e+38, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         where_self: "f32[4, 1, 1024, 1024]" = torch.ops.aten.where.self(expand_default, full_1, full_default);  expand_default = full_1 = full_default = None
-        reshape_default_6: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(arg40_1, [4, 8, 1024, 1024]);  arg40_1 = None
+        reshape_default_6: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(arg40_1, _shape_param_7);  arg40_1 = _shape_param_7 = None
         permute_default_1: "f32[8, 1024, 1024]" = torch.ops.aten.permute.default(arg42_1, [2, 0, 1]);  arg42_1 = None
         unsqueeze_default_1: "f32[1, 8, 1024, 1024]" = torch.ops.aten.unsqueeze.default(permute_default_1, 0);  permute_default_1 = None
         add_tensor_2: "f32[4, 8, 1024, 1024]" = torch.ops.aten.add.Tensor(unsqueeze_default_1, where_self);  unsqueeze_default_1 = where_self = None
@@ -62,9 +62,9 @@ class Repro(torch.nn.Module):
         neg_default_1: "f32[4, 8, 1024, 1024]" = torch.ops.aten.neg.default(div_tensor_1);  div_tensor_1 = None
         fma_default_1: "f32[4, 8, 1024, 1024]" = torch.ops.prims.fma.default(neg_default_1, sum_dim_int_list_1, mul_tensor_5);  neg_default_1 = sum_dim_int_list_1 = mul_tensor_5 = None
         convert_element_type_default_7: "f16[4, 8, 1024, 1024]" = torch.ops.prims.convert_element_type.default(fma_default_1, torch.float16);  fma_default_1 = None
-        reshape_default_7: "f16[32, 1024, 1024]" = torch.ops.aten.reshape.default(convert_element_type_default_7, [32, 1024, 1024]);  convert_element_type_default_7 = None
-        reshape_default_8: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_7, [4, 8, 1024, 1024]);  reshape_default_7 = None
-        reshape_default_9: "f16[32, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_8, [32, 1024, 1024]);  reshape_default_8 = None
+        reshape_default_7: "f16[32, 1024, 1024]" = torch.ops.aten.reshape.default(convert_element_type_default_7, _shape_param_8);  convert_element_type_default_7 = _shape_param_8 = None
+        reshape_default_8: "f16[4, 8, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_7, _shape_param_9);  reshape_default_7 = _shape_param_9 = None
+        reshape_default_9: "f16[32, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_8, _shape_param_10);  reshape_default_8 = _shape_param_10 = None
         return (reshape_default_4, reshape_default_9)
 
 
@@ -85,6 +85,17 @@ def _default_make_inputs():
     torch.randn([1024, 1024, 8], dtype=torch.float32, device='cuda'),
     torch.randn([4, 8, 1024, 1], dtype=torch.float32, device='cuda'),
     torch.randn([4, 8, 1024, 1], dtype=torch.float32, device='cuda'),
+    [4, 8, 1024, 1024],  # _shape_param_0
+    [4, 8, 1024, 1024],  # _shape_param_1
+    [32, 1024, 1024],  # _shape_param_2
+    [4, 8, 1024, 1024],  # _shape_param_3
+    [32, 1024, 1024],  # _shape_param_4
+    [4, 8, 1024, 1024],  # _shape_param_5
+    [4, -1, 1024, 1024],  # _shape_param_6
+    [4, 8, 1024, 1024],  # _shape_param_7
+    [32, 1024, 1024],  # _shape_param_8
+    [4, 8, 1024, 1024],  # _shape_param_9
+    [32, 1024, 1024],  # _shape_param_10
     ]
 
 

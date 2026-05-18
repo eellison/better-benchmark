@@ -26,9 +26,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_default_1: "f32[16384, 768]", primals_203: "f32[768]", addmm_72: "f32[16384, 768]", getitem_51: "f32[32, 512, 1]", rsqrt_25: "f32[32, 512, 1]"):
+    def forward(self, mm_default_1: "f32[16384, 768]", primals_203: "f32[768]", addmm_72: "f32[16384, 768]", getitem_51: "f32[32, 512, 1]", rsqrt_25: "f32[32, 512, 1]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:499 in forward, code: hidden_states = self.decoder(hidden_states)
-        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_default_1, [32, 512, 768]);  mm_default_1 = None
+        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_default_1, _shape_param_0);  mm_default_1 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:483 in forward, code: hidden_states = self.LayerNorm(hidden_states)
         mul_tensor: "f32[32, 512, 768]" = torch.ops.aten.mul.Tensor(reshape_default, primals_203);  primals_203 = None
@@ -36,7 +36,7 @@ class Repro(torch.nn.Module):
         sum_dim_int_list: "f32[32, 512, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [2], True)
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:481 in forward, code: hidden_states = self.dense(hidden_states)
-        reshape_default_1: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(addmm_72, [32, 512, 768]);  addmm_72 = None
+        reshape_default_1: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(addmm_72, _shape_param_1);  addmm_72 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/activations.py:89 in forward, code: return self.act(input)
         mul_tensor_2: "f32[32, 512, 768]" = torch.ops.aten.mul.Tensor(reshape_default_1, 0.5)
@@ -70,10 +70,10 @@ class Repro(torch.nn.Module):
         mul_tensor_15: "f32[32, 512, 768]" = torch.ops.aten.mul.Tensor(mul_tensor_8, add_tensor_1);  mul_tensor_8 = add_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:481 in forward, code: hidden_states = self.dense(hidden_states)
-        reshape_default_2: "f32[16384, 768]" = torch.ops.aten.reshape.default(mul_tensor_15, [16384, 768]);  mul_tensor_15 = None
+        reshape_default_2: "f32[16384, 768]" = torch.ops.aten.reshape.default(mul_tensor_15, _shape_param_2);  mul_tensor_15 = _shape_param_2 = None
         permute_default: "f32[768, 16384]" = torch.ops.aten.permute.default(reshape_default_2, [1, 0])
         sum_dim_int_list_4: "f32[1, 768]" = torch.ops.aten.sum.dim_IntList(reshape_default_2, [0], True);  reshape_default_2 = None
-        reshape_default_3: "f32[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, [768]);  sum_dim_int_list_4 = None
+        reshape_default_3: "f32[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, _shape_param_3);  sum_dim_int_list_4 = _shape_param_3 = None
         return (sum_dim_int_list_2, sum_dim_int_list_3, permute_default, reshape_default_3)
 
 
@@ -84,6 +84,10 @@ def _default_make_inputs():
     torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
     torch.randn([32, 512, 1], dtype=torch.float32, device='cuda'),
     torch.randn([32, 512, 1], dtype=torch.float32, device='cuda'),
+    [32, 512, 768],  # _shape_param_0
+    [32, 512, 768],  # _shape_param_1
+    [16384, 768],  # _shape_param_2
+    [768],  # _shape_param_3
     ]
 
 

@@ -16,10 +16,10 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg3_1: "f32[10000, 64]", mm: "f16[64, 64]"):
+    def forward(self, arg3_1: "f32[10000, 64]", mm: "f16[64, 64]", _shape_param_0):
         # No stacktrace found for following nodes
         sum_dim_int_list: "f32[1, 64]" = torch.ops.aten.sum.dim_IntList(arg3_1, [0], True, dtype = torch.float32);  arg3_1 = None
-        reshape_default: "f32[64]" = torch.ops.aten.reshape.default(sum_dim_int_list, [64]);  sum_dim_int_list = None
+        reshape_default: "f32[64]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_0);  sum_dim_int_list = _shape_param_0 = None
         convert_element_type_default: "f32[64, 64]" = torch.ops.prims.convert_element_type.default(mm, torch.float32);  mm = None
         _output_to_half_0: "f16[64]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float16);  reshape_default = None
         _output_to_half_1: "f16[64, 64]" = torch.ops.prims.convert_element_type.default(convert_element_type_default, torch.float16);  convert_element_type_default = None
@@ -30,6 +30,7 @@ def _default_make_inputs():
     return [
     torch.randn([10000, 64], dtype=torch.float32, device='cuda'),
     torch.randn([64, 64], dtype=torch.float16, device='cuda'),
+    [64],  # _shape_param_0
     ]
 
 

@@ -16,11 +16,11 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, convolution_94: "bf16[8, 1280, 1, 1]", arg431_1: "bf16[1000, 1280]"):
+    def forward(self, convolution_94: "bf16[8, 1280, 1, 1]", arg431_1: "bf16[1000, 1280]", _shape_param_0):
         # No stacktrace found for following nodes
         relu_default: "bf16[8, 1280, 1, 1]" = torch.ops.aten.relu.default(convolution_94);  convolution_94 = None
         permute_default: "bf16[1280, 1000]" = torch.ops.aten.permute.default(arg431_1, [1, 0]);  arg431_1 = None
-        reshape_default: "bf16[8, 1280]" = torch.ops.aten.reshape.default(relu_default, [8, 1280]);  relu_default = None
+        reshape_default: "bf16[8, 1280]" = torch.ops.aten.reshape.default(relu_default, _shape_param_0);  relu_default = _shape_param_0 = None
         return (permute_default, reshape_default)
 
 
@@ -28,6 +28,7 @@ def _default_make_inputs():
     return [
     torch.randn([8, 1280, 1, 1], dtype=torch.bfloat16, device='cuda'),
     torch.randn([1000, 1280], dtype=torch.bfloat16, device='cuda'),
+    [8, 1280],  # _shape_param_0
     ]
 
 

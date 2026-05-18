@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm_137: "f32[192, 128, 128]", gt_6: "b8[32, 6, 128, 128]", div_3: "f32[32, 6, 128, 128]"):
+    def forward(self, bmm_137: "f32[192, 128, 128]", gt_6: "b8[32, 6, 128, 128]", div_3: "f32[32, 6, 128, 128]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:443 in forward, code: attn_output = torch.matmul(attn_weights, value_states)
-        reshape_default: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_137, [32, 6, 128, 128]);  bmm_137 = None
+        reshape_default: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(bmm_137, _shape_param_0);  bmm_137 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:437 in forward, code: attn_weights = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
         convert_element_type_default: "f32[32, 6, 128, 128]" = torch.ops.prims.convert_element_type.default(gt_6, torch.float32);  gt_6 = None
@@ -32,9 +32,9 @@ class Repro(torch.nn.Module):
         fma_default: "f32[32, 6, 128, 128]" = torch.ops.prims.fma.default(neg_default, sum_dim_int_list, mul_tensor_2);  neg_default = sum_dim_int_list = mul_tensor_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:433 in forward, code: scores += position_bias_masked
-        reshape_default_1: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(fma_default, [192, 128, 128]);  fma_default = None
-        reshape_default_2: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_1, [32, 6, 128, 128]);  reshape_default_1 = None
-        reshape_default_3: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_2, [192, 128, 128]);  reshape_default_2 = None
+        reshape_default_1: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(fma_default, _shape_param_1);  fma_default = _shape_param_1 = None
+        reshape_default_2: "f32[32, 6, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_1, _shape_param_2);  reshape_default_1 = _shape_param_2 = None
+        reshape_default_3: "f32[192, 128, 128]" = torch.ops.aten.reshape.default(reshape_default_2, _shape_param_3);  reshape_default_2 = _shape_param_3 = None
         return reshape_default_3
 
 
@@ -43,6 +43,10 @@ def _default_make_inputs():
     torch.randn([192, 128, 128], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [32, 6, 128, 128], dtype=torch.bool, device='cuda'),
     torch.randn([32, 6, 128, 128], dtype=torch.float32, device='cuda'),
+    [32, 6, 128, 128],  # _shape_param_0
+    [192, 128, 128],  # _shape_param_1
+    [32, 6, 128, 128],  # _shape_param_2
+    [192, 128, 128],  # _shape_param_3
     ]
 
 

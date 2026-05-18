@@ -21,7 +21,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, tangents_1: "f32[]", convert_element_type_1: "f32[]", eq_tensor: "b8[8, 2]", ne_5: "b8[8, 1]", index_2: "f32[8, 2]", tangents_2: "f32[8, 2]", iota_2: "i64[8]", argmax: "i64[8]"):
+    def forward(self, tangents_1: "f32[]", convert_element_type_1: "f32[]", eq_tensor: "b8[8, 2]", ne_5: "b8[8, 1]", index_2: "f32[8, 2]", tangents_2: "f32[8, 2]", iota_2: "i64[8]", argmax: "i64[8]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:1422 in forward, code: loss = loss_fct(pooled_logits.view(-1, self.num_labels), labels.view(-1))
         div_tensor: "f32[]" = torch.ops.aten.div.Tensor(tangents_1, convert_element_type_1);  tangents_1 = convert_element_type_1 = None
 
@@ -55,7 +55,7 @@ class Repro(torch.nn.Module):
         index_put_default: "f32[8, 1024, 2]" = torch.ops.aten.index_put.default(full_default_1, [iota_2, argmax], add_tensor, True);  full_default_1 = iota_2 = argmax = add_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:1379 in forward, code: logits = self.score(hidden_states)
-        reshape_default: "f32[8192, 2]" = torch.ops.aten.reshape.default(index_put_default, [8192, 2]);  index_put_default = None
+        reshape_default: "f32[8192, 2]" = torch.ops.aten.reshape.default(index_put_default, _shape_param_0);  index_put_default = _shape_param_0 = None
         permute_default: "f32[2, 8192]" = torch.ops.aten.permute.default(reshape_default, [1, 0]);  reshape_default = None
         return permute_default
 
@@ -70,6 +70,7 @@ def _default_make_inputs():
     torch.randn([8, 2], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [8], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [8], dtype=torch.int64, device='cuda'),
+    [8192, 2],  # _shape_param_0
     ]
 
 

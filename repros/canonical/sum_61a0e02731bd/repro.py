@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, tangents_1: "f32[]", convert_element_type_680: "f32[]", constant_pad_nd: "i64[4, 513]", view_572: "bf16[4, 512, 151936]", amax: "f32[2048, 1]", log: "f32[2048, 1]", tangents_2: "bf16[4, 512, 151936]"):
+    def forward(self, tangents_1: "f32[]", convert_element_type_680: "f32[]", constant_pad_nd: "i64[4, 513]", view_572: "bf16[4, 512, 151936]", amax: "f32[2048, 1]", log: "f32[2048, 1]", tangents_2: "bf16[4, 512, 151936]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:36 in fixed_cross_entropy, code: loss = nn.functional.cross_entropy(source, target, ignore_index=ignore_index, reduction=reduction)
         div_tensor: "f32[]" = torch.ops.aten.div.Tensor(tangents_1, convert_element_type_680);  tangents_1 = convert_element_type_680 = None
 
@@ -36,8 +36,8 @@ class Repro(torch.nn.Module):
 
         # No stacktrace found for following nodes
         iota_default: "i64[151936]" = torch.ops.prims.iota.default(151936, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
-        reshape_default_1: "i64[1, 151936]" = torch.ops.aten.reshape.default(iota_default, [1, 151936]);  iota_default = None
-        expand_default: "i64[2048, 151936]" = torch.ops.aten.expand.default(where_self, [2048, 151936]);  where_self = None
+        reshape_default_1: "i64[1, 151936]" = torch.ops.aten.reshape.default(iota_default, _shape_param_0);  iota_default = _shape_param_0 = None
+        expand_default: "i64[2048, 151936]" = torch.ops.aten.expand.default(where_self, _shape_param_1);  where_self = _shape_param_1 = None
         eq_tensor: "b8[2048, 151936]" = torch.ops.aten.eq.Tensor(expand_default, reshape_default_1);  expand_default = reshape_default_1 = None
         scalar_tensor_default: "f32[]" = torch.ops.aten.scalar_tensor.default(0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0))
         scalar_tensor_default_1: "f32[]" = torch.ops.aten.scalar_tensor.default(-1.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0))
@@ -52,7 +52,7 @@ class Repro(torch.nn.Module):
         convert_element_type_default: "f32[4, 512, 151936]" = torch.ops.prims.convert_element_type.default(view_572, torch.float32);  view_572 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:63 in ForCausalLMLoss, code: logits = logits.view(-1, vocab_size)
-        reshape_default_2: "f32[2048, 151936]" = torch.ops.aten.reshape.default(convert_element_type_default, [-1, 151936]);  convert_element_type_default = None
+        reshape_default_2: "f32[2048, 151936]" = torch.ops.aten.reshape.default(convert_element_type_default, _shape_param_2);  convert_element_type_default = _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:36 in fixed_cross_entropy, code: loss = nn.functional.cross_entropy(source, target, ignore_index=ignore_index, reduction=reduction)
         sub_tensor: "f32[2048, 151936]" = torch.ops.aten.sub.Tensor(reshape_default_2, amax);  reshape_default_2 = amax = None
@@ -63,14 +63,14 @@ class Repro(torch.nn.Module):
         sub_tensor_2: "f32[2048, 151936]" = torch.ops.aten.sub.Tensor(mul_tensor, mul_tensor_1);  mul_tensor = mul_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:63 in ForCausalLMLoss, code: logits = logits.view(-1, vocab_size)
-        reshape_default_3: "f32[4, 512, 151936]" = torch.ops.aten.reshape.default(sub_tensor_2, [4, 512, 151936]);  sub_tensor_2 = None
+        reshape_default_3: "f32[4, 512, 151936]" = torch.ops.aten.reshape.default(sub_tensor_2, _shape_param_3);  sub_tensor_2 = _shape_param_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:55 in ForCausalLMLoss, code: logits = logits.float()
         convert_element_type_default_1: "bf16[4, 512, 151936]" = torch.ops.prims.convert_element_type.default(reshape_default_3, torch.bfloat16);  reshape_default_3 = None
         add_tensor: "bf16[4, 512, 151936]" = torch.ops.aten.add.Tensor(tangents_2, convert_element_type_default_1);  tangents_2 = convert_element_type_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:494 in forward, code: logits = self.lm_head(hidden_states[:, slice_indices, :])
-        reshape_default_4: "bf16[2048, 151936]" = torch.ops.aten.reshape.default(add_tensor, [2048, 151936]);  add_tensor = None
+        reshape_default_4: "bf16[2048, 151936]" = torch.ops.aten.reshape.default(add_tensor, _shape_param_4);  add_tensor = _shape_param_4 = None
         permute_default: "bf16[151936, 2048]" = torch.ops.aten.permute.default(reshape_default_4, [1, 0]);  reshape_default_4 = None
         return permute_default
 
@@ -84,6 +84,11 @@ def _default_make_inputs():
     torch.randn([2048, 1], dtype=torch.float32, device='cuda'),
     torch.randn([2048, 1], dtype=torch.float32, device='cuda'),
     torch.randn([4, 512, 151936], dtype=torch.bfloat16, device='cuda'),
+    [1, 151936],  # _shape_param_0
+    [2048, 151936],  # _shape_param_1
+    [-1, 151936],  # _shape_param_2
+    [4, 512, 151936],  # _shape_param_3
+    [2048, 151936],  # _shape_param_4
     ]
 
 

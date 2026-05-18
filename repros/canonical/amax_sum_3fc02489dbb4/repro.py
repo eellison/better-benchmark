@@ -19,13 +19,13 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg8_1: "b8[1, 1, 2048, 2048]", bmm: "f32[512, 128, 128]", iota: "i64[128]"):
+    def forward(self, arg8_1: "b8[1, 1, 2048, 2048]", bmm: "f32[512, 128, 128]", iota: "i64[128]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:209 in _attn, code: causal_mask = self.bias[:, :, key_length - query_length : key_length, :key_length]
         slice_tensor: "b8[1, 1, 128, 2048]" = torch.ops.aten.slice.Tensor(arg8_1, 2, 0, 128);  arg8_1 = None
         slice_tensor_1: "b8[1, 1, 128, 128]" = torch.ops.aten.slice.Tensor(slice_tensor, 3, 0, 128);  slice_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:205 in _attn, code: attn_weights = torch.matmul(query, key.transpose(-1, -2))
-        reshape_default: "f32[32, 16, 128, 128]" = torch.ops.aten.reshape.default(bmm, [32, 16, 128, 128]);  bmm = None
+        reshape_default: "f32[32, 16, 128, 128]" = torch.ops.aten.reshape.default(bmm, _shape_param_0);  bmm = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:213 in _attn, code: mask_value = torch.tensor(mask_value, dtype=attn_weights.dtype, device=attn_weights.device)
         full_default: "f32[]" = torch.ops.aten.full.default([], -3.4028234663852886e+38, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
@@ -57,7 +57,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:217 in _attn, code: causal_mask = attention_mask[:, :, :, : key.shape[-2]]
         unsqueeze_default_2: "f32[1, 128, 129]" = torch.ops.aten.unsqueeze.default(mul_tensor, 0);  mul_tensor = None
         unsqueeze_default_3: "f32[1, 1, 128, 129]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_2, 1);  unsqueeze_default_2 = None
-        expand_default: "f32[32, 1, 128, 129]" = torch.ops.aten.expand.default(unsqueeze_default_3, [32, 1, -1, -1]);  unsqueeze_default_3 = None
+        expand_default: "f32[32, 1, 128, 129]" = torch.ops.aten.expand.default(unsqueeze_default_3, _shape_param_1);  unsqueeze_default_3 = _shape_param_1 = None
         slice_tensor_2: "f32[32, 1, 128, 128]" = torch.ops.aten.slice.Tensor(expand_default, 3, 0, 128);  expand_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:218 in _attn, code: attn_weights = attn_weights + causal_mask
@@ -71,8 +71,8 @@ class Repro(torch.nn.Module):
         div_tensor: "f32[32, 16, 128, 128]" = torch.ops.aten.div.Tensor(exp_default, sum_dim_int_list);  exp_default = sum_dim_int_list = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:228 in _attn, code: attn_output = torch.matmul(attn_weights, value)
-        expand_default_1: "f32[32, 16, 128, 128]" = torch.ops.aten.expand.default(div_tensor, [32, 16, 128, 128]);  div_tensor = None
-        reshape_default_2: "f32[512, 128, 128]" = torch.ops.aten.reshape.default(expand_default_1, [512, 128, 128]);  expand_default_1 = None
+        expand_default_1: "f32[32, 16, 128, 128]" = torch.ops.aten.expand.default(div_tensor, _shape_param_2);  div_tensor = _shape_param_2 = None
+        reshape_default_2: "f32[512, 128, 128]" = torch.ops.aten.reshape.default(expand_default_1, _shape_param_3);  expand_default_1 = _shape_param_3 = None
         return reshape_default_2
 
 
@@ -81,6 +81,10 @@ def _default_make_inputs():
     torch.randint(0, 2, [1, 1, 2048, 2048], dtype=torch.bool, device='cuda'),
     torch.randn([512, 128, 128], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [128], dtype=torch.int64, device='cuda'),
+    [32, 16, 128, 128],  # _shape_param_0
+    [32, 1, -1, -1],  # _shape_param_1
+    [32, 16, 128, 128],  # _shape_param_2
+    [512, 128, 128],  # _shape_param_3
     ]
 
 

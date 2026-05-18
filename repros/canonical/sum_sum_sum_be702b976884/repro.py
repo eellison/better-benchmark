@@ -25,16 +25,16 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_default: "f32[30524, 768]", mm_198: "f32[16384, 768]", mul_567: "f32[32, 512, 768]", mm_202: "f32[16384, 768]", getitem_121: "f32[32, 768, 512]", mm_204: "f32[16384, 768]", mm_206: "f32[16384, 768]", gt: "b8[32, 512, 768]", primals_7: "f32[768]", mul_1: "f32[32, 512, 768]", div_75: "f32[32, 512, 1]", primals_2: "i64[1, 512]", full_default_2: "f32[]", primals_4: "i64[1, 512]", primals_1: "i64[32, 512]"):
+    def forward(self, mm_default: "f32[30524, 768]", mm_198: "f32[16384, 768]", mul_567: "f32[32, 512, 768]", mm_202: "f32[16384, 768]", getitem_121: "f32[32, 768, 512]", mm_204: "f32[16384, 768]", mm_206: "f32[16384, 768]", gt: "b8[32, 512, 768]", primals_7: "f32[768]", mul_1: "f32[32, 512, 768]", div_75: "f32[32, 512, 1]", primals_2: "i64[1, 512]", full_default_2: "f32[]", primals_4: "i64[1, 512]", primals_1: "i64[32, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:938 in forward, code: prediction_scores = self.generator_lm_head(prediction_scores)
         slice_tensor: "f32[30522, 768]" = torch.ops.aten.slice.Tensor(mm_default, 0, 0, -2);  mm_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:365 in forward, code: conv_out_layer = self.conv_out_layer(hidden_states)
-        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_198, [32, 512, 768]);  mm_198 = None
+        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_198, _shape_param_0);  mm_198 = _shape_param_0 = None
         add_tensor: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(mul_567, reshape_default);  mul_567 = reshape_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:349 in forward, code: mixed_query_layer = self.query(hidden_states)
-        reshape_default_1: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_202, [32, 512, 768]);  mm_202 = None
+        reshape_default_1: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_202, _shape_param_1);  mm_202 = _shape_param_1 = None
         add_tensor_1: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_1);  add_tensor = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:346 in forward, code: mixed_key_conv_attn_layer = self.key_conv_attn_layer(hidden_states.transpose(1, 2))
@@ -42,11 +42,11 @@ class Repro(torch.nn.Module):
         add_tensor_2: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor_1, permute_default);  add_tensor_1 = permute_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:344 in forward, code: mixed_value_layer = self.value(hidden_states)
-        reshape_default_2: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_204, [32, 512, 768]);  mm_204 = None
+        reshape_default_2: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_204, _shape_param_2);  mm_204 = _shape_param_2 = None
         add_tensor_3: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor_2, reshape_default_2);  add_tensor_2 = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:343 in forward, code: mixed_key_layer = self.key(hidden_states)
-        reshape_default_3: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_206, [32, 512, 768]);  mm_206 = None
+        reshape_default_3: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(mm_206, _shape_param_3);  mm_206 = _shape_param_3 = None
         add_tensor_4: "f32[32, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor_3, reshape_default_3);  add_tensor_3 = reshape_default_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:228 in forward, code: embeddings = self.dropout(embeddings)
@@ -72,7 +72,7 @@ class Repro(torch.nn.Module):
         sum_dim_int_list_4: "f32[1, 512, 768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_6, [0], True)
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:837 in forward, code: buffered_token_type_ids_expanded = buffered_token_type_ids.expand(batch_size, seq_length)
-        expand_default: "i64[32, 512]" = torch.ops.aten.expand.default(primals_2, [32, 512]);  primals_2 = None
+        expand_default: "i64[32, 512]" = torch.ops.aten.expand.default(primals_2, _shape_param_4);  primals_2 = _shape_param_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:224 in forward, code: token_type_embeddings = self.token_type_embeddings(token_type_ids)
         eq_scalar: "b8[32, 512]" = torch.ops.aten.eq.Scalar(expand_default, -1)
@@ -115,6 +115,11 @@ def _default_make_inputs():
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [32, 512], dtype=torch.int64, device='cuda'),
+    [32, 512, 768],  # _shape_param_0
+    [32, 512, 768],  # _shape_param_1
+    [32, 512, 768],  # _shape_param_2
+    [32, 512, 768],  # _shape_param_3
+    [32, 512],  # _shape_param_4
     ]
 
 

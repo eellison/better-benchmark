@@ -17,9 +17,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_94: "f16[4096, 2048]", inductor_seeds: "i64[64]", arg132_1: "f32[512, 2048]"):
+    def forward(self, mm_94: "f16[4096, 2048]", inductor_seeds: "i64[64]", arg132_1: "f32[512, 2048]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
-        reshape_default: "f16[4, 1024, 2048]" = torch.ops.aten.reshape.default(mm_94, [4, 1024, 2048]);  mm_94 = None
+        reshape_default: "f16[4, 1024, 2048]" = torch.ops.aten.reshape.default(mm_94, _shape_param_0);  mm_94 = _shape_param_0 = None
         relu_default: "f16[4, 1024, 2048]" = torch.ops.aten.relu.default(reshape_default);  reshape_default = None
         inductor_lookup_seed_default: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 61);  inductor_seeds = None
         inductor_random_default: "f32[4, 1024, 2048]" = torch.ops.prims.inductor_random.default([4, 1024, 2048], inductor_lookup_seed_default, 'rand');  inductor_lookup_seed_default = None
@@ -30,7 +30,7 @@ class Repro(torch.nn.Module):
         convert_element_type_default_1: "f16[512, 2048]" = torch.ops.prims.convert_element_type.default(arg132_1, torch.float16);  arg132_1 = None
         convert_element_type_default_2: "f16[4, 1024, 2048]" = torch.ops.prims.convert_element_type.default(mul_tensor_1, torch.float16);  mul_tensor_1 = None
         permute_default: "f16[2048, 512]" = torch.ops.aten.permute.default(convert_element_type_default_1, [1, 0]);  convert_element_type_default_1 = None
-        reshape_default_1: "f16[4096, 2048]" = torch.ops.aten.reshape.default(convert_element_type_default_2, [4096, 2048]);  convert_element_type_default_2 = None
+        reshape_default_1: "f16[4096, 2048]" = torch.ops.aten.reshape.default(convert_element_type_default_2, _shape_param_1);  convert_element_type_default_2 = _shape_param_1 = None
         return (permute_default, reshape_default_1)
 
 
@@ -39,6 +39,8 @@ def _default_make_inputs():
     torch.randn([4096, 2048], dtype=torch.float16, device='cuda'),
     torch.randint(0, 2, [64], dtype=torch.int64, device='cuda'),
     torch.randn([512, 2048], dtype=torch.float32, device='cuda'),
+    [4, 1024, 2048],  # _shape_param_0
+    [4096, 2048],  # _shape_param_1
     ]
 
 

@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg1_1: "f32[256008, 1024]", arg0_1: "i64[32, 128]", arg2_1: "f32[2050, 1024]"):
+    def forward(self, arg1_1: "f32[256008, 1024]", arg0_1: "i64[32, 128]", arg2_1: "f32[2050, 1024]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xglm/modeling_xglm.py:49 in forward, code: return super().forward(input_ids) * self.embed_scale
         embedding_default: "f32[32, 128, 1024]" = torch.ops.aten.embedding.default(arg1_1, arg0_1, 1);  arg1_1 = arg0_1 = None
         mul_tensor: "f32[32, 128, 1024]" = torch.ops.aten.mul.Tensor(embedding_default, 32.0);  embedding_default = None
@@ -36,7 +36,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_1: "i64[1, 128]" = torch.ops.aten.unsqueeze.default(squeeze_dim, 0);  squeeze_dim = None
         reshape_default: "i64[128]" = torch.ops.aten.reshape.default(unsqueeze_default_1, [-1]);  unsqueeze_default_1 = None
         index_tensor: "f32[128, 1024]" = torch.ops.aten.index.Tensor(arg2_1, [reshape_default]);  arg2_1 = reshape_default = None
-        reshape_default_1: "f32[1, 128, 1024]" = torch.ops.aten.reshape.default(index_tensor, [1, 128, 1024]);  index_tensor = None
+        reshape_default_1: "f32[1, 128, 1024]" = torch.ops.aten.reshape.default(index_tensor, _shape_param_0);  index_tensor = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xglm/modeling_xglm.py:532 in forward, code: hidden_states = inputs_embeds + self.embed_positions(position_ids, past_key_values_length).to(
         add_tensor_1: "f32[32, 128, 1024]" = torch.ops.aten.add.Tensor(mul_tensor, reshape_default_1);  mul_tensor = reshape_default_1 = None
@@ -53,6 +53,7 @@ def _default_make_inputs():
     torch.randn([256008, 1024], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [32, 128], dtype=torch.int64, device='cuda'),
     torch.randn([2050, 1024], dtype=torch.float32, device='cuda'),
+    [1, 128, 1024],  # _shape_param_0
     ]
 
 

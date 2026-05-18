@@ -22,16 +22,16 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_6: "f32[8192, 1024]", mm_8: "f32[8192, 1024]", mm_10: "f32[8192, 1024]", primals_1: "f32[1024]", primals_3: "f32[64, 128, 1024]", getitem_1: "f32[64, 128, 1]", rsqrt: "f32[64, 128, 1]", add_6: "f32[64, 128, 1024]"):
+    def forward(self, mm_6: "f32[8192, 1024]", mm_8: "f32[8192, 1024]", mm_10: "f32[8192, 1024]", primals_1: "f32[1024]", primals_3: "f32[64, 128, 1024]", getitem_1: "f32[64, 128, 1]", rsqrt: "f32[64, 128, 1]", add_6: "f32[64, 128, 1024]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:304 in forward, code: value_states = self.v_proj(current_states)
-        reshape_default: "f32[64, 128, 1024]" = torch.ops.aten.reshape.default(mm_6, [64, 128, 1024]);  mm_6 = None
+        reshape_default: "f32[64, 128, 1024]" = torch.ops.aten.reshape.default(mm_6, _shape_param_0);  mm_6 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:303 in forward, code: key_states = self.k_proj(current_states)
-        reshape_default_1: "f32[64, 128, 1024]" = torch.ops.aten.reshape.default(mm_8, [64, 128, 1024]);  mm_8 = None
+        reshape_default_1: "f32[64, 128, 1024]" = torch.ops.aten.reshape.default(mm_8, _shape_param_1);  mm_8 = _shape_param_1 = None
         add_tensor: "f32[64, 128, 1024]" = torch.ops.aten.add.Tensor(reshape_default, reshape_default_1);  reshape_default = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:283 in forward, code: query_states = self.q_proj(hidden_states).view(*q_input_shape).transpose(1, 2)
-        reshape_default_2: "f32[64, 128, 1024]" = torch.ops.aten.reshape.default(mm_10, [64, 128, 1024]);  mm_10 = None
+        reshape_default_2: "f32[64, 128, 1024]" = torch.ops.aten.reshape.default(mm_10, _shape_param_2);  mm_10 = _shape_param_2 = None
         add_tensor_1: "f32[64, 128, 1024]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_2);  add_tensor = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:380 in forward, code: hidden_states = self.self_attn_layer_norm(hidden_states)
@@ -64,6 +64,9 @@ def _default_make_inputs():
     torch.randn([64, 128, 1], dtype=torch.float32, device='cuda'),
     torch.randn([64, 128, 1], dtype=torch.float32, device='cuda'),
     torch.randn([64, 128, 1024], dtype=torch.float32, device='cuda'),
+    [64, 128, 1024],  # _shape_param_0
+    [64, 128, 1024],  # _shape_param_1
+    [64, 128, 1024],  # _shape_param_2
     ]
 
 

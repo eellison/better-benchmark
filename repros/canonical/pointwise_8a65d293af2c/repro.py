@@ -17,9 +17,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_22: "f32[16384, 3072]"):
+    def forward(self, addmm_22: "f32[16384, 3072]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:122 in forward, code: x = x.view(size_out)
-        reshape_default: "f32[32, 512, 3072]" = torch.ops.aten.reshape.default(addmm_22, [32, 512, 3072]);  addmm_22 = None
+        reshape_default: "f32[32, 512, 3072]" = torch.ops.aten.reshape.default(addmm_22, _shape_param_0);  addmm_22 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/activations.py:66 in forward, code: return 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
         mul_tensor: "f32[32, 512, 3072]" = torch.ops.aten.mul.Tensor(reshape_default, 0.5)
@@ -32,7 +32,7 @@ class Repro(torch.nn.Module):
         mul_tensor_3: "f32[32, 512, 3072]" = torch.ops.aten.mul.Tensor(mul_tensor, add_tensor_1);  mul_tensor = add_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:121 in forward, code: x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
-        reshape_default_1: "f32[16384, 3072]" = torch.ops.aten.reshape.default(mul_tensor_3, [-1, 3072]);  mul_tensor_3 = None
+        reshape_default_1: "f32[16384, 3072]" = torch.ops.aten.reshape.default(mul_tensor_3, _shape_param_1);  mul_tensor_3 = _shape_param_1 = None
         permute_default: "f32[3072, 16384]" = torch.ops.aten.permute.default(reshape_default_1, [1, 0]);  reshape_default_1 = None
         return permute_default
 
@@ -40,6 +40,8 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randn([16384, 3072], dtype=torch.float32, device='cuda'),
+    [32, 512, 3072],  # _shape_param_0
+    [-1, 3072],  # _shape_param_1
     ]
 
 

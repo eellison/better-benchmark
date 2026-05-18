@@ -18,7 +18,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, getitem_333: "bf16[4, 16, 512, 128]", unsqueeze_6: "bf16[1, 1, 512, 128]", full_default_64: "bf16[4, 16, 512, 128]", unsqueeze_5: "bf16[1, 1, 512, 128]", primals_6: "bf16[128]", mm: "bf16[2048, 2048]", rsqrt_1: "f32[4, 512, 16, 1]"):
+    def forward(self, getitem_333: "bf16[4, 16, 512, 128]", unsqueeze_6: "bf16[1, 1, 512, 128]", full_default_64: "bf16[4, 16, 512, 128]", unsqueeze_5: "bf16[1, 1, 512, 128]", primals_6: "bf16[128]", mm: "bf16[2048, 2048]", rsqrt_1: "f32[4, 512, 16, 1]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:115 in apply_rotary_pos_emb, code: q_embed = (q * cos) + (rotate_half(q) * sin)
         mul_tensor: "bf16[4, 16, 512, 128]" = torch.ops.aten.mul.Tensor(getitem_333, unsqueeze_6);  unsqueeze_6 = None
 
@@ -45,8 +45,8 @@ class Repro(torch.nn.Module):
         mul_tensor_2: "bf16[4, 512, 16, 128]" = torch.ops.aten.mul.Tensor(permute_default, primals_6);  primals_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:200 in forward, code: query_states = self.q_norm(self.q_proj(hidden_states).view(hidden_shape)).transpose(1, 2)
-        reshape_default: "bf16[4, 512, 2048]" = torch.ops.aten.reshape.default(mm, [4, 512, 2048]);  mm = None
-        reshape_default_1: "bf16[4, 512, 16, 128]" = torch.ops.aten.reshape.default(reshape_default, [4, 512, -1, 128]);  reshape_default = None
+        reshape_default: "bf16[4, 512, 2048]" = torch.ops.aten.reshape.default(mm, _shape_param_0);  mm = _shape_param_0 = None
+        reshape_default_1: "bf16[4, 512, 16, 128]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:61 in forward, code: hidden_states = hidden_states.to(torch.float32)
         convert_element_type_default: "f32[4, 512, 16, 128]" = torch.ops.prims.convert_element_type.default(reshape_default_1, torch.float32);  reshape_default_1 = None
@@ -58,7 +58,7 @@ class Repro(torch.nn.Module):
         convert_element_type_default_1: "bf16[4, 512, 16, 128]" = torch.ops.prims.convert_element_type.default(mul_tensor_3, torch.bfloat16);  mul_tensor_3 = None
         mul_tensor_4: "bf16[4, 512, 16, 128]" = torch.ops.aten.mul.Tensor(permute_default, convert_element_type_default_1);  permute_default = convert_element_type_default_1 = None
         sum_dim_int_list: "bf16[1, 1, 1, 128]" = torch.ops.aten.sum.dim_IntList(mul_tensor_4, [0, 1, 2], True);  mul_tensor_4 = None
-        reshape_default_2: "bf16[128]" = torch.ops.aten.reshape.default(sum_dim_int_list, [128]);  sum_dim_int_list = None
+        reshape_default_2: "bf16[128]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_2);  sum_dim_int_list = _shape_param_2 = None
         convert_element_type_default_2: "f32[4, 512, 16, 128]" = torch.ops.prims.convert_element_type.default(mul_tensor_2, torch.float32);  mul_tensor_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:63 in forward, code: hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
@@ -70,7 +70,7 @@ class Repro(torch.nn.Module):
         mul_tensor_7: "f32[4, 512, 16, 1]" = torch.ops.aten.mul.Tensor(mul_scalar, pow_tensor_scalar);  mul_scalar = pow_tensor_scalar = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:62 in forward, code: variance = hidden_states.pow(2).mean(-1, keepdim=True)
-        expand_default: "f32[4, 512, 16, 128]" = torch.ops.aten.expand.default(mul_tensor_7, [4, 512, 16, 128]);  mul_tensor_7 = None
+        expand_default: "f32[4, 512, 16, 128]" = torch.ops.aten.expand.default(mul_tensor_7, _shape_param_3);  mul_tensor_7 = _shape_param_3 = None
         div_scalar: "f32[4, 512, 16, 128]" = torch.ops.aten.div.Scalar(expand_default, 128);  expand_default = None
         pow_tensor_scalar_1: "f32[4, 512, 16, 128]" = torch.ops.aten.pow.Tensor_Scalar(convert_element_type_default, 1.0);  convert_element_type_default = None
         mul_scalar_1: "f32[4, 512, 16, 128]" = torch.ops.aten.mul.Scalar(pow_tensor_scalar_1, 2.0);  pow_tensor_scalar_1 = None
@@ -82,8 +82,8 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:200 in forward, code: query_states = self.q_norm(self.q_proj(hidden_states).view(hidden_shape)).transpose(1, 2)
         clone_default: "bf16[4, 512, 16, 128]" = torch.ops.aten.clone.default(convert_element_type_default_3, memory_format = torch.contiguous_format);  convert_element_type_default_3 = None
-        reshape_default_3: "bf16[4, 512, 2048]" = torch.ops.aten.reshape.default(clone_default, [4, 512, 2048]);  clone_default = None
-        reshape_default_4: "bf16[2048, 2048]" = torch.ops.aten.reshape.default(reshape_default_3, [2048, 2048]);  reshape_default_3 = None
+        reshape_default_3: "bf16[4, 512, 2048]" = torch.ops.aten.reshape.default(clone_default, _shape_param_4);  clone_default = _shape_param_4 = None
+        reshape_default_4: "bf16[2048, 2048]" = torch.ops.aten.reshape.default(reshape_default_3, _shape_param_5);  reshape_default_3 = _shape_param_5 = None
         permute_default_1: "bf16[2048, 2048]" = torch.ops.aten.permute.default(reshape_default_4, [1, 0]);  reshape_default_4 = None
         return (reshape_default_2, permute_default_1)
 
@@ -97,6 +97,12 @@ def _default_make_inputs():
     torch.randn([128], dtype=torch.bfloat16, device='cuda'),
     torch.randn([2048, 2048], dtype=torch.bfloat16, device='cuda'),
     torch.randn([4, 512, 16, 1], dtype=torch.float32, device='cuda'),
+    [4, 512, 2048],  # _shape_param_0
+    [4, 512, -1, 128],  # _shape_param_1
+    [128],  # _shape_param_2
+    [4, 512, 16, 128],  # _shape_param_3
+    [4, 512, 2048],  # _shape_param_4
+    [2048, 2048],  # _shape_param_5
     ]
 
 

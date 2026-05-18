@@ -23,17 +23,17 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "i64[16, 128]", mm: "f32[2048, 8008]", arg665_1: "f32[1, 8008]"):
+    def forward(self, arg0_1: "i64[16, 128]", mm: "f32[2048, 8008]", arg665_1: "f32[1, 8008]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:1438 in forward, code: masked_lm_loss = loss_fct(lm_logits.view(-1, self.config.vocab_size), labels.view(-1))
         reshape_default: "i64[2048]" = torch.ops.aten.reshape.default(arg0_1, [-1]);  arg0_1 = None
         ne_scalar: "b8[2048]" = torch.ops.aten.ne.Scalar(reshape_default, -100)
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:1433 in forward, code: lm_logits = self.lm_head(outputs[0]) + self.final_logits_bias
-        reshape_default_1: "f32[16, 128, 8008]" = torch.ops.aten.reshape.default(mm, [16, 128, 8008]);  mm = None
+        reshape_default_1: "f32[16, 128, 8008]" = torch.ops.aten.reshape.default(mm, _shape_param_0);  mm = _shape_param_0 = None
         add_tensor: "f32[16, 128, 8008]" = torch.ops.aten.add.Tensor(reshape_default_1, arg665_1);  reshape_default_1 = arg665_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:1438 in forward, code: masked_lm_loss = loss_fct(lm_logits.view(-1, self.config.vocab_size), labels.view(-1))
-        reshape_default_2: "f32[2048, 8008]" = torch.ops.aten.reshape.default(add_tensor, [-1, 8008]);  add_tensor = None
+        reshape_default_2: "f32[2048, 8008]" = torch.ops.aten.reshape.default(add_tensor, _shape_param_1);  add_tensor = _shape_param_1 = None
         amax_default: "f32[2048, 1]" = torch.ops.aten.amax.default(reshape_default_2, [1], True)
         sub_tensor: "f32[2048, 8008]" = torch.ops.aten.sub.Tensor(reshape_default_2, amax_default);  reshape_default_2 = amax_default = None
         exp_default: "f32[2048, 8008]" = torch.ops.aten.exp.default(sub_tensor)
@@ -62,6 +62,8 @@ def _default_make_inputs():
     torch.randint(0, 2, [16, 128], dtype=torch.int64, device='cuda'),
     torch.randn([2048, 8008], dtype=torch.float32, device='cuda'),
     torch.randn([1, 8008], dtype=torch.float32, device='cuda'),
+    [16, 128, 8008],  # _shape_param_0
+    [-1, 8008],  # _shape_param_1
     ]
 
 

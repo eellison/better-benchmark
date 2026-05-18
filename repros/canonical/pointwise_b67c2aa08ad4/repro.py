@@ -16,24 +16,24 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_default_4: "f32[8192, 1024]", mul_1132: "f32[512, 16, 1024]", mm_default_2: "f32[8192, 1024]", mm_default: "f32[8192, 1024]", gt: "b8[512, 16, 1024]", clone: "i64[512, 16]", full_default_1: "f32[]", mm_1: "f32[32000, 1024]"):
+    def forward(self, mm_default_4: "f32[8192, 1024]", mul_1132: "f32[512, 16, 1024]", mm_default_2: "f32[8192, 1024]", mm_default: "f32[8192, 1024]", gt: "b8[512, 16, 1024]", clone: "i64[512, 16]", full_default_1: "f32[]", mm_1: "f32[32000, 1024]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:418 in forward, code: v_head_h = torch.einsum("ibh,hnd->ibnd", cat, self.v)
         unsqueeze_default: "f32[1, 8192, 1024]" = torch.ops.aten.unsqueeze.default(mm_default_4, 0);  mm_default_4 = None
-        reshape_default: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default, [512, 16, 1024, 1, 1]);  unsqueeze_default = None
+        reshape_default: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default, _shape_param_0);  unsqueeze_default = _shape_param_0 = None
         squeeze_dim: "f32[512, 16, 1024, 1]" = torch.ops.aten.squeeze.dim(reshape_default, 4);  reshape_default = None
         squeeze_dim_1: "f32[512, 16, 1024]" = torch.ops.aten.squeeze.dim(squeeze_dim, 3);  squeeze_dim = None
         add_tensor: "f32[512, 16, 1024]" = torch.ops.aten.add.Tensor(mul_1132, squeeze_dim_1);  mul_1132 = squeeze_dim_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:417 in forward, code: k_head_h = torch.einsum("ibh,hnd->ibnd", cat, self.k)
         unsqueeze_default_1: "f32[1, 8192, 1024]" = torch.ops.aten.unsqueeze.default(mm_default_2, 0);  mm_default_2 = None
-        reshape_default_1: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default_1, [512, 16, 1024, 1, 1]);  unsqueeze_default_1 = None
+        reshape_default_1: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default_1, _shape_param_1);  unsqueeze_default_1 = _shape_param_1 = None
         squeeze_dim_2: "f32[512, 16, 1024, 1]" = torch.ops.aten.squeeze.dim(reshape_default_1, 4);  reshape_default_1 = None
         squeeze_dim_3: "f32[512, 16, 1024]" = torch.ops.aten.squeeze.dim(squeeze_dim_2, 3);  squeeze_dim_2 = None
         add_tensor_1: "f32[512, 16, 1024]" = torch.ops.aten.add.Tensor(add_tensor, squeeze_dim_3);  add_tensor = squeeze_dim_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:416 in forward, code: q_head_h = torch.einsum("ibh,hnd->ibnd", h, self.q)
         unsqueeze_default_2: "f32[1, 8192, 1024]" = torch.ops.aten.unsqueeze.default(mm_default, 0);  mm_default = None
-        reshape_default_2: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default_2, [512, 16, 1024, 1, 1]);  unsqueeze_default_2 = None
+        reshape_default_2: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default_2, _shape_param_2);  unsqueeze_default_2 = _shape_param_2 = None
         squeeze_dim_4: "f32[512, 16, 1024, 1]" = torch.ops.aten.squeeze.dim(reshape_default_2, 4);  reshape_default_2 = None
         squeeze_dim_5: "f32[512, 16, 1024]" = torch.ops.aten.squeeze.dim(squeeze_dim_4, 3);  squeeze_dim_4 = None
         add_tensor_2: "f32[512, 16, 1024]" = torch.ops.aten.add.Tensor(add_tensor_1, squeeze_dim_5);  add_tensor_1 = squeeze_dim_5 = None
@@ -63,6 +63,9 @@ def _default_make_inputs():
     torch.randint(0, 2, [512, 16], dtype=torch.int64, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.randn([32000, 1024], dtype=torch.float32, device='cuda'),
+    [512, 16, 1024, 1, 1],  # _shape_param_0
+    [512, 16, 1024, 1, 1],  # _shape_param_1
+    [512, 16, 1024, 1, 1],  # _shape_param_2
     ]
 
 

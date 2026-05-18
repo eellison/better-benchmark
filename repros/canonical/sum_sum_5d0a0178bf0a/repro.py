@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm: "f16[4, 768]", arg288_1: "f32[4, 476, 768]", arg26_1: "f32[768]", arg127_1: "f32[4, 476, 768]", arg131_1: "f32[4, 476, 1]"):
+    def forward(self, mm: "f16[4, 768]", arg288_1: "f32[4, 476, 768]", arg26_1: "f32[768]", arg127_1: "f32[4, 476, 768]", arg131_1: "f32[4, 476, 1]", _shape_param_0):
         # No stacktrace found for following nodes
         convert_element_type_default: "f32[4, 768]" = torch.ops.prims.convert_element_type.default(mm, torch.float32);  mm = None
         full_default: "f32[4, 476, 768]" = torch.ops.aten.full.default([4, 476, 768], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
@@ -32,7 +32,7 @@ class Repro(torch.nn.Module):
         sub_tensor_1: "f32[4, 476, 768]" = torch.ops.aten.sub.Tensor(sub_tensor, mul_tensor_3);  sub_tensor = mul_tensor_3 = None
         mul_tensor_4: "f32[4, 476, 768]" = torch.ops.aten.mul.Tensor(arg131_1, sub_tensor_1);  arg131_1 = sub_tensor_1 = None
         convert_element_type_default_1: "f16[4, 476, 768]" = torch.ops.prims.convert_element_type.default(mul_tensor_4, torch.float16);  mul_tensor_4 = None
-        reshape_default: "f16[1904, 768]" = torch.ops.aten.reshape.default(convert_element_type_default_1, [1904, 768]);  convert_element_type_default_1 = None
+        reshape_default: "f16[1904, 768]" = torch.ops.aten.reshape.default(convert_element_type_default_1, _shape_param_0);  convert_element_type_default_1 = _shape_param_0 = None
         return reshape_default
 
 
@@ -43,6 +43,7 @@ def _default_make_inputs():
     torch.randn([768], dtype=torch.float32, device='cuda'),
     torch.randn([4, 476, 768], dtype=torch.float32, device='cuda'),
     torch.randn([4, 476, 1], dtype=torch.float32, device='cuda'),
+    [1904, 768],  # _shape_param_0
     ]
 
 

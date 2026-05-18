@@ -16,22 +16,25 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, getitem_72: "f32[256, 12, 128, 64]"):
+    def forward(self, getitem_72: "f32[256, 12, 128, 64]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:382 in shape, code: return x.view(batch_size, -1, self.n_heads, dim_per_head).transpose(1, 2)
         permute_default: "f32[256, 128, 12, 64]" = torch.ops.aten.permute.default(getitem_72, [0, 2, 1, 3]);  getitem_72 = None
-        reshape_default: "f32[256, 128, 768]" = torch.ops.aten.reshape.default(permute_default, [256, 128, 768]);  permute_default = None
+        reshape_default: "f32[256, 128, 768]" = torch.ops.aten.reshape.default(permute_default, _shape_param_0);  permute_default = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:388 in forward, code: q = shape(self.q_lin(query))  # (bs, n_heads, q_length, dim_per_head)
-        reshape_default_1: "f32[32768, 768]" = torch.ops.aten.reshape.default(reshape_default, [32768, 768]);  reshape_default = None
+        reshape_default_1: "f32[32768, 768]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
         permute_default_1: "f32[768, 32768]" = torch.ops.aten.permute.default(reshape_default_1, [1, 0])
         sum_dim_int_list: "f32[1, 768]" = torch.ops.aten.sum.dim_IntList(reshape_default_1, [0], True);  reshape_default_1 = None
-        reshape_default_2: "f32[768]" = torch.ops.aten.reshape.default(sum_dim_int_list, [768]);  sum_dim_int_list = None
+        reshape_default_2: "f32[768]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_2);  sum_dim_int_list = _shape_param_2 = None
         return (permute_default_1, reshape_default_2)
 
 
 def _default_make_inputs():
     return [
     torch.randn([256, 12, 128, 64], dtype=torch.float32, device='cuda'),
+    [256, 128, 768],  # _shape_param_0
+    [32768, 768],  # _shape_param_1
+    [768],  # _shape_param_2
     ]
 
 

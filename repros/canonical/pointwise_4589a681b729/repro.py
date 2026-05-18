@@ -16,11 +16,11 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "i64[2, 209981]", arg4_1: "f32[10000, 64]", arg1_1: "f32[209981]"):
+    def forward(self, arg0_1: "i64[2, 209981]", arg4_1: "f32[10000, 64]", arg1_1: "f32[209981]", _shape_param_0):
         # No stacktrace found for following nodes
         select_int: "i64[209981]" = torch.ops.aten.select.int(arg0_1, 0, 1)
         reshape_default: "i64[209981, 1]" = torch.ops.aten.reshape.default(select_int, [-1, 1]);  select_int = None
-        expand_default: "i64[209981, 64]" = torch.ops.aten.expand.default(reshape_default, [209981, 64]);  reshape_default = None
+        expand_default: "i64[209981, 64]" = torch.ops.aten.expand.default(reshape_default, _shape_param_0);  reshape_default = _shape_param_0 = None
         gather_default: "f32[209981, 64]" = torch.ops.aten.gather.default(arg4_1, 0, expand_default);  arg4_1 = expand_default = None
         reshape_default_1: "f32[209981, 1]" = torch.ops.aten.reshape.default(arg1_1, [-1, 1]);  arg1_1 = None
         mul_tensor: "f32[209981, 64]" = torch.ops.aten.mul.Tensor(gather_default, reshape_default_1);  gather_default = reshape_default_1 = None
@@ -37,6 +37,7 @@ def _default_make_inputs():
     torch.randint(0, 2, [2, 209981], dtype=torch.int64, device='cuda'),
     torch.randn([10000, 64], dtype=torch.float32, device='cuda'),
     torch.randn([209981], dtype=torch.float32, device='cuda'),
+    [209981, 64],  # _shape_param_0
     ]
 
 

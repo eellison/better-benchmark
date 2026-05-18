@@ -16,15 +16,15 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_171: "f16[4096, 2048]", arg64_1: "b8[4, 1024, 2048]", arg417_1: "b8[4, 1024, 2048]", full_2: "f16[]"):
+    def forward(self, mm_171: "f16[4096, 2048]", arg64_1: "b8[4, 1024, 2048]", arg417_1: "b8[4, 1024, 2048]", full_2: "f16[]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
-        reshape_default: "f16[4, 1024, 2048]" = torch.ops.aten.reshape.default(mm_171, [4, 1024, 2048]);  mm_171 = None
+        reshape_default: "f16[4, 1024, 2048]" = torch.ops.aten.reshape.default(mm_171, _shape_param_0);  mm_171 = _shape_param_0 = None
         convert_element_type_default: "f16[4, 1024, 2048]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float16);  reshape_default = None
         convert_element_type_default_1: "f16[4, 1024, 2048]" = torch.ops.prims.convert_element_type.default(arg64_1, torch.float16);  arg64_1 = None
         mul_tensor: "f16[4, 1024, 2048]" = torch.ops.aten.mul.Tensor(convert_element_type_default_1, 1.1111111111111112);  convert_element_type_default_1 = None
         mul_tensor_1: "f16[4, 1024, 2048]" = torch.ops.aten.mul.Tensor(convert_element_type_default, mul_tensor);  convert_element_type_default = mul_tensor = None
         where_self: "f16[4, 1024, 2048]" = torch.ops.aten.where.self(arg417_1, full_2, mul_tensor_1);  arg417_1 = full_2 = mul_tensor_1 = None
-        reshape_default_1: "f16[4096, 2048]" = torch.ops.aten.reshape.default(where_self, [4096, 2048]);  where_self = None
+        reshape_default_1: "f16[4096, 2048]" = torch.ops.aten.reshape.default(where_self, _shape_param_1);  where_self = _shape_param_1 = None
         return reshape_default_1
 
 
@@ -34,6 +34,8 @@ def _default_make_inputs():
     torch.randint(0, 2, [4, 1024, 2048], dtype=torch.bool, device='cuda'),
     torch.randint(0, 2, [4, 1024, 2048], dtype=torch.bool, device='cuda'),
     torch.randn([], dtype=torch.float16, device='cuda'),
+    [4, 1024, 2048],  # _shape_param_0
+    [4096, 2048],  # _shape_param_1
     ]
 
 

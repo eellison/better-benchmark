@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, inductor_seeds_default: "i64[2]", addmm_5: "f16[2048, 768]", view_12: "f16[2048, 768]"):
+    def forward(self, inductor_seeds_default: "i64[2]", addmm_5: "f16[2048, 768]", view_12: "f16[2048, 768]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:285 in forward, code: hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
         inductor_lookup_seed_default: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds_default, 1);  inductor_seeds_default = None
         inductor_random_default: "f32[2048, 768]" = torch.ops.prims.inductor_random.default([2048, 768], inductor_lookup_seed_default, 'rand');  inductor_lookup_seed_default = None
@@ -27,7 +27,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:287 in forward, code: hidden_states = (residual + hidden_states).view(hidden_states_shape)
         add_tensor: "f16[2048, 768]" = torch.ops.aten.add.Tensor(view_12, mul_tensor_1);  view_12 = mul_tensor_1 = None
-        reshape_default: "f16[4, 512, 768]" = torch.ops.aten.reshape.default(add_tensor, [4, 512, 768]);  add_tensor = None
+        reshape_default: "f16[4, 512, 768]" = torch.ops.aten.reshape.default(add_tensor, _shape_param_0);  add_tensor = _shape_param_0 = None
         return reshape_default
 
 
@@ -36,6 +36,7 @@ def _default_make_inputs():
     torch.randint(0, 2, [2], dtype=torch.int64, device='cuda'),
     torch.randn([2048, 768], dtype=torch.float16, device='cuda'),
     torch.randn([2048, 768], dtype=torch.float16, device='cuda'),
+    [4, 512, 768],  # _shape_param_0
     ]
 
 

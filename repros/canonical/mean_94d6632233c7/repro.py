@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg274_1: "bf16[640]", arg275_1: "bf16[640]", convolution_34: "bf16[64, 640, 8, 8]", arg276_1: "bf16[640]", arg277_1: "bf16[640]", arg278_1: "bf16[1000, 640]"):
+    def forward(self, arg274_1: "bf16[640]", arg275_1: "bf16[640]", convolution_34: "bf16[64, 640, 8, 8]", arg276_1: "bf16[640]", arg277_1: "bf16[640]", arg278_1: "bf16[1000, 640]", _shape_param_0):
         # No stacktrace found for following nodes
         convert_element_type_default: "f32[640]" = torch.ops.prims.convert_element_type.default(arg274_1, torch.float32);  arg274_1 = None
         convert_element_type_default_1: "f32[640]" = torch.ops.prims.convert_element_type.default(arg275_1, torch.float32);  arg275_1 = None
@@ -43,7 +43,7 @@ class Repro(torch.nn.Module):
         div_tensor: "f32[64, 640, 8, 8]" = torch.ops.aten.div.Tensor(convert_element_type_default_2, add_tensor_2);  convert_element_type_default_2 = add_tensor_2 = None
         convert_element_type_default_3: "bf16[64, 640, 8, 8]" = torch.ops.prims.convert_element_type.default(div_tensor, torch.bfloat16);  div_tensor = None
         mean_dim: "bf16[64, 640, 1, 1]" = torch.ops.aten.mean.dim(convert_element_type_default_3, [-1, -2], True);  convert_element_type_default_3 = None
-        reshape_default: "bf16[64, 640]" = torch.ops.aten.reshape.default(mean_dim, [64, 640]);  mean_dim = None
+        reshape_default: "bf16[64, 640]" = torch.ops.aten.reshape.default(mean_dim, _shape_param_0);  mean_dim = _shape_param_0 = None
         permute_default: "bf16[640, 1000]" = torch.ops.aten.permute.default(arg278_1, [1, 0]);  arg278_1 = None
         return (reshape_default, permute_default)
 
@@ -56,6 +56,7 @@ def _default_make_inputs():
     torch.randn([640], dtype=torch.bfloat16, device='cuda'),
     torch.randn([640], dtype=torch.bfloat16, device='cuda'),
     torch.randn([1000, 640], dtype=torch.bfloat16, device='cuda'),
+    [64, 640],  # _shape_param_0
     ]
 
 

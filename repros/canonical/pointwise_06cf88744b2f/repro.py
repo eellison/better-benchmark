@@ -15,9 +15,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm: "f32[16384, 768]"):
+    def forward(self, addmm: "f32[16384, 768]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/fnet/modeling_fnet.py:141 in forward, code: embeddings = self.projection(embeddings)
-        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(addmm, [32, 512, 768]);  addmm = None
+        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(addmm, _shape_param_0);  addmm = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/fnet/modeling_fnet.py:180 in forward, code: outputs = self.fourier_transform(hidden_states).real
         convert_element_type_default: "c64[32, 512, 768]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.complex64);  reshape_default = None
@@ -27,6 +27,7 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
+    [32, 512, 768],  # _shape_param_0
     ]
 
 

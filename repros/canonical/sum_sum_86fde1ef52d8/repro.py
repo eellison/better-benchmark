@@ -20,17 +20,17 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_118: "f32[4096, 4096]", mul_401: "f32[8, 512, 4096]", mm_120: "f32[4096, 4096]", mm_122: "f32[4096, 4096]", primals_25: "f32[4096]", mul_20: "f32[8, 512, 4096]", div_35: "f32[8, 512, 1]"):
+    def forward(self, mm_118: "f32[4096, 4096]", mul_401: "f32[8, 512, 4096]", mm_120: "f32[4096, 4096]", mm_122: "f32[4096, 4096]", primals_25: "f32[4096]", mul_20: "f32[8, 512, 4096]", div_35: "f32[8, 512, 1]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:182 in forward, code: value_layer = self.value(hidden_states).view(*hidden_shape).transpose(1, 2)
-        reshape_default: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_118, [8, 512, 4096]);  mm_118 = None
+        reshape_default: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_118, _shape_param_0);  mm_118 = _shape_param_0 = None
         add_tensor: "f32[8, 512, 4096]" = torch.ops.aten.add.Tensor(mul_401, reshape_default);  mul_401 = reshape_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:181 in forward, code: key_layer = self.key(hidden_states).view(*hidden_shape).transpose(1, 2)
-        reshape_default_1: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_120, [8, 512, 4096]);  mm_120 = None
+        reshape_default_1: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_120, _shape_param_1);  mm_120 = _shape_param_1 = None
         add_tensor_1: "f32[8, 512, 4096]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_1);  add_tensor = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:180 in forward, code: query_layer = self.query(hidden_states).view(*hidden_shape).transpose(1, 2)
-        reshape_default_2: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_122, [8, 512, 4096]);  mm_122 = None
+        reshape_default_2: "f32[8, 512, 4096]" = torch.ops.aten.reshape.default(mm_122, _shape_param_2);  mm_122 = _shape_param_2 = None
         add_tensor_2: "f32[8, 512, 4096]" = torch.ops.aten.add.Tensor(add_tensor_1, reshape_default_2);  add_tensor_1 = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:235 in forward, code: hidden_states = self.full_layer_layer_norm(ffn_output + attention_output)
@@ -45,7 +45,7 @@ class Repro(torch.nn.Module):
         mul_tensor_4: "f32[8, 512, 4096]" = torch.ops.aten.mul.Tensor(div_35, sub_tensor_1);  div_35 = sub_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
-        reshape_default_3: "f32[4096, 4096]" = torch.ops.aten.reshape.default(mul_tensor_4, [4096, 4096]);  mul_tensor_4 = None
+        reshape_default_3: "f32[4096, 4096]" = torch.ops.aten.reshape.default(mul_tensor_4, _shape_param_3);  mul_tensor_4 = _shape_param_3 = None
         permute_default: "f32[4096, 4096]" = torch.ops.aten.permute.default(reshape_default_3, [1, 0]);  reshape_default_3 = None
         return permute_default
 
@@ -59,6 +59,10 @@ def _default_make_inputs():
     torch.randn([4096], dtype=torch.float32, device='cuda'),
     torch.randn([8, 512, 4096], dtype=torch.float32, device='cuda'),
     torch.randn([8, 512, 1], dtype=torch.float32, device='cuda'),
+    [8, 512, 4096],  # _shape_param_0
+    [8, 512, 4096],  # _shape_param_1
+    [8, 512, 4096],  # _shape_param_2
+    [4096, 4096],  # _shape_param_3
     ]
 
 

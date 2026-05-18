@@ -17,9 +17,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_71: "f32[4096, 16384]"):
+    def forward(self, addmm_71: "f32[4096, 16384]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:239 in ff_chunk, code: ffn_output = self.ffn(attention_output)
-        reshape_default: "f32[8, 512, 16384]" = torch.ops.aten.reshape.default(addmm_71, [8, 512, 16384]);  addmm_71 = None
+        reshape_default: "f32[8, 512, 16384]" = torch.ops.aten.reshape.default(addmm_71, _shape_param_0);  addmm_71 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/activations.py:66 in forward, code: return 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
         mul_tensor: "f32[8, 512, 16384]" = torch.ops.aten.mul.Tensor(reshape_default, 0.5)
@@ -32,13 +32,15 @@ class Repro(torch.nn.Module):
         mul_tensor_3: "f32[8, 512, 16384]" = torch.ops.aten.mul.Tensor(mul_tensor, add_tensor_1);  mul_tensor = add_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:241 in ff_chunk, code: ffn_output = self.ffn_output(ffn_output)
-        reshape_default_1: "f32[4096, 16384]" = torch.ops.aten.reshape.default(mul_tensor_3, [4096, 16384]);  mul_tensor_3 = None
+        reshape_default_1: "f32[4096, 16384]" = torch.ops.aten.reshape.default(mul_tensor_3, _shape_param_1);  mul_tensor_3 = _shape_param_1 = None
         return reshape_default_1
 
 
 def _default_make_inputs():
     return [
     torch.randn([4096, 16384], dtype=torch.float32, device='cuda'),
+    [8, 512, 16384],  # _shape_param_0
+    [4096, 16384],  # _shape_param_1
     ]
 
 

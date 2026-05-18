@@ -33,7 +33,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, view_473: "f32[8, 8, 1024, 1024]", view_524: "f32[8, 8, 1024, 1024]", view_575: "f32[8, 8, 1024, 1024]", view_626: "f32[8, 8, 1024, 1024]", view_677: "f32[8, 8, 1024, 1024]", bmm_81: "f32[64, 1024, 1024]", gt_29: "b8[8, 8, 1024, 1024]", ge: "b8[1024, 1025]", full_default_2: "f32[]", bmm_12: "f32[64, 1024, 1024]", embedding_3: "f32[1024, 1024, 8]", amax_6: "f32[8, 8, 1024, 1]", sum_7: "f32[8, 8, 1024, 1]", add_38: "i64[1024, 1024]", view_757: "f32[8, 8, 1024, 1024]", view_785: "f32[8, 8, 1024, 1024]", view_813: "f32[8, 8, 1024, 1024]", view_841: "f32[8, 8, 1024, 1024]", view_869: "f32[8, 8, 1024, 1024]", bmm_105: "f32[64, 1024, 1024]", gt_2: "b8[8, 8, 1024, 1024]", bmm: "f32[64, 1024, 1024]", embedding_1: "f32[1024, 1024, 8]", amax: "f32[8, 8, 1024, 1]", sum_1: "f32[8, 8, 1024, 1]", add_4: "i64[1024, 1024]"):
+    def forward(self, view_473: "f32[8, 8, 1024, 1024]", view_524: "f32[8, 8, 1024, 1024]", view_575: "f32[8, 8, 1024, 1024]", view_626: "f32[8, 8, 1024, 1024]", view_677: "f32[8, 8, 1024, 1024]", bmm_81: "f32[64, 1024, 1024]", gt_29: "b8[8, 8, 1024, 1024]", ge: "b8[1024, 1025]", full_default_2: "f32[]", bmm_12: "f32[64, 1024, 1024]", embedding_3: "f32[1024, 1024, 8]", amax_6: "f32[8, 8, 1024, 1]", sum_7: "f32[8, 8, 1024, 1]", add_38: "i64[1024, 1024]", view_757: "f32[8, 8, 1024, 1024]", view_785: "f32[8, 8, 1024, 1024]", view_813: "f32[8, 8, 1024, 1024]", view_841: "f32[8, 8, 1024, 1024]", view_869: "f32[8, 8, 1024, 1024]", bmm_105: "f32[64, 1024, 1024]", gt_2: "b8[8, 8, 1024, 1024]", bmm: "f32[64, 1024, 1024]", embedding_1: "f32[1024, 1024, 8]", amax: "f32[8, 8, 1024, 1]", sum_1: "f32[8, 8, 1024, 1]", add_4: "i64[1024, 1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:558 in forward, code: scores += position_bias_masked
         add_tensor: "f32[8, 8, 1024, 1024]" = torch.ops.aten.add.Tensor(view_473, view_524);  view_473 = view_524 = None
         add_tensor_1: "f32[8, 8, 1024, 1024]" = torch.ops.aten.add.Tensor(add_tensor, view_575);  add_tensor = view_575 = None
@@ -41,7 +41,7 @@ class Repro(torch.nn.Module):
         add_tensor_3: "f32[8, 8, 1024, 1024]" = torch.ops.aten.add.Tensor(add_tensor_2, view_677);  add_tensor_2 = view_677 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:568 in forward, code: attn_output = torch.matmul(attn_weights, value_states)
-        reshape_default: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_81, [8, 8, 1024, 1024]);  bmm_81 = None
+        reshape_default: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_81, _shape_param_0);  bmm_81 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:562 in forward, code: attn_weights = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
         convert_element_type_default: "f32[8, 8, 1024, 1024]" = torch.ops.prims.convert_element_type.default(gt_29, torch.float32);  gt_29 = None
@@ -64,7 +64,7 @@ class Repro(torch.nn.Module):
         mul_tensor_2: "f32[1024, 1025]" = torch.ops.aten.mul.Tensor(where_self, gt_tensor);  where_self = gt_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:529 in forward, code: scores = torch.matmul(query_states, key_states.transpose(3, 2))
-        reshape_default_2: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_12, [8, 8, 1024, 1024]);  bmm_12 = None
+        reshape_default_2: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_12, _shape_param_1);  bmm_12 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:465 in compute_bias, code: values = values.permute([2, 0, 1]).unsqueeze(0)  # shape (1, num_heads, query_length, key_length)
         permute_default: "f32[8, 1024, 1024]" = torch.ops.aten.permute.default(embedding_3, [2, 0, 1]);  embedding_3 = None
@@ -76,7 +76,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:548 in forward, code: causal_mask = mask[:, :, :, : key_states.shape[-2]]
         unsqueeze_default_1: "f32[1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(mul_tensor_2, 0);  mul_tensor_2 = None
         unsqueeze_default_2: "f32[1, 1, 1024, 1025]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_1, 1);  unsqueeze_default_1 = None
-        expand_default: "f32[8, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_2, [8, 1, -1, -1]);  unsqueeze_default_2 = None
+        expand_default: "f32[8, 1, 1024, 1025]" = torch.ops.aten.expand.default(unsqueeze_default_2, _shape_param_2);  unsqueeze_default_2 = _shape_param_2 = None
         slice_tensor_1: "f32[8, 1, 1024, 1024]" = torch.ops.aten.slice.Tensor(expand_default, 3, 0, 1024);  expand_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:549 in forward, code: position_bias = position_bias + causal_mask
@@ -95,9 +95,9 @@ class Repro(torch.nn.Module):
         fma_default: "f32[8, 8, 1024, 1024]" = torch.ops.prims.fma.default(neg_default, sum_dim_int_list, mul_tensor_3);  neg_default = sum_dim_int_list = mul_tensor_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:558 in forward, code: scores += position_bias_masked
-        reshape_default_3: "f32[64, 1024, 1024]" = torch.ops.aten.reshape.default(fma_default, [64, 1024, 1024]);  fma_default = None
-        reshape_default_4: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_3, [8, 8, 1024, 1024]);  reshape_default_3 = None
-        reshape_default_5: "f32[64, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_4, [64, 1024, 1024])
+        reshape_default_3: "f32[64, 1024, 1024]" = torch.ops.aten.reshape.default(fma_default, _shape_param_3);  fma_default = _shape_param_3 = None
+        reshape_default_4: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_3, _shape_param_4);  reshape_default_3 = _shape_param_4 = None
+        reshape_default_5: "f32[64, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_4, _shape_param_5);  _shape_param_5 = None
         add_tensor_6: "f32[8, 8, 1024, 1024]" = torch.ops.aten.add.Tensor(add_tensor_3, reshape_default_4);  add_tensor_3 = reshape_default_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:549 in forward, code: position_bias = position_bias + causal_mask
@@ -131,7 +131,7 @@ class Repro(torch.nn.Module):
         add_tensor_10: "f32[1, 8, 1024, 1024]" = torch.ops.aten.add.Tensor(add_tensor_9, sum_dim_int_list_6);  add_tensor_9 = sum_dim_int_list_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:568 in forward, code: attn_output = torch.matmul(attn_weights, value_states)
-        reshape_default_6: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_105, [8, 8, 1024, 1024]);  bmm_105 = None
+        reshape_default_6: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm_105, _shape_param_6);  bmm_105 = _shape_param_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:562 in forward, code: attn_weights = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
         convert_element_type_default_1: "f32[8, 8, 1024, 1024]" = torch.ops.prims.convert_element_type.default(gt_2, torch.float32);  gt_2 = None
@@ -139,7 +139,7 @@ class Repro(torch.nn.Module):
         mul_tensor_5: "f32[8, 8, 1024, 1024]" = torch.ops.aten.mul.Tensor(reshape_default_6, mul_tensor_4);  reshape_default_6 = mul_tensor_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:529 in forward, code: scores = torch.matmul(query_states, key_states.transpose(3, 2))
-        reshape_default_7: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm, [8, 8, 1024, 1024]);  bmm = None
+        reshape_default_7: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(bmm, _shape_param_7);  bmm = _shape_param_7 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:465 in compute_bias, code: values = values.permute([2, 0, 1]).unsqueeze(0)  # shape (1, num_heads, query_length, key_length)
         permute_default_2: "f32[8, 1024, 1024]" = torch.ops.aten.permute.default(embedding_1, [2, 0, 1]);  embedding_1 = None
@@ -161,9 +161,9 @@ class Repro(torch.nn.Module):
         fma_default_1: "f32[8, 8, 1024, 1024]" = torch.ops.prims.fma.default(neg_default_1, sum_dim_int_list_7, mul_tensor_6);  neg_default_1 = sum_dim_int_list_7 = mul_tensor_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:558 in forward, code: scores += position_bias_masked
-        reshape_default_8: "f32[64, 1024, 1024]" = torch.ops.aten.reshape.default(fma_default_1, [64, 1024, 1024]);  fma_default_1 = None
-        reshape_default_9: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_8, [8, 8, 1024, 1024]);  reshape_default_8 = None
-        reshape_default_10: "f32[64, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_9, [64, 1024, 1024])
+        reshape_default_8: "f32[64, 1024, 1024]" = torch.ops.aten.reshape.default(fma_default_1, _shape_param_8);  fma_default_1 = _shape_param_8 = None
+        reshape_default_9: "f32[8, 8, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_8, _shape_param_9);  reshape_default_8 = _shape_param_9 = None
+        reshape_default_10: "f32[64, 1024, 1024]" = torch.ops.aten.reshape.default(reshape_default_9, _shape_param_10);  _shape_param_10 = None
         sum_dim_int_list_8: "f32[1, 8, 1024, 1024]" = torch.ops.aten.sum.dim_IntList(reshape_default_9, [0], True);  reshape_default_9 = None
         add_tensor_12: "f32[1, 8, 1024, 1024]" = torch.ops.aten.add.Tensor(add_tensor_10, sum_dim_int_list_8);  add_tensor_10 = sum_dim_int_list_8 = None
 
@@ -211,6 +211,17 @@ def _default_make_inputs():
     torch.randn([8, 8, 1024, 1], dtype=torch.float32, device='cuda'),
     torch.randn([8, 8, 1024, 1], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [1024, 1024], dtype=torch.int64, device='cuda'),
+    [8, 8, 1024, 1024],  # _shape_param_0
+    [8, 8, 1024, 1024],  # _shape_param_1
+    [8, 1, -1, -1],  # _shape_param_2
+    [64, 1024, 1024],  # _shape_param_3
+    [8, 8, 1024, 1024],  # _shape_param_4
+    [64, 1024, 1024],  # _shape_param_5
+    [8, 8, 1024, 1024],  # _shape_param_6
+    [8, 8, 1024, 1024],  # _shape_param_7
+    [64, 1024, 1024],  # _shape_param_8
+    [8, 8, 1024, 1024],  # _shape_param_9
+    [64, 1024, 1024],  # _shape_param_10
     ]
 
 

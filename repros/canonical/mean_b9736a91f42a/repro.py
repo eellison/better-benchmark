@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg1_1: "f32[32128, 512]", arg0_1: "i64[4, 1024]", arg2_1: "f32[512]", arg3_1: "f32[512, 512]", arg4_1: "f32[512, 512]"):
+    def forward(self, arg1_1: "f32[32128, 512]", arg0_1: "i64[4, 1024]", arg2_1: "f32[512]", arg3_1: "f32[512, 512]", arg4_1: "f32[512, 512]", _shape_param_0):
         # No stacktrace found for following nodes
         embedding_default: "f32[4, 1024, 512]" = torch.ops.aten.embedding.default(arg1_1, arg0_1);  arg1_1 = arg0_1 = None
         inductor_seeds_default: "i64[64]" = torch.ops.prims.inductor_seeds.default(64, device(type='cuda', index=0))
@@ -35,7 +35,7 @@ class Repro(torch.nn.Module):
         convert_element_type_default: "f16[512, 512]" = torch.ops.prims.convert_element_type.default(arg3_1, torch.float16);  arg3_1 = None
         convert_element_type_default_1: "f16[4, 1024, 512]" = torch.ops.prims.convert_element_type.default(mul_tensor_3, torch.float16);  mul_tensor_3 = None
         permute_default: "f16[512, 512]" = torch.ops.aten.permute.default(convert_element_type_default, [1, 0]);  convert_element_type_default = None
-        reshape_default: "f16[4096, 512]" = torch.ops.aten.reshape.default(convert_element_type_default_1, [4096, 512]);  convert_element_type_default_1 = None
+        reshape_default: "f16[4096, 512]" = torch.ops.aten.reshape.default(convert_element_type_default_1, _shape_param_0);  convert_element_type_default_1 = _shape_param_0 = None
         convert_element_type_default_2: "f16[512, 512]" = torch.ops.prims.convert_element_type.default(arg4_1, torch.float16);  arg4_1 = None
         permute_default_1: "f16[512, 512]" = torch.ops.aten.permute.default(convert_element_type_default_2, [1, 0]);  convert_element_type_default_2 = None
         return (permute_default, reshape_default, permute_default_1)
@@ -48,6 +48,7 @@ def _default_make_inputs():
     torch.randn([512], dtype=torch.float32, device='cuda'),
     torch.randn([512, 512], dtype=torch.float32, device='cuda'),
     torch.randn([512, 512], dtype=torch.float32, device='cuda'),
+    [4096, 512],  # _shape_param_0
     ]
 
 

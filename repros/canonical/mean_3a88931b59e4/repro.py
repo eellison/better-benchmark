@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "bf16[4, 512, 2048]", arg1_1: "bf16[2048]"):
+    def forward(self, arg0_1: "bf16[4, 512, 2048]", arg1_1: "bf16[2048]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:279 in forward, code: hidden_states = hidden_states.to(torch.float32)
         convert_element_type_default: "f32[4, 512, 2048]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.float32);  arg0_1 = None
 
@@ -34,13 +34,13 @@ class Repro(torch.nn.Module):
         mul_tensor_1: "bf16[4, 512, 2048]" = torch.ops.aten.mul.Tensor(arg1_1, convert_element_type_default_1);  arg1_1 = convert_element_type_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:164 in forward, code: query_states = self.q_norm(self.q_proj(hidden_states).view(hidden_shape)).transpose(1, 2)
-        reshape_default: "bf16[2048, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, [2048, 2048])
+        reshape_default: "bf16[2048, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_0);  _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:165 in forward, code: key_states = self.k_norm(self.k_proj(hidden_states).view(hidden_shape)).transpose(1, 2)
-        reshape_default_1: "bf16[2048, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, [2048, 2048])
+        reshape_default_1: "bf16[2048, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_1);  _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:166 in forward, code: value_states = self.v_proj(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default_2: "bf16[2048, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, [2048, 2048]);  mul_tensor_1 = None
+        reshape_default_2: "bf16[2048, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_2);  mul_tensor_1 = _shape_param_2 = None
         return (reshape_default, reshape_default_1, reshape_default_2)
 
 
@@ -48,6 +48,9 @@ def _default_make_inputs():
     return [
     torch.randn([4, 512, 2048], dtype=torch.bfloat16, device='cuda'),
     torch.randn([2048], dtype=torch.bfloat16, device='cuda'),
+    [2048, 2048],  # _shape_param_0
+    [2048, 2048],  # _shape_param_1
+    [2048, 2048],  # _shape_param_2
     ]
 
 

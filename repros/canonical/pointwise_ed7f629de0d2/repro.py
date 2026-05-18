@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg2_1: "i64[2, 209981]", mm: "f16[10000, 64]", arg3_1: "f32[209981]", arg4_1: "f32[64]"):
+    def forward(self, arg2_1: "i64[2, 209981]", mm: "f16[10000, 64]", arg3_1: "f32[209981]", arg4_1: "f32[64]", _shape_param_0):
         # No stacktrace found for following nodes
         select_int: "i64[209981]" = torch.ops.aten.select.int(arg2_1, 0, 0)
         index_tensor: "f16[209981, 64]" = torch.ops.aten.index.Tensor(mm, [select_int]);  mm = select_int = None
@@ -24,7 +24,7 @@ class Repro(torch.nn.Module):
         reshape_default: "f32[209981, 1]" = torch.ops.aten.reshape.default(arg3_1, [-1, 1]);  arg3_1 = None
         mul_tensor: "f32[209981, 64]" = torch.ops.aten.mul.Tensor(reshape_default, index_tensor);  reshape_default = index_tensor = None
         reshape_default_1: "i64[209981, 1]" = torch.ops.aten.reshape.default(select_int_1, [-1, 1]);  select_int_1 = None
-        expand_default: "i64[209981, 64]" = torch.ops.aten.expand.default(reshape_default_1, [209981, 64]);  reshape_default_1 = None
+        expand_default: "i64[209981, 64]" = torch.ops.aten.expand.default(reshape_default_1, _shape_param_0);  reshape_default_1 = _shape_param_0 = None
         full_default: "f32[10000, 64]" = torch.ops.aten.full.default([10000, 64], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         scatter_add_default: "f32[10000, 64]" = torch.ops.aten.scatter_add.default(full_default, 0, expand_default, mul_tensor);  full_default = expand_default = mul_tensor = None
         add_tensor: "f32[10000, 64]" = torch.ops.aten.add.Tensor(scatter_add_default, arg4_1);  scatter_add_default = arg4_1 = None
@@ -38,6 +38,7 @@ def _default_make_inputs():
     torch.randn([10000, 64], dtype=torch.float16, device='cuda'),
     torch.randn([209981], dtype=torch.float32, device='cuda'),
     torch.randn([64], dtype=torch.float32, device='cuda'),
+    [209981, 64],  # _shape_param_0
     ]
 
 

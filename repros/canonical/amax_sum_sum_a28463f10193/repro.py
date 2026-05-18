@@ -16,11 +16,11 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm: "bf16[1024, 50272]", arg197_1: "i64[1, 1024]"):
+    def forward(self, mm: "bf16[1024, 50272]", arg197_1: "i64[1, 1024]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
         slice_tensor: "bf16[1024, 50265]" = torch.ops.aten.slice.Tensor(mm, 1, 0, -7);  mm = None
-        reshape_default: "bf16[1, 1024, 50265]" = torch.ops.aten.reshape.default(slice_tensor, [1, 1024, 50265]);  slice_tensor = None
-        reshape_default_1: "bf16[1024, 50265]" = torch.ops.aten.reshape.default(reshape_default, [-1, 50265]);  reshape_default = None
+        reshape_default: "bf16[1, 1024, 50265]" = torch.ops.aten.reshape.default(slice_tensor, _shape_param_0);  slice_tensor = _shape_param_0 = None
+        reshape_default_1: "bf16[1024, 50265]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
         reshape_default_2: "i64[1024]" = torch.ops.aten.reshape.default(arg197_1, [-1]);  arg197_1 = None
         convert_element_type_default: "f32[1024, 50265]" = torch.ops.prims.convert_element_type.default(reshape_default_1, torch.float32);  reshape_default_1 = None
         amax_default: "f32[1024, 1]" = torch.ops.aten.amax.default(convert_element_type_default, [1], True)
@@ -52,6 +52,8 @@ def _default_make_inputs():
     return [
     torch.randn([1024, 50272], dtype=torch.bfloat16, device='cuda'),
     torch.randint(0, 2, [1, 1024], dtype=torch.int64, device='cuda'),
+    [1, 1024, 50265],  # _shape_param_0
+    [-1, 50265],  # _shape_param_1
     ]
 
 

@@ -20,9 +20,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm: "f32[6144, 64, 128]"):
+    def forward(self, bmm: "f32[6144, 64, 128]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1271 in forward, code: query_key_dots = torch.matmul(query_vectors, key_vectors.transpose(-1, -2))
-        reshape_default: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.reshape.default(bmm, [8, 12, 64, 64, 128]);  bmm = None
+        reshape_default: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.reshape.default(bmm, _shape_param_0);  bmm = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1293 in forward, code: logits = torch.logsumexp(query_key_dots, dim=-1, keepdim=True)
         amax_default: "f32[8, 12, 64, 64, 1]" = torch.ops.aten.amax.default(reshape_default, [-1], True)
@@ -41,14 +41,17 @@ class Repro(torch.nn.Module):
         exp_default_1: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.exp.default(sub_tensor_1);  sub_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1307 in forward, code: out_vectors = torch.matmul(attention_probs, value_vectors)
-        expand_default: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.expand.default(exp_default_1, [8, 12, 64, 64, 128]);  exp_default_1 = None
-        reshape_default_1: "f32[6144, 64, 128]" = torch.ops.aten.reshape.default(expand_default, [6144, 64, 128]);  expand_default = None
+        expand_default: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.expand.default(exp_default_1, _shape_param_1);  exp_default_1 = _shape_param_1 = None
+        reshape_default_1: "f32[6144, 64, 128]" = torch.ops.aten.reshape.default(expand_default, _shape_param_2);  expand_default = _shape_param_2 = None
         return reshape_default_1
 
 
 def _default_make_inputs():
     return [
     torch.randn([6144, 64, 128], dtype=torch.float32, device='cuda'),
+    [8, 12, 64, 64, 128],  # _shape_param_0
+    [8, 12, 64, 64, 128],  # _shape_param_1
+    [6144, 64, 128],  # _shape_param_2
     ]
 
 

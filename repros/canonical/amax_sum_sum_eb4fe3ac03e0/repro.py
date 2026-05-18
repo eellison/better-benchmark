@@ -24,16 +24,16 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg31_1: "i64[8, 512]", addmm_74: "f32[4096, 30000]"):
+    def forward(self, arg31_1: "i64[8, 512]", addmm_74: "f32[4096, 30000]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:650 in forward, code: masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))
         reshape_default: "i64[4096]" = torch.ops.aten.reshape.default(arg31_1, [-1]);  arg31_1 = None
         ne_scalar: "b8[4096]" = torch.ops.aten.ne.Scalar(reshape_default, -100)
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:541 in forward, code: hidden_states = self.decoder(hidden_states)
-        reshape_default_1: "f32[8, 512, 30000]" = torch.ops.aten.reshape.default(addmm_74, [8, 512, 30000]);  addmm_74 = None
+        reshape_default_1: "f32[8, 512, 30000]" = torch.ops.aten.reshape.default(addmm_74, _shape_param_0);  addmm_74 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:650 in forward, code: masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))
-        reshape_default_2: "f32[4096, 30000]" = torch.ops.aten.reshape.default(reshape_default_1, [-1, 30000]);  reshape_default_1 = None
+        reshape_default_2: "f32[4096, 30000]" = torch.ops.aten.reshape.default(reshape_default_1, _shape_param_1);  reshape_default_1 = _shape_param_1 = None
         amax_default: "f32[4096, 1]" = torch.ops.aten.amax.default(reshape_default_2, [1], True)
         sub_tensor: "f32[4096, 30000]" = torch.ops.aten.sub.Tensor(reshape_default_2, amax_default);  reshape_default_2 = amax_default = None
         exp_default: "f32[4096, 30000]" = torch.ops.aten.exp.default(sub_tensor)
@@ -61,6 +61,8 @@ def _default_make_inputs():
     return [
     torch.randint(0, 2, [8, 512], dtype=torch.int64, device='cuda'),
     torch.randn([4096, 30000], dtype=torch.float32, device='cuda'),
+    [8, 512, 30000],  # _shape_param_0
+    [-1, 30000],  # _shape_param_1
     ]
 
 

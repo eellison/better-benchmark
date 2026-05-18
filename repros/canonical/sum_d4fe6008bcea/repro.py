@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg350_1: "f32[]", arg202_1: "f32[]", arg28_1: "i64[1, 512]", arg199_1: "f16[512, 30522]", arg200_1: "f32[512, 1]", arg201_1: "f32[512, 1]"):
+    def forward(self, arg350_1: "f32[]", arg202_1: "f32[]", arg28_1: "i64[1, 512]", arg199_1: "f16[512, 30522]", arg200_1: "f32[512, 1]", arg201_1: "f32[512, 1]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
         div_tensor: "f32[]" = torch.ops.aten.div.Tensor(arg350_1, arg202_1);  arg350_1 = arg202_1 = None
         reshape_default: "i64[512]" = torch.ops.aten.reshape.default(arg28_1, [-1]);  arg28_1 = None
@@ -25,8 +25,8 @@ class Repro(torch.nn.Module):
         full_default: "i64[]" = torch.ops.aten.full.default([], 0, dtype = torch.int64, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         where_self: "i64[512, 1]" = torch.ops.aten.where.self(ne_scalar, unsqueeze_default, full_default);  unsqueeze_default = full_default = None
         iota_default: "i64[30522]" = torch.ops.prims.iota.default(30522, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
-        reshape_default_1: "i64[1, 30522]" = torch.ops.aten.reshape.default(iota_default, [1, 30522]);  iota_default = None
-        expand_default: "i64[512, 30522]" = torch.ops.aten.expand.default(where_self, [512, 30522]);  where_self = None
+        reshape_default_1: "i64[1, 30522]" = torch.ops.aten.reshape.default(iota_default, _shape_param_0);  iota_default = _shape_param_0 = None
+        expand_default: "i64[512, 30522]" = torch.ops.aten.expand.default(where_self, _shape_param_1);  where_self = _shape_param_1 = None
         eq_tensor: "b8[512, 30522]" = torch.ops.aten.eq.Tensor(expand_default, reshape_default_1);  expand_default = reshape_default_1 = None
         scalar_tensor_default: "f32[]" = torch.ops.aten.scalar_tensor.default(0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0))
         scalar_tensor_default_1: "f32[]" = torch.ops.aten.scalar_tensor.default(-1.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0))
@@ -56,6 +56,8 @@ def _default_make_inputs():
     torch.randn(15630330, dtype=torch.float16, device='cuda').as_strided([512, 30522], [30528, 1]),  # arg199_1
     torch.randn([512, 1], dtype=torch.float32, device='cuda'),
     torch.randn([512, 1], dtype=torch.float32, device='cuda'),
+    [1, 30522],  # _shape_param_0
+    [512, 30522],  # _shape_param_1
     ]
 
 

@@ -25,16 +25,16 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_358: "f32[4096, 2048]", mm_360: "f32[4096, 2048]", mm_362: "f32[4096, 2048]", primals_4: "f32[2048]", embedding: "f32[32, 128, 2048]", embedding_1: "f32[1, 128, 2048]", getitem_1: "f32[32, 128, 1]", rsqrt: "f32[32, 128, 1]", add_360: "f32[32, 128, 2048]", unsqueeze: "i64[1, 128]", full_default_1: "f32[]", primals_1: "i64[32, 128]"):
+    def forward(self, mm_358: "f32[4096, 2048]", mm_360: "f32[4096, 2048]", mm_362: "f32[4096, 2048]", primals_4: "f32[2048]", embedding: "f32[32, 128, 2048]", embedding_1: "f32[1, 128, 2048]", getitem_1: "f32[32, 128, 1]", rsqrt: "f32[32, 128, 1]", add_360: "f32[32, 128, 2048]", unsqueeze: "i64[1, 128]", full_default_1: "f32[]", primals_1: "i64[32, 128]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:244 in forward, code: value = self.v_proj(hidden_states)
-        reshape_default: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_358, [32, 128, 2048]);  mm_358 = None
+        reshape_default: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_358, _shape_param_0);  mm_358 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:243 in forward, code: key = self.k_proj(hidden_states)
-        reshape_default_1: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_360, [32, 128, 2048]);  mm_360 = None
+        reshape_default_1: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_360, _shape_param_1);  mm_360 = _shape_param_1 = None
         add_tensor: "f32[32, 128, 2048]" = torch.ops.aten.add.Tensor(reshape_default, reshape_default_1);  reshape_default = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:242 in forward, code: query = self.q_proj(hidden_states)
-        reshape_default_2: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_362, [32, 128, 2048]);  mm_362 = None
+        reshape_default_2: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_362, _shape_param_2);  mm_362 = _shape_param_2 = None
         add_tensor_1: "f32[32, 128, 2048]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_2);  add_tensor = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:447 in forward, code: hidden_states = self.ln_1(hidden_states)
@@ -93,6 +93,9 @@ def _default_make_inputs():
     torch.randint(0, 2, [1, 128], dtype=torch.int64, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [32, 128], dtype=torch.int64, device='cuda'),
+    [32, 128, 2048],  # _shape_param_0
+    [32, 128, 2048],  # _shape_param_1
+    [32, 128, 2048],  # _shape_param_2
     ]
 
 

@@ -16,18 +16,20 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, tangents_1: "f32[8, 512, 30000]"):
+    def forward(self, tangents_1: "f32[8, 512, 30000]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:859 in forward, code: hidden_states = self.decoder(hidden_states)
-        reshape_default: "f32[4096, 30000]" = torch.ops.aten.reshape.default(tangents_1, [4096, 30000]);  tangents_1 = None
+        reshape_default: "f32[4096, 30000]" = torch.ops.aten.reshape.default(tangents_1, _shape_param_0);  tangents_1 = _shape_param_0 = None
         permute_default: "f32[30000, 4096]" = torch.ops.aten.permute.default(reshape_default, [1, 0])
         sum_dim_int_list: "f32[1, 30000]" = torch.ops.aten.sum.dim_IntList(reshape_default, [0], True);  reshape_default = None
-        reshape_default_1: "f32[30000]" = torch.ops.aten.reshape.default(sum_dim_int_list, [30000]);  sum_dim_int_list = None
+        reshape_default_1: "f32[30000]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_1);  sum_dim_int_list = _shape_param_1 = None
         return (permute_default, reshape_default_1)
 
 
 def _default_make_inputs():
     return [
     torch.randn([8, 512, 30000], dtype=torch.float32, device='cuda'),
+    [4096, 30000],  # _shape_param_0
+    [30000],  # _shape_param_1
     ]
 
 

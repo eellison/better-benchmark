@@ -17,9 +17,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_47: "f16[4096, 768]", inductor_seeds: "i64[25]", add_92: "f32[4, 1024, 768]"):
+    def forward(self, addmm_47: "f16[4096, 768]", inductor_seeds: "i64[25]", add_92: "f32[4, 1024, 768]", _shape_param_0):
         # No stacktrace found for following nodes
-        reshape_default: "f16[4, 1024, 768]" = torch.ops.aten.reshape.default(addmm_47, [4, 1024, 768]);  addmm_47 = None
+        reshape_default: "f16[4, 1024, 768]" = torch.ops.aten.reshape.default(addmm_47, _shape_param_0);  addmm_47 = _shape_param_0 = None
         inductor_lookup_seed_default: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 24);  inductor_seeds = None
         inductor_random_default: "f32[4, 1024, 768]" = torch.ops.prims.inductor_random.default([4, 1024, 768], inductor_lookup_seed_default, 'rand');  inductor_lookup_seed_default = None
         convert_element_type_default: "f16[4, 1024, 768]" = torch.ops.prims.convert_element_type.default(inductor_random_default, torch.float16);  inductor_random_default = None
@@ -40,6 +40,7 @@ def _default_make_inputs():
     torch.randn([4096, 768], dtype=torch.float16, device='cuda'),
     torch.randint(0, 2, [25], dtype=torch.int64, device='cuda'),
     torch.randn([4, 1024, 768], dtype=torch.float32, device='cuda'),
+    [4, 1024, 768],  # _shape_param_0
     ]
 
 

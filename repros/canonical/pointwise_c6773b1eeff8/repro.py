@@ -15,9 +15,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_193: "bf16[2048, 3072]", mm_194: "bf16[2048, 3072]"):
+    def forward(self, mm_193: "bf16[2048, 3072]", mm_194: "bf16[2048, 3072]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:82 in forward, code: down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
-        reshape_default: "bf16[4, 512, 3072]" = torch.ops.aten.reshape.default(mm_193, [4, 512, 3072]);  mm_193 = None
+        reshape_default: "bf16[4, 512, 3072]" = torch.ops.aten.reshape.default(mm_193, _shape_param_0);  mm_193 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/activations.py:99 in forward, code: return nn.functional.silu(input)
         convert_element_type_default: "f32[4, 512, 3072]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float32);  reshape_default = None
@@ -28,9 +28,9 @@ class Repro(torch.nn.Module):
         convert_element_type_default_1: "bf16[4, 512, 3072]" = torch.ops.prims.convert_element_type.default(div_tensor, torch.bfloat16);  div_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:82 in forward, code: down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
-        reshape_default_1: "bf16[4, 512, 3072]" = torch.ops.aten.reshape.default(mm_194, [4, 512, 3072]);  mm_194 = None
+        reshape_default_1: "bf16[4, 512, 3072]" = torch.ops.aten.reshape.default(mm_194, _shape_param_1);  mm_194 = _shape_param_1 = None
         mul_tensor: "bf16[4, 512, 3072]" = torch.ops.aten.mul.Tensor(convert_element_type_default_1, reshape_default_1);  convert_element_type_default_1 = reshape_default_1 = None
-        reshape_default_2: "bf16[2048, 3072]" = torch.ops.aten.reshape.default(mul_tensor, [2048, 3072]);  mul_tensor = None
+        reshape_default_2: "bf16[2048, 3072]" = torch.ops.aten.reshape.default(mul_tensor, _shape_param_2);  mul_tensor = _shape_param_2 = None
         return reshape_default_2
 
 
@@ -38,6 +38,9 @@ def _default_make_inputs():
     return [
     torch.randn([2048, 3072], dtype=torch.bfloat16, device='cuda'),
     torch.randn([2048, 3072], dtype=torch.bfloat16, device='cuda'),
+    [4, 512, 3072],  # _shape_param_0
+    [4, 512, 3072],  # _shape_param_1
+    [2048, 3072],  # _shape_param_2
     ]
 
 

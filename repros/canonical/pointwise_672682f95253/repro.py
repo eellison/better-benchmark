@@ -15,9 +15,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "i64[1, 512]"):
+    def forward(self, arg0_1: "i64[1, 512]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:739 in _preprocess_mask_arguments, code: position_ids = position_ids.expand(batch_size, -1)
-        expand_default: "i64[4, 512]" = torch.ops.aten.expand.default(arg0_1, [4, -1]);  arg0_1 = None
+        expand_default: "i64[4, 512]" = torch.ops.aten.expand.default(arg0_1, _shape_param_0);  arg0_1 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:655 in find_packed_sequence_indices, code: first_dummy_value = position_ids[:, :1] - 1  # We just need the diff on this first value to be 1
         slice_tensor: "i64[4, 1]" = torch.ops.aten.slice.Tensor(expand_default, 1, 0, 1)
@@ -37,6 +37,7 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
+    [4, -1],  # _shape_param_0
     ]
 
 

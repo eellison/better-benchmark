@@ -25,12 +25,12 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg150_1: "i64[8]", mm: "f32[8192, 2]", arg0_1: "i64[8, 1024]"):
+    def forward(self, arg150_1: "i64[8]", mm: "f32[8192, 2]", arg0_1: "i64[8, 1024]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:1422 in forward, code: loss = loss_fct(pooled_logits.view(-1, self.num_labels), labels.view(-1))
         ne_scalar: "b8[8]" = torch.ops.aten.ne.Scalar(arg150_1, -100)
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:1379 in forward, code: logits = self.score(hidden_states)
-        reshape_default: "f32[8, 1024, 2]" = torch.ops.aten.reshape.default(mm, [8, 1024, 2]);  mm = None
+        reshape_default: "f32[8, 1024, 2]" = torch.ops.aten.reshape.default(mm, _shape_param_0);  mm = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:1402 in forward, code: pooled_logits = logits[torch.arange(batch_size, device=logits.device), last_non_pad_token]
         iota_default: "i64[8]" = torch.ops.prims.iota.default(8, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
@@ -78,6 +78,7 @@ def _default_make_inputs():
     torch.randint(0, 2, [8], dtype=torch.int64, device='cuda'),
     torch.randn([8192, 2], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [8, 1024], dtype=torch.int64, device='cuda'),
+    [8, 1024, 2],  # _shape_param_0
     ]
 
 

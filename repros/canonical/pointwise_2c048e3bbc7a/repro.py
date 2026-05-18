@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_71: "f16[512, 768]"):
+    def forward(self, addmm_71: "f16[512, 768]", _shape_param_0):
         # No stacktrace found for following nodes
-        reshape_default: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(addmm_71, [1, 512, 768]);  addmm_71 = None
+        reshape_default: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(addmm_71, _shape_param_0);  addmm_71 = _shape_param_0 = None
         native_dropout_default = torch.ops.aten.native_dropout.default(reshape_default, 0.1, True);  reshape_default = None
         getitem: "f16[1, 512, 768]" = native_dropout_default[0]
         getitem_1: "b8[1, 512, 768]" = native_dropout_default[1];  native_dropout_default = None
@@ -28,6 +28,7 @@ class Repro(torch.nn.Module):
 def _default_make_inputs():
     return [
     torch.randn([512, 768], dtype=torch.float16, device='cuda'),
+    [1, 512, 768],  # _shape_param_0
     ]
 
 

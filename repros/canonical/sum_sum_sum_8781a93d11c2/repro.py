@@ -20,32 +20,32 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_717: "f32[32768, 128]", mm_719: "f32[32768, 128]", addmm_2: "f32[32768, 128]", primals_16: "f32[128]"):
+    def forward(self, mm_717: "f32[32768, 128]", mm_719: "f32[32768, 128]", addmm_2: "f32[32768, 128]", primals_16: "f32[128]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:250 in forward, code: self.key(key_tensor)
-        reshape_default: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(mm_717, [256, 128, 128]);  mm_717 = None
+        reshape_default: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(mm_717, _shape_param_0);  mm_717 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:245 in forward, code: self.query(query_tensor)
-        reshape_default_1: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(mm_719, [256, 128, 128]);  mm_719 = None
+        reshape_default_1: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(mm_719, _shape_param_1);  mm_719 = _shape_param_1 = None
         add_tensor: "f32[256, 128, 128]" = torch.ops.aten.add.Tensor(reshape_default, reshape_default_1);  reshape_default = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:138 in forward, code: return input_tensor * self.weight + self.bias
         sum_dim_int_list: "f32[1, 1, 128]" = torch.ops.aten.sum.dim_IntList(add_tensor, [0, 1], True)
-        reshape_default_2: "f32[128]" = torch.ops.aten.reshape.default(sum_dim_int_list, [128]);  sum_dim_int_list = None
+        reshape_default_2: "f32[128]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_2);  sum_dim_int_list = _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:409 in forward, code: layer_input = self.dense(hidden_states)
-        reshape_default_3: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(addmm_2, [256, 128, 128]);  addmm_2 = None
+        reshape_default_3: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(addmm_2, _shape_param_3);  addmm_2 = _shape_param_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:138 in forward, code: return input_tensor * self.weight + self.bias
         mul_tensor: "f32[256, 128, 128]" = torch.ops.aten.mul.Tensor(add_tensor, reshape_default_3);  reshape_default_3 = None
         mul_tensor_1: "f32[256, 128, 128]" = torch.ops.aten.mul.Tensor(add_tensor, primals_16);  add_tensor = primals_16 = None
         sum_dim_int_list_1: "f32[1, 1, 128]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [0, 1], True);  mul_tensor = None
-        reshape_default_4: "f32[128]" = torch.ops.aten.reshape.default(sum_dim_int_list_1, [128]);  sum_dim_int_list_1 = None
+        reshape_default_4: "f32[128]" = torch.ops.aten.reshape.default(sum_dim_int_list_1, _shape_param_4);  sum_dim_int_list_1 = _shape_param_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:409 in forward, code: layer_input = self.dense(hidden_states)
-        reshape_default_5: "f32[32768, 128]" = torch.ops.aten.reshape.default(mul_tensor_1, [32768, 128]);  mul_tensor_1 = None
+        reshape_default_5: "f32[32768, 128]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_5);  mul_tensor_1 = _shape_param_5 = None
         permute_default: "f32[128, 32768]" = torch.ops.aten.permute.default(reshape_default_5, [1, 0])
         sum_dim_int_list_2: "f32[1, 128]" = torch.ops.aten.sum.dim_IntList(reshape_default_5, [0], True);  reshape_default_5 = None
-        reshape_default_6: "f32[128]" = torch.ops.aten.reshape.default(sum_dim_int_list_2, [128]);  sum_dim_int_list_2 = None
+        reshape_default_6: "f32[128]" = torch.ops.aten.reshape.default(sum_dim_int_list_2, _shape_param_6);  sum_dim_int_list_2 = _shape_param_6 = None
         return (reshape_default_2, reshape_default_4, permute_default, reshape_default_6)
 
 
@@ -55,6 +55,13 @@ def _default_make_inputs():
     torch.randn([32768, 128], dtype=torch.float32, device='cuda'),
     torch.randn([32768, 128], dtype=torch.float32, device='cuda'),
     torch.randn([128], dtype=torch.float32, device='cuda'),
+    [256, 128, 128],  # _shape_param_0
+    [256, 128, 128],  # _shape_param_1
+    [128],  # _shape_param_2
+    [256, 128, 128],  # _shape_param_3
+    [128],  # _shape_param_4
+    [32768, 128],  # _shape_param_5
+    [128],  # _shape_param_6
     ]
 
 

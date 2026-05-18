@@ -24,24 +24,24 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_default_13: "f32[8192, 1024]", mul_1101: "f32[512, 16, 1024]", mm_default_11: "f32[8192, 1024]", mm_default_9: "f32[8192, 1024]", primals_16: "f32[1024]", mul_20: "f32[512, 16, 1024]", div_73: "f32[512, 16, 1]", gt_5: "b8[512, 16, 1024]"):
+    def forward(self, mm_default_13: "f32[8192, 1024]", mul_1101: "f32[512, 16, 1024]", mm_default_11: "f32[8192, 1024]", mm_default_9: "f32[8192, 1024]", primals_16: "f32[1024]", mul_20: "f32[512, 16, 1024]", div_73: "f32[512, 16, 1]", gt_5: "b8[512, 16, 1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:418 in forward, code: v_head_h = torch.einsum("ibh,hnd->ibnd", cat, self.v)
         unsqueeze_default: "f32[1, 8192, 1024]" = torch.ops.aten.unsqueeze.default(mm_default_13, 0);  mm_default_13 = None
-        reshape_default: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default, [512, 16, 1024, 1, 1]);  unsqueeze_default = None
+        reshape_default: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default, _shape_param_0);  unsqueeze_default = _shape_param_0 = None
         squeeze_dim: "f32[512, 16, 1024, 1]" = torch.ops.aten.squeeze.dim(reshape_default, 4);  reshape_default = None
         squeeze_dim_1: "f32[512, 16, 1024]" = torch.ops.aten.squeeze.dim(squeeze_dim, 3);  squeeze_dim = None
         add_tensor: "f32[512, 16, 1024]" = torch.ops.aten.add.Tensor(mul_1101, squeeze_dim_1);  mul_1101 = squeeze_dim_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:417 in forward, code: k_head_h = torch.einsum("ibh,hnd->ibnd", cat, self.k)
         unsqueeze_default_1: "f32[1, 8192, 1024]" = torch.ops.aten.unsqueeze.default(mm_default_11, 0);  mm_default_11 = None
-        reshape_default_1: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default_1, [512, 16, 1024, 1, 1]);  unsqueeze_default_1 = None
+        reshape_default_1: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default_1, _shape_param_1);  unsqueeze_default_1 = _shape_param_1 = None
         squeeze_dim_2: "f32[512, 16, 1024, 1]" = torch.ops.aten.squeeze.dim(reshape_default_1, 4);  reshape_default_1 = None
         squeeze_dim_3: "f32[512, 16, 1024]" = torch.ops.aten.squeeze.dim(squeeze_dim_2, 3);  squeeze_dim_2 = None
         add_tensor_1: "f32[512, 16, 1024]" = torch.ops.aten.add.Tensor(add_tensor, squeeze_dim_3);  add_tensor = squeeze_dim_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:416 in forward, code: q_head_h = torch.einsum("ibh,hnd->ibnd", h, self.q)
         unsqueeze_default_2: "f32[1, 8192, 1024]" = torch.ops.aten.unsqueeze.default(mm_default_9, 0);  mm_default_9 = None
-        reshape_default_2: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default_2, [512, 16, 1024, 1, 1]);  unsqueeze_default_2 = None
+        reshape_default_2: "f32[512, 16, 1024, 1, 1]" = torch.ops.aten.reshape.default(unsqueeze_default_2, _shape_param_2);  unsqueeze_default_2 = _shape_param_2 = None
         squeeze_dim_4: "f32[512, 16, 1024, 1]" = torch.ops.aten.squeeze.dim(reshape_default_2, 4);  reshape_default_2 = None
         squeeze_dim_5: "f32[512, 16, 1024]" = torch.ops.aten.squeeze.dim(squeeze_dim_4, 3);  squeeze_dim_4 = None
         add_tensor_2: "f32[512, 16, 1024]" = torch.ops.aten.add.Tensor(add_tensor_1, squeeze_dim_5);  add_tensor_1 = squeeze_dim_5 = None
@@ -66,10 +66,10 @@ class Repro(torch.nn.Module):
         mul_tensor_7: "f32[512, 16, 1024]" = torch.ops.aten.mul.Tensor(mul_tensor_4, mul_tensor_6);  mul_tensor_4 = mul_tensor_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:466 in forward, code: output = self.layer_2(output)
-        reshape_default_3: "f32[8192, 1024]" = torch.ops.aten.reshape.default(mul_tensor_7, [8192, 1024]);  mul_tensor_7 = None
+        reshape_default_3: "f32[8192, 1024]" = torch.ops.aten.reshape.default(mul_tensor_7, _shape_param_3);  mul_tensor_7 = _shape_param_3 = None
         permute_default: "f32[1024, 8192]" = torch.ops.aten.permute.default(reshape_default_3, [1, 0])
         sum_dim_int_list_4: "f32[1, 1024]" = torch.ops.aten.sum.dim_IntList(reshape_default_3, [0], True);  reshape_default_3 = None
-        reshape_default_4: "f32[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, [1024]);  sum_dim_int_list_4 = None
+        reshape_default_4: "f32[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, _shape_param_4);  sum_dim_int_list_4 = _shape_param_4 = None
         return (sum_dim_int_list_2, sum_dim_int_list_3, permute_default, reshape_default_4)
 
 
@@ -83,6 +83,11 @@ def _default_make_inputs():
     torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
     torch.randn([512, 16, 1], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [512, 16, 1024], dtype=torch.bool, device='cuda'),
+    [512, 16, 1024, 1, 1],  # _shape_param_0
+    [512, 16, 1024, 1, 1],  # _shape_param_1
+    [512, 16, 1024, 1, 1],  # _shape_param_2
+    [8192, 1024],  # _shape_param_3
+    [1024],  # _shape_param_4
     ]
 
 

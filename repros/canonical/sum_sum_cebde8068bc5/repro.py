@@ -19,16 +19,16 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_586: "bf16[2048, 1024]", mm_588: "bf16[2048, 1024]", mm_590: "bf16[2048, 1024]", primals_4: "bf16[1024]", embedding: "bf16[4, 512, 1024]", rsqrt: "f32[4, 512, 1]", add_665: "bf16[4, 512, 1024]", primals_1: "i64[4, 512]", full_default_58: "f32[]", mm_197: "bf16[151936, 1024]"):
+    def forward(self, mm_586: "bf16[2048, 1024]", mm_588: "bf16[2048, 1024]", mm_590: "bf16[2048, 1024]", primals_4: "bf16[1024]", embedding: "bf16[4, 512, 1024]", rsqrt: "f32[4, 512, 1]", add_665: "bf16[4, 512, 1024]", primals_1: "i64[4, 512]", full_default_58: "f32[]", mm_197: "bf16[151936, 1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:202 in forward, code: value_states = self.v_proj(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default: "bf16[4, 512, 1024]" = torch.ops.aten.reshape.default(mm_586, [4, 512, 1024]);  mm_586 = None
+        reshape_default: "bf16[4, 512, 1024]" = torch.ops.aten.reshape.default(mm_586, _shape_param_0);  mm_586 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:201 in forward, code: key_states = self.k_norm(self.k_proj(hidden_states).view(hidden_shape)).transpose(1, 2)
-        reshape_default_1: "bf16[4, 512, 1024]" = torch.ops.aten.reshape.default(mm_588, [4, 512, 1024]);  mm_588 = None
+        reshape_default_1: "bf16[4, 512, 1024]" = torch.ops.aten.reshape.default(mm_588, _shape_param_1);  mm_588 = _shape_param_1 = None
         add_tensor: "bf16[4, 512, 1024]" = torch.ops.aten.add.Tensor(reshape_default, reshape_default_1);  reshape_default = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:200 in forward, code: query_states = self.q_norm(self.q_proj(hidden_states).view(hidden_shape)).transpose(1, 2)
-        reshape_default_2: "bf16[4, 512, 1024]" = torch.ops.aten.reshape.default(mm_590, [4, 512, 1024]);  mm_590 = None
+        reshape_default_2: "bf16[4, 512, 1024]" = torch.ops.aten.reshape.default(mm_590, _shape_param_2);  mm_590 = _shape_param_2 = None
         add_tensor_1: "bf16[4, 512, 1024]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_2);  add_tensor = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:64 in forward, code: return self.weight * hidden_states.to(input_dtype)
@@ -44,7 +44,7 @@ class Repro(torch.nn.Module):
         convert_element_type_default_1: "bf16[4, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_tensor_1, torch.bfloat16);  mul_tensor_1 = None
         mul_tensor_2: "bf16[4, 512, 1024]" = torch.ops.aten.mul.Tensor(add_tensor_1, convert_element_type_default_1);  add_tensor_1 = convert_element_type_default_1 = None
         sum_dim_int_list: "bf16[1, 1, 1024]" = torch.ops.aten.sum.dim_IntList(mul_tensor_2, [0, 1], True);  mul_tensor_2 = None
-        reshape_default_3: "bf16[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list, [1024]);  sum_dim_int_list = None
+        reshape_default_3: "bf16[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_3);  sum_dim_int_list = _shape_param_3 = None
         convert_element_type_default_2: "f32[4, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_tensor, torch.float32);  mul_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:63 in forward, code: hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
@@ -56,7 +56,7 @@ class Repro(torch.nn.Module):
         mul_tensor_5: "f32[4, 512, 1]" = torch.ops.aten.mul.Tensor(mul_scalar, pow_tensor_scalar);  mul_scalar = pow_tensor_scalar = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py:62 in forward, code: variance = hidden_states.pow(2).mean(-1, keepdim=True)
-        expand_default: "f32[4, 512, 1024]" = torch.ops.aten.expand.default(mul_tensor_5, [4, 512, 1024]);  mul_tensor_5 = None
+        expand_default: "f32[4, 512, 1024]" = torch.ops.aten.expand.default(mul_tensor_5, _shape_param_4);  mul_tensor_5 = _shape_param_4 = None
         div_scalar: "f32[4, 512, 1024]" = torch.ops.aten.div.Scalar(expand_default, 1024);  expand_default = None
         pow_tensor_scalar_1: "f32[4, 512, 1024]" = torch.ops.aten.pow.Tensor_Scalar(convert_element_type_default, 1.0);  convert_element_type_default = None
         mul_scalar_1: "f32[4, 512, 1024]" = torch.ops.aten.mul.Scalar(pow_tensor_scalar_1, 2.0);  pow_tensor_scalar_1 = None
@@ -91,6 +91,11 @@ def _default_make_inputs():
     torch.randint(0, 2, [4, 512], dtype=torch.int64, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.randn([151936, 1024], dtype=torch.bfloat16, device='cuda'),
+    [4, 512, 1024],  # _shape_param_0
+    [4, 512, 1024],  # _shape_param_1
+    [4, 512, 1024],  # _shape_param_2
+    [1024],  # _shape_param_3
+    [4, 512, 1024],  # _shape_param_4
     ]
 
 

@@ -24,16 +24,16 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_346: "f32[4096, 2048]", mm_348: "f32[4096, 2048]", mm_350: "f32[4096, 2048]", primals_18: "f32[2048]", mul_9: "f32[32, 128, 2048]", div_72: "f32[32, 128, 1]", add_354: "f32[32, 128, 2048]"):
+    def forward(self, mm_346: "f32[4096, 2048]", mm_348: "f32[4096, 2048]", mm_350: "f32[4096, 2048]", primals_18: "f32[2048]", mul_9: "f32[32, 128, 2048]", div_72: "f32[32, 128, 1]", add_354: "f32[32, 128, 2048]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:244 in forward, code: value = self.v_proj(hidden_states)
-        reshape_default: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_346, [32, 128, 2048]);  mm_346 = None
+        reshape_default: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_346, _shape_param_0);  mm_346 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:243 in forward, code: key = self.k_proj(hidden_states)
-        reshape_default_1: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_348, [32, 128, 2048]);  mm_348 = None
+        reshape_default_1: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_348, _shape_param_1);  mm_348 = _shape_param_1 = None
         add_tensor: "f32[32, 128, 2048]" = torch.ops.aten.add.Tensor(reshape_default, reshape_default_1);  reshape_default = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:242 in forward, code: query = self.q_proj(hidden_states)
-        reshape_default_2: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_350, [32, 128, 2048]);  mm_350 = None
+        reshape_default_2: "f32[32, 128, 2048]" = torch.ops.aten.reshape.default(mm_350, _shape_param_2);  mm_350 = _shape_param_2 = None
         add_tensor_1: "f32[32, 128, 2048]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_2);  add_tensor = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:447 in forward, code: hidden_states = self.ln_1(hidden_states)
@@ -52,10 +52,10 @@ class Repro(torch.nn.Module):
         add_tensor_2: "f32[32, 128, 2048]" = torch.ops.aten.add.Tensor(add_354, mul_tensor_4);  add_354 = mul_tensor_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:421 in forward, code: hidden_states = self.c_proj(hidden_states)
-        reshape_default_3: "f32[4096, 2048]" = torch.ops.aten.reshape.default(add_tensor_2, [4096, 2048]);  add_tensor_2 = None
+        reshape_default_3: "f32[4096, 2048]" = torch.ops.aten.reshape.default(add_tensor_2, _shape_param_3);  add_tensor_2 = _shape_param_3 = None
         permute_default: "f32[2048, 4096]" = torch.ops.aten.permute.default(reshape_default_3, [1, 0])
         sum_dim_int_list_4: "f32[1, 2048]" = torch.ops.aten.sum.dim_IntList(reshape_default_3, [0], True);  reshape_default_3 = None
-        reshape_default_4: "f32[2048]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, [2048]);  sum_dim_int_list_4 = None
+        reshape_default_4: "f32[2048]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, _shape_param_4);  sum_dim_int_list_4 = _shape_param_4 = None
         return (sum_dim_int_list_2, sum_dim_int_list_3, permute_default, reshape_default_4)
 
 
@@ -68,6 +68,11 @@ def _default_make_inputs():
     torch.randn([32, 128, 2048], dtype=torch.float32, device='cuda'),
     torch.randn([32, 128, 1], dtype=torch.float32, device='cuda'),
     torch.randn([32, 128, 2048], dtype=torch.float32, device='cuda'),
+    [32, 128, 2048],  # _shape_param_0
+    [32, 128, 2048],  # _shape_param_1
+    [32, 128, 2048],  # _shape_param_2
+    [4096, 2048],  # _shape_param_3
+    [2048],  # _shape_param_4
     ]
 
 

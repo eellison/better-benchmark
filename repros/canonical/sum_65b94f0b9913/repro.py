@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_94: "f32[8192, 4096]", gt_4: "b8[512, 16, 4096]", addmm: "f32[8192, 4096]"):
+    def forward(self, mm_94: "f32[8192, 4096]", gt_4: "b8[512, 16, 4096]", addmm: "f32[8192, 4096]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:466 in forward, code: output = self.layer_2(output)
-        reshape_default: "f32[512, 16, 4096]" = torch.ops.aten.reshape.default(mm_94, [512, 16, 4096]);  mm_94 = None
+        reshape_default: "f32[512, 16, 4096]" = torch.ops.aten.reshape.default(mm_94, _shape_param_0);  mm_94 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:465 in forward, code: output = self.dropout(output)
         convert_element_type_default: "f32[512, 16, 4096]" = torch.ops.prims.convert_element_type.default(gt_4, torch.float32);  gt_4 = None
@@ -26,7 +26,7 @@ class Repro(torch.nn.Module):
         mul_tensor_1: "f32[512, 16, 4096]" = torch.ops.aten.mul.Tensor(reshape_default, mul_tensor);  reshape_default = mul_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:463 in forward, code: output = self.layer_1(output)
-        reshape_default_1: "f32[512, 16, 4096]" = torch.ops.aten.reshape.default(addmm, [512, 16, 4096]);  addmm = None
+        reshape_default_1: "f32[512, 16, 4096]" = torch.ops.aten.reshape.default(addmm, _shape_param_1);  addmm = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/activations.py:85 in forward, code: return self.act(input)
         mul_tensor_2: "f32[512, 16, 4096]" = torch.ops.aten.mul.Tensor(reshape_default_1, 0.7071067811865476)
@@ -42,10 +42,10 @@ class Repro(torch.nn.Module):
         mul_tensor_8: "f32[512, 16, 4096]" = torch.ops.aten.mul.Tensor(mul_tensor_1, add_tensor_1);  mul_tensor_1 = add_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:463 in forward, code: output = self.layer_1(output)
-        reshape_default_2: "f32[8192, 4096]" = torch.ops.aten.reshape.default(mul_tensor_8, [8192, 4096]);  mul_tensor_8 = None
+        reshape_default_2: "f32[8192, 4096]" = torch.ops.aten.reshape.default(mul_tensor_8, _shape_param_2);  mul_tensor_8 = _shape_param_2 = None
         permute_default: "f32[4096, 8192]" = torch.ops.aten.permute.default(reshape_default_2, [1, 0])
         sum_dim_int_list: "f32[1, 4096]" = torch.ops.aten.sum.dim_IntList(reshape_default_2, [0], True);  reshape_default_2 = None
-        reshape_default_3: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list, [4096]);  sum_dim_int_list = None
+        reshape_default_3: "f32[4096]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_3);  sum_dim_int_list = _shape_param_3 = None
         return (permute_default, reshape_default_3)
 
 
@@ -54,6 +54,10 @@ def _default_make_inputs():
     torch.randn([8192, 4096], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [512, 16, 4096], dtype=torch.bool, device='cuda'),
     torch.randn([8192, 4096], dtype=torch.float32, device='cuda'),
+    [512, 16, 4096],  # _shape_param_0
+    [512, 16, 4096],  # _shape_param_1
+    [8192, 4096],  # _shape_param_2
+    [4096],  # _shape_param_3
     ]
 
 

@@ -16,13 +16,13 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg77_1: "bf16[256]", arg78_1: "bf16[256]", arg75_1: "bf16[256]", arg76_1: "bf16[256]", convolution_14: "bf16[16, 256, 32, 32]", add_30: "bf16[16, 256, 32, 32]"):
+    def forward(self, arg77_1: "bf16[256]", arg78_1: "bf16[256]", arg75_1: "bf16[256]", arg76_1: "bf16[256]", convolution_14: "bf16[16, 256, 32, 32]", add_30: "bf16[16, 256, 32, 32]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
         repeat_default: "bf16[4096]" = torch.ops.aten.repeat.default(arg77_1, [16]);  arg77_1 = None
         repeat_default_1: "bf16[4096]" = torch.ops.aten.repeat.default(arg78_1, [16]);  arg78_1 = None
         repeat_default_2: "bf16[4096]" = torch.ops.aten.repeat.default(arg75_1, [16]);  arg75_1 = None
         repeat_default_3: "bf16[4096]" = torch.ops.aten.repeat.default(arg76_1, [16]);  arg76_1 = None
-        reshape_default: "bf16[1, 4096, 32, 32]" = torch.ops.aten.reshape.default(convolution_14, [1, 4096, 32, 32]);  convolution_14 = None
+        reshape_default: "bf16[1, 4096, 32, 32]" = torch.ops.aten.reshape.default(convolution_14, _shape_param_0);  convolution_14 = _shape_param_0 = None
         convert_element_type_default: "f32[4096]" = torch.ops.prims.convert_element_type.default(repeat_default_2, torch.float32);  repeat_default_2 = None
         convert_element_type_default_1: "f32[4096]" = torch.ops.prims.convert_element_type.default(repeat_default_3, torch.float32);  repeat_default_3 = None
         add_tensor: "f32[4096]" = torch.ops.aten.add.Tensor(convert_element_type_default_1, 1e-05);  convert_element_type_default_1 = None
@@ -42,7 +42,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_7: "bf16[4096, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[1, 4096, 32, 32]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
         convert_element_type_default_2: "bf16[1, 4096, 32, 32]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.bfloat16);  add_tensor_1 = None
-        reshape_default_1: "bf16[16, 256, 32, 32]" = torch.ops.aten.reshape.default(convert_element_type_default_2, [16, 256, 32, 32]);  convert_element_type_default_2 = None
+        reshape_default_1: "bf16[16, 256, 32, 32]" = torch.ops.aten.reshape.default(convert_element_type_default_2, _shape_param_1);  convert_element_type_default_2 = _shape_param_1 = None
         add_tensor_2: "bf16[16, 256, 32, 32]" = torch.ops.aten.add.Tensor(add_30, reshape_default_1);  add_30 = reshape_default_1 = None
         return add_tensor_2
 
@@ -55,6 +55,8 @@ def _default_make_inputs():
     torch.randn([256], dtype=torch.bfloat16, device='cuda'),
     torch.randn([16, 256, 32, 32], dtype=torch.bfloat16, device='cuda'),
     torch.randn([16, 256, 32, 32], dtype=torch.bfloat16, device='cuda'),
+    [1, 4096, 32, 32],  # _shape_param_0
+    [16, 256, 32, 32],  # _shape_param_1
     ]
 
 

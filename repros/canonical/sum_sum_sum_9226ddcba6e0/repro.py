@@ -25,9 +25,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_148: "f32[4096, 128]", primals_7: "f32[128]", mul: "f32[8, 512, 128]", div_25: "f32[8, 512, 1]", primals_3: "i64[1, 512]", primals_2: "i64[1, 512]", primals_1: "i64[8, 512]", mm_1: "f32[30000, 128]"):
+    def forward(self, mm_148: "f32[4096, 128]", primals_7: "f32[128]", mul: "f32[8, 512, 128]", div_25: "f32[8, 512, 1]", primals_3: "i64[1, 512]", primals_2: "i64[1, 512]", primals_1: "i64[8, 512]", mm_1: "f32[30000, 128]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:510 in forward, code: hidden_states = self.embedding_hidden_mapping_in(hidden_states)
-        reshape_default: "f32[8, 512, 128]" = torch.ops.aten.reshape.default(mm_148, [8, 512, 128]);  mm_148 = None
+        reshape_default: "f32[8, 512, 128]" = torch.ops.aten.reshape.default(mm_148, _shape_param_0);  mm_148 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:239 in forward, code: embeddings = self.LayerNorm(embeddings)
         mul_tensor: "f32[8, 512, 128]" = torch.ops.aten.mul.Tensor(reshape_default, primals_7);  primals_7 = None
@@ -55,7 +55,7 @@ class Repro(torch.nn.Module):
         index_put_default: "f32[512, 128]" = torch.ops.aten.index_put.default(full_default_1, [primals_3], where_self, True);  full_default_1 = primals_3 = where_self = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:685 in forward, code: buffered_token_type_ids_expanded = buffered_token_type_ids.expand(batch_size, seq_length)
-        expand_default: "i64[8, 512]" = torch.ops.aten.expand.default(primals_2, [8, 512]);  primals_2 = None
+        expand_default: "i64[8, 512]" = torch.ops.aten.expand.default(primals_2, _shape_param_1);  primals_2 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:233 in forward, code: token_type_embeddings = self.token_type_embeddings(token_type_ids)
         eq_scalar_1: "b8[8, 512]" = torch.ops.aten.eq.Scalar(expand_default, -1)
@@ -84,6 +84,8 @@ def _default_make_inputs():
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [8, 512], dtype=torch.int64, device='cuda'),
     torch.randn([30000, 128], dtype=torch.float32, device='cuda'),
+    [8, 512, 128],  # _shape_param_0
+    [8, 512],  # _shape_param_1
     ]
 
 

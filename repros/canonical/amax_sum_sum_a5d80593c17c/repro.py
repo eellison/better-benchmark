@@ -23,13 +23,13 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg53_1: "f32[32, 2880]", bmm_11: "f32[32, 2048, 2880]", getitem_22: "f32[2048, 4]", getitem_23: "i64[2048, 4]", add_26: "f32[4, 512, 2880]", arg54_1: "f32[2880]"):
+    def forward(self, arg53_1: "f32[32, 2880]", bmm_11: "f32[32, 2048, 2880]", getitem_22: "f32[2048, 4]", getitem_23: "i64[2048, 4]", add_26: "f32[4, 512, 2880]", arg54_1: "f32[2880]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:136 in forward, code: next_states = next_states + self.down_proj_bias[..., None, :]
         unsqueeze_default: "f32[32, 1, 2880]" = torch.ops.aten.unsqueeze.default(arg53_1, 1);  arg53_1 = None
         add_tensor: "f32[32, 2048, 2880]" = torch.ops.aten.add.Tensor(bmm_11, unsqueeze_default);  bmm_11 = unsqueeze_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:137 in forward, code: next_states = next_states.view(num_experts, batch_size, -1, self.hidden_size)
-        reshape_default: "f32[32, 4, 512, 2880]" = torch.ops.aten.reshape.default(add_tensor, [32, 4, -1, 2880]);  add_tensor = None
+        reshape_default: "f32[32, 4, 512, 2880]" = torch.ops.aten.reshape.default(add_tensor, _shape_param_0);  add_tensor = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:157 in forward, code: router_scores = torch.zeros_like(router_logits).scatter_(1, router_indices, router_top_value)
         full_default: "f32[2048, 32]" = torch.ops.aten.full.default([2048, 32], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
@@ -46,7 +46,7 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:138 in forward, code: next_states = next_states * routing_weights.transpose(0, 1).view(num_experts, batch_size, -1)[..., None]
         permute_default: "f32[32, 2048]" = torch.ops.aten.permute.default(scatter_src, [1, 0]);  scatter_src = None
-        reshape_default_1: "f32[32, 4, 512]" = torch.ops.aten.reshape.default(permute_default, [32, 4, -1]);  permute_default = None
+        reshape_default_1: "f32[32, 4, 512]" = torch.ops.aten.reshape.default(permute_default, _shape_param_1);  permute_default = _shape_param_1 = None
         unsqueeze_default_1: "f32[32, 4, 512, 1]" = torch.ops.aten.unsqueeze.default(reshape_default_1, 3);  reshape_default_1 = None
         mul_tensor: "f32[32, 4, 512, 2880]" = torch.ops.aten.mul.Tensor(reshape_default, unsqueeze_default_1);  reshape_default = unsqueeze_default_1 = None
 
@@ -69,13 +69,13 @@ class Repro(torch.nn.Module):
         mul_tensor_2: "f32[4, 512, 2880]" = torch.ops.aten.mul.Tensor(arg54_1, mul_tensor_1);  arg54_1 = mul_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:313 in forward, code: query_states = self.q_proj(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default_2: "f32[2048, 2880]" = torch.ops.aten.reshape.default(mul_tensor_2, [2048, 2880])
+        reshape_default_2: "f32[2048, 2880]" = torch.ops.aten.reshape.default(mul_tensor_2, _shape_param_2);  _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:314 in forward, code: key_states = self.k_proj(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default_3: "f32[2048, 2880]" = torch.ops.aten.reshape.default(mul_tensor_2, [2048, 2880])
+        reshape_default_3: "f32[2048, 2880]" = torch.ops.aten.reshape.default(mul_tensor_2, _shape_param_3);  _shape_param_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:315 in forward, code: value_states = self.v_proj(hidden_states).view(hidden_shape).transpose(1, 2)
-        reshape_default_4: "f32[2048, 2880]" = torch.ops.aten.reshape.default(mul_tensor_2, [2048, 2880]);  mul_tensor_2 = None
+        reshape_default_4: "f32[2048, 2880]" = torch.ops.aten.reshape.default(mul_tensor_2, _shape_param_4);  mul_tensor_2 = _shape_param_4 = None
         return (reshape_default_2, reshape_default_3, reshape_default_4)
 
 
@@ -87,6 +87,11 @@ def _default_make_inputs():
     torch.randint(0, 2, [2048, 4], dtype=torch.int64, device='cuda'),
     torch.randn([4, 512, 2880], dtype=torch.float32, device='cuda'),
     torch.randn([2880], dtype=torch.float32, device='cuda'),
+    [32, 4, -1, 2880],  # _shape_param_0
+    [32, 4, -1],  # _shape_param_1
+    [2048, 2880],  # _shape_param_2
+    [2048, 2880],  # _shape_param_3
+    [2048, 2880],  # _shape_param_4
     ]
 
 

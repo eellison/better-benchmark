@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg1_1: "bf16[128256, 2048]", arg0_1: "i64[1, 1000]", arg3_1: "bf16[2048]", arg4_1: "bf16[2048, 2048]", arg5_1: "bf16[512, 2048]", arg6_1: "bf16[512, 2048]"):
+    def forward(self, arg1_1: "bf16[128256, 2048]", arg0_1: "i64[1, 1000]", arg3_1: "bf16[2048]", arg4_1: "bf16[2048, 2048]", arg5_1: "bf16[512, 2048]", arg6_1: "bf16[512, 2048]", _shape_param_0, _shape_param_1, _shape_param_2):
         # No stacktrace found for following nodes
         embedding_default: "bf16[1, 1000, 2048]" = torch.ops.aten.embedding.default(arg1_1, arg0_1);  arg1_1 = arg0_1 = None
         convert_element_type_default: "f32[1, 1000, 2048]" = torch.ops.prims.convert_element_type.default(embedding_default, torch.float32);  embedding_default = None
@@ -28,11 +28,11 @@ class Repro(torch.nn.Module):
         convert_element_type_default_1: "bf16[1, 1000, 2048]" = torch.ops.prims.convert_element_type.default(mul_tensor, torch.bfloat16);  mul_tensor = None
         mul_tensor_1: "bf16[1, 1000, 2048]" = torch.ops.aten.mul.Tensor(arg3_1, convert_element_type_default_1);  arg3_1 = convert_element_type_default_1 = None
         permute_default: "bf16[2048, 2048]" = torch.ops.aten.permute.default(arg4_1, [1, 0]);  arg4_1 = None
-        reshape_default: "bf16[1000, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, [1000, 2048])
+        reshape_default: "bf16[1000, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_0);  _shape_param_0 = None
         permute_default_1: "bf16[2048, 512]" = torch.ops.aten.permute.default(arg5_1, [1, 0]);  arg5_1 = None
-        reshape_default_1: "bf16[1000, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, [1000, 2048])
+        reshape_default_1: "bf16[1000, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_1);  _shape_param_1 = None
         permute_default_2: "bf16[2048, 512]" = torch.ops.aten.permute.default(arg6_1, [1, 0]);  arg6_1 = None
-        reshape_default_2: "bf16[1000, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, [1000, 2048]);  mul_tensor_1 = None
+        reshape_default_2: "bf16[1000, 2048]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_2);  mul_tensor_1 = _shape_param_2 = None
         return (permute_default, reshape_default, permute_default_1, reshape_default_1, permute_default_2, reshape_default_2)
 
 
@@ -44,6 +44,9 @@ def _default_make_inputs():
     torch.randn([2048, 2048], dtype=torch.bfloat16, device='cuda'),
     torch.randn([512, 2048], dtype=torch.bfloat16, device='cuda'),
     torch.randn([512, 2048], dtype=torch.bfloat16, device='cuda'),
+    [1000, 2048],  # _shape_param_0
+    [1000, 2048],  # _shape_param_1
+    [1000, 2048],  # _shape_param_2
     ]
 
 

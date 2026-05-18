@@ -16,7 +16,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg260_1: "bf16[960]", arg261_1: "bf16[960]", convolution_61: "bf16[32, 960, 7, 7]", arg262_1: "bf16[960]", arg263_1: "bf16[960]", arg264_1: "bf16[1280, 960]"):
+    def forward(self, arg260_1: "bf16[960]", arg261_1: "bf16[960]", convolution_61: "bf16[32, 960, 7, 7]", arg262_1: "bf16[960]", arg263_1: "bf16[960]", arg264_1: "bf16[1280, 960]", _shape_param_0):
         # No stacktrace found for following nodes
         convert_element_type_default: "f32[960]" = torch.ops.prims.convert_element_type.default(arg260_1, torch.float32);  arg260_1 = None
         convert_element_type_default_1: "f32[960]" = torch.ops.prims.convert_element_type.default(arg261_1, torch.float32);  arg261_1 = None
@@ -44,7 +44,7 @@ class Repro(torch.nn.Module):
         div_tensor: "f32[32, 960, 7, 7]" = torch.ops.aten.div.Tensor(mul_tensor_3, 6);  mul_tensor_3 = None
         convert_element_type_default_3: "bf16[32, 960, 7, 7]" = torch.ops.prims.convert_element_type.default(div_tensor, torch.bfloat16);  div_tensor = None
         mean_dim: "bf16[32, 960, 1, 1]" = torch.ops.aten.mean.dim(convert_element_type_default_3, [-1, -2], True);  convert_element_type_default_3 = None
-        reshape_default: "bf16[32, 960]" = torch.ops.aten.reshape.default(mean_dim, [32, 960]);  mean_dim = None
+        reshape_default: "bf16[32, 960]" = torch.ops.aten.reshape.default(mean_dim, _shape_param_0);  mean_dim = _shape_param_0 = None
         permute_default: "bf16[960, 1280]" = torch.ops.aten.permute.default(arg264_1, [1, 0]);  arg264_1 = None
         return (reshape_default, permute_default)
 
@@ -57,6 +57,7 @@ def _default_make_inputs():
     torch.randn([960], dtype=torch.bfloat16, device='cuda'),
     torch.randn([960], dtype=torch.bfloat16, device='cuda'),
     torch.randn([1280, 960], dtype=torch.bfloat16, device='cuda'),
+    [32, 960],  # _shape_param_0
     ]
 
 

@@ -19,9 +19,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_23: "f32[16384, 768]", inductor_seeds_default: "i64[13]", add_46: "f32[32, 512, 768]"):
+    def forward(self, addmm_23: "f32[16384, 768]", inductor_seeds_default: "i64[13]", add_46: "f32[32, 512, 768]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:122 in forward, code: x = x.view(size_out)
-        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(addmm_23, [32, 512, 768]);  addmm_23 = None
+        reshape_default: "f32[32, 512, 768]" = torch.ops.aten.reshape.default(addmm_23, _shape_param_0);  addmm_23 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:242 in forward, code: hidden_states = self.dropout(hidden_states)
         inductor_lookup_seed_default: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds_default, 12);  inductor_seeds_default = None
@@ -45,6 +45,7 @@ def _default_make_inputs():
     torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [13], dtype=torch.int64, device='cuda'),
     torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
+    [32, 512, 768],  # _shape_param_0
     ]
 
 

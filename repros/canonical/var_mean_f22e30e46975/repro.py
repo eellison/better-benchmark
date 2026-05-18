@@ -16,11 +16,11 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg2_1: "f32[21128, 768]", arg3_1: "i64[4, 476]", arg4_1: "f32[512, 768]", arg5_1: "f32[2, 768]", arg1_1: "i64[4, 476]"):
+    def forward(self, arg2_1: "f32[21128, 768]", arg3_1: "i64[4, 476]", arg4_1: "f32[512, 768]", arg5_1: "f32[2, 768]", arg1_1: "i64[4, 476]", _shape_param_0):
         # No stacktrace found for following nodes
         iota_default: "i64[476]" = torch.ops.prims.iota.default(476, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
         unsqueeze_default: "i64[1, 476]" = torch.ops.aten.unsqueeze.default(iota_default, 0);  iota_default = None
-        expand_default: "i64[4, 476]" = torch.ops.aten.expand.default(unsqueeze_default, [4, 476]);  unsqueeze_default = None
+        expand_default: "i64[4, 476]" = torch.ops.aten.expand.default(unsqueeze_default, _shape_param_0);  unsqueeze_default = _shape_param_0 = None
         embedding_default: "f32[4, 476, 768]" = torch.ops.aten.embedding.default(arg2_1, arg3_1, 0);  arg2_1 = arg3_1 = None
         embedding_default_1: "f32[4, 476, 768]" = torch.ops.aten.embedding.default(arg4_1, expand_default);  arg4_1 = expand_default = None
         embedding_default_2: "f32[4, 476, 768]" = torch.ops.aten.embedding.default(arg5_1, arg1_1);  arg5_1 = arg1_1 = None
@@ -39,6 +39,7 @@ def _default_make_inputs():
     torch.randn([512, 768], dtype=torch.float32, device='cuda'),
     torch.randn([2, 768], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [4, 476], dtype=torch.int64, device='cuda'),
+    [4, 476],  # _shape_param_0
     ]
 
 

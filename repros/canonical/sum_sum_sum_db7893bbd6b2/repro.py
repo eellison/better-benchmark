@@ -24,9 +24,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm: "f32[8192, 1024]", gt_98: "b8[512, 16, 1024]", primals_361: "f32[1024]", mul_388: "f32[512, 16, 1024]", div_27: "f32[512, 16, 1]", gt_97: "b8[512, 16, 1024]"):
+    def forward(self, mm: "f32[8192, 1024]", gt_98: "b8[512, 16, 1024]", primals_361: "f32[1024]", mul_388: "f32[512, 16, 1024]", div_27: "f32[512, 16, 1]", gt_97: "b8[512, 16, 1024]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:1633 in forward, code: logits = self.lm_loss(transformer_outputs[0])
-        reshape_default: "f32[16, 512, 1024]" = torch.ops.aten.reshape.default(mm, [16, 512, 1024]);  mm = None
+        reshape_default: "f32[16, 512, 1024]" = torch.ops.aten.reshape.default(mm, _shape_param_0);  mm = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:1391 in forward, code: output = output.permute(1, 0, 2).contiguous()
         permute_default: "f32[512, 16, 1024]" = torch.ops.aten.permute.default(reshape_default, [1, 0, 2]);  reshape_default = None
@@ -57,10 +57,10 @@ class Repro(torch.nn.Module):
         mul_tensor_9: "f32[512, 16, 1024]" = torch.ops.aten.mul.Tensor(mul_tensor_6, mul_tensor_8);  mul_tensor_6 = mul_tensor_8 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:466 in forward, code: output = self.layer_2(output)
-        reshape_default_1: "f32[8192, 1024]" = torch.ops.aten.reshape.default(mul_tensor_9, [8192, 1024]);  mul_tensor_9 = None
+        reshape_default_1: "f32[8192, 1024]" = torch.ops.aten.reshape.default(mul_tensor_9, _shape_param_1);  mul_tensor_9 = _shape_param_1 = None
         permute_default_1: "f32[1024, 8192]" = torch.ops.aten.permute.default(reshape_default_1, [1, 0])
         sum_dim_int_list_4: "f32[1, 1024]" = torch.ops.aten.sum.dim_IntList(reshape_default_1, [0], True);  reshape_default_1 = None
-        reshape_default_2: "f32[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, [1024]);  sum_dim_int_list_4 = None
+        reshape_default_2: "f32[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, _shape_param_2);  sum_dim_int_list_4 = _shape_param_2 = None
         return (sum_dim_int_list_2, sum_dim_int_list_3, permute_default_1, reshape_default_2)
 
 
@@ -72,6 +72,9 @@ def _default_make_inputs():
     torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
     torch.randn([512, 16, 1], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [512, 16, 1024], dtype=torch.bool, device='cuda'),
+    [16, 512, 1024],  # _shape_param_0
+    [8192, 1024],  # _shape_param_1
+    [1024],  # _shape_param_2
     ]
 
 

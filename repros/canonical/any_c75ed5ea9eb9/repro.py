@@ -17,7 +17,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg1_1: "i64[512]", arg0_1: "f32[4, 512]"):
+    def forward(self, arg1_1: "i64[512]", arg0_1: "f32[4, 512]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:483 in _prepare_4d_causal_attention_mask_with_cache_position, code: causal_mask = torch.triu(causal_mask, diagonal=1)
         iota_default: "i64[512]" = torch.ops.prims.iota.default(512, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
         unsqueeze_default: "i64[1, 512]" = torch.ops.aten.unsqueeze.default(iota_default, -2);  iota_default = None
@@ -42,7 +42,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:485 in _prepare_4d_causal_attention_mask_with_cache_position, code: causal_mask = causal_mask[None, None, :, :].expand(batch_size, 1, -1, -1)
         unsqueeze_default_2: "f16[1, 512, 512]" = torch.ops.aten.unsqueeze.default(mul_tensor, 0);  mul_tensor = None
         unsqueeze_default_3: "f16[1, 1, 512, 512]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_2, 1);  unsqueeze_default_2 = None
-        expand_default: "f16[4, 1, 512, 512]" = torch.ops.aten.expand.default(unsqueeze_default_3, [4, 1, -1, -1]);  unsqueeze_default_3 = None
+        expand_default: "f16[4, 1, 512, 512]" = torch.ops.aten.expand.default(unsqueeze_default_3, _shape_param_0);  unsqueeze_default_3 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:487 in _prepare_4d_causal_attention_mask_with_cache_position, code: causal_mask = causal_mask.clone()  # copy to contiguous memory for in-place edit
         clone_default: "f16[4, 1, 512, 512]" = torch.ops.aten.clone.default(expand_default);  expand_default = None
@@ -73,6 +73,7 @@ def _default_make_inputs():
     return [
     torch.randint(0, 2, [512], dtype=torch.int64, device='cuda'),
     torch.randn([4, 512], dtype=torch.float32, device='cuda'),
+    [4, 1, -1, -1],  # _shape_param_0
     ]
 
 

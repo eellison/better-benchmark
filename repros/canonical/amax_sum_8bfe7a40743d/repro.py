@@ -20,9 +20,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, remainder_1: "i64[8, 12, 4096]", bmm_1: "f32[6144, 64, 128]", arg2_1: "f32[]"):
+    def forward(self, remainder_1: "i64[8, 12, 4096]", bmm_1: "f32[6144, 64, 128]", arg2_1: "f32[]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:426 in _split_seq_length_dim_to, code: return torch.reshape(vectors, split_dim_shape)
-        reshape_default: "i64[8, 12, 64, 64]" = torch.ops.aten.reshape.default(remainder_1, [8, 12, -1, 64]);  remainder_1 = None
+        reshape_default: "i64[8, 12, 64, 64]" = torch.ops.aten.reshape.default(remainder_1, _shape_param_0);  remainder_1 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:905 in _attend, code: self_mask = torch.ne(query_bucket_idx.unsqueeze(-1), key_value_bucket_idx.unsqueeze(-2)).to(
         unsqueeze_default: "i64[8, 12, 64, 64, 1]" = torch.ops.aten.unsqueeze.default(reshape_default, -1)
@@ -40,7 +40,7 @@ class Repro(torch.nn.Module):
         ne_tensor: "b8[8, 12, 64, 64, 128]" = torch.ops.aten.ne.Tensor(unsqueeze_default, unsqueeze_default_1);  unsqueeze_default = unsqueeze_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:848 in _attend, code: query_key_dots = torch.matmul(query_vectors, key_vectors.transpose(-1, -2))
-        reshape_default_1: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.reshape.default(bmm_1, [8, 12, 64, 64, 128]);  bmm_1 = None
+        reshape_default_1: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.reshape.default(bmm_1, _shape_param_1);  bmm_1 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:910 in _attend, code: query_key_dots = torch.where(self_mask, query_key_dots, self_mask_value)
         where_self: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.where.self(ne_tensor, reshape_default_1, arg2_1);  ne_tensor = reshape_default_1 = arg2_1 = None
@@ -62,8 +62,8 @@ class Repro(torch.nn.Module):
         exp_default_1: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.exp.default(sub_tensor_1);  sub_tensor_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:930 in _attend, code: out_vectors = torch.matmul(attention_probs, value_vectors)
-        expand_default: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.expand.default(exp_default_1, [8, 12, 64, 64, 128]);  exp_default_1 = None
-        reshape_default_2: "f32[6144, 64, 128]" = torch.ops.aten.reshape.default(expand_default, [6144, 64, 128]);  expand_default = None
+        expand_default: "f32[8, 12, 64, 64, 128]" = torch.ops.aten.expand.default(exp_default_1, _shape_param_2);  exp_default_1 = _shape_param_2 = None
+        reshape_default_2: "f32[6144, 64, 128]" = torch.ops.aten.reshape.default(expand_default, _shape_param_3);  expand_default = _shape_param_3 = None
         return reshape_default_2
 
 
@@ -72,6 +72,10 @@ def _default_make_inputs():
     torch.randint(0, 2, [8, 12, 4096], dtype=torch.int64, device='cuda'),
     torch.randn([6144, 64, 128], dtype=torch.float32, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
+    [8, 12, -1, 64],  # _shape_param_0
+    [8, 12, 64, 64, 128],  # _shape_param_1
+    [8, 12, 64, 64, 128],  # _shape_param_2
+    [6144, 64, 128],  # _shape_param_3
     ]
 
 

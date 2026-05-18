@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_3: "f32[2048, 2880]", arg0_1: "f32[4, 512, 2880]", arg14_1: "f32[2880]"):
+    def forward(self, addmm_3: "f32[2048, 2880]", arg0_1: "f32[4, 512, 2880]", arg14_1: "f32[2880]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:342 in forward, code: attn_output = self.o_proj(attn_output)
-        reshape_default: "f32[4, 512, 2880]" = torch.ops.aten.reshape.default(addmm_3, [4, 512, 2880]);  addmm_3 = None
+        reshape_default: "f32[4, 512, 2880]" = torch.ops.aten.reshape.default(addmm_3, _shape_param_0);  addmm_3 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:381 in forward, code: hidden_states = residual + hidden_states
         add_tensor: "f32[4, 512, 2880]" = torch.ops.aten.add.Tensor(arg0_1, reshape_default);  arg0_1 = reshape_default = None
@@ -42,6 +42,7 @@ def _default_make_inputs():
     torch.randn([2048, 2880], dtype=torch.float32, device='cuda'),
     torch.randn([4, 512, 2880], dtype=torch.float32, device='cuda'),
     torch.randn([2880], dtype=torch.float32, device='cuda'),
+    [4, 512, 2880],  # _shape_param_0
     ]
 
 

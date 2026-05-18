@@ -24,9 +24,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_2: "f32[8192, 768]", primals_148: "f32[768]", mul_146: "f32[8, 1024, 768]", div_2: "f32[8, 1024, 1]", gt_24: "b8[8, 1024, 768]"):
+    def forward(self, mm_2: "f32[8192, 768]", primals_148: "f32[768]", mul_146: "f32[8, 1024, 768]", div_2: "f32[8, 1024, 1]", gt_24: "b8[8, 1024, 768]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:1379 in forward, code: logits = self.score(hidden_states)
-        reshape_default: "f32[8, 1024, 768]" = torch.ops.aten.reshape.default(mm_2, [8, 1024, 768]);  mm_2 = None
+        reshape_default: "f32[8, 1024, 768]" = torch.ops.aten.reshape.default(mm_2, _shape_param_0);  mm_2 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:951 in forward, code: hidden_states = self.ln_f(hidden_states)
         mul_tensor: "f32[8, 1024, 768]" = torch.ops.aten.mul.Tensor(reshape_default, primals_148);  primals_148 = None
@@ -48,11 +48,11 @@ class Repro(torch.nn.Module):
         mul_tensor_7: "f32[8, 1024, 768]" = torch.ops.aten.mul.Tensor(mul_tensor_4, mul_tensor_6);  mul_tensor_4 = mul_tensor_6 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:123 in forward, code: x = x.view(size_out)
-        reshape_default_1: "f32[8192, 768]" = torch.ops.aten.reshape.default(mul_tensor_7, [8192, 768]);  mul_tensor_7 = None
+        reshape_default_1: "f32[8192, 768]" = torch.ops.aten.reshape.default(mul_tensor_7, _shape_param_1);  mul_tensor_7 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:122 in forward, code: x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
         sum_dim_int_list_4: "f32[1, 768]" = torch.ops.aten.sum.dim_IntList(reshape_default_1, [0], True);  reshape_default_1 = None
-        reshape_default_2: "f32[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, [768]);  sum_dim_int_list_4 = None
+        reshape_default_2: "f32[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, _shape_param_2);  sum_dim_int_list_4 = _shape_param_2 = None
         return (sum_dim_int_list_2, sum_dim_int_list_3, reshape_default_2)
 
 
@@ -63,6 +63,9 @@ def _default_make_inputs():
     torch.randn([8, 1024, 768], dtype=torch.float32, device='cuda'),
     torch.randn([8, 1024, 1], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [8, 1024, 768], dtype=torch.bool, device='cuda'),
+    [8, 1024, 768],  # _shape_param_0
+    [8192, 768],  # _shape_param_1
+    [768],  # _shape_param_2
     ]
 
 

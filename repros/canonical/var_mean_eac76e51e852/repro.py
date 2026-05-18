@@ -16,12 +16,12 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg3_1: "f32[30522, 128]", arg1_1: "i64[64, 512]", arg2_1: "i64[1, 512]", arg5_1: "f32[2, 128]", arg6_1: "f32[512, 128]", arg4_1: "i64[1, 512]"):
+    def forward(self, arg3_1: "f32[30522, 128]", arg1_1: "i64[64, 512]", arg2_1: "i64[1, 512]", arg5_1: "f32[2, 128]", arg6_1: "f32[512, 128]", arg4_1: "i64[1, 512]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/electra/modeling_electra.py:186 in forward, code: inputs_embeds = self.word_embeddings(input_ids)
         embedding_default: "f32[64, 512, 128]" = torch.ops.aten.embedding.default(arg3_1, arg1_1, 0);  arg3_1 = arg1_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/electra/modeling_electra.py:758 in forward, code: buffered_token_type_ids_expanded = buffered_token_type_ids.expand(batch_size, seq_length)
-        expand_default: "i64[64, 512]" = torch.ops.aten.expand.default(arg2_1, [64, 512]);  arg2_1 = None
+        expand_default: "i64[64, 512]" = torch.ops.aten.expand.default(arg2_1, _shape_param_0);  arg2_1 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/electra/modeling_electra.py:187 in forward, code: token_type_embeddings = self.token_type_embeddings(token_type_ids)
         embedding_default_1: "f32[64, 512, 128]" = torch.ops.aten.embedding.default(arg5_1, expand_default);  arg5_1 = expand_default = None
@@ -50,6 +50,7 @@ def _default_make_inputs():
     torch.randn([2, 128], dtype=torch.float32, device='cuda'),
     torch.randn([512, 128], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
+    [64, 512],  # _shape_param_0
     ]
 
 

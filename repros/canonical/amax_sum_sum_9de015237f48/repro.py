@@ -23,7 +23,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "i64[64, 512]", addmm_default: "f32[32768, 30524]"):
+    def forward(self, arg0_1: "i64[64, 512]", addmm_default: "f32[32768, 30524]", _shape_param_0, _shape_param_1):
         # File: /tmp/pytorch-work/torch/nn/functional.py:5461 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
         constant_pad_nd_default: "i64[64, 513]" = torch.ops.aten.constant_pad_nd.default(arg0_1, [0, 1], -100.0);  arg0_1 = None
 
@@ -39,10 +39,10 @@ class Repro(torch.nn.Module):
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/electra/modeling_electra.py:1550 in forward, code: prediction_scores = self.generator_lm_head(self.generator_predictions(sequence_output))
         slice_tensor_1: "f32[32768, 30522]" = torch.ops.aten.slice.Tensor(addmm_default, 1, 0, -2);  addmm_default = None
-        reshape_default_1: "f32[64, 512, 30522]" = torch.ops.aten.reshape.default(slice_tensor_1, [64, 512, 30522]);  slice_tensor_1 = None
+        reshape_default_1: "f32[64, 512, 30522]" = torch.ops.aten.reshape.default(slice_tensor_1, _shape_param_0);  slice_tensor_1 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:63 in ForCausalLMLoss, code: logits = logits.view(-1, vocab_size)
-        reshape_default_2: "f32[32768, 30522]" = torch.ops.aten.reshape.default(reshape_default_1, [-1, 30522]);  reshape_default_1 = None
+        reshape_default_2: "f32[32768, 30522]" = torch.ops.aten.reshape.default(reshape_default_1, _shape_param_1);  reshape_default_1 = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:36 in fixed_cross_entropy, code: loss = nn.functional.cross_entropy(source, target, ignore_index=ignore_index, reduction=reduction)
         amax_default: "f32[32768, 1]" = torch.ops.aten.amax.default(reshape_default_2, [1], True)
@@ -72,6 +72,8 @@ def _default_make_inputs():
     return [
     torch.randint(0, 2, [64, 512], dtype=torch.int64, device='cuda'),
     torch.randn([32768, 30524], dtype=torch.float32, device='cuda'),
+    [64, 512, 30522],  # _shape_param_0
+    [-1, 30522],  # _shape_param_1
     ]
 
 

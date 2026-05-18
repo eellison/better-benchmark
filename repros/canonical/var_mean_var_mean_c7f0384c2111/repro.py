@@ -16,14 +16,14 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_32: "f16[1600, 768]", add_76: "f32[32, 50, 768]", addmm_79: "f16[2464, 512]", add_152: "f32[77, 32, 512]"):
+    def forward(self, addmm_32: "f16[1600, 768]", add_76: "f32[32, 50, 768]", addmm_79: "f16[2464, 512]", add_152: "f32[77, 32, 512]", _shape_param_0, _shape_param_1):
         # No stacktrace found for following nodes
-        reshape_default: "f16[32, 50, 768]" = torch.ops.aten.reshape.default(addmm_32, [32, 50, 768]);  addmm_32 = None
+        reshape_default: "f16[32, 50, 768]" = torch.ops.aten.reshape.default(addmm_32, _shape_param_0);  addmm_32 = _shape_param_0 = None
         add_tensor: "f32[32, 50, 768]" = torch.ops.aten.add.Tensor(add_76, reshape_default);  add_76 = reshape_default = None
         var_mean_correction = torch.ops.aten.var_mean.correction(add_tensor, [2], correction = 0, keepdim = True);  add_tensor = None
         getitem: "f32[32, 50, 1]" = var_mean_correction[0]
         getitem_1: "f32[32, 50, 1]" = var_mean_correction[1];  var_mean_correction = None
-        reshape_default_1: "f16[77, 32, 512]" = torch.ops.aten.reshape.default(addmm_79, [77, 32, 512]);  addmm_79 = None
+        reshape_default_1: "f16[77, 32, 512]" = torch.ops.aten.reshape.default(addmm_79, _shape_param_1);  addmm_79 = _shape_param_1 = None
         add_tensor_1: "f32[77, 32, 512]" = torch.ops.aten.add.Tensor(add_152, reshape_default_1);  add_152 = reshape_default_1 = None
         clone_default: "f32[77, 32, 512]" = torch.ops.aten.clone.default(add_tensor_1, memory_format = torch.contiguous_format);  add_tensor_1 = None
         var_mean_correction_1 = torch.ops.aten.var_mean.correction(clone_default, [2], correction = 0, keepdim = True);  clone_default = None
@@ -41,7 +41,9 @@ def _default_make_inputs():
     torch.randn([1600, 768], dtype=torch.float16, device='cuda'),
     torch.randn([32, 50, 768], dtype=torch.float32, device='cuda'),
     torch.randn([2464, 512], dtype=torch.float16, device='cuda'),
-    torch.randn(1261568, dtype=torch.float32, device='cuda').as_strided([77, 32, 512], [512, 39424, 1]),  # add_152
+    torch.randn(1261568, dtype=torch.float32, device='cuda').as_strided([77, 32, 512], [512, 39424, 1]),  # add_152,
+    [32, 50, 768],  # _shape_param_0
+    [77, 32, 512],  # _shape_param_1
     ]
 
 

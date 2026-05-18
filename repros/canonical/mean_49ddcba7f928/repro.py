@@ -16,9 +16,9 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_3: "bf16[2048, 2048]", arg0_1: "bf16[4, 512, 2048]", arg11_1: "bf16[2048]"):
+    def forward(self, mm_3: "bf16[2048, 2048]", arg0_1: "bf16[4, 512, 2048]", arg11_1: "bf16[2048]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:193 in forward, code: attn_output = self.o_proj(attn_output)
-        reshape_default: "bf16[4, 512, 2048]" = torch.ops.aten.reshape.default(mm_3, [4, 512, 2048]);  mm_3 = None
+        reshape_default: "bf16[4, 512, 2048]" = torch.ops.aten.reshape.default(mm_3, _shape_param_0);  mm_3 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:354 in forward, code: hidden_states = residual + hidden_states
         add_tensor: "bf16[4, 512, 2048]" = torch.ops.aten.add.Tensor(arg0_1, reshape_default);  arg0_1 = reshape_default = None
@@ -46,6 +46,7 @@ def _default_make_inputs():
     torch.randn([2048, 2048], dtype=torch.bfloat16, device='cuda'),
     torch.randn([4, 512, 2048], dtype=torch.bfloat16, device='cuda'),
     torch.randn([2048], dtype=torch.bfloat16, device='cuda'),
+    [4, 512, 2048],  # _shape_param_0
     ]
 
 

@@ -16,384 +16,384 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, convert_element_type_4: "f16[512, 30522]", mm_1: "f16[30522, 768]", convert_element_type_5: "f32[1, 512, 768]", mul_7: "f32[1, 512, 768]", view_5: "f16[512, 768]", mm_3: "f16[768, 768]", convert_element_type_12: "f32[1, 512, 768]", arg193_1: "f32[1, 512, 768]", view_8: "f16[512, 768]", mm_5: "f16[768, 3072]", view_12: "f16[512, 3072]", mm_7: "f16[3072, 768]", add_4: "f32[1, 512, 768]", arg188_1: "f32[1, 512, 768]", view_15: "f16[512, 768]", mm_9: "f16[768, 768]", view_27: "f16[512, 768]", mm_11: "f16[768, 768]", view_31: "f16[512, 768]", mm_13: "f16[768, 768]", view_35: "f16[512, 768]", mm_15: "f16[768, 768]", add_7: "f32[1, 512, 768]", arg180_1: "f32[1, 512, 768]", view_38: "f16[512, 768]", mm_17: "f16[768, 3072]", view_42: "f16[512, 3072]", mm_19: "f16[3072, 768]", add_10: "f32[1, 512, 768]", arg175_1: "f32[1, 512, 768]", view_45: "f16[512, 768]", mm_21: "f16[768, 768]", view_57: "f16[512, 768]", mm_23: "f16[768, 768]", view_61: "f16[512, 768]", mm_25: "f16[768, 768]", view_65: "f16[512, 768]", mm_27: "f16[768, 768]", add_13: "f32[1, 512, 768]", arg167_1: "f32[1, 512, 768]", view_68: "f16[512, 768]", mm_29: "f16[768, 3072]", view_72: "f16[512, 3072]", mm_31: "f16[3072, 768]", add_16: "f32[1, 512, 768]", arg162_1: "f32[1, 512, 768]", view_75: "f16[512, 768]", mm_33: "f16[768, 768]", view_87: "f16[512, 768]", mm_35: "f16[768, 768]", view_91: "f16[512, 768]", mm_37: "f16[768, 768]", view_95: "f16[512, 768]", mm_39: "f16[768, 768]", add_19: "f32[1, 512, 768]", arg154_1: "f32[1, 512, 768]", view_98: "f16[512, 768]", mm_41: "f16[768, 3072]", view_102: "f16[512, 3072]", mm_43: "f16[3072, 768]", add_22: "f32[1, 512, 768]", arg149_1: "f32[1, 512, 768]", view_105: "f16[512, 768]", mm_45: "f16[768, 768]", view_117: "f16[512, 768]", mm_47: "f16[768, 768]", view_121: "f16[512, 768]", mm_49: "f16[768, 768]", view_125: "f16[512, 768]", mm_51: "f16[768, 768]", add_25: "f32[1, 512, 768]", arg141_1: "f32[1, 512, 768]", view_128: "f16[512, 768]", mm_53: "f16[768, 3072]", view_132: "f16[512, 3072]", mm_55: "f16[3072, 768]", add_28: "f32[1, 512, 768]", arg136_1: "f32[1, 512, 768]", view_135: "f16[512, 768]", mm_57: "f16[768, 768]", view_147: "f16[512, 768]", mm_59: "f16[768, 768]", view_151: "f16[512, 768]", mm_61: "f16[768, 768]", view_155: "f16[512, 768]", mm_63: "f16[768, 768]", add_31: "f32[1, 512, 768]", arg128_1: "f32[1, 512, 768]", view_158: "f16[512, 768]", mm_65: "f16[768, 3072]", view_162: "f16[512, 3072]", mm_67: "f16[3072, 768]", add_34: "f32[1, 512, 768]", arg123_1: "f32[1, 512, 768]", view_165: "f16[512, 768]", mm_69: "f16[768, 768]", view_177: "f16[512, 768]", mm_71: "f16[768, 768]", view_181: "f16[512, 768]", mm_73: "f16[768, 768]", view_185: "f16[512, 768]", mm_75: "f16[768, 768]", add_37: "f32[1, 512, 768]", arg115_1: "f32[1, 512, 768]", view_188: "f16[512, 768]", mm_77: "f16[768, 3072]", view_192: "f16[512, 3072]", mm_79: "f16[3072, 768]", add_40: "f32[1, 512, 768]", arg110_1: "f32[1, 512, 768]", view_195: "f16[512, 768]", mm_81: "f16[768, 768]", view_207: "f16[512, 768]", mm_83: "f16[768, 768]", view_211: "f16[512, 768]", mm_85: "f16[768, 768]", view_215: "f16[512, 768]", mm_87: "f16[768, 768]", add_43: "f32[1, 512, 768]", arg102_1: "f32[1, 512, 768]", view_218: "f16[512, 768]", mm_89: "f16[768, 3072]", view_222: "f16[512, 3072]", mm_91: "f16[3072, 768]", add_46: "f32[1, 512, 768]", arg97_1: "f32[1, 512, 768]", view_225: "f16[512, 768]", mm_93: "f16[768, 768]", view_237: "f16[512, 768]", mm_95: "f16[768, 768]", view_241: "f16[512, 768]", mm_97: "f16[768, 768]", view_245: "f16[512, 768]", mm_99: "f16[768, 768]", add_49: "f32[1, 512, 768]", arg89_1: "f32[1, 512, 768]", view_248: "f16[512, 768]", mm_101: "f16[768, 3072]", view_252: "f16[512, 3072]", mm_103: "f16[3072, 768]", add_52: "f32[1, 512, 768]", arg84_1: "f32[1, 512, 768]", view_255: "f16[512, 768]", mm_105: "f16[768, 768]", view_267: "f16[512, 768]", mm_107: "f16[768, 768]", view_271: "f16[512, 768]", mm_109: "f16[768, 768]", view_275: "f16[512, 768]", mm_111: "f16[768, 768]", add_55: "f32[1, 512, 768]", arg76_1: "f32[1, 512, 768]", view_278: "f16[512, 768]", mm_113: "f16[768, 3072]", view_282: "f16[512, 3072]", mm_115: "f16[3072, 768]", add_58: "f32[1, 512, 768]", arg71_1: "f32[1, 512, 768]", view_285: "f16[512, 768]", mm_117: "f16[768, 768]", view_297: "f16[512, 768]", mm_119: "f16[768, 768]", view_301: "f16[512, 768]", mm_121: "f16[768, 768]", view_305: "f16[512, 768]", mm_123: "f16[768, 768]", add_61: "f32[1, 512, 768]", arg63_1: "f32[1, 512, 768]", view_308: "f16[512, 768]", mm_125: "f16[768, 3072]", view_312: "f16[512, 3072]", mm_127: "f16[3072, 768]", add_64: "f32[1, 512, 768]", arg58_1: "f32[1, 512, 768]", view_315: "f16[512, 768]", mm_129: "f16[768, 768]", view_327: "f16[512, 768]", mm_131: "f16[768, 768]", view_331: "f16[512, 768]", mm_133: "f16[768, 768]", view_335: "f16[512, 768]", mm_135: "f16[768, 768]", add_67: "f32[1, 512, 768]", arg50_1: "f32[1, 512, 768]", view_338: "f16[512, 768]", mm_137: "f16[768, 3072]", view_342: "f16[512, 3072]", mm_139: "f16[3072, 768]", add_70: "f32[1, 512, 768]", arg45_1: "f32[1, 512, 768]", view_345: "f16[512, 768]", mm_141: "f16[768, 768]", view_357: "f16[512, 768]", mm_142: "f16[512, 768]", mul_356: "f32[1, 512, 768]", mm_143: "f16[768, 768]", view_361: "f16[512, 768]", mm_144: "f16[512, 768]", mm_145: "f16[768, 768]", view_365: "f16[512, 768]", mm_146: "f16[512, 768]", mm_147: "f16[768, 768]", arg37_1: "b8[1, 512, 768]", arg2_1: "f32[768]", arg36_1: "f32[1, 512, 768]", arg349_1: "f32[1, 512, 1]", full_1: "f32[]", arg29_1: "i64[1, 512]", arg35_1: "i64[1, 512]", arg34_1: "i64[1, 512]", arg33_1: "i64[1, 512]", arg32_1: "i64[1, 512]", arg31_1: "i64[1, 512]", arg30_1: "i64[1, 512]", arg1_1: "i64[1, 512]", arg0_1: "i64[1, 512]"):
+    def forward(self, convert_element_type_4: "f16[512, 30522]", mm_1: "f16[30522, 768]", convert_element_type_5: "f32[1, 512, 768]", mul_7: "f32[1, 512, 768]", view_5: "f16[512, 768]", mm_3: "f16[768, 768]", convert_element_type_12: "f32[1, 512, 768]", arg193_1: "f32[1, 512, 768]", view_8: "f16[512, 768]", mm_5: "f16[768, 3072]", view_12: "f16[512, 3072]", mm_7: "f16[3072, 768]", add_4: "f32[1, 512, 768]", arg188_1: "f32[1, 512, 768]", view_15: "f16[512, 768]", mm_9: "f16[768, 768]", view_27: "f16[512, 768]", mm_11: "f16[768, 768]", view_31: "f16[512, 768]", mm_13: "f16[768, 768]", view_35: "f16[512, 768]", mm_15: "f16[768, 768]", add_7: "f32[1, 512, 768]", arg180_1: "f32[1, 512, 768]", view_38: "f16[512, 768]", mm_17: "f16[768, 3072]", view_42: "f16[512, 3072]", mm_19: "f16[3072, 768]", add_10: "f32[1, 512, 768]", arg175_1: "f32[1, 512, 768]", view_45: "f16[512, 768]", mm_21: "f16[768, 768]", view_57: "f16[512, 768]", mm_23: "f16[768, 768]", view_61: "f16[512, 768]", mm_25: "f16[768, 768]", view_65: "f16[512, 768]", mm_27: "f16[768, 768]", add_13: "f32[1, 512, 768]", arg167_1: "f32[1, 512, 768]", view_68: "f16[512, 768]", mm_29: "f16[768, 3072]", view_72: "f16[512, 3072]", mm_31: "f16[3072, 768]", add_16: "f32[1, 512, 768]", arg162_1: "f32[1, 512, 768]", view_75: "f16[512, 768]", mm_33: "f16[768, 768]", view_87: "f16[512, 768]", mm_35: "f16[768, 768]", view_91: "f16[512, 768]", mm_37: "f16[768, 768]", view_95: "f16[512, 768]", mm_39: "f16[768, 768]", add_19: "f32[1, 512, 768]", arg154_1: "f32[1, 512, 768]", view_98: "f16[512, 768]", mm_41: "f16[768, 3072]", view_102: "f16[512, 3072]", mm_43: "f16[3072, 768]", add_22: "f32[1, 512, 768]", arg149_1: "f32[1, 512, 768]", view_105: "f16[512, 768]", mm_45: "f16[768, 768]", view_117: "f16[512, 768]", mm_47: "f16[768, 768]", view_121: "f16[512, 768]", mm_49: "f16[768, 768]", view_125: "f16[512, 768]", mm_51: "f16[768, 768]", add_25: "f32[1, 512, 768]", arg141_1: "f32[1, 512, 768]", view_128: "f16[512, 768]", mm_53: "f16[768, 3072]", view_132: "f16[512, 3072]", mm_55: "f16[3072, 768]", add_28: "f32[1, 512, 768]", arg136_1: "f32[1, 512, 768]", view_135: "f16[512, 768]", mm_57: "f16[768, 768]", view_147: "f16[512, 768]", mm_59: "f16[768, 768]", view_151: "f16[512, 768]", mm_61: "f16[768, 768]", view_155: "f16[512, 768]", mm_63: "f16[768, 768]", add_31: "f32[1, 512, 768]", arg128_1: "f32[1, 512, 768]", view_158: "f16[512, 768]", mm_65: "f16[768, 3072]", view_162: "f16[512, 3072]", mm_67: "f16[3072, 768]", add_34: "f32[1, 512, 768]", arg123_1: "f32[1, 512, 768]", view_165: "f16[512, 768]", mm_69: "f16[768, 768]", view_177: "f16[512, 768]", mm_71: "f16[768, 768]", view_181: "f16[512, 768]", mm_73: "f16[768, 768]", view_185: "f16[512, 768]", mm_75: "f16[768, 768]", add_37: "f32[1, 512, 768]", arg115_1: "f32[1, 512, 768]", view_188: "f16[512, 768]", mm_77: "f16[768, 3072]", view_192: "f16[512, 3072]", mm_79: "f16[3072, 768]", add_40: "f32[1, 512, 768]", arg110_1: "f32[1, 512, 768]", view_195: "f16[512, 768]", mm_81: "f16[768, 768]", view_207: "f16[512, 768]", mm_83: "f16[768, 768]", view_211: "f16[512, 768]", mm_85: "f16[768, 768]", view_215: "f16[512, 768]", mm_87: "f16[768, 768]", add_43: "f32[1, 512, 768]", arg102_1: "f32[1, 512, 768]", view_218: "f16[512, 768]", mm_89: "f16[768, 3072]", view_222: "f16[512, 3072]", mm_91: "f16[3072, 768]", add_46: "f32[1, 512, 768]", arg97_1: "f32[1, 512, 768]", view_225: "f16[512, 768]", mm_93: "f16[768, 768]", view_237: "f16[512, 768]", mm_95: "f16[768, 768]", view_241: "f16[512, 768]", mm_97: "f16[768, 768]", view_245: "f16[512, 768]", mm_99: "f16[768, 768]", add_49: "f32[1, 512, 768]", arg89_1: "f32[1, 512, 768]", view_248: "f16[512, 768]", mm_101: "f16[768, 3072]", view_252: "f16[512, 3072]", mm_103: "f16[3072, 768]", add_52: "f32[1, 512, 768]", arg84_1: "f32[1, 512, 768]", view_255: "f16[512, 768]", mm_105: "f16[768, 768]", view_267: "f16[512, 768]", mm_107: "f16[768, 768]", view_271: "f16[512, 768]", mm_109: "f16[768, 768]", view_275: "f16[512, 768]", mm_111: "f16[768, 768]", add_55: "f32[1, 512, 768]", arg76_1: "f32[1, 512, 768]", view_278: "f16[512, 768]", mm_113: "f16[768, 3072]", view_282: "f16[512, 3072]", mm_115: "f16[3072, 768]", add_58: "f32[1, 512, 768]", arg71_1: "f32[1, 512, 768]", view_285: "f16[512, 768]", mm_117: "f16[768, 768]", view_297: "f16[512, 768]", mm_119: "f16[768, 768]", view_301: "f16[512, 768]", mm_121: "f16[768, 768]", view_305: "f16[512, 768]", mm_123: "f16[768, 768]", add_61: "f32[1, 512, 768]", arg63_1: "f32[1, 512, 768]", view_308: "f16[512, 768]", mm_125: "f16[768, 3072]", view_312: "f16[512, 3072]", mm_127: "f16[3072, 768]", add_64: "f32[1, 512, 768]", arg58_1: "f32[1, 512, 768]", view_315: "f16[512, 768]", mm_129: "f16[768, 768]", view_327: "f16[512, 768]", mm_131: "f16[768, 768]", view_331: "f16[512, 768]", mm_133: "f16[768, 768]", view_335: "f16[512, 768]", mm_135: "f16[768, 768]", add_67: "f32[1, 512, 768]", arg50_1: "f32[1, 512, 768]", view_338: "f16[512, 768]", mm_137: "f16[768, 3072]", view_342: "f16[512, 3072]", mm_139: "f16[3072, 768]", add_70: "f32[1, 512, 768]", arg45_1: "f32[1, 512, 768]", view_345: "f16[512, 768]", mm_141: "f16[768, 768]", view_357: "f16[512, 768]", mm_142: "f16[512, 768]", mul_356: "f32[1, 512, 768]", mm_143: "f16[768, 768]", view_361: "f16[512, 768]", mm_144: "f16[512, 768]", mm_145: "f16[768, 768]", view_365: "f16[512, 768]", mm_146: "f16[512, 768]", mm_147: "f16[768, 768]", arg37_1: "b8[1, 512, 768]", arg2_1: "f32[768]", arg36_1: "f32[1, 512, 768]", arg349_1: "f32[1, 512, 1]", full_1: "f32[]", arg29_1: "i64[1, 512]", arg35_1: "i64[1, 512]", arg34_1: "i64[1, 512]", arg33_1: "i64[1, 512]", arg32_1: "i64[1, 512]", arg31_1: "i64[1, 512]", arg30_1: "i64[1, 512]", arg1_1: "i64[1, 512]", arg0_1: "i64[1, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15, _shape_param_16, _shape_param_17, _shape_param_18, _shape_param_19, _shape_param_20, _shape_param_21, _shape_param_22, _shape_param_23, _shape_param_24, _shape_param_25, _shape_param_26, _shape_param_27, _shape_param_28, _shape_param_29, _shape_param_30, _shape_param_31, _shape_param_32, _shape_param_33, _shape_param_34, _shape_param_35, _shape_param_36, _shape_param_37, _shape_param_38, _shape_param_39, _shape_param_40, _shape_param_41, _shape_param_42, _shape_param_43, _shape_param_44, _shape_param_45, _shape_param_46, _shape_param_47, _shape_param_48, _shape_param_49, _shape_param_50, _shape_param_51, _shape_param_52, _shape_param_53, _shape_param_54, _shape_param_55, _shape_param_56, _shape_param_57, _shape_param_58, _shape_param_59, _shape_param_60, _shape_param_61, _shape_param_62, _shape_param_63, _shape_param_64, _shape_param_65, _shape_param_66, _shape_param_67, _shape_param_68, _shape_param_69, _shape_param_70, _shape_param_71, _shape_param_72, _shape_param_73, _shape_param_74, _shape_param_75, _shape_param_76):
         # No stacktrace found for following nodes
         sum_dim_int_list: "f16[1, 30522]" = torch.ops.aten.sum.dim_IntList(convert_element_type_4, [0], True);  convert_element_type_4 = None
-        reshape_default: "f16[30522]" = torch.ops.aten.reshape.default(sum_dim_int_list, [30522]);  sum_dim_int_list = None
+        reshape_default: "f16[30522]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_0);  sum_dim_int_list = _shape_param_0 = None
         convert_element_type_default: "f32[30522, 768]" = torch.ops.prims.convert_element_type.default(mm_1, torch.float32);  mm_1 = None
         convert_element_type_default_1: "f32[30522]" = torch.ops.prims.convert_element_type.default(reshape_default, torch.float32);  reshape_default = None
         mul_tensor: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(convert_element_type_5, mul_7);  mul_7 = None
         sum_dim_int_list_1: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [0, 1]);  mul_tensor = None
         sum_dim_int_list_2: "f32[768]" = torch.ops.aten.sum.dim_IntList(convert_element_type_5, [0, 1]);  convert_element_type_5 = None
         sum_dim_int_list_3: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_5, [0], True);  view_5 = None
-        reshape_default_1: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_3, [768]);  sum_dim_int_list_3 = None
+        reshape_default_1: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_3, _shape_param_1);  sum_dim_int_list_3 = _shape_param_1 = None
         convert_element_type_default_2: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_3, torch.float32);  mm_3 = None
         convert_element_type_default_3: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_1, torch.float32);  reshape_default_1 = None
         mul_tensor_1: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(convert_element_type_12, arg193_1);  arg193_1 = None
         sum_dim_int_list_4: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_1, [0, 1]);  mul_tensor_1 = None
         sum_dim_int_list_5: "f32[768]" = torch.ops.aten.sum.dim_IntList(convert_element_type_12, [0, 1]);  convert_element_type_12 = None
         sum_dim_int_list_6: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_8, [0], True);  view_8 = None
-        reshape_default_2: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_6, [768]);  sum_dim_int_list_6 = None
+        reshape_default_2: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_6, _shape_param_2);  sum_dim_int_list_6 = _shape_param_2 = None
         convert_element_type_default_4: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_5, torch.float32);  mm_5 = None
         convert_element_type_default_5: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_2, torch.float32);  reshape_default_2 = None
         sum_dim_int_list_7: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_12, [0], True);  view_12 = None
-        reshape_default_3: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_7, [3072]);  sum_dim_int_list_7 = None
+        reshape_default_3: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_7, _shape_param_3);  sum_dim_int_list_7 = _shape_param_3 = None
         convert_element_type_default_6: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_7, torch.float32);  mm_7 = None
         convert_element_type_default_7: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_3, torch.float32);  reshape_default_3 = None
         mul_tensor_2: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_4, arg188_1);  arg188_1 = None
         sum_dim_int_list_8: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_2, [0, 1]);  mul_tensor_2 = None
         sum_dim_int_list_9: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_4, [0, 1]);  add_4 = None
         sum_dim_int_list_10: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_15, [0], True);  view_15 = None
-        reshape_default_4: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_10, [768]);  sum_dim_int_list_10 = None
+        reshape_default_4: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_10, _shape_param_4);  sum_dim_int_list_10 = _shape_param_4 = None
         convert_element_type_default_8: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_9, torch.float32);  mm_9 = None
         convert_element_type_default_9: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_4, torch.float32);  reshape_default_4 = None
         sum_dim_int_list_11: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_27, [0], True);  view_27 = None
-        reshape_default_5: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_11, [768]);  sum_dim_int_list_11 = None
+        reshape_default_5: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_11, _shape_param_5);  sum_dim_int_list_11 = _shape_param_5 = None
         convert_element_type_default_10: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_11, torch.float32);  mm_11 = None
         convert_element_type_default_11: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_5, torch.float32);  reshape_default_5 = None
         sum_dim_int_list_12: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_31, [0], True);  view_31 = None
-        reshape_default_6: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_12, [768]);  sum_dim_int_list_12 = None
+        reshape_default_6: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_12, _shape_param_6);  sum_dim_int_list_12 = _shape_param_6 = None
         convert_element_type_default_12: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_13, torch.float32);  mm_13 = None
         convert_element_type_default_13: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_6, torch.float32);  reshape_default_6 = None
         sum_dim_int_list_13: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_35, [0], True);  view_35 = None
-        reshape_default_7: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_13, [768]);  sum_dim_int_list_13 = None
+        reshape_default_7: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_13, _shape_param_7);  sum_dim_int_list_13 = _shape_param_7 = None
         convert_element_type_default_14: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_15, torch.float32);  mm_15 = None
         convert_element_type_default_15: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_7, torch.float32);  reshape_default_7 = None
         mul_tensor_3: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_7, arg180_1);  arg180_1 = None
         sum_dim_int_list_14: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_3, [0, 1]);  mul_tensor_3 = None
         sum_dim_int_list_15: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_7, [0, 1]);  add_7 = None
         sum_dim_int_list_16: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_38, [0], True);  view_38 = None
-        reshape_default_8: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_16, [768]);  sum_dim_int_list_16 = None
+        reshape_default_8: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_16, _shape_param_8);  sum_dim_int_list_16 = _shape_param_8 = None
         convert_element_type_default_16: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_17, torch.float32);  mm_17 = None
         convert_element_type_default_17: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_8, torch.float32);  reshape_default_8 = None
         sum_dim_int_list_17: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_42, [0], True);  view_42 = None
-        reshape_default_9: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_17, [3072]);  sum_dim_int_list_17 = None
+        reshape_default_9: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_17, _shape_param_9);  sum_dim_int_list_17 = _shape_param_9 = None
         convert_element_type_default_18: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_19, torch.float32);  mm_19 = None
         convert_element_type_default_19: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_9, torch.float32);  reshape_default_9 = None
         mul_tensor_4: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_10, arg175_1);  arg175_1 = None
         sum_dim_int_list_18: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_4, [0, 1]);  mul_tensor_4 = None
         sum_dim_int_list_19: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_10, [0, 1]);  add_10 = None
         sum_dim_int_list_20: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_45, [0], True);  view_45 = None
-        reshape_default_10: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_20, [768]);  sum_dim_int_list_20 = None
+        reshape_default_10: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_20, _shape_param_10);  sum_dim_int_list_20 = _shape_param_10 = None
         convert_element_type_default_20: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_21, torch.float32);  mm_21 = None
         convert_element_type_default_21: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_10, torch.float32);  reshape_default_10 = None
         sum_dim_int_list_21: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_57, [0], True);  view_57 = None
-        reshape_default_11: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_21, [768]);  sum_dim_int_list_21 = None
+        reshape_default_11: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_21, _shape_param_11);  sum_dim_int_list_21 = _shape_param_11 = None
         convert_element_type_default_22: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_23, torch.float32);  mm_23 = None
         convert_element_type_default_23: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_11, torch.float32);  reshape_default_11 = None
         sum_dim_int_list_22: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_61, [0], True);  view_61 = None
-        reshape_default_12: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_22, [768]);  sum_dim_int_list_22 = None
+        reshape_default_12: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_22, _shape_param_12);  sum_dim_int_list_22 = _shape_param_12 = None
         convert_element_type_default_24: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_25, torch.float32);  mm_25 = None
         convert_element_type_default_25: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_12, torch.float32);  reshape_default_12 = None
         sum_dim_int_list_23: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_65, [0], True);  view_65 = None
-        reshape_default_13: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_23, [768]);  sum_dim_int_list_23 = None
+        reshape_default_13: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_23, _shape_param_13);  sum_dim_int_list_23 = _shape_param_13 = None
         convert_element_type_default_26: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_27, torch.float32);  mm_27 = None
         convert_element_type_default_27: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_13, torch.float32);  reshape_default_13 = None
         mul_tensor_5: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_13, arg167_1);  arg167_1 = None
         sum_dim_int_list_24: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_5, [0, 1]);  mul_tensor_5 = None
         sum_dim_int_list_25: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_13, [0, 1]);  add_13 = None
         sum_dim_int_list_26: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_68, [0], True);  view_68 = None
-        reshape_default_14: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_26, [768]);  sum_dim_int_list_26 = None
+        reshape_default_14: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_26, _shape_param_14);  sum_dim_int_list_26 = _shape_param_14 = None
         convert_element_type_default_28: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_29, torch.float32);  mm_29 = None
         convert_element_type_default_29: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_14, torch.float32);  reshape_default_14 = None
         sum_dim_int_list_27: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_72, [0], True);  view_72 = None
-        reshape_default_15: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_27, [3072]);  sum_dim_int_list_27 = None
+        reshape_default_15: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_27, _shape_param_15);  sum_dim_int_list_27 = _shape_param_15 = None
         convert_element_type_default_30: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_31, torch.float32);  mm_31 = None
         convert_element_type_default_31: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_15, torch.float32);  reshape_default_15 = None
         mul_tensor_6: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_16, arg162_1);  arg162_1 = None
         sum_dim_int_list_28: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_6, [0, 1]);  mul_tensor_6 = None
         sum_dim_int_list_29: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_16, [0, 1]);  add_16 = None
         sum_dim_int_list_30: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_75, [0], True);  view_75 = None
-        reshape_default_16: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_30, [768]);  sum_dim_int_list_30 = None
+        reshape_default_16: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_30, _shape_param_16);  sum_dim_int_list_30 = _shape_param_16 = None
         convert_element_type_default_32: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_33, torch.float32);  mm_33 = None
         convert_element_type_default_33: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_16, torch.float32);  reshape_default_16 = None
         sum_dim_int_list_31: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_87, [0], True);  view_87 = None
-        reshape_default_17: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_31, [768]);  sum_dim_int_list_31 = None
+        reshape_default_17: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_31, _shape_param_17);  sum_dim_int_list_31 = _shape_param_17 = None
         convert_element_type_default_34: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_35, torch.float32);  mm_35 = None
         convert_element_type_default_35: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_17, torch.float32);  reshape_default_17 = None
         sum_dim_int_list_32: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_91, [0], True);  view_91 = None
-        reshape_default_18: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_32, [768]);  sum_dim_int_list_32 = None
+        reshape_default_18: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_32, _shape_param_18);  sum_dim_int_list_32 = _shape_param_18 = None
         convert_element_type_default_36: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_37, torch.float32);  mm_37 = None
         convert_element_type_default_37: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_18, torch.float32);  reshape_default_18 = None
         sum_dim_int_list_33: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_95, [0], True);  view_95 = None
-        reshape_default_19: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_33, [768]);  sum_dim_int_list_33 = None
+        reshape_default_19: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_33, _shape_param_19);  sum_dim_int_list_33 = _shape_param_19 = None
         convert_element_type_default_38: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_39, torch.float32);  mm_39 = None
         convert_element_type_default_39: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_19, torch.float32);  reshape_default_19 = None
         mul_tensor_7: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_19, arg154_1);  arg154_1 = None
         sum_dim_int_list_34: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_7, [0, 1]);  mul_tensor_7 = None
         sum_dim_int_list_35: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_19, [0, 1]);  add_19 = None
         sum_dim_int_list_36: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_98, [0], True);  view_98 = None
-        reshape_default_20: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_36, [768]);  sum_dim_int_list_36 = None
+        reshape_default_20: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_36, _shape_param_20);  sum_dim_int_list_36 = _shape_param_20 = None
         convert_element_type_default_40: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_41, torch.float32);  mm_41 = None
         convert_element_type_default_41: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_20, torch.float32);  reshape_default_20 = None
         sum_dim_int_list_37: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_102, [0], True);  view_102 = None
-        reshape_default_21: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_37, [3072]);  sum_dim_int_list_37 = None
+        reshape_default_21: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_37, _shape_param_21);  sum_dim_int_list_37 = _shape_param_21 = None
         convert_element_type_default_42: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_43, torch.float32);  mm_43 = None
         convert_element_type_default_43: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_21, torch.float32);  reshape_default_21 = None
         mul_tensor_8: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_22, arg149_1);  arg149_1 = None
         sum_dim_int_list_38: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_8, [0, 1]);  mul_tensor_8 = None
         sum_dim_int_list_39: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_22, [0, 1]);  add_22 = None
         sum_dim_int_list_40: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_105, [0], True);  view_105 = None
-        reshape_default_22: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_40, [768]);  sum_dim_int_list_40 = None
+        reshape_default_22: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_40, _shape_param_22);  sum_dim_int_list_40 = _shape_param_22 = None
         convert_element_type_default_44: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_45, torch.float32);  mm_45 = None
         convert_element_type_default_45: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_22, torch.float32);  reshape_default_22 = None
         sum_dim_int_list_41: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_117, [0], True);  view_117 = None
-        reshape_default_23: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_41, [768]);  sum_dim_int_list_41 = None
+        reshape_default_23: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_41, _shape_param_23);  sum_dim_int_list_41 = _shape_param_23 = None
         convert_element_type_default_46: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_47, torch.float32);  mm_47 = None
         convert_element_type_default_47: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_23, torch.float32);  reshape_default_23 = None
         sum_dim_int_list_42: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_121, [0], True);  view_121 = None
-        reshape_default_24: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_42, [768]);  sum_dim_int_list_42 = None
+        reshape_default_24: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_42, _shape_param_24);  sum_dim_int_list_42 = _shape_param_24 = None
         convert_element_type_default_48: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_49, torch.float32);  mm_49 = None
         convert_element_type_default_49: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_24, torch.float32);  reshape_default_24 = None
         sum_dim_int_list_43: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_125, [0], True);  view_125 = None
-        reshape_default_25: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_43, [768]);  sum_dim_int_list_43 = None
+        reshape_default_25: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_43, _shape_param_25);  sum_dim_int_list_43 = _shape_param_25 = None
         convert_element_type_default_50: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_51, torch.float32);  mm_51 = None
         convert_element_type_default_51: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_25, torch.float32);  reshape_default_25 = None
         mul_tensor_9: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_25, arg141_1);  arg141_1 = None
         sum_dim_int_list_44: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_9, [0, 1]);  mul_tensor_9 = None
         sum_dim_int_list_45: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_25, [0, 1]);  add_25 = None
         sum_dim_int_list_46: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_128, [0], True);  view_128 = None
-        reshape_default_26: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_46, [768]);  sum_dim_int_list_46 = None
+        reshape_default_26: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_46, _shape_param_26);  sum_dim_int_list_46 = _shape_param_26 = None
         convert_element_type_default_52: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_53, torch.float32);  mm_53 = None
         convert_element_type_default_53: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_26, torch.float32);  reshape_default_26 = None
         sum_dim_int_list_47: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_132, [0], True);  view_132 = None
-        reshape_default_27: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_47, [3072]);  sum_dim_int_list_47 = None
+        reshape_default_27: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_47, _shape_param_27);  sum_dim_int_list_47 = _shape_param_27 = None
         convert_element_type_default_54: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_55, torch.float32);  mm_55 = None
         convert_element_type_default_55: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_27, torch.float32);  reshape_default_27 = None
         mul_tensor_10: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_28, arg136_1);  arg136_1 = None
         sum_dim_int_list_48: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_10, [0, 1]);  mul_tensor_10 = None
         sum_dim_int_list_49: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_28, [0, 1]);  add_28 = None
         sum_dim_int_list_50: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_135, [0], True);  view_135 = None
-        reshape_default_28: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_50, [768]);  sum_dim_int_list_50 = None
+        reshape_default_28: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_50, _shape_param_28);  sum_dim_int_list_50 = _shape_param_28 = None
         convert_element_type_default_56: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_57, torch.float32);  mm_57 = None
         convert_element_type_default_57: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_28, torch.float32);  reshape_default_28 = None
         sum_dim_int_list_51: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_147, [0], True);  view_147 = None
-        reshape_default_29: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_51, [768]);  sum_dim_int_list_51 = None
+        reshape_default_29: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_51, _shape_param_29);  sum_dim_int_list_51 = _shape_param_29 = None
         convert_element_type_default_58: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_59, torch.float32);  mm_59 = None
         convert_element_type_default_59: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_29, torch.float32);  reshape_default_29 = None
         sum_dim_int_list_52: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_151, [0], True);  view_151 = None
-        reshape_default_30: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_52, [768]);  sum_dim_int_list_52 = None
+        reshape_default_30: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_52, _shape_param_30);  sum_dim_int_list_52 = _shape_param_30 = None
         convert_element_type_default_60: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_61, torch.float32);  mm_61 = None
         convert_element_type_default_61: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_30, torch.float32);  reshape_default_30 = None
         sum_dim_int_list_53: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_155, [0], True);  view_155 = None
-        reshape_default_31: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_53, [768]);  sum_dim_int_list_53 = None
+        reshape_default_31: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_53, _shape_param_31);  sum_dim_int_list_53 = _shape_param_31 = None
         convert_element_type_default_62: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_63, torch.float32);  mm_63 = None
         convert_element_type_default_63: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_31, torch.float32);  reshape_default_31 = None
         mul_tensor_11: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_31, arg128_1);  arg128_1 = None
         sum_dim_int_list_54: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_11, [0, 1]);  mul_tensor_11 = None
         sum_dim_int_list_55: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_31, [0, 1]);  add_31 = None
         sum_dim_int_list_56: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_158, [0], True);  view_158 = None
-        reshape_default_32: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_56, [768]);  sum_dim_int_list_56 = None
+        reshape_default_32: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_56, _shape_param_32);  sum_dim_int_list_56 = _shape_param_32 = None
         convert_element_type_default_64: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_65, torch.float32);  mm_65 = None
         convert_element_type_default_65: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_32, torch.float32);  reshape_default_32 = None
         sum_dim_int_list_57: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_162, [0], True);  view_162 = None
-        reshape_default_33: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_57, [3072]);  sum_dim_int_list_57 = None
+        reshape_default_33: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_57, _shape_param_33);  sum_dim_int_list_57 = _shape_param_33 = None
         convert_element_type_default_66: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_67, torch.float32);  mm_67 = None
         convert_element_type_default_67: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_33, torch.float32);  reshape_default_33 = None
         mul_tensor_12: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_34, arg123_1);  arg123_1 = None
         sum_dim_int_list_58: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_12, [0, 1]);  mul_tensor_12 = None
         sum_dim_int_list_59: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_34, [0, 1]);  add_34 = None
         sum_dim_int_list_60: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_165, [0], True);  view_165 = None
-        reshape_default_34: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_60, [768]);  sum_dim_int_list_60 = None
+        reshape_default_34: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_60, _shape_param_34);  sum_dim_int_list_60 = _shape_param_34 = None
         convert_element_type_default_68: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_69, torch.float32);  mm_69 = None
         convert_element_type_default_69: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_34, torch.float32);  reshape_default_34 = None
         sum_dim_int_list_61: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_177, [0], True);  view_177 = None
-        reshape_default_35: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_61, [768]);  sum_dim_int_list_61 = None
+        reshape_default_35: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_61, _shape_param_35);  sum_dim_int_list_61 = _shape_param_35 = None
         convert_element_type_default_70: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_71, torch.float32);  mm_71 = None
         convert_element_type_default_71: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_35, torch.float32);  reshape_default_35 = None
         sum_dim_int_list_62: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_181, [0], True);  view_181 = None
-        reshape_default_36: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_62, [768]);  sum_dim_int_list_62 = None
+        reshape_default_36: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_62, _shape_param_36);  sum_dim_int_list_62 = _shape_param_36 = None
         convert_element_type_default_72: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_73, torch.float32);  mm_73 = None
         convert_element_type_default_73: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_36, torch.float32);  reshape_default_36 = None
         sum_dim_int_list_63: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_185, [0], True);  view_185 = None
-        reshape_default_37: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_63, [768]);  sum_dim_int_list_63 = None
+        reshape_default_37: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_63, _shape_param_37);  sum_dim_int_list_63 = _shape_param_37 = None
         convert_element_type_default_74: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_75, torch.float32);  mm_75 = None
         convert_element_type_default_75: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_37, torch.float32);  reshape_default_37 = None
         mul_tensor_13: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_37, arg115_1);  arg115_1 = None
         sum_dim_int_list_64: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_13, [0, 1]);  mul_tensor_13 = None
         sum_dim_int_list_65: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_37, [0, 1]);  add_37 = None
         sum_dim_int_list_66: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_188, [0], True);  view_188 = None
-        reshape_default_38: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_66, [768]);  sum_dim_int_list_66 = None
+        reshape_default_38: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_66, _shape_param_38);  sum_dim_int_list_66 = _shape_param_38 = None
         convert_element_type_default_76: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_77, torch.float32);  mm_77 = None
         convert_element_type_default_77: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_38, torch.float32);  reshape_default_38 = None
         sum_dim_int_list_67: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_192, [0], True);  view_192 = None
-        reshape_default_39: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_67, [3072]);  sum_dim_int_list_67 = None
+        reshape_default_39: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_67, _shape_param_39);  sum_dim_int_list_67 = _shape_param_39 = None
         convert_element_type_default_78: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_79, torch.float32);  mm_79 = None
         convert_element_type_default_79: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_39, torch.float32);  reshape_default_39 = None
         mul_tensor_14: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_40, arg110_1);  arg110_1 = None
         sum_dim_int_list_68: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_14, [0, 1]);  mul_tensor_14 = None
         sum_dim_int_list_69: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_40, [0, 1]);  add_40 = None
         sum_dim_int_list_70: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_195, [0], True);  view_195 = None
-        reshape_default_40: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_70, [768]);  sum_dim_int_list_70 = None
+        reshape_default_40: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_70, _shape_param_40);  sum_dim_int_list_70 = _shape_param_40 = None
         convert_element_type_default_80: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_81, torch.float32);  mm_81 = None
         convert_element_type_default_81: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_40, torch.float32);  reshape_default_40 = None
         sum_dim_int_list_71: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_207, [0], True);  view_207 = None
-        reshape_default_41: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_71, [768]);  sum_dim_int_list_71 = None
+        reshape_default_41: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_71, _shape_param_41);  sum_dim_int_list_71 = _shape_param_41 = None
         convert_element_type_default_82: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_83, torch.float32);  mm_83 = None
         convert_element_type_default_83: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_41, torch.float32);  reshape_default_41 = None
         sum_dim_int_list_72: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_211, [0], True);  view_211 = None
-        reshape_default_42: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_72, [768]);  sum_dim_int_list_72 = None
+        reshape_default_42: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_72, _shape_param_42);  sum_dim_int_list_72 = _shape_param_42 = None
         convert_element_type_default_84: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_85, torch.float32);  mm_85 = None
         convert_element_type_default_85: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_42, torch.float32);  reshape_default_42 = None
         sum_dim_int_list_73: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_215, [0], True);  view_215 = None
-        reshape_default_43: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_73, [768]);  sum_dim_int_list_73 = None
+        reshape_default_43: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_73, _shape_param_43);  sum_dim_int_list_73 = _shape_param_43 = None
         convert_element_type_default_86: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_87, torch.float32);  mm_87 = None
         convert_element_type_default_87: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_43, torch.float32);  reshape_default_43 = None
         mul_tensor_15: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_43, arg102_1);  arg102_1 = None
         sum_dim_int_list_74: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_15, [0, 1]);  mul_tensor_15 = None
         sum_dim_int_list_75: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_43, [0, 1]);  add_43 = None
         sum_dim_int_list_76: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_218, [0], True);  view_218 = None
-        reshape_default_44: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_76, [768]);  sum_dim_int_list_76 = None
+        reshape_default_44: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_76, _shape_param_44);  sum_dim_int_list_76 = _shape_param_44 = None
         convert_element_type_default_88: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_89, torch.float32);  mm_89 = None
         convert_element_type_default_89: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_44, torch.float32);  reshape_default_44 = None
         sum_dim_int_list_77: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_222, [0], True);  view_222 = None
-        reshape_default_45: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_77, [3072]);  sum_dim_int_list_77 = None
+        reshape_default_45: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_77, _shape_param_45);  sum_dim_int_list_77 = _shape_param_45 = None
         convert_element_type_default_90: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_91, torch.float32);  mm_91 = None
         convert_element_type_default_91: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_45, torch.float32);  reshape_default_45 = None
         mul_tensor_16: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_46, arg97_1);  arg97_1 = None
         sum_dim_int_list_78: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_16, [0, 1]);  mul_tensor_16 = None
         sum_dim_int_list_79: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_46, [0, 1]);  add_46 = None
         sum_dim_int_list_80: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_225, [0], True);  view_225 = None
-        reshape_default_46: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_80, [768]);  sum_dim_int_list_80 = None
+        reshape_default_46: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_80, _shape_param_46);  sum_dim_int_list_80 = _shape_param_46 = None
         convert_element_type_default_92: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_93, torch.float32);  mm_93 = None
         convert_element_type_default_93: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_46, torch.float32);  reshape_default_46 = None
         sum_dim_int_list_81: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_237, [0], True);  view_237 = None
-        reshape_default_47: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_81, [768]);  sum_dim_int_list_81 = None
+        reshape_default_47: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_81, _shape_param_47);  sum_dim_int_list_81 = _shape_param_47 = None
         convert_element_type_default_94: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_95, torch.float32);  mm_95 = None
         convert_element_type_default_95: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_47, torch.float32);  reshape_default_47 = None
         sum_dim_int_list_82: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_241, [0], True);  view_241 = None
-        reshape_default_48: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_82, [768]);  sum_dim_int_list_82 = None
+        reshape_default_48: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_82, _shape_param_48);  sum_dim_int_list_82 = _shape_param_48 = None
         convert_element_type_default_96: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_97, torch.float32);  mm_97 = None
         convert_element_type_default_97: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_48, torch.float32);  reshape_default_48 = None
         sum_dim_int_list_83: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_245, [0], True);  view_245 = None
-        reshape_default_49: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_83, [768]);  sum_dim_int_list_83 = None
+        reshape_default_49: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_83, _shape_param_49);  sum_dim_int_list_83 = _shape_param_49 = None
         convert_element_type_default_98: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_99, torch.float32);  mm_99 = None
         convert_element_type_default_99: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_49, torch.float32);  reshape_default_49 = None
         mul_tensor_17: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_49, arg89_1);  arg89_1 = None
         sum_dim_int_list_84: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_17, [0, 1]);  mul_tensor_17 = None
         sum_dim_int_list_85: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_49, [0, 1]);  add_49 = None
         sum_dim_int_list_86: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_248, [0], True);  view_248 = None
-        reshape_default_50: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_86, [768]);  sum_dim_int_list_86 = None
+        reshape_default_50: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_86, _shape_param_50);  sum_dim_int_list_86 = _shape_param_50 = None
         convert_element_type_default_100: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_101, torch.float32);  mm_101 = None
         convert_element_type_default_101: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_50, torch.float32);  reshape_default_50 = None
         sum_dim_int_list_87: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_252, [0], True);  view_252 = None
-        reshape_default_51: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_87, [3072]);  sum_dim_int_list_87 = None
+        reshape_default_51: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_87, _shape_param_51);  sum_dim_int_list_87 = _shape_param_51 = None
         convert_element_type_default_102: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_103, torch.float32);  mm_103 = None
         convert_element_type_default_103: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_51, torch.float32);  reshape_default_51 = None
         mul_tensor_18: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_52, arg84_1);  arg84_1 = None
         sum_dim_int_list_88: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_18, [0, 1]);  mul_tensor_18 = None
         sum_dim_int_list_89: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_52, [0, 1]);  add_52 = None
         sum_dim_int_list_90: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_255, [0], True);  view_255 = None
-        reshape_default_52: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_90, [768]);  sum_dim_int_list_90 = None
+        reshape_default_52: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_90, _shape_param_52);  sum_dim_int_list_90 = _shape_param_52 = None
         convert_element_type_default_104: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_105, torch.float32);  mm_105 = None
         convert_element_type_default_105: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_52, torch.float32);  reshape_default_52 = None
         sum_dim_int_list_91: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_267, [0], True);  view_267 = None
-        reshape_default_53: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_91, [768]);  sum_dim_int_list_91 = None
+        reshape_default_53: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_91, _shape_param_53);  sum_dim_int_list_91 = _shape_param_53 = None
         convert_element_type_default_106: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_107, torch.float32);  mm_107 = None
         convert_element_type_default_107: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_53, torch.float32);  reshape_default_53 = None
         sum_dim_int_list_92: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_271, [0], True);  view_271 = None
-        reshape_default_54: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_92, [768]);  sum_dim_int_list_92 = None
+        reshape_default_54: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_92, _shape_param_54);  sum_dim_int_list_92 = _shape_param_54 = None
         convert_element_type_default_108: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_109, torch.float32);  mm_109 = None
         convert_element_type_default_109: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_54, torch.float32);  reshape_default_54 = None
         sum_dim_int_list_93: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_275, [0], True);  view_275 = None
-        reshape_default_55: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_93, [768]);  sum_dim_int_list_93 = None
+        reshape_default_55: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_93, _shape_param_55);  sum_dim_int_list_93 = _shape_param_55 = None
         convert_element_type_default_110: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_111, torch.float32);  mm_111 = None
         convert_element_type_default_111: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_55, torch.float32);  reshape_default_55 = None
         mul_tensor_19: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_55, arg76_1);  arg76_1 = None
         sum_dim_int_list_94: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_19, [0, 1]);  mul_tensor_19 = None
         sum_dim_int_list_95: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_55, [0, 1]);  add_55 = None
         sum_dim_int_list_96: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_278, [0], True);  view_278 = None
-        reshape_default_56: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_96, [768]);  sum_dim_int_list_96 = None
+        reshape_default_56: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_96, _shape_param_56);  sum_dim_int_list_96 = _shape_param_56 = None
         convert_element_type_default_112: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_113, torch.float32);  mm_113 = None
         convert_element_type_default_113: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_56, torch.float32);  reshape_default_56 = None
         sum_dim_int_list_97: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_282, [0], True);  view_282 = None
-        reshape_default_57: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_97, [3072]);  sum_dim_int_list_97 = None
+        reshape_default_57: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_97, _shape_param_57);  sum_dim_int_list_97 = _shape_param_57 = None
         convert_element_type_default_114: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_115, torch.float32);  mm_115 = None
         convert_element_type_default_115: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_57, torch.float32);  reshape_default_57 = None
         mul_tensor_20: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_58, arg71_1);  arg71_1 = None
         sum_dim_int_list_98: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_20, [0, 1]);  mul_tensor_20 = None
         sum_dim_int_list_99: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_58, [0, 1]);  add_58 = None
         sum_dim_int_list_100: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_285, [0], True);  view_285 = None
-        reshape_default_58: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_100, [768]);  sum_dim_int_list_100 = None
+        reshape_default_58: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_100, _shape_param_58);  sum_dim_int_list_100 = _shape_param_58 = None
         convert_element_type_default_116: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_117, torch.float32);  mm_117 = None
         convert_element_type_default_117: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_58, torch.float32);  reshape_default_58 = None
         sum_dim_int_list_101: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_297, [0], True);  view_297 = None
-        reshape_default_59: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_101, [768]);  sum_dim_int_list_101 = None
+        reshape_default_59: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_101, _shape_param_59);  sum_dim_int_list_101 = _shape_param_59 = None
         convert_element_type_default_118: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_119, torch.float32);  mm_119 = None
         convert_element_type_default_119: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_59, torch.float32);  reshape_default_59 = None
         sum_dim_int_list_102: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_301, [0], True);  view_301 = None
-        reshape_default_60: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_102, [768]);  sum_dim_int_list_102 = None
+        reshape_default_60: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_102, _shape_param_60);  sum_dim_int_list_102 = _shape_param_60 = None
         convert_element_type_default_120: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_121, torch.float32);  mm_121 = None
         convert_element_type_default_121: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_60, torch.float32);  reshape_default_60 = None
         sum_dim_int_list_103: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_305, [0], True);  view_305 = None
-        reshape_default_61: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_103, [768]);  sum_dim_int_list_103 = None
+        reshape_default_61: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_103, _shape_param_61);  sum_dim_int_list_103 = _shape_param_61 = None
         convert_element_type_default_122: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_123, torch.float32);  mm_123 = None
         convert_element_type_default_123: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_61, torch.float32);  reshape_default_61 = None
         mul_tensor_21: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_61, arg63_1);  arg63_1 = None
         sum_dim_int_list_104: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_21, [0, 1]);  mul_tensor_21 = None
         sum_dim_int_list_105: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_61, [0, 1]);  add_61 = None
         sum_dim_int_list_106: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_308, [0], True);  view_308 = None
-        reshape_default_62: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_106, [768]);  sum_dim_int_list_106 = None
+        reshape_default_62: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_106, _shape_param_62);  sum_dim_int_list_106 = _shape_param_62 = None
         convert_element_type_default_124: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_125, torch.float32);  mm_125 = None
         convert_element_type_default_125: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_62, torch.float32);  reshape_default_62 = None
         sum_dim_int_list_107: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_312, [0], True);  view_312 = None
-        reshape_default_63: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_107, [3072]);  sum_dim_int_list_107 = None
+        reshape_default_63: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_107, _shape_param_63);  sum_dim_int_list_107 = _shape_param_63 = None
         convert_element_type_default_126: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_127, torch.float32);  mm_127 = None
         convert_element_type_default_127: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_63, torch.float32);  reshape_default_63 = None
         mul_tensor_22: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_64, arg58_1);  arg58_1 = None
         sum_dim_int_list_108: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_22, [0, 1]);  mul_tensor_22 = None
         sum_dim_int_list_109: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_64, [0, 1]);  add_64 = None
         sum_dim_int_list_110: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_315, [0], True);  view_315 = None
-        reshape_default_64: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_110, [768]);  sum_dim_int_list_110 = None
+        reshape_default_64: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_110, _shape_param_64);  sum_dim_int_list_110 = _shape_param_64 = None
         convert_element_type_default_128: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_129, torch.float32);  mm_129 = None
         convert_element_type_default_129: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_64, torch.float32);  reshape_default_64 = None
         sum_dim_int_list_111: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_327, [0], True);  view_327 = None
-        reshape_default_65: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_111, [768]);  sum_dim_int_list_111 = None
+        reshape_default_65: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_111, _shape_param_65);  sum_dim_int_list_111 = _shape_param_65 = None
         convert_element_type_default_130: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_131, torch.float32);  mm_131 = None
         convert_element_type_default_131: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_65, torch.float32);  reshape_default_65 = None
         sum_dim_int_list_112: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_331, [0], True);  view_331 = None
-        reshape_default_66: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_112, [768]);  sum_dim_int_list_112 = None
+        reshape_default_66: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_112, _shape_param_66);  sum_dim_int_list_112 = _shape_param_66 = None
         convert_element_type_default_132: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_133, torch.float32);  mm_133 = None
         convert_element_type_default_133: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_66, torch.float32);  reshape_default_66 = None
         sum_dim_int_list_113: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_335, [0], True);  view_335 = None
-        reshape_default_67: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_113, [768]);  sum_dim_int_list_113 = None
+        reshape_default_67: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_113, _shape_param_67);  sum_dim_int_list_113 = _shape_param_67 = None
         convert_element_type_default_134: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_135, torch.float32);  mm_135 = None
         convert_element_type_default_135: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_67, torch.float32);  reshape_default_67 = None
         mul_tensor_23: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_67, arg50_1);  arg50_1 = None
         sum_dim_int_list_114: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_23, [0, 1]);  mul_tensor_23 = None
         sum_dim_int_list_115: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_67, [0, 1]);  add_67 = None
         sum_dim_int_list_116: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_338, [0], True);  view_338 = None
-        reshape_default_68: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_116, [768]);  sum_dim_int_list_116 = None
+        reshape_default_68: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_116, _shape_param_68);  sum_dim_int_list_116 = _shape_param_68 = None
         convert_element_type_default_136: "f32[768, 3072]" = torch.ops.prims.convert_element_type.default(mm_137, torch.float32);  mm_137 = None
         convert_element_type_default_137: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_68, torch.float32);  reshape_default_68 = None
         sum_dim_int_list_117: "f16[1, 3072]" = torch.ops.aten.sum.dim_IntList(view_342, [0], True);  view_342 = None
-        reshape_default_69: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_117, [3072]);  sum_dim_int_list_117 = None
+        reshape_default_69: "f16[3072]" = torch.ops.aten.reshape.default(sum_dim_int_list_117, _shape_param_69);  sum_dim_int_list_117 = _shape_param_69 = None
         convert_element_type_default_138: "f32[3072, 768]" = torch.ops.prims.convert_element_type.default(mm_139, torch.float32);  mm_139 = None
         convert_element_type_default_139: "f32[3072]" = torch.ops.prims.convert_element_type.default(reshape_default_69, torch.float32);  reshape_default_69 = None
         mul_tensor_24: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(add_70, arg45_1);  arg45_1 = None
         sum_dim_int_list_118: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor_24, [0, 1]);  mul_tensor_24 = None
         sum_dim_int_list_119: "f32[768]" = torch.ops.aten.sum.dim_IntList(add_70, [0, 1]);  add_70 = None
         sum_dim_int_list_120: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_345, [0], True);  view_345 = None
-        reshape_default_70: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_120, [768]);  sum_dim_int_list_120 = None
+        reshape_default_70: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_120, _shape_param_70);  sum_dim_int_list_120 = _shape_param_70 = None
         convert_element_type_default_140: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_141, torch.float32);  mm_141 = None
         convert_element_type_default_141: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_70, torch.float32);  reshape_default_70 = None
         sum_dim_int_list_121: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_357, [0], True);  view_357 = None
-        reshape_default_71: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_121, [768]);  sum_dim_int_list_121 = None
-        reshape_default_72: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(mm_142, [1, 512, 768]);  mm_142 = None
+        reshape_default_71: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_121, _shape_param_71);  sum_dim_int_list_121 = _shape_param_71 = None
+        reshape_default_72: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(mm_142, _shape_param_72);  mm_142 = _shape_param_72 = None
         convert_element_type_default_142: "f32[1, 512, 768]" = torch.ops.prims.convert_element_type.default(reshape_default_72, torch.float32);  reshape_default_72 = None
         add_tensor: "f32[1, 512, 768]" = torch.ops.aten.add.Tensor(mul_356, convert_element_type_default_142);  mul_356 = convert_element_type_default_142 = None
         convert_element_type_default_143: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_143, torch.float32);  mm_143 = None
         convert_element_type_default_144: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_71, torch.float32);  reshape_default_71 = None
         sum_dim_int_list_122: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_361, [0], True);  view_361 = None
-        reshape_default_73: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_122, [768]);  sum_dim_int_list_122 = None
-        reshape_default_74: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(mm_144, [1, 512, 768]);  mm_144 = None
+        reshape_default_73: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_122, _shape_param_73);  sum_dim_int_list_122 = _shape_param_73 = None
+        reshape_default_74: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(mm_144, _shape_param_74);  mm_144 = _shape_param_74 = None
         convert_element_type_default_145: "f32[1, 512, 768]" = torch.ops.prims.convert_element_type.default(reshape_default_74, torch.float32);  reshape_default_74 = None
         add_tensor_1: "f32[1, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor, convert_element_type_default_145);  add_tensor = convert_element_type_default_145 = None
         convert_element_type_default_146: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_145, torch.float32);  mm_145 = None
         convert_element_type_default_147: "f32[768]" = torch.ops.prims.convert_element_type.default(reshape_default_73, torch.float32);  reshape_default_73 = None
         sum_dim_int_list_123: "f16[1, 768]" = torch.ops.aten.sum.dim_IntList(view_365, [0], True);  view_365 = None
-        reshape_default_75: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_123, [768]);  sum_dim_int_list_123 = None
-        reshape_default_76: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(mm_146, [1, 512, 768]);  mm_146 = None
+        reshape_default_75: "f16[768]" = torch.ops.aten.reshape.default(sum_dim_int_list_123, _shape_param_75);  sum_dim_int_list_123 = _shape_param_75 = None
+        reshape_default_76: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(mm_146, _shape_param_76);  mm_146 = _shape_param_76 = None
         convert_element_type_default_148: "f32[1, 512, 768]" = torch.ops.prims.convert_element_type.default(reshape_default_76, torch.float32);  reshape_default_76 = None
         add_tensor_2: "f32[1, 512, 768]" = torch.ops.aten.add.Tensor(add_tensor_1, convert_element_type_default_148);  add_tensor_1 = convert_element_type_default_148 = None
         convert_element_type_default_149: "f32[768, 768]" = torch.ops.prims.convert_element_type.default(mm_147, torch.float32);  mm_147 = None
@@ -882,6 +882,83 @@ def _default_make_inputs():
     torch.randint(0, 2, (2045,), dtype=torch.int64, device='cuda').as_strided([1, 512], [2048, 4]),  # arg30_1
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
+    [30522],  # _shape_param_0
+    [768],  # _shape_param_1
+    [768],  # _shape_param_2
+    [3072],  # _shape_param_3
+    [768],  # _shape_param_4
+    [768],  # _shape_param_5
+    [768],  # _shape_param_6
+    [768],  # _shape_param_7
+    [768],  # _shape_param_8
+    [3072],  # _shape_param_9
+    [768],  # _shape_param_10
+    [768],  # _shape_param_11
+    [768],  # _shape_param_12
+    [768],  # _shape_param_13
+    [768],  # _shape_param_14
+    [3072],  # _shape_param_15
+    [768],  # _shape_param_16
+    [768],  # _shape_param_17
+    [768],  # _shape_param_18
+    [768],  # _shape_param_19
+    [768],  # _shape_param_20
+    [3072],  # _shape_param_21
+    [768],  # _shape_param_22
+    [768],  # _shape_param_23
+    [768],  # _shape_param_24
+    [768],  # _shape_param_25
+    [768],  # _shape_param_26
+    [3072],  # _shape_param_27
+    [768],  # _shape_param_28
+    [768],  # _shape_param_29
+    [768],  # _shape_param_30
+    [768],  # _shape_param_31
+    [768],  # _shape_param_32
+    [3072],  # _shape_param_33
+    [768],  # _shape_param_34
+    [768],  # _shape_param_35
+    [768],  # _shape_param_36
+    [768],  # _shape_param_37
+    [768],  # _shape_param_38
+    [3072],  # _shape_param_39
+    [768],  # _shape_param_40
+    [768],  # _shape_param_41
+    [768],  # _shape_param_42
+    [768],  # _shape_param_43
+    [768],  # _shape_param_44
+    [3072],  # _shape_param_45
+    [768],  # _shape_param_46
+    [768],  # _shape_param_47
+    [768],  # _shape_param_48
+    [768],  # _shape_param_49
+    [768],  # _shape_param_50
+    [3072],  # _shape_param_51
+    [768],  # _shape_param_52
+    [768],  # _shape_param_53
+    [768],  # _shape_param_54
+    [768],  # _shape_param_55
+    [768],  # _shape_param_56
+    [3072],  # _shape_param_57
+    [768],  # _shape_param_58
+    [768],  # _shape_param_59
+    [768],  # _shape_param_60
+    [768],  # _shape_param_61
+    [768],  # _shape_param_62
+    [3072],  # _shape_param_63
+    [768],  # _shape_param_64
+    [768],  # _shape_param_65
+    [768],  # _shape_param_66
+    [768],  # _shape_param_67
+    [768],  # _shape_param_68
+    [3072],  # _shape_param_69
+    [768],  # _shape_param_70
+    [768],  # _shape_param_71
+    [1, 512, 768],  # _shape_param_72
+    [768],  # _shape_param_73
+    [1, 512, 768],  # _shape_param_74
+    [768],  # _shape_param_75
+    [1, 512, 768],  # _shape_param_76
     ]
 
 

@@ -18,7 +18,7 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, cat_2: "f32[4, 64, 512, 513]", getitem_4: "f32[4, 64, 512, 1]"):
+    def forward(self, cat_2: "f32[4, 64, 512, 513]", getitem_4: "f32[4, 64, 512, 1]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:264 in eager_attention_forward, code: combined_logits = combined_logits - combined_logits.max(dim=-1, keepdim=True).values
         sub_tensor: "f32[4, 64, 512, 513]" = torch.ops.aten.sub.Tensor(cat_2, getitem_4);  cat_2 = getitem_4 = None
 
@@ -36,8 +36,8 @@ class Repro(torch.nn.Module):
         clone_default: "f32[4, 64, 512, 512]" = torch.ops.aten.clone.default(slice_tensor);  slice_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_oss/modeling_gpt_oss.py:268 in eager_attention_forward, code: attn_output = torch.matmul(attn_weights, value_states)
-        expand_default: "f32[4, 64, 512, 512]" = torch.ops.aten.expand.default(clone_default, [4, 64, 512, 512]);  clone_default = None
-        reshape_default: "f32[256, 512, 512]" = torch.ops.aten.reshape.default(expand_default, [256, 512, 512]);  expand_default = None
+        expand_default: "f32[4, 64, 512, 512]" = torch.ops.aten.expand.default(clone_default, _shape_param_0);  clone_default = _shape_param_0 = None
+        reshape_default: "f32[256, 512, 512]" = torch.ops.aten.reshape.default(expand_default, _shape_param_1);  expand_default = _shape_param_1 = None
         return reshape_default
 
 
@@ -45,6 +45,8 @@ def _default_make_inputs():
     return [
     torch.randn([4, 64, 512, 513], dtype=torch.float32, device='cuda'),
     torch.randn([4, 64, 512, 1], dtype=torch.float32, device='cuda'),
+    [4, 64, 512, 512],  # _shape_param_0
+    [256, 512, 512],  # _shape_param_1
     ]
 
 

@@ -25,17 +25,17 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_286: "f32[4096, 1536]", mul_1028: "f32[8, 512, 1536]", mm_288: "f32[4096, 1536]", mm_290: "f32[4096, 1536]", gt: "b8[8, 512, 1536]", primals_5: "f32[1536]", embedding: "f32[8, 512, 1536]", embedding_1: "f32[1, 512, 1536]", getitem_1: "f32[8, 512, 1]", rsqrt: "f32[8, 512, 1]", primals_2: "i64[1, 512]", full_default_74: "f32[]", primals_1: "i64[8, 512]", mm_1: "f32[128100, 1536]"):
+    def forward(self, mm_286: "f32[4096, 1536]", mul_1028: "f32[8, 512, 1536]", mm_288: "f32[4096, 1536]", mm_290: "f32[4096, 1536]", gt: "b8[8, 512, 1536]", primals_5: "f32[1536]", embedding: "f32[8, 512, 1536]", embedding_1: "f32[1, 512, 1536]", getitem_1: "f32[8, 512, 1]", rsqrt: "f32[8, 512, 1]", primals_2: "i64[1, 512]", full_default_74: "f32[]", primals_1: "i64[8, 512]", mm_1: "f32[128100, 1536]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py:237 in forward, code: value_layer = self.transpose_for_scores(self.value_proj(hidden_states), self.num_attention_heads)
-        reshape_default: "f32[8, 512, 1536]" = torch.ops.aten.reshape.default(mm_286, [8, 512, 1536]);  mm_286 = None
+        reshape_default: "f32[8, 512, 1536]" = torch.ops.aten.reshape.default(mm_286, _shape_param_0);  mm_286 = _shape_param_0 = None
         add_tensor: "f32[8, 512, 1536]" = torch.ops.aten.add.Tensor(mul_1028, reshape_default);  mul_1028 = reshape_default = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py:236 in forward, code: key_layer = self.transpose_for_scores(self.key_proj(hidden_states), self.num_attention_heads)
-        reshape_default_1: "f32[8, 512, 1536]" = torch.ops.aten.reshape.default(mm_288, [8, 512, 1536]);  mm_288 = None
+        reshape_default_1: "f32[8, 512, 1536]" = torch.ops.aten.reshape.default(mm_288, _shape_param_1);  mm_288 = _shape_param_1 = None
         add_tensor_1: "f32[8, 512, 1536]" = torch.ops.aten.add.Tensor(add_tensor, reshape_default_1);  add_tensor = reshape_default_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py:235 in forward, code: query_layer = self.transpose_for_scores(self.query_proj(query_states), self.num_attention_heads)
-        reshape_default_2: "f32[8, 512, 1536]" = torch.ops.aten.reshape.default(mm_290, [8, 512, 1536]);  mm_290 = None
+        reshape_default_2: "f32[8, 512, 1536]" = torch.ops.aten.reshape.default(mm_290, _shape_param_2);  mm_290 = _shape_param_2 = None
         add_tensor_2: "f32[8, 512, 1536]" = torch.ops.aten.add.Tensor(add_tensor_1, reshape_default_2);  add_tensor_1 = reshape_default_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py:567 in forward, code: embeddings = self.dropout(embeddings)
@@ -103,6 +103,9 @@ def _default_make_inputs():
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.randint(0, 2, [8, 512], dtype=torch.int64, device='cuda'),
     torch.randn([128100, 1536], dtype=torch.float32, device='cuda'),
+    [8, 512, 1536],  # _shape_param_0
+    [8, 512, 1536],  # _shape_param_1
+    [8, 512, 1536],  # _shape_param_2
     ]
 
 

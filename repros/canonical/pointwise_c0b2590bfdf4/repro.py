@@ -15,12 +15,12 @@ from repro_prelude import *  # noqa: F401,F403
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 class Repro(torch.nn.Module):
-    def forward(self, getitem_1: "bf16[4, 128, 512, 64]", arg8_1: "bf16[1, 512, 64]", arg9_1: "bf16[1, 512, 64]", getitem: "bf16[4, 128, 512, 128]", getitem_3: "bf16[4, 512, 64]", getitem_4: "bf16[4, 128, 512, 128]"):
+    def forward(self, getitem_1: "bf16[4, 128, 512, 64]", arg8_1: "bf16[1, 512, 64]", arg9_1: "bf16[1, 512, 64]", getitem: "bf16[4, 128, 512, 128]", getitem_3: "bf16[4, 512, 64]", getitem_4: "bf16[4, 128, 512, 128]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deepseek_v3/modeling_deepseek_v3.py:311 in apply_rotary_pos_emb_interleave, code: q = q.view(b, h, s, d // 2, 2).transpose(4, 3).reshape(b, h, s, d)
-        reshape_default: "bf16[4, 128, 512, 32, 2]" = torch.ops.aten.reshape.default(getitem_1, [4, 128, 512, 32, 2]);  getitem_1 = None
+        reshape_default: "bf16[4, 128, 512, 32, 2]" = torch.ops.aten.reshape.default(getitem_1, _shape_param_0);  getitem_1 = _shape_param_0 = None
         permute_default: "bf16[4, 128, 512, 2, 32]" = torch.ops.aten.permute.default(reshape_default, [0, 1, 2, 4, 3]);  reshape_default = None
         clone_default: "bf16[4, 128, 512, 2, 32]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
-        reshape_default_1: "bf16[4, 128, 512, 64]" = torch.ops.aten.reshape.default(clone_default, [4, 128, 512, 64]);  clone_default = None
+        reshape_default_1: "bf16[4, 128, 512, 64]" = torch.ops.aten.reshape.default(clone_default, _shape_param_1);  clone_default = _shape_param_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deepseek_v3/modeling_deepseek_v3.py:307 in apply_rotary_pos_emb_interleave, code: cos = cos.unsqueeze(unsqueeze_dim)
         unsqueeze_default: "bf16[1, 1, 512, 64]" = torch.ops.aten.unsqueeze.default(arg8_1, 1);  arg8_1 = None
@@ -51,13 +51,13 @@ class Repro(torch.nn.Module):
         cat_default_1: "bf16[4, 128, 512, 192]" = torch.ops.aten.cat.default([getitem, add_tensor], -1);  getitem = add_tensor = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deepseek_v3/modeling_deepseek_v3.py:406 in forward, code: k_rot = k_rot.view(batch_size, 1, seq_length, self.qk_rope_head_dim)
-        reshape_default_2: "bf16[4, 1, 512, 64]" = torch.ops.aten.reshape.default(getitem_3, [4, 1, 512, 64]);  getitem_3 = None
+        reshape_default_2: "bf16[4, 1, 512, 64]" = torch.ops.aten.reshape.default(getitem_3, _shape_param_2);  getitem_3 = _shape_param_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deepseek_v3/modeling_deepseek_v3.py:314 in apply_rotary_pos_emb_interleave, code: k = k.view(b, h, s, d // 2, 2).transpose(4, 3).reshape(b, h, s, d)
-        reshape_default_3: "bf16[4, 1, 512, 32, 2]" = torch.ops.aten.reshape.default(reshape_default_2, [4, 1, 512, 32, 2]);  reshape_default_2 = None
+        reshape_default_3: "bf16[4, 1, 512, 32, 2]" = torch.ops.aten.reshape.default(reshape_default_2, _shape_param_3);  reshape_default_2 = _shape_param_3 = None
         permute_default_1: "bf16[4, 1, 512, 2, 32]" = torch.ops.aten.permute.default(reshape_default_3, [0, 1, 2, 4, 3]);  reshape_default_3 = None
         clone_default_1: "bf16[4, 1, 512, 2, 32]" = torch.ops.aten.clone.default(permute_default_1, memory_format = torch.contiguous_format);  permute_default_1 = None
-        reshape_default_4: "bf16[4, 1, 512, 64]" = torch.ops.aten.reshape.default(clone_default_1, [4, 1, 512, 64]);  clone_default_1 = None
+        reshape_default_4: "bf16[4, 1, 512, 64]" = torch.ops.aten.reshape.default(clone_default_1, _shape_param_4);  clone_default_1 = _shape_param_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deepseek_v3/modeling_deepseek_v3.py:317 in apply_rotary_pos_emb_interleave, code: k_embed = (k * cos) + (rotate_half(k) * sin)
         mul_tensor_2: "bf16[4, 1, 512, 64]" = torch.ops.aten.mul.Tensor(reshape_default_4, unsqueeze_default);  unsqueeze_default = None
@@ -79,7 +79,7 @@ class Repro(torch.nn.Module):
         add_tensor_1: "bf16[4, 1, 512, 64]" = torch.ops.aten.add.Tensor(mul_tensor_2, mul_tensor_3);  mul_tensor_2 = mul_tensor_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deepseek_v3/modeling_deepseek_v3.py:413 in forward, code: k_rot = k_rot.expand(*k_pass.shape[:-1], -1)
-        expand_default: "bf16[4, 128, 512, 64]" = torch.ops.aten.expand.default(add_tensor_1, [4, 128, 512, -1]);  add_tensor_1 = None
+        expand_default: "bf16[4, 128, 512, 64]" = torch.ops.aten.expand.default(add_tensor_1, _shape_param_5);  add_tensor_1 = _shape_param_5 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deepseek_v3/modeling_deepseek_v3.py:416 in forward, code: key_states = torch.cat((k_pass, k_rot), dim=-1)
         cat_default_3: "bf16[4, 128, 512, 192]" = torch.ops.aten.cat.default([getitem_4, expand_default], -1);  getitem_4 = expand_default = None
@@ -94,6 +94,12 @@ def _default_make_inputs():
     torch.randn([4, 128, 512, 128], dtype=torch.bfloat16, device='cuda'),
     torch.randn([4, 512, 64], dtype=torch.bfloat16, device='cuda'),
     torch.randn([4, 128, 512, 128], dtype=torch.bfloat16, device='cuda'),
+    [4, 128, 512, 32, 2],  # _shape_param_0
+    [4, 128, 512, 64],  # _shape_param_1
+    [4, 1, 512, 64],  # _shape_param_2
+    [4, 1, 512, 32, 2],  # _shape_param_3
+    [4, 1, 512, 64],  # _shape_param_4
+    [4, 128, 512, -1],  # _shape_param_5
     ]
 
 
