@@ -197,7 +197,7 @@ def _default_make_inputs():
     return [
     torch.randn([4096, 2], dtype=torch.float16, device='cuda'),
     torch.randint(0, 2, [4, 1024], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 2, [4], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 4, [4], dtype=torch.int64, device='cuda'),
     torch.randint(0, 2, [4], dtype=torch.int64, device='cuda'),
     torch.randn(1536, dtype=torch.float16, device='cuda').as_strided([768, 2], [1, 768]),  # permute_48
     torch.randn([4, 1024, 1], dtype=torch.float32, device='cuda'),

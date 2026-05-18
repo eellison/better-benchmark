@@ -87,7 +87,7 @@ def _default_make_inputs():
     return [
     torch.randn(7102464, dtype=torch.float32, device='cuda').as_strided([32, 768, 17, 17], [221952, 1, 13056, 768]),  # add_493
     [9216, 289],  # _shape_param_0
-    torch.randint(0, 2, (2663424,), dtype=torch.int8, device='cuda').as_strided([32, 288, 17, 17], [83232, 1, 4896, 288]),  # getitem_65
+    torch.randint(0, 1225, (2663424,), dtype=torch.int8, device='cuda').as_strided([32, 288, 17, 17], [83232, 1, 4896, 288]),  # getitem_65
     [9216, 289],  # _shape_param_1
     [32, 288, 35, 35],  # _shape_param_2
     torch.randn(11289600, dtype=torch.float32, device='cuda').as_strided([32, 288, 35, 35], [352800, 1, 10080, 288]),  # getitem_394

@@ -601,7 +601,7 @@ def _default_make_inputs():
     torch.randn([4, 1024, 512], dtype=torch.float32, device='cuda'),
     torch.randn([512, 512], dtype=torch.float16, device='cuda'),
     torch.randn([4, 8, 1024, 1024], dtype=torch.float16, device='cuda'),
-    torch.randint(0, 2, [1024, 1024], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 32, [1024, 1024], dtype=torch.int64, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.randn([4096, 512], dtype=torch.float16, device='cuda'),
     torch.randn([512, 512], dtype=torch.float16, device='cuda'),
@@ -614,7 +614,7 @@ def _default_make_inputs():
     torch.randn([4, 1024, 512], dtype=torch.float32, device='cuda'),
     torch.randn([4, 1024, 1], dtype=torch.float32, device='cuda'),
     torch.randn([4, 1024, 512], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [4, 1024], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 32128, [4, 1024], dtype=torch.int64, device='cuda'),
     torch.randn([4, 1024, 512], dtype=torch.float32, device='cuda'),
     torch.randn([4, 1024, 1], dtype=torch.float32, device='cuda'),
     torch.randn([4, 1024, 512], dtype=torch.float32, device='cuda'),
@@ -690,7 +690,7 @@ def _default_make_inputs():
     torch.randn([4, 1024, 512], dtype=torch.float32, device='cuda'),
     torch.randn([512, 512], dtype=torch.float16, device='cuda'),
     torch.randn([4, 8, 1024, 1024], dtype=torch.float16, device='cuda'),
-    torch.randint(0, 2, [1024, 1024], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 32, [1024, 1024], dtype=torch.int64, device='cuda'),
     torch.randn([4096, 512], dtype=torch.float16, device='cuda'),
     torch.randn([512, 512], dtype=torch.float16, device='cuda'),
     torch.randn([4096, 512], dtype=torch.float16, device='cuda'),
@@ -702,7 +702,7 @@ def _default_make_inputs():
     torch.randn([4, 1024, 512], dtype=torch.float32, device='cuda'),
     torch.randn([4, 1024, 1], dtype=torch.float32, device='cuda'),
     torch.randn([4, 1024, 512], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [4, 1024], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 32128, [4, 1024], dtype=torch.int64, device='cuda'),
     [512],  # _shape_param_0
     [512],  # _shape_param_1
     [512],  # _shape_param_2

@@ -985,7 +985,7 @@ def _default_make_inputs():
     [768],  # _shape_param_9
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_137
     [38809, 12],  # _shape_param_10
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_11
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1011,7 +1011,7 @@ def _default_make_inputs():
     [768],  # _shape_param_20
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_141
     [38809, 12],  # _shape_param_21
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_22
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1037,7 +1037,7 @@ def _default_make_inputs():
     [768],  # _shape_param_31
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_145
     [38809, 12],  # _shape_param_32
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_33
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1063,7 +1063,7 @@ def _default_make_inputs():
     [768],  # _shape_param_42
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_149
     [38809, 12],  # _shape_param_43
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_44
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1089,7 +1089,7 @@ def _default_make_inputs():
     [768],  # _shape_param_53
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_153
     [38809, 12],  # _shape_param_54
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_55
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1115,7 +1115,7 @@ def _default_make_inputs():
     [768],  # _shape_param_64
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_157
     [38809, 12],  # _shape_param_65
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_66
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1141,7 +1141,7 @@ def _default_make_inputs():
     [768],  # _shape_param_75
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_161
     [38809, 12],  # _shape_param_76
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_77
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1167,7 +1167,7 @@ def _default_make_inputs():
     [768],  # _shape_param_86
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_165
     [38809, 12],  # _shape_param_87
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_88
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1193,7 +1193,7 @@ def _default_make_inputs():
     [768],  # _shape_param_97
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_169
     [38809, 12],  # _shape_param_98
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_99
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1219,7 +1219,7 @@ def _default_make_inputs():
     [768],  # _shape_param_108
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_173
     [38809, 12],  # _shape_param_109
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_110
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1245,7 +1245,7 @@ def _default_make_inputs():
     [768],  # _shape_param_119
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_177
     [38809, 12],  # _shape_param_120
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_121
     torch.randn([32, 197, 768], dtype=torch.float32, device='cuda'),
@@ -1270,7 +1270,7 @@ def _default_make_inputs():
     [768],  # _shape_param_129
     torch.randn(15734773, dtype=torch.float32, device='cuda').as_strided([32, 12, 197, 197], [491712, 40976, 208, 1]),  # getitem_181
     [38809, 12],  # _shape_param_130
-    torch.randint(0, 2, [197, 197], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 732, [197, 197], dtype=torch.int64, device='cuda'),
     torch.randn([6304, 2304], dtype=torch.float32, device='cuda'),
     [2304],  # _shape_param_131
     torch.randn([6304, 768], dtype=torch.float32, device='cuda'),

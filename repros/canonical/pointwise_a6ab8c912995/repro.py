@@ -68,7 +68,7 @@ def _default_make_inputs():
     [8, 12, 64, 64, 64],  # _shape_param_0
     [8, 12, 4096, 64],  # _shape_param_1
     [8, 12, 4096],  # _shape_param_2
-    torch.randint(0, 2, [8, 12, 4096], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 4096, [8, 12, 4096], dtype=torch.int64, device='cuda'),
     [8, 12, 4096, 64],  # _shape_param_3
     [8, 4096, 768],  # _shape_param_4
     torch.randint(0, 2, [8, 12, 4096], dtype=torch.int64, device='cuda'),

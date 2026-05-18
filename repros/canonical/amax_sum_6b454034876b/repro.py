@@ -90,7 +90,7 @@ class Repro(torch.nn.Module):
 
 def _default_make_inputs():
     return [
-    torch.randint(0, 2, [8, 12, 4096], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 4096, [8, 12, 4096], dtype=torch.int64, device='cuda'),
     [8, 12, -1, 64],  # _shape_param_0
     torch.randn([6144, 64, 128], dtype=torch.float32, device='cuda'),
     [8, 12, 64, 64, 128],  # _shape_param_1

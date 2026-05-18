@@ -95,9 +95,9 @@ def _default_make_inputs():
     torch.randn([32, 128, 1], dtype=torch.float32, device='cuda'),
     torch.randn([32, 128, 1], dtype=torch.float32, device='cuda'),
     torch.randn([32, 128, 2048], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [1, 128], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 2048, [1, 128], dtype=torch.int64, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [32, 128], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 50257, [32, 128], dtype=torch.int64, device='cuda'),
     [32, 128, 2048],  # _shape_param_0
     [32, 128, 2048],  # _shape_param_1
     [32, 128, 2048],  # _shape_param_2

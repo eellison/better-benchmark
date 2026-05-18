@@ -226,7 +226,7 @@ class Repro(torch.nn.Module):
 
 def _default_make_inputs():
     return [
-    torch.randint(0, 2, [4, 1024], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 32128, [4, 1024], dtype=torch.int64, device='cuda'),
     torch.randn([4096, 32128], dtype=torch.float16, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.randn(16449536, dtype=torch.float16, device='cuda').as_strided([512, 32128], [1, 512]),  # permute_188

@@ -815,14 +815,14 @@ def _default_make_inputs():
     torch.randn([8, 512, 1], dtype=torch.float32, device='cuda'),
     torch.randn([], dtype=torch.float32, device='cuda'),
     torch.tensor(1),  # full_default_6 (unknown shape)
-    torch.randint(0, 2, [8, 512], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 2, [8, 512], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 2, (16381,), dtype=torch.int64, device='cuda').as_strided([8, 512], [2048, 4]),  # select_3
-    torch.randint(0, 2, (16381,), dtype=torch.int64, device='cuda').as_strided([8, 512], [2048, 4]),  # select_2
-    torch.randint(0, 2, (16381,), dtype=torch.int64, device='cuda').as_strided([8, 512], [2048, 4]),  # select_1
-    torch.randint(0, 2, (16381,), dtype=torch.int64, device='cuda').as_strided([8, 512], [2048, 4]),  # select
-    torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 2, [8, 512], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 1024, [8, 512], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 1024, [8, 512], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 1024, (16381,), dtype=torch.int64, device='cuda').as_strided([8, 512], [2048, 4]),  # select_3
+    torch.randint(0, 1024, (16381,), dtype=torch.int64, device='cuda').as_strided([8, 512], [2048, 4]),  # select_2
+    torch.randint(0, 1024, (16381,), dtype=torch.int64, device='cuda').as_strided([8, 512], [2048, 4]),  # select_1
+    torch.randint(0, 1024, (16381,), dtype=torch.int64, device='cuda').as_strided([8, 512], [2048, 4]),  # select
+    torch.randint(0, 512, [1, 512], dtype=torch.int64, device='cuda'),
+    torch.randint(0, 30522, [8, 512], dtype=torch.int64, device='cuda'),
     torch.randn([30522, 768], dtype=torch.float32, device='cuda'),
     ]
 
