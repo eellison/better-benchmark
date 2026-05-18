@@ -136,31 +136,27 @@ def select_benchmark_set(canonical_dir: Path, n_size_buckets: int = 4,
             selected.append({"repro": repro['name'], "shape": repro['configs'][0]['key'], "kind": repro['kind']})
             continue
 
-        # Group by characteristics
-        groups = defaultdict(list)
-        for cfg in repro['configs']:
-            size_bkt = _assign_bucket(cfg['total_bytes'], size_boundaries)
-            stride_pat = cfg['stride_pat']
-
-            if repro['is_reduction']:
-                rdim_bkt = _assign_bucket(cfg['rdim'], rdim_boundaries)
-                grid_bkt = _assign_bucket(cfg['grid_size'], grid_boundaries)
-                group_key = (rdim_bkt, grid_bkt, stride_pat)
-            else:
+        if repro['is_reduction']:
+            # Reductions: include ALL shapes (heuristic decisions are shape-sensitive)
+            for cfg in repro['configs']:
+                selected.append({"repro": repro['name'], "shape": cfg['key'], "kind": repro['kind']})
+        else:
+            # Pointwise: group by (size_quantile, stride_pattern), pick median per group
+            groups = defaultdict(list)
+            for cfg in repro['configs']:
+                size_bkt = _assign_bucket(cfg['total_bytes'], size_boundaries)
+                stride_pat = cfg['stride_pat']
                 group_key = (size_bkt, stride_pat)
+                groups[group_key].append(cfg)
 
-            groups[group_key].append(cfg)
+            picks = []
+            for group_key in sorted(groups.keys()):
+                members = sorted(groups[group_key], key=lambda x: x['total_bytes'])
+                median_idx = len(members) // 2
+                picks.append(members[median_idx]['key'])
 
-        # Pick median from each group
-        max_picks = max_shapes_reduction if repro['is_reduction'] else max_shapes_pointwise
-        picks = []
-        for group_key in sorted(groups.keys()):
-            members = sorted(groups[group_key], key=lambda x: x['total_bytes'])
-            median_idx = len(members) // 2
-            picks.append(members[median_idx]['key'])
-
-        for config_key in picks[:max_picks]:
-            selected.append({"repro": repro['name'], "shape": config_key, "kind": repro['kind']})
+            for config_key in picks[:max_shapes_pointwise]:
+                selected.append({"repro": repro['name'], "shape": config_key, "kind": repro['kind']})
 
     return selected
 
