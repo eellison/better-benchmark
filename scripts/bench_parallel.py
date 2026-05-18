@@ -268,13 +268,29 @@ def main():
     done = 0
     failed = 0
     start_time = time.time()
+    last_progress_time = time.time()
 
     while done + failed < len(repros):
         try:
-            result = result_queue.get(timeout=600)
+            result = result_queue.get(timeout=30)
         except Exception:
-            print("Timed out waiting for results")
-            break
+            # No result in 30s — check worker health
+            elapsed = time.time() - start_time
+            alive = sum(1 for p in workers if p.is_alive())
+            rate = (done + failed) / max(elapsed, 1) * 60
+            remaining = len(repros) - done - failed
+            eta = remaining / max(rate, 0.01)
+
+            if alive == 0:
+                print(f"\n[WARN] All workers dead! {done} ok, {failed} failed, "
+                      f"{remaining} remaining. Aborting.")
+                break
+
+            # Periodic progress update every 30s of silence
+            print(f"  [{done+failed}/{len(repros)}] ... {alive} workers alive, "
+                  f"{rate:.1f} repros/min, ETA {eta:.0f}min, elapsed {elapsed/60:.1f}min",
+                  flush=True)
+            continue
 
         repro_name = Path(result["repro"]).parent.name
         if result["status"] == "ok":
@@ -286,16 +302,26 @@ def main():
                     best_gap = gap
             gap_str = f"{best_gap:.2f}x" if best_gap else "?"
             print(f"  [{done+failed}/{len(repros)}] OK  gpu={result['gpu']}  "
-                  f"{result['elapsed']:.1f}s  gap={gap_str}  {repro_name}")
+                  f"{result['elapsed']:.1f}s  gap={gap_str}  {repro_name}", flush=True)
             all_results[result["repro"]] = result["results"]
         else:
             failed += 1
             print(f"  [{done+failed}/{len(repros)}] FAIL gpu={result['gpu']}  "
-                  f"{result['elapsed']:.1f}s  {repro_name}: {result['error'][:80]}")
+                  f"{result['elapsed']:.1f}s  {repro_name}: {result['error'][:80]}", flush=True)
+
+        # Incremental save every 50 results
+        if args.output and (done + failed) % 50 == 0:
+            args.output.write_text(json.dumps(all_results, indent=2))
 
     # Wait for workers
     for p in workers:
         p.join(timeout=10)
+
+    # Check for unfinished work
+    remaining = len(repros) - done - failed
+    if remaining > 0:
+        print(f"\n[WARN] {remaining} repros were not completed (workers died)")
+        print(f"  Re-run with same --tag to fill gaps.")
 
     elapsed_total = time.time() - start_time
     print(f"\nDone: {done} ok, {failed} failed in {elapsed_total:.1f}s "
