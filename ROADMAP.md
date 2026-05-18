@@ -13,7 +13,7 @@
 
 ### Next
 - [x] ~~Better index bounds in capture_hook~~ (DONE: infer from scatter/gather/embedding target dims)
-- [ ] Separate compile from benchmark: compile N repros in parallel (CPU-bound), lock GPU only for timing. Would reduce wall time from compile-bound ~7s/repro to bench-bound ~0.5s/repro. Tricky with coord descent (also needs GPU). Consider: 8 compile workers + 1 bench worker per GPU.
+- [ ] GPU lock hook inside inductor autotuning: add `with gpu_benchmark_lock():` around autotune trials in `triton_heuristics.py`. This lets multiple processes compile in parallel (CPU-bound graph lowering) while serializing only the GPU autotune trials. Combined with multi-process compile, could reduce sweep time from ~7s/repro to ~2-3s/repro (overlap CPU compilation across processes, only serialize GPU timing). Key insight: compilation is CPU until autotuning, then brief GPU, then CPU again for codegen.
 - [ ] Fix shapes.json to include S() shape param entries (currently --all-shapes breaks with lifted repros)
 - [ ] Compute-intensity metric: tag kernels as memory-bound vs compute-bound (FLOPs/byte ratio) so SOL gap is only reported when meaningful
 - [ ] Incremental results file (JSONL) during sweep — survive interrupts
