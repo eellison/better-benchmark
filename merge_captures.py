@@ -5,7 +5,7 @@ Takes a capture directory (produced by capture_hook.py or extract_reductions.py)
 and upserts regions into the canonical repro set.
 
 Usage:
-    python merge_captures.py /tmp/captures/my_model --canonical-dir repros/ --model-name my_model_inference
+    python merge_captures.py /tmp/captures/my_model --canonical-dir repros/ --model-name my_model --suite hf --mode train
 
     # Merge multiple capture directories
     python merge_captures.py /tmp/captures/model_a /tmp/captures/model_b --canonical-dir repros/
@@ -24,7 +24,76 @@ from canonicalize_repros import (
 )
 
 
-def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str):
+def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
+                      suite: str = "other", mode: str | None = None):
+    """Write per-model JSON file with pattern list."""
+    models_dir = canonical_dir / "models"
+    if mode:
+        out_dir = models_dir / suite / mode
+    else:
+        out_dir = models_dir / suite
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    out_file = out_dir / f"{model_name}.json"
+
+    # Merge with existing if present
+    if out_file.exists():
+        existing = json.loads(out_file.read_text())
+        patterns = sorted(set(existing["patterns"] + patterns))
+    else:
+        patterns = sorted(set(patterns))
+
+    out_file.write_text(json.dumps({"patterns": patterns}, indent=2) + "\n")
+    return out_file
+
+
+def _infer_suite_mode(model_name: str) -> tuple[str, str | None, str]:
+    """Infer suite, mode, and clean name from a model label."""
+    name = model_name
+
+    if name.startswith("dynamo_"):
+        name = name.replace("dynamo_", "")
+        if "_inference" in name:
+            return "hf", "infer", name.replace("_inference", "")
+        return "hf", "train", name
+
+    if name.startswith("hf_"):
+        name = name.replace("hf_", "")
+        if "_train" in name:
+            return "hf", "train", name.replace("_train", "")
+        return "hf", "infer", name
+
+    if name.startswith("timm_"):
+        name = name.replace("timm_", "")
+        if "_training" in name:
+            return "timm", "train", name.replace("_training", "")
+        if "_inference" in name:
+            return "timm", "infer", name.replace("_inference", "")
+        return "timm", "infer", name
+
+    if name.startswith("vllm_"):
+        name = name.replace("vllm_", "")
+        if "_inference" in name:
+            name = name.replace("_inference", "")
+        return "vllm", None, name
+
+    if name.startswith("genai_") or name.startswith("tritonbench_"):
+        return "genai", None, name
+
+    if name.startswith("tlparse_"):
+        return "tlparse", None, name.replace("tlparse_", "")
+
+    # torchvision or other
+    if "_training" in name:
+        return "torchvision", "train", name.replace("_training", "")
+    if "_inference" in name:
+        return "torchvision", "infer", name.replace("_inference", "")
+
+    return "other", None, name
+
+
+def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
+                      suite: str | None = None, mode: str | None = None):
     """Merge a single capture directory into the canonical set."""
     index_path = capture_dir / "index.json"
     if not index_path.exists():
@@ -35,19 +104,19 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str):
         entries = json.load(f)
 
     canonical_path = canonical_dir / "canonical"
-    manifest_path = canonical_dir / "manifest.json"
     canonical_path.mkdir(parents=True, exist_ok=True)
 
-    if manifest_path.exists():
-        with open(manifest_path) as f:
-            manifest = json.load(f)
+    # Infer suite/mode if not provided
+    if suite is None:
+        suite, inferred_mode, clean_name = _infer_suite_mode(model_name)
+        if mode is None:
+            mode = inferred_mode
     else:
-        manifest = {"version": 1, "models": {}}
+        clean_name = model_name
 
-    if model_name not in manifest["models"]:
-        manifest["models"][model_name] = {"repros": []}
-
+    merged_patterns = []
     merged = 0
+
     for entry in entries:
         pattern_hash = entry.get("pattern_hash")
         if not pattern_hash:
@@ -121,16 +190,13 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str):
                 except Exception as e:
                     print(f"  Warning: could not generate canonical repro for {dir_name}: {e}")
 
-        # Update manifest
-        manifest["models"][model_name]["repros"].append({
-            "pattern_hash": pattern_hash,
-            "shape_config": config_key,
-            "original_file": Path(entry["file"]).name,
-        })
+        merged_patterns.append(pattern_hash)
         merged += 1
 
-    with open(manifest_path, "w") as f:
-        json.dump(manifest, f, indent=2)
+    # Write per-model JSON
+    if merged_patterns:
+        out_file = _write_model_json(canonical_dir, clean_name, merged_patterns, suite, mode)
+        print(f"  Model JSON: {out_file}")
 
     return merged
 
@@ -143,6 +209,12 @@ def main():
                         help="Path to canonical repro set root")
     parser.add_argument("--model-name", type=str, default=None,
                         help="Model name for manifest. If not set, inferred from directory name.")
+    parser.add_argument("--suite", type=str, default=None,
+                        choices=["hf", "timm", "vllm", "torchvision", "genai", "tritonbench", "torchbench", "other"],
+                        help="Suite to categorize this model under.")
+    parser.add_argument("--mode", type=str, default=None,
+                        choices=["train", "infer"],
+                        help="Mode (training or inference). If not set, inferred from model name.")
     args = parser.parse_args()
 
     total = 0
@@ -153,7 +225,8 @@ def main():
 
         model_name = args.model_name or capture_dir.name
         print(f"Merging {capture_dir} as '{model_name}'...")
-        n = merge_one_capture(capture_dir, args.canonical_dir, model_name)
+        n = merge_one_capture(capture_dir, args.canonical_dir, model_name,
+                              suite=args.suite, mode=args.mode)
         total += n
         print(f"  Merged {n} regions")
 
