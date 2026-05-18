@@ -13,6 +13,7 @@
 
 ### Next
 - [x] ~~Better index bounds in capture_hook~~ (DONE: infer from scatter/gather/embedding target dims)
+- [ ] **Use CI batch sizes for captures** — currently batch=4/8, CI uses batch=8-256 per model (from `huggingface_models_list.txt`, `timm_models_list.txt`). Kernels at batch=128 have different perf characteristics than batch=8. Capture script should read batch sizes from these files.
 - [ ] GPU lock hook inside inductor autotuning: add `with gpu_benchmark_lock():` around autotune trials in `triton_heuristics.py`. This lets multiple processes compile in parallel (CPU-bound graph lowering) while serializing only the GPU autotune trials. Combined with multi-process compile, could reduce sweep time from ~7s/repro to ~2-3s/repro (overlap CPU compilation across processes, only serialize GPU timing). Key insight: compilation is CPU until autotuning, then brief GPU, then CPU again for codegen.
 - [ ] Fix shapes.json to include S() shape param entries (currently --all-shapes breaks with lifted repros)
 - [ ] Compute-intensity metric: tag kernels as memory-bound vs compute-bound (FLOPs/byte ratio) so SOL gap is only reported when meaningful
