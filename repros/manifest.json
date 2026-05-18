@@ -43467,6 +43467,1230 @@
           "original_file": "region_000_mean_6f459d40ee4d_6728219c.py"
         }
       ]
+    },
+    "genai_ce_fwd_32768x256": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_32768x256_c483969c",
+          "original_file": "region_000_amax_sum_d6bcaecca702_c483969c.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_32768x512": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_32768x512_a76989c5",
+          "original_file": "region_000_amax_sum_d6bcaecca702_a76989c5.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_32768x1024_0369d5d9",
+          "original_file": "region_000_amax_sum_d6bcaecca702_0369d5d9.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_32768x2048": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_32768x2048_595dfc26",
+          "original_file": "region_000_amax_sum_d6bcaecca702_595dfc26.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_32768x4096": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_32768x4096_0baf754a",
+          "original_file": "region_000_amax_sum_d6bcaecca702_0baf754a.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_32768x8192": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_32768x8192_47b5ddc4",
+          "original_file": "region_000_amax_sum_d6bcaecca702_47b5ddc4.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_32768x16384": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_32768x16384_afd8e8b6",
+          "original_file": "region_000_amax_sum_d6bcaecca702_afd8e8b6.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_32768x32768": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_32768x32768_efe4203e",
+          "original_file": "region_000_amax_sum_d6bcaecca702_efe4203e.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_32768x65536": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_32768x65536_44fa184b",
+          "original_file": "region_000_amax_sum_d6bcaecca702_44fa184b.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_16384x131072": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_16384x131072_a7df5efe",
+          "original_file": "region_000_amax_sum_d6bcaecca702_a7df5efe.py"
+        }
+      ]
+    },
+    "genai_ce_fwd_8192x262144": {
+      "repros": [
+        {
+          "pattern_hash": "d6bcaecca702",
+          "shape_config": "genai_ce_fwd_8192x262144_3700f816",
+          "original_file": "region_000_amax_sum_d6bcaecca702_3700f816.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_32768x256": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_32768x256_c483969c",
+          "original_file": "region_000_amax_sum_6079c0ad1522_c483969c.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_32768x256_fc42ab9a",
+          "original_file": "region_001_sum_a200f7f26bf6_fc42ab9a.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_32768x512": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_32768x512_a76989c5",
+          "original_file": "region_000_amax_sum_6079c0ad1522_a76989c5.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_32768x512_58304ec9",
+          "original_file": "region_001_sum_a200f7f26bf6_58304ec9.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_32768x1024_0369d5d9",
+          "original_file": "region_000_amax_sum_6079c0ad1522_0369d5d9.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_32768x1024_26f01925",
+          "original_file": "region_001_sum_a200f7f26bf6_26f01925.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_32768x2048": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_32768x2048_595dfc26",
+          "original_file": "region_000_amax_sum_6079c0ad1522_595dfc26.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_32768x2048_c4c9661f",
+          "original_file": "region_001_sum_a200f7f26bf6_c4c9661f.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_32768x4096": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_32768x4096_0baf754a",
+          "original_file": "region_000_amax_sum_6079c0ad1522_0baf754a.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_32768x4096_cc67dd63",
+          "original_file": "region_001_sum_a200f7f26bf6_cc67dd63.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_32768x8192": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_32768x8192_47b5ddc4",
+          "original_file": "region_000_amax_sum_6079c0ad1522_47b5ddc4.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_32768x8192_4302e4d8",
+          "original_file": "region_001_sum_a200f7f26bf6_4302e4d8.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_32768x16384": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_32768x16384_afd8e8b6",
+          "original_file": "region_000_amax_sum_6079c0ad1522_afd8e8b6.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_32768x16384_15d8f0d1",
+          "original_file": "region_001_sum_a200f7f26bf6_15d8f0d1.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_32768x32768": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_32768x32768_efe4203e",
+          "original_file": "region_000_amax_sum_6079c0ad1522_efe4203e.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_32768x32768_61643c63",
+          "original_file": "region_001_sum_a200f7f26bf6_61643c63.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_32768x65536": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_32768x65536_44fa184b",
+          "original_file": "region_000_amax_sum_6079c0ad1522_44fa184b.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_32768x65536_0ede0c4f",
+          "original_file": "region_001_sum_a200f7f26bf6_0ede0c4f.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_16384x131072": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_16384x131072_a7df5efe",
+          "original_file": "region_000_amax_sum_6079c0ad1522_a7df5efe.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_16384x131072_ae954055",
+          "original_file": "region_001_sum_a200f7f26bf6_ae954055.py"
+        }
+      ]
+    },
+    "genai_ce_bwd_8192x262144": {
+      "repros": [
+        {
+          "pattern_hash": "6079c0ad1522",
+          "shape_config": "genai_ce_bwd_8192x262144_3700f816",
+          "original_file": "region_000_amax_sum_6079c0ad1522_3700f816.py"
+        },
+        {
+          "pattern_hash": "a200f7f26bf6",
+          "shape_config": "genai_ce_bwd_8192x262144_4b36b0bc",
+          "original_file": "region_001_sum_a200f7f26bf6_4b36b0bc.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_32768x256": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_32768x256_44f3d1cd",
+          "original_file": "region_000_amax_sum_5a19f8539c85_44f3d1cd.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_32768x512": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_32768x512_418cedc5",
+          "original_file": "region_000_amax_sum_5a19f8539c85_418cedc5.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_32768x1024_9cb0d695",
+          "original_file": "region_000_amax_sum_5a19f8539c85_9cb0d695.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_32768x2048": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_32768x2048_ab894959",
+          "original_file": "region_000_amax_sum_5a19f8539c85_ab894959.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_32768x4096": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_32768x4096_6ddde060",
+          "original_file": "region_000_amax_sum_5a19f8539c85_6ddde060.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_32768x8192": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_32768x8192_67fe38da",
+          "original_file": "region_000_amax_sum_5a19f8539c85_67fe38da.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_32768x16384": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_32768x16384_4e9e139f",
+          "original_file": "region_000_amax_sum_5a19f8539c85_4e9e139f.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_32768x32768": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_32768x32768_2c9b4c46",
+          "original_file": "region_000_amax_sum_5a19f8539c85_2c9b4c46.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_32768x65536": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_32768x65536_176fafc7",
+          "original_file": "region_000_amax_sum_5a19f8539c85_176fafc7.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_16384x131072": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_16384x131072_d35e3d68",
+          "original_file": "region_000_amax_sum_5a19f8539c85_d35e3d68.py"
+        }
+      ]
+    },
+    "genai_softmax_fwd_8192x262144": {
+      "repros": [
+        {
+          "pattern_hash": "5a19f8539c85",
+          "shape_config": "genai_softmax_fwd_8192x262144_4cb2161c",
+          "original_file": "region_000_amax_sum_5a19f8539c85_4cb2161c.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_32768x256": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_32768x256_44f3d1cd",
+          "original_file": "region_000_amax_sum_dda568630a89_44f3d1cd.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_32768x256_6c05d37f",
+          "original_file": "region_001_sum_e8dcda279108_6c05d37f.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_32768x512": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_32768x512_418cedc5",
+          "original_file": "region_000_amax_sum_dda568630a89_418cedc5.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_32768x512_8d6d30f6",
+          "original_file": "region_001_sum_e8dcda279108_8d6d30f6.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_32768x1024_9cb0d695",
+          "original_file": "region_000_amax_sum_dda568630a89_9cb0d695.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_32768x1024_8a960b91",
+          "original_file": "region_001_sum_e8dcda279108_8a960b91.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_32768x2048": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_32768x2048_ab894959",
+          "original_file": "region_000_amax_sum_dda568630a89_ab894959.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_32768x2048_8f5d2d14",
+          "original_file": "region_001_sum_e8dcda279108_8f5d2d14.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_32768x4096": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_32768x4096_6ddde060",
+          "original_file": "region_000_amax_sum_dda568630a89_6ddde060.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_32768x4096_dad49051",
+          "original_file": "region_001_sum_e8dcda279108_dad49051.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_32768x8192": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_32768x8192_67fe38da",
+          "original_file": "region_000_amax_sum_dda568630a89_67fe38da.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_32768x8192_901bd4f5",
+          "original_file": "region_001_sum_e8dcda279108_901bd4f5.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_32768x16384": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_32768x16384_4e9e139f",
+          "original_file": "region_000_amax_sum_dda568630a89_4e9e139f.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_32768x16384_411a9388",
+          "original_file": "region_001_sum_e8dcda279108_411a9388.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_32768x32768": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_32768x32768_2c9b4c46",
+          "original_file": "region_000_amax_sum_dda568630a89_2c9b4c46.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_32768x32768_42a6c861",
+          "original_file": "region_001_sum_e8dcda279108_42a6c861.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_32768x65536": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_32768x65536_176fafc7",
+          "original_file": "region_000_amax_sum_dda568630a89_176fafc7.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_32768x65536_43fe50ee",
+          "original_file": "region_001_sum_e8dcda279108_43fe50ee.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_16384x131072": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_16384x131072_d35e3d68",
+          "original_file": "region_000_amax_sum_dda568630a89_d35e3d68.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_16384x131072_8ee3d83d",
+          "original_file": "region_001_sum_e8dcda279108_8ee3d83d.py"
+        }
+      ]
+    },
+    "genai_softmax_bwd_8192x262144": {
+      "repros": [
+        {
+          "pattern_hash": "dda568630a89",
+          "shape_config": "genai_softmax_bwd_8192x262144_4cb2161c",
+          "original_file": "region_000_amax_sum_dda568630a89_4cb2161c.py"
+        },
+        {
+          "pattern_hash": "e8dcda279108",
+          "shape_config": "genai_softmax_bwd_8192x262144_680a04b0",
+          "original_file": "region_001_sum_e8dcda279108_680a04b0.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_32768x256": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_32768x256_f98085da",
+          "original_file": "region_000_mean_bf5fef91b4d7_f98085da.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_32768x512": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_32768x512_e2db81ce",
+          "original_file": "region_000_mean_bf5fef91b4d7_e2db81ce.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_32768x1024_3372869d",
+          "original_file": "region_000_mean_bf5fef91b4d7_3372869d.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_32768x2048": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_32768x2048_5ec7ff0f",
+          "original_file": "region_000_mean_bf5fef91b4d7_5ec7ff0f.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_32768x4096": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_32768x4096_6a70aba4",
+          "original_file": "region_000_mean_bf5fef91b4d7_6a70aba4.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_32768x8192": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_32768x8192_e36fe852",
+          "original_file": "region_000_mean_bf5fef91b4d7_e36fe852.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_32768x16384": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_32768x16384_7ec86f3b",
+          "original_file": "region_000_mean_bf5fef91b4d7_7ec86f3b.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_32768x32768": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_32768x32768_3845c61f",
+          "original_file": "region_000_mean_bf5fef91b4d7_3845c61f.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_32768x65536": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_32768x65536_17ac9e74",
+          "original_file": "region_000_mean_bf5fef91b4d7_17ac9e74.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_16384x131072": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_16384x131072_a4b7984c",
+          "original_file": "region_000_mean_bf5fef91b4d7_a4b7984c.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_8192x262144": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_8192x262144_04758aa5",
+          "original_file": "region_000_mean_bf5fef91b4d7_04758aa5.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_576000x384": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_576000x384_300fb826",
+          "original_file": "region_000_mean_bf5fef91b4d7_300fb826.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_576000x512": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_576000x512_37e45777",
+          "original_file": "region_000_mean_bf5fef91b4d7_37e45777.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_1152000x384": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_1152000x384_2c6e8a1f",
+          "original_file": "region_000_mean_bf5fef91b4d7_2c6e8a1f.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_fwd_1152000x512": {
+      "repros": [
+        {
+          "pattern_hash": "bf5fef91b4d7",
+          "shape_config": "genai_rmsnorm_fwd_1152000x512_d48cdb30",
+          "original_file": "region_000_mean_bf5fef91b4d7_d48cdb30.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_32768x256": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_32768x256_f98085da",
+          "original_file": "region_000_mean_sum_4559c84bdae9_f98085da.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_32768x256_c4f6330b",
+          "original_file": "region_001_sum_6e05dd5286b9_c4f6330b.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_32768x512": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_32768x512_e2db81ce",
+          "original_file": "region_000_mean_sum_4559c84bdae9_e2db81ce.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_32768x512_e9f7e9b4",
+          "original_file": "region_001_sum_6e05dd5286b9_e9f7e9b4.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_32768x1024_3372869d",
+          "original_file": "region_000_mean_sum_4559c84bdae9_3372869d.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_32768x1024_0e8d5178",
+          "original_file": "region_001_sum_6e05dd5286b9_0e8d5178.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_32768x2048": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_32768x2048_5ec7ff0f",
+          "original_file": "region_000_mean_sum_4559c84bdae9_5ec7ff0f.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_32768x2048_ad361c53",
+          "original_file": "region_001_sum_6e05dd5286b9_ad361c53.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_32768x4096": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_32768x4096_6a70aba4",
+          "original_file": "region_000_mean_sum_4559c84bdae9_6a70aba4.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_32768x4096_fa05994e",
+          "original_file": "region_001_sum_6e05dd5286b9_fa05994e.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_32768x8192": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_32768x8192_e36fe852",
+          "original_file": "region_000_mean_sum_4559c84bdae9_e36fe852.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_32768x8192_82521d40",
+          "original_file": "region_001_sum_6e05dd5286b9_82521d40.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_32768x16384": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_32768x16384_7ec86f3b",
+          "original_file": "region_000_mean_sum_4559c84bdae9_7ec86f3b.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_32768x16384_ba9a2c99",
+          "original_file": "region_001_sum_6e05dd5286b9_ba9a2c99.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_576000x384": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_576000x384_300fb826",
+          "original_file": "region_000_mean_sum_4559c84bdae9_300fb826.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_576000x384_9350412b",
+          "original_file": "region_001_sum_6e05dd5286b9_9350412b.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_576000x512": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_576000x512_37e45777",
+          "original_file": "region_000_mean_sum_4559c84bdae9_37e45777.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_576000x512_b1e9ac0c",
+          "original_file": "region_001_sum_6e05dd5286b9_b1e9ac0c.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_1152000x384": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_1152000x384_2c6e8a1f",
+          "original_file": "region_000_mean_sum_4559c84bdae9_2c6e8a1f.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_1152000x384_945f6340",
+          "original_file": "region_001_sum_6e05dd5286b9_945f6340.py"
+        }
+      ]
+    },
+    "genai_rmsnorm_bwd_1152000x512": {
+      "repros": [
+        {
+          "pattern_hash": "4559c84bdae9",
+          "shape_config": "genai_rmsnorm_bwd_1152000x512_d48cdb30",
+          "original_file": "region_000_mean_sum_4559c84bdae9_d48cdb30.py"
+        },
+        {
+          "pattern_hash": "6e05dd5286b9",
+          "shape_config": "genai_rmsnorm_bwd_1152000x512_3568a7f6",
+          "original_file": "region_001_sum_6e05dd5286b9_3568a7f6.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_32768x256": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_32768x256_b23d030b",
+          "original_file": "region_000_pointwise_24751479ede6_b23d030b.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_32768x256_44f3d1cd",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_44f3d1cd.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_32768x512": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_32768x512_2d74f58d",
+          "original_file": "region_000_pointwise_24751479ede6_2d74f58d.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_32768x512_418cedc5",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_418cedc5.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_32768x1024_0a96ec30",
+          "original_file": "region_000_pointwise_24751479ede6_0a96ec30.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_32768x1024_9cb0d695",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_9cb0d695.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_32768x2048": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_32768x2048_296abf6e",
+          "original_file": "region_000_pointwise_24751479ede6_296abf6e.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_32768x2048_ab894959",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_ab894959.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_32768x4096": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_32768x4096_8841b0a8",
+          "original_file": "region_000_pointwise_24751479ede6_8841b0a8.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_32768x4096_6ddde060",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_6ddde060.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_32768x8192": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_32768x8192_452f2140",
+          "original_file": "region_000_pointwise_24751479ede6_452f2140.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_32768x8192_67fe38da",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_67fe38da.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_32768x16384": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_32768x16384_d9ae4792",
+          "original_file": "region_000_pointwise_24751479ede6_d9ae4792.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_32768x16384_4e9e139f",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_4e9e139f.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_32768x32768": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_32768x32768_8a85a425",
+          "original_file": "region_000_pointwise_24751479ede6_8a85a425.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_32768x32768_2c9b4c46",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_2c9b4c46.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_32768x65536": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_32768x65536_a8e6c124",
+          "original_file": "region_000_pointwise_24751479ede6_a8e6c124.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_32768x65536_176fafc7",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_176fafc7.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_576000x384": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_576000x384_d60aaed3",
+          "original_file": "region_000_pointwise_24751479ede6_d60aaed3.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_576000x384_e7d4d1d3",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_e7d4d1d3.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_576000x512": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_576000x512_198f0843",
+          "original_file": "region_000_pointwise_24751479ede6_198f0843.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_576000x512_7d842613",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_7d842613.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_1152000x384": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_1152000x384_3630f4f1",
+          "original_file": "region_000_pointwise_24751479ede6_3630f4f1.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_1152000x384_db6d28bb",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_db6d28bb.py"
+        }
+      ]
+    },
+    "genai_layernorm_fwd_1152000x512": {
+      "repros": [
+        {
+          "pattern_hash": "24751479ede6",
+          "shape_config": "genai_layernorm_fwd_1152000x512_126be517",
+          "original_file": "region_000_pointwise_24751479ede6_126be517.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_fwd_1152000x512_87d65b5b",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_87d65b5b.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_32768x256": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_32768x256_b23d030b",
+          "original_file": "region_000_sum_eaee705ee3c9_b23d030b.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_32768x256_44f3d1cd",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_44f3d1cd.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_32768x256_044f6574",
+          "original_file": "region_002_sum_caed04b72569_044f6574.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_32768x512": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_32768x512_2d74f58d",
+          "original_file": "region_000_sum_eaee705ee3c9_2d74f58d.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_32768x512_418cedc5",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_418cedc5.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_32768x512_84159fa0",
+          "original_file": "region_002_sum_caed04b72569_84159fa0.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_32768x1024": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_32768x1024_0a96ec30",
+          "original_file": "region_000_sum_eaee705ee3c9_0a96ec30.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_32768x1024_9cb0d695",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_9cb0d695.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_32768x1024_5fad50d6",
+          "original_file": "region_002_sum_caed04b72569_5fad50d6.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_32768x2048": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_32768x2048_296abf6e",
+          "original_file": "region_000_sum_eaee705ee3c9_296abf6e.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_32768x2048_ab894959",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_ab894959.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_32768x2048_888375eb",
+          "original_file": "region_002_sum_caed04b72569_888375eb.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_32768x4096": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_32768x4096_8841b0a8",
+          "original_file": "region_000_sum_eaee705ee3c9_8841b0a8.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_32768x4096_6ddde060",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_6ddde060.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_32768x4096_0a05ce1d",
+          "original_file": "region_002_sum_caed04b72569_0a05ce1d.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_32768x8192": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_32768x8192_452f2140",
+          "original_file": "region_000_sum_eaee705ee3c9_452f2140.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_32768x8192_67fe38da",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_67fe38da.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_32768x8192_9516769e",
+          "original_file": "region_002_sum_caed04b72569_9516769e.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_32768x16384": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_32768x16384_d9ae4792",
+          "original_file": "region_000_sum_eaee705ee3c9_d9ae4792.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_32768x16384_4e9e139f",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_4e9e139f.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_32768x16384_a7dbe80f",
+          "original_file": "region_002_sum_caed04b72569_a7dbe80f.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_32768x32768": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_32768x32768_8a85a425",
+          "original_file": "region_000_sum_eaee705ee3c9_8a85a425.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_32768x32768_2c9b4c46",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_2c9b4c46.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_32768x32768_c6ad96da",
+          "original_file": "region_002_sum_caed04b72569_c6ad96da.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_32768x65536": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_32768x65536_a8e6c124",
+          "original_file": "region_000_sum_eaee705ee3c9_a8e6c124.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_32768x65536_176fafc7",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_176fafc7.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_32768x65536_719764fb",
+          "original_file": "region_002_sum_caed04b72569_719764fb.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_576000x384": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_576000x384_d60aaed3",
+          "original_file": "region_000_sum_eaee705ee3c9_d60aaed3.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_576000x384_e7d4d1d3",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_e7d4d1d3.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_576000x384_ab2afbc6",
+          "original_file": "region_002_sum_caed04b72569_ab2afbc6.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_576000x512": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_576000x512_198f0843",
+          "original_file": "region_000_sum_eaee705ee3c9_198f0843.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_576000x512_7d842613",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_7d842613.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_576000x512_9dab0149",
+          "original_file": "region_002_sum_caed04b72569_9dab0149.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_1152000x384": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_1152000x384_3630f4f1",
+          "original_file": "region_000_sum_eaee705ee3c9_3630f4f1.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_1152000x384_db6d28bb",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_db6d28bb.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_1152000x384_44cf6ca2",
+          "original_file": "region_002_sum_caed04b72569_44cf6ca2.py"
+        }
+      ]
+    },
+    "genai_layernorm_bwd_1152000x512": {
+      "repros": [
+        {
+          "pattern_hash": "eaee705ee3c9",
+          "shape_config": "genai_layernorm_bwd_1152000x512_126be517",
+          "original_file": "region_000_sum_eaee705ee3c9_126be517.py"
+        },
+        {
+          "pattern_hash": "c1f6f4afaa1c",
+          "shape_config": "genai_layernorm_bwd_1152000x512_87d65b5b",
+          "original_file": "region_001_var_mean_c1f6f4afaa1c_87d65b5b.py"
+        },
+        {
+          "pattern_hash": "caed04b72569",
+          "shape_config": "genai_layernorm_bwd_1152000x512_e45e1d05",
+          "original_file": "region_002_sum_caed04b72569_e45e1d05.py"
+        }
+      ]
     }
   }
 }

@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import torch
+import torch._inductor.inductor_prims
 from math import inf, nan
 from torch import device
 
