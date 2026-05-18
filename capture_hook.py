@@ -182,6 +182,42 @@ class _CaptureState:
         new_gm = fx.GraphModule(gm, new_graph)
         return new_gm, placeholder_info, shape_params
 
+    def _compute_dag_signature(self, gm) -> list:
+        """Compute a DAG-structure signature for the graph.
+
+        Encodes: for each node in topological order, its op name and which
+        predecessor nodes feed each argument (by index). This guarantees that
+        two graphs with the same ops but different wiring get different hashes.
+
+        Placeholders are numbered by position. Shape params and tensor inputs
+        are both just "input_N" — the signature doesn't encode shapes, only structure.
+        """
+        nodes = list(gm.graph.nodes)
+        node_to_idx = {n: i for i, n in enumerate(nodes)}
+
+        signature = []
+        for node in nodes:
+            if node.op == "placeholder":
+                signature.append(("input", node_to_idx[node]))
+            elif node.op == "call_function":
+                # Record which nodes feed this op and at which arg position
+                arg_sources = []
+                for arg_idx, arg in enumerate(node.args):
+                    if isinstance(arg, torch.fx.Node) and arg in node_to_idx:
+                        arg_sources.append((node_to_idx[arg], arg_idx))
+                signature.append((str(node.target), arg_sources))
+            elif node.op == "output":
+                # Record which nodes are outputs
+                def _collect_output_indices(x):
+                    if isinstance(x, torch.fx.Node) and x in node_to_idx:
+                        return node_to_idx[x]
+                    elif isinstance(x, (tuple, list)):
+                        return [_collect_output_indices(item) for item in x]
+                    return None
+                signature.append(("output", _collect_output_indices(node.args[0])))
+
+        return signature
+
     def _infer_index_bounds(self, gm, placeholder_info) -> dict[str, int]:
         """Infer valid index bounds for int64 placeholders by inspecting consumers.
 
@@ -389,8 +425,11 @@ if __name__ == "__main__":
 
             origin_ops = sorted(str(n.target) for n in comp if n.op == "call_function")
 
+            # DAG-structure hash: encodes op names + wiring (which input feeds which arg)
+            # This ensures two graphs with same ops but different connectivity get different hashes
+            dag_signature = self._compute_dag_signature(sub_gm)
             pattern_key = hashlib.md5(
-                json.dumps({"ops": origin_ops}, sort_keys=True).encode()
+                json.dumps(dag_signature).encode()
             ).hexdigest()[:12]
 
             input_shapes = sorted(
