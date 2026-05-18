@@ -37,13 +37,16 @@ import torch._inductor.config as inductor_config
 
 
 class _CaptureState:
-    def __init__(self, output_dir: str, label: str = "capture"):
+    def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None):
         self.output_dir = output_dir
         self.label = label
+        self.graph_dir = graph_dir
         self.seen_hashes: set[str] = set()
         self.counter = 0
         self.captured: list[dict] = []
         os.makedirs(output_dir, exist_ok=True)
+        if graph_dir:
+            os.makedirs(graph_dir, exist_ok=True)
 
     def _extract_subgraph(self, origin_nodes: list[fx.Node], gm: fx.GraphModule):
         seen = set()
@@ -408,6 +411,18 @@ if __name__ == "__main__":
         filepath = os.path.join(self.output_dir, filename)
         with open(filepath, "w") as f:
             f.write(script)
+
+        # Save full FX graph for recovery (not committed, just local backup)
+        if self.graph_dir:
+            graph_filename = filename.replace(".py", "_graph.py")
+            graph_filepath = os.path.join(self.graph_dir, graph_filename)
+            try:
+                graph_code = gm.print_readable(print_output=False)
+                with open(graph_filepath, "w") as f:
+                    f.write(graph_code)
+            except Exception:
+                pass  # non-critical
+
         return filepath
 
     def process_graph(self, gm: fx.GraphModule):
@@ -528,7 +543,7 @@ if __name__ == "__main__":
 _active_state: _CaptureState | None = None
 
 
-def install_capture_hook(output_dir: str, label: str = "capture"):
+def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str | None = None):
     """Install the post-grad capture hook.
 
     Call this before torch.compile(). All subsequent compilations will have
@@ -539,7 +554,7 @@ def install_capture_hook(output_dir: str, label: str = "capture"):
         label: Human-readable label for the capture session.
     """
     global _active_state
-    _active_state = _CaptureState(output_dir, label)
+    _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir)
 
     _old_pass = inductor_config.post_grad_custom_pre_pass
 
