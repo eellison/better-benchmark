@@ -12,7 +12,6 @@
 - Memcopy SOL per-shape baseline
 
 ### Next
-- [x] ~~`bench_parallel.py --benchmark-set benchmarks/v1.json`~~ (DONE: runs frozen versioned set, 3557 points, ~15 min)
 - [ ] Better index bounds in capture_hook: infer valid range from scatter/gather target dims during graph analysis
 - [ ] Compute-intensity metric: tag kernels as memory-bound vs compute-bound (FLOPs/byte ratio) so SOL gap is only reported when meaningful
 - [ ] Incremental results file (JSONL) during sweep — survive interrupts
@@ -20,13 +19,14 @@
 - [ ] Profile mode: `python repro.py --profile` emits torch.profiler trace or Triton TTGIR for deep investigation
 
 ### Recently Completed
-- [x] ~~Lift reshape/view/expand dims to _shape_param~~ (DONE: 1069 repros converted)
-- [x] ~~Fix missing output dtype cast~~ (DONE: 52 repros regenerated)
-- [x] ~~Per-model JSON manifests~~ (DONE: 263 model files, git-friendly)
-- [x] ~~repro_prelude.py~~ (DONE: all 1521 repros use it)
-- [x] ~~Handle symbolic shapes in make_inputs~~ (DONE: resolve SymInt to concrete hint, emit scalar dims)
-- [x] ~~Smart shape sampling~~ (DONE: `scripts/select_benchmark_set.py` — quantile-grouped pointwise + all reduction shapes, frozen `benchmarks/v1.json` with 3557 points)
-- [x] ~~`--all-shapes` in repro_harness~~ (DONE: works per-repro)
+- [x] `bench_parallel.py --benchmark-set benchmarks/v1.json` (runs frozen versioned set, 3557 points, ~15 min)
+- [x] Smart shape sampling (`scripts/select_benchmark_set.py` — quantile-grouped pointwise + all reduction shapes)
+- [x] Lift reshape/view/expand dims to _shape_param (1069 repros converted)
+- [x] Fix missing output dtype cast (52 repros regenerated)
+- [x] Per-model JSON manifests (263 model files, git-friendly)
+- [x] repro_prelude.py (all 1521 repros use it)
+- [x] Handle symbolic shapes / SymInt (resolve to concrete hint, emit scalar dims)
+- [x] `--all-shapes` in repro_harness (works per-repro)
 
 ### Polish
 - [ ] Fix ndim-mismatch edge case in pattern hash (include input ranks if needed)
