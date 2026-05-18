@@ -215,8 +215,11 @@ def main():
                 repros.append(repro_path)
         # Deduplicate (same repro appears multiple times for different shapes)
         repros = sorted(set(repros))
-        # Pass shape info to workers via the all_shapes mechanism
-        args.all_shapes = True
+        # NOTE: --all-shapes requires shapes.json to include _shape_param entries.
+        # For now, use default shape per repro (safe). Enable --all-shapes explicitly
+        # only when shapes.json is updated to include shape params.
+        if not args.all_shapes:
+            pass  # use default shape only (safe)
         print(f"Benchmark set: {args.benchmark_set.name} "
               f"({len(benchmark_entries)} points, {len(repros)} unique repros)")
     elif args.paths:
