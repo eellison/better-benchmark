@@ -15,6 +15,10 @@
 - [ ] `--all-shapes` natively in bench_parallel.py (currently only in repro_harness single-file mode)
 - [ ] Smart shape sampling: for pointwise, pick 3 representative sizes (small/med/large); for reductions, test all shapes (heuristic decisions depend on dims)
 - [ ] Better index bounds in capture_hook: infer valid range from scatter/gather target dims during graph analysis
+- [x] ~~Lift reshape/view/expand dims to _shape_param~~ (DONE: 1069 repros converted)
+- [x] ~~Fix missing output dtype cast~~ (DONE: 52 repros regenerated)
+- [x] ~~Per-model JSON manifests~~ (DONE: 263 model files, git-friendly)
+- [x] ~~repro_prelude.py~~ (DONE: all 1521 repros use it)
 - [ ] Compute-intensity metric: tag kernels as memory-bound vs compute-bound (FLOPs/byte ratio) so SOL gap is only reported when meaningful
 - [ ] Incremental results file (JSONL) during sweep — survive interrupts
 - [ ] `bench_parallel.py --compare` reads perf.json directly (no separate run needed)
@@ -23,7 +27,7 @@
 
 ### Polish
 - [ ] Fix ndim-mismatch edge case in pattern hash (include input ranks if needed)
-- [ ] Handle symbolic shapes in make_inputs (some old repros reference undefined symbols)
+- [x] ~~Handle symbolic shapes in make_inputs~~ (DONE: resolve SymInt to concrete hint, emit scalar dims)
 - [ ] Faster compilation during capture (disable fusion passes that don't affect graph structure)
 
 ---
