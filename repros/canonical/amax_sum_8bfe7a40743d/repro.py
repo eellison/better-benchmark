@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 import torch
+from math import inf, nan
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))

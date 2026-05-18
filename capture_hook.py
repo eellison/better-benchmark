@@ -232,7 +232,7 @@ Pattern hash: {meta.get("pattern_hash", "?")}
 Shape hash: {meta.get("shape_hash", "?")}
 """
 import torch
-import torch._inductor.config as inductor_config
+import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
