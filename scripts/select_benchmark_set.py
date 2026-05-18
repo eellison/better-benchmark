@@ -2,9 +2,12 @@
 Select a representative benchmark set from all canonical repros + shapes.
 
 Strategy:
-- Pointwise: group by (stride_pattern, size_bucket), pick 1 per group
-- Reductions: group by (reduction_dim_size, non_reduction_size_bucket, stride_pattern),
+- Pointwise: group by (stride_pattern, size_quantile), pick 1 per group
+- Reductions: group by (reduction_dim_quantile, grid_size_quantile, stride_pattern),
   pick 1 per group — more aggressive sampling since heuristic decisions depend on reduction dim
+
+Uses quantile-based bucketing (no hardcoded thresholds) so the selection
+adapts to whatever distribution of shapes exists.
 
 Output: a frozen JSON manifest of (repro_dir, shape_config_key) pairs.
 """
@@ -14,120 +17,73 @@ from collections import defaultdict
 from pathlib import Path
 
 
-def _size_bucket(total_bytes: int) -> str:
-    """Coarse size bucket."""
-    if total_bytes < 1_000_000:
-        return "tiny"     # <1MB (launch-bound)
-    elif total_bytes < 10_000_000:
-        return "small"    # 1-10MB
-    elif total_bytes < 100_000_000:
-        return "medium"   # 10-100MB
-    elif total_bytes < 1_000_000_000:
-        return "large"    # 100MB-1GB
-    else:
-        return "huge"     # >1GB
+def _quantile_buckets(values: list[int | float], n_buckets: int) -> list[float]:
+    """Compute bucket boundaries from data distribution."""
+    if not values:
+        return []
+    s = sorted(values)
+    boundaries = []
+    for i in range(1, n_buckets):
+        idx = int(len(s) * i / n_buckets)
+        boundaries.append(s[idx])
+    return boundaries
 
 
-def _reduction_dim_bucket(rdim: int) -> str:
-    """Bucket the reduction dimension size."""
-    if rdim <= 64:
-        return "r_tiny"
-    elif rdim <= 256:
-        return "r_small"
-    elif rdim <= 1024:
-        return "r_medium"
-    elif rdim <= 4096:
-        return "r_large"
-    else:
-        return "r_huge"
+def _assign_bucket(value: int | float, boundaries: list[float]) -> int:
+    """Assign a value to a bucket given boundaries."""
+    for i, b in enumerate(boundaries):
+        if value <= b:
+            return i
+    return len(boundaries)
 
 
 def _stride_pattern(shape: list, stride: list | None) -> str:
     """Classify stride pattern."""
     if not stride:
         return "contiguous"
-    # Check channels-last (stride[1] == 1 for 4D NHWC)
     if len(shape) == 4 and len(stride) == 4 and stride[1] == 1:
         return "channels_last"
-    # Check if any stride is 0 (broadcast)
     if 0 in stride:
         return "broadcast"
     return "strided"
 
 
-def _infer_reduction_dim(repro_path: Path) -> int | None:
-    """Infer the reduction dimension size from the repro's forward method."""
-    content = repro_path.read_text()
-
-    # Look for var_mean/mean/sum with dim argument
-    import re
-    # Pattern: var_mean.correction(tensor, [2], ...) or mean.dim(tensor, [-1], ...)
-    for m in re.finditer(r'(?:var_mean\.correction|mean\.dim|sum\.dim_IntList)\([^,]+,\s*\[([^\]]+)\]', content):
-        dims_str = m.group(1)
-        # Get the tensor shape from annotation
-        # Find the first tensor arg annotation before this op
-        break
-
-    # Simpler: look at the forward signature for the main input shape
-    fwd_match = re.search(r'def forward\(self,\s*\w+:\s*"[^"]*\[([^\]]+)\]"', content)
-    if fwd_match:
-        shape_str = fwd_match.group(1)
-        try:
-            dims = [int(x.strip()) for x in shape_str.split(',') if x.strip().isdigit()]
-            if dims:
-                # For reductions, last dim is usually the reduction dim
-                return dims[-1]
-        except:
-            pass
-    return None
-
-
-def select_benchmark_set(canonical_dir: Path, max_shapes_pointwise: int = 3,
-                         max_shapes_reduction: int = 5) -> list[dict]:
+def select_benchmark_set(canonical_dir: Path, n_size_buckets: int = 4,
+                         n_rdim_buckets: int = 6,
+                         max_shapes_pointwise: int = 3,
+                         max_shapes_reduction: int = 8) -> list[dict]:
     """Select representative (repro, shape) pairs."""
 
-    selected = []
+    # First pass: collect all shape characteristics for quantile computation
+    all_sizes = []
+    all_rdims = []
+    all_grid_sizes = []
+
+    repro_data = []
 
     for d in sorted(canonical_dir.iterdir()):
         if not (d / 'repro.py').exists():
             continue
-
         meta_path = d / 'meta.json'
         if not meta_path.exists():
             continue
         meta = json.loads(meta_path.read_text())
-
         kind = meta.get('kind', 'pointwise')
         is_reduction = kind == 'reduction'
 
-        # Get all shape configs
         configs = {}
         sj = d / 'shapes.json'
         if sj.exists():
             data = json.loads(sj.read_text())
             configs = data.get('configs', {})
 
-        if not configs:
-            # Just default shape
-            selected.append({"repro": d.name, "shape": None, "kind": kind})
-            continue
-
-        if len(configs) == 1:
-            key = list(configs.keys())[0]
-            selected.append({"repro": d.name, "shape": key, "kind": kind})
-            continue
-
-        # Multiple shapes — need to select representatives
-        # Group by characteristics
-        groups = defaultdict(list)
-
+        config_info = []
         for config_key, config in configs.items():
             inputs = config.get('inputs', [])
-
-            # Compute total bytes
             total_bytes = 0
             main_shape = []
             main_stride = None
+
             for inp in inputs:
                 if inp.get('kind') == 'shape':
                     continue
@@ -139,34 +95,72 @@ def select_benchmark_set(canonical_dir: Path, max_shapes_pointwise: int = 3,
                     main_shape = shape
                     main_stride = inp.get('stride')
 
-            size_bkt = _size_bucket(total_bytes)
-            stride_pat = _stride_pattern(main_shape, main_stride)
+            rdim = main_shape[-1] if main_shape else 0
+            grid_size = math.prod(main_shape[:-1]) if len(main_shape) > 1 else 1
 
+            all_sizes.append(total_bytes)
             if is_reduction:
-                # Group by reduction dim size + non-reduction size + strides
-                rdim = main_shape[-1] if main_shape else 0
-                non_rdim = math.prod(main_shape[:-1]) if len(main_shape) > 1 else 1
-                rdim_bkt = _reduction_dim_bucket(rdim)
-                non_rdim_bkt = _size_bucket(non_rdim * 4)  # rough bytes for grid size
-                group_key = (rdim_bkt, non_rdim_bkt, stride_pat)
+                all_rdims.append(rdim)
+                all_grid_sizes.append(grid_size)
+
+            config_info.append({
+                'key': config_key,
+                'total_bytes': total_bytes,
+                'rdim': rdim,
+                'grid_size': grid_size,
+                'stride_pat': _stride_pattern(main_shape, main_stride),
+            })
+
+        repro_data.append({
+            'dir': d,
+            'name': d.name,
+            'kind': kind,
+            'is_reduction': is_reduction,
+            'configs': config_info,
+        })
+
+    # Compute quantile boundaries from actual data
+    size_boundaries = _quantile_buckets(all_sizes, n_size_buckets)
+    rdim_boundaries = _quantile_buckets(all_rdims, n_rdim_buckets)
+    grid_boundaries = _quantile_buckets(all_grid_sizes, n_size_buckets)
+
+    # Second pass: group and select
+    selected = []
+
+    for repro in repro_data:
+        if not repro['configs']:
+            selected.append({"repro": repro['name'], "shape": None, "kind": repro['kind']})
+            continue
+
+        if len(repro['configs']) == 1:
+            selected.append({"repro": repro['name'], "shape": repro['configs'][0]['key'], "kind": repro['kind']})
+            continue
+
+        # Group by characteristics
+        groups = defaultdict(list)
+        for cfg in repro['configs']:
+            size_bkt = _assign_bucket(cfg['total_bytes'], size_boundaries)
+            stride_pat = cfg['stride_pat']
+
+            if repro['is_reduction']:
+                rdim_bkt = _assign_bucket(cfg['rdim'], rdim_boundaries)
+                grid_bkt = _assign_bucket(cfg['grid_size'], grid_boundaries)
+                group_key = (rdim_bkt, grid_bkt, stride_pat)
             else:
-                # Pointwise: group by size + strides only
                 group_key = (size_bkt, stride_pat)
 
-            groups[group_key].append((config_key, total_bytes))
+            groups[group_key].append(cfg)
 
-        # Pick one representative per group
-        max_picks = max_shapes_reduction if is_reduction else max_shapes_pointwise
+        # Pick median from each group
+        max_picks = max_shapes_reduction if repro['is_reduction'] else max_shapes_pointwise
         picks = []
-        for group_key, members in sorted(groups.items()):
-            # Pick the median-sized member
-            members.sort(key=lambda x: x[1])
+        for group_key in sorted(groups.keys()):
+            members = sorted(groups[group_key], key=lambda x: x['total_bytes'])
             median_idx = len(members) // 2
-            picks.append(members[median_idx][0])
+            picks.append(members[median_idx]['key'])
 
-        # Cap at max
         for config_key in picks[:max_picks]:
-            selected.append({"repro": d.name, "shape": config_key, "kind": kind})
+            selected.append({"repro": repro['name'], "shape": config_key, "kind": repro['kind']})
 
     return selected
 
@@ -177,15 +171,24 @@ def main():
     parser.add_argument("--canonical-dir", type=Path, default=Path("repros/canonical"))
     parser.add_argument("--max-pointwise", type=int, default=3,
                         help="Max shapes per pointwise repro")
-    parser.add_argument("--max-reduction", type=int, default=5,
+    parser.add_argument("--max-reduction", type=int, default=8,
                         help="Max shapes per reduction repro")
+    parser.add_argument("--size-buckets", type=int, default=4,
+                        help="Number of quantile buckets for total data size")
+    parser.add_argument("--rdim-buckets", type=int, default=6,
+                        help="Number of quantile buckets for reduction dimension")
     parser.add_argument("--output", type=Path, default=Path("benchmarks/v1.json"),
                         help="Output benchmark set manifest")
     args = parser.parse_args()
 
-    selected = select_benchmark_set(args.canonical_dir, args.max_pointwise, args.max_reduction)
+    selected = select_benchmark_set(
+        args.canonical_dir,
+        n_size_buckets=args.size_buckets,
+        n_rdim_buckets=args.rdim_buckets,
+        max_shapes_pointwise=args.max_pointwise,
+        max_shapes_reduction=args.max_reduction,
+    )
 
-    # Stats
     n_repros = len(set(s['repro'] for s in selected))
     n_reduction = sum(1 for s in selected if s['kind'] == 'reduction')
     n_pointwise = sum(1 for s in selected if s['kind'] != 'reduction')
@@ -198,10 +201,12 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps({
         "version": "v1",
-        "description": f"Auto-selected benchmark set: {len(selected)} points from {n_repros} repros",
+        "description": f"Auto-selected: {len(selected)} points from {n_repros} repros",
         "selection_params": {
             "max_pointwise": args.max_pointwise,
             "max_reduction": args.max_reduction,
+            "size_buckets": args.size_buckets,
+            "rdim_buckets": args.rdim_buckets,
         },
         "benchmarks": selected,
     }, indent=2) + "\n")
