@@ -3040,6 +3040,13 @@
             1408
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            128,
+            1408
+          ]
         }
       ],
       "source_models": [

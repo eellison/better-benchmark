@@ -13,6 +13,15 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            4,
+            28,
+            28,
+            192
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -64,6 +73,32 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            4,
+            7,
+            4,
+            7,
+            192
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            64,
+            49,
+            192
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            3136,
+            192
+          ]
         },
         {
           "dtype": "torch.float32",

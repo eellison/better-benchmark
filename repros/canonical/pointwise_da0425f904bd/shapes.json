@@ -32,6 +32,78 @@
             64
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            8,
+            1024,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            8,
+            64,
+            1024
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            8,
+            1024,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            512
+          ]
         }
       ],
       "source_models": [

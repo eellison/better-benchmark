@@ -4,34 +4,36 @@
     "timm_visformer_small_inference_5a695a43": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
             32,
             6,
             49,
             128
-          ],
-          "stride": [
-            112896,
-            6272,
-            1,
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            192,
+            49,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            6,
+            128,
             49
           ]
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            6,
-            49,
-            128
-          ],
-          "stride": [
-            112896,
-            6272,
-            1,
+          "kind": "shape",
+          "dims": [
+            192,
+            128,
             49
           ]
         }
@@ -44,35 +46,37 @@
     "timm_visformer_small_inference_a9d947a5": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
             32,
             6,
-            196,
-            64
-          ],
-          "stride": [
-            225792,
-            12544,
-            1,
-            196
+            49,
+            128
           ]
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            192,
+            49,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
             32,
             6,
-            196,
-            64
-          ],
-          "stride": [
-            225792,
-            12544,
-            1,
-            196
+            128,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            192,
+            128,
+            49
           ]
         }
       ],
@@ -84,34 +88,36 @@
     "timm_visformer_small_training_5a695a43": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
             32,
             6,
             49,
             128
-          ],
-          "stride": [
-            112896,
-            6272,
-            1,
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            192,
+            49,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            6,
+            128,
             49
           ]
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            6,
-            49,
-            128
-          ],
-          "stride": [
-            112896,
-            6272,
-            1,
+          "kind": "shape",
+          "dims": [
+            192,
+            128,
             49
           ]
         }
@@ -124,35 +130,37 @@
     "timm_visformer_small_training_a9d947a5": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
             32,
             6,
-            196,
-            64
-          ],
-          "stride": [
-            225792,
-            12544,
-            1,
-            196
+            49,
+            128
           ]
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            192,
+            49,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
             32,
             6,
-            196,
-            64
-          ],
-          "stride": [
-            225792,
-            12544,
-            1,
-            196
+            128,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            192,
+            128,
+            49
           ]
         }
       ],

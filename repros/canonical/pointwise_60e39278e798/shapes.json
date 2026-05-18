@@ -11,6 +11,58 @@
             1152
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            49,
+            1152
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            49,
+            3,
+            12,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            32,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            32,
+            49
+          ]
         }
       ],
       "source_models": [
@@ -28,6 +80,58 @@
             576
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            196,
+            576
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            196,
+            3,
+            6,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            32,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            32,
+            49
+          ]
         }
       ],
       "source_models": [
@@ -45,6 +149,58 @@
             288
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            784,
+            288
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            784,
+            3,
+            3,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            32,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            32,
+            49
+          ]
         }
       ],
       "source_models": [
@@ -62,6 +218,58 @@
             2304
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            49,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            49,
+            6,
+            12,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            32,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            32,
+            49
+          ]
         }
       ],
       "source_models": [
@@ -79,6 +287,58 @@
             1152
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            196,
+            1152
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            196,
+            3,
+            12,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            32,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            32,
+            49
+          ]
         }
       ],
       "source_models": [
@@ -96,6 +356,58 @@
             576
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            784,
+            576
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            784,
+            3,
+            6,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            32,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            32,
+            49
+          ]
         }
       ],
       "source_models": [
@@ -113,6 +425,58 @@
             288
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            3136,
+            288
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            3136,
+            3,
+            3,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            32,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
+            32,
+            49
+          ]
         }
       ],
       "source_models": [

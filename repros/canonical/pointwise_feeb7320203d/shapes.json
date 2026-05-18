@@ -14,6 +14,30 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            8,
+            1024,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            1024,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            512
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -32,6 +56,14 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            1024,
+            2048
+          ]
+        },
+        {
           "dtype": "torch.bool",
           "device": "cuda",
           "shape": [
@@ -52,6 +84,13 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            2048
+          ]
         },
         {
           "dtype": "torch.float32",
@@ -81,6 +120,30 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            8,
+            1024,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            1024,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            512
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -99,6 +162,14 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            1024,
+            2048
+          ]
+        },
+        {
           "dtype": "torch.bool",
           "device": "cuda",
           "shape": [
@@ -119,6 +190,13 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            2048
+          ]
         },
         {
           "dtype": "torch.float32",

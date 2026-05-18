@@ -22,6 +22,21 @@
             240
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            256,
+            16,
+            240
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            240
+          ]
         }
       ],
       "source_models": [
@@ -50,6 +65,21 @@
             144
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            256,
+            16,
+            240
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            240
+          ]
         }
       ],
       "source_models": [

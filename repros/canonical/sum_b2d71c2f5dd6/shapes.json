@@ -35,35 +35,29 @@
           "stride": null
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
             4,
             12,
             476,
-            1
-          ],
-          "stride": [
-            5728,
-            476,
-            1,
-            1
+            476
           ]
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
             4,
             12,
             476,
-            1
-          ],
-          "stride": [
-            5728,
+            476
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            48,
             476,
-            1,
-            1
+            476
           ]
         }
       ],

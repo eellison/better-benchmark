@@ -41,6 +41,66 @@
           ],
           "stride": null,
           "max_val": 100
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            -1,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            8,
+            1024,
+            1024
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            8,
+            1024,
+            1024
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            1024,
+            1024
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            8,
+            1024,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            1024,
+            64
+          ]
         }
       ],
       "source_models": [

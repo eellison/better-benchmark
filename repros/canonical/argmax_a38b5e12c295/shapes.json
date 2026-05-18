@@ -13,6 +13,14 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            1024,
+            2
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -38,6 +46,14 @@
             2
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            128,
+            2
+          ]
         },
         {
           "dtype": "torch.int64",

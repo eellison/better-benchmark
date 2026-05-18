@@ -11,6 +11,58 @@
             2304
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            49,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            49,
+            3,
+            24,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            24,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            24,
+            49,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            24,
+            32,
+            49
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            24,
+            32,
+            49
+          ]
         }
       ],
       "source_models": [

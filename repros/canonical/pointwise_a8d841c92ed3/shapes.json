@@ -4,19 +4,28 @@
     "timm_beit_base_patch16_224_training_645a93d0": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            3,
             32,
             12,
             197,
             64
-          ],
-          "stride": [
-            151296,
-            64,
-            768,
-            1
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            197,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            6304,
+            2304
           ]
         },
         {
@@ -34,31 +43,6 @@
             768,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            12,
-            197,
-            64
-          ],
-          "stride": [
-            151296,
-            64,
-            768,
-            1
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2304,
-            768
-          ],
-          "stride": null
         }
       ],
       "source_models": [
@@ -69,19 +53,28 @@
     "timm_deit_base_distilled_patch16_224_training_c923b2ed": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            3,
             32,
             12,
-            198,
+            197,
             64
-          ],
-          "stride": [
-            152064,
-            64,
-            768,
-            1
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            197,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            6304,
+            2304
           ]
         },
         {
@@ -99,31 +92,6 @@
             768,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            12,
-            198,
-            64
-          ],
-          "stride": [
-            152064,
-            64,
-            768,
-            1
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2304,
-            768
-          ],
-          "stride": null
         }
       ],
       "source_models": [
@@ -134,19 +102,28 @@
     "timm_deit_tiny_patch16_224.fb_in1k_training_b8c18b46": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
+          "kind": "shape",
+          "dims": [
             3,
+            32,
+            12,
             197,
             64
-          ],
-          "stride": [
-            37824,
-            64,
-            192,
-            1
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            197,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            6304,
+            2304
           ]
         },
         {
@@ -164,31 +141,6 @@
             192,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            3,
-            197,
-            64
-          ],
-          "stride": [
-            37824,
-            64,
-            192,
-            1
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            576,
-            192
-          ],
-          "stride": null
         }
       ],
       "source_models": [
@@ -199,19 +151,28 @@
     "timm_mobilevit_s_training_2f40987c": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            4,
-            256,
-            36
-          ],
-          "stride": [
-            36864,
-            36,
-            144,
-            1
+          "kind": "shape",
+          "dims": [
+            3,
+            32,
+            12,
+            197,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            197,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            6304,
+            2304
           ]
         },
         {
@@ -229,31 +190,6 @@
             144,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            4,
-            256,
-            36
-          ],
-          "stride": [
-            36864,
-            36,
-            144,
-            1
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            432,
-            144
-          ],
-          "stride": null
         }
       ],
       "source_models": [
@@ -264,19 +200,28 @@
     "timm_mobilevit_s_training_085c26d1": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            4,
-            64,
-            48
-          ],
-          "stride": [
-            12288,
-            48,
-            192,
-            1
+          "kind": "shape",
+          "dims": [
+            3,
+            32,
+            12,
+            197,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            197,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            6304,
+            2304
           ]
         },
         {
@@ -294,31 +239,6 @@
             192,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            4,
-            64,
-            48
-          ],
-          "stride": [
-            12288,
-            48,
-            192,
-            1
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            576,
-            192
-          ],
-          "stride": null
         }
       ],
       "source_models": [
@@ -329,19 +249,28 @@
     "timm_mobilevit_s_training_68e39885": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            4,
-            16,
-            60
-          ],
-          "stride": [
-            3840,
-            60,
-            240,
-            1
+          "kind": "shape",
+          "dims": [
+            3,
+            32,
+            12,
+            197,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            197,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            6304,
+            2304
           ]
         },
         {
@@ -359,31 +288,6 @@
             240,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            4,
-            16,
-            60
-          ],
-          "stride": [
-            3840,
-            60,
-            240,
-            1
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            720,
-            240
-          ],
-          "stride": null
         }
       ],
       "source_models": [
@@ -394,19 +298,28 @@
     "timm_vit_base_patch14_dinov2.lvd142m_training_5f4e1d0e": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            3,
             32,
             12,
-            1370,
+            197,
             64
-          ],
-          "stride": [
-            1052160,
-            64,
-            768,
-            1
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            197,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            6304,
+            2304
           ]
         },
         {
@@ -424,31 +337,6 @@
             768,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            12,
-            1370,
-            64
-          ],
-          "stride": [
-            1052160,
-            64,
-            768,
-            1
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2304,
-            768
-          ],
-          "stride": null
         }
       ],
       "source_models": [
@@ -459,19 +347,28 @@
     "timm_vit_base_patch16_siglip_256_training_9d6e88dd": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            3,
             32,
             12,
-            256,
+            197,
             64
-          ],
-          "stride": [
-            196608,
-            64,
-            768,
-            1
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            197,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            6304,
+            2304
           ]
         },
         {
@@ -489,31 +386,6 @@
             768,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            12,
-            256,
-            64
-          ],
-          "stride": [
-            196608,
-            64,
-            768,
-            1
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2304,
-            768
-          ],
-          "stride": null
         }
       ],
       "source_models": [
@@ -524,19 +396,28 @@
     "timm_vit_base_patch16_siglip_256_training_ae83b21f": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            3,
             32,
             12,
-            256,
+            197,
             64
-          ],
-          "stride": [
-            196608,
-            64,
-            768,
-            1
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            197,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            6304,
+            2304
           ]
         },
         {
@@ -554,15 +435,6 @@
             768,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1536,
-            768
-          ],
-          "stride": null
         }
       ],
       "source_models": [

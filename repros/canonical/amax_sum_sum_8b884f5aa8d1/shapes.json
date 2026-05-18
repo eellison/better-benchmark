@@ -22,6 +22,13 @@
             50257
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            -1,
+            50257
+          ]
         }
       ],
       "source_models": [

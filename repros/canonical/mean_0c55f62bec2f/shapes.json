@@ -44,26 +44,9 @@
           "stride": null
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2048
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
             8,
-            2048,
-            7,
-            7
-          ],
-          "stride": [
-            100352,
-            1,
-            14336,
             2048
           ]
         },
@@ -71,7 +54,6 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            1000,
             2048
           ],
           "stride": null
@@ -125,34 +107,16 @@
           "stride": null
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1008
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
             8,
-            1008,
-            7,
-            7
-          ],
-          "stride": [
-            49392,
-            1,
-            7056,
-            1008
+            2048
           ]
         },
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            1000,
             1008
           ],
           "stride": null

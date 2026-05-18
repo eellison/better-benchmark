@@ -13,6 +13,32 @@
             8
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            61440,
+            2,
+            4,
+            2
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            64,
+            240,
+            16,
+            4
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            256,
+            16,
+            240
+          ]
         }
       ],
       "source_models": [

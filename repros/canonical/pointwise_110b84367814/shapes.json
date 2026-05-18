@@ -20,6 +20,56 @@
             512
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            8,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            1024,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            8,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            1024,
+            64
+          ]
         }
       ],
       "source_models": [

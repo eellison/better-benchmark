@@ -47,6 +47,14 @@
             1
           ],
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            256
+          ]
         }
       ],
       "source_models": [

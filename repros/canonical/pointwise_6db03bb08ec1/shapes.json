@@ -4,6 +4,13 @@
     "hf_trocrforcausallm_training_02575374": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [

@@ -29,6 +29,14 @@
             768
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            1024,
+            768
+          ]
         }
       ],
       "source_models": [

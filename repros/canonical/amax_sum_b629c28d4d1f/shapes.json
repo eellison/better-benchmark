@@ -13,6 +13,23 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            1,
+            128,
+            4096
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            128,
+            16,
+            256
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -21,6 +38,15 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            16,
+            128,
+            128
+          ]
         },
         {
           "dtype": "torch.float32",
@@ -32,6 +58,40 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            16,
+            128,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            16,
+            128,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            16,
+            128,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            16,
+            128,
+            256
+          ]
         },
         {
           "dtype": "torch.float32",
@@ -60,6 +120,23 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            1,
+            128,
+            4096
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            128,
+            16,
+            256
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -68,6 +145,15 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            16,
+            128,
+            128
+          ]
         },
         {
           "dtype": "torch.float32",
@@ -79,6 +165,40 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            16,
+            128,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            16,
+            128,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            16,
+            128,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            16,
+            128,
+            256
+          ]
         },
         {
           "dtype": "torch.float32",

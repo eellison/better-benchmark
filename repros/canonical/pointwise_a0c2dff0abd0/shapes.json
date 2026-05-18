@@ -13,12 +13,80 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            197,
+            4,
+            2304
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
             2304
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            197,
+            4,
+            3,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            197,
+            48,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            197,
+            48,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            197,
+            48,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            197,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            197,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            12,
+            197,
+            64
+          ]
         }
       ],
       "source_models": [

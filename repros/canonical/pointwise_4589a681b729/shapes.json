@@ -29,6 +29,13 @@
             209981
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            209981,
+            64
+          ]
         }
       ],
       "source_models": [
@@ -64,6 +71,13 @@
             209981
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            209981,
+            64
+          ]
         }
       ],
       "source_models": [
@@ -99,6 +113,13 @@
             209981
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            209981,
+            64
+          ]
         }
       ],
       "source_models": [

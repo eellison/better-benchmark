@@ -77,6 +77,37 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            476,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            476,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            476,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1904,
+            768
+          ]
         }
       ],
       "source_models": [

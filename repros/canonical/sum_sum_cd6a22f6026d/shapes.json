@@ -67,6 +67,44 @@
             768
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            77,
+            32,
+            2048
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            77,
+            32,
+            2048
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            2464,
+            2048
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            50,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1600,
+            768
+          ]
         }
       ],
       "source_models": [

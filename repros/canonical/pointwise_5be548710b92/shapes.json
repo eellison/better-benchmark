@@ -120,6 +120,20 @@
             512
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1600,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            2464,
+            512
+          ]
         }
       ],
       "source_models": [

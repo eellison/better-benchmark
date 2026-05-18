@@ -11,6 +11,21 @@
             16384
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            512,
+            16384
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            16384
+          ]
         }
       ],
       "source_models": [
@@ -28,6 +43,21 @@
             3072
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            512,
+            3072
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            3072
+          ]
         }
       ],
       "source_models": [
@@ -45,6 +75,21 @@
             3072
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            512,
+            3072
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            3072
+          ]
         }
       ],
       "source_models": [
@@ -62,6 +107,21 @@
             3072
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            1024,
+            3072
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            3072
+          ]
         }
       ],
       "source_models": [
@@ -79,6 +139,21 @@
             3072
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            1024,
+            3072
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            3072
+          ]
         }
       ],
       "source_models": [

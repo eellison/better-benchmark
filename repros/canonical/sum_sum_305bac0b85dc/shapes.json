@@ -48,6 +48,29 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            512,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            512,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            512,
+            768
+          ]
         }
       ],
       "source_models": [

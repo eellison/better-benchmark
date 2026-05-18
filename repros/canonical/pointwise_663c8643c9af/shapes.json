@@ -35,6 +35,15 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            256,
+            48,
+            48
+          ]
         }
       ],
       "source_models": [
@@ -76,6 +85,15 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            512,
+            24,
+            24
+          ]
         }
       ],
       "source_models": [
@@ -117,6 +135,15 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            1536,
+            12,
+            12
+          ]
         }
       ],
       "source_models": [
@@ -158,6 +185,15 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            1536,
+            6,
+            6
+          ]
         }
       ],
       "source_models": [
@@ -199,6 +235,15 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            256,
+            56,
+            56
+          ]
         }
       ],
       "source_models": [
@@ -240,6 +285,15 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            512,
+            28,
+            28
+          ]
         }
       ],
       "source_models": [
@@ -281,6 +335,15 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            1536,
+            14,
+            14
+          ]
         }
       ],
       "source_models": [
@@ -322,6 +385,15 @@
             1
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            1536,
+            7,
+            7
+          ]
         }
       ],
       "source_models": [

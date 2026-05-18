@@ -60,6 +60,21 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            512,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            512,
+            768
+          ]
         }
       ],
       "source_models": [

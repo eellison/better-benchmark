@@ -57,6 +57,13 @@
             768
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            768
+          ]
         }
       ],
       "source_models": [
@@ -120,6 +127,13 @@
             768
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            768
+          ]
         }
       ],
       "source_models": [

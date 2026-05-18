@@ -5953,6 +5953,13 @@
             1024
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024
+          ]
         }
       ],
       "source_models": [

@@ -4,6 +4,15 @@
     "hf_mobilebertformaskedlm_training_4c3fc3a0": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            128,
+            128
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -11,6 +20,23 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            128,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            128,
+            -1,
+            32
+          ]
         },
         {
           "dtype": "torch.float32",
@@ -21,6 +47,49 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            4,
+            128,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            4,
+            128,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            128,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            4,
+            128,
+            32
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            128,
+            32
+          ]
         }
       ],
       "source_models": [

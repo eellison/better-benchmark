@@ -23,6 +23,23 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            32,
+            128,
+            128
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            256,
+            128,
+            128
+          ]
         }
       ],
       "source_models": [

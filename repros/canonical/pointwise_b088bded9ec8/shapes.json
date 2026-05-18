@@ -13,6 +13,14 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            4,
+            512,
+            3072
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -29,6 +37,13 @@
             3072
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            2048,
+            3072
+          ]
         }
       ],
       "source_models": [
@@ -48,6 +63,14 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            4,
+            128,
+            3072
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -64,6 +87,13 @@
             3072
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            512,
+            3072
+          ]
         }
       ],
       "source_models": [
@@ -83,6 +113,14 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            16,
+            512,
+            2048
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -99,6 +137,13 @@
             2048
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            2048
+          ]
         }
       ],
       "source_models": [
@@ -118,6 +163,14 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            16,
+            512,
+            2048
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -134,6 +187,13 @@
             2048
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            2048
+          ]
         }
       ],
       "source_models": [

@@ -4,19 +4,19 @@
     "hf_reformer_inference_aa83b929": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
+          "kind": "shape",
+          "dims": [
             12,
-            4096,
+            32768,
             64
-          ],
-          "stride": [
-            3145728,
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            12,
             64,
-            768,
-            1
+            64
           ]
         }
       ],
@@ -28,19 +28,19 @@
     "hf_reformer_training_aa83b929": {
       "inputs": [
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
+          "kind": "shape",
+          "dims": [
             12,
-            4096,
+            32768,
             64
-          ],
-          "stride": [
-            3145728,
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            12,
             64,
-            768,
-            1
+            64
           ]
         }
       ],

@@ -4,6 +4,12 @@
     "genai_ce_bwd_32768x256_fc42ab9a": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            32768
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -11,6 +17,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32768,
+            256
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -48,6 +68,12 @@
     "genai_ce_bwd_32768x512_58304ec9": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            32768
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -55,6 +81,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32768,
+            512
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -92,6 +132,12 @@
     "genai_ce_bwd_32768x1024_26f01925": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            32768
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -99,6 +145,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32768,
+            1024
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -136,6 +196,12 @@
     "genai_ce_bwd_32768x2048_c4c9661f": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            32768
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -143,6 +209,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32768,
+            2048
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -180,6 +260,12 @@
     "genai_ce_bwd_32768x4096_cc67dd63": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            32768
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -187,6 +273,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32768,
+            4096
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -224,6 +324,12 @@
     "genai_ce_bwd_32768x8192_4302e4d8": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            32768
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -231,6 +337,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32768,
+            8192
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -268,6 +388,12 @@
     "genai_ce_bwd_32768x16384_15d8f0d1": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            32768
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -275,6 +401,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32768,
+            16384
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -312,6 +452,12 @@
     "genai_ce_bwd_32768x32768_61643c63": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            32768
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -319,6 +465,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32768,
+            32768
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -356,6 +516,12 @@
     "genai_ce_bwd_32768x65536_0ede0c4f": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            32768
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -363,6 +529,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32768,
+            65536
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -400,6 +580,12 @@
     "genai_ce_bwd_16384x131072_ae954055": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            16384
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -407,6 +593,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            16384,
+            131072
+          ]
         },
         {
           "dtype": "torch.bfloat16",
@@ -444,6 +644,12 @@
     "genai_ce_bwd_8192x262144_4b36b0bc": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            8192
+          ]
+        },
+        {
           "dtype": "torch.int64",
           "device": "cuda",
           "shape": [
@@ -451,6 +657,20 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1,
+            256
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            262144
+          ]
         },
         {
           "dtype": "torch.bfloat16",

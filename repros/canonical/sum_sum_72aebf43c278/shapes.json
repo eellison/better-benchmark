@@ -45,19 +45,17 @@
           ]
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            43840,
             768
-          ],
-          "stride": null
+          ]
         },
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            768,
-            3072
+            768
           ],
           "stride": null
         }

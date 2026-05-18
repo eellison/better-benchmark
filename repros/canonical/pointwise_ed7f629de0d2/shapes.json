@@ -37,6 +37,13 @@
             64
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            209981,
+            64
+          ]
         }
       ],
       "source_models": [

@@ -14,15 +14,31 @@
           "stride": null
         },
         {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            8,
+            12,
+            64,
+            64,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            12,
+            4096,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
             8,
             12,
             4096
-          ],
-          "stride": null,
-          "max_val": 2
+          ]
         },
         {
           "dtype": "torch.int64",
@@ -34,6 +50,43 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            12,
+            4096,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            4096,
+            768
+          ]
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            4096
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            12,
+            1,
+            -1
+          ]
         }
       ],
       "source_models": [
@@ -54,15 +107,31 @@
           "stride": null
         },
         {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            8,
+            12,
+            64,
+            64,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            12,
+            4096,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
             8,
             12,
             4096
-          ],
-          "stride": null,
-          "max_val": 2
+          ]
         },
         {
           "dtype": "torch.int64",
@@ -74,6 +143,43 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            12,
+            4096,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            4096,
+            768
+          ]
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            4096
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            12,
+            1,
+            -1
+          ]
         }
       ],
       "source_models": [

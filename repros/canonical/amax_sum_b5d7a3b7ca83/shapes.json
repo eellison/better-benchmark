@@ -13,6 +13,25 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            512,
+            8,
+            1,
+            16,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            512,
+            8,
+            16,
+            64
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -23,6 +42,25 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            16,
+            512,
+            1,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            16,
+            512,
+            512
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -31,6 +69,43 @@
             1024
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            16,
+            512,
+            1,
+            1024
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            16,
+            512,
+            1024
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            16,
+            1024,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            16,
+            512,
+            1023
+          ]
         },
         {
           "dtype": "torch.int64",
@@ -49,6 +124,22 @@
           ],
           "stride": null,
           "max_val": 2
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            128,
+            512,
+            512
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            128,
+            512,
+            64
+          ]
         }
       ],
       "source_models": [

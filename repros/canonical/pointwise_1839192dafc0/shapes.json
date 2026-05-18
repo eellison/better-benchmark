@@ -13,51 +13,75 @@
           "stride": null
         },
         {
-          "dtype": "torch.float16",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            77,
             32,
-            12,
-            50,
+            8,
             64
-          ],
-          "stride": [
-            768,
-            64,
-            24576,
-            1
           ]
         },
         {
-          "dtype": "torch.float16",
-          "device": "cuda",
-          "shape": [
-            32,
-            12,
+          "kind": "shape",
+          "dims": [
+            384,
             50,
             64
-          ],
-          "stride": [
-            768,
-            64,
-            24576,
-            1
           ]
         },
         {
-          "dtype": "torch.float16",
-          "device": "cuda",
-          "shape": [
-            32,
-            12,
+          "kind": "shape",
+          "dims": [
+            384,
             50,
             64
-          ],
-          "stride": [
-            768,
-            64,
-            24576,
-            1
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            384,
+            50,
+            64
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            50,
+            32,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            50,
+            32,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            50,
+            32,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            50,
+            32,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            1600,
+            2304
           ]
         }
       ],

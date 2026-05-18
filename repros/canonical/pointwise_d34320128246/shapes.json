@@ -12,6 +12,12 @@
           ],
           "stride": null,
           "max_val": 100
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            209981
+          ]
         }
       ],
       "source_models": [

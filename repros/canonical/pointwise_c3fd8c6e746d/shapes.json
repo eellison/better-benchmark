@@ -13,6 +13,16 @@
             7
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            3,
+            6,
+            128,
+            -1
+          ]
         }
       ],
       "source_models": [
@@ -51,6 +61,16 @@
             7
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            3,
+            6,
+            128,
+            -1
+          ]
         }
       ],
       "source_models": [

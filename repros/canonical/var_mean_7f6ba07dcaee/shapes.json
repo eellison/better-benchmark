@@ -13,28 +13,21 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            14,
+            14,
+            384
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
             384
           ],
           "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            384,
-            14,
-            14
-          ],
-          "stride": [
-            75264,
-            1,
-            5376,
-            384
-          ]
         }
       ],
       "source_models": [
@@ -54,28 +47,21 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            32,
+            14,
+            14,
+            192
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
             192
           ],
           "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            192,
-            28,
-            28
-          ],
-          "stride": [
-            150528,
-            1,
-            5376,
-            192
-          ]
         }
       ],
       "source_models": [
@@ -95,28 +81,21 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            128,
+            14,
+            14,
+            96
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
             96
           ],
           "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            96,
-            56,
-            56
-          ],
-          "stride": [
-            301056,
-            1,
-            5376,
-            96
-          ]
         }
       ],
       "source_models": [

@@ -11,6 +11,15 @@
             1024
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            1024,
+            1024
+          ]
         }
       ],
       "source_models": [
@@ -28,6 +37,15 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            1024,
+            1024
+          ]
         }
       ],
       "source_models": [
@@ -45,6 +63,15 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            1024,
+            1024
+          ]
         }
       ],
       "source_models": [
@@ -62,6 +89,15 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            1024,
+            1024
+          ]
         }
       ],
       "source_models": [
@@ -79,6 +115,15 @@
             1024
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            1024,
+            1024
+          ]
         }
       ],
       "source_models": [
@@ -96,6 +141,15 @@
             2048
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            1024,
+            1024
+          ]
         }
       ],
       "source_models": [
@@ -113,6 +167,15 @@
             1024
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            1024,
+            1024
+          ]
         }
       ],
       "source_models": [
@@ -130,6 +193,15 @@
             128
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8,
+            -1,
+            1024,
+            1024
+          ]
         }
       ],
       "source_models": [

@@ -48,6 +48,33 @@
             240
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            4,
+            16,
+            -1
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            30720,
+            4,
+            2,
+            2
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            240,
+            8,
+            8
+          ]
         }
       ],
       "source_models": [

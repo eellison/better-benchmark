@@ -29,6 +29,21 @@
             2048
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4,
+            1024,
+            2048
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            2048
+          ]
         }
       ],
       "source_models": [

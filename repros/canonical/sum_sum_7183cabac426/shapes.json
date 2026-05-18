@@ -42,27 +42,12 @@
           "stride": null
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2560
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
             32,
             2560,
             7,
             7
-          ],
-          "stride": [
-            125440,
-            1,
-            17920,
-            2560
           ]
         }
       ],

@@ -48,6 +48,13 @@
             4096
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            1
+          ]
         }
       ],
       "source_models": [
@@ -102,6 +109,13 @@
             768
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            768
+          ]
         }
       ],
       "source_models": [
@@ -156,6 +170,13 @@
             768
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            4096,
+            1
+          ]
         }
       ],
       "source_models": [
@@ -210,6 +231,13 @@
             768
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            768
+          ]
         }
       ],
       "source_models": [
@@ -264,6 +292,13 @@
             768
           ],
           "stride": null
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            1
+          ]
         }
       ],
       "source_models": [

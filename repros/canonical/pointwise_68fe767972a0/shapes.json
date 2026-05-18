@@ -15,6 +15,21 @@
           "stride": null
         },
         {
+          "kind": "shape",
+          "dims": [
+            32,
+            1,
+            768
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            768
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -24,19 +39,28 @@
           "stride": null
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            3,
             32,
             12,
             256,
             64
-          ],
-          "stride": [
-            196608,
-            64,
-            768,
-            1
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            32,
+            256,
+            2304
+          ]
+        },
+        {
+          "kind": "shape",
+          "dims": [
+            8192,
+            2304
           ]
         },
         {
@@ -54,31 +78,6 @@
             768,
             1
           ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            12,
-            256,
-            64
-          ],
-          "stride": [
-            196608,
-            64,
-            768,
-            1
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2304,
-            768
-          ],
-          "stride": null
         }
       ],
       "source_models": [

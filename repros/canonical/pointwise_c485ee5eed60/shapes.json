@@ -59,6 +59,13 @@
           "max_val": 2
         },
         {
+          "kind": "shape",
+          "dims": [
+            4096,
+            1024
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [

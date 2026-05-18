@@ -44,18 +44,16 @@
           "stride": null
         },
         {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
+          "kind": "shape",
+          "dims": [
+            8,
             1280
-          ],
-          "stride": null
+          ]
         },
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            1000,
             1280
           ],
           "stride": null

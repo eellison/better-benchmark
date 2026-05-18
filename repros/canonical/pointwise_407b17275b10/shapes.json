@@ -4,6 +4,13 @@
     "hf_reformer_inference_d69025d3": {
       "inputs": [
         {
+          "kind": "shape",
+          "dims": [
+            8,
+            4096
+          ]
+        },
+        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
