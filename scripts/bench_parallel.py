@@ -170,8 +170,10 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
 
 def main():
     parser = argparse.ArgumentParser(description="Parallel GPU benchmark runner")
-    parser.add_argument("paths", nargs="+", type=Path,
+    parser.add_argument("paths", nargs="*", type=Path,
                         help="repro.py files or directories to benchmark")
+    parser.add_argument("--benchmark-set", type=Path, default=None,
+                        help="Path to a frozen benchmark set JSON (e.g. benchmarks/v1.json)")
     parser.add_argument("--device-kind", default=None,
                         help="GPU kind to use (e.g. H100, B200). Default: all GPUs")
     parser.add_argument("--max-workers", type=int, default=None,
@@ -196,10 +198,32 @@ def main():
 
     # Compare mode: just read existing perf.json and diff
     if args.compare:
-        _run_compare(args.paths, args.compare[0], args.compare[1])
+        paths = args.paths or [Path("repros/canonical")]
+        _run_compare(paths, args.compare[0], args.compare[1])
         return
 
-    repros = find_repros(args.paths)
+    # Load benchmark set if specified
+    benchmark_entries = None
+    if args.benchmark_set:
+        bset = json.loads(args.benchmark_set.read_text())
+        benchmark_entries = bset.get("benchmarks", [])
+        canonical_dir = Path("repros/canonical")
+        repros = []
+        for entry in benchmark_entries:
+            repro_path = canonical_dir / entry["repro"] / "repro.py"
+            if repro_path.exists():
+                repros.append(repro_path)
+        # Deduplicate (same repro appears multiple times for different shapes)
+        repros = sorted(set(repros))
+        # Pass shape info to workers via the all_shapes mechanism
+        args.all_shapes = True
+        print(f"Benchmark set: {args.benchmark_set.name} "
+              f"({len(benchmark_entries)} points, {len(repros)} unique repros)")
+    elif args.paths:
+        repros = find_repros(args.paths)
+    else:
+        repros = find_repros([Path("repros/canonical")])
+
     if not repros:
         print("No repro.py files found.")
         return
