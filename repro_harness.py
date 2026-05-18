@@ -365,6 +365,26 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
             if name is not None:
                 inputs = make_inputs_from_config(configs[name])
                 label = name
+                # If shapes.json doesn't include shape params but forward() expects them,
+                # merge shape params from _default_make_inputs at the correct positions
+                default_inputs = make_inputs_fn()
+                if len(inputs) < len(default_inputs):
+                    # Build merged list: use config tensors where available,
+                    # fill shape params (plain lists/ints) from defaults
+                    merged = []
+                    config_idx = 0
+                    for di in default_inputs:
+                        if isinstance(di, (list, int)) and not isinstance(di, torch.Tensor):
+                            # Shape param or scalar — take from default
+                            merged.append(di)
+                        else:
+                            # Tensor — take from config if available
+                            if config_idx < len(inputs):
+                                merged.append(inputs[config_idx])
+                                config_idx += 1
+                            else:
+                                merged.append(di)
+                    inputs = merged
             else:
                 inputs = make_inputs_fn()
                 label = "default"
