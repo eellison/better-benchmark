@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "46e731175c1d",
+  "configs": {
+    "timm_mobilevit_s_inference_f0be7762": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            240,
+            7,
+            7
+          ],
+          "stride": [
+            11760,
+            1,
+            1680,
+            240
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_inference"
+      ],
+      "shape_hash": "f0be7762"
+    }
+  }
+}

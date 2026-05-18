@@ -236,6 +236,55 @@
         "hf_GPTNeoForSequenceClassification_inference"
       ],
       "shape_hash": "4a74c77e"
+    },
+    "hf_gptneoforcausallm_inference_40c36f89": {
+      "inputs": [
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            2048,
+            2048
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            64,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            512
+          ],
+          "stride": null,
+          "max_val": 4
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            2048
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_gptneoforcausallm_inference"
+      ],
+      "shape_hash": "40c36f89"
     }
   }
 }

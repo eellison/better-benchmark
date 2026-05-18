@@ -1,4 +1,141 @@
 {
   "pattern_hash": "c220b5b6850e",
-  "configs": {}
+  "configs": {
+    "timm_visformer_small_inference_c82019c2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            48,
+            49,
+            49
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            6,
+            49,
+            128
+          ],
+          "stride": [
+            112896,
+            128,
+            2304,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_inference"
+      ],
+      "shape_hash": "c82019c2"
+    },
+    "timm_visformer_small_inference_36d19cd2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            48,
+            196,
+            196
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            6,
+            196,
+            64
+          ],
+          "stride": [
+            225792,
+            64,
+            1152,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_inference"
+      ],
+      "shape_hash": "36d19cd2"
+    },
+    "timm_visformer_small_training_c82019c2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            48,
+            49,
+            49
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            6,
+            49,
+            128
+          ],
+          "stride": [
+            112896,
+            128,
+            2304,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_training"
+      ],
+      "shape_hash": "c82019c2"
+    },
+    "timm_visformer_small_training_36d19cd2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            48,
+            196,
+            196
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            6,
+            196,
+            64
+          ],
+          "stride": [
+            225792,
+            64,
+            1152,
+            1
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_training"
+      ],
+      "shape_hash": "36d19cd2"
+    }
+  }
 }

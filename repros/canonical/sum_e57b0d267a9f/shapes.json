@@ -58,6 +58,47 @@
         "hf_DebertaV2ForMaskedLM_training"
       ],
       "shape_hash": "cf8de827"
+    },
+    "hf_debertav2formaskedlm_training_c7639093": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            4,
+            24,
+            512,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            24,
+            512,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_debertav2formaskedlm_training"
+      ],
+      "shape_hash": "c7639093"
     }
   }
 }

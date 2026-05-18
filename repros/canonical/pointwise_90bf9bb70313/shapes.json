@@ -242,6 +242,23 @@
         "hf_blenderbotforcausallm_training"
       ],
       "shape_hash": "92e26b76"
+    },
+    "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_training_92e26b76": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "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_training"
+      ],
+      "shape_hash": "92e26b76"
     }
   }
 }

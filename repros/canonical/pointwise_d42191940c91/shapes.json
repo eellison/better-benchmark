@@ -33,6 +33,32 @@
         "timm_vit_base_patch16_siglip_256_training"
       ],
       "shape_hash": "d46a8339"
+    },
+    "timm_vit_base_patch16_siglip_256_training_fb8649aa": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch16_siglip_256_training"
+      ],
+      "shape_hash": "fb8649aa"
     }
   }
 }

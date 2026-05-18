@@ -25,6 +25,23 @@
         "hf_DebertaV2ForMaskedLM_inference"
       ],
       "shape_hash": "0fceceb9"
+    },
+    "hf_debertav2formaskedlm_inference_43ee402a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            128100
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_debertav2formaskedlm_inference"
+      ],
+      "shape_hash": "43ee402a"
     }
   }
 }

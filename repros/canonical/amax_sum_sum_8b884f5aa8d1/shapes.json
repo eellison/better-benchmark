@@ -35,6 +35,34 @@
         "hf_DistillGPT2_training"
       ],
       "shape_hash": "c1756e28"
+    },
+    "hf_distillgpt2_training_bf8fded6": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            50257
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_distillgpt2_training"
+      ],
+      "shape_hash": "bf8fded6"
     }
   }
 }

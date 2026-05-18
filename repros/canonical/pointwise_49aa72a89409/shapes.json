@@ -61,6 +61,32 @@
         "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_inference"
       ],
       "shape_hash": "d4b88f30"
+    },
+    "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_inference_3f32977b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            8008
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            8008
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "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_inference"
+      ],
+      "shape_hash": "3f32977b"
     }
   }
 }
