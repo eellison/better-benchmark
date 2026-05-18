@@ -12,7 +12,7 @@
 - Memcopy SOL per-shape baseline
 
 ### Next
-- [ ] `bench_parallel.py --benchmark-set benchmarks/v1.json` support (run the frozen versioned set)
+- [x] ~~`bench_parallel.py --benchmark-set benchmarks/v1.json`~~ (DONE: runs frozen versioned set, 3557 points, ~15 min)
 - [ ] Better index bounds in capture_hook: infer valid range from scatter/gather target dims during graph analysis
 - [ ] Compute-intensity metric: tag kernels as memory-bound vs compute-bound (FLOPs/byte ratio) so SOL gap is only reported when meaningful
 - [ ] Incremental results file (JSONL) during sweep — survive interrupts
