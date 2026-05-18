@@ -26,8 +26,9 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_DebertaV2ForMaskedLM_training"
+    "hf_DebertaV2ForMaskedLM_training",
+    "hf_debertav2formaskedlm_training"
   ]
 }

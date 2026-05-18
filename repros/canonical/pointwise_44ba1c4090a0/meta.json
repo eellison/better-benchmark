@@ -12,12 +12,14 @@
     "aten.reshape.default",
     "aten.unbind.int"
   ],
-  "n_models": 15,
+  "n_models": 17,
   "models": [
     "timm_deit_base_distilled_patch16_224_inference",
     "timm_deit_base_distilled_patch16_224_training",
     "timm_deit_tiny_patch16_224.fb_in1k_inference",
     "timm_deit_tiny_patch16_224.fb_in1k_training",
+    "timm_deit_tiny_patch16_224_inference",
+    "timm_deit_tiny_patch16_224_training",
     "timm_mobilevit_s_inference",
     "timm_mobilevit_s_training",
     "timm_swin_base_patch4_window7_224_inference",

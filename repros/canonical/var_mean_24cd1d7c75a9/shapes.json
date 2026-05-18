@@ -108,6 +108,42 @@
         "hf_PLBartForCausalLM_inference"
       ],
       "shape_hash": "1aee1cfd"
+    },
+    "hf_bartforcausallm_inference_0f5d5364": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            50265,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            512
+          ],
+          "stride": null,
+          "max_val": 50265
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1026,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bartforcausallm_inference"
+      ],
+      "shape_hash": "0f5d5364"
     }
   }
 }

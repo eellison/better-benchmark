@@ -32,7 +32,7 @@
     "aten.sum.dim_IntList",
     "prims.convert_element_type.default"
   ],
-  "n_models": 9,
+  "n_models": 12,
   "models": [
     "hf_BartForCausalLM_training",
     "hf_BlenderbotForCausalLM_training",
@@ -42,6 +42,9 @@
     "hf_PLBartForCausalLM_training",
     "hf_PegasusForCausalLM_training",
     "hf_TrOCRForCausalLM_training",
-    "hf_XGLMForCausalLM_training"
+    "hf_XGLMForCausalLM_training",
+    "hf_bartforcausallm_training",
+    "hf_blenderbotforcausallm_training",
+    "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_training"
   ]
 }

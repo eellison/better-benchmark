@@ -8,10 +8,11 @@
     "aten.embedding.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "hf_BartForCausalLM_training",
     "hf_MBartForCausalLM_training",
-    "hf_PLBartForCausalLM_training"
+    "hf_PLBartForCausalLM_training",
+    "hf_bartforcausallm_training"
   ]
 }

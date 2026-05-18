@@ -43,6 +43,41 @@
         "hf_AllenaiLongformerBase_inference"
       ],
       "shape_hash": "8dfe6e75"
+    },
+    "hf_allenailongformerbase_inference_3a2fb433": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_allenailongformerbase_inference"
+      ],
+      "shape_hash": "3a2fb433"
     }
   }
 }

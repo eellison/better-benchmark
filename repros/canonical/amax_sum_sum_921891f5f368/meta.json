@@ -33,8 +33,9 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "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_training"
+    "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_training",
+    "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_training"
   ]
 }

@@ -46,6 +46,40 @@
         "hf_AllenaiLongformerBase_training"
       ],
       "shape_hash": "0a3b54e6"
+    },
+    "hf_allenailongformerbase_inference_07cccf5d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_allenailongformerbase_inference"
+      ],
+      "shape_hash": "07cccf5d"
+    },
+    "hf_allenailongformerbase_training_07cccf5d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_allenailongformerbase_training"
+      ],
+      "shape_hash": "07cccf5d"
     }
   }
 }

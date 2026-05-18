@@ -1,111 +1,6 @@
 {
   "pattern_hash": "a7cbd072693b",
   "configs": {
-    "tlparse_timm_s2_g20_0953587b": {
-      "inputs": [
-        {
-          "dtype": "torch.float16",
-          "device": "cuda",
-          "shape": [
-            1584,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            198,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            198,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "tlparse_timm_s2_g20"
-      ],
-      "shape_hash": "0953587b"
-    },
-    "tlparse_timm_s3_g20_f744a24d": {
-      "inputs": [
-        {
-          "dtype": "torch.float16",
-          "device": "cuda",
-          "shape": [
-            25216,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            197,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            197,
-            192
-          ]
-        }
-      ],
-      "source_models": [
-        "tlparse_timm_s3_g20"
-      ],
-      "shape_hash": "f744a24d"
-    },
-    "tlparse_torchbench_s3_g62_2de2d6ff": {
-      "inputs": [
-        {
-          "dtype": "torch.float16",
-          "device": "cuda",
-          "shape": [
-            1904,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4,
-            476,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4,
-            476,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "tlparse_torchbench_s3_g62"
-      ],
-      "shape_hash": "2de2d6ff"
-    },
     "hf_albertformaskedlm_inference_369a51f8": {
       "inputs": [
         {
@@ -126,18 +21,10 @@
             4096
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            4096
-          ]
         }
       ],
       "source_models": [
-        "hf_AlbertForMaskedLM_inference"
+        "hf_albertformaskedlm_inference"
       ],
       "shape_hash": "369a51f8"
     },
@@ -161,18 +48,10 @@
             4096
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            4096
-          ]
         }
       ],
       "source_models": [
-        "hf_AlbertForMaskedLM_training"
+        "hf_albertformaskedlm_training"
       ],
       "shape_hash": "369a51f8"
     },
@@ -196,18 +75,10 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            1024,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_AllenaiLongformerBase_inference"
+        "hf_allenailongformerbase_inference"
       ],
       "shape_hash": "40b93261"
     },
@@ -231,18 +102,10 @@
             1024
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            1024,
-            1024
-          ]
         }
       ],
       "source_models": [
-        "hf_BartForCausalLM_inference"
+        "hf_bartforcausallm_inference"
       ],
       "shape_hash": "e1be0823"
     },
@@ -266,18 +129,10 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_BertForMaskedLM_inference"
+        "hf_bertformaskedlm_inference"
       ],
       "shape_hash": "3f7da3f3"
     },
@@ -301,20 +156,39 @@
             2560
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2560
-          ]
         }
       ],
       "source_models": [
-        "hf_BlenderbotForCausalLM_inference"
+        "hf_blenderbotforcausallm_inference"
       ],
       "shape_hash": "afd1799f"
+    },
+    "hf_albertformaskedlm_inference_1d1c1675": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_albertformaskedlm_inference"
+      ],
+      "shape_hash": "1d1c1675"
     },
     "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_inference_afd1799f": {
       "inputs": [
@@ -336,20 +210,174 @@
             2560
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2560
-          ]
         }
       ],
       "source_models": [
-        "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_inference"
+        "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_inference"
       ],
       "shape_hash": "afd1799f"
+    },
+    "hf_albertformaskedlm_training_1d1c1675": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_albertformaskedlm_training"
+      ],
+      "shape_hash": "1d1c1675"
+    },
+    "timm_deit_base_distilled_patch16_224_inference_aaf9bed8": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1584,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            198,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_base_distilled_patch16_224_inference"
+      ],
+      "shape_hash": "aaf9bed8"
+    },
+    "timm_deit_base_distilled_patch16_224_training_aaf9bed8": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1584,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            198,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_base_distilled_patch16_224_training"
+      ],
+      "shape_hash": "aaf9bed8"
+    },
+    "timm_deit_tiny_patch16_224_inference_c20d6d73": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1576,
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            197,
+            192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_tiny_patch16_224_inference"
+      ],
+      "shape_hash": "c20d6d73"
+    },
+    "hf_allenailongformerbase_inference_4cd87029": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_allenailongformerbase_inference"
+      ],
+      "shape_hash": "4cd87029"
+    },
+    "timm_deit_tiny_patch16_224_training_c20d6d73": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1576,
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            197,
+            192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_tiny_patch16_224_training"
+      ],
+      "shape_hash": "c20d6d73"
     },
     "hf_debertav2formaskedlm_inference_fbaba926": {
       "inputs": [
@@ -371,20 +399,66 @@
             1536
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            1536
-          ]
         }
       ],
       "source_models": [
-        "hf_DebertaV2ForMaskedLM_inference"
+        "hf_debertav2formaskedlm_inference"
       ],
       "shape_hash": "fbaba926"
+    },
+    "hf_bartforcausallm_inference_06316a82": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bartforcausallm_inference"
+      ],
+      "shape_hash": "06316a82"
+    },
+    "hf_bertformaskedlm_inference_de774af5": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bertformaskedlm_inference"
+      ],
+      "shape_hash": "de774af5"
     },
     "hf_distilbertformaskedlm_inference_90411801": {
       "inputs": [
@@ -406,1397 +480,12 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_DistilBertForMaskedLM_inference"
+        "hf_distilbertformaskedlm_inference"
       ],
       "shape_hash": "90411801"
-    },
-    "hf_distilbertformaskedlm_training_90411801": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_DistilBertForMaskedLM_training"
-      ],
-      "shape_hash": "90411801"
-    },
-    "hf_distillgpt2_inference_3f7da3f3": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_DistillGPT2_inference"
-      ],
-      "shape_hash": "3f7da3f3"
-    },
-    "hf_electraforcausallm_inference_dc9bcfac": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            256
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            256
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            256
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_ElectraForCausalLM_inference"
-      ],
-      "shape_hash": "dc9bcfac"
-    },
-    "hf_gpt2forsequenceclassification_inference_40b93261": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8192,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            1024,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            1024,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_GPT2ForSequenceClassification_inference"
-      ],
-      "shape_hash": "40b93261"
-    },
-    "hf_distilbert_train_de774af5": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2048,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4,
-            512,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_distilbert_train"
-      ],
-      "shape_hash": "de774af5"
-    },
-    "hf_gptneoforcausallm_inference_c2974415": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            2048
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            2048
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2048
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_GPTNeoForCausalLM_inference"
-      ],
-      "shape_hash": "c2974415"
-    },
-    "hf_gptneoforcausallm_training_c2974415": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            2048
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            2048
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2048
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_GPTNeoForCausalLM_training"
-      ],
-      "shape_hash": "c2974415"
-    },
-    "hf_gptneoforsequenceclassification_inference_c2974415": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            2048
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            2048
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2048
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_GPTNeoForSequenceClassification_inference"
-      ],
-      "shape_hash": "c2974415"
-    },
-    "hf_gptneoforsequenceclassification_training_c2974415": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            2048
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            2048
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2048
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_GPTNeoForSequenceClassification_training"
-      ],
-      "shape_hash": "c2974415"
-    },
-    "hf_googlefnet_inference_3f7da3f3": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_GoogleFnet_inference"
-      ],
-      "shape_hash": "3f7da3f3"
-    },
-    "hf_layoutlmformaskedlm_inference_3f7da3f3": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_LayoutLMForMaskedLM_inference"
-      ],
-      "shape_hash": "3f7da3f3"
-    },
-    "hf_m2m100forconditionalgeneration_inference_452fe86f": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_M2M100ForConditionalGeneration_inference"
-      ],
-      "shape_hash": "452fe86f"
-    },
-    "hf_mbartforcausallm_inference_e1be0823": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8192,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            1024,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            1024,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_MBartForCausalLM_inference"
-      ],
-      "shape_hash": "e1be0823"
-    },
-    "hf_megatronbertforcausallm_inference_571acbf2": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_MegatronBertForCausalLM_inference"
-      ],
-      "shape_hash": "571acbf2"
-    },
-    "torchvision_swin_t_inference_eaf77e5b": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            49,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1,
-            7,
-            7,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1,
-            7,
-            7,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "torchvision_swin_t_inference"
-      ],
-      "shape_hash": "eaf77e5b"
-    },
-    "torchvision_swin_t_inference_634844db": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            196,
-            384
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1,
-            14,
-            14,
-            384
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1,
-            14,
-            14,
-            384
-          ]
-        }
-      ],
-      "source_models": [
-        "torchvision_swin_t_inference"
-      ],
-      "shape_hash": "634844db"
-    },
-    "torchvision_swin_t_inference_e2123c64": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            784,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1,
-            28,
-            28,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1,
-            28,
-            28,
-            192
-          ]
-        }
-      ],
-      "source_models": [
-        "torchvision_swin_t_inference"
-      ],
-      "shape_hash": "e2123c64"
-    },
-    "torchvision_swin_t_inference_f0bf36e1": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            3136,
-            96
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1,
-            56,
-            56,
-            96
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1,
-            56,
-            56,
-            96
-          ]
-        }
-      ],
-      "source_models": [
-        "torchvision_swin_t_inference"
-      ],
-      "shape_hash": "f0bf36e1"
-    },
-    "torchvision_swin_t_training_881ec44a": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            12544,
-            96
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4,
-            56,
-            56,
-            96
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4,
-            56,
-            56,
-            96
-          ]
-        }
-      ],
-      "source_models": [
-        "torchvision_swin_t_training"
-      ],
-      "shape_hash": "881ec44a"
-    },
-    "torchvision_vit_b_16_inference_5ecad280": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            197,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1,
-            197,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1,
-            197,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "torchvision_vit_b_16_inference"
-      ],
-      "shape_hash": "5ecad280"
-    },
-    "hf_optforcausallm_inference_dfa43b2d": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8192,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8192,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8192,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_OPTForCausalLM_inference"
-      ],
-      "shape_hash": "dfa43b2d"
-    },
-    "hf_plbartforcausallm_inference_40b93261": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8192,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            1024,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            1024,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_PLBartForCausalLM_inference"
-      ],
-      "shape_hash": "40b93261"
-    },
-    "hf_pegasusforcausallm_inference_452fe86f": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_PegasusForCausalLM_inference"
-      ],
-      "shape_hash": "452fe86f"
-    },
-    "hf_reformer_inference_f467d290": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32768,
-            256
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            4096,
-            256
-          ],
-          "stride": [
-            2097152,
-            512,
-            1
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            4096,
-            256
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_Reformer_inference"
-      ],
-      "shape_hash": "f467d290"
-    },
-    "hf_robertaforcausallm_inference_3f7da3f3": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_RobertaForCausalLM_inference"
-      ],
-      "shape_hash": "3f7da3f3"
-    },
-    "hf_trocrforcausallm_inference_0e56e20c": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2048,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            256,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            256,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_TrOCRForCausalLM_inference"
-      ],
-      "shape_hash": "0e56e20c"
-    },
-    "hf_xglmforcausallm_inference_452fe86f": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_XGLMForCausalLM_inference"
-      ],
-      "shape_hash": "452fe86f"
-    },
-    "hf_xlnetlmheadmodel_inference_64884f00": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            512,
-            8,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            512,
-            8,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_XLNetLMHeadModel_inference"
-      ],
-      "shape_hash": "64884f00"
-    },
-    "hf_yitutechconvbert_inference_3f7da3f3": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_YituTechConvBert_inference"
-      ],
-      "shape_hash": "3f7da3f3"
-    },
-    "timm_deit_base_distilled_patch16_224_inference_33136774": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            6336,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            198,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            198,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_deit_base_distilled_patch16_224_inference"
-      ],
-      "shape_hash": "33136774"
-    },
-    "timm_deit_base_distilled_patch16_224_training_33136774": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            6336,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            198,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            198,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_deit_base_distilled_patch16_224_training"
-      ],
-      "shape_hash": "33136774"
-    },
-    "timm_deit_tiny_patch16_224.fb_in1k_inference_525a87ac": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            6304,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            197,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            197,
-            192
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_deit_tiny_patch16_224.fb_in1k_inference"
-      ],
-      "shape_hash": "525a87ac"
-    },
-    "timm_deit_tiny_patch16_224.fb_in1k_training_525a87ac": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            6304,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32,
-            197,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            197,
-            192
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_deit_tiny_patch16_224.fb_in1k_training"
-      ],
-      "shape_hash": "525a87ac"
-    },
-    "timm_mobilevit_s_inference_be1119f0": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2048,
-            240
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            16,
-            240
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            16,
-            240
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_mobilevit_s_inference"
-      ],
-      "shape_hash": "be1119f0"
-    },
-    "timm_mobilevit_s_inference_70ad3df2": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8192,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            64,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            64,
-            192
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_mobilevit_s_inference"
-      ],
-      "shape_hash": "70ad3df2"
-    },
-    "timm_mobilevit_s_inference_c56d3ef4": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32768,
-            144
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            256,
-            144
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            256,
-            144
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_mobilevit_s_inference"
-      ],
-      "shape_hash": "c56d3ef4"
-    },
-    "timm_mobilevit_s_training_be1119f0": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2048,
-            240
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            16,
-            240
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            16,
-            240
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_mobilevit_s_training"
-      ],
-      "shape_hash": "be1119f0"
-    },
-    "timm_mobilevit_s_training_70ad3df2": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8192,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            64,
-            192
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            64,
-            192
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_mobilevit_s_training"
-      ],
-      "shape_hash": "70ad3df2"
-    },
-    "timm_mobilevit_s_training_c56d3ef4": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            32768,
-            144
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            256,
-            144
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            256,
-            144
-          ]
-        }
-      ],
-      "source_models": [
-        "timm_mobilevit_s_training"
-      ],
-      "shape_hash": "c56d3ef4"
     }
   }
 }

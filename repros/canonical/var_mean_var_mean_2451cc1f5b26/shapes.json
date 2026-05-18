@@ -164,6 +164,118 @@
         "timm_inception_v3_training"
       ],
       "shape_hash": "a9856661"
+    },
+    "timm_adv_inception_v3_training_359e8105": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            5,
+            5
+          ],
+          "stride": [
+            8000,
+            1,
+            1600,
+            320
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            5,
+            5
+          ],
+          "stride": [
+            4800,
+            1,
+            960,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            12,
+            12
+          ],
+          "stride": [
+            110592,
+            1,
+            9216,
+            768
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "359e8105"
+    },
+    "timm_adv_inception_v3_training_5fab665e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            12,
+            12
+          ],
+          "stride": [
+            55296,
+            1,
+            4608,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            12,
+            12
+          ],
+          "stride": [
+            13824,
+            1,
+            1152,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            288,
+            25,
+            25
+          ],
+          "stride": [
+            180000,
+            1,
+            7200,
+            288
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "5fab665e"
     }
   }
 }

@@ -15,7 +15,7 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 7,
+  "n_models": 9,
   "models": [
     "hf_BlenderbotForCausalLM_training",
     "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_training",
@@ -23,6 +23,8 @@
     "hf_MBartForCausalLM_training",
     "hf_OPTForCausalLM_training",
     "hf_PegasusForCausalLM_training",
-    "hf_YituTechConvBert_training"
+    "hf_YituTechConvBert_training",
+    "hf_blenderbotforcausallm_training",
+    "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_training"
   ]
 }

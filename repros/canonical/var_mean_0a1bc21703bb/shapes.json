@@ -11,18 +11,10 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            1024,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_AllenaiLongformerBase_inference"
+        "hf_allenailongformerbase_inference"
       ],
       "shape_hash": "a4155d35"
     },
@@ -36,18 +28,10 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            1024,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_AllenaiLongformerBase_training"
+        "hf_allenailongformerbase_training"
       ],
       "shape_hash": "a4155d35"
     },
@@ -61,18 +45,10 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_BertForMaskedLM_inference"
+        "hf_bertformaskedlm_inference"
       ],
       "shape_hash": "13b20d0d"
     },
@@ -86,18 +62,27 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_BertForMaskedLM_training"
+        "hf_bertformaskedlm_training"
+      ],
+      "shape_hash": "13b20d0d"
+    },
+    "hf_allenailongformerbase_inference_13b20d0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_allenailongformerbase_inference"
       ],
       "shape_hash": "13b20d0d"
     },
@@ -111,20 +96,29 @@
             1536
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            1536
-          ]
         }
       ],
       "source_models": [
-        "hf_DebertaV2ForMaskedLM_inference"
+        "hf_debertav2formaskedlm_inference"
       ],
       "shape_hash": "73729168"
+    },
+    "hf_allenailongformerbase_training_13b20d0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_allenailongformerbase_training"
+      ],
+      "shape_hash": "13b20d0d"
     },
     "hf_debertav2formaskedlm_training_73729168": {
       "inputs": [
@@ -136,20 +130,29 @@
             1536
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            1536
-          ]
         }
       ],
       "source_models": [
-        "hf_DebertaV2ForMaskedLM_training"
+        "hf_debertav2formaskedlm_training"
       ],
       "shape_hash": "73729168"
+    },
+    "hf_bertformaskedlm_inference_0e7f33e1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bertformaskedlm_inference"
+      ],
+      "shape_hash": "0e7f33e1"
     },
     "hf_distilbertformaskedlm_inference_f08cde25": {
       "inputs": [
@@ -161,122 +164,14 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_DistilBertForMaskedLM_inference"
+        "hf_distilbertformaskedlm_inference"
       ],
       "shape_hash": "f08cde25"
     },
-    "hf_distilbertformaskedlm_training_f08cde25": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_DistilBertForMaskedLM_training"
-      ],
-      "shape_hash": "f08cde25"
-    },
-    "hf_electraforcausallm_inference_8405719f": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            128
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            128
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_ElectraForCausalLM_inference"
-      ],
-      "shape_hash": "8405719f"
-    },
-    "hf_electraforcausallm_training_8405719f": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            128
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            128
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_ElectraForCausalLM_training"
-      ],
-      "shape_hash": "8405719f"
-    },
-    "hf_bert_large_train_6ab23c32": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2048,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            2,
-            1024,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_bert_large_train"
-      ],
-      "shape_hash": "6ab23c32"
-    },
-    "hf_distilbert_train_0e7f33e1": {
+    "hf_bertformaskedlm_training_0e7f33e1": {
       "inputs": [
         {
           "dtype": "torch.float32",
@@ -286,220 +181,12 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            256,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_distilbert_train"
+        "hf_bertformaskedlm_training"
       ],
       "shape_hash": "0e7f33e1"
-    },
-    "hf_layoutlmformaskedlm_inference_13b20d0d": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_LayoutLMForMaskedLM_inference"
-      ],
-      "shape_hash": "13b20d0d"
-    },
-    "hf_layoutlmformaskedlm_training_13b20d0d": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_LayoutLMForMaskedLM_training"
-      ],
-      "shape_hash": "13b20d0d"
-    },
-    "hf_megatronbertforcausallm_inference_120669b8": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4,
-            1024,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_MegatronBertForCausalLM_inference"
-      ],
-      "shape_hash": "120669b8"
-    },
-    "hf_megatronbertforcausallm_training_120669b8": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4,
-            1024,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_MegatronBertForCausalLM_training"
-      ],
-      "shape_hash": "120669b8"
-    },
-    "hf_robertaforcausallm_inference_13b20d0d": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_RobertaForCausalLM_inference"
-      ],
-      "shape_hash": "13b20d0d"
-    },
-    "hf_robertaforcausallm_training_13b20d0d": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_RobertaForCausalLM_training"
-      ],
-      "shape_hash": "13b20d0d"
-    },
-    "hf_yitutechconvbert_inference_13b20d0d": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_YituTechConvBert_inference"
-      ],
-      "shape_hash": "13b20d0d"
-    },
-    "hf_yitutechconvbert_training_13b20d0d": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_YituTechConvBert_training"
-      ],
-      "shape_hash": "13b20d0d"
     }
   }
 }

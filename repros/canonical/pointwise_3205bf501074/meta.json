@@ -16,8 +16,9 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "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_training"
+    "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_training",
+    "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_training"
   ]
 }

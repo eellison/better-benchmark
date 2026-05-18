@@ -23,9 +23,10 @@
     "prims.convert_element_type.default",
     "prims.fma.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
     "dynamo_DebertaV2ForMaskedLM",
-    "hf_DebertaV2ForMaskedLM_training"
+    "hf_DebertaV2ForMaskedLM_training",
+    "hf_debertav2formaskedlm_training"
   ]
 }

@@ -14,15 +14,6 @@
           "stride": null
         },
         {
-          "kind": "shape",
-          "dims": [
-            8,
-            32,
-            128,
-            80
-          ]
-        },
-        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -33,83 +24,37 @@
           "stride": null
         },
         {
-          "kind": "shape",
-          "dims": [
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2560,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2560,
+            2560
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
             8,
             32,
+            128,
+            80
+          ],
+          "stride": [
+            327680,
             80,
-            128
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2560
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2560
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            2560
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
             2560,
-            2560
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            2560
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2560,
-            2560
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2560
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2560
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            2560
+            1
           ]
         },
         {
@@ -129,11 +74,22 @@
           ]
         },
         {
-          "kind": "shape",
-          "dims": [
-            1024,
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2560,
             2560
-          ]
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2560,
+            2560
+          ],
+          "stride": null
         },
         {
           "dtype": "torch.float32",
@@ -149,21 +105,6 @@
             80,
             2560,
             1
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2560
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            2560
           ]
         },
         {
@@ -177,189 +118,9 @@
         }
       ],
       "source_models": [
-        "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_training"
+        "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_training"
       ],
       "shape_hash": "e6fa2778"
-    },
-    "hf_m2m100forconditionalgeneration_training_e24f49c2": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            128,
-            64
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            16,
-            128,
-            64
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            128,
-            64,
-            128
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            16,
-            128,
-            64
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            128,
-            64
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            128,
-            64
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            1024
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            1024
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            128,
-            64
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            128,
-            64
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            1024
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            16,
-            128,
-            64
-          ],
-          "stride": [
-            131072,
-            64,
-            1024,
-            1
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            1024
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            16,
-            128,
-            64
-          ],
-          "stride": [
-            131072,
-            64,
-            1024,
-            1
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            128,
-            128,
-            64
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            1024
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            1024
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "hf_M2M100ForConditionalGeneration_training"
-      ],
-      "shape_hash": "e24f49c2"
     }
   }
 }

@@ -220,6 +220,34 @@
         "hf_TrOCRForCausalLM_training"
       ],
       "shape_hash": "f747e6d3"
+    },
+    "hf_bartforcausallm_training_0b07dc3a": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 1026
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            512,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bartforcausallm_training"
+      ],
+      "shape_hash": "0b07dc3a"
     }
   }
 }

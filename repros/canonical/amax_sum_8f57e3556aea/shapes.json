@@ -291,6 +291,60 @@
         "hf_AllenaiLongformerBase_training"
       ],
       "shape_hash": "e2da0436"
+    },
+    "hf_allenailongformerbase_training_3d166341": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            144,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_allenailongformerbase_training"
+      ],
+      "shape_hash": "3d166341"
     }
   }
 }

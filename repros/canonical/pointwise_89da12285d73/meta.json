@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "89da12285d73",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.split.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "genai_swiglu_decode"
+  ]
+}

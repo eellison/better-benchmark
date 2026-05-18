@@ -32,7 +32,7 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 10,
+  "n_models": 13,
   "models": [
     "hf_AllenaiLongformerBase_training",
     "hf_BartForCausalLM_training",
@@ -43,6 +43,9 @@
     "hf_PegasusForCausalLM_training",
     "hf_Reformer_training",
     "hf_TrOCRForCausalLM_training",
+    "hf_allenailongformerbase_training",
+    "hf_bartforcausallm_training",
+    "hf_blenderbotforcausallm_training",
     "hf_t5_base_train"
   ]
 }

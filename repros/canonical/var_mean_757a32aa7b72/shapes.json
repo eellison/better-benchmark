@@ -11,18 +11,10 @@
             128
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            128
-          ]
         }
       ],
       "source_models": [
-        "hf_AlbertForMaskedLM_inference"
+        "hf_albertformaskedlm_inference"
       ],
       "shape_hash": "8405719f"
     },
@@ -36,70 +28,46 @@
             128
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            128
-          ]
         }
       ],
       "source_models": [
-        "hf_AlbertForMaskedLM_training"
+        "hf_albertformaskedlm_training"
       ],
       "shape_hash": "8405719f"
     },
-    "hf_googlefnet_inference_13b20d0d": {
+    "hf_albertformaskedlm_inference_de5e18b7": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            4096,
-            768
+            2048,
+            128
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_GoogleFnet_inference"
+        "hf_albertformaskedlm_inference"
       ],
-      "shape_hash": "13b20d0d"
+      "shape_hash": "de5e18b7"
     },
-    "hf_googlefnet_training_13b20d0d": {
+    "hf_albertformaskedlm_training_de5e18b7": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            4096,
-            768
+            2048,
+            128
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            768
-          ]
         }
       ],
       "source_models": [
-        "hf_GoogleFnet_training"
+        "hf_albertformaskedlm_training"
       ],
-      "shape_hash": "13b20d0d"
+      "shape_hash": "de5e18b7"
     }
   }
 }

@@ -45,13 +45,14 @@
     "prims.inductor_random.default",
     "prims.iota.default"
   ],
-  "n_models": 6,
+  "n_models": 7,
   "models": [
     "hf_BertForMaskedLM_training",
     "hf_DistilBertForMaskedLM_training",
     "hf_ElectraForCausalLM_training",
     "hf_RobertaForCausalLM_training",
     "hf_bert_large_train",
+    "hf_bertformaskedlm_training",
     "hf_distilbert_train"
   ]
 }

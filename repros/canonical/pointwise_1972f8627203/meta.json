@@ -17,9 +17,11 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
     "hf_AllenaiLongformerBase_inference",
-    "hf_AllenaiLongformerBase_training"
+    "hf_AllenaiLongformerBase_training",
+    "hf_allenailongformerbase_inference",
+    "hf_allenailongformerbase_training"
   ]
 }

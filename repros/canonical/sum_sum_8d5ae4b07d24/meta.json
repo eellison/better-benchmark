@@ -24,8 +24,9 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_AlbertForMaskedLM_training"
+    "hf_AlbertForMaskedLM_training",
+    "hf_albertformaskedlm_training"
   ]
 }

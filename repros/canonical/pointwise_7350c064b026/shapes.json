@@ -80,322 +80,6 @@
       ],
       "shape_hash": "89078cdd"
     },
-    "hf_debertav2formaskedlm_training_2f165b2f": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            1536
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1536
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1536
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4096,
-            1536
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1536,
-            1536
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1536,
-            1536
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "hf_DebertaV2ForMaskedLM_training"
-      ],
-      "shape_hash": "2f165b2f"
-    },
-    "hf_distilbertformaskedlm_training_59b294db": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            128,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            768
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768,
-            768
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "hf_DistilBertForMaskedLM_training"
-      ],
-      "shape_hash": "59b294db"
-    },
-    "hf_bert_large_train_bec97ffa": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4,
-            512,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            2048,
-            1024
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            1024
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            1024
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "hf_bert_large_train"
-      ],
-      "shape_hash": "bec97ffa"
-    },
-    "hf_distilbert_train_a068d5ad": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4,
-            512,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            2048,
-            768
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768,
-            768
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "hf_distilbert_train"
-      ],
-      "shape_hash": "a068d5ad"
-    },
     "hf_layoutlmformaskedlm_training_89078cdd": {
       "inputs": [
         {
@@ -553,6 +237,150 @@
         "hf_RobertaForCausalLM_training"
       ],
       "shape_hash": "89078cdd"
+    },
+    "hf_debertav2formaskedlm_training_2f165b2f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            1536
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1536
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1536
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1536,
+            1536
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1536,
+            1536
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_debertav2formaskedlm_training"
+      ],
+      "shape_hash": "2f165b2f"
+    },
+    "hf_bertformaskedlm_training_a068d5ad": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bertformaskedlm_training"
+      ],
+      "shape_hash": "a068d5ad"
     }
   }
 }

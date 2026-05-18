@@ -1,34 +1,16 @@
 {
   "pattern_hash": "9929e3b3c1a1",
   "configs": {
-    "timm_beit_base_patch16_224_inference_6d182c60": {
+    "timm_beit_base_patch16_224_inference_91ea6204": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            6304,
+            1576,
             2304
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            197,
-            2304
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            197,
-            3,
-            12,
-            -1
-          ]
         },
         {
           "dtype": "torch.int64",
@@ -48,58 +30,23 @@
             12
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            197,
-            197,
-            -1
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            12,
-            197,
-            197
-          ]
         }
       ],
       "source_models": [
         "timm_beit_base_patch16_224_inference"
       ],
-      "shape_hash": "6d182c60"
+      "shape_hash": "91ea6204"
     },
-    "timm_beit_base_patch16_224_training_6d182c60": {
+    "timm_beit_base_patch16_224_training_91ea6204": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            6304,
+            1576,
             2304
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            197,
-            2304
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            197,
-            3,
-            12,
-            -1
-          ]
         },
         {
           "dtype": "torch.int64",
@@ -119,29 +66,12 @@
             12
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            197,
-            197,
-            -1
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            12,
-            197,
-            197
-          ]
         }
       ],
       "source_models": [
         "timm_beit_base_patch16_224_training"
       ],
-      "shape_hash": "6d182c60"
+      "shape_hash": "91ea6204"
     }
   }
 }

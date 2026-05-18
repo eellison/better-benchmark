@@ -36,24 +36,6 @@
       ],
       "shape_hash": "08cb3aa0"
     },
-    "genai_swiglu_decode_5d73f110": {
-      "inputs": [
-        {
-          "dtype": "torch.bfloat16",
-          "device": "cuda",
-          "shape": [
-            32,
-            1,
-            8192
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "genai_swiglu_decode"
-      ],
-      "shape_hash": "5d73f110"
-    },
     "genai_swiglu_short_prefill_fe1ef17e": {
       "inputs": [
         {

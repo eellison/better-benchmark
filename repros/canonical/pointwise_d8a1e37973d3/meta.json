@@ -11,7 +11,7 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 10,
+  "n_models": 13,
   "models": [
     "dynamo_BlenderbotForConditionalGeneration",
     "dynamo_OPTForCausalLM",
@@ -22,6 +22,9 @@
     "hf_OPTForCausalLM_training",
     "hf_PLBartForCausalLM_training",
     "hf_TrOCRForCausalLM_training",
+    "hf_bartforcausallm_training",
+    "hf_blenderbotforcausallm_training",
+    "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_training",
     "hf_t5_base_train"
   ]
 }

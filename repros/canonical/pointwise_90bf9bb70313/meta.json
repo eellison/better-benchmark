@@ -26,7 +26,7 @@
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 8,
+  "n_models": 11,
   "models": [
     "hf_BartForCausalLM_training",
     "hf_BlenderbotForCausalLM_training",
@@ -35,6 +35,9 @@
     "hf_MBartForCausalLM_training",
     "hf_OPTForCausalLM_training",
     "hf_PLBartForCausalLM_training",
-    "hf_PegasusForCausalLM_training"
+    "hf_PegasusForCausalLM_training",
+    "hf_bartforcausallm_training",
+    "hf_blenderbotforcausallm_training",
+    "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_training"
   ]
 }

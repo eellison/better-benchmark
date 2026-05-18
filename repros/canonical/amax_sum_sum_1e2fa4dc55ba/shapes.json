@@ -420,6 +420,60 @@
         "hf_TrOCRForCausalLM_training"
       ],
       "shape_hash": "ab263c49"
+    },
+    "hf_allenailongformerbase_training_0b7a7b94": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            50265
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_allenailongformerbase_training"
+      ],
+      "shape_hash": "0b7a7b94"
+    },
+    "hf_bartforcausallm_training_170b031a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2048,
+            50265
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        }
+      ],
+      "source_models": [
+        "hf_bartforcausallm_training"
+      ],
+      "shape_hash": "170b031a"
     }
   }
 }

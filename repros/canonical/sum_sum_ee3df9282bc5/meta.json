@@ -23,11 +23,13 @@
     "aten.sum.dim_IntList",
     "prims.convert_element_type.default"
   ],
-  "n_models": 4,
+  "n_models": 6,
   "models": [
     "hf_AllenaiLongformerBase_training",
     "hf_BartForCausalLM_training",
     "hf_PLBartForCausalLM_training",
-    "hf_TrOCRForCausalLM_training"
+    "hf_TrOCRForCausalLM_training",
+    "hf_allenailongformerbase_training",
+    "hf_bartforcausallm_training"
   ]
 }

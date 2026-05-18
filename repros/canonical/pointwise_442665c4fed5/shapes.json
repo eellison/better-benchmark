@@ -162,6 +162,60 @@
         "hf_TrOCRForCausalLM_training"
       ],
       "shape_hash": "64c8e89d"
+    },
+    "hf_bartforcausallm_training_5a485da9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bartforcausallm_training"
+      ],
+      "shape_hash": "5a485da9"
     }
   }
 }

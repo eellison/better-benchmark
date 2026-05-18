@@ -86,6 +86,36 @@
         "timm_nfnet_l0_training"
       ],
       "shape_hash": "b8c999ef"
+    },
+    "timm_dm_nfnet_f0_training_6663780d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_training"
+      ],
+      "shape_hash": "6663780d"
     }
   }
 }

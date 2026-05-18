@@ -78,6 +78,32 @@
         "hf_PLBartForCausalLM_training"
       ],
       "shape_hash": "401de7c7"
+    },
+    "hf_bartforcausallm_training_941a5e4a": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1026,
+            1024
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bartforcausallm_training"
+      ],
+      "shape_hash": "941a5e4a"
     }
   }
 }

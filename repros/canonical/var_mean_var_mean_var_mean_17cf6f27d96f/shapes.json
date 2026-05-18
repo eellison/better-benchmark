@@ -312,6 +312,222 @@
         "timm_inception_v3_training"
       ],
       "shape_hash": "0238e9bb"
+    },
+    "timm_adv_inception_v3_training_9f97c3e7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            12,
+            12
+          ],
+          "stride": [
+            27648,
+            1,
+            2304,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            12,
+            12
+          ],
+          "stride": [
+            27648,
+            1,
+            2304,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            12,
+            12
+          ],
+          "stride": [
+            27648,
+            1,
+            2304,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            12,
+            12
+          ],
+          "stride": [
+            27648,
+            1,
+            2304,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "9f97c3e7"
+    },
+    "timm_adv_inception_v3_training_2523077f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            25,
+            25
+          ],
+          "stride": [
+            40000,
+            1,
+            1600,
+            64
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            25,
+            25
+          ],
+          "stride": [
+            40000,
+            1,
+            1600,
+            64
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            25,
+            25
+          ],
+          "stride": [
+            60000,
+            1,
+            2400,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            25,
+            25
+          ],
+          "stride": [
+            40000,
+            1,
+            1600,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "2523077f"
+    },
+    "timm_adv_inception_v3_training_8e8a9814": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            25,
+            25
+          ],
+          "stride": [
+            40000,
+            1,
+            1600,
+            64
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            25,
+            25
+          ],
+          "stride": [
+            40000,
+            1,
+            1600,
+            64
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            25,
+            25
+          ],
+          "stride": [
+            60000,
+            1,
+            2400,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            25,
+            25
+          ],
+          "stride": [
+            20000,
+            1,
+            800,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "8e8a9814"
     }
   }
 }

@@ -18,7 +18,7 @@
     "aten.reshape.default",
     "aten.where.self"
   ],
-  "n_models": 15,
+  "n_models": 21,
   "models": [
     "hf_BartForCausalLM_inference",
     "hf_BartForCausalLM_training",
@@ -34,6 +34,12 @@
     "hf_PLBartForCausalLM_training",
     "hf_PegasusForCausalLM_inference",
     "hf_PegasusForCausalLM_training",
+    "hf_bartforcausallm_inference",
+    "hf_bartforcausallm_training",
+    "hf_blenderbotforcausallm_inference",
+    "hf_blenderbotforcausallm_training",
+    "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_inference",
+    "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_training",
     "tlparse_huggingface_s1_g5"
   ]
 }

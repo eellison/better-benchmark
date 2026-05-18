@@ -35,7 +35,7 @@
     "aten.where.self",
     "prims.iota.default"
   ],
-  "n_models": 24,
+  "n_models": 31,
   "models": [
     "hf_AlbertForMaskedLM_training",
     "hf_AllenaiLongformerBase_training",
@@ -58,7 +58,14 @@
     "hf_TrOCRForCausalLM_training",
     "hf_XLNetLMHeadModel_training",
     "hf_YituTechConvBert_training",
+    "hf_albertformaskedlm_training",
+    "hf_allenailongformerbase_training",
+    "hf_bartforcausallm_training",
     "hf_bert_large_train",
+    "hf_bertformaskedlm_training",
+    "hf_blenderbotforcausallm_training",
+    "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_training",
+    "hf_debertav2formaskedlm_training",
     "hf_distilbert_train",
     "hf_t5_base_train"
   ]

@@ -229,56 +229,149 @@
       ],
       "shape_hash": "f952816a"
     },
-    "tritonbench_mean_dim1_32768x1024_5ed612bf": {
+    "timm_dm_nfnet_f0_inference_70b5e0b7": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32768,
-            1024
+            8,
+            1536,
+            7,
+            7
           ],
-          "stride": null
+          "stride": [
+            75264,
+            1,
+            10752,
+            1536
+          ]
         }
       ],
       "source_models": [
-        "tritonbench_mean_dim1_32768x1024"
+        "timm_dm_nfnet_f0_inference"
       ],
-      "shape_hash": "5ed612bf"
+      "shape_hash": "70b5e0b7"
     },
-    "tritonbench_mean_dim1_4096x4096_6f365176": {
+    "timm_dm_nfnet_f0_inference_0c93ec02": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            4096,
-            4096
+            8,
+            1536,
+            14,
+            14
           ],
-          "stride": null
+          "stride": [
+            301056,
+            1,
+            21504,
+            1536
+          ]
         }
       ],
       "source_models": [
-        "tritonbench_mean_dim1_4096x4096"
+        "timm_dm_nfnet_f0_inference"
       ],
-      "shape_hash": "6f365176"
+      "shape_hash": "0c93ec02"
     },
-    "tritonbench_mean_dim1_8192x8192_c8e62511": {
+    "timm_dm_nfnet_f0_inference_95f5f8ef": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            8192,
-            8192
+            8,
+            512,
+            28,
+            28
           ],
-          "stride": null
+          "stride": [
+            401408,
+            1,
+            14336,
+            512
+          ]
         }
       ],
       "source_models": [
-        "tritonbench_mean_dim1_8192x8192"
+        "timm_dm_nfnet_f0_inference"
       ],
-      "shape_hash": "c8e62511"
+      "shape_hash": "95f5f8ef"
+    },
+    "timm_dm_nfnet_f0_training_70b5e0b7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1536,
+            7,
+            7
+          ],
+          "stride": [
+            75264,
+            1,
+            10752,
+            1536
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_training"
+      ],
+      "shape_hash": "70b5e0b7"
+    },
+    "timm_dm_nfnet_f0_training_0c93ec02": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1536,
+            14,
+            14
+          ],
+          "stride": [
+            301056,
+            1,
+            21504,
+            1536
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_training"
+      ],
+      "shape_hash": "0c93ec02"
+    },
+    "timm_dm_nfnet_f0_training_95f5f8ef": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            28,
+            28
+          ],
+          "stride": [
+            401408,
+            1,
+            14336,
+            512
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_training"
+      ],
+      "shape_hash": "95f5f8ef"
     }
   }
 }

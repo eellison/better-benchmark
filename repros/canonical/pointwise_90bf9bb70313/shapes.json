@@ -208,6 +208,23 @@
         "hf_PegasusForCausalLM_training"
       ],
       "shape_hash": "baee1e2d"
+    },
+    "hf_bartforcausallm_training_09ab2074": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bartforcausallm_training"
+      ],
+      "shape_hash": "09ab2074"
     }
   }
 }

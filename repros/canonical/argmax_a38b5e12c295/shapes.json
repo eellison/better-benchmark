@@ -35,41 +35,6 @@
         "hf_GPT2ForSequenceClassification_inference"
       ],
       "shape_hash": "0da1f411"
-    },
-    "hf_gptneoforsequenceclassification_inference_c2d24c41": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            2
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            2
-          ]
-        },
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            8,
-            128
-          ],
-          "stride": null,
-          "max_val": 2
-        }
-      ],
-      "source_models": [
-        "hf_GPTNeoForSequenceClassification_inference"
-      ],
-      "shape_hash": "c2d24c41"
     }
   }
 }

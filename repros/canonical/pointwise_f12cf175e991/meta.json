@@ -30,11 +30,12 @@
     "aten.sub.Tensor",
     "aten.tanh.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "hf_AlbertForMaskedLM_training",
     "hf_GPTNeoForCausalLM_training",
     "hf_GPTNeoForSequenceClassification_training",
-    "hf_GoogleFnet_training"
+    "hf_GoogleFnet_training",
+    "hf_albertformaskedlm_training"
   ]
 }

@@ -363,6 +363,60 @@
         "hf_AllenaiLongformerBase_inference"
       ],
       "shape_hash": "e2da0436"
+    },
+    "hf_allenailongformerbase_inference_3d166341": {
+      "inputs": [
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            144,
+            512,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            1024
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_allenailongformerbase_inference"
+      ],
+      "shape_hash": "3d166341"
     }
   }
 }

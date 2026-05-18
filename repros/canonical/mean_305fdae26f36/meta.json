@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "305fdae26f36",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.mean.dim"
+  ],
+  "n_models": 1,
+  "models": [
+    "tritonbench_mean_dim1_4096x4096"
+  ]
+}

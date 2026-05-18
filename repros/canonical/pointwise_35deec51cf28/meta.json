@@ -10,7 +10,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 41,
+  "n_models": 45,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_AlbertForMaskedLM_inference",
@@ -44,7 +44,11 @@
     "hf_T5ForConditionalGeneration_training",
     "hf_T5Small_training",
     "hf_XGLMForCausalLM_training",
+    "hf_albertformaskedlm_training",
     "hf_bert_large_train",
+    "hf_bertformaskedlm_training",
+    "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_training",
+    "hf_debertav2formaskedlm_training",
     "hf_distilbert_train",
     "hf_t5_base_train",
     "timm_swin_base_patch4_window7_224_training",

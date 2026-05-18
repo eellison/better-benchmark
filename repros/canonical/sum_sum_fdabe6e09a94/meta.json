@@ -22,15 +22,17 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 9,
+  "n_models": 11,
   "models": [
     "hf_AlbertForMaskedLM_training",
     "hf_DistilBertForMaskedLM_training",
     "hf_GPTNeoForCausalLM_training",
     "hf_GPTNeoForSequenceClassification_training",
+    "hf_albertformaskedlm_training",
     "hf_distilbert_train",
     "timm_deit_base_distilled_patch16_224_training",
     "timm_deit_tiny_patch16_224.fb_in1k_training",
+    "timm_deit_tiny_patch16_224_training",
     "timm_mobilevit_s_training",
     "timm_vit_base_patch16_siglip_256_training"
   ]

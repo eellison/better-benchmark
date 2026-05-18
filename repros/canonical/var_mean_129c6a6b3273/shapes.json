@@ -240,6 +240,246 @@
         "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
       ],
       "shape_hash": "40579aeb"
+    },
+    "timm_convnextv2_nano_inference_8ce5addf": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            14,
+            14
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            320
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            14,
+            14
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            320
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano_inference"
+      ],
+      "shape_hash": "8ce5addf"
+    },
+    "timm_convnextv2_nano_inference_2ee93c15": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            28,
+            28
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            160
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            28,
+            28
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            160
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano_inference"
+      ],
+      "shape_hash": "2ee93c15"
+    },
+    "timm_convnextv2_nano_inference_3bad8c6a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            56,
+            56
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            80
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            56,
+            56
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            80
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano_inference"
+      ],
+      "shape_hash": "3bad8c6a"
+    },
+    "timm_convnextv2_nano_training_8ce5addf": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            14,
+            14
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            320
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            14,
+            14
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            320
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano_training"
+      ],
+      "shape_hash": "8ce5addf"
+    },
+    "timm_convnextv2_nano_training_2ee93c15": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            28,
+            28
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            160
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            28,
+            28
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            160
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano_training"
+      ],
+      "shape_hash": "2ee93c15"
+    },
+    "timm_convnextv2_nano_training_3bad8c6a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            56,
+            56
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            80
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            56,
+            56
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            80
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano_training"
+      ],
+      "shape_hash": "3bad8c6a"
     }
   }
 }

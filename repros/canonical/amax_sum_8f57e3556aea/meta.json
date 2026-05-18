@@ -205,8 +205,9 @@
     "prims.rev.default",
     "prims.rev.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_AllenaiLongformerBase_training"
+    "hf_AllenaiLongformerBase_training",
+    "hf_allenailongformerbase_training"
   ]
 }

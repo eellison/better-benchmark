@@ -1,70 +1,6 @@
 {
   "pattern_hash": "49aa72a89409",
   "configs": {
-    "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_inference_d4b88f30": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            8008
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1,
-            8008
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1,
-            8008
-          ]
-        }
-      ],
-      "source_models": [
-        "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_inference"
-      ],
-      "shape_hash": "d4b88f30"
-    },
-    "hf_mobilebertformaskedlm_inference_74eed1f5": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            30522
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            30522
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            30522
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_MobileBertForMaskedLM_inference"
-      ],
-      "shape_hash": "74eed1f5"
-    },
     "hf_reformer_inference_f467d290": {
       "inputs": [
         {
@@ -99,6 +35,32 @@
         "hf_Reformer_inference"
       ],
       "shape_hash": "f467d290"
+    },
+    "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_inference_d4b88f30": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1024,
+            8008
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            8008
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "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_inference"
+      ],
+      "shape_hash": "d4b88f30"
     }
   }
 }

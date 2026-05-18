@@ -1,13 +1,13 @@
 {
   "pattern_hash": "1fa49c1308fa",
   "configs": {
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_afb093c3": {
+    "timm_convnextv2_nano_training_881341bd": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             320,
             56,
             56
@@ -23,7 +23,7 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             320,
             1,
             1
@@ -34,21 +34,12 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             1,
             1,
             1
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            320,
-            56,
-            56
-          ]
         },
         {
           "dtype": "torch.float32",
@@ -57,20 +48,36 @@
             320
           ],
           "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            56,
+            56
+          ],
+          "stride": [
+            1003520,
+            1,
+            17920,
+            320
+          ]
         }
       ],
       "source_models": [
-        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+        "timm_convnextv2_nano_training"
       ],
-      "shape_hash": "afb093c3"
+      "shape_hash": "881341bd"
     },
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_a75bb065": {
+    "timm_convnextv2_nano_training_f6dd3102": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             640,
             28,
             28
@@ -86,7 +93,7 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             640,
             1,
             1
@@ -97,21 +104,12 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             1,
             1,
             1
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            640,
-            28,
-            28
-          ]
         },
         {
           "dtype": "torch.float32",
@@ -120,20 +118,36 @@
             640
           ],
           "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            640,
+            28,
+            28
+          ],
+          "stride": [
+            501760,
+            1,
+            17920,
+            640
+          ]
         }
       ],
       "source_models": [
-        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+        "timm_convnextv2_nano_training"
       ],
-      "shape_hash": "a75bb065"
+      "shape_hash": "f6dd3102"
     },
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_404fba89": {
+    "timm_convnextv2_nano_training_6419f505": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             1280,
             14,
             14
@@ -149,7 +163,7 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             1280,
             1,
             1
@@ -160,21 +174,12 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             1,
             1,
             1
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            1280,
-            14,
-            14
-          ]
         },
         {
           "dtype": "torch.float32",
@@ -183,20 +188,36 @@
             1280
           ],
           "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1280,
+            14,
+            14
+          ],
+          "stride": [
+            250880,
+            1,
+            17920,
+            1280
+          ]
         }
       ],
       "source_models": [
-        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+        "timm_convnextv2_nano_training"
       ],
-      "shape_hash": "404fba89"
+      "shape_hash": "6419f505"
     },
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_c998c5e8": {
+    "timm_convnextv2_nano_training_591d6c6e": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             2560,
             7,
             7
@@ -212,7 +233,7 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             2560,
             1,
             1
@@ -223,21 +244,12 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            32,
+            8,
             1,
             1,
             1
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            32,
-            2560,
-            7,
-            7
-          ]
         },
         {
           "dtype": "torch.float32",
@@ -246,12 +258,28 @@
             2560
           ],
           "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            2560,
+            7,
+            7
+          ],
+          "stride": [
+            125440,
+            1,
+            17920,
+            2560
+          ]
         }
       ],
       "source_models": [
-        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+        "timm_convnextv2_nano_training"
       ],
-      "shape_hash": "c998c5e8"
+      "shape_hash": "591d6c6e"
     }
   }
 }

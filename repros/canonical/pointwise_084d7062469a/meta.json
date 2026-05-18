@@ -7,8 +7,9 @@
     "aten.embedding.default",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "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_training"
+    "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_training",
+    "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_training"
   ]
 }

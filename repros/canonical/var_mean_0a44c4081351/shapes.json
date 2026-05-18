@@ -20,7 +20,7 @@
             512
           ],
           "stride": null,
-          "max_val": 2
+          "max_val": 30000
         },
         {
           "dtype": "torch.int64",
@@ -40,7 +40,7 @@
             512
           ],
           "stride": null,
-          "max_val": 2
+          "max_val": 512
         },
         {
           "dtype": "torch.float32",
@@ -59,17 +59,10 @@
             128
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512
-          ]
         }
       ],
       "source_models": [
-        "hf_AlbertForMaskedLM_inference"
+        "hf_albertformaskedlm_inference"
       ],
       "shape_hash": "fe10a6a0"
     },
@@ -93,7 +86,7 @@
             512
           ],
           "stride": null,
-          "max_val": 2
+          "max_val": 512
         },
         {
           "dtype": "torch.float32",
@@ -112,7 +105,7 @@
             512
           ],
           "stride": null,
-          "max_val": 2
+          "max_val": 30000
         },
         {
           "dtype": "torch.float32",
@@ -131,17 +124,10 @@
             128
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1,
-            512
-          ]
         }
       ],
       "source_models": [
-        "hf_AlbertForMaskedLM_training"
+        "hf_albertformaskedlm_training"
       ],
       "shape_hash": "fe10a6a0"
     },
@@ -164,7 +150,7 @@
             512
           ],
           "stride": null,
-          "max_val": 2
+          "max_val": 30522
         },
         {
           "dtype": "torch.int64",
@@ -184,7 +170,7 @@
             512
           ],
           "stride": null,
-          "max_val": 2
+          "max_val": 512
         },
         {
           "dtype": "torch.float32",
@@ -203,17 +189,10 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512
-          ]
         }
       ],
       "source_models": [
-        "hf_BertForMaskedLM_inference"
+        "hf_bertformaskedlm_inference"
       ],
       "shape_hash": "d9e962ac"
     },
@@ -237,7 +216,7 @@
             512
           ],
           "stride": null,
-          "max_val": 2
+          "max_val": 512
         },
         {
           "dtype": "torch.float32",
@@ -256,7 +235,7 @@
             512
           ],
           "stride": null,
-          "max_val": 2
+          "max_val": 30522
         },
         {
           "dtype": "torch.float32",
@@ -275,192 +254,21 @@
             768
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1,
-            512
-          ]
         }
       ],
       "source_models": [
-        "hf_BertForMaskedLM_training"
+        "hf_bertformaskedlm_training"
       ],
       "shape_hash": "d9e962ac"
     },
-    "hf_electraforcausallm_inference_cab56dc3": {
+    "hf_albertformaskedlm_inference_af1f7bf6": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            30522,
+            30000,
             128
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            8,
-            512
-          ],
-          "stride": null,
-          "max_val": 2
-        },
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            1,
-            512
-          ],
-          "stride": null,
-          "max_val": 2
-        },
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            1,
-            512
-          ],
-          "stride": null,
-          "max_val": 2
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2,
-            128
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            512,
-            128
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_ElectraForCausalLM_inference"
-      ],
-      "shape_hash": "cab56dc3"
-    },
-    "hf_electraforcausallm_training_cab56dc3": {
-      "inputs": [
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            1,
-            512
-          ],
-          "stride": null,
-          "max_val": 2
-        },
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            1,
-            512
-          ],
-          "stride": null,
-          "max_val": 2
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            30522,
-            128
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            8,
-            512
-          ],
-          "stride": null,
-          "max_val": 2
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            2,
-            128
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            512,
-            128
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1,
-            512
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_ElectraForCausalLM_training"
-      ],
-      "shape_hash": "cab56dc3"
-    },
-    "hf_bert_large_train_23359106": {
-      "inputs": [
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            1,
-            512
-          ],
-          "stride": null,
-          "max_val": 2
-        },
-        {
-          "dtype": "torch.int64",
-          "device": "cuda",
-          "shape": [
-            1,
-            512
-          ],
-          "stride": null,
-          "max_val": 2
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            30522,
-            1024
           ],
           "stride": null
         },
@@ -472,14 +280,34 @@
             512
           ],
           "stride": null,
+          "max_val": 30000
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
           "max_val": 2
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 512
         },
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
             2,
-            1024
+            128
           ],
           "stride": null
         },
@@ -488,22 +316,210 @@
           "device": "cuda",
           "shape": [
             512,
-            1024
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_albertformaskedlm_inference"
+      ],
+      "shape_hash": "af1f7bf6"
+    },
+    "hf_albertformaskedlm_training_af1f7bf6": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 512
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            30000,
+            128
           ],
           "stride": null
         },
         {
-          "kind": "shape",
-          "dims": [
-            1,
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
             512
-          ]
+          ],
+          "stride": null,
+          "max_val": 30000
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            128
+          ],
+          "stride": null
         }
       ],
       "source_models": [
-        "hf_bert_large_train"
+        "hf_albertformaskedlm_training"
       ],
-      "shape_hash": "23359106"
+      "shape_hash": "af1f7bf6"
+    },
+    "hf_bertformaskedlm_inference_76545b57": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            30522,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            512
+          ],
+          "stride": null,
+          "max_val": 30522
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 512
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bertformaskedlm_inference"
+      ],
+      "shape_hash": "76545b57"
+    },
+    "hf_bertformaskedlm_training_76545b57": {
+      "inputs": [
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1,
+            512
+          ],
+          "stride": null,
+          "max_val": 512
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            30522,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            4,
+            512
+          ],
+          "stride": null,
+          "max_val": 30522
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_bertformaskedlm_training"
+      ],
+      "shape_hash": "76545b57"
     }
   }
 }

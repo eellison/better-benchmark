@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "89da12285d73",
+  "configs": {
+    "genai_swiglu_decode_5d73f110": {
+      "inputs": [
+        {
+          "dtype": "torch.bfloat16",
+          "device": "cuda",
+          "shape": [
+            32,
+            1,
+            8192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "genai_swiglu_decode"
+      ],
+      "shape_hash": "5d73f110"
+    }
+  }
+}

@@ -120,6 +120,166 @@
         "timm_dm_nfnet_f0_training"
       ],
       "shape_hash": "04de1f33"
+    },
+    "timm_dm_nfnet_f0_training_3f881029": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            113,
+            113
+          ],
+          "stride": [
+            817216,
+            1,
+            7232,
+            64
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            112,
+            112
+          ],
+          "stride": [
+            802816,
+            1,
+            7168,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_training"
+      ],
+      "shape_hash": "3f881029"
+    },
+    "timm_dm_nfnet_f0_training_b54baf30": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            256,
+            57,
+            57
+          ],
+          "stride": [
+            831744,
+            1,
+            14592,
+            256
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            256,
+            56,
+            56
+          ],
+          "stride": [
+            802816,
+            1,
+            14336,
+            256
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_training"
+      ],
+      "shape_hash": "b54baf30"
+    },
+    "timm_dm_nfnet_f0_training_7d6abd40": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            29,
+            29
+          ],
+          "stride": [
+            645888,
+            1,
+            22272,
+            768
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            28,
+            28
+          ],
+          "stride": [
+            602112,
+            1,
+            21504,
+            768
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_training"
+      ],
+      "shape_hash": "7d6abd40"
+    },
+    "timm_dm_nfnet_f0_training_3c0719b8": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            15,
+            15
+          ],
+          "stride": [
+            172800,
+            1,
+            11520,
+            768
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            14,
+            14
+          ],
+          "stride": [
+            150528,
+            1,
+            10752,
+            768
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_training"
+      ],
+      "shape_hash": "3c0719b8"
     }
   }
 }

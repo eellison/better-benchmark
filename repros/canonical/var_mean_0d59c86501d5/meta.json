@@ -11,10 +11,12 @@
     "aten.permute.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
     "timm_convnext_tiny",
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference",
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training",
+    "timm_convnextv2_nano_inference",
+    "timm_convnextv2_nano_training"
   ]
 }

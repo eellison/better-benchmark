@@ -1,0 +1,71 @@
+"""
+Standalone repro captured via capture_hook.
+Label: timm_ghostnet_100_training
+Pattern hash: f43627991d11
+Shape hash: d8a703bf
+"""
+import sys
+from pathlib import Path
+
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+class Repro(torch.nn.Module):
+    def forward(self, getitem_163: "f32[8, 160, 7, 7]", convolution_92: "f32[8, 80, 7, 7]", unsqueeze_334: "f32[1, 80, 1, 1]", squeeze_235: "f32[80]", primals_502: "f32[80]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:445 in forward, code: x += self.shortcut(shortcut)
+        clone_default: "f32[8, 160, 7, 7]" = torch.ops.aten.clone.default(getitem_163, memory_format = torch.contiguous_format)
+        copy_default: "f32[8, 160, 7, 7]" = torch.ops.aten.copy.default(getitem_163, clone_default);  getitem_163 = clone_default = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:70 in forward, code: out = torch.cat([x1, x2], dim=1)
+        slice_tensor: "f32[8, 80, 7, 7]" = torch.ops.aten.slice.Tensor(copy_default, 1, 80, 160);  copy_default = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:69 in forward, code: x2 = self.cheap_operation(x1)
+        sum_dim_int_list: "f32[80]" = torch.ops.aten.sum.dim_IntList(slice_tensor, [0, 2, 3])
+        sub_tensor: "f32[8, 80, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_92, unsqueeze_334);  convolution_92 = unsqueeze_334 = None
+        mul_tensor: "f32[8, 80, 7, 7]" = torch.ops.aten.mul.Tensor(slice_tensor, sub_tensor)
+        sum_dim_int_list_1: "f32[80]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [0, 2, 3]);  mul_tensor = None
+        mul_tensor_1: "f32[80]" = torch.ops.aten.mul.Tensor(sum_dim_int_list, 0.002551020408163265);  sum_dim_int_list = None
+        unsqueeze_default: "f32[1, 80]" = torch.ops.aten.unsqueeze.default(mul_tensor_1, 0);  mul_tensor_1 = None
+        unsqueeze_default_1: "f32[1, 80, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, 2);  unsqueeze_default = None
+        unsqueeze_default_2: "f32[1, 80, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_1, 3);  unsqueeze_default_1 = None
+        mul_tensor_2: "f32[80]" = torch.ops.aten.mul.Tensor(sum_dim_int_list_1, 0.002551020408163265);  sum_dim_int_list_1 = None
+        mul_tensor_3: "f32[80]" = torch.ops.aten.mul.Tensor(squeeze_235, squeeze_235)
+        mul_tensor_4: "f32[80]" = torch.ops.aten.mul.Tensor(mul_tensor_2, mul_tensor_3);  mul_tensor_2 = mul_tensor_3 = None
+        unsqueeze_default_3: "f32[1, 80]" = torch.ops.aten.unsqueeze.default(mul_tensor_4, 0);  mul_tensor_4 = None
+        unsqueeze_default_4: "f32[1, 80, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_3, 2);  unsqueeze_default_3 = None
+        unsqueeze_default_5: "f32[1, 80, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_4, 3);  unsqueeze_default_4 = None
+        mul_tensor_5: "f32[80]" = torch.ops.aten.mul.Tensor(squeeze_235, primals_502);  squeeze_235 = primals_502 = None
+        unsqueeze_default_6: "f32[1, 80]" = torch.ops.aten.unsqueeze.default(mul_tensor_5, 0);  mul_tensor_5 = None
+        unsqueeze_default_7: "f32[1, 80, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, 2);  unsqueeze_default_6 = None
+        unsqueeze_default_8: "f32[1, 80, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_7, 3);  unsqueeze_default_7 = None
+        mul_tensor_6: "f32[8, 80, 7, 7]" = torch.ops.aten.mul.Tensor(sub_tensor, unsqueeze_default_5);  sub_tensor = unsqueeze_default_5 = None
+        sub_tensor_1: "f32[8, 80, 7, 7]" = torch.ops.aten.sub.Tensor(slice_tensor, mul_tensor_6);  slice_tensor = mul_tensor_6 = None
+        sub_tensor_2: "f32[8, 80, 7, 7]" = torch.ops.aten.sub.Tensor(sub_tensor_1, unsqueeze_default_2);  sub_tensor_1 = unsqueeze_default_2 = None
+        mul_tensor_7: "f32[8, 80, 7, 7]" = torch.ops.aten.mul.Tensor(sub_tensor_2, unsqueeze_default_8);  sub_tensor_2 = unsqueeze_default_8 = None
+        return mul_tensor_7
+
+
+def _default_make_inputs():
+    return [
+    torch.randn(62720, dtype=torch.float32, device='cuda').as_strided([8, 160, 7, 7], [7840, 1, 1120, 160]),  # getitem_163
+    torch.randn(31360, dtype=torch.float32, device='cuda').as_strided([8, 80, 7, 7], [3920, 1, 560, 80]),  # convolution_92
+    torch.randn([1, 80, 1, 1], dtype=torch.float32, device='cuda'),
+    torch.randn([80], dtype=torch.float32, device='cuda'),
+    torch.randn([80], dtype=torch.float32, device='cuda'),
+    ]
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
+
+
+if __name__ == "__main__":
+    benchmark_repro(__file__, Repro, make_inputs)

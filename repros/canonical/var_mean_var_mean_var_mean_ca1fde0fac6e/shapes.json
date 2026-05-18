@@ -148,6 +148,110 @@
         "timm_inception_v3_training"
       ],
       "shape_hash": "10980bcd"
+    },
+    "timm_adv_inception_v3_training_6f5abfa7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            5,
+            5
+          ],
+          "stride": [
+            8000,
+            1,
+            1600,
+            320
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            5,
+            5
+          ],
+          "stride": [
+            9600,
+            1,
+            1920,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            5,
+            5
+          ],
+          "stride": [
+            9600,
+            1,
+            1920,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            5,
+            5
+          ],
+          "stride": [
+            9600,
+            1,
+            1920,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            5,
+            5
+          ],
+          "stride": [
+            9600,
+            1,
+            1920,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            5,
+            5
+          ],
+          "stride": [
+            4800,
+            1,
+            960,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "6f5abfa7"
     }
   }
 }

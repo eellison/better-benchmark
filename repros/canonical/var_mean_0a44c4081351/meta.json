@@ -18,7 +18,7 @@
     "aten.gather.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 11,
+  "n_models": 15,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_AlbertForMaskedLM_inference",
@@ -30,6 +30,10 @@
     "hf_BertForMaskedLM_training",
     "hf_ElectraForCausalLM_inference",
     "hf_ElectraForCausalLM_training",
-    "hf_bert_large_train"
+    "hf_albertformaskedlm_inference",
+    "hf_albertformaskedlm_training",
+    "hf_bert_large_train",
+    "hf_bertformaskedlm_inference",
+    "hf_bertformaskedlm_training"
   ]
 }

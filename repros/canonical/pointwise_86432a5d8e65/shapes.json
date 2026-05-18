@@ -1,67 +1,6 @@
 {
   "pattern_hash": "86432a5d8e65",
   "configs": {
-    "hf_albertformaskedlm_training_bce56cb6": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            4096
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4096,
-            1
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_AlbertForMaskedLM_training"
-      ],
-      "shape_hash": "bce56cb6"
-    },
     "hf_distillgpt2_inference_d3a4508d": {
       "inputs": [
         {
@@ -120,67 +59,6 @@
       ],
       "source_models": [
         "hf_DistillGPT2_inference"
-      ],
-      "shape_hash": "d3a4508d"
-    },
-    "hf_distillgpt2_training_d3a4508d": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8,
-            512,
-            1
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768
-          ],
-          "stride": null
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            768
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4096,
-            1
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_DistillGPT2_training"
       ],
       "shape_hash": "d3a4508d"
     },
@@ -245,14 +123,14 @@
       ],
       "shape_hash": "41fe5c52"
     },
-    "hf_gpt2forsequenceclassification_training_41fe5c52": {
+    "hf_albertformaskedlm_training_bce56cb6": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
             8,
-            1024,
+            512,
             1
           ],
           "stride": null
@@ -262,8 +140,8 @@
           "device": "cuda",
           "shape": [
             8,
-            1024,
-            768
+            512,
+            4096
           ],
           "stride": null
         },
@@ -272,7 +150,7 @@
           "device": "cuda",
           "shape": [
             8,
-            1024,
+            512,
             1
           ],
           "stride": null
@@ -281,7 +159,7 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            768
+            4096
           ],
           "stride": null
         },
@@ -289,22 +167,69 @@
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            768
+            4096
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8192,
-            1
-          ]
         }
       ],
       "source_models": [
-        "hf_GPT2ForSequenceClassification_training"
+        "hf_albertformaskedlm_training"
       ],
-      "shape_hash": "41fe5c52"
+      "shape_hash": "bce56cb6"
+    },
+    "hf_albertformaskedlm_training_2be9478b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4,
+            512,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_albertformaskedlm_training"
+      ],
+      "shape_hash": "2be9478b"
     }
   }
 }

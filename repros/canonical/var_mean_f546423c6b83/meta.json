@@ -16,9 +16,10 @@
     "aten.var_mean.correction",
     "prims.iota.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
     "hf_BlenderbotForCausalLM_inference",
-    "hf_PegasusForCausalLM_inference"
+    "hf_PegasusForCausalLM_inference",
+    "hf_blenderbotforcausallm_inference"
   ]
 }

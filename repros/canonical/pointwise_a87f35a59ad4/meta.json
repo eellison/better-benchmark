@@ -15,7 +15,7 @@
     "aten.reshape.default",
     "aten.tanh.default"
   ],
-  "n_models": 17,
+  "n_models": 18,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_AlbertForMaskedLM_inference",
@@ -33,6 +33,7 @@
     "hf_DistillGPT2_inference",
     "hf_DistillGPT2_training",
     "hf_GPT2ForSequenceClassification_inference",
-    "hf_GPT2ForSequenceClassification_training"
+    "hf_GPT2ForSequenceClassification_training",
+    "hf_albertformaskedlm_training"
   ]
 }

@@ -2,121 +2,23 @@
   "pattern_hash": "a478cc89108b",
   "configs": {
     "hf_bartforcausallm_training_d7517139": {
-      "inputs": [
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            -1,
-            1024,
-            1024
-          ]
-        }
-      ],
+      "inputs": [],
       "source_models": [
-        "hf_BartForCausalLM_training"
+        "hf_bartforcausallm_training"
       ],
       "shape_hash": "d7517139"
     },
     "hf_blenderbotforcausallm_training_d7517139": {
-      "inputs": [
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            -1,
-            1024,
-            1024
-          ]
-        }
-      ],
+      "inputs": [],
       "source_models": [
-        "hf_BlenderbotForCausalLM_training"
+        "hf_blenderbotforcausallm_training"
       ],
       "shape_hash": "d7517139"
     },
     "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_training_d7517139": {
-      "inputs": [
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            -1,
-            1024,
-            1024
-          ]
-        }
-      ],
+      "inputs": [],
       "source_models": [
-        "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_training"
-      ],
-      "shape_hash": "d7517139"
-    },
-    "hf_m2m100forconditionalgeneration_training_d7517139": {
-      "inputs": [
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            -1,
-            1024,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_M2M100ForConditionalGeneration_training"
-      ],
-      "shape_hash": "d7517139"
-    },
-    "hf_mbartforcausallm_training_d7517139": {
-      "inputs": [
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            -1,
-            1024,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_MBartForCausalLM_training"
-      ],
-      "shape_hash": "d7517139"
-    },
-    "hf_plbartforcausallm_training_d7517139": {
-      "inputs": [
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            -1,
-            1024,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_PLBartForCausalLM_training"
-      ],
-      "shape_hash": "d7517139"
-    },
-    "hf_pegasusforcausallm_training_d7517139": {
-      "inputs": [
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            -1,
-            1024,
-            1024
-          ]
-        }
-      ],
-      "source_models": [
-        "hf_PegasusForCausalLM_training"
+        "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_training"
       ],
       "shape_hash": "d7517139"
     }

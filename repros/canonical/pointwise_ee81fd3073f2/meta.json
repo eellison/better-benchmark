@@ -17,7 +17,7 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 9,
+  "n_models": 12,
   "models": [
     "hf_BartForCausalLM_inference",
     "hf_BlenderbotForCausalLM_inference",
@@ -27,6 +27,9 @@
     "hf_OPTForCausalLM_inference",
     "hf_PLBartForCausalLM_inference",
     "hf_PegasusForCausalLM_inference",
-    "hf_TrOCRForCausalLM_inference"
+    "hf_TrOCRForCausalLM_inference",
+    "hf_bartforcausallm_inference",
+    "hf_blenderbotforcausallm_inference",
+    "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_inference"
   ]
 }

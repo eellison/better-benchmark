@@ -12,10 +12,11 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "hf_BartForCausalLM_training",
     "hf_PLBartForCausalLM_training",
-    "hf_TrOCRForCausalLM_training"
+    "hf_TrOCRForCausalLM_training",
+    "hf_bartforcausallm_training"
   ]
 }

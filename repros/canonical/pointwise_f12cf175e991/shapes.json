@@ -13,14 +13,6 @@
           "stride": null
         },
         {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            16384
-          ]
-        },
-        {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
@@ -28,21 +20,6 @@
             16384
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            16384
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4096,
-            16384
-          ]
         },
         {
           "dtype": "torch.float32",
@@ -55,183 +32,44 @@
         }
       ],
       "source_models": [
-        "hf_AlbertForMaskedLM_training"
+        "hf_albertformaskedlm_training"
       ],
       "shape_hash": "cc8cb662"
     },
-    "hf_gptneoforcausallm_training_8bc8c758": {
+    "hf_albertformaskedlm_training_069bc45e": {
       "inputs": [
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            1024,
-            8192
+            2048,
+            16384
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            8192
-          ]
         },
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            1024,
-            8192
+            2048,
+            16384
           ],
           "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            8192
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            8192
-          ]
         },
         {
           "dtype": "torch.float32",
           "device": "cuda",
           "shape": [
-            8192,
-            2048
+            16384,
+            4096
           ],
           "stride": null
         }
       ],
       "source_models": [
-        "hf_GPTNeoForCausalLM_training"
+        "hf_albertformaskedlm_training"
       ],
-      "shape_hash": "8bc8c758"
-    },
-    "hf_gptneoforsequenceclassification_training_8bc8c758": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            8192
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            8192
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            1024,
-            8192
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            128,
-            8192
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            1024,
-            8192
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            8192,
-            2048
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "hf_GPTNeoForSequenceClassification_training"
-      ],
-      "shape_hash": "8bc8c758"
-    },
-    "hf_googlefnet_training_44021567": {
-      "inputs": [
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            3072
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            3072
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            4096,
-            3072
-          ],
-          "stride": null
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            8,
-            512,
-            3072
-          ]
-        },
-        {
-          "kind": "shape",
-          "dims": [
-            4096,
-            3072
-          ]
-        },
-        {
-          "dtype": "torch.float32",
-          "device": "cuda",
-          "shape": [
-            3072,
-            768
-          ],
-          "stride": null
-        }
-      ],
-      "source_models": [
-        "hf_GoogleFnet_training"
-      ],
-      "shape_hash": "44021567"
+      "shape_hash": "069bc45e"
     }
   }
 }

@@ -23,8 +23,9 @@
     "aten.sum.dim_IntList",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_DebertaV2ForMaskedLM_inference"
+    "hf_DebertaV2ForMaskedLM_inference",
+    "hf_debertav2formaskedlm_inference"
   ]
 }

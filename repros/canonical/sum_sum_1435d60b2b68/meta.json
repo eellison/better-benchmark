@@ -21,13 +21,14 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 6,
+  "n_models": 7,
   "models": [
     "hf_AlbertForMaskedLM_training",
     "hf_GPTJForCausalLM_training",
     "hf_GPTJForQuestionAnswering_training",
     "hf_GPTNeoForCausalLM_training",
     "hf_GPTNeoForSequenceClassification_training",
+    "hf_albertformaskedlm_training",
     "timm_vit_base_patch16_siglip_256_training"
   ]
 }

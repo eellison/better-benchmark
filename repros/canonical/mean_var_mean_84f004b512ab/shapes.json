@@ -80,6 +80,86 @@
         "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
       ],
       "shape_hash": "6c9f00a7"
+    },
+    "timm_convnextv2_nano_inference_32724806": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            640,
+            7,
+            7
+          ],
+          "stride": [
+            31360,
+            1,
+            4480,
+            640
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            640,
+            7,
+            7
+          ],
+          "stride": [
+            31360,
+            1,
+            4480,
+            640
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano_inference"
+      ],
+      "shape_hash": "32724806"
+    },
+    "timm_convnextv2_nano_training_32724806": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            640,
+            7,
+            7
+          ],
+          "stride": [
+            31360,
+            1,
+            4480,
+            640
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            640,
+            7,
+            7
+          ],
+          "stride": [
+            31360,
+            1,
+            4480,
+            640
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano_training"
+      ],
+      "shape_hash": "32724806"
     }
   }
 }
