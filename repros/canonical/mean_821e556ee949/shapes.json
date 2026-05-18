@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "821e556ee949",
+  "configs": {
+    "timm_dm_nfnet_f0_inference_88ecd5ab": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            3072,
+            8,
+            8
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1000,
+            3072
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_dm_nfnet_f0_inference"
+      ],
+      "shape_hash": "88ecd5ab"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "26f945f51c2e",
+  "configs": {
+    "timm_vit_base_patch16_siglip_256_inference_07c4ed7e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            16,
+            16
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            256,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch16_siglip_256_inference"
+      ],
+      "shape_hash": "07c4ed7e"
+    }
+  }
+}

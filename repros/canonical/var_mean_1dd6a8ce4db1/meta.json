@@ -15,13 +15,17 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 9,
+  "n_models": 13,
   "models": [
+    "timm_deit_tiny_patch16_224.fb_in1k_infer",
     "timm_deit_tiny_patch16_224.fb_in1k_inference",
+    "timm_deit_tiny_patch16_224.fb_in1k_train",
     "timm_deit_tiny_patch16_224.fb_in1k_training",
     "timm_deit_tiny_patch16_224_inference",
     "timm_deit_tiny_patch16_224_training",
+    "timm_vit_base_patch14_dinov2.lvd142m_infer",
     "timm_vit_base_patch14_dinov2.lvd142m_inference",
+    "timm_vit_base_patch14_dinov2.lvd142m_train",
     "timm_vit_base_patch14_dinov2.lvd142m_training",
     "tlparse_timm_s3_g20",
     "torchvision_vit_b_16_inference",

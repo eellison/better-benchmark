@@ -21,9 +21,11 @@
     "aten.unbind.int",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_beit_base_patch16_224_infer",
     "timm_beit_base_patch16_224_inference",
+    "timm_beit_base_patch16_224_train",
     "timm_beit_base_patch16_224_training"
   ]
 }

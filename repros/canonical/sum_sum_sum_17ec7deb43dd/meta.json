@@ -365,8 +365,9 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_mobilevit_s_train",
     "timm_mobilevit_s_training"
   ]
 }

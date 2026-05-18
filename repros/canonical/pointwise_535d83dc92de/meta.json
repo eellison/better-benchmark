@@ -16,9 +16,11 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_vit_base_patch16_siglip_256_infer",
     "timm_vit_base_patch16_siglip_256_inference",
+    "timm_vit_base_patch16_siglip_256_train",
     "timm_vit_base_patch16_siglip_256_training"
   ]
 }

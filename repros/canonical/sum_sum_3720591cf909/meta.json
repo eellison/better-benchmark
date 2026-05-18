@@ -29,8 +29,9 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_beit_base_patch16_224_train",
     "timm_beit_base_patch16_224_training"
   ]
 }

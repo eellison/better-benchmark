@@ -63,8 +63,9 @@
     "prims.convert_element_type.default",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_GPTJForQuestionAnswering_training"
+    "hf_GPTJForQuestionAnswering_training",
+    "hf_gptjforquestionanswering_training"
   ]
 }

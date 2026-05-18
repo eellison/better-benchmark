@@ -29,8 +29,9 @@
     "prims.inductor_random.default",
     "prims.inductor_seeds.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_swin_base_patch4_window7_224_train",
     "timm_swin_base_patch4_window7_224_training"
   ]
 }

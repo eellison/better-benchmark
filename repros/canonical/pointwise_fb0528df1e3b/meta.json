@@ -10,8 +10,9 @@
     "aten.permute.default",
     "aten.permute.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_deit_base_distilled_patch16_224_train",
     "timm_deit_base_distilled_patch16_224_training"
   ]
 }

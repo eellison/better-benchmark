@@ -7,8 +7,9 @@
     "aten.add.Tensor",
     "aten.div.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_deit_base_distilled_patch16_224_infer",
     "timm_deit_base_distilled_patch16_224_inference"
   ]
 }

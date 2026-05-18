@@ -79,8 +79,9 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_ghostnet_100_train",
     "timm_ghostnet_100_training"
   ]
 }

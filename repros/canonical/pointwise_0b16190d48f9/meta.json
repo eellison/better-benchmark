@@ -9,9 +9,11 @@
     "aten.reshape.default",
     "aten.split.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
     "hf_GPTJForQuestionAnswering_inference",
-    "hf_GPTJForQuestionAnswering_training"
+    "hf_GPTJForQuestionAnswering_training",
+    "hf_gptjforquestionanswering_inference",
+    "hf_gptjforquestionanswering_training"
   ]
 }

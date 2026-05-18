@@ -1,0 +1,81 @@
+{
+  "pattern_hash": "162b60d306e0",
+  "configs": {
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference_09d5ad61": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            72,
+            72
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference"
+      ],
+      "shape_hash": "09d5ad61"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_43f6f5fc": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+      ],
+      "shape_hash": "43f6f5fc"
+    },
+    "timm_swin_base_patch4_window7_224_inference_dbd8839b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_inference"
+      ],
+      "shape_hash": "dbd8839b"
+    },
+    "timm_swin_base_patch4_window7_224_training_dbd8839b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_training"
+      ],
+      "shape_hash": "dbd8839b"
+    }
+  }
+}

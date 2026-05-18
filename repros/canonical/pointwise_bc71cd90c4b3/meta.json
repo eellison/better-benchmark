@@ -10,9 +10,11 @@
     "aten.mul.Tensor",
     "aten.mul.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_visformer_small_infer",
     "timm_visformer_small_inference",
+    "timm_visformer_small_train",
     "timm_visformer_small_training"
   ]
 }

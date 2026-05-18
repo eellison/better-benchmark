@@ -1,0 +1,130 @@
+{
+  "pattern_hash": "c964aaf7374d",
+  "configs": {
+    "hf_gptjforquestionanswering_training_a6e5f445": {
+      "inputs": [
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            1
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.bool",
+          "device": "cuda",
+          "shape": [
+            1
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            1
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            2,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_gptjforquestionanswering_training"
+      ],
+      "shape_hash": "a6e5f445"
+    }
+  }
+}

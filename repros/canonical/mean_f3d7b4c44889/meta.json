@@ -28,9 +28,10 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "timm_efficientnet_b0",
+    "timm_tf_efficientnet_b0_infer",
     "timm_tf_efficientnet_b0_inference",
     "torchvision_efficientnet_b0_inference"
   ]

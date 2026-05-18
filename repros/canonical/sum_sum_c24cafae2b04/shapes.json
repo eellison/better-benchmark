@@ -1,0 +1,78 @@
+{
+  "pattern_hash": "c24cafae2b04",
+  "configs": {
+    "timm_ghostnet_100_train_3f38dae0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            960,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            960,
+            7,
+            7
+          ],
+          "stride": [
+            47040,
+            1,
+            6720,
+            960
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            960,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            960,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            960
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            960
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "3f38dae0"
+    }
+  }
+}

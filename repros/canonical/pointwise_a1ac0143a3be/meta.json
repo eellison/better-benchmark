@@ -38,8 +38,9 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_repvgg_a2_train",
     "timm_repvgg_a2_training"
   ]
 }

@@ -14,11 +14,13 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 4,
+  "n_models": 6,
   "models": [
     "hf_MobileBertForMaskedLM_inference",
     "hf_MobileBertForMaskedLM_training",
+    "timm_beit_base_patch16_224_infer",
     "timm_beit_base_patch16_224_inference",
+    "timm_beit_base_patch16_224_train",
     "timm_beit_base_patch16_224_training"
   ]
 }

@@ -7,10 +7,12 @@
     "aten.mul.Tensor",
     "aten.sigmoid.default"
   ],
-  "n_models": 5,
+  "n_models": 7,
   "models": [
     "timm_efficientnet_b0",
+    "timm_tf_efficientnet_b0_infer",
     "timm_tf_efficientnet_b0_inference",
+    "timm_tf_efficientnet_b0_train",
     "timm_tf_efficientnet_b0_training",
     "torchvision_efficientnet_b0_inference",
     "torchvision_efficientnet_b0_training"

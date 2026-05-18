@@ -1,0 +1,39 @@
+{
+  "pattern_hash": "8bf170a2cd9d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 27,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.reshape.default",
+    "aten.select.int"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_vit_base_patch16_siglip_256_train"
+  ]
+}

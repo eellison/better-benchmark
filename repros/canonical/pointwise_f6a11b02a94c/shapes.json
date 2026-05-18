@@ -1,0 +1,59 @@
+{
+  "pattern_hash": "f6a11b02a94c",
+  "configs": {
+    "timm_vit_base_patch16_siglip_256_infer_b742dacb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch16_siglip_256_infer"
+      ],
+      "shape_hash": "b742dacb"
+    },
+    "timm_vit_base_patch16_siglip_256_inference_ae574c32": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch16_siglip_256_inference"
+      ],
+      "shape_hash": "ae574c32"
+    }
+  }
+}

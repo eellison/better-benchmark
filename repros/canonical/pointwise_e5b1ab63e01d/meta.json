@@ -64,9 +64,10 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
     "hf_GPTJForCausalLM_inference",
-    "hf_GPTJForQuestionAnswering_inference"
+    "hf_GPTJForQuestionAnswering_inference",
+    "hf_gptjforquestionanswering_inference"
   ]
 }

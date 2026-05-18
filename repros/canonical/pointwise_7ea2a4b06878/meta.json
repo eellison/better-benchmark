@@ -53,9 +53,11 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
     "hf_GPTJForCausalLM_training",
-    "hf_GPTJForQuestionAnswering_training"
+    "hf_GPTJForQuestionAnswering_training",
+    "hf_gptjforcausallm_training",
+    "hf_gptjforquestionanswering_training"
   ]
 }

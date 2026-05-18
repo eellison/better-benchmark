@@ -21,9 +21,11 @@
     "aten.sub.Tensor",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_visformer_small_infer",
     "timm_visformer_small_inference",
+    "timm_visformer_small_train",
     "timm_visformer_small_training"
   ]
 }

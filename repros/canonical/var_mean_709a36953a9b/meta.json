@@ -16,9 +16,11 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
+    "timm_deit_base_distilled_patch16_224_infer",
     "timm_deit_base_distilled_patch16_224_inference",
+    "timm_deit_base_distilled_patch16_224_train",
     "timm_deit_base_distilled_patch16_224_training",
     "tlparse_timm_s2_g20"
   ]

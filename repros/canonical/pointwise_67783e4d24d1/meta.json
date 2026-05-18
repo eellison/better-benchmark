@@ -13,8 +13,9 @@
     "aten.select.int",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_vit_base_patch14_dinov2.lvd142m_infer",
     "timm_vit_base_patch14_dinov2.lvd142m_inference"
   ]
 }

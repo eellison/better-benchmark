@@ -1,0 +1,389 @@
+{
+  "pattern_hash": "8892f3df546e",
+  "configs": {
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_29554548": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            80,
+            56,
+            56
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            80
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            80
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            56,
+            56,
+            80
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            56
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            56,
+            56,
+            1
+          ],
+          "stride": [
+            3136,
+            1,
+            56,
+            56
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train"
+      ],
+      "shape_hash": "29554548"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_a2b7e093": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            160,
+            28,
+            28
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            160
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            160
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            28,
+            28,
+            160
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            28
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            28,
+            28,
+            1
+          ],
+          "stride": [
+            784,
+            1,
+            28,
+            28
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train"
+      ],
+      "shape_hash": "a2b7e093"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_f4b91df0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            320,
+            14,
+            14
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            320
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            320
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            14,
+            14,
+            320
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            14
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            14,
+            14,
+            1
+          ],
+          "stride": [
+            196,
+            1,
+            14,
+            14
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train"
+      ],
+      "shape_hash": "f4b91df0"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_493b4043": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            56,
+            56
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            80
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            80
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            56,
+            56,
+            80
+          ],
+          "stride": [
+            250880,
+            1,
+            4480,
+            56
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            56,
+            56,
+            1
+          ],
+          "stride": [
+            3136,
+            1,
+            56,
+            56
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+      ],
+      "shape_hash": "493b4043"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_f35a50d6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            28,
+            28
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            160
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            160
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            28,
+            28,
+            160
+          ],
+          "stride": [
+            125440,
+            1,
+            4480,
+            28
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            28,
+            28,
+            1
+          ],
+          "stride": [
+            784,
+            1,
+            28,
+            28
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+      ],
+      "shape_hash": "f35a50d6"
+    },
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training_2ae63210": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            14,
+            14
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            320
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            320
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            14,
+            14,
+            320
+          ],
+          "stride": [
+            62720,
+            1,
+            4480,
+            14
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            14,
+            14,
+            1
+          ],
+          "stride": [
+            196,
+            1,
+            14,
+            14
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training"
+      ],
+      "shape_hash": "2ae63210"
+    }
+  }
+}

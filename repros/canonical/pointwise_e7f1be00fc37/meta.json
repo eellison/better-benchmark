@@ -8,9 +8,11 @@
     "aten.le.Scalar",
     "aten.where.self"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
+    "timm_dm_nfnet_f0_train",
     "timm_dm_nfnet_f0_training",
+    "timm_nfnet_l0_train",
     "timm_nfnet_l0_training",
     "tlparse_torchbench_s8_g27"
   ]

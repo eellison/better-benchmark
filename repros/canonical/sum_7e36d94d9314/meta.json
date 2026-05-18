@@ -16,8 +16,9 @@
     "aten.sub.Tensor",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_dm_nfnet_f0_train",
     "timm_dm_nfnet_f0_training"
   ]
 }

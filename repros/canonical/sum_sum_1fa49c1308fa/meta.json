@@ -43,8 +43,9 @@
     "aten.sum.dim_IntList",
     "aten.where.self"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training",
     "timm_convnextv2_nano_training"
   ]

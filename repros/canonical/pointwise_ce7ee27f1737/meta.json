@@ -14,10 +14,11 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "hf_YituTechConvBert_inference",
     "hf_YituTechConvBert_training",
+    "timm_visformer_small_train",
     "timm_visformer_small_training"
   ]
 }

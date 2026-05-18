@@ -29,8 +29,9 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_mobilenetv2_100_infer",
     "timm_mobilenetv2_100_inference"
   ]
 }

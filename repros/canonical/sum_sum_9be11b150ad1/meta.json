@@ -32,10 +32,13 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 8,
+  "n_models": 11,
   "models": [
+    "timm_adv_inception_v3_train",
     "timm_adv_inception_v3_training",
+    "timm_inception_v3_train",
     "timm_inception_v3_training",
+    "timm_mobilenetv3_large_100_train",
     "timm_mobilenetv3_large_100_training",
     "torchvision_densenet121_training",
     "torchvision_resnet18_training",

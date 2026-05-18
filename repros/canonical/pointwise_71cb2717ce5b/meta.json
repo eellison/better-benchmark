@@ -21,14 +21,19 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 9,
+  "n_models": 14,
   "models": [
     "timm_efficientnet_b0",
+    "timm_ghostnet_100_infer",
     "timm_ghostnet_100_inference",
+    "timm_mobilenetv2_100_infer",
     "timm_mobilenetv2_100_inference",
     "timm_mobilenetv3",
+    "timm_mobilenetv3_large_100_infer",
     "timm_mobilenetv3_large_100_inference",
+    "timm_mobilevit_s_infer",
     "timm_mobilevit_s_inference",
+    "timm_tf_efficientnet_b0_infer",
     "timm_tf_efficientnet_b0_inference",
     "torchvision_efficientnet_b0_inference",
     "torchvision_mobilenet_v2_inference"

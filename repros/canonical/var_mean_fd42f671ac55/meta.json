@@ -24,9 +24,11 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_nfnet_l0_infer",
     "timm_nfnet_l0_inference",
+    "timm_nfnet_l0_train",
     "timm_nfnet_l0_training"
   ]
 }

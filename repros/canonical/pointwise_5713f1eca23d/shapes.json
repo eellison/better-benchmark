@@ -1,0 +1,1055 @@
+{
+  "pattern_hash": "5713f1eca23d",
+  "configs": {
+    "timm_nfnet_l0_training_9bd4e7de": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            16,
+            112,
+            112
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            16,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_training"
+      ],
+      "shape_hash": "9bd4e7de"
+    },
+    "timm_nfnet_l0_training_0a8ede14": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            112,
+            112
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_training"
+      ],
+      "shape_hash": "0a8ede14"
+    },
+    "timm_nfnet_l0_training_f268f620": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            112,
+            112
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_training"
+      ],
+      "shape_hash": "f268f620"
+    },
+    "timm_nfnet_l0_training_96072d24": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            56,
+            56
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_training"
+      ],
+      "shape_hash": "96072d24"
+    },
+    "timm_nfnet_l0_training_8849b4d7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            56,
+            56
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_training"
+      ],
+      "shape_hash": "8849b4d7"
+    },
+    "timm_nfnet_l0_training_c0aae362": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            28,
+            28
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_training"
+      ],
+      "shape_hash": "c0aae362"
+    },
+    "timm_nfnet_l0_training_4c2a91bb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            28,
+            28
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_training"
+      ],
+      "shape_hash": "4c2a91bb"
+    },
+    "timm_nfnet_l0_training_c74ab865": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_training"
+      ],
+      "shape_hash": "c74ab865"
+    },
+    "timm_nfnet_l0_training_93b9818a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            7,
+            7
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_training"
+      ],
+      "shape_hash": "93b9818a"
+    },
+    "timm_nfnet_l0_train_8799e580": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16,
+            112,
+            112
+          ],
+          "stride": [
+            200704,
+            1,
+            1792,
+            16
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16,
+            112,
+            112
+          ],
+          "stride": [
+            200704,
+            1,
+            1792,
+            16
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "8799e580"
+    },
+    "timm_nfnet_l0_train_a536d57d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            112,
+            112
+          ],
+          "stride": [
+            401408,
+            1,
+            3584,
+            32
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            112,
+            112
+          ],
+          "stride": [
+            401408,
+            1,
+            3584,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "a536d57d"
+    },
+    "timm_nfnet_l0_train_1c60bafc": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            112,
+            112
+          ],
+          "stride": [
+            802816,
+            1,
+            7168,
+            64
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            112,
+            112
+          ],
+          "stride": [
+            802816,
+            1,
+            7168,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "1c60bafc"
+    },
+    "timm_nfnet_l0_train_715b3d86": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            56,
+            56
+          ],
+          "stride": [
+            200704,
+            1,
+            3584,
+            64
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            56,
+            56
+          ],
+          "stride": [
+            200704,
+            1,
+            3584,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "715b3d86"
+    },
+    "timm_nfnet_l0_train_c3acab78": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            56,
+            56
+          ],
+          "stride": [
+            401408,
+            1,
+            7168,
+            128
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            56,
+            56
+          ],
+          "stride": [
+            401408,
+            1,
+            7168,
+            128
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "c3acab78"
+    },
+    "timm_nfnet_l0_train_5d65d9fa": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            28,
+            28
+          ],
+          "stride": [
+            100352,
+            1,
+            3584,
+            128
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            28,
+            28
+          ],
+          "stride": [
+            100352,
+            1,
+            3584,
+            128
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "5d65d9fa"
+    },
+    "timm_nfnet_l0_train_76b64da2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            28,
+            28
+          ],
+          "stride": [
+            301056,
+            1,
+            10752,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            28,
+            28
+          ],
+          "stride": [
+            301056,
+            1,
+            10752,
+            384
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "76b64da2"
+    },
+    "timm_nfnet_l0_train_2adccae9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "2adccae9"
+    },
+    "timm_nfnet_l0_train_20f92844": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            7,
+            7
+          ],
+          "stride": [
+            18816,
+            1,
+            2688,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            7,
+            7
+          ],
+          "stride": [
+            18816,
+            1,
+            2688,
+            384
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_nfnet_l0_train"
+      ],
+      "shape_hash": "20f92844"
+    },
+    "timm_tf_efficientnet_b0_train_013300dc": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            8,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            8,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "013300dc"
+    },
+    "timm_tf_efficientnet_b0_train_545ad394": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            4,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            4,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "545ad394"
+    },
+    "timm_tf_efficientnet_b0_train_916b9f5c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            6,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            6,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "916b9f5c"
+    },
+    "timm_tf_efficientnet_b0_train_ac5ab298": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            10,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            10,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "ac5ab298"
+    },
+    "timm_tf_efficientnet_b0_train_094d91b4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            20,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            20,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "094d91b4"
+    },
+    "timm_tf_efficientnet_b0_train_e5b42763": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            28,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            28,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "e5b42763"
+    },
+    "timm_tf_efficientnet_b0_train_9c8c5292": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            48,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            48,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "9c8c5292"
+    },
+    "timm_tf_efficientnet_b0_training_0e3d6aeb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            8,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            8,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "0e3d6aeb"
+    },
+    "timm_tf_efficientnet_b0_training_c445212a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            4,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            4,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "c445212a"
+    },
+    "timm_tf_efficientnet_b0_training_5a03b951": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            6,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            6,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "5a03b951"
+    },
+    "timm_tf_efficientnet_b0_training_40f7d1d1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            10,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            10,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "40f7d1d1"
+    },
+    "timm_tf_efficientnet_b0_training_9b9cbe52": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            20,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            20,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "9b9cbe52"
+    },
+    "timm_tf_efficientnet_b0_training_8d71196f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            28,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            28,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "8d71196f"
+    },
+    "timm_tf_efficientnet_b0_training_f521e20e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            48,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            48,
+            1,
+            1
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "f521e20e"
+    }
+  }
+}

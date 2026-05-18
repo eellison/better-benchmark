@@ -50,9 +50,11 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_adv_inception_v3_train",
     "timm_adv_inception_v3_training",
+    "timm_inception_v3_train",
     "timm_inception_v3_training"
   ]
 }

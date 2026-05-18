@@ -32,9 +32,11 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_ghostnet_100_train",
     "timm_ghostnet_100_training",
+    "timm_mobilevit_s_train",
     "timm_mobilevit_s_training"
   ]
 }

@@ -19,9 +19,11 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
+    "timm_mobilevit_s_train",
     "timm_mobilevit_s_training",
+    "timm_tf_efficientnet_b0_train",
     "timm_tf_efficientnet_b0_training",
     "torchvision_efficientnet_b0_training"
   ]

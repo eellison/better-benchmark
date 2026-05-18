@@ -1,0 +1,285 @@
+{
+  "pattern_hash": "8b85516130f1",
+  "configs": {
+    "timm_beit_base_patch16_224_infer_75ce95ec": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25216,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            197,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_beit_base_patch16_224_infer"
+      ],
+      "shape_hash": "75ce95ec"
+    },
+    "timm_beit_base_patch16_224_train_75ce95ec": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25216,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            197,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_beit_base_patch16_224_train"
+      ],
+      "shape_hash": "75ce95ec"
+    },
+    "timm_beit_base_patch16_224_inference_40664c98": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1576,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            197,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_beit_base_patch16_224_inference"
+      ],
+      "shape_hash": "40664c98"
+    },
+    "timm_beit_base_patch16_224_training_40664c98": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1576,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            197,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_beit_base_patch16_224_training"
+      ],
+      "shape_hash": "40664c98"
+    },
+    "timm_vit_base_patch14_dinov2.lvd142m_infer_c3b0d001": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            175360,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1370,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch14_dinov2.lvd142m_infer"
+      ],
+      "shape_hash": "c3b0d001"
+    },
+    "timm_vit_base_patch14_dinov2.lvd142m_train_c3b0d001": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            175360,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1370,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch14_dinov2.lvd142m_train"
+      ],
+      "shape_hash": "c3b0d001"
+    },
+    "timm_vit_base_patch14_dinov2.lvd142m_inference_c2049911": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            10960,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1370,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch14_dinov2.lvd142m_inference"
+      ],
+      "shape_hash": "c2049911"
+    },
+    "timm_vit_base_patch14_dinov2.lvd142m_training_c2049911": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            10960,
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            768
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1370,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_vit_base_patch14_dinov2.lvd142m_training"
+      ],
+      "shape_hash": "c2049911"
+    }
+  }
+}

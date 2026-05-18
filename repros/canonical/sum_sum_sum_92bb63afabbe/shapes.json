@@ -1,0 +1,857 @@
+{
+  "pattern_hash": "92bb63afabbe",
+  "configs": {
+    "timm_repvgg_a2_training_825c1968": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            96,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            96,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_repvgg_a2_training"
+      ],
+      "shape_hash": "825c1968"
+    },
+    "timm_repvgg_a2_training_f4bf3245": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            192,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            192,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_repvgg_a2_training"
+      ],
+      "shape_hash": "f4bf3245"
+    },
+    "timm_repvgg_a2_training_62f5b693": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            384,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            384,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_repvgg_a2_training"
+      ],
+      "shape_hash": "62f5b693"
+    },
+    "timm_repvgg_a2_train_5c58aa3b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            96,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            96,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            96
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_repvgg_a2_train"
+      ],
+      "shape_hash": "5c58aa3b"
+    },
+    "timm_repvgg_a2_train_48ad97a7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            192,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            192,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_repvgg_a2_train"
+      ],
+      "shape_hash": "48ad97a7"
+    },
+    "timm_repvgg_a2_train_9410d667": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            384,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            384,
+            1,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            384
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_repvgg_a2_train"
+      ],
+      "shape_hash": "9410d667"
+    }
+  }
+}

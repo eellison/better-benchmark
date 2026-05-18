@@ -11,7 +11,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 62,
+  "n_models": 64,
   "models": [
     "dynamo_AlbertForMaskedLM",
     "dynamo_GPTNeoForCausalLM",
@@ -71,7 +71,9 @@
     "hf_mt5forconditionalgeneration_training",
     "hf_t5_base_train",
     "t5_base_inference",
+    "timm_swin_base_patch4_window7_224_infer",
     "timm_swin_base_patch4_window7_224_inference",
+    "timm_swin_base_patch4_window7_224_train",
     "timm_swin_base_patch4_window7_224_training",
     "torchvision_swin_t_inference",
     "torchvision_swin_t_training"

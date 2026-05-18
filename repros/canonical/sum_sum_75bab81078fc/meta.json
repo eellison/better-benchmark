@@ -31,8 +31,9 @@
     "aten.sum.dim_IntList",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_swin_base_patch4_window7_224_train",
     "timm_swin_base_patch4_window7_224_training"
   ]
 }

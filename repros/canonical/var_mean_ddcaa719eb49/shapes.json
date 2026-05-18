@@ -1,0 +1,215 @@
+{
+  "pattern_hash": "ddcaa719eb49",
+  "configs": {
+    "timm_visformer_small_train_ddf28ff1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            768,
+            7,
+            7
+          ],
+          "stride": [
+            37632,
+            1,
+            5376,
+            768
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            768,
+            7,
+            7
+          ],
+          "stride": [
+            37632,
+            1,
+            5376,
+            768
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_train"
+      ],
+      "shape_hash": "ddf28ff1"
+    },
+    "timm_visformer_small_train_2adccae9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_train"
+      ],
+      "shape_hash": "2adccae9"
+    },
+    "timm_visformer_small_train_604edb77": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_train"
+      ],
+      "shape_hash": "604edb77"
+    },
+    "timm_visformer_small_training_88f9bf84": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            7,
+            7
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_training"
+      ],
+      "shape_hash": "88f9bf84"
+    },
+    "timm_visformer_small_training_c74ab865": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_training"
+      ],
+      "shape_hash": "c74ab865"
+    },
+    "timm_visformer_small_training_31859329": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            28,
+            28
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_training"
+      ],
+      "shape_hash": "31859329"
+    }
+  }
+}

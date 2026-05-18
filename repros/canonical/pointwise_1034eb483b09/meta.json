@@ -10,12 +10,16 @@
     "aten.div.Tensor",
     "aten.mul.Tensor"
   ],
-  "n_models": 5,
+  "n_models": 9,
   "models": [
+    "timm_ghostnet_100_infer",
     "timm_ghostnet_100_inference",
+    "timm_ghostnet_100_train",
     "timm_ghostnet_100_training",
     "timm_mobilenetv3",
+    "timm_mobilenetv3_large_100_infer",
     "timm_mobilenetv3_large_100_inference",
+    "timm_mobilenetv3_large_100_train",
     "timm_mobilenetv3_large_100_training"
   ]
 }

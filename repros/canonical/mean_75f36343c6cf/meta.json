@@ -1,0 +1,52 @@
+{
+  "pattern_hash": "75f36343c6cf",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 38,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.as_strided.default",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reciprocal.default",
+    "aten.reciprocal.default",
+    "aten.relu.default",
+    "aten.reshape.default",
+    "aten.sqrt.default",
+    "aten.sqrt.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_repvgg_a2_infer"
+  ]
+}

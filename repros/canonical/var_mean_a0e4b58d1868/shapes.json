@@ -1,0 +1,221 @@
+{
+  "pattern_hash": "a0e4b58d1868",
+  "configs": {
+    "timm_swin_base_patch4_window7_224_train_cccfb353": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25088,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            46
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            196,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "cccfb353"
+    },
+    "timm_swin_base_patch4_window7_224_train_dbf37895": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            100352,
+            256
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            46
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            784,
+            256
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "dbf37895"
+    },
+    "timm_swin_base_patch4_window7_224_train_40484e37": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            401408,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            46
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            3136,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_train"
+      ],
+      "shape_hash": "40484e37"
+    },
+    "timm_swin_base_patch4_window7_224_training_eb350032": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1568,
+            512
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            46
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            196,
+            512
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_training"
+      ],
+      "shape_hash": "eb350032"
+    },
+    "timm_swin_base_patch4_window7_224_training_613c7f3a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            6272,
+            256
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            46
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            784,
+            256
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_training"
+      ],
+      "shape_hash": "613c7f3a"
+    },
+    "timm_swin_base_patch4_window7_224_training_b21204bd": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            25088,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.int64",
+          "device": "cuda",
+          "shape": [
+            46
+          ],
+          "stride": null,
+          "max_val": 2
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            3136,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_swin_base_patch4_window7_224_training"
+      ],
+      "shape_hash": "b21204bd"
+    }
+  }
+}

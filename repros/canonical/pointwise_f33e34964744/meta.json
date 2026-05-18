@@ -23,8 +23,9 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "timm_ghostnet_100_infer",
     "timm_ghostnet_100_inference",
     "torchvision_densenet121_inference"
   ]

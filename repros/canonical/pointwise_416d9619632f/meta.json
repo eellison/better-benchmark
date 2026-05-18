@@ -17,8 +17,9 @@
     "aten.reciprocal.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_nfnet_l0_train",
     "timm_nfnet_l0_training"
   ]
 }

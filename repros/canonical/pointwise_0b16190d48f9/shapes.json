@@ -1,0 +1,39 @@
+{
+  "pattern_hash": "0b16190d48f9",
+  "configs": {
+    "hf_gptjforquestionanswering_inference_c2d5e989": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            2
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_gptjforquestionanswering_inference"
+      ],
+      "shape_hash": "c2d5e989"
+    },
+    "hf_gptjforquestionanswering_training_c2d5e989": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            2
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_gptjforquestionanswering_training"
+      ],
+      "shape_hash": "c2d5e989"
+    }
+  }
+}

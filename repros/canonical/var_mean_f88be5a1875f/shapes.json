@@ -1,0 +1,5122 @@
+{
+  "pattern_hash": "f88be5a1875f",
+  "configs": {
+    "timm_ghostnet_100_training_e6617c51": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            960,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "e6617c51"
+    },
+    "timm_ghostnet_100_training_21f00e04": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "21f00e04"
+    },
+    "timm_ghostnet_100_training_c4926033": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            480,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "c4926033"
+    },
+    "timm_ghostnet_100_training_8fe7703a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            672,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "8fe7703a"
+    },
+    "timm_ghostnet_100_training_33e8a092": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            336,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "33e8a092"
+    },
+    "timm_ghostnet_100_training_81f85483": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            56,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "81f85483"
+    },
+    "timm_ghostnet_100_training_a4c9c27c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            240,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "a4c9c27c"
+    },
+    "timm_ghostnet_100_training_fd90297b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            40,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "fd90297b"
+    },
+    "timm_ghostnet_100_training_ec4e2082": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            92,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "ec4e2082"
+    },
+    "timm_ghostnet_100_training_44159431": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            100,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "44159431"
+    },
+    "timm_ghostnet_100_training_8298391c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            120,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "8298391c"
+    },
+    "timm_ghostnet_100_training_268d837e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            20,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "268d837e"
+    },
+    "timm_ghostnet_100_training_10d1d3c7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            60,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "10d1d3c7"
+    },
+    "timm_ghostnet_100_training_0021dd26": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            72,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "0021dd26"
+    },
+    "timm_ghostnet_100_training_1d8a7cdf": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            36,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "1d8a7cdf"
+    },
+    "timm_ghostnet_100_training_b9bba073": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            12,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "b9bba073"
+    },
+    "timm_ghostnet_100_training_4c01df6f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            48,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "4c01df6f"
+    },
+    "timm_ghostnet_100_training_b05b2f36": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            24,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "b05b2f36"
+    },
+    "timm_ghostnet_100_training_9513c8b6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            8,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "9513c8b6"
+    },
+    "timm_ghostnet_100_training_1fe20cab": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            16,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_training"
+      ],
+      "shape_hash": "1fe20cab"
+    },
+    "timm_adv_inception_v3_train_2d7c3127": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            448,
+            8,
+            8
+          ],
+          "stride": [
+            28672,
+            1,
+            3584,
+            448
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "2d7c3127"
+    },
+    "timm_adv_inception_v3_train_91f429b9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            17,
+            17
+          ],
+          "stride": [
+            55488,
+            1,
+            3264,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "91f429b9"
+    },
+    "timm_adv_inception_v3_train_b796cfc0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            160,
+            17,
+            17
+          ],
+          "stride": [
+            46240,
+            1,
+            2720,
+            160
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "b796cfc0"
+    },
+    "timm_adv_inception_v3_train_c94ad554": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            17,
+            17
+          ],
+          "stride": [
+            36992,
+            1,
+            2176,
+            128
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "c94ad554"
+    },
+    "timm_adv_inception_v3_train_1dd7615f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            35,
+            35
+          ],
+          "stride": [
+            117600,
+            1,
+            3360,
+            96
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "1dd7615f"
+    },
+    "timm_adv_inception_v3_train_0976d6b6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            35,
+            35
+          ],
+          "stride": [
+            78400,
+            1,
+            2240,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "0976d6b6"
+    },
+    "timm_adv_inception_v3_train_c95cf796": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            71,
+            71
+          ],
+          "stride": [
+            967872,
+            1,
+            13632,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "c95cf796"
+    },
+    "timm_adv_inception_v3_train_0ee36aaf": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            80,
+            73,
+            73
+          ],
+          "stride": [
+            426320,
+            1,
+            5840,
+            80
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "0ee36aaf"
+    },
+    "timm_adv_inception_v3_train_4f6e2399": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            147,
+            147
+          ],
+          "stride": [
+            1382976,
+            1,
+            9408,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "4f6e2399"
+    },
+    "timm_adv_inception_v3_train_bb0ce9eb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            147,
+            147
+          ],
+          "stride": [
+            691488,
+            1,
+            4704,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "bb0ce9eb"
+    },
+    "timm_adv_inception_v3_train_1663ef7a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            149,
+            149
+          ],
+          "stride": [
+            710432,
+            1,
+            4768,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_train"
+      ],
+      "shape_hash": "1663ef7a"
+    },
+    "timm_inception_v3_training_a0ccc394": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            448,
+            8,
+            8
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "a0ccc394"
+    },
+    "timm_inception_v3_training_9f7b94f1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            17,
+            17
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "9f7b94f1"
+    },
+    "timm_inception_v3_training_778cb24e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            17,
+            17
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "778cb24e"
+    },
+    "timm_inception_v3_training_adeac0ad": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            17,
+            17
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "adeac0ad"
+    },
+    "timm_inception_v3_training_f774d0b3": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            35,
+            35
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "f774d0b3"
+    },
+    "timm_inception_v3_training_e04a8096": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            35,
+            35
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "e04a8096"
+    },
+    "timm_inception_v3_training_1aa183da": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            71,
+            71
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "1aa183da"
+    },
+    "timm_inception_v3_training_97bb12c8": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            73,
+            73
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "97bb12c8"
+    },
+    "timm_inception_v3_training_8c4af1cf": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            147,
+            147
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "8c4af1cf"
+    },
+    "timm_inception_v3_training_a631011c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            147,
+            147
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "a631011c"
+    },
+    "timm_inception_v3_training_a9e61813": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            149,
+            149
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_training"
+      ],
+      "shape_hash": "a9e61813"
+    },
+    "timm_mobilenetv2_100_training_6640208a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1280,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "6640208a"
+    },
+    "timm_mobilenetv2_100_training_9bbe2353": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "9bbe2353"
+    },
+    "timm_mobilenetv2_100_training_e6617c51": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            960,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "e6617c51"
+    },
+    "timm_mobilenetv2_100_training_deb5c240": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "deb5c240"
+    },
+    "timm_mobilenetv2_100_training_bb928637": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            576,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "bb928637"
+    },
+    "timm_mobilenetv2_100_training_4ad42e37": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            576,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "4ad42e37"
+    },
+    "timm_mobilenetv2_100_training_6534ee8f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "6534ee8f"
+    },
+    "timm_mobilenetv2_100_training_6b3e7c45": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "6b3e7c45"
+    },
+    "timm_mobilenetv2_100_training_6e6f9fc1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "6e6f9fc1"
+    },
+    "timm_mobilenetv2_100_training_7450794f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "7450794f"
+    },
+    "timm_mobilenetv2_100_training_c7aee410": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "c7aee410"
+    },
+    "timm_mobilenetv2_100_training_23061334": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "23061334"
+    },
+    "timm_mobilenetv2_100_training_87b7363f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            144,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "87b7363f"
+    },
+    "timm_mobilenetv2_100_training_b835a441": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            144,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "b835a441"
+    },
+    "timm_mobilenetv2_100_training_b8aeb1e4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            24,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "b8aeb1e4"
+    },
+    "timm_mobilenetv2_100_training_434cde94": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "434cde94"
+    },
+    "timm_mobilenetv2_100_training_64fceec4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "64fceec4"
+    },
+    "timm_mobilenetv2_100_training_1fe20cab": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            16,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "1fe20cab"
+    },
+    "timm_mobilenetv2_100_training_fc55b288": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_training"
+      ],
+      "shape_hash": "fc55b288"
+    },
+    "timm_ghostnet_100_train_783b82c5": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            960,
+            7,
+            7
+          ],
+          "stride": [
+            47040,
+            1,
+            6720,
+            960
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "783b82c5"
+    },
+    "timm_ghostnet_100_train_85a7fb0f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            80,
+            7,
+            7
+          ],
+          "stride": [
+            3920,
+            1,
+            560,
+            80
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "85a7fb0f"
+    },
+    "timm_ghostnet_100_train_866bb4b7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            480,
+            7,
+            7
+          ],
+          "stride": [
+            23520,
+            1,
+            3360,
+            480
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "866bb4b7"
+    },
+    "timm_ghostnet_100_train_1c2205f2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            672,
+            7,
+            7
+          ],
+          "stride": [
+            32928,
+            1,
+            4704,
+            672
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "1c2205f2"
+    },
+    "timm_ghostnet_100_train_e9ab92db": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            336,
+            14,
+            14
+          ],
+          "stride": [
+            65856,
+            1,
+            4704,
+            336
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "e9ab92db"
+    },
+    "timm_ghostnet_100_train_5f7473be": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            56,
+            14,
+            14
+          ],
+          "stride": [
+            10976,
+            1,
+            784,
+            56
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "5f7473be"
+    },
+    "timm_ghostnet_100_train_fb9b134c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            240,
+            14,
+            14
+          ],
+          "stride": [
+            47040,
+            1,
+            3360,
+            240
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "fb9b134c"
+    },
+    "timm_ghostnet_100_train_f6f953ae": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            40,
+            14,
+            14
+          ],
+          "stride": [
+            7840,
+            1,
+            560,
+            40
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "f6f953ae"
+    },
+    "timm_ghostnet_100_train_8a752bc0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            92,
+            14,
+            14
+          ],
+          "stride": [
+            18032,
+            1,
+            1288,
+            92
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "8a752bc0"
+    },
+    "timm_ghostnet_100_train_c65271a6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            100,
+            14,
+            14
+          ],
+          "stride": [
+            19600,
+            1,
+            1400,
+            100
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "c65271a6"
+    },
+    "timm_ghostnet_100_train_7c57bb2b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            120,
+            28,
+            28
+          ],
+          "stride": [
+            94080,
+            1,
+            3360,
+            120
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "7c57bb2b"
+    },
+    "timm_ghostnet_100_train_4e6db9f7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            20,
+            28,
+            28
+          ],
+          "stride": [
+            15680,
+            1,
+            560,
+            20
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "4e6db9f7"
+    },
+    "timm_ghostnet_100_train_9b33ce8c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            60,
+            28,
+            28
+          ],
+          "stride": [
+            47040,
+            1,
+            1680,
+            60
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "9b33ce8c"
+    },
+    "timm_ghostnet_100_train_f2642550": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            72,
+            28,
+            28
+          ],
+          "stride": [
+            56448,
+            1,
+            2016,
+            72
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "f2642550"
+    },
+    "timm_ghostnet_100_train_e731d7ad": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            36,
+            56,
+            56
+          ],
+          "stride": [
+            112896,
+            1,
+            2016,
+            36
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "e731d7ad"
+    },
+    "timm_ghostnet_100_train_45961cb0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            12,
+            56,
+            56
+          ],
+          "stride": [
+            37632,
+            1,
+            672,
+            12
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "45961cb0"
+    },
+    "timm_ghostnet_100_train_21cca99e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            48,
+            56,
+            56
+          ],
+          "stride": [
+            150528,
+            1,
+            2688,
+            48
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "21cca99e"
+    },
+    "timm_ghostnet_100_train_fc67c5e8": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            24,
+            112,
+            112
+          ],
+          "stride": [
+            301056,
+            1,
+            2688,
+            24
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "fc67c5e8"
+    },
+    "timm_ghostnet_100_train_87049b88": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            8,
+            112,
+            112
+          ],
+          "stride": [
+            100352,
+            1,
+            896,
+            8
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "87049b88"
+    },
+    "timm_ghostnet_100_train_ee5b7bf7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            16,
+            112,
+            112
+          ],
+          "stride": [
+            200704,
+            1,
+            1792,
+            16
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_ghostnet_100_train"
+      ],
+      "shape_hash": "ee5b7bf7"
+    },
+    "timm_mobilenetv3_large_100_training_e6617c51": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            960,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "e6617c51"
+    },
+    "timm_mobilenetv3_large_100_training_deb5c240": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "deb5c240"
+    },
+    "timm_mobilenetv3_large_100_training_8fe7703a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            672,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "8fe7703a"
+    },
+    "timm_mobilenetv3_large_100_training_725d4297": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            672,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "725d4297"
+    },
+    "timm_mobilenetv3_large_100_training_a577280b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            112,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "a577280b"
+    },
+    "timm_mobilenetv3_large_100_training_3fd98be1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            480,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "3fd98be1"
+    },
+    "timm_mobilenetv3_large_100_training_f35210cb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "f35210cb"
+    },
+    "timm_mobilenetv3_large_100_training_41b49ec2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            184,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "41b49ec2"
+    },
+    "timm_mobilenetv3_large_100_training_e29f9798": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            200,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "e29f9798"
+    },
+    "timm_mobilenetv3_large_100_training_a4c9c27c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            240,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "a4c9c27c"
+    },
+    "timm_mobilenetv3_large_100_training_83f6216c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            240,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "83f6216c"
+    },
+    "timm_mobilenetv3_large_100_training_ac9a13f3": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            40,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "ac9a13f3"
+    },
+    "timm_mobilenetv3_large_100_training_8298391c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            120,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "8298391c"
+    },
+    "timm_mobilenetv3_large_100_training_0021dd26": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            72,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "0021dd26"
+    },
+    "timm_mobilenetv3_large_100_training_e9c4f2a0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            72,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "e9c4f2a0"
+    },
+    "timm_mobilenetv3_large_100_training_b8aeb1e4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            24,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "b8aeb1e4"
+    },
+    "timm_mobilenetv3_large_100_training_81321d52": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "81321d52"
+    },
+    "timm_mobilenetv3_large_100_training_badf83be": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "badf83be"
+    },
+    "timm_mobilenetv3_large_100_training_1fe20cab": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            16,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_training"
+      ],
+      "shape_hash": "1fe20cab"
+    },
+    "timm_inception_v3_train_2d7c3127": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            448,
+            8,
+            8
+          ],
+          "stride": [
+            28672,
+            1,
+            3584,
+            448
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "2d7c3127"
+    },
+    "timm_inception_v3_train_91f429b9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            17,
+            17
+          ],
+          "stride": [
+            55488,
+            1,
+            3264,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "91f429b9"
+    },
+    "timm_inception_v3_train_b796cfc0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            160,
+            17,
+            17
+          ],
+          "stride": [
+            46240,
+            1,
+            2720,
+            160
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "b796cfc0"
+    },
+    "timm_inception_v3_train_c94ad554": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            17,
+            17
+          ],
+          "stride": [
+            36992,
+            1,
+            2176,
+            128
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "c94ad554"
+    },
+    "timm_inception_v3_train_1dd7615f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            35,
+            35
+          ],
+          "stride": [
+            117600,
+            1,
+            3360,
+            96
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "1dd7615f"
+    },
+    "timm_inception_v3_train_0976d6b6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            35,
+            35
+          ],
+          "stride": [
+            78400,
+            1,
+            2240,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "0976d6b6"
+    },
+    "timm_inception_v3_train_c95cf796": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            71,
+            71
+          ],
+          "stride": [
+            967872,
+            1,
+            13632,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "c95cf796"
+    },
+    "timm_inception_v3_train_0ee36aaf": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            80,
+            73,
+            73
+          ],
+          "stride": [
+            426320,
+            1,
+            5840,
+            80
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "0ee36aaf"
+    },
+    "timm_inception_v3_train_4f6e2399": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            147,
+            147
+          ],
+          "stride": [
+            1382976,
+            1,
+            9408,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "4f6e2399"
+    },
+    "timm_inception_v3_train_bb0ce9eb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            147,
+            147
+          ],
+          "stride": [
+            691488,
+            1,
+            4704,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "bb0ce9eb"
+    },
+    "timm_inception_v3_train_1663ef7a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            149,
+            149
+          ],
+          "stride": [
+            710432,
+            1,
+            4768,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_inception_v3_train"
+      ],
+      "shape_hash": "1663ef7a"
+    },
+    "timm_adv_inception_v3_training_a0ccc394": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            448,
+            8,
+            8
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "a0ccc394"
+    },
+    "timm_adv_inception_v3_training_9f7b94f1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            17,
+            17
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "9f7b94f1"
+    },
+    "timm_adv_inception_v3_training_778cb24e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            17,
+            17
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "778cb24e"
+    },
+    "timm_adv_inception_v3_training_adeac0ad": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            17,
+            17
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "adeac0ad"
+    },
+    "timm_adv_inception_v3_training_f774d0b3": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            35,
+            35
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "f774d0b3"
+    },
+    "timm_adv_inception_v3_training_e04a8096": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            35,
+            35
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "e04a8096"
+    },
+    "timm_adv_inception_v3_training_1aa183da": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            71,
+            71
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "1aa183da"
+    },
+    "timm_adv_inception_v3_training_97bb12c8": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            73,
+            73
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "97bb12c8"
+    },
+    "timm_adv_inception_v3_training_8c4af1cf": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            147,
+            147
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "8c4af1cf"
+    },
+    "timm_adv_inception_v3_training_a631011c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            147,
+            147
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "a631011c"
+    },
+    "timm_adv_inception_v3_training_a9e61813": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            149,
+            149
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_adv_inception_v3_training"
+      ],
+      "shape_hash": "a9e61813"
+    },
+    "timm_mobilenetv2_100_train_d3f2e0e1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1280,
+            7,
+            7
+          ],
+          "stride": [
+            62720,
+            1,
+            8960,
+            1280
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "d3f2e0e1"
+    },
+    "timm_mobilenetv2_100_train_66010bd9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            320,
+            7,
+            7
+          ],
+          "stride": [
+            15680,
+            1,
+            2240,
+            320
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "66010bd9"
+    },
+    "timm_mobilenetv2_100_train_beeeba03": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            960,
+            7,
+            7
+          ],
+          "stride": [
+            47040,
+            1,
+            6720,
+            960
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "beeeba03"
+    },
+    "timm_mobilenetv2_100_train_40836180": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            160,
+            7,
+            7
+          ],
+          "stride": [
+            7840,
+            1,
+            1120,
+            160
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "40836180"
+    },
+    "timm_mobilenetv2_100_train_71f2bbcf": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            576,
+            7,
+            7
+          ],
+          "stride": [
+            28224,
+            1,
+            4032,
+            576
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "71f2bbcf"
+    },
+    "timm_mobilenetv2_100_train_74d616e4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            576,
+            14,
+            14
+          ],
+          "stride": [
+            112896,
+            1,
+            8064,
+            576
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "74d616e4"
+    },
+    "timm_mobilenetv2_100_train_29525dd5": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            14,
+            14
+          ],
+          "stride": [
+            18816,
+            1,
+            1344,
+            96
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "29525dd5"
+    },
+    "timm_mobilenetv2_100_train_4d8ffddd": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "4d8ffddd"
+    },
+    "timm_mobilenetv2_100_train_3a874bad": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            14,
+            14
+          ],
+          "stride": [
+            12544,
+            1,
+            896,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "3a874bad"
+    },
+    "timm_mobilenetv2_100_train_9b5c4ae0": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            14,
+            14
+          ],
+          "stride": [
+            37632,
+            1,
+            2688,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "9b5c4ae0"
+    },
+    "timm_mobilenetv2_100_train_a21f5590": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "a21f5590"
+    },
+    "timm_mobilenetv2_100_train_97ca9a39": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            28,
+            28
+          ],
+          "stride": [
+            25088,
+            1,
+            896,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "97ca9a39"
+    },
+    "timm_mobilenetv2_100_train_7190842b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            144,
+            28,
+            28
+          ],
+          "stride": [
+            112896,
+            1,
+            4032,
+            144
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "7190842b"
+    },
+    "timm_mobilenetv2_100_train_b0b409fd": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            144,
+            56,
+            56
+          ],
+          "stride": [
+            451584,
+            1,
+            8064,
+            144
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "b0b409fd"
+    },
+    "timm_mobilenetv2_100_train_8ca59d5e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            24,
+            56,
+            56
+          ],
+          "stride": [
+            75264,
+            1,
+            1344,
+            24
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "8ca59d5e"
+    },
+    "timm_mobilenetv2_100_train_20dc2146": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "20dc2146"
+    },
+    "timm_mobilenetv2_100_train_041a760d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            112,
+            112
+          ],
+          "stride": [
+            1204224,
+            1,
+            10752,
+            96
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "041a760d"
+    },
+    "timm_mobilenetv2_100_train_23ac85ae": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16,
+            112,
+            112
+          ],
+          "stride": [
+            200704,
+            1,
+            1792,
+            16
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "23ac85ae"
+    },
+    "timm_mobilenetv2_100_train_e3ab5e40": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            112,
+            112
+          ],
+          "stride": [
+            401408,
+            1,
+            3584,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv2_100_train"
+      ],
+      "shape_hash": "e3ab5e40"
+    },
+    "timm_mobilevit_s_training_93b5c0f9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            640,
+            8,
+            8
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "93b5c0f9"
+    },
+    "timm_mobilevit_s_training_1528920b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            160,
+            8,
+            8
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "1528920b"
+    },
+    "timm_mobilevit_s_training_2f75b894": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            8,
+            8
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "2f75b894"
+    },
+    "timm_mobilevit_s_training_da068ea1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            512,
+            16,
+            16
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "da068ea1"
+    },
+    "timm_mobilevit_s_training_dc63601b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            16,
+            16
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "dc63601b"
+    },
+    "timm_mobilevit_s_training_02fd5f33": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            16,
+            16
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "02fd5f33"
+    },
+    "timm_mobilevit_s_training_16b5338d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            32,
+            32
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "16b5338d"
+    },
+    "timm_mobilevit_s_training_82e4a4a7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            32,
+            32
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "82e4a4a7"
+    },
+    "timm_mobilevit_s_training_cf18db3d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            256,
+            32,
+            32
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "cf18db3d"
+    },
+    "timm_mobilevit_s_training_d50aac5d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            256,
+            64,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "d50aac5d"
+    },
+    "timm_mobilevit_s_training_399379b7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            64,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "399379b7"
+    },
+    "timm_mobilevit_s_training_fb4e4d72": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            64,
+            64
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "fb4e4d72"
+    },
+    "timm_mobilevit_s_training_ade0c5e5": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            128,
+            128,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "ade0c5e5"
+    },
+    "timm_mobilevit_s_training_26f9ac4a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            128,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "26f9ac4a"
+    },
+    "timm_mobilevit_s_training_ffb652cc": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            64,
+            128,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "ffb652cc"
+    },
+    "timm_mobilevit_s_training_498dfc6c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            16,
+            128,
+            128
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_training"
+      ],
+      "shape_hash": "498dfc6c"
+    },
+    "timm_mobilenetv3_large_100_train_783b82c5": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            960,
+            7,
+            7
+          ],
+          "stride": [
+            47040,
+            1,
+            6720,
+            960
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "783b82c5"
+    },
+    "timm_mobilenetv3_large_100_train_9b677abb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            160,
+            7,
+            7
+          ],
+          "stride": [
+            7840,
+            1,
+            1120,
+            160
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "9b677abb"
+    },
+    "timm_mobilenetv3_large_100_train_1c2205f2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            672,
+            7,
+            7
+          ],
+          "stride": [
+            32928,
+            1,
+            4704,
+            672
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "1c2205f2"
+    },
+    "timm_mobilenetv3_large_100_train_688a8635": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            672,
+            14,
+            14
+          ],
+          "stride": [
+            131712,
+            1,
+            9408,
+            672
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "688a8635"
+    },
+    "timm_mobilenetv3_large_100_train_cf6a6438": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            112,
+            14,
+            14
+          ],
+          "stride": [
+            21952,
+            1,
+            1568,
+            112
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "cf6a6438"
+    },
+    "timm_mobilenetv3_large_100_train_c2b5a32e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            480,
+            14,
+            14
+          ],
+          "stride": [
+            94080,
+            1,
+            6720,
+            480
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "c2b5a32e"
+    },
+    "timm_mobilenetv3_large_100_train_dc296c20": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            80,
+            14,
+            14
+          ],
+          "stride": [
+            15680,
+            1,
+            1120,
+            80
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "dc296c20"
+    },
+    "timm_mobilenetv3_large_100_train_4f65dde9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            184,
+            14,
+            14
+          ],
+          "stride": [
+            36064,
+            1,
+            2576,
+            184
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "4f65dde9"
+    },
+    "timm_mobilenetv3_large_100_train_8a74798e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            200,
+            14,
+            14
+          ],
+          "stride": [
+            39200,
+            1,
+            2800,
+            200
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "8a74798e"
+    },
+    "timm_mobilenetv3_large_100_train_fb9b134c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            240,
+            14,
+            14
+          ],
+          "stride": [
+            47040,
+            1,
+            3360,
+            240
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "fb9b134c"
+    },
+    "timm_mobilenetv3_large_100_train_3555088f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            240,
+            28,
+            28
+          ],
+          "stride": [
+            188160,
+            1,
+            6720,
+            240
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "3555088f"
+    },
+    "timm_mobilenetv3_large_100_train_35bb0ca9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            40,
+            28,
+            28
+          ],
+          "stride": [
+            31360,
+            1,
+            1120,
+            40
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "35bb0ca9"
+    },
+    "timm_mobilenetv3_large_100_train_7c57bb2b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            120,
+            28,
+            28
+          ],
+          "stride": [
+            94080,
+            1,
+            3360,
+            120
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "7c57bb2b"
+    },
+    "timm_mobilenetv3_large_100_train_f2642550": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            72,
+            28,
+            28
+          ],
+          "stride": [
+            56448,
+            1,
+            2016,
+            72
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "f2642550"
+    },
+    "timm_mobilenetv3_large_100_train_8330dd3f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            72,
+            56,
+            56
+          ],
+          "stride": [
+            225792,
+            1,
+            4032,
+            72
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "8330dd3f"
+    },
+    "timm_mobilenetv3_large_100_train_296cba0d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            24,
+            56,
+            56
+          ],
+          "stride": [
+            75264,
+            1,
+            1344,
+            24
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "296cba0d"
+    },
+    "timm_mobilenetv3_large_100_train_836606b1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            64,
+            56,
+            56
+          ],
+          "stride": [
+            200704,
+            1,
+            3584,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "836606b1"
+    },
+    "timm_mobilenetv3_large_100_train_44d63625": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            64,
+            112,
+            112
+          ],
+          "stride": [
+            802816,
+            1,
+            7168,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "44d63625"
+    },
+    "timm_mobilenetv3_large_100_train_ee5b7bf7": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            512,
+            16,
+            112,
+            112
+          ],
+          "stride": [
+            200704,
+            1,
+            1792,
+            16
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilenetv3_large_100_train"
+      ],
+      "shape_hash": "ee5b7bf7"
+    },
+    "timm_mobilevit_s_train_206bf7fd": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            640,
+            8,
+            8
+          ],
+          "stride": [
+            40960,
+            1,
+            5120,
+            640
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "206bf7fd"
+    },
+    "timm_mobilevit_s_train_1ce81624": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            160,
+            8,
+            8
+          ],
+          "stride": [
+            10240,
+            1,
+            1280,
+            160
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "1ce81624"
+    },
+    "timm_mobilevit_s_train_8a61fb58": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            512,
+            8,
+            8
+          ],
+          "stride": [
+            32768,
+            1,
+            4096,
+            512
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "8a61fb58"
+    },
+    "timm_mobilevit_s_train_27d6e2fb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            512,
+            16,
+            16
+          ],
+          "stride": [
+            131072,
+            1,
+            8192,
+            512
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "27d6e2fb"
+    },
+    "timm_mobilevit_s_train_106fc914": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            16,
+            16
+          ],
+          "stride": [
+            32768,
+            1,
+            2048,
+            128
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "106fc914"
+    },
+    "timm_mobilevit_s_train_4d34af45": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            16,
+            16
+          ],
+          "stride": [
+            98304,
+            1,
+            6144,
+            384
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "4d34af45"
+    },
+    "timm_mobilevit_s_train_8a7c5a0f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            32,
+            32
+          ],
+          "stride": [
+            393216,
+            1,
+            12288,
+            384
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "8a7c5a0f"
+    },
+    "timm_mobilevit_s_train_6ad6a412": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            32,
+            32
+          ],
+          "stride": [
+            98304,
+            1,
+            3072,
+            96
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "6ad6a412"
+    },
+    "timm_mobilevit_s_train_8ee20997": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            256,
+            32,
+            32
+          ],
+          "stride": [
+            262144,
+            1,
+            8192,
+            256
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "8ee20997"
+    },
+    "timm_mobilevit_s_train_30793f0b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            256,
+            64,
+            64
+          ],
+          "stride": [
+            1048576,
+            1,
+            16384,
+            256
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "30793f0b"
+    },
+    "timm_mobilevit_s_train_eb33ce55": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            64,
+            64
+          ],
+          "stride": [
+            262144,
+            1,
+            4096,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "eb33ce55"
+    },
+    "timm_mobilevit_s_train_4df3a1d1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            64,
+            64
+          ],
+          "stride": [
+            524288,
+            1,
+            8192,
+            128
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "4df3a1d1"
+    },
+    "timm_mobilevit_s_train_8d62b433": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            128,
+            128,
+            128
+          ],
+          "stride": [
+            2097152,
+            1,
+            16384,
+            128
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "8d62b433"
+    },
+    "timm_mobilevit_s_train_fc0c5105": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            128,
+            128
+          ],
+          "stride": [
+            524288,
+            1,
+            4096,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "fc0c5105"
+    },
+    "timm_mobilevit_s_train_94e6bf63": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            64,
+            128,
+            128
+          ],
+          "stride": [
+            1048576,
+            1,
+            8192,
+            64
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "94e6bf63"
+    },
+    "timm_mobilevit_s_train_fac9ee7f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16,
+            128,
+            128
+          ],
+          "stride": [
+            262144,
+            1,
+            2048,
+            16
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_mobilevit_s_train"
+      ],
+      "shape_hash": "fac9ee7f"
+    },
+    "timm_tf_efficientnet_b0_train_d3f2e0e1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1280,
+            7,
+            7
+          ],
+          "stride": [
+            62720,
+            1,
+            8960,
+            1280
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "d3f2e0e1"
+    },
+    "timm_tf_efficientnet_b0_train_66010bd9": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            320,
+            7,
+            7
+          ],
+          "stride": [
+            15680,
+            1,
+            2240,
+            320
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "66010bd9"
+    },
+    "timm_tf_efficientnet_b0_train_9e3c83a1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            1152,
+            7,
+            7
+          ],
+          "stride": [
+            56448,
+            1,
+            8064,
+            1152
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "9e3c83a1"
+    },
+    "timm_tf_efficientnet_b0_train_6ae32d83": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            7,
+            7
+          ],
+          "stride": [
+            9408,
+            1,
+            1344,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "6ae32d83"
+    },
+    "timm_tf_efficientnet_b0_train_b8425cec": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            672,
+            7,
+            7
+          ],
+          "stride": [
+            32928,
+            1,
+            4704,
+            672
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "b8425cec"
+    },
+    "timm_tf_efficientnet_b0_train_7d086e4b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            672,
+            14,
+            14
+          ],
+          "stride": [
+            131712,
+            1,
+            9408,
+            672
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "7d086e4b"
+    },
+    "timm_tf_efficientnet_b0_train_2e81b698": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            112,
+            14,
+            14
+          ],
+          "stride": [
+            21952,
+            1,
+            1568,
+            112
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "2e81b698"
+    },
+    "timm_tf_efficientnet_b0_train_c48541e2": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            480,
+            14,
+            14
+          ],
+          "stride": [
+            94080,
+            1,
+            6720,
+            480
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "c48541e2"
+    },
+    "timm_tf_efficientnet_b0_train_405eab05": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            80,
+            14,
+            14
+          ],
+          "stride": [
+            15680,
+            1,
+            1120,
+            80
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "405eab05"
+    },
+    "timm_tf_efficientnet_b0_train_668c9001": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            240,
+            14,
+            14
+          ],
+          "stride": [
+            47040,
+            1,
+            3360,
+            240
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "668c9001"
+    },
+    "timm_tf_efficientnet_b0_train_7839883b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            240,
+            28,
+            28
+          ],
+          "stride": [
+            188160,
+            1,
+            6720,
+            240
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "7839883b"
+    },
+    "timm_tf_efficientnet_b0_train_541658be": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            40,
+            28,
+            28
+          ],
+          "stride": [
+            31360,
+            1,
+            1120,
+            40
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "541658be"
+    },
+    "timm_tf_efficientnet_b0_train_7190842b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            144,
+            28,
+            28
+          ],
+          "stride": [
+            112896,
+            1,
+            4032,
+            144
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "7190842b"
+    },
+    "timm_tf_efficientnet_b0_train_b0b409fd": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            144,
+            56,
+            56
+          ],
+          "stride": [
+            451584,
+            1,
+            8064,
+            144
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "b0b409fd"
+    },
+    "timm_tf_efficientnet_b0_train_8ca59d5e": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            24,
+            56,
+            56
+          ],
+          "stride": [
+            75264,
+            1,
+            1344,
+            24
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "8ca59d5e"
+    },
+    "timm_tf_efficientnet_b0_train_20dc2146": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            56,
+            56
+          ],
+          "stride": [
+            301056,
+            1,
+            5376,
+            96
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "20dc2146"
+    },
+    "timm_tf_efficientnet_b0_train_041a760d": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            96,
+            112,
+            112
+          ],
+          "stride": [
+            1204224,
+            1,
+            10752,
+            96
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "041a760d"
+    },
+    "timm_tf_efficientnet_b0_train_23ac85ae": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16,
+            112,
+            112
+          ],
+          "stride": [
+            200704,
+            1,
+            1792,
+            16
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "23ac85ae"
+    },
+    "timm_tf_efficientnet_b0_train_e3ab5e40": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            112,
+            112
+          ],
+          "stride": [
+            401408,
+            1,
+            3584,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_train"
+      ],
+      "shape_hash": "e3ab5e40"
+    },
+    "timm_visformer_small_train_ae969c27": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            768,
+            7,
+            7
+          ],
+          "stride": [
+            37632,
+            1,
+            5376,
+            768
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_train"
+      ],
+      "shape_hash": "ae969c27"
+    },
+    "timm_visformer_small_train_4d8ffddd": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            384,
+            14,
+            14
+          ],
+          "stride": [
+            75264,
+            1,
+            5376,
+            384
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_train"
+      ],
+      "shape_hash": "4d8ffddd"
+    },
+    "timm_visformer_small_train_a21f5590": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192,
+            28,
+            28
+          ],
+          "stride": [
+            150528,
+            1,
+            5376,
+            192
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_train"
+      ],
+      "shape_hash": "a21f5590"
+    },
+    "timm_visformer_small_train_e3ab5e40": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            32,
+            112,
+            112
+          ],
+          "stride": [
+            401408,
+            1,
+            3584,
+            32
+          ]
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_train"
+      ],
+      "shape_hash": "e3ab5e40"
+    },
+    "timm_tf_efficientnet_b0_training_6640208a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1280,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "6640208a"
+    },
+    "timm_tf_efficientnet_b0_training_9bbe2353": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            320,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "9bbe2353"
+    },
+    "timm_tf_efficientnet_b0_training_6ab7c3c6": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            1152,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "6ab7c3c6"
+    },
+    "timm_tf_efficientnet_b0_training_01d65728": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "01d65728"
+    },
+    "timm_tf_efficientnet_b0_training_8fe7703a": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            672,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "8fe7703a"
+    },
+    "timm_tf_efficientnet_b0_training_725d4297": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            672,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "725d4297"
+    },
+    "timm_tf_efficientnet_b0_training_a577280b": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            112,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "a577280b"
+    },
+    "timm_tf_efficientnet_b0_training_3fd98be1": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            480,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "3fd98be1"
+    },
+    "timm_tf_efficientnet_b0_training_f35210cb": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            80,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "f35210cb"
+    },
+    "timm_tf_efficientnet_b0_training_a4c9c27c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            240,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "a4c9c27c"
+    },
+    "timm_tf_efficientnet_b0_training_83f6216c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            240,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "83f6216c"
+    },
+    "timm_tf_efficientnet_b0_training_ac9a13f3": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            40,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "ac9a13f3"
+    },
+    "timm_tf_efficientnet_b0_training_87b7363f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            144,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "87b7363f"
+    },
+    "timm_tf_efficientnet_b0_training_b835a441": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            144,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "b835a441"
+    },
+    "timm_tf_efficientnet_b0_training_b8aeb1e4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            24,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "b8aeb1e4"
+    },
+    "timm_tf_efficientnet_b0_training_434cde94": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            56,
+            56
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "434cde94"
+    },
+    "timm_tf_efficientnet_b0_training_64fceec4": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            96,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "64fceec4"
+    },
+    "timm_tf_efficientnet_b0_training_1fe20cab": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            16,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "1fe20cab"
+    },
+    "timm_tf_efficientnet_b0_training_fc55b288": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_tf_efficientnet_b0_training"
+      ],
+      "shape_hash": "fc55b288"
+    },
+    "timm_visformer_small_training_7a8af858": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            768,
+            7,
+            7
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_training"
+      ],
+      "shape_hash": "7a8af858"
+    },
+    "timm_visformer_small_training_6b3e7c45": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            384,
+            14,
+            14
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_training"
+      ],
+      "shape_hash": "6b3e7c45"
+    },
+    "timm_visformer_small_training_c7aee410": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192,
+            28,
+            28
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_training"
+      ],
+      "shape_hash": "c7aee410"
+    },
+    "timm_visformer_small_training_fc55b288": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            32,
+            112,
+            112
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_visformer_small_training"
+      ],
+      "shape_hash": "fc55b288"
+    }
+  }
+}

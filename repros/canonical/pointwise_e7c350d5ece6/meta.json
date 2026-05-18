@@ -8,8 +8,9 @@
     "aten.relu.default",
     "aten.reshape.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "timm_ghostnet_100_infer",
     "timm_ghostnet_100_inference",
     "tlparse_timm_s4_g10"
   ]

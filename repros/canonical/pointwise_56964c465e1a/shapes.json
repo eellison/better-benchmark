@@ -1,0 +1,261 @@
+{
+  "pattern_hash": "56964c465e1a",
+  "configs": {
+    "hf_gptjforcausallm_training_67274dc5": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16384,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            128,
+            256
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            256,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            128,
+            256
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            128,
+            1,
+            32,
+            1
+          ],
+          "stride": [
+            8192,
+            64,
+            32,
+            1,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            128,
+            1,
+            32,
+            1
+          ],
+          "stride": [
+            8192,
+            64,
+            32,
+            1,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_gptjforcausallm_training"
+      ],
+      "shape_hash": "67274dc5"
+    },
+    "hf_gptjforquestionanswering_training_67274dc5": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            16384
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16384,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            128,
+            256
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            256,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            128,
+            256
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            128,
+            1,
+            32,
+            1
+          ],
+          "stride": [
+            8192,
+            64,
+            32,
+            1,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            128,
+            1,
+            32,
+            1
+          ],
+          "stride": [
+            8192,
+            64,
+            32,
+            1,
+            1
+          ]
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            4096,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_gptjforquestionanswering_training"
+      ],
+      "shape_hash": "67274dc5"
+    }
+  }
+}

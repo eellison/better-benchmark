@@ -11,11 +11,12 @@
     "aten.add.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 5,
+  "n_models": 6,
   "models": [
     "dynamo_Reformer",
     "dynamo_Reformer_inference",
     "hf_Reformer_inference",
+    "timm_visformer_small_train",
     "timm_visformer_small_training",
     "tlparse_huggingface_s3_g21"
   ]

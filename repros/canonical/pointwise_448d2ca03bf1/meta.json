@@ -26,8 +26,9 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_tf_efficientnet_b0_infer",
     "timm_tf_efficientnet_b0_inference"
   ]
 }

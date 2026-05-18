@@ -24,9 +24,11 @@
     "aten.reshape.default",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 4,
+  "n_models": 6,
   "models": [
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer",
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_inference",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_training",
     "timm_convnextv2_nano_inference",
     "timm_convnextv2_nano_training"

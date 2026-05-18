@@ -18,9 +18,11 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_mobilevit_s_infer",
     "timm_mobilevit_s_inference",
+    "timm_mobilevit_s_train",
     "timm_mobilevit_s_training"
   ]
 }

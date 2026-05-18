@@ -13,11 +13,15 @@
     "aten.reshape.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 4,
+  "n_models": 8,
   "models": [
+    "timm_dm_nfnet_f0_infer",
     "timm_dm_nfnet_f0_inference",
+    "timm_dm_nfnet_f0_train",
     "timm_dm_nfnet_f0_training",
+    "timm_nfnet_l0_infer",
     "timm_nfnet_l0_inference",
+    "timm_nfnet_l0_train",
     "timm_nfnet_l0_training"
   ]
 }

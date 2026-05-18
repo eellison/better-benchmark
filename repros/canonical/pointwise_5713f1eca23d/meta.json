@@ -15,9 +15,11 @@
     "aten.reciprocal.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
+    "timm_nfnet_l0_train",
     "timm_nfnet_l0_training",
+    "timm_tf_efficientnet_b0_train",
     "timm_tf_efficientnet_b0_training",
     "torchvision_efficientnet_b0_training"
   ]

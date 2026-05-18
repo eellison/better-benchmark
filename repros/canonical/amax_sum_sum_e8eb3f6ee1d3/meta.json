@@ -145,8 +145,9 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_GPTJForCausalLM_training"
+    "hf_GPTJForCausalLM_training",
+    "hf_gptjforcausallm_training"
   ]
 }

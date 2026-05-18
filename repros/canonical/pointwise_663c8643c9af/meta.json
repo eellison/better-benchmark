@@ -9,9 +9,11 @@
     "aten.expand.default",
     "aten.mul.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_dm_nfnet_f0_train",
     "timm_dm_nfnet_f0_training",
+    "timm_nfnet_l0_train",
     "timm_nfnet_l0_training"
   ]
 }

@@ -35,8 +35,9 @@
     "aten.rsqrt.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_beit_base_patch16_224_train",
     "timm_beit_base_patch16_224_training"
   ]
 }

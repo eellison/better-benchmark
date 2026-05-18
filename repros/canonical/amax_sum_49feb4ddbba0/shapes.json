@@ -1,0 +1,62 @@
+{
+  "pattern_hash": "49feb4ddbba0",
+  "configs": {
+    "hf_gptjforquestionanswering_inference_67997a53": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            1,
+            128,
+            128
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            1,
+            128,
+            4096
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            16384,
+            4096
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "hf_gptjforquestionanswering_inference"
+      ],
+      "shape_hash": "67997a53"
+    }
+  }
+}

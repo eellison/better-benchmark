@@ -1,0 +1,113 @@
+{
+  "pattern_hash": "e47bf40e6193",
+  "configs": {
+    "timm_deit_tiny_patch16_224.fb_in1k_train_71e91b0f": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            197,
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            128,
+            197,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_tiny_patch16_224.fb_in1k_train"
+      ],
+      "shape_hash": "71e91b0f"
+    },
+    "timm_deit_tiny_patch16_224.fb_in1k_training_1fbf8b5c": {
+      "inputs": [
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            197,
+            192
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            8,
+            197,
+            1
+          ],
+          "stride": null
+        },
+        {
+          "dtype": "torch.float32",
+          "device": "cuda",
+          "shape": [
+            192,
+            768
+          ],
+          "stride": null
+        }
+      ],
+      "source_models": [
+        "timm_deit_tiny_patch16_224.fb_in1k_training"
+      ],
+      "shape_hash": "1fbf8b5c"
+    }
+  }
+}
