@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "a79a6a9a1ad4",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.permute.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "vllm_Qwen_Qwen3-30B-A3B"
+  ]
+}

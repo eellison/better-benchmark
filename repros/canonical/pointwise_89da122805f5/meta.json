@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "89da122805f5",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.split.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "vllm_Qwen_Qwen3-30B-A3B"
+  ]
+}

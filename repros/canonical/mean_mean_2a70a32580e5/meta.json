@@ -60,8 +60,9 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "vllm_Qwen_Qwen3-0.6B"
+    "vllm_Qwen_Qwen3-0.6B",
+    "vllm_Qwen_Qwen3-30B-A3B"
   ]
 }

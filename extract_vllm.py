@@ -8,16 +8,21 @@ import sys
 import torch
 import torch._inductor.config as inductor_config
 
+sys.path.insert(0, "/tmp/scratch_space/better_benchmark")
 PYTHONPATH = os.environ.get("PYTORCH_DIR", "/tmp/pytorch-work")
 sys.path.insert(0, PYTHONPATH)
 
 inductor_config.force_disable_caches = True
 inductor_config.split_reductions = False
 
+REPRO_DIR = "/tmp/scratch_space/better_benchmark/repros"
+
 
 def extract_from_model(model_name, output_name=None, device_id=0,
                        inference_only=False, max_layers=None):
     from extract_reductions import run_aten_extraction
+    from merge_captures import merge_one_capture
+    from pathlib import Path
     from transformers import AutoConfig, AutoModelForCausalLM
 
     if output_name is None:
@@ -25,7 +30,7 @@ def extract_from_model(model_name, output_name=None, device_id=0,
         suffix = "_inference" if inference_only else ""
         output_name = f"vllm_{safe_name}{suffix}"
 
-    output_dir = os.path.join("output", "aten_repros", output_name)
+    output_dir = os.path.join("/tmp/scratch_space/better_benchmark/output", "aten_repros", output_name)
     device = f"cuda:{device_id}"
 
     config = AutoConfig.from_pretrained(model_name)
@@ -60,8 +65,13 @@ def extract_from_model(model_name, output_name=None, device_id=0,
         labels = input_ids.clone()
         return [{"input_ids": input_ids, "labels": labels}]
 
-    run_aten_extraction(make_model, make_args, output_dir,
+    extractor = run_aten_extraction(make_model, make_args, output_dir,
                         model_name=output_name, inference_only=inference_only)
+
+    # Merge into canonical repro set
+    n = merge_one_capture(Path(output_dir), Path(REPRO_DIR), output_name)
+    print(f"  Merged {n} regions into {REPRO_DIR}/canonical/")
+    return n
 
 
 VLLM_MODELS = [

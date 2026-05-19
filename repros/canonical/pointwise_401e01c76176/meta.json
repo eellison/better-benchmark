@@ -41,8 +41,9 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "vllm_meta-llama_Llama-3.2-1B"
+    "vllm_meta-llama_Llama-3.2-1B",
+    "vllm_mistralai_Mistral-7B-Instruct-v0.3"
   ]
 }
