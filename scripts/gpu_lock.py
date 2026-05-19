@@ -80,6 +80,28 @@ def _write_lock_metadata(fd: int, *, gpu: str, label: str, device_kind: str = ""
     os.fsync(fd)
 
 
+def _is_pid_alive(pid: int) -> bool:
+    """Check if a process is still running."""
+    try:
+        os.kill(pid, 0)
+        return True
+    except (OSError, ProcessLookupError):
+        return False
+
+
+def _read_lock_pid(fd: int) -> int | None:
+    """Read the PID from a lock file's metadata."""
+    try:
+        os.lseek(fd, 0, os.SEEK_SET)
+        content = os.read(fd, 256).decode()
+        for line in content.splitlines():
+            if line.startswith("pid="):
+                return int(line.split("=")[1])
+    except Exception:
+        pass
+    return None
+
+
 @contextlib.contextmanager
 def gpu_lock(
     gpu: int | str = 0,
@@ -88,7 +110,12 @@ def gpu_lock(
     timeout_s: float | None = None,
     label: str = "",
 ) -> Iterator[Path]:
-    """Acquire an exclusive advisory lock for one GPU."""
+    """Acquire an exclusive advisory lock for one GPU.
+
+    Handles stale locks: if the lock is held by a dead process, it's
+    forcibly released (the flock is automatically dropped when the holding
+    process dies, but the file may still exist with stale metadata).
+    """
     directory = Path(lock_dir) if lock_dir is not None else DEFAULT_LOCK_DIR
     directory.mkdir(parents=True, exist_ok=True)
     lock_path = directory / f"gpu_{gpu}.lock"
@@ -100,6 +127,16 @@ def gpu_lock(
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             break
         except BlockingIOError:
+            # Check if the holder is still alive
+            holder_pid = _read_lock_pid(fd)
+            if holder_pid is not None and not _is_pid_alive(holder_pid):
+                # Stale lock — force acquire (the flock should already be released
+                # by the kernel when the process died, so try again immediately)
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    pass
             if timeout_s is not None and time.monotonic() - start >= timeout_s:
                 os.close(fd)
                 raise TimeoutError(f"Timed out waiting for GPU {gpu} lock: {lock_path}")
