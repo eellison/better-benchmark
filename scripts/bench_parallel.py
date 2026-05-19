@@ -293,7 +293,8 @@ def main():
         return
 
     gpus = matching_gpus(args.device_kind)
-    n_workers = min(args.max_workers or len(gpus), len(gpus), len(repros))
+    workers_per_gpu = getattr(args, 'workers_per_gpu', 1) or 1
+    n_workers = min(args.max_workers or len(gpus) * workers_per_gpu, len(gpus) * workers_per_gpu, len(repros))
 
     print(f"Benchmarking {len(repros)} repros across {n_workers} GPUs")
     gpu_labels = [f"{g['index']}:{g['kind']}" for g in gpus[:n_workers]]
@@ -325,7 +326,7 @@ def main():
     import threading
     workers = []
     for i in range(n_workers):
-        gpu = gpus[i]
+        gpu = gpus[i % len(gpus)]  # round-robin GPUs across workers
         t = threading.Thread(
             target=_locked_worker,
             args=(gpu, task_queue, result_queue, args_dict),
@@ -448,11 +449,15 @@ def main():
 
 
 def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
-    """Acquire GPU lock, run persistent worker subprocess, respawn on CUDA error."""
-    from gpu_lock import gpu_lock
+    """Run persistent worker subprocess on a GPU, respawn on CUDA error.
+
+    No process-level GPU lock — serialization happens inside inductor via
+    INDUCTOR_GPU_BENCH_LOCK (exclusive file lock around do_bench only).
+    Multiple workers per GPU can compile in parallel.
+    """
     import subprocess
 
-    with gpu_lock(gpu["index"], label=f"bench_parallel gpu{gpu['index']}"):
+    if True:  # was: with gpu_lock(...) — now using inductor-level lock instead
         env = os.environ.copy()
         env["CUDA_VISIBLE_DEVICES"] = gpu["index"]
         # Enable per-GPU exclusive lock around inductor's do_bench calls.
