@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "3ed297ef02cd",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 11,
+  "models": [
+    "genai_softmax_fwd_16384x131072",
+    "genai_softmax_fwd_32768x1024",
+    "genai_softmax_fwd_32768x16384",
+    "genai_softmax_fwd_32768x2048",
+    "genai_softmax_fwd_32768x256",
+    "genai_softmax_fwd_32768x32768",
+    "genai_softmax_fwd_32768x4096",
+    "genai_softmax_fwd_32768x512",
+    "genai_softmax_fwd_32768x65536",
+    "genai_softmax_fwd_32768x8192",
+    "genai_softmax_fwd_8192x262144"
+  ]
+}

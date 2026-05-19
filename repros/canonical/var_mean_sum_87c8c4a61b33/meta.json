@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "87c8c4a61b33",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean",
+    "sum"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.sum.default",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 13,
+  "models": [
+    "genai_layernorm_bwd_1152000x384",
+    "genai_layernorm_bwd_1152000x512",
+    "genai_layernorm_bwd_32768x1024",
+    "genai_layernorm_bwd_32768x16384",
+    "genai_layernorm_bwd_32768x2048",
+    "genai_layernorm_bwd_32768x256",
+    "genai_layernorm_bwd_32768x32768",
+    "genai_layernorm_bwd_32768x4096",
+    "genai_layernorm_bwd_32768x512",
+    "genai_layernorm_bwd_32768x65536",
+    "genai_layernorm_bwd_32768x8192",
+    "genai_layernorm_bwd_576000x384",
+    "genai_layernorm_bwd_576000x512"
+  ]
+}
