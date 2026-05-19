@@ -164,3 +164,44 @@ def gpu_lock_for_kind(
         if timeout_s is not None and time.monotonic() - start >= timeout_s:
             raise TimeoutError(f"Timed out waiting for GPU kind {device_kind!r}")
         time.sleep(1.0)
+
+
+@contextlib.contextmanager
+def gpu_shared_lock(
+    gpu: int | str = 0,
+    *,
+    lock_dir: Path | str | None = None,
+    timeout_s: float | None = None,
+    label: str = "",
+) -> Iterator[Path]:
+    """Acquire a shared (non-exclusive) advisory lock for one GPU.
+
+    Multiple processes can hold shared locks simultaneously (e.g., for
+    CUDA initialization, autotuning, compilation warmup). An exclusive
+    lock (gpu_lock) will block until all shared locks are released.
+
+    Use this for operations that need the GPU but don't require isolated
+    timing (compilation, autotuning, random tensor creation).
+    Use gpu_lock (exclusive) for actual performance measurement.
+    """
+    directory = Path(lock_dir) if lock_dir is not None else DEFAULT_LOCK_DIR
+    directory.mkdir(parents=True, exist_ok=True)
+    lock_path = directory / f"gpu_{gpu}.lock"
+    fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o666)
+    start = time.monotonic()
+
+    while True:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
+            break
+        except BlockingIOError:
+            if timeout_s is not None and time.monotonic() - start >= timeout_s:
+                os.close(fd)
+                raise TimeoutError(f"Timed out waiting for shared GPU {gpu} lock: {lock_path}")
+            time.sleep(0.1)
+
+    try:
+        yield lock_path
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
