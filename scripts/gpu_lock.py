@@ -177,12 +177,21 @@ def gpu_shared_lock(
     """Acquire a shared (non-exclusive) advisory lock for one GPU.
 
     Multiple processes can hold shared locks simultaneously (e.g., for
-    CUDA initialization, autotuning, compilation warmup). An exclusive
-    lock (gpu_lock) will block until all shared locks are released.
+    CUDA initialization, tensor allocation, graph lowering).
 
-    Use this for operations that need the GPU but don't require isolated
-    timing (compilation, autotuning, random tensor creation).
-    Use gpu_lock (exclusive) for actual performance measurement.
+    An exclusive lock (gpu_lock) will block until all shared locks are
+    released — use exclusive for ANY benchmarking (both autotuning's
+    do_bench and our final measurement).
+
+    Shared lock use cases:
+      - torch.randn(device='cuda'), tensor creation
+      - CUDA context init
+      - Graph lowering / Triton codegen (CPU-bound but may touch GPU for shape queries)
+
+    Exclusive lock use cases:
+      - Inductor autotuning (benchmarker.benchmark / do_bench)
+      - Our final do_bench measurement
+      - Any timing-sensitive GPU operation
     """
     directory = Path(lock_dir) if lock_dir is not None else DEFAULT_LOCK_DIR
     directory.mkdir(parents=True, exist_ok=True)

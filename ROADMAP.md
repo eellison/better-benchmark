@@ -46,9 +46,9 @@ dm_nfnet_f0 128            vit_base_dinov2 128      vit_base_siglip 128
 
 ### [DONE] Final cleanup
 - ~~Fix 38 failing repros~~ ALL FIXED, 100% pass rate
-- ~~Freeze benchmarks/v1.json~~ DONE (1133 patterns)
-- Optimize execution: subprocess pool, GPU lock around timing only (in progress)
-- Baseline benchmark sweep (in progress)
+- ~~Freeze benchmarks/v1.json~~ DONE (1133 patterns, 777 reduction, 356 pointwise)
+- ~~Execution optimization~~ documented bottlenecks, added shared cache + pre-import
+- ~~Baseline sweep~~ 298/1133 benchmarked: median 1.06x, 54.7% at SOL, 17.1% severe (>2x)
 
 ---
 
