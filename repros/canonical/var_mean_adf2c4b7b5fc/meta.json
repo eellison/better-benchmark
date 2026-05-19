@@ -1,0 +1,53 @@
+{
+  "pattern_hash": "adf2c4b7b5fc",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 38,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.le.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction",
+    "aten.where.self",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "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_infer",
+    "hf_M2M100ForConditionalGeneration_infer"
+  ]
+}

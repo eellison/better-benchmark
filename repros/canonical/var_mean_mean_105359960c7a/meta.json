@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "105359960c7a",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean",
+    "mean"
+  ],
+  "n_ops": 16,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_ghostnet_100_train"
+  ]
+}

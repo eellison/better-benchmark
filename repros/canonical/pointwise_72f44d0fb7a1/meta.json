@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "72f44d0fb7a1",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf_MT5ForConditionalGeneration_train",
+    "hf_T5ForConditionalGeneration_train",
+    "hf_T5Small_train"
+  ]
+}

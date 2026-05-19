@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "b6f26797cc4e",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 16,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.gt.Scalar",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.pow.Tensor_Scalar",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_MT5ForConditionalGeneration_train"
+  ]
+}

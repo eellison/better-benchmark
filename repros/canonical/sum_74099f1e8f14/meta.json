@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "74099f1e8f14",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "prims.fma.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_YituTechConvBert_train"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "cbe6a547c7ab",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.relu.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_M2M100ForConditionalGeneration_infer"
+  ]
+}

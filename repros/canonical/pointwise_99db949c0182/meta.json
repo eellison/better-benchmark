@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "99db949c0182",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.clamp_max.default",
+    "aten.clamp_min.default",
+    "aten.div.Tensor",
+    "aten.mul.Tensor"
+  ],
+  "n_models": 4,
+  "models": [
+    "timm_ghostnet_100_infer",
+    "timm_ghostnet_100_train",
+    "timm_mobilenetv3_large_100_infer",
+    "timm_mobilenetv3_large_100_train"
+  ]
+}

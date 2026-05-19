@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "4790760343db",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean",
+    "mean"
+  ],
+  "n_ops": 15,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_mobilenetv3_large_100_train"
+  ]
+}

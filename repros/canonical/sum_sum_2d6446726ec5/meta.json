@@ -1,0 +1,44 @@
+{
+  "pattern_hash": "2d6446726ec5",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 24,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf_BlenderbotForCausalLM_train",
+    "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_train",
+    "hf_M2M100ForConditionalGeneration_train",
+    "hf_MBartForCausalLM_train",
+    "hf_PegasusForCausalLM_train",
+    "hf_XGLMForCausalLM_train"
+  ]
+}

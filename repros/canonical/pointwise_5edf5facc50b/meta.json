@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "5edf5facc50b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 20,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf_MT5ForConditionalGeneration_train",
+    "hf_T5ForConditionalGeneration_train",
+    "hf_T5Small_train"
+  ]
+}

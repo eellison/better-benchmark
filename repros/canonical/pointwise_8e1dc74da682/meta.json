@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "8e1dc74da682",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.add.Tensor"
+  ],
+  "n_models": 4,
+  "models": [
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
+    "timm_visformer_small_infer",
+    "timm_visformer_small_train"
+  ]
+}

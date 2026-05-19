@@ -1,0 +1,42 @@
+{
+  "pattern_hash": "f0852ef46987",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean",
+    "var_mean"
+  ],
+  "n_ops": 26,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "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_infer",
+    "hf_M2M100ForConditionalGeneration_infer"
+  ]
+}

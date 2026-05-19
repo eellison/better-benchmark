@@ -1,0 +1,49 @@
+{
+  "pattern_hash": "4b4326d1b5ad",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.gather.default",
+    "aten.log.default",
+    "aten.ne.Scalar",
+    "aten.ne.Scalar",
+    "aten.ne.Scalar",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.squeeze.dim",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.default",
+    "aten.sum.default",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.where.self",
+    "aten.where.self",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 8,
+  "models": [
+    "hf_AllenaiLongformerBase_infer",
+    "hf_BartForCausalLM_infer",
+    "hf_BertForMaskedLM_infer",
+    "hf_DistilBertForMaskedLM_infer",
+    "hf_MBartForCausalLM_infer",
+    "hf_PLBartForCausalLM_infer",
+    "hf_PegasusForCausalLM_infer",
+    "hf_TrOCRForCausalLM_infer"
+  ]
+}

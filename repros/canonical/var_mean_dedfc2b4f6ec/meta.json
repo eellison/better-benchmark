@@ -1,0 +1,52 @@
+{
+  "pattern_hash": "dedfc2b4f6ec",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 38,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.select.int",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_vit_base_patch14_dinov2.lvd142m_train"
+  ]
+}

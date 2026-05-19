@@ -1,0 +1,6 @@
+hf_m2m100forconditionalgeneration_infer_e5259d2b: (T([8192, 4096], f32), T([1024, 4096], f32), S([64, 128, 4096]), S([8192, 4096]))
+hf_m2m100forconditionalgeneration_train_e5259d2b: (T([8192, 4096], f32), T([1024, 4096], f32), S([64, 128, 4096]), S([8192, 4096]))
+hf_mobilebertformaskedlm_infer_afcc803f: (T([32768, 512], f32), T([128, 512], f32), S([256, 128, 512]), S([32768, 512]))
+hf_mobilebertformaskedlm_train_afcc803f: (T([32768, 512], f32), T([128, 512], f32), S([256, 128, 512]), S([32768, 512]))
+hf_t5forconditionalgeneration_infer_b10d072c: (T([8192, 2048], f32), T([512, 2048], f32), S([8, 1024, 2048]), S([8192, 2048]))
+hf_t5small_infer_b10d072c: (T([8192, 2048], f32), T([512, 2048], f32), S([8, 1024, 2048]), S([8192, 2048]))

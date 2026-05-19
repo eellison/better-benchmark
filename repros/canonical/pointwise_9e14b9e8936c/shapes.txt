@@ -1,0 +1,8 @@
+hf_albertformaskedlm_infer_6a76fd57: (T([4096, 16384], f32), T([4096, 16384], f32), S([8, 512, 16384]), S([4096, 16384]))
+hf_albertformaskedlm_train_6a76fd57: (T([4096, 16384], f32), T([4096, 16384], f32), S([8, 512, 16384]), S([4096, 16384]))
+hf_gptneoforcausallm_infer_ca3606d2: (T([4096, 8192], f32), T([2048, 8192], f32), S([32, 128, 8192]), S([4096, 8192]))
+hf_gptneoforcausallm_train_ca3606d2: (T([4096, 8192], f32), T([2048, 8192], f32), S([32, 128, 8192]), S([4096, 8192]))
+hf_gptneoforsequenceclassification_infer_ca3606d2: (T([4096, 8192], f32), T([2048, 8192], f32), S([32, 128, 8192]), S([4096, 8192]))
+hf_gptneoforsequenceclassification_train_ca3606d2: (T([4096, 8192], f32), T([2048, 8192], f32), S([32, 128, 8192]), S([4096, 8192]))
+hf_googlefnet_infer_b3e7b15f: (T([16384, 3072], f32), T([768, 3072], f32), S([32, 512, 3072]), S([16384, 3072]))
+hf_googlefnet_train_b3e7b15f: (T([16384, 3072], f32), T([768, 3072], f32), S([32, 512, 3072]), S([16384, 3072]))

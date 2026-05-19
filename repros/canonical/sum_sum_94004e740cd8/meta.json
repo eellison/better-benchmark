@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "94004e740cd8",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 17,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "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_train",
+    "hf_M2M100ForConditionalGeneration_train",
+    "hf_MegatronBertForCausalLM_train"
+  ]
+}

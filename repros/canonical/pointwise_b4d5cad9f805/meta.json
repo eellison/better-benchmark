@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "b4d5cad9f805",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.index.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_XGLMForCausalLM_train"
+  ]
+}

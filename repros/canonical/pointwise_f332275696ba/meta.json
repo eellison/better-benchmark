@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "f332275696ba",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 23,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.pow.Tensor_Scalar",
+    "aten.pow.Tensor_Scalar",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.tanh.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_AlbertForMaskedLM_train"
+  ]
+}

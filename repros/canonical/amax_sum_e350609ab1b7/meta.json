@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "e350609ab1b7",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 13,
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_visformer_small_infer",
+    "timm_visformer_small_train"
+  ]
+}

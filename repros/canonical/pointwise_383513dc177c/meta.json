@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "383513dc177c",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "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_train"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "a3335975dec9",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "prims.fma.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_visformer_small_train"
+  ]
+}

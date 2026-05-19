@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "4ebc1e147929",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.reshape.default",
+    "aten.select.int"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_vit_base_patch16_siglip_256_infer"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "b4b430f98c71",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 15,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.where.self",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_T5ForConditionalGeneration_train",
+    "hf_T5Small_train"
+  ]
+}

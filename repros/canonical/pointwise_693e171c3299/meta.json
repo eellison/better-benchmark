@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "693e171c3299",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.eq.Scalar",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.index_put.default",
+    "aten.unsqueeze.default",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_OPTForCausalLM_train"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "b76bd7ef6f73",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 13,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 4,
+  "models": [
+    "hf_AlbertForMaskedLM_train",
+    "hf_DistilBertForMaskedLM_train",
+    "hf_GPTNeoForCausalLM_train",
+    "hf_GPTNeoForSequenceClassification_train"
+  ]
+}

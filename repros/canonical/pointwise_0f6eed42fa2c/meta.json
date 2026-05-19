@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "0f6eed42fa2c",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_AlbertForMaskedLM_train"
+  ]
+}

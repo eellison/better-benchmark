@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "36804d150a9a",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf_GPTNeoForCausalLM_train",
+    "hf_GPTNeoForSequenceClassification_train",
+    "timm_deit_base_distilled_patch16_224_train",
+    "timm_deit_tiny_patch16_224.fb_in1k_train",
+    "timm_mobilevit_s_train",
+    "timm_vit_base_patch16_siglip_256_train"
+  ]
+}

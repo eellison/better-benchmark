@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "af652b1bd45c",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_YituTechConvBert_infer"
+  ]
+}

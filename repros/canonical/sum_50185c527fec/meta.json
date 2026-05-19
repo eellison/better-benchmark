@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "50185c527fec",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "prims.fma.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "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_train"
+  ]
+}

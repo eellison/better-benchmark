@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "49ac8c44e9b1",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.embedding.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "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_train"
+  ]
+}

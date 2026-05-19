@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "a5d52cc24f84",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.embedding.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_OPTForCausalLM_train"
+  ]
+}

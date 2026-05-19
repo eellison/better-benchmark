@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "532b61911f41",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.constant_pad_nd.default",
+    "aten.permute.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 5,
+  "models": [
+    "hf_BartForCausalLM_train",
+    "hf_MBartForCausalLM_train",
+    "hf_PLBartForCausalLM_train",
+    "hf_PegasusForCausalLM_train",
+    "hf_TrOCRForCausalLM_train"
+  ]
+}

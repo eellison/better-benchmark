@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "d79682d7b4b7",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 16,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_OPTForCausalLM_train"
+  ]
+}

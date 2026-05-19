@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "b6ee6d935f27",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 22,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.ge.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.where.self",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_MT5ForConditionalGeneration_infer"
+  ]
+}

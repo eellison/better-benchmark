@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "05b584ead7a8",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 16,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.clone.default",
+    "aten.constant_pad_nd.default",
+    "aten.expand.default",
+    "aten.index.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.unbind.int",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_beit_base_patch16_224_infer",
+    "timm_beit_base_patch16_224_train"
+  ]
+}

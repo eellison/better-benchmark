@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "4b00fc3842ce",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 22,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_GPTNeoForCausalLM_train",
+    "hf_GPTNeoForSequenceClassification_train"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "pattern_hash": "01ae8f681ede",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 13,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 11,
+  "models": [
+    "hf_AlbertForMaskedLM_infer",
+    "hf_BertForMaskedLM_infer",
+    "hf_DebertaV2ForMaskedLM_infer",
+    "hf_DistilBertForMaskedLM_infer",
+    "hf_ElectraForCausalLM_infer",
+    "hf_GPTNeoForCausalLM_infer",
+    "hf_GPTNeoForSequenceClassification_infer",
+    "hf_GoogleFnet_infer",
+    "hf_LayoutLMForMaskedLM_infer",
+    "hf_RobertaForCausalLM_infer",
+    "hf_YituTechConvBert_infer"
+  ]
+}
