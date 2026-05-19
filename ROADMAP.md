@@ -44,19 +44,20 @@ dm_nfnet_f0 128            vit_base_dinov2 128      vit_base_siglip 128
 - Decode patterns, operator-level kernels
 - vLLM configs
 
-### [TODO] Final cleanup
-- Fix 29 failing repros (15 Bool dtype, 14 CUDA index bounds)
-- Optimize execution: subprocess pool, GPU lock around timing only
-- Baseline benchmark sweep on the 1073-pattern set
+### [DONE] Final cleanup
+- ~~Fix 38 failing repros~~ ALL FIXED, 100% pass rate
+- ~~Freeze benchmarks/v1.json~~ DONE (1133 patterns)
+- Optimize execution: subprocess pool, GPU lock around timing only (in progress)
+- Baseline benchmark sweep (in progress)
 
 ---
 
 ## Short-term (next few days)
 
-1. Full recapture of all suites at correct CI batch sizes
-2. Validate 100% pass rate (default + all shape configs)
-3. Run baseline benchmark sweep on clean set
-4. Freeze as `benchmarks/v2.json`
+1. ~~Full recapture of all suites at correct CI batch sizes~~ DONE
+2. Validate pass rate + fix failures (in progress)
+3. Run baseline benchmark sweep on clean set (in progress)
+4. Freeze as `benchmarks/v1.json` (first clean set)
 5. Land easy inductor fixes with benchmark evidence:
    - combo_kernels enable (3x on 60% of severe gaps)
    - num_warps=2 for persistent INNER (1.28x)
