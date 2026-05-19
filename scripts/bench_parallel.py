@@ -452,6 +452,10 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
     with gpu_lock(gpu["index"], label=f"bench_parallel gpu{gpu['index']}"):
         env = os.environ.copy()
         env["CUDA_VISIBLE_DEVICES"] = gpu["index"]
+        # Enable per-GPU exclusive lock around inductor's do_bench calls.
+        # This lets multiple workers compile in parallel while serializing
+        # only the timing-sensitive benchmarker.benchmark() calls.
+        env["INDUCTOR_GPU_BENCH_LOCK"] = "1"
         # Share inductor cache across workers to avoid redundant compilation
         if args_dict.get("share_cache", True):
             env["TORCHINDUCTOR_CACHE_DIR"] = _SHARED_CACHE_DIR
