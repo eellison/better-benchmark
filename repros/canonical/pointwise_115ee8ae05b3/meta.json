@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "115ee8ae05b3",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "inductor_huggingface_perf-3-5-linux.aws.a100_graph7",
+    "inductor_huggingface_perf_cuda_h100-1-5-linux.aws.h100_graph33",
+    "inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph40"
+  ]
+}

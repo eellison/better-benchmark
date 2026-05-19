@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "404d9ff8cff7",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.split.Tensor",
+    "aten.tanh.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_torchbench_perf-6-6-linux.aws.a100_graph28"
+  ]
+}

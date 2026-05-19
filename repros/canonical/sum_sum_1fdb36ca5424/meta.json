@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "1fdb36ca5424",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.select_scatter.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_huggingface_perf-2-5-linux.aws.a100_graph5"
+  ]
+}

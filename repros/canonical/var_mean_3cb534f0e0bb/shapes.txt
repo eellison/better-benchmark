@@ -1,0 +1,7 @@
+inductor_huggingface_perf-4-5-linux.aws.a100_graph10_03abb6fa: (T([256, 1024], bf16), T([1, 256, 1024], bf16), T([1024], bf16), T([1024], bf16), T([4096, 1024], bf16), S([1, 256, 1024]), S([256, 1024]))
+inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_e5b872d6: (T([512, 240], bf16), T([32, 16, 240], bf16), T([240], bf16), T([240], bf16), T([480, 240], bf16), S([32, 16, 240]), S([512, 240]))
+inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_33e5c237: (T([512, 240], bf16), T([32, 16, 240], bf16), T([240], bf16), T([240], bf16), T([720, 240], bf16), S([32, 16, 240]), S([512, 240]))
+inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_5e7f7a25: (T([2048, 192], bf16), T([32, 64, 192], bf16), T([192], bf16), T([192], bf16), T([384, 192], bf16), S([32, 64, 192]), S([2048, 192]))
+inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_ffd9fc1d: (T([2048, 192], bf16), T([32, 64, 192], bf16), T([192], bf16), T([192], bf16), T([576, 192], bf16), S([32, 64, 192]), S([2048, 192]))
+inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_e6e67075: (T([8192, 144], bf16), T([32, 256, 144], bf16), T([144], bf16), T([144], bf16), T([288, 144], bf16), S([32, 256, 144]), S([8192, 144]))
+inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_e0470ff5: (T([8192, 144], bf16), T([32, 256, 144], bf16), T([144], bf16), T([144], bf16), T([432, 144], bf16), S([32, 256, 144]), S([8192, 144]))

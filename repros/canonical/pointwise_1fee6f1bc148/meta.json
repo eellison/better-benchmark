@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "1fee6f1bc148",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.cat.default",
+    "aten.relu.default",
+    "aten.relu.default",
+    "prims._low_memory_max_pool_with_offsets.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_torchbench_perf_cuda_h100-9-9-linux.aws.h100_graph75"
+  ]
+}

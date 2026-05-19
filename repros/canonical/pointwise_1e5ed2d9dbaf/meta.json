@@ -7,9 +7,10 @@
     "aten.permute.default",
     "aten.relu.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
     "hf_OPTForCausalLM_infer",
-    "hf_OPTForCausalLM_train"
+    "hf_OPTForCausalLM_train",
+    "inductor_torchbench_perf_cuda_h100-1-9-linux.aws.h100_graph62"
   ]
 }

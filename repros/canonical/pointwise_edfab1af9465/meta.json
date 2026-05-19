@@ -1,0 +1,13 @@
+{
+  "pattern_hash": "edfab1af9465",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.tanh.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_torchbench_perf-6-6-linux.aws.a100_graph30"
+  ]
+}

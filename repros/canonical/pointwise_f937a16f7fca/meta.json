@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "f937a16f7fca",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.relu.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_torchbench_perf-6-6-linux.aws.a100_graph28"
+  ]
+}

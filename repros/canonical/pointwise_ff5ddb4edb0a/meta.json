@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "ff5ddb4edb0a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.index.Tensor",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph39"
+  ]
+}

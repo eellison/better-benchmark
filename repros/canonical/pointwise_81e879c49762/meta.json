@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "81e879c49762",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 18,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mul.Scalar",
+    "aten.mul.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_huggingface_perf_cuda_h100-1-5-linux.aws.h100_graph33"
+  ]
+}

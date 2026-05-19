@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "c89dd9aad128",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum",
+    "amax",
+    "sum"
+  ],
+  "n_ops": 17,
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.amax.default",
+    "aten.exp.default",
+    "aten.exp.default",
+    "aten.log.default",
+    "aten.log.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_torchbench_perf-1-6-linux.aws.a100_graph22"
+  ]
+}

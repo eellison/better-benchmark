@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "e75e2d1f8e7c",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph43"
+  ]
+}

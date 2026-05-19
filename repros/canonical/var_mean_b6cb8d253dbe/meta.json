@@ -1,0 +1,51 @@
+{
+  "pattern_hash": "b6cb8d253dbe",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 37,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_huggingface_perf-1-5-linux.aws.a100_graph2"
+  ]
+}

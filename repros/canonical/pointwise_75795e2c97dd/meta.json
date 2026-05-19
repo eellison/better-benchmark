@@ -7,13 +7,14 @@
     "aten.ne.Scalar",
     "prims.convert_element_type.default"
   ],
-  "n_models": 6,
+  "n_models": 7,
   "models": [
     "hf_AllenaiLongformerBase_infer",
     "hf_AllenaiLongformerBase_train",
     "hf_M2M100ForConditionalGeneration_infer",
     "hf_M2M100ForConditionalGeneration_train",
     "hf_RobertaForCausalLM_infer",
-    "hf_RobertaForCausalLM_train"
+    "hf_RobertaForCausalLM_train",
+    "inductor_huggingface_perf-1-5-linux.aws.a100_graph0"
   ]
 }

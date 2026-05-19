@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "2efa5da28e80",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph42"
+  ]
+}

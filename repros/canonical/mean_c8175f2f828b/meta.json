@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "c8175f2f828b",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 20,
+  "origin_ops": [
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.mean.dim",
+    "aten.relu.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_torchbench_perf_cuda_h100-9-9-linux.aws.h100_graph75"
+  ]
+}

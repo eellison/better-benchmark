@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "1d52a0b8ac65",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.squeeze.dim",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_huggingface_perf-5-5-linux.aws.a100_graph11"
+  ]
+}

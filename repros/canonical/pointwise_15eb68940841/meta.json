@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "15eb68940841",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.index.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.scatter_add.default",
+    "aten.select.int",
+    "aten.select.int",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_torchbench_perf_cuda_h100-1-9-linux.aws.h100_graph62"
+  ]
+}

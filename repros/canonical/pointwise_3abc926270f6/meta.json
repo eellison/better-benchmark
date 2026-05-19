@@ -6,8 +6,10 @@
   "origin_ops": [
     "aten.relu.default"
   ],
-  "n_models": 8,
+  "n_models": 10,
   "models": [
+    "inductor_timm_perf-2-6-linux.aws.a100_graph15",
+    "inductor_timm_perf-4-6-linux.aws.a100_graph17",
     "timm_dm_nfnet_f0_infer",
     "timm_dm_nfnet_f0_train",
     "timm_ghostnet_100_infer",

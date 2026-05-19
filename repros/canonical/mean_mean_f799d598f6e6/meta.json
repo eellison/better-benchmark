@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "f799d598f6e6",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean",
+    "mean"
+  ],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.mean.dim",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.pow.Tensor_Scalar",
+    "aten.sqrt.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "inductor_torchbench_perf_cuda_h100-8-9-linux.aws.h100_graph74"
+  ]
+}

@@ -70,49 +70,240 @@ def infer_model_name(graph_path: Path) -> str:
     return "unknown"
 
 
-def load_graph_module(graph_path: Path):
-    """Load a post-grad graph txt as an FX GraphModule."""
+def _parse_input_shapes_from_reader(content: str):
+    """Parse input tensor shapes/dtypes from reader.tensor() lines in load_args.
+
+    Lines look like:
+        reader.tensor(buf0, (32, 3, 3, 3), is_leaf=True)  # primals_1
+        reader.tensor(buf2, (), dtype=torch.int64, is_leaf=True)  # primals_3
+    """
+    import re
     import torch
+
+    dtype_map = {
+        'torch.float32': torch.float32,
+        'torch.float16': torch.float16,
+        'torch.bfloat16': torch.bfloat16,
+        'torch.int64': torch.int64,
+        'torch.int32': torch.int32,
+        'torch.int8': torch.int8,
+        'torch.uint8': torch.uint8,
+        'torch.bool': torch.bool,
+        'torch.float64': torch.float64,
+        'torch.complex64': torch.complex64,
+        'torch.complex128': torch.complex128,
+    }
+
+    inputs = []
+    for m in re.finditer(
+        r'reader\.tensor\(\w+,\s*\(([^)]*)\)(?:,\s*dtype=([^,)]+))?', content
+    ):
+        shape_str, dtype_str = m.group(1), m.group(2)
+        # Handle symbolic shapes (e.g. 's28') by substituting a concrete value
+        dims = []
+        for x in shape_str.split(','):
+            x = x.strip()
+            if not x:
+                continue
+            try:
+                dims.append(int(x))
+            except ValueError:
+                # Symbolic dim (e.g. 's28', 's0') - use 32 as reasonable batch size
+                dims.append(32)
+        shape = tuple(dims)
+        dtype = dtype_map.get(dtype_str, torch.float32) if dtype_str else torch.float32
+        inputs.append((shape, dtype))
+
+    return inputs
+
+
+def _parse_input_shapes_from_annotations(content: str):
+    """Parse input tensor shapes/dtypes from forward signature annotations.
+
+    Annotations look like:
+        primals_1: "f32[768, 768][768, 1]cuda:0"
+        primals_2: "i64[1, 512][512, 1]cuda:0"
+    """
+    import re
+    import torch
+
+    dtype_map = {
+        'f32': torch.float32,
+        'f16': torch.float16,
+        'bf16': torch.bfloat16,
+        'i64': torch.int64,
+        'i32': torch.int32,
+        'i8': torch.int8,
+        'u8': torch.uint8,
+        'b8': torch.bool,
+        'f64': torch.float64,
+        'c64': torch.complex64,
+        'c128': torch.complex128,
+    }
+
+    # Match the forward signature
+    fwd_match = re.search(r'def forward\(self,?\s*(.*?)\):', content, re.DOTALL)
+    if not fwd_match:
+        return []
+
+    sig = fwd_match.group(1)
+    inputs = []
+    for m in re.finditer(r'\w+:\s*"(\w+)\[([^\]]*)\]', sig):
+        dtype_str, shape_str = m.group(1), m.group(2)
+        dims = []
+        for x in shape_str.split(','):
+            x = x.strip()
+            if not x:
+                continue
+            try:
+                dims.append(int(x))
+            except ValueError:
+                dims.append(32)  # symbolic dim fallback
+        shape = tuple(dims)
+        dtype = dtype_map.get(dtype_str, torch.float32)
+        inputs.append((shape, dtype))
+
+    return inputs
+
+
+def load_graph_module(graph_path: Path):
+    """Load a post-grad graph txt or fx_graph_runnable as an FX GraphModule.
+
+    Handles two formats:
+    - inductor_post_grad_graph_*.txt: has `class <lambda>(torch.nn.Module):`
+    - fx_graph_runnable_*.txt: has `from torch.nn import *`, class Repro,
+      __init__ with submodule constructors, and `if __name__` block.
+
+    Strategy:
+    1. Exec file content with globals that include torch.nn.* exports
+    2. Strip __main__ blocks to avoid running the graph
+    3. Replace `class <lambda>` with `class Repro`
+    4. Trace the instantiated module with make_fx to produce a GraphModule
+    """
+    import re
+    import torch
+    import torch.nn
     import torch.fx as fx
 
     content = graph_path.read_text()
 
-    # The post_grad_graph files have format:
-    # class <lambda>(torch.nn.Module):
-    #     def forward(self, arg0_1: "dtype[shape]", ...):
-    #         ...
-    # We need to exec this to get the GraphModule
+    # Fix 1: Replace `class <lambda>` with `class Repro` (invalid Python syntax)
+    content = content.replace("class <lambda>", "class Repro")
 
-    # Create a module with the graph class
-    module_code = f"""
-import torch
-import torch.fx as fx
-import torch._inductor.inductor_prims
-from math import inf, nan
-from torch import device
+    # Fix 2: Strip `if __name__ == '__main__':` blocks to avoid running the graph.
+    # These blocks compile/run the model which we don't want.
+    content = re.sub(
+        r'^if __name__\s*==\s*[\'"]__main__[\'"]:\s*\n(?:(?:[ \t]+.*)?\n)*',
+        '', content, flags=re.MULTILINE
+    )
 
-{content}
-"""
+    # Also strip `mod = Repro()` lines at module level that appear before __main__
+    # (the file creates the instance itself which we'll do ourselves)
+    content = re.sub(r'^mod\s*=\s*Repro\(\)\s*$', '', content, flags=re.MULTILINE)
+
+    # Extract input shapes BEFORE exec (from the original content)
+    input_shapes = _parse_input_shapes_from_reader(content)
+    if not input_shapes:
+        input_shapes = _parse_input_shapes_from_annotations(content)
+
+    # Build globals dict with all needed imports pre-populated.
+    # This ensures `from torch.nn import *` style usage works (Module, etc.)
+    exec_globals = {"__builtins__": __builtins__}
+
+    # Add torch.nn.* to globals (handles AdaptiveAvgPool1d, Module, etc.)
+    for attr in dir(torch.nn):
+        if not attr.startswith('_'):
+            exec_globals[attr] = getattr(torch.nn, attr)
+
+    # Add core imports
+    exec_globals['torch'] = torch
+    exec_globals['fx'] = fx
+    exec_globals['inf'] = math.inf
+    exec_globals['nan'] = float('nan')
+    exec_globals['device'] = torch.device
+    exec_globals['tensor'] = torch.tensor
 
     try:
-        local_ns = {}
-        exec(compile(module_code, str(graph_path), "exec"), local_ns)
+        exec(compile(content, str(graph_path), "exec"), exec_globals)
 
-        # Find the class (usually named '<lambda>' or 'Repro')
+        # Find the class (named 'Repro' after our lambda fix, or other nn.Module subclass)
         graph_cls = None
-        for v in local_ns.values():
-            if isinstance(v, type) and issubclass(v, torch.nn.Module) and v is not torch.nn.Module:
+        for name, v in exec_globals.items():
+            if (isinstance(v, type)
+                    and issubclass(v, torch.nn.Module)
+                    and v is not torch.nn.Module
+                    and name not in dir(torch.nn)):
                 graph_cls = v
                 break
 
         if graph_cls is None:
             return None
 
-        # Instantiate and get the graph
+        # Instantiate -- this runs __init__ which may register buffers/submodules
         instance = graph_cls()
+
+        # For inductor_post_grad_graph files: register _frozen_param* buffers
+        # These appear as: `var: "dtype[shape][strides]device" = self._frozen_paramN`
+        frozen_params = re.findall(
+            r'self\.(_frozen_param\w+)',
+            content
+        )
+        if frozen_params:
+            # Parse their shapes from the annotation lines
+            frozen_info = {}
+            for m in re.finditer(
+                r'"(\w+)\[([^\]]*)\].*?=\s*self\.(_frozen_param\w+)',
+                content
+            ):
+                dtype_str, shape_str, param_name = m.group(1), m.group(2), m.group(3)
+                dtype_short_map = {
+                    'f32': torch.float32, 'f16': torch.float16,
+                    'bf16': torch.bfloat16, 'i64': torch.int64,
+                    'i32': torch.int32, 'b8': torch.bool,
+                    'f64': torch.float64, 'i8': torch.int8, 'u8': torch.uint8,
+                }
+                dtype = dtype_short_map.get(dtype_str, torch.float32)
+                shape = tuple(int(x.strip()) for x in shape_str.split(',') if x.strip())
+                frozen_info[param_name] = (shape, dtype)
+
+            dev = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+            for param_name, (shape, dtype) in frozen_info.items():
+                if not hasattr(instance, param_name):
+                    if dtype in (torch.int64, torch.int32, torch.int8, torch.uint8):
+                        buf = torch.zeros(shape, dtype=dtype, device=dev)
+                    elif dtype == torch.bool:
+                        buf = torch.zeros(shape, dtype=torch.bool, device=dev)
+                    else:
+                        buf = torch.randn(shape, dtype=dtype, device=dev)
+                    instance.register_buffer(param_name, buf)
+
+        # If already a GraphModule (has .graph), return directly
         if hasattr(instance, 'graph'):
             return instance
-        return None
+
+        # Otherwise, trace with make_fx to produce a proper GraphModule
+        if not input_shapes:
+            print(f"  No input shapes found for {graph_path.name}")
+            return None
+
+        from torch.fx.experimental.proxy_tensor import make_fx
+
+        # Create inputs on CUDA (forward methods typically hardcode cuda:0 device)
+        dev = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+        instance = instance.to(dev)
+
+        inputs = []
+        for shape, dtype in input_shapes:
+            if dtype in (torch.int64, torch.int32, torch.int8, torch.uint8):
+                t = torch.zeros(shape, dtype=dtype, device=dev)
+            elif dtype == torch.bool:
+                t = torch.zeros(shape, dtype=torch.bool, device=dev)
+            else:
+                t = torch.randn(shape, dtype=dtype, device=dev)
+            inputs.append(t)
+
+        gm = make_fx(instance, tracing_mode="real")(*inputs)
+        return gm
 
     except Exception as e:
         print(f"  Failed to load {graph_path.name}: {e}")

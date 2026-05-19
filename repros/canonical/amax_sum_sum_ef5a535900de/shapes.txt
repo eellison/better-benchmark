@@ -1,0 +1,1 @@
+inductor_huggingface_perf_cuda_h100-2-5-linux.aws.h100_graph37_ea0b5552: (T([1, 512, 50257], bf16), T([1, 512], i64), S([-1, 50257]))
