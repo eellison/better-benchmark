@@ -16,6 +16,7 @@ from pathlib import Path
 import glob
 import os
 import torch
+import torch._inductor.inductor_prims  # noqa: F401
 from math import inf
 from torch import device
 
