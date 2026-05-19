@@ -1,8 +1,2 @@
 hf_distilbertformaskedlm_infer_e0699204: (T([256, 128], i64), T([32768, 30524], f32), S([256, 128, 30522]), S([-1, 30522]))
-hf_allenailongformerbase_infer_9fabe7a2: (T([8, 1024], i64), T([8192, 50268], f32), S([8, 1024, 50265]), S([-1, 50265]))
-hf_mbartforcausallm_infer_9fabe7a2: (T([8, 1024], i64), T([8192, 50268], f32), S([8, 1024, 50265]), S([-1, 50265]))
-hf_bartforcausallm_infer_9fabe7a2: (T([8, 1024], i64), T([8192, 50268], f32), S([8, 1024, 50265]), S([-1, 50265]))
 hf_bertformaskedlm_infer_ef250ee2: (T([32, 512], i64), T([16384, 30524], f32), S([32, 512, 30522]), S([-1, 30522]))
-hf_plbartforcausallm_infer_843277f4: (T([16, 1024], i64), T([16384, 50008], f32), S([16, 1024, 50005]), S([-1, 50005]))
-hf_pegasusforcausallm_infer_700a973c: (T([128, 128], i64), T([16384, 50268], f32), S([128, 128, 50265]), S([-1, 50265]))
-hf_trocrforcausallm_infer_c27e7272: (T([64, 256], i64), T([16384, 50268], f32), S([64, 256, 50265]), S([-1, 50265]))
