@@ -54,11 +54,13 @@ dm_nfnet_f0 128            vit_base_dinov2 128      vit_base_siglip 128
 
 ## Short-term (next few days)
 
-1. ~~Full recapture of all suites at correct CI batch sizes~~ DONE
-2. Validate pass rate + fix failures (in progress)
-3. Run baseline benchmark sweep on clean set (in progress)
-4. Freeze as `benchmarks/v1.json` (first clean set)
-5. Land easy inductor fixes with benchmark evidence:
+1. ~~Full recapture of all suites~~ DONE (1133 patterns)
+2. ~~Validate + fix failures~~ DONE (100% pass rate, 38 fixed)
+3. ~~Baseline sweep~~ DONE (298 benchmarked: median 1.06x, 17% severe)
+4. ~~Freeze benchmarks/v1.json~~ DONE
+5. ~~CI report tooling~~ DONE (bench_report.py: v3 JSON + markdown + regression gate)
+6. ~~Parallel execution~~ DONE (INDUCTOR_GPU_BENCH_LOCK, 2.6x throughput, no noise)
+7. Land easy inductor fixes with benchmark evidence:
    - combo_kernels enable (3x on 60% of severe gaps)
    - num_warps=2 for persistent INNER (1.28x)
    - Raise persistent RBLOCK to 4096 on B200 (1.4-1.6x)
