@@ -23,6 +23,31 @@ from canonicalize_repros import (
     parse_make_inputs,
 )
 
+_DTYPE_SHORT = {
+    "torch.float32": "f32", "torch.float16": "f16",
+    "torch.bfloat16": "bf16", "torch.float64": "f64",
+    "torch.int64": "i64", "torch.int32": "i32",
+    "torch.int16": "i16", "torch.int8": "i8",
+    "torch.bool": "b8", "torch.uint8": "u8",
+}
+
+
+def _format_compact_config(label: str, input_specs: list[dict]) -> str:
+    """Format input specs as compact one-liner: label: (T([...], f32), S([...]), ...)"""
+    parts = []
+    for spec in input_specs:
+        if spec.get("kind") == "shape":
+            parts.append(f"S({spec['dims']})")
+        else:
+            shape = spec["shape"]
+            dt = _DTYPE_SHORT.get(spec.get("dtype", ""), spec.get("dtype", "f32"))
+            stride = spec.get("stride")
+            if stride:
+                parts.append(f"T({shape}, {dt}, stride={tuple(stride)})")
+            else:
+                parts.append(f"T({shape}, {dt})")
+    return f"{label}: ({', '.join(parts)})"
+
 
 def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
                       suite: str = "other", mode: str | None = None):
@@ -130,25 +155,19 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         repro_dir = canonical_path / dir_name
         repro_dir.mkdir(parents=True, exist_ok=True)
 
-        # Update shapes.json
-        shapes_path = repro_dir / "shapes.json"
-        if shapes_path.exists():
-            with open(shapes_path) as f:
-                shapes_data = json.load(f)
-        else:
-            shapes_data = {"pattern_hash": pattern_hash, "configs": {}}
-
+        # Update shapes.txt (compact T()/S() format)
+        shapes_path = repro_dir / "shapes.txt"
         config_key = f"{model_name.lower()}_{shape_hash[:8]}"
-        if config_key not in shapes_data["configs"]:
+
+        # Check if this config already exists
+        existing_lines = shapes_path.read_text().splitlines() if shapes_path.exists() else []
+        if not any(line.startswith(f"{config_key}:") for line in existing_lines):
             src_file = Path(entry["file"])
             input_specs = parse_make_inputs(src_file) if src_file.exists() else []
-            shapes_data["configs"][config_key] = {
-                "inputs": input_specs,
-                "source_models": [model_name],
-                "shape_hash": shape_hash,
-            }
-            with open(shapes_path, "w") as f:
-                json.dump(shapes_data, f, indent=2)
+            if input_specs:
+                compact_line = _format_compact_config(config_key, input_specs)
+                with open(shapes_path, "a") as f:
+                    f.write(compact_line + "\n")
 
         # Update meta.json
         meta_path = repro_dir / "meta.json"

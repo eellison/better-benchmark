@@ -20,80 +20,68 @@ import torch._inductor.config as inductor_config
 
 
 def load_shape_configs(repro_file: str) -> dict:
-    """Load shapes from shapes.json (with S() shape params) or shapes.txt (compact T() format)."""
+    """Load shapes from shapes.txt (compact T()/S() format).
+
+    Falls back to shapes.json for legacy repos.
+    """
     repro_dir = Path(repro_file).parent
 
-    # Prefer shapes.json (has shape param entries)
+    shapes_txt = repro_dir / "shapes.txt"
+    if shapes_txt.exists():
+        return _parse_shapes_txt(shapes_txt)
+
+    # Legacy: verbose JSON format
     shapes_json = repro_dir / "shapes.json"
     if shapes_json.exists():
         with open(shapes_json) as f:
             data = json.load(f)
         return data.get("configs", {})
 
-    # Fall back to compact .txt format
-    shapes_txt = repro_dir / "shapes.txt"
-    if shapes_txt.exists():
-        return _parse_shapes_txt(shapes_txt)
-
     return {}
 
 
 def _parse_shapes_txt(shapes_path: Path) -> dict:
-    """Parse compact T()/S() format into shape configs.
+    """Parse shapes.txt by eval'ing each line with T() and S() as constructors."""
 
-    Format: cnt: N, ((T([shape], dtype), S([dims]), ...), {})
-    T() = tensor input, S() = shape param (plain list passed to reshape/view)
-    Returns dict keyed by index (0, 1, 2, ...) with input specs.
-    """
-    import re
+    _DTYPE_MAP = {
+        "f32": "torch.float32", "f16": "torch.float16",
+        "bf16": "torch.bfloat16", "f64": "torch.float64",
+        "i64": "torch.int64", "i32": "torch.int32",
+        "i16": "torch.int16", "i8": "torch.int8",
+        "b8": "torch.bool", "u8": "torch.uint8",
+    }
+
+    def T(shape, dtype, stride=None):
+        return {"kind": "tensor", "shape": shape, "dtype": _DTYPE_MAP.get(dtype, f"torch.{dtype}"), "stride": list(stride) if stride else None, "device": "cuda"}
+
+    def S(dims):
+        return {"kind": "shape", "dims": dims}
+
+    _eval_ns = {"__builtins__": {}, "T": T, "S": S,
+                "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
+                "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
+                "b8": "b8", "u8": "u8"}
+
     configs = {}
-    idx = 0
     for line in shapes_path.read_text().splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
-        # Parse: cnt: N, ((T(...), S(...), ...), {})
-        cnt_match = re.match(r'cnt:\s*(\d+),\s*\((\(.*\))\s*,\s*\{.*\}\)', line)
-        if not cnt_match:
+
+        colon = line.find(":")
+        if colon < 0:
             continue
-        cnt = int(cnt_match.group(1))
-        args_str = cnt_match.group(2)
+        label = line[:colon].strip()
+        expr = line[colon + 1:].strip()
 
-        inputs = []
-
-        # Parse T() entries (tensor inputs)
-        for t_match in re.finditer(r'T\(\[([^\]]+)\],\s*(\w+)(?:,\s*stride=\(([^)]+)\))?\)', args_str):
-            shape = [int(x.strip()) for x in t_match.group(1).split(",")]
-            dtype_short = t_match.group(2)
-            stride_str = t_match.group(3)
-            stride = [int(x.strip()) for x in stride_str.split(",")] if stride_str else None
-
-            dtype_map = {
-                "f32": "torch.float32", "f16": "torch.float16",
-                "bf16": "torch.bfloat16", "f64": "torch.float64",
-                "i64": "torch.int64", "i32": "torch.int32",
-                "i16": "torch.int16", "i8": "torch.int8",
-                "b8": "torch.bool", "u8": "torch.uint8",
-            }
-            inputs.append({
-                "kind": "tensor",
-                "shape": shape,
-                "dtype": dtype_map.get(dtype_short, f"torch.{dtype_short}"),
-                "stride": stride,
-                "device": "cuda",
-            })
-
-        # Parse S() entries (shape params for reshape/view)
-        for s_match in re.finditer(r'S\(\[([^\]]+)\]\)', args_str):
-            dims = [int(x.strip()) for x in s_match.group(1).split(",")]
-            inputs.append({
-                "kind": "shape",
-                "dims": dims,
-            })
-
-        if inputs:
-            configs[str(idx)] = {"inputs": inputs, "cnt": cnt}
-            idx += 1
+        try:
+            inputs = eval(expr, _eval_ns)
+            if isinstance(inputs, tuple):
+                inputs = list(inputs)
+            if inputs:
+                configs[label] = {"inputs": inputs}
+        except Exception:
+            continue
 
     return configs
 

@@ -37,60 +37,48 @@ def scan_all_indexes(aten_dir: Path) -> list[dict]:
 
 
 def parse_make_inputs(repro_path: Path) -> list[dict]:
-    """Parse make_inputs() from a repro file to extract input specs."""
+    """Extract input specs by executing _default_make_inputs() from a captured repro."""
     if not repro_path.exists():
         return []
 
-    text = repro_path.read_text()
+    import importlib.util
+    import math
+    import torch
 
-    # Find make_inputs function body
-    match = re.search(r'def make_inputs\(\):\s*\n\s*return \[\n(.*?)\n\s*\]', text, re.DOTALL)
-    if not match:
+    try:
+        spec = importlib.util.spec_from_file_location("repro_parse", str(repro_path))
+        mod = importlib.util.module_from_spec(spec)
+        mod.device = torch.device
+        mod.inf = math.inf
+        mod.nan = math.nan
+        spec.loader.exec_module(mod)
+
+        if hasattr(mod, '_default_make_inputs'):
+            inputs = mod._default_make_inputs()
+        elif hasattr(mod, 'make_inputs'):
+            inputs = mod.make_inputs()
+        else:
+            return []
+    except Exception:
         return []
 
-    body = match.group(1)
     specs = []
-
-    for line in body.split("\n"):
-        line = line.strip().rstrip(",")
-        if not line or line.startswith("#"):
-            continue
-
-        spec = {}
-
-        # Detect dtype
-        dtype_match = re.search(r'dtype=(torch\.\w+)', line)
-        spec["dtype"] = dtype_match.group(1) if dtype_match else "torch.float32"
-
-        # Detect device
-        device_match = re.search(r"device='(\w+)'", line)
-        spec["device"] = device_match.group(1) if device_match else "cuda"
-
-        # Check for as_strided pattern
-        strided_match = re.search(r'\.as_strided\(\[([^\]]+)\],\s*\[([^\]]+)\]\)', line)
-        if strided_match:
-            spec["shape"] = [int(x.strip()) for x in strided_match.group(1).split(",")]
-            spec["stride"] = [int(x.strip()) for x in strided_match.group(2).split(",")]
-        else:
-            # Look for shape in various forms: [1,2,3] or (1,2,3)
-            shape_match = re.search(r'(?:torch\.randint\(\d+,\s*\d+,\s*|torch\.randn\(|torch\.zeros\(|torch\.ones\()\[?([^\]\)]+)\]?', line)
-            if shape_match:
-                shape_str = shape_match.group(1).strip("[]() ")
-                try:
-                    spec["shape"] = [int(x.strip()) for x in shape_str.split(",") if x.strip()]
-                except ValueError:
-                    continue
+    for item in inputs:
+        if isinstance(item, torch.Tensor):
+            spec = {
+                "shape": list(item.shape),
+                "dtype": str(item.dtype),
+                "device": "cuda",
+            }
+            if not item.is_contiguous():
+                spec["stride"] = list(item.stride())
             else:
-                continue
-            spec["stride"] = None
-
-        # Detect max_val for randint
-        randint_match = re.search(r'torch\.randint\((\d+),\s*(\d+)', line)
-        if randint_match:
-            spec["max_val"] = int(randint_match.group(2))
-
-        if spec.get("shape"):
+                spec["stride"] = None
             specs.append(spec)
+        elif isinstance(item, list):
+            specs.append({"kind": "shape", "dims": item})
+        elif isinstance(item, int):
+            specs.append({"kind": "shape", "dims": [item]})
 
     return specs
 

@@ -99,14 +99,30 @@ class _CaptureState:
                     "hint": hint,
                 }
 
+        _ph_names_used: set[str] = set()
+
+        def _unique_ph_name(base: str) -> str:
+            """Ensure placeholder names don't collide with internal node names."""
+            # Internal call_function nodes get names like full_default, clone_default, etc.
+            # Prefix external inputs to avoid collision.
+            name = base
+            if name in _ph_names_used:
+                i = 1
+                while f"{name}_{i}" in _ph_names_used:
+                    i += 1
+                name = f"{name}_{i}"
+            _ph_names_used.add(name)
+            return name
+
         def _ensure_in_env(x: Any) -> Any:
             if isinstance(x, fx.Node):
                 if x in env:
                     return env[x]
-                ph = new_graph.placeholder(x.name)
+                name = _unique_ph_name(x.name)
+                ph = new_graph.placeholder(name)
                 ph.meta = copy.copy(x.meta) if x.meta else {}
                 env[x] = ph
-                _record_placeholder(x.name, x.meta or {})
+                _record_placeholder(name, x.meta or {})
                 return ph
             return x
 
@@ -147,6 +163,16 @@ class _CaptureState:
         all_graph_nodes = list(gm.graph.nodes)
         node_order = {n: i for i, n in enumerate(all_graph_nodes)}
         sorted_needed = sorted(needed_nodes, key=lambda n: node_order.get(n, 0))
+
+        # Create placeholders for ALL external dependencies first,
+        # so they claim clean names before internal nodes are added.
+        for node in sorted_needed:
+            if node.op in ("call_function", "call_method"):
+                def _pre_register(x):
+                    if isinstance(x, fx.Node) and x not in needed_nodes and x not in env:
+                        _ensure_in_env(x)
+                fx.map_arg(node.args, _pre_register)
+                fx.map_arg(node.kwargs, _pre_register)
 
         for node in sorted_needed:
             if node.op == "placeholder":
@@ -345,7 +371,9 @@ class _CaptureState:
                         s * (d - 1) for s, d in zip(stride, shape) if d > 1
                     ) + 1
                     if "int" in dtype:
-                        hi = index_bounds.get(name, 2)
+                        # int8 = pool offsets (0..8), int64 = indices (inferred or shape[0])
+                        default_hi = 9 if "int8" in dtype else max(shape)
+                        hi = index_bounds.get(name, default_hi)
                         input_lines.append(
                             f"    torch.randint(0, {hi}, ({storage_size},), dtype={dtype}, device='{device}')"
                             f".as_strided({shape}, {stride}),  # {name}"
@@ -357,7 +385,8 @@ class _CaptureState:
                         )
                 else:
                     if "int" in dtype:
-                        hi = index_bounds.get(name, 2)
+                        default_hi = 9 if "int8" in dtype else max(shape) if shape else 2
+                        hi = index_bounds.get(name, default_hi)
                         input_lines.append(
                             f"    torch.randint(0, {hi}, {shape}, dtype={dtype}, device='{device}'),"
                         )
@@ -431,7 +460,26 @@ if __name__ == "__main__":
         from torch.fx.passes.infra.partitioner import CapabilityBasedPartitioner
         from torch.fx.passes.operator_support import create_op_support
 
+        import operator
+        _TRANSPARENT_OPS = {
+            operator.getitem,
+            torch.ops.aten.view.default,
+            torch.ops.aten.reshape.default,
+            torch.ops.aten.permute.default,
+            torch.ops.aten.slice.Tensor,
+            torch.ops.aten.unsqueeze.default,
+            torch.ops.aten.squeeze.default,
+            torch.ops.aten.squeeze.dim,
+            torch.ops.aten.expand.default,
+            torch.ops.aten.t.default,
+            torch.ops.aten.transpose.int,
+            torch.ops.aten.select.int,
+            torch.ops.aten.as_strided.default,
+        }
+
         def _is_supported(_submodules, node):
+            if node.op == "call_function" and node.target in _TRANSPARENT_OPS:
+                return True
             return is_fusible_node(node)
 
         def _has_reduction(nodes):
@@ -448,10 +496,19 @@ if __name__ == "__main__":
         partitions = partitioner.propose_partitions()
         components = [list(p.nodes.keys()) for p in partitions]
 
-        from torch._inductor.fx_passes.fusion_regions import is_view_node
+        def _has_real_compute(nodes):
+            """Check if a partition has at least one non-transparent compute op."""
+            for n in nodes:
+                if n.op != "call_function":
+                    continue
+                if n.target in _TRANSPARENT_OPS:
+                    continue
+                # It's a real compute op (pointwise, reduction, etc.)
+                return True
+            return False
 
         for comp in components:
-            if all(is_view_node(n) or n.op != "call_function" for n in comp):
+            if not _has_real_compute(comp):
                 continue
 
             is_reduction = _has_reduction(comp)
