@@ -271,21 +271,38 @@ class _CaptureState:
         return signature
 
     def _infer_index_bounds(self, gm, placeholder_info) -> dict[str, int]:
-        """Infer valid index bounds for int64 placeholders by inspecting consumers.
+        """Infer valid index bounds for integer placeholders by inspecting consumers.
 
-        Looks one hop downstream: if a placeholder feeds directly into scatter,
-        gather, index_put, index_select, or embedding, the bound is the target
-        tensor's size along the scatter/gather dim.
+        Traces up to 3 hops downstream to find scatter/gather/embedding consumers.
+        Also handles:
+        - int8 pool offsets (_low_memory_max_pool_offsets_to_indices)
+        - Multi-hop: placeholder → clone/reshape → scatter_add
         """
         _INDEX_CONSUMERS = {
             torch.ops.aten.scatter.src: (0, 1),        # (target_arg, dim_arg)
             torch.ops.aten.scatter.value: (0, 1),
             torch.ops.aten.scatter_add.default: (0, 1),
             torch.ops.aten.gather.default: (0, 1),
-            torch.ops.aten.index_put.default: (0, None),  # target is arg0, dim inferred
+            torch.ops.aten.index_put.default: (0, None),
             torch.ops.aten.index.Tensor: (0, None),
             torch.ops.aten.index_select.default: (0, 1),
-            torch.ops.aten.embedding.default: (0, None),  # weight is arg0, bound = weight.shape[0]
+            torch.ops.aten.embedding.default: (0, None),
+        }
+
+        # Ops that pass index values through unchanged
+        _PASSTHROUGH_OPS = {
+            torch.ops.aten.clone.default,
+            torch.ops.aten.reshape.default,
+            torch.ops.aten.view.default,
+            torch.ops.aten.expand.default,
+            torch.ops.aten.slice.Tensor,
+            torch.ops.aten.unsqueeze.default,
+            torch.ops.aten.squeeze.default,
+            torch.ops.aten.squeeze.dim,
+            torch.ops.aten.permute.default,
+            torch.ops.aten.contiguous.default,
+            torch.ops.aten.t.default,
+            torch.ops.aten.transpose.int,
         }
 
         bounds = {}
@@ -293,40 +310,68 @@ class _CaptureState:
 
         for name, node in ph_nodes.items():
             info = placeholder_info.get(name, {})
-            if "int" not in info.get("dtype", ""):
+            dtype = info.get("dtype", "")
+            if "int" not in dtype:
                 continue
 
-            # Check all users of this placeholder
-            for user in node.users:
-                if user.op != "call_function":
-                    continue
-                target = user.target
+            # For int8: almost always pool offsets. Infer from pool kernel size.
+            if "int8" in dtype:
+                for user in node.users:
+                    if user.op == "call_function":
+                        target_name = str(user.target)
+                        if "max_pool_offsets_to_indices" in target_name:
+                            # Args: (offsets, kernel_size, ...) — bound = prod(kernel_size)
+                            if len(user.args) >= 2 and isinstance(user.args[1], (list, tuple)):
+                                ks = user.args[1]
+                                bounds[name] = int(ks[0] * ks[1]) if len(ks) >= 2 else int(ks[0])
+                                break
+                if name not in bounds:
+                    bounds[name] = 9  # default for 3x3 pool
+                continue
 
-                if target == torch.ops.aten.embedding.default:
-                    # embedding(weight, indices) — bound is weight.shape[0]
-                    weight_arg = user.args[0] if user.args else None
-                    if weight_arg and hasattr(weight_arg, 'meta'):
-                        val = weight_arg.meta.get('val')
-                        if isinstance(val, torch.Tensor) and len(val.shape) > 0:
-                            bounds[name] = int(val.shape[0])
-                    break
+            # For int64/int32: trace downstream up to 3 hops to find index consumers
+            def _find_bound(start_node, max_hops=3):
+                frontier = [start_node]
+                for _hop in range(max_hops):
+                    next_frontier = []
+                    for n in frontier:
+                        for user in n.users:
+                            if user.op != "call_function":
+                                continue
+                            target = user.target
 
-                if target in _INDEX_CONSUMERS:
-                    target_arg_idx, dim_arg_idx = _INDEX_CONSUMERS[target]
-                    if len(user.args) > target_arg_idx:
-                        target_node = user.args[target_arg_idx]
-                        if hasattr(target_node, 'meta'):
-                            val = target_node.meta.get('val')
-                            if isinstance(val, torch.Tensor):
-                                if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
-                                    dim = user.args[dim_arg_idx]
-                                    if isinstance(dim, int) and dim < len(val.shape):
-                                        bounds[name] = int(val.shape[dim])
-                                        break
-                                else:
-                                    # No explicit dim — use first dim as bound
-                                    bounds[name] = int(val.shape[0])
-                                    break
+                            if target == torch.ops.aten.embedding.default:
+                                weight_arg = user.args[0] if user.args else None
+                                if weight_arg and hasattr(weight_arg, 'meta'):
+                                    val = weight_arg.meta.get('val')
+                                    if isinstance(val, torch.Tensor) and len(val.shape) > 0:
+                                        return int(val.shape[0])
+
+                            if target in _INDEX_CONSUMERS:
+                                target_arg_idx, dim_arg_idx = _INDEX_CONSUMERS[target]
+                                if len(user.args) > target_arg_idx:
+                                    target_node = user.args[target_arg_idx]
+                                    if hasattr(target_node, 'meta'):
+                                        val = target_node.meta.get('val')
+                                        if isinstance(val, torch.Tensor):
+                                            if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
+                                                dim = user.args[dim_arg_idx]
+                                                if isinstance(dim, int) and dim < len(val.shape):
+                                                    return int(val.shape[dim])
+                                            else:
+                                                return int(val.shape[0])
+
+                            # Passthrough: trace further
+                            if target in _PASSTHROUGH_OPS:
+                                next_frontier.append(user)
+                    frontier = next_frontier
+                    if not frontier:
+                        break
+                return None
+
+            bound = _find_bound(node)
+            if bound is not None:
+                bounds[name] = bound
 
         return bounds
 
