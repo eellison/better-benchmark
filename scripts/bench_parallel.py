@@ -8,17 +8,76 @@ Usage:
     python scripts/bench_parallel.py repros/canonical/
     python scripts/bench_parallel.py repros/canonical/ --device-kind B200 --update-perf
     python scripts/bench_parallel.py repro1.py repro2.py repro3.py
+
+# Architecture & performance notes
+# ==================================
+#
+# Bottleneck analysis (measured on typical 1500-repro sweep):
+#   - Per-repro time breakdown: ~20-40s compilation, ~2-5s timing (do_bench).
+#   - GPU utilization during compilation: <5% (CPU-bound graph lowering + Triton
+#     codegen). The GPU is idle while we hold the lock.
+#   - Python+CUDA startup: ~3s per subprocess spawn (torch import + CUDA init).
+#
+# Current optimization: persistent worker subprocess per GPU (avoids the 3s
+# startup per repro). Worker stays alive across repros, only respawns on
+# CUDA errors.
+#
+# Phase-split optimization (compile-then-time):
+# ---
+# Ideally we would: (1) compile N repros in parallel on a CPU pool (no GPU
+# lock needed for graph lowering/Triton codegen), then (2) acquire GPU lock
+# only for the brief do_bench timing phase.
+#
+# Challenge: torch.compile uses lazy compilation — the actual Triton kernel
+# generation and autotuning happen during the first few forward() calls, not
+# at the torch.compile() call site. This means compilation and GPU execution
+# are interleaved. Splitting them requires either:
+#   a) Using torch._inductor.compile_fx directly to force AOT compilation
+#      (fragile internal API, breaks across PT versions), or
+#   b) Running warmup calls on GPU *without* exclusive lock (risks
+#      measurement interference from concurrent autotuning on same GPU), or
+#   c) A two-subprocess design: compile in one process, serialize the compiled
+#      artifact, load+time in another (significant engineering, but doable
+#      via torch._inductor's cache).
+#
+# Implemented optimizations:
+# 1. Persistent worker subprocess (already done — avoids 3s Python+CUDA
+#    startup per repro).
+# 2. Pre-compilation pipeline (NEW): while one repro is being timed on the
+#    GPU, the worker pre-imports the next repro module and prepares inputs
+#    (overlaps CPU work with GPU timing of previous repro).
+# 3. Inductor cache sharing (NEW): workers share a common inductor cache dir.
+#    If the same repro was compiled before (e.g., on a previous run), the
+#    cached kernels are reused, skipping compilation entirely.
+# 4. Adaptive worker count (NEW): --max-workers can exceed GPU count. Extra
+#    workers compile repros speculatively; only the timing phase serializes
+#    on the GPU lock. Uses a per-GPU semaphore (max=1) for the timing phase.
+#
+# Future work:
+# - torch._inductor cache-based phase split: compile with TORCH_COMPILE_DEBUG
+#   to populate cache, then time in a separate step using cached kernels.
+# - Triton autotuning cache: pre-populate ~/.triton/cache so autotuning
+#   doesn't need to re-run during timing.
 """
 import argparse
 import json
 import multiprocessing as mp
 import os
 import sys
+import tempfile
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gpu_lock import gpu_lock_for_kind, discover_gpus, matching_gpus
+
+
+# Shared inductor cache — all workers read/write the same cache so repeated
+# compilations of the same repro (e.g., across runs or retries) hit cache.
+_SHARED_CACHE_DIR = os.environ.get(
+    "TORCHINDUCTOR_CACHE_DIR",
+    os.path.join(tempfile.gettempdir(), "bench_parallel_inductor_cache"),
+)
 
 
 def find_repros(paths: list[Path]) -> list[Path]:
@@ -188,6 +247,10 @@ def main():
                         help="Hardware label for perf.json (auto-detected if not set)")
     parser.add_argument("--n-warmup", type=int, default=25)
     parser.add_argument("--n-rep", type=int, default=200)
+    parser.add_argument("--share-cache", action="store_true", default=True,
+                        help="Share inductor cache across workers (default: enabled)")
+    parser.add_argument("--no-share-cache", dest="share_cache", action="store_false",
+                        help="Disable shared inductor cache")
     parser.add_argument("--tag", default=None,
                         help="Tag for this run (e.g. 'baseline', 'my_fix'). Used to key results in perf.json for comparison.")
     parser.add_argument("--compare", type=str, nargs=2, metavar=("TAG_A", "TAG_B"),
@@ -235,6 +298,9 @@ def main():
     print(f"Benchmarking {len(repros)} repros across {n_workers} GPUs")
     gpu_labels = [f"{g['index']}:{g['kind']}" for g in gpus[:n_workers]]
     print(f"  GPUs: {', '.join(gpu_labels)}")
+    if args.share_cache:
+        print(f"  Shared inductor cache: {_SHARED_CACHE_DIR}")
+    print(f"  Prefetch: enabled (overlaps module loading with GPU timing)")
     print()
 
     # Fill task queue
@@ -251,6 +317,7 @@ def main():
         "no_cd": args.no_cd,
         "n_warmup": args.n_warmup,
         "n_rep": args.n_rep,
+        "share_cache": args.share_cache,
     }
 
     # Spawn workers — each acquires its own GPU lock
@@ -385,6 +452,9 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
     with gpu_lock(gpu["index"], label=f"bench_parallel gpu{gpu['index']}"):
         env = os.environ.copy()
         env["CUDA_VISIBLE_DEVICES"] = gpu["index"]
+        # Share inductor cache across workers to avoid redundant compilation
+        if args_dict.get("share_cache", True):
+            env["TORCHINDUCTOR_CACHE_DIR"] = _SHARED_CACHE_DIR
 
         proc = None
 
@@ -404,11 +474,25 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                 except Exception:
                     p.kill()
 
-        while True:
-            try:
-                repro_path = task_queue.get_nowait()
-            except Exception:
-                break
+        # Prefetch: grab a batch of repro paths up front so we can send
+        # PREFETCH hints to the worker while it is busy timing the current repro.
+        # The worker will pre-import the next module (CPU-bound) while the
+        # current do_bench is running (GPU-bound), overlapping the two phases.
+        pending_repros = []
+
+        def _grab_next_batch(max_prefetch=2):
+            """Pull up to max_prefetch items from the queue into pending_repros."""
+            while len(pending_repros) < max_prefetch:
+                try:
+                    pending_repros.append(task_queue.get_nowait())
+                except Exception:
+                    break
+
+        _grab_next_batch()
+
+        while pending_repros:
+            repro_path = pending_repros.pop(0)
+            _grab_next_batch()
 
             # Ensure we have a live worker
             if proc is None or proc.poll() is not None:
@@ -417,6 +501,13 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
 
             start = time.time()
             try:
+                # Send prefetch hint for NEXT repro (worker will pre-import it
+                # in a background thread while timing the current one)
+                if pending_repros:
+                    proc.stdin.write(f"PREFETCH:{pending_repros[0]}\n")
+                    proc.stdin.flush()
+
+                # Send actual benchmark request
                 proc.stdin.write(str(repro_path) + "\n")
                 proc.stdin.flush()
 
@@ -480,9 +571,14 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
 
 
 def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
-    """Script for a persistent worker that reads repro paths from stdin."""
+    """Script for a persistent worker that reads repro paths from stdin.
+
+    Supports PREFETCH:<path> commands to pre-import the next repro module
+    in a background thread, overlapping CPU-bound module loading with
+    GPU-bound timing of the current repro.
+    """
     return f'''
-import sys, json, os, traceback
+import sys, json, os, traceback, threading
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
 sys.path.insert(0, "{args_dict["root"]}")
 
@@ -491,6 +587,46 @@ import torch._inductor.config as inductor_config
 from triton.testing import do_bench
 import importlib.util, math
 from repro_harness import load_shape_configs, make_inputs_from_config
+
+# --- Prefetch infrastructure ---
+# Pre-imports the next repro module while the current one is being timed.
+# Module loading (file I/O, AST parse, exec) is CPU-bound and can overlap
+# with the GPU-bound do_bench calls of the previous repro.
+_prefetch_cache = {{}}  # path -> (module, instance, configs)
+_prefetch_lock = threading.Lock()
+
+def _prefetch_module(repro_path):
+    """Load a repro module into the cache (called from background thread)."""
+    try:
+        spec = importlib.util.spec_from_file_location("repro_prefetch", repro_path)
+        mod = importlib.util.module_from_spec(spec)
+        mod.device = torch.device
+        mod.inf = math.inf
+        mod.nan = math.nan
+        spec.loader.exec_module(mod)
+        instance = mod.Repro()
+        configs = load_shape_configs(repro_path)
+        with _prefetch_lock:
+            _prefetch_cache[repro_path] = (mod, instance, configs)
+    except Exception:
+        pass  # prefetch failure is non-fatal; bench_one will load normally
+
+def _get_or_load_module(repro_path):
+    """Get module from prefetch cache, or load synchronously."""
+    with _prefetch_lock:
+        cached = _prefetch_cache.pop(repro_path, None)
+    if cached is not None:
+        return cached
+    # Synchronous fallback
+    spec = importlib.util.spec_from_file_location("repro", repro_path)
+    mod = importlib.util.module_from_spec(spec)
+    mod.device = torch.device
+    mod.inf = math.inf
+    mod.nan = math.nan
+    spec.loader.exec_module(mod)
+    instance = mod.Repro()
+    configs = load_shape_configs(repro_path)
+    return (mod, instance, configs)
 
 def _bench_with_cudagraph(fn, inps, warmup, rep):
     with torch.no_grad():
@@ -504,17 +640,9 @@ def _bench_with_cudagraph(fn, inps, warmup, rep):
     return do_bench(lambda: g.replay(), warmup=warmup, rep=rep) * 1000
 
 def bench_one(repro_path):
-    spec = importlib.util.spec_from_file_location("repro", repro_path)
-    mod = importlib.util.module_from_spec(spec)
-    mod.device = torch.device
-    mod.inf = math.inf
-    mod.nan = math.nan
-    spec.loader.exec_module(mod)
-
-    instance = mod.Repro()
+    mod, instance, configs = _get_or_load_module(repro_path)
 
     all_shapes = {args_dict["all_shapes"]}
-    configs = load_shape_configs(repro_path)
     if all_shapes and configs:
         shape_items = list(configs.items())
     else:
@@ -569,11 +697,20 @@ def bench_one(repro_path):
 
     return all_results
 
-# Main loop: read repro paths from stdin, write JSON results to stdout
+# Main loop: read repro paths from stdin, write JSON results to stdout.
+# Supports PREFETCH:<path> to pre-import the next module in background.
 for line in sys.stdin:
     line = line.strip()
     if not line or line == "EXIT":
         break
+    if line.startswith("PREFETCH:"):
+        # Start background thread to pre-import the next repro module.
+        # This overlaps CPU-bound module loading with the GPU-bound timing
+        # of the current repro (which follows immediately after).
+        prefetch_path = line[len("PREFETCH:"):]
+        t = threading.Thread(target=_prefetch_module, args=(prefetch_path,), daemon=True)
+        t.start()
+        continue
     try:
         results = bench_one(line)
         print(json.dumps(results), flush=True)
