@@ -61,10 +61,13 @@ dm_nfnet_f0 128            vit_base_dinov2 128      vit_base_siglip 128
 5. ~~CI report tooling~~ DONE (bench_report.py: v3 JSON + markdown + regression gate)
 6. ~~Parallel execution~~ DONE (INDUCTOR_GPU_BENCH_LOCK, 2.6x throughput, no noise)
 7. TODO (immediate):
-   - Run full baseline sweep with `--no-share-cache --max-workers 4` and commit results
-   - Add `--workers-per-gpu` CLI arg to bench_parallel
+   - ~~Run full baseline sweep~~ DONE (1073 repros, median 1.03x)
+   - ~~Stale lock detection~~ DONE
+   - ~~Validate all shapes~~ DONE (removed 194 bad configs, 2981 remaining pass)
+   - Fix merge_captures.py: shape params (S()) must come from each model's capture,
+     not from the canonical repro's defaults. Currently cross-model dedup copies the
+     FIRST model's S() values which are wrong for models with different vocab/seq sizes.
    - Investigate: combo_kernels fix (8 of top 20 gaps), horizontal fusion cap (8 of top 20)
-   - Add stale lock detection to gpu_lock.py (check PID alive before blocking)
 8. Land easy inductor fixes with benchmark evidence:
    - combo_kernels enable (3x on 60% of severe gaps)
    - num_warps=2 for persistent INNER (1.28x)
