@@ -17,6 +17,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gpu_lock import gpu_lock, gpu_lock_for_kind
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from repro_harness import make_inputs_safely
+
 
 def _resolve_input_path(path_arg):
     path = Path(path_arg)
@@ -44,33 +47,8 @@ def current_hardware_label():
     return name.replace(" ", "_")
 
 
-def _randn_with_bool(old_randn):
-    import torch
-
-    def randn(*args, **kwargs):
-        if kwargs.get("dtype") is torch.bool:
-            kwargs = dict(kwargs)
-            kwargs.pop("dtype")
-            if "size" in kwargs:
-                size = kwargs.pop("size")
-            elif len(args) == 1 and isinstance(args[0], (list, tuple, torch.Size)):
-                size = tuple(args[0])
-            else:
-                size = args
-            return torch.randint(0, 2, size, dtype=torch.bool, **kwargs)
-        return old_randn(*args, **kwargs)
-
-    return randn
-
-
 def make_inputs(mod):
-    import torch
-    old_randn = torch.randn
-    torch.randn = _randn_with_bool(old_randn)
-    try:
-        return mod.make_inputs()
-    finally:
-        torch.randn = old_randn
+    return make_inputs_safely(mod.make_inputs)
 
 
 def _count_bytes(inputs, outputs):
@@ -156,12 +134,12 @@ def load_repro(path):
     return mod.Repro(), make_inputs(mod)
 
 
-def _cuda_graph_time(fn, inputs, n_warmup=10, n_iter=200):
-    import time
+def _cuda_graph_time(fn, inputs, n_warmup=25, n_iter=100):
     import torch
+    from triton.testing import do_bench
 
     with torch.no_grad():
-        for _ in range(n_warmup):
+        for _ in range(3):
             fn(*inputs)
         torch.cuda.synchronize()
 
@@ -170,19 +148,15 @@ def _cuda_graph_time(fn, inputs, n_warmup=10, n_iter=200):
             fn(*inputs)
         torch.cuda.synchronize()
 
-        for _ in range(5):
-            g.replay()
-        torch.cuda.synchronize()
-
-        start = time.perf_counter()
-        for _ in range(n_iter):
-            g.replay()
-        torch.cuda.synchronize()
-        elapsed = (time.perf_counter() - start) / n_iter * 1e6
-    return elapsed
+        return do_bench(
+            lambda: g.replay(),
+            warmup=n_warmup,
+            rep=n_iter,
+            return_mode="min",
+        ) * 1000
 
 
-def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
+def benchmark_one(repro_path, n_warmup=25, n_rep=100, use_cuda_graph=True):
     import torch
     import torch._dynamo
     import torch._inductor.config as inductor_config
@@ -201,7 +175,12 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
     copy_elems = max(total_bytes // (2 * 4), 256)
     src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
     dst = torch.empty_like(src)
-    sol_ms = do_bench(lambda: dst.copy_(src), warmup=n_warmup, rep=n_rep)
+    sol_ms = do_bench(
+        lambda: dst.copy_(src),
+        warmup=n_warmup,
+        rep=n_rep,
+        return_mode="min",
+    )
     sol_us = sol_ms * 1000
     del src, dst
 
@@ -215,7 +194,12 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
             for _ in range(3):
                 compiled(*inputs)
             torch.cuda.synchronize()
-        compiled_ms = do_bench(lambda: compiled(*inputs), warmup=n_warmup, rep=n_rep)
+        compiled_ms = do_bench(
+            lambda: compiled(*inputs),
+            warmup=n_warmup,
+            rep=n_rep,
+            return_mode="min",
+        )
         compiled_us = compiled_ms * 1000
 
     # Compiled with coordinate descent tuning
@@ -229,7 +213,12 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
             for _ in range(3):
                 compiled_cd(*inputs)
             torch.cuda.synchronize()
-        cd_ms = do_bench(lambda: compiled_cd(*inputs), warmup=n_warmup, rep=n_rep)
+        cd_ms = do_bench(
+            lambda: compiled_cd(*inputs),
+            warmup=n_warmup,
+            rep=n_rep,
+            return_mode="min",
+        )
         cd_us = cd_ms * 1000
     inductor_config.coordinate_descent_tuning = False
 

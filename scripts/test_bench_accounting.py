@@ -1,12 +1,28 @@
+import fcntl
+import json
+import os
 import sys
 import tempfile
 from pathlib import Path
 
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "scripts"))
 
 from bench import _count_bytes, _resolve_input_path
+from bench_parallel import _compute_worker_count, _filter_gpus, load_benchmark_set
+from capture_hook import _CaptureState
+import gpu_lock as gpu_lock_module
+from canonicalize_repros import _spec_to_T, parse_make_inputs
+from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+
+
+def _touch_repro(canonical_dir: Path, name: str) -> None:
+    repro_dir = canonical_dir / name
+    repro_dir.mkdir(parents=True)
+    (repro_dir / "repro.py").write_text("# repro\n")
 
 
 def test_count_bytes_deduplicates_output_aliases():
@@ -55,10 +71,242 @@ def test_resolve_input_path_rejects_whitespace_only_path():
         raise AssertionError("whitespace-only benchmark path should fail")
 
 
+def test_compute_worker_count_defaults_to_one_worker_per_gpu():
+    assert _compute_worker_count(
+        num_repros=1133,
+        num_gpus=2,
+        max_workers=None,
+        workers_per_gpu=None,
+    ) == (2, 1)
+
+
+def test_compute_worker_count_max_workers_raises_effective_gpu_cap():
+    assert _compute_worker_count(
+        num_repros=1133,
+        num_gpus=2,
+        max_workers=4,
+        workers_per_gpu=None,
+    ) == (4, 2)
+
+
+def test_compute_worker_count_explicit_workers_per_gpu_caps_max_workers():
+    assert _compute_worker_count(
+        num_repros=1133,
+        num_gpus=2,
+        max_workers=4,
+        workers_per_gpu=1,
+    ) == (2, 1)
+
+
+def test_compute_worker_count_never_exceeds_repro_count():
+    assert _compute_worker_count(
+        num_repros=3,
+        num_gpus=2,
+        max_workers=8,
+        workers_per_gpu=None,
+    ) == (3, 4)
+
+
+def test_load_benchmark_set_accepts_current_patterns_schema():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        canonical_dir = root / "repros" / "canonical"
+        _touch_repro(canonical_dir, "foo")
+        manifest = root / "v1.json"
+        manifest.write_text(json.dumps({
+            "version": "v1",
+            "patterns": [
+                {"name": "foo", "kind": "pointwise"},
+                {"name": "missing", "kind": "reduction"},
+            ],
+        }))
+
+        repros, entries = load_benchmark_set(manifest, canonical_dir=canonical_dir)
+        assert entries == 2
+        assert repros == [canonical_dir / "foo" / "repro.py"]
+
+
+def test_load_benchmark_set_accepts_legacy_benchmarks_schema():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        canonical_dir = root / "repros" / "canonical"
+        _touch_repro(canonical_dir, "bar")
+        manifest = root / "v0.json"
+        manifest.write_text(json.dumps({
+            "benchmarks": [
+                {"repro": "bar", "shape": "default"},
+                {"repro": "bar", "shape": "shape_1"},
+            ],
+        }))
+
+        repros, entries = load_benchmark_set(manifest, canonical_dir=canonical_dir)
+        assert entries == 2
+        assert repros == [canonical_dir / "bar" / "repro.py"]
+
+
+def test_filter_gpus_selects_physical_indices():
+    gpus = [
+        {"index": "0", "name": "NVIDIA H100", "kind": "H100"},
+        {"index": "1", "name": "NVIDIA H100", "kind": "H100"},
+    ]
+    assert _filter_gpus(gpus, "1") == [gpus[1]]
+    assert _filter_gpus(gpus, "0,1") == gpus
+
+
+def test_make_inputs_safely_handles_legacy_bool_randn():
+    (value,) = make_inputs_safely(
+        lambda: [torch.randn([2, 3], dtype=torch.bool, device="cpu")]
+    )
+    assert value.dtype is torch.bool
+    assert value.shape == (2, 3)
+
+
+def test_shape_configs_accept_general_input_generators():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "repro.py").write_text("# repro\n")
+        (root / "shapes.txt").write_text(
+            "case: (T([8], i64, gen=Perm(8)), T([2, 4], i64, gen=Index(4)))\n"
+        )
+
+        config = load_shape_configs(str(root / "repro.py"))["case"]
+        assert config["inputs"][0]["gen"] == {"kind": "permutation", "size": 8}
+        assert config["inputs"][1]["gen"] == {"kind": "index", "low": 0, "high": 4}
+
+
+def test_make_inputs_from_config_honors_generators_on_cpu():
+    perm, bounded = make_inputs_from_config({
+        "inputs": [
+            {
+                "kind": "tensor",
+                "shape": [8],
+                "dtype": "torch.int64",
+                "stride": None,
+                "device": "cpu",
+                "gen": {"kind": "permutation", "size": 8},
+            },
+            {
+                "kind": "tensor",
+                "shape": [64],
+                "dtype": "torch.int64",
+                "stride": None,
+                "device": "cpu",
+                "gen": {"kind": "index", "low": 0, "high": 4},
+            },
+        ],
+    })
+    assert sorted(perm.tolist()) == list(range(8))
+    assert int(bounded.min()) >= 0
+    assert int(bounded.max()) < 4
+
+
+def test_parse_make_inputs_preserves_generators():
+    with tempfile.TemporaryDirectory() as tmp:
+        repro = Path(tmp) / "repro.py"
+        repro.write_text("""
+import torch
+
+
+def make_inputs():
+    return [
+        torch.randint(0, 4, [2, 4], dtype=torch.int64, device='cuda'),
+        torch.randperm(8, dtype=torch.int64, device='cuda').reshape([2, 4]),
+    ]
+""")
+
+        specs = parse_make_inputs(repro)
+        assert specs[0]["gen"] == {"kind": "index", "low": 0, "high": 4}
+        assert specs[1]["gen"] == {"kind": "permutation", "size": 8}
+        assert _spec_to_T(specs[0]) == "T([2, 4], i64, gen=Index(4))"
+        assert _spec_to_T(specs[1]) == "T([2, 4], i64, gen=Perm(8))"
+
+
+def test_capture_hook_traces_select_to_index_bound():
+    graph = torch.fx.Graph()
+    indices = graph.placeholder("arg1_1")
+    indices.meta["val"] = torch.empty(2, 200, dtype=torch.int64)
+    data = graph.placeholder("arg0_1")
+    data.meta["val"] = torch.empty(10000, 64, dtype=torch.bfloat16)
+
+    selected = graph.call_function(torch.ops.aten.select.int, (indices, 0, 0))
+    selected.meta["val"] = torch.empty(200, dtype=torch.int64)
+    indexed = graph.call_function(torch.ops.aten.index.Tensor, (data, [selected]))
+    indexed.meta["val"] = torch.empty(200, 64, dtype=torch.bfloat16)
+    graph.output(indexed)
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(tmp)
+        bounds = state._infer_index_bounds(gm, {
+            "arg1_1": {"dtype": "torch.int64"},
+            "arg0_1": {"dtype": "torch.bfloat16"},
+        })
+
+    assert bounds["arg1_1"] == 10000
+
+
+def test_gpu_lock_metadata_marks_lock_mode():
+    with tempfile.TemporaryDirectory() as tmp:
+        with gpu_lock_module.gpu_lock(0, lock_dir=tmp, label="exclusive-test") as lock_path:
+            metadata = gpu_lock_module._read_lock_metadata(lock_path)
+            assert metadata["pid"] == str(os.getpid())
+            assert metadata["mode"] == "exclusive"
+            assert metadata["label"] == "exclusive-test"
+
+        with gpu_lock_module.gpu_shared_lock(0, lock_dir=tmp, label="shared-test") as lock_path:
+            metadata = gpu_lock_module._read_lock_metadata(lock_path)
+            assert metadata["pid"] == str(os.getpid())
+            assert metadata["mode"] == "shared"
+            assert metadata["label"] == "shared-test"
+
+
+def test_gpu_lock_detects_dead_pid_metadata_while_blocked():
+    with tempfile.TemporaryDirectory() as tmp:
+        lock_path = Path(tmp) / "gpu_0.lock"
+        fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o666)
+        old_stale_grace = gpu_lock_module.STALE_LOCK_GRACE_S
+        gpu_lock_module.STALE_LOCK_GRACE_S = 0
+        try:
+            fcntl.flock(fd, fcntl.LOCK_SH)
+            lock_path.write_text(
+                "pid=999999999\n"
+                "gpu=0\n"
+                "mode=shared\n"
+                "label=dead-test\n"
+            )
+
+            try:
+                with gpu_lock_module.gpu_lock(0, lock_dir=tmp, timeout_s=10):
+                    pass
+            except TimeoutError as exc:
+                assert "appears stale" in str(exc)
+                assert "pid=999999999" in str(exc)
+            else:
+                raise AssertionError("dead PID metadata should fail instead of waiting")
+        finally:
+            gpu_lock_module.STALE_LOCK_GRACE_S = old_stale_grace
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+
+
 if __name__ == "__main__":
     test_count_bytes_deduplicates_output_aliases()
     test_count_bytes_counts_distinct_outputs()
     test_resolve_input_path_strips_accidental_whitespace()
     test_resolve_input_path_rejects_missing_path()
     test_resolve_input_path_rejects_whitespace_only_path()
+    test_compute_worker_count_defaults_to_one_worker_per_gpu()
+    test_compute_worker_count_max_workers_raises_effective_gpu_cap()
+    test_compute_worker_count_explicit_workers_per_gpu_caps_max_workers()
+    test_compute_worker_count_never_exceeds_repro_count()
+    test_load_benchmark_set_accepts_current_patterns_schema()
+    test_load_benchmark_set_accepts_legacy_benchmarks_schema()
+    test_filter_gpus_selects_physical_indices()
+    test_make_inputs_safely_handles_legacy_bool_randn()
+    test_shape_configs_accept_general_input_generators()
+    test_make_inputs_from_config_honors_generators_on_cpu()
+    test_parse_make_inputs_preserves_generators()
+    test_capture_hook_traces_select_to_index_bound()
+    test_gpu_lock_metadata_marks_lock_mode()
+    test_gpu_lock_detects_dead_pid_metadata_while_blocked()
     print("All tests passed.")

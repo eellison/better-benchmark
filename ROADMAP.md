@@ -62,9 +62,11 @@ dm_nfnet_f0 128            vit_base_dinov2 128      vit_base_siglip 128
 6. ~~Parallel execution~~ DONE (INDUCTOR_GPU_BENCH_LOCK, 2.6x throughput, no noise)
 7. TODO (immediate):
    - Run full baseline sweep with `--no-share-cache --max-workers 4` and commit results
-   - Add `--workers-per-gpu` CLI arg to bench_parallel
+   - ~~Add `--workers-per-gpu` CLI arg to bench_parallel~~ DONE
+   - Generalize input value inference: derive `Index(...)` / `Perm(...)` generators from FX consumers, then extend to offsets/segment-id style constraints as failures appear
+   - Clean stale `shapes.txt` configs exposed by full `--all-shapes` sweep: shape-param mismatches, missing optional deps, and remaining index-bound cases
    - Investigate: combo_kernels fix (8 of top 20 gaps), horizontal fusion cap (8 of top 20)
-   - Add stale lock detection to gpu_lock.py (check PID alive before blocking)
+   - ~~Add stale lock detection to gpu_lock.py (check PID alive before blocking)~~ DONE
 8. Land easy inductor fixes with benchmark evidence:
    - combo_kernels enable (3x on 60% of severe gaps)
    - num_warps=2 for persistent INNER (1.28x)

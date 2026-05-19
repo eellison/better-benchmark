@@ -12,6 +12,7 @@ Usage:
     python canonicalize_repros.py [--aten-dir output/aten_repros] [--out-dir repros]
 """
 import argparse
+import ast
 import json
 import re
 import textwrap
@@ -36,10 +37,174 @@ def scan_all_indexes(aten_dir: Path) -> list[dict]:
     return entries
 
 
+def _literal(node):
+    try:
+        return ast.literal_eval(node)
+    except Exception:
+        return None
+
+
+def _call_name(node) -> str | None:
+    if isinstance(node, ast.Call):
+        return _call_name(node.func)
+    if isinstance(node, ast.Attribute):
+        base = _call_name(node.value)
+        return f"{base}.{node.attr}" if base else node.attr
+    if isinstance(node, ast.Name):
+        return node.id
+    return None
+
+
+def _kw(call: ast.Call, name: str):
+    for keyword in call.keywords:
+        if keyword.arg == name:
+            return keyword.value
+    return None
+
+
+def _dtype_from_call(call: ast.Call, default: str = "torch.float32") -> str:
+    dtype_node = _kw(call, "dtype")
+    dtype_name = _call_name(dtype_node)
+    if dtype_name and dtype_name.startswith("torch."):
+        return dtype_name
+    return default
+
+
+def _shape_from_arg(node):
+    value = _literal(node)
+    if isinstance(value, int):
+        return [value]
+    if isinstance(value, tuple):
+        value = list(value)
+    if isinstance(value, list) and all(isinstance(dim, int) for dim in value):
+        return value
+    return None
+
+
+def _unwrap_view_call(node):
+    """Return (base_call, shape, stride) for torch factory calls with optional view ops."""
+    shape = None
+    stride = None
+    cur = node
+    while isinstance(cur, ast.Call) and isinstance(cur.func, ast.Attribute):
+        attr = cur.func.attr
+        if attr == "reshape" and cur.args:
+            shape = _shape_from_arg(cur.args[0])
+            cur = cur.func.value
+            continue
+        if attr == "as_strided" and len(cur.args) >= 2:
+            shape = _shape_from_arg(cur.args[0])
+            stride_value = _literal(cur.args[1])
+            if isinstance(stride_value, tuple):
+                stride_value = list(stride_value)
+            if isinstance(stride_value, list):
+                stride = stride_value
+            cur = cur.func.value
+            continue
+        break
+    return cur if isinstance(cur, ast.Call) else None, shape, stride
+
+
+def _parse_tensor_factory(node) -> dict | None:
+    call, view_shape, stride = _unwrap_view_call(node)
+    if call is None:
+        return None
+
+    name = _call_name(call.func)
+    if name not in {"torch.randn", "torch.randint", "torch.randperm"}:
+        return None
+
+    if name == "torch.randperm":
+        if not call.args:
+            return None
+        max_val = _literal(call.args[0])
+        if not isinstance(max_val, int):
+            return None
+        shape = view_shape or [max_val]
+        spec = {
+            "shape": shape,
+            "dtype": _dtype_from_call(call, default="torch.int64"),
+            "device": "cuda",
+            "stride": stride,
+            "gen": {"kind": "permutation", "size": max_val},
+        }
+        return spec
+
+    if name == "torch.randint":
+        if len(call.args) < 3:
+            return None
+        min_val = _literal(call.args[0])
+        max_val = _literal(call.args[1])
+        shape = view_shape or _shape_from_arg(call.args[2])
+        if not isinstance(min_val, int) or not isinstance(max_val, int) or shape is None:
+            return None
+        spec = {
+            "shape": shape,
+            "dtype": _dtype_from_call(call, default="torch.int64"),
+            "device": "cuda",
+            "stride": stride,
+            "gen": {"kind": "index", "low": min_val, "high": max_val},
+        }
+        return spec
+
+    shape_node = call.args[0] if call.args else _kw(call, "size")
+    shape = view_shape or (_shape_from_arg(shape_node) if shape_node is not None else None)
+    if shape is None:
+        return None
+    return {
+        "shape": shape,
+        "dtype": _dtype_from_call(call),
+        "device": "cuda",
+        "stride": stride,
+    }
+
+
+def _parse_make_inputs_source(repro_path: Path) -> list[dict]:
+    try:
+        tree = ast.parse(repro_path.read_text())
+    except SyntaxError:
+        return []
+
+    funcs = {
+        node.name: node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name in {"_default_make_inputs", "make_inputs"}
+    }
+    func = funcs.get("_default_make_inputs") or funcs.get("make_inputs")
+    if func is None:
+        return []
+
+    return_node = next((node for node in ast.walk(func) if isinstance(node, ast.Return)), None)
+    if return_node is None or not isinstance(return_node.value, (ast.List, ast.Tuple)):
+        return []
+
+    specs = []
+    for elt in return_node.value.elts:
+        if isinstance(elt, ast.Call):
+            spec = _parse_tensor_factory(elt)
+            if spec is None:
+                return []
+            specs.append(spec)
+            continue
+
+        value = _literal(elt)
+        if isinstance(value, list):
+            specs.append({"kind": "shape", "dims": value})
+        elif isinstance(value, int):
+            specs.append({"kind": "shape", "dims": [value]})
+        else:
+            return []
+    return specs
+
+
 def parse_make_inputs(repro_path: Path) -> list[dict]:
-    """Extract input specs by executing _default_make_inputs() from a captured repro."""
+    """Extract input specs from a captured repro."""
     if not repro_path.exists():
         return []
+
+    source_specs = _parse_make_inputs_source(repro_path)
+    if source_specs:
+        return source_specs
 
     import importlib.util
     import math
@@ -226,6 +391,30 @@ def extract_make_inputs_body(repro_path: Path) -> str:
     return "\n".join(result)
 
 
+def _generation_expr(spec: dict) -> str | None:
+    gen = spec.get("gen")
+    if gen is None:
+        if spec.get("constraint") == "permutation":
+            gen = {"kind": "permutation", "size": spec.get("max_val")}
+        elif spec.get("max_val") is not None:
+            gen = {"kind": "index", "low": 0, "high": spec["max_val"]}
+    if gen is None:
+        return None
+
+    if gen.get("kind") == "permutation":
+        size = gen.get("size")
+        return "Perm()" if size is None else f"Perm({size})"
+
+    if gen.get("kind") == "index":
+        low = int(gen.get("low", 0))
+        high = int(gen["high"])
+        if low == 0:
+            return f"Index({high})"
+        return f"Index({high}, low={low})"
+
+    return None
+
+
 def _spec_to_T(spec: dict) -> str:
     """Convert an input spec dict to compact T() notation."""
     shape = spec["shape"]
@@ -238,9 +427,14 @@ def _spec_to_T(spec: dict) -> str:
     }
     short_dtype = dtype_map.get(dtype_str, dtype_str)
     stride = spec.get("stride")
+    kwargs = []
     if stride:
-        return f"T({shape}, {short_dtype}, stride={tuple(stride)})"
-    return f"T({shape}, {short_dtype})"
+        kwargs.append(f"stride={tuple(stride)}")
+    gen = _generation_expr(spec)
+    if gen is not None:
+        kwargs.append(f"gen={gen}")
+    suffix = f", {', '.join(kwargs)}" if kwargs else ""
+    return f"T({shape}, {short_dtype}{suffix})"
 
 
 def _inputs_to_line(input_specs: list[dict]) -> str:

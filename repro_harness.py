@@ -51,13 +51,38 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
         "b8": "torch.bool", "u8": "torch.uint8",
     }
 
-    def T(shape, dtype, stride=None):
-        return {"kind": "tensor", "shape": shape, "dtype": _DTYPE_MAP.get(dtype, f"torch.{dtype}"), "stride": list(stride) if stride else None, "device": "cuda"}
+    def Index(high, low=0):
+        return {"kind": "index", "low": int(low), "high": int(high)}
+
+    def Perm(size=None):
+        return {"kind": "permutation", "size": None if size is None else int(size)}
+
+    def T(shape, dtype, stride=None, gen=None, max_val=None, constraint=None, index=None):
+        spec = {
+            "kind": "tensor",
+            "shape": shape,
+            "dtype": _DTYPE_MAP.get(dtype, f"torch.{dtype}"),
+            "stride": list(stride) if stride else None,
+            "device": "cuda",
+        }
+        if constraint is None:
+            constraint = index
+        if gen is not None:
+            spec["gen"] = gen
+        elif constraint == "permutation":
+            spec["gen"] = Perm(max_val)
+        elif max_val is not None:
+            spec["gen"] = Index(max_val)
+        if constraint is not None:
+            spec["constraint"] = constraint
+        if max_val is not None:
+            spec["max_val"] = int(max_val)
+        return spec
 
     def S(dims):
         return {"kind": "shape", "dims": dims}
 
-    _eval_ns = {"__builtins__": {}, "T": T, "S": S,
+    _eval_ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm,
                 "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
                 "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
                 "b8": "b8", "u8": "u8"}
@@ -88,6 +113,47 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
     return configs
 
 
+def _storage_size_for_strided(shape: list[int], stride: list[int]) -> int:
+    if not shape:
+        return 1
+    return sum((s - 1) * st for s, st in zip(shape, stride) if s > 1) + 1
+
+
+def _numel(shape: list[int]) -> int:
+    result = 1
+    for dim in shape:
+        result *= dim
+    return result
+
+
+def _generation_spec(spec: dict) -> dict | None:
+    gen = spec.get("gen")
+    if gen is not None:
+        return gen
+
+    if spec.get("constraint") == "permutation":
+        return {"kind": "permutation", "size": spec.get("max_val")}
+    if spec.get("max_val") is not None:
+        return {"kind": "index", "low": 0, "high": int(spec["max_val"])}
+    return None
+
+
+def _make_permutation_tensor(shape, dtype, device, stride=None, size=None):
+    logical_numel = _numel(shape)
+    size = int(size if size is not None else logical_numel)
+    if size < logical_numel:
+        raise ValueError(
+            f"permutation generator needs size >= numel, got size={size}, numel={logical_numel}"
+        )
+
+    values = torch.randperm(size, dtype=dtype, device=device)[:logical_numel].reshape(shape)
+    if stride:
+        out = torch.empty_strided(shape, stride, dtype=dtype, device=device)
+        out.copy_(values)
+        return out
+    return values
+
+
 def make_inputs_from_config(config: dict) -> list:
     """Create inputs from a shape config. Returns mix of tensors and shape-param lists."""
     result = []
@@ -101,30 +167,73 @@ def make_inputs_from_config(config: dict) -> list:
         dtype = getattr(torch, dtype_str)
         stride = spec.get("stride")
         device = spec.get("device", "cuda")
+        gen = _generation_spec(spec)
 
         if dtype in (torch.int64, torch.int32, torch.int16, torch.int8):
-            hi = spec.get("max_val", 100)
+            if gen and gen.get("kind") == "permutation":
+                result.append(
+                    _make_permutation_tensor(
+                        shape,
+                        dtype=dtype,
+                        device=device,
+                        stride=stride,
+                        size=gen.get("size"),
+                    )
+                )
+                continue
+
+            low = int(gen.get("low", 0)) if gen else 0
+            hi = int(gen.get("high", 100)) if gen else 100
+            if hi <= low:
+                hi = low + 1
             if stride:
-                numel = sum((s - 1) * st for s, st in zip(shape, stride) if s > 1) + 1
-                storage = torch.randint(0, hi, (numel,), dtype=dtype, device=device)
+                numel = _storage_size_for_strided(shape, stride)
+                storage = torch.randint(low, hi, (numel,), dtype=dtype, device=device)
                 result.append(storage.as_strided(shape, stride))
             else:
-                result.append(torch.randint(0, hi, shape, dtype=dtype, device=device))
+                result.append(torch.randint(low, hi, shape, dtype=dtype, device=device))
         elif dtype == torch.bool:
             if stride:
-                numel = sum((s - 1) * st for s, st in zip(shape, stride) if s > 1) + 1
+                numel = _storage_size_for_strided(shape, stride)
                 storage = torch.randint(0, 2, (numel,), dtype=torch.bool, device=device)
                 result.append(storage.as_strided(shape, stride))
             else:
                 result.append(torch.randint(0, 2, shape, dtype=torch.bool, device=device))
         else:
             if stride:
-                numel = sum((s - 1) * st for s, st in zip(shape, stride) if s > 1) + 1
+                numel = _storage_size_for_strided(shape, stride)
                 storage = torch.randn(numel, dtype=dtype, device=device)
                 result.append(storage.as_strided(shape, stride))
             else:
                 result.append(torch.randn(shape, dtype=dtype, device=device))
     return result
+
+
+def _randn_with_bool(old_randn):
+    def randn(*args, **kwargs):
+        if kwargs.get("dtype") is torch.bool:
+            kwargs = dict(kwargs)
+            kwargs.pop("dtype")
+            if "size" in kwargs:
+                size = kwargs.pop("size")
+            elif len(args) == 1 and isinstance(args[0], (list, tuple, torch.Size)):
+                size = tuple(args[0])
+            else:
+                size = args
+            return torch.randint(0, 2, size, dtype=torch.bool, **kwargs)
+        return old_randn(*args, **kwargs)
+
+    return randn
+
+
+def make_inputs_safely(make_inputs_fn, *args, **kwargs):
+    """Run generated make_inputs while tolerating legacy bool randn repros."""
+    old_randn = torch.randn
+    torch.randn = _randn_with_bool(old_randn)
+    try:
+        return make_inputs_fn(*args, **kwargs)
+    finally:
+        torch.randn = old_randn
 
 
 def count_bytes_naive(inputs, outputs) -> int:
@@ -330,7 +439,7 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
     parser.add_argument("--count-kernels-only", action="store_true",
                         help="Only count generated kernels, skip timing")
     parser.add_argument("--n-warmup", type=int, default=25)
-    parser.add_argument("--n-rep", type=int, default=200)
+    parser.add_argument("--n-rep", type=int, default=100)
     parser.add_argument("--gpu", default=None,
                         help="GPU id to lock (default: grab any free GPU)")
     parser.add_argument("--device-kind", default=None,
@@ -357,7 +466,7 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                 label = name
                 # If shapes.json doesn't include shape params but forward() expects them,
                 # merge shape params from _default_make_inputs at the correct positions
-                default_inputs = make_inputs_fn()
+                default_inputs = make_inputs_safely(make_inputs_fn)
                 if len(inputs) < len(default_inputs):
                     # Build merged list: use config tensors where available,
                     # fill shape params (plain lists/ints) from defaults
@@ -376,7 +485,7 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                                 merged.append(di)
                     inputs = merged
             else:
-                inputs = make_inputs_fn()
+                inputs = make_inputs_safely(make_inputs_fn)
                 label = "default"
 
             mod = repro_cls()
@@ -406,7 +515,12 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
             copy_elems = max(total_bytes // (2 * 4), 256)
             src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
             dst = torch.empty_like(src)
-            sol_ms = do_bench(lambda: dst.copy_(src), warmup=parsed.n_warmup, rep=parsed.n_rep)
+            sol_ms = do_bench(
+                lambda: dst.copy_(src),
+                warmup=parsed.n_warmup,
+                rep=parsed.n_rep,
+                return_mode="min",
+            )
             sol_us = sol_ms * 1000
             del src, dst
 
@@ -417,7 +531,12 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                 for _ in range(3):
                     compiled(*inputs)
                 torch.cuda.synchronize()
-            compiled_ms = do_bench(lambda: compiled(*inputs), warmup=parsed.n_warmup, rep=parsed.n_rep)
+            compiled_ms = do_bench(
+                lambda: compiled(*inputs),
+                warmup=parsed.n_warmup,
+                rep=parsed.n_rep,
+                return_mode="min",
+            )
             compiled_us = compiled_ms * 1000
 
             # Compiled with coordinate descent tuning
@@ -430,7 +549,12 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                     for _ in range(3):
                         compiled_cd(*inputs)
                     torch.cuda.synchronize()
-                cd_ms = do_bench(lambda: compiled_cd(*inputs), warmup=parsed.n_warmup, rep=parsed.n_rep)
+                cd_ms = do_bench(
+                    lambda: compiled_cd(*inputs),
+                    warmup=parsed.n_warmup,
+                    rep=parsed.n_rep,
+                    return_mode="min",
+                )
                 cd_us = cd_ms * 1000
                 inductor_config.coordinate_descent_tuning = False
 

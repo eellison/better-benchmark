@@ -26,7 +26,8 @@ Usage:
 # ---
 # Ideally we would: (1) compile N repros in parallel on a CPU pool (no GPU
 # lock needed for graph lowering/Triton codegen), then (2) acquire GPU lock
-# only for the brief do_bench timing phase.
+# around benchmark timing phases. Use --strict-gpu-lock to also serialize
+# CUDA setup/warmup/capture phases when validating measurement variance.
 #
 # Challenge: torch.compile uses lazy compilation — the actual Triton kernel
 # generation and autotuning happen during the first few forward() calls, not
@@ -34,8 +35,8 @@ Usage:
 # are interleaved. Splitting them requires either:
 #   a) Using torch._inductor.compile_fx directly to force AOT compilation
 #      (fragile internal API, breaks across PT versions), or
-#   b) Running warmup calls on GPU *without* exclusive lock (risks
-#      measurement interference from concurrent autotuning on same GPU), or
+#   b) Running warmup calls on GPU without the strict benchmark lock (risks
+#      measurement interference from concurrent CUDA work on same GPU), or
 #   c) A two-subprocess design: compile in one process, serialize the compiled
 #      artifact, load+time in another (significant engineering, but doable
 #      via torch._inductor's cache).
@@ -50,8 +51,9 @@ Usage:
 #    If the same repro was compiled before (e.g., on a previous run), the
 #    cached kernels are reused, skipping compilation entirely.
 # 4. Adaptive worker count (NEW): --max-workers can exceed GPU count. Extra
-#    workers compile repros speculatively; only the timing phase serializes
-#    on the GPU lock. Uses a per-GPU semaphore (max=1) for the timing phase.
+#    workers prepare repros speculatively; benchmark timing serializes on the
+#    per-GPU lock. --strict-gpu-lock additionally serializes CUDA setup,
+#    warmup, and capture to keep SOL/gap measurements stable.
 #
 # Future work:
 # - torch._inductor cache-based phase split: compile with TORCH_COMPILE_DEBUG
@@ -89,6 +91,78 @@ def find_repros(paths: list[Path]) -> list[Path]:
         elif p.is_dir():
             repros.extend(sorted(p.rglob("repro.py")))
     return repros
+
+
+def _benchmark_entry_name(entry) -> str | None:
+    if isinstance(entry, str):
+        return entry
+    if not isinstance(entry, dict):
+        return None
+    return entry.get("repro") or entry.get("name")
+
+
+def load_benchmark_set(
+    benchmark_set: Path,
+    *,
+    canonical_dir: Path = Path("repros/canonical"),
+) -> tuple[list[Path], int]:
+    """Load repro paths from either the old or current benchmark-set schema."""
+    data = json.loads(benchmark_set.read_text())
+    if isinstance(data, list):
+        entries = data
+    else:
+        entries = data.get("patterns") or data.get("benchmarks") or []
+
+    repros = []
+    for entry in entries:
+        name = _benchmark_entry_name(entry)
+        if not name:
+            continue
+        repro_path = canonical_dir / name / "repro.py"
+        if repro_path.exists():
+            repros.append(repro_path)
+    return sorted(set(repros)), len(entries)
+
+
+def _filter_gpus(gpus: list[dict[str, str]], selected: str | None) -> list[dict[str, str]]:
+    if not selected:
+        return gpus
+
+    wanted = {item.strip() for item in selected.split(",") if item.strip()}
+    if not wanted:
+        return gpus
+
+    return [gpu for gpu in gpus if gpu["index"] in wanted]
+
+
+def _compute_worker_count(
+    *,
+    num_repros: int,
+    num_gpus: int,
+    max_workers: int | None,
+    workers_per_gpu: int | None,
+) -> tuple[int, int]:
+    """Return (worker_count, effective_workers_per_gpu)."""
+    if num_gpus <= 0:
+        raise ValueError("No matching GPUs found")
+    if max_workers is not None and max_workers < 1:
+        raise ValueError("--max-workers must be >= 1")
+    if workers_per_gpu is not None and workers_per_gpu < 1:
+        raise ValueError("--workers-per-gpu must be >= 1")
+    if num_repros <= 0:
+        return 0, workers_per_gpu or 1
+
+    if workers_per_gpu is None:
+        if max_workers is None:
+            effective_workers_per_gpu = 1
+        else:
+            effective_workers_per_gpu = max(1, (max_workers + num_gpus - 1) // num_gpus)
+    else:
+        effective_workers_per_gpu = workers_per_gpu
+
+    worker_capacity = num_gpus * effective_workers_per_gpu
+    requested_workers = max_workers if max_workers is not None else worker_capacity
+    return min(requested_workers, worker_capacity, num_repros), effective_workers_per_gpu
 
 
 def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
@@ -129,11 +203,15 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
         for name in shape_names:
             label = name if name is not None else "default"
             if name is not None:
-                from repro_harness import make_inputs_from_config, load_shape_configs
+                from repro_harness import (
+                    load_shape_configs,
+                    make_inputs_from_config,
+                    make_inputs_safely,
+                )
                 configs = load_shape_configs(repro_path)
                 inputs = make_inputs_from_config(configs[name])
             else:
-                inputs = make_inputs_fn()
+                inputs = make_inputs_safely(make_inputs_fn)
 
             instance = repro_cls()
             with torch.no_grad():
@@ -155,7 +233,12 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             copy_elems = max(total_bytes // (2 * 4), 256)
             src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
             dst = torch.empty_like(src)
-            sol_us = do_bench(lambda: dst.copy_(src), warmup=n_warmup, rep=n_rep) * 1000
+            sol_us = do_bench(
+                lambda: dst.copy_(src),
+                warmup=n_warmup,
+                rep=n_rep,
+                return_mode="min",
+            ) * 1000
             del src, dst
 
             # Compiled
@@ -165,7 +248,12 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
                 for _ in range(3):
                     compiled(*inputs)
                 torch.cuda.synchronize()
-            compiled_us = do_bench(lambda: compiled(*inputs), warmup=n_warmup, rep=n_rep) * 1000
+            compiled_us = do_bench(
+                lambda: compiled(*inputs),
+                warmup=n_warmup,
+                rep=n_rep,
+                return_mode="min",
+            ) * 1000
 
             # Coord descent
             cd_us = None
@@ -177,7 +265,12 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
                     for _ in range(3):
                         compiled_cd(*inputs)
                     torch.cuda.synchronize()
-                cd_us = do_bench(lambda: compiled_cd(*inputs), warmup=n_warmup, rep=n_rep) * 1000
+                cd_us = do_bench(
+                    lambda: compiled_cd(*inputs),
+                    warmup=n_warmup,
+                    rep=n_rep,
+                    return_mode="min",
+                ) * 1000
                 inductor_config.coordinate_descent_tuning = False
 
             results[label] = {
@@ -235,8 +328,13 @@ def main():
                         help="Path to a frozen benchmark set JSON (e.g. benchmarks/v1.json)")
     parser.add_argument("--device-kind", default=None,
                         help="GPU kind to use (e.g. H100, B200). Default: all GPUs")
+    parser.add_argument("--gpus", default=None,
+                        help="Comma-separated physical GPU indices to use, e.g. '0' or '0,1'")
     parser.add_argument("--max-workers", type=int, default=None,
                         help="Max parallel workers (default: one per matching GPU)")
+    parser.add_argument("--workers-per-gpu", type=int, default=None,
+                        help="Max persistent worker subprocesses per matching GPU "
+                             "(default: 1, or enough to satisfy --max-workers)")
     parser.add_argument("--all-shapes", action="store_true",
                         help="Benchmark all shapes from shapes.txt")
     parser.add_argument("--no-cd", action="store_true",
@@ -246,11 +344,14 @@ def main():
     parser.add_argument("--hardware", default=None,
                         help="Hardware label for perf.json (auto-detected if not set)")
     parser.add_argument("--n-warmup", type=int, default=25)
-    parser.add_argument("--n-rep", type=int, default=200)
+    parser.add_argument("--n-rep", type=int, default=100)
     parser.add_argument("--share-cache", action="store_true", default=True,
                         help="Share inductor cache across workers (default: enabled)")
     parser.add_argument("--no-share-cache", dest="share_cache", action="store_false",
                         help="Disable shared inductor cache")
+    parser.add_argument("--strict-gpu-lock", action="store_true",
+                        help="Serialize CUDA setup/warmup/capture as well as timing. "
+                             "Slower, but useful for variance validation.")
     parser.add_argument("--tag", default=None,
                         help="Tag for this run (e.g. 'baseline', 'my_fix'). Used to key results in perf.json for comparison.")
     parser.add_argument("--compare", type=str, nargs=2, metavar=("TAG_A", "TAG_B"),
@@ -268,21 +369,12 @@ def main():
     # Load benchmark set if specified
     benchmark_entries = None
     if args.benchmark_set:
-        bset = json.loads(args.benchmark_set.read_text())
-        benchmark_entries = bset.get("benchmarks", [])
-        canonical_dir = Path("repros/canonical")
-        repros = []
-        for entry in benchmark_entries:
-            repro_path = canonical_dir / entry["repro"] / "repro.py"
-            if repro_path.exists():
-                repros.append(repro_path)
-        # Deduplicate (same repro appears multiple times for different shapes)
-        repros = sorted(set(repros))
+        repros, benchmark_entries = load_benchmark_set(args.benchmark_set)
         # Enable --all-shapes for benchmark set runs (repro_harness now merges
         # shape params from _default_make_inputs when shapes.json doesn't have them)
         args.all_shapes = True
         print(f"Benchmark set: {args.benchmark_set.name} "
-              f"({len(benchmark_entries)} points, {len(repros)} unique repros)")
+              f"({benchmark_entries} points, {len(repros)} unique repros)")
     elif args.paths:
         repros = find_repros(args.paths)
     else:
@@ -292,13 +384,21 @@ def main():
         print("No repro.py files found.")
         return
 
-    gpus = matching_gpus(args.device_kind)
-    workers_per_gpu = getattr(args, 'workers_per_gpu', 1) or 1
-    n_workers = min(args.max_workers or len(gpus) * workers_per_gpu, len(gpus) * workers_per_gpu, len(repros))
+    gpus = _filter_gpus(matching_gpus(args.device_kind), args.gpus)
+    try:
+        n_workers, workers_per_gpu = _compute_worker_count(
+            num_repros=len(repros),
+            num_gpus=len(gpus),
+            max_workers=args.max_workers,
+            workers_per_gpu=args.workers_per_gpu,
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
 
-    print(f"Benchmarking {len(repros)} repros across {n_workers} GPUs")
-    gpu_labels = [f"{g['index']}:{g['kind']}" for g in gpus[:n_workers]]
+    print(f"Benchmarking {len(repros)} repros across {n_workers} workers on {len(gpus)} GPUs")
+    gpu_labels = [f"{g['index']}:{g['kind']}" for g in gpus]
     print(f"  GPUs: {', '.join(gpu_labels)}")
+    print(f"  Workers per GPU cap: {workers_per_gpu}")
     if args.share_cache:
         print(f"  Shared inductor cache: {_SHARED_CACHE_DIR}")
     print(f"  Prefetch: enabled (overlaps module loading with GPU timing)")
@@ -319,6 +419,8 @@ def main():
         "n_warmup": args.n_warmup,
         "n_rep": args.n_rep,
         "share_cache": args.share_cache,
+        "strict_gpu_lock": args.strict_gpu_lock,
+        "n_workers": n_workers,
     }
 
     # Use threads — the actual GPU work is in subprocess.Popen children,
@@ -451,60 +553,115 @@ def main():
 def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
     """Run persistent worker subprocess on a GPU, respawn on CUDA error.
 
-    No process-level GPU lock — serialization happens inside inductor via
-    INDUCTOR_GPU_BENCH_LOCK (exclusive file lock around do_bench only).
-    Multiple workers per GPU can compile in parallel.
+    No process-level batch GPU lock. Workers serialize timing with
+    INDUCTOR_GPU_BENCH_LOCK, while CPU-only module loading can overlap. With
+    --strict-gpu-lock, workers also serialize CUDA setup/warmup/capture.
     """
+    import collections
     import subprocess
+    import threading
 
     if True:  # was: with gpu_lock(...) — now using inductor-level lock instead
         env = os.environ.copy()
         env["CUDA_VISIBLE_DEVICES"] = gpu["index"]
-        # Enable per-GPU exclusive lock around inductor's do_bench calls.
-        # This lets multiple workers compile in parallel while serializing
-        # only the timing-sensitive benchmarker.benchmark() calls.
+        # Enable the per-GPU exclusive lock used by inductor benchmark calls
+        # and the direct harness CUDA setup/timing sections below.
         env["INDUCTOR_GPU_BENCH_LOCK"] = "1"
         # Share inductor cache across workers to avoid redundant compilation
         if args_dict.get("share_cache", True):
             env["TORCHINDUCTOR_CACHE_DIR"] = _SHARED_CACHE_DIR
 
         proc = None
+        stderr_tail = collections.deque(maxlen=20)
+
+        def _stderr_summary():
+            lines = [line for line in stderr_tail if line]
+            if not lines:
+                return ""
+            return "stderr: " + " | ".join(lines[-3:])[:300]
 
         def _spawn_worker():
-            return subprocess.Popen(
+            nonlocal stderr_tail
+            stderr_tail = collections.deque(maxlen=20)
+            p = subprocess.Popen(
                 [sys.executable, "-u", "-c", _persistent_worker_script(gpu["index"], args_dict)],
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE, text=True,
+                stderr=subprocess.PIPE, text=True, bufsize=1,
                 env=env, cwd=args_dict["root"],
             )
 
-        def _kill_worker(p):
-            if p and p.poll() is None:
-                p.terminate()
-                try:
-                    p.wait(timeout=5)
-                except Exception:
-                    p.kill()
+            def _drain_stderr():
+                if p.stderr is None:
+                    return
+                for stderr_line in p.stderr:
+                    stderr_line = stderr_line.rstrip()
+                    if stderr_line:
+                        stderr_tail.append(stderr_line)
 
-        # Prefetch: grab a batch of repro paths up front so we can send
-        # PREFETCH hints to the worker while it is busy timing the current repro.
+            threading.Thread(
+                target=_drain_stderr,
+                name=f"bench-worker-stderr-gpu-{gpu['index']}",
+                daemon=True,
+            ).start()
+            return p
+
+        def _kill_worker(p):
+            if p is None:
+                return
+            if p.poll() is None:
+                try:
+                    if p.stdin is not None:
+                        p.stdin.write("EXIT\n")
+                        p.stdin.flush()
+                except Exception:
+                    pass
+                try:
+                    p.wait(timeout=2)
+                except Exception:
+                    p.terminate()
+                    try:
+                        p.wait(timeout=5)
+                    except Exception:
+                        p.kill()
+                        try:
+                            p.wait(timeout=5)
+                        except Exception:
+                            pass
+            for stream in (p.stdin, p.stdout, p.stderr):
+                try:
+                    if stream is not None:
+                        stream.close()
+                except Exception:
+                    pass
+
+        # Prefetch: keep at most one next repro local so we can send PREFETCH
+        # hints while the worker is timing the current repro without starving
+        # peer workers at the start of small runs.
         # The worker will pre-import the next module (CPU-bound) while the
         # current do_bench is running (GPU-bound), overlapping the two phases.
         pending_repros = []
 
-        def _grab_next_batch(max_prefetch=2):
+        def _grab_next_batch(max_prefetch=2, reserve_for_peers=0):
             """Pull up to max_prefetch items from the queue into pending_repros."""
             while len(pending_repros) < max_prefetch:
+                if reserve_for_peers and task_queue.qsize() <= reserve_for_peers:
+                    break
                 try:
                     pending_repros.append(task_queue.get_nowait())
                 except Exception:
                     break
 
-        _grab_next_batch()
+        while True:
+            if not pending_repros:
+                _grab_next_batch(max_prefetch=1)
+                if not pending_repros:
+                    break
 
-        while pending_repros:
             repro_path = pending_repros.pop(0)
-            _grab_next_batch()
+            _grab_next_batch(
+                max_prefetch=2,
+                reserve_for_peers=max(0, int(args_dict.get("n_workers", 1)) - 1),
+            )
 
             # Ensure we have a live worker
             if proc is None or proc.poll() is not None:
@@ -528,6 +685,11 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
 
                 if not line:
                     # Worker died
+                    returncode = proc.poll()
+                    error = f"worker exited without a result (returncode={returncode})"
+                    stderr = _stderr_summary()
+                    if stderr:
+                        error = f"{error}; {stderr}"
                     _kill_worker(proc)
                     proc = None
                     result_queue.put({
@@ -535,7 +697,7 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                         "gpu": gpu["index"],
                         "status": "failed",
                         "elapsed": elapsed,
-                        "error": "worker crashed (CUDA error)",
+                        "error": error[:500],
                     })
                     continue
 
@@ -551,6 +713,10 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                     })
                 elif "CUDA_ERROR" in line:
                     # Worker will exit, respawn on next iteration
+                    error = line[:200]
+                    stderr = _stderr_summary()
+                    if stderr:
+                        error = f"{error}; {stderr}"
                     _kill_worker(proc)
                     proc = None
                     result_queue.put({
@@ -558,15 +724,19 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                         "gpu": gpu["index"],
                         "status": "failed",
                         "elapsed": elapsed,
-                        "error": line[:200],
+                        "error": error[:500],
                     })
                 else:
+                    error = line[:200]
+                    stderr = _stderr_summary()
+                    if stderr:
+                        error = f"{error}; {stderr}"
                     result_queue.put({
                         "repro": str(repro_path),
                         "gpu": gpu["index"],
                         "status": "failed",
                         "elapsed": elapsed,
-                        "error": line[:200],
+                        "error": error[:500],
                     })
             except Exception as e:
                 _kill_worker(proc)
@@ -590,7 +760,7 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     GPU-bound timing of the current repro.
     """
     return f'''
-import sys, json, os, traceback, threading
+import builtins, contextlib, fcntl, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
 sys.path.insert(0, "{args_dict["root"]}")
 
@@ -598,7 +768,9 @@ import torch, torch._dynamo
 import torch._inductor.config as inductor_config
 from triton.testing import do_bench
 import importlib.util, math
-from repro_harness import load_shape_configs, make_inputs_from_config
+from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+
+STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 
 # --- Prefetch infrastructure ---
 # Pre-imports the next repro module while the current one is being timed.
@@ -606,6 +778,121 @@ from repro_harness import load_shape_configs, make_inputs_from_config
 # with the GPU-bound do_bench calls of the previous repro.
 _prefetch_cache = {{}}  # path -> (module, instance, configs)
 _prefetch_lock = threading.Lock()
+_GPU_BENCH_LOCK_STATE_NAME = "_torchinductor_gpu_benchmark_lock_state"
+_GPU_BENCH_LOCK_MODES = {{"shared", "exclusive"}}
+
+def _env_flag_enabled(name):
+    return os.environ.get(name, "").strip().lower() in ("1", "true", "yes", "on")
+
+def _safe_lock_component(value):
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", value.strip()) or "unknown"
+
+def _gpu_bench_lock_state():
+    state = getattr(builtins, _GPU_BENCH_LOCK_STATE_NAME, None)
+    if state is None:
+        state = {{
+            "mutex": threading.RLock(),
+            "local": threading.local(),
+        }}
+        setattr(builtins, _GPU_BENCH_LOCK_STATE_NAME, state)
+    return state
+
+def _gpu_bench_flock_op(mode):
+    if mode == "shared":
+        return fcntl.LOCK_SH
+    if mode == "exclusive":
+        return fcntl.LOCK_EX
+    raise ValueError(f"Unsupported GPU benchmark lock mode: {{mode!r}}")
+
+@contextlib.contextmanager
+def gpu_bench_lock(mode="exclusive"):
+    if mode not in _GPU_BENCH_LOCK_MODES:
+        raise ValueError(f"Unsupported GPU benchmark lock mode: {{mode!r}}")
+    if not (
+        _env_flag_enabled("INDUCTOR_GPU_BENCH_LOCK")
+        or _env_flag_enabled("TORCHINDUCTOR_GPU_BENCH_LOCK")
+    ):
+        yield
+        return
+    lock_dir = (
+        os.environ.get("INDUCTOR_GPU_BENCH_LOCK_DIR")
+        or os.environ.get("TORCHINDUCTOR_GPU_BENCH_LOCK_DIR")
+        or os.environ.get("COMPILE_UTILS_GPU_LOCK_DIR")
+        or os.path.join(tempfile.gettempdir(), "compile_utils_gpu_locks")
+    )
+    os.makedirs(lock_dir, exist_ok=True)
+    visible = [d.strip() for d in os.environ.get("CUDA_VISIBLE_DEVICES", "").split(",") if d.strip()]
+    gpu = _safe_lock_component(visible[0] if visible else "0")
+    lock_path = os.path.join(lock_dir, f"gpu_{{gpu}}.lock")
+    state = _gpu_bench_lock_state()
+    mutex = state["mutex"]
+    local = state["local"]
+    depth = getattr(local, "depth", 0)
+    if depth > 0:
+        current_mode = getattr(local, "mode", None)
+        fd = getattr(local, "fd", None)
+        if current_mode == "exclusive" or current_mode == mode:
+            local.depth = depth + 1
+            try:
+                yield
+            finally:
+                local.depth -= 1
+            return
+        if current_mode == "shared" and mode == "exclusive" and fd is not None:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            fcntl.flock(fd, _gpu_bench_flock_op("exclusive"))
+            local.mode = "exclusive"
+            local.depth = depth + 1
+            try:
+                yield
+            finally:
+                local.depth -= 1
+                fcntl.flock(fd, _gpu_bench_flock_op("shared"))
+                local.mode = "shared"
+            return
+        local.depth = depth + 1
+        try:
+            yield
+        finally:
+            local.depth -= 1
+        return
+    with mutex:
+        fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o666)
+        try:
+            fcntl.flock(fd, _gpu_bench_flock_op(mode))
+            try:
+                os.ftruncate(fd, 0)
+                os.write(fd, (
+                    f"pid={{os.getpid()}}\\n"
+                    f"gpu={{gpu}}\\n"
+                    f"mode={{mode}}\\n"
+                    "label=bench_parallel_do_bench\\n"
+                    f"acquired_unix={{time.time():.0f}}\\n"
+                ).encode())
+                os.fsync(fd)
+            except OSError:
+                pass
+            local.depth = 1
+            local.mode = mode
+            local.fd = fd
+            try:
+                yield
+            finally:
+                local.depth = 0
+                local.mode = None
+                local.fd = None
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+
+@contextlib.contextmanager
+def gpu_setup_lock():
+    if STRICT_GPU_LOCK:
+        with gpu_bench_lock("exclusive"):
+            yield
+    else:
+        with gpu_bench_lock("shared"):
+            yield
 
 def _prefetch_module(repro_path):
     """Load a repro module into the cache (called from background thread)."""
@@ -641,19 +928,26 @@ def _get_or_load_module(repro_path):
     return (mod, instance, configs)
 
 def _bench_with_cudagraph(fn, inps, warmup, rep):
-    with torch.no_grad():
-        for _ in range(3):
-            fn(*inps)
-        torch.cuda.synchronize()
-        try:
-            g = torch.cuda.CUDAGraph()
-            with torch.cuda.graph(g):
+    with gpu_setup_lock():
+        with torch.no_grad():
+            for _ in range(3):
                 fn(*inps)
             torch.cuda.synchronize()
-            return do_bench(lambda: g.replay(), warmup=warmup, rep=rep) * 1000
-        except Exception:
-            # Fallback: some ops don't support CUDA graph capture
-            return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep) * 1000
+            try:
+                g = torch.cuda.CUDAGraph()
+                with torch.cuda.graph(g):
+                    fn(*inps)
+                torch.cuda.synchronize()
+                if STRICT_GPU_LOCK:
+                    return do_bench(lambda: g.replay(), warmup=warmup, rep=rep, return_mode="min") * 1000
+                with gpu_bench_lock():
+                    return do_bench(lambda: g.replay(), warmup=warmup, rep=rep, return_mode="min") * 1000
+            except Exception:
+                # Fallback: some ops don't support CUDA graph capture
+                if STRICT_GPU_LOCK:
+                    return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep, return_mode="min") * 1000
+                with gpu_bench_lock():
+                    return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep, return_mode="min") * 1000
 
 def bench_one(repro_path):
     mod, instance, configs = _get_or_load_module(repro_path)
@@ -666,15 +960,18 @@ def bench_one(repro_path):
 
     all_results = {{}}
     for shape_name, shape_config in shape_items:
-        if shape_config is not None:
-            inputs = make_inputs_from_config(shape_config)
-            label = shape_name
-        else:
-            inputs = mod.make_inputs() if hasattr(mod, "make_inputs") else mod._default_make_inputs()
-            label = "default"
+        with gpu_setup_lock():
+            if shape_config is not None:
+                inputs = make_inputs_from_config(shape_config)
+                label = shape_name
+            else:
+                make_inputs_fn = mod.make_inputs if hasattr(mod, "make_inputs") else mod._default_make_inputs
+                inputs = make_inputs_safely(make_inputs_fn)
+                label = "default"
 
-        with torch.no_grad():
-            eager_out = instance(*inputs)
+            with torch.no_grad():
+                eager_out = instance(*inputs)
+            torch.cuda.synchronize()
 
         total_bytes = sum(t.nelement() * t.element_size() for t in inputs if isinstance(t, torch.Tensor))
         if isinstance(eager_out, torch.Tensor):
@@ -685,9 +982,16 @@ def bench_one(repro_path):
                     total_bytes += o.nelement() * o.element_size()
 
         copy_elems = max(total_bytes // 8, 256)
-        src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
-        dst = torch.empty_like(src)
-        sol_us = do_bench(lambda: dst.copy_(src), warmup={args_dict["n_warmup"]}, rep={args_dict["n_rep"]}) * 1000
+        with gpu_bench_lock():
+            src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
+            dst = torch.empty_like(src)
+            sol_us = do_bench(
+                lambda: dst.copy_(src),
+                warmup={args_dict["n_warmup"]},
+                rep={args_dict["n_rep"]},
+                return_mode="min",
+            ) * 1000
+            torch.cuda.synchronize()
         del src, dst
 
         torch._dynamo.reset()
@@ -757,7 +1061,7 @@ mod.inf = math.inf
 mod.nan = math.nan
 spec.loader.exec_module(mod)
 
-from repro_harness import load_shape_configs, make_inputs_from_config
+from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
 
 instance = mod.Repro()
 
@@ -775,7 +1079,8 @@ for shape_name, shape_config in shape_items:
         inputs = make_inputs_from_config(shape_config)
         label = shape_name
     else:
-        inputs = mod.make_inputs() if hasattr(mod, "make_inputs") else mod._default_make_inputs()
+        make_inputs_fn = mod.make_inputs if hasattr(mod, "make_inputs") else mod._default_make_inputs
+        inputs = make_inputs_safely(make_inputs_fn)
         label = "default"
 
     with torch.no_grad():
@@ -792,7 +1097,12 @@ for shape_name, shape_config in shape_items:
     copy_elems = max(total_bytes // 8, 256)
     src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
     dst = torch.empty_like(src)
-    sol_us = do_bench(lambda: dst.copy_(src), warmup={args_dict["n_warmup"]}, rep={args_dict["n_rep"]}) * 1000
+    sol_us = do_bench(
+        lambda: dst.copy_(src),
+        warmup={args_dict["n_warmup"]},
+        rep={args_dict["n_rep"]},
+        return_mode="min",
+    ) * 1000
     del src, dst
 
     def _bench_with_cudagraph(fn, inps, warmup, rep):
@@ -805,9 +1115,9 @@ for shape_name, shape_config in shape_items:
                 with torch.cuda.graph(g):
                     fn(*inps)
                 torch.cuda.synchronize()
-                return do_bench(lambda: g.replay(), warmup=warmup, rep=rep) * 1000
+                return do_bench(lambda: g.replay(), warmup=warmup, rep=rep, return_mode="min") * 1000
             except Exception:
-                return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep) * 1000
+                return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep, return_mode="min") * 1000
 
     torch._dynamo.reset()
     compiled = torch.compile(instance)

@@ -21,16 +21,8 @@ from canonicalize_repros import (
     extract_repro_class,
     generate_canonical_repro,
     parse_make_inputs,
+    _spec_to_T,
 )
-
-_DTYPE_SHORT = {
-    "torch.float32": "f32", "torch.float16": "f16",
-    "torch.bfloat16": "bf16", "torch.float64": "f64",
-    "torch.int64": "i64", "torch.int32": "i32",
-    "torch.int16": "i16", "torch.int8": "i8",
-    "torch.bool": "b8", "torch.uint8": "u8",
-}
-
 
 def _format_compact_config(label: str, input_specs: list[dict]) -> str:
     """Format input specs as compact one-liner: label: (T([...], f32), S([...]), ...)"""
@@ -39,13 +31,7 @@ def _format_compact_config(label: str, input_specs: list[dict]) -> str:
         if spec.get("kind") == "shape":
             parts.append(f"S({spec['dims']})")
         else:
-            shape = spec["shape"]
-            dt = _DTYPE_SHORT.get(spec.get("dtype", ""), spec.get("dtype", "f32"))
-            stride = spec.get("stride")
-            if stride:
-                parts.append(f"T({shape}, {dt}, stride={tuple(stride)})")
-            else:
-                parts.append(f"T({shape}, {dt})")
+            parts.append(_spec_to_T(spec))
     return f"{label}: ({', '.join(parts)})"
 
 
