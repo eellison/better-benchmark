@@ -27,27 +27,27 @@ dm_nfnet_f0 128            vit_base_dinov2 128      vit_base_siglip 128
 - 351/355 pass (4 marked failing: int8 pool offset bounds, Bool dtype)
 - ~7 min wall time (2x B200 parallel)
 
-### [IN PROGRESS] HF (32 models, infer + train)
+### [DONE] HF (32 models, infer + train)
 - Batch sizes from `huggingface_models_list.txt` (4-256 per model)
-- Running on both GPUs in parallel (16 models each)
-- Skipping 7 models needing HF auth/download
+- 1066 regions → ~520 unique patterns (many shared with timm)
+- Skipped 7 models needing HF auth/download
+- ~8 min wall time (2x B200 parallel)
 
-### [PARTIAL] torchbench — via CI tlparse artifacts
-- tlparse artifacts from CI have `inductor_post_grad_graph_*.txt` and `fx_graph_runnable_*.txt`
-- Downloaded 15 graphs from run 26008397786 (shards with cache misses)
-- These are full post-grad graphs (segment_anything, etc.) — can feed to capture_hook.process_graph()
-- Most shards had cache hits (no graph logged). Need a run with `fx_graph_cache=False` for full coverage
-- Path: `gh run download <run_id> --repo pytorch/pytorch --pattern "tlparse-*torchbench*"`
-- Script needed: `scripts/ingest_tlparse.py` to parse post_grad_graph txt → process_graph → merge
+### [DONE] torchbench — via CI tlparse artifacts
+- Ingested from CI runs 25956360525 and 26008397786
+- 55/77 graphs loaded (22 failed: missing custom ops, dtype issues)
+- 522 regions → 203 new unique patterns
+- Script: `scripts/ingest_tlparse.py --run-id <id> --suite torchbench`
+- Can add more coverage by ingesting from additional CI runs
 
 ### [TODO] GenAI / tritonbench
 - Decode patterns, operator-level kernels
 - vLLM configs
 
-### [TODO] Final validation + commit
-- Validate ALL repros runnable (mark failures, don't delete)
-- Commit per-suite (timm, HF, torchbench, genai)
+### [TODO] Final cleanup
+- Fix 29 failing repros (15 Bool dtype, 14 CUDA index bounds)
 - Optimize execution: subprocess pool, GPU lock around timing only
+- Baseline benchmark sweep on the 1073-pattern set
 
 ---
 
