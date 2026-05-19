@@ -303,12 +303,12 @@ def main():
     print(f"  Prefetch: enabled (overlaps module loading with GPU timing)")
     print()
 
-    # Fill task queue
-    task_queue = mp.Queue()
+    # Fill task queue (use regular queue since workers are threads)
+    import queue
+    task_queue = queue.Queue()
     for r in repros:
         task_queue.put(r)
-
-    result_queue = mp.Queue()
+    result_queue = queue.Queue()
     root = str(Path(__file__).resolve().parents[1])
 
     args_dict = {
@@ -320,16 +320,19 @@ def main():
         "share_cache": args.share_cache,
     }
 
-    # Spawn workers — each acquires its own GPU lock
+    # Use threads — the actual GPU work is in subprocess.Popen children,
+    # so GIL isn't a bottleneck (threads just do pipe I/O).
+    import threading
     workers = []
     for i in range(n_workers):
         gpu = gpus[i]
-        p = mp.Process(
+        t = threading.Thread(
             target=_locked_worker,
             args=(gpu, task_queue, result_queue, args_dict),
+            daemon=True,
         )
-        p.start()
-        workers.append(p)
+        t.start()
+        workers.append(t)
 
     # Collect results
     all_results = {}
@@ -464,7 +467,7 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
 
         def _spawn_worker():
             return subprocess.Popen(
-                [sys.executable, "-c", _persistent_worker_script(gpu["index"], args_dict)],
+                [sys.executable, "-u", "-c", _persistent_worker_script(gpu["index"], args_dict)],
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE, text=True,
                 env=env, cwd=args_dict["root"],
@@ -637,11 +640,15 @@ def _bench_with_cudagraph(fn, inps, warmup, rep):
         for _ in range(3):
             fn(*inps)
         torch.cuda.synchronize()
-        g = torch.cuda.CUDAGraph()
-        with torch.cuda.graph(g):
-            fn(*inps)
-        torch.cuda.synchronize()
-    return do_bench(lambda: g.replay(), warmup=warmup, rep=rep) * 1000
+        try:
+            g = torch.cuda.CUDAGraph()
+            with torch.cuda.graph(g):
+                fn(*inps)
+            torch.cuda.synchronize()
+            return do_bench(lambda: g.replay(), warmup=warmup, rep=rep) * 1000
+        except Exception:
+            # Fallback: some ops don't support CUDA graph capture
+            return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep) * 1000
 
 def bench_one(repro_path):
     mod, instance, configs = _get_or_load_module(repro_path)
@@ -788,11 +795,14 @@ for shape_name, shape_config in shape_items:
             for _ in range(3):
                 fn(*inps)
             torch.cuda.synchronize()
-            g = torch.cuda.CUDAGraph()
-            with torch.cuda.graph(g):
-                fn(*inps)
-            torch.cuda.synchronize()
-        return do_bench(lambda: g.replay(), warmup=warmup, rep=rep) * 1000
+            try:
+                g = torch.cuda.CUDAGraph()
+                with torch.cuda.graph(g):
+                    fn(*inps)
+                torch.cuda.synchronize()
+                return do_bench(lambda: g.replay(), warmup=warmup, rep=rep) * 1000
+            except Exception:
+                return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep) * 1000
 
     torch._dynamo.reset()
     compiled = torch.compile(instance)
