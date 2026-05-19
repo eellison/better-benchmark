@@ -32,6 +32,29 @@ _DTYPE_SHORT = {
 }
 
 
+def _read_shapes_config(src_file: Path, config_key: str) -> str | None:
+    """Read _shapes_config from a captured repro file.
+
+    The capture hook writes `_shapes_config = "(T(...), S(...))"` directly
+    in the file — this is the authoritative per-capture shape config.
+    Falls back to exec-based parse_make_inputs if _shapes_config is missing.
+    """
+    if not src_file.exists():
+        return None
+
+    import re
+    content = src_file.read_text()
+    match = re.search(r'^_shapes_config\s*=\s*"(.+)"', content, re.MULTILINE)
+    if match:
+        return f"{config_key}: {match.group(1)}"
+
+    # Fallback for old captures without _shapes_config
+    input_specs = parse_make_inputs(src_file)
+    if input_specs:
+        return _format_compact_config(config_key, input_specs)
+    return None
+
+
 def _format_compact_config(label: str, input_specs: list[dict]) -> str:
     """Format input specs as compact one-liner: label: (T([...], f32), S([...]), ...)"""
     parts = []
@@ -163,9 +186,8 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         existing_lines = shapes_path.read_text().splitlines() if shapes_path.exists() else []
         if not any(line.startswith(f"{config_key}:") for line in existing_lines):
             src_file = Path(entry["file"])
-            input_specs = parse_make_inputs(src_file) if src_file.exists() else []
-            if input_specs:
-                compact_line = _format_compact_config(config_key, input_specs)
+            compact_line = _read_shapes_config(src_file, config_key)
+            if compact_line:
                 with open(shapes_path, "a") as f:
                     f.write(compact_line + "\n")
 

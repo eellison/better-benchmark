@@ -453,12 +453,39 @@ class _CaptureState:
 
         inputs_code = "\n".join(input_lines)
 
+        # Build compact shapes config line (same format as shapes.txt)
+        # This is the authoritative source for merge_captures — no exec/parsing needed.
+        _DTYPE_SHORT = {
+            "torch.float32": "f32", "torch.float16": "f16",
+            "torch.bfloat16": "bf16", "torch.float64": "f64",
+            "torch.int64": "i64", "torch.int32": "i32",
+            "torch.int16": "i16", "torch.int8": "i8",
+            "torch.bool": "b8", "torch.uint8": "u8",
+        }
+        config_parts = []
+        for name in ph_names:
+            if name in shape_params:
+                config_parts.append(f"S({shape_params[name]})")
+            else:
+                info = placeholder_info.get(name)
+                if info and info["dtype"] != "symint":
+                    dt = _DTYPE_SHORT.get(info["dtype"], info["dtype"])
+                    stride = info.get("stride", [])
+                    if stride and info["shape"]:
+                        config_parts.append(f"T({info['shape']}, {dt}, stride={tuple(stride)})")
+                    else:
+                        config_parts.append(f"T({info['shape']}, {dt})")
+                elif info and info.get("dtype") == "symint":
+                    config_parts.append(f"S([{info.get('hint', 1)}])")
+        shapes_config_line = f"({', '.join(config_parts)})"
+
         script = f'''"""
 Standalone repro captured via capture_hook.
 Label: {self.label}
 Pattern hash: {meta.get("pattern_hash", "?")}
 Shape hash: {meta.get("shape_hash", "?")}
 """
+_shapes_config = "{shapes_config_line}"
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
