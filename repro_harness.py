@@ -78,6 +78,8 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
             inputs = eval(expr, _eval_ns)
             if isinstance(inputs, tuple):
                 inputs = list(inputs)
+            elif isinstance(inputs, dict):
+                inputs = [inputs]
             if inputs:
                 configs[label] = {"inputs": inputs}
         except Exception:
