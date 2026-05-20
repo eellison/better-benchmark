@@ -132,6 +132,7 @@ def test_shapes_config_parses():
 # ============================================================
 def test_input_count_matches_forward():
     print("test_input_count_matches_forward...")
+    import ast
     mismatches = []
     for d in sorted(CANONICAL.iterdir()):
         repro = d / "repro.py"
@@ -139,12 +140,23 @@ def test_input_count_matches_forward():
             continue
         content = repro.read_text()
 
-        fwd_match = re.search(r"def forward\(self,([^)]*)\)", content)
         config_match = re.search(r'^_shapes_config\s*=\s*"(.+)"', content, re.MULTILINE)
-        if not fwd_match or not config_match:
+        if not config_match:
             continue
 
-        n_fwd = len([a.strip() for a in fwd_match.group(1).split(",") if a.strip()])
+        # Use ast to properly count forward args (annotations contain commas)
+        try:
+            tree = ast.parse(content)
+        except SyntaxError:
+            continue
+        n_fwd = None
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == "forward":
+                n_fwd = len(node.args.args) - 1  # exclude self
+                break
+        if n_fwd is None:
+            continue
+
         try:
             inputs = parse_shapes_config(config_match.group(1))
             n_inputs = len(inputs)
@@ -153,12 +165,8 @@ def test_input_count_matches_forward():
 
         if n_fwd != n_inputs:
             mismatches.append((d.name, n_fwd, n_inputs))
-    # Known issue: some repros have inductor_seeds/special inputs not captured in _shapes_config
-    # These still RUN because _default_make_inputs falls back correctly, but the count won't match.
-    # Track but don't fail on this (for now).
-    if mismatches:
-        print(f"  WARN: {len(mismatches)} input count mismatches (known: seeds/special inputs)")
-    check("input_count_matches", True, "")
+    check("input_count_matches", len(mismatches) == 0,
+          f"{len(mismatches)} mismatches: {mismatches[:5]}")
 
 
 # ============================================================
