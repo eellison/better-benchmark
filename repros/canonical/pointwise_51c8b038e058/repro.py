@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8, 1000], f16), T([8, 1000], f16), T([768, 1000], f16, stride=(1, 768)), T([768, 1000], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)), T([8, 198, 1], f32), T([3072, 768], f16, stride=(1, 3072)), T([768, 3072], f16, stride=(1, 768)), T([8, 198, 1], f32), T([768, 768], f16, stride=(1, 768)), T([768, 2304], f16, stride=(1, 768)))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_48: "f16[8, 1000]", addmm_49: "f16[8, 1000]", permute_74: "f16[768, 1000]", permute_73: "f16[768, 1000]", rsqrt_24: "f32[8, 198, 1]", permute_72: "f16[3072, 768]", permute_71: "f16[768, 3072]", rsqrt_23: "f32[8, 198, 1]", permute_70: "f16[768, 768]", permute_67: "f16[768, 2304]", rsqrt_22: "f32[8, 198, 1]", permute_66: "f16[3072, 768]", permute_65: "f16[768, 3072]", rsqrt_21: "f32[8, 198, 1]", permute_64: "f16[768, 768]", permute_61: "f16[768, 2304]", rsqrt_20: "f32[8, 198, 1]", permute_60: "f16[3072, 768]", permute_59: "f16[768, 3072]", rsqrt_19: "f32[8, 198, 1]", permute_58: "f16[768, 768]", permute_55: "f16[768, 2304]", rsqrt_18: "f32[8, 198, 1]", permute_54: "f16[3072, 768]", permute_53: "f16[768, 3072]", rsqrt_17: "f32[8, 198, 1]", permute_52: "f16[768, 768]", permute_49: "f16[768, 2304]", rsqrt_16: "f32[8, 198, 1]", permute_48: "f16[3072, 768]", permute_47: "f16[768, 3072]", rsqrt_15: "f32[8, 198, 1]", permute_46: "f16[768, 768]", permute_43: "f16[768, 2304]", rsqrt_14: "f32[8, 198, 1]", permute_42: "f16[3072, 768]", permute_41: "f16[768, 3072]", rsqrt_13: "f32[8, 198, 1]", permute_40: "f16[768, 768]", permute_37: "f16[768, 2304]", rsqrt_12: "f32[8, 198, 1]", permute_36: "f16[3072, 768]", permute_35: "f16[768, 3072]", rsqrt_11: "f32[8, 198, 1]", permute_34: "f16[768, 768]", permute_31: "f16[768, 2304]", rsqrt_10: "f32[8, 198, 1]", permute_30: "f16[3072, 768]", permute_29: "f16[768, 3072]", rsqrt_9: "f32[8, 198, 1]", permute_28: "f16[768, 768]", permute_25: "f16[768, 2304]", rsqrt_8: "f32[8, 198, 1]", permute_24: "f16[3072, 768]", permute_23: "f16[768, 3072]", rsqrt_7: "f32[8, 198, 1]", permute_22: "f16[768, 768]", permute_19: "f16[768, 2304]", rsqrt_6: "f32[8, 198, 1]", permute_18: "f16[3072, 768]", permute_17: "f16[768, 3072]", rsqrt_5: "f32[8, 198, 1]", permute_16: "f16[768, 768]", permute_13: "f16[768, 2304]", rsqrt_4: "f32[8, 198, 1]", permute_12: "f16[3072, 768]", permute_11: "f16[768, 3072]", rsqrt_3: "f32[8, 198, 1]", permute_10: "f16[768, 768]", permute_7: "f16[768, 2304]", rsqrt_2: "f32[8, 198, 1]", permute_6: "f16[3072, 768]", permute_5: "f16[768, 3072]", rsqrt_1: "f32[8, 198, 1]", permute_4: "f16[768, 768]", permute_1: "f16[768, 2304]"):
         # No stacktrace found for following nodes
@@ -98,84 +100,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8, 1000], dtype=torch.float16, device='cuda'),
-    torch.randn([8, 1000], dtype=torch.float16, device='cuda'),
-    torch.randn(768000, dtype=torch.float16, device='cuda').as_strided([768, 1000], [1, 768]),  # permute_74
-    torch.randn(768000, dtype=torch.float16, device='cuda').as_strided([768, 1000], [1, 768]),  # permute_73
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_72
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_71
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_70
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_67
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_66
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_65
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_64
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_61
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_60
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_59
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_58
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_55
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_54
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_53
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_52
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_49
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_48
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_47
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_46
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_43
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_42
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_41
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_40
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_37
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_36
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_35
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_34
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_31
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_30
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_29
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_28
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_25
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_24
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_23
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_22
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_19
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_18
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_17
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_16
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_13
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_12
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_11
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_10
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_7
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([3072, 768], [1, 3072]),  # permute_6
-    torch.randn(2359296, dtype=torch.float16, device='cuda').as_strided([768, 3072], [1, 768]),  # permute_5
-    torch.randn([8, 198, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(589824, dtype=torch.float16, device='cuda').as_strided([768, 768], [1, 768]),  # permute_4
-    torch.randn(1769472, dtype=torch.float16, device='cuda').as_strided([768, 2304], [1, 768]),  # permute_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

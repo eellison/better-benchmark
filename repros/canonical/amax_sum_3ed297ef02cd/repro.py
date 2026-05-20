@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([32768, 256], bf16))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "bf16[32768, 256]"):
         # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:217 in sm_fwd, code: return F.softmax(x, dim=-1)
@@ -29,9 +31,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([32768, 256], dtype=torch.bfloat16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

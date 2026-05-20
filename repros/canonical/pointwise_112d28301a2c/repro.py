@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([16384, 50257], f32), T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([768, 2304], f32), S([32, 512, 768]), S([32, 512, 768]), S([32, 512, 768]), S([16384, 2304]))"
+
 class Repro(torch.nn.Module):
     def forward(self, view_76: "f32[16384, 50257]", getitem_88: "f32[32, 12, 512, 64]", getitem_90: "f32[32, 12, 512, 64]", getitem_89: "f32[32, 12, 512, 64]", primals_7: "f32[768, 2304]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:706 in forward, code: logits = self.lm_head(hidden_states[:, slice_indices, :])
@@ -45,17 +47,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([16384, 50257], dtype=torch.float32, device='cuda'),
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_88
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_90
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_89
-    torch.randn([768, 2304], dtype=torch.float32, device='cuda'),
-    [32, 512, 768],  # _shape_param_0
-    [32, 512, 768],  # _shape_param_1
-    [32, 512, 768],  # _shape_param_2
-    [16384, 2304],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([1024, 3072], bf16), T([512, 1024], bf16), T([16, 64], bf16), T([16, 64], bf16), T([512, 1024], bf16), T([512, 1, 1024], bf16), S([1024, 1, 1, 16, 64]), S([1024, 1, 16, 64]), S([16, 64, 1024]), S([512, 1, 1, 16, 64]), S([512, 1, 16, 64]), S([16, 512, 64]), S([16, 512, 64]), S([512, 1, 1, 16, 64]), S([512, 1, 16, 64]), S([16, 64, 512]), S([1, 512, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_3: "bf16[1024, 3072]", mm_64: "bf16[512, 1024]", _param_constant113: "bf16[16, 64]", _param_constant114: "bf16[16, 64]", mm_65: "bf16[512, 1024]", convert_element_type_114: "bf16[512, 1, 1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10):
         # No stacktrace found for following nodes
@@ -62,25 +64,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([1024, 3072], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([512, 1024], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([16, 64], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([16, 64], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([512, 1024], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([512, 1, 1024], dtype=torch.bfloat16, device='cuda'),
-    [1024, 1, 1, 16, 64],  # _shape_param_0
-    [1024, 1, 16, 64],  # _shape_param_1
-    [16, 64, 1024],  # _shape_param_2
-    [512, 1, 1, 16, 64],  # _shape_param_3
-    [512, 1, 16, 64],  # _shape_param_4
-    [16, 512, 64],  # _shape_param_5
-    [16, 512, 64],  # _shape_param_6
-    [512, 1, 1, 16, 64],  # _shape_param_7
-    [512, 1, 16, 64],  # _shape_param_8
-    [16, 64, 512],  # _shape_param_9
-    [1, 512, 1024],  # _shape_param_10
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

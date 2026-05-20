@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([512, 480, 1, 1], f32), T([512, 480, 14, 14], f32, stride=(94080, 1, 6720, 480)), T([512, 480, 1, 1], f32), T([512, 480, 14, 14], f32, stride=(94080, 1, 6720, 480)), T([], f32), T([1, 480, 1, 1], f32), T([512, 480, 14, 14], f32, stride=(94080, 1, 6720, 480)), T([1, 480, 1, 1], f32), T([480], f32), S([512, 480, 14, 14]))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_39: "f32[512, 480, 1, 1]", getitem_158: "f32[512, 480, 14, 14]", getitem_164: "f32[512, 480, 1, 1]", add_179: "f32[512, 480, 14, 14]", full_default: "f32[]", getitem_63: "f32[1, 480, 1, 1]", convolution_37: "f32[512, 480, 14, 14]", rsqrt_31: "f32[1, 480, 1, 1]", primals_204: "f32[480]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:83 in forward, code: return x * self.gate(x_se)
@@ -70,18 +72,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([512, 480, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(48168960, dtype=torch.float32, device='cuda').as_strided([512, 480, 14, 14], [94080, 1, 6720, 480]),  # getitem_158
-    torch.randn([512, 480, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(48168960, dtype=torch.float32, device='cuda').as_strided([512, 480, 14, 14], [94080, 1, 6720, 480]),  # add_179
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 480, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(48168960, dtype=torch.float32, device='cuda').as_strided([512, 480, 14, 14], [94080, 1, 6720, 480]),  # convolution_37
-    torch.randn([1, 480, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([480], dtype=torch.float32, device='cuda'),
-    [512, 480, 14, 14],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

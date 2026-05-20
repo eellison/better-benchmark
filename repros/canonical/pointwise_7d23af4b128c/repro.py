@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([4096, 1024], f32), T([3], i64, max=3), T([32, 128, 1024], f32), T([512, 128, 128], f32), T([512, 128, 64], f32), T([512, 128, 64], f32), T([512, 64, 128], f32, stride=(8192, 1, 64)), S([32, 128, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_5: "f32[4096, 1024]", inductor_seeds_default: "i64[3]", add_3: "f32[32, 128, 1024]", mul_4: "f32[512, 128, 128]", view_11: "f32[512, 128, 64]", view_9: "f32[512, 128, 64]", permute_6: "f32[512, 64, 128]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xglm/modeling_xglm.py:334 in forward, code: hidden_states = self.fc2(hidden_states)
@@ -41,16 +43,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([4096, 1024], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 3, [3], dtype=torch.int64, device='cuda'),
-    torch.randn([32, 128, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn(4194304, dtype=torch.float32, device='cuda').as_strided([512, 64, 128], [8192, 1, 64]),  # permute_6
-    [32, 128, 1024],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

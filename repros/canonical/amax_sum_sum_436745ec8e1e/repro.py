@@ -1,28 +1,18 @@
 """
-Standalone reduction kernel repro.
-Extracted from inductor compilation.
-
-Reduction info:
-#   type=amax, ranges=['2048', '1'], reduction_ranges=[]
-#   origins: ['aten.amax.default']
-#   type=sum, ranges=['2048', '1'], reduction_ranges=[]
-#   origins: ['aten.sum.dim_IntList']
-#   type=sum, ranges=[], reduction_ranges=[]
-#   origins: ['aten.sum.default']
-#   type=sum, ranges=[], reduction_ranges=[]
-#   origins: ['aten.sum.default']
+Standalone repro captured via capture_hook.
 """
 import sys
 from pathlib import Path
 
-import glob
-import os
 import torch
-from math import inf
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_shapes_config = "(T([4, 512], i64, max=100), T([2048, 50272], f16))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg2_1: "i64[4, 512]", mm: "f16[2048, 50272]"):
@@ -73,10 +63,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 100, [4, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([2048, 50272], dtype=torch.float16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

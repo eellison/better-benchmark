@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([384, 512, 512], f32), T([16384, 768], f32), S([32, 12, 512, 512]), S([32, -1, 512, 512]), S([32, 12, 512, 512]), S([384, 512, 512]), S([32, 512, 768]), S([32, 512, -1, 64]), S([32, 12, 512, 64]), S([384, 512, 64]))"
+
 class Repro(torch.nn.Module):
     def forward(self, bmm: "f32[384, 512, 512]", addmm_2: "f32[16384, 768]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
@@ -67,18 +69,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([384, 512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    [32, 12, 512, 512],  # _shape_param_0
-    [32, -1, 512, 512],  # _shape_param_1
-    [32, 12, 512, 512],  # _shape_param_2
-    [384, 512, 512],  # _shape_param_3
-    [32, 512, 768],  # _shape_param_4
-    [32, 512, -1, 64],  # _shape_param_5
-    [32, 12, 512, 64],  # _shape_param_6
-    [384, 512, 64],  # _shape_param_7
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

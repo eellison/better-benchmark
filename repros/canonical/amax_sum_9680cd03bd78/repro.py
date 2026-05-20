@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8, 1024], b8), T([288, 512, 512], f32), T([8, 1024], f32), T([8192, 768], f32), T([768], f32), S([96, 3, 512, 1, 512]), S([96, 3, 512, 512]), S([96, 3, 512, 513]), S([8, 12, 1024, 513]), S([8, 12, 1024, 513]), S([8, 256, 12, 257]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 12, 1024, 513]), S([8, 12, 1024, 513]), S([8, 256, 12, 257]), S([8, 12, 1024, 513]), S([8, 1024, 1]), S([8, 2, 512, 1]), S([8, 1024, 1]), S([8, 2, 512, 1]), S([8, 3, 512, 512]), S([8, 3, 512, 513]), S([8, 1, 1024, 513]), S([8, 1, 1024, 513]), S([8, 256, 1, 257]), S([8, 1, 1024, 513]), S([8, 4, 256, 513]), S([8, 1, 1024, 513]), S([8, 1, 1024, 513]), S([8, 256, 1, 257]), S([8, 1, 1024, 513]), S([96, 4, 256, 513]), S([96, 4, -1]), S([96, 4, 256, 769]), S([384, 256, 768]), S([1024, 8, 768]), S([1024, 8, 12, 64]), S([96, 1024, 64]), S([384, 768, 64]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg8_1: "b8[8, 1024]", bmm_22: "f32[288, 512, 512]", arg7_1: "f32[8, 1024]", mm_46: "f32[8192, 768]", arg184_1: "f32[768]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15, _shape_param_16, _shape_param_17, _shape_param_18, _shape_param_19, _shape_param_20, _shape_param_21, _shape_param_22, _shape_param_23, _shape_param_24, _shape_param_25, _shape_param_26, _shape_param_27, _shape_param_28, _shape_param_29, _shape_param_30, _shape_param_31, _shape_param_32, _shape_param_33, _shape_param_34):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:578 in forward, code: attn_probs = torch.masked_fill(attn_probs, is_index_masked[:, :, None, None], 0.0)
@@ -430,48 +432,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 2, [8, 1024], dtype=torch.bool, device='cuda'),
-    torch.randn([288, 512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([8, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([8192, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    [96, 3, 512, 1, 512],  # _shape_param_0
-    [96, 3, 512, 512],  # _shape_param_1
-    [96, 3, 512, 513],  # _shape_param_2
-    [8, 12, 1024, 513],  # _shape_param_3
-    [8, 12, 1024, 513],  # _shape_param_4
-    [8, 256, 12, 257],  # _shape_param_5
-    [8, 12, 1024, 513],  # _shape_param_6
-    [96, 4, 256, 513],  # _shape_param_7
-    [8, 12, 1024, 513],  # _shape_param_8
-    [8, 12, 1024, 513],  # _shape_param_9
-    [8, 256, 12, 257],  # _shape_param_10
-    [8, 12, 1024, 513],  # _shape_param_11
-    [8, 1024, 1],  # _shape_param_12
-    [8, 2, 512, 1],  # _shape_param_13
-    [8, 1024, 1],  # _shape_param_14
-    [8, 2, 512, 1],  # _shape_param_15
-    [8, 3, 512, 512],  # _shape_param_16
-    [8, 3, 512, 513],  # _shape_param_17
-    [8, 1, 1024, 513],  # _shape_param_18
-    [8, 1, 1024, 513],  # _shape_param_19
-    [8, 256, 1, 257],  # _shape_param_20
-    [8, 1, 1024, 513],  # _shape_param_21
-    [8, 4, 256, 513],  # _shape_param_22
-    [8, 1, 1024, 513],  # _shape_param_23
-    [8, 1, 1024, 513],  # _shape_param_24
-    [8, 256, 1, 257],  # _shape_param_25
-    [8, 1, 1024, 513],  # _shape_param_26
-    [96, 4, 256, 513],  # _shape_param_27
-    [96, 4, -1],  # _shape_param_28
-    [96, 4, 256, 769],  # _shape_param_29
-    [384, 256, 768],  # _shape_param_30
-    [1024, 8, 768],  # _shape_param_31
-    [1024, 8, 12, 64],  # _shape_param_32
-    [96, 1024, 64],  # _shape_param_33
-    [384, 768, 64],  # _shape_param_34
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -1,22 +1,18 @@
 """
-Standalone reduction kernel repro.
-Extracted from inductor compilation.
-
-Reduction info:
-#   type=sum, ranges=['4', '512', '1'], reduction_ranges=[]
-#   origins: ['aten.sum.dim_IntList']
+Standalone repro captured via capture_hook.
 """
 import sys
 from pathlib import Path
 
-import glob
-import os
 import torch
-from math import inf
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_shapes_config = "(T([16384, 1], b8), T([], bf16), T([16384, 2048], bf16), T([16384], i64, max=100), T([2048, 2048], bf16), T([2048], bf16), T([4, 512, 2048], bf16), T([4, 512, 1], f32), T([4, 512, 2048], bf16), T([2048, 4096], bf16))"
 
 class Repro(torch.nn.Module):
     def forward(self, unsqueeze_36: "b8[16384, 1]", full_default_2: "bf16[]", _grouped_mm_11: "bf16[16384, 2048]", div_14: "i64[16384]", mm_24: "bf16[2048, 2048]", primals_44: "bf16[2048]", add_35: "bf16[4, 512, 2048]", rsqrt_15: "f32[4, 512, 1]", convert_element_type_107: "bf16[4, 512, 2048]", primals_43: "bf16[2048, 4096]"):
@@ -70,18 +66,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 2, [16384, 1], dtype=torch.bool, device="cuda"),
-    torch.randn([], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([16384, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randint(0, 100, [16384], dtype=torch.int64, device='cuda'),
-    torch.randn([2048, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([4, 512, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([4, 512, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([4, 512, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([2048, 4096], dtype=torch.bfloat16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([512, 72, 1, 1], f32), T([512, 72, 28, 28], f32, stride=(56448, 1, 2016, 72)), T([512, 72, 1, 1], f32), T([512, 72, 28, 28], f32, stride=(56448, 1, 2016, 72)), T([], f32), T([1, 72, 1, 1], f32), T([512, 72, 28, 28], f32, stride=(56448, 1, 2016, 72)), T([1, 72, 1, 1], f32), T([72], f32), S([512, 72, 28, 28]))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_12: "f32[512, 72, 1, 1]", getitem_239: "f32[512, 72, 28, 28]", getitem_245: "f32[512, 72, 1, 1]", relu_6: "f32[512, 72, 28, 28]", full_default: "f32[]", getitem_21: "f32[1, 72, 1, 1]", convolution_10: "f32[512, 72, 28, 28]", rsqrt_10: "f32[1, 72, 1, 1]", primals_66: "f32[72]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:83 in forward, code: return x * self.gate(x_se)
@@ -65,18 +67,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([512, 72, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(28901376, dtype=torch.float32, device='cuda').as_strided([512, 72, 28, 28], [56448, 1, 2016, 72]),  # getitem_239
-    torch.randn([512, 72, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(28901376, dtype=torch.float32, device='cuda').as_strided([512, 72, 28, 28], [56448, 1, 2016, 72]),  # relu_6
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 72, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(28901376, dtype=torch.float32, device='cuda').as_strided([512, 72, 28, 28], [56448, 1, 2016, 72]),  # convolution_10
-    torch.randn([1, 72, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([72], dtype=torch.float32, device='cuda'),
-    [512, 72, 28, 28],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

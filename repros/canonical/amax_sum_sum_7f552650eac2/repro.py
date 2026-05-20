@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([16, 512], i64, max=512), T([8192, 32000], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), T([512, 16, 1024], f32), S([16, 512, 32000]), S([-1, 32000]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg363_1: "i64[16, 512]", addmm_48: "f32[8192, 32000]", embedding: "f32[512, 16, 1024]", add_10: "f32[512, 16, 1024]", add_21: "f32[512, 16, 1024]", add_32: "f32[512, 16, 1024]", add_43: "f32[512, 16, 1024]", add_54: "f32[512, 16, 1024]", add_65: "f32[512, 16, 1024]", add_76: "f32[512, 16, 1024]", add_87: "f32[512, 16, 1024]", add_98: "f32[512, 16, 1024]", add_109: "f32[512, 16, 1024]", add_120: "f32[512, 16, 1024]", add_131: "f32[512, 16, 1024]", add_142: "f32[512, 16, 1024]", add_153: "f32[512, 16, 1024]", add_164: "f32[512, 16, 1024]", add_175: "f32[512, 16, 1024]", add_186: "f32[512, 16, 1024]", add_197: "f32[512, 16, 1024]", add_208: "f32[512, 16, 1024]", add_219: "f32[512, 16, 1024]", add_230: "f32[512, 16, 1024]", add_241: "f32[512, 16, 1024]", add_252: "f32[512, 16, 1024]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:1432 in forward, code: loss = loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
@@ -76,36 +78,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 512, [16, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([8192, 32000], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    [16, 512, 32000],  # _shape_param_0
-    [-1, 32000],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

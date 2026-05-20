@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 384, 7, 7], f32, stride=(18816, 1, 2688, 384)), T([1536, 384, 1, 1], f32), T([1536, 1, 1, 1], f32), S([1, 1536, -1]), S([1536, 384, 1, 1]))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_76: "f32[128, 384, 7, 7]", primals_211: "f32[1536, 384, 1, 1]", primals_212: "f32[1536, 1, 1, 1]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:274 in forward, code: out = self.conv3(self.act3(out))
@@ -47,13 +49,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(2408448, dtype=torch.float32, device='cuda').as_strided([128, 384, 7, 7], [18816, 1, 2688, 384]),  # convolution_76
-    torch.randn([1536, 384, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1536, 1, 1, 1], dtype=torch.float32, device='cuda'),
-    [1, 1536, -1],  # _shape_param_0
-    [1536, 384, 1, 1],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

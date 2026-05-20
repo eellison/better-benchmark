@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([29056, 1024], f32), T([16, 512], i64, max=29056), T([2, 1024], f32), T([512, 1024], f32), T([1, 512], i64, max=512), T([1024], f32), T([1024], f32), T([1024, 1024], f32), T([1024, 1024], f32), T([1024, 1024], f32), S([8192, 1024]), S([8192, 1024]), S([8192, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg2_1: "f32[29056, 1024]", arg1_1: "i64[16, 512]", arg4_1: "f32[2, 1024]", arg5_1: "f32[512, 1024]", arg3_1: "i64[1, 512]", arg6_1: "f32[1024]", arg7_1: "f32[1024]", arg8_1: "f32[1024, 1024]", arg10_1: "f32[1024, 1024]", arg12_1: "f32[1024, 1024]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/megatron_bert/modeling_megatron_bert.py:89 in forward, code: inputs_embeds = self.word_embeddings(input_ids)
@@ -61,21 +63,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([29056, 1024], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 29056, [16, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([2, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 1024], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 512, [1, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 1024], dtype=torch.float32, device='cuda'),
-    [8192, 1024],  # _shape_param_0
-    [8192, 1024],  # _shape_param_1
-    [8192, 1024],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

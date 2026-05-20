@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([16, 512], i64, max=512), T([8192, 29056], f32), S([16, 512, 29056]), S([-1, 29056]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "i64[16, 512]", addmm_145: "f32[8192, 29056]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/megatron_bert/modeling_megatron_bert.py:626 in forward, code: attention_mask = torch.ones(((batch_size, seq_length + past_key_values_length)), device=device)
@@ -72,12 +74,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 512, [16, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([8192, 29056], dtype=torch.float32, device='cuda'),
-    [16, 512, 29056],  # _shape_param_0
-    [-1, 29056],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

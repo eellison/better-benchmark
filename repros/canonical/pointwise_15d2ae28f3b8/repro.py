@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 32000], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 64, 1024], f32), T([256, 512, 64], f32), T([256, 64, 1024], f32), T([256, 512, 64], f32), T([256, 64, 512], f32), T([256, 512, 64], f32), T([1024, 16, 64], f32), T([1024, 16, 64], f32), T([1024, 16, 64], f32), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 64, 1024, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([16, 16, 512, 64, 1]), S([16, 16, 64, 1024, 1]), S([16, 16, 512, 64, 1]), S([16, 16, 64, 512, 1]), S([16, 16, 512, 64, 1]), S([1024, 16, 16, 64, 1]), S([1, 16384, 1024]), S([512, 16, 16, 64, 1]), S([1, 8192, 1024]), S([1, 1024, 1024]), S([512, 16, 16, 64, 1]), S([1, 8192, 1024]), S([1, 1024, 1024]), S([512, 16, 16, 64, 1]), S([1, 8192, 1024]), S([1, 1024, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, view_917: "f32[8192, 32000]", bmm_196: "f32[256, 64, 1024]", bmm_211: "f32[256, 64, 1024]", bmm_226: "f32[256, 64, 1024]", bmm_241: "f32[256, 64, 1024]", bmm_256: "f32[256, 64, 1024]", bmm_271: "f32[256, 64, 1024]", bmm_286: "f32[256, 64, 1024]", bmm_301: "f32[256, 64, 1024]", bmm_316: "f32[256, 64, 1024]", bmm_331: "f32[256, 64, 1024]", bmm_346: "f32[256, 64, 1024]", bmm_361: "f32[256, 64, 1024]", bmm_376: "f32[256, 64, 1024]", bmm_391: "f32[256, 64, 1024]", bmm_406: "f32[256, 64, 1024]", bmm_421: "f32[256, 64, 1024]", bmm_436: "f32[256, 64, 1024]", bmm_451: "f32[256, 64, 1024]", bmm_466: "f32[256, 64, 1024]", bmm_481: "f32[256, 64, 1024]", bmm_496: "f32[256, 64, 1024]", bmm_511: "f32[256, 64, 1024]", bmm_526: "f32[256, 64, 1024]", bmm_539: "f32[256, 512, 64]", bmm_541: "f32[256, 64, 1024]", bmm_542: "f32[256, 512, 64]", bmm_543: "f32[256, 64, 512]", bmm_544: "f32[256, 512, 64]", primals_5: "f32[1024, 16, 64]", primals_4: "f32[1024, 16, 64]", primals_3: "f32[1024, 16, 64]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15, _shape_param_16, _shape_param_17, _shape_param_18, _shape_param_19, _shape_param_20, _shape_param_21, _shape_param_22, _shape_param_23, _shape_param_24, _shape_param_25, _shape_param_26, _shape_param_27, _shape_param_28, _shape_param_29, _shape_param_30, _shape_param_31, _shape_param_32, _shape_param_33, _shape_param_34, _shape_param_35, _shape_param_36, _shape_param_37, _shape_param_38, _shape_param_39, _shape_param_40, _shape_param_41, _shape_param_42, _shape_param_43, _shape_param_44, _shape_param_45, _shape_param_46, _shape_param_47, _shape_param_48, _shape_param_49, _shape_param_50, _shape_param_51, _shape_param_52, _shape_param_53, _shape_param_54, _shape_param_55, _shape_param_56, _shape_param_57, _shape_param_58, _shape_param_59, _shape_param_60, _shape_param_61, _shape_param_62, _shape_param_63, _shape_param_64, _shape_param_65, _shape_param_66, _shape_param_67, _shape_param_68, _shape_param_69, _shape_param_70, _shape_param_71, _shape_param_72, _shape_param_73, _shape_param_74, _shape_param_75, _shape_param_76, _shape_param_77, _shape_param_78, _shape_param_79, _shape_param_80, _shape_param_81, _shape_param_82, _shape_param_83, _shape_param_84):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:1426 in forward, code: logits = self.lm_loss(hidden_states[:, slice_indices, :])
@@ -392,125 +394,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 32000], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 512, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 512, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 64, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 512, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 16, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 16, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 16, 64], dtype=torch.float32, device='cuda'),
-    [16, 16, 64, 1024, 1],  # _shape_param_0
-    [1024, 16, 16, 64, 1],  # _shape_param_1
-    [1, 16384, 1024],  # _shape_param_2
-    [16, 16, 64, 1024, 1],  # _shape_param_3
-    [1024, 16, 16, 64, 1],  # _shape_param_4
-    [1, 16384, 1024],  # _shape_param_5
-    [16, 16, 64, 1024, 1],  # _shape_param_6
-    [1024, 16, 16, 64, 1],  # _shape_param_7
-    [1, 16384, 1024],  # _shape_param_8
-    [16, 16, 64, 1024, 1],  # _shape_param_9
-    [1024, 16, 16, 64, 1],  # _shape_param_10
-    [1, 16384, 1024],  # _shape_param_11
-    [16, 16, 64, 1024, 1],  # _shape_param_12
-    [1024, 16, 16, 64, 1],  # _shape_param_13
-    [1, 16384, 1024],  # _shape_param_14
-    [16, 16, 64, 1024, 1],  # _shape_param_15
-    [1024, 16, 16, 64, 1],  # _shape_param_16
-    [1, 16384, 1024],  # _shape_param_17
-    [16, 16, 64, 1024, 1],  # _shape_param_18
-    [1024, 16, 16, 64, 1],  # _shape_param_19
-    [1, 16384, 1024],  # _shape_param_20
-    [16, 16, 64, 1024, 1],  # _shape_param_21
-    [1024, 16, 16, 64, 1],  # _shape_param_22
-    [1, 16384, 1024],  # _shape_param_23
-    [16, 16, 64, 1024, 1],  # _shape_param_24
-    [1024, 16, 16, 64, 1],  # _shape_param_25
-    [1, 16384, 1024],  # _shape_param_26
-    [16, 16, 64, 1024, 1],  # _shape_param_27
-    [1024, 16, 16, 64, 1],  # _shape_param_28
-    [1, 16384, 1024],  # _shape_param_29
-    [16, 16, 64, 1024, 1],  # _shape_param_30
-    [1024, 16, 16, 64, 1],  # _shape_param_31
-    [1, 16384, 1024],  # _shape_param_32
-    [16, 16, 64, 1024, 1],  # _shape_param_33
-    [1024, 16, 16, 64, 1],  # _shape_param_34
-    [1, 16384, 1024],  # _shape_param_35
-    [16, 16, 64, 1024, 1],  # _shape_param_36
-    [1024, 16, 16, 64, 1],  # _shape_param_37
-    [1, 16384, 1024],  # _shape_param_38
-    [16, 16, 64, 1024, 1],  # _shape_param_39
-    [1024, 16, 16, 64, 1],  # _shape_param_40
-    [1, 16384, 1024],  # _shape_param_41
-    [16, 16, 64, 1024, 1],  # _shape_param_42
-    [1024, 16, 16, 64, 1],  # _shape_param_43
-    [1, 16384, 1024],  # _shape_param_44
-    [16, 16, 64, 1024, 1],  # _shape_param_45
-    [1024, 16, 16, 64, 1],  # _shape_param_46
-    [1, 16384, 1024],  # _shape_param_47
-    [16, 16, 64, 1024, 1],  # _shape_param_48
-    [1024, 16, 16, 64, 1],  # _shape_param_49
-    [1, 16384, 1024],  # _shape_param_50
-    [16, 16, 64, 1024, 1],  # _shape_param_51
-    [1024, 16, 16, 64, 1],  # _shape_param_52
-    [1, 16384, 1024],  # _shape_param_53
-    [16, 16, 64, 1024, 1],  # _shape_param_54
-    [1024, 16, 16, 64, 1],  # _shape_param_55
-    [1, 16384, 1024],  # _shape_param_56
-    [16, 16, 64, 1024, 1],  # _shape_param_57
-    [1024, 16, 16, 64, 1],  # _shape_param_58
-    [1, 16384, 1024],  # _shape_param_59
-    [16, 16, 64, 1024, 1],  # _shape_param_60
-    [1024, 16, 16, 64, 1],  # _shape_param_61
-    [1, 16384, 1024],  # _shape_param_62
-    [16, 16, 64, 1024, 1],  # _shape_param_63
-    [1024, 16, 16, 64, 1],  # _shape_param_64
-    [1, 16384, 1024],  # _shape_param_65
-    [16, 16, 64, 1024, 1],  # _shape_param_66
-    [1024, 16, 16, 64, 1],  # _shape_param_67
-    [1, 16384, 1024],  # _shape_param_68
-    [16, 16, 512, 64, 1],  # _shape_param_69
-    [16, 16, 64, 1024, 1],  # _shape_param_70
-    [16, 16, 512, 64, 1],  # _shape_param_71
-    [16, 16, 64, 512, 1],  # _shape_param_72
-    [16, 16, 512, 64, 1],  # _shape_param_73
-    [1024, 16, 16, 64, 1],  # _shape_param_74
-    [1, 16384, 1024],  # _shape_param_75
-    [512, 16, 16, 64, 1],  # _shape_param_76
-    [1, 8192, 1024],  # _shape_param_77
-    [1, 1024, 1024],  # _shape_param_78
-    [512, 16, 16, 64, 1],  # _shape_param_79
-    [1, 8192, 1024],  # _shape_param_80
-    [1, 1024, 1024],  # _shape_param_81
-    [512, 16, 16, 64, 1],  # _shape_param_82
-    [1, 8192, 1024],  # _shape_param_83
-    [1, 1024, 1024],  # _shape_param_84
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([32768, 768], f32), T([30522], f32), T([768], f32), T([768], f32), T([30522, 768], f32), S([256, 128, 768]), S([32768, 768]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_36: "f32[32768, 768]", arg106_1: "f32[30522]", arg104_1: "f32[768]", arg105_1: "f32[768]", arg1_1: "f32[30522, 768]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:514 in forward, code: prediction_logits = self.vocab_transform(hidden_states)  # (bs, seq_length, dim)
@@ -52,15 +54,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([32768, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([30522], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([30522, 768], dtype=torch.float32, device='cuda'),
-    [256, 128, 768],  # _shape_param_0
-    [32768, 768],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

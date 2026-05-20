@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([1, 512], i64, max=512), T([32768, 512], f32), T([512, 512], f32), T([2, 512], f32), T([512], f32), T([512], f32), T([128, 512], f32), S([256, 128, 512]), S([32768, 512]))"
+
 class Repro(torch.nn.Module):
     def forward(self, primals_2: "i64[1, 512]", addmm: "f32[32768, 512]", primals_6: "f32[512, 512]", primals_7: "f32[2, 512]", primals_8: "f32[512]", primals_9: "f32[512]", primals_14: "f32[128, 512]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:108 in forward, code: position_ids = self.position_ids[:, :seq_length]
@@ -47,17 +49,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 512, [1, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([32768, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([2, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 512], dtype=torch.float32, device='cuda'),
-    [256, 128, 512],  # _shape_param_0
-    [32768, 512],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

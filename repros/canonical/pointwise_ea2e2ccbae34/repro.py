@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 384, 28, 28], f32, stride=(301056, 1, 10752, 384)), T([128, 384, 28, 28], f32, stride=(301056, 1, 10752, 384)))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_2: "f32[128, 384, 28, 28]", getitem_239: "f32[128, 384, 28, 28]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:68 in forward, code: x = self.act1(x)
@@ -33,10 +35,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(38535168, dtype=torch.float32, device='cuda').as_strided([128, 384, 28, 28], [301056, 1, 10752, 384]),  # convolution_2
-    torch.randn(38535168, dtype=torch.float32, device='cuda').as_strided([128, 384, 28, 28], [301056, 1, 10752, 384]),  # getitem_239
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

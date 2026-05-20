@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 12, 1, 64], f32), T([768, 768], f32), T([32768, 768], f32), T([768], f32), T([128, 768, 16, 16], f32, stride=(196608, 1, 12288, 768)), T([1, 256, 768], f32), T([128, 256, 1], f32), T([128, 256, 1], f32), T([128, 256, 768], f32), S([128, 1, 768]), S([128, 768]), S([128, 256, 768]), S([128, 768, 256]), S([128, 768, 16, 16]))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_142: "f32[128, 12, 1, 64]", primals_152: "f32[768, 768]", mm_105: "f32[32768, 768]", primals_5: "f32[768]", convolution: "f32[128, 768, 16, 16]", primals_4: "f32[1, 256, 768]", getitem_1: "f32[128, 256, 1]", rsqrt: "f32[128, 256, 1]", add_141: "f32[128, 256, 768]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/attention_pool.py:102 in forward, code: q = self.q(q_latent).reshape(B, self.latent_len, self.num_heads, self.head_dim).transpose(1, 2)
@@ -58,22 +60,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([128, 12, 1, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32768, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn(25165824, dtype=torch.float32, device='cuda').as_strided([128, 768, 16, 16], [196608, 1, 12288, 768]),  # convolution
-    torch.randn([1, 256, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 256, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 256, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 256, 768], dtype=torch.float32, device='cuda'),
-    [128, 1, 768],  # _shape_param_0
-    [128, 768],  # _shape_param_1
-    [128, 256, 768],  # _shape_param_2
-    [128, 768, 256],  # _shape_param_3
-    [128, 768, 16, 16],  # _shape_param_4
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

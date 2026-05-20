@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([32768, 30524], f32), T([256, 128], i64, max=256), T([], f32), T([256, 128, 1], f32), T([256, 128, 1], f32), T([3072, 128, 128], f32), T([3072, 128, 64], f32), T([3072, 128, 64], f32), T([3072, 64, 128], f32), T([256, 128, 1], f32), T([256, 128, 1], f32), T([3072, 128, 128], f32), T([3072, 128, 64], f32), T([3072, 128, 64], f32), T([3072, 64, 128], f32), T([256, 128, 1], f32), T([256, 128, 1], f32), T([3072, 128, 128], f32), T([3072, 128, 64], f32), T([3072, 128, 64], f32), T([3072, 64, 128], f32), T([256, 128, 1], f32), T([256, 128, 1], f32), T([3072, 128, 128], f32), T([3072, 128, 64], f32), T([3072, 128, 64], f32), T([3072, 64, 128], f32), T([256, 128, 1], f32), T([256, 128, 1], f32), T([3072, 128, 128], f32), T([3072, 128, 64], f32), T([3072, 128, 64], f32), T([3072, 64, 128], f32), T([256, 128, 1], f32), T([256, 128, 1], f32), T([3072, 128, 128], f32), T([3072, 128, 64], f32), T([3072, 128, 64], f32), T([3072, 64, 128], f32), S([256, 128, 30522]), S([-1, 30522]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_default: "f32[32768, 30524]", primals_108: "i64[256, 128]", full_default_1: "f32[]", rsqrt_12: "f32[256, 128, 1]", rsqrt_11: "f32[256, 128, 1]", view_122: "f32[3072, 128, 128]", view_123: "f32[3072, 128, 64]", view_119: "f32[3072, 128, 64]", view_120: "f32[3072, 64, 128]", rsqrt_10: "f32[256, 128, 1]", rsqrt_9: "f32[256, 128, 1]", view_100: "f32[3072, 128, 128]", view_101: "f32[3072, 128, 64]", view_97: "f32[3072, 128, 64]", view_98: "f32[3072, 64, 128]", rsqrt_8: "f32[256, 128, 1]", rsqrt_7: "f32[256, 128, 1]", view_78: "f32[3072, 128, 128]", view_79: "f32[3072, 128, 64]", view_75: "f32[3072, 128, 64]", view_76: "f32[3072, 64, 128]", rsqrt_6: "f32[256, 128, 1]", rsqrt_5: "f32[256, 128, 1]", view_56: "f32[3072, 128, 128]", view_57: "f32[3072, 128, 64]", view_53: "f32[3072, 128, 64]", view_54: "f32[3072, 64, 128]", rsqrt_4: "f32[256, 128, 1]", rsqrt_3: "f32[256, 128, 1]", view_34: "f32[3072, 128, 128]", view_35: "f32[3072, 128, 64]", view_31: "f32[3072, 128, 64]", view_32: "f32[3072, 64, 128]", rsqrt_2: "f32[256, 128, 1]", rsqrt_1: "f32[256, 128, 1]", view_12: "f32[3072, 128, 128]", view_13: "f32[3072, 128, 64]", view_9: "f32[3072, 128, 64]", view_10: "f32[3072, 64, 128]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/distilbert/modeling_distilbert.py:517 in forward, code: prediction_logits = self.vocab_projector(prediction_logits)  # (bs, seq_length, vocab_size)
@@ -118,49 +120,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([32768, 30524], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 256, [256, 128], dtype=torch.int64, device='cuda'),
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 64, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 64, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 64, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 64, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 64, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 64, 128], dtype=torch.float32, device='cuda'),
-    [256, 128, 30522],  # _shape_param_0
-    [-1, 30522],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

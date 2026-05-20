@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([64, 1024, 64], f32), T([64, 64, 1024], f32), T([512, 512], f32), T([512, 512], f32), T([64, 1024, 64], f32), T([64, 64, 1024], f32), T([512, 512], f32), T([512, 512], f32), T([64, 1024, 64], f32), T([64, 64, 1024], f32), T([512, 512], f32), T([512, 512], f32), T([64, 1024, 64], f32), T([64, 64, 1024], f32), T([512, 512], f32), T([512, 512], f32), T([64, 1024, 64], f32), T([64, 64, 1024], f32), T([512, 512], f32), T([512, 512], f32), T([64, 1024, 64], f32), T([64, 64, 1024], f32), T([512, 512], f32), T([512, 512], f32), S([8, 8, 1024, 64]), S([8, 8, 64, 1024]), S([8, 1024, 512]), S([8192, 512]), S([8, 1024, 512]), S([8192, 512]), S([8, 8, 1024, 64]), S([8, 8, 64, 1024]), S([8, 1024, 512]), S([8192, 512]), S([8, 1024, 512]), S([8192, 512]), S([8, 8, 1024, 64]), S([8, 8, 64, 1024]), S([8, 1024, 512]), S([8192, 512]), S([8, 1024, 512]), S([8192, 512]), S([8, 8, 1024, 64]), S([8, 8, 64, 1024]), S([8, 1024, 512]), S([8192, 512]), S([8, 1024, 512]), S([8192, 512]), S([8, 8, 1024, 64]), S([8, 8, 64, 1024]), S([8, 1024, 512]), S([8192, 512]), S([8, 1024, 512]), S([8192, 512]), S([8, 8, 1024, 64]), S([8, 8, 64, 1024]), S([8, 1024, 512]), S([8192, 512]), S([8, 1024, 512]), S([8192, 512]))"
+
 class Repro(torch.nn.Module):
     def forward(self, bmm_36: "f32[64, 1024, 64]", bmm_38: "f32[64, 64, 1024]", primals_128: "f32[512, 512]", primals_127: "f32[512, 512]", bmm_44: "f32[64, 1024, 64]", bmm_46: "f32[64, 64, 1024]", primals_115: "f32[512, 512]", primals_114: "f32[512, 512]", bmm_52: "f32[64, 1024, 64]", bmm_54: "f32[64, 64, 1024]", primals_102: "f32[512, 512]", primals_101: "f32[512, 512]", bmm_60: "f32[64, 1024, 64]", bmm_62: "f32[64, 64, 1024]", primals_89: "f32[512, 512]", primals_88: "f32[512, 512]", bmm_68: "f32[64, 1024, 64]", bmm_70: "f32[64, 64, 1024]", primals_76: "f32[512, 512]", primals_75: "f32[512, 512]", bmm_76: "f32[64, 1024, 64]", bmm_78: "f32[64, 64, 1024]", primals_63: "f32[512, 512]", primals_62: "f32[512, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15, _shape_param_16, _shape_param_17, _shape_param_18, _shape_param_19, _shape_param_20, _shape_param_21, _shape_param_22, _shape_param_23, _shape_param_24, _shape_param_25, _shape_param_26, _shape_param_27, _shape_param_28, _shape_param_29, _shape_param_30, _shape_param_31, _shape_param_32, _shape_param_33, _shape_param_34, _shape_param_35):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:321 in forward, code: attn_output = torch.matmul(attn_weights, value_states)
@@ -158,68 +160,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([64, 1024, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 1024, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 1024, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 1024, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 1024, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 1024, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 64, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    [8, 8, 1024, 64],  # _shape_param_0
-    [8, 8, 64, 1024],  # _shape_param_1
-    [8, 1024, 512],  # _shape_param_2
-    [8192, 512],  # _shape_param_3
-    [8, 1024, 512],  # _shape_param_4
-    [8192, 512],  # _shape_param_5
-    [8, 8, 1024, 64],  # _shape_param_6
-    [8, 8, 64, 1024],  # _shape_param_7
-    [8, 1024, 512],  # _shape_param_8
-    [8192, 512],  # _shape_param_9
-    [8, 1024, 512],  # _shape_param_10
-    [8192, 512],  # _shape_param_11
-    [8, 8, 1024, 64],  # _shape_param_12
-    [8, 8, 64, 1024],  # _shape_param_13
-    [8, 1024, 512],  # _shape_param_14
-    [8192, 512],  # _shape_param_15
-    [8, 1024, 512],  # _shape_param_16
-    [8192, 512],  # _shape_param_17
-    [8, 8, 1024, 64],  # _shape_param_18
-    [8, 8, 64, 1024],  # _shape_param_19
-    [8, 1024, 512],  # _shape_param_20
-    [8192, 512],  # _shape_param_21
-    [8, 1024, 512],  # _shape_param_22
-    [8192, 512],  # _shape_param_23
-    [8, 8, 1024, 64],  # _shape_param_24
-    [8, 8, 64, 1024],  # _shape_param_25
-    [8, 1024, 512],  # _shape_param_26
-    [8192, 512],  # _shape_param_27
-    [8, 1024, 512],  # _shape_param_28
-    [8192, 512],  # _shape_param_29
-    [8, 8, 1024, 64],  # _shape_param_30
-    [8, 8, 64, 1024],  # _shape_param_31
-    [8, 1024, 512],  # _shape_param_32
-    [8192, 512],  # _shape_param_33
-    [8, 1024, 512],  # _shape_param_34
-    [8192, 512],  # _shape_param_35
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([50260, 768], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([16384, 768], f32), T([16384, 3072], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([16384, 768], f32), T([16384, 2304], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([16384, 768], f32), T([16384, 3072], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([16384, 768], f32), T([16384, 2304], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([16384, 768], f32), T([16384, 3072], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([16384, 768], f32), T([16384, 2304], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([16384, 768], f32), T([16384, 3072], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([16384, 768], f32), T([16384, 2304], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([16384, 768], f32), T([16384, 3072], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([16384, 768], f32), T([16384, 2304], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([16384, 768], f32), T([16384, 3072], f32), T([32, 512, 768], f32), T([32, 512, 768], f32), T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([16384, 768], f32), T([16384, 2304], f32), T([16384, 768], f32), T([768], f32), T([32, 512, 768], f32), T([1, 512, 768], f32), T([32, 512, 768], b8), T([32, 512, 1], f32), T([32, 512, 1], f32), T([32, 512, 768], f32), T([1, 512], i64, max=1024), T([32, 512], i64, max=50257), S([768]), S([3072]), S([32, 512, -1]), S([-1, 768]), S([768]), S([2304]), S([768]), S([3072]), S([32, 512, -1]), S([-1, 768]), S([768]), S([2304]), S([768]), S([3072]), S([32, 512, -1]), S([-1, 768]), S([768]), S([2304]), S([768]), S([3072]), S([32, 512, -1]), S([-1, 768]), S([768]), S([2304]), S([768]), S([3072]), S([32, 512, -1]), S([-1, 768]), S([768]), S([2304]), S([768]), S([3072]), S([32, 512, -1]), S([-1, 768]), S([768]), S([2304]), S([32, 512, 768]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_default_1: "f32[50260, 768]", add_54: "f32[32, 512, 768]", mul_74: "f32[32, 512, 768]", view_79: "f32[16384, 768]", view_82: "f32[16384, 3072]", view_84: "f32[32, 512, 768]", mul_66: "f32[32, 512, 768]", getitem_60: "f32[32, 12, 512, 64]", view_85: "f32[16384, 768]", view_92: "f32[16384, 2304]", view_94: "f32[32, 512, 768]", mul_62: "f32[32, 512, 768]", view_95: "f32[16384, 768]", view_98: "f32[16384, 3072]", view_100: "f32[32, 512, 768]", mul_54: "f32[32, 512, 768]", getitem_49: "f32[32, 12, 512, 64]", view_101: "f32[16384, 768]", view_108: "f32[16384, 2304]", view_110: "f32[32, 512, 768]", mul_50: "f32[32, 512, 768]", view_111: "f32[16384, 768]", view_114: "f32[16384, 3072]", view_116: "f32[32, 512, 768]", mul_42: "f32[32, 512, 768]", getitem_38: "f32[32, 12, 512, 64]", view_117: "f32[16384, 768]", view_124: "f32[16384, 2304]", view_126: "f32[32, 512, 768]", mul_38: "f32[32, 512, 768]", view_127: "f32[16384, 768]", view_130: "f32[16384, 3072]", view_132: "f32[32, 512, 768]", mul_30: "f32[32, 512, 768]", getitem_27: "f32[32, 12, 512, 64]", view_133: "f32[16384, 768]", view_140: "f32[16384, 2304]", view_142: "f32[32, 512, 768]", mul_26: "f32[32, 512, 768]", view_143: "f32[16384, 768]", view_146: "f32[16384, 3072]", view_148: "f32[32, 512, 768]", mul_18: "f32[32, 512, 768]", getitem_16: "f32[32, 12, 512, 64]", view_149: "f32[16384, 768]", view_156: "f32[16384, 2304]", view_158: "f32[32, 512, 768]", mul_14: "f32[32, 512, 768]", view_159: "f32[16384, 768]", view_162: "f32[16384, 3072]", view_164: "f32[32, 512, 768]", mul_6: "f32[32, 512, 768]", getitem_5: "f32[32, 12, 512, 64]", view_165: "f32[16384, 768]", view_172: "f32[16384, 2304]", mm_49: "f32[16384, 768]", primals_4: "f32[768]", embedding: "f32[32, 512, 768]", embedding_1: "f32[1, 512, 768]", gt: "b8[32, 512, 768]", getitem_1: "f32[32, 512, 1]", rsqrt: "f32[32, 512, 1]", add_77: "f32[32, 512, 768]", unsqueeze: "i64[1, 512]", primals_1: "i64[32, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15, _shape_param_16, _shape_param_17, _shape_param_18, _shape_param_19, _shape_param_20, _shape_param_21, _shape_param_22, _shape_param_23, _shape_param_24, _shape_param_25, _shape_param_26, _shape_param_27, _shape_param_28, _shape_param_29, _shape_param_30, _shape_param_31, _shape_param_32, _shape_param_33, _shape_param_34, _shape_param_35, _shape_param_36):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:706 in forward, code: logits = self.lm_head(hidden_states[:, slice_indices, :])
@@ -259,110 +261,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([50260, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 3072], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_60
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 2304], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 3072], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_49
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 2304], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 3072], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_38
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 2304], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 3072], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_27
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 2304], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 3072], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_16
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 2304], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 3072], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_5
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 2304], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [32, 512, 768], dtype=torch.bool, device='cuda'),
-    torch.randn([32, 512, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 1024, [1, 512], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 50257, [32, 512], dtype=torch.int64, device='cuda'),
-    [768],  # _shape_param_0
-    [3072],  # _shape_param_1
-    [32, 512, -1],  # _shape_param_2
-    [-1, 768],  # _shape_param_3
-    [768],  # _shape_param_4
-    [2304],  # _shape_param_5
-    [768],  # _shape_param_6
-    [3072],  # _shape_param_7
-    [32, 512, -1],  # _shape_param_8
-    [-1, 768],  # _shape_param_9
-    [768],  # _shape_param_10
-    [2304],  # _shape_param_11
-    [768],  # _shape_param_12
-    [3072],  # _shape_param_13
-    [32, 512, -1],  # _shape_param_14
-    [-1, 768],  # _shape_param_15
-    [768],  # _shape_param_16
-    [2304],  # _shape_param_17
-    [768],  # _shape_param_18
-    [3072],  # _shape_param_19
-    [32, 512, -1],  # _shape_param_20
-    [-1, 768],  # _shape_param_21
-    [768],  # _shape_param_22
-    [2304],  # _shape_param_23
-    [768],  # _shape_param_24
-    [3072],  # _shape_param_25
-    [32, 512, -1],  # _shape_param_26
-    [-1, 768],  # _shape_param_27
-    [768],  # _shape_param_28
-    [2304],  # _shape_param_29
-    [768],  # _shape_param_30
-    [3072],  # _shape_param_31
-    [32, 512, -1],  # _shape_param_32
-    [-1, 768],  # _shape_param_33
-    [768],  # _shape_param_34
-    [2304],  # _shape_param_35
-    [32, 512, 768],  # _shape_param_36
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

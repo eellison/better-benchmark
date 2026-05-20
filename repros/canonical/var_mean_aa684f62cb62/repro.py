@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([32, 512], i64, max=512), T([32, 512], i32, max=2), T([1, 512], i64, max=2), T([50265, 768], f32), T([32, 512], i64, max=50265), T([2, 768], f32), T([512, 768], f32), T([768], f32), T([768], f32), T([768, 768], f32), T([768, 768], f32), S([32, -1]), S([32, 512]), S([16384, 768]))"
+
 class Repro(torch.nn.Module):
     def forward(self, cumsum: "i64[32, 512]", convert_element_type: "i32[32, 512]", primals_3: "i64[1, 512]", primals_4: "f32[50265, 768]", primals_2: "i64[32, 512]", primals_5: "f32[2, 768]", primals_6: "f32[512, 768]", primals_7: "f32[768]", primals_8: "f32[768]", primals_9: "f32[768, 768]", primals_11: "f32[768, 768]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/roberta/modeling_roberta.py:158 in create_position_ids_from_input_ids, code: incremental_indices = (torch.cumsum(mask, dim=1).type_as(mask) + past_key_values_length) * mask
@@ -81,22 +83,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 512, [32, 512], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 2, [32, 512], dtype=torch.int32, device='cuda'),
-    torch.randint(0, 2, [1, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([50265, 768], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 50265, [32, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([2, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    [32, -1],  # _shape_param_0
-    [32, 512],  # _shape_param_1
-    [16384, 768],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

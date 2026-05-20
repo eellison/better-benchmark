@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 2304, 7, 7], f32, stride=(112896, 1, 16128, 2304)), S([128, 3, 6, 128, 49]), S([128, 6, 49, 128]), S([768, 49, 128]), S([128, 6, 128, 49]), S([768, 128, 49]))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_53: "f32[128, 2304, 7, 7]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:107 in forward, code: x = self.qkv(x).reshape(B, 3, self.num_heads, self.head_dim, -1).permute(1, 0, 2, 4, 3)
@@ -39,14 +41,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(14450688, dtype=torch.float32, device='cuda').as_strided([128, 2304, 7, 7], [112896, 1, 16128, 2304]),  # convolution_53
-    [128, 3, 6, 128, 49],  # _shape_param_0
-    [128, 6, 49, 128],  # _shape_param_1
-    [768, 49, 128],  # _shape_param_2
-    [128, 6, 128, 49],  # _shape_param_3
-    [768, 128, 49],  # _shape_param_4
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

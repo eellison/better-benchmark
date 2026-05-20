@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 1024], f16), T([1, 128, 1024], f32), T([4096, 1024], f16, stride=(1, 4096)), T([1024, 4096], f16, stride=(1, 1024)), T([1024, 1024], f16, stride=(1, 1024)), T([16, 128, 128], f16), T([16, 128, 64], f16, stride=(64, 1024, 1)), T([16, 128, 64], f16, stride=(64, 1024, 1)), T([16, 64, 128], f16, stride=(64, 1, 1024)), T([1024, 1024], f16, stride=(1, 1024)), T([1024, 1024], f16, stride=(1, 1024)), T([1024, 1024], f16, stride=(1, 1024)), S([1, 128, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_5: "f16[128, 1024]", add_3: "f32[1, 128, 1024]", permute_10: "f16[4096, 1024]", permute_9: "f16[1024, 4096]", permute_8: "f16[1024, 1024]", convert_element_type_7: "f16[16, 128, 128]", view_9: "f16[16, 128, 64]", view_7: "f16[16, 128, 64]", permute_6: "f16[16, 64, 128]", permute_2: "f16[1024, 1024]", permute_1: "f16[1024, 1024]", permute: "f16[1024, 1024]", _shape_param_0):
         # No stacktrace found for following nodes
@@ -37,21 +39,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([128, 1024], dtype=torch.float16, device='cuda'),
-    torch.randn([1, 128, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn(4194304, dtype=torch.float16, device='cuda').as_strided([4096, 1024], [1, 4096]),  # permute_10
-    torch.randn(4194304, dtype=torch.float16, device='cuda').as_strided([1024, 4096], [1, 1024]),  # permute_9
-    torch.randn(1048576, dtype=torch.float16, device='cuda').as_strided([1024, 1024], [1, 1024]),  # permute_8
-    torch.randn([16, 128, 128], dtype=torch.float16, device='cuda'),
-    torch.randn(131072, dtype=torch.float16, device='cuda').as_strided([16, 128, 64], [64, 1024, 1]),  # view_9
-    torch.randn(131072, dtype=torch.float16, device='cuda').as_strided([16, 128, 64], [64, 1024, 1]),  # view_7
-    torch.randn(131072, dtype=torch.float16, device='cuda').as_strided([16, 64, 128], [64, 1, 1024]),  # permute_6
-    torch.randn(1048576, dtype=torch.float16, device='cuda').as_strided([1024, 1024], [1, 1024]),  # permute_2
-    torch.randn(1048576, dtype=torch.float16, device='cuda').as_strided([1024, 1024], [1, 1024]),  # permute_1
-    torch.randn(1048576, dtype=torch.float16, device='cuda').as_strided([1024, 1024], [1, 1024]),  # permute
-    [1, 128, 1024],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

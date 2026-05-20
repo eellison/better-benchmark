@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([50272, 768], f32), T([4, 2048], i64, max=50272), T([4, 2048], f32), T([2050, 768], f32), T([768], f32), T([768], f32), T([768, 768], f32), T([768, 768], f32), T([768, 768], f32), S([8192, 768]), S([8192, 768]), S([8192, 768]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg1_1: "f32[50272, 768]", arg0_1: "i64[4, 2048]", cumsum: "f32[4, 2048]", arg2_1: "f32[2050, 768]", arg3_1: "f32[768]", arg4_1: "f32[768]", arg5_1: "f32[768, 768]", arg7_1: "f32[768, 768]", arg9_1: "f32[768, 768]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:338 in forward, code: inputs_embeds = self.embed_tokens(input_ids)
@@ -57,20 +59,13 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([50272, 768], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 50272, [4, 2048], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 2048, [4, 2048], device='cuda').float(),
-    torch.randn([2050, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    [8192, 768],  # _shape_param_0
-    [8192, 768],  # _shape_param_1
-    [8192, 768],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    import torch
+    inputs = parse_shapes_config(_shapes_config)
+    # cumsum (input 2) is f32 used as position_ids via (cumsum-1).long()+2 -> embedding[2050,768]
+    # Must be positive integers in [1, 2049] as float
+    inputs[2] = torch.arange(1, 2049, device='cuda').unsqueeze(0).expand(4, -1).float()
+    return inputs
 
 
 def make_inputs(shape_config=None):

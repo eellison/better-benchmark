@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([192], bf16), T([192], bf16), T([128, 192, 71, 71], bf16), T([192], bf16), T([192], bf16))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg22_1: "bf16[192]", arg23_1: "bf16[192]", convolution_4: "bf16[128, 192, 71, 71]", arg24_1: "bf16[192]", arg25_1: "bf16[192]"):
         # No stacktrace found for following nodes
@@ -45,13 +47,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([192], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([192], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([128, 192, 71, 71], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([192], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([192], dtype=torch.bfloat16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

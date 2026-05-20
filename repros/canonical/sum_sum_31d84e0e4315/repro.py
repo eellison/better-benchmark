@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([25088, 512], f32), T([512], f32), T([128, 196, 512], f32), T([128, 196, 1], f32), T([128, 196, 512], f32), T([128, 1, 1, 1], b8), T([14], i64, max=128), T([512, 512], f32), S([128, 196, 512]), S([128, 14, 14, 512]), S([128, 2, 7, 2, 7, 512]), S([512, 7, 7, 512]), S([512, 49, 512]), S([25088, 512]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_153: "f32[25088, 512]", primals_93: "f32[512]", mul_58: "f32[128, 196, 512]", div_109: "f32[128, 196, 1]", view_1219: "f32[128, 196, 512]", lt_8: "b8[128, 1, 1, 1]", fmod_8: "i64[14]", primals_91: "f32[512, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/mlp.py:48 in forward, code: x = self.fc1(x)
@@ -67,22 +69,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([25088, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 196, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 196, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 196, 512], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [128, 1, 1, 1], dtype=torch.bool, device='cuda'),
-    torch.randint(0, 128, [14], dtype=torch.int64, device='cuda'),
-    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
-    [128, 196, 512],  # _shape_param_0
-    [128, 14, 14, 512],  # _shape_param_1
-    [128, 2, 7, 2, 7, 512],  # _shape_param_2
-    [512, 7, 7, 512],  # _shape_param_3
-    [512, 49, 512],  # _shape_param_4
-    [25088, 512],  # _shape_param_5
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

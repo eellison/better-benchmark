@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 128112], f32), T([64, 128], i64, max=128), S([64, 128, 128112]), S([-1, 128112]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm: "f32[8192, 128112]", primals_3: "i64[64, 128]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:901 in torch_dynamo_resume_in_forward_at_889, code: lm_logits = self.lm_head(outputs.last_hidden_state)
@@ -46,12 +48,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 128112], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 128, [64, 128], dtype=torch.int64, device='cuda'),
-    [64, 128, 128112],  # _shape_param_0
-    [-1, 128112],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

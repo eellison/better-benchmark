@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 1024], f32), T([256, 512, 512], f32), T([256, 512, 1024], f32), T([99], i64, max=99), S([512, 16, 1, 16, 64]), S([512, 16, 16, 64]), S([16, 16, 512, 1, 512]), S([16, 16, 512, 512]), S([16, 16, 512, 1, 1024]), S([16, 16, 512, 1024]), S([16, 16, 1024, 512]), S([16, 16, 512, 1023]), S([256, 512, 512]), S([256, 512, 64]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_default_333: "f32[8192, 1024]", bmm_4: "f32[256, 512, 512]", bmm_5: "f32[256, 512, 1024]", inductor_seeds_default: "i64[99]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:255 in forward, code: v_head_h = torch.einsum("ibh,hnd->ibnd", cat, self.v)
@@ -79,22 +81,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([256, 512, 1024], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 99, [99], dtype=torch.int64, device='cuda'),
-    [512, 16, 1, 16, 64],  # _shape_param_0
-    [512, 16, 16, 64],  # _shape_param_1
-    [16, 16, 512, 1, 512],  # _shape_param_2
-    [16, 16, 512, 512],  # _shape_param_3
-    [16, 16, 512, 1, 1024],  # _shape_param_4
-    [16, 16, 512, 1024],  # _shape_param_5
-    [16, 16, 1024, 512],  # _shape_param_6
-    [16, 16, 512, 1023],  # _shape_param_7
-    [256, 512, 512],  # _shape_param_8
-    [256, 512, 64],  # _shape_param_9
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

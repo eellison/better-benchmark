@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 192, 32, 32], f32, stride=(196608, 1, 6144, 192)), T([128, 96, 32, 32], f32, stride=(98304, 1, 3072, 96)), T([128, 96, 32, 32], f32, stride=(98304, 1, 3072, 96)), T([1, 96, 1, 1], f32), T([96], f32), T([96], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_242: "f32[128, 192, 32, 32]", getitem_259: "f32[128, 96, 32, 32]", convolution_15: "f32[128, 96, 32, 32]", unsqueeze_322: "f32[1, 96, 1, 1]", squeeze_46: "f32[96]", primals_96: "f32[96]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/mobilevit.py:277 in forward, code: x = self.conv_fusion(torch.cat((shortcut, x), dim=1))
@@ -50,14 +52,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(25165824, dtype=torch.float32, device='cuda').as_strided([128, 192, 32, 32], [196608, 1, 6144, 192]),  # getitem_242
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([128, 96, 32, 32], [98304, 1, 3072, 96]),  # getitem_259
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([128, 96, 32, 32], [98304, 1, 3072, 96]),  # convolution_15
-    torch.randn([1, 96, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([96], dtype=torch.float32, device='cuda'),
-    torch.randn([96], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

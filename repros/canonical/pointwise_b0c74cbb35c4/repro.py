@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([80], f32), T([512, 80, 7, 7], f32, stride=(3920, 1, 560, 80)), T([80], f32), T([80], f32), T([80], f32), T([512, 80, 7, 7], f32, stride=(3920, 1, 560, 80)), T([160], f32), T([512, 160, 7, 7], f32, stride=(7840, 1, 1120, 160)), T([160], f32), T([160], f32), T([160], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg322_1: "f32[80]", convolution_70: "f32[512, 80, 7, 7]", arg323_1: "f32[80]", arg324_1: "f32[80]", arg325_1: "f32[80]", add_135: "f32[512, 80, 7, 7]", arg332_1: "f32[160]", convolution_72: "f32[512, 160, 7, 7]", arg333_1: "f32[160]", arg334_1: "f32[160]", arg335_1: "f32[160]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:69 in forward, code: x2 = self.cheap_operation(x1)
@@ -60,19 +62,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([80], dtype=torch.float32, device='cuda'),
-    torch.randn(2007040, dtype=torch.float32, device='cuda').as_strided([512, 80, 7, 7], [3920, 1, 560, 80]),  # convolution_70
-    torch.randn([80], dtype=torch.float32, device='cuda'),
-    torch.randn([80], dtype=torch.float32, device='cuda'),
-    torch.randn([80], dtype=torch.float32, device='cuda'),
-    torch.randn(2007040, dtype=torch.float32, device='cuda').as_strided([512, 80, 7, 7], [3920, 1, 560, 80]),  # add_135
-    torch.randn([160], dtype=torch.float32, device='cuda'),
-    torch.randn(4014080, dtype=torch.float32, device='cuda').as_strided([512, 160, 7, 7], [7840, 1, 1120, 160]),  # convolution_72
-    torch.randn([160], dtype=torch.float32, device='cuda'),
-    torch.randn([160], dtype=torch.float32, device='cuda'),
-    torch.randn([160], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

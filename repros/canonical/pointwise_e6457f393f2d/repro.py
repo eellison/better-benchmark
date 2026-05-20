@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([401408, 128], f32), S([8192, 49, 128]), S([8192, 49, 4, 32]), S([32768, 49, 32]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_199: "f32[401408, 128]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/swin_transformer.py:246 in forward, code: x = self.proj(x)
@@ -31,12 +33,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([401408, 128], dtype=torch.float32, device='cuda'),
-    [8192, 49, 128],  # _shape_param_0
-    [8192, 49, 4, 32],  # _shape_param_1
-    [32768, 49, 32],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

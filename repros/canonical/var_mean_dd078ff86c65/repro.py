@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([4096, 2048], f32), T([32, 128, 2048], f32), T([2048], f32), T([2048], f32), T([50257, 2048], f32), S([32, 128, 2048]), S([4096, 2048]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_71: "f32[4096, 2048]", add_214: "f32[32, 128, 2048]", primals_340: "f32[2048]", primals_341: "f32[2048]", primals_2: "f32[50257, 2048]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt_neo/modeling_gpt_neo.py:307 in forward, code: hidden_states = self.c_proj(hidden_states)
@@ -42,15 +44,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([4096, 2048], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 128, 2048], dtype=torch.float32, device='cuda'),
-    torch.randn([2048], dtype=torch.float32, device='cuda'),
-    torch.randn([2048], dtype=torch.float32, device='cuda'),
-    torch.randn([50257, 2048], dtype=torch.float32, device='cuda'),
-    [32, 128, 2048],  # _shape_param_0
-    [4096, 2048],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

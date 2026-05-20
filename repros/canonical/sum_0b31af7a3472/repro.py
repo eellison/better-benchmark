@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 256, 24, 24], f32, stride=(147456, 1, 6144, 256)), T([128, 256, 48, 48], f32, stride=(589824, 1, 12288, 256)), T([128, 256, 48, 48], f32, stride=(589824, 1, 12288, 256)), T([128, 256, 1, 1], f32), T([128, 256, 48, 48], f32, stride=(589824, 1, 12288, 256)), T([], f32), T([128, 256, 48, 48], f32, stride=(589824, 1, 12288, 256)))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_321: "f32[128, 256, 24, 24]", mul_64: "f32[128, 256, 48, 48]", getitem_318: "f32[128, 256, 48, 48]", convolution_10: "f32[128, 256, 1, 1]", convolution_8: "f32[128, 256, 48, 48]", primals_33: "f32[]", convolution_4: "f32[128, 256, 48, 48]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:149 in forward, code: return self.conv(self.pool(x))
@@ -77,15 +79,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(18874368, dtype=torch.float32, device='cuda').as_strided([128, 256, 24, 24], [147456, 1, 6144, 256]),  # getitem_321
-    torch.randn(75497472, dtype=torch.float32, device='cuda').as_strided([128, 256, 48, 48], [589824, 1, 12288, 256]),  # mul_64
-    torch.randn(75497472, dtype=torch.float32, device='cuda').as_strided([128, 256, 48, 48], [589824, 1, 12288, 256]),  # getitem_318
-    torch.randn([128, 256, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(75497472, dtype=torch.float32, device='cuda').as_strided([128, 256, 48, 48], [589824, 1, 12288, 256]),  # convolution_8
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn(75497472, dtype=torch.float32, device='cuda').as_strided([128, 256, 48, 48], [589824, 1, 12288, 256]),  # convolution_4
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

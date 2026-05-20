@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([], bf16), T([32768, 256], bf16), T([32768, 1], f32), T([256], f32), S([32768, 256]), S([256]), S([32768, 256]))"
+
 class Repro(torch.nn.Module):
     def forward(self, tangents_1: "bf16[]", primals_1: "bf16[32768, 256]", rsqrt: "f32[32768, 1]", primals_2: "f32[256]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:306 in rmsnorm_bwd, code: return out.sum()
@@ -53,15 +55,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([32768, 256], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([32768, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([256], dtype=torch.float32, device='cuda'),
-    [32768, 256],  # _shape_param_0
-    [256],  # _shape_param_1
-    [32768, 256],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

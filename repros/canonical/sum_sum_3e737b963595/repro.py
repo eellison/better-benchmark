@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 32, 112, 112], f32, stride=(401408, 1, 3584, 32)), T([128, 32, 112, 112], f32, stride=(401408, 1, 3584, 32)), T([128, 32, 112, 112], f32, stride=(401408, 1, 3584, 32)), T([1, 32, 1, 1], f32), T([32], f32), T([32], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, relu: "f32[128, 32, 112, 112]", getitem_245: "f32[128, 32, 112, 112]", convolution: "f32[128, 32, 112, 112]", unsqueeze_438: "f32[1, 32, 1, 1]", squeeze_1: "f32[32]", primals_6: "f32[32]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:437 in forward_features, code: x = self.stem(x)
@@ -47,14 +49,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(51380224, dtype=torch.float32, device='cuda').as_strided([128, 32, 112, 112], [401408, 1, 3584, 32]),  # relu
-    torch.randn(51380224, dtype=torch.float32, device='cuda').as_strided([128, 32, 112, 112], [401408, 1, 3584, 32]),  # getitem_245
-    torch.randn(51380224, dtype=torch.float32, device='cuda').as_strided([128, 32, 112, 112], [401408, 1, 3584, 32]),  # convolution
-    torch.randn([1, 32, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([32], dtype=torch.float32, device='cuda'),
-    torch.randn([32], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

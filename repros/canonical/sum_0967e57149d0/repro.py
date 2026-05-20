@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([], f32), T([], f32), T([1, 129], i64, max=129), T([1, 128, 50400], f32), T([128, 1], f32), T([128, 1], f32), T([1, 128, 50400], f32), T([50400, 4096], f32), S([1, 50400]), S([128, 50400]), S([-1, 50400]), S([1, 128, 50400]), S([128, 50400]))"
+
 class Repro(torch.nn.Module):
     def forward(self, tangents_1: "f32[]", convert_element_type: "f32[]", constant_pad_nd: "i64[1, 129]", view_786: "f32[1, 128, 50400]", amax_28: "f32[128, 1]", log: "f32[128, 1]", tangents_2: "f32[1, 128, 50400]", primals_313: "f32[50400, 4096]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:37 in fixed_cross_entropy, code: loss = nn.functional.cross_entropy(source, target, ignore_index=ignore_index, reduction=reduction)
@@ -73,21 +75,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 129, [1, 129], dtype=torch.int64, device='cuda'),
-    torch.randn([1, 128, 50400], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 128, 50400], dtype=torch.float32, device='cuda'),
-    torch.randn([50400, 4096], dtype=torch.float32, device='cuda'),
-    [1, 50400],  # _shape_param_0
-    [128, 50400],  # _shape_param_1
-    [-1, 50400],  # _shape_param_2
-    [1, 128, 50400],  # _shape_param_3
-    [128, 50400],  # _shape_param_4
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

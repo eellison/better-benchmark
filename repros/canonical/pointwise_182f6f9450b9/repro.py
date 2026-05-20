@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 1152, 1, 1], f32), T([128, 1152, 7, 7], f32, stride=(56448, 1, 8064, 1152)))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_78: "f32[128, 1152, 1, 1]", div_46: "f32[128, 1152, 7, 7]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:83 in forward, code: return x * self.gate(x_se)
@@ -24,10 +26,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([128, 1152, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(7225344, dtype=torch.float32, device='cuda').as_strided([128, 1152, 7, 7], [56448, 1, 8064, 1152]),  # div_46
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

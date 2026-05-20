@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 1024], f32), T([1024], f32), T([8192, 1024], f32), T([64, 128, 1024], b8), T([64, 128, 1024], f32), T([64, 128, 1], f32), T([64, 128, 1], f32), T([64, 128, 1024], f32), T([1024, 1024], f32), S([64, 128, 1024]), S([64, 128, 1024]), S([8192, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_10: "f32[8192, 1024]", primals_14: "f32[1024]", addmm_3: "f32[8192, 1024]", gt: "b8[64, 128, 1024]", primals_3: "f32[64, 128, 1024]", getitem_7: "f32[64, 128, 1]", rsqrt_1: "f32[64, 128, 1]", add_10: "f32[64, 128, 1024]", primals_11: "f32[1024, 1024]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:276 in forward, code: query_states = self.q_proj(hidden_states).view(hidden_shape).transpose(1, 2)
@@ -60,20 +62,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [64, 128, 1024], dtype=torch.bool, device='cuda'),
-    torch.randn([64, 128, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 128, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 1024], dtype=torch.float32, device='cuda'),
-    [64, 128, 1024],  # _shape_param_0
-    [64, 128, 1024],  # _shape_param_1
-    [8192, 1024],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 512, 12, 12], f32, stride=(73728, 1, 6144, 512)), T([128, 512, 24, 24], f32, stride=(294912, 1, 12288, 512)), T([128, 512, 24, 24], f32, stride=(294912, 1, 12288, 512)), T([128, 512, 24, 24], f32, stride=(294912, 1, 12288, 512)), T([128, 512, 1, 1], f32), T([], f32), T([128, 512, 24, 24], f32, stride=(294912, 1, 12288, 512)))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_282: "f32[128, 512, 12, 12]", mul_133: "f32[128, 512, 24, 24]", getitem_279: "f32[128, 512, 24, 24]", add_212: "f32[128, 512, 24, 24]", convolution_23: "f32[128, 512, 1, 1]", primals_70: "f32[]", convolution_21: "f32[128, 512, 24, 24]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:149 in forward, code: return self.conv(self.pool(x))
@@ -54,15 +56,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(9437184, dtype=torch.float32, device='cuda').as_strided([128, 512, 12, 12], [73728, 1, 6144, 512]),  # getitem_282
-    torch.randn(37748736, dtype=torch.float32, device='cuda').as_strided([128, 512, 24, 24], [294912, 1, 12288, 512]),  # mul_133
-    torch.randn(37748736, dtype=torch.float32, device='cuda').as_strided([128, 512, 24, 24], [294912, 1, 12288, 512]),  # getitem_279
-    torch.randn(37748736, dtype=torch.float32, device='cuda').as_strided([128, 512, 24, 24], [294912, 1, 12288, 512]),  # add_212
-    torch.randn([128, 512, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn(37748736, dtype=torch.float32, device='cuda').as_strided([128, 512, 24, 24], [294912, 1, 12288, 512]),  # convolution_21
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

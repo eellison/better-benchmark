@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([1, 1, 192], f32), T([128, 192, 14, 14], f32, stride=(37632, 1, 2688, 192)), T([1, 197, 192], f32), T([192], f32), T([192], f32), T([576, 192], f32), S([128, -1, -1]), S([128, 192, 196]), S([25216, 192]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg3_1: "f32[1, 1, 192]", convolution: "f32[128, 192, 14, 14]", arg4_1: "f32[1, 197, 192]", arg5_1: "f32[192]", arg6_1: "f32[192]", arg7_1: "f32[576, 192]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/vision_transformer.py:1042 in _pos_embed, code: to_cat.append(self.cls_token.expand(x.shape[0], -1, -1))
@@ -48,17 +50,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([1, 1, 192], dtype=torch.float32, device='cuda'),
-    torch.randn(4816896, dtype=torch.float32, device='cuda').as_strided([128, 192, 14, 14], [37632, 1, 2688, 192]),  # convolution
-    torch.randn([1, 197, 192], dtype=torch.float32, device='cuda'),
-    torch.randn([192], dtype=torch.float32, device='cuda'),
-    torch.randn([192], dtype=torch.float32, device='cuda'),
-    torch.randn([576, 192], dtype=torch.float32, device='cuda'),
-    [128, -1, -1],  # _shape_param_0
-    [128, 192, 196],  # _shape_param_1
-    [25216, 192],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128100, 1536], f32), T([8, 512], i64, max=128100), T([512, 1536], f32), T([1, 512], i64, max=512), T([1536], f32), T([1536], f32), T([1536, 1536], f32), T([1536, 1536], f32), S([4096, 1536]))"
+
 class Repro(torch.nn.Module):
     def forward(self, primals_3: "f32[128100, 1536]", primals_1: "i64[8, 512]", primals_4: "f32[512, 1536]", primals_2: "i64[1, 512]", primals_5: "f32[1536]", primals_6: "f32[1536]", primals_7: "f32[1536, 1536]", primals_9: "f32[1536, 1536]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py:535 in forward, code: inputs_embeds = self.word_embeddings(input_ids)
@@ -59,17 +61,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([128100, 1536], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 128100, [8, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([512, 1536], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 512, [1, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([1536], dtype=torch.float32, device='cuda'),
-    torch.randn([1536], dtype=torch.float32, device='cuda'),
-    torch.randn([1536, 1536], dtype=torch.float32, device='cuda'),
-    torch.randn([1536, 1536], dtype=torch.float32, device='cuda'),
-    [4096, 1536],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

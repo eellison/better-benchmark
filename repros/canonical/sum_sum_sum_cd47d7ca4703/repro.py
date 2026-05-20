@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8, 1024, 768], b8), T([8, 1024, 768], f32), T([768], f32), T([8, 1024, 768], f32), T([8, 1024, 1], f32), T([8, 1024], i64, max=1), T([8, 1024], i64, max=4098), T([8, 1024], i64, max=50265))"
+
 class Repro(torch.nn.Module):
     def forward(self, gt: "b8[8, 1024, 768]", tangents_1: "f32[8, 1024, 768]", primals_5: "f32[768]", mul_2: "f32[8, 1024, 768]", div: "f32[8, 1024, 1]", full_default: "i64[8, 1024]", add: "i64[8, 1024]", primals_1: "i64[8, 1024]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:424 in forward, code: embeddings = self.dropout(embeddings)
@@ -60,16 +62,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 2, [8, 1024, 768], dtype=torch.bool, device='cuda'),
-    torch.randn([8, 1024, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([8, 1024, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([8, 1024, 1], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 1, [8, 1024], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 4098, [8, 1024], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 50265, [8, 1024], dtype=torch.int64, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

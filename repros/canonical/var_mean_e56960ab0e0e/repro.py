@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 1024], f32), T([8, 1024, 1024], f32), T([1024], f32), T([1024], f32), T([50265, 1024], f32), S([8, 1024, 1024]), S([8192, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_71: "f32[8192, 1024]", add_88: "f32[8, 1024, 1024]", arg197_1: "f32[1024]", arg198_1: "f32[1024]", arg1_1: "f32[50265, 1024]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mbart/modeling_mbart.py:415 in forward, code: hidden_states = self.fc2(hidden_states)
@@ -42,15 +44,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([8, 1024, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([50265, 1024], dtype=torch.float32, device='cuda'),
-    [8, 1024, 1024],  # _shape_param_0
-    [8192, 1024],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

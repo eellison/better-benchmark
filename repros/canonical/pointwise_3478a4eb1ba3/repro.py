@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([16384, 2304], f32), S([32, 512, 2304]), S([32, 512, -1, 64]), S([32, 512, -1, 64]), S([32, 512, -1, 64]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_20: "f32[16384, 2304]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:122 in forward, code: x = x.view(size_out)
@@ -41,13 +43,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([16384, 2304], dtype=torch.float32, device='cuda'),
-    [32, 512, 2304],  # _shape_param_0
-    [32, 512, -1, 64],  # _shape_param_1
-    [32, 512, -1, 64],  # _shape_param_2
-    [32, 512, -1, 64],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

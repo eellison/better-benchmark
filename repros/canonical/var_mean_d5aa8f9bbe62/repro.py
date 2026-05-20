@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([512, 128, 80], f32), T([2560, 2560], f32), T([8008, 2560], f32), T([16, 128], i64, max=8008), T([128, 2560], f32), T([2560], f32), T([2560], f32), T([2560, 2560], f32), T([2560, 2560], f32), T([2560, 2560], f32), S([16, 32, 128, 80]), S([16, 128, -1]), S([2048, 2560]), S([2048, 2560]), S([2048, 2560]), S([2048, 2560]))"
+
 class Repro(torch.nn.Module):
     def forward(self, bmm_3: "f32[512, 128, 80]", arg28_1: "f32[2560, 2560]", arg2_1: "f32[8008, 2560]", arg1_1: "i64[16, 128]", arg38_1: "f32[128, 2560]", arg39_1: "f32[2560]", arg40_1: "f32[2560]", arg41_1: "f32[2560, 2560]", arg43_1: "f32[2560, 2560]", arg45_1: "f32[2560, 2560]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
@@ -71,24 +73,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([512, 128, 80], dtype=torch.float32, device='cuda'),
-    torch.randn([2560, 2560], dtype=torch.float32, device='cuda'),
-    torch.randn([8008, 2560], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 8008, [16, 128], dtype=torch.int64, device='cuda'),
-    torch.randn([128, 2560], dtype=torch.float32, device='cuda'),
-    torch.randn([2560], dtype=torch.float32, device='cuda'),
-    torch.randn([2560], dtype=torch.float32, device='cuda'),
-    torch.randn([2560, 2560], dtype=torch.float32, device='cuda'),
-    torch.randn([2560, 2560], dtype=torch.float32, device='cuda'),
-    torch.randn([2560, 2560], dtype=torch.float32, device='cuda'),
-    [16, 32, 128, 80],  # _shape_param_0
-    [16, 128, -1],  # _shape_param_1
-    [2048, 2560],  # _shape_param_2
-    [2048, 2560],  # _shape_param_3
-    [2048, 2560],  # _shape_param_4
-    [2048, 2560],  # _shape_param_5
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

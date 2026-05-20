@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 1024], f32), T([1024], f32), T([128, 7, 7, 1024], f32), T([128, 7, 7, 1], f32), T([128, 1, 1], b8), T([1024, 4096], f32), S([128, 7, 7, 1024]), S([128, 49, 1024]), S([6272, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_3: "f32[128, 1024]", primals_362: "f32[1024]", mul_246: "f32[128, 7, 7, 1024]", div_71: "f32[128, 7, 7, 1]", lt_45: "b8[128, 1, 1]", primals_360: "f32[1024, 4096]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/adaptive_avgmax_pool.py:65 in forward, code: return x.mean(self.dim, keepdim=not self.flatten)
@@ -54,17 +56,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([128, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 7, 7, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 7, 7, 1], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [128, 1, 1], dtype=torch.bool, device='cuda'),
-    torch.randn([1024, 4096], dtype=torch.float32, device='cuda'),
-    [128, 7, 7, 1024],  # _shape_param_0
-    [128, 49, 1024],  # _shape_param_1
-    [6272, 1024],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

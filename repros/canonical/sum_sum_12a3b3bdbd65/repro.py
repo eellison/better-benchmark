@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([6272, 1024], f32), T([1024], f32), T([128, 7, 7, 1024], f32), T([128, 7, 7, 1], f32), T([128, 7, 7, 1024], f32), T([128, 1, 1], b8), T([1024, 4096], f32), S([128, 49, 1024]), S([128, 7, 7, 1024]), S([128, 1, 1, 7, 7, 1024]), S([128, 7, 7, 1024]), S([128, 49, 1024]), S([6272, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_11: "f32[6272, 1024]", primals_348: "f32[1024]", mul_236: "f32[128, 7, 7, 1024]", div_73: "f32[128, 7, 7, 1]", view_666: "f32[128, 7, 7, 1024]", lt_43: "b8[128, 1, 1]", primals_346: "f32[1024, 4096]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/swin_transformer.py:219 in forward, code: qkv = self.qkv(x).reshape(B_, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
@@ -62,21 +64,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([6272, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 7, 7, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 7, 7, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 7, 7, 1024], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [128, 1, 1], dtype=torch.bool, device='cuda'),
-    torch.randn([1024, 4096], dtype=torch.float32, device='cuda'),
-    [128, 49, 1024],  # _shape_param_0
-    [128, 7, 7, 1024],  # _shape_param_1
-    [128, 1, 1, 7, 7, 1024],  # _shape_param_2
-    [128, 7, 7, 1024],  # _shape_param_3
-    [128, 49, 1024],  # _shape_param_4
-    [6272, 1024],  # _shape_param_5
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

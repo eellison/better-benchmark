@@ -1,26 +1,18 @@
 """
-Standalone reduction kernel repro.
-Extracted from inductor compilation.
-
-Reduction info:
-#   type=sum, ranges=['2048', '1'], reduction_ranges=[]
-#   origins: ['aten.sum.dim_IntList']
-#   type=sum, ranges=['2048', '2048'], reduction_ranges=[]
-#   origins: ['aten.sum.dim_IntList']
-#   type=mean, ranges=['4', '512', '1'], reduction_ranges=[]
-#   origins: ['aten.mean.dim']
+Standalone repro captured via capture_hook.
 """
 import sys
 from pathlib import Path
 
-import glob
-import os
 import torch
-from math import inf
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_shapes_config = "(T([2048, 8], f32), T([16384], i64, max=16384), T([16384, 2048], bf16), T([16384, 1], b8), T([4, 512, 2048], bf16), T([2048], bf16), T([4096, 2048], bf16), T([512, 2048], bf16), T([512, 2048], bf16))"
 
 class Repro(torch.nn.Module):
     def forward(self, getitem_39: "f32[2048, 8]", getitem_42: "i64[16384]", _grouped_mm_5: "bf16[16384, 2048]", unsqueeze_30: "b8[16384, 1]", add_26: "bf16[4, 512, 2048]", arg36_1: "bf16[2048]", arg37_1: "bf16[4096, 2048]", arg39_1: "bf16[512, 2048]", arg41_1: "bf16[512, 2048]"):
@@ -98,17 +90,12 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([2048, 8], dtype=torch.float32, device='cuda'),
-    torch.randperm(16384, dtype=torch.int64, device='cuda'),
-    torch.randn([16384, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randint(0, 2, [16384, 1], dtype=torch.bool, device="cuda"),
-    torch.randn([4, 512, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([4096, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([512, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([512, 2048], dtype=torch.bfloat16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    import torch
+    inputs = parse_shapes_config(_shapes_config)
+    # getitem_42 (input 1) must be a true permutation of [0, 16384) for inverse-perm logic
+    inputs[1] = torch.randperm(16384, dtype=torch.int64, device='cuda')
+    return inputs
 
 
 def make_inputs(shape_config=None):

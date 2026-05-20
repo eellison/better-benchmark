@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([512, 80, 7, 7], f32, stride=(3920, 1, 560, 80)), T([80], f32), T([80], f32), T([512, 112, 7, 7], f32, stride=(5488, 1, 784, 112)), T([112], f32), T([112], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_69: "f32[512, 80, 7, 7]", primals_380: "f32[80]", primals_381: "f32[80]", convolution_71: "f32[512, 112, 7, 7]", primals_392: "f32[112]", primals_393: "f32[112]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:68 in forward, code: x1 = self.primary_conv(x)
@@ -50,14 +52,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(2007040, dtype=torch.float32, device='cuda').as_strided([512, 80, 7, 7], [3920, 1, 560, 80]),  # convolution_69
-    torch.randn([80], dtype=torch.float32, device='cuda'),
-    torch.randn([80], dtype=torch.float32, device='cuda'),
-    torch.randn(2809856, dtype=torch.float32, device='cuda').as_strided([512, 112, 7, 7], [5488, 1, 784, 112]),  # convolution_71
-    torch.randn([112], dtype=torch.float32, device='cuda'),
-    torch.randn([112], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 50268], f32), T([8, 1024], i64, max=1024), S([8, 1024, 50265]), S([-1, 50265]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_default_2: "f32[8192, 50268]", primals_3: "i64[8, 1024]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mbart/modeling_mbart.py:1371 in torch_dynamo_resume_in_forward_at_1357, code: logits = self.lm_head(hidden_states[:, slice_indices, :])
@@ -47,12 +49,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 50268], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 1024, [8, 1024], dtype=torch.int64, device='cuda'),
-    [8, 1024, 50265],  # _shape_param_0
-    [-1, 50265],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([64, 16, 256, 64], f32, stride=(262144, 64, 1024, 1)), T([64, 16, 256, 64], f32, stride=(262144, 64, 1024, 1)), T([64, 16, 256, 64], f32, stride=(262144, 64, 1024, 1)), T([1024, 1024], f32), T([1024, 1024], f32), T([1024, 1024], f32), S([64, 256, 1024]), S([64, 256, 1024]), S([64, 256, 1024]), S([16384, 1024]), S([16384, 1024]), S([16384, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_8: "f32[64, 16, 256, 64]", getitem_10: "f32[64, 16, 256, 64]", getitem_9: "f32[64, 16, 256, 64]", primals_6: "f32[1024, 1024]", primals_4: "f32[1024, 1024]", primals_2: "f32[1024, 1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/trocr/modeling_trocr.py:226 in forward, code: query_states = query_states.view(bsz, tgt_len, self.num_heads, self.head_dim).transpose(1, 2)
@@ -51,20 +53,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(16777216, dtype=torch.float32, device='cuda').as_strided([64, 16, 256, 64], [262144, 64, 1024, 1]),  # getitem_8
-    torch.randn(16777216, dtype=torch.float32, device='cuda').as_strided([64, 16, 256, 64], [262144, 64, 1024, 1]),  # getitem_10
-    torch.randn(16777216, dtype=torch.float32, device='cuda').as_strided([64, 16, 256, 64], [262144, 64, 1024, 1]),  # getitem_9
-    torch.randn([1024, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 1024], dtype=torch.float32, device='cuda'),
-    [64, 256, 1024],  # _shape_param_0
-    [64, 256, 1024],  # _shape_param_1
-    [64, 256, 1024],  # _shape_param_2
-    [16384, 1024],  # _shape_param_3
-    [16384, 1024],  # _shape_param_4
-    [16384, 1024],  # _shape_param_5
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

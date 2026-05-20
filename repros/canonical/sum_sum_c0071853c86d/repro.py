@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 96, 113, 113], f32, stride=(1225824, 1, 10848, 96)), T([128, 96, 112, 112], f32, stride=(1204224, 1, 10752, 96)), T([1, 96, 1, 1], f32), T([1, 96, 1, 1], f32), T([96], f32), T([96], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_320: "f32[128, 96, 113, 113]", convolution_5: "f32[128, 96, 112, 112]", getitem_7: "f32[1, 96, 1, 1]", rsqrt_3: "f32[1, 96, 1, 1]", primals_28: "f32[96]", primals_29: "f32[96]"):
         # File: /tmp/pytorch-work/torch/nn/functional.py:5461 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
@@ -74,14 +76,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(156905472, dtype=torch.float32, device='cuda').as_strided([128, 96, 113, 113], [1225824, 1, 10848, 96]),  # getitem_320
-    torch.randn(154140672, dtype=torch.float32, device='cuda').as_strided([128, 96, 112, 112], [1204224, 1, 10752, 96]),  # convolution_5
-    torch.randn([1, 96, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 96, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([96], dtype=torch.float32, device='cuda'),
-    torch.randn([96], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

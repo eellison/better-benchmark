@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([32, 512], i64, max=512), T([16384, 30524], f32), S([32, 512, 30522]), S([-1, 30522]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg210_1: "i64[32, 512]", addmm_default: "f32[16384, 30524]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/layoutlm/modeling_layoutlm.py:496 in forward, code: attention_mask = torch.ones(input_shape, device=device)
@@ -66,12 +68,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 512, [32, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([16384, 30524], dtype=torch.float32, device='cuda'),
-    [32, 512, 30522],  # _shape_param_0
-    [-1, 30522],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

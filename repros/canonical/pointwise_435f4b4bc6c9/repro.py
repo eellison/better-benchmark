@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([2048, 10240], f32), T([2560, 10240], f32), T([16, 32, 128, 80], f32, stride=(327680, 80, 2560, 1)), T([2560, 2560], f32), S([16, 128, 10240]), S([2048, 10240]), S([16, 128, -1]), S([2048, 2560]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_10: "f32[2048, 10240]", arg34_1: "f32[2560, 10240]", getitem_12: "f32[16, 32, 128, 80]", arg47_1: "f32[2560, 2560]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:290 in forward, code: hidden_states = self.activation_fn(self.fc1(hidden_states))
@@ -44,16 +46,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([2048, 10240], dtype=torch.float32, device='cuda'),
-    torch.randn([2560, 10240], dtype=torch.float32, device='cuda'),
-    torch.randn(5242880, dtype=torch.float32, device='cuda').as_strided([16, 32, 128, 80], [327680, 80, 2560, 1]),  # getitem_12
-    torch.randn([2560, 2560], dtype=torch.float32, device='cuda'),
-    [16, 128, 10240],  # _shape_param_0
-    [2048, 10240],  # _shape_param_1
-    [16, 128, -1],  # _shape_param_2
-    [2048, 2560],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

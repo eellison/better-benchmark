@@ -1,28 +1,18 @@
 """
-Standalone reduction kernel repro.
-Extracted from inductor compilation.
-
-Reduction info:
-#   type=sum, ranges=['4', '8', '1', '512', '128'], reduction_ranges=[]
-#   origins: ['aten.sum.dim_IntList']
-#   type=sum, ranges=['4', '8', '1', '512', '128'], reduction_ranges=[]
-#   origins: ['aten.sum.dim_IntList']
-#   type=sum, ranges=['4', '512', '8', '1'], reduction_ranges=[]
-#   origins: ['aten.sum.dim_IntList']
-#   type=sum, ranges=['4', '512', '16', '1'], reduction_ranges=[]
-#   origins: ['aten.sum.dim_IntList']
+Standalone repro captured via capture_hook.
 """
 import sys
 from pathlib import Path
 
-import glob
-import os
 import torch
-from math import inf
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_shapes_config = "(T([4, 16, 512, 128], bf16), T([4, 16, 512, 128], bf16), T([64], f32), T([4, 16, 512, 128], bf16, stride=(1048576, 128, 2048, 1)), T([1024, 1024], bf16), T([128], bf16), T([2048, 1024], bf16), T([4, 512, 8, 1], f32), T([1024, 1024], bf16), T([128], bf16), T([2048, 2048], bf16), T([4, 512, 16, 1], f32), T([2048, 1024], bf16))"
 
 class Repro(torch.nn.Module):
     def forward(self, getitem_254: "bf16[4, 16, 512, 128]", getitem_253: "bf16[4, 16, 512, 128]", primals_3: "f32[64]", getitem_252: "bf16[4, 16, 512, 128]", primals_306: "bf16[1024, 1024]", primals_305: "bf16[128]", mm_190: "bf16[2048, 1024]", rsqrt_110: "f32[4, 512, 8, 1]", primals_304: "bf16[1024, 1024]", primals_303: "bf16[128]", mm_189: "bf16[2048, 2048]", rsqrt_109: "f32[4, 512, 16, 1]", primals_302: "bf16[2048, 1024]"):
@@ -225,21 +215,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([4, 16, 512, 128], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([4, 16, 512, 128], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([64], dtype=torch.float32, device='cuda'),
-    torch.randn(4194304, dtype=torch.bfloat16, device='cuda').as_strided([4, 16, 512, 128], [1048576, 128, 2048, 1]),  # getitem_252
-    torch.randn([1024, 1024], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([128], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([2048, 1024], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([4, 512, 8, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 1024], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([128], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([2048, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([4, 512, 16, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([2048, 1024], dtype=torch.bfloat16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

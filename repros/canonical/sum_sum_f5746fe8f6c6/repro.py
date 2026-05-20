@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([512, 960, 1, 1], f32), T([512, 960, 7, 7], f32, stride=(47040, 1, 6720, 960)), T([1, 960, 1, 1], f32), T([1, 960, 1, 1], f32), T([960], f32), T([960], f32), T([], f32), S([512, 960, 7, 7]))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_92: "f32[512, 960, 1, 1]", convolution_61: "f32[512, 960, 7, 7]", getitem_91: "f32[1, 960, 1, 1]", rsqrt_45: "f32[1, 960, 1, 1]", primals_308: "f32[960]", primals_309: "f32[960]", full_default: "f32[]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/adaptive_avgmax_pool.py:172 in forward, code: x = self.pool(x)
@@ -77,16 +79,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([512, 960, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn(24084480, dtype=torch.float32, device='cuda').as_strided([512, 960, 7, 7], [47040, 1, 6720, 960]),  # convolution_61
-    torch.randn([1, 960, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 960, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([960], dtype=torch.float32, device='cuda'),
-    torch.randn([960], dtype=torch.float32, device='cuda'),
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    [512, 960, 7, 7],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

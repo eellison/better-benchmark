@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([131072, 144], f32), T([144], f32), T([512, 256, 144], f32), T([512, 256, 1], f32), T([512, 256, 144], f32), S([512, 256, 144]), S([128, 4, 256, 144]), S([294912, 16, 2, 2]), S([128, 144, 32, 32]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_72: "f32[131072, 144]", primals_105: "f32[144]", mul_119: "f32[512, 256, 144]", div_55: "f32[512, 256, 1]", add_318: "f32[512, 256, 144]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/attention.py:115 in forward, code: qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, self.head_dim).permute(2, 0, 3, 1, 4)
@@ -46,17 +48,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([131072, 144], dtype=torch.float32, device='cuda'),
-    torch.randn([144], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 256, 144], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 256, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 256, 144], dtype=torch.float32, device='cuda'),
-    [512, 256, 144],  # _shape_param_0
-    [128, 4, 256, 144],  # _shape_param_1
-    [294912, 16, 2, 2],  # _shape_param_2
-    [128, 144, 32, 32],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

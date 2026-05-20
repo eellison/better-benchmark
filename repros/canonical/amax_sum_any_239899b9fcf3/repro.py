@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([64, 1024, 64], f64), T([64, 1024, 64], f64), T([16, 4096, 80], f64, stride=(80, 3840, 1)), T([16, 4096, 4096], f64), S([64, 16, 64, 1, 64]), S([16, 64, 64, 64]), S([64, 16, 64, 1, 64]), S([16, 64, 64, 64]), S([16, 4096, 64, 1]), S([16, 4096, 1, 64]), S([1, 16, 4096, -1]), S([1, 16, 4096, 64, 1]), S([1, 16, 4096, 1, 64]), S([1, 16, 4096, 4096]), S([1, 16, 4096, 4096]), S([1, 16, 4096, 4096]), S([16, 4096, 4096]), S([1, 16, 4096, 80]), S([16, 4096, 80]))"
+
 class Repro(torch.nn.Module):
     def forward(self, bmm_124: "f64[64, 1024, 64]", bmm_125: "f64[64, 1024, 64]", getitem_221: "f64[16, 4096, 80]", bmm_126: "f64[16, 4096, 4096]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14):
         # No stacktrace found for following nodes
@@ -56,27 +58,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([64, 1024, 64], dtype=torch.float64, device='cuda'),
-    torch.randn([64, 1024, 64], dtype=torch.float64, device='cuda'),
-    torch.randn(15726080, dtype=torch.float64, device='cuda').as_strided([16, 4096, 80], [80, 3840, 1]),  # getitem_221
-    torch.randn([16, 4096, 4096], dtype=torch.float64, device='cuda'),
-    [64, 16, 64, 1, 64],  # _shape_param_0
-    [16, 64, 64, 64],  # _shape_param_1
-    [64, 16, 64, 1, 64],  # _shape_param_2
-    [16, 64, 64, 64],  # _shape_param_3
-    [16, 4096, 64, 1],  # _shape_param_4
-    [16, 4096, 1, 64],  # _shape_param_5
-    [1, 16, 4096, -1],  # _shape_param_6
-    [1, 16, 4096, 64, 1],  # _shape_param_7
-    [1, 16, 4096, 1, 64],  # _shape_param_8
-    [1, 16, 4096, 4096],  # _shape_param_9
-    [1, 16, 4096, 4096],  # _shape_param_10
-    [1, 16, 4096, 4096],  # _shape_param_11
-    [16, 4096, 4096],  # _shape_param_12
-    [1, 16, 4096, 80],  # _shape_param_13
-    [16, 4096, 80],  # _shape_param_14
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([100352, 256], f32), T([28], i64, max=28), T([256], f32), T([128, 28, 28, 256], f32), T([128, 28, 28, 1], f32), T([128, 28, 28, 256], f32), T([128, 1, 1], b8), T([256, 1024], f32), S([2048, 49, 256]), S([2048, 7, 7, 256]), S([128, 4, 4, 7, 7, 256]), S([128, 28, 28, 256]), S([128, 784, 256]), S([100352, 256]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_175: "f32[100352, 256]", fmod_6: "i64[28]", primals_52: "f32[256]", mul_32: "f32[128, 28, 28, 256]", div_115: "f32[128, 28, 28, 1]", view_1292: "f32[128, 28, 28, 256]", lt_3: "b8[128, 1, 1]", primals_50: "f32[256, 1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/swin_transformer.py:219 in forward, code: qkv = self.qkv(x).reshape(B_, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
@@ -67,22 +69,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([100352, 256], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 128, [28], dtype=torch.int64, device='cuda'),
-    torch.randn([256], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 28, 28, 256], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 28, 28, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 28, 28, 256], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [128, 1, 1], dtype=torch.bool, device='cuda'),
-    torch.randn([256, 1024], dtype=torch.float32, device='cuda'),
-    [2048, 49, 256],  # _shape_param_0
-    [2048, 7, 7, 256],  # _shape_param_1
-    [128, 4, 4, 7, 7, 256],  # _shape_param_2
-    [128, 28, 28, 256],  # _shape_param_3
-    [128, 784, 256],  # _shape_param_4
-    [100352, 256],  # _shape_param_5
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

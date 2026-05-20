@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8], i64, max=2), T([8192, 2], f32), T([8, 1024], i64, max=1024), S([8, 1024, 2]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg150_1: "i64[8]", mm: "f32[8192, 2]", arg0_1: "i64[8, 1024]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:963 in forward, code: loss = loss_fct(pooled_logits.view(-1, self.num_labels), labels.view(-1))
@@ -65,12 +67,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 2, [8], dtype=torch.int64, device='cuda'),
-    torch.randn([8192, 2], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 1024, [8, 1024], dtype=torch.int64, device='cuda'),
-    [8, 1024, 2],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

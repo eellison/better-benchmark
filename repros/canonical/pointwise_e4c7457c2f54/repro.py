@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 2048], f32), T([64], i64, max=64), T([512, 2048], f32), S([8, 1024, 2048]), S([8192, 2048]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_94: "f32[8192, 2048]", inductor_seeds_default: "i64[64]", primals_132: "f32[512, 2048]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:80 in forward, code: hidden_states = self.wi(hidden_states)
@@ -37,13 +39,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 2048], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 64, [64], dtype=torch.int64, device='cuda'),
-    torch.randn([512, 2048], dtype=torch.float32, device='cuda'),
-    [8, 1024, 2048],  # _shape_param_0
-    [8192, 2048],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

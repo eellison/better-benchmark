@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 3072], f32), T([128, 3072, 6, 6], f32, stride=(110592, 1, 18432, 3072)), S([128, 3072, 1, 1]), S([128, 3072, 6, 6]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm: "f32[128, 3072]", convolution_80: "f32[128, 3072, 6, 6]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/adaptive_avgmax_pool.py:173 in forward, code: x = self.flatten(x)
@@ -48,12 +50,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([128, 3072], dtype=torch.float32, device='cuda'),
-    torch.randn(14155776, dtype=torch.float32, device='cuda').as_strided([128, 3072, 6, 6], [110592, 1, 18432, 3072]),  # convolution_80
-    [128, 3072, 1, 1],  # _shape_param_0
-    [128, 3072, 6, 6],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

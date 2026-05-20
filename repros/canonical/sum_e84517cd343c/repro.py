@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([], f32), T([], f32), T([32, 513], i64, max=513), T([32, 512, 50265], f32, stride=(25737216, 50268, 1)), T([16384, 1], f32), T([16384, 1], f32), T([32, 512, 50265], f32), T([50265, 768], f32), S([1, 50265]), S([16384, 50265]), S([-1, 50265]), S([32, 512, 50265]), S([16384, 50265]))"
+
 class Repro(torch.nn.Module):
     def forward(self, tangents_1: "f32[]", convert_element_type_3: "f32[]", constant_pad_nd: "i64[32, 513]", view_267: "f32[32, 512, 50265]", amax_12: "f32[16384, 1]", log: "f32[16384, 1]", tangents_2: "f32[32, 512, 50265]", primals_4: "f32[50265, 768]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:37 in fixed_cross_entropy, code: loss = nn.functional.cross_entropy(source, target, ignore_index=ignore_index, reduction=reduction)
@@ -76,21 +78,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 513, [32, 513], dtype=torch.int64, device='cuda'),
-    torch.randn(823590909, dtype=torch.float32, device='cuda').as_strided([32, 512, 50265], [25737216, 50268, 1]),  # view_267
-    torch.randn([16384, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([16384, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 50265], dtype=torch.float32, device='cuda'),
-    torch.randn([50265, 768], dtype=torch.float32, device='cuda'),
-    [1, 50265],  # _shape_param_0
-    [16384, 50265],  # _shape_param_1
-    [-1, 50265],  # _shape_param_2
-    [32, 512, 50265],  # _shape_param_3
-    [16384, 50265],  # _shape_param_4
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([256, 128], i64, max=256), T([32768, 30524], f32), T([30522], f32), S([256, 128, 30522]), S([32768, 30522]), S([256, 128, 30522]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg1119_1: "i64[256, 128]", mm_default: "f32[32768, 30524]", arg1118_1: "f32[30522]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:825 in forward, code: masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))
@@ -57,14 +59,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 256, [256, 128], dtype=torch.int64, device='cuda'),
-    torch.randn([32768, 30524], dtype=torch.float32, device='cuda'),
-    torch.randn([30522], dtype=torch.float32, device='cuda'),
-    [256, 128, 30522],  # _shape_param_0
-    [32768, 30522],  # _shape_param_1
-    [256, 128, 30522],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

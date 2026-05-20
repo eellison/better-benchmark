@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 256, 35, 35], f32, stride=(313600, 1, 8960, 256)), T([128, 256, 35, 35], f32, stride=(313600, 1, 8960, 256)), T([128, 256, 35, 35], f32, stride=(313600, 1, 8960, 256)), T([128, 256, 35, 35], f32, stride=(313600, 1, 8960, 256)), T([128, 256, 35, 35], f32, stride=(313600, 1, 8960, 256)), T([128, 96, 35, 35], f32, stride=(117600, 1, 3360, 96)), T([1, 96, 1, 1], f32), T([1, 96, 1, 1], f32), T([96], f32), T([96], f32), T([], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_421: "f32[128, 256, 35, 35]", cat: "f32[128, 256, 35, 35]", getitem_430: "f32[128, 256, 35, 35]", getitem_436: "f32[128, 256, 35, 35]", getitem_439: "f32[128, 256, 35, 35]", convolution_10: "f32[128, 96, 35, 35]", getitem_25: "f32[1, 96, 1, 1]", rsqrt_10: "f32[1, 96, 1, 1]", primals_66: "f32[96]", primals_67: "f32[96]", full_default: "f32[]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/inception_v3.py:57 in _forward, code: branch_pool = F.avg_pool2d(x, kernel_size=3, stride=1, padding=1)
@@ -75,19 +77,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(40140800, dtype=torch.float32, device='cuda').as_strided([128, 256, 35, 35], [313600, 1, 8960, 256]),  # getitem_421
-    torch.randn(40140800, dtype=torch.float32, device='cuda').as_strided([128, 256, 35, 35], [313600, 1, 8960, 256]),  # cat
-    torch.randn(40140800, dtype=torch.float32, device='cuda').as_strided([128, 256, 35, 35], [313600, 1, 8960, 256]),  # getitem_430
-    torch.randn(40140800, dtype=torch.float32, device='cuda').as_strided([128, 256, 35, 35], [313600, 1, 8960, 256]),  # getitem_436
-    torch.randn(40140800, dtype=torch.float32, device='cuda').as_strided([128, 256, 35, 35], [313600, 1, 8960, 256]),  # getitem_439
-    torch.randn(15052800, dtype=torch.float32, device='cuda').as_strided([128, 96, 35, 35], [117600, 1, 3360, 96]),  # convolution_10
-    torch.randn([1, 96, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 96, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([96], dtype=torch.float32, device='cuda'),
-    torch.randn([96], dtype=torch.float32, device='cuda'),
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

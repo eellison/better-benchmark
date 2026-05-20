@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([16, 512], i64, max=512), T([32000, 1024], f32), T([1024, 16, 64], f32), T([1024, 16, 64], f32), T([1024, 16, 64], f32), S([1, 8192, 1024]), S([1, 1024, 1024]), S([1, 8192, 1024]), S([1, 1024, 1024]), S([-1, 16, -1]), S([1, 16384, 1024]), S([1, 1024, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "i64[16, 512]", arg1_1: "f32[32000, 1024]", arg2_1: "f32[1024, 16, 64]", arg3_1: "f32[1024, 16, 64]", arg5_1: "f32[1024, 16, 64]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:1046 in forward, code: input_ids = input_ids.transpose(0, 1).contiguous()
@@ -94,20 +96,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 512, [16, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([32000, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 16, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 16, 64], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 16, 64], dtype=torch.float32, device='cuda'),
-    [1, 8192, 1024],  # _shape_param_0
-    [1, 1024, 1024],  # _shape_param_1
-    [1, 8192, 1024],  # _shape_param_2
-    [1, 1024, 1024],  # _shape_param_3
-    [-1, 16, -1],  # _shape_param_4
-    [1, 16384, 1024],  # _shape_param_5
-    [1, 1024, 1024],  # _shape_param_6
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

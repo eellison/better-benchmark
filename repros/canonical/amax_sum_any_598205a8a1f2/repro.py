@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([32768, 768], f32), T([3072, 128, 128], f32), T([13], i64, max=13), S([256, -1, 128, 128]), S([256, 128, 768]), S([256, 128, -1, 64]), S([256, 12, 128, 128]), S([256, 12, 128, 128]), S([3072, 128, 128]), S([256, 12, 128, 64]), S([3072, 128, 64]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_2: "f32[32768, 768]", bmm: "f32[3072, 128, 128]", inductor_seeds_default: "i64[13]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/masking_utils.py:511 in sdpa_mask, code: q_arange = torch.arange(q_length, device=device) + q_offset
@@ -68,19 +70,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([32768, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([3072, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 13, [13], dtype=torch.int64, device='cuda'),
-    [256, -1, 128, 128],  # _shape_param_0
-    [256, 128, 768],  # _shape_param_1
-    [256, 128, -1, 64],  # _shape_param_2
-    [256, 12, 128, 128],  # _shape_param_3
-    [256, 12, 128, 128],  # _shape_param_4
-    [3072, 128, 128],  # _shape_param_5
-    [256, 12, 128, 64],  # _shape_param_6
-    [3072, 128, 64],  # _shape_param_7
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

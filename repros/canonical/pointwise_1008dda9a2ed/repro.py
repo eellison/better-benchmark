@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([1, 512], i64, max=1), T([512, 2304], bf16), S([1, -1, 512, 512]), S([1, 512, 2304]), S([1, 512, -1, 64]), S([1, 512, -1, 64]), S([1, 512, -1, 64]), S([1, 12, 512, 512]))"
+
 class Repro(torch.nn.Module):
     def forward(self, cumsum: "i64[1, 512]", addmm: "bf16[512, 2304]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # No stacktrace found for following nodes
@@ -59,16 +61,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 1, [1, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([512, 2304], dtype=torch.bfloat16, device='cuda'),
-    [1, -1, 512, 512],  # _shape_param_0
-    [1, 512, 2304],  # _shape_param_1
-    [1, 512, -1, 64],  # _shape_param_2
-    [1, 512, -1, 64],  # _shape_param_3
-    [1, 512, -1, 64],  # _shape_param_4
-    [1, 12, 512, 512],  # _shape_param_5
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

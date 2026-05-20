@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 4096], f32), T([1024, 4096], f32), T([64, 16, 128, 64], f32, stride=(131072, 64, 1024, 1)), T([1024, 1024], f32), S([64, 128, 4096]), S([8192, 4096]), S([64, 128, -1]), S([8192, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_70: "f32[8192, 4096]", arg194_1: "f32[1024, 4096]", getitem_52: "f32[64, 16, 128, 64]", arg207_1: "f32[1024, 1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:373 in forward, code: hidden_states = self.activation_fn(self.fc1(hidden_states))
@@ -38,16 +40,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 4096], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 4096], dtype=torch.float32, device='cuda'),
-    torch.randn(8388608, dtype=torch.float32, device='cuda').as_strided([64, 16, 128, 64], [131072, 64, 1024, 1]),  # getitem_52
-    torch.randn([1024, 1024], dtype=torch.float32, device='cuda'),
-    [64, 128, 4096],  # _shape_param_0
-    [8192, 4096],  # _shape_param_1
-    [64, 128, -1],  # _shape_param_2
-    [8192, 1024],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

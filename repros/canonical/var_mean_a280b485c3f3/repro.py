@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([4096, 1536], f32), T([73], i64, max=73), T([8, 512, 1536], f32), T([1536], f32), T([1536], f32), T([1536, 1536], f32), S([8, 512, 1536]), S([4096, 1536]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_143: "f32[4096, 1536]", inductor_seeds_default: "i64[73]", add_166: "f32[8, 512, 1536]", primals_389: "f32[1536]", primals_390: "f32[1536]", primals_391: "f32[1536, 1536]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py:409 in forward, code: hidden_states = self.dense(hidden_states)
@@ -46,16 +48,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([4096, 1536], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 73, [73], dtype=torch.int64, device='cuda'),
-    torch.randn([8, 512, 1536], dtype=torch.float32, device='cuda'),
-    torch.randn([1536], dtype=torch.float32, device='cuda'),
-    torch.randn([1536], dtype=torch.float32, device='cuda'),
-    torch.randn([1536, 1536], dtype=torch.float32, device='cuda'),
-    [8, 512, 1536],  # _shape_param_0
-    [4096, 1536],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

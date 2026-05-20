@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([2048, 2560], f32), T([16, 128, 2560], f32), T([2560], f32), T([2560], f32), T([2560, 2560], f32), T([16, 128, 2560], f32), T([2560, 2560], f32), S([16, 128, 2560]), S([2048, 2560]), S([2048, 2560]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_3: "f32[2048, 2560]", primals_3: "f32[16, 128, 2560]", primals_14: "f32[2560]", primals_15: "f32[2560]", primals_16: "f32[2560, 2560]", primals_13: "f32[16, 128, 2560]", primals_18: "f32[2560, 2560]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:241 in forward, code: attn_output = self.out_proj(attn_output)
@@ -55,18 +57,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([2048, 2560], dtype=torch.float32, device='cuda'),
-    torch.randn([16, 128, 2560], dtype=torch.float32, device='cuda'),
-    torch.randn([2560], dtype=torch.float32, device='cuda'),
-    torch.randn([2560], dtype=torch.float32, device='cuda'),
-    torch.randn([2560, 2560], dtype=torch.float32, device='cuda'),
-    torch.randn([16, 128, 2560], dtype=torch.float32, device='cuda'),
-    torch.randn([2560, 2560], dtype=torch.float32, device='cuda'),
-    [16, 128, 2560],  # _shape_param_0
-    [2048, 2560],  # _shape_param_1
-    [2048, 2560],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

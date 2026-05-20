@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 3, 224, 224], f32, stride=(150528, 1, 672, 3)))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg1_1: "f32[128, 3, 224, 224]"):
         # File: /tmp/pytorch-work/torch/nn/functional.py:5461 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
@@ -23,9 +25,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(19267584, dtype=torch.float32, device='cuda').as_strided([128, 3, 224, 224], [150528, 1, 672, 3]),  # arg1_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

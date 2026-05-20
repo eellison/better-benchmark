@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([512, 128, 128], b8), T([512, 128, 128], f32), T([512, 128, 128], f32), T([32, 1, 128, 128], f32), T([512, 128, 1], f32), T([512, 128, 1], f32), S([32, 16, 128, 128]), S([512, 128, 128]), S([32, 16, 128, 128]), S([512, 128, 128]))"
+
 class Repro(torch.nn.Module):
     def forward(self, gt: "b8[512, 128, 128]", bmm_3: "f32[512, 128, 128]", bmm: "f32[512, 128, 128]", primals_10: "f32[32, 1, 128, 128]", amax: "f32[512, 128, 1]", sum_1: "f32[512, 128, 1]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xglm/modeling_xglm.py:226 in forward, code: attn_probs = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
@@ -61,18 +63,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 2, [512, 128, 128], dtype=torch.bool, device='cuda'),
-    torch.randn([512, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 1, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 128, 1], dtype=torch.float32, device='cuda'),
-    [32, 16, 128, 128],  # _shape_param_0
-    [512, 128, 128],  # _shape_param_1
-    [32, 16, 128, 128],  # _shape_param_2
-    [512, 128, 128],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

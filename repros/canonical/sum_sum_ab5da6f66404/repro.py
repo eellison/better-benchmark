@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([25088, 512], f32), T([512], f32), T([128, 14, 14, 512], f32), T([128, 14, 14, 1], f32), T([128, 14, 14, 512], f32), T([128, 1, 1], b8), T([512, 2048], f32), S([512, 49, 512]), S([512, 7, 7, 512]), S([128, 2, 2, 7, 7, 512]), S([128, 14, 14, 512]), S([128, 196, 512]), S([25088, 512]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_149: "f32[25088, 512]", primals_99: "f32[512]", mul_64: "f32[128, 14, 14, 512]", div_108: "f32[128, 14, 14, 1]", view_1196: "f32[128, 14, 14, 512]", lt_9: "b8[128, 1, 1]", primals_97: "f32[512, 2048]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/swin_transformer.py:219 in forward, code: qkv = self.qkv(x).reshape(B_, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
@@ -63,21 +65,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([25088, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 14, 14, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 14, 14, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 14, 14, 512], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [128, 1, 1], dtype=torch.bool, device='cuda'),
-    torch.randn([512, 2048], dtype=torch.float32, device='cuda'),
-    [512, 49, 512],  # _shape_param_0
-    [512, 7, 7, 512],  # _shape_param_1
-    [128, 2, 2, 7, 7, 512],  # _shape_param_2
-    [128, 14, 14, 512],  # _shape_param_3
-    [128, 196, 512],  # _shape_param_4
-    [25088, 512],  # _shape_param_5
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

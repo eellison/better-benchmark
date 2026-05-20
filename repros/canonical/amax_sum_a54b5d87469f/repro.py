@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 768], f32), T([768], f32), T([288, 512, 512], f32), T([8, 1024], f32), T([8, 1024], b8), S([1024, 8, 768]), S([96, 3, 512, 1, 512]), S([96, 3, 512, 512]), S([96, 3, 512, 513]), S([8, 256, 12, 257]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 256, 12, 257]), S([8, 12, 1024, 513]), S([8, 1024, 1]), S([8, 1024, 1]), S([8, 2, 512, 1]), S([8, 2, 512, 1]), S([8, 3, 512, 512]), S([8, 3, 512, 513]), S([8, 256, 1, 257]), S([8, 1, 1024, 513]), S([8, 4, 256, 513]), S([8, 256, 1, 257]), S([8, 1, 1024, 513]), S([1024, 8, 12, 64]), S([96, 4, 256, 513]), S([96, 1024, 64]), S([96, 4, -1]), S([96, 4, 256, 769]), S([384, 256, 768]), S([384, 768, 64]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_2: "f32[8192, 768]", primals_7: "f32[768]", bmm: "f32[288, 512, 512]", primals_8: "f32[8, 1024]", primals_9: "b8[8, 1024]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15, _shape_param_16, _shape_param_17, _shape_param_18, _shape_param_19, _shape_param_20, _shape_param_21, _shape_param_22, _shape_param_23, _shape_param_24, _shape_param_25, _shape_param_26):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:505 in forward, code: value_vectors = self.value(hidden_states)
@@ -345,40 +347,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([288, 512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([8, 1024], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [8, 1024], dtype=torch.bool, device='cuda'),
-    [1024, 8, 768],  # _shape_param_0
-    [96, 3, 512, 1, 512],  # _shape_param_1
-    [96, 3, 512, 512],  # _shape_param_2
-    [96, 3, 512, 513],  # _shape_param_3
-    [8, 256, 12, 257],  # _shape_param_4
-    [8, 12, 1024, 513],  # _shape_param_5
-    [96, 4, 256, 513],  # _shape_param_6
-    [8, 256, 12, 257],  # _shape_param_7
-    [8, 12, 1024, 513],  # _shape_param_8
-    [8, 1024, 1],  # _shape_param_9
-    [8, 1024, 1],  # _shape_param_10
-    [8, 2, 512, 1],  # _shape_param_11
-    [8, 2, 512, 1],  # _shape_param_12
-    [8, 3, 512, 512],  # _shape_param_13
-    [8, 3, 512, 513],  # _shape_param_14
-    [8, 256, 1, 257],  # _shape_param_15
-    [8, 1, 1024, 513],  # _shape_param_16
-    [8, 4, 256, 513],  # _shape_param_17
-    [8, 256, 1, 257],  # _shape_param_18
-    [8, 1, 1024, 513],  # _shape_param_19
-    [1024, 8, 12, 64],  # _shape_param_20
-    [96, 4, 256, 513],  # _shape_param_21
-    [96, 1024, 64],  # _shape_param_22
-    [96, 4, -1],  # _shape_param_23
-    [96, 4, 256, 769],  # _shape_param_24
-    [384, 256, 768],  # _shape_param_25
-    [384, 768, 64],  # _shape_param_26
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

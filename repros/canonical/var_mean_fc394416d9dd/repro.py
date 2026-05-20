@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([50400, 4096], f32), T([1, 128], i64, max=50400), T([4096], f32), T([4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), S([128, 4096]))"
+
 class Repro(torch.nn.Module):
     def forward(self, primals_2: "f32[50400, 4096]", primals_1: "i64[1, 128]", primals_3: "f32[4096]", primals_4: "f32[4096]", primals_5: "f32[4096, 4096]", primals_6: "f32[4096, 4096]", primals_7: "f32[4096, 4096]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gptj/modeling_gptj.py:494 in forward, code: inputs_embeds = self.wte(input_ids)
@@ -64,16 +66,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([50400, 4096], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 50400, [1, 128], dtype=torch.int64, device='cuda'),
-    torch.randn([4096], dtype=torch.float32, device='cuda'),
-    torch.randn([4096], dtype=torch.float32, device='cuda'),
-    torch.randn([4096, 4096], dtype=torch.float32, device='cuda'),
-    torch.randn([4096, 4096], dtype=torch.float32, device='cuda'),
-    torch.randn([4096, 4096], dtype=torch.float32, device='cuda'),
-    [128, 4096],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

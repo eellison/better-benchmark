@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([401408, 128], f32), T([56], i64, max=56), T([128], f32), T([128, 56, 56, 128], f32), T([128, 56, 56, 1], f32), T([128, 56, 56, 128], f32), T([128, 512], f32), S([8192, 49, 128]), S([8192, 7, 7, 128]), S([128, 8, 8, 7, 7, 128]), S([128, 56, 56, 128]), S([128, 3136, 128]), S([401408, 128]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_193: "f32[401408, 128]", fmod_2: "i64[56]", primals_20: "f32[128]", mul_10: "f32[128, 56, 56, 128]", div_120: "f32[128, 56, 56, 1]", view_1358: "f32[128, 56, 56, 128]", primals_18: "f32[128, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/swin_transformer.py:219 in forward, code: qkv = self.qkv(x).reshape(B_, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
@@ -58,21 +60,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([401408, 128], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 128, [56], dtype=torch.int64, device='cuda'),
-    torch.randn([128], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 56, 56, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 56, 56, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 56, 56, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 512], dtype=torch.float32, device='cuda'),
-    [8192, 49, 128],  # _shape_param_0
-    [8192, 7, 7, 128],  # _shape_param_1
-    [128, 8, 8, 7, 7, 128],  # _shape_param_2
-    [128, 56, 56, 128],  # _shape_param_3
-    [128, 3136, 128],  # _shape_param_4
-    [401408, 128],  # _shape_param_5
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

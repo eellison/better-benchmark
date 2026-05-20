@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([], f32), T([], f32), T([8, 2], b8), T([8, 1], b8), T([8, 2], f32), T([8, 2], f32), T([8], i64, max=8), T([8], i64, max=8), T([2, 768], f32), S([8192, 2]))"
+
 class Repro(torch.nn.Module):
     def forward(self, tangents_1: "f32[]", convert_element_type_1: "f32[]", eq_tensor: "b8[8, 2]", ne_5: "b8[8, 1]", index_2: "f32[8, 2]", tangents_2: "f32[8, 2]", iota_1: "i64[8]", argmax: "i64[8]", primals_150: "f32[2, 768]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:963 in forward, code: loss = loss_fct(pooled_logits.view(-1, self.num_labels), labels.view(-1))
@@ -57,18 +59,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [8, 2], dtype=torch.bool, device='cuda'),
-    torch.randint(0, 2, [8, 1], dtype=torch.bool, device='cuda'),
-    torch.randn([8, 2], dtype=torch.float32, device='cuda'),
-    torch.randn([8, 2], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 8, [8], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 8, [8], dtype=torch.int64, device='cuda'),
-    torch.randn([2, 768], dtype=torch.float32, device='cuda'),
-    [8192, 2],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

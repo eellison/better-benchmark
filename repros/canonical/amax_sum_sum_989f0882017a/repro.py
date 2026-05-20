@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([16, 128], i64, max=128), T([2048, 8008], f32), T([1, 8008], f32), S([16, 128, 8008]), S([-1, 8008]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "i64[16, 128]", mm: "f32[2048, 8008]", arg665_1: "f32[1, 8008]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:892 in forward, code: masked_lm_loss = loss_fct(lm_logits.view(-1, self.config.vocab_size), labels.view(-1))
@@ -53,13 +55,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 128, [16, 128], dtype=torch.int64, device='cuda'),
-    torch.randn([2048, 8008], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 8008], dtype=torch.float32, device='cuda'),
-    [16, 128, 8008],  # _shape_param_0
-    [-1, 8008],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

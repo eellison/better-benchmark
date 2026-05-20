@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([16384, 1024], f32), T([128, 128, 1024], f32), T([1024], f32), T([1024], f32), T([4096, 1024], f32), S([128, 128, 1024]), S([16384, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_3: "f32[16384, 1024]", primals_3: "f32[128, 128, 1024]", primals_13: "f32[1024]", primals_14: "f32[1024]", primals_15: "f32[4096, 1024]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/pegasus/modeling_pegasus.py:250 in forward, code: attn_output = self.out_proj(attn_output)
@@ -51,15 +53,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([16384, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 128, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([4096, 1024], dtype=torch.float32, device='cuda'),
-    [128, 128, 1024],  # _shape_param_0
-    [16384, 1024],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

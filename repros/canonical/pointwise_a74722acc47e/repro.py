@@ -1,21 +1,18 @@
 """
-Standalone reduction kernel repro.
-Extracted from inductor compilation.
-
-Reduction info:
-
+Standalone repro captured via capture_hook.
 """
 import sys
 from pathlib import Path
 
-import glob
-import os
 import torch
-from math import inf
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_shapes_config = "(T([16384], i64, max=100), T([16384], i64, max=100), T([2048, 2048], bf16), T([128, 1536, 2048], bf16))"
 
 class Repro(torch.nn.Module):
     def forward(self, getitem_56: "i64[16384]", getitem_57: "i64[16384]", view_78: "bf16[2048, 2048]", arg45_1: "bf16[128, 1536, 2048]"):
@@ -42,12 +39,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 100, [16384], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 100, [16384], dtype=torch.int64, device='cuda'),
-    torch.randn([2048, 2048], dtype=torch.bfloat16, device='cuda'),
-    torch.randn([128, 1536, 2048], dtype=torch.bfloat16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

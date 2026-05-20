@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([512, 1280, 1, 1], f32), T([1000, 1280], f32), S([512, 1280]))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_94: "f32[512, 1280, 1, 1]", arg431_1: "f32[1000, 1280]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:833 in forward_head, code: x = self.act2(x)
@@ -29,11 +31,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([512, 1280, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1000, 1280], dtype=torch.float32, device='cuda'),
-    [512, 1280],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

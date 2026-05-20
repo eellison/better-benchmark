@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([16384, 384], f32), T([32, 512, 768], f32), T([384, 768], f32), T([384, 768], f32), T([384, 768], f32), T([32, 384, 512], f32), T([384, 1], f32), T([54, 384], f32), S([32, 512, 384]), S([16384, 768]), S([16384, 768]), S([16384, 768]), S([16384, 384]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_79: "f32[16384, 384]", add_135: "f32[32, 512, 768]", arg261_1: "f32[384, 768]", arg263_1: "f32[384, 768]", arg272_1: "f32[384, 768]", convolution_23: "f32[32, 384, 512]", arg267_1: "f32[384, 1]", arg270_1: "f32[54, 384]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:197 in forward, code: mixed_query_layer = self.query(hidden_states)
@@ -49,21 +51,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([16384, 384], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 384, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([384, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([54, 384], dtype=torch.float32, device='cuda'),
-    [32, 512, 384],  # _shape_param_0
-    [16384, 768],  # _shape_param_1
-    [16384, 768],  # _shape_param_2
-    [16384, 768],  # _shape_param_3
-    [16384, 384],  # _shape_param_4
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

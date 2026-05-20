@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([32, 12, 512, 64], f32, stride=(393216, 64, 768, 1)), T([768, 768], f32), S([32, 512, -1]), S([16384, 768]))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_52: "f32[32, 12, 512, 64]", arg193_1: "f32[768, 768]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/layoutlm/modeling_layoutlm.py:143 in eager_attention_forward, code: attn_output = attn_output.transpose(1, 2).contiguous()
@@ -31,12 +33,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(12582912, dtype=torch.float32, device='cuda').as_strided([32, 12, 512, 64], [393216, 64, 768, 1]),  # getitem_52
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    [32, 512, -1],  # _shape_param_0
-    [16384, 768],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([32, 6, 512, 64], f32, stride=(196608, 64, 384, 1)), T([98304, 64, 1], f32), T([768, 768], f32), S([-1, 384]), S([32, -1, 6, 64]), S([32, 512, 768]), S([16384, 768]))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_52: "f32[32, 6, 512, 64]", bmm_33: "f32[98304, 64, 1]", arg274_1: "f32[768, 768]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/convbert/modeling_convbert.py:241 in forward, code: context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
@@ -40,15 +42,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn(6291456, dtype=torch.float32, device='cuda').as_strided([32, 6, 512, 64], [196608, 64, 384, 1]),  # getitem_52
-    torch.randn([98304, 64, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    [-1, 384],  # _shape_param_0
-    [32, -1, 6, 64],  # _shape_param_1
-    [32, 512, 768],  # _shape_param_2
-    [16384, 768],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

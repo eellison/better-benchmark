@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([128, 768], f32), T([768], f32), T([128, 768], f32), T([128, 1, 1], f32), T([128, 1, 1], f32), T([128, 1, 768], f32), T([768, 768], f32), S([128, 1, 768]), S([128, 1, 768]), S([128, 768]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_3: "f32[128, 768]", primals_158: "f32[768]", addmm_49: "f32[128, 768]", getitem_141: "f32[128, 1, 1]", rsqrt_25: "f32[128, 1, 1]", select_scatter: "f32[128, 1, 768]", primals_156: "f32[768, 768]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/mlp.py:48 in forward, code: x = self.fc1(x)
@@ -48,18 +50,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([128, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 1, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    [128, 1, 768],  # _shape_param_0
-    [128, 1, 768],  # _shape_param_1
-    [128, 768],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

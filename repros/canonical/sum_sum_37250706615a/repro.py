@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 1024], f32), T([512, 16, 1024], f32), T([8192, 1024], f32), T([8192, 1024], f32), T([1024], f32), T([512, 16, 1024], f32), T([512, 16, 1], f32), T([512, 16, 1024], b8), T([1024, 4096], f32), S([512, 16, 1024, 1, 1]), S([512, 16, 1024, 1, 1]), S([512, 16, 1024, 1, 1]), S([8192, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_default_13: "f32[8192, 1024]", mul_1101: "f32[512, 16, 1024]", mm_default_11: "f32[8192, 1024]", mm_default_9: "f32[8192, 1024]", primals_16: "f32[1024]", mul_20: "f32[512, 16, 1024]", div_73: "f32[512, 16, 1]", gt_5: "b8[512, 16, 1024]", primals_14: "f32[1024, 4096]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/xlnet/modeling_xlnet.py:255 in forward, code: v_head_h = torch.einsum("ibh,hnd->ibnd", cat, self.v)
@@ -62,21 +64,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([512, 16, 1], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [512, 16, 1024], dtype=torch.bool, device='cuda'),
-    torch.randn([1024, 4096], dtype=torch.float32, device='cuda'),
-    [512, 16, 1024, 1, 1],  # _shape_param_0
-    [512, 16, 1024, 1, 1],  # _shape_param_1
-    [512, 16, 1024, 1, 1],  # _shape_param_2
-    [8192, 1024],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([], f32), T([], f32), T([8, 512], i64, max=512), T([8, 512, 30000], f32), T([4096, 1], f32), T([4096, 1], f32), T([8, 512, 30000], f32), T([30000, 128], f32), S([1, 30000]), S([4096, 30000]), S([-1, 30000]), S([8, 512, 30000]), S([4096, 30000]))"
+
 class Repro(torch.nn.Module):
     def forward(self, tangents_1: "f32[]", convert_element_type: "f32[]", primals_32: "i64[8, 512]", view_269: "f32[8, 512, 30000]", amax_12: "f32[4096, 1]", log: "f32[4096, 1]", tangents_2: "f32[8, 512, 30000]", primals_4: "f32[30000, 128]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:650 in forward, code: masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))
@@ -60,21 +62,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 512, [8, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([8, 512, 30000], dtype=torch.float32, device='cuda'),
-    torch.randn([4096, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([4096, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([8, 512, 30000], dtype=torch.float32, device='cuda'),
-    torch.randn([30000, 128], dtype=torch.float32, device='cuda'),
-    [1, 30000],  # _shape_param_0
-    [4096, 30000],  # _shape_param_1
-    [-1, 30000],  # _shape_param_2
-    [8, 512, 30000],  # _shape_param_3
-    [4096, 30000],  # _shape_param_4
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

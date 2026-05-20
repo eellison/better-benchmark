@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([64, 128], i64, max=128), T([64, 128], i32, max=128), T([1026, 1024], f32), S([64, 128, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, cumsum: "i64[64, 128]", convert_element_type: "i32[64, 128]", arg1_1: "f32[1026, 1024]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:178 in create_position_ids_from_input_ids, code: incremental_indices = (torch.cumsum(mask, dim=1).type_as(mask) + past_key_values_length) * mask
@@ -34,12 +36,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randint(0, 128, [64, 128], dtype=torch.int64, device='cuda'),
-    torch.randint(0, 128, [64, 128], dtype=torch.int32, device='cuda'),
-    torch.randn([1026, 1024], dtype=torch.float32, device='cuda'),
-    [64, 128, 1024],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

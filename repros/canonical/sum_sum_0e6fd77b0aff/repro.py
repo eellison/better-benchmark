@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([8192, 1024], f32), T([8192, 1024], f32), T([8192, 1024], f32), T([1024], f32), T([16, 512, 1024], f32), T([16, 512, 1], f32), T([16, 512, 1024], f32), T([16, 512, 1024], b8), T([1024, 4096], f32), S([16, 512, 1024]), S([16, 512, 1024]), S([16, 512, 1024]), S([8192, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_274: "f32[8192, 1024]", mm_276: "f32[8192, 1024]", mm_278: "f32[8192, 1024]", primals_23: "f32[1024]", mul_16: "f32[16, 512, 1024]", div_120: "f32[16, 512, 1]", add_336: "f32[16, 512, 1024]", gt_3: "b8[16, 512, 1024]", primals_21: "f32[1024, 4096]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/megatron_bert/modeling_megatron_bert.py:160 in forward, code: value_layer = self.value(current_states)
@@ -53,21 +55,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([8192, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([1024], dtype=torch.float32, device='cuda'),
-    torch.randn([16, 512, 1024], dtype=torch.float32, device='cuda'),
-    torch.randn([16, 512, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([16, 512, 1024], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [16, 512, 1024], dtype=torch.bool, device='cuda'),
-    torch.randn([1024, 4096], dtype=torch.float32, device='cuda'),
-    [16, 512, 1024],  # _shape_param_0
-    [16, 512, 1024],  # _shape_param_1
-    [16, 512, 1024],  # _shape_param_2
-    [8192, 1024],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([4096, 512], f32), T([84], i64, max=84), T([32, 128, 512], f32), T([512], f32), T([4096, 512], f32), T([32, 128, 512], f32), T([512], f32), T([384, 512], f32), T([384, 512], f32), S([32, 128, 512]), S([32, 128, 512]), S([4096, 512]), S([4096, 512]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm_55: "f32[4096, 512]", inductor_seeds_default: "i64[84]", add_58: "f32[32, 128, 512]", primals_76: "f32[512]", mm_59: "f32[4096, 512]", mul_145: "f32[32, 128, 512]", primals_84: "f32[512]", primals_85: "f32[384, 512]", primals_86: "f32[384, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mt5/modeling_mt5.py:121 in forward, code: hidden_states = self.wo(hidden_states)
@@ -81,21 +83,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([4096, 512], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 84, [84], dtype=torch.int64, device='cuda'),
-    torch.randn([32, 128, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    torch.randn([4096, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([32, 128, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    torch.randn([384, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([384, 512], dtype=torch.float32, device='cuda'),
-    [32, 128, 512],  # _shape_param_0
-    [32, 128, 512],  # _shape_param_1
-    [4096, 512],  # _shape_param_2
-    [4096, 512],  # _shape_param_3
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

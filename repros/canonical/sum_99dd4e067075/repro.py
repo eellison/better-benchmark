@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([1024, 128, 128], f32), T([64, 16, 128, 128], b8), T([64, 1, 128, 128], b8, stride=(0, 128, 1, 0)), T([], f32), T([1024, 128, 128], f32), T([64, 16, 128, 1], f32), T([64, 16, 128, 1], f32), T([64, 16, 128, 1], b8), S([64, 16, 128, 128]), S([64, 16, 128, 128]), S([1024, 128, 128]))"
+
 class Repro(torch.nn.Module):
     def forward(self, bmm_3: "f32[1024, 128, 128]", gt: "b8[64, 16, 128, 128]", primals_10: "b8[64, 1, 128, 128]", full_default_1: "f32[]", bmm: "f32[1024, 128, 128]", amax: "f32[64, 16, 128, 1]", sum_1: "f32[64, 16, 128, 1]", logical_not_1: "b8[64, 16, 128, 1]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
@@ -40,19 +42,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([1024, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [64, 16, 128, 128], dtype=torch.bool, device='cuda'),
-    torch.randint(0, 2, (128,), dtype=torch.bool, device='cuda').as_strided([64, 1, 128, 128], [0, 128, 1, 0]),  # primals_10
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 16, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([64, 16, 128, 1], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [64, 16, 128, 1], dtype=torch.bool, device='cuda'),
-    [64, 16, 128, 128],  # _shape_param_0
-    [64, 16, 128, 128],  # _shape_param_1
-    [1024, 128, 128],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

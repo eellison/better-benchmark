@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([192, 512, 512], f32), T([4096, 1536], f32), S([-1, 24, 512, 512]), S([-1, 512, 512]), S([8, 512, 1536]), S([8, 512, 24, -1]), S([-1, 512, 64]))"
+
 class Repro(torch.nn.Module):
     def forward(self, bmm_46: "f32[192, 512, 512]", addmm_140: "f32[4096, 1536]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py:257 in forward, code: attention_scores = attention_scores.masked_fill(~(attention_mask), torch.finfo(query_layer.dtype).min)
@@ -51,15 +53,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([192, 512, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([4096, 1536], dtype=torch.float32, device='cuda'),
-    [-1, 24, 512, 512],  # _shape_param_0
-    [-1, 512, 512],  # _shape_param_1
-    [8, 512, 1536],  # _shape_param_2
-    [8, 512, 24, -1],  # _shape_param_3
-    [-1, 512, 64],  # _shape_param_4
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

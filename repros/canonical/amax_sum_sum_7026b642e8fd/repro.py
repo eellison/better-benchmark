@@ -15,6 +15,8 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_shapes_config = "(T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([], f32), T([8, 512], i64, max=512), T([4096, 128100], f32), S([8, 512, 128100]), S([-1, 128100]))"
+
 class Repro(torch.nn.Module):
     def forward(self, _tensor_constant0: "f32[]", _tensor_constant1: "f32[]", _tensor_constant2: "f32[]", _tensor_constant3: "f32[]", _tensor_constant4: "f32[]", _tensor_constant5: "f32[]", _tensor_constant6: "f32[]", _tensor_constant7: "f32[]", _tensor_constant8: "f32[]", _tensor_constant9: "f32[]", _tensor_constant10: "f32[]", _tensor_constant11: "f32[]", _tensor_constant12: "f32[]", _tensor_constant13: "f32[]", _tensor_constant14: "f32[]", _tensor_constant15: "f32[]", _tensor_constant16: "f32[]", _tensor_constant17: "f32[]", _tensor_constant18: "f32[]", _tensor_constant19: "f32[]", _tensor_constant20: "f32[]", _tensor_constant21: "f32[]", _tensor_constant22: "f32[]", _tensor_constant23: "f32[]", arg395_1: "i64[8, 512]", addmm_145: "f32[4096, 128100]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py:558 in forward, code: mask = mask.unsqueeze(2)
@@ -233,36 +235,8 @@ class Repro(torch.nn.Module):
 
 
 def _default_make_inputs():
-    return [
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randn([], dtype=torch.float32, device='cpu'),
-    torch.randint(0, 512, [8, 512], dtype=torch.int64, device='cuda'),
-    torch.randn([4096, 128100], dtype=torch.float32, device='cuda'),
-    [8, 512, 128100],  # _shape_param_0
-    [-1, 128100],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):
