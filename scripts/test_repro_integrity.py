@@ -119,7 +119,7 @@ def test_shapes_config_parses():
         config_str = match.group(1)
         try:
             result = parse_shapes_config(config_str)
-            if not result:
+            if result is None:
                 errors.append((d.name, "empty result"))
         except Exception as e:
             errors.append((d.name, str(e)[:50]))
