@@ -37,18 +37,8 @@ _shapes_config = "{shapes_config}"
 
 
 def _default_make_inputs():
-    def T(shape, dtype, stride=None):
-        return {{"kind": "tensor", "shape": shape, "dtype": dtype, "stride": list(stride) if stride else None, "device": "cuda"}}
-    def S(dims):
-        return {{"kind": "shape", "dims": dims}}
-    _ns = {{"T": T, "S": S, "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
-            "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8", "b8": "b8", "u8": "u8"}}
-    inputs = eval(_shapes_config, {{"__builtins__": {{}}}}, _ns)
-    if isinstance(inputs, dict):
-        inputs = [inputs]
-    elif isinstance(inputs, tuple):
-        inputs = list(inputs)
-    return make_inputs_from_config({{"inputs": inputs}})
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):
@@ -76,6 +66,57 @@ def extract_shapes_config(content: str) -> str | None:
     """Extract the _shapes_config string value."""
     match = re.search(r'^_shapes_config\s*=\s*"(.+)"', content, re.MULTILINE)
     return match.group(1) if match else None
+
+
+def derive_shapes_config(repro_path: Path) -> str | None:
+    """Derive _shapes_config by exec'ing _default_make_inputs() and inspecting results."""
+    import importlib.util
+    import math
+    import torch
+
+    try:
+        spec = importlib.util.spec_from_file_location("repro_derive", str(repro_path))
+        mod = importlib.util.module_from_spec(spec)
+        mod.device = torch.device
+        mod.inf = math.inf
+        mod.nan = math.nan
+        spec.loader.exec_module(mod)
+
+        if hasattr(mod, '_default_make_inputs'):
+            inputs = mod._default_make_inputs()
+        elif hasattr(mod, 'make_inputs'):
+            inputs = mod.make_inputs()
+        else:
+            return None
+    except Exception:
+        return None
+
+    _DTYPE_SHORT = {
+        "torch.float32": "f32", "torch.float16": "f16",
+        "torch.bfloat16": "bf16", "torch.float64": "f64",
+        "torch.int64": "i64", "torch.int32": "i32",
+        "torch.int16": "i16", "torch.int8": "i8",
+        "torch.bool": "b8", "torch.uint8": "u8",
+    }
+
+    parts = []
+    for item in inputs:
+        if isinstance(item, list):
+            parts.append(f"S({item})")
+        elif isinstance(item, int):
+            parts.append(f"S([{item}])")
+        elif isinstance(item, torch.Tensor):
+            dt = _DTYPE_SHORT.get(str(item.dtype), str(item.dtype))
+            shape = list(item.shape)
+            stride = list(item.stride()) if not item.is_contiguous() else None
+            if stride:
+                parts.append(f"T({shape}, {dt}, stride={tuple(stride)})")
+            else:
+                parts.append(f"T({shape}, {dt})")
+        else:
+            return None
+
+    return f"({', '.join(parts)})"
 
 
 def extract_docstring_extra(content: str) -> str:
@@ -144,8 +185,21 @@ def main():
             continue
         content = repro.read_text()
         if "_shapes_config" not in content:
-            skipped += 1
-            continue
+            # Derive _shapes_config from existing _default_make_inputs
+            config = derive_shapes_config(repro)
+            if config is None:
+                skipped += 1
+                if skipped <= 5:
+                    print(f"  SKIP {d.name}: could not derive _shapes_config")
+                continue
+            # Inject it into the content so regenerate_one can use it
+            # Insert after the docstring closing """
+            content = re.sub(
+                r'(""")\n',
+                rf'\1\n_shapes_config = "{config}"\n',
+                content, count=1,
+            )
+            repro.write_text(content)
         if regenerate_one(repro, dry_run=args.dry_run):
             updated += 1
         else:

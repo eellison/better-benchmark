@@ -131,7 +131,7 @@ def make_inputs_from_config(config: dict) -> list:
         device = spec.get("device", "cuda")
 
         if dtype in (torch.int64, torch.int32, torch.int16, torch.int8):
-            hi = spec.get("max_val", 100)
+            hi = spec.get("max_val") or 100
             if stride:
                 numel = sum((s - 1) * st for s, st in zip(shape, stride) if s > 1) + 1
                 storage = torch.randint(0, hi, (numel,), dtype=dtype, device=device)

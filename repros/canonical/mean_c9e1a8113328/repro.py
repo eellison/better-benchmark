@@ -1,4 +1,5 @@
 """
+_shapes_config = "(T([128, 1536, 7, 7], f32, stride=(75264, 1, 10752, 1536)))"
 Standalone repro captured via capture_hook.
 Label: timm_nfnet_l0_infer
 Pattern hash: c9e1a8113328
