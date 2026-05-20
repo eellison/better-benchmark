@@ -12,7 +12,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([2048, 2048], bf16), T([2048], bf16), T([4, 512, 2048], bf16), T([4, 512, 1], f32), T([16384], i64, max=100), T([16384, 1], b8), T([2048, 8], f32), T([16384], i64, max=100), T([128, 2048, 768], bf16), T([16384, 1536], bf16))"
+_shapes_config = "(T([2048, 2048], bf16), T([2048], bf16), T([4, 512, 2048], bf16), T([4, 512, 1], f32), T([16384], i64, gen=Index(100)), T([16384, 1], b8), T([2048, 8], f32), T([16384], i64, gen=Index(100)), T([128, 2048, 768], bf16), T([16384, 1536], bf16))"
 
 class Repro(torch.nn.Module):
     def forward(self, mm_22: "bf16[2048, 2048]", primals_48: "bf16[2048]", add_38: "bf16[4, 512, 2048]", rsqrt_16: "f32[4, 512, 1]", index_put_3: "i64[16384]", unsqueeze_36: "b8[16384, 1]", div_13: "f32[2048, 8]", getitem_57: "i64[16384]", primals_47: "bf16[128, 2048, 768]", _grouped_mm_6: "bf16[16384, 1536]"):

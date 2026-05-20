@@ -15,7 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([8192, 1024], f32), T([256, 512, 512], f32), T([256, 512, 1024], f32), T([512], i64, max=16), T([99], i64, max=99), S([512, 16, 1, 16, 64]), S([512, 16, 16, 64]), S([16, 16, 512, 1, 512]), S([16, 16, 512, 512]), S([16, 16, 512, 1, 1024]), S([16, 16, 512, 1024]), S([16, 16, 1024, 512]), S([16, 16, 512, 1023]), S([256, 512, 512]), S([256, 512, 64]))"
+_shapes_config = "(T([8192, 1024], f32), T([256, 512, 512], f32), T([256, 512, 1024], f32), T([512], i64, gen=Index(16)), T([99], i64, gen=Index(99)), S([512, 16, 1, 16, 64]), S([512, 16, 16, 64]), S([16, 16, 512, 1, 512]), S([16, 16, 512, 512]), S([16, 16, 512, 1, 1024]), S([16, 16, 512, 1024]), S([16, 16, 1024, 512]), S([16, 16, 512, 1023]), S([256, 512, 512]), S([256, 512, 64]))"
 
 class Repro(torch.nn.Module):
     def forward(self, mm_default_218: "f32[8192, 1024]", bmm_188: "f32[256, 512, 512]", bmm_189: "f32[256, 512, 1024]", iota_2: "i64[512]", inductor_seeds_default: "i64[99]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9):

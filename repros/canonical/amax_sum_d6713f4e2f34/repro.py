@@ -15,7 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([16384, 384], f32), T([16384, 384], f32), T([32, 512, 384], f32), T([16384, 54], f32), T([54], f32), T([16384, 384], f32), T([9, 512, 1, 1], i64, max=32), T([1, 1], i64, max=32), S([32, 512, 384]), S([32, 512, 384]), S([32, 512, -1, 64]), S([32, 512, -1, 64]), S([32, 512, -1, 64]), S([32, 512, 54]), S([-1, 9, 1]), S([32, 512, 384]), S([32, 3456, 512]), S([32, 512, 384, 9]), S([98304, 64, 9]), S([98304, 64, 9]), S([98304, 9, 1]))"
+_shapes_config = "(T([16384, 384], f32), T([16384, 384], f32), T([32, 512, 384], f32), T([16384, 54], f32), T([54], f32), T([16384, 384], f32), T([9, 512, 1, 1], i64, gen=Index(520)), T([1, 1], i64, gen=Index(1)), S([32, 512, 384]), S([32, 512, 384]), S([32, 512, -1, 64]), S([32, 512, -1, 64]), S([32, 512, -1, 64]), S([32, 512, 54]), S([-1, 9, 1]), S([32, 512, 384]), S([32, 3456, 512]), S([32, 512, 384, 9]), S([98304, 64, 9]), S([98304, 64, 9]), S([98304, 9, 1]))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm_77: "f32[16384, 384]", addmm_78: "f32[16384, 384]", view_401: "f32[32, 512, 384]", mm_11: "f32[16384, 54]", primals_272: "f32[54]", addmm_80: "f32[16384, 384]", unsqueeze_8: "i64[9, 512, 1, 1]", add_7: "i64[1, 1]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12):

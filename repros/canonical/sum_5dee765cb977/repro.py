@@ -15,7 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([], f32), T([], f32), T([8, 1024], i64, max=1024), T([8, 1024, 50265], f32, stride=(51474432, 50268, 1)), T([8192, 1], f32), T([8192, 1], f32), T([8, 1024, 50265], f32), T([50265, 768], f32), S([1, 50265]), S([8192, 50265]), S([-1, 50265]), S([8, 1024, 50265]), S([8192, 50265]))"
+_shapes_config = "(T([], f32), T([], f32), T([8, 1024], i64, gen=Index(1024)), T([8, 1024, 50265], f32, stride=(51474432, 50268, 1)), T([8192, 1], f32), T([8192, 1], f32), T([8, 1024, 50265], f32), T([50265, 768], f32), S([1, 50265]), S([8192, 50265]), S([-1, 50265]), S([8, 1024, 50265]), S([8192, 50265]))"
 
 class Repro(torch.nn.Module):
     def forward(self, tangents_1: "f32[]", convert_element_type: "f32[]", primals_8: "i64[8, 1024]", view_3: "f32[8, 1024, 50265]", amax: "f32[8192, 1]", log: "f32[8192, 1]", tangents_2: "f32[8, 1024, 50265]", primals_6: "f32[50265, 768]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):

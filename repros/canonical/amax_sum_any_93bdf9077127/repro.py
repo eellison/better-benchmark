@@ -15,7 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([8192, 1024], f32), T([64, 1, 128, 128], b8, stride=(0, 128, 1, 0)), T([], f32), T([], f32), T([1024, 128, 128], f32), T([4], i64, max=4), S([64, 128, 1024]), S([64, 128, -1, 64]), S([64, 16, 128, 128]), S([64, 16, 128, 128]), S([1024, 128, 128]), S([64, 16, 128, 64]), S([1024, 128, 64]))"
+_shapes_config = "(T([8192, 1024], f32), T([64, 1, 128, 128], b8, stride=(0, 128, 1, 0)), T([], f32), T([], f32), T([1024, 128, 128], f32), T([4], i64, gen=Index(4)), S([64, 128, 1024]), S([64, 128, -1, 64]), S([64, 16, 128, 128]), S([64, 16, 128, 128]), S([1024, 128, 128]), S([64, 16, 128, 64]), S([1024, 128, 64]))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm_6: "f32[8192, 1024]", primals_22: "b8[64, 1, 128, 128]", full_default_1: "f32[]", full_default: "f32[]", bmm: "f32[1024, 128, 128]", inductor_seeds_default: "i64[4]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6):

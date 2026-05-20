@@ -15,7 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([8192, 768], f32), T([25], i64, max=25), T([8, 1024, 768], f32), T([768], f32), T([768], f32), T([2, 768], f32), S([8, 1024, 768]), S([8192, 768]))"
+_shapes_config = "(T([8192, 768], f32), T([25], i64, gen=Index(25)), T([8, 1024, 768], f32), T([768], f32), T([768], f32), T([2, 768], f32), S([8, 1024, 768]), S([8192, 768]))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm_47: "f32[8192, 768]", inductor_seeds_default: "i64[25]", add_94: "f32[8, 1024, 768]", primals_148: "f32[768]", primals_149: "f32[768]", primals_150: "f32[2, 768]", _shape_param_0, _shape_param_1):

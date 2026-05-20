@@ -17,7 +17,6 @@ captures_hf/
 captures_torchvision/
 output/
 experiments/
-test_*.py
 analyze_*.py
 bench_tile_sizes.py
 benchmark_all.py
