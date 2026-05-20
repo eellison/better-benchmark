@@ -43,7 +43,6 @@ class _CaptureState:
         self.graph_dir = graph_dir
         self.seen_hashes: set[str] = set()
         self.counter = 0
-        self.graph_counter = 0
         self.captured: list[dict] = []
         os.makedirs(output_dir, exist_ok=True)
         if graph_dir:
@@ -300,14 +299,30 @@ class _CaptureState:
             torch.ops.aten.unsqueeze.default,
             torch.ops.aten.squeeze.default,
             torch.ops.aten.squeeze.dim,
+            torch.ops.aten.select.int,
             torch.ops.aten.permute.default,
             torch.ops.aten.contiguous.default,
             torch.ops.aten.t.default,
             torch.ops.aten.transpose.int,
+            torch.ops.aten.where.self,
         }
 
         bounds = {}
         ph_nodes = {n.name: n for n in gm.graph.nodes if n.op == "placeholder"}
+
+        def _node_shape(n):
+            if not hasattr(n, "meta"):
+                return None
+            val = n.meta.get("val")
+            if isinstance(val, torch.Tensor):
+                return list(val.shape)
+            if n.op == "call_function" and n.target in {
+                torch.ops.aten.empty.memory_format,
+                torch.ops.aten.full.default,
+            }:
+                if n.args and isinstance(n.args[0], (list, tuple)):
+                    return list(n.args[0])
+            return None
 
         for name, node in ph_nodes.items():
             info = placeholder_info.get(name, {})
@@ -348,19 +363,36 @@ class _CaptureState:
                                     if isinstance(val, torch.Tensor) and len(val.shape) > 0:
                                         return int(val.shape[0])
 
+                            if target == torch.ops.aten.index.Tensor:
+                                if len(user.args) >= 2:
+                                    target_shape = _node_shape(user.args[0])
+                                    indices = user.args[1]
+                                    if target_shape and isinstance(indices, (list, tuple)):
+                                        for dim, index_node in enumerate(indices):
+                                            if index_node is n and dim < len(target_shape):
+                                                return int(target_shape[dim])
+
+                            if target == torch.ops.aten.gather.default:
+                                # If `n` is the source tensor, gather passes
+                                # those values through. Their valid bound comes
+                                # from the gathered result's downstream index
+                                # consumers, not from gather's index dimension.
+                                if user.args and user.args[0] is n:
+                                    next_frontier.append(user)
+                                    continue
+
                             if target in _INDEX_CONSUMERS:
                                 target_arg_idx, dim_arg_idx = _INDEX_CONSUMERS[target]
                                 if len(user.args) > target_arg_idx:
                                     target_node = user.args[target_arg_idx]
-                                    if hasattr(target_node, 'meta'):
-                                        val = target_node.meta.get('val')
-                                        if isinstance(val, torch.Tensor):
-                                            if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
-                                                dim = user.args[dim_arg_idx]
-                                                if isinstance(dim, int) and dim < len(val.shape):
-                                                    return int(val.shape[dim])
-                                            else:
-                                                return int(val.shape[0])
+                                    target_shape = _node_shape(target_node)
+                                    if target_shape:
+                                        if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
+                                            dim = user.args[dim_arg_idx]
+                                            if isinstance(dim, int) and dim < len(target_shape):
+                                                return int(target_shape[dim])
+                                        else:
+                                            return int(target_shape[0])
 
                             # Passthrough: trace further
                             if target in _PASSTHROUGH_OPS:
@@ -376,6 +408,61 @@ class _CaptureState:
 
         return bounds
 
+    def _infer_permutation_indices(self, gm, placeholder_info) -> dict[str, int]:
+        """Find integer placeholders that must be valid permutations.
+
+        Pattern:
+            inverse = empty([N], dtype=int64)
+            inverse = index_put(inverse, [idx], iota(N))
+            use(inverse)
+
+        Random randint indices can leave holes in `inverse`; those holes contain
+        uninitialized values and can trigger device asserts when used later as
+        indices. A randperm preserves the intended inverse-permutation shape.
+        """
+        permutation_sizes = {}
+        ph_nodes = {n.name: n for n in gm.graph.nodes if n.op == "placeholder"}
+
+        def _shape_from_alloc(n):
+            if n.op != "call_function":
+                return None
+            if n.target not in {
+                torch.ops.aten.empty.memory_format,
+                torch.ops.aten.full.default,
+            }:
+                return None
+            if not n.args or not isinstance(n.args[0], (list, tuple)):
+                return None
+            return list(n.args[0])
+
+        def _iota_size(n):
+            if n.op != "call_function":
+                return None
+            if n.target != torch.ops.prims.iota.default:
+                return None
+            if n.args and isinstance(n.args[0], int):
+                return int(n.args[0])
+            return None
+
+        for name, node in ph_nodes.items():
+            info = placeholder_info.get(name, {})
+            dtype = info.get("dtype", "")
+            if "int" not in dtype:
+                continue
+            for user in node.users:
+                if user.op != "call_function" or user.target != torch.ops.aten.index_put.default:
+                    continue
+                if len(user.args) < 3:
+                    continue
+                indices = user.args[1]
+                if not isinstance(indices, (list, tuple)) or node not in indices:
+                    continue
+                target_shape = _shape_from_alloc(user.args[0])
+                iota_size = _iota_size(user.args[2])
+                if target_shape and iota_size and target_shape[0] == iota_size:
+                    permutation_sizes[name] = iota_size
+        return permutation_sizes
+
     def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
         shape_params = shape_params or {}
         code = gm.print_readable(print_output=False)
@@ -383,6 +470,7 @@ class _CaptureState:
 
         # Infer index bounds for int64 placeholders
         index_bounds = self._infer_index_bounds(gm, placeholder_info)
+        permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
 
         # Replace symbolic shape refs (s0, s1, ...) in annotations with concrete values
         import re
@@ -420,8 +508,19 @@ class _CaptureState:
                         # int8 = pool offsets (0..8), int64 = indices (inferred or shape[0])
                         default_hi = 9 if "int8" in dtype else max(shape)
                         hi = index_bounds.get(name, default_hi)
+                        if name in permutation_indices:
+                            input_lines.append(
+                                f"    torch.randperm({permutation_indices[name]}, dtype={dtype}, device='{device}')"
+                                f".as_strided({shape}, {stride}),  # {name}"
+                            )
+                        else:
+                            input_lines.append(
+                                f"    torch.randint(0, {hi}, ({storage_size},), dtype={dtype}, device='{device}')"
+                                f".as_strided({shape}, {stride}),  # {name}"
+                            )
+                    elif "bool" in dtype:
                         input_lines.append(
-                            f"    torch.randint(0, {hi}, ({storage_size},), dtype={dtype}, device='{device}')"
+                            f"    torch.randint(0, 2, ({storage_size},), dtype=torch.bool, device='{device}')"
                             f".as_strided({shape}, {stride}),  # {name}"
                         )
                     else:
@@ -433,9 +532,15 @@ class _CaptureState:
                     if "int" in dtype:
                         default_hi = 9 if "int8" in dtype else max(shape) if shape else 2
                         hi = index_bounds.get(name, default_hi)
-                        input_lines.append(
-                            f"    torch.randint(0, {hi}, {shape}, dtype={dtype}, device='{device}'),"
-                        )
+                        if name in permutation_indices:
+                            input_lines.append(
+                                f"    torch.randperm({permutation_indices[name]}, dtype={dtype}, device='{device}')"
+                                f".reshape({shape}),"
+                            )
+                        else:
+                            input_lines.append(
+                                f"    torch.randint(0, {hi}, {shape}, dtype={dtype}, device='{device}'),"
+                            )
                     elif "bool" in dtype:
                         input_lines.append(
                             f"    torch.randint(0, 2, {shape}, dtype=torch.bool, device='{device}'),"
@@ -454,96 +559,54 @@ class _CaptureState:
 
         inputs_code = "\n".join(input_lines)
 
-        # Build compact shapes config line (same format as shapes.txt)
-        # This is the authoritative source for merge_captures — no exec/parsing needed.
-        _DTYPE_SHORT = {
-            "torch.float32": "f32", "torch.float16": "f16",
-            "torch.bfloat16": "bf16", "torch.float64": "f64",
-            "torch.int64": "i64", "torch.int32": "i32",
-            "torch.int16": "i16", "torch.int8": "i8",
-            "torch.bool": "b8", "torch.uint8": "u8",
-        }
-        config_parts = []
-        for name in ph_names:
-            if name in shape_params:
-                config_parts.append(f"S({shape_params[name]})")
-            else:
-                info = placeholder_info.get(name)
-                if info and info["dtype"] != "symint":
-                    dt = _DTYPE_SHORT.get(info["dtype"], info["dtype"])
-                    stride = info.get("stride", [])
-                    # Add max= for integer tensors with known bounds
-                    max_kwarg = ""
-                    if "int" in info["dtype"] or "bool" in info["dtype"]:
-                        bound = index_bounds.get(name)
-                        if bound:
-                            max_kwarg = f", max={bound}"
-                    if stride and info["shape"]:
-                        config_parts.append(f"T({info['shape']}, {dt}, stride={tuple(stride)}{max_kwarg})")
-                    else:
-                        config_parts.append(f"T({info['shape']}, {dt}{max_kwarg})")
-                elif info and info.get("dtype") == "symint":
-                    config_parts.append(f"S([{info.get('hint', 1)}])")
-        shapes_config_line = f"({', '.join(config_parts)})"
-
         script = f'''"""
 Standalone repro captured via capture_hook.
 Label: {self.label}
 Pattern hash: {meta.get("pattern_hash", "?")}
 Shape hash: {meta.get("shape_hash", "?")}
 """
-import sys
-from pathlib import Path
-
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
-
-_shapes_config = "{shapes_config_line}"
-
 {code}
 
 
-def _default_make_inputs():
-    from repro_harness import parse_shapes_config
-    return parse_shapes_config(_shapes_config)
-
-
-def make_inputs(shape_config=None):
-    """Generate inputs for a specific shape config, or default."""
-    if shape_config is not None:
-        return make_inputs_from_config(shape_config)
-    return _default_make_inputs()
+def make_inputs():
+    return [
+{inputs_code}
+    ]
 
 
 if __name__ == "__main__":
-    benchmark_repro(__file__, Repro, make_inputs)
+    mod = Repro()
+    inputs = make_inputs()
+    compiled = torch.compile(mod)
+    with torch.no_grad():
+        out = compiled(*inputs)
+        torch.cuda.synchronize()
+    print("OK")
 '''
         filepath = os.path.join(self.output_dir, filename)
         with open(filepath, "w") as f:
             f.write(script)
 
-        # Per-region subgraph saving removed — full_graph_*.py + canonical repros are sufficient
+        # Save full FX graph for recovery (not committed, just local backup)
+        if self.graph_dir:
+            graph_filename = filename.replace(".py", "_graph.py")
+            graph_filepath = os.path.join(self.graph_dir, graph_filename)
+            try:
+                graph_code = gm.print_readable(print_output=False)
+                with open(graph_filepath, "w") as f:
+                    f.write(graph_code)
+            except Exception:
+                pass  # non-critical
 
         return filepath
 
     def process_graph(self, gm: fx.GraphModule):
         """Called by the hook for each post-grad graph. Partitions and captures."""
-        # Save the FULL post-grad graph (before partitioning) for recovery
-        if self.graph_dir:
-            full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
-            self.graph_counter += 1
-            try:
-                full_code = gm.print_readable(print_output=False)
-                with open(full_graph_path, "w") as f:
-                    f.write(full_code)
-            except Exception:
-                pass
-
         from torch._inductor.fx_passes.fusion_regions import is_fusible_node
         from torch.fx.passes.infra.partitioner import CapabilityBasedPartitioner
         from torch.fx.passes.operator_support import create_op_support

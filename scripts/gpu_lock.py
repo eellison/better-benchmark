@@ -17,6 +17,7 @@ from typing import Iterator
 
 
 DEFAULT_LOCK_DIR = Path(os.environ.get("COMPILE_UTILS_GPU_LOCK_DIR", "/tmp/compile_utils_gpu_locks"))
+STALE_LOCK_GRACE_S = float(os.environ.get("COMPILE_UTILS_GPU_LOCK_STALE_GRACE_S", "5"))
 
 
 KNOWN_DEVICE_KINDS = ("B200", "H200", "H100", "A100", "V100")
@@ -65,7 +66,14 @@ def matching_gpus(device_kind: str | None = None) -> list[dict[str, str]]:
     ]
 
 
-def _write_lock_metadata(fd: int, *, gpu: str, label: str, device_kind: str = "") -> None:
+def _write_lock_metadata(
+    fd: int,
+    *,
+    gpu: str,
+    label: str,
+    device_kind: str = "",
+    mode: str = "exclusive",
+) -> None:
     os.ftruncate(fd, 0)
     os.write(
         fd,
@@ -73,6 +81,7 @@ def _write_lock_metadata(fd: int, *, gpu: str, label: str, device_kind: str = ""
             f"pid={os.getpid()}\n"
             f"gpu={gpu}\n"
             f"device_kind={device_kind}\n"
+            f"mode={mode}\n"
             f"label={label}\n"
             f"acquired_unix={time.time():.0f}\n"
         ).encode(),
@@ -80,26 +89,76 @@ def _write_lock_metadata(fd: int, *, gpu: str, label: str, device_kind: str = ""
     os.fsync(fd)
 
 
-def _is_pid_alive(pid: int) -> bool:
-    """Check if a process is still running."""
+def _read_lock_metadata(lock_path: Path) -> dict[str, str]:
     try:
-        os.kill(pid, 0)
-        return True
-    except (OSError, ProcessLookupError):
+        text = lock_path.read_text()
+    except OSError:
+        return {}
+
+    metadata = {}
+    for line in text.splitlines():
+        key, separator, value = line.partition("=")
+        if separator:
+            metadata[key.strip()] = value.strip()
+    return metadata
+
+
+def _pid_is_alive(pid: str | None) -> bool | None:
+    if not pid:
+        return None
+    try:
+        pid_int = int(pid)
+    except ValueError:
+        return None
+    if pid_int <= 0:
         return False
 
-
-def _read_lock_pid(fd: int) -> int | None:
-    """Read the PID from a lock file's metadata."""
     try:
-        os.lseek(fd, 0, os.SEEK_SET)
-        content = os.read(fd, 256).decode()
-        for line in content.splitlines():
-            if line.startswith("pid="):
-                return int(line.split("=")[1])
-    except Exception:
-        pass
-    return None
+        os.kill(pid_int, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _format_lock_holder(metadata: dict[str, str]) -> str:
+    if not metadata:
+        return "unknown holder"
+
+    fields = [
+        f"{key}={metadata[key]}"
+        for key in ("pid", "gpu", "device_kind", "mode", "label", "acquired_unix")
+        if metadata.get(key)
+    ]
+    return ", ".join(fields) if fields else "unknown holder"
+
+
+def _note_stale_holder_or_raise(
+    *,
+    lock_path: Path,
+    stale_since: float | None,
+    now: float,
+) -> float | None:
+    metadata = _read_lock_metadata(lock_path)
+    if _pid_is_alive(metadata.get("pid")) is not False:
+        return None
+
+    stale_since = stale_since if stale_since is not None else now
+    if now - stale_since >= STALE_LOCK_GRACE_S:
+        raise TimeoutError(
+            f"GPU lock appears stale: {lock_path} reports dead "
+            f"{_format_lock_holder(metadata)}"
+        )
+    return stale_since
+
+
+def _timeout_error(lock_path: Path, description: str) -> TimeoutError:
+    metadata = _read_lock_metadata(lock_path)
+    return TimeoutError(
+        f"Timed out waiting for {description}: {lock_path} "
+        f"({_format_lock_holder(metadata)})"
+    )
 
 
 @contextlib.contextmanager
@@ -110,36 +169,32 @@ def gpu_lock(
     timeout_s: float | None = None,
     label: str = "",
 ) -> Iterator[Path]:
-    """Acquire an exclusive advisory lock for one GPU.
-
-    Handles stale locks: if the lock is held by a dead process, it's
-    forcibly released (the flock is automatically dropped when the holding
-    process dies, but the file may still exist with stale metadata).
-    """
+    """Acquire an exclusive advisory lock for one GPU."""
     directory = Path(lock_dir) if lock_dir is not None else DEFAULT_LOCK_DIR
     directory.mkdir(parents=True, exist_ok=True)
     lock_path = directory / f"gpu_{gpu}.lock"
     fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o666)
     start = time.monotonic()
+    stale_since = None
 
     while True:
         try:
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             break
         except BlockingIOError:
-            # Check if the holder is still alive
-            holder_pid = _read_lock_pid(fd)
-            if holder_pid is not None and not _is_pid_alive(holder_pid):
-                # Stale lock — force acquire (the flock should already be released
-                # by the kernel when the process died, so try again immediately)
-                try:
-                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                    break
-                except BlockingIOError:
-                    pass
-            if timeout_s is not None and time.monotonic() - start >= timeout_s:
+            now = time.monotonic()
+            try:
+                stale_since = _note_stale_holder_or_raise(
+                    lock_path=lock_path,
+                    stale_since=stale_since,
+                    now=now,
+                )
+            except TimeoutError:
                 os.close(fd)
-                raise TimeoutError(f"Timed out waiting for GPU {gpu} lock: {lock_path}")
+                raise
+            if timeout_s is not None and now - start >= timeout_s:
+                os.close(fd)
+                raise _timeout_error(lock_path, f"GPU {gpu} lock")
             time.sleep(1.0)
 
     try:
@@ -165,6 +220,7 @@ def gpu_lock_for_kind(
     directory = Path(lock_dir) if lock_dir is not None else DEFAULT_LOCK_DIR
     directory.mkdir(parents=True, exist_ok=True)
     start = time.monotonic()
+    stale_since_by_path: dict[Path, float | None] = {}
 
     while True:
         devices = matching_gpus(device_kind)
@@ -182,6 +238,16 @@ def gpu_lock_for_kind(
             try:
                 fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except BlockingIOError:
+                now = time.monotonic()
+                try:
+                    stale_since_by_path[lock_path] = _note_stale_holder_or_raise(
+                        lock_path=lock_path,
+                        stale_since=stale_since_by_path.get(lock_path),
+                        now=now,
+                    )
+                except TimeoutError:
+                    os.close(fd)
+                    raise
                 os.close(fd)
                 continue
 
@@ -191,6 +257,7 @@ def gpu_lock_for_kind(
                     gpu=device["index"],
                     device_kind=device["kind"],
                     label=label,
+                    mode="exclusive",
                 )
                 yield {**device, "lock_path": str(lock_path)}
             finally:
@@ -235,18 +302,30 @@ def gpu_shared_lock(
     lock_path = directory / f"gpu_{gpu}.lock"
     fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o666)
     start = time.monotonic()
+    stale_since = None
 
     while True:
         try:
             fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
             break
         except BlockingIOError:
-            if timeout_s is not None and time.monotonic() - start >= timeout_s:
+            now = time.monotonic()
+            try:
+                stale_since = _note_stale_holder_or_raise(
+                    lock_path=lock_path,
+                    stale_since=stale_since,
+                    now=now,
+                )
+            except TimeoutError:
                 os.close(fd)
-                raise TimeoutError(f"Timed out waiting for shared GPU {gpu} lock: {lock_path}")
+                raise
+            if timeout_s is not None and now - start >= timeout_s:
+                os.close(fd)
+                raise _timeout_error(lock_path, f"shared GPU {gpu} lock")
             time.sleep(0.1)
 
     try:
+        _write_lock_metadata(fd, gpu=str(gpu), label=label, mode="shared")
         yield lock_path
     finally:
         fcntl.flock(fd, fcntl.LOCK_UN)
