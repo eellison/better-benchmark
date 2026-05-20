@@ -1,7 +1,4 @@
 hf_m2m100forconditionalgeneration_train_d7517139: (S([64, -1, 128, 128]))
-hf_mbartforcausallm_train_d7517139: (S([8, -1, 1024, 1024]))
-hf_bartforcausallm_train_d7517139: (S([8, -1, 1024, 1024]))
 hf_blenderbotforcausallm_train_d7517139: (S([32, -1, 128, 128]))
 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_train_d7517139: (S([16, -1, 128, 128]))
-hf_plbartforcausallm_train_d7517139: (S([16, -1, 1024, 1024]))
 hf_pegasusforcausallm_train_d7517139: (S([128, -1, 128, 128]))

@@ -1,2 +1,2 @@
-inductor_huggingface_perf-1-5-linux.aws.a100_graph3_5df17655: (T([1024, 50265], bf16), T([1, 1024], i64), S([1, 1024, 50265]), S([-1, 50265]))
-inductor_huggingface_perf-4-5-linux.aws.a100_graph10_ea2a0cf3: (T([256, 50265], bf16), T([1, 256], i64), S([1, 256, 50265]), S([-1, 50265]))
+inductor_huggingface_perf-1-5-linux.aws.a100_graph3_5df17655: (T([1024, 50265], bf16), T([1, 1024], i64, gen=Index(1024)), S([1, 1024, 50265]), S([-1, 50265]))
+inductor_huggingface_perf-4-5-linux.aws.a100_graph10_ea2a0cf3: (T([256, 50265], bf16), T([1, 256], i64, gen=Index(1024)), S([1, 256, 50265]), S([-1, 50265]))

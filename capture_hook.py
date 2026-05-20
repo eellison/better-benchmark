@@ -372,6 +372,15 @@ class _CaptureState:
                                             if index_node is n and dim < len(target_shape):
                                                 return int(target_shape[dim])
 
+                            if target == torch.ops.aten.gather.default:
+                                # If `n` is the source tensor, gather passes
+                                # those values through. Their valid bound comes
+                                # from the gathered result's downstream index
+                                # consumers, not from gather's index dimension.
+                                if user.args and user.args[0] is n:
+                                    next_frontier.append(user)
+                                    continue
+
                             if target in _INDEX_CONSUMERS:
                                 target_arg_idx, dim_arg_idx = _INDEX_CONSUMERS[target]
                                 if len(user.args) > target_arg_idx:

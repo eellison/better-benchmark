@@ -1,1 +1,1 @@
-hf_xglmforcausallm_train_7e4611ca: (T([1, 128], i64), T([2050, 1024], f32), S([1, 128, 1024]))
+hf_xglmforcausallm_train_7e4611ca: (T([1, 128], i64, gen=Index(128)), T([2050, 1024], f32), S([1, 128, 1024]))

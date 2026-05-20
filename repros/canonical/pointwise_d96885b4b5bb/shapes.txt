@@ -1,1 +1,1 @@
-vllm_qwen_qwen3-30b-a3b_20bce9e1: (T([2048, 8], i64))
+vllm_qwen_qwen3-30b-a3b_20bce9e1: (T([2048, 8], i64, gen=Index(100)))

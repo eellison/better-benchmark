@@ -17,6 +17,7 @@ from typing import Any
 
 import torch
 import torch._inductor.config as inductor_config
+import torch._inductor.inductor_prims  # noqa: F401
 
 
 def load_shape_configs(repro_file: str) -> dict:
@@ -200,7 +201,18 @@ def make_inputs_from_config(config: dict) -> list:
             else:
                 result.append(torch.randint(0, 2, shape, dtype=torch.bool, device=device))
         else:
-            if stride:
+            if gen and gen.get("kind") == "index":
+                low = int(gen.get("low", 0))
+                hi = int(gen.get("high", 100))
+                if hi <= low:
+                    hi = low + 1
+                if stride:
+                    numel = _storage_size_for_strided(shape, stride)
+                    storage = torch.randint(low, hi, (numel,), dtype=torch.int64, device=device)
+                    result.append(storage.to(dtype).as_strided(shape, stride))
+                else:
+                    result.append(torch.randint(low, hi, shape, dtype=torch.int64, device=device).to(dtype))
+            elif stride:
                 numel = _storage_size_for_strided(shape, stride)
                 storage = torch.randn(numel, dtype=dtype, device=device)
                 result.append(storage.as_strided(shape, stride))

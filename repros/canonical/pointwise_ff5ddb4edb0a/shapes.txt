@@ -1,1 +1,1 @@
-inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph39_7e4611ca: (T([1, 128], i64), T([2050, 1024], f32), S([1, 128, 1024]))
+inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph39_7e4611ca: (T([1, 128], i64, gen=Index(128)), T([2050, 1024], f32), S([1, 128, 1024]))

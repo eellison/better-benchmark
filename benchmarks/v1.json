@@ -2,7 +2,7 @@
   "version": "v1",
   "created": "2026-05-19",
   "description": "First clean benchmark set: timm (18) + HF (32) + torchbench (CI) + GenAI + vLLM",
-  "n_patterns": 1133,
+  "n_patterns": 1132,
   "patterns": [
     {
       "name": "amax_sum_00b8bc42acc6",
@@ -172,7 +172,7 @@
     {
       "name": "amax_sum_any_4d8894a420ec",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "amax_sum_any_598205a8a1f2",
@@ -192,7 +192,7 @@
     {
       "name": "amax_sum_any_6df2bdfd3abf",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "amax_sum_any_706ca3ca1d66",
@@ -202,7 +202,7 @@
     {
       "name": "amax_sum_any_93bdf9077127",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "amax_sum_any_953862c9c973",
@@ -232,7 +232,7 @@
     {
       "name": "amax_sum_any_d4e7d15ad848",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "amax_sum_any_f9ea80a430c8",
@@ -327,7 +327,7 @@
     {
       "name": "amax_sum_sum_03a20707852c",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "amax_sum_sum_042680cbfa71",
@@ -402,12 +402,12 @@
     {
       "name": "amax_sum_sum_436745ec8e1e",
       "kind": "reduction",
-      "n_shapes": 5
+      "n_shapes": 1
     },
     {
       "name": "amax_sum_sum_4b4326d1b5ad",
       "kind": "reduction",
-      "n_shapes": 8
+      "n_shapes": 2
     },
     {
       "name": "amax_sum_sum_568a7f3343f9",
@@ -467,7 +467,7 @@
     {
       "name": "amax_sum_sum_9d66c7eb4897",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "amax_sum_sum_9ee7388742c0",
@@ -572,7 +572,7 @@
     {
       "name": "any_amax_sum_13d697c3327f",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "any_amax_sum_3398c3cbc2d7",
@@ -582,7 +582,7 @@
     {
       "name": "any_amax_sum_444158be394e",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "any_amax_sum_44ff5115c4db",
@@ -592,7 +592,7 @@
     {
       "name": "any_amax_sum_54856d97c466",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "any_amax_sum_5f6c0f3380dc",
@@ -602,7 +602,7 @@
     {
       "name": "any_amax_sum_702110971f25",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "any_amax_sum_72cb816d4b18",
@@ -612,7 +612,7 @@
     {
       "name": "any_amax_sum_77e3c0c677fe",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "any_amax_sum_7f84f691cf2a",
@@ -627,12 +627,12 @@
     {
       "name": "any_amax_sum_a9b352c4dd8a",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "any_amax_sum_b5dd3a5a5b42",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "any_amax_sum_b6995d56b75d",
@@ -667,7 +667,7 @@
     {
       "name": "argmax_amax_sum_43f6a0b25c23",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "argmax_amax_sum_5d9bcbd4e953",
@@ -697,7 +697,7 @@
     {
       "name": "mean_16e152dc577b",
       "kind": "reduction",
-      "n_shapes": 4
+      "n_shapes": 1
     },
     {
       "name": "mean_19128622cc10",
@@ -742,7 +742,7 @@
     {
       "name": "mean_51281ced2106",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "mean_56c27cd60aa2",
@@ -802,7 +802,7 @@
     {
       "name": "mean_a3a7fba6c952",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "mean_a7a4403de0e1",
@@ -817,7 +817,7 @@
     {
       "name": "mean_a852fda9fbc1",
       "kind": "reduction",
-      "n_shapes": 4
+      "n_shapes": 1
     },
     {
       "name": "mean_amax_sum_040a2f0ad8f4",
@@ -912,7 +912,7 @@
     {
       "name": "mean_mean_2a70a32580e5",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "mean_mean_3d1e0346817a",
@@ -937,7 +937,7 @@
     {
       "name": "mean_mean_f882b24762e2",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "mean_sum_e5a21319f6c6",
@@ -1072,7 +1072,7 @@
     {
       "name": "pointwise_0be9d97f3d16",
       "kind": "pointwise",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "pointwise_0c20ded68861",
@@ -1092,7 +1092,7 @@
     {
       "name": "pointwise_0e300a470a0f",
       "kind": "pointwise",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "pointwise_0ef5520dfd57",
@@ -1252,7 +1252,7 @@
     {
       "name": "pointwise_21caf6bb6dca",
       "kind": "pointwise",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "pointwise_224a54a489b0",
@@ -1467,7 +1467,7 @@
     {
       "name": "pointwise_401e01c76176",
       "kind": "pointwise",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "pointwise_4048fec675b0",
@@ -1642,7 +1642,7 @@
     {
       "name": "pointwise_58de5316dae4",
       "kind": "pointwise",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "pointwise_59ca2d5c7d0b",
@@ -1662,7 +1662,7 @@
     {
       "name": "pointwise_5d7c3bd1f499",
       "kind": "pointwise",
-      "n_shapes": 8
+      "n_shapes": 1
     },
     {
       "name": "pointwise_5d9f82394fec",
@@ -1787,7 +1787,7 @@
     {
       "name": "pointwise_6c6941b442c2",
       "kind": "pointwise",
-      "n_shapes": 5
+      "n_shapes": 3
     },
     {
       "name": "pointwise_6caf55069d9e",
@@ -1942,7 +1942,7 @@
     {
       "name": "pointwise_81c9b6261ff2",
       "kind": "pointwise",
-      "n_shapes": 7
+      "n_shapes": 4
     },
     {
       "name": "pointwise_81e879c49762",
@@ -2087,7 +2087,7 @@
     {
       "name": "pointwise_976704b7446c",
       "kind": "pointwise",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "pointwise_982e67b30dfa",
@@ -2102,7 +2102,7 @@
     {
       "name": "pointwise_98c0686d6611",
       "kind": "pointwise",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "pointwise_98f0cdc6239a",
@@ -2207,7 +2207,7 @@
     {
       "name": "pointwise_ae0cf0fe8e23",
       "kind": "pointwise",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "pointwise_ae13b013ea3e",
@@ -2257,7 +2257,7 @@
     {
       "name": "pointwise_b430273ac746",
       "kind": "pointwise",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "pointwise_b4b430f98c71",
@@ -2322,7 +2322,7 @@
     {
       "name": "pointwise_bc7461a2bc9b",
       "kind": "pointwise",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "pointwise_bd60f8c6fa98",
@@ -2377,7 +2377,7 @@
     {
       "name": "pointwise_c64fbaab0782",
       "kind": "pointwise",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "pointwise_c67b1bce4e40",
@@ -2762,7 +2762,7 @@
     {
       "name": "sum_0588ba452097",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_0967e57149d0",
@@ -2797,7 +2797,7 @@
     {
       "name": "sum_0c6370aa8259",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "sum_102fa898f1ef",
@@ -2827,7 +2827,7 @@
     {
       "name": "sum_2b8cb9e5d445",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_303fa404aa0a",
@@ -2837,7 +2837,7 @@
     {
       "name": "sum_3d59e9cd3970",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "sum_3d797e9a12e2",
@@ -2882,7 +2882,7 @@
     {
       "name": "sum_54a72e26c180",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_56676d71555e",
@@ -2897,12 +2897,12 @@
     {
       "name": "sum_572b2c80ad3d",
       "kind": "reduction",
-      "n_shapes": 6
+      "n_shapes": 1
     },
     {
       "name": "sum_58ca7193263c",
       "kind": "reduction",
-      "n_shapes": 4
+      "n_shapes": 2
     },
     {
       "name": "sum_5bdd9539405a",
@@ -2957,7 +2957,7 @@
     {
       "name": "sum_835da2618e7d",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_8abdf7c27a3b",
@@ -2967,7 +2967,7 @@
     {
       "name": "sum_96169519e55a",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_96f8c40356b7",
@@ -2982,7 +2982,7 @@
     {
       "name": "sum_99dd4e067075",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_9e51979b5684",
@@ -2992,7 +2992,7 @@
     {
       "name": "sum_a32c08f63093",
       "kind": "reduction",
-      "n_shapes": 10
+      "n_shapes": 1
     },
     {
       "name": "sum_a3335975dec9",
@@ -3007,7 +3007,7 @@
     {
       "name": "sum_ac902649310d",
       "kind": "reduction",
-      "n_shapes": 11
+      "n_shapes": 1
     },
     {
       "name": "sum_b1b70029fb34",
@@ -3047,7 +3047,7 @@
     {
       "name": "sum_cd1d18c11a67",
       "kind": "reduction",
-      "n_shapes": 5
+      "n_shapes": 4
     },
     {
       "name": "sum_d8ac9dba20da",
@@ -3067,12 +3067,12 @@
     {
       "name": "sum_e1a327127faa",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_e84517cd343c",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "sum_ea195044098d",
@@ -3087,12 +3087,12 @@
     {
       "name": "sum_f90930a6d194",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "sum_fa93a106e77a",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_fd206342afb8",
@@ -3197,7 +3197,7 @@
     {
       "name": "sum_sum_1c4efa8068a8",
       "kind": "reduction",
-      "n_shapes": 9
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_1d215d2bfb51",
@@ -3347,7 +3347,7 @@
     {
       "name": "sum_sum_6b9f2a6f0f37",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_6ea9467811c5",
@@ -3402,7 +3402,7 @@
     {
       "name": "sum_sum_81a5c296e4f2",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_83b0943d0741",
@@ -3412,7 +3412,7 @@
     {
       "name": "sum_sum_86b03d1a3e60",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_877d25fd00c6",
@@ -3432,7 +3432,7 @@
     {
       "name": "sum_sum_93fde1d3b680",
       "kind": "reduction",
-      "n_shapes": 7
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_94004e740cd8",
@@ -3442,7 +3442,7 @@
     {
       "name": "sum_sum_9558f28d5b8a",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_956e66cee2ae",
@@ -3472,7 +3472,7 @@
     {
       "name": "sum_sum_9a5dad4e740b",
       "kind": "reduction",
-      "n_shapes": 5
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_9bdad250a64c",
@@ -3517,7 +3517,7 @@
     {
       "name": "sum_sum_ac007a230329",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_ae1b9924ac59",
@@ -3602,7 +3602,7 @@
     {
       "name": "sum_sum_d9e105c10a87",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_dce3815b24a0",
@@ -3652,7 +3652,7 @@
     {
       "name": "sum_sum_f9cf0f90e7dc",
       "kind": "reduction",
-      "n_shapes": 10
+      "n_shapes": 6
     },
     {
       "name": "sum_sum_fdaf6ca471e5",
@@ -3662,17 +3662,17 @@
     {
       "name": "sum_sum_fdea164def2e",
       "kind": "reduction",
-      "n_shapes": 5
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_mean_bfbe9da220d2",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_mean_e17182ccea6b",
       "kind": "reduction",
-      "n_shapes": 0
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_sum_0295d490aeb6",
@@ -3777,7 +3777,7 @@
     {
       "name": "sum_sum_sum_4d7e4d27796e",
       "kind": "reduction",
-      "n_shapes": 10
+      "n_shapes": 2
     },
     {
       "name": "sum_sum_sum_5529d69c9bcf",
@@ -3832,11 +3832,6 @@
     {
       "name": "sum_sum_sum_7dd14f739c29",
       "kind": "reduction",
-      "n_shapes": 5
-    },
-    {
-      "name": "sum_sum_sum_7ebd24eb8dc5",
-      "kind": "reduction",
       "n_shapes": 1
     },
     {
@@ -3857,7 +3852,7 @@
     {
       "name": "sum_sum_sum_8a039874d404",
       "kind": "reduction",
-      "n_shapes": 14
+      "n_shapes": 4
     },
     {
       "name": "sum_sum_sum_8b53603f6172",
@@ -3887,7 +3882,7 @@
     {
       "name": "sum_sum_sum_9c6bfbc4476f",
       "kind": "reduction",
-      "n_shapes": 4
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_sum_9d1c1466aafa",
@@ -3962,7 +3957,7 @@
     {
       "name": "sum_sum_sum_e7599279d509",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_sum_e9dd8d0f1eed",
@@ -3992,7 +3987,7 @@
     {
       "name": "sum_sum_sum_f5983b11ff19",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "sum_sum_sum_f985aa2ba675",
@@ -4902,7 +4897,7 @@
     {
       "name": "var_mean_a501ce1ff33f",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "var_mean_a6b90944561b",
@@ -5122,7 +5117,7 @@
     {
       "name": "var_mean_c7b3c08de59d",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "var_mean_c9c3527cb012",
@@ -5157,7 +5152,7 @@
     {
       "name": "var_mean_d4477543084f",
       "kind": "reduction",
-      "n_shapes": 3
+      "n_shapes": 1
     },
     {
       "name": "var_mean_d4e6d30851cd",
@@ -5177,7 +5172,7 @@
     {
       "name": "var_mean_d6a013c7702a",
       "kind": "reduction",
-      "n_shapes": 9
+      "n_shapes": 8
     },
     {
       "name": "var_mean_d6ed28e38abc",
@@ -5387,7 +5382,7 @@
     {
       "name": "var_mean_f715055edb02",
       "kind": "reduction",
-      "n_shapes": 2
+      "n_shapes": 1
     },
     {
       "name": "var_mean_f8bc8f849c1e",

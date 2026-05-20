@@ -1,1 +1,1 @@
-inductor_huggingface_perf-1-5-linux.aws.a100_graph0_abd438fa: (T([1, 1024], i64), T([1, 1024], i32), T([50265, 768], bf16), T([1, 1024], i64), T([4098, 768], bf16), T([1, 768], bf16), T([768], bf16), T([768], bf16))
+inductor_huggingface_perf-1-5-linux.aws.a100_graph0_abd438fa: (T([1, 1024], i64, gen=Index(1024)), T([1, 1024], i32, gen=Index(2)), T([50265, 768], bf16), T([1, 1024], i64, gen=Index(50265)), T([4098, 768], bf16), T([1, 768], bf16), T([768], bf16), T([768], bf16))

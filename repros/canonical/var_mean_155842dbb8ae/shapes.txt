@@ -1,1 +1,1 @@
-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_train_d626c5c1: (T([2048, 2560], f32), T([3], i64), T([16, 128, 2560], f32), T([2560], f32), T([2560], f32), T([10240, 2560], f32), S([16, 128, 2560]), S([2048, 2560]))
+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_train_d626c5c1: (T([2048, 2560], f32), T([3], i64, gen=Index(3)), T([16, 128, 2560], f32), T([2560], f32), T([2560], f32), T([10240, 2560], f32), S([16, 128, 2560]), S([2048, 2560]))

@@ -1,1 +1,1 @@
-hf_optforcausallm_train_fc4d30c5: (T([4, 2048], i64), T([2050, 768], f32))
+hf_optforcausallm_train_fc4d30c5: (T([4, 2048], i64, gen=Index(2048)), T([2050, 768], f32))

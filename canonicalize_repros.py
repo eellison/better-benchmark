@@ -81,10 +81,24 @@ def _shape_from_arg(node):
     return None
 
 
+_DTYPE_CAST_METHODS = {
+    "float": "torch.float32",
+    "double": "torch.float64",
+    "half": "torch.float16",
+    "bfloat16": "torch.bfloat16",
+    "long": "torch.int64",
+    "int": "torch.int32",
+    "short": "torch.int16",
+    "byte": "torch.uint8",
+    "bool": "torch.bool",
+}
+
+
 def _unwrap_view_call(node):
-    """Return (base_call, shape, stride) for torch factory calls with optional view ops."""
+    """Return (base_call, shape, stride, dtype) for torch factory calls with optional view/cast ops."""
     shape = None
     stride = None
+    dtype = None
     cur = node
     while isinstance(cur, ast.Call) and isinstance(cur.func, ast.Attribute):
         attr = cur.func.attr
@@ -101,12 +115,16 @@ def _unwrap_view_call(node):
                 stride = stride_value
             cur = cur.func.value
             continue
+        if attr in _DTYPE_CAST_METHODS and not cur.args and not cur.keywords:
+            dtype = _DTYPE_CAST_METHODS[attr]
+            cur = cur.func.value
+            continue
         break
-    return cur if isinstance(cur, ast.Call) else None, shape, stride
+    return cur if isinstance(cur, ast.Call) else None, shape, stride, dtype
 
 
 def _parse_tensor_factory(node) -> dict | None:
-    call, view_shape, stride = _unwrap_view_call(node)
+    call, view_shape, stride, dtype_override = _unwrap_view_call(node)
     if call is None:
         return None
 
@@ -123,7 +141,7 @@ def _parse_tensor_factory(node) -> dict | None:
         shape = view_shape or [max_val]
         spec = {
             "shape": shape,
-            "dtype": _dtype_from_call(call, default="torch.int64"),
+            "dtype": dtype_override or _dtype_from_call(call, default="torch.int64"),
             "device": "cuda",
             "stride": stride,
             "gen": {"kind": "permutation", "size": max_val},
@@ -140,7 +158,7 @@ def _parse_tensor_factory(node) -> dict | None:
             return None
         spec = {
             "shape": shape,
-            "dtype": _dtype_from_call(call, default="torch.int64"),
+            "dtype": dtype_override or _dtype_from_call(call, default="torch.int64"),
             "device": "cuda",
             "stride": stride,
             "gen": {"kind": "index", "low": min_val, "high": max_val},
@@ -153,7 +171,7 @@ def _parse_tensor_factory(node) -> dict | None:
         return None
     return {
         "shape": shape,
-        "dtype": _dtype_from_call(call),
+        "dtype": dtype_override or _dtype_from_call(call),
         "device": "cuda",
         "stride": stride,
     }

@@ -245,6 +245,37 @@ def test_capture_hook_traces_select_to_index_bound():
     assert bounds["arg1_1"] == 10000
 
 
+def test_capture_hook_traces_gathered_values_to_embedding_bound():
+    graph = torch.fx.Graph()
+    token_types = graph.placeholder("token_types")
+    token_types.meta["val"] = torch.empty(1, 512, dtype=torch.int64)
+    positions = graph.placeholder("positions")
+    positions.meta["val"] = torch.empty(1, 512, dtype=torch.int64)
+    table = graph.placeholder("table")
+    table.meta["val"] = torch.empty(2, 128, dtype=torch.float32)
+
+    gathered = graph.call_function(
+        torch.ops.aten.gather.default,
+        (token_types, 1, positions),
+    )
+    gathered.meta["val"] = torch.empty(1, 512, dtype=torch.int64)
+    embedded = graph.call_function(torch.ops.aten.embedding.default, (table, gathered))
+    embedded.meta["val"] = torch.empty(1, 512, 128, dtype=torch.float32)
+    graph.output(embedded)
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(tmp)
+        bounds = state._infer_index_bounds(gm, {
+            "token_types": {"dtype": "torch.int64"},
+            "positions": {"dtype": "torch.int64"},
+            "table": {"dtype": "torch.float32"},
+        })
+
+    assert bounds["token_types"] == 2
+    assert bounds["positions"] == 512
+
+
 def test_gpu_lock_metadata_marks_lock_mode():
     with tempfile.TemporaryDirectory() as tmp:
         with gpu_lock_module.gpu_lock(0, lock_dir=tmp, label="exclusive-test") as lock_path:
@@ -307,6 +338,7 @@ if __name__ == "__main__":
     test_make_inputs_from_config_honors_generators_on_cpu()
     test_parse_make_inputs_preserves_generators()
     test_capture_hook_traces_select_to_index_bound()
+    test_capture_hook_traces_gathered_values_to_embedding_bound()
     test_gpu_lock_metadata_marks_lock_mode()
     test_gpu_lock_detects_dead_pid_metadata_while_blocked()
     print("All tests passed.")

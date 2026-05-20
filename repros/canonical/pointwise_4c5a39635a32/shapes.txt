@@ -1,2 +1,2 @@
-hf_mobilebertformaskedlm_infer_0f05ac4a: (T([30522, 128], f32), T([256, 128], i64), T([512, 384], f32), S([32768, 384]))
-hf_mobilebertformaskedlm_train_0f05ac4a: (T([30522, 128], f32), T([256, 128], i64), T([512, 384], f32), S([32768, 384]))
+hf_mobilebertformaskedlm_infer_0f05ac4a: (T([30522, 128], f32), T([256, 128], i64, gen=Index(30522)), T([512, 384], f32), S([32768, 384]))
+hf_mobilebertformaskedlm_train_0f05ac4a: (T([30522, 128], f32), T([256, 128], i64, gen=Index(30522)), T([512, 384], f32), S([32768, 384]))

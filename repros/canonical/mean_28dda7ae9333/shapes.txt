@@ -1,1 +1,1 @@
-hf_mt5forconditionalgeneration_train_7bcdbc59: (T([4096, 512], f32), T([84], i64), T([32, 128, 512], f32), T([512], f32), T([250112, 512], f32), S([32, 128, 512]), S([4096, 512]))
+hf_mt5forconditionalgeneration_train_7bcdbc59: (T([4096, 512], f32), T([84], i64, gen=Index(84)), T([32, 128, 512], f32), T([512], f32), T([250112, 512], f32), S([32, 128, 512]), S([4096, 512]))
