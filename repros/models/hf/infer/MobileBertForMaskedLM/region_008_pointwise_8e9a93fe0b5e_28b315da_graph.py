@@ -1,0 +1,29 @@
+class GraphModule(torch.nn.Module):
+    def forward(self, addmm_348: "f32[32768, 128]", addmm_349: "f32[32768, 128]", add_349: "f32[256, 128, 512]", arg1079_1: "f32[128, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:203 in forward, code: query_layer = self.query(query_tensor).view(*hidden_shape).transpose(1, 2)
+        reshape_default: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(addmm_348, _shape_param_0);  addmm_348 = _shape_param_0 = None
+        reshape_default_1: "f32[256, 128, 4, 32]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
+        permute_default: "f32[256, 4, 128, 32]" = torch.ops.aten.permute.default(reshape_default_1, [0, 2, 1, 3]);  reshape_default_1 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
+        mul_scalar: "f32[256, 4, 128, 32]" = torch.ops.aten.mul.Scalar(permute_default, 0.4204482076268573);  permute_default = None
+        expand_default: "f32[256, 4, 128, 32]" = torch.ops.aten.expand.default(mul_scalar, _shape_param_2);  mul_scalar = _shape_param_2 = None
+        clone_default: "f32[256, 4, 128, 32]" = torch.ops.aten.clone.default(expand_default, memory_format = torch.contiguous_format);  expand_default = None
+        reshape_default_2: "f32[1024, 128, 32]" = torch.ops.aten.reshape.default(clone_default, _shape_param_3);  clone_default = _shape_param_3 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:204 in forward, code: key_layer = self.key(key_tensor).view(*hidden_shape).transpose(1, 2)
+        reshape_default_3: "f32[256, 128, 128]" = torch.ops.aten.reshape.default(addmm_349, _shape_param_4);  addmm_349 = _shape_param_4 = None
+        reshape_default_4: "f32[256, 128, 4, 32]" = torch.ops.aten.reshape.default(reshape_default_3, _shape_param_5);  reshape_default_3 = _shape_param_5 = None
+        permute_default_1: "f32[256, 4, 128, 32]" = torch.ops.aten.permute.default(reshape_default_4, [0, 2, 1, 3]);  reshape_default_4 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
+        permute_default_2: "f32[256, 4, 32, 128]" = torch.ops.aten.permute.default(permute_default_1, [0, 1, 3, 2]);  permute_default_1 = None
+        mul_scalar_1: "f32[256, 4, 32, 128]" = torch.ops.aten.mul.Scalar(permute_default_2, 0.4204482076268573);  permute_default_2 = None
+        expand_default_1: "f32[256, 4, 32, 128]" = torch.ops.aten.expand.default(mul_scalar_1, _shape_param_6);  mul_scalar_1 = _shape_param_6 = None
+        clone_default_1: "f32[256, 4, 32, 128]" = torch.ops.aten.clone.default(expand_default_1, memory_format = torch.contiguous_format);  expand_default_1 = None
+        reshape_default_5: "f32[1024, 32, 128]" = torch.ops.aten.reshape.default(clone_default_1, _shape_param_7);  clone_default_1 = _shape_param_7 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mobilebert/modeling_mobilebert.py:205 in forward, code: value_layer = self.value(value_tensor).view(*hidden_shape).transpose(1, 2)
+        reshape_default_6: "f32[32768, 512]" = torch.ops.aten.reshape.default(add_349, _shape_param_8);  add_349 = _shape_param_8 = None
+        permute_default_3: "f32[512, 128]" = torch.ops.aten.permute.default(arg1079_1, [1, 0]);  arg1079_1 = None
+        return (reshape_default_2, reshape_default_5, reshape_default_6, permute_default_3)
