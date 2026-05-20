@@ -472,10 +472,16 @@ class _CaptureState:
                 if info and info["dtype"] != "symint":
                     dt = _DTYPE_SHORT.get(info["dtype"], info["dtype"])
                     stride = info.get("stride", [])
+                    # Add max= for integer tensors with known bounds
+                    max_kwarg = ""
+                    if "int" in info["dtype"] or "bool" in info["dtype"]:
+                        bound = index_bounds.get(name)
+                        if bound:
+                            max_kwarg = f", max={bound}"
                     if stride and info["shape"]:
-                        config_parts.append(f"T({info['shape']}, {dt}, stride={tuple(stride)})")
+                        config_parts.append(f"T({info['shape']}, {dt}, stride={tuple(stride)}{max_kwarg})")
                     else:
-                        config_parts.append(f"T({info['shape']}, {dt})")
+                        config_parts.append(f"T({info['shape']}, {dt}{max_kwarg})")
                 elif info and info.get("dtype") == "symint":
                     config_parts.append(f"S([{info.get('hint', 1)}])")
         shapes_config_line = f"({', '.join(config_parts)})"
@@ -486,29 +492,36 @@ Label: {self.label}
 Pattern hash: {meta.get("pattern_hash", "?")}
 Shape hash: {meta.get("shape_hash", "?")}
 """
-_shapes_config = "{shapes_config_line}"
+import sys
+from pathlib import Path
+
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_shapes_config = "{shapes_config_line}"
+
 {code}
 
 
-def make_inputs():
-    return [
-{inputs_code}
-    ]
+def _default_make_inputs():
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
 
 
 if __name__ == "__main__":
-    mod = Repro()
-    inputs = make_inputs()
-    compiled = torch.compile(mod)
-    with torch.no_grad():
-        out = compiled(*inputs)
-        torch.cuda.synchronize()
-    print("OK")
+    benchmark_repro(__file__, Repro, make_inputs)
 '''
         filepath = os.path.join(self.output_dir, filename)
         with open(filepath, "w") as f:

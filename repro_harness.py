@@ -51,8 +51,8 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
         "b8": "torch.bool", "u8": "torch.uint8",
     }
 
-    def T(shape, dtype, stride=None):
-        return {"kind": "tensor", "shape": shape, "dtype": _DTYPE_MAP.get(dtype, f"torch.{dtype}"), "stride": list(stride) if stride else None, "device": "cuda"}
+    def T(shape, dtype, stride=None, max=None):
+        return {"kind": "tensor", "shape": shape, "dtype": _DTYPE_MAP.get(dtype, f"torch.{dtype}"), "stride": list(stride) if stride else None, "device": "cuda", "max_val": max}
 
     def S(dims):
         return {"kind": "shape", "dims": dims}
@@ -86,6 +86,34 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
             continue
 
     return configs
+
+
+def parse_shapes_config(config_str: str) -> list:
+    """Parse a _shapes_config string and generate inputs. Used by repro._default_make_inputs()."""
+    _DTYPE_MAP = {
+        "f32": "torch.float32", "f16": "torch.float16",
+        "bf16": "torch.bfloat16", "f64": "torch.float64",
+        "i64": "torch.int64", "i32": "torch.int32",
+        "i16": "torch.int16", "i8": "torch.int8",
+        "b8": "torch.bool", "u8": "torch.uint8",
+    }
+
+    def T(shape, dtype, stride=None, max=None):
+        return {"kind": "tensor", "shape": shape, "dtype": _DTYPE_MAP.get(dtype, f"torch.{dtype}"), "stride": list(stride) if stride else None, "device": "cuda", "max_val": max}
+
+    def S(dims):
+        return {"kind": "shape", "dims": dims}
+
+    _ns = {"__builtins__": {}, "T": T, "S": S,
+            "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
+            "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
+            "b8": "b8", "u8": "u8"}
+    inputs = eval(config_str, _ns)
+    if isinstance(inputs, dict):
+        inputs = [inputs]
+    elif isinstance(inputs, tuple):
+        inputs = list(inputs)
+    return make_inputs_from_config({"inputs": inputs})
 
 
 def make_inputs_from_config(config: dict) -> list:
