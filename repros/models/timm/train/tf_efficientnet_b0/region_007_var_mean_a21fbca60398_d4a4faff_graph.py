@@ -1,0 +1,17 @@
+class GraphModule(torch.nn.Module):
+    def forward(self, convolution_59: "f32[128, 192, 7, 7]", primals_264: "f32[192]", primals_265: "f32[192]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
+        var_mean_correction = torch.ops.aten.var_mean.correction(convolution_59, [0, 2, 3], correction = 0, keepdim = True)
+        getitem: "f32[1, 192, 1, 1]" = var_mean_correction[0]
+        getitem_1: "f32[1, 192, 1, 1]" = var_mean_correction[1];  var_mean_correction = None
+        add_tensor: "f32[1, 192, 1, 1]" = torch.ops.aten.add.Tensor(getitem, 0.001);  getitem = None
+        rsqrt_default: "f32[1, 192, 1, 1]" = torch.ops.aten.rsqrt.default(add_tensor);  add_tensor = None
+        sub_tensor: "f32[128, 192, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_59, getitem_1);  convolution_59 = getitem_1 = None
+        mul_tensor: "f32[128, 192, 7, 7]" = torch.ops.aten.mul.Tensor(sub_tensor, rsqrt_default);  sub_tensor = rsqrt_default = None
+        unsqueeze_default: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(primals_264, -1);  primals_264 = None
+        unsqueeze_default_1: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
+        mul_tensor_1: "f32[128, 192, 7, 7]" = torch.ops.aten.mul.Tensor(mul_tensor, unsqueeze_default_1);  mul_tensor = unsqueeze_default_1 = None
+        unsqueeze_default_2: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(primals_265, -1);  primals_265 = None
+        unsqueeze_default_3: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_2, -1);  unsqueeze_default_2 = None
+        add_tensor_1: "f32[128, 192, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_1, unsqueeze_default_3);  mul_tensor_1 = unsqueeze_default_3 = None
+        return add_tensor_1

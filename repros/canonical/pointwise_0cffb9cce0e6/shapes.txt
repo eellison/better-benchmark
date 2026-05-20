@@ -1,4 +1,0 @@
-inductor_huggingface_perf-3-5-linux.aws.a100_graph7_68f1a4dd: (T([512, 3072], f16), T([768], f32), T([768, 3072], f32), S([1, 512, 3072]), S([512, 3072]))
-inductor_huggingface_perf_cuda_h100-1-5-linux.aws.h100_graph33_1eddf999: (T([8192, 3072], f16), T([768], f32), T([768, 3072], f32), S([16, 512, 3072]), S([8192, 3072]))
-inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph40_a307eded: (T([128, 4096], f16), T([1024], f32), T([1024, 4096], f32), S([1, 128, 4096]), S([128, 4096]))
-inductor_timm_perf_cuda_h100-2-7-linux.aws.h100_graph49_7bc76a70: (T([1584, 3072], f16), T([768], f32), T([768, 3072], f32), S([8, 198, 3072]), S([1584, 3072]))

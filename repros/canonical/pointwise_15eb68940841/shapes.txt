@@ -1,1 +1,0 @@
-inductor_torchbench_perf_cuda_h100-1-9-linux.aws.h100_graph62_700ca791: (T([2, 200000], i64), T([10000, 64], bf16), T([1], bf16), T([64, 64], bf16), S([200000, 64]))

@@ -42,7 +42,6 @@ TIMM_MODELS = {
 }
 
 OUTPUT_DIR = Path("/tmp/scratch_space/better_benchmark/repros")
-GRAPH_DIR = Path("/tmp/scratch_space/better_benchmark/fx_graphs")
 
 
 def capture_model(model_name: str, batch_size: int, mode: str):
@@ -70,7 +69,11 @@ def capture_model(model_name: str, batch_size: int, mode: str):
         else:
             model.eval()
 
-        install_capture_hook(str(cap_dir), label=label, graph_dir=str(GRAPH_DIR / label))
+        # Save full graphs to the per-model directory
+        # Use label-derived name to match what merge_captures writes manifest to
+        model_dir = OUTPUT_DIR / "models" / "timm" / mode / label
+        model_dir.mkdir(parents=True, exist_ok=True)
+        install_capture_hook(str(cap_dir), label=label, graph_dir=str(model_dir))
 
         t0 = time.time()
         with fresh_inductor_cache():
@@ -91,7 +94,7 @@ def capture_model(model_name: str, batch_size: int, mode: str):
         uninstall_capture_hook()
 
         # Merge into canonical set
-        n = merge_one_capture(cap_dir, OUTPUT_DIR, label, suite="timm", mode=mode.replace("infer", "infer"))
+        n = merge_one_capture(cap_dir, OUTPUT_DIR, label, suite="timm", mode=mode)
         return n, elapsed
 
     except Exception as e:
@@ -127,7 +130,6 @@ def main():
 
     modes = ["infer", "train"] if args.mode == "both" else [args.mode]
 
-    GRAPH_DIR.mkdir(parents=True, exist_ok=True)
 
     total_regions = 0
     total_time = 0

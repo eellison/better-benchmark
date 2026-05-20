@@ -1,2 +1,0 @@
-inductor_torchbench_perf-2-6-linux.aws.a100_graph23_37d3ccb0: (T([64, 64, 16, 16], bf16), T([64], bf16), T([64], bf16), S([64, 32, 2, 256]), S([64, 64, 16, 16]))
-inductor_torchbench_perf_cuda_h100-3-9-linux.aws.h100_graph64_37d3ccb0: (T([64, 64, 16, 16], bf16), T([64], bf16), T([64], bf16), S([64, 32, 2, 256]), S([64, 64, 16, 16]))

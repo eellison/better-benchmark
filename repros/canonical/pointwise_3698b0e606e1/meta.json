@@ -22,12 +22,13 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 5,
+  "n_models": 6,
   "models": [
     "timm_adv_inception_v3_infer",
     "timm_ghostnet_100_infer",
     "timm_inception_v3_infer",
     "timm_mobilenetv3_large_100_infer",
+    "timm_resnet50_infer",
     "timm_visformer_small_infer"
   ]
 }

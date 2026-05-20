@@ -72,27 +72,35 @@ def _format_compact_config(label: str, input_specs: list[dict]) -> str:
     return f"{label}: ({', '.join(parts)})"
 
 
-def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
-                      suite: str = "other", mode: str | None = None):
-    """Write per-model JSON file with pattern list."""
+def _write_model_manifest(canonical_dir: Path, model_name: str,
+                          patterns: list[str], shapes: dict[str, str],
+                          suite: str = "other", mode: str | None = None):
+    """Write per-model manifest with patterns and their shapes.
+
+    Writes to models/<suite>/<mode>/<model_name>/manifest.json with:
+      {"patterns": [...], "shapes": {"pattern_hash": "config_line"}}
+    """
     models_dir = canonical_dir / "models"
     if mode:
-        out_dir = models_dir / suite / mode
+        out_dir = models_dir / suite / mode / model_name
     else:
-        out_dir = models_dir / suite
+        out_dir = models_dir / suite / model_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    out_file = out_dir / f"{model_name}.json"
+    manifest_file = out_dir / "manifest.json"
 
     # Merge with existing if present
-    if out_file.exists():
-        existing = json.loads(out_file.read_text())
-        patterns = sorted(set(existing["patterns"] + patterns))
+    if manifest_file.exists():
+        existing = json.loads(manifest_file.read_text())
+        patterns = sorted(set(existing.get("patterns", []) + patterns))
+        existing_shapes = existing.get("shapes", {})
+        existing_shapes.update(shapes)
+        shapes = existing_shapes
     else:
         patterns = sorted(set(patterns))
 
-    out_file.write_text(json.dumps({"patterns": patterns}, indent=2) + "\n")
-    return out_file
+    manifest_file.write_text(json.dumps({"patterns": patterns, "shapes": shapes}, indent=2) + "\n")
+    return out_dir
 
 
 def _infer_suite_mode(model_name: str) -> tuple[str, str | None, str]:
@@ -163,6 +171,7 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         clean_name = model_name
 
     merged_patterns = []
+    merged_shapes = {}  # pattern_hash -> shapes_config_line
     merged = 0
 
     for entry in entries:
@@ -232,12 +241,20 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                     print(f"  Warning: could not generate canonical repro for {dir_name}: {e}")
 
         merged_patterns.append(pattern_hash)
+        # Record the shapes config for this pattern (from the raw capture)
+        src_file = Path(entry["file"])
+        config_line = _read_shapes_config(src_file, config_key) if src_file.exists() else None
+        if config_line:
+            # Extract just the config part (after "key: ")
+            colon = config_line.find(":")
+            if colon > 0:
+                merged_shapes[pattern_hash] = config_line[colon + 1:].strip()
         merged += 1
 
-    # Write per-model JSON
+    # Write per-model manifest (patterns + shapes)
     if merged_patterns:
-        out_file = _write_model_json(canonical_dir, clean_name, merged_patterns, suite, mode)
-        print(f"  Model JSON: {out_file}")
+        model_dir = _write_model_manifest(canonical_dir, clean_name, merged_patterns, merged_shapes, suite, mode)
+        print(f"  Model dir: {model_dir}")
 
     return merged
 

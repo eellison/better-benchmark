@@ -1,2 +1,0 @@
-inductor_huggingface_perf-4-5-linux.aws.a100_graph10_5107bfe4: (T([16, 256, 64], bf16), T([1024, 1024], bf16), S([1, 16, 256, 64]), S([1, 256, 1024]), S([256, 1024]))
-inductor_torchbench_perf-1-6-linux.aws.a100_graph22_3fc4dace: (T([48, 128, 64], bf16), T([768, 768], bf16), S([4, 12, 128, 64]), S([4, -1, 768]), S([512, 768]))

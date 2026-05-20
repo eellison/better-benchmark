@@ -1,2 +1,0 @@
-inductor_huggingface_perf-4-5-linux.aws.a100_graph10_ce1cd2da: (T([256, 1024], bf16), T([1, 256, 1024], bf16), T([1024], bf16), T([1024], bf16), T([50265, 1024], bf16), S([1, 256, 1024]), S([256, 1024]))
-inductor_huggingface_perf_cuda_h100-2-5-linux.aws.h100_graph36_93c9ceb6: (T([512, 768], bf16), T([1, 512, 768], bf16), T([768], bf16), T([768], bf16), T([50257, 768], bf16), S([1, 512, 768]), S([512, 768]))

@@ -1,6 +1,0 @@
-inductor_torchbench_perf_cuda_h100-9-9-linux.aws.h100_graph75_e43b3a1a: (T([4, 256, 13, 13], f16), T([4, 256, 13, 13], f16), T([1000], f32), T([1000, 512, 1, 1], f32))
-inductor_torchbench_perf_cuda_h100-9-9-linux.aws.h100_graph75_6bac4a05: (T([4, 256, 13, 13], f16), T([4, 256, 13, 13], f16), T([64], f32), T([64, 512, 1, 1], f32))
-inductor_torchbench_perf_cuda_h100-9-9-linux.aws.h100_graph75_35cceb48: (T([4, 192, 13, 13], f16), T([4, 192, 13, 13], f16), T([64], f32), T([64, 384, 1, 1], f32))
-inductor_torchbench_perf_cuda_h100-9-9-linux.aws.h100_graph75_08a4beb2: (T([4, 192, 13, 13], f16), T([4, 192, 13, 13], f16), T([48], f32), T([48, 384, 1, 1], f32))
-inductor_torchbench_perf_cuda_h100-9-9-linux.aws.h100_graph75_ec6dab3b: (T([4, 128, 27, 27], f16), T([4, 128, 27, 27], f16), T([32], f32), T([32, 256, 1, 1], f32))
-inductor_torchbench_perf_cuda_h100-9-9-linux.aws.h100_graph75_94f5f5ce: (T([4, 64, 55, 55], f16), T([4, 64, 55, 55], f16), T([16], f32), T([16, 128, 1, 1], f32))

@@ -1,3 +1,0 @@
-inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_ef7c876b: (T([512, 480], bf16), T([240, 480], bf16), S([32, 16, 480]), S([512, 480]))
-inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_3353245f: (T([2048, 384], bf16), T([192, 384], bf16), S([32, 64, 384]), S([2048, 384]))
-inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_0c8605cf: (T([8192, 288], bf16), T([144, 288], bf16), S([32, 256, 288]), S([8192, 288]))

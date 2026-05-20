@@ -1,1 +1,3 @@
 hf_electraforcausallm_infer_0a6affde: (T([64, 512], i64), T([32768, 30524], f32), S([64, 512, 30522]), S([-1, 30522]))
+hf_gptneoforcausallm_infer_dacea998: (T([32, 128], i64), T([4096, 50260], f32), S([32, 128, 50257]), S([-1, 50257]))
+hf_robertaforcausallm_infer_7dd627fd: (T([32, 512], i64), T([16384, 50268], f32), S([32, 512, 50265]), S([-1, 50265]))

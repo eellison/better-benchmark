@@ -1,6 +1,0 @@
-inductor_timm_perf-3-6-linux.aws.a100_graph16_da131ae3: (T([160], bf16), T([160], bf16), T([128, 160, 7, 7], bf16), T([160], bf16), T([160], bf16), T([128, 160, 7, 7], bf16))
-inductor_timm_perf-3-6-linux.aws.a100_graph16_30c99811: (T([96], bf16), T([96], bf16), T([128, 96, 14, 14], bf16), T([96], bf16), T([96], bf16), T([128, 96, 14, 14], bf16))
-inductor_timm_perf-3-6-linux.aws.a100_graph16_1e936607: (T([64], bf16), T([64], bf16), T([128, 64, 14, 14], bf16), T([64], bf16), T([64], bf16), T([128, 64, 14, 14], bf16))
-inductor_timm_perf-3-6-linux.aws.a100_graph16_e48e013b: (T([32], bf16), T([32], bf16), T([128, 32, 28, 28], bf16), T([32], bf16), T([32], bf16), T([128, 32, 28, 28], bf16))
-inductor_timm_perf-3-6-linux.aws.a100_graph16_f5495b3e: (T([24], bf16), T([24], bf16), T([128, 24, 56, 56], bf16), T([24], bf16), T([24], bf16), T([128, 24, 56, 56], bf16))
-inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_70785578: (T([64], bf16), T([64], bf16), T([8, 64, 64, 64], bf16), T([64], bf16), T([64], bf16), T([8, 64, 64, 64], bf16))

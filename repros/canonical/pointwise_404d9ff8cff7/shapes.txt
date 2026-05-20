@@ -1,1 +1,0 @@
-inductor_torchbench_perf-6-6-linux.aws.a100_graph28_7dfa6f73: (T([256, 2], f16), T([1024, 2], f16, stride=(1, 1024)), T([1024, 1024], f16, stride=(1, 1024)))

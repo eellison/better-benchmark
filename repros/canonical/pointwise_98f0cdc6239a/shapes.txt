@@ -1,2 +1,1 @@
 hf_xglmforcausallm_train_a3914025: (T([32, 128, 1024], f32), T([32, 128], i64))
-inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph44_4f14eb98: (T([1, 128, 1024], f32), T([1, 128], i64))

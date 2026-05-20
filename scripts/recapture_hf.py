@@ -30,7 +30,6 @@ SKIP_MODELS = {
 }
 
 OUTPUT_DIR = Path("/tmp/scratch_space/better_benchmark/repros")
-GRAPH_DIR = Path("/tmp/scratch_space/better_benchmark/fx_graphs")
 HF_LIST = Path("/tmp/pytorch-work/benchmarks/dynamo/huggingface_models_list.txt")
 
 
@@ -77,7 +76,9 @@ def capture_hf_model(model_name: str, batch_size: int, mode: str):
         else:
             model.eval()
 
-        install_capture_hook(str(cap_dir), label=label, graph_dir=str(GRAPH_DIR / label))
+        model_dir = OUTPUT_DIR / "models" / "hf" / mode / model_name
+        model_dir.mkdir(parents=True, exist_ok=True)
+        install_capture_hook(str(cap_dir), label=label, graph_dir=str(model_dir))
 
         t0 = time.time()
         with fresh_inductor_cache():
@@ -122,7 +123,6 @@ def main():
     models = args.models or list(all_models.keys())
     modes = ["infer", "train"] if args.mode == "both" else [args.mode]
 
-    GRAPH_DIR.mkdir(parents=True, exist_ok=True)
 
     total_regions = 0
     total_time = 0

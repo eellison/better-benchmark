@@ -1,3 +1,0 @@
-inductor_torchbench_perf-4-6-linux.aws.a100_graph24_7f35ccee: (T([32, 3, 3, 3], f32), T([32, 3, 224, 224], f32))
-inductor_timm_perf_cuda_h100-4-7-linux.aws.h100_graph53_09e6ddcc: (T([16, 3, 3, 3], f32), T([8, 3, 224, 224], f32))
-inductor_timm_perf_cuda_h100-5-7-linux.aws.h100_graph55_f624a6c1: (T([32, 3, 3, 3], f32), T([8, 3, 224, 224], f32))

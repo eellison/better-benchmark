@@ -1,1 +1,0 @@
-inductor_huggingface_perf-1-5-linux.aws.a100_graph3_c2d95551: (T([1024, 768], bf16), T([768], bf16), T([768], bf16), T([50265, 768], bf16), S([1, 1024, 768]), S([1024, 768]))

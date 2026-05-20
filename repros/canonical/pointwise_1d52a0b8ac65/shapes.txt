@@ -1,1 +1,0 @@
-inductor_huggingface_perf-5-5-linux.aws.a100_graph11_f521085b: (T([16, 512, 64], bf16), S([16, 512, 1, 1, 64]), S([512, 1, 16, 64]), S([1, 512, 1024]))
