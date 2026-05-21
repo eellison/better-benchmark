@@ -681,15 +681,11 @@ if __name__ == "__main__":
             full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
             self.graph_counter += 1
             try:
-<<<<<<< HEAD
-                full_code = gm.print_readable(print_output=False, include_stride=True, include_device=True)
-=======
                 full_code = gm.print_readable(
                     print_output=False,
                     include_stride=True,
                     include_device=True,
                 )
->>>>>>> origin/repro-correctness-loader-fixes
                 with open(full_graph_path, "w") as f:
                     f.write(full_code)
             except Exception:
