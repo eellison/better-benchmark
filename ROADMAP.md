@@ -60,14 +60,23 @@ dm_nfnet_f0 128            vit_base_dinov2 128      vit_base_siglip 128
 4. ~~Freeze benchmarks/v1.json~~ DONE
 5. ~~CI report tooling~~ DONE (bench_report.py: v3 JSON + markdown + regression gate)
 6. ~~Parallel execution~~ DONE (INDUCTOR_GPU_BENCH_LOCK, 2.6x throughput, no noise)
-7. TODO (immediate):
-   - ~~Run full baseline sweep~~ DONE (1073 repros, median 1.03x)
-   - ~~Stale lock detection~~ DONE
-   - ~~Validate all shapes~~ DONE (removed 194 bad configs, 2981 remaining pass)
-   - Fix merge_captures.py: shape params (S()) must come from each model's capture,
-     not from the canonical repro's defaults. Currently cross-model dedup copies the
-     FIRST model's S() values which are wrong for models with different vocab/seq sizes.
-   - Investigate: combo_kernels fix (8 of top 20 gaps), horizontal fusion cap (8 of top 20)
+7. Known issues (must fix before next full recapture):
+   - **Partitioner groups independent chains**: reshape/permute/clone chains that share
+     no data dependency get fused into one partition. The CapabilityBasedPartitioner
+     groups ALL reachable supported nodes, not just data-dependent ones. Need to split
+     on data independence OR use a different partitioner.
+   - **1185 repros still in old format** (no _repro_version): need upgrade via
+     `scripts/upgrade_repros.py` (re-compile through hook). But pointless until
+     partitioner bug is fixed (would re-capture wrong partitions).
+   - **8 new torchbench models fail capture** (GNN, stable_diffusion, SAM, Super_SloMo):
+     capture hook validation raises because index bounds inference is wrong for these.
+   - **11 vLLM repros have bad index bounds** (MoE routing — blanket gen=Index(100)).
+   - **SOL baseline**: `add(a, 0, out=b)` is still slightly slower than Triton pointwise
+     kernels, giving <1.0x gaps for pointwise. Not a correctness issue but confusing.
+   - **GPU bench lock**: shared/exclusive deadlocks across processes (different fds).
+     Using exclusive-only for now (minor noise from concurrent compilation).
+   
+8. Investigate: combo_kernels fix (8 of top 20 gaps), horizontal fusion cap (8 of top 20)
 8. Land easy inductor fixes with benchmark evidence:
    - combo_kernels enable (3x on 60% of severe gaps)
    - num_warps=2 for persistent INNER (1.28x)
