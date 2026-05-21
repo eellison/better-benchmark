@@ -1,0 +1,75 @@
+"""
+Standalone repro captured via capture_hook.
+Label: vllm_Qwen_Qwen3-0.6B_001
+Pattern hash: 50a261f0bced
+Shape hash: bd8d3550
+"""
+import sys
+from pathlib import Path
+
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_repro_version = 2
+_shapes_config = "(T([4, 16, 512, 128], bf16), T([1, 1, 512, 128], bf16), T([4, 8, 512, 128], bf16), T([1, 1, 512, 128], bf16), T([128], bf16), T([2048, 1024], bf16), T([4, 512, 8, 1], f32), S([4, 8, 2, 512, 128]), S([4, 512, 1024]), S([4, 512, -1, 128]), S([4, 512, 8, 128]), S([4, 512, 1024]), S([2048, 1024]))"
+
+class Repro(torch.nn.Module):
+    def forward(self, getitem_82: "bf16[4, 16, 512, 128]", unsqueeze_6: "bf16[1, 1, 512, 128]", full_2: "bf16[4, 8, 512, 128]", unsqueeze_7: "bf16[1, 1, 512, 128]", arg7_1: "bf16[128]", arg317_1: "bf16[2048, 1024]", arg318_1: "f32[4, 512, 8, 1]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
+        # No stacktrace found for following nodes
+        view_default: "bf16[4, 8, 2, 512, 128]" = torch.ops.aten.view.default(getitem_82, _shape_param_0);  getitem_82 = _shape_param_0 = None
+        sum_dim_int_list: "bf16[4, 8, 1, 512, 128]" = torch.ops.aten.sum.dim_IntList(view_default, [2], True);  view_default = None
+        squeeze_dim: "bf16[4, 8, 512, 128]" = torch.ops.aten.squeeze.dim(sum_dim_int_list, 2);  sum_dim_int_list = None
+        mul_tensor: "bf16[4, 8, 512, 128]" = torch.ops.aten.mul.Tensor(squeeze_dim, unsqueeze_6);  unsqueeze_6 = None
+        slice_tensor: "bf16[4, 8, 512, 64]" = torch.ops.aten.slice.Tensor(mul_tensor, 3, 0, 64)
+        slice_tensor_1: "bf16[4, 8, 512, 64]" = torch.ops.aten.slice.Tensor(mul_tensor, 3, 64, 128);  mul_tensor = None
+        neg_default: "bf16[4, 8, 512, 64]" = torch.ops.aten.neg.default(slice_tensor);  slice_tensor = None
+        slice_scatter_default: "bf16[4, 8, 512, 128]" = torch.ops.aten.slice_scatter.default(full_2, neg_default, 3, 64, 9223372036854775807);  neg_default = None
+        slice_scatter_default_1: "bf16[4, 8, 512, 128]" = torch.ops.aten.slice_scatter.default(full_2, slice_tensor_1, 3, 0, 64);  full_2 = slice_tensor_1 = None
+        add_tensor: "bf16[4, 8, 512, 128]" = torch.ops.aten.add.Tensor(slice_scatter_default, slice_scatter_default_1);  slice_scatter_default = slice_scatter_default_1 = None
+        mul_tensor_1: "bf16[4, 8, 512, 128]" = torch.ops.aten.mul.Tensor(squeeze_dim, unsqueeze_7);  squeeze_dim = unsqueeze_7 = None
+        add_tensor_1: "bf16[4, 8, 512, 128]" = torch.ops.aten.add.Tensor(add_tensor, mul_tensor_1);  add_tensor = mul_tensor_1 = None
+        permute_default: "bf16[4, 512, 8, 128]" = torch.ops.aten.permute.default(add_tensor_1, [0, 2, 1, 3]);  add_tensor_1 = None
+        mul_tensor_2: "bf16[4, 512, 8, 128]" = torch.ops.aten.mul.Tensor(permute_default, arg7_1);  permute_default = arg7_1 = None
+        view_default_1: "bf16[4, 512, 1024]" = torch.ops.aten.view.default(arg317_1, _shape_param_1);  arg317_1 = _shape_param_1 = None
+        view_default_2: "bf16[4, 512, 8, 128]" = torch.ops.aten.view.default(view_default_1, _shape_param_2);  view_default_1 = _shape_param_2 = None
+        convert_element_type_default: "f32[4, 512, 8, 128]" = torch.ops.prims.convert_element_type.default(view_default_2, torch.float32);  view_default_2 = None
+        convert_element_type_default_1: "f32[4, 512, 8, 128]" = torch.ops.prims.convert_element_type.default(mul_tensor_2, torch.float32);  mul_tensor_2 = None
+        mul_tensor_3: "f32[4, 512, 8, 128]" = torch.ops.aten.mul.Tensor(convert_element_type_default_1, convert_element_type_default)
+        mul_tensor_4: "f32[4, 512, 8, 128]" = torch.ops.aten.mul.Tensor(convert_element_type_default_1, arg318_1);  convert_element_type_default_1 = None
+        sum_dim_int_list_1: "f32[4, 512, 8, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor_3, [3], True);  mul_tensor_3 = None
+        pow_tensor_scalar: "f32[4, 512, 8, 1]" = torch.ops.aten.pow.Tensor_Scalar(arg318_1, 3);  arg318_1 = None
+        mul_scalar: "f32[4, 512, 8, 1]" = torch.ops.aten.mul.Scalar(sum_dim_int_list_1, -0.5);  sum_dim_int_list_1 = None
+        mul_tensor_5: "f32[4, 512, 8, 1]" = torch.ops.aten.mul.Tensor(mul_scalar, pow_tensor_scalar);  mul_scalar = pow_tensor_scalar = None
+        expand_default: "f32[4, 512, 8, 128]" = torch.ops.aten.expand.default(mul_tensor_5, _shape_param_3);  mul_tensor_5 = _shape_param_3 = None
+        div_scalar: "f32[4, 512, 8, 128]" = torch.ops.aten.div.Scalar(expand_default, 128);  expand_default = None
+        pow_tensor_scalar_1: "f32[4, 512, 8, 128]" = torch.ops.aten.pow.Tensor_Scalar(convert_element_type_default, 1.0);  convert_element_type_default = None
+        mul_scalar_1: "f32[4, 512, 8, 128]" = torch.ops.aten.mul.Scalar(pow_tensor_scalar_1, 2.0);  pow_tensor_scalar_1 = None
+        mul_tensor_6: "f32[4, 512, 8, 128]" = torch.ops.aten.mul.Tensor(div_scalar, mul_scalar_1);  div_scalar = mul_scalar_1 = None
+        add_tensor_2: "f32[4, 512, 8, 128]" = torch.ops.aten.add.Tensor(mul_tensor_4, mul_tensor_6);  mul_tensor_4 = mul_tensor_6 = None
+        convert_element_type_default_2: "bf16[4, 512, 8, 128]" = torch.ops.prims.convert_element_type.default(add_tensor_2, torch.bfloat16);  add_tensor_2 = None
+        clone_default: "bf16[4, 512, 8, 128]" = torch.ops.aten.clone.default(convert_element_type_default_2, memory_format = torch.contiguous_format);  convert_element_type_default_2 = None
+        view_default_3: "bf16[4, 512, 1024]" = torch.ops.aten.view.default(clone_default, _shape_param_4);  clone_default = _shape_param_4 = None
+        view_default_4: "bf16[2048, 1024]" = torch.ops.aten.view.default(view_default_3, _shape_param_5);  view_default_3 = _shape_param_5 = None
+        return view_default_4
+
+
+
+def _default_make_inputs():
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
+
+
+if __name__ == "__main__":
+    benchmark_repro(__file__, Repro, make_inputs)

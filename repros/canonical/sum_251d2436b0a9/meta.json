@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "251d2436b0a9",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "vllm_Qwen_Qwen3-0.6B_001",
+    "vllm_Qwen_Qwen3-30B-A3B_001",
+    "vllm_meta-llama_Llama-3.2-1B_001",
+    "vllm_mistralai_Mistral-7B-Instruct-v0.3_001"
+  ]
+}

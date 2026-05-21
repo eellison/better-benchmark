@@ -6,23 +6,23 @@
   "origin_ops": [
     "aten.add.Tensor"
   ],
-  "n_models": 6,
+  "n_models": 16,
   "models": [
     "demucs",
     "hf_Reformer",
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer_000",
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_000",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_001",
+    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer_infer_000",
+    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_000",
+    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_001",
+    "timm_timm_visformer_small_infer_infer_000",
+    "timm_timm_visformer_small_train_train_000",
     "timm_visformer_small_infer",
-    "timm_visformer_small_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 13.952000066637993,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 13.183999806642532,
-      "total_bytes": 48168960,
-      "gap_default": 1.05825244775933,
-      "gap_cd": null
-    }
-  }
+    "timm_visformer_small_infer_000",
+    "timm_visformer_small_train",
+    "timm_visformer_small_train_000"
+  ]
 }

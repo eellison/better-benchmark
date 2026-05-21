@@ -33,22 +33,23 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 5,
+  "n_models": 16,
   "models": [
     "LearningToPaint",
+    "phlippe_resnet",
+    "resnet152",
     "resnet18",
     "resnet50",
     "resnext50_32x4d",
-    "timm_ghostnet_100_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 667.5199866294861,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 301.91999673843384,
-      "total_bytes": 2055209156,
-      "gap_default": 2.2109167787511175,
-      "gap_cd": null
-    }
-  }
+    "timm_adv_inception_v3_train",
+    "timm_adv_inception_v3_train_001",
+    "timm_ghostnet_100_train",
+    "timm_ghostnet_100_train_001",
+    "timm_inception_v3_train",
+    "timm_inception_v3_train_001",
+    "timm_regnet",
+    "timm_timm_adv_inception_v3_train_train_001",
+    "timm_timm_ghostnet_100_train_train_001",
+    "timm_timm_inception_v3_train_train_001"
+  ]
 }

@@ -16,8 +16,10 @@
     "aten.reshape.default",
     "aten.split.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
+    "hf_GPT2",
+    "hf_GPT2_large",
     "nanogpt"
   ]
 }

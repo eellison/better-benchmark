@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "dca18e3e98e9",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten._unsafe_view.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "vllm_Qwen_Qwen3-0.6B_001",
+    "vllm_meta-llama_Llama-3.2-1B_001"
+  ]
+}

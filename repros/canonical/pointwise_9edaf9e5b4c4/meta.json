@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "9edaf9e5b4c4",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "vllm_facebook_opt-125m_002"
+  ]
+}

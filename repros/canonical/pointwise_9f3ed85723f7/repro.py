@@ -15,11 +15,12 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128, 64, 97, 97], f32, stride=(602176, 1, 6208, 64)), T([128, 64, 96, 96], f32, stride=(589824, 1, 6144, 64)))"
 
 class Repro(torch.nn.Module):
     def forward(self, getitem_345: "f32[128, 64, 97, 97]", convolution_2: "f32[128, 64, 96, 96]"):
-        # File: /tmp/pytorch-work/torch/nn/functional.py:5461 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:5462 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
         constant_pad_nd_default: "f32[128, 64, 96, 96]" = torch.ops.aten.constant_pad_nd.default(getitem_345, [0, -1, 0, -1]);  getitem_345 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:89 in forward, code: return self.act_fn(x, inplace=self.inplace).mul_(self.gamma)
@@ -38,6 +39,7 @@ class Repro(torch.nn.Module):
         add_tensor_1: "f32[128, 64, 96, 96]" = torch.ops.aten.add.Tensor(mul_tensor_2, mul_tensor_6);  mul_tensor_2 = mul_tensor_6 = None
         mul_tensor_7: "f32[128, 64, 96, 96]" = torch.ops.aten.mul.Tensor(mul_tensor, add_tensor_1);  mul_tensor = add_tensor_1 = None
         return mul_tensor_7
+
 
 
 def _default_make_inputs():

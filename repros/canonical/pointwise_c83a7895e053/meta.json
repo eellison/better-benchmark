@@ -9,19 +9,20 @@
     "aten.exp.default",
     "aten.neg.default"
   ],
-  "n_models": 2,
+  "n_models": 13,
   "models": [
+    "timm_efficientnet",
+    "timm_nfnet_l0_infer",
+    "timm_nfnet_l0_infer_000",
+    "timm_nfnet_l0_train",
+    "timm_nfnet_l0_train_000",
     "timm_tf_efficientnet_b0_infer",
-    "timm_tf_efficientnet_b0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 5.696000065654516,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 5.472000222653151,
-      "total_bytes": 49152,
-      "gap_default": 1.0409356421576967,
-      "gap_cd": null
-    }
-  }
+    "timm_tf_efficientnet_b0_infer_000",
+    "timm_tf_efficientnet_b0_train",
+    "timm_tf_efficientnet_b0_train_000",
+    "timm_timm_nfnet_l0_infer_infer_000",
+    "timm_timm_nfnet_l0_train_train_000",
+    "timm_timm_tf_efficientnet_b0_infer_infer_000",
+    "timm_timm_tf_efficientnet_b0_train_train_000"
+  ]
 }

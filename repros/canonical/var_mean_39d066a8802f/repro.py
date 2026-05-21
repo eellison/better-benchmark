@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([512, 80, 7, 7], f32, stride=(3920, 1, 560, 80)), T([80], f32), T([80], f32), T([512, 80, 7, 7], f32, stride=(3920, 1, 560, 80)), T([512, 160, 7, 7], f32, stride=(7840, 1, 1120, 160)))"
 
 class Repro(torch.nn.Module):
@@ -40,6 +41,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:445 in forward, code: x += self.shortcut(shortcut)
         add_tensor_2: "f32[512, 160, 7, 7]" = torch.ops.aten.add.Tensor(cat_default, add_395);  cat_default = add_395 = None
         return add_tensor_2
+
 
 
 def _default_make_inputs():

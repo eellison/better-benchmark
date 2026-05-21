@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: genai_softmax_fwd_32768x256
+Label: genai_SoftmaxForward_000
 Pattern hash: 3ed297ef02cd
-Shape hash: 44f3d1cd
+Shape hash: 4cb2161c
 """
 import sys
 from pathlib import Path
@@ -16,18 +16,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([32768, 256], bf16))"
+_shapes_config = "(T([8192, 262144], bf16))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "bf16[32768, 256]"):
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:227 in sm_fwd, code: return F.softmax(x, dim=-1)
-        convert_element_type_default: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.float32);  arg0_1 = None
-        amax_default: "f32[32768, 1]" = torch.ops.aten.amax.default(convert_element_type_default, [-1], True)
-        sub_tensor: "f32[32768, 256]" = torch.ops.aten.sub.Tensor(convert_element_type_default, amax_default);  convert_element_type_default = amax_default = None
-        exp_default: "f32[32768, 256]" = torch.ops.aten.exp.default(sub_tensor);  sub_tensor = None
-        sum_dim_int_list: "f32[32768, 1]" = torch.ops.aten.sum.dim_IntList(exp_default, [-1], True)
-        div_tensor: "f32[32768, 256]" = torch.ops.aten.div.Tensor(exp_default, sum_dim_int_list);  exp_default = sum_dim_int_list = None
-        convert_element_type_default_1: "bf16[32768, 256]" = torch.ops.prims.convert_element_type.default(div_tensor, torch.bfloat16);  div_tensor = None
+    def forward(self, arg0_1: "bf16[8192, 262144]"):
+        # No stacktrace found for following nodes
+        convert_element_type_default: "f32[8192, 262144]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.float32);  arg0_1 = None
+        amax_default: "f32[8192, 1]" = torch.ops.aten.amax.default(convert_element_type_default, [-1], True)
+        sub_tensor: "f32[8192, 262144]" = torch.ops.aten.sub.Tensor(convert_element_type_default, amax_default);  convert_element_type_default = amax_default = None
+        exp_default: "f32[8192, 262144]" = torch.ops.aten.exp.default(sub_tensor);  sub_tensor = None
+        sum_dim_int_list: "f32[8192, 1]" = torch.ops.aten.sum.dim_IntList(exp_default, [-1], True)
+        div_tensor: "f32[8192, 262144]" = torch.ops.aten.div.Tensor(exp_default, sum_dim_int_list);  exp_default = sum_dim_int_list = None
+        convert_element_type_default_1: "bf16[8192, 262144]" = torch.ops.prims.convert_element_type.default(div_tensor, torch.bfloat16);  div_tensor = None
         return convert_element_type_default_1
 
 

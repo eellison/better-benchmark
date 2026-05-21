@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "54f7ee896ad5",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sigmoid.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "timm_nfnet_l0_infer",
+    "timm_nfnet_l0_infer_000",
+    "timm_nfnet_l0_train",
+    "timm_nfnet_l0_train_000",
+    "timm_timm_nfnet_l0_infer_infer_000",
+    "timm_timm_nfnet_l0_train_train_000"
+  ]
+}

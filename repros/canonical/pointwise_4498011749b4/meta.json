@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "4498011749b4",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.relu.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf_M2M100ForConditionalGeneration_infer_000",
+    "hf_M2M100ForConditionalGeneration_train_003",
+    "hf_M2M100ForConditionalGeneration_train_006",
+    "hf_M2M100ForConditionalGeneration_train_012",
+    "hf_MobileBertForMaskedLM_infer_000",
+    "hf_MobileBertForMaskedLM_train_000"
+  ]
+}

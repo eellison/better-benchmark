@@ -19,14 +19,14 @@ _repro_version = 2
 _shapes_config = "(T([32, 128], f32), S([32, 128]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm: "f32[32, 128]", _shape_param_0):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:145 in torch_dynamo_resume_in_forward_at_142, code: k = nn.functional.normalize(k, dim=1)
-        pow_tensor_scalar: "f32[32, 128]" = torch.ops.aten.pow.Tensor_Scalar(addmm, 2.0)
+    def forward(self, arg0_1: "f32[32, 128]", _shape_param_0):
+        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:135 in forward, code: q = nn.functional.normalize(q, dim=1)
+        pow_tensor_scalar: "f32[32, 128]" = torch.ops.aten.pow.Tensor_Scalar(arg0_1, 2.0)
         sum_dim_int_list: "f32[32, 1]" = torch.ops.aten.sum.dim_IntList(pow_tensor_scalar, [1], True);  pow_tensor_scalar = None
         pow_tensor_scalar_1: "f32[32, 1]" = torch.ops.aten.pow.Tensor_Scalar(sum_dim_int_list, 0.5);  sum_dim_int_list = None
         clamp_min_default: "f32[32, 1]" = torch.ops.aten.clamp_min.default(pow_tensor_scalar_1, 1e-12);  pow_tensor_scalar_1 = None
         expand_default: "f32[32, 128]" = torch.ops.aten.expand.default(clamp_min_default, _shape_param_0);  clamp_min_default = _shape_param_0 = None
-        div_tensor: "f32[32, 128]" = torch.ops.aten.div.Tensor(addmm, expand_default);  addmm = expand_default = None
+        div_tensor: "f32[32, 128]" = torch.ops.aten.div.Tensor(arg0_1, expand_default);  arg0_1 = expand_default = None
         return div_tensor
 
 

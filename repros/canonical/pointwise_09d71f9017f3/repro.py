@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([512, 1280], f32), T([512, 1280, 1, 1], f32), S([512, 1280, 1, 1]))"
 
 class Repro(torch.nn.Module):
@@ -32,6 +33,7 @@ class Repro(torch.nn.Module):
         full_default: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         where_self_1: "f32[512, 1280, 1, 1]" = torch.ops.aten.where.self(le_scalar, full_default, where_self);  le_scalar = full_default = where_self = None
         return where_self_1
+
 
 
 def _default_make_inputs():

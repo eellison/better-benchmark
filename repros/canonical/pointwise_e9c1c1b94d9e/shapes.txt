@@ -1,6 +1,0 @@
-timm_visformer_small_infer_5657547b: (T([128, 3072, 7, 7], f32, stride=(150528, 1, 21504, 3072)))
-timm_visformer_small_infer_c403f816: (T([128, 1536, 14, 14], f32, stride=(301056, 1, 21504, 1536)))
-timm_visformer_small_infer_7d022e9c: (T([128, 384, 28, 28], f32, stride=(301056, 1, 10752, 384)))
-timm_visformer_small_train_5657547b: (T([128, 3072, 7, 7], f32, stride=(150528, 1, 21504, 3072)))
-timm_visformer_small_train_c403f816: (T([128, 1536, 14, 14], f32, stride=(301056, 1, 21504, 1536)))
-timm_visformer_small_train_7d022e9c: (T([128, 384, 28, 28], f32, stride=(301056, 1, 10752, 384)))

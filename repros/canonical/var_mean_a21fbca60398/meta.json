@@ -20,26 +20,27 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 9,
+  "n_models": 20,
   "models": [
     "mnasnet1_0",
     "mobilenet_v2",
     "mobilenet_v3_large",
     "shufflenet_v2_x1_0",
+    "timm_efficientnet",
     "timm_ghostnet_100_train",
+    "timm_ghostnet_100_train_000",
     "timm_mobilenetv2_100_train",
+    "timm_mobilenetv2_100_train_000",
     "timm_mobilenetv3_large_100_train",
+    "timm_mobilenetv3_large_100_train_000",
     "timm_mobilevit_s_train",
-    "timm_tf_efficientnet_b0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 22.336000576615334,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 10.912000201642513,
-      "total_bytes": 32113920,
-      "gap_default": 2.0469208361316964,
-      "gap_cd": null
-    }
-  }
+    "timm_mobilevit_s_train_000",
+    "timm_tf_efficientnet_b0_train",
+    "timm_tf_efficientnet_b0_train_000",
+    "timm_timm_ghostnet_100_train_train_000",
+    "timm_timm_mobilenetv2_100_train_train_000",
+    "timm_timm_mobilenetv3_large_100_train_train_000",
+    "timm_timm_mobilevit_s_train_train_000",
+    "timm_timm_tf_efficientnet_b0_train_train_000"
+  ]
 }

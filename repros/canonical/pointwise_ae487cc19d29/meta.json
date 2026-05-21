@@ -17,18 +17,11 @@
     "aten.reciprocal.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 4,
   "models": [
-    "timm_nfnet_l0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 122.6240023970604,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 124.95999783277512,
-      "total_bytes": 822083584,
-      "gap_default": 0.9813060541274912,
-      "gap_cd": null
-    }
-  }
+    "timm_nfnet_l0_train",
+    "timm_nfnet_l0_train_001",
+    "timm_nfnet_l0_train_032",
+    "timm_timm_nfnet_l0_train_train_001"
+  ]
 }

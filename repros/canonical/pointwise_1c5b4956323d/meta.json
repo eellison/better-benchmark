@@ -8,20 +8,9 @@
     "aten.embedding.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 3,
+  "n_models": 2,
   "models": [
-    "hf_BartForCausalLM_train",
-    "hf_MBartForCausalLM_train",
-    "hf_PLBartForCausalLM_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 7.327999919652939,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 7.040000054985285,
-      "total_bytes": 8404992,
-      "gap_default": 1.0409090713662297,
-      "gap_cd": null
-    }
-  }
+    "hf_BartForCausalLM_train_003",
+    "hf_MBartForCausalLM_train_003"
+  ]
 }

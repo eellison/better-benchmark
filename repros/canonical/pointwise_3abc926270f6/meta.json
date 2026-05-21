@@ -6,35 +6,42 @@
   "origin_ops": [
     "aten.relu.default"
   ],
-  "n_models": 18,
+  "n_models": 35,
   "models": [
     "alexnet",
     "demucs",
     "dlrm",
-    "inductor_timm_perf-2-6-linux.aws.a100_graph15",
-    "inductor_timm_perf-4-6-linux.aws.a100_graph17",
     "mobilenet_v3_large",
+    "soft_actor_critic",
     "squeezenet1_1",
     "timm_dm_nfnet_f0_infer",
+    "timm_dm_nfnet_f0_infer_000",
     "timm_dm_nfnet_f0_train",
+    "timm_dm_nfnet_f0_train_000",
     "timm_ghostnet_100_infer",
+    "timm_ghostnet_100_infer_000",
     "timm_ghostnet_100_train",
+    "timm_ghostnet_100_train_000",
     "timm_mobilenetv3_large_100_infer",
+    "timm_mobilenetv3_large_100_infer_000",
     "timm_mobilenetv3_large_100_train",
+    "timm_mobilenetv3_large_100_train_000",
     "timm_nfnet",
     "timm_nfnet_l0_infer",
+    "timm_nfnet_l0_infer_000",
     "timm_nfnet_l0_train",
+    "timm_nfnet_l0_train_000",
     "timm_regnet",
-    "vgg16"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 5.791999865323305,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 6.111999973654747,
-      "total_bytes": 983040,
-      "gap_default": 0.9476439611075302,
-      "gap_cd": null
-    }
-  }
+    "timm_timm_dm_nfnet_f0_infer_infer_000",
+    "timm_timm_dm_nfnet_f0_train_train_000",
+    "timm_timm_ghostnet_100_infer_infer_000",
+    "timm_timm_ghostnet_100_train_train_000",
+    "timm_timm_mobilenetv3_large_100_infer_infer_000",
+    "timm_timm_mobilenetv3_large_100_train_train_000",
+    "timm_timm_nfnet_l0_infer_infer_000",
+    "timm_timm_nfnet_l0_train_train_000",
+    "torchbench_alexnet_infer_000",
+    "vgg16",
+    "vllm_facebook_opt-125m_002"
+  ]
 }

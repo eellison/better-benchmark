@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_OPTForCausalLM_train
+Label: vllm_facebook_opt-125m_001
 Pattern hash: a5d52cc24f84
-Shape hash: fc4d30c5
+Shape hash: f05d8499
 """
 import sys
 from pathlib import Path
@@ -15,14 +15,16 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([4, 2048], i64, gen=Index(2048)), T([2050, 768], f32))"
+_repro_version = 2
+_shapes_config = "(T([4, 512], i64), T([2050, 768], f16))"
 
 class Repro(torch.nn.Module):
-    def forward(self, primals_1: "i64[4, 2048]", primals_2: "f32[2050, 768]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:70 in forward, code: return super().forward(position_ids + self.offset)
-        add_tensor: "i64[4, 2048]" = torch.ops.aten.add.Tensor(primals_1, 2);  primals_1 = None
-        embedding_default: "f32[4, 2048, 768]" = torch.ops.aten.embedding.default(primals_2, add_tensor);  primals_2 = add_tensor = None
+    def forward(self, arg0_1: "i64[4, 512]", arg1_1: "f16[2050, 768]"):
+        # No stacktrace found for following nodes
+        add_tensor: "i64[4, 512]" = torch.ops.aten.add.Tensor(arg0_1, 2);  arg0_1 = None
+        embedding_default: "f16[4, 512, 768]" = torch.ops.aten.embedding.default(arg1_1, add_tensor);  arg1_1 = add_tensor = None
         return embedding_default
+
 
 
 def _default_make_inputs():

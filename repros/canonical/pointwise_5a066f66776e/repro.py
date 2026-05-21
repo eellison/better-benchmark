@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([160], f32), T([128, 160, 8, 8], f32, stride=(10240, 1, 1280, 160)), T([160], f32), T([160], f32), T([160], f32), T([128, 160, 8, 8], f32, stride=(10240, 1, 1280, 160)))"
 
 class Repro(torch.nn.Module):
@@ -46,6 +47,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/mobilevit.py:277 in forward, code: x = self.conv_fusion(torch.cat((shortcut, x), dim=1))
         cat_default: "f32[128, 320, 8, 8]" = torch.ops.aten.cat.default([add_124, div_tensor], 1);  add_124 = div_tensor = None
         return cat_default
+
 
 
 def _default_make_inputs():

@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "4756a1e6dbd8",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 18,
+  "origin_ops": [
+    "aten.div.Tensor",
+    "aten.le.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_MobileBertForMaskedLM_train_014"
+  ]
+}

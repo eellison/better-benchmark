@@ -13,15 +13,5 @@
   "models": [
     "timm_visformer_small_infer",
     "timm_visformer_small_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 11.231999844312668,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 11.071999557316303,
-      "total_bytes": 38535168,
-      "gap_default": 1.014450893550717,
-      "gap_cd": null
-    }
-  }
+  ]
 }

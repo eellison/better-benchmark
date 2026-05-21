@@ -32,29 +32,31 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 12,
+  "n_models": 24,
   "models": [
     "LearningToPaint",
-    "densenet121",
     "mnasnet1_0",
     "mobilenet_v3_large",
+    "phlippe_densenet",
+    "phlippe_resnet",
     "pytorch_unet",
+    "resnet152",
     "resnet18",
     "resnet50",
     "resnext50_32x4d",
     "shufflenet_v2_x1_0",
     "timm_adv_inception_v3_train",
+    "timm_adv_inception_v3_train_001",
     "timm_inception_v3_train",
-    "timm_mobilenetv3_large_100_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 456.8000137805939,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 242.5920069217682,
-      "total_bytes": 1644167364,
-      "gap_default": 1.8829969691783957,
-      "gap_cd": null
-    }
-  }
+    "timm_inception_v3_train_001",
+    "timm_mobilenetv3_large_100_train",
+    "timm_mobilenetv3_large_100_train_001",
+    "timm_mobilenetv3_large_100_train_043",
+    "timm_regnet",
+    "timm_resnest",
+    "timm_timm_adv_inception_v3_train_train_001",
+    "timm_timm_inception_v3_train_train_001",
+    "timm_timm_mobilenetv3_large_100_train_train_001",
+    "timm_vovnet"
+  ]
 }

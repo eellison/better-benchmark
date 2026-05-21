@@ -27,18 +27,10 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_mobilenetv3_large_100_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 83.99999886751175,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 21.27999998629093,
-      "total_bytes": 98311680,
-      "gap_default": 3.947368370377185,
-      "gap_cd": null
-    }
-  }
+    "timm_mobilenetv3_large_100_train",
+    "timm_mobilenetv3_large_100_train_000",
+    "timm_timm_mobilenetv3_large_100_train_train_000"
+  ]
 }

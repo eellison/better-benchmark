@@ -24,19 +24,8 @@
     "aten.unsqueeze.default",
     "prims._low_memory_max_pool_with_offsets.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "timm_adv_inception_v3_infer",
     "timm_inception_v3_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 315.2320086956024,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 95.13600170612335,
-      "total_bytes": 615975936,
-      "gap_default": 3.3134880911787654,
-      "gap_cd": null
-    }
-  }
+  ]
 }

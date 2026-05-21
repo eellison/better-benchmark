@@ -1,0 +1,13 @@
+{
+  "pattern_hash": "ce7169287d93",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.full.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Reformer"
+  ]
+}

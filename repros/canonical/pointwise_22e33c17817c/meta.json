@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "22e33c17817c",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.relu.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_ghostnet_100_infer"
+  ]
+}

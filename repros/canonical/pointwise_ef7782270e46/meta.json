@@ -8,8 +8,9 @@
     "aten.mul.Tensor",
     "aten.sub.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "LearningToPaint",
     "dcgan"
   ]
 }

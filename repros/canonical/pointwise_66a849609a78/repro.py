@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_timm_vision_transformer_infer
+Label: timm_beit_base_patch16_224_infer
 Pattern hash: 66a849609a78
-Shape hash: 718bca88
+Shape hash: 5a1fbf8b
 """
 import sys
 from pathlib import Path
@@ -16,20 +16,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([6304, 1152], f16), S([32, 197, 1152]), S([32, 197, 3, 6, 64]))"
+_shapes_config = "(T([25216, 2304], f32), S([128, 197, 2304]), S([128, 197, 3, 12, -1]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_44: "f16[6304, 1152]", _shape_param_0, _shape_param_1):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/attention.py:115 in forward, code: qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, self.head_dim).permute(2, 0, 3, 1, 4)
-        reshape_default: "f16[32, 197, 1152]" = torch.ops.aten.reshape.default(addmm_44, _shape_param_0);  addmm_44 = _shape_param_0 = None
-        reshape_default_1: "f16[32, 197, 3, 6, 64]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
-        permute_default: "f16[3, 32, 6, 197, 64]" = torch.ops.aten.permute.default(reshape_default_1, [2, 0, 3, 1, 4]);  reshape_default_1 = None
+    def forward(self, addmm_28: "f32[25216, 2304]", _shape_param_0, _shape_param_1):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/beit.py:218 in forward, code: qkv = F.linear(x, weight=self.qkv.weight, bias=qkv_bias)
+        reshape_default: "f32[128, 197, 2304]" = torch.ops.aten.reshape.default(addmm_28, _shape_param_0);  addmm_28 = _shape_param_0 = None
 
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/attention.py:116 in forward, code: q, k, v = qkv.unbind(0)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/beit.py:219 in forward, code: qkv = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+        reshape_default_1: "f32[128, 197, 3, 12, 64]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
+        permute_default: "f32[3, 128, 12, 197, 64]" = torch.ops.aten.permute.default(reshape_default_1, [2, 0, 3, 1, 4]);  reshape_default_1 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/beit.py:220 in forward, code: q, k, v = qkv.unbind(0)  # B, num_heads, N, head_dim
         unbind_int = torch.ops.aten.unbind.int(permute_default);  permute_default = None
-        getitem: "f16[32, 6, 197, 64]" = unbind_int[0]
-        getitem_1: "f16[32, 6, 197, 64]" = unbind_int[1]
-        getitem_2: "f16[32, 6, 197, 64]" = unbind_int[2];  unbind_int = None
+        getitem: "f32[128, 12, 197, 64]" = unbind_int[0]
+        getitem_1: "f32[128, 12, 197, 64]" = unbind_int[1]
+        getitem_2: "f32[128, 12, 197, 64]" = unbind_int[2];  unbind_int = None
         return (getitem, getitem_1, getitem_2)
 
 

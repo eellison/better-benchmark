@@ -1,6 +1,0 @@
-hf_mbartforcausallm_train_9fabe7a2: (T([8192, 50268], f32), T([8, 1024], i64), S([8, 1024, 50265]), S([-1, 50265]))
-hf_allenailongformerbase_train_9fabe7a2: (T([8192, 50268], f32), T([8, 1024], i64), S([8, 1024, 50265]), S([-1, 50265]))
-hf_bartforcausallm_train_9fabe7a2: (T([8192, 50268], f32), T([8, 1024], i64), S([8, 1024, 50265]), S([-1, 50265]))
-hf_plbartforcausallm_train_843277f4: (T([16384, 50008], f32), T([16, 1024], i64), S([16, 1024, 50005]), S([-1, 50005]))
-hf_pegasusforcausallm_train_700a973c: (T([16384, 50268], f32), T([128, 128], i64), S([128, 128, 50265]), S([-1, 50265]))
-hf_trocrforcausallm_train_c27e7272: (T([16384, 50268], f32), T([64, 256], i64), S([64, 256, 50265]), S([-1, 50265]))

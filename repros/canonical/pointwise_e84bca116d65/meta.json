@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "e84bca116d65",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_AllenaiLongformerBase_infer_002"
+  ]
+}

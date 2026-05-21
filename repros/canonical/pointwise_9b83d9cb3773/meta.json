@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "9b83d9cb3773",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_AlbertForMaskedLM_train_001"
+  ]
+}

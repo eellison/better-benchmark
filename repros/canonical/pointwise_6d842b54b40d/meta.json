@@ -74,19 +74,12 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 5,
   "models": [
-    "timm_adv_inception_v3_infer",
-    "timm_inception_v3_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 179.1040003299713,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 39.07199949026108,
-      "total_bytes": 227291136,
-      "gap_default": 4.583947652195635,
-      "gap_cd": null
-    }
-  }
+    "timm_adv_inception_v3_infer_000",
+    "timm_inception_v3_infer",
+    "timm_inception_v3_infer_000",
+    "timm_timm_adv_inception_v3_infer_infer_000",
+    "timm_timm_inception_v3_infer_infer_000"
+  ]
 }

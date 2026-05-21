@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128, 80, 56, 56], f32, stride=(250880, 1, 4480, 80)), T([80], f32), T([128, 56, 56, 80], f32, stride=(250880, 1, 4480, 56)), T([128, 56, 56, 1], f32, stride=(3136, 1, 56, 56)))"
 
 class Repro(torch.nn.Module):
@@ -36,6 +37,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm.py:128 in forward, code: x = x.permute(0, 2, 3, 1)
         permute_default_1: "f32[128, 80, 56, 56]" = torch.ops.aten.permute.default(mul_tensor_4, [0, 3, 1, 2]);  mul_tensor_4 = None
         return permute_default_1
+
 
 
 def _default_make_inputs():

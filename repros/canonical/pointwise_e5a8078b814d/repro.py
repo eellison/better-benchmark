@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_adv_inception_v3_infer
+Label: timm_inception_v3_infer
 Pattern hash: e5a8078b814d
 Shape hash: dae27bc8
 """
@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([192], f32), T([128, 192, 71, 71], f32, stride=(967872, 1, 13632, 192)), T([192], f32), T([192], f32), T([192], f32))"
 
 class Repro(torch.nn.Module):
@@ -44,6 +45,7 @@ class Repro(torch.nn.Module):
         _low_memory_max_pool_with_offsets_default = torch.ops.prims._low_memory_max_pool_with_offsets.default(relu_default, [3, 3], [2, 2], [0, 0], [1, 1], False);  relu_default = None
         getitem: "f32[128, 192, 35, 35]" = _low_memory_max_pool_with_offsets_default[0];  _low_memory_max_pool_with_offsets_default = None
         return getitem
+
 
 
 def _default_make_inputs():

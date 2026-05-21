@@ -19,18 +19,10 @@
     "aten.sub.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 21.215999498963356,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 20.35200037062168,
-      "total_bytes": 96340480,
-      "gap_default": 1.042452786586466,
-      "gap_cd": null
-    }
-  }
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_000",
+    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_000"
+  ]
 }

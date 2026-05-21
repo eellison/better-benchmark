@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_LearningToPaint_infer
+Label: timm_repvgg_a2_infer
 Pattern hash: 42d933d52272
-Shape hash: 0664358d
+Shape hash: 054dc4a4
 """
 import sys
 from pathlib import Path
@@ -16,49 +16,49 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([512], f32), T([1024, 512, 4, 4], f32), T([512], f32), T([512], f32), T([512], f32), T([512], f32), T([1024, 512, 4, 4], f32), T([512], f32), T([512], f32), T([512], f32))"
+_shapes_config = "(T([384], f32), T([128, 384, 14, 14], f32, stride=(75264, 1, 5376, 384)), T([384], f32), T([384], f32), T([384], f32), T([384], f32), T([128, 384, 14, 14], f32, stride=(75264, 1, 5376, 384)), T([384], f32), T([384], f32), T([384], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg87_1: "f32[512]", convolution_17: "f32[1024, 512, 4, 4]", arg88_1: "f32[512]", arg89_1: "f32[512]", arg90_1: "f32[512]", arg92_1: "f32[512]", convolution_18: "f32[1024, 512, 4, 4]", arg93_1: "f32[512]", arg94_1: "f32[512]", arg95_1: "f32[512]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/LearningToPaint/baseline/DRL/actor.py:55 in forward, code: out = self.bn2(self.conv2(out))
-        unsqueeze_default: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(arg87_1, -1);  arg87_1 = None
-        unsqueeze_default_1: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
-        sub_tensor: "f32[1024, 512, 4, 4]" = torch.ops.aten.sub.Tensor(convolution_17, unsqueeze_default_1);  convolution_17 = unsqueeze_default_1 = None
-        add_tensor: "f32[512]" = torch.ops.aten.add.Tensor(arg88_1, 1e-05);  arg88_1 = None
-        sqrt_default: "f32[512]" = torch.ops.aten.sqrt.default(add_tensor);  add_tensor = None
-        reciprocal_default: "f32[512]" = torch.ops.aten.reciprocal.default(sqrt_default);  sqrt_default = None
-        mul_tensor: "f32[512]" = torch.ops.aten.mul.Tensor(reciprocal_default, 1);  reciprocal_default = None
-        unsqueeze_default_2: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(mul_tensor, -1);  mul_tensor = None
-        unsqueeze_default_3: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_2, -1);  unsqueeze_default_2 = None
-        mul_tensor_1: "f32[1024, 512, 4, 4]" = torch.ops.aten.mul.Tensor(sub_tensor, unsqueeze_default_3);  sub_tensor = unsqueeze_default_3 = None
-        unsqueeze_default_4: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(arg89_1, -1);  arg89_1 = None
-        unsqueeze_default_5: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_4, -1);  unsqueeze_default_4 = None
-        mul_tensor_2: "f32[1024, 512, 4, 4]" = torch.ops.aten.mul.Tensor(mul_tensor_1, unsqueeze_default_5);  mul_tensor_1 = unsqueeze_default_5 = None
-        unsqueeze_default_6: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(arg90_1, -1);  arg90_1 = None
-        unsqueeze_default_7: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
-        add_tensor_1: "f32[1024, 512, 4, 4]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
+    def forward(self, arg88_1: "f32[384]", convolution_14: "f32[128, 384, 14, 14]", arg89_1: "f32[384]", arg90_1: "f32[384]", arg91_1: "f32[384]", arg93_1: "f32[384]", convolution_15: "f32[128, 384, 14, 14]", arg94_1: "f32[384]", arg95_1: "f32[384]", arg96_1: "f32[384]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
+        unsqueeze_default: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg88_1, -1);  arg88_1 = None
+        unsqueeze_default_1: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
+        sub_tensor: "f32[128, 384, 14, 14]" = torch.ops.aten.sub.Tensor(convolution_14, unsqueeze_default_1);  convolution_14 = unsqueeze_default_1 = None
+        add_tensor: "f32[384]" = torch.ops.aten.add.Tensor(arg89_1, 1e-05);  arg89_1 = None
+        sqrt_default: "f32[384]" = torch.ops.aten.sqrt.default(add_tensor);  add_tensor = None
+        reciprocal_default: "f32[384]" = torch.ops.aten.reciprocal.default(sqrt_default);  sqrt_default = None
+        mul_tensor: "f32[384]" = torch.ops.aten.mul.Tensor(reciprocal_default, 1);  reciprocal_default = None
+        unsqueeze_default_2: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(mul_tensor, -1);  mul_tensor = None
+        unsqueeze_default_3: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_2, -1);  unsqueeze_default_2 = None
+        mul_tensor_1: "f32[128, 384, 14, 14]" = torch.ops.aten.mul.Tensor(sub_tensor, unsqueeze_default_3);  sub_tensor = unsqueeze_default_3 = None
+        unsqueeze_default_4: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg90_1, -1);  arg90_1 = None
+        unsqueeze_default_5: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_4, -1);  unsqueeze_default_4 = None
+        mul_tensor_2: "f32[128, 384, 14, 14]" = torch.ops.aten.mul.Tensor(mul_tensor_1, unsqueeze_default_5);  mul_tensor_1 = unsqueeze_default_5 = None
+        unsqueeze_default_6: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg91_1, -1);  arg91_1 = None
+        unsqueeze_default_7: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
+        add_tensor_1: "f32[128, 384, 14, 14]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
+        unsqueeze_default_8: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg93_1, -1);  arg93_1 = None
+        unsqueeze_default_9: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_8, -1);  unsqueeze_default_8 = None
+        sub_tensor_1: "f32[128, 384, 14, 14]" = torch.ops.aten.sub.Tensor(convolution_15, unsqueeze_default_9);  convolution_15 = unsqueeze_default_9 = None
+        add_tensor_2: "f32[384]" = torch.ops.aten.add.Tensor(arg94_1, 1e-05);  arg94_1 = None
+        sqrt_default_1: "f32[384]" = torch.ops.aten.sqrt.default(add_tensor_2);  add_tensor_2 = None
+        reciprocal_default_1: "f32[384]" = torch.ops.aten.reciprocal.default(sqrt_default_1);  sqrt_default_1 = None
+        mul_tensor_3: "f32[384]" = torch.ops.aten.mul.Tensor(reciprocal_default_1, 1);  reciprocal_default_1 = None
+        unsqueeze_default_10: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(mul_tensor_3, -1);  mul_tensor_3 = None
+        unsqueeze_default_11: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_10, -1);  unsqueeze_default_10 = None
+        mul_tensor_4: "f32[128, 384, 14, 14]" = torch.ops.aten.mul.Tensor(sub_tensor_1, unsqueeze_default_11);  sub_tensor_1 = unsqueeze_default_11 = None
+        unsqueeze_default_12: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg95_1, -1);  arg95_1 = None
+        unsqueeze_default_13: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_12, -1);  unsqueeze_default_12 = None
+        mul_tensor_5: "f32[128, 384, 14, 14]" = torch.ops.aten.mul.Tensor(mul_tensor_4, unsqueeze_default_13);  mul_tensor_4 = unsqueeze_default_13 = None
+        unsqueeze_default_14: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg96_1, -1);  arg96_1 = None
+        unsqueeze_default_15: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_14, -1);  unsqueeze_default_14 = None
+        add_tensor_3: "f32[128, 384, 14, 14]" = torch.ops.aten.add.Tensor(mul_tensor_5, unsqueeze_default_15);  mul_tensor_5 = unsqueeze_default_15 = None
 
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/LearningToPaint/baseline/DRL/actor.py:56 in forward, code: out += self.shortcut(x)
-        unsqueeze_default_8: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(arg92_1, -1);  arg92_1 = None
-        unsqueeze_default_9: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_8, -1);  unsqueeze_default_8 = None
-        sub_tensor_1: "f32[1024, 512, 4, 4]" = torch.ops.aten.sub.Tensor(convolution_18, unsqueeze_default_9);  convolution_18 = unsqueeze_default_9 = None
-        add_tensor_2: "f32[512]" = torch.ops.aten.add.Tensor(arg93_1, 1e-05);  arg93_1 = None
-        sqrt_default_1: "f32[512]" = torch.ops.aten.sqrt.default(add_tensor_2);  add_tensor_2 = None
-        reciprocal_default_1: "f32[512]" = torch.ops.aten.reciprocal.default(sqrt_default_1);  sqrt_default_1 = None
-        mul_tensor_3: "f32[512]" = torch.ops.aten.mul.Tensor(reciprocal_default_1, 1);  reciprocal_default_1 = None
-        unsqueeze_default_10: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(mul_tensor_3, -1);  mul_tensor_3 = None
-        unsqueeze_default_11: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_10, -1);  unsqueeze_default_10 = None
-        mul_tensor_4: "f32[1024, 512, 4, 4]" = torch.ops.aten.mul.Tensor(sub_tensor_1, unsqueeze_default_11);  sub_tensor_1 = unsqueeze_default_11 = None
-        unsqueeze_default_12: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(arg94_1, -1);  arg94_1 = None
-        unsqueeze_default_13: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_12, -1);  unsqueeze_default_12 = None
-        mul_tensor_5: "f32[1024, 512, 4, 4]" = torch.ops.aten.mul.Tensor(mul_tensor_4, unsqueeze_default_13);  mul_tensor_4 = unsqueeze_default_13 = None
-        unsqueeze_default_14: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(arg95_1, -1);  arg95_1 = None
-        unsqueeze_default_15: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_14, -1);  unsqueeze_default_14 = None
-        add_tensor_3: "f32[1024, 512, 4, 4]" = torch.ops.aten.add.Tensor(mul_tensor_5, unsqueeze_default_15);  mul_tensor_5 = unsqueeze_default_15 = None
-        add_tensor_4: "f32[1024, 512, 4, 4]" = torch.ops.aten.add.Tensor(add_tensor_1, add_tensor_3);  add_tensor_1 = add_tensor_3 = None
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/byobnet.py:748 in forward, code: x = self.conv_1x1(x) + self.conv_kxk(x)
+        add_tensor_4: "f32[128, 384, 14, 14]" = torch.ops.aten.add.Tensor(add_tensor_1, add_tensor_3);  add_tensor_1 = add_tensor_3 = None
 
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/LearningToPaint/baseline/DRL/actor.py:57 in forward, code: out = F.relu(out)
-        relu_default: "f32[1024, 512, 4, 4]" = torch.ops.aten.relu.default(add_tensor_4);  add_tensor_4 = None
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/byobnet.py:755 in forward, code: return self.act(x)
+        relu_default: "f32[128, 384, 14, 14]" = torch.ops.aten.relu.default(add_tensor_4);  add_tensor_4 = None
         return relu_default
 
 

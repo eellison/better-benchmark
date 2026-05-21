@@ -36,22 +36,17 @@
     "aten.var_mean.correction",
     "aten.var_mean.correction"
   ],
-  "n_models": 5,
+  "n_models": 10,
   "models": [
     "LearningToPaint",
+    "resnet152",
     "resnet18",
     "resnet50",
     "resnext50_32x4d",
-    "timm_repvgg_a2_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 69.43999975919724,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 23.360000923275948,
-      "total_bytes": 115611648,
-      "gap_default": 2.9726026119291413,
-      "gap_cd": null
-    }
-  }
+    "timm_regnet",
+    "timm_repvgg_a2_train",
+    "timm_repvgg_a2_train_000",
+    "timm_resnest",
+    "timm_timm_repvgg_a2_train_train_000"
+  ]
 }

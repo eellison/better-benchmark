@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "bfc058b2d299",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.fma.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_MT5ForConditionalGeneration_train_001",
+    "hf_MT5ForConditionalGeneration_train_018"
+  ]
+}

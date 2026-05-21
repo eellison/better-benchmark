@@ -39,18 +39,10 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_ghostnet_100_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 21.407999098300934,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 13.024000450968742,
-      "total_bytes": 48172800,
-      "gap_default": 1.6437345175850773,
-      "gap_cd": null
-    }
-  }
+    "timm_ghostnet_100_infer",
+    "timm_ghostnet_100_infer_000",
+    "timm_timm_ghostnet_100_infer_infer_000"
+  ]
 }

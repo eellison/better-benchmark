@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "54850af50118",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.mul.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 15,
+  "models": [
+    "hf_AlbertForMaskedLM_train_001",
+    "hf_BertForMaskedLM_train_001",
+    "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_train_010",
+    "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_train_013",
+    "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_train_020",
+    "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_train_031",
+    "hf_DistilBertForMaskedLM_train_001",
+    "hf_DistilBertForMaskedLM_train_011",
+    "hf_ElectraForCausalLM_train_001",
+    "hf_ElectraForCausalLM_train_011",
+    "hf_M2M100ForConditionalGeneration_train_009",
+    "hf_M2M100ForConditionalGeneration_train_011",
+    "hf_M2M100ForConditionalGeneration_train_020",
+    "hf_M2M100ForConditionalGeneration_train_030",
+    "hf_MobileBertForMaskedLM_train_014"
+  ]
+}

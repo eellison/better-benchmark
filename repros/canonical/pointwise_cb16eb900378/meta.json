@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "cb16eb900378",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "aten.sort.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "moco"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "72f523536c11",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.expand.default",
+    "aten.ne.Scalar",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_GPTNeoForCausalLM_train_000",
+    "hf_GPTNeoForSequenceClassification_train_000"
+  ]
+}

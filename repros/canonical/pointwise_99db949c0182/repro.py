@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_mobilenetv3_large_100_infer
+Label: timm_ghostnet_100_infer
 Pattern hash: 99db949c0182
 Shape hash: 8d18dc3c
 """
@@ -15,17 +15,19 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([512, 960, 1, 1], f32), T([512, 960, 7, 7], f32, stride=(47040, 1, 6720, 960)))"
 
 class Repro(torch.nn.Module):
-    def forward(self, convolution_59: "f32[512, 960, 1, 1]", div_25: "f32[512, 960, 7, 7]"):
+    def forward(self, convolution_90: "f32[512, 960, 1, 1]", cat_30: "f32[512, 960, 7, 7]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:83 in forward, code: return x * self.gate(x_se)
-        add_tensor: "f32[512, 960, 1, 1]" = torch.ops.aten.add.Tensor(convolution_59, 3);  convolution_59 = None
+        add_tensor: "f32[512, 960, 1, 1]" = torch.ops.aten.add.Tensor(convolution_90, 3);  convolution_90 = None
         clamp_min_default: "f32[512, 960, 1, 1]" = torch.ops.aten.clamp_min.default(add_tensor, 0);  add_tensor = None
         clamp_max_default: "f32[512, 960, 1, 1]" = torch.ops.aten.clamp_max.default(clamp_min_default, 6);  clamp_min_default = None
         div_tensor: "f32[512, 960, 1, 1]" = torch.ops.aten.div.Tensor(clamp_max_default, 6);  clamp_max_default = None
-        mul_tensor: "f32[512, 960, 7, 7]" = torch.ops.aten.mul.Tensor(div_25, div_tensor);  div_25 = div_tensor = None
+        mul_tensor: "f32[512, 960, 7, 7]" = torch.ops.aten.mul.Tensor(cat_30, div_tensor);  cat_30 = div_tensor = None
         return mul_tensor
+
 
 
 def _default_make_inputs():

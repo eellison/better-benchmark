@@ -1,0 +1,39 @@
+{
+  "pattern_hash": "c07ebdf78f2a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.permute.default",
+    "aten.unbind.int",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 21,
+  "models": [
+    "timm_beit_base_patch16_224_infer_000",
+    "timm_beit_base_patch16_224_train_000",
+    "timm_deit_base_distilled_patch16_224_infer_000",
+    "timm_deit_base_distilled_patch16_224_train_000",
+    "timm_deit_tiny_patch16_224.fb_in1k_infer_000",
+    "timm_deit_tiny_patch16_224.fb_in1k_train_000",
+    "timm_mobilevit_s_infer_000",
+    "timm_mobilevit_s_train_000",
+    "timm_timm_beit_base_patch16_224_infer_infer_000",
+    "timm_timm_beit_base_patch16_224_train_train_000",
+    "timm_timm_deit_base_distilled_patch16_224_infer_infer_000",
+    "timm_timm_deit_base_distilled_patch16_224_train_train_000",
+    "timm_timm_deit_tiny_patch16_224.fb_in1k_train_train_000",
+    "timm_timm_mobilevit_s_train_train_000",
+    "timm_timm_vit_base_patch14_dinov2.lvd142m_infer_infer_000",
+    "timm_timm_vit_base_patch14_dinov2.lvd142m_train_train_000",
+    "timm_timm_vit_base_patch16_siglip_256_infer_infer_000",
+    "timm_timm_vit_base_patch16_siglip_256_train_train_000",
+    "timm_vit_base_patch14_dinov2.lvd142m_infer_000",
+    "timm_vit_base_patch16_siglip_256_infer_000",
+    "timm_vit_base_patch16_siglip_256_train_000"
+  ]
+}

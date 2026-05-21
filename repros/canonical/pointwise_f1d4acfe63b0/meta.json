@@ -11,19 +11,12 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 2,
+  "n_models": 5,
   "models": [
-    "hf_BlenderbotForCausalLM_train",
-    "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_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 7.712000049650669,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 6.144000217318535,
-      "total_bytes": 2622464,
-      "gap_default": 1.255208297016706,
-      "gap_cd": null
-    }
-  }
+    "hf_BlenderbotForCausalLM_train_008",
+    "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_train_011",
+    "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_train_014",
+    "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_train_029",
+    "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_train_034"
+  ]
 }

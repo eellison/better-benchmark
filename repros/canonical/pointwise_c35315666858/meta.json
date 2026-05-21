@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "c35315666858",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_MegatronBertForCausalLM_infer_000"
+  ]
+}

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: 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_train
+Label: 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_train_001
 Pattern hash: 49ac8c44e9b1
 Shape hash: 12ea8e76
 """
@@ -15,16 +15,16 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128, 2560], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, primals_1: "f32[128, 2560]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:79 in forward, code: position_ids = torch.arange(
+    def forward(self, arg0_1: "f32[128, 2560]"):
+        # No stacktrace found for following nodes
         iota_default: "i64[128]" = torch.ops.prims.iota.default(128, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:82 in forward, code: return super().forward(position_ids)
-        embedding_default: "f32[128, 2560]" = torch.ops.aten.embedding.default(primals_1, iota_default);  primals_1 = iota_default = None
+        embedding_default: "f32[128, 2560]" = torch.ops.aten.embedding.default(arg0_1, iota_default);  arg0_1 = iota_default = None
         return embedding_default
+
 
 
 def _default_make_inputs():

@@ -9,16 +9,6 @@
   ],
   "n_models": 1,
   "models": [
-    "hf_OPTForCausalLM_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 11.103999800980091,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 10.975999757647514,
-      "total_bytes": 31528960,
-      "gap_default": 1.011661811785609,
-      "gap_cd": null
-    }
-  }
+    "vllm_facebook_opt-125m_001"
+  ]
 }

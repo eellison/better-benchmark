@@ -1,2 +1,0 @@
-torchbench_mobilenet_v3_large_infer_a1144c0e: (T([256, 1280], f16), T([1000, 1280], f16))
-mobilenet_v3_large_a1144c0e: (T([256, 1280], f16), T([1000, 1280], f16))

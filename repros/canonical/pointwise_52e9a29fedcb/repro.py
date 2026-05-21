@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([512, 128, 27, 27], f16), T([512, 128, 27, 27], f16))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_11: "f16[512, 128, 27, 27]", convolution_12: "f16[512, 128, 27, 27]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/squeezenet.py:32 in forward, code: [self.expand1x1_activation(self.expand1x1(x)), self.expand3x3_activation(self.expand3x3(x))], 1
@@ -30,11 +33,10 @@ class Repro(torch.nn.Module):
         return getitem
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([512, 128, 27, 27], dtype=torch.float16, device='cuda'),
-    torch.randn([512, 128, 27, 27], dtype=torch.float16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

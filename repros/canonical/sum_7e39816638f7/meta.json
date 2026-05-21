@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "7e39816638f7",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 7,
+  "models": [
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_001",
+    "timm_swin_base_patch4_window7_224_train",
+    "timm_swin_base_patch4_window7_224_train_001",
+    "timm_swin_base_patch4_window7_224_train_041",
+    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_001",
+    "timm_timm_swin_base_patch4_window7_224_train_train_001"
+  ]
+}

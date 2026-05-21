@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_BlenderbotForCausalLM_train
+Label: hf_BlenderbotForCausalLM_train_008
 Pattern hash: f1d4acfe63b0
 Shape hash: d999c84a
 """
@@ -15,18 +15,20 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128], i64, gen=Index(128)), T([128, 2560], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, primals_1: "i64[128]", tangents_1: "f32[128, 2560]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:82 in forward, code: return super().forward(position_ids)
-        eq_scalar: "b8[128]" = torch.ops.aten.eq.Scalar(primals_1, -1)
+    def forward(self, arg0_1: "i64[128]", arg1_1: "f32[128, 2560]"):
+        # No stacktrace found for following nodes
+        eq_scalar: "b8[128]" = torch.ops.aten.eq.Scalar(arg0_1, -1)
         unsqueeze_default: "b8[128, 1]" = torch.ops.aten.unsqueeze.default(eq_scalar, -1);  eq_scalar = None
         full_default: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
-        where_self: "f32[128, 2560]" = torch.ops.aten.where.self(unsqueeze_default, full_default, tangents_1);  unsqueeze_default = full_default = tangents_1 = None
+        where_self: "f32[128, 2560]" = torch.ops.aten.where.self(unsqueeze_default, full_default, arg1_1);  unsqueeze_default = full_default = arg1_1 = None
         full_default_1: "f32[128, 2560]" = torch.ops.aten.full.default([128, 2560], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
-        index_put_default: "f32[128, 2560]" = torch.ops.aten.index_put.default(full_default_1, [primals_1], where_self, True);  full_default_1 = primals_1 = where_self = None
+        index_put_default: "f32[128, 2560]" = torch.ops.aten.index_put.default(full_default_1, [arg0_1], where_self, True);  full_default_1 = arg0_1 = where_self = None
         return index_put_default
+
 
 
 def _default_make_inputs():

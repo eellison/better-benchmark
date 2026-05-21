@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "ade13fba7659",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.index.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.select.int"
+  ],
+  "n_models": 1,
+  "models": [
+    "moco"
+  ]
+}

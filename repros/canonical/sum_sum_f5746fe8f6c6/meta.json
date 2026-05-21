@@ -57,18 +57,11 @@
     "aten.where.self",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 4,
   "models": [
-    "timm_mobilenetv3_large_100_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 133.98399949073792,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 31.55200183391571,
-      "total_bytes": 194657284,
-      "gap_default": 4.246450041300281,
-      "gap_cd": null
-    }
-  }
+    "timm_mobilenetv3_large_100_train",
+    "timm_mobilenetv3_large_100_train_001",
+    "timm_mobilenetv3_large_100_train_043",
+    "timm_timm_mobilenetv3_large_100_train_train_001"
+  ]
 }

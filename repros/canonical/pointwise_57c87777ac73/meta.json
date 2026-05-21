@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "57c87777ac73",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.select.int"
+  ],
+  "n_models": 1,
+  "models": [
+    "BERT_pytorch"
+  ]
+}

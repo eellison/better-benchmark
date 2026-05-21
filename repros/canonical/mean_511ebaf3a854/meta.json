@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "511ebaf3a854",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.pow.Tensor_Scalar",
+    "aten.rsqrt.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_MT5ForConditionalGeneration_infer_000"
+  ]
+}

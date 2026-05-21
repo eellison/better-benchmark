@@ -15,18 +15,23 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 1,
+  "n_models": 16,
   "models": [
-    "inductor_huggingface_perf_cuda_h100-2-5-linux.aws.h100_graph36"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 7.7760000713169575,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 6.87999976798892,
-      "total_bytes": 6291456,
-      "gap_default": 1.1302326066196868,
-      "gap_cd": null
-    }
-  }
+    "hf_AlbertForMaskedLM_infer_000",
+    "hf_AlbertForMaskedLM_train_000",
+    "hf_DistillGPT2_infer_000",
+    "hf_DistillGPT2_train_000",
+    "hf_GPT2ForSequenceClassification_infer_000",
+    "hf_GPT2ForSequenceClassification_train_000",
+    "hf_GPTJForCausalLM_infer_000",
+    "hf_GPTJForCausalLM_train_000",
+    "hf_GPTJForQuestionAnswering_infer_000",
+    "hf_GPTJForQuestionAnswering_train_000",
+    "hf_GPTNeoForCausalLM_infer_000",
+    "hf_GPTNeoForCausalLM_train_000",
+    "hf_GPTNeoForSequenceClassification_infer_000",
+    "hf_GPTNeoForSequenceClassification_train_000",
+    "hf_GoogleFnet_infer_000",
+    "hf_GoogleFnet_train_000"
+  ]
 }

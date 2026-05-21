@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128, 960, 7, 7], f32, stride=(47040, 1, 6720, 960)), T([960], f32), T([960], f32))"
 
 class Repro(torch.nn.Module):
@@ -38,6 +39,7 @@ class Repro(torch.nn.Module):
         clamp_min_default: "f32[128, 960, 7, 7]" = torch.ops.aten.clamp_min.default(add_tensor_1, 0.0);  add_tensor_1 = None
         clamp_max_default: "f32[128, 960, 7, 7]" = torch.ops.aten.clamp_max.default(clamp_min_default, 6.0);  clamp_min_default = None
         return clamp_max_default
+
 
 
 def _default_make_inputs():

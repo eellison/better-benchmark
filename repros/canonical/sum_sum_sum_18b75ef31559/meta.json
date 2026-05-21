@@ -1,0 +1,50 @@
+{
+  "pattern_hash": "18b75ef31559",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 31,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.eq.Scalar",
+    "aten.eq.Scalar",
+    "aten.eq.Scalar",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.index_put.default",
+    "aten.index_put.default",
+    "aten.index_put.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.where.self",
+    "aten.where.self",
+    "aten.where.self"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_GoogleFnet_train_001",
+    "hf_GoogleFnet_train_008"
+  ]
+}

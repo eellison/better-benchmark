@@ -7,25 +7,27 @@
     "aten.le.Scalar",
     "aten.where.self"
   ],
-  "n_models": 8,
+  "n_models": 20,
   "models": [
     "alexnet",
     "demucs",
     "mobilenet_v3_large",
     "timm_dm_nfnet_f0_train",
+    "timm_dm_nfnet_f0_train_001",
     "timm_ghostnet_100_train",
+    "timm_ghostnet_100_train_001",
     "timm_mobilenetv3_large_100_train",
+    "timm_mobilenetv3_large_100_train_001",
+    "timm_mobilenetv3_large_100_train_043",
+    "timm_nfnet",
     "timm_nfnet_l0_train",
+    "timm_nfnet_l0_train_001",
+    "timm_nfnet_l0_train_032",
+    "timm_regnet",
+    "timm_timm_dm_nfnet_f0_train_train_001",
+    "timm_timm_ghostnet_100_train_train_001",
+    "timm_timm_mobilenetv3_large_100_train_train_001",
+    "timm_timm_nfnet_l0_train_train_001",
     "vgg16"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 5.824000108987093,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 5.888000130653381,
-      "total_bytes": 147460,
-      "gap_default": 0.9891304313440655,
-      "gap_cd": null
-    }
-  }
+  ]
 }

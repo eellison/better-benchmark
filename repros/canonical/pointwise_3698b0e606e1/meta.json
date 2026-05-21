@@ -22,7 +22,7 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 13,
+  "n_models": 18,
   "models": [
     "LearningToPaint",
     "doctr_det_predictor",
@@ -31,21 +31,16 @@
     "phlippe_densenet",
     "phlippe_resnet",
     "pytorch_unet",
-    "timm_adv_inception_v3_infer",
-    "timm_ghostnet_100_infer",
-    "timm_inception_v3_infer",
-    "timm_mobilenetv3_large_100_infer",
-    "timm_resnet50_infer",
-    "timm_visformer_small_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 91.0400003194809,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 62.30400130152702,
-      "total_bytes": 385353600,
-      "gap_default": 1.461222368028706,
-      "gap_cd": null
-    }
-  }
+    "timm_adv_inception_v3_infer_000",
+    "timm_ghostnet_100_infer_000",
+    "timm_inception_v3_infer_000",
+    "timm_mobilenetv3_large_100_infer_000",
+    "timm_timm_adv_inception_v3_infer_infer_000",
+    "timm_timm_ghostnet_100_infer_infer_000",
+    "timm_timm_inception_v3_infer_infer_000",
+    "timm_timm_mobilenetv3_large_100_infer_infer_000",
+    "timm_timm_visformer_small_infer_infer_000",
+    "timm_visformer_small_infer_000",
+    "torchbench_LearningToPaint_infer_000"
+  ]
 }

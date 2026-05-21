@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "24f5d46e3cbb",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "llava"
+  ]
+}

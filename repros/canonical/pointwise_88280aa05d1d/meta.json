@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "88280aa05d1d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "timm_timm_visformer_small_train_train_001",
+    "timm_visformer_small_train_001",
+    "timm_visformer_small_train_019"
+  ]
+}

@@ -24,20 +24,9 @@
     "aten.unsqueeze.default",
     "prims._low_memory_max_pool_with_offsets.default"
   ],
-  "n_models": 3,
+  "n_models": 2,
   "models": [
     "doctr_det_predictor",
-    "moco",
-    "timm_resnet50_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 234.43199694156647,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 80.76799660921097,
-      "total_bytes": 513803264,
-      "gap_default": 2.9025357416730984,
-      "gap_cd": null
-    }
-  }
+    "moco"
+  ]
 }

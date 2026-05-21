@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "e045c37b7d18",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.constant_pad_nd.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_DistillGPT2_train_003",
+    "hf_DistillGPT2_train_010"
+  ]
+}

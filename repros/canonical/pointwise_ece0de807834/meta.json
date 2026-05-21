@@ -26,18 +26,10 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_mobilenetv3_large_100_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 51.04000121355057,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 34.68799963593483,
-      "total_bytes": 192691200,
-      "gap_default": 1.471402264449864,
-      "gap_cd": null
-    }
-  }
+    "timm_mobilenetv3_large_100_infer",
+    "timm_mobilenetv3_large_100_infer_000",
+    "timm_timm_mobilenetv3_large_100_infer_infer_000"
+  ]
 }

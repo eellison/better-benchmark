@@ -25,19 +25,13 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 6,
   "models": [
     "timm_mobilevit_s_infer",
-    "timm_tf_efficientnet_b0_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 9.184000082314014,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 7.935999892652035,
-      "total_bytes": 10488320,
-      "gap_default": 1.1572580905422525,
-      "gap_cd": null
-    }
-  }
+    "timm_mobilevit_s_infer_000",
+    "timm_tf_efficientnet_b0_infer",
+    "timm_tf_efficientnet_b0_infer_000",
+    "timm_timm_mobilevit_s_infer_infer_000",
+    "timm_timm_tf_efficientnet_b0_infer_infer_000"
+  ]
 }

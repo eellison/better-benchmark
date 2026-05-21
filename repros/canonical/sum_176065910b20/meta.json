@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "176065910b20",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.sum.dim_IntList",
+    "aten.view.default"
+  ],
+  "n_models": 5,
+  "models": [
+    "hf_AllenaiLongformerBase_train_005",
+    "hf_MobileBertForMaskedLM_train_014",
+    "timm_timm_vit_base_patch16_siglip_256_train_train_001",
+    "timm_vit_base_patch16_siglip_256_train_001",
+    "timm_vit_base_patch16_siglip_256_train_010"
+  ]
+}

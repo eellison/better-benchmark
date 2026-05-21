@@ -1,8 +1,0 @@
-torchbench_vgg16_infer_0b6b69f4: (T([128, 512, 28, 28], f16))
-torchbench_vgg16_infer_db898f95: (T([128, 256, 56, 56], f16))
-torchbench_vgg16_infer_bdec2881: (T([128, 128, 112, 112], f16))
-torchbench_vgg16_infer_bbdef333: (T([128, 64, 224, 224], f16))
-vgg16_0b6b69f4: (T([128, 512, 28, 28], f16))
-vgg16_db898f95: (T([128, 256, 56, 56], f16))
-vgg16_bdec2881: (T([128, 128, 112, 112], f16))
-vgg16_bbdef333: (T([128, 64, 224, 224], f16))

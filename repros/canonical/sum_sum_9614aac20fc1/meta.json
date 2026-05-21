@@ -31,24 +31,27 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 7,
+  "n_models": 20,
   "models": [
     "mnasnet1_0",
     "mobilenet_v2",
     "mobilenet_v3_large",
+    "timm_efficientnet",
     "timm_mobilenetv2_100_train",
+    "timm_mobilenetv2_100_train_001",
+    "timm_mobilenetv2_100_train_024",
     "timm_mobilenetv3_large_100_train",
+    "timm_mobilenetv3_large_100_train_001",
+    "timm_mobilenetv3_large_100_train_043",
     "timm_mobilevit_s_train",
-    "timm_tf_efficientnet_b0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 221.11999988555908,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 95.23200243711472,
-      "total_bytes": 616562976,
-      "gap_default": 2.3219085415280745,
-      "gap_cd": null
-    }
-  }
+    "timm_mobilevit_s_train_001",
+    "timm_mobilevit_s_train_041",
+    "timm_tf_efficientnet_b0_train",
+    "timm_tf_efficientnet_b0_train_001",
+    "timm_tf_efficientnet_b0_train_051",
+    "timm_timm_mobilenetv2_100_train_train_001",
+    "timm_timm_mobilenetv3_large_100_train_train_001",
+    "timm_timm_mobilevit_s_train_train_001",
+    "timm_timm_tf_efficientnet_b0_train_train_001"
+  ]
 }

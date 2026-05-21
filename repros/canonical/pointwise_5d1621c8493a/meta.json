@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "5d1621c8493a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.relu.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf_Reformer",
+    "hf_T5",
+    "hf_T5_base"
+  ]
+}

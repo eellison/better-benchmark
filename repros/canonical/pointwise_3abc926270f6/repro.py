@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_alexnet_infer
+Label: timm_dm_nfnet_f0_infer
 Pattern hash: 3abc926270f6
-Shape hash: 9d97ed0b
+Shape hash: a1cda94e
 """
 import sys
 from pathlib import Path
@@ -16,12 +16,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([1024, 256, 13, 13], f16))"
+_shapes_config = "(T([128, 768, 1, 1], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, convolution_3: "f16[1024, 256, 13, 13]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:48 in forward, code: x = self.features(x)
-        relu_default: "f16[1024, 256, 13, 13]" = torch.ops.aten.relu.default(convolution_3);  convolution_3 = None
+    def forward(self, convolution_78: "f32[128, 768, 1, 1]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/squeeze_excite.py:61 in forward, code: x_se = self.act(self.bn(x_se))
+        relu_default: "f32[128, 768, 1, 1]" = torch.ops.aten.relu.default(convolution_78);  convolution_78 = None
         return relu_default
 
 

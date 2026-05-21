@@ -22,21 +22,19 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 4,
+  "n_models": 12,
   "models": [
     "timm_mobilenetv2_100_infer",
+    "timm_mobilenetv2_100_infer_000",
     "timm_mobilenetv3_large_100_infer",
+    "timm_mobilenetv3_large_100_infer_000",
     "timm_mobilevit_s_infer",
-    "timm_tf_efficientnet_b0_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 16.00000075995922,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 13.088000006973743,
-      "total_bytes": 48171520,
-      "gap_default": 1.2224939449445187,
-      "gap_cd": null
-    }
-  }
+    "timm_mobilevit_s_infer_000",
+    "timm_tf_efficientnet_b0_infer",
+    "timm_tf_efficientnet_b0_infer_000",
+    "timm_timm_mobilenetv2_100_infer_infer_000",
+    "timm_timm_mobilenetv3_large_100_infer_infer_000",
+    "timm_timm_mobilevit_s_infer_infer_000",
+    "timm_timm_tf_efficientnet_b0_infer_infer_000"
+  ]
 }

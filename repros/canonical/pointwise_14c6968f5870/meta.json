@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "14c6968f5870",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.as_strided.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_AllenaiLongformerBase_infer_002",
+    "hf_AllenaiLongformerBase_train_002"
+  ]
+}

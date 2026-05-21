@@ -7,26 +7,13 @@
     "aten.ne.Scalar",
     "prims.convert_element_type.default"
   ],
-  "n_models": 9,
+  "n_models": 6,
   "models": [
-    "hf_AllenaiLongformerBase_infer",
-    "hf_AllenaiLongformerBase_train",
+    "hf_AllenaiLongformerBase_infer_000",
+    "hf_AllenaiLongformerBase_train_000",
     "hf_Longformer",
-    "hf_M2M100ForConditionalGeneration_infer",
-    "hf_M2M100ForConditionalGeneration_train",
-    "hf_RobertaForCausalLM_infer",
-    "hf_RobertaForCausalLM_train",
-    "hf_Roberta_base",
-    "inductor_huggingface_perf-1-5-linux.aws.a100_graph0"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 5.663999821990728,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 5.98399993032217,
-      "total_bytes": 98304,
-      "gap_default": 0.9465240454449314,
-      "gap_cd": null
-    }
-  }
+    "hf_M2M100ForConditionalGeneration_infer_000",
+    "hf_M2M100ForConditionalGeneration_train_001",
+    "hf_Roberta_base"
+  ]
 }

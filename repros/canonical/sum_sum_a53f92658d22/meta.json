@@ -47,19 +47,12 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 2,
+  "n_models": 5,
   "models": [
     "mobilenet_v2",
-    "timm_mobilenetv2_100_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 334.81600880622864,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 95.13600170612335,
-      "total_bytes": 616563204,
-      "gap_default": 3.5193407627165234,
-      "gap_cd": null
-    }
-  }
+    "timm_mobilenetv2_100_train",
+    "timm_mobilenetv2_100_train_001",
+    "timm_mobilenetv2_100_train_024",
+    "timm_timm_mobilenetv2_100_train_train_001"
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "ec2d16acc9ec",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.erf.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 9,
+  "models": [
+    "hf_Bart",
+    "hf_Bert",
+    "hf_Bert_large",
+    "hf_DistilBert",
+    "hf_Longformer",
+    "hf_Roberta_base",
+    "hf_Whisper",
+    "hf_distil_whisper",
+    "timm_vision_transformer"
+  ]
+}

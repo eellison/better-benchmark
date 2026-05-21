@@ -35,18 +35,10 @@
     "aten.var_mean.correction",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_visformer_small_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 46.81599885225296,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 11.552000418305397,
-      "total_bytes": 38697984,
-      "gap_default": 4.052631332844131,
-      "gap_cd": null
-    }
-  }
+    "timm_timm_visformer_small_train_train_000",
+    "timm_visformer_small_train",
+    "timm_visformer_small_train_000"
+  ]
 }

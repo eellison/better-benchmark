@@ -10,18 +10,11 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 1,
+  "n_models": 4,
   "models": [
-    "hf_AlbertForMaskedLM_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 26.367999613285065,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 26.464000344276428,
-      "total_bytes": 134217728,
-      "gap_default": 0.9963724028966722,
-      "gap_cd": null
-    }
-  }
+    "BERT_pytorch",
+    "hf_T5",
+    "hf_T5_base",
+    "llama"
+  ]
 }

@@ -51,19 +51,13 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 2,
+  "n_models": 6,
   "models": [
     "timm_adv_inception_v3_train",
-    "timm_inception_v3_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 399.1999924182892,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 140.19200205802917,
-      "total_bytes": 923239940,
-      "gap_default": 2.847523300602054,
-      "gap_cd": null
-    }
-  }
+    "timm_adv_inception_v3_train_001",
+    "timm_inception_v3_train",
+    "timm_inception_v3_train_001",
+    "timm_timm_adv_inception_v3_train_train_001",
+    "timm_timm_inception_v3_train_train_001"
+  ]
 }

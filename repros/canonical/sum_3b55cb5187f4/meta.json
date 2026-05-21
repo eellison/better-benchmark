@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "3b55cb5187f4",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf_MobileBertForMaskedLM_train_014",
+    "timm_beit_base_patch16_224_train_001",
+    "timm_timm_beit_base_patch16_224_train_train_001",
+    "timm_timm_vit_base_patch14_dinov2.lvd142m_train_train_001",
+    "timm_vit_base_patch14_dinov2.lvd142m_train_001",
+    "timm_vit_base_patch14_dinov2.lvd142m_train_006"
+  ]
+}

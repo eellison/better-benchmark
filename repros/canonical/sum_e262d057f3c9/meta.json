@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "e262d057f3c9",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 3,
+  "models": [
+    "BERT_pytorch",
+    "LearningToPaint",
+    "alexnet"
+  ]
+}

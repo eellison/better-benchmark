@@ -21,23 +21,23 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 6,
+  "n_models": 16,
   "models": [
     "moco",
     "timm_ghostnet_100_infer",
+    "timm_ghostnet_100_infer_000",
     "timm_mobilenetv2_100_infer",
+    "timm_mobilenetv2_100_infer_000",
     "timm_mobilenetv3_large_100_infer",
+    "timm_mobilenetv3_large_100_infer_000",
     "timm_mobilevit_s_infer",
-    "timm_tf_efficientnet_b0_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 13.98400031030178,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 10.912000201642513,
-      "total_bytes": 32115200,
-      "gap_default": 1.2815249314417039,
-      "gap_cd": null
-    }
-  }
+    "timm_mobilevit_s_infer_000",
+    "timm_tf_efficientnet_b0_infer",
+    "timm_tf_efficientnet_b0_infer_000",
+    "timm_timm_ghostnet_100_infer_infer_000",
+    "timm_timm_mobilenetv2_100_infer_infer_000",
+    "timm_timm_mobilenetv3_large_100_infer_infer_000",
+    "timm_timm_mobilevit_s_infer_infer_000",
+    "timm_timm_tf_efficientnet_b0_infer_infer_000"
+  ]
 }

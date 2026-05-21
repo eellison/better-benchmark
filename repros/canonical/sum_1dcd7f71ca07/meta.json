@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "1dcd7f71ca07",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.sum.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "timm_dm_nfnet_f0_train",
+    "timm_dm_nfnet_f0_train_001",
+    "timm_nfnet",
+    "timm_timm_dm_nfnet_f0_train_train_001"
+  ]
+}

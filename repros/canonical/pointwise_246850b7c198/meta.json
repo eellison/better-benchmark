@@ -6,20 +6,11 @@
   "origin_ops": [
     "aten.sigmoid.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
     "LearningToPaint",
     "dcgan",
-    "doctr_det_predictor"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 5.663999821990728,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 6.0800001956522465,
-      "total_bytes": 1024,
-      "gap_default": 0.9315788881127016,
-      "gap_cd": null
-    }
-  }
+    "doctr_det_predictor",
+    "torchbench_LearningToPaint_infer_000"
+  ]
 }

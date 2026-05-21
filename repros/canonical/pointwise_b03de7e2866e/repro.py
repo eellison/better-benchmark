@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([232], f16), T([512, 232, 7, 7], f16), T([232], f16), T([232], f16), T([232], f16), T([512, 232, 7, 7], f16, stride=(22736, 49, 7, 1)), S([512, 2, 232, 7, 7]), S([512, 464, 7, 7]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg257_1: "f16[232]", convolution_51: "f16[512, 232, 7, 7]", arg258_1: "f16[232]", arg259_1: "f16[232]", arg260_1: "f16[232]", getitem_24: "f16[512, 232, 7, 7]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/shufflenetv2.py:95 in forward, code: out = torch.cat((x1, self.branch2(x2)), dim=1)
@@ -57,17 +60,10 @@ class Repro(torch.nn.Module):
         return (getitem_25, getitem)
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([232], dtype=torch.float16, device='cuda'),
-    torch.randn([512, 232, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([232], dtype=torch.float16, device='cuda'),
-    torch.randn([232], dtype=torch.float16, device='cuda'),
-    torch.randn([232], dtype=torch.float16, device='cuda'),
-    torch.randn(11629464, dtype=torch.float16, device='cuda').as_strided([512, 232, 7, 7], [22736, 49, 7, 1]),  # getitem_24
-    [512, 2, 232, 7, 7],  # _shape_param_0
-    [512, 464, 7, 7],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -8,20 +8,18 @@
     "aten.le.Scalar",
     "aten.where.self"
   ],
-  "n_models": 3,
+  "n_models": 11,
   "models": [
+    "alexnet",
     "demucs",
+    "soft_actor_critic",
     "timm_dm_nfnet_f0_train",
-    "timm_nfnet_l0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 5.8559998869895935,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 6.047999951988459,
-      "total_bytes": 589824,
-      "gap_default": 0.9682539572547881,
-      "gap_cd": null
-    }
-  }
+    "timm_dm_nfnet_f0_train_001",
+    "timm_nfnet",
+    "timm_nfnet_l0_train",
+    "timm_nfnet_l0_train_001",
+    "timm_nfnet_l0_train_032",
+    "timm_timm_dm_nfnet_f0_train_train_001",
+    "timm_timm_nfnet_l0_train_train_001"
+  ]
 }

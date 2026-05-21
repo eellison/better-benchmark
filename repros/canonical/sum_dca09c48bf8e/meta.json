@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "dca09c48bf8e",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "BERT_pytorch"
+  ]
+}

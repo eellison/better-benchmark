@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "4f0525de80b5",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.le.Scalar"
+  ],
+  "n_models": 6,
+  "models": [
+    "alexnet",
+    "demucs",
+    "hf_M2M100ForConditionalGeneration_train_003",
+    "hf_M2M100ForConditionalGeneration_train_006",
+    "hf_M2M100ForConditionalGeneration_train_012",
+    "hf_MobileBertForMaskedLM_train_000"
+  ]
+}

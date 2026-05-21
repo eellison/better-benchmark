@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "907bcbfadbba",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.permute.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "modded_nanogpt"
+  ]
+}

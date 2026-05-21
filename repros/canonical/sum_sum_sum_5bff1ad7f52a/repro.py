@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: genai_layernorm_bwd_32768x256
+Label: genai_LayerNormBackward_001
 Pattern hash: 5bff1ad7f52a
-Shape hash: 044f6574
+Shape hash: e45e1d05
 """
 import sys
 from pathlib import Path
@@ -16,37 +16,29 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([], bf16), T([256], f32), T([32768, 256], bf16), T([32768, 1], f32), T([32768, 1], f32), S([32768, 256]))"
+_shapes_config = "(T([], bf16), T([512], f32), T([1152000, 512], bf16), T([1152000, 1], f32), T([1152000, 1], f32), S([1152000, 512]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, tangents_1: "bf16[]", primals_2: "f32[256]", primals_1: "bf16[32768, 256]", getitem_1: "f32[32768, 1]", rsqrt: "f32[32768, 1]", _shape_param_0):
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:386 in layernorm_bwd, code: return out.sum()
-        expand_default: "bf16[32768, 256]" = torch.ops.aten.expand.default(tangents_1, _shape_param_0);  tangents_1 = _shape_param_0 = None
-
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:385 in layernorm_bwd, code: out = F.layer_norm(x_f32, w.shape, w, None, 1e-6).to(x.dtype)
-        convert_element_type_default: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(expand_default, torch.float32);  expand_default = None
-        mul_tensor: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(convert_element_type_default, primals_2);  primals_2 = None
-        mul_tensor_1: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(mul_tensor, 256)
-        sum_dim_int_list: "f32[32768, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [1], True)
-
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:384 in layernorm_bwd, code: x_f32 = x.float()
-        convert_element_type_default_1: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(primals_1, torch.float32);  primals_1 = None
-
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:385 in layernorm_bwd, code: out = F.layer_norm(x_f32, w.shape, w, None, 1e-6).to(x.dtype)
-        sub_tensor: "f32[32768, 256]" = torch.ops.aten.sub.Tensor(convert_element_type_default_1, getitem_1);  convert_element_type_default_1 = getitem_1 = None
-        mul_tensor_2: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(sub_tensor, rsqrt);  sub_tensor = None
-        mul_tensor_3: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(mul_tensor, mul_tensor_2);  mul_tensor = None
-        sum_dim_int_list_1: "f32[32768, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor_3, [1], True);  mul_tensor_3 = None
-        mul_tensor_4: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(mul_tensor_2, sum_dim_int_list_1);  sum_dim_int_list_1 = None
-        sub_tensor_1: "f32[32768, 256]" = torch.ops.aten.sub.Tensor(mul_tensor_1, sum_dim_int_list);  mul_tensor_1 = sum_dim_int_list = None
-        sub_tensor_2: "f32[32768, 256]" = torch.ops.aten.sub.Tensor(sub_tensor_1, mul_tensor_4);  sub_tensor_1 = mul_tensor_4 = None
-        div_tensor: "f32[32768, 1]" = torch.ops.aten.div.Tensor(rsqrt, 256);  rsqrt = None
-        mul_tensor_5: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(div_tensor, sub_tensor_2);  div_tensor = sub_tensor_2 = None
-        mul_tensor_6: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(convert_element_type_default, mul_tensor_2);  convert_element_type_default = mul_tensor_2 = None
-        sum_dim_int_list_2: "f32[256]" = torch.ops.aten.sum.dim_IntList(mul_tensor_6, [0]);  mul_tensor_6 = None
-
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:384 in layernorm_bwd, code: x_f32 = x.float()
-        convert_element_type_default_2: "bf16[32768, 256]" = torch.ops.prims.convert_element_type.default(mul_tensor_5, torch.bfloat16);  mul_tensor_5 = None
+    def forward(self, arg4_1: "bf16[]", arg1_1: "f32[512]", arg0_1: "bf16[1152000, 512]", arg2_1: "f32[1152000, 1]", arg3_1: "f32[1152000, 1]", _shape_param_0):
+        # No stacktrace found for following nodes
+        expand_default: "bf16[1152000, 512]" = torch.ops.aten.expand.default(arg4_1, _shape_param_0);  arg4_1 = _shape_param_0 = None
+        convert_element_type_default: "f32[1152000, 512]" = torch.ops.prims.convert_element_type.default(expand_default, torch.float32);  expand_default = None
+        mul_tensor: "f32[1152000, 512]" = torch.ops.aten.mul.Tensor(convert_element_type_default, arg1_1);  arg1_1 = None
+        mul_tensor_1: "f32[1152000, 512]" = torch.ops.aten.mul.Tensor(mul_tensor, 512)
+        sum_dim_int_list: "f32[1152000, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [1], True)
+        convert_element_type_default_1: "f32[1152000, 512]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.float32);  arg0_1 = None
+        sub_tensor: "f32[1152000, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_default_1, arg2_1);  convert_element_type_default_1 = arg2_1 = None
+        mul_tensor_2: "f32[1152000, 512]" = torch.ops.aten.mul.Tensor(sub_tensor, arg3_1);  sub_tensor = None
+        mul_tensor_3: "f32[1152000, 512]" = torch.ops.aten.mul.Tensor(mul_tensor, mul_tensor_2);  mul_tensor = None
+        sum_dim_int_list_1: "f32[1152000, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor_3, [1], True);  mul_tensor_3 = None
+        mul_tensor_4: "f32[1152000, 512]" = torch.ops.aten.mul.Tensor(mul_tensor_2, sum_dim_int_list_1);  sum_dim_int_list_1 = None
+        sub_tensor_1: "f32[1152000, 512]" = torch.ops.aten.sub.Tensor(mul_tensor_1, sum_dim_int_list);  mul_tensor_1 = sum_dim_int_list = None
+        sub_tensor_2: "f32[1152000, 512]" = torch.ops.aten.sub.Tensor(sub_tensor_1, mul_tensor_4);  sub_tensor_1 = mul_tensor_4 = None
+        div_tensor: "f32[1152000, 1]" = torch.ops.aten.div.Tensor(arg3_1, 512);  arg3_1 = None
+        mul_tensor_5: "f32[1152000, 512]" = torch.ops.aten.mul.Tensor(div_tensor, sub_tensor_2);  div_tensor = sub_tensor_2 = None
+        mul_tensor_6: "f32[1152000, 512]" = torch.ops.aten.mul.Tensor(convert_element_type_default, mul_tensor_2);  convert_element_type_default = mul_tensor_2 = None
+        sum_dim_int_list_2: "f32[512]" = torch.ops.aten.sum.dim_IntList(mul_tensor_6, [0]);  mul_tensor_6 = None
+        convert_element_type_default_2: "bf16[1152000, 512]" = torch.ops.prims.convert_element_type.default(mul_tensor_5, torch.bfloat16);  mul_tensor_5 = None
         return (sum_dim_int_list_2, convert_element_type_default_2)
 
 

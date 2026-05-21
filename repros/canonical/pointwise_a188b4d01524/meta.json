@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "a188b4d01524",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.full.default",
+    "aten.index_put.default",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_MobileBertForMaskedLM_train_014"
+  ]
+}

@@ -6,8 +6,9 @@
   "origin_ops": [
     "aten.tanh.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "lennard_jones",
     "pytorch_CycleGAN_and_pix2pix"
   ]
 }

@@ -47,18 +47,18 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 11,
   "models": [
-    "timm_ghostnet_100_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 339.87200260162354,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 124.9919980764389,
-      "total_bytes": 822083716,
-      "gap_default": 2.7191500882622477,
-      "gap_cd": null
-    }
-  }
+    "shufflenet_v2_x1_0",
+    "timm_adv_inception_v3_train",
+    "timm_adv_inception_v3_train_001",
+    "timm_ghostnet_100_train",
+    "timm_ghostnet_100_train_001",
+    "timm_inception_v3_train",
+    "timm_inception_v3_train_001",
+    "timm_timm_adv_inception_v3_train_train_001",
+    "timm_timm_ghostnet_100_train_train_001",
+    "timm_timm_inception_v3_train_train_001",
+    "timm_vovnet"
+  ]
 }

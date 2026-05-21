@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "bcfec253e455",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.copy_.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "moco"
+  ]
+}

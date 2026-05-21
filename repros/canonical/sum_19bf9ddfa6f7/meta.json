@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "19bf9ddfa6f7",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train"
+  ]
+}

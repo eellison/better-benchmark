@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "18d9dcca560a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_LayoutLMForMaskedLM_infer_000"
+  ]
+}

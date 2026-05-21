@@ -19,18 +19,13 @@
     "aten.sub.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 6,
   "models": [
-    "hf_AlbertForMaskedLM_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 38.656000047922134,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 35.64799949526787,
-      "total_bytes": 201359360,
-      "gap_default": 1.0843806271107461,
-      "gap_cd": null
-    }
-  }
+    "nanogpt",
+    "timm_deit_base_distilled_patch16_224_train",
+    "timm_deit_tiny_patch16_224.fb_in1k_train",
+    "timm_mobilevit_s_train",
+    "timm_vision_transformer",
+    "timm_vit_base_patch16_siglip_256_train"
+  ]
 }

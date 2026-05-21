@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "3d31a80e888b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten._unsafe_view.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_M2M100ForConditionalGeneration_train_009",
+    "hf_M2M100ForConditionalGeneration_train_020"
+  ]
+}

@@ -1,8 +1,0 @@
-torchbench_pytorch_unet_train_4840e5cd: (T([8, 512, 80, 119], f32), T([512], f32), T([512], f32))
-torchbench_pytorch_unet_train_b517fe34: (T([8, 256, 160, 239], f32), T([256], f32), T([256], f32))
-torchbench_pytorch_unet_train_02896910: (T([8, 128, 320, 479], f32), T([128], f32), T([128], f32))
-torchbench_pytorch_unet_train_ac0d4f4c: (T([8, 64, 640, 959], f32), T([64], f32), T([64], f32))
-pytorch_unet_4840e5cd: (T([8, 512, 80, 119], f32), T([512], f32), T([512], f32))
-pytorch_unet_b517fe34: (T([8, 256, 160, 239], f32), T([256], f32), T([256], f32))
-pytorch_unet_02896910: (T([8, 128, 320, 479], f32), T([128], f32), T([128], f32))
-pytorch_unet_ac0d4f4c: (T([8, 64, 640, 959], f32), T([64], f32), T([64], f32))

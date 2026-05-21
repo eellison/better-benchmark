@@ -15,11 +15,12 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128, 96, 113, 113], f32, stride=(1225824, 1, 10848, 96)), T([128, 96, 112, 112], f32, stride=(1204224, 1, 10752, 96)), T([1, 96, 1, 1], f32), T([1, 96, 1, 1], f32), T([96], f32), T([96], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, getitem_320: "f32[128, 96, 113, 113]", convolution_5: "f32[128, 96, 112, 112]", getitem_7: "f32[1, 96, 1, 1]", rsqrt_3: "f32[1, 96, 1, 1]", primals_28: "f32[96]", primals_29: "f32[96]"):
-        # File: /tmp/pytorch-work/torch/nn/functional.py:5461 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:5462 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
         constant_pad_nd_default: "f32[128, 96, 112, 112]" = torch.ops.aten.constant_pad_nd.default(getitem_320, [0, -1, 0, -1]);  getitem_320 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
@@ -73,6 +74,7 @@ class Repro(torch.nn.Module):
         sub_tensor_4: "f32[128, 96, 112, 112]" = torch.ops.aten.sub.Tensor(sub_tensor_3, unsqueeze_default_9);  sub_tensor_3 = unsqueeze_default_9 = None
         mul_tensor_13: "f32[128, 96, 112, 112]" = torch.ops.aten.mul.Tensor(sub_tensor_4, unsqueeze_default_15);  sub_tensor_4 = unsqueeze_default_15 = None
         return mul_tensor_13
+
 
 
 def _default_make_inputs():

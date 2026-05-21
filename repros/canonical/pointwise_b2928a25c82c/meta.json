@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "b2928a25c82c",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.select_scatter.default",
+    "aten.view.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "timm_timm_vit_base_patch16_siglip_256_train_train_001",
+    "timm_vit_base_patch16_siglip_256_train_001",
+    "timm_vit_base_patch16_siglip_256_train_010"
+  ]
+}

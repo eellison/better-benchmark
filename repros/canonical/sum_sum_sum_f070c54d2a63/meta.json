@@ -82,18 +82,11 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 4,
   "models": [
-    "timm_repvgg_a2_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 421.82400822639465,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 183.16799402236938,
-      "total_bytes": 1233128836,
-      "gap_default": 2.3029351305494967,
-      "gap_cd": null
-    }
-  }
+    "timm_repvgg_a2_train",
+    "timm_repvgg_a2_train_001",
+    "timm_repvgg_a2_train_008",
+    "timm_timm_repvgg_a2_train_train_001"
+  ]
 }

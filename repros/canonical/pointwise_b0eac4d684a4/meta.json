@@ -15,24 +15,12 @@
     "aten.reshape.default",
     "aten.tanh.default"
   ],
-  "n_models": 7,
+  "n_models": 5,
   "models": [
-    "hf_AlbertForMaskedLM_train",
-    "hf_DistillGPT2_infer",
-    "hf_DistillGPT2_train",
+    "hf_Albert",
     "hf_GPT2",
-    "hf_GPT2ForSequenceClassification_infer",
-    "hf_GPT2ForSequenceClassification_train",
-    "hf_GPT2_large"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 82.8159973025322,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 83.96799862384796,
-      "total_bytes": 536870912,
-      "gap_default": 0.9862804718440844,
-      "gap_cd": null
-    }
-  }
+    "hf_GPT2_large",
+    "moondream",
+    "nanogpt"
+  ]
 }

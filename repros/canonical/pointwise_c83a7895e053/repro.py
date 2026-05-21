@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_tf_efficientnet_b0_infer
+Label: timm_nfnet_l0_infer
 Pattern hash: c83a7895e053
-Shape hash: 62347d5e
+Shape hash: 4859dd9a
 """
 import sys
 from pathlib import Path
@@ -15,16 +15,18 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([128, 48, 1, 1], f32))"
+_repro_version = 2
+_shapes_config = "(T([128, 384, 7, 7], f32, stride=(18816, 1, 2688, 384)))"
 
 class Repro(torch.nn.Module):
-    def forward(self, convolution_77: "f32[128, 48, 1, 1]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:81 in forward, code: x_se = self.act1(x_se)
-        neg_default: "f32[128, 48, 1, 1]" = torch.ops.aten.neg.default(convolution_77)
-        exp_default: "f32[128, 48, 1, 1]" = torch.ops.aten.exp.default(neg_default);  neg_default = None
-        add_tensor: "f32[128, 48, 1, 1]" = torch.ops.aten.add.Tensor(exp_default, 1);  exp_default = None
-        div_tensor: "f32[128, 48, 1, 1]" = torch.ops.aten.div.Tensor(convolution_77, add_tensor);  convolution_77 = add_tensor = None
+    def forward(self, convolution_76: "f32[128, 384, 7, 7]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:274 in forward, code: out = self.conv3(self.act3(out))
+        neg_default: "f32[128, 384, 7, 7]" = torch.ops.aten.neg.default(convolution_76)
+        exp_default: "f32[128, 384, 7, 7]" = torch.ops.aten.exp.default(neg_default);  neg_default = None
+        add_tensor: "f32[128, 384, 7, 7]" = torch.ops.aten.add.Tensor(exp_default, 1);  exp_default = None
+        div_tensor: "f32[128, 384, 7, 7]" = torch.ops.aten.div.Tensor(convolution_76, add_tensor);  convolution_76 = add_tensor = None
         return div_tensor
+
 
 
 def _default_make_inputs():

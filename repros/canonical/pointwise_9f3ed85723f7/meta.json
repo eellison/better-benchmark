@@ -18,18 +18,11 @@
     "aten.mul.Tensor",
     "aten.mul.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 4,
   "models": [
-    "timm_dm_nfnet_f0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 136.9599997997284,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 137.9839926958084,
-      "total_bytes": 912293888,
-      "gap_default": 0.9925789008125206,
-      "gap_cd": null
-    }
-  }
+    "timm_dm_nfnet_f0_train",
+    "timm_dm_nfnet_f0_train_001",
+    "timm_nfnet",
+    "timm_timm_dm_nfnet_f0_train_train_001"
+  ]
 }

@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "a3a8e8f5cc86",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.as_strided.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.mean.dim",
+    "aten.neg.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_nfnet_l0_infer",
+    "timm_nfnet_l0_train"
+  ]
+}

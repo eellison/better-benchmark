@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_BlenderbotForCausalLM_train
+Label: hf_BlenderbotForCausalLM_train_003
 Pattern hash: edf2e0dc44ea
 Shape hash: d999c84a
 """
@@ -15,13 +15,15 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128, 2560], f32), T([128], i64, gen=Index(128)))"
 
 class Repro(torch.nn.Module):
-    def forward(self, primals_2: "f32[128, 2560]", primals_1: "i64[128]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:82 in forward, code: return super().forward(position_ids)
-        embedding_default: "f32[128, 2560]" = torch.ops.aten.embedding.default(primals_2, primals_1);  primals_2 = primals_1 = None
+    def forward(self, arg1_1: "f32[128, 2560]", arg0_1: "i64[128]"):
+        # No stacktrace found for following nodes
+        embedding_default: "f32[128, 2560]" = torch.ops.aten.embedding.default(arg1_1, arg0_1);  arg1_1 = arg0_1 = None
         return embedding_default
+
 
 
 def _default_make_inputs():

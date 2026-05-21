@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "8f0d035aad9e",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf_AlbertForMaskedLM_train_001",
+    "hf_DistilBertForMaskedLM_train_001",
+    "hf_DistilBertForMaskedLM_train_011"
+  ]
+}

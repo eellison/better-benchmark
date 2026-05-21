@@ -21,9 +21,15 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 8,
   "models": [
+    "hf_Albert",
+    "hf_Bert",
+    "hf_Bert_large",
+    "hf_DistilBert",
     "hf_GPT2",
-    "hf_GPT2_large"
+    "hf_GPT2_large",
+    "hf_Longformer",
+    "hf_Roberta_base"
   ]
 }

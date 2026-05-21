@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "0de8974bd5cb",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.neg.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "timm_mobilevit_s_infer_000",
+    "timm_mobilevit_s_train_000",
+    "timm_timm_mobilevit_s_infer_infer_000",
+    "timm_timm_mobilevit_s_train_train_000"
+  ]
+}

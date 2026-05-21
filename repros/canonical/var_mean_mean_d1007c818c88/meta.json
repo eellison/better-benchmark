@@ -26,18 +26,11 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 4,
   "models": [
-    "timm_tf_efficientnet_b0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 38.62399980425835,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 10.17600018531084,
-      "total_bytes": 29500416,
-      "gap_default": 3.795597395921089,
-      "gap_cd": null
-    }
-  }
+    "timm_efficientnet",
+    "timm_tf_efficientnet_b0_train",
+    "timm_tf_efficientnet_b0_train_000",
+    "timm_timm_tf_efficientnet_b0_train_train_000"
+  ]
 }

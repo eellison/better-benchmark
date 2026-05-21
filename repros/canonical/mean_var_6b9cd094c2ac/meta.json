@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "6b9cd094c2ac",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean",
+    "var"
+  ],
+  "n_ops": 15,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.sqrt.default",
+    "aten.sub.Tensor",
+    "aten.var.correction"
+  ],
+  "n_models": 1,
+  "models": [
+    "BERT_pytorch"
+  ]
+}

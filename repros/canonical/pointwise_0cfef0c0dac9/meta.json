@@ -15,19 +15,16 @@
     "aten.reciprocal.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 9,
   "models": [
+    "timm_efficientnet",
     "timm_nfnet_l0_train",
-    "timm_tf_efficientnet_b0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 50.97600072622299,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 51.072001457214355,
-      "total_bytes": 308281344,
-      "gap_default": 0.9981202864925552,
-      "gap_cd": null
-    }
-  }
+    "timm_nfnet_l0_train_001",
+    "timm_nfnet_l0_train_032",
+    "timm_tf_efficientnet_b0_train",
+    "timm_tf_efficientnet_b0_train_001",
+    "timm_tf_efficientnet_b0_train_051",
+    "timm_timm_nfnet_l0_train_train_001",
+    "timm_timm_tf_efficientnet_b0_train_train_001"
+  ]
 }

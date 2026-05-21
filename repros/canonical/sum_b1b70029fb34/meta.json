@@ -32,18 +32,11 @@
     "aten.sub.Tensor",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 1,
+  "n_models": 4,
   "models": [
-    "timm_nfnet_l0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 230.27199506759644,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 257.02399015426636,
-      "total_bytes": 1747189760,
-      "gap_default": 0.8959163497904872,
-      "gap_cd": null
-    }
-  }
+    "timm_nfnet_l0_train",
+    "timm_nfnet_l0_train_001",
+    "timm_nfnet_l0_train_032",
+    "timm_timm_nfnet_l0_train_train_001"
+  ]
 }

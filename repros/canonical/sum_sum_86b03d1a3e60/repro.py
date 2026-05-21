@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([25344, 768], f32), T([768], f32), T([128, 198, 768], f32), T([1, 198, 768], f32), T([128, 198, 1], f32), T([128, 198, 1], f32), T([128, 198, 768], f32), S([128, 198, 768]), S([128, 768, 14, 14]))"
 
 class Repro(torch.nn.Module):
@@ -49,6 +50,7 @@ class Repro(torch.nn.Module):
         permute_default: "f32[128, 768, 196]" = torch.ops.aten.permute.default(slice_tensor, [0, 2, 1]);  slice_tensor = None
         reshape_default_1: "f32[128, 768, 14, 14]" = torch.ops.aten.reshape.default(permute_default, _shape_param_1);  permute_default = _shape_param_1 = None
         return reshape_default_1
+
 
 
 def _default_make_inputs():

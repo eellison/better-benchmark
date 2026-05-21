@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_GPT2_infer
+Label: torchbench_hf_Albert_infer
 Pattern hash: 8a9912a82e25
-Shape hash: f0ea9551
+Shape hash: 2366d6e2
 """
 import sys
 from pathlib import Path
@@ -16,31 +16,29 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([1024, 768], f16), T([1, 1024, 768], f16), T([768], f16), T([768], f16), S([1, 1024, 768]), S([-1, 768]))"
+_shapes_config = "(T([512, 768], f16), T([1, 512, 768], f16), T([768], f16), T([768], f16), S([1, 512, 768]), S([512, 768]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_43: "f16[1024, 768]", add_86: "f16[1, 1024, 768]", arg135_1: "f16[768]", arg136_1: "f16[768]", _shape_param_0, _shape_param_1):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:122 in forward, code: x = x.view(size_out)
-        reshape_default: "f16[1, 1024, 768]" = torch.ops.aten.reshape.default(addmm_43, _shape_param_0);  addmm_43 = _shape_param_0 = None
+    def forward(self, addmm_70: "f16[512, 768]", convert_element_type_301: "f16[1, 512, 768]", arg18_1: "f16[768]", arg19_1: "f16[768]", _shape_param_0, _shape_param_1):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:200 in forward, code: attn_output = self.dense(attn_output)
+        reshape_default: "f16[1, 512, 768]" = torch.ops.aten.reshape.default(addmm_70, _shape_param_0);  addmm_70 = _shape_param_0 = None
 
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:307 in forward, code: hidden_states = residual + feed_forward_hidden_states
-        add_tensor: "f16[1, 1024, 768]" = torch.ops.aten.add.Tensor(add_86, reshape_default);  add_86 = reshape_default = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py:273 in forward, code: hidden_states = self.ln_1(hidden_states)
-        convert_element_type_default: "f32[1, 1024, 768]" = torch.ops.prims.convert_element_type.default(add_tensor, torch.float32);  add_tensor = None
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:202 in forward, code: attn_output = self.LayerNorm(hidden_states + attn_output)
+        add_tensor: "f16[1, 512, 768]" = torch.ops.aten.add.Tensor(convert_element_type_301, reshape_default);  convert_element_type_301 = reshape_default = None
+        convert_element_type_default: "f32[1, 512, 768]" = torch.ops.prims.convert_element_type.default(add_tensor, torch.float32);  add_tensor = None
         var_mean_correction = torch.ops.aten.var_mean.correction(convert_element_type_default, [2], correction = 0, keepdim = True)
-        getitem: "f32[1, 1024, 1]" = var_mean_correction[0]
-        getitem_1: "f32[1, 1024, 1]" = var_mean_correction[1];  var_mean_correction = None
-        sub_tensor: "f32[1, 1024, 768]" = torch.ops.aten.sub.Tensor(convert_element_type_default, getitem_1);  convert_element_type_default = getitem_1 = None
-        add_tensor_1: "f32[1, 1024, 1]" = torch.ops.aten.add.Tensor(getitem, 1e-05);  getitem = None
-        rsqrt_default: "f32[1, 1024, 1]" = torch.ops.aten.rsqrt.default(add_tensor_1);  add_tensor_1 = None
-        mul_tensor: "f32[1, 1024, 768]" = torch.ops.aten.mul.Tensor(sub_tensor, rsqrt_default);  sub_tensor = rsqrt_default = None
-        mul_tensor_1: "f32[1, 1024, 768]" = torch.ops.aten.mul.Tensor(mul_tensor, arg135_1);  mul_tensor = arg135_1 = None
-        add_tensor_2: "f32[1, 1024, 768]" = torch.ops.aten.add.Tensor(mul_tensor_1, arg136_1);  mul_tensor_1 = arg136_1 = None
-        convert_element_type_default_1: "f16[1, 1024, 768]" = torch.ops.prims.convert_element_type.default(add_tensor_2, torch.float16);  add_tensor_2 = None
+        getitem: "f32[1, 512, 1]" = var_mean_correction[0]
+        getitem_1: "f32[1, 512, 1]" = var_mean_correction[1];  var_mean_correction = None
+        sub_tensor: "f32[1, 512, 768]" = torch.ops.aten.sub.Tensor(convert_element_type_default, getitem_1);  convert_element_type_default = getitem_1 = None
+        add_tensor_1: "f32[1, 512, 1]" = torch.ops.aten.add.Tensor(getitem, 1e-12);  getitem = None
+        rsqrt_default: "f32[1, 512, 1]" = torch.ops.aten.rsqrt.default(add_tensor_1);  add_tensor_1 = None
+        mul_tensor: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(sub_tensor, rsqrt_default);  sub_tensor = rsqrt_default = None
+        mul_tensor_1: "f32[1, 512, 768]" = torch.ops.aten.mul.Tensor(mul_tensor, arg18_1);  mul_tensor = arg18_1 = None
+        add_tensor_2: "f32[1, 512, 768]" = torch.ops.aten.add.Tensor(mul_tensor_1, arg19_1);  mul_tensor_1 = arg19_1 = None
+        convert_element_type_default_1: "f16[1, 512, 768]" = torch.ops.prims.convert_element_type.default(add_tensor_2, torch.float16);  add_tensor_2 = None
 
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/pytorch_utils.py:121 in forward, code: x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
-        reshape_default_1: "f16[1024, 768]" = torch.ops.aten.reshape.default(convert_element_type_default_1, _shape_param_1);  convert_element_type_default_1 = _shape_param_1 = None
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:239 in ff_chunk, code: ffn_output = self.ffn(attention_output)
+        reshape_default_1: "f16[512, 768]" = torch.ops.aten.reshape.default(convert_element_type_default_1, _shape_param_1);  convert_element_type_default_1 = _shape_param_1 = None
         return reshape_default_1
 
 

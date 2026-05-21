@@ -22,18 +22,10 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_visformer_small_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 18.144000321626663,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 15.039999969303608,
-      "total_bytes": 57815040,
-      "gap_default": 1.2063830025703637,
-      "gap_cd": null
-    }
-  }
+    "timm_timm_visformer_small_infer_infer_000",
+    "timm_visformer_small_infer",
+    "timm_visformer_small_infer_000"
+  ]
 }

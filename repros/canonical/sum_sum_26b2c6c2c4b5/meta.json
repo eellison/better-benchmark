@@ -43,18 +43,10 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_ghostnet_100_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 115.61600118875504,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 56.223999708890915,
-      "total_bytes": 347112288,
-      "gap_default": 2.0563460761841217,
-      "gap_cd": null
-    }
-  }
+    "timm_ghostnet_100_train",
+    "timm_ghostnet_100_train_001",
+    "timm_timm_ghostnet_100_train_train_001"
+  ]
 }

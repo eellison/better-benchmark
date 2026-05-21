@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "213bb6231faa",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "BERT_pytorch"
+  ]
+}

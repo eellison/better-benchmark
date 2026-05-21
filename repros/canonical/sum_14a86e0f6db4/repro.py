@@ -1,0 +1,52 @@
+"""
+Standalone repro captured via capture_hook.
+Label: timm_visformer_small_train
+Pattern hash: 14a86e0f6db4
+Shape hash: 35f55d21
+"""
+import sys
+from pathlib import Path
+
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_repro_version = 2
+_shapes_config = "(T([768, 196, 196], f32), T([128, 6, 196, 196], f32), S([128, 6, 196, 196]), S([768, 196, 196]))"
+
+class Repro(torch.nn.Module):
+    def forward(self, bmm_45: "f32[768, 196, 196]", div: "f32[128, 6, 196, 196]", _shape_param_0, _shape_param_1):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:119 in forward, code: x = attn @ v
+        reshape_default: "f32[128, 6, 196, 196]" = torch.ops.aten.reshape.default(bmm_45, _shape_param_0);  bmm_45 = _shape_param_0 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:117 in forward, code: attn = attn.softmax(dim=-1)
+        mul_tensor: "f32[128, 6, 196, 196]" = torch.ops.aten.mul.Tensor(reshape_default, div);  reshape_default = None
+        sum_dim_int_list: "f32[128, 6, 196, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [-1], True)
+        neg_default: "f32[128, 6, 196, 196]" = torch.ops.aten.neg.default(div);  div = None
+        fma_default: "f32[128, 6, 196, 196]" = torch.ops.prims.fma.default(neg_default, sum_dim_int_list, mul_tensor);  neg_default = sum_dim_int_list = mul_tensor = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:116 in forward, code: attn = (q @ k.transpose(-2, -1)) * self.scale
+        mul_tensor_1: "f32[128, 6, 196, 196]" = torch.ops.aten.mul.Tensor(fma_default, 0.125);  fma_default = None
+        reshape_default_1: "f32[768, 196, 196]" = torch.ops.aten.reshape.default(mul_tensor_1, _shape_param_1);  mul_tensor_1 = _shape_param_1 = None
+        return reshape_default_1
+
+
+
+def _default_make_inputs():
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
+
+
+if __name__ == "__main__":
+    benchmark_repro(__file__, Repro, make_inputs)

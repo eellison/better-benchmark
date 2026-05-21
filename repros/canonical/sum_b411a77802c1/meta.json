@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "b411a77802c1",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 19,
+  "models": [
+    "timm_deit_base_distilled_patch16_224_train",
+    "timm_deit_base_distilled_patch16_224_train_001",
+    "timm_deit_tiny_patch16_224.fb_in1k_train",
+    "timm_deit_tiny_patch16_224.fb_in1k_train_001",
+    "timm_timm_deit_base_distilled_patch16_224_train_train_001",
+    "timm_timm_deit_tiny_patch16_224.fb_in1k_train_train_001",
+    "timm_timm_visformer_small_train_train_001",
+    "timm_timm_vit_base_patch14_dinov2.lvd142m_train_train_001",
+    "timm_timm_vit_base_patch16_siglip_256_train_train_001",
+    "timm_visformer_small_train",
+    "timm_visformer_small_train_001",
+    "timm_visformer_small_train_019",
+    "timm_vision_transformer",
+    "timm_vit_base_patch14_dinov2.lvd142m_train",
+    "timm_vit_base_patch14_dinov2.lvd142m_train_001",
+    "timm_vit_base_patch14_dinov2.lvd142m_train_006",
+    "timm_vit_base_patch16_siglip_256_train",
+    "timm_vit_base_patch16_siglip_256_train_001",
+    "timm_vit_base_patch16_siglip_256_train_010"
+  ]
+}

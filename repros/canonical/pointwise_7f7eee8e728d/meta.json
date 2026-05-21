@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "7f7eee8e728d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.constant_pad_nd.default",
+    "aten.permute.default"
+  ],
+  "n_models": 8,
+  "models": [
+    "hf_BertForMaskedLM_infer_000",
+    "hf_BertForMaskedLM_train_000",
+    "hf_DistilBertForMaskedLM_infer_000",
+    "hf_DistilBertForMaskedLM_train_000",
+    "hf_ElectraForCausalLM_infer_000",
+    "hf_ElectraForCausalLM_train_000",
+    "hf_LayoutLMForMaskedLM_infer_000",
+    "hf_LayoutLMForMaskedLM_train_000"
+  ]
+}

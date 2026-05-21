@@ -29,16 +29,6 @@
     "doctr_det_predictor",
     "moco",
     "phlippe_resnet",
-    "timm_resnet50_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 35.77600046992302,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 28.60799990594387,
-      "total_bytes": 154173440,
-      "gap_default": 1.2505593046541452,
-      "gap_cd": null
-    }
-  }
+    "torchbench_LearningToPaint_infer_000"
+  ]
 }

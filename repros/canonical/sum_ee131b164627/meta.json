@@ -1,0 +1,47 @@
+{
+  "pattern_hash": "ee131b164627",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 30,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.eq.Tensor",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.scalar_tensor.default",
+    "aten.scalar_tensor.default",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "aten.where.self",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "vllm_Qwen_Qwen3-0.6B_001",
+    "vllm_Qwen_Qwen3-30B-A3B_001",
+    "vllm_meta-llama_Llama-3.2-1B_001",
+    "vllm_mistralai_Mistral-7B-Instruct-v0.3_001"
+  ]
+}

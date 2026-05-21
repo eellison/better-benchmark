@@ -21,18 +21,9 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_dm_nfnet_f0_train",
     "timm_nfnet_l0_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 5.727999843657017,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 6.0800001956522465,
-      "total_bytes": 3520,
-      "gap_default": 0.9421052071269764,
-      "gap_cd": null
-    }
-  }
+  ]
 }

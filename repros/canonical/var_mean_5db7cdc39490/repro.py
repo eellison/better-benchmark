@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128, 192, 71, 71], f32, stride=(967872, 1, 13632, 192)), T([192], f32), T([192], f32))"
 
 class Repro(torch.nn.Module):
@@ -42,6 +43,7 @@ class Repro(torch.nn.Module):
         getitem_2: "f32[128, 192, 35, 35]" = _low_memory_max_pool_with_offsets_default[0]
         getitem_3: "i8[128, 192, 35, 35]" = _low_memory_max_pool_with_offsets_default[1];  _low_memory_max_pool_with_offsets_default = None
         return (getitem_2, getitem_3)
+
 
 
 def _default_make_inputs():

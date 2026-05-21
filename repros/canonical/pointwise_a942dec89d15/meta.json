@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "a942dec89d15",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.lift_fresh_copy.default",
+    "aten.mul.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_DebertaV2ForMaskedLM_infer_000"
+  ]
+}

@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], i8, stride=(235200, 1, 6720, 192), gen=Index(9)), T([128, 192, 71, 71], f32, stride=(967872, 1, 13632, 192)), T([1, 192, 1, 1], f32), T([1, 192, 1, 1], f32), T([192], f32), T([192], f32), T([], f32), S([24576, 1225]), S([24576, 1225]), S([128, 192, 71, 71]))"
 
 class Repro(torch.nn.Module):
@@ -82,6 +83,7 @@ class Repro(torch.nn.Module):
         sub_tensor_3: "f32[128, 192, 71, 71]" = torch.ops.aten.sub.Tensor(sub_tensor_2, unsqueeze_default_9);  sub_tensor_2 = unsqueeze_default_9 = None
         mul_tensor_9: "f32[128, 192, 71, 71]" = torch.ops.aten.mul.Tensor(sub_tensor_3, unsqueeze_default_15);  sub_tensor_3 = unsqueeze_default_15 = None
         return mul_tensor_9
+
 
 
 def _default_make_inputs():

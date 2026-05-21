@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "4d236bfe44e3",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.cat.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "timm_beit_base_patch16_224_infer",
+    "timm_beit_base_patch16_224_infer_000",
+    "timm_beit_base_patch16_224_train",
+    "timm_beit_base_patch16_224_train_000",
+    "timm_timm_beit_base_patch16_224_infer_infer_000",
+    "timm_timm_beit_base_patch16_224_train_train_000"
+  ]
+}

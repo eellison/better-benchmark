@@ -23,18 +23,10 @@
     "aten.sum.dim_IntList",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 65.18399715423584,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 62.24000081419945,
-      "total_bytes": 388563264,
-      "gap_default": 1.0473007117854143,
-      "gap_cd": null
-    }
-  }
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_001",
+    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_001"
+  ]
 }

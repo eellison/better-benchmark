@@ -1,4 +1,0 @@
-torchbench_mobilenet_v3_large_train_eaf7aabc: (T([256, 120, 28, 28], f32), T([120], f32), T([120], f32))
-torchbench_mobilenet_v3_large_train_bd2b3ced: (T([256, 72, 28, 28], f32), T([72], f32), T([72], f32))
-mobilenet_v3_large_eaf7aabc: (T([256, 120, 28, 28], f32), T([120], f32), T([120], f32))
-mobilenet_v3_large_bd2b3ced: (T([256, 72, 28, 28], f32), T([72], f32), T([72], f32))

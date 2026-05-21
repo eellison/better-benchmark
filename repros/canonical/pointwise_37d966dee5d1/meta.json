@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "37d966dee5d1",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.full.default",
+    "aten.le.Scalar",
+    "aten.lt.Scalar",
+    "aten.mul.Tensor",
+    "aten.view.default",
+    "aten.where.self",
+    "aten.where.self"
+  ],
+  "n_models": 3,
+  "models": [
+    "timm_mobilenetv3_large_100_train_001",
+    "timm_mobilenetv3_large_100_train_043",
+    "timm_timm_mobilenetv3_large_100_train_train_001"
+  ]
+}

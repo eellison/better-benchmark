@@ -12,18 +12,9 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_M2M100ForConditionalGeneration_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 90.04800021648407,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 86.87999844551086,
-      "total_bytes": 558366720,
-      "gap_default": 1.0364641094343494,
-      "gap_cd": null
-    }
-  }
+    "hf_M2M100ForConditionalGeneration_train_010",
+    "hf_M2M100ForConditionalGeneration_train_029"
+  ]
 }

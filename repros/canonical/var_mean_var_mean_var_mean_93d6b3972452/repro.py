@@ -15,6 +15,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([128, 192, 17, 17], f32, stride=(55488, 1, 3264, 192)), T([192], f32), T([192], f32), T([128, 192, 17, 17], f32, stride=(55488, 1, 3264, 192)), T([192], f32), T([192], f32), T([128, 192, 17, 17], f32, stride=(55488, 1, 3264, 192)), T([192], f32), T([192], f32), T([128, 192, 17, 17], f32, stride=(55488, 1, 3264, 192)), T([192], f32), T([192], f32))"
 
 class Repro(torch.nn.Module):
@@ -94,6 +95,7 @@ class Repro(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/inception_v3.py:152 in forward, code: return torch.cat(outputs, 1)
         cat_default: "f32[128, 768, 17, 17]" = torch.ops.aten.cat.default([relu_default, relu_default_1, relu_default_2, relu_default_3], 1);  relu_default = relu_default_1 = relu_default_2 = relu_default_3 = None
         return cat_default
+
 
 
 def _default_make_inputs():

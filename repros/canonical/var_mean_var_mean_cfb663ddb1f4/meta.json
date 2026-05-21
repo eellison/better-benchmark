@@ -40,19 +40,13 @@
     "aten.var_mean.correction",
     "prims._low_memory_max_pool_with_offsets.default"
   ],
-  "n_models": 2,
+  "n_models": 6,
   "models": [
     "timm_adv_inception_v3_train",
-    "timm_inception_v3_train"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 81.44000172615051,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 32.6399989426136,
-      "total_bytes": 178655232,
-      "gap_default": 2.495098172929944,
-      "gap_cd": null
-    }
-  }
+    "timm_adv_inception_v3_train_000",
+    "timm_inception_v3_train",
+    "timm_inception_v3_train_000",
+    "timm_timm_adv_inception_v3_train_train_000",
+    "timm_timm_inception_v3_train_train_000"
+  ]
 }

@@ -56,18 +56,10 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_repvgg_a2_infer"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 56.15999922156334,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 29.40800040960312,
-      "total_bytes": 154159104,
-      "gap_default": 1.9096843865393995,
-      "gap_cd": null
-    }
-  }
+    "timm_repvgg_a2_infer",
+    "timm_repvgg_a2_infer_000",
+    "timm_timm_repvgg_a2_infer_infer_000"
+  ]
 }

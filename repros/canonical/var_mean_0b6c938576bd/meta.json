@@ -22,11 +22,8 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 4,
+  "n_models": 1,
   "models": [
-    "LearningToPaint",
-    "resnet18",
-    "resnet50",
-    "resnext50_32x4d"
+    "LearningToPaint"
   ]
 }
