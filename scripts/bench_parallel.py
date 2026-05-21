@@ -566,7 +566,7 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
         env["CUDA_VISIBLE_DEVICES"] = gpu["index"]
         # Enable the per-GPU exclusive lock used by inductor benchmark calls
         # and the direct harness CUDA setup/timing sections below.
-        env["INDUCTOR_GPU_BENCH_LOCK"] = "1"
+        env["INDUCTOR_GPU_BENCH_LOCK"] = "strict" if args_dict.get("strict_gpu_lock") else "1"
         # Share inductor cache across workers to avoid redundant compilation
         if args_dict.get("share_cache", True):
             env["TORCHINDUCTOR_CACHE_DIR"] = _SHARED_CACHE_DIR
