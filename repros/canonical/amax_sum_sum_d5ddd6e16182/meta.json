@@ -38,19 +38,9 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-<<<<<<< HEAD:repros/canonical/amax_sum_sum_d5ddd6e16182/meta.json
   "n_models": 2,
   "models": [
     "hf_ElectraForCausalLM_infer_000",
     "hf_GPTNeoForCausalLM_infer_000"
-=======
-  "n_models": 5,
-  "models": [
-    "vllm_Qwen_Qwen3-0.6B_000",
-    "vllm_Qwen_Qwen3-30B-A3B_000",
-    "vllm_facebook_opt-125m_003",
-    "vllm_meta-llama_Llama-3.2-1B_000",
-    "vllm_mistralai_Mistral-7B-Instruct-v0.3_000"
->>>>>>> origin/repro-correctness-loader-fixes:repros/canonical/sum_sum_amax_9e768dff4978/meta.json
   ]
 }

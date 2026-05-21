@@ -29,13 +29,8 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-<<<<<<< HEAD:repros/canonical/amax_sum_any_878cbcb8e8c2/meta.json
     "hf_ElectraForCausalLM_train_000"
-=======
-    "hf_Bert",
-    "hf_Roberta_base"
->>>>>>> origin/repro-correctness-loader-fixes:repros/canonical/amax_any_sum_a7d92c495088/meta.json
   ]
 }
