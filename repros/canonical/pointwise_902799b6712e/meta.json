@@ -11,31 +11,18 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 24,
+  "n_models": 11,
   "models": [
     "hf_AlbertForMaskedLM_infer_000",
-    "hf_AlbertForMaskedLM_train_000",
     "hf_BertForMaskedLM_infer_000",
-    "hf_BertForMaskedLM_train_000",
     "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_infer_000",
-    "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_train_003",
-    "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_train_007",
     "hf_DistilBertForMaskedLM_infer_000",
-    "hf_DistilBertForMaskedLM_train_000",
     "hf_ElectraForCausalLM_infer_000",
-    "hf_ElectraForCausalLM_train_000",
     "hf_GPTNeoForCausalLM_infer_000",
-    "hf_GPTNeoForCausalLM_train_000",
     "hf_GPTNeoForSequenceClassification_infer_000",
-    "hf_GPTNeoForSequenceClassification_train_000",
     "hf_M2M100ForConditionalGeneration_infer_000",
-    "hf_M2M100ForConditionalGeneration_train_003",
-    "hf_M2M100ForConditionalGeneration_train_006",
-    "hf_M2M100ForConditionalGeneration_train_012",
     "hf_MT5ForConditionalGeneration_infer_000",
-    "hf_MT5ForConditionalGeneration_train_000",
     "hf_MobileBertForMaskedLM_infer_000",
-    "hf_MobileBertForMaskedLM_train_000",
     "torchbench_BERT_pytorch_infer_000"
   ]
 }

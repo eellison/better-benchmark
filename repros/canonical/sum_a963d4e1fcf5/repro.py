@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_tts_angular_infer
+Label: torchbench_tts_angular_infer_000
 Pattern hash: a963d4e1fcf5
 Shape hash: aab07da7
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([64, 50, 256], f32), S([64, 256]))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[64, 50, 256]", _shape_param_0):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/tts_angular/model.py:75 in torch_dynamo_resume_in_forward_at_73, code: d = torch.nn.functional.normalize(d[:, -1], p=2, dim=1)
+        # No stacktrace found for following nodes
         select_int: "f32[64, 256]" = torch.ops.aten.select.int(arg0_1, 1, -1);  arg0_1 = None
         pow_tensor_scalar: "f32[64, 256]" = torch.ops.aten.pow.Tensor_Scalar(select_int, 2)
         sum_dim_int_list: "f32[64, 1]" = torch.ops.aten.sum.dim_IntList(pow_tensor_scalar, [1], True);  pow_tensor_scalar = None

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_pyhpc_turbulent_kinetic_energy_infer
+Label: torchbench_pyhpc_turbulent_kinetic_energy_infer_000
 Pattern hash: c8cb51f30736
 Shape hash: d7517139
 """
@@ -20,7 +20,7 @@ _shapes_config = "()"
 
 class Repro(torch.nn.Module):
     def forward(self):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pyhpc_turbulent_kinetic_energy/tke_pytorch.py:214 in integrate_tke, code: d_tri = torch.zeros_like(maskU[2:-2, 2:-2])
+        # No stacktrace found for following nodes
         full_default: "f64[200, 200, 26]" = torch.ops.aten.full.default([200, 200, 26], 0, dtype = torch.float64, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         return full_default
 

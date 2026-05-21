@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: vllm_Qwen_Qwen3-0.6B_000
+Label: torchbench_llava_infer_000
 Pattern hash: 8b70c08405c1
-Shape hash: cffba909
+Shape hash: af568cdb
 """
 import sys
 from pathlib import Path
@@ -16,23 +16,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([2048, 1024], bf16), T([4, 512, 1024], bf16), T([1024], bf16), S([4, 512, 1024]), S([2048, 1024]), S([2048, 1024]))"
+_shapes_config = "(T([512, 4096], f16), T([1, 512, 4096], f16), T([4096], f16), S([1, 512, 4096]), S([512, 4096]), S([512, 4096]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_185: "bf16[2048, 1024]", add_236: "bf16[4, 512, 1024]", arg296_1: "bf16[1024]", _shape_param_0, _shape_param_1, _shape_param_2):
+    def forward(self, mm_220: "f16[512, 4096]", add_219: "f16[1, 512, 4096]", arg287_1: "f16[4096]", _shape_param_0, _shape_param_1, _shape_param_2):
         # No stacktrace found for following nodes
-        view_default: "bf16[4, 512, 1024]" = torch.ops.aten.view.default(mm_185, _shape_param_0);  mm_185 = _shape_param_0 = None
-        add_tensor: "bf16[4, 512, 1024]" = torch.ops.aten.add.Tensor(add_236, view_default);  add_236 = view_default = None
-        convert_element_type_default: "f32[4, 512, 1024]" = torch.ops.prims.convert_element_type.default(add_tensor, torch.float32);  add_tensor = None
-        pow_tensor_scalar: "f32[4, 512, 1024]" = torch.ops.aten.pow.Tensor_Scalar(convert_element_type_default, 2)
-        mean_dim: "f32[4, 512, 1]" = torch.ops.aten.mean.dim(pow_tensor_scalar, [-1], True);  pow_tensor_scalar = None
-        add_tensor_1: "f32[4, 512, 1]" = torch.ops.aten.add.Tensor(mean_dim, 1e-06);  mean_dim = None
-        rsqrt_default: "f32[4, 512, 1]" = torch.ops.aten.rsqrt.default(add_tensor_1);  add_tensor_1 = None
-        mul_tensor: "f32[4, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_default, rsqrt_default);  convert_element_type_default = rsqrt_default = None
-        convert_element_type_default_1: "bf16[4, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_tensor, torch.bfloat16);  mul_tensor = None
-        mul_tensor_1: "bf16[4, 512, 1024]" = torch.ops.aten.mul.Tensor(arg296_1, convert_element_type_default_1);  arg296_1 = convert_element_type_default_1 = None
-        view_default_1: "bf16[2048, 1024]" = torch.ops.aten.view.default(mul_tensor_1, _shape_param_1);  _shape_param_1 = None
-        view_default_2: "bf16[2048, 1024]" = torch.ops.aten.view.default(mul_tensor_1, _shape_param_2);  mul_tensor_1 = _shape_param_2 = None
+        view_default: "f16[1, 512, 4096]" = torch.ops.aten.view.default(mm_220, _shape_param_0);  mm_220 = _shape_param_0 = None
+        add_tensor: "f16[1, 512, 4096]" = torch.ops.aten.add.Tensor(add_219, view_default);  add_219 = view_default = None
+        convert_element_type_default: "f32[1, 512, 4096]" = torch.ops.prims.convert_element_type.default(add_tensor, torch.float32);  add_tensor = None
+        pow_tensor_scalar: "f32[1, 512, 4096]" = torch.ops.aten.pow.Tensor_Scalar(convert_element_type_default, 2)
+        mean_dim: "f32[1, 512, 1]" = torch.ops.aten.mean.dim(pow_tensor_scalar, [-1], True);  pow_tensor_scalar = None
+        add_tensor_1: "f32[1, 512, 1]" = torch.ops.aten.add.Tensor(mean_dim, 1e-06);  mean_dim = None
+        rsqrt_default: "f32[1, 512, 1]" = torch.ops.aten.rsqrt.default(add_tensor_1);  add_tensor_1 = None
+        mul_tensor: "f32[1, 512, 4096]" = torch.ops.aten.mul.Tensor(convert_element_type_default, rsqrt_default);  convert_element_type_default = rsqrt_default = None
+        convert_element_type_default_1: "f16[1, 512, 4096]" = torch.ops.prims.convert_element_type.default(mul_tensor, torch.float16);  mul_tensor = None
+        mul_tensor_1: "f16[1, 512, 4096]" = torch.ops.aten.mul.Tensor(arg287_1, convert_element_type_default_1);  arg287_1 = convert_element_type_default_1 = None
+        view_default_1: "f16[512, 4096]" = torch.ops.aten.view.default(mul_tensor_1, _shape_param_1);  _shape_param_1 = None
+        view_default_2: "f16[512, 4096]" = torch.ops.aten.view.default(mul_tensor_1, _shape_param_2);  mul_tensor_1 = _shape_param_2 = None
         return (view_default_1, view_default_2)
 
 

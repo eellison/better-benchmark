@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_mobilenet_v2_infer
+Label: torchbench_mobilenet_v2_infer_000
 Pattern hash: 604e62335f7c
 Shape hash: 77470fa6
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([160], f16), T([128, 160, 7, 7], f16), T([160], f16), T([16
 
 class Repro(torch.nn.Module):
     def forward(self, arg237_1: "f16[160]", convolution_47: "f16[128, 160, 7, 7]", arg238_1: "f16[160]", arg239_1: "f16[160]", arg240_1: "f16[160]", add_98: "f16[128, 160, 7, 7]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mobilenetv2.py:62 in forward, code: return x + self.conv(x)
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[160]" = torch.ops.prims.convert_element_type.default(arg237_1, torch.float32);  arg237_1 = None
         unsqueeze_default: "f32[160, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[160, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None

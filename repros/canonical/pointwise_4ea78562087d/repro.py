@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_pytorch_CycleGAN_and_pix2pix_infer
+Label: torchbench_pytorch_CycleGAN_and_pix2pix_infer_000
 Pattern hash: 4ea78562087d
 Shape hash: 25f363be
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1, 3, 256, 256], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[1, 3, 256, 256]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:5462 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
+        # No stacktrace found for following nodes
         iota_default: "i64[262]" = torch.ops.prims.iota.default(262, start = -3, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
         abs_default: "i64[262]" = torch.ops.aten.abs.default(iota_default);  iota_default = None
         sub_tensor: "i64[262]" = torch.ops.aten.sub.Tensor(255, abs_default);  abs_default = None

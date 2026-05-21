@@ -8,9 +8,8 @@
   "origin_ops": [
     "aten.sum.dim_IntList"
   ],
-  "n_models": 4,
+  "n_models": 3,
   "models": [
-    "functorch_dp_cifar10",
     "timm_beit_base_patch16_224_train",
     "timm_beit_base_patch16_224_train_001",
     "timm_timm_beit_base_patch16_224_train_train_001"

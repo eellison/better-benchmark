@@ -8,11 +8,12 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "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_train_010",
     "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_train_020",
     "hf_M2M100ForConditionalGeneration_train_009",
-    "hf_M2M100ForConditionalGeneration_train_020"
+    "hf_M2M100ForConditionalGeneration_train_020",
+    "torchbench_hf_Bart_train_011"
   ]
 }

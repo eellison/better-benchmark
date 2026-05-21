@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_AlbertForMaskedLM_train_001
+Label: hf_AllenaiLongformerBase_train_005
 Pattern hash: 7a3340d935e9
-Shape hash: 7a1066d6
+Shape hash: 965c7f5d
 """
 import sys
 from pathlib import Path
@@ -16,13 +16,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([8, 512, 128], f32), T([8, 512, 128], f32))"
+_shapes_config = "(T([8, 1024, 768], f32), T([8, 1024, 768], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, view_6: "f32[8, 512, 128]", mul_8: "f32[8, 512, 128]"):
+    def forward(self, arg303_1: "f32[8, 1024, 768]", arg230_1: "f32[8, 1024, 768]"):
         # No stacktrace found for following nodes
-        mul_tensor: "f32[8, 512, 128]" = torch.ops.aten.mul.Tensor(view_6, mul_8);  view_6 = mul_8 = None
-        sum_dim_int_list: "f32[128]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [0, 1]);  mul_tensor = None
+        mul_tensor: "f32[8, 1024, 768]" = torch.ops.aten.mul.Tensor(arg303_1, arg230_1);  arg303_1 = arg230_1 = None
+        sum_dim_int_list: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [0, 1]);  mul_tensor = None
         return sum_dim_int_list
 
 

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_demucs_infer
+Label: torchbench_demucs_infer_001
 Pattern hash: 7e1a654d52d5
 Shape hash: 9d56daaf
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([8, 4096, 92], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_11: "f32[8, 4096, 92]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/demucs/demucs/model.py:215 in forward, code: x = encode(x)
+        # No stacktrace found for following nodes
         glu_default: "f32[8, 2048, 92]" = torch.ops.aten.glu.default(convolution_11, 1);  convolution_11 = None
         return glu_default
 

@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "7de69e2bde32",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.fma.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_BERT_pytorch_train_001"
+  ]
+}

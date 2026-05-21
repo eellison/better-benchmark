@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_dm_nfnet_f0_infer
+Label: timm_dm_nfnet_f0_infer_000
 Pattern hash: 3abc926270f6
 Shape hash: a1cda94e
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([128, 768, 1, 1], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_78: "f32[128, 768, 1, 1]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/squeeze_excite.py:61 in forward, code: x_se = self.act(self.bn(x_se))
+        # No stacktrace found for following nodes
         relu_default: "f32[128, 768, 1, 1]" = torch.ops.aten.relu.default(convolution_78);  convolution_78 = None
         return relu_default
 

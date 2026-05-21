@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_mnasnet1_0_infer
+Label: torchbench_mnasnet1_0_infer_000
 Pattern hash: 557274333bb2
 Shape hash: 19281860
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([320], f16), T([256, 320, 7, 7], f16), T([320], f16), T([32
 
 class Repro(torch.nn.Module):
     def forward(self, arg252_1: "f16[320]", convolution_50: "f16[256, 320, 7, 7]", arg253_1: "f16[320]", arg254_1: "f16[320]", arg255_1: "f16[320]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mnasnet.py:63 in forward, code: return self.layers(input)
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[320]" = torch.ops.prims.convert_element_type.default(arg252_1, torch.float32);  arg252_1 = None
         unsqueeze_default: "f32[320, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[320, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None

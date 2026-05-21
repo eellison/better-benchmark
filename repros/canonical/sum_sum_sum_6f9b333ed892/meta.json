@@ -1,0 +1,53 @@
+{
+  "pattern_hash": "6f9b333ed892",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 33,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.avg_pool2d_backward.default",
+    "aten.erf.default",
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sigmoid.default",
+    "aten.sub.Tensor",
+    "aten.sum.default",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 4,
+  "models": [
+    "timm_dm_nfnet_f0_train",
+    "timm_dm_nfnet_f0_train_001",
+    "timm_timm_dm_nfnet_f0_train_train_001",
+    "torchbench_timm_nfnet_train_001"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "b8db5e701976",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "hf_LayoutLMForMaskedLM_train_001",
+    "hf_LayoutLMForMaskedLM_train_009",
+    "hf_MegatronBertForCausalLM_train_001",
+    "hf_MegatronBertForCausalLM_train_008"
+  ]
+}

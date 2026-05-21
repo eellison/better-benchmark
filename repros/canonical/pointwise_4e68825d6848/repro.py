@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_soft_actor_critic_infer
+Label: torchbench_soft_actor_critic_infer_000
 Pattern hash: 4e68825d6848
 Shape hash: 9f43f75e
 """
@@ -20,22 +20,14 @@ _shapes_config = "(T([256, 2], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm_2: "f32[256, 2]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py:116 in forward, code: mu, log_std = out.chunk(2, dim=1)
+        # No stacktrace found for following nodes
         split_tensor = torch.ops.aten.split.Tensor(addmm_2, 1, 1);  addmm_2 = None
         getitem: "f32[256, 1]" = split_tensor[0]
         getitem_1: "f32[256, 1]" = split_tensor[1];  split_tensor = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py:118 in forward, code: log_std = torch.tanh(log_std)
         tanh_default: "f32[256, 1]" = torch.ops.aten.tanh.default(getitem_1);  getitem_1 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py:121 in forward, code: ) * (log_std + 1)
         add_tensor: "f32[256, 1]" = torch.ops.aten.add.Tensor(tanh_default, 1);  tanh_default = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py:119 in forward, code: log_std = self.log_std_low + 0.5 * (
         mul_tensor: "f32[256, 1]" = torch.ops.aten.mul.Tensor(add_tensor, 6.0);  add_tensor = None
         add_tensor_1: "f32[256, 1]" = torch.ops.aten.add.Tensor(mul_tensor, -10.0);  mul_tensor = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py:122 in forward, code: std = log_std.exp()
         exp_default: "f32[256, 1]" = torch.ops.aten.exp.default(add_tensor_1);  add_tensor_1 = None
         return (getitem, exp_default)
 

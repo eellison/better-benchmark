@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_inception_v3_infer
+Label: timm_adv_inception_v3_infer
 Pattern hash: d0fc206717a8
 Shape hash: 3f5b3c4b
 """

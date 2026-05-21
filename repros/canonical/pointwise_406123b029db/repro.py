@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_phlippe_densenet_infer
+Label: torchbench_phlippe_densenet_infer_000
 Pattern hash: 406123b029db
 Shape hash: 7b8bcef6
 """
@@ -20,10 +20,8 @@ _shapes_config = "(T([128, 88, 8, 8], f32), T([88], f32), T([88], f32), T([88], 
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_39: "f32[128, 88, 8, 8]", arg198_1: "f32[88]", arg199_1: "f32[88]", arg200_1: "f32[88]", arg201_1: "f32[88]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/phlippe_densenet/__init__.py:79 in forward, code: return self.transition(x)
+        # No stacktrace found for following nodes
         avg_pool2d_default: "f32[128, 88, 4, 4]" = torch.ops.aten.avg_pool2d.default(convolution_39, [2, 2], [2, 2]);  convolution_39 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/phlippe_densenet/__init__.py:32 in forward, code: out = self.net(x)
         unsqueeze_default: "f32[88, 1]" = torch.ops.aten.unsqueeze.default(arg198_1, -1);  arg198_1 = None
         unsqueeze_default_1: "f32[88, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[128, 88, 4, 4]" = torch.ops.aten.sub.Tensor(avg_pool2d_default, unsqueeze_default_1);  avg_pool2d_default = unsqueeze_default_1 = None

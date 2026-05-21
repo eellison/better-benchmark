@@ -12,13 +12,10 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 6,
+  "n_models": 3,
   "models": [
     "hf_GPTNeoForCausalLM_infer_000",
-    "hf_GPTNeoForCausalLM_train_000",
     "hf_GPTNeoForSequenceClassification_infer_000",
-    "hf_GPTNeoForSequenceClassification_train_000",
-    "hf_MT5ForConditionalGeneration_train_000",
     "torchbench_BERT_pytorch_infer_000"
   ]
 }

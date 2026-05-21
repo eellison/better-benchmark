@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_dcgan_train
+Label: torchbench_dcgan_train_001
 Pattern hash: 09d687b1b23f
 Shape hash: d2b3adb9
 """
@@ -19,11 +19,11 @@ _repro_version = 2
 _shapes_config = "(T([1024, 64, 32, 32], f32), T([1024, 64, 32, 32], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, where: "f32[1024, 64, 32, 32]", getitem_15: "f32[1024, 64, 32, 32]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dcgan/__init__.py:128 in forward, code: return self.main(input)
-        gt_scalar: "b8[1024, 64, 32, 32]" = torch.ops.aten.gt.Scalar(where, 0);  where = None
-        mul_tensor: "f32[1024, 64, 32, 32]" = torch.ops.aten.mul.Tensor(getitem_15, 0.2)
-        where_self: "f32[1024, 64, 32, 32]" = torch.ops.aten.where.self(gt_scalar, getitem_15, mul_tensor);  gt_scalar = getitem_15 = mul_tensor = None
+    def forward(self, arg9_1: "f32[1024, 64, 32, 32]", getitem_9: "f32[1024, 64, 32, 32]"):
+        # No stacktrace found for following nodes
+        gt_scalar: "b8[1024, 64, 32, 32]" = torch.ops.aten.gt.Scalar(arg9_1, 0);  arg9_1 = None
+        mul_tensor: "f32[1024, 64, 32, 32]" = torch.ops.aten.mul.Tensor(getitem_9, 0.2)
+        where_self: "f32[1024, 64, 32, 32]" = torch.ops.aten.where.self(gt_scalar, getitem_9, mul_tensor);  gt_scalar = getitem_9 = mul_tensor = None
         return where_self
 
 

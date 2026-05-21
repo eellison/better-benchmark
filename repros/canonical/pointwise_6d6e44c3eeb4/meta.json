@@ -6,8 +6,9 @@
   "origin_ops": [
     "aten.full.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "moco"
+    "torchbench_moco_infer_007",
+    "torchbench_moco_infer_008"
   ]
 }

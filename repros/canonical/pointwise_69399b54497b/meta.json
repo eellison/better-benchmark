@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "69399b54497b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_DebertaV2ForMaskedLM_train_000"
+  ]
+}

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_dm_nfnet_f0_infer
+Label: timm_dm_nfnet_f0_infer_000
 Pattern hash: 01099867ba2c
 Shape hash: 102f3a82
 """
@@ -16,23 +16,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([128, 1536, 1, 1], f32), T([128, 1536, 6, 6], f32, stride=(55296, 1, 9216, 1536)), T([], f32), T([128, 1536, 6, 6], f32, stride=(55296, 1, 9216, 1536)))"
+_shapes_config = "(T([128, 1536, 1, 1], f32), T([128, 1536, 6, 6], f32), T([], f32), T([128, 1536, 6, 6], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_79: "f32[128, 1536, 1, 1]", convolution_77: "f32[128, 1536, 6, 6]", arg228_1: "f32[]", add_109: "f32[128, 1536, 6, 6]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/activations.py:57 in forward, code: return x.sigmoid_() if self.inplace else x.sigmoid()
+        # No stacktrace found for following nodes
         sigmoid_default: "f32[128, 1536, 1, 1]" = torch.ops.aten.sigmoid.default(convolution_79);  convolution_79 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/squeeze_excite.py:63 in forward, code: return x * self.gate(x_se)
         mul_tensor: "f32[128, 1536, 6, 6]" = torch.ops.aten.mul.Tensor(convolution_77, sigmoid_default);  convolution_77 = sigmoid_default = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:276 in forward, code: out = self.attn_gain * self.attn_last(out)
         mul_tensor_1: "f32[128, 1536, 6, 6]" = torch.ops.aten.mul.Tensor(mul_tensor, 2.0);  mul_tensor = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:280 in forward, code: out.mul_(self.skipinit_gain)
         mul_tensor_2: "f32[128, 1536, 6, 6]" = torch.ops.aten.mul.Tensor(mul_tensor_1, arg228_1);  mul_tensor_1 = arg228_1 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:281 in forward, code: out = out * self.alpha + shortcut
         mul_tensor_3: "f32[128, 1536, 6, 6]" = torch.ops.aten.mul.Tensor(mul_tensor_2, 0.2);  mul_tensor_2 = None
         add_tensor: "f32[128, 1536, 6, 6]" = torch.ops.aten.add.Tensor(mul_tensor_3, add_109);  mul_tensor_3 = add_109 = None
         return add_tensor

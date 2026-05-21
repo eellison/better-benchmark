@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_lennard_jones_infer
+Label: torchbench_lennard_jones_infer_000
 Pattern hash: edfab1af9465
 Shape hash: 0a019d11
 """

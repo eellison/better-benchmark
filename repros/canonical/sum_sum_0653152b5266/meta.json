@@ -1,0 +1,52 @@
+{
+  "pattern_hash": "0653152b5266",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 37,
+  "origin_ops": [
+    "aten.as_strided.default",
+    "aten.as_strided.default",
+    "aten.as_strided.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.full.default",
+    "aten.index_put.default",
+    "aten.index_put.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.squeeze.dim",
+    "aten.squeeze.dim",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_hf_Longformer_train_005"
+  ]
+}

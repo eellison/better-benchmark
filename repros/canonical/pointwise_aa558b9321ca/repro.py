@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_BlenderbotForCausalLM_train_007
+Label: torchbench_alexnet_train_001
 Pattern hash: aa558b9321ca
-Shape hash: fd11e6d8
+Shape hash: 8f38ef61
 """
 import sys
 from pathlib import Path
@@ -16,15 +16,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([32, 128, 2560], b8), T([32, 128, 2560], f32), S([4096, 2560]))"
+_shapes_config = "(T([1024, 9216], b8), T([1024, 9216], f32), S([1024, 256, 6, 6]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg27_1: "b8[32, 128, 2560]", arg28_1: "f32[32, 128, 2560]", _shape_param_0):
+    def forward(self, arg17_1: "b8[1024, 9216]", mm_4: "f32[1024, 9216]", _shape_param_0):
         # No stacktrace found for following nodes
-        convert_element_type_default: "f32[32, 128, 2560]" = torch.ops.prims.convert_element_type.default(arg27_1, torch.float32);  arg27_1 = None
-        mul_tensor: "f32[32, 128, 2560]" = torch.ops.aten.mul.Tensor(convert_element_type_default, 1.1111111111111112);  convert_element_type_default = None
-        mul_tensor_1: "f32[32, 128, 2560]" = torch.ops.aten.mul.Tensor(arg28_1, mul_tensor);  arg28_1 = mul_tensor = None
-        view_default: "f32[4096, 2560]" = torch.ops.aten.view.default(mul_tensor_1, _shape_param_0);  mul_tensor_1 = _shape_param_0 = None
+        convert_element_type_default: "f32[1024, 9216]" = torch.ops.prims.convert_element_type.default(arg17_1, torch.float32);  arg17_1 = None
+        mul_tensor: "f32[1024, 9216]" = torch.ops.aten.mul.Tensor(convert_element_type_default, 2.0);  convert_element_type_default = None
+        mul_tensor_1: "f32[1024, 9216]" = torch.ops.aten.mul.Tensor(mm_4, mul_tensor);  mm_4 = mul_tensor = None
+        view_default: "f32[1024, 256, 6, 6]" = torch.ops.aten.view.default(mul_tensor_1, _shape_param_0);  mul_tensor_1 = _shape_param_0 = None
         return view_default
 
 

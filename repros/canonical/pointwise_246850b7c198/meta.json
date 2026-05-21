@@ -6,11 +6,12 @@
   "origin_ops": [
     "aten.sigmoid.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
-    "LearningToPaint",
-    "dcgan",
-    "doctr_det_predictor",
-    "torchbench_LearningToPaint_infer_000"
+    "torchbench_LearningToPaint_infer_000",
+    "torchbench_LearningToPaint_train_000",
+    "torchbench_dcgan_infer_000",
+    "torchbench_dcgan_train_000",
+    "torchbench_doctr_det_predictor_infer_000"
   ]
 }

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_densenet121_infer
+Label: torchbench_densenet121_infer_000
 Pattern hash: a5ce2f1040ee
 Shape hash: f71dbcaf
 """
@@ -20,10 +20,8 @@ _shapes_config = "(T([64, 512, 7, 7], f16), T([64, 32, 7, 7], f16), T([64, 32, 7
 
 class Repro(torch.nn.Module):
     def forward(self, avg_pool2d_2: "f16[64, 512, 7, 7]", convolution_89: "f16[64, 32, 7, 7]", convolution_91: "f16[64, 32, 7, 7]", convolution_93: "f16[64, 32, 7, 7]", convolution_95: "f16[64, 32, 7, 7]", convolution_97: "f16[64, 32, 7, 7]", arg491_1: "f16[672]", arg492_1: "f16[672]", arg493_1: "f16[672]", arg494_1: "f16[672]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:48 in bn_function, code: concated_features = torch.cat(inputs, 1)
+        # No stacktrace found for following nodes
         cat_default: "f16[64, 672, 7, 7]" = torch.ops.aten.cat.default([avg_pool2d_2, convolution_89, convolution_91, convolution_93, convolution_95, convolution_97], 1);  avg_pool2d_2 = convolution_89 = convolution_91 = convolution_93 = convolution_95 = convolution_97 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:49 in bn_function, code: bottleneck_output = self.conv1(self.relu1(self.norm1(concated_features)))  # noqa: T484
         convert_element_type_default: "f32[672]" = torch.ops.prims.convert_element_type.default(arg491_1, torch.float32);  arg491_1 = None
         unsqueeze_default: "f32[672, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[672, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None

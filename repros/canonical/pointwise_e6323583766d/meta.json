@@ -12,15 +12,19 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 8,
+  "n_models": 12,
   "models": [
-    "BERT_pytorch",
-    "hf_Bert",
-    "hf_Bert_large",
-    "hf_DistilBert",
-    "hf_Longformer",
-    "hf_Roberta_base",
-    "hf_Whisper",
-    "timm_vision_transformer"
+    "timm_beit_base_patch16_224_infer",
+    "timm_beit_base_patch16_224_train",
+    "timm_deit_base_distilled_patch16_224_infer",
+    "timm_deit_base_distilled_patch16_224_train",
+    "timm_deit_tiny_patch16_224.fb_in1k_infer",
+    "timm_deit_tiny_patch16_224.fb_in1k_train",
+    "timm_swin_base_patch4_window7_224_infer",
+    "timm_swin_base_patch4_window7_224_train",
+    "timm_vit_base_patch14_dinov2.lvd142m_infer",
+    "timm_vit_base_patch14_dinov2.lvd142m_train",
+    "timm_vit_base_patch16_siglip_256_infer",
+    "timm_vit_base_patch16_siglip_256_train"
   ]
 }

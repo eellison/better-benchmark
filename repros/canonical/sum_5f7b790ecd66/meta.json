@@ -16,7 +16,7 @@
     "prims.convert_element_type.default",
     "prims.fma.default"
   ],
-  "n_models": 10,
+  "n_models": 17,
   "models": [
     "hf_BertForMaskedLM_train_001",
     "hf_DistilBertForMaskedLM_train_001",
@@ -27,6 +27,13 @@
     "hf_M2M100ForConditionalGeneration_train_020",
     "hf_MT5ForConditionalGeneration_train_001",
     "hf_MT5ForConditionalGeneration_train_018",
-    "hf_MobileBertForMaskedLM_train_014"
+    "hf_MobileBertForMaskedLM_train_014",
+    "torchbench_hf_Bart_train_011",
+    "torchbench_hf_Bert_large_train_001",
+    "torchbench_hf_Bert_train_001",
+    "torchbench_hf_DistilBert_train_001",
+    "torchbench_hf_Roberta_base_train_001",
+    "torchbench_hf_T5_base_train_001",
+    "torchbench_hf_T5_train_001"
   ]
 }

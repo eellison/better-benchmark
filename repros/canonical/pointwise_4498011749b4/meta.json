@@ -8,13 +8,12 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 6,
+  "n_models": 5,
   "models": [
     "hf_M2M100ForConditionalGeneration_infer_000",
-    "hf_M2M100ForConditionalGeneration_train_003",
-    "hf_M2M100ForConditionalGeneration_train_006",
-    "hf_M2M100ForConditionalGeneration_train_012",
     "hf_MobileBertForMaskedLM_infer_000",
-    "hf_MobileBertForMaskedLM_train_000"
+    "torchbench_hf_Reformer_infer_005",
+    "torchbench_hf_T5_base_infer_000",
+    "torchbench_hf_T5_infer_000"
   ]
 }

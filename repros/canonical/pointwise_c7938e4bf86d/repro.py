@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_dcgan_infer
+Label: torchbench_dcgan_infer_000
 Pattern hash: c7938e4bf86d
 Shape hash: f1221c81
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([512], f32), T([1024, 512, 4, 4], f32), T([512], f32), T([5
 
 class Repro(torch.nn.Module):
     def forward(self, arg13_1: "f32[512]", convolution_3: "f32[1024, 512, 4, 4]", arg14_1: "f32[512]", arg15_1: "f32[512]", arg16_1: "f32[512]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dcgan/__init__.py:128 in forward, code: return self.main(input)
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(arg13_1, -1);  arg13_1 = None
         unsqueeze_default_1: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[1024, 512, 4, 4]" = torch.ops.aten.sub.Tensor(convolution_3, unsqueeze_default_1);  convolution_3 = unsqueeze_default_1 = None

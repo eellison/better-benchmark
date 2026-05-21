@@ -1,0 +1,42 @@
+{
+  "pattern_hash": "bd2fed913c26",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.mul.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 20,
+  "models": [
+    "hf_BertForMaskedLM_train_001",
+    "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_train_010",
+    "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_train_013",
+    "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_train_020",
+    "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_train_031",
+    "hf_DistilBertForMaskedLM_train_001",
+    "hf_DistilBertForMaskedLM_train_011",
+    "hf_ElectraForCausalLM_train_001",
+    "hf_ElectraForCausalLM_train_011",
+    "hf_M2M100ForConditionalGeneration_train_009",
+    "hf_M2M100ForConditionalGeneration_train_011",
+    "hf_M2M100ForConditionalGeneration_train_020",
+    "hf_M2M100ForConditionalGeneration_train_030",
+    "hf_MobileBertForMaskedLM_train_014",
+    "torchbench_hf_Bart_train_011",
+    "torchbench_hf_Bart_train_014",
+    "torchbench_hf_Bert_large_train_001",
+    "torchbench_hf_Bert_train_001",
+    "torchbench_hf_DistilBert_train_001",
+    "torchbench_hf_Roberta_base_train_001"
+  ]
+}

@@ -10,6 +10,6 @@
   ],
   "n_models": 1,
   "models": [
-    "hf_Longformer"
+    "torchbench_hf_Longformer_infer_000"
   ]
 }

@@ -11,6 +11,6 @@
   ],
   "n_models": 1,
   "models": [
-    "hf_Bart"
+    "torchbench_hf_Bart_infer_001"
   ]
 }

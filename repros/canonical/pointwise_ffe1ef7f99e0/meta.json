@@ -23,7 +23,6 @@
   ],
   "n_models": 16,
   "models": [
-    "moco",
     "timm_ghostnet_100_infer",
     "timm_ghostnet_100_infer_000",
     "timm_mobilenetv2_100_infer",
@@ -38,6 +37,7 @@
     "timm_timm_mobilenetv2_100_infer_infer_000",
     "timm_timm_mobilenetv3_large_100_infer_infer_000",
     "timm_timm_mobilevit_s_infer_infer_000",
-    "timm_timm_tf_efficientnet_b0_infer_infer_000"
+    "timm_timm_tf_efficientnet_b0_infer_infer_000",
+    "torchbench_moco_infer_000"
   ]
 }

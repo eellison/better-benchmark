@@ -32,12 +32,14 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 5,
+  "n_models": 7,
   "models": [
     "hf_BlenderbotForCausalLM_train_005",
     "hf_DebertaV2ForMaskedLM_train_000",
     "hf_GoogleFnet_train_000",
     "hf_M2M100ForConditionalGeneration_train_007",
-    "hf_M2M100ForConditionalGeneration_train_018"
+    "hf_M2M100ForConditionalGeneration_train_018",
+    "torchbench_hf_Longformer_train_003",
+    "torchbench_hf_Reformer_train_010"
   ]
 }

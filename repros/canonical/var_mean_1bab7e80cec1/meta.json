@@ -20,8 +20,9 @@
     "aten.var_mean.correction",
     "aten.view.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_deit_base_distilled_patch16_224_infer_000",
     "timm_timm_deit_base_distilled_patch16_224_infer_infer_000"
   ]
 }

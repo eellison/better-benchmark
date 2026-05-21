@@ -10,6 +10,6 @@
   "models": [
     "hf_BlenderbotForCausalLM_train_003",
     "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_train_006",
-    "hf_Reformer"
+    "torchbench_hf_Reformer_infer_001"
   ]
 }

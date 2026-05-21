@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_Whisper_infer
+Label: torchbench_hf_Whisper_infer_000
 Pattern hash: 106406131986
 Shape hash: 9115f773
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([8, 384, 3000], f16))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution: "f16[8, 384, 3000]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/whisper/modeling_whisper.py:618 in forward, code: inputs_embeds = nn.functional.gelu(self.conv1(input_features))
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[8, 384, 3000]" = torch.ops.prims.convert_element_type.default(convolution, torch.float32);  convolution = None
         mul_tensor: "f32[8, 384, 3000]" = torch.ops.aten.mul.Tensor(convert_element_type_default, 0.5)
         mul_tensor_1: "f32[8, 384, 3000]" = torch.ops.aten.mul.Tensor(convert_element_type_default, 0.7071067811865476);  convert_element_type_default = None

@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_BERT_pytorch_infer
+Label: timm_beit_base_patch16_224_infer
 Pattern hash: e6323583766d
-Shape hash: 59beeb25
+Shape hash: 024ffdd3
 """
 import sys
 from pathlib import Path
@@ -16,18 +16,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([16384, 3072], f32), S([128, 128, 3072]), S([16384, 3072]))"
+_shapes_config = "(T([25216, 3072], f32), S([128, 197, 3072]), S([25216, 3072]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_70: "f32[16384, 3072]", _shape_param_0, _shape_param_1):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/utils/feed_forward.py:15 in forward, code: return self.w_2(self.dropout(self.activation(self.w_1(x))))
-        reshape_default: "f32[128, 128, 3072]" = torch.ops.aten.reshape.default(addmm_70, _shape_param_0);  addmm_70 = _shape_param_0 = None
-        mul_tensor: "f32[128, 128, 3072]" = torch.ops.aten.mul.Tensor(reshape_default, 0.5)
-        mul_tensor_1: "f32[128, 128, 3072]" = torch.ops.aten.mul.Tensor(reshape_default, 0.7071067811865476);  reshape_default = None
-        erf_default: "f32[128, 128, 3072]" = torch.ops.aten.erf.default(mul_tensor_1);  mul_tensor_1 = None
-        add_tensor: "f32[128, 128, 3072]" = torch.ops.aten.add.Tensor(erf_default, 1);  erf_default = None
-        mul_tensor_2: "f32[128, 128, 3072]" = torch.ops.aten.mul.Tensor(mul_tensor, add_tensor);  mul_tensor = add_tensor = None
-        reshape_default_1: "f32[16384, 3072]" = torch.ops.aten.reshape.default(mul_tensor_2, _shape_param_1);  mul_tensor_2 = _shape_param_1 = None
+    def forward(self, addmm_46: "f32[25216, 3072]", _shape_param_0, _shape_param_1):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/mlp.py:48 in forward, code: x = self.fc1(x)
+        reshape_default: "f32[128, 197, 3072]" = torch.ops.aten.reshape.default(addmm_46, _shape_param_0);  addmm_46 = _shape_param_0 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/mlp.py:49 in forward, code: x = self.act(x)
+        mul_tensor: "f32[128, 197, 3072]" = torch.ops.aten.mul.Tensor(reshape_default, 0.5)
+        mul_tensor_1: "f32[128, 197, 3072]" = torch.ops.aten.mul.Tensor(reshape_default, 0.7071067811865476);  reshape_default = None
+        erf_default: "f32[128, 197, 3072]" = torch.ops.aten.erf.default(mul_tensor_1);  mul_tensor_1 = None
+        add_tensor: "f32[128, 197, 3072]" = torch.ops.aten.add.Tensor(erf_default, 1);  erf_default = None
+        mul_tensor_2: "f32[128, 197, 3072]" = torch.ops.aten.mul.Tensor(mul_tensor, add_tensor);  mul_tensor = add_tensor = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/mlp.py:52 in forward, code: x = self.fc2(x)
+        reshape_default_1: "f32[25216, 3072]" = torch.ops.aten.reshape.default(mul_tensor_2, _shape_param_1);  mul_tensor_2 = _shape_param_1 = None
         return reshape_default_1
 
 

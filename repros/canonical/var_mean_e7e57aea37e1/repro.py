@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_pytorch_CycleGAN_and_pix2pix_infer
+Label: torchbench_pytorch_CycleGAN_and_pix2pix_infer_000
 Pattern hash: e7e57aea37e1
 Shape hash: 6a26adea
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1, 128, 128, 128], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_21: "f32[1, 128, 128, 128]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_CycleGAN_and_pix2pix/models/networks.py:496 in forward, code: return self.model(input)
+        # No stacktrace found for following nodes
         var_mean_correction = torch.ops.aten.var_mean.correction(convolution_21, [0, 2, 3], correction = 0, keepdim = True)
         getitem: "f32[1, 128, 1, 1]" = var_mean_correction[0]
         getitem_1: "f32[1, 128, 1, 1]" = var_mean_correction[1];  var_mean_correction = None

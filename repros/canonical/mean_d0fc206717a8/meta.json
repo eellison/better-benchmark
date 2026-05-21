@@ -115,8 +115,9 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_adv_inception_v3_infer",
     "timm_inception_v3_infer"
   ]
 }

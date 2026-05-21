@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "55ae6a130879",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 16,
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_DebertaV2ForMaskedLM_train_000"
+  ]
+}

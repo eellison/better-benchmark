@@ -6,8 +6,11 @@
   "origin_ops": [
     "aten.glu.default"
   ],
-  "n_models": 1,
+  "n_models": 4,
   "models": [
-    "demucs"
+    "torchbench_demucs_infer_001",
+    "torchbench_demucs_infer_002",
+    "torchbench_demucs_train_001",
+    "torchbench_demucs_train_002"
   ]
 }

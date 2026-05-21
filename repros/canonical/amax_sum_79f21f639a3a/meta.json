@@ -15,8 +15,9 @@
     "aten.sum.dim_IntList",
     "aten.view.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "torchbench_BERT_pytorch_infer_000"
+    "torchbench_BERT_pytorch_infer_000",
+    "torchbench_BERT_pytorch_train_000"
   ]
 }

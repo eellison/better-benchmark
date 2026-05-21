@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_dlrm_infer
+Label: torchbench_dlrm_infer_000
 Pattern hash: 3cfc4c59af74
 Shape hash: 40d0a0c4
 """
@@ -20,16 +20,10 @@ _shapes_config = "(T([36], i64), T([36], i64), T([2048, 9, 9], f32), T([2048, 64
 
 class Repro(torch.nn.Module):
     def forward(self, _tensor_constant0: "i64[36]", _tensor_constant1: "i64[36]", bmm: "f32[2048, 9, 9]", relu_1: "f32[2048, 64]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dlrm/dlrm_s_pytorch.py:329 in interact_features, code: li = torch.tensor(
+        # No stacktrace found for following nodes
         lift_fresh_copy_default: "i64[36]" = torch.ops.aten.lift_fresh_copy.default(_tensor_constant0);  _tensor_constant0 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dlrm/dlrm_s_pytorch.py:332 in interact_features, code: lj = torch.tensor(
         lift_fresh_copy_default_1: "i64[36]" = torch.ops.aten.lift_fresh_copy.default(_tensor_constant1);  _tensor_constant1 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dlrm/dlrm_s_pytorch.py:335 in interact_features, code: Zflat = Z[:, li, lj]
         index_tensor: "f32[2048, 36]" = torch.ops.aten.index.Tensor(bmm, [None, lift_fresh_copy_default, lift_fresh_copy_default_1]);  bmm = lift_fresh_copy_default = lift_fresh_copy_default_1 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dlrm/dlrm_s_pytorch.py:337 in interact_features, code: R = torch.cat([x] + [Zflat], dim=1)
         cat_default: "f32[2048, 100]" = torch.ops.aten.cat.default([relu_1, index_tensor], 1);  relu_1 = index_tensor = None
         return cat_default
 

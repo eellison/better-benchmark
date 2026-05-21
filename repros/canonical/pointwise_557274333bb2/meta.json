@@ -26,10 +26,10 @@
   ],
   "n_models": 5,
   "models": [
-    "mnasnet1_0",
-    "mobilenet_v2",
-    "mobilenet_v3_large",
-    "shufflenet_v2_x1_0",
-    "timm_efficientnet"
+    "torchbench_mnasnet1_0_infer_000",
+    "torchbench_mobilenet_v2_infer_000",
+    "torchbench_mobilenet_v3_large_infer_000",
+    "torchbench_shufflenet_v2_x1_0_infer_000",
+    "torchbench_timm_efficientnet_infer_000"
   ]
 }

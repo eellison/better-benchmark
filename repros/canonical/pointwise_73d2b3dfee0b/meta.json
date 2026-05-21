@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "73d2b3dfee0b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf_GPTNeoForCausalLM_train_000",
+    "hf_GPTNeoForSequenceClassification_train_000",
+    "hf_MT5ForConditionalGeneration_train_000",
+    "torchbench_BERT_pytorch_train_000",
+    "torchbench_hf_T5_base_train_000",
+    "torchbench_hf_T5_train_000"
+  ]
+}

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_nvidia_deeprecommender_infer
+Label: torchbench_nvidia_deeprecommender_infer_000
 Pattern hash: 298ea8f11903
 Shape hash: 3e8393fc
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1024, 197951], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm_5: "f32[1024, 197951]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/nvidia_deeprecommender/reco_encoder/model/model.py:12 in activation, code: return F.selu(input)
+        # No stacktrace found for following nodes
         gt_scalar: "b8[1024, 197951]" = torch.ops.aten.gt.Scalar(addmm_5, 0)
         mul_tensor: "f32[1024, 197951]" = torch.ops.aten.mul.Tensor(addmm_5, 1.0507009873554805)
         mul_tensor_1: "f32[1024, 197951]" = torch.ops.aten.mul.Tensor(addmm_5, 1.0);  addmm_5 = None

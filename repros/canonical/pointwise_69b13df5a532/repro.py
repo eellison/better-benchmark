@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_timm_efficientnet_infer
+Label: torchbench_timm_efficientnet_infer_000
 Pattern hash: 69b13df5a532
 Shape hash: 584aabd9
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([64, 48, 1, 1], f16))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_77: "f16[64, 48, 1, 1]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:81 in forward, code: x_se = self.act1(x_se)
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[64, 48, 1, 1]" = torch.ops.prims.convert_element_type.default(convolution_77, torch.float32);  convolution_77 = None
         neg_default: "f32[64, 48, 1, 1]" = torch.ops.aten.neg.default(convert_element_type_default)
         exp_default: "f32[64, 48, 1, 1]" = torch.ops.aten.exp.default(neg_default);  neg_default = None

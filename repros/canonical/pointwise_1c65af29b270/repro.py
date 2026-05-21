@@ -19,16 +19,16 @@ _repro_version = 2
 _shapes_config = "(T([2048, 64], f32), T([1, 128], i64), T([128, 4096], f32), T([128, 4096], f32), S([1, 128, 4096]), S([1, 128, 16, 256]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]), S([1, 128, 16, 64]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]), S([1, 128, 4096]), S([1, 128, 16, 256]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]), S([1, 128, 16, 64]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg293_1: "f32[2048, 64]", unsqueeze: "i64[1, 128]", mm_104: "f32[128, 4096]", mm_105: "f32[128, 4096]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13):
+    def forward(self, arg304_1: "f32[2048, 64]", unsqueeze: "i64[1, 128]", mm_108: "f32[128, 4096]", mm_109: "f32[128, 4096]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13):
         # No stacktrace found for following nodes
-        repeat_default: "f32[1, 2048, 64]" = torch.ops.aten.repeat.default(arg293_1, [1, 1, 1]);  arg293_1 = None
+        repeat_default: "f32[1, 2048, 64]" = torch.ops.aten.repeat.default(arg304_1, [1, 1, 1]);  arg304_1 = None
         unsqueeze_default: "i64[1, 128, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze, -1);  unsqueeze = None
         repeat_default_1: "i64[1, 128, 64]" = torch.ops.aten.repeat.default(unsqueeze_default, [1, 1, 64]);  unsqueeze_default = None
         gather_default: "f32[1, 128, 64]" = torch.ops.aten.gather.default(repeat_default, 1, repeat_default_1);  repeat_default = repeat_default_1 = None
         split_tensor = torch.ops.aten.split.Tensor(gather_default, 32, -1);  gather_default = None
         getitem: "f32[1, 128, 32]" = split_tensor[0]
         getitem_1: "f32[1, 128, 32]" = split_tensor[1];  split_tensor = None
-        view_default: "f32[1, 128, 4096]" = torch.ops.aten.view.default(mm_104, _shape_param_0);  mm_104 = _shape_param_0 = None
+        view_default: "f32[1, 128, 4096]" = torch.ops.aten.view.default(mm_108, _shape_param_0);  mm_108 = _shape_param_0 = None
         view_default_1: "f32[1, 128, 16, 256]" = torch.ops.aten.view.default(view_default, _shape_param_1);  view_default = _shape_param_1 = None
         slice_tensor: "f32[1, 128, 16, 64]" = torch.ops.aten.slice.Tensor(view_default_1, 3, 0, 64)
         unsqueeze_default_1: "f32[1, 128, 1, 32]" = torch.ops.aten.unsqueeze.default(getitem_1, 2)
@@ -54,7 +54,7 @@ class Repro(torch.nn.Module):
         slice_tensor_3: "f32[1, 128, 16, 192]" = torch.ops.aten.slice.Tensor(view_default_1, 3, 64, 9223372036854775807);  view_default_1 = None
         cat_default_1: "f32[1, 128, 16, 256]" = torch.ops.aten.cat.default([add_tensor, slice_tensor_3], -1);  add_tensor = slice_tensor_3 = None
         permute_default: "f32[1, 16, 128, 256]" = torch.ops.aten.permute.default(cat_default_1, [0, 2, 1, 3]);  cat_default_1 = None
-        view_default_5: "f32[1, 128, 4096]" = torch.ops.aten.view.default(mm_105, _shape_param_7);  mm_105 = _shape_param_7 = None
+        view_default_5: "f32[1, 128, 4096]" = torch.ops.aten.view.default(mm_109, _shape_param_7);  mm_109 = _shape_param_7 = None
         view_default_6: "f32[1, 128, 16, 256]" = torch.ops.aten.view.default(view_default_5, _shape_param_8);  view_default_5 = _shape_param_8 = None
         slice_tensor_4: "f32[1, 128, 16, 64]" = torch.ops.aten.slice.Tensor(view_default_6, 3, 0, 64)
         unsqueeze_default_7: "f32[1, 128, 1, 32]" = torch.ops.aten.unsqueeze.default(getitem_1, 2);  getitem_1 = None

@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "27da2a9850b6",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.full.default",
+    "aten.slice_scatter.default",
+    "aten.sum.dim_IntList",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_demucs_train_003"
+  ]
+}

@@ -19,9 +19,9 @@ _repro_version = 2
 _shapes_config = "(T([4, 32, 512, 128], bf16), S([2048, 4096]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg155_1: "bf16[4, 32, 512, 128]", _shape_param_0):
+    def forward(self, arg59_1: "bf16[4, 32, 512, 128]", _shape_param_0):
         # No stacktrace found for following nodes
-        permute_default: "bf16[4, 512, 32, 128]" = torch.ops.aten.permute.default(arg155_1, [0, 2, 1, 3]);  arg155_1 = None
+        permute_default: "bf16[4, 512, 32, 128]" = torch.ops.aten.permute.default(arg59_1, [0, 2, 1, 3]);  arg59_1 = None
         clone_default: "bf16[4, 512, 32, 128]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
         _unsafe_view_default: "bf16[4, 512, 4096]" = torch.ops.aten._unsafe_view.default(clone_default, [4, 512, 4096]);  clone_default = None
         view_default: "bf16[2048, 4096]" = torch.ops.aten.view.default(_unsafe_view_default, _shape_param_0);  _unsafe_view_default = _shape_param_0 = None

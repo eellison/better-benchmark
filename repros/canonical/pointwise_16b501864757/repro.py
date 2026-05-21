@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_nfnet_l0_infer
+Label: timm_nfnet_l0_infer_000
 Pattern hash: 16b501864757
 Shape hash: f791b756
 """
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([128, 128, 56, 56], f32, stride=(401408, 1, 7168, 128)))"
+_shapes_config = "(T([128, 128, 56, 56], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_3: "f32[128, 128, 56, 56]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:260 in forward, code: out = self.act1(x) * self.beta
+        # No stacktrace found for following nodes
         neg_default: "f32[128, 128, 56, 56]" = torch.ops.aten.neg.default(convolution_3)
         exp_default: "f32[128, 128, 56, 56]" = torch.ops.aten.exp.default(neg_default);  neg_default = None
         add_tensor: "f32[128, 128, 56, 56]" = torch.ops.aten.add.Tensor(exp_default, 1);  exp_default = None

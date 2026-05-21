@@ -18,8 +18,9 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
+    "torchbench_llava_infer_000",
     "vllm_Qwen_Qwen3-0.6B_000",
     "vllm_Qwen_Qwen3-30B-A3B_000",
     "vllm_meta-llama_Llama-3.2-1B_000",

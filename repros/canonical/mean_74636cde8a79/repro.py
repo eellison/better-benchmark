@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_ghostnet_100_infer
+Label: timm_ghostnet_100_infer_000
 Pattern hash: 74636cde8a79
 Shape hash: b81bb1f8
 """
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([672], f32), T([512, 672, 7, 7], f32, stride=(32928, 1, 4704, 672)), T([672], f32), T([672], f32), T([672], f32))"
+_shapes_config = "(T([672], f32), T([512, 672, 7, 7], f32), T([672], f32), T([672], f32), T([672], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg308_1: "f32[672]", convolution_66: "f32[512, 672, 7, 7]", arg309_1: "f32[672]", arg310_1: "f32[672]", arg311_1: "f32[672]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:436 in forward, code: x = self.bn_dw(x)
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[672, 1]" = torch.ops.aten.unsqueeze.default(arg308_1, -1);  arg308_1 = None
         unsqueeze_default_1: "f32[672, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[512, 672, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_66, unsqueeze_default_1);  convolution_66 = unsqueeze_default_1 = None
@@ -37,8 +37,6 @@ class Repro(torch.nn.Module):
         unsqueeze_default_6: "f32[672, 1]" = torch.ops.aten.unsqueeze.default(arg311_1, -1);  arg311_1 = None
         unsqueeze_default_7: "f32[672, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[512, 672, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:79 in forward, code: x_se = x.mean((2, 3), keepdim=True)
         mean_dim: "f32[512, 672, 1, 1]" = torch.ops.aten.mean.dim(add_tensor_1, [2, 3], True);  add_tensor_1 = None
         return mean_dim
 

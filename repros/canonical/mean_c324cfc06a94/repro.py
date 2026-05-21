@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_timm_efficientnet_infer
+Label: torchbench_timm_efficientnet_infer_000
 Pattern hash: c324cfc06a94
 Shape hash: 3ed92b6f
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1152], f16), T([64, 1152, 7, 7], f16), T([1152], f16), T([
 
 class Repro(torch.nn.Module):
     def forward(self, arg292_1: "f16[1152]", convolution_76: "f16[64, 1152, 7, 7]", arg293_1: "f16[1152]", arg294_1: "f16[1152]", arg295_1: "f16[1152]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[1152]" = torch.ops.prims.convert_element_type.default(arg292_1, torch.float32);  arg292_1 = None
         unsqueeze_default: "f32[1152, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[1152, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
@@ -39,16 +39,12 @@ class Repro(torch.nn.Module):
         unsqueeze_default_6: "f16[1152, 1]" = torch.ops.aten.unsqueeze.default(arg295_1, -1);  arg295_1 = None
         unsqueeze_default_7: "f16[1152, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[64, 1152, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:148 in forward, code: x = self.act(x)
         convert_element_type_default_2: "f32[64, 1152, 7, 7]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float32);  add_tensor_1 = None
         neg_default: "f32[64, 1152, 7, 7]" = torch.ops.aten.neg.default(convert_element_type_default_2)
         exp_default: "f32[64, 1152, 7, 7]" = torch.ops.aten.exp.default(neg_default);  neg_default = None
         add_tensor_2: "f32[64, 1152, 7, 7]" = torch.ops.aten.add.Tensor(exp_default, 1);  exp_default = None
         div_tensor: "f32[64, 1152, 7, 7]" = torch.ops.aten.div.Tensor(convert_element_type_default_2, add_tensor_2);  convert_element_type_default_2 = add_tensor_2 = None
         convert_element_type_default_3: "f16[64, 1152, 7, 7]" = torch.ops.prims.convert_element_type.default(div_tensor, torch.float16);  div_tensor = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:79 in forward, code: x_se = x.mean((2, 3), keepdim=True)
         mean_dim: "f16[64, 1152, 1, 1]" = torch.ops.aten.mean.dim(convert_element_type_default_3, [2, 3], True);  convert_element_type_default_3 = None
         return mean_dim
 

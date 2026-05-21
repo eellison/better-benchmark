@@ -21,8 +21,13 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 1,
+  "n_models": 6,
   "models": [
+    "hf_AlbertForMaskedLM_infer_000",
+    "hf_BertForMaskedLM_infer_000",
+    "hf_DebertaV2ForMaskedLM_infer_000",
+    "hf_DistilBertForMaskedLM_infer_000",
+    "hf_ElectraForCausalLM_infer_000",
     "hf_LayoutLMForMaskedLM_infer_000"
   ]
 }

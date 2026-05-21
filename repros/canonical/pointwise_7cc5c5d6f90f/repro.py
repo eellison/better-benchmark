@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_moco_infer
+Label: torchbench_moco_infer_009
 Pattern hash: 7cc5c5d6f90f
 Shape hash: 348b888e
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([128, 32000], f32), T([32, 128], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg1_1: "f32[128, 32000]", arg0_1: "f32[32, 128]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:72 in torch_dynamo_resume_in__dequeue_and_enqueue_at_68, code: self.queue[:, ptr : ptr + batch_size] = keys.T
+        # No stacktrace found for following nodes
         slice_tensor: "f32[128, 32]" = torch.ops.aten.slice.Tensor(arg1_1, 1, 0, 32)
         permute_default: "f32[128, 32]" = torch.ops.aten.permute.default(arg0_1, [1, 0]);  arg0_1 = None
         copy_default: "f32[128, 32]" = torch.ops.aten.copy.default(slice_tensor, permute_default);  slice_tensor = permute_default = None

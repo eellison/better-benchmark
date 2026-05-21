@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_resnet152_infer
+Label: torchbench_resnet152_infer_000
 Pattern hash: 57287c224f10
 Shape hash: fd896af1
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([2048], f16), T([32, 2048, 7, 7], f16), T([2048], f16), T([
 
 class Repro(torch.nn.Module):
     def forward(self, arg737_1: "f16[2048]", convolution_147: "f16[32, 2048, 7, 7]", arg738_1: "f16[2048]", arg739_1: "f16[2048]", arg740_1: "f16[2048]", arg742_1: "f16[2048]", convolution_148: "f16[32, 2048, 7, 7]", arg743_1: "f16[2048]", arg744_1: "f16[2048]", arg745_1: "f16[2048]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:155 in forward, code: out = self.bn3(out)
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[2048]" = torch.ops.prims.convert_element_type.default(arg737_1, torch.float32);  arg737_1 = None
         unsqueeze_default: "f32[2048, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[2048, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
@@ -40,8 +40,6 @@ class Repro(torch.nn.Module):
         unsqueeze_default_7: "f16[2048, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[32, 2048, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
         convert_element_type_default_2: "f16[32, 2048, 7, 7]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float16);  add_tensor_1 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:158 in forward, code: identity = self.downsample(x)
         convert_element_type_default_3: "f32[2048]" = torch.ops.prims.convert_element_type.default(arg742_1, torch.float32);  arg742_1 = None
         unsqueeze_default_8: "f32[2048, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default_3, -1);  convert_element_type_default_3 = None
         unsqueeze_default_9: "f32[2048, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_8, -1);  unsqueeze_default_8 = None
@@ -61,11 +59,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_15: "f16[2048, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_14, -1);  unsqueeze_default_14 = None
         add_tensor_3: "f32[32, 2048, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_5, unsqueeze_default_15);  mul_tensor_5 = unsqueeze_default_15 = None
         convert_element_type_default_5: "f16[32, 2048, 7, 7]" = torch.ops.prims.convert_element_type.default(add_tensor_3, torch.float16);  add_tensor_3 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:160 in forward, code: out += identity
         add_tensor_4: "f16[32, 2048, 7, 7]" = torch.ops.aten.add.Tensor(convert_element_type_default_2, convert_element_type_default_5);  convert_element_type_default_2 = convert_element_type_default_5 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:161 in forward, code: out = self.relu(out)
         relu_default: "f16[32, 2048, 7, 7]" = torch.ops.aten.relu.default(add_tensor_4);  add_tensor_4 = None
         return relu_default
 

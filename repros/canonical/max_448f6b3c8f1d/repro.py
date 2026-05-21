@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_Reformer_infer
+Label: torchbench_hf_Reformer_infer_002
 Pattern hash: 448f6b3c8f1d
 Shape hash: bb9f18fc
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1, 4096], i64))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "i64[1, 4096]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:266 in forward, code: max_position_id = position_ids.max().item()
+        # No stacktrace found for following nodes
         max_default: "i64[]" = torch.ops.aten.max.default(arg0_1);  arg0_1 = None
         return max_default
 

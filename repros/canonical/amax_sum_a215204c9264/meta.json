@@ -16,7 +16,7 @@
   ],
   "n_models": 2,
   "models": [
-    "BERT_pytorch",
-    "torchbench_BERT_pytorch_infer_000"
+    "torchbench_BERT_pytorch_infer_000",
+    "torchbench_BERT_pytorch_train_000"
   ]
 }

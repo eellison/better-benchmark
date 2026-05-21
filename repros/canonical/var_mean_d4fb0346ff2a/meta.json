@@ -24,10 +24,8 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 3,
+  "n_models": 1,
   "models": [
-    "hf_M2M100ForConditionalGeneration_train_003",
-    "hf_M2M100ForConditionalGeneration_train_006",
-    "hf_M2M100ForConditionalGeneration_train_012"
+    "hf_M2M100ForConditionalGeneration_train_003"
   ]
 }

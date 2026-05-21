@@ -15,6 +15,6 @@
   ],
   "n_models": 1,
   "models": [
-    "soft_actor_critic"
+    "torchbench_soft_actor_critic_infer_000"
   ]
 }

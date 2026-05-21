@@ -6,9 +6,8 @@
   "origin_ops": [
     "aten.full.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "hf_Reformer",
-    "modded_nanogpt"
+    "torchbench_modded_nanogpt_train_023"
   ]
 }

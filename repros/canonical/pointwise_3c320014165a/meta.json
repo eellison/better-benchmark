@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "3c320014165a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.split.Tensor",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "hf_DistillGPT2_train_000",
+    "hf_GPT2ForSequenceClassification_train_000",
+    "torchbench_hf_GPT2_large_train_000",
+    "torchbench_hf_GPT2_train_000"
+  ]
+}

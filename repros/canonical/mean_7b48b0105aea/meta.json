@@ -30,6 +30,6 @@
   ],
   "n_models": 1,
   "models": [
-    "timm_regnet"
+    "torchbench_timm_regnet_infer_000"
   ]
 }

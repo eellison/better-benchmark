@@ -14,8 +14,9 @@
     "aten.select.int",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "tts_angular"
+    "torchbench_tts_angular_infer_000",
+    "torchbench_tts_angular_train_000"
   ]
 }

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_timm_regnet_infer
+Label: torchbench_timm_regnet_infer_000
 Pattern hash: 7b48b0105aea
 Shape hash: aefb6786
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([2240], f16), T([32, 2240, 7, 7], f16), T([2240], f16), T([
 
 class Repro(torch.nn.Module):
     def forward(self, arg369_1: "f16[2240]", convolution_95: "f16[32, 2240, 7, 7]", arg370_1: "f16[2240]", arg371_1: "f16[2240]", arg372_1: "f16[2240]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[2240]" = torch.ops.prims.convert_element_type.default(arg369_1, torch.float32);  arg369_1 = None
         unsqueeze_default: "f32[2240, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[2240, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
@@ -40,11 +40,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_7: "f16[2240, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[32, 2240, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
         convert_element_type_default_2: "f16[32, 2240, 7, 7]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float16);  add_tensor_1 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:148 in forward, code: x = self.act(x)
         relu_default: "f16[32, 2240, 7, 7]" = torch.ops.aten.relu.default(convert_element_type_default_2);  convert_element_type_default_2 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/squeeze_excite.py:56 in forward, code: x_se = x.mean((2, 3), keepdim=True)
         mean_dim: "f16[32, 2240, 1, 1]" = torch.ops.aten.mean.dim(relu_default, [2, 3], True);  relu_default = None
         return mean_dim
 

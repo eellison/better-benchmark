@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_moco_infer
+Label: torchbench_moco_infer_007
 Pattern hash: 6d6e44c3eeb4
 Shape hash: d7517139
 """
@@ -20,7 +20,7 @@ _shapes_config = "()"
 
 class Repro(torch.nn.Module):
     def forward(self):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:180 in concat_all_gather, code: torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())
+        # No stacktrace found for following nodes
         full_default: "f32[32, 128]" = torch.ops.aten.full.default([32, 128], 1, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         return full_default
 

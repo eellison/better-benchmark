@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_Reformer_train
+Label: torchbench_hf_Reformer_train_013
 Pattern hash: ca25949bc9c4
 Shape hash: d4e37485
 """
@@ -19,10 +19,10 @@ _repro_version = 2
 _shapes_config = "(T([8, 4096, 512], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, tangents_1: "f32[8, 4096, 512]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1780 in forward, code: hidden_states = torch.cat([hidden_states, hidden_states], dim=-1)
-        slice_tensor: "f32[8, 4096, 256]" = torch.ops.aten.slice.Tensor(tangents_1, 2, 0, 256)
-        slice_tensor_1: "f32[8, 4096, 256]" = torch.ops.aten.slice.Tensor(tangents_1, 2, 256, 512);  tangents_1 = None
+    def forward(self, arg0_1: "f32[8, 4096, 512]"):
+        # No stacktrace found for following nodes
+        slice_tensor: "f32[8, 4096, 256]" = torch.ops.aten.slice.Tensor(arg0_1, 2, 0, 256)
+        slice_tensor_1: "f32[8, 4096, 256]" = torch.ops.aten.slice.Tensor(arg0_1, 2, 256, 512);  arg0_1 = None
         add_tensor: "f32[8, 4096, 256]" = torch.ops.aten.add.Tensor(slice_tensor, slice_tensor_1);  slice_tensor = slice_tensor_1 = None
         return add_tensor
 

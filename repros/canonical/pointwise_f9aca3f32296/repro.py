@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_dlrm_train
+Label: torchbench_dlrm_train_000
 Pattern hash: f9aca3f32296
 Shape hash: 3997c37d
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([2048, 1], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm_5: "f32[2048, 1]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dlrm/dlrm_s_pytorch.py:284 in apply_mlp, code: return layers(x)
+        # No stacktrace found for following nodes
         relu_default: "f32[2048, 1]" = torch.ops.aten.relu.default(addmm_5);  addmm_5 = None
         le_scalar: "b8[2048, 1]" = torch.ops.aten.le.Scalar(relu_default, 0);  relu_default = None
         return le_scalar

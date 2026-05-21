@@ -18,7 +18,7 @@
   ],
   "n_models": 2,
   "models": [
-    "hf_Albert",
-    "hf_AlbertForMaskedLM_train_001"
+    "hf_AlbertForMaskedLM_train_001",
+    "torchbench_hf_Albert_train_001"
   ]
 }

@@ -1,0 +1,37 @@
+{
+  "pattern_hash": "9f9f7f8de566",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 19,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.erf.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 5,
+  "models": [
+    "torchbench_hf_Bert_infer_000",
+    "torchbench_hf_Bert_large_infer_000",
+    "torchbench_hf_DistilBert_infer_000",
+    "torchbench_hf_Longformer_infer_003",
+    "torchbench_hf_Roberta_base_infer_000"
+  ]
+}

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_modded_nanogpt_train
+Label: torchbench_modded_nanogpt_train_023
 Pattern hash: 43877c71f0eb
 Shape hash: a8fc7cf2
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([6144, 768], bf16))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "bf16[6144, 768]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/modded_nanogpt/model.py:48 in impl, code: x_f8 = x.div(x_s).to(torch.float8_e4m3fn)
+        # No stacktrace found for following nodes
         div_tensor: "bf16[6144, 768]" = torch.ops.aten.div.Tensor(arg0_1, 0.06185895741317419);  arg0_1 = None
         convert_element_type_default: "f8e4m3fn[6144, 768]" = torch.ops.prims.convert_element_type.default(div_tensor, torch.float8_e4m3fn);  div_tensor = None
         return convert_element_type_default

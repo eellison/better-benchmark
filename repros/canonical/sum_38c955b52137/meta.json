@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "38c955b52137",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.squeeze.dim",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "vllm_Qwen_Qwen3-0.6B_001",
+    "vllm_Qwen_Qwen3-30B-A3B_001",
+    "vllm_meta-llama_Llama-3.2-1B_001",
+    "vllm_mistralai_Mistral-7B-Instruct-v0.3_001"
+  ]
+}

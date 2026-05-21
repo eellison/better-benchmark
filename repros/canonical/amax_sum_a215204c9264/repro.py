@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_BERT_pytorch_infer
+Label: torchbench_BERT_pytorch_infer_000
 Pattern hash: a215204c9264
 Shape hash: c2d5e989
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([128, 2], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm_72: "f32[128, 2]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/language_model.py:42 in forward, code: return self.softmax(self.linear(x[:, 0]))
+        # No stacktrace found for following nodes
         amax_default: "f32[128, 1]" = torch.ops.aten.amax.default(addmm_72, [-1], True)
         sub_tensor: "f32[128, 2]" = torch.ops.aten.sub.Tensor(addmm_72, amax_default);  addmm_72 = amax_default = None
         exp_default: "f32[128, 2]" = torch.ops.aten.exp.default(sub_tensor)

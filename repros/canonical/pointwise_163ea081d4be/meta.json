@@ -8,9 +8,8 @@
     "aten.constant_pad_nd.default",
     "aten.permute.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "hf_MobileBertForMaskedLM_infer_000",
-    "hf_MobileBertForMaskedLM_train_000"
+    "hf_MobileBertForMaskedLM_infer_000"
   ]
 }

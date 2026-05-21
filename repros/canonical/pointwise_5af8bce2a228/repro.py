@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_vgg16_train
+Label: torchbench_vgg16_infer_000
 Pattern hash: 5af8bce2a228
-Shape hash: c4255a26
+Shape hash: 0b6b69f4
 """
 import sys
 from pathlib import Path
@@ -16,15 +16,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([128, 64, 224, 224], f32))"
+_shapes_config = "(T([128, 512, 28, 28], f16))"
 
 class Repro(torch.nn.Module):
-    def forward(self, convolution_1: "f32[128, 64, 224, 224]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/vgg.py:66 in forward, code: x = self.features(x)
-        relu_default: "f32[128, 64, 224, 224]" = torch.ops.aten.relu.default(convolution_1);  convolution_1 = None
+    def forward(self, convolution_9: "f16[128, 512, 28, 28]"):
+        # No stacktrace found for following nodes
+        relu_default: "f16[128, 512, 28, 28]" = torch.ops.aten.relu.default(convolution_9);  convolution_9 = None
         _low_memory_max_pool_with_offsets_default = torch.ops.prims._low_memory_max_pool_with_offsets.default(relu_default, [2, 2], [2, 2], [0, 0], [1, 1], False);  relu_default = None
-        getitem: "f32[128, 64, 112, 112]" = _low_memory_max_pool_with_offsets_default[0]
-        getitem_1: "i8[128, 64, 112, 112]" = _low_memory_max_pool_with_offsets_default[1];  _low_memory_max_pool_with_offsets_default = None
+        getitem: "f16[128, 512, 14, 14]" = _low_memory_max_pool_with_offsets_default[0]
+        getitem_1: "i8[128, 512, 14, 14]" = _low_memory_max_pool_with_offsets_default[1];  _low_memory_max_pool_with_offsets_default = None
         return (getitem, getitem_1)
 
 

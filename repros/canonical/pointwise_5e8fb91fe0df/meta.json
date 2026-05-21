@@ -7,13 +7,14 @@
     "aten.embedding.default",
     "aten.mul.Tensor"
   ],
-  "n_models": 6,
+  "n_models": 7,
   "models": [
-    "hf_Bart",
     "hf_BartForCausalLM_train_000",
     "hf_BlenderbotForCausalLM_train_000",
     "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_train_000",
     "hf_M2M100ForConditionalGeneration_train_000",
-    "hf_MBartForCausalLM_train_000"
+    "hf_MBartForCausalLM_train_000",
+    "torchbench_hf_Bart_infer_000",
+    "torchbench_hf_Bart_train_001"
   ]
 }

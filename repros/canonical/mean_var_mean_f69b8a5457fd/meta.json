@@ -23,8 +23,9 @@
     "aten.var_mean.correction",
     "aten.view.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "timm_beit_base_patch16_224_train_000",
     "timm_timm_beit_base_patch16_224_train_train_000"
   ]
 }

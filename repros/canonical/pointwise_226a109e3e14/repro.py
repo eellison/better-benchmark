@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_mobilevit_s_infer
+Label: timm_mobilevit_s_infer_000
 Pattern hash: 226a109e3e14
 Shape hash: fcaa3727
 """
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([160], f32), T([128, 160, 8, 8], f32, stride=(10240, 1, 1280, 160)), T([160], f32), T([160], f32), T([160], f32))"
+_shapes_config = "(T([160], f32), T([128, 160, 8, 8], f32), T([160], f32), T([160], f32), T([160], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg269_1: "f32[160]", convolution_33: "f32[128, 160, 8, 8]", arg270_1: "f32[160]", arg271_1: "f32[160]", arg272_1: "f32[160]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[160, 1]" = torch.ops.aten.unsqueeze.default(arg269_1, -1);  arg269_1 = None
         unsqueeze_default_1: "f32[160, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[128, 160, 8, 8]" = torch.ops.aten.sub.Tensor(convolution_33, unsqueeze_default_1);  convolution_33 = unsqueeze_default_1 = None
@@ -37,8 +37,6 @@ class Repro(torch.nn.Module):
         unsqueeze_default_6: "f32[160, 1]" = torch.ops.aten.unsqueeze.default(arg272_1, -1);  arg272_1 = None
         unsqueeze_default_7: "f32[160, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[128, 160, 8, 8]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:148 in forward, code: x = self.act(x)
         neg_default: "f32[128, 160, 8, 8]" = torch.ops.aten.neg.default(add_tensor_1)
         exp_default: "f32[128, 160, 8, 8]" = torch.ops.aten.exp.default(neg_default);  neg_default = None
         add_tensor_2: "f32[128, 160, 8, 8]" = torch.ops.aten.add.Tensor(exp_default, 1);  exp_default = None

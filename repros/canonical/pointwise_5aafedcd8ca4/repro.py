@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_Longformer_infer
+Label: torchbench_hf_Longformer_infer_002
 Pattern hash: 5aafedcd8ca4
 Shape hash: d7517139
 """
@@ -20,7 +20,7 @@ _shapes_config = "()"
 
 class Repro(torch.nn.Module):
     def forward(self):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:749 in _mask_invalid_locations, code: input_tensor[:, :affected_seq_len, :, : affected_seq_len + 1] = torch.full_like(
+        # No stacktrace found for following nodes
         full_default: "f16[1, 1, 256, 257]" = torch.ops.aten.full.default([1, 1, 256, 257], -inf, dtype = torch.float16, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         return full_default
 

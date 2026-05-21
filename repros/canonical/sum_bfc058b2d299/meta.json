@@ -18,9 +18,11 @@
     "prims.convert_element_type.default",
     "prims.fma.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
     "hf_MT5ForConditionalGeneration_train_001",
-    "hf_MT5ForConditionalGeneration_train_018"
+    "hf_MT5ForConditionalGeneration_train_018",
+    "torchbench_hf_T5_base_train_001",
+    "torchbench_hf_T5_train_001"
   ]
 }

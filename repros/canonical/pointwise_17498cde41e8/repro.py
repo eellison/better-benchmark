@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_timm_nfnet_infer
+Label: torchbench_timm_nfnet_infer_000
 Pattern hash: 17498cde41e8
 Shape hash: aeec4977
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([128, 128, 48, 48], f16))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_3: "f16[128, 128, 48, 48]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/activations.py:135 in gelu, code: return F.gelu(x)
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[128, 128, 48, 48]" = torch.ops.prims.convert_element_type.default(convolution_3, torch.float32);  convolution_3 = None
         mul_tensor: "f32[128, 128, 48, 48]" = torch.ops.aten.mul.Tensor(convert_element_type_default, 0.5)
         mul_tensor_1: "f32[128, 128, 48, 48]" = torch.ops.aten.mul.Tensor(convert_element_type_default, 0.7071067811865476);  convert_element_type_default = None
@@ -28,11 +28,7 @@ class Repro(torch.nn.Module):
         add_tensor: "f32[128, 128, 48, 48]" = torch.ops.aten.add.Tensor(erf_default, 1);  erf_default = None
         mul_tensor_2: "f32[128, 128, 48, 48]" = torch.ops.aten.mul.Tensor(mul_tensor, add_tensor);  mul_tensor = add_tensor = None
         convert_element_type_default_1: "f16[128, 128, 48, 48]" = torch.ops.prims.convert_element_type.default(mul_tensor_2, torch.float16);  mul_tensor_2 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:89 in forward, code: return self.act_fn(x, inplace=self.inplace).mul_(self.gamma)
         mul_tensor_3: "f16[128, 128, 48, 48]" = torch.ops.aten.mul.Tensor(convert_element_type_default_1, 1.7015043497085571);  convert_element_type_default_1 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/nfnet.py:260 in forward, code: out = self.act1(x) * self.beta
         mul_tensor_4: "f16[128, 128, 48, 48]" = torch.ops.aten.mul.Tensor(mul_tensor_3, 1.0);  mul_tensor_3 = None
         return mul_tensor_4
 

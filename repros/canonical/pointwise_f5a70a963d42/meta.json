@@ -16,9 +16,10 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
     "hf_AllenaiLongformerBase_infer_002",
-    "hf_AllenaiLongformerBase_train_002"
+    "hf_AllenaiLongformerBase_train_002",
+    "torchbench_hf_Longformer_train_002"
   ]
 }

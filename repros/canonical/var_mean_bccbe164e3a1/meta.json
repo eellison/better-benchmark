@@ -19,7 +19,7 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 17,
+  "n_models": 18,
   "models": [
     "hf_AlbertForMaskedLM_infer_000",
     "hf_BartForCausalLM_infer_000",
@@ -37,6 +37,7 @@
     "timm_mobilevit_s_infer_000",
     "timm_timm_deit_base_distilled_patch16_224_infer_infer_000",
     "timm_timm_deit_tiny_patch16_224.fb_in1k_infer_infer_000",
-    "timm_timm_mobilevit_s_infer_infer_000"
+    "timm_timm_mobilevit_s_infer_infer_000",
+    "torchbench_nanogpt_infer_000"
   ]
 }

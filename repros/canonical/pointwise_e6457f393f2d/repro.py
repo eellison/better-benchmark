@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_BERT_pytorch_train
+Label: timm_swin_base_patch4_window7_224_train
 Pattern hash: e6457f393f2d
-Shape hash: e045a23d
+Shape hash: 6aaa001c
 """
 import sys
 from pathlib import Path
@@ -16,20 +16,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([16384, 768], f32), S([128, 128, 768]), S([128, 128, 12, 64]), S([1536, 128, 64]))"
+_shapes_config = "(T([401408, 128], f32), S([8192, 49, 128]), S([8192, 49, 4, 32]), S([32768, 49, 32]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_140: "f32[16384, 768]", _shape_param_0, _shape_param_1, _shape_param_2):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/attention/multi_head.py:53 in forward, code: return self.output_linear(x)
-        reshape_default: "f32[128, 128, 768]" = torch.ops.aten.reshape.default(mm_140, _shape_param_0);  mm_140 = _shape_param_0 = None
+    def forward(self, mm_199: "f32[401408, 128]", _shape_param_0, _shape_param_1, _shape_param_2):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/swin_transformer.py:246 in forward, code: x = self.proj(x)
+        reshape_default: "f32[8192, 49, 128]" = torch.ops.aten.reshape.default(mm_199, _shape_param_0);  mm_199 = _shape_param_0 = None
 
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/attention/multi_head.py:51 in forward, code: x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.h * self.d_k)
-        reshape_default_1: "f32[128, 128, 12, 64]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
-        permute_default: "f32[128, 12, 128, 64]" = torch.ops.aten.permute.default(reshape_default_1, [0, 2, 1, 3]);  reshape_default_1 = None
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/swin_transformer.py:245 in forward, code: x = x.transpose(1, 2).reshape(B_, N, -1)
+        reshape_default_1: "f32[8192, 49, 4, 32]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None
+        permute_default: "f32[8192, 4, 49, 32]" = torch.ops.aten.permute.default(reshape_default_1, [0, 2, 1, 3]);  reshape_default_1 = None
 
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/attention/single.py:41 in forward, code: return torch.matmul(p_attn, value), p_attn
-        clone_default: "f32[128, 12, 128, 64]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
-        reshape_default_2: "f32[1536, 128, 64]" = torch.ops.aten.reshape.default(clone_default, _shape_param_2);  clone_default = _shape_param_2 = None
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/swin_transformer.py:243 in forward, code: x = attn @ v
+        clone_default: "f32[8192, 4, 49, 32]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
+        reshape_default_2: "f32[32768, 49, 32]" = torch.ops.aten.reshape.default(clone_default, _shape_param_2);  clone_default = _shape_param_2 = None
         return reshape_default_2
 
 

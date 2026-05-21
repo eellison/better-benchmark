@@ -8,8 +8,9 @@
     "aten.permute.default",
     "aten.view.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_AllenaiLongformerBase_train_002"
+    "hf_AllenaiLongformerBase_train_002",
+    "torchbench_hf_Longformer_train_002"
   ]
 }

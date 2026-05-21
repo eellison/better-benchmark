@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_LearningToPaint_infer
+Label: torchbench_LearningToPaint_infer_000
 Pattern hash: 246850b7c198
 Shape hash: d69ae404
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1024, 65], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm: "f32[1024, 65]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/LearningToPaint/baseline/DRL/actor.py:136 in forward, code: x = torch.sigmoid(x)
+        # No stacktrace found for following nodes
         sigmoid_default: "f32[1024, 65]" = torch.ops.aten.sigmoid.default(addmm);  addmm = None
         return sigmoid_default
 

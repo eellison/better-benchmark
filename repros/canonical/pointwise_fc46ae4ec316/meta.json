@@ -27,8 +27,8 @@
   ],
   "n_models": 3,
   "models": [
-    "mnasnet1_0",
-    "mobilenet_v3_large",
-    "timm_efficientnet"
+    "torchbench_mnasnet1_0_infer_000",
+    "torchbench_mobilenet_v3_large_infer_000",
+    "torchbench_timm_efficientnet_infer_000"
   ]
 }

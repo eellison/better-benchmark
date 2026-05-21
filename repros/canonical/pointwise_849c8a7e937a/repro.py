@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_mobilenetv2_100_infer
+Label: timm_mobilenetv2_100_infer_000
 Pattern hash: 849c8a7e937a
 Shape hash: 74c967c3
 """
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([160], f32), T([128, 160, 7, 7], f32, stride=(7840, 1, 1120, 160)), T([160], f32), T([160], f32), T([160], f32), T([128, 160, 7, 7], f32, stride=(7840, 1, 1120, 160)))"
+_shapes_config = "(T([160], f32), T([128, 160, 7, 7], f32), T([160], f32), T([160], f32), T([160], f32), T([128, 160, 7, 7], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg237_1: "f32[160]", convolution_47: "f32[128, 160, 7, 7]", arg238_1: "f32[160]", arg239_1: "f32[160]", arg240_1: "f32[160]", add_98: "f32[128, 160, 7, 7]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[160, 1]" = torch.ops.aten.unsqueeze.default(arg237_1, -1);  arg237_1 = None
         unsqueeze_default_1: "f32[160, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[128, 160, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_47, unsqueeze_default_1);  convolution_47 = unsqueeze_default_1 = None
@@ -37,8 +37,6 @@ class Repro(torch.nn.Module):
         unsqueeze_default_6: "f32[160, 1]" = torch.ops.aten.unsqueeze.default(arg240_1, -1);  arg240_1 = None
         unsqueeze_default_7: "f32[160, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[128, 160, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:338 in forward, code: x = self.drop_path(x) + shortcut
         add_tensor_2: "f32[128, 160, 7, 7]" = torch.ops.aten.add.Tensor(add_tensor_1, add_98);  add_tensor_1 = add_98 = None
         return add_tensor_2
 

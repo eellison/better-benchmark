@@ -1,0 +1,45 @@
+{
+  "pattern_hash": "adeaebad93f7",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 31,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.gather.default",
+    "aten.gather.default",
+    "aten.gather.default",
+    "aten.gather.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.slice.Tensor",
+    "aten.sort.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_randint.default",
+    "prims.inductor_randint.default",
+    "prims.inductor_randint.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_demucs_train_000"
+  ]
+}

@@ -11,8 +11,10 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "hf_BartForCausalLM_train_007"
+    "hf_BartForCausalLM_train_007",
+    "torchbench_hf_Bart_train_011",
+    "torchbench_hf_Bart_train_014"
   ]
 }

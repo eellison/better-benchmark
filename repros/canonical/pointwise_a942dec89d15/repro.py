@@ -19,9 +19,9 @@ _repro_version = 2
 _shapes_config = "(T([], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, _tensor_constant0: "f32[]"):
+    def forward(self, _tensor_constant23: "f32[]"):
         # No stacktrace found for following nodes
-        lift_fresh_copy_default: "f32[]" = torch.ops.aten.lift_fresh_copy.default(_tensor_constant0);  _tensor_constant0 = None
+        lift_fresh_copy_default: "f32[]" = torch.ops.aten.lift_fresh_copy.default(_tensor_constant23);  _tensor_constant23 = None
         mul_tensor: "f32[]" = torch.ops.aten.mul.Tensor(lift_fresh_copy_default, 1);  lift_fresh_copy_default = None
         return mul_tensor
 

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_moco_infer
+Label: torchbench_moco_infer_007
 Pattern hash: 41aa929b1bf2
 Shape hash: d7517139
 """
@@ -20,7 +20,7 @@ _shapes_config = "()"
 
 class Repro(torch.nn.Module):
     def forward(self):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:164 in torch_dynamo_resume_in_forward_at_142, code: labels = torch.zeros(logits.shape[0], dtype=torch.long, device=logits.device)
+        # No stacktrace found for following nodes
         full_default: "i64[32]" = torch.ops.aten.full.default([32], 0, dtype = torch.int64, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         return full_default
 

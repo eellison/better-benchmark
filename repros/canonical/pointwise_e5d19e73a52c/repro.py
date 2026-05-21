@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_Reformer_infer
+Label: torchbench_hf_Reformer_infer_005
 Pattern hash: e5d19e73a52c
 Shape hash: ee32fdb4
 """
@@ -19,9 +19,9 @@ _repro_version = 2
 _shapes_config = "(T([], i64))"
 
 class Repro(torch.nn.Module):
-    def forward(self, _tensor_constant0: "i64[]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1188 in forward, code: key_vectors = key_vectors / np.sqrt(self.attention_head_size)
-        lift_fresh_copy_default: "i64[]" = torch.ops.aten.lift_fresh_copy.default(_tensor_constant0);  _tensor_constant0 = None
+    def forward(self, _tensor_constant5: "i64[]"):
+        # No stacktrace found for following nodes
+        lift_fresh_copy_default: "i64[]" = torch.ops.aten.lift_fresh_copy.default(_tensor_constant5);  _tensor_constant5 = None
         convert_element_type_default: "f64[]" = torch.ops.prims.convert_element_type.default(lift_fresh_copy_default, torch.float64);  lift_fresh_copy_default = None
         return convert_element_type_default
 

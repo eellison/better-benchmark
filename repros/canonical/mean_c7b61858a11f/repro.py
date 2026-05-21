@@ -19,16 +19,16 @@ _repro_version = 2
 _shapes_config = "(T([4096, 512], f32), T([32, 128, 512], f32), T([512], f32), S([32, 128, 512]), S([4096, 512]), S([4096, 512]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, mm_129: "f32[4096, 512]", add_127: "f32[32, 128, 512]", arg172_1: "f32[512]", _shape_param_0, _shape_param_1, _shape_param_2):
+    def forward(self, mm_140: "f32[4096, 512]", add_136: "f32[32, 128, 512]", arg186_1: "f32[512]", _shape_param_0, _shape_param_1, _shape_param_2):
         # No stacktrace found for following nodes
-        view_default: "f32[32, 128, 512]" = torch.ops.aten.view.default(mm_129, _shape_param_0);  mm_129 = _shape_param_0 = None
-        add_tensor: "f32[32, 128, 512]" = torch.ops.aten.add.Tensor(add_127, view_default);  add_127 = view_default = None
+        view_default: "f32[32, 128, 512]" = torch.ops.aten.view.default(mm_140, _shape_param_0);  mm_140 = _shape_param_0 = None
+        add_tensor: "f32[32, 128, 512]" = torch.ops.aten.add.Tensor(add_136, view_default);  add_136 = view_default = None
         pow_tensor_scalar: "f32[32, 128, 512]" = torch.ops.aten.pow.Tensor_Scalar(add_tensor, 2)
         mean_dim: "f32[32, 128, 1]" = torch.ops.aten.mean.dim(pow_tensor_scalar, [-1], True);  pow_tensor_scalar = None
         add_tensor_1: "f32[32, 128, 1]" = torch.ops.aten.add.Tensor(mean_dim, 1e-06);  mean_dim = None
         rsqrt_default: "f32[32, 128, 1]" = torch.ops.aten.rsqrt.default(add_tensor_1);  add_tensor_1 = None
         mul_tensor: "f32[32, 128, 512]" = torch.ops.aten.mul.Tensor(add_tensor, rsqrt_default);  add_tensor = rsqrt_default = None
-        mul_tensor_1: "f32[32, 128, 512]" = torch.ops.aten.mul.Tensor(arg172_1, mul_tensor);  arg172_1 = mul_tensor = None
+        mul_tensor_1: "f32[32, 128, 512]" = torch.ops.aten.mul.Tensor(arg186_1, mul_tensor);  arg186_1 = mul_tensor = None
         view_default_1: "f32[4096, 512]" = torch.ops.aten.view.default(mul_tensor_1, _shape_param_1);  _shape_param_1 = None
         view_default_2: "f32[4096, 512]" = torch.ops.aten.view.default(mul_tensor_1, _shape_param_2);  mul_tensor_1 = _shape_param_2 = None
         return (view_default_1, view_default_2)

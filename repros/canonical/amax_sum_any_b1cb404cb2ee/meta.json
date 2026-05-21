@@ -1,0 +1,41 @@
+{
+  "pattern_hash": "b1cb404cb2ee",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum",
+    "any"
+  ],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.any.dim",
+    "aten.div.Tensor",
+    "aten.eq.Scalar",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.ge.Scalar",
+    "aten.logical_not.default",
+    "aten.logical_not.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "aten.where.self",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_hf_Albert_train_000"
+  ]
+}

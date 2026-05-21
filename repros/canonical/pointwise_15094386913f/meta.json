@@ -12,7 +12,7 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 48,
+  "n_models": 55,
   "models": [
     "hf_AllenaiLongformerBase_infer_002",
     "hf_AllenaiLongformerBase_train_002",
@@ -61,6 +61,13 @@
     "timm_vit_base_patch14_dinov2.lvd142m_train_000",
     "timm_vit_base_patch16_siglip_256_infer_000",
     "timm_vit_base_patch16_siglip_256_train_000",
-    "torchbench_BERT_pytorch_infer_000"
+    "torchbench_BERT_pytorch_infer_000",
+    "torchbench_hf_Bert_large_train_000",
+    "torchbench_hf_Bert_train_000",
+    "torchbench_hf_DistilBert_train_000",
+    "torchbench_hf_Longformer_train_002",
+    "torchbench_hf_Roberta_base_train_000",
+    "torchbench_hf_Whisper_train_000",
+    "torchbench_timm_vision_transformer_train_000"
   ]
 }

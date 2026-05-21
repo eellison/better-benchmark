@@ -1,0 +1,46 @@
+{
+  "pattern_hash": "dd2f7ee1cf42",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 30,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.copy_.default",
+    "aten.copy_.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.squeeze.dims",
+    "aten.squeeze.dims",
+    "aten.squeeze.dims",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 3,
+  "models": [
+    "timm_timm_visformer_small_train_train_000",
+    "timm_visformer_small_train",
+    "timm_visformer_small_train_000"
+  ]
+}

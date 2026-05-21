@@ -7,13 +7,15 @@
     "aten.ne.Scalar",
     "prims.convert_element_type.default"
   ],
-  "n_models": 6,
+  "n_models": 8,
   "models": [
     "hf_AllenaiLongformerBase_infer_000",
     "hf_AllenaiLongformerBase_train_000",
-    "hf_Longformer",
     "hf_M2M100ForConditionalGeneration_infer_000",
     "hf_M2M100ForConditionalGeneration_train_001",
-    "hf_Roberta_base"
+    "torchbench_hf_Longformer_infer_000",
+    "torchbench_hf_Longformer_train_000",
+    "torchbench_hf_Roberta_base_infer_000",
+    "torchbench_hf_Roberta_base_train_000"
   ]
 }

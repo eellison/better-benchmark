@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_modded_nanogpt_infer
+Label: torchbench_modded_nanogpt_infer_001
 Pattern hash: 36d7a6209c54
 Shape hash: 8f4d0096
 """
@@ -20,15 +20,11 @@ _shapes_config = "(T([], i32, gen=Index(6144)), T([], i32, gen=Index(6144)), T([
 
 class Repro(torch.nn.Module):
     def forward(self, arg2_1: "i32[]", arg3_1: "i32[]", arg4_1: "i64[6144]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/modded_nanogpt/model.py:826 in document_causal, code: causal_mask = q_idx >= kv_idx
+        # No stacktrace found for following nodes
         ge_tensor: "b8[]" = torch.ops.aten.ge.Tensor(arg2_1, arg3_1)
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/modded_nanogpt/model.py:827 in document_causal, code: document_mask = docs[q_idx] == docs[kv_idx]
         index_tensor: "i64[]" = torch.ops.aten.index.Tensor(arg4_1, [arg2_1]);  arg2_1 = None
         index_tensor_1: "i64[]" = torch.ops.aten.index.Tensor(arg4_1, [arg3_1]);  arg4_1 = arg3_1 = None
         eq_tensor: "b8[]" = torch.ops.aten.eq.Tensor(index_tensor, index_tensor_1);  index_tensor = index_tensor_1 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/modded_nanogpt/model.py:828 in document_causal, code: return causal_mask & document_mask
         bitwise_and_tensor: "b8[]" = torch.ops.aten.bitwise_and.Tensor(ge_tensor, eq_tensor);  ge_tensor = eq_tensor = None
         return bitwise_and_tensor
 

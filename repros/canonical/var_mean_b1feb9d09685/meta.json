@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "b1feb9d09685",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 17,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench_opacus_cifar10_infer_001",
+    "torchbench_opacus_cifar10_infer_019"
+  ]
+}

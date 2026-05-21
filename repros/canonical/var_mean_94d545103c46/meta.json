@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "94d545103c46",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 15,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_GPTJForCausalLM_train_000",
+    "hf_GPTJForQuestionAnswering_train_000"
+  ]
+}

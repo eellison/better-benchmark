@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_ghostnet_100_infer
+Label: timm_ghostnet_100_infer_000
 Pattern hash: ffe1ef7f99e0
 Shape hash: 0a6317e7
 """
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([80], f32), T([512, 80, 7, 7], f32, stride=(3920, 1, 560, 80)), T([80], f32), T([80], f32), T([80], f32))"
+_shapes_config = "(T([80], f32), T([512, 80, 7, 7], f32), T([80], f32), T([80], f32), T([80], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg415_1: "f32[80]", convolution_91: "f32[512, 80, 7, 7]", arg416_1: "f32[80]", arg417_1: "f32[80]", arg418_1: "f32[80]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:68 in forward, code: x1 = self.primary_conv(x)
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[80, 1]" = torch.ops.aten.unsqueeze.default(arg415_1, -1);  arg415_1 = None
         unsqueeze_default_1: "f32[80, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[512, 80, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_91, unsqueeze_default_1);  convolution_91 = unsqueeze_default_1 = None

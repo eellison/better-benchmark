@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_ghostnet_100_infer
+Label: timm_ghostnet_100_infer_000
 Pattern hash: 08701284b477
 Shape hash: ae16f756
 """
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([80], f32), T([512, 80, 7, 7], f32, stride=(3920, 1, 560, 80)), T([80], f32), T([80], f32), T([80], f32), T([512, 80, 7, 7], f32, stride=(3920, 1, 560, 80)), T([512, 160, 7, 7], f32, stride=(7840, 1, 1120, 160)))"
+_shapes_config = "(T([80], f32), T([512, 80, 7, 7], f32), T([80], f32), T([80], f32), T([80], f32), T([512, 80, 7, 7], f32), T([512, 160, 7, 7], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg420_1: "f32[80]", convolution_92: "f32[512, 80, 7, 7]", arg421_1: "f32[80]", arg422_1: "f32[80]", arg423_1: "f32[80]", add_177: "f32[512, 80, 7, 7]", add_170: "f32[512, 160, 7, 7]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:69 in forward, code: x2 = self.cheap_operation(x1)
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[80, 1]" = torch.ops.aten.unsqueeze.default(arg420_1, -1);  arg420_1 = None
         unsqueeze_default_1: "f32[80, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[512, 80, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_92, unsqueeze_default_1);  convolution_92 = unsqueeze_default_1 = None
@@ -37,11 +37,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_6: "f32[80, 1]" = torch.ops.aten.unsqueeze.default(arg423_1, -1);  arg423_1 = None
         unsqueeze_default_7: "f32[80, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[512, 80, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:70 in forward, code: out = torch.cat([x1, x2], dim=1)
         cat_default: "f32[512, 160, 7, 7]" = torch.ops.aten.cat.default([add_177, add_tensor_1], 1);  add_177 = add_tensor_1 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/ghostnet.py:445 in forward, code: x += self.shortcut(shortcut)
         add_tensor_2: "f32[512, 160, 7, 7]" = torch.ops.aten.add.Tensor(cat_default, add_170);  cat_default = add_170 = None
         return add_tensor_2
 

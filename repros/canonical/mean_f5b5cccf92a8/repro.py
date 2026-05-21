@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_mobilenet_v3_large_infer
+Label: torchbench_mobilenet_v3_large_infer_000
 Pattern hash: f5b5cccf92a8
 Shape hash: 6d5f113c
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([120], f16), T([256, 120, 28, 28], f16), T([120], f16), T([
 
 class Repro(torch.nn.Module):
     def forward(self, arg90_1: "f16[120]", convolution_20: "f16[256, 120, 28, 28]", arg91_1: "f16[120]", arg92_1: "f16[120]", arg93_1: "f16[120]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mobilenetv3.py:112 in forward, code: result = self.block(input)
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[120]" = torch.ops.prims.convert_element_type.default(arg90_1, torch.float32);  arg90_1 = None
         unsqueeze_default: "f32[120, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[120, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
@@ -41,8 +41,6 @@ class Repro(torch.nn.Module):
         add_tensor_1: "f32[256, 120, 28, 28]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
         convert_element_type_default_2: "f16[256, 120, 28, 28]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float16);  add_tensor_1 = None
         relu_default: "f16[256, 120, 28, 28]" = torch.ops.aten.relu.default(convert_element_type_default_2);  convert_element_type_default_2 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/ops/misc.py:253 in _scale, code: scale = self.avgpool(input)
         mean_dim: "f16[256, 120, 1, 1]" = torch.ops.aten.mean.dim(relu_default, [-1, -2], True);  relu_default = None
         return mean_dim
 

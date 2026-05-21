@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_timm_vovnet_infer
+Label: torchbench_timm_vovnet_infer_000
 Pattern hash: 976768b988b8
 Shape hash: e8b43e12
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([224], f16), T([32, 224, 7, 7], f16), T([224], f16), T([224
 
 class Repro(torch.nn.Module):
     def forward(self, arg187_1: "f16[224]", convolution_37: "f16[32, 224, 7, 7]", arg188_1: "f16[224]", arg189_1: "f16[224]", arg190_1: "f16[224]", relu_32: "f16[32, 1024, 7, 7]", relu_33: "f16[32, 224, 7, 7]", relu_34: "f16[32, 224, 7, 7]", relu_35: "f16[32, 224, 7, 7]", relu_36: "f16[32, 224, 7, 7]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[224]" = torch.ops.prims.convert_element_type.default(arg187_1, torch.float32);  arg187_1 = None
         unsqueeze_default: "f32[224, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[224, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
@@ -40,11 +40,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_7: "f16[224, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[32, 224, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
         convert_element_type_default_2: "f16[32, 224, 7, 7]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float16);  add_tensor_1 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:148 in forward, code: x = self.act(x)
         relu_default: "f16[32, 224, 7, 7]" = torch.ops.aten.relu.default(convert_element_type_default_2);  convert_element_type_default_2 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/vovnet.py:40 in forward, code: x = torch.cat(concat_list, dim=1)
         cat_default: "f16[32, 2144, 7, 7]" = torch.ops.aten.cat.default([relu_32, relu_33, relu_34, relu_35, relu_36, relu_default], 1);  relu_32 = relu_33 = relu_34 = relu_35 = relu_36 = relu_default = None
         return cat_default
 

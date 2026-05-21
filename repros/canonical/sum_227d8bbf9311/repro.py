@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_moco_infer
+Label: torchbench_moco_infer_004
 Pattern hash: 227d8bbf9311
 Shape hash: 3cf239db
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([32, 128], f32), S([32, 128]))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[32, 128]", _shape_param_0):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:135 in forward, code: q = nn.functional.normalize(q, dim=1)
+        # No stacktrace found for following nodes
         pow_tensor_scalar: "f32[32, 128]" = torch.ops.aten.pow.Tensor_Scalar(arg0_1, 2.0)
         sum_dim_int_list: "f32[32, 1]" = torch.ops.aten.sum.dim_IntList(pow_tensor_scalar, [1], True);  pow_tensor_scalar = None
         pow_tensor_scalar_1: "f32[32, 1]" = torch.ops.aten.pow.Tensor_Scalar(sum_dim_int_list, 0.5);  sum_dim_int_list = None

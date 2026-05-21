@@ -19,9 +19,9 @@ _repro_version = 2
 _shapes_config = "(T([8, 12, 1024, 64], f32), S([-1, 768]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg218_1: "f32[8, 12, 1024, 64]", _shape_param_0):
+    def forward(self, arg86_1: "f32[8, 12, 1024, 64]", _shape_param_0):
         # No stacktrace found for following nodes
-        permute_default: "f32[8, 1024, 12, 64]" = torch.ops.aten.permute.default(arg218_1, [0, 2, 1, 3]);  arg218_1 = None
+        permute_default: "f32[8, 1024, 12, 64]" = torch.ops.aten.permute.default(arg86_1, [0, 2, 1, 3]);  arg86_1 = None
         clone_default: "f32[8, 1024, 12, 64]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
         _unsafe_view_default: "f32[8, 1024, 768]" = torch.ops.aten._unsafe_view.default(clone_default, [8, 1024, 768]);  clone_default = None
         view_default: "f32[8192, 768]" = torch.ops.aten.view.default(_unsafe_view_default, _shape_param_0);  _unsafe_view_default = _shape_param_0 = None

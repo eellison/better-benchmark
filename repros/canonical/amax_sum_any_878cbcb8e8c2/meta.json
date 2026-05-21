@@ -1,0 +1,36 @@
+{
+  "pattern_hash": "878cbcb8e8c2",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum",
+    "any"
+  ],
+  "n_ops": 20,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.any.dim",
+    "aten.div.Tensor",
+    "aten.eq.Scalar",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.gt.Scalar",
+    "aten.logical_not.default",
+    "aten.logical_not.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_ElectraForCausalLM_train_000"
+  ]
+}

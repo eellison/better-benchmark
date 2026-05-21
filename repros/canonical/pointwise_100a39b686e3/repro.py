@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_adv_inception_v3_train
+Label: timm_adv_inception_v3_train_000
 Pattern hash: 100a39b686e3
 Shape hash: ee32fdb4
 """
@@ -19,12 +19,10 @@ _repro_version = 2
 _shapes_config = "(T([], i64))"
 
 class Repro(torch.nn.Module):
-    def forward(self, primals_3: "i64[]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:116 in forward, code: self.num_batches_tracked.add_(1)  # type: ignore[has-type]
-        add_tensor: "i64[]" = torch.ops.aten.add.Tensor(primals_3, 1)
-
+    def forward(self, arg560_1: "i64[]"):
         # No stacktrace found for following nodes
-        copy__default: "i64[]" = torch.ops.aten.copy_.default(primals_3, add_tensor);  primals_3 = add_tensor = None
+        add_tensor: "i64[]" = torch.ops.aten.add.Tensor(arg560_1, 1)
+        copy__default: "i64[]" = torch.ops.aten.copy_.default(arg560_1, add_tensor);  arg560_1 = add_tensor = None
         return copy__default
 
 

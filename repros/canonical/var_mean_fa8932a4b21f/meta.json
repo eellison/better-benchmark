@@ -1,0 +1,36 @@
+{
+  "pattern_hash": "fa8932a4b21f",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 21,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clamp_max.default",
+    "aten.clamp_min.default",
+    "aten.clone.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench_hf_Whisper_infer_000",
+    "torchbench_hf_distil_whisper_infer_000"
+  ]
+}

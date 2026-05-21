@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "c181ecbfc1ec",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.full.default",
+    "aten.le.Scalar",
+    "aten.lt.Scalar",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "aten.where.self",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_mobilenetv3_large_100_train"
+  ]
+}

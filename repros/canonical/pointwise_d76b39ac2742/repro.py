@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_Bart_infer
+Label: torchbench_hf_Bart_infer_001
 Pattern hash: d76b39ac2742
 Shape hash: 1258901a
 """
@@ -20,13 +20,9 @@ _shapes_config = "(T([1026, 768], f16))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f16[1026, 768]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bart/modeling_bart.py:92 in forward, code: position_ids = torch.arange(
+        # No stacktrace found for following nodes
         iota_default: "i64[512]" = torch.ops.prims.iota.default(512, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bart/modeling_bart.py:94 in forward, code: ).expand(bsz, -1)
         expand_default: "i64[1, 512]" = torch.ops.aten.expand.default(iota_default, [1, -1]);  iota_default = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bart/modeling_bart.py:98 in forward, code: return super().forward(position_ids + self.offset)
         add_tensor: "i64[1, 512]" = torch.ops.aten.add.Tensor(expand_default, 2);  expand_default = None
         embedding_default: "f16[1, 512, 768]" = torch.ops.aten.embedding.default(arg0_1, add_tensor);  arg0_1 = add_tensor = None
         return embedding_default

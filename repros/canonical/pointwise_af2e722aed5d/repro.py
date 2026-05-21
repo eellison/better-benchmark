@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_M2M100ForConditionalGeneration_train_003
+Label: hf_AlbertForMaskedLM_infer_000
 Pattern hash: af2e722aed5d
-Shape hash: 40a27608
+Shape hash: f63b52c1
 """
 import sys
 from pathlib import Path
@@ -16,16 +16,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([1024, 128, 64], f32), S([64, 16, 128, 64]), S([64, 128, -1]), S([8192, 1024]))"
+_shapes_config = "(T([512, 512, 64], f32), S([8, 64, 512, 64]), S([8, 512, -1]), S([4096, 4096]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, bmm_1: "f32[1024, 128, 64]", _shape_param_0, _shape_param_1, _shape_param_2):
+    def forward(self, bmm_23: "f32[512, 512, 64]", _shape_param_0, _shape_param_1, _shape_param_2):
         # No stacktrace found for following nodes
-        view_default: "f32[64, 16, 128, 64]" = torch.ops.aten.view.default(bmm_1, _shape_param_0);  bmm_1 = _shape_param_0 = None
-        permute_default: "f32[64, 128, 16, 64]" = torch.ops.aten.permute.default(view_default, [0, 2, 1, 3]);  view_default = None
-        clone_default: "f32[64, 128, 16, 64]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
-        view_default_1: "f32[64, 128, 1024]" = torch.ops.aten.view.default(clone_default, _shape_param_1);  clone_default = _shape_param_1 = None
-        view_default_2: "f32[8192, 1024]" = torch.ops.aten.view.default(view_default_1, _shape_param_2);  view_default_1 = _shape_param_2 = None
+        view_default: "f32[8, 64, 512, 64]" = torch.ops.aten.view.default(bmm_23, _shape_param_0);  bmm_23 = _shape_param_0 = None
+        permute_default: "f32[8, 512, 64, 64]" = torch.ops.aten.permute.default(view_default, [0, 2, 1, 3]);  view_default = None
+        clone_default: "f32[8, 512, 64, 64]" = torch.ops.aten.clone.default(permute_default, memory_format = torch.contiguous_format);  permute_default = None
+        view_default_1: "f32[8, 512, 4096]" = torch.ops.aten.view.default(clone_default, _shape_param_1);  clone_default = _shape_param_1 = None
+        view_default_2: "f32[4096, 4096]" = torch.ops.aten.view.default(view_default_1, _shape_param_2);  view_default_1 = _shape_param_2 = None
         return view_default_2
 
 

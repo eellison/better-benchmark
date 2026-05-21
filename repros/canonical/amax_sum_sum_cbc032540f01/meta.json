@@ -31,9 +31,14 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 7,
   "models": [
     "hf_AlbertForMaskedLM_train_000",
-    "hf_MT5ForConditionalGeneration_train_000"
+    "hf_MT5ForConditionalGeneration_train_000",
+    "torchbench_hf_Albert_train_000",
+    "torchbench_hf_Bert_large_train_000",
+    "torchbench_hf_Bert_train_000",
+    "torchbench_hf_DistilBert_train_000",
+    "torchbench_hf_Roberta_base_train_000"
   ]
 }

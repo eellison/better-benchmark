@@ -1,0 +1,48 @@
+{
+  "pattern_hash": "512dcf4a167b",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 28,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_beit_base_patch16_224_train_001",
+    "timm_timm_beit_base_patch16_224_train_train_001"
+  ]
+}

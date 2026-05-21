@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "7ee057acd9bc",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.scatter_add.default",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims._low_memory_max_pool_offsets_to_indices.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_alexnet_train_001"
+  ]
+}

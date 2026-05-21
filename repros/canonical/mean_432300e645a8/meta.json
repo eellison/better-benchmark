@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "432300e645a8",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.mean.dim",
+    "aten.relu.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_squeezenet1_1_infer_000"
+  ]
+}

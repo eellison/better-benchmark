@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "0e9b16fc1230",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 19,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.fma.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_hf_Bert_large_train_001"
+  ]
+}

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_timm_beit_base_patch16_224_train_train_000
+Label: timm_beit_base_patch16_224_train_000
 Pattern hash: f69b8a5457fd
 Shape hash: 3eea3606
 """

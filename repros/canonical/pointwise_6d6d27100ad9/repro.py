@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_phlippe_densenet_infer
+Label: torchbench_phlippe_densenet_infer_000
 Pattern hash: 6d6d27100ad9
 Shape hash: 1c106828
 """
@@ -20,10 +20,8 @@ _shapes_config = "(T([128, 16, 4, 4], f32), T([128, 152, 4, 4], f32), T([168], f
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_49: "f32[128, 16, 4, 4]", cat_21: "f32[128, 152, 4, 4]", arg248_1: "f32[168]", arg249_1: "f32[168]", arg250_1: "f32[168]", arg251_1: "f32[168]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/phlippe_densenet/__init__.py:33 in forward, code: out = torch.cat([out, x], dim=1)
+        # No stacktrace found for following nodes
         cat_default: "f32[128, 168, 4, 4]" = torch.ops.aten.cat.default([convolution_49, cat_21], 1);  convolution_49 = cat_21 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/phlippe_densenet/__init__.py:32 in forward, code: out = self.net(x)
         unsqueeze_default: "f32[168, 1]" = torch.ops.aten.unsqueeze.default(arg248_1, -1);  arg248_1 = None
         unsqueeze_default_1: "f32[168, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[128, 168, 4, 4]" = torch.ops.aten.sub.Tensor(cat_default, unsqueeze_default_1);  cat_default = unsqueeze_default_1 = None

@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "66dc4fac757d",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 17,
+  "origin_ops": [
+    "aten.abs.default",
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.eq.Scalar",
+    "aten.exp.default",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.log.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_hf_Reformer_infer_005"
+  ]
+}

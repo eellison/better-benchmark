@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "e947949b6a0b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "torchbench_hf_Reformer_train_004",
+    "torchbench_hf_Reformer_train_006",
+    "torchbench_hf_Reformer_train_008"
+  ]
+}

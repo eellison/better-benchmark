@@ -13,7 +13,7 @@
     "aten.view.default",
     "prims.fma.default"
   ],
-  "n_models": 8,
+  "n_models": 9,
   "models": [
     "hf_AlbertForMaskedLM_train_001",
     "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_train_010",
@@ -22,6 +22,7 @@
     "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_train_031",
     "timm_swin_base_patch4_window7_224_train_001",
     "timm_swin_base_patch4_window7_224_train_041",
-    "timm_timm_swin_base_patch4_window7_224_train_train_001"
+    "timm_timm_swin_base_patch4_window7_224_train_train_001",
+    "torchbench_hf_Albert_train_001"
   ]
 }

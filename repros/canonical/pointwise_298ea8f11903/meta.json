@@ -11,8 +11,9 @@
     "aten.mul.Tensor",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "nvidia_deeprecommender"
+    "torchbench_nvidia_deeprecommender_infer_000",
+    "torchbench_nvidia_deeprecommender_train_000"
   ]
 }

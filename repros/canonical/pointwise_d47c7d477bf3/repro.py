@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_mobilenet_v3_large_infer
+Label: torchbench_mobilenet_v3_large_infer_000
 Pattern hash: d47c7d477bf3
 Shape hash: 7665b346
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([256, 1280], f16))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm: "f16[256, 1280]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mobilenetv3.py:216 in _forward_impl, code: x = self.classifier(x)
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[256, 1280]" = torch.ops.prims.convert_element_type.default(addmm, torch.float32);  addmm = None
         add_tensor: "f32[256, 1280]" = torch.ops.aten.add.Tensor(convert_element_type_default, 3)
         clamp_min_default: "f32[256, 1280]" = torch.ops.aten.clamp_min.default(add_tensor, 0);  add_tensor = None

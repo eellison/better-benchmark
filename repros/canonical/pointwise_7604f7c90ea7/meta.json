@@ -1,0 +1,36 @@
+{
+  "pattern_hash": "7604f7c90ea7",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 21,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.avg_pool2d.default",
+    "aten.erf.default",
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sigmoid.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "timm_dm_nfnet_f0_train",
+    "timm_dm_nfnet_f0_train_000",
+    "timm_timm_dm_nfnet_f0_train_train_000",
+    "torchbench_timm_nfnet_train_000"
+  ]
+}

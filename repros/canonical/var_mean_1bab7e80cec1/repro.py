@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_timm_deit_base_distilled_patch16_224_infer_infer_000
+Label: timm_deit_base_distilled_patch16_224_infer_000
 Pattern hash: 1bab7e80cec1
 Shape hash: 575fc6d7
 """

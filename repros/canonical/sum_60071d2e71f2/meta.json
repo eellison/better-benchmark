@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "60071d2e71f2",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.exp.default",
+    "aten.le.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_nvidia_deeprecommender_train_001"
+  ]
+}

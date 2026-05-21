@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "a80f6127c2d6",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.slice.Tensor",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_hf_Bart_infer_005"
+  ]
+}

@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_moco_infer
+Label: torchbench_moco_infer_009
 Pattern hash: 3320bac17d54
 Shape hash: e92a1ac3
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1], i64))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg2_1: "i64[1]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:75 in torch_dynamo_resume_in__dequeue_and_enqueue_at_68, code: self.queue_ptr[0] = ptr
+        # No stacktrace found for following nodes
         select_int: "i64[]" = torch.ops.aten.select.int(arg2_1, 0, 0)
         full_default: "i64[]" = torch.ops.aten.full.default([], 32, dtype = torch.int64, layout = torch.strided, device = device(type='cpu'), pin_memory = False)
         copy_default: "i64[]" = torch.ops.aten.copy.default(select_int, full_default);  select_int = full_default = None

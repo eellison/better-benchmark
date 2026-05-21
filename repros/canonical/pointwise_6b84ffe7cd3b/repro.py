@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_mobilenet_v3_large_train
+Label: torchbench_mobilenet_v3_large_train_000
 Pattern hash: 6b84ffe7cd3b
 Shape hash: f2681a3a
 """
@@ -20,17 +20,13 @@ _shapes_config = "(T([256, 1280], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, addmm: "f32[256, 1280]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mobilenetv3.py:216 in _forward_impl, code: x = self.classifier(x)
+        # No stacktrace found for following nodes
         add_tensor: "f32[256, 1280]" = torch.ops.aten.add.Tensor(addmm, 3)
         clamp_min_default: "f32[256, 1280]" = torch.ops.aten.clamp_min.default(add_tensor, 0);  add_tensor = None
         clamp_max_default: "f32[256, 1280]" = torch.ops.aten.clamp_max.default(clamp_min_default, 6);  clamp_min_default = None
         mul_tensor: "f32[256, 1280]" = torch.ops.aten.mul.Tensor(addmm, clamp_max_default);  addmm = clamp_max_default = None
         div_tensor: "f32[256, 1280]" = torch.ops.aten.div.Tensor(mul_tensor, 6);  mul_tensor = None
-
-        # No stacktrace found for following nodes
         inductor_seeds_default: "i64[1]" = torch.ops.prims.inductor_seeds.default(1, device(type='cuda', index=0))
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mobilenetv3.py:216 in _forward_impl, code: x = self.classifier(x)
         inductor_lookup_seed_default: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds_default, 0);  inductor_seeds_default = None
         inductor_random_default: "f32[256, 1280]" = torch.ops.prims.inductor_random.default([256, 1280], inductor_lookup_seed_default, 'rand');  inductor_lookup_seed_default = None
         lt_scalar: "b8[256, 1280]" = torch.ops.aten.lt.Scalar(inductor_random_default, 0.8);  inductor_random_default = None

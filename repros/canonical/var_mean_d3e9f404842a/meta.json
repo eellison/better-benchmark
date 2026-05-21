@@ -1,0 +1,46 @@
+{
+  "pattern_hash": "d3e9f404842a",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 32,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.div.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.expand.default",
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.permute.default",
+    "aten.rsqrt.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_hf_GPT2_train_000"
+  ]
+}

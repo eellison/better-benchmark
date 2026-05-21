@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_ghostnet_100_infer
+Label: timm_ghostnet_100_infer_000
 Pattern hash: 03851ba8cf43
 Shape hash: 6e2d6904
 """
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([960], f32), T([512, 960, 7, 7], f32, stride=(47040, 1, 6720, 960)), T([960], f32), T([960], f32), T([960], f32))"
+_shapes_config = "(T([960], f32), T([512, 960, 7, 7], f32), T([960], f32), T([960], f32), T([960], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg425_1: "f32[960]", convolution_93: "f32[512, 960, 7, 7]", arg426_1: "f32[960]", arg427_1: "f32[960]", arg428_1: "f32[960]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[960, 1]" = torch.ops.aten.unsqueeze.default(arg425_1, -1);  arg425_1 = None
         unsqueeze_default_1: "f32[960, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[512, 960, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_93, unsqueeze_default_1);  convolution_93 = unsqueeze_default_1 = None
@@ -37,11 +37,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_6: "f32[960, 1]" = torch.ops.aten.unsqueeze.default(arg428_1, -1);  arg428_1 = None
         unsqueeze_default_7: "f32[960, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[512, 960, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:148 in forward, code: x = self.act(x)
         relu_default: "f32[512, 960, 7, 7]" = torch.ops.aten.relu.default(add_tensor_1);  add_tensor_1 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/adaptive_avgmax_pool.py:172 in forward, code: x = self.pool(x)
         mean_dim: "f32[512, 960, 1, 1]" = torch.ops.aten.mean.dim(relu_default, [-1, -2], True);  relu_default = None
         as_strided_default: "f32[512, 960, 1, 1]" = torch.ops.aten.as_strided.default(mean_dim, [512, 960, 1, 1], [960, 1, 960, 960]);  mean_dim = None
         return as_strided_default

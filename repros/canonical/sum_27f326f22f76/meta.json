@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "27f326f22f76",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_lennard_jones_train_001"
+  ]
+}

@@ -31,6 +31,6 @@
   ],
   "n_models": 1,
   "models": [
-    "timm_efficientnet"
+    "torchbench_timm_efficientnet_infer_000"
   ]
 }

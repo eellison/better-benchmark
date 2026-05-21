@@ -11,8 +11,9 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_Bart"
+    "torchbench_hf_Bart_train_012",
+    "torchbench_hf_Bart_train_015"
   ]
 }

@@ -19,9 +19,9 @@ _repro_version = 2
 _shapes_config = "(T([25216, 2304], f32), S([128, 197, 2304]), S([128, 197, 3, 12, -1]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_28: "f32[25216, 2304]", _shape_param_0, _shape_param_1):
+    def forward(self, addmm_44: "f32[25216, 2304]", _shape_param_0, _shape_param_1):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/beit.py:218 in forward, code: qkv = F.linear(x, weight=self.qkv.weight, bias=qkv_bias)
-        reshape_default: "f32[128, 197, 2304]" = torch.ops.aten.reshape.default(addmm_28, _shape_param_0);  addmm_28 = _shape_param_0 = None
+        reshape_default: "f32[128, 197, 2304]" = torch.ops.aten.reshape.default(addmm_44, _shape_param_0);  addmm_44 = _shape_param_0 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/beit.py:219 in forward, code: qkv = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
         reshape_default_1: "f32[128, 197, 3, 12, 64]" = torch.ops.aten.reshape.default(reshape_default, _shape_param_1);  reshape_default = _shape_param_1 = None

@@ -9,9 +9,9 @@
   ],
   "n_models": 4,
   "models": [
-    "hf_Bart",
-    "hf_GPT2",
-    "hf_GPT2_large",
-    "hf_Longformer"
+    "torchbench_hf_Bart_infer_005",
+    "torchbench_hf_GPT2_infer_000",
+    "torchbench_hf_GPT2_large_infer_000",
+    "torchbench_hf_Longformer_infer_003"
   ]
 }

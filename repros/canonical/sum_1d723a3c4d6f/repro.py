@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_demucs_infer
+Label: torchbench_demucs_infer_000
 Pattern hash: 1d723a3c4d6f
 Shape hash: fb801ae1
 """
@@ -20,13 +20,9 @@ _shapes_config = "(T([8, 5, 2, 426888], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[8, 5, 2, 426888]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/demucs/__init__.py:29 in forward, code: sources = streams[:, 1:]
+        # No stacktrace found for following nodes
         slice_tensor: "f32[8, 4, 2, 426888]" = torch.ops.aten.slice.Tensor(arg0_1, 1, 1, 9223372036854775807);  arg0_1 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/demucs/demucs/augment.py:26 in forward, code: wav = wav[..., :length]
         slice_tensor_1: "f32[8, 4, 2, 382788]" = torch.ops.aten.slice.Tensor(slice_tensor, 3, 0, 382788);  slice_tensor = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/demucs/__init__.py:31 in forward, code: mix = sources.sum(dim=1)
         sum_dim_int_list: "f32[8, 2, 382788]" = torch.ops.aten.sum.dim_IntList(slice_tensor_1, [1]);  slice_tensor_1 = None
         return sum_dim_int_list
 

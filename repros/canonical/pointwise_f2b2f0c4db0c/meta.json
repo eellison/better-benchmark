@@ -28,10 +28,10 @@
   ],
   "n_models": 5,
   "models": [
-    "resnet152",
-    "resnet18",
-    "resnet50",
-    "resnext50_32x4d",
-    "timm_regnet"
+    "torchbench_resnet152_infer_000",
+    "torchbench_resnet18_infer_000",
+    "torchbench_resnet50_infer_000",
+    "torchbench_resnext50_32x4d_infer_000",
+    "torchbench_timm_regnet_infer_000"
   ]
 }

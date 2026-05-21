@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "5ccd045f4193",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.mean.dim",
+    "aten.view.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "torchbench_hf_Whisper_infer_000",
+    "torchbench_hf_Whisper_train_001",
+    "torchbench_hf_distil_whisper_infer_000"
+  ]
+}

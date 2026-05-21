@@ -39,14 +39,15 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 7,
+  "n_models": 8,
   "models": [
-    "LearningToPaint",
-    "doctr_det_predictor",
-    "moco",
     "timm_repvgg_a2_infer",
     "timm_repvgg_a2_infer_000",
     "timm_timm_repvgg_a2_infer_infer_000",
-    "torchbench_LearningToPaint_infer_000"
+    "torchbench_LearningToPaint_infer_000",
+    "torchbench_doctr_det_predictor_infer_000",
+    "torchbench_moco_infer_000",
+    "torchbench_moco_infer_002",
+    "torchbench_moco_infer_007"
   ]
 }

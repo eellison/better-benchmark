@@ -22,10 +22,9 @@
     "aten.sub.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 3,
+  "n_models": 2,
   "models": [
     "timm_deit_tiny_patch16_224.fb_in1k_train",
-    "timm_vision_transformer",
     "timm_vit_base_patch14_dinov2.lvd142m_train"
   ]
 }

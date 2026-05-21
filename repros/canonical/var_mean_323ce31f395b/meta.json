@@ -1,0 +1,50 @@
+{
+  "pattern_hash": "323ce31f395b",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 30,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.copy_.default",
+    "aten.copy_.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.rsqrt.default",
+    "aten.squeeze.dims",
+    "aten.squeeze.dims",
+    "aten.squeeze.dims",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 7,
+  "models": [
+    "torchbench_LearningToPaint_train_000",
+    "torchbench_phlippe_resnet_train_000",
+    "torchbench_resnet152_train_000",
+    "torchbench_resnet18_train_000",
+    "torchbench_resnet50_train_000",
+    "torchbench_resnext50_32x4d_train_000",
+    "torchbench_timm_regnet_train_000"
+  ]
+}

@@ -9,13 +9,16 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 6,
+  "n_models": 9,
   "models": [
     "hf_LayoutLMForMaskedLM_infer_000",
     "hf_LayoutLMForMaskedLM_train_000",
     "hf_LayoutLMForMaskedLM_train_001",
     "hf_LayoutLMForMaskedLM_train_009",
     "hf_MegatronBertForCausalLM_train_001",
-    "hf_MegatronBertForCausalLM_train_008"
+    "hf_MegatronBertForCausalLM_train_008",
+    "torchbench_hf_Whisper_infer_000",
+    "torchbench_hf_Whisper_train_000",
+    "torchbench_hf_distil_whisper_infer_000"
   ]
 }

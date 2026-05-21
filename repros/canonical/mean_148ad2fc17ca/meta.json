@@ -30,7 +30,7 @@
   ],
   "n_models": 2,
   "models": [
-    "mnasnet1_0",
-    "shufflenet_v2_x1_0"
+    "torchbench_mnasnet1_0_infer_000",
+    "torchbench_shufflenet_v2_x1_0_infer_000"
   ]
 }

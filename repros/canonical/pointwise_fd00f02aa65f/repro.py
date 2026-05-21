@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_pyhpc_isoneutral_mixing_infer
+Label: torchbench_pyhpc_isoneutral_mixing_infer_000
 Pattern hash: fd00f02aa65f
 Shape hash: d7517139
 """
@@ -20,7 +20,7 @@ _shapes_config = "()"
 
 class Repro(torch.nn.Module):
     def forward(self):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pyhpc_isoneutral_mixing/isoneutral_pytorch.py:21 in get_drhodS, code: return betaS * rho0 * torch.ones_like(temp)
+        # No stacktrace found for following nodes
         full_default: "f64[204, 204, 26]" = torch.ops.aten.full.default([204, 204, 26], 1, dtype = torch.float64, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         return full_default
 

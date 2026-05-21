@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_visformer_small_infer
+Label: timm_timm_visformer_small_infer_infer_000
 Pattern hash: bc30b7a4c3fd
 Shape hash: 540a56ff
 """
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([768], f32), T([128, 768, 7, 7], f32, stride=(37632, 1, 5376, 768)), T([768], f32), T([768], f32), T([768], f32), T([1, 768, 7, 7], f32, stride=(37632, 1, 5376, 768)), T([768], f32), T([768], f32), T([768], f32), T([768], f32))"
+_shapes_config = "(T([768], f32), T([128, 768, 7, 7], f32), T([768], f32), T([768], f32), T([768], f32), T([1, 768, 7, 7], f32), T([768], f32), T([768], f32), T([768], f32), T([768], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg119_1: "f32[768]", convolution_40: "f32[128, 768, 7, 7]", arg120_1: "f32[768]", arg121_1: "f32[768]", arg122_1: "f32[768]", arg123_1: "f32[1, 768, 7, 7]", arg124_1: "f32[768]", arg125_1: "f32[768]", arg126_1: "f32[768]", arg127_1: "f32[768]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/patch_embed.py:141 in forward, code: x = self.norm(x)
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[768, 1]" = torch.ops.aten.unsqueeze.default(arg119_1, -1);  arg119_1 = None
         unsqueeze_default_1: "f32[768, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[128, 768, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_40, unsqueeze_default_1);  convolution_40 = unsqueeze_default_1 = None
@@ -37,11 +37,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_6: "f32[768, 1]" = torch.ops.aten.unsqueeze.default(arg122_1, -1);  arg122_1 = None
         unsqueeze_default_7: "f32[768, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[128, 768, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:462 in forward_features, code: x = self.pos_drop(x + self.pos_embed3)
         add_tensor_2: "f32[128, 768, 7, 7]" = torch.ops.aten.add.Tensor(add_tensor_1, arg123_1);  add_tensor_1 = arg123_1 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:176 in forward, code: x = x + self.drop_path(self.attn(self.norm1(x)))
         unsqueeze_default_8: "f32[768, 1]" = torch.ops.aten.unsqueeze.default(arg124_1, -1);  arg124_1 = None
         unsqueeze_default_9: "f32[768, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_8, -1);  unsqueeze_default_8 = None
         sub_tensor_1: "f32[128, 768, 7, 7]" = torch.ops.aten.sub.Tensor(add_tensor_2, unsqueeze_default_9);  add_tensor_2 = unsqueeze_default_9 = None

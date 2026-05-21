@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_pytorch_CycleGAN_and_pix2pix_infer
+Label: torchbench_pytorch_CycleGAN_and_pix2pix_infer_000
 Pattern hash: 3ea42611b4f0
 Shape hash: 15254c9a
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1, 256, 64, 64], f32), T([1, 256, 64, 64], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution_18: "f32[1, 256, 64, 64]", add_23: "f32[1, 256, 64, 64]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_CycleGAN_and_pix2pix/models/networks.py:564 in forward, code: out = x + self.conv_block(x)  # add skip connections
+        # No stacktrace found for following nodes
         var_mean_correction = torch.ops.aten.var_mean.correction(convolution_18, [0, 2, 3], correction = 0, keepdim = True)
         getitem: "f32[1, 256, 1, 1]" = var_mean_correction[0]
         getitem_1: "f32[1, 256, 1, 1]" = var_mean_correction[1];  var_mean_correction = None
@@ -29,8 +29,6 @@ class Repro(torch.nn.Module):
         rsqrt_default: "f32[1, 256, 1, 1]" = torch.ops.aten.rsqrt.default(add_tensor);  add_tensor = None
         mul_tensor: "f32[1, 256, 64, 64]" = torch.ops.aten.mul.Tensor(sub_tensor, rsqrt_default);  sub_tensor = rsqrt_default = None
         add_tensor_1: "f32[1, 256, 64, 64]" = torch.ops.aten.add.Tensor(add_23, mul_tensor);  add_23 = mul_tensor = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:5462 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
         iota_default: "i64[66]" = torch.ops.prims.iota.default(66, start = -1, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
         abs_default: "i64[66]" = torch.ops.aten.abs.default(iota_default);  iota_default = None
         sub_tensor_1: "i64[66]" = torch.ops.aten.sub.Tensor(63, abs_default);  abs_default = None

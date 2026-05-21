@@ -11,6 +11,6 @@
   ],
   "n_models": 1,
   "models": [
-    "vgg16"
+    "torchbench_vgg16_infer_000"
   ]
 }

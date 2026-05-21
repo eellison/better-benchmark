@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "b1d8f8a4704b",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.erf.default",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_timm_nfnet_train_000"
+  ]
+}

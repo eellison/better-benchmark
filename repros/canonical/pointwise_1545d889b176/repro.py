@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_LearningToPaint_infer
+Label: torchbench_LearningToPaint_infer_000
 Pattern hash: 1545d889b176
 Shape hash: 53fb4d3f
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([256], f32), T([1024, 256, 8, 8], f32), T([256], f32), T([2
 
 class Repro(torch.nn.Module):
     def forward(self, arg77_1: "f32[256]", convolution_15: "f32[1024, 256, 8, 8]", arg78_1: "f32[256]", arg79_1: "f32[256]", arg80_1: "f32[256]", relu_10: "f32[1024, 256, 8, 8]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/LearningToPaint/baseline/DRL/actor.py:55 in forward, code: out = self.bn2(self.conv2(out))
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[256, 1]" = torch.ops.aten.unsqueeze.default(arg77_1, -1);  arg77_1 = None
         unsqueeze_default_1: "f32[256, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[1024, 256, 8, 8]" = torch.ops.aten.sub.Tensor(convolution_15, unsqueeze_default_1);  convolution_15 = unsqueeze_default_1 = None
@@ -37,11 +37,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_6: "f32[256, 1]" = torch.ops.aten.unsqueeze.default(arg80_1, -1);  arg80_1 = None
         unsqueeze_default_7: "f32[256, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
         add_tensor_1: "f32[1024, 256, 8, 8]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/LearningToPaint/baseline/DRL/actor.py:56 in forward, code: out += self.shortcut(x)
         add_tensor_2: "f32[1024, 256, 8, 8]" = torch.ops.aten.add.Tensor(add_tensor_1, relu_10);  add_tensor_1 = relu_10 = None
-
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/LearningToPaint/baseline/DRL/actor.py:57 in forward, code: out = F.relu(out)
         relu_default: "f32[1024, 256, 8, 8]" = torch.ops.aten.relu.default(add_tensor_2);  add_tensor_2 = None
         return relu_default
 

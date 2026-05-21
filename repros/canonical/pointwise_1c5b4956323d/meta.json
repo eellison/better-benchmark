@@ -10,8 +10,8 @@
   ],
   "n_models": 3,
   "models": [
-    "hf_Bart",
     "hf_BartForCausalLM_train_003",
-    "hf_MBartForCausalLM_train_003"
+    "hf_MBartForCausalLM_train_003",
+    "torchbench_hf_Bart_train_007"
   ]
 }

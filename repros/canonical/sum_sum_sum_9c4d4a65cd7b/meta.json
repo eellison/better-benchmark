@@ -1,0 +1,48 @@
+{
+  "pattern_hash": "9c4d4a65cd7b",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 27,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_deit_base_distilled_patch16_224_train"
+  ]
+}

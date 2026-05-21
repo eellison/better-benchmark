@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_repvgg_a2_infer
+Label: timm_repvgg_a2_infer_000
 Pattern hash: 42ab411e21f6
 Shape hash: 9f8c2e21
 """
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([384], f32), T([128, 384, 14, 14], f32, stride=(75264, 1, 5376, 384)), T([384], f32), T([384], f32), T([384], f32), T([384], f32), T([128, 384, 14, 14], f32, stride=(75264, 1, 5376, 384)), T([384], f32), T([384], f32), T([384], f32), T([384], f32), T([128, 384, 14, 14], f32, stride=(75264, 1, 5376, 384)), T([384], f32), T([384], f32), T([384], f32))"
+_shapes_config = "(T([384], f32), T([128, 384, 14, 14], f32), T([384], f32), T([384], f32), T([384], f32), T([384], f32), T([128, 384, 14, 14], f32), T([384], f32), T([384], f32), T([384], f32), T([384], f32), T([128, 384, 14, 14], f32), T([384], f32), T([384], f32), T([384], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg270_1: "f32[384]", convolution_40: "f32[128, 384, 14, 14]", arg271_1: "f32[384]", arg272_1: "f32[384]", arg273_1: "f32[384]", arg275_1: "f32[384]", convolution_41: "f32[128, 384, 14, 14]", arg276_1: "f32[384]", arg277_1: "f32[384]", arg278_1: "f32[384]", arg265_1: "f32[384]", relu_19: "f32[128, 384, 14, 14]", arg266_1: "f32[384]", arg267_1: "f32[384]", arg268_1: "f32[384]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
+        # No stacktrace found for following nodes
         unsqueeze_default: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg270_1, -1);  arg270_1 = None
         unsqueeze_default_1: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[128, 384, 14, 14]" = torch.ops.aten.sub.Tensor(convolution_40, unsqueeze_default_1);  convolution_40 = unsqueeze_default_1 = None
@@ -53,11 +53,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_14: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg278_1, -1);  arg278_1 = None
         unsqueeze_default_15: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_14, -1);  unsqueeze_default_14 = None
         add_tensor_3: "f32[128, 384, 14, 14]" = torch.ops.aten.add.Tensor(mul_tensor_5, unsqueeze_default_15);  mul_tensor_5 = unsqueeze_default_15 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/byobnet.py:751 in forward, code: x = self.conv_1x1(x) + self.conv_kxk(x)
         add_tensor_4: "f32[128, 384, 14, 14]" = torch.ops.aten.add.Tensor(add_tensor_1, add_tensor_3);  add_tensor_1 = add_tensor_3 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm_act.py:136 in forward, code: x = F.batch_norm(
         unsqueeze_default_16: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg265_1, -1);  arg265_1 = None
         unsqueeze_default_17: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_16, -1);  unsqueeze_default_16 = None
         sub_tensor_2: "f32[128, 384, 14, 14]" = torch.ops.aten.sub.Tensor(relu_19, unsqueeze_default_17);  relu_19 = unsqueeze_default_17 = None
@@ -74,11 +70,7 @@ class Repro(torch.nn.Module):
         unsqueeze_default_22: "f32[384, 1]" = torch.ops.aten.unsqueeze.default(arg268_1, -1);  arg268_1 = None
         unsqueeze_default_23: "f32[384, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_22, -1);  unsqueeze_default_22 = None
         add_tensor_6: "f32[128, 384, 14, 14]" = torch.ops.aten.add.Tensor(mul_tensor_8, unsqueeze_default_23);  mul_tensor_8 = unsqueeze_default_23 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/byobnet.py:753 in forward, code: x += identity
         add_tensor_7: "f32[128, 384, 14, 14]" = torch.ops.aten.add.Tensor(add_tensor_4, add_tensor_6);  add_tensor_4 = add_tensor_6 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/byobnet.py:755 in forward, code: return self.act(x)
         relu_default: "f32[128, 384, 14, 14]" = torch.ops.aten.relu.default(add_tensor_7);  add_tensor_7 = None
         return relu_default
 

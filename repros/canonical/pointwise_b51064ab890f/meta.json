@@ -9,24 +9,19 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 17,
+  "n_models": 12,
   "models": [
     "hf_GPTJForCausalLM_infer_000",
     "hf_GPTJForCausalLM_train_000",
-    "hf_GPTJForCausalLM_train_001",
-    "hf_GPTJForCausalLM_train_007",
     "hf_GPTJForQuestionAnswering_infer_000",
     "hf_GPTJForQuestionAnswering_train_000",
-    "hf_GPTJForQuestionAnswering_train_001",
-    "hf_GPTJForQuestionAnswering_train_007",
     "hf_LayoutLMForMaskedLM_infer_000",
     "hf_LayoutLMForMaskedLM_train_000",
-    "hf_LayoutLMForMaskedLM_train_001",
-    "hf_LayoutLMForMaskedLM_train_009",
     "hf_MT5ForConditionalGeneration_infer_000",
     "hf_MegatronBertForCausalLM_infer_000",
     "hf_MegatronBertForCausalLM_train_000",
-    "hf_MegatronBertForCausalLM_train_001",
-    "hf_MegatronBertForCausalLM_train_008"
+    "torchbench_hf_Whisper_infer_000",
+    "torchbench_hf_distil_whisper_infer_000",
+    "torchbench_moondream_infer_000"
   ]
 }

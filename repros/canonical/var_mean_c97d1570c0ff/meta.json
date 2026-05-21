@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "c97d1570c0ff",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 13,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 12,
+  "models": [
+    "hf_AlbertForMaskedLM_train_000",
+    "hf_GPTNeoForCausalLM_train_000",
+    "hf_GPTNeoForSequenceClassification_train_000",
+    "timm_deit_base_distilled_patch16_224_train_000",
+    "timm_deit_tiny_patch16_224.fb_in1k_train_000",
+    "timm_mobilevit_s_train_000",
+    "timm_timm_deit_base_distilled_patch16_224_train_train_000",
+    "timm_timm_deit_tiny_patch16_224.fb_in1k_train_train_000",
+    "timm_timm_mobilevit_s_train_train_000",
+    "torchbench_hf_Albert_train_000",
+    "torchbench_nanogpt_train_000",
+    "torchbench_timm_vision_transformer_train_000"
+  ]
+}

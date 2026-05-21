@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "31bf563cdf96",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm_beit_base_patch16_224_train"
+  ]
+}

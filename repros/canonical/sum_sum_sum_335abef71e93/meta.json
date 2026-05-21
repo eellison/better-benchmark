@@ -1,0 +1,42 @@
+{
+  "pattern_hash": "335abef71e93",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 24,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_hf_Whisper_train_003"
+  ]
+}

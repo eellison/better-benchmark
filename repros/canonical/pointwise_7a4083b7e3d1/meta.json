@@ -27,16 +27,16 @@
   ],
   "n_models": 11,
   "models": [
-    "densenet121",
-    "mnasnet1_0",
-    "mobilenet_v3_large",
-    "resnet152",
-    "resnet18",
-    "resnet50",
-    "resnext50_32x4d",
-    "shufflenet_v2_x1_0",
-    "timm_regnet",
-    "timm_resnest",
-    "timm_vovnet"
+    "torchbench_densenet121_infer_000",
+    "torchbench_mnasnet1_0_infer_000",
+    "torchbench_mobilenet_v3_large_infer_000",
+    "torchbench_resnet152_infer_000",
+    "torchbench_resnet18_infer_000",
+    "torchbench_resnet50_infer_000",
+    "torchbench_resnext50_32x4d_infer_000",
+    "torchbench_shufflenet_v2_x1_0_infer_000",
+    "torchbench_timm_regnet_infer_000",
+    "torchbench_timm_resnest_infer_000",
+    "torchbench_timm_vovnet_infer_000"
   ]
 }

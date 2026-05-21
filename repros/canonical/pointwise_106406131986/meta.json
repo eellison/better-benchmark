@@ -14,7 +14,7 @@
   ],
   "n_models": 2,
   "models": [
-    "hf_Whisper",
-    "hf_distil_whisper"
+    "torchbench_hf_Whisper_infer_000",
+    "torchbench_hf_distil_whisper_infer_000"
   ]
 }

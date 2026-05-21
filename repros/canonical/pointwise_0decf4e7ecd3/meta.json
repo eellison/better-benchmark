@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "0decf4e7ecd3",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.expand.default",
+    "aten.mul.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 7,
+  "models": [
+    "torchbench_hf_Albert_infer_000",
+    "torchbench_hf_Bart_infer_003",
+    "torchbench_hf_Bart_infer_004",
+    "torchbench_hf_Bert_infer_000",
+    "torchbench_hf_Bert_large_infer_000",
+    "torchbench_hf_DistilBert_infer_000",
+    "torchbench_hf_Roberta_base_infer_000"
+  ]
+}

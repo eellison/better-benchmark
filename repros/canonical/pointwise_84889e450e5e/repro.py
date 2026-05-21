@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_DistillGPT2_infer_000
+Label: hf_AllenaiLongformerBase_infer_003
 Pattern hash: 84889e450e5e
-Shape hash: a6241673
+Shape hash: 09f23c3a
 """
 import sys
 from pathlib import Path
@@ -16,13 +16,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([50257, 768], f32))"
+_shapes_config = "(T([50265, 768], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg1_1: "f32[50257, 768]"):
+    def forward(self, arg5_1: "f32[50265, 768]"):
         # No stacktrace found for following nodes
-        permute_default: "f32[768, 50257]" = torch.ops.aten.permute.default(arg1_1, [1, 0]);  arg1_1 = None
-        constant_pad_nd_default: "f32[768, 50260]" = torch.ops.aten.constant_pad_nd.default(permute_default, [0, 3, 0, 0]);  permute_default = None
+        permute_default: "f32[768, 50265]" = torch.ops.aten.permute.default(arg5_1, [1, 0]);  arg5_1 = None
+        constant_pad_nd_default: "f32[768, 50268]" = torch.ops.aten.constant_pad_nd.default(permute_default, [0, 3, 0, 0]);  permute_default = None
         return constant_pad_nd_default
 
 

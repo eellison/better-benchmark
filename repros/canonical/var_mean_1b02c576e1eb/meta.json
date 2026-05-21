@@ -1,0 +1,39 @@
+{
+  "pattern_hash": "1b02c576e1eb",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 24,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.rsqrt.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "prims.iota.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_GPTNeoForCausalLM_train_000",
+    "hf_GPTNeoForSequenceClassification_train_000"
+  ]
+}

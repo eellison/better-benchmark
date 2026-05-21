@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "4dbee302662f",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 16,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.sigmoid.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_timm_regnet_train_001"
+  ]
+}

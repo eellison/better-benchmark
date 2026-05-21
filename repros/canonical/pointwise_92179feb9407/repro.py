@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_visformer_small_infer
+Label: timm_timm_visformer_small_infer_infer_000
 Pattern hash: 92179feb9407
 Shape hash: 4ae91b05
 """
@@ -16,14 +16,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([128, 768, 7, 7], f32, stride=(37632, 1, 5376, 768)), T([128, 768, 7, 7], f32, stride=(37632, 1, 5376, 768)), T([768], f32), T([768], f32), T([768], f32), T([768], f32))"
+_shapes_config = "(T([128, 768, 7, 7], f32), T([128, 768, 7, 7], f32), T([768], f32), T([768], f32), T([768], f32), T([768], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, add_94: "f32[128, 768, 7, 7]", convolution_54: "f32[128, 768, 7, 7]", arg166_1: "f32[768]", arg167_1: "f32[768]", arg168_1: "f32[768]", arg169_1: "f32[768]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:176 in forward, code: x = x + self.drop_path(self.attn(self.norm1(x)))
+        # No stacktrace found for following nodes
         add_tensor: "f32[128, 768, 7, 7]" = torch.ops.aten.add.Tensor(add_94, convolution_54);  add_94 = convolution_54 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/visformer.py:177 in forward, code: x = x + self.drop_path(self.mlp(self.norm2(x)))
         unsqueeze_default: "f32[768, 1]" = torch.ops.aten.unsqueeze.default(arg166_1, -1);  arg166_1 = None
         unsqueeze_default_1: "f32[768, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[128, 768, 7, 7]" = torch.ops.aten.sub.Tensor(add_tensor, unsqueeze_default_1);  add_tensor = unsqueeze_default_1 = None

@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "b55a3e33e658",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "torchbench_hf_Whisper_infer_000",
+    "torchbench_hf_Whisper_train_000",
+    "torchbench_hf_distil_whisper_infer_000"
+  ]
+}

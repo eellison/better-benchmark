@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_densenet121_infer
+Label: torchbench_densenet121_infer_000
 Pattern hash: 7a4083b7e3d1
 Shape hash: 97f3af02
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([128], f16), T([64, 128, 7, 7], f16), T([128], f16), T([128
 
 class Repro(torch.nn.Module):
     def forward(self, arg596_1: "f16[128]", convolution_118: "f16[64, 128, 7, 7]", arg597_1: "f16[128]", arg598_1: "f16[128]", arg599_1: "f16[128]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:90 in forward, code: new_features = self.conv2(self.relu2(self.norm2(bottleneck_output)))
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[128]" = torch.ops.prims.convert_element_type.default(arg596_1, torch.float32);  arg596_1 = None
         unsqueeze_default: "f32[128, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[128, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None

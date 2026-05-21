@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "06ebd69de9aa",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.div.Tensor",
+    "aten.permute.default",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm_deit_base_distilled_patch16_224_train_001",
+    "timm_timm_deit_base_distilled_patch16_224_train_train_001"
+  ]
+}

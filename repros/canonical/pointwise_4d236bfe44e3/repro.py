@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_beit_base_patch16_224_infer
+Label: timm_beit_base_patch16_224_infer_000
 Pattern hash: 4d236bfe44e3
 Shape hash: 9e714a29
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([768], f32), T([768], f32), T([768], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg205_1: "f32[768]", arg206_1: "f32[768]", arg207_1: "f32[768]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/beit.py:213 in forward, code: qkv_bias = torch.cat((self.q_bias, self.k_bias, self.v_bias))
+        # No stacktrace found for following nodes
         cat_default: "f32[2304]" = torch.ops.aten.cat.default([arg205_1, arg206_1, arg207_1]);  arg205_1 = arg206_1 = arg207_1 = None
         return cat_default
 

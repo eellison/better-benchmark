@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "ac47153c2891",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.empty.memory_format",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.gather.default",
+    "aten.permute.default",
+    "aten.scatter.src",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_hf_Reformer_train_005"
+  ]
+}

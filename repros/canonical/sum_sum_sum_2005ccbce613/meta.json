@@ -1,0 +1,48 @@
+{
+  "pattern_hash": "2005ccbce613",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 28,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf_BartForCausalLM_train_007",
+    "torchbench_hf_Bart_train_011",
+    "torchbench_hf_Bart_train_014"
+  ]
+}

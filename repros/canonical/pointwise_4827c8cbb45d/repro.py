@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_dcgan_infer
+Label: torchbench_dcgan_infer_000
 Pattern hash: 4827c8cbb45d
 Shape hash: 38702c6e
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1024, 64, 32, 32], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, convolution: "f32[1024, 64, 32, 32]"):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dcgan/__init__.py:128 in forward, code: return self.main(input)
+        # No stacktrace found for following nodes
         gt_scalar: "b8[1024, 64, 32, 32]" = torch.ops.aten.gt.Scalar(convolution, 0)
         mul_tensor: "f32[1024, 64, 32, 32]" = torch.ops.aten.mul.Tensor(convolution, 0.2)
         where_self: "f32[1024, 64, 32, 32]" = torch.ops.aten.where.self(gt_scalar, convolution, mul_tensor);  gt_scalar = convolution = mul_tensor = None

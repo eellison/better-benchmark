@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_mnasnet1_0_infer
+Label: torchbench_mnasnet1_0_infer_000
 Pattern hash: 148ad2fc17ca
 Shape hash: 627cd29a
 """
@@ -20,7 +20,7 @@ _shapes_config = "(T([1280], f16), T([256, 1280, 7, 7], f16), T([1280], f16), T(
 
 class Repro(torch.nn.Module):
     def forward(self, arg257_1: "f16[1280]", convolution_51: "f16[256, 1280, 7, 7]", arg258_1: "f16[1280]", arg259_1: "f16[1280]", arg260_1: "f16[1280]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mnasnet.py:159 in forward, code: x = self.layers(x)
+        # No stacktrace found for following nodes
         convert_element_type_default: "f32[1280]" = torch.ops.prims.convert_element_type.default(arg257_1, torch.float32);  arg257_1 = None
         unsqueeze_default: "f32[1280, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
         unsqueeze_default_1: "f32[1280, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
@@ -41,8 +41,6 @@ class Repro(torch.nn.Module):
         add_tensor_1: "f32[256, 1280, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
         convert_element_type_default_2: "f16[256, 1280, 7, 7]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float16);  add_tensor_1 = None
         relu_default: "f16[256, 1280, 7, 7]" = torch.ops.aten.relu.default(convert_element_type_default_2);  convert_element_type_default_2 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mnasnet.py:161 in forward, code: x = x.mean([2, 3])
         mean_dim: "f16[256, 1280]" = torch.ops.aten.mean.dim(relu_default, [2, 3]);  relu_default = None
         return mean_dim
 

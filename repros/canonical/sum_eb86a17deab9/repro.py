@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_AlbertForMaskedLM_train_001
+Label: hf_AllenaiLongformerBase_train_005
 Pattern hash: eb86a17deab9
-Shape hash: c4d2b80d
+Shape hash: 40f7eb36
 """
 import sys
 from pathlib import Path
@@ -16,12 +16,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([8, 512, 128], f32))"
+_shapes_config = "(T([8, 1024, 768], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, view_6: "f32[8, 512, 128]"):
+    def forward(self, arg303_1: "f32[8, 1024, 768]"):
         # No stacktrace found for following nodes
-        sum_dim_int_list: "f32[128]" = torch.ops.aten.sum.dim_IntList(view_6, [0, 1]);  view_6 = None
+        sum_dim_int_list: "f32[768]" = torch.ops.aten.sum.dim_IntList(arg303_1, [0, 1]);  arg303_1 = None
         return sum_dim_int_list
 
 

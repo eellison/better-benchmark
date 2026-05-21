@@ -9,8 +9,9 @@
     "aten.lift_fresh_copy.default",
     "aten.lift_fresh_copy.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "dlrm"
+    "torchbench_dlrm_infer_000",
+    "torchbench_dlrm_train_000"
   ]
 }

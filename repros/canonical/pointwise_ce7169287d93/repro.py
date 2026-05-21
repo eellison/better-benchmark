@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_Reformer_infer
+Label: torchbench_modded_nanogpt_train_023
 Pattern hash: ce7169287d93
 Shape hash: d7517139
 """
@@ -20,8 +20,8 @@ _shapes_config = "()"
 
 class Repro(torch.nn.Module):
     def forward(self):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:167 in _get_least_common_mult_chunk_len, code: return np.lcm(config.lsh_attn_chunk_length, config.local_attn_chunk_length)
-        full_default: "i64[]" = torch.ops.aten.full.default([], 64, dtype = torch.int64, layout = torch.strided, device = device(type='cpu'), pin_memory = False)
+        # No stacktrace found for following nodes
+        full_default: "f32[]" = torch.ops.aten.full.default([], 0.001953125, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         return full_default
 
 

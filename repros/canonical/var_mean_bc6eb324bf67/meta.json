@@ -23,7 +23,7 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 7,
+  "n_models": 12,
   "models": [
     "hf_AllenaiLongformerBase_train_003",
     "hf_BertForMaskedLM_train_000",
@@ -31,6 +31,11 @@
     "hf_DistilBertForMaskedLM_train_000",
     "hf_ElectraForCausalLM_train_000",
     "hf_LayoutLMForMaskedLM_train_000",
-    "hf_MegatronBertForCausalLM_train_000"
+    "hf_MegatronBertForCausalLM_train_000",
+    "torchbench_hf_Bert_large_train_000",
+    "torchbench_hf_Bert_train_000",
+    "torchbench_hf_DistilBert_train_000",
+    "torchbench_hf_Longformer_train_003",
+    "torchbench_hf_Roberta_base_train_000"
   ]
 }

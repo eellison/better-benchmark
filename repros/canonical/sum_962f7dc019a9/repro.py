@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_beit_base_patch16_224_train
+Label: timm_beit_base_patch16_224_train_001
 Pattern hash: 962f7dc019a9
 Shape hash: d6c767ff
 """
@@ -19,9 +19,9 @@ _repro_version = 2
 _shapes_config = "(T([128, 768], f32), T([128, 768], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, mm: "f32[128, 768]", mul_108: "f32[128, 768]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/layers/norm.py:89 in forward, code: x = F.layer_norm(x, self.normalized_shape, self.weight, self.bias, self.eps)
-        mul_tensor: "f32[128, 768]" = torch.ops.aten.mul.Tensor(mm, mul_108);  mm = mul_108 = None
+    def forward(self, mm: "f32[128, 768]", arg307_1: "f32[128, 768]"):
+        # No stacktrace found for following nodes
+        mul_tensor: "f32[128, 768]" = torch.ops.aten.mul.Tensor(mm, arg307_1);  mm = arg307_1 = None
         sum_dim_int_list: "f32[768]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [0]);  mul_tensor = None
         return sum_dim_int_list
 

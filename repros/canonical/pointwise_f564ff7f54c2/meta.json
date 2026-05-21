@@ -32,6 +32,6 @@
   ],
   "n_models": 1,
   "models": [
-    "mobilenet_v3_large"
+    "torchbench_mobilenet_v3_large_infer_000"
   ]
 }

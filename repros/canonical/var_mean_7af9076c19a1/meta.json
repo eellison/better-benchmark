@@ -22,11 +22,12 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "timm_deit_tiny_patch16_224.fb_in1k_train_000",
     "timm_timm_deit_tiny_patch16_224.fb_in1k_train_train_000",
     "timm_timm_vit_base_patch14_dinov2.lvd142m_train_train_000",
-    "timm_vit_base_patch14_dinov2.lvd142m_train_000"
+    "timm_vit_base_patch14_dinov2.lvd142m_train_000",
+    "torchbench_timm_vision_transformer_train_000"
   ]
 }

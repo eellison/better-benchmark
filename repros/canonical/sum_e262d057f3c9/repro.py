@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_BERT_pytorch_train
+Label: timm_adv_inception_v3_train
 Pattern hash: e262d057f3c9
-Shape hash: 2810a40e
+Shape hash: 6f5549c8
 """
 import sys
 from pathlib import Path
@@ -16,13 +16,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([16384, 20005], f32), S([20005]))"
+_shapes_config = "(T([128, 1000], f32), S([1000]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, view_266: "f32[16384, 20005]", _shape_param_0):
-        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/language_model.py:61 in forward, code: return self.softmax(self.linear(x))
-        sum_dim_int_list: "f32[1, 20005]" = torch.ops.aten.sum.dim_IntList(view_266, [0], True);  view_266 = None
-        reshape_default: "f32[20005]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_0);  sum_dim_int_list = _shape_param_0 = None
+    def forward(self, tangents_1: "f32[128, 1000]", _shape_param_0):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/inception_v3.py:430 in forward_head, code: x = self.fc(x)
+        sum_dim_int_list: "f32[1, 1000]" = torch.ops.aten.sum.dim_IntList(tangents_1, [0], True);  tangents_1 = None
+        reshape_default: "f32[1000]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_0);  sum_dim_int_list = _shape_param_0 = None
         return reshape_default
 
 

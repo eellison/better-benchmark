@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_Bart_infer
+Label: vllm_facebook_opt-125m_002
 Pattern hash: f9f5fb61c369
-Shape hash: afe5be13
+Shape hash: afa0359d
 """
 import sys
 from pathlib import Path
@@ -16,14 +16,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([1, 1, 512, 512], b8))"
+_shapes_config = "(T([4, 1, 512, 512], b8))"
 
 class Repro(torch.nn.Module):
-    def forward(self, expand: "b8[1, 1, 512, 512]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
+    def forward(self, arg9_1: "b8[4, 1, 512, 512]"):
+        # No stacktrace found for following nodes
         full_default: "f16[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float16, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         full_default_1: "f16[]" = torch.ops.aten.full.default([], -inf, dtype = torch.float16, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
-        where_self: "f16[1, 1, 512, 512]" = torch.ops.aten.where.self(expand, full_default, full_default_1);  expand = full_default = full_default_1 = None
+        where_self: "f16[4, 1, 512, 512]" = torch.ops.aten.where.self(arg9_1, full_default, full_default_1);  arg9_1 = full_default = full_default_1 = None
         return where_self
 
 

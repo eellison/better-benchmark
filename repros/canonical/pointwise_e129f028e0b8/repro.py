@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_opacus_cifar10_infer
+Label: torchbench_opacus_cifar10_infer_006
 Pattern hash: e129f028e0b8
 Shape hash: 8db2f04a
 """
@@ -20,10 +20,8 @@ _shapes_config = "(T([64, 64, 8, 8], f32), T([64, 64, 8, 8], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[64, 64, 8, 8]", arg1_1: "f32[64, 64, 8, 8]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:102 in torch_dynamo_resume_in_forward_at_97, code: out += identity
+        # No stacktrace found for following nodes
         add_tensor: "f32[64, 64, 8, 8]" = torch.ops.aten.add.Tensor(arg0_1, arg1_1);  arg1_1 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:103 in torch_dynamo_resume_in_forward_at_97, code: out = self.relu(out)
         relu_default: "f32[64, 64, 8, 8]" = torch.ops.aten.relu.default(add_tensor);  add_tensor = None
         copy__default: "f32[64, 64, 8, 8]" = torch.ops.aten.copy_.default(arg0_1, relu_default);  arg0_1 = relu_default = None
         return copy__default

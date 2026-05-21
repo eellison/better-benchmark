@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_M2M100ForConditionalGeneration_train_003
+Label: hf_BlenderbotForCausalLM_train_004
 Pattern hash: 899b2afef412
-Shape hash: c581739b
+Shape hash: 141c3b7c
 """
 import sys
 from pathlib import Path
@@ -16,21 +16,21 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([64, 128, 1024], f32), T([1024], f32), T([1024], f32), S([8192, 1024]))"
+_shapes_config = "(T([32, 128, 2560], f32), T([2560], f32), T([2560], f32), S([4096, 2560]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg2_1: "f32[64, 128, 1024]", arg0_1: "f32[1024]", arg1_1: "f32[1024]", _shape_param_0):
+    def forward(self, arg2_1: "f32[32, 128, 2560]", arg0_1: "f32[2560]", arg1_1: "f32[2560]", _shape_param_0):
         # No stacktrace found for following nodes
         var_mean_correction = torch.ops.aten.var_mean.correction(arg2_1, [2], correction = 0, keepdim = True)
-        getitem: "f32[64, 128, 1]" = var_mean_correction[0]
-        getitem_1: "f32[64, 128, 1]" = var_mean_correction[1];  var_mean_correction = None
-        add_tensor: "f32[64, 128, 1]" = torch.ops.aten.add.Tensor(getitem, 1e-05);  getitem = None
-        rsqrt_default: "f32[64, 128, 1]" = torch.ops.aten.rsqrt.default(add_tensor);  add_tensor = None
-        sub_tensor: "f32[64, 128, 1024]" = torch.ops.aten.sub.Tensor(arg2_1, getitem_1);  arg2_1 = getitem_1 = None
-        mul_tensor: "f32[64, 128, 1024]" = torch.ops.aten.mul.Tensor(sub_tensor, rsqrt_default);  sub_tensor = rsqrt_default = None
-        mul_tensor_1: "f32[64, 128, 1024]" = torch.ops.aten.mul.Tensor(mul_tensor, arg0_1);  mul_tensor = arg0_1 = None
-        add_tensor_1: "f32[64, 128, 1024]" = torch.ops.aten.add.Tensor(mul_tensor_1, arg1_1);  mul_tensor_1 = arg1_1 = None
-        view_default: "f32[8192, 1024]" = torch.ops.aten.view.default(add_tensor_1, _shape_param_0);  add_tensor_1 = _shape_param_0 = None
+        getitem: "f32[32, 128, 1]" = var_mean_correction[0]
+        getitem_1: "f32[32, 128, 1]" = var_mean_correction[1];  var_mean_correction = None
+        add_tensor: "f32[32, 128, 1]" = torch.ops.aten.add.Tensor(getitem, 1e-05);  getitem = None
+        rsqrt_default: "f32[32, 128, 1]" = torch.ops.aten.rsqrt.default(add_tensor);  add_tensor = None
+        sub_tensor: "f32[32, 128, 2560]" = torch.ops.aten.sub.Tensor(arg2_1, getitem_1);  arg2_1 = getitem_1 = None
+        mul_tensor: "f32[32, 128, 2560]" = torch.ops.aten.mul.Tensor(sub_tensor, rsqrt_default);  sub_tensor = rsqrt_default = None
+        mul_tensor_1: "f32[32, 128, 2560]" = torch.ops.aten.mul.Tensor(mul_tensor, arg0_1);  mul_tensor = arg0_1 = None
+        add_tensor_1: "f32[32, 128, 2560]" = torch.ops.aten.add.Tensor(mul_tensor_1, arg1_1);  mul_tensor_1 = arg1_1 = None
+        view_default: "f32[4096, 2560]" = torch.ops.aten.view.default(add_tensor_1, _shape_param_0);  add_tensor_1 = _shape_param_0 = None
         return view_default
 
 

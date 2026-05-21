@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "558522245da0",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 5,
+  "models": [
+    "timm_deit_base_distilled_patch16_224_train",
+    "timm_deit_tiny_patch16_224.fb_in1k_train",
+    "timm_mobilevit_s_train",
+    "timm_vit_base_patch14_dinov2.lvd142m_train",
+    "timm_vit_base_patch16_siglip_256_train"
+  ]
+}

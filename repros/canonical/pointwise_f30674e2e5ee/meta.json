@@ -6,13 +6,12 @@
   "origin_ops": [
     "aten.constant_pad_nd.default"
   ],
-  "n_models": 13,
+  "n_models": 14,
   "models": [
     "timm_dm_nfnet_f0_infer",
     "timm_dm_nfnet_f0_infer_000",
     "timm_dm_nfnet_f0_train",
     "timm_dm_nfnet_f0_train_000",
-    "timm_nfnet",
     "timm_tf_efficientnet_b0_infer",
     "timm_tf_efficientnet_b0_infer_000",
     "timm_tf_efficientnet_b0_train",
@@ -20,6 +19,8 @@
     "timm_timm_dm_nfnet_f0_infer_infer_000",
     "timm_timm_dm_nfnet_f0_train_train_000",
     "timm_timm_tf_efficientnet_b0_infer_infer_000",
-    "timm_timm_tf_efficientnet_b0_train_train_000"
+    "timm_timm_tf_efficientnet_b0_train_train_000",
+    "torchbench_timm_nfnet_infer_000",
+    "torchbench_timm_nfnet_train_000"
   ]
 }

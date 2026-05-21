@@ -1,0 +1,49 @@
+{
+  "pattern_hash": "7b9c13470fca",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 31,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.relu.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.fma.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench_timm_resnest_train_001"
+  ]
+}

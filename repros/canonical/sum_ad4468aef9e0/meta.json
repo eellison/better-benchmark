@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "ad4468aef9e0",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf_DistillGPT2_train_003",
+    "hf_DistillGPT2_train_010",
+    "hf_GPT2ForSequenceClassification_train_001",
+    "hf_GPT2ForSequenceClassification_train_008",
+    "torchbench_hf_GPT2_large_train_002",
+    "torchbench_hf_GPT2_train_002"
+  ]
+}

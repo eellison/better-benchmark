@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_hf_Bart_train
+Label: torchbench_hf_Bart_train_012
 Pattern hash: 37c9e37865c1
 Shape hash: c08053bf
 """
@@ -19,14 +19,14 @@ _repro_version = 2
 _shapes_config = "(T([1, 512], i64, gen=Index(1026)), T([1, 512, 768], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, add: "i64[1, 512]", tangents_1: "f32[1, 512, 768]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bart/modeling_bart.py:98 in forward, code: return super().forward(position_ids + self.offset)
-        eq_scalar: "b8[1, 512]" = torch.ops.aten.eq.Scalar(add, -1)
+    def forward(self, arg0_1: "i64[1, 512]", arg1_1: "f32[1, 512, 768]"):
+        # No stacktrace found for following nodes
+        eq_scalar: "b8[1, 512]" = torch.ops.aten.eq.Scalar(arg0_1, -1)
         unsqueeze_default: "b8[1, 512, 1]" = torch.ops.aten.unsqueeze.default(eq_scalar, -1);  eq_scalar = None
         full_default: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
-        where_self: "f32[1, 512, 768]" = torch.ops.aten.where.self(unsqueeze_default, full_default, tangents_1);  unsqueeze_default = full_default = tangents_1 = None
+        where_self: "f32[1, 512, 768]" = torch.ops.aten.where.self(unsqueeze_default, full_default, arg1_1);  unsqueeze_default = full_default = arg1_1 = None
         full_default_1: "f32[1026, 768]" = torch.ops.aten.full.default([1026, 768], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
-        index_put_default: "f32[1026, 768]" = torch.ops.aten.index_put.default(full_default_1, [add], where_self, True);  full_default_1 = add = where_self = None
+        index_put_default: "f32[1026, 768]" = torch.ops.aten.index_put.default(full_default_1, [arg0_1], where_self, True);  full_default_1 = arg0_1 = where_self = None
         return index_put_default
 
 
