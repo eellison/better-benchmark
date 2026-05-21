@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([1024, 512], f32), T([1024, 512, 4, 4], f32), T([1024, 512, 4, 4], f32, stride=(8192, 1, 2048, 512)), T([1, 512, 1, 1], f32), T([512], f32), T([512], f32), S([1024, 512, 1, 1]))"
+
 class Repro(torch.nn.Module):
     def forward(self, mm: "f32[1024, 512]", relu_16: "f32[1024, 512, 4, 4]", convolution_20: "f32[1024, 512, 4, 4]", unsqueeze_86: "f32[1, 512, 1, 1]", squeeze_61: "f32[512]", primals_126: "f32[512]", _shape_param_0):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/LearningToPaint/baseline/DRL/actor.py:134 in forward, code: x = x.view(x.size(0), -1)
@@ -54,16 +57,10 @@ class Repro(torch.nn.Module):
         return mul_tensor_7
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([1024, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 512, 4, 4], dtype=torch.float32, device='cuda'),
-    torch.randn(8388608, dtype=torch.float32, device='cuda').as_strided([1024, 512, 4, 4], [8192, 1, 2048, 512]),  # convolution_20
-    torch.randn([1, 512, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    [1024, 512, 1, 1],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

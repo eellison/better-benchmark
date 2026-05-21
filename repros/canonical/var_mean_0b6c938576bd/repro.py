@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([1024, 256, 8, 8], f32), T([256], f32), T([256], f32), T([1024, 256, 8, 8], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_15: "f32[1024, 256, 8, 8]", primals_96: "f32[256]", primals_97: "f32[256]", relu_10: "f32[1024, 256, 8, 8]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/LearningToPaint/baseline/DRL/actor.py:55 in forward, code: out = self.bn2(self.conv2(out))
@@ -40,13 +43,10 @@ class Repro(torch.nn.Module):
         return relu_default
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([1024, 256, 8, 8], dtype=torch.float32, device='cuda'),
-    torch.randn([256], dtype=torch.float32, device='cuda'),
-    torch.randn([256], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 256, 8, 8], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

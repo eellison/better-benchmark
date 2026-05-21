@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([128, 128, 20005], f32), T([128, 128, 20005], f32), T([20005, 768], f32), T([128, 2], f32), T([128, 2], f32), T([2, 768], f32), S([16384, 20005]))"
+
 class Repro(torch.nn.Module):
     def forward(self, tangents_2: "f32[128, 128, 20005]", sub_39: "f32[128, 128, 20005]", primals_200: "f32[20005, 768]", sub_37: "f32[128, 2]", tangents_1: "f32[128, 2]", primals_198: "f32[2, 768]", _shape_param_0):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/language_model.py:61 in forward, code: return self.softmax(self.linear(x))
@@ -36,16 +39,10 @@ class Repro(torch.nn.Module):
         return (reshape_default, permute_default_1, sub_tensor_1, permute_default_3)
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([128, 128, 20005], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 128, 20005], dtype=torch.float32, device='cuda'),
-    torch.randn([20005, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 2], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 2], dtype=torch.float32, device='cuda'),
-    torch.randn([2, 768], dtype=torch.float32, device='cuda'),
-    [16384, 20005],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

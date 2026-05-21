@@ -25,8 +25,9 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "timm_vision_transformer"
+    "timm_vision_transformer",
+    "timm_vision_transformer_large"
   ]
 }

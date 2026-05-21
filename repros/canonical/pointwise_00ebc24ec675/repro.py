@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([1024, 192, 13, 13], f32, stride=(32448, 1, 2496, 192)), T([1024, 192, 13, 13], i8, stride=(32448, 1, 2496, 192), gen=Index(9)), T([1024, 192, 27, 27], b8, stride=(139968, 1, 5184, 192)), T([], f32), S([196608, 169]), S([196608, 169]), S([1024, 192, 27, 27]))"
+
 class Repro(torch.nn.Module):
     def forward(self, getitem_12: "f32[1024, 192, 13, 13]", getitem_3: "i8[1024, 192, 13, 13]", le_5: "b8[1024, 192, 27, 27]", full_default: "f32[]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:48 in forward, code: x = self.features(x)
@@ -28,16 +31,10 @@ class Repro(torch.nn.Module):
         return where_self
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn(33226752, dtype=torch.float32, device='cuda').as_strided([1024, 192, 13, 13], [32448, 1, 2496, 192]),  # getitem_12
-    torch.randint(0, 9, (33226752,), dtype=torch.int8, device='cuda').as_strided([1024, 192, 13, 13], [32448, 1, 2496, 192]),  # getitem_3
-    torch.randint(0, 2, (143327232,), dtype=torch.bool, device='cuda').as_strided([1024, 192, 27, 27], [139968, 1, 5184, 192]),  # le_5
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    [196608, 169],  # _shape_param_0
-    [196608, 169],  # _shape_param_1
-    [1024, 192, 27, 27],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

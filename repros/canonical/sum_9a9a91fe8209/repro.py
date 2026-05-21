@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([1536, 128, 128], f32), T([128, 12, 128, 128], b8), T([128, 12, 128, 128], f32), T([128, 1, 128, 128], b8), T([], f32), S([128, 12, 128, 128]), S([1536, 128, 128]))"
+
 class Repro(torch.nn.Module):
     def forward(self, bmm_65: "f32[1536, 128, 128]", gt_7: "b8[128, 12, 128, 128]", div_6: "f32[128, 12, 128, 128]", eq: "b8[128, 1, 128, 128]", full_default_13: "f32[]", _shape_param_0, _shape_param_1):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/attention/single.py:41 in forward, code: return torch.matmul(p_attn, value), p_attn
@@ -40,16 +43,10 @@ class Repro(torch.nn.Module):
         return reshape_default_1
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([1536, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [128, 12, 128, 128], dtype=torch.bool, device='cuda'),
-    torch.randn([128, 12, 128, 128], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [128, 1, 128, 128], dtype=torch.bool, device='cuda'),
-    torch.randn([], dtype=torch.float32, device='cuda'),
-    [128, 12, 128, 128],  # _shape_param_0
-    [1536, 128, 128],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

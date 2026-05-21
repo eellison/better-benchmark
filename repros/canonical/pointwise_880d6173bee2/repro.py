@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([], i64), T([1, 128, 1, 1], f32), T([1, 128, 1, 1], f32), T([128], f32), T([1, 128, 1, 1], f32), T([128], f32), T([], i64), T([1, 256, 1, 1], f32), T([1, 256, 1, 1], f32), T([256], f32), T([1, 256, 1, 1], f32), T([256], f32), T([], i64), T([1, 512, 1, 1], f32), T([1, 512, 1, 1], f32), T([512], f32), T([1, 512, 1, 1], f32), T([512], f32), T([1024, 1, 1, 1], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, primals_4: "i64[]", getitem_1: "f32[1, 128, 1, 1]", rsqrt: "f32[1, 128, 1, 1]", primals_5: "f32[128]", getitem: "f32[1, 128, 1, 1]", primals_6: "f32[128]", primals_10: "i64[]", getitem_3: "f32[1, 256, 1, 1]", rsqrt_1: "f32[1, 256, 1, 1]", primals_11: "f32[256]", getitem_2: "f32[1, 256, 1, 1]", primals_12: "f32[256]", primals_16: "i64[]", getitem_5: "f32[1, 512, 1, 1]", rsqrt_2: "f32[1, 512, 1, 1]", primals_17: "f32[512]", getitem_4: "f32[1, 512, 1, 1]", primals_18: "f32[512]", convolution_4: "f32[1024, 1, 1, 1]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dcgan/__init__.py:128 in forward, code: return self.main(input)
@@ -75,28 +78,10 @@ class Repro(torch.nn.Module):
         return (squeeze_dims_1, squeeze_dims_4, squeeze_dims_7, sigmoid_default, unsqueeze_default_2, unsqueeze_default_5, unsqueeze_default_8, copy__default, copy__default_1, copy__default_2, copy__default_3, copy__default_4, copy__default_5, copy__default_6, copy__default_7, copy__default_8)
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randint(0, 2, [], dtype=torch.int64, device='cuda'),
-    torch.randn([1, 128, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 128, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 128, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([128], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [], dtype=torch.int64, device='cuda'),
-    torch.randn([1, 256, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 256, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([256], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 256, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([256], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 2, [], dtype=torch.int64, device='cuda'),
-    torch.randn([1, 512, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 512, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    torch.randn([1, 512, 1, 1], dtype=torch.float32, device='cuda'),
-    torch.randn([512], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 1, 1, 1], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

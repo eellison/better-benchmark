@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([1024, 1000], f32), T([1024, 4096], f32), T([1024, 4096], f32), T([1024, 256, 13, 13], f32), T([1024, 256, 13, 13], f32, stride=(43264, 1, 3328, 256)), T([1024, 384, 13, 13], f32, stride=(64896, 1, 4992, 384)), T([1024, 192, 27, 27], f32, stride=(139968, 1, 5184, 192)), T([1024, 64, 55, 55], f32, stride=(193600, 1, 3520, 64)), S([1000]), S([4096]), S([4096]))"
+
 class Repro(torch.nn.Module):
     def forward(self, tangents_1: "f32[1024, 1000]", where: "f32[1024, 4096]", where_1: "f32[1024, 4096]", where_2: "f32[1024, 256, 13, 13]", where_3: "f32[1024, 256, 13, 13]", where_4: "f32[1024, 384, 13, 13]", where_5: "f32[1024, 192, 27, 27]", where_6: "f32[1024, 64, 55, 55]", _shape_param_0, _shape_param_1, _shape_param_2):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:51 in forward, code: x = self.classifier(x)
@@ -37,20 +40,10 @@ class Repro(torch.nn.Module):
         return (permute_default, reshape_default, permute_default_1, reshape_default_1, permute_default_2, reshape_default_2, sum_dim_int_list_3, sum_dim_int_list_4, sum_dim_int_list_5, sum_dim_int_list_6, sum_dim_int_list_7)
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([1024, 1000], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 4096], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 4096], dtype=torch.float32, device='cuda'),
-    torch.randn([1024, 256, 13, 13], dtype=torch.float32, device='cuda'),
-    torch.randn(44302336, dtype=torch.float32, device='cuda').as_strided([1024, 256, 13, 13], [43264, 1, 3328, 256]),  # where_3
-    torch.randn(66453504, dtype=torch.float32, device='cuda').as_strided([1024, 384, 13, 13], [64896, 1, 4992, 384]),  # where_4
-    torch.randn(143327232, dtype=torch.float32, device='cuda').as_strided([1024, 192, 27, 27], [139968, 1, 5184, 192]),  # where_5
-    torch.randn(198246400, dtype=torch.float32, device='cuda').as_strided([1024, 64, 55, 55], [193600, 1, 3520, 64]),  # where_6
-    [1000],  # _shape_param_0
-    [4096],  # _shape_param_1
-    [4096],  # _shape_param_2
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

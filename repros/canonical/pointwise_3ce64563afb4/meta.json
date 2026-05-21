@@ -15,7 +15,7 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 9,
+  "n_models": 10,
   "models": [
     "hf_Bart",
     "hf_Bert",
@@ -25,6 +25,7 @@
     "hf_Roberta_base",
     "hf_Whisper",
     "hf_distil_whisper",
-    "timm_vision_transformer"
+    "timm_vision_transformer",
+    "timm_vision_transformer_large"
   ]
 }

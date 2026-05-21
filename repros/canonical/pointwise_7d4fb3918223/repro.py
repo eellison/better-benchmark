@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_OPTForCausalLM_train
+Label: torchbench_alexnet_train
 Pattern hash: 7d4fb3918223
-Shape hash: 3cd993ce
+Shape hash: 84e52a3a
 """
 import sys
 from pathlib import Path
@@ -15,23 +15,19 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([8192, 3072], f32), T([8192, 3072], f32), T([3072, 768], f32))"
+_repro_version = 2
+_shapes_config = "(T([1024, 4096], f32), T([1024, 4096], f32), T([4096, 4096], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, relu: "f32[8192, 3072]", mm: "f32[8192, 3072]", primals_15: "f32[3072, 768]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:242 in forward, code: hidden_states = self.activation_fn(hidden_states)
-        le_scalar: "b8[8192, 3072]" = torch.ops.aten.le.Scalar(relu, 0);  relu = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
+    def forward(self, relu_6: "f32[1024, 4096]", mm: "f32[1024, 4096]", primals_14: "f32[4096, 4096]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:51 in forward, code: x = self.classifier(x)
+        le_scalar: "b8[1024, 4096]" = torch.ops.aten.le.Scalar(relu_6, 0);  relu_6 = None
         full_default: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:242 in forward, code: hidden_states = self.activation_fn(hidden_states)
-        where_self: "f32[8192, 3072]" = torch.ops.aten.where.self(le_scalar, full_default, mm);  le_scalar = full_default = mm = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:241 in forward, code: hidden_states = self.fc1(hidden_states)
-        permute_default: "f32[768, 3072]" = torch.ops.aten.permute.default(primals_15, [1, 0]);  primals_15 = None
-        permute_default_1: "f32[3072, 768]" = torch.ops.aten.permute.default(permute_default, [1, 0]);  permute_default = None
+        where_self: "f32[1024, 4096]" = torch.ops.aten.where.self(le_scalar, full_default, mm);  le_scalar = full_default = mm = None
+        permute_default: "f32[4096, 4096]" = torch.ops.aten.permute.default(primals_14, [1, 0]);  primals_14 = None
+        permute_default_1: "f32[4096, 4096]" = torch.ops.aten.permute.default(permute_default, [1, 0]);  permute_default = None
         return (where_self, permute_default_1)
+
 
 
 def _default_make_inputs():
