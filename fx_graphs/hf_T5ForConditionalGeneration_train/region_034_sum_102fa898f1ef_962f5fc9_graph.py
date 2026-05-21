@@ -1,0 +1,42 @@
+class GraphModule(torch.nn.Module):
+    def forward(self, mm_98: "f32[8192, 512]", gt_64: "b8[8, 1024, 512]", primals_133: "f32[512]", add_94: "f32[8, 1024, 512]", rsqrt_31: "f32[8, 1024, 1]", gt_63: "b8[8, 1024, 512]", primals_132: "f32[512, 2048]", _shape_param_0, _shape_param_1, _shape_param_2):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:1097 in forward, code: lm_logits = self.lm_head(sequence_output)
+        reshape_default: "f32[8, 1024, 512]" = torch.ops.aten.reshape.default(mm_98, _shape_param_0);  mm_98 = _shape_param_0 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:1095 in forward, code: sequence_output = sequence_output * (self.model_dim**-0.5)
+        mul_tensor: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(reshape_default, 0.04419417382415922);  reshape_default = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:755 in forward, code: hidden_states = self.dropout(hidden_states)
+        convert_element_type_default: "f32[8, 1024, 512]" = torch.ops.prims.convert_element_type.default(gt_64, torch.float32);  gt_64 = None
+        mul_tensor_1: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(convert_element_type_default, 1.1111111111111112);  convert_element_type_default = None
+        mul_tensor_2: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(mul_tensor, mul_tensor_1);  mul_tensor = mul_tensor_1 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:68 in forward, code: return self.weight * hidden_states
+        mul_tensor_3: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(mul_tensor_2, primals_133);  mul_tensor_2 = primals_133 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:62 in forward, code: hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
+        mul_tensor_4: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(mul_tensor_3, add_94)
+        mul_tensor_5: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(mul_tensor_3, rsqrt_31);  mul_tensor_3 = None
+        sum_dim_int_list: "f32[8, 1024, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor_4, [2], True);  mul_tensor_4 = None
+        pow_tensor_scalar: "f32[8, 1024, 1]" = torch.ops.aten.pow.Tensor_Scalar(rsqrt_31, 3);  rsqrt_31 = None
+        mul_scalar: "f32[8, 1024, 1]" = torch.ops.aten.mul.Scalar(sum_dim_int_list, -0.5);  sum_dim_int_list = None
+        mul_tensor_6: "f32[8, 1024, 1]" = torch.ops.aten.mul.Tensor(mul_scalar, pow_tensor_scalar);  mul_scalar = pow_tensor_scalar = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:61 in forward, code: variance = hidden_states.to(torch.float32).pow(2).mean(-1, keepdim=True)
+        expand_default: "f32[8, 1024, 512]" = torch.ops.aten.expand.default(mul_tensor_6, _shape_param_1);  mul_tensor_6 = _shape_param_1 = None
+        div_scalar: "f32[8, 1024, 512]" = torch.ops.aten.div.Scalar(expand_default, 512);  expand_default = None
+        pow_tensor_scalar_1: "f32[8, 1024, 512]" = torch.ops.aten.pow.Tensor_Scalar(add_94, 1.0);  add_94 = None
+        mul_scalar_1: "f32[8, 1024, 512]" = torch.ops.aten.mul.Scalar(pow_tensor_scalar_1, 2.0);  pow_tensor_scalar_1 = None
+        mul_tensor_7: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(div_scalar, mul_scalar_1);  div_scalar = mul_scalar_1 = None
+        add_tensor: "f32[8, 1024, 512]" = torch.ops.aten.add.Tensor(mul_tensor_5, mul_tensor_7);  mul_tensor_5 = mul_tensor_7 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:136 in forward, code: hidden_states = hidden_states + self.dropout(forwarded_states)
+        convert_element_type_default_1: "f32[8, 1024, 512]" = torch.ops.prims.convert_element_type.default(gt_63, torch.float32);  gt_63 = None
+        mul_tensor_8: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(convert_element_type_default_1, 1.1111111111111112);  convert_element_type_default_1 = None
+        mul_tensor_9: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(add_tensor, mul_tensor_8);  add_tensor = mul_tensor_8 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:89 in forward, code: hidden_states = self.wo(hidden_states)
+        reshape_default_1: "f32[8192, 512]" = torch.ops.aten.reshape.default(mul_tensor_9, _shape_param_2);  mul_tensor_9 = _shape_param_2 = None
+        permute_default: "f32[2048, 512]" = torch.ops.aten.permute.default(primals_132, [1, 0]);  primals_132 = None
+        permute_default_1: "f32[512, 2048]" = torch.ops.aten.permute.default(permute_default, [1, 0]);  permute_default = None
+        return (reshape_default_1, permute_default_1)

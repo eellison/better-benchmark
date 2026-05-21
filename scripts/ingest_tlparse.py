@@ -86,6 +86,7 @@ def _parse_input_shapes_from_reader(content: str):
         'torch.bfloat16': torch.bfloat16,
         'torch.int64': torch.int64,
         'torch.int32': torch.int32,
+        'torch.int16': torch.int16,
         'torch.int8': torch.int8,
         'torch.uint8': torch.uint8,
         'torch.bool': torch.bool,
@@ -133,6 +134,7 @@ def _parse_input_shapes_from_annotations(content: str):
         'bf16': torch.bfloat16,
         'i64': torch.int64,
         'i32': torch.int32,
+        'i16': torch.int16,
         'i8': torch.int8,
         'u8': torch.uint8,
         'b8': torch.bool,
@@ -146,24 +148,98 @@ def _parse_input_shapes_from_annotations(content: str):
     if not fwd_match:
         return []
 
+    def split_signature_args(sig: str) -> list[str]:
+        args = []
+        start = 0
+        in_quote = False
+        quote = ""
+        for i, ch in enumerate(sig):
+            if ch in {'"', "'"}:
+                if in_quote and ch == quote:
+                    in_quote = False
+                    quote = ""
+                elif not in_quote:
+                    in_quote = True
+                    quote = ch
+            elif ch == "," and not in_quote:
+                part = sig[start:i].strip()
+                if part:
+                    args.append(part)
+                start = i + 1
+        part = sig[start:].strip()
+        if part:
+            args.append(part)
+        return args
+
+    def parse_symbol_hint(annotation: str) -> int:
+        match = re.search(r'Sym\((-?\d+)\)', annotation)
+        return int(match.group(1)) if match else 32
+
+    def parse_dim(dim: str) -> int:
+        try:
+            return int(dim)
+        except ValueError:
+            return 32
+
     sig = fwd_match.group(1)
     inputs = []
-    for m in re.finditer(r'\w+:\s*"(\w+)\[([^\]]*)\]', sig):
-        dtype_str, shape_str = m.group(1), m.group(2)
+    for arg in split_signature_args(sig):
+        match = re.match(r'\w+\s*:\s*"([^"]*)"', arg)
+        if match is None:
+            inputs.append({"kind": "scalar", "value": 1})
+            continue
+
+        annotation = match.group(1)
+        if annotation.startswith("Sym("):
+            inputs.append({"kind": "symint", "hint": parse_symbol_hint(annotation)})
+            continue
+
+        m = re.match(
+            r'(\w+)\[([^\]]*)\](?:\[([^\]]*)\])?(.*)',
+            annotation,
+        )
+        if m is None:
+            inputs.append({"kind": "scalar", "value": 1})
+            continue
+
+        dtype_str, shape_str, stride_str, device_str = m.groups()
         dims = []
         for x in shape_str.split(','):
             x = x.strip()
             if not x:
                 continue
-            try:
-                dims.append(int(x))
-            except ValueError:
-                dims.append(32)  # symbolic dim fallback
+            dims.append(parse_dim(x))
+        stride = None
+        if stride_str is not None:
+            stride = []
+            for x in stride_str.split(','):
+                x = x.strip()
+                if not x:
+                    continue
+                try:
+                    stride.append(parse_dim(x))
+                except ValueError:
+                    stride = None
+                    break
+            if stride is not None:
+                stride = tuple(stride)
         shape = tuple(dims)
         dtype = dtype_map.get(dtype_str, torch.float32)
-        inputs.append((shape, dtype))
+        inputs.append({
+            "shape": shape,
+            "dtype": dtype,
+            "stride": stride,
+            "device": device_str.strip() or None,
+        })
 
     return inputs
+
+
+def _forward_takes_no_inputs(content: str) -> bool:
+    import re
+
+    fwd_match = re.search(r'def forward\(self,?\s*(.*?)\):', content, re.DOTALL)
+    return fwd_match is not None and not fwd_match.group(1).strip()
 
 
 def load_graph_module(graph_path: Path):
@@ -184,6 +260,7 @@ def load_graph_module(graph_path: Path):
     import torch
     import torch.nn
     import torch.fx as fx
+    import torch._inductor.inductor_prims  # noqa: F401 - registers prims.fma, inductor seeds
 
     content = graph_path.read_text()
 
@@ -242,47 +319,65 @@ def load_graph_module(graph_path: Path):
         # Instantiate -- this runs __init__ which may register buffers/submodules
         instance = graph_cls()
 
-        # For inductor_post_grad_graph files: register _frozen_param* buffers
-        # These appear as: `var: "dtype[shape][strides]device" = self._frozen_paramN`
-        frozen_params = re.findall(
-            r'self\.(_frozen_param\w+)',
-            content
-        )
-        if frozen_params:
-            # Parse their shapes from the annotation lines
-            frozen_info = {}
-            for m in re.finditer(
-                r'"(\w+)\[([^\]]*)\].*?=\s*self\.(_frozen_param\w+)',
-                content
-            ):
-                dtype_str, shape_str, param_name = m.group(1), m.group(2), m.group(3)
-                dtype_short_map = {
-                    'f32': torch.float32, 'f16': torch.float16,
-                    'bf16': torch.bfloat16, 'i64': torch.int64,
-                    'i32': torch.int32, 'b8': torch.bool,
-                    'f64': torch.float64, 'i8': torch.int8, 'u8': torch.uint8,
-                }
-                dtype = dtype_short_map.get(dtype_str, torch.float32)
-                shape = tuple(int(x.strip()) for x in shape_str.split(',') if x.strip())
-                frozen_info[param_name] = (shape, dtype)
+        # Recreate saved self.* tensor attributes referenced by printed full graphs.
+        # Their values do not affect partitioning; shape/dtype/device do.
+        dtype_short_map = {
+            'f32': torch.float32, 'f16': torch.float16,
+            'bf16': torch.bfloat16, 'i64': torch.int64,
+            'i32': torch.int32, 'i16': torch.int16, 'b8': torch.bool,
+            'f64': torch.float64, 'i8': torch.int8, 'u8': torch.uint8,
+        }
 
+        def parse_shape(shape_str: str) -> tuple[int, ...]:
+            dims = []
+            for dim in shape_str.split(','):
+                dim = dim.strip()
+                if not dim:
+                    continue
+                try:
+                    dims.append(int(dim))
+                except ValueError:
+                    dims.append(1)
+            return tuple(dims)
+
+        def collect_self_tensor_attrs(prefix: str) -> dict[str, tuple[tuple[int, ...], torch.dtype]]:
+            info = {}
+            pattern = re.compile(
+                rf'\w+:\s*"(\w+)\[([^\]]*)\][^"]*"\s*=\s*self\.({prefix}\w*)'
+            )
+            for line in content.splitlines():
+                match = pattern.search(line)
+                if not match:
+                    continue
+                dtype_str, shape_str, attr_name = match.groups()
+                info[attr_name] = (
+                    parse_shape(shape_str),
+                    dtype_short_map.get(dtype_str, torch.float32),
+                )
+            return info
+
+        tensor_attrs = {}
+        # For inductor_post_grad_graph files: `_frozen_param*` buffers appear as:
+        # `var: "dtype[shape][strides]device" = self._frozen_paramN`
+        tensor_attrs.update(collect_self_tensor_attrs("_frozen_param"))
+        # Saved full_graph_*.py files can also reference scalar/tensor constants:
+        # `_tensor_constant0: "f32[]" = self._tensor_constant0`
+        tensor_attrs.update(collect_self_tensor_attrs("_tensor_constant"))
+
+        if tensor_attrs:
             dev = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
-            for param_name, (shape, dtype) in frozen_info.items():
-                if not hasattr(instance, param_name):
-                    if dtype in (torch.int64, torch.int32, torch.int8, torch.uint8):
-                        buf = torch.zeros(shape, dtype=dtype, device=dev)
-                    elif dtype == torch.bool:
-                        buf = torch.zeros(shape, dtype=torch.bool, device=dev)
-                    else:
-                        buf = torch.randn(shape, dtype=dtype, device=dev)
-                    instance.register_buffer(param_name, buf)
+            for attr_name, (shape, dtype) in tensor_attrs.items():
+                if hasattr(instance, attr_name):
+                    continue
+                buf = torch.zeros(shape, dtype=dtype, device=dev)
+                instance.register_buffer(attr_name, buf)
 
         # If already a GraphModule (has .graph), return directly
         if hasattr(instance, 'graph'):
             return instance
 
         # Otherwise, trace with make_fx to produce a proper GraphModule
-        if not input_shapes:
+        if not input_shapes and not _forward_takes_no_inputs(content):
             print(f"  No input shapes found for {graph_path.name}")
             return None
 
@@ -292,15 +387,47 @@ def load_graph_module(graph_path: Path):
         dev = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
         instance = instance.to(dev)
 
-        inputs = []
-        for shape, dtype in input_shapes:
-            if dtype in (torch.int64, torch.int32, torch.int8, torch.uint8):
-                t = torch.zeros(shape, dtype=dtype, device=dev)
-            elif dtype == torch.bool:
-                t = torch.zeros(shape, dtype=torch.bool, device=dev)
+        def normalize_input_spec(spec):
+            if isinstance(spec, dict):
+                return spec
+            shape, dtype = spec
+            return {"shape": shape, "dtype": dtype, "stride": None, "device": None}
+
+        def make_tensor_from_spec(spec):
+            if spec.get("kind") == "symint":
+                return int(spec.get("hint", 1))
+            if spec.get("kind") == "scalar":
+                return spec.get("value", 1)
+
+            shape = tuple(spec["shape"])
+            dtype = spec["dtype"]
+            stride = spec.get("stride")
+            device_text = spec.get("device") or ""
+            if device_text.startswith("cuda") and torch.cuda.is_available():
+                tensor_dev = torch.device("cuda:0")
+            elif device_text.startswith("cpu"):
+                tensor_dev = torch.device("cpu")
             else:
-                t = torch.randn(shape, dtype=dtype, device=dev)
-            inputs.append(t)
+                tensor_dev = dev
+
+            if dtype in (torch.int64, torch.int32, torch.int16, torch.int8, torch.uint8):
+                make_base = lambda size: torch.zeros(size, dtype=dtype, device=tensor_dev)
+            elif dtype == torch.bool:
+                make_base = lambda size: torch.zeros(size, dtype=torch.bool, device=tensor_dev)
+            else:
+                make_base = lambda size: torch.randn(size, dtype=dtype, device=tensor_dev)
+
+            if stride is not None and len(stride) == len(shape) and shape:
+                storage_size = sum(
+                    s * (d - 1) for s, d in zip(stride, shape) if d > 1
+                ) + 1
+                return make_base((storage_size,)).as_strided(shape, stride)
+            return make_base(shape)
+
+        inputs = []
+        for raw_spec in input_shapes:
+            spec = normalize_input_spec(raw_spec)
+            inputs.append(make_tensor_from_spec(spec))
 
         gm = make_fx(instance, tracing_mode="real")(*inputs)
         return gm

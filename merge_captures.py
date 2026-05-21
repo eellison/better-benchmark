@@ -62,6 +62,18 @@ def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
     return out_dir
 
 
+def _find_existing_pattern_dir(canonical_path: Path, pattern_hash: str) -> Path | None:
+    """Return an existing canonical dir for pattern_hash, if one exists."""
+    for meta_path in sorted(canonical_path.glob("*/meta.json")):
+        try:
+            meta = json.loads(meta_path.read_text())
+        except Exception:
+            continue
+        if meta.get("pattern_hash") == pattern_hash:
+            return meta_path.parent
+    return None
+
+
 def _infer_suite_mode(model_name: str) -> tuple[str, str | None, str]:
     """Infer suite, mode, and clean name from a model label."""
     name = model_name
@@ -142,7 +154,9 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         reduction_types = entry.get("reduction_types", [])
         kind_label = "_".join(reduction_types[:3]) if reduction_types else kind
         dir_name = f"{kind_label}_{pattern_hash}"
-        repro_dir = canonical_path / dir_name
+        repro_dir = _find_existing_pattern_dir(canonical_path, pattern_hash)
+        if repro_dir is None:
+            repro_dir = canonical_path / dir_name
         repro_dir.mkdir(parents=True, exist_ok=True)
 
         # Update shapes.txt (compact T()/S() format)

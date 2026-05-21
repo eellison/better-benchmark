@@ -34,8 +34,16 @@
     "aten.where.self",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 5,
   "models": [
+<<<<<<< HEAD:repros/canonical/any_amax_sum_14151855d365/meta.json
     "hf_BertForMaskedLM_infer_000"
+=======
+    "hf_Albert",
+    "hf_Bart",
+    "hf_Bert",
+    "hf_DistilBert",
+    "hf_Roberta_base"
+>>>>>>> origin/repro-correctness-loader-fixes:repros/canonical/amax_any_sum_84bb21b87dd0/meta.json
   ]
 }

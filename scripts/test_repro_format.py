@@ -12,16 +12,73 @@ Usage:
     python scripts/test_repro_format.py --quick      # format checks only (no GPU)
 """
 import argparse
+import ast
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from repro_harness import (
+    CURRENT_REPRO_VERSION,
+    UNVERSIONED_REPRO_VERSION,
+    parse_repro_version,
+)
+
 
 def check_has_shapes_config(content: str) -> str | None:
-    if '_shapes_config' not in content:
+    if not _has_top_level_assignment(content, "_shapes_config"):
         return "missing _shapes_config"
+    return None
+
+
+def _has_top_level_assignment(content: str, name: str) -> bool:
+    try:
+        tree = ast.parse(content)
+    except SyntaxError:
+        return False
+
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            if any(isinstance(target, ast.Name) and target.id == name for target in node.targets):
+                return True
+        elif isinstance(node, ast.AnnAssign):
+            target = node.target
+            if isinstance(target, ast.Name) and target.id == name:
+                return True
+    return False
+
+
+def check_repro_version_marker(content: str) -> str | None:
+    """Require explicit markers to be parseable and current.
+
+    Legacy unversioned repros remain valid here so the format sweep can run
+    before bulk upgrades; the upgrade script treats them as v0/outdated.
+    """
+    try:
+        version = parse_repro_version(content)
+    except ValueError as e:
+        return str(e)
+
+    if version not in (UNVERSIONED_REPRO_VERSION, CURRENT_REPRO_VERSION):
+        return (
+            f"unexpected _repro_version v{version}; "
+            f"expected v{CURRENT_REPRO_VERSION} or no legacy marker"
+        )
+    return None
+
+
+def _forward_arg_count(content: str) -> int | None:
+    try:
+        tree = ast.parse(content)
+    except SyntaxError:
+        return None
+
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == "Repro":
+            for item in node.body:
+                if isinstance(item, ast.FunctionDef) and item.name == "forward":
+                    return len(item.args.args) - 1  # exclude self
     return None
 
 
@@ -40,12 +97,9 @@ def check_no_raw_inputs(content: str) -> str | None:
 
 def check_input_count(content: str) -> str | None:
     """Check _shapes_config produces right number of inputs for forward()."""
-    # Count forward args
-    fwd_match = re.search(r'def forward\(self,([^)]*)\)', content)
-    if not fwd_match:
+    n_fwd = _forward_arg_count(content)
+    if n_fwd is None:
         return "no forward() found"
-    fwd_args = [a.strip() for a in fwd_match.group(1).split(',') if a.strip()]
-    n_fwd = len(fwd_args)
 
     # Count items in _shapes_config
     config_match = re.search(r'^_shapes_config\s*=\s*"(.+)"', content, re.MULTILINE)
@@ -67,10 +121,9 @@ def check_shapes_txt(repro_dir: Path, content: str) -> list[str]:
     if not shapes_txt.exists():
         return []
 
-    fwd_match = re.search(r'def forward\(self,([^)]*)\)', content)
-    if not fwd_match:
+    n_fwd = _forward_arg_count(content)
+    if n_fwd is None:
         return []
-    n_fwd = len([a.strip() for a in fwd_match.group(1).split(',') if a.strip()])
 
     errors = []
     for i, line in enumerate(shapes_txt.read_text().splitlines()):
@@ -85,7 +138,9 @@ def check_shapes_txt(repro_dir: Path, content: str) -> list[str]:
         n_items = len(re.findall(r'(?:T|S)\(', expr))
         if n_items != n_fwd:
             label = line[:colon].strip()
-            errors.append(f"shapes.txt [{label}]: {n_items} items vs forward expects {n_fwd}")
+            errors.append(
+                f"shapes.txt [{label}]: {n_items} items vs forward expects {n_fwd}"
+            )
     return errors
 
 
@@ -102,6 +157,10 @@ def main():
     for d in dirs:
         content = (d / "repro.py").read_text()
         name = d.name
+
+        err = check_repro_version_marker(content)
+        if err:
+            errors.append((name, err))
 
         err = check_has_shapes_config(content)
         if err:

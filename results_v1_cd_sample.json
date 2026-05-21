@@ -1,0 +1,502 @@
+{
+  "repros/canonical/amax_sum_00b8bc42acc6/repro.py": {
+    "default": {
+      "compiled_us": 186.0799938440323,
+      "coord_descent_us": 175.04000663757324,
+      "memcopy_sol_us": 72.48000055551529,
+      "total_bytes": 452985416,
+      "gap_default": 2.5673288137119465,
+      "gap_cd": 2.415011110595994
+    }
+  },
+  "repros/canonical/amax_sum_any_312fd76f8ba5/repro.py": {
+    "default": {
+      "compiled_us": 188.4479969739914,
+      "coord_descent_us": 177.05599963665009,
+      "memcopy_sol_us": 39.712000638246536,
+      "total_bytes": 226492712,
+      "gap_default": 4.745366487340796,
+      "gap_cd": 4.458501127896534
+    }
+  },
+  "repros/canonical/amax_sum_35ded6d72c86/repro.py": {
+    "default": {
+      "compiled_us": 9.920000098645687,
+      "coord_descent_us": 9.184000082314014,
+      "memcopy_sol_us": 6.87999976798892,
+      "total_bytes": 4722688,
+      "gap_default": 1.4418605280775152,
+      "gap_cd": 1.3348837779101512
+    }
+  },
+  "repros/canonical/amax_sum_any_a87586ecb959/repro.py": {
+    "default": {
+      "compiled_us": 78.72000336647034,
+      "coord_descent_us": 78.68800312280655,
+      "memcopy_sol_us": 30.7839997112751,
+      "total_bytes": 167772160,
+      "gap_default": 2.5571726905142205,
+      "gap_cd": 2.556133181549696
+    }
+  },
+  "repros/canonical/amax_sum_dba4bcc87361/repro.py": {
+    "default": {
+      "compiled_us": 24.320000782608986,
+      "coord_descent_us": 22.23999984562397,
+      "memcopy_sol_us": 13.344000093638897,
+      "total_bytes": 50332320,
+      "gap_default": 1.8225420122862832,
+      "gap_cd": 1.666666643402214
+    }
+  },
+  "repros/canonical/amax_sum_sum_340ff8cec257/repro.py": {
+    "default": {
+      "compiled_us": 55.135998874902725,
+      "coord_descent_us": 52.99200117588043,
+      "memcopy_sol_us": 9.8879998549819,
+      "total_bytes": 25834504,
+      "gap_default": 5.576051747929931,
+      "gap_cd": 5.359223498489568
+    }
+  },
+  "repros/canonical/amax_sum_75e05cdc9884/repro.py": {
+    "default": {
+      "compiled_us": 97.21600264310837,
+      "coord_descent_us": 97.21600264310837,
+      "memcopy_sol_us": 12.35199999064207,
+      "total_bytes": 44043264,
+      "gap_default": 7.870466541188442,
+      "gap_cd": 7.870466541188442
+    }
+  },
+  "repros/canonical/amax_sum_sum_b2400bf20242/repro.py": {
+    "default": {
+      "compiled_us": 4581.344127655029,
+      "coord_descent_us": 4142.079830169678,
+      "memcopy_sol_us": 3985.503911972046,
+      "total_bytes": 25951829232,
+      "gap_default": 1.1495018519221973,
+      "gap_cd": 1.0392863541614634
+    }
+  },
+  "repros/canonical/amax_sum_sum_ffcc48e8a192/repro.py": {
+    "default": {
+      "compiled_us": 480.3520143032074,
+      "coord_descent_us": 479.16799783706665,
+      "memcopy_sol_us": 242.88000166416168,
+      "total_bytes": 1647378436,
+      "gap_default": 1.9777339056815646,
+      "gap_cd": 1.9728590026099733
+    }
+  },
+  "repros/canonical/amax_sum_sum_03a20707852c/repro.py": {
+    "default": {
+      "compiled_us": 1232.8959703445435,
+      "coord_descent_us": 1163.3280515670776,
+      "memcopy_sol_us": 1862.6879453659058,
+      "total_bytes": 12866027528,
+      "gap_default": 0.6618907763975215,
+      "gap_cd": 0.6245426425082458
+    }
+  },
+  "repros/canonical/any_amax_sum_702110971f25/repro.py": {
+    "default": {
+      "compiled_us": 183.26400220394135,
+      "coord_descent_us": 180.2240014076233,
+      "memcopy_sol_us": 180.1919937133789,
+      "total_bytes": 1210056704,
+      "gap_default": 1.017048529333933,
+      "gap_cd": 1.0001776310566568
+    }
+  },
+  "repros/canonical/mean_1cdd17891b1e/repro.py": {
+    "default": {
+      "compiled_us": 14.047999866306782,
+      "coord_descent_us": 14.015999622642994,
+      "memcopy_sol_us": 13.088000006973743,
+      "total_bytes": 45091488,
+      "gap_default": 1.0733496224649692,
+      "gap_cd": 1.0709046160738676
+    }
+  },
+  "repros/canonical/amax_sum_sum_730df957c9d4/repro.py": {
+    "default": {
+      "compiled_us": 1163.167953491211,
+      "coord_descent_us": 1144.7360515594482,
+      "memcopy_sol_us": 610.3360056877136,
+      "total_bytes": 4198039556,
+      "gap_default": 1.9057829501318344,
+      "gap_cd": 1.8755833522709906
+    }
+  },
+  "repros/canonical/any_amax_sum_de6fca0b5f90/repro.py": {
+    "default": {
+      "compiled_us": 98.11200201511383,
+      "coord_descent_us": 98.1760025024414,
+      "memcopy_sol_us": 93.12000125646591,
+      "total_bytes": 603979776,
+      "gap_default": 1.0536082548463377,
+      "gap_cd": 1.0542955452937606
+    }
+  },
+  "repros/canonical/mean_59dcc97db026/repro.py": {
+    "default": {
+      "compiled_us": 65.60000032186508,
+      "coord_descent_us": 65.31199812889099,
+      "memcopy_sol_us": 19.200000911951065,
+      "total_bytes": 84574208,
+      "gap_default": 3.4166665211475213,
+      "gap_cd": 3.4016664076425878
+    }
+  },
+  "repros/canonical/mean_a83e003db20c/repro.py": {
+    "default": {
+      "compiled_us": 23.552000522613525,
+      "coord_descent_us": 16.095999628305435,
+      "memcopy_sol_us": 10.33599954098463,
+      "total_bytes": 29509632,
+      "gap_default": 2.2786379226531883,
+      "gap_cd": 1.5572755749921496
+    }
+  },
+  "repros/canonical/mean_d107c386ffbd/repro.py": {
+    "default": {
+      "compiled_us": 20.191999152302742,
+      "coord_descent_us": 19.45599913597107,
+      "memcopy_sol_us": 19.26399953663349,
+      "total_bytes": 88082944,
+      "gap_default": 1.0481727386830817,
+      "gap_cd": 1.0099667568498671
+    }
+  },
+  "repros/canonical/mean_mean_97c2e0ba1bc1/repro.py": {
+    "default": {
+      "compiled_us": 17.376000061631203,
+      "coord_descent_us": 16.3199994713068,
+      "memcopy_sol_us": 15.231999568641186,
+      "total_bytes": 63442944,
+      "gap_default": 1.1407563388725384,
+      "gap_cd": 1.0714285670612498
+    }
+  },
+  "repros/canonical/pointwise_0cfef0c0dac9/repro.py": {
+    "default": {
+      "compiled_us": 51.19999870657921,
+      "coord_descent_us": 51.00800096988678,
+      "memcopy_sol_us": 51.16799846291542,
+      "total_bytes": 308281344,
+      "gap_default": 1.0006253956501148,
+      "gap_cd": 0.9968730945545076
+    }
+  },
+  "repros/canonical/mean_var_mean_ee672e3f4790/repro.py": {
+    "default": {
+      "compiled_us": 69.40799951553345,
+      "coord_descent_us": 69.40799951553345,
+      "memcopy_sol_us": 30.6560005992651,
+      "total_bytes": 165912064,
+      "gap_default": 2.2640917979756736,
+      "gap_cd": 2.2640917979756736
+    }
+  },
+  "repros/canonical/pointwise_0887afcdb277/repro.py": {
+    "default": {
+      "compiled_us": 55.135998874902725,
+      "coord_descent_us": 55.03999814391136,
+      "memcopy_sol_us": 52.000001072883606,
+      "total_bytes": 316145664,
+      "gap_default": 1.060307648794539,
+      "gap_cd": 1.0584614809289499
+    }
+  },
+  "repros/canonical/pointwise_196b1dab028a/repro.py": {
+    "default": {
+      "compiled_us": 18.464000895619392,
+      "coord_descent_us": 19.29599978029728,
+      "memcopy_sol_us": 16.256000846624374,
+      "total_bytes": 68681728,
+      "gap_default": 1.135826767593551,
+      "gap_cd": 1.1870077986803362
+    }
+  },
+  "repros/canonical/pointwise_1452242c7662/repro.py": {
+    "default": {
+      "compiled_us": 10.015999898314476,
+      "coord_descent_us": 9.727999567985535,
+      "memcopy_sol_us": 11.136000044643879,
+      "total_bytes": 34603008,
+      "gap_default": 0.8994252746193107,
+      "gap_cd": 0.8735631760943144
+    }
+  },
+  "repros/canonical/pointwise_33c786e4cf12/repro.py": {
+    "default": {
+      "compiled_us": 5.888000130653381,
+      "coord_descent_us": 5.8559998869895935,
+      "memcopy_sol_us": 7.071999832987785,
+      "total_bytes": 7340032,
+      "gap_default": 0.8325792236572797,
+      "gap_cd": 0.8280543022178699
+    }
+  },
+  "repros/canonical/pointwise_1fee6f1bc148/repro.py": {
+    "default": {
+      "compiled_us": 12.223999947309494,
+      "coord_descent_us": 12.128000147640705,
+      "memcopy_sol_us": 6.175999995321035,
+      "total_bytes": 2086176,
+      "gap_default": 1.9792746043669769,
+      "gap_cd": 1.963730595341472
+    }
+  },
+  "repros/canonical/pointwise_38d5f8e025b9/repro.py": {
+    "default": {
+      "compiled_us": 7.74399982765317,
+      "coord_descent_us": 7.840000092983246,
+      "memcopy_sol_us": 10.17600018531084,
+      "total_bytes": 22825984,
+      "gap_default": 0.7610062585132135,
+      "gap_cd": 0.7704402466796695
+    }
+  },
+  "repros/canonical/pointwise_28f8f2b2c0c2/repro.py": {
+    "default": {
+      "compiled_us": 7.168000098317862,
+      "coord_descent_us": 7.135999854654074,
+      "memcopy_sol_us": 8.128000423312187,
+      "total_bytes": 15482880,
+      "gap_default": 0.8818897299462587,
+      "gap_cd": 0.8779526922989664
+    }
+  },
+  "repros/canonical/pointwise_3f4d7cbf859e/repro.py": {
+    "default": {
+      "compiled_us": 21.47199958562851,
+      "coord_descent_us": 21.43999934196472,
+      "memcopy_sol_us": 22.495999932289124,
+      "total_bytes": 105381888,
+      "gap_default": 0.9544807810391732,
+      "gap_cd": 0.9530582950967788
+    }
+  },
+  "repros/canonical/pointwise_46ac3170d265/repro.py": {
+    "default": {
+      "compiled_us": 128.7039965391159,
+      "coord_descent_us": 128.76799702644348,
+      "memcopy_sol_us": 41.6640006005764,
+      "total_bytes": 240648192,
+      "gap_default": 3.0890935744018626,
+      "gap_cd": 3.0906296843866223
+    }
+  },
+  "repros/canonical/pointwise_55f341be77e3/repro.py": {
+    "default": {
+      "compiled_us": 118.52800101041794,
+      "coord_descent_us": 117.76000261306763,
+      "memcopy_sol_us": 49.984000623226166,
+      "total_bytes": 301990680,
+      "gap_default": 2.371318812671055,
+      "gap_cd": 2.355953928152519
+    }
+  },
+  "repros/canonical/pointwise_4de125517662/repro.py": {
+    "default": {
+      "compiled_us": 13.98400031030178,
+      "coord_descent_us": 13.98400031030178,
+      "memcopy_sol_us": 14.240000396966934,
+      "total_bytes": 55050240,
+      "gap_default": 0.982022466325234,
+      "gap_cd": 0.982022466325234
+    }
+  },
+  "repros/canonical/pointwise_5e8fb91fe0df/repro.py": {
+    "default": {
+      "compiled_us": 17.343999817967415,
+      "coord_descent_us": 17.27999933063984,
+      "memcopy_sol_us": 86.87999844551086,
+      "total_bytes": 558366720,
+      "gap_default": 0.1996316773514352,
+      "gap_cd": 0.19889502347859106
+    }
+  },
+  "repros/canonical/pointwise_653da0da068c/repro.py": {
+    "default": {
+      "compiled_us": 22.272000089287758,
+      "coord_descent_us": 22.08000048995018,
+      "memcopy_sol_us": 14.336000196635723,
+      "total_bytes": 54526624,
+      "gap_default": 1.5535714134905216,
+      "gap_cd": 1.5401785844793563
+    }
+  },
+  "repros/canonical/pointwise_7314654d3afc/repro.py": {
+    "default": {
+      "compiled_us": 5.919999908655882,
+      "coord_descent_us": 5.888000130653381,
+      "memcopy_sol_us": 6.175999995321035,
+      "total_bytes": 1536000,
+      "gap_default": 0.958549208733954,
+      "gap_cd": 0.9533678975249605
+    }
+  },
+  "repros/canonical/pointwise_6c6941b442c2/repro.py": {
+    "default": {
+      "compiled_us": 9.79200005531311,
+      "coord_descent_us": 9.119999594986439,
+      "memcopy_sol_us": 113.53600025177002,
+      "total_bytes": 738197504,
+      "gap_default": 0.08624577256199804,
+      "gap_cd": 0.08032694101221219
+    }
+  },
+  "repros/canonical/pointwise_81f6209dd038/repro.py": {
+    "default": {
+      "compiled_us": 32.70399942994118,
+      "coord_descent_us": 32.67199918627739,
+      "memcopy_sol_us": 32.607998698949814,
+      "total_bytes": 178257920,
+      "gap_default": 1.0029440853416882,
+      "gap_cd": 1.0019627235611255
+    }
+  },
+  "repros/canonical/pointwise_79f7d0111cf0/repro.py": {
+    "default": {
+      "compiled_us": 74.68800246715546,
+      "coord_descent_us": 71.52000069618225,
+      "memcopy_sol_us": 70.43199986219406,
+      "total_bytes": 440401920,
+      "gap_default": 1.0604271157043477,
+      "gap_cd": 1.0154475357240593
+    }
+  },
+  "repros/canonical/pointwise_899673354061/repro.py": {
+    "default": {
+      "compiled_us": 30.527999624609947,
+      "coord_descent_us": 30.559999868273735,
+      "memcopy_sol_us": 641.9519782066345,
+      "total_bytes": 4405198852,
+      "gap_default": 0.047554958409651404,
+      "gap_cd": 0.04760480675462135
+    }
+  },
+  "repros/canonical/pointwise_99db949c0182/repro.py": {
+    "default": {
+      "compiled_us": 34.55999866127968,
+      "coord_descent_us": 34.68799963593483,
+      "memcopy_sol_us": 34.65599939227104,
+      "total_bytes": 194641920,
+      "gap_default": 0.9972298957561508,
+      "gap_cd": 1.000923368081283
+    }
+  },
+  "repros/canonical/pointwise_8ffa2a3ecbe7/repro.py": {
+    "default": {
+      "compiled_us": 1024.0639448165894,
+      "coord_descent_us": 993.183970451355,
+      "memcopy_sol_us": 1001.471996307373,
+      "total_bytes": 6896270336,
+      "gap_default": 1.0225587421241107,
+      "gap_cd": 0.9917241561555613
+    }
+  },
+  "repros/canonical/pointwise_a5ee5d819887/repro.py": {
+    "default": {
+      "compiled_us": 5.888000130653381,
+      "coord_descent_us": 5.95200015231967,
+      "memcopy_sol_us": 64.38399851322174,
+      "total_bytes": 403442688,
+      "gap_default": 0.09145129638763017,
+      "gap_cd": 0.09244533253238973
+    }
+  },
+  "repros/canonical/pointwise_afc4ddb6d0ba/repro.py": {
+    "default": {
+      "compiled_us": 46.9760000705719,
+      "coord_descent_us": 46.879999339580536,
+      "memcopy_sol_us": 41.02399945259094,
+      "total_bytes": 239505408,
+      "gap_default": 1.1450858204319971,
+      "gap_cd": 1.1427457089784
+    }
+  },
+  "repros/canonical/pointwise_b6ee6d935f27/repro.py": {
+    "default": {
+      "compiled_us": 7.007999811321497,
+      "coord_descent_us": 7.807999849319458,
+      "memcopy_sol_us": 14.240000396966934,
+      "total_bytes": 50331648,
+      "gap_default": 0.49213480449159075,
+      "gap_cd": 0.5483145808747683
+    }
+  },
+  "repros/canonical/pointwise_c14c6888f1e6/repro.py": {
+    "default": {
+      "compiled_us": 11.744000017642975,
+      "coord_descent_us": 11.711999773979187,
+      "memcopy_sol_us": 8.1599997356534,
+      "total_bytes": 14683648,
+      "gap_default": 1.4392157350606325,
+      "gap_cd": 1.4352941364453813
+    }
+  },
+  "repros/canonical/pointwise_d3ad24ca07d1/repro.py": {
+    "default": {
+      "compiled_us": 5.888000130653381,
+      "coord_descent_us": 5.919999908655882,
+      "memcopy_sol_us": 64.41599875688553,
+      "total_bytes": 403442688,
+      "gap_default": 0.09140586568991145,
+      "gap_cd": 0.09190263324176254
+    }
+  },
+  "repros/canonical/pointwise_c83a7895e053/repro.py": {
+    "default": {
+      "compiled_us": 5.760000087320805,
+      "coord_descent_us": 5.8559998869895935,
+      "memcopy_sol_us": 6.111999973654747,
+      "total_bytes": 49152,
+      "gap_default": 0.9424083953123024,
+      "gap_cd": 0.9581151688860242
+    }
+  },
+  "repros/canonical/pointwise_db1811e16689/repro.py": {
+    "default": {
+      "compiled_us": 21.344000473618507,
+      "coord_descent_us": 21.407999098300934,
+      "memcopy_sol_us": 60.447998344898224,
+      "total_bytes": 377495552,
+      "gap_default": 0.35309689415745443,
+      "gap_cd": 0.3541556326837042
+    }
+  },
+  "repros/canonical/pointwise_e732643dd15b/repro.py": {
+    "default": {
+      "compiled_us": 16.287999227643013,
+      "coord_descent_us": 16.127999871969223,
+      "memcopy_sol_us": 16.3199994713068,
+      "total_bytes": 67108864,
+      "gap_default": 0.9980392006923744,
+      "gap_cd": 0.9882353182869188
+    }
+  },
+  "repros/canonical/pointwise_e3470d11c26c/repro.py": {
+    "default": {
+      "compiled_us": 28.095999732613564,
+      "coord_descent_us": 26.496000587940216,
+      "memcopy_sol_us": 40.063999593257904,
+      "total_bytes": 234881024,
+      "gap_default": 0.7012779557171732,
+      "gap_cd": 0.661341874424316
+    }
+  },
+  "repros/canonical/pointwise_f937a16f7fca/repro.py": {
+    "default": {
+      "compiled_us": 9.184000082314014,
+      "coord_descent_us": 9.151999838650227,
+      "memcopy_sol_us": 6.175999995321035,
+      "total_bytes": 1060876,
+      "gap_default": 1.4870466465789918,
+      "gap_cd": 1.4818652599714737
+    }
+  }
+}

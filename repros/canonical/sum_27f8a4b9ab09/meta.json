@@ -23,8 +23,13 @@
     "aten.sum.dim_IntList",
     "aten.view.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+<<<<<<< HEAD:repros/canonical/sum_27f8a4b9ab09/meta.json
     "torchbench_timm_nfnet_train_001"
+=======
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer_000",
+    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer_infer_000"
+>>>>>>> origin/repro-correctness-loader-fixes:repros/canonical/mean_sum_d742fc89ffad/meta.json
   ]
 }

@@ -1,5 +1,7 @@
 import fcntl
+import inspect
 import json
+import operator
 import os
 import sys
 import tempfile
@@ -17,6 +19,15 @@ from capture_hook import _CaptureState
 import gpu_lock as gpu_lock_module
 from canonicalize_repros import _spec_to_T, parse_make_inputs
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+
+
+def _partitioner_supports_skip_horizontal_fusion() -> bool:
+    from torch.fx.passes.infra.partitioner import CapabilityBasedPartitioner
+
+    return (
+        "skip_horizontal_fusion"
+        in inspect.signature(CapabilityBasedPartitioner.__init__).parameters
+    )
 
 
 def _touch_repro(canonical_dir: Path, name: str) -> None:
@@ -276,6 +287,149 @@ def test_capture_hook_traces_gathered_values_to_embedding_bound():
     assert bounds["positions"] == 512
 
 
+def test_capture_hook_emits_permutation_config_for_inverse_permutation_indices():
+    graph = torch.fx.Graph()
+    idx = graph.placeholder("idx")
+    idx.meta["val"] = torch.empty(8, dtype=torch.int64)
+    empty = graph.call_function(
+        torch.ops.aten.empty.memory_format,
+        ([8],),
+        {
+            "dtype": torch.int64,
+            "layout": torch.strided,
+            "device": torch.device("cuda"),
+            "pin_memory": False,
+        },
+    )
+    empty.meta["val"] = torch.empty(8, dtype=torch.int64)
+    iota = graph.call_function(
+        torch.ops.prims.iota.default,
+        (8,),
+        {
+            "start": 0,
+            "step": 1,
+            "dtype": torch.int64,
+            "device": torch.device("cuda"),
+            "requires_grad": False,
+        },
+    )
+    iota.meta["val"] = torch.empty(8, dtype=torch.int64)
+    inverse = graph.call_function(torch.ops.aten.index_put.default, (empty, [idx], iota))
+    inverse.meta["val"] = torch.empty(8, dtype=torch.int64)
+    graph.output(inverse)
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(tmp, validate=False)
+        state._generate_repro_file(
+            gm,
+            {
+                "idx": {
+                    "dtype": "torch.int64",
+                    "shape": [8],
+                    "stride": [],
+                    "device": "cuda",
+                }
+            },
+            {"pattern_hash": "pattern", "shape_hash": "shape"},
+            "repro.py",
+        )
+        source = (Path(tmp) / "repro.py").read_text()
+
+    assert "T([8], i64, gen=Perm(8))" in source
+
+
+def _real_targets(nodes):
+    return {
+        node.target
+        for node in nodes
+        if node.op == "call_function"
+        and node.target
+        not in {
+            operator.getitem,
+            torch.ops.aten.view.default,
+            torch.ops.aten.reshape.default,
+            torch.ops.aten.permute.default,
+            torch.ops.aten.slice.Tensor,
+            torch.ops.aten.unsqueeze.default,
+            torch.ops.aten.squeeze.default,
+            torch.ops.aten.squeeze.dim,
+            torch.ops.aten.expand.default,
+            torch.ops.aten.t.default,
+            torch.ops.aten.transpose.int,
+            torch.ops.aten.select.int,
+            torch.ops.aten.as_strided.default,
+        }
+    }
+
+
+class _RecordingCaptureState(_CaptureState):
+    def __init__(self, output_dir):
+        super().__init__(output_dir, validate=False)
+        self.generated_targets = []
+
+    def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
+        self.generated_targets.append(_real_targets(gm.graph.nodes))
+        return str(Path(self.output_dir) / filename)
+
+
+def test_capture_hook_process_graph_splits_horizontal_fusion_regions():
+    if not _partitioner_supports_skip_horizontal_fusion():
+        print("Skipping horizontal fusion capture test; installed PyTorch lacks pytorch/pytorch#170191")
+        return
+
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    x.meta["val"] = torch.empty(4)
+    viewed = graph.call_function(torch.ops.aten.view.default, (x, [4]))
+    viewed.meta["val"] = torch.empty(4)
+    left = graph.call_function(torch.ops.aten.sin.default, (viewed,))
+    left.meta["val"] = torch.empty(4)
+    right = graph.call_function(torch.ops.aten.cos.default, (viewed,))
+    right.meta["val"] = torch.empty(4)
+    graph.output((left, right))
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _RecordingCaptureState(tmp)
+        state.process_graph(gm)
+
+    assert len(state.generated_targets) == 2
+    assert {frozenset(targets) for targets in state.generated_targets} == {
+        frozenset({torch.ops.aten.sin.default}),
+        frozenset({torch.ops.aten.cos.default}),
+    }
+
+
+def test_capture_hook_process_graph_keeps_getitem_data_dependency_together():
+    if not _partitioner_supports_skip_horizontal_fusion():
+        print("Skipping getitem capture test; installed PyTorch lacks pytorch/pytorch#170191")
+        return
+
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    x.meta["val"] = torch.empty(4, 4)
+    values_and_indices = graph.call_function(torch.ops.aten.max.dim, (x, 1))
+    values_and_indices.meta["val"] = (
+        torch.empty(4),
+        torch.empty(4, dtype=torch.int64),
+    )
+    values = graph.call_function(operator.getitem, (values_and_indices, 0))
+    values.meta["val"] = torch.empty(4)
+    out = graph.call_function(torch.ops.aten.sin.default, (values,))
+    out.meta["val"] = torch.empty(4)
+    graph.output(out)
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _RecordingCaptureState(tmp)
+        state.process_graph(gm)
+
+    assert state.generated_targets == [
+        {torch.ops.aten.max.dim, torch.ops.aten.sin.default},
+    ]
+
+
 def test_gpu_lock_metadata_marks_lock_mode():
     with tempfile.TemporaryDirectory() as tmp:
         with gpu_lock_module.gpu_lock(0, lock_dir=tmp, label="exclusive-test") as lock_path:
@@ -339,6 +493,9 @@ if __name__ == "__main__":
     test_parse_make_inputs_preserves_generators()
     test_capture_hook_traces_select_to_index_bound()
     test_capture_hook_traces_gathered_values_to_embedding_bound()
+    test_capture_hook_emits_permutation_config_for_inverse_permutation_indices()
+    test_capture_hook_process_graph_splits_horizontal_fusion_regions()
+    test_capture_hook_process_graph_keeps_getitem_data_dependency_together()
     test_gpu_lock_metadata_marks_lock_mode()
     test_gpu_lock_detects_dead_pid_metadata_while_blocked()
     print("All tests passed.")

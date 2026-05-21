@@ -1,0 +1,977 @@
+{
+  "total": 3175,
+  "pass": 2981,
+  "fail": 194,
+  "failures": [
+    [
+      "amax_sum_sum_0182313d362b",
+      "hf_gpt2forsequenceclassification_train_c2c75b65",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "amax_sum_sum_03a20707852c",
+      "hf_robertaforcausallm_train_716be541",
+      "RuntimeError: shape '[32, 512, 50265]' is invalid for input of size 823558144"
+    ],
+    [
+      "amax_sum_sum_066cf404f9c7",
+      "hf_gptneoforsequenceclassification_train_6e041acd",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "amax_sum_sum_436745ec8e1e",
+      "vllm_qwen_qwen3-0.6b_9e81ce3b",
+      "RuntimeError: shape '[4, 512, 50272]' is invalid for input of size 311164928"
+    ],
+    [
+      "amax_sum_sum_436745ec8e1e",
+      "vllm_meta-llama_llama-3.2-1b_9e2050cd",
+      "RuntimeError: shape '[4, 512, 50272]' is invalid for input of size 262668288"
+    ],
+    [
+      "amax_sum_sum_436745ec8e1e",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_3f1a7412",
+      "RuntimeError: shape '[4, 512, 50272]' is invalid for input of size 67108864"
+    ],
+    [
+      "amax_sum_sum_436745ec8e1e",
+      "vllm_qwen_qwen3-30b-a3b_9e81ce3b",
+      "RuntimeError: shape '[4, 512, 50272]' is invalid for input of size 311164928"
+    ],
+    [
+      "amax_sum_sum_4b4326d1b5ad",
+      "hf_allenailongformerbase_infer_9fabe7a2",
+      "RuntimeError: shape '[8, 1024, 50265]' is invalid for input of size 411779072"
+    ],
+    [
+      "amax_sum_sum_4b4326d1b5ad",
+      "hf_mbartforcausallm_infer_9fabe7a2",
+      "RuntimeError: shape '[8, 1024, 50265]' is invalid for input of size 411779072"
+    ],
+    [
+      "amax_sum_sum_4b4326d1b5ad",
+      "hf_bartforcausallm_infer_9fabe7a2",
+      "RuntimeError: shape '[8, 1024, 50265]' is invalid for input of size 411779072"
+    ],
+    [
+      "amax_sum_sum_4b4326d1b5ad",
+      "hf_plbartforcausallm_infer_843277f4",
+      "RuntimeError: shape '[16, 1024, 50005]' is invalid for input of size 819298304"
+    ],
+    [
+      "amax_sum_sum_4b4326d1b5ad",
+      "hf_pegasusforcausallm_infer_700a973c",
+      "RuntimeError: shape '[128, 128, 50265]' is invalid for input of size 823558144"
+    ],
+    [
+      "amax_sum_sum_4b4326d1b5ad",
+      "hf_trocrforcausallm_infer_c27e7272",
+      "RuntimeError: shape '[64, 256, 50265]' is invalid for input of size 823558144"
+    ],
+    [
+      "amax_sum_sum_9d66c7eb4897",
+      "hf_robertaforcausallm_infer_7dd627fd",
+      "RuntimeError: shape '[32, 512, 50265]' is invalid for input of size 823558144"
+    ],
+    [
+      "amax_sum_sum_9d66c7eb4897",
+      "hf_gptneoforcausallm_infer_dacea998",
+      "RuntimeError: shape '[32, 128, 50257]' is invalid for input of size 205856768"
+    ],
+    [
+      "argmax_amax_sum_1f2d9fcd0ec8",
+      "hf_gpt2forsequenceclassification_train_4a275495",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "argmax_amax_sum_43f6a0b25c23",
+      "hf_gpt2forsequenceclassification_infer_03f102c9",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "argmax_amax_sum_43f6a0b25c23",
+      "hf_gptneoforsequenceclassification_infer_7127cf2c",
+      "RuntimeError: The size of tensor a (1024) must match the size of tensor b (128) at non-singleton dim"
+    ],
+    [
+      "argmax_amax_sum_5d9bcbd4e953",
+      "hf_gptneoforsequenceclassification_train_4ba5b84f",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "mean_16e152dc577b",
+      "vllm_meta-llama_llama-3.2-1b_b3edf0c7",
+      "RuntimeError: shape '[2048, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "mean_16e152dc577b",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_21e6ad44",
+      "RuntimeError: shape '[2048, 1024]' is invalid for input of size 8388608"
+    ],
+    [
+      "mean_16e152dc577b",
+      "vllm_qwen_qwen3-30b-a3b_13d1d355",
+      "RuntimeError: shape '[2048, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "mean_51281ced2106",
+      "vllm_meta-llama_llama-3.2-1b_256bdba6",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "mean_51281ced2106",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_987a3d12",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 8388608"
+    ],
+    [
+      "mean_a3a7fba6c952",
+      "vllm_meta-llama_llama-3.2-1b_0422c559",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "mean_a3a7fba6c952",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_2235bd3c",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 8388608"
+    ],
+    [
+      "mean_a852fda9fbc1",
+      "vllm_meta-llama_llama-3.2-1b_c096bdc9",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "mean_a852fda9fbc1",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_50e5eeaf",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 8388608"
+    ],
+    [
+      "mean_a852fda9fbc1",
+      "vllm_qwen_qwen3-30b-a3b_f3b7ae08",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "mean_mean_f882b24762e2",
+      "vllm_qwen_qwen3-30b-a3b_4df63874",
+      "RuntimeError: shape '[4, 512, 2048]' is invalid for input of size 8388608"
+    ],
+    [
+      "mean_var_74b9c51e3fc4",
+      "inductor_torchbench_perf-1-6-linux.aws.a100_graph22_01f0243a",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "pointwise_0be9d97f3d16",
+      "hf_gpt2forsequenceclassification_infer_bc77c7d2",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "pointwise_1166e862427d",
+      "hf_yitutechconvbert_train_bcb0ea63",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "pointwise_21caf6bb6dca",
+      "hf_gpt2forsequenceclassification_train_301dbdaa",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "pointwise_5d7c3bd1f499",
+      "hf_mbartforcausallm_train_0a3b54e6",
+      "RuntimeError: The expanded size of the tensor (1024) must match the existing size (128) at non-singl"
+    ],
+    [
+      "pointwise_5d7c3bd1f499",
+      "hf_bartforcausallm_train_0a3b54e6",
+      "RuntimeError: The expanded size of the tensor (1024) must match the existing size (128) at non-singl"
+    ],
+    [
+      "pointwise_5d7c3bd1f499",
+      "hf_blenderbotforcausallm_train_3cf239db",
+      "RuntimeError: The expanded size of the tensor (32) must match the existing size (64) at non-singleto"
+    ],
+    [
+      "pointwise_5d7c3bd1f499",
+      "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_train_23ba3d03",
+      "/tmp/pytorch-work/aten/src/ATen/native/cuda/IndexKernel.cu:111: operator(): block: [12,0,0], thread:"
+    ],
+    [
+      "pointwise_5d7c3bd1f499",
+      "hf_optforcausallm_train_373883f1",
+      "RuntimeError: The expanded size of the tensor (2048) must match the existing size (128) at non-singl"
+    ],
+    [
+      "pointwise_5d7c3bd1f499",
+      "hf_plbartforcausallm_train_8e6b1d5e",
+      "RuntimeError: The expanded size of the tensor (1024) must match the existing size (128) at non-singl"
+    ],
+    [
+      "pointwise_5d7c3bd1f499",
+      "hf_pegasusforcausallm_train_e59c12da",
+      "RuntimeError: The expanded size of the tensor (128) must match the existing size (64) at non-singlet"
+    ],
+    [
+      "pointwise_6c6941b442c2",
+      "hf_blenderbotforcausallm_infer_a12082d4",
+      "RuntimeError: The expanded size of the tensor (128) must match the existing size (1024) at non-singl"
+    ],
+    [
+      "pointwise_6c6941b442c2",
+      "hf_pegasusforcausallm_infer_584b4978",
+      "RuntimeError: The expanded size of the tensor (128) must match the existing size (1024) at non-singl"
+    ],
+    [
+      "pointwise_745980b83886",
+      "hf_yitutechconvbert_train_eeb4d150",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "pointwise_81c9b6261ff2",
+      "hf_mbartforcausallm_train_d7517139",
+      "RuntimeError: The expanded size of the tensor (1024) must match the existing size (128) at non-singl"
+    ],
+    [
+      "pointwise_81c9b6261ff2",
+      "hf_bartforcausallm_train_d7517139",
+      "RuntimeError: The expanded size of the tensor (1024) must match the existing size (128) at non-singl"
+    ],
+    [
+      "pointwise_81c9b6261ff2",
+      "hf_plbartforcausallm_train_d7517139",
+      "RuntimeError: The expanded size of the tensor (1024) must match the existing size (128) at non-singl"
+    ],
+    [
+      "pointwise_8697026307d0",
+      "hf_yitutechconvbert_train_b56b165e",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "pointwise_976704b7446c",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_1309fc5a",
+      "RuntimeError: shape '[4, 512, 2048]' is invalid for input of size 8388608"
+    ],
+    [
+      "pointwise_98c0686d6611",
+      "vllm_meta-llama_llama-3.2-1b_7a501af4",
+      "RuntimeError: shape '[4, 512, 3072]' is invalid for input of size 16777216"
+    ],
+    [
+      "pointwise_98c0686d6611",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_bcf78156",
+      "RuntimeError: shape '[4, 512, 3072]' is invalid for input of size 29360128"
+    ],
+    [
+      "pointwise_ae0cf0fe8e23",
+      "hf_xglmforcausallm_train_d7517139",
+      "RuntimeError: The expanded size of the tensor (128) must match the existing size (256) at non-single"
+    ],
+    [
+      "pointwise_b430273ac746",
+      "vllm_meta-llama_llama-3.2-1b_34fdb24a",
+      "RuntimeError: shape '[4, 512, 3072]' is invalid for input of size 16777216"
+    ],
+    [
+      "pointwise_b430273ac746",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_efc442db",
+      "RuntimeError: shape '[4, 512, 3072]' is invalid for input of size 29360128"
+    ],
+    [
+      "pointwise_bc7461a2bc9b",
+      "inductor_timm_perf_cuda_h100-6-7-linux.aws.h100_graph58_2b22fb6d",
+      "RuntimeError: shape '[32, 256, 144]' is invalid for input of size 1310720"
+    ],
+    [
+      "sum_0c6370aa8259",
+      "vllm_meta-llama_llama-3.2-1b_a650dc83",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "sum_0c6370aa8259",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_19a4be53",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 8388608"
+    ],
+    [
+      "sum_3d59e9cd3970",
+      "hf_optforcausallm_train_23ac92e3",
+      "RuntimeError: shape '[1, 50272]' is invalid for input of size 29056"
+    ],
+    [
+      "sum_3d59e9cd3970",
+      "hf_xglmforcausallm_train_82ffbabc",
+      "RuntimeError: shape '[1, 256008]' is invalid for input of size 29056"
+    ],
+    [
+      "sum_572b2c80ad3d",
+      "vllm_qwen_qwen3-0.6b_8217c719",
+      "RuntimeError: The size of tensor a (512) must match the size of tensor b (2048) at non-singleton dim"
+    ],
+    [
+      "sum_572b2c80ad3d",
+      "vllm_meta-llama_llama-3.2-1b_b844b019",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "sum_572b2c80ad3d",
+      "vllm_meta-llama_llama-3.2-1b_ddc3f157",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "sum_572b2c80ad3d",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_20bddc02",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 8388608"
+    ],
+    [
+      "sum_572b2c80ad3d",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_5d76347b",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 8388608"
+    ],
+    [
+      "sum_58ca7193263c",
+      "vllm_meta-llama_llama-3.2-1b_197bdfea",
+      "RuntimeError: shape '[-1, 151936]' is invalid for input of size 262668288"
+    ],
+    [
+      "sum_58ca7193263c",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_9b843bc1",
+      "RuntimeError: shape '[-1, 151936]' is invalid for input of size 67108864"
+    ],
+    [
+      "sum_a32c08f63093",
+      "hf_m2m100forconditionalgeneration_train_c6599d01",
+      "RuntimeError: shape '[1, 128112]' is invalid for input of size 30000"
+    ],
+    [
+      "sum_a32c08f63093",
+      "hf_mt5forconditionalgeneration_train_5163b03a",
+      "RuntimeError: shape '[1, 250112]' is invalid for input of size 30000"
+    ],
+    [
+      "sum_a32c08f63093",
+      "hf_blenderbotforcausallm_train_b5ac3632",
+      "RuntimeError: shape '[1, 8008]' is invalid for input of size 30000"
+    ],
+    [
+      "sum_a32c08f63093",
+      "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_train_0da7ef6d",
+      "RuntimeError: shape '[1, 8008]' is invalid for input of size 30000"
+    ],
+    [
+      "sum_a32c08f63093",
+      "hf_debertav2formaskedlm_train_815382ff",
+      "RuntimeError: shape '[1, 128100]' is invalid for input of size 30000"
+    ],
+    [
+      "sum_a32c08f63093",
+      "hf_t5forconditionalgeneration_train_79dbc4fc",
+      "RuntimeError: shape '[1, 32128]' is invalid for input of size 30000"
+    ],
+    [
+      "sum_a32c08f63093",
+      "hf_t5small_train_79dbc4fc",
+      "RuntimeError: shape '[1, 32128]' is invalid for input of size 30000"
+    ],
+    [
+      "sum_a32c08f63093",
+      "hf_xlnetlmheadmodel_train_93d7397f",
+      "RuntimeError: shape '[1, 32000]' is invalid for input of size 30000"
+    ],
+    [
+      "sum_a32c08f63093",
+      "hf_googlefnet_train_cbad2813",
+      "RuntimeError: shape '[1, 32000]' is invalid for input of size 30000"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_32768x512_58304ec9",
+      "RuntimeError: shape '[1, 512]' is invalid for input of size 256"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_32768x1024_26f01925",
+      "RuntimeError: shape '[1, 1024]' is invalid for input of size 256"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_32768x2048_c4c9661f",
+      "RuntimeError: shape '[1, 2048]' is invalid for input of size 256"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_32768x4096_cc67dd63",
+      "RuntimeError: shape '[1, 4096]' is invalid for input of size 256"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_32768x8192_4302e4d8",
+      "RuntimeError: shape '[1, 8192]' is invalid for input of size 256"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_32768x16384_15d8f0d1",
+      "RuntimeError: shape '[1, 16384]' is invalid for input of size 256"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_32768x32768_61643c63",
+      "RuntimeError: shape '[1, 32768]' is invalid for input of size 256"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_32768x65536_0ede0c4f",
+      "RuntimeError: shape '[1, 65536]' is invalid for input of size 256"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_16384x131072_ae954055",
+      "RuntimeError: shape '[1, 131072]' is invalid for input of size 256"
+    ],
+    [
+      "sum_ac902649310d",
+      "genai_ce_bwd_8192x262144_4b36b0bc",
+      "RuntimeError: shape '[1, 262144]' is invalid for input of size 256"
+    ],
+    [
+      "sum_cd1d18c11a67",
+      "hf_plbartforcausallm_train_13271f7e",
+      "RuntimeError: shape '[1, 50005]' is invalid for input of size 50265"
+    ],
+    [
+      "sum_e84517cd343c",
+      "hf_gptneoforcausallm_train_938b7333",
+      "RuntimeError: shape '[1, 50257]' is invalid for input of size 50265"
+    ],
+    [
+      "sum_f90930a6d194",
+      "vllm_meta-llama_llama-3.2-1b_29c4f4be",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 4194304"
+    ],
+    [
+      "sum_f90930a6d194",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_4a99e9fc",
+      "RuntimeError: shape '[4, 512, 1024]' is invalid for input of size 8388608"
+    ],
+    [
+      "sum_sum_17a39670fc2c",
+      "timm_adv_inception_v3_train_58d4509f",
+      "/tmp/pytorch-work/aten/src/ATen/native/cuda/ScatterGatherKernel.cu:163: operator(): block: [259,0,0]"
+    ],
+    [
+      "sum_sum_17a39670fc2c",
+      "timm_inception_v3_train_58d4509f",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_1c4efa8068a8",
+      "timm_mobilevit_s_train_4a3694c8",
+      "RuntimeError: The size of tensor a (96) must match the size of tensor b (128) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_1c4efa8068a8",
+      "timm_mobilevit_s_train_b052ffa5",
+      "RuntimeError: The size of tensor a (96) must match the size of tensor b (160) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_1c4efa8068a8",
+      "timm_ghostnet_100_train_3b285a26",
+      "RuntimeError: The size of tensor a (16) must match the size of tensor b (8) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_1c4efa8068a8",
+      "timm_ghostnet_100_train_6ca69c08",
+      "RuntimeError: The size of tensor a (24) must match the size of tensor b (12) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_1c4efa8068a8",
+      "timm_ghostnet_100_train_34fdef4d",
+      "RuntimeError: The size of tensor a (40) must match the size of tensor b (20) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_1c4efa8068a8",
+      "timm_ghostnet_100_train_4ee4a043",
+      "RuntimeError: The size of tensor a (80) must match the size of tensor b (40) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_1c4efa8068a8",
+      "timm_ghostnet_100_train_053873ad",
+      "RuntimeError: The size of tensor a (96) must match the size of tensor b (56) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_1c4efa8068a8",
+      "timm_ghostnet_100_train_ed89440f",
+      "RuntimeError: The size of tensor a (96) must match the size of tensor b (80) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_2813c3cf2b06",
+      "timm_adv_inception_v3_train_b0f23f1f",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_2813c3cf2b06",
+      "timm_inception_v3_train_b0f23f1f",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_6b9f2a6f0f37",
+      "timm_swin_base_patch4_window7_224_train_553574c1",
+      "RuntimeError: shape '[128, 4, 7, 4, 7, 256]' is invalid for input of size 102760448"
+    ],
+    [
+      "sum_sum_6b9f2a6f0f37",
+      "timm_swin_base_patch4_window7_224_train_790f1a67",
+      "RuntimeError: shape '[128, 2, 7, 2, 7, 512]' is invalid for input of size 205520896"
+    ],
+    [
+      "sum_sum_81a5c296e4f2",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_10afa213",
+      "RuntimeError: shape '[4, 8, 4, 512, 64]' is invalid for input of size 8388608"
+    ],
+    [
+      "sum_sum_86b03d1a3e60",
+      "timm_deit_tiny_patch16_224.fb_in1k_train_f26c5137",
+      "RuntimeError: shape '[128, 192, 14, 14]' is invalid for input of size 4792320"
+    ],
+    [
+      "sum_sum_86b03d1a3e60",
+      "timm_vit_base_patch14_dinov2.lvd142m_train_7cc25ed5",
+      "RuntimeError: shape '[128, 768, 37, 37]' is invalid for input of size 19267584"
+    ],
+    [
+      "sum_sum_93f506e4684e",
+      "timm_adv_inception_v3_train_c71ab6c4",
+      "/tmp/pytorch-work/aten/src/ATen/native/cuda/ScatterGatherKernel.cu:163: operator(): block: [141,0,0]"
+    ],
+    [
+      "sum_sum_93f506e4684e",
+      "timm_inception_v3_train_c71ab6c4",
+      "/tmp/pytorch-work/aten/src/ATen/native/cuda/ScatterGatherKernel.cu:163: operator(): block: [64,0,0],"
+    ],
+    [
+      "sum_sum_93fde1d3b680",
+      "timm_ghostnet_100_train_02dc45e7",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (36) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_93fde1d3b680",
+      "timm_ghostnet_100_train_a1386e12",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (60) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_93fde1d3b680",
+      "timm_ghostnet_100_train_0f977eb0",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (100) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_93fde1d3b680",
+      "timm_ghostnet_100_train_47ff9d30",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (92) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_93fde1d3b680",
+      "timm_ghostnet_100_train_24daf5e0",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (336) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_93fde1d3b680",
+      "timm_ghostnet_100_train_096a0b42",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (480) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_9558f28d5b8a",
+      "timm_ghostnet_100_train_0e70dd2c",
+      "RuntimeError: The size of tensor a (336) must match the size of tensor b (60) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_9558f28d5b8a",
+      "timm_ghostnet_100_train_9f39c731",
+      "RuntimeError: The size of tensor a (480) must match the size of tensor b (60) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_9a5dad4e740b",
+      "timm_ghostnet_100_train_cf71f8cd",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (12) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_9a5dad4e740b",
+      "timm_ghostnet_100_train_20faba33",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (20) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_9a5dad4e740b",
+      "timm_ghostnet_100_train_f15ed5c6",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (40) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_9a5dad4e740b",
+      "timm_ghostnet_100_train_08060bcb",
+      "RuntimeError: The size of tensor a (8) must match the size of tensor b (56) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_ac007a230329",
+      "vllm_mistralai_mistral-7b-instruct-v0.3_275fd559",
+      "RuntimeError: shape '[4, 8, 4, 512, 64]' is invalid for input of size 8388608"
+    ],
+    [
+      "sum_sum_b3342686caa1",
+      "timm_adv_inception_v3_train_5f2668c9",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_b3342686caa1",
+      "timm_inception_v3_train_5f2668c9",
+      "/tmp/pytorch-work/aten/src/ATen/native/cuda/ScatterGatherKernel.cu:163: operator(): block: [1929,0,0"
+    ],
+    [
+      "sum_sum_d9e105c10a87",
+      "timm_mobilevit_s_train_73a5ba64",
+      "RuntimeError: The size of tensor a (96) must match the size of tensor b (128) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_d9e105c10a87",
+      "timm_mobilevit_s_train_1c8764f1",
+      "RuntimeError: The size of tensor a (96) must match the size of tensor b (160) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_f9cf0f90e7dc",
+      "timm_adv_inception_v3_train_70612132",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (96) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_f9cf0f90e7dc",
+      "timm_adv_inception_v3_train_89754c99",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (96) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_f9cf0f90e7dc",
+      "timm_inception_v3_train_70612132",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (96) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_f9cf0f90e7dc",
+      "timm_inception_v3_train_89754c99",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (96) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_fdea164def2e",
+      "timm_ghostnet_100_train_8117bae5",
+      "RuntimeError: The size of tensor a (36) must match the size of tensor b (8) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_fdea164def2e",
+      "timm_ghostnet_100_train_e36e0513",
+      "RuntimeError: The size of tensor a (100) must match the size of tensor b (8) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_fdea164def2e",
+      "timm_ghostnet_100_train_5c62bfd4",
+      "RuntimeError: The size of tensor a (92) must match the size of tensor b (8) at non-singleton dimensi"
+    ],
+    [
+      "sum_sum_fdea164def2e",
+      "timm_ghostnet_100_train_ed9ed2aa",
+      "RuntimeError: The size of tensor a (480) must match the size of tensor b (8) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_sum_0b3fb1f4c638",
+      "hf_yitutechconvbert_train_7316f1d8",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_sum_4d7e4d27796e",
+      "timm_adv_inception_v3_train_455f8b04",
+      "RuntimeError: The size of tensor a (64) must match the size of tensor b (32) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_sum_4d7e4d27796e",
+      "timm_adv_inception_v3_train_94074339",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (32) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_4d7e4d27796e",
+      "timm_adv_inception_v3_train_a00f21a8",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (32) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_4d7e4d27796e",
+      "timm_adv_inception_v3_train_a2d525b0",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (32) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_4d7e4d27796e",
+      "timm_inception_v3_train_455f8b04",
+      "RuntimeError: The size of tensor a (64) must match the size of tensor b (32) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_sum_4d7e4d27796e",
+      "timm_inception_v3_train_94074339",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (32) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_4d7e4d27796e",
+      "timm_inception_v3_train_a00f21a8",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (32) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_4d7e4d27796e",
+      "timm_inception_v3_train_a2d525b0",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (32) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_7dd14f739c29",
+      "timm_ghostnet_100_train_44135da6",
+      "RuntimeError: The size of tensor a (24) must match the size of tensor b (36) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_sum_7dd14f739c29",
+      "timm_ghostnet_100_train_52dc70e1",
+      "RuntimeError: The size of tensor a (24) must match the size of tensor b (120) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_7dd14f739c29",
+      "timm_ghostnet_100_train_fd87cb09",
+      "RuntimeError: The size of tensor a (24) must match the size of tensor b (240) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_7dd14f739c29",
+      "timm_ghostnet_100_train_b37ea879",
+      "RuntimeError: The size of tensor a (24) must match the size of tensor b (336) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_adv_inception_v3_train_151ca3c4",
+      "RuntimeError: The size of tensor a (384) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_adv_inception_v3_train_b1581f2e",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_adv_inception_v3_train_dbe35472",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_adv_inception_v3_train_175b03f8",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_adv_inception_v3_train_7b5cce16",
+      "RuntimeError: The size of tensor a (320) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_inception_v3_train_151ca3c4",
+      "RuntimeError: The size of tensor a (384) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_inception_v3_train_b1581f2e",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_inception_v3_train_dbe35472",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_inception_v3_train_175b03f8",
+      "RuntimeError: The size of tensor a (192) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_8a039874d404",
+      "timm_inception_v3_train_7b5cce16",
+      "RuntimeError: The size of tensor a (320) must match the size of tensor b (64) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_9c6bfbc4476f",
+      "timm_ghostnet_100_train_78b4082d",
+      "RuntimeError: The size of tensor a (36) must match the size of tensor b (24) at non-singleton dimens"
+    ],
+    [
+      "sum_sum_sum_9c6bfbc4476f",
+      "timm_ghostnet_100_train_86fe8cb9",
+      "RuntimeError: The size of tensor a (120) must match the size of tensor b (24) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_9c6bfbc4476f",
+      "timm_ghostnet_100_train_0e7c9005",
+      "RuntimeError: The size of tensor a (336) must match the size of tensor b (24) at non-singleton dimen"
+    ],
+    [
+      "sum_sum_sum_b65fbfe9803d",
+      "hf_mobilebertformaskedlm_train_6b9886c8",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_sum_cd47d7ca4703",
+      "hf_allenailongformerbase_train_6e66b7cd",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_sum_d82dce7fbf63",
+      "hf_mt5forconditionalgeneration_train_0161a0e7",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_sum_e7599279d509",
+      "vllm_qwen_qwen3-30b-a3b_a6b6ec61",
+      "RuntimeError: shape '[4, 8, 2, 512, 128]' is invalid for input of size 8388608"
+    ],
+    [
+      "sum_sum_sum_e9dd8d0f1eed",
+      "hf_t5forconditionalgeneration_train_0e025f9c",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_sum_e9dd8d0f1eed",
+      "hf_t5small_train_0e025f9c",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "sum_sum_sum_f5983b11ff19",
+      "vllm_qwen_qwen3-30b-a3b_044e266d",
+      "RuntimeError: shape '[4, 8, 2, 512, 128]' is invalid for input of size 8388608"
+    ],
+    [
+      "sum_sum_sum_f985aa2ba675",
+      "hf_layoutlmformaskedlm_train_83e5fbbd",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_083b9a31540a",
+      "hf_albertformaskedlm_train_7df6f7e9",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_0dbe40f48fdd",
+      "hf_bertformaskedlm_train_ae69658f",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_0ed414912696",
+      "hf_albertformaskedlm_infer_7df6f7e9",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_0ed414912696",
+      "hf_electraforcausallm_infer_3a14005c",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_112690ea5b4b",
+      "hf_m2m100forconditionalgeneration_infer_13bb6eda",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_14ac48aa4523",
+      "hf_optforcausallm_infer_ed8db03d",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_166d931cff4f",
+      "hf_googlefnet_train_432a2049",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_21ea62bab778",
+      "inductor_huggingface_perf-1-5-linux.aws.a100_graph0_abd438fa",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_3ab375a24598",
+      "hf_yitutechconvbert_infer_22caa6f4",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_3ff3c35c48eb",
+      "inductor_huggingface_perf-2-5-linux.aws.a100_graph4_8760923a",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_783f8136af55",
+      "hf_allenailongformerbase_train_40cd047e",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_7dfad1b1c261",
+      "hf_bertformaskedlm_infer_ae69658f",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_80ca6a635383",
+      "hf_yitutechconvbert_train_22caa6f4",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_a0c4a939f53e",
+      "hf_allenailongformerbase_infer_40cd047e",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_a501ce1ff33f",
+      "hf_gpt2forsequenceclassification_infer_bbe55057",
+      "RuntimeError: The size of tensor a (1024) must match the size of tensor b (512) at non-singleton dim"
+    ],
+    [
+      "var_mean_aa684f62cb62",
+      "hf_robertaforcausallm_train_8dbfa535",
+      "/tmp/pytorch-work/aten/src/ATen/native/cuda/ScatterGatherKernel.cu:163: operator(): block: [11,0,0],"
+    ],
+    [
+      "var_mean_c7b3c08de59d",
+      "timm_swin_base_patch4_window7_224_infer_a79c9658",
+      "RuntimeError: The size of tensor a (28) must match the size of tensor b (14) at non-singleton dimens"
+    ],
+    [
+      "var_mean_c7b3c08de59d",
+      "timm_swin_base_patch4_window7_224_infer_9aae7c7e",
+      "RuntimeError: The size of tensor a (56) must match the size of tensor b (14) at non-singleton dimens"
+    ],
+    [
+      "var_mean_d4477543084f",
+      "timm_swin_base_patch4_window7_224_infer_2c194117",
+      "RuntimeError: shape '[128, 4, 7, 4, 7, 256]' is invalid for input of size 6422528"
+    ],
+    [
+      "var_mean_d4477543084f",
+      "timm_swin_base_patch4_window7_224_infer_568caa09",
+      "RuntimeError: shape '[128, 8, 7, 8, 7, 128]' is invalid for input of size 3211264"
+    ],
+    [
+      "var_mean_d6a013c7702a",
+      "hf_googlefnet_train_aed0ccb9",
+      "IndexError: index 24 is out of bounds for dimension 0 with size 13"
+    ],
+    [
+      "var_mean_db8ca1144f8b",
+      "hf_electraforcausallm_train_3a14005c",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_dcf1d294b09f",
+      "inductor_huggingface_perf_cuda_h100-1-5-linux.aws.h100_graph33_bc2d61fe",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_ddc3f655f776",
+      "hf_robertaforcausallm_infer_8dbfa535",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_e17588aa4b78",
+      "hf_m2m100forconditionalgeneration_infer_f5da8c86",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_e210c66e72d1",
+      "hf_googlefnet_infer_432a2049",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_f715055edb02",
+      "timm_swin_base_patch4_window7_224_train_e16f12eb",
+      "RuntimeError: shape '[128, 4, 7, 4, 7, 256]' is invalid for input of size 6422528"
+    ]
+  ]
+}

@@ -36,7 +36,12 @@
   ],
   "n_models": 2,
   "models": [
+<<<<<<< HEAD:repros/canonical/amax_sum_sum_e2f518f0a274/meta.json
     "torchbench_hf_GPT2_large_train_001",
     "torchbench_hf_GPT2_train_001"
+=======
+    "hf_GPT2",
+    "hf_GPT2_large"
+>>>>>>> origin/repro-correctness-loader-fixes:repros/canonical/sum_sum_amax_7e55e8085931/meta.json
   ]
 }

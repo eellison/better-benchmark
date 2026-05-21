@@ -42,7 +42,12 @@
   ],
   "n_models": 2,
   "models": [
+<<<<<<< HEAD:repros/canonical/argmax_amax_sum_fd72c2ef2d40/meta.json
     "hf_GPT2ForSequenceClassification_infer_000",
     "hf_GPTNeoForSequenceClassification_infer_000"
+=======
+    "hf_GPT2ForSequenceClassification_train_000",
+    "hf_GPTNeoForSequenceClassification_train_000"
+>>>>>>> origin/repro-correctness-loader-fixes:repros/canonical/amax_argmax_sum_5dfabd070411/meta.json
   ]
 }

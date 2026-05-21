@@ -27,6 +27,8 @@ def _find_repros(paths: list[Path]) -> list[Path]:
     for path in paths:
         if path.is_file():
             repros.append(path)
+        elif (path / "repro.py").exists():
+            repros.append(path / "repro.py")
         else:
             repros.extend(path.glob("*/repro.py"))
     return sorted(set(repros))
@@ -221,6 +223,10 @@ def main() -> int:
         for repro in repros
         for shape in _shape_labels(repro, args.all_shapes)
     ]
+    if not tasks:
+        print("No repro.py files found.")
+        return 1
+
     gpus = [gpu.strip() for gpu in args.gpus.split(",") if gpu.strip()]
     if not gpus:
         raise SystemExit("--gpus cannot be empty")

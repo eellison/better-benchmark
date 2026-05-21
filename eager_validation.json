@@ -1,0 +1,98 @@
+{
+  "pass": 1110,
+  "fail": 23,
+  "failures": [
+    [
+      "amax_sum_f0661488d68c",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "amax_sum_sum_1bad0f362efd",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "mean_mean_2a70a32580e5",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "pointwise_15eb68940841",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "pointwise_401e01c76176",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "pointwise_58de5316dae4",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "pointwise_8bd2c54a1f92",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "pointwise_f3cd1cb10701",
+      "AttributeError: '_OpNamespace' 'prims' object has no attribute 'inductor_lookup_seed'"
+    ],
+    [
+      "sum_0588ba452097",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "sum_54a72e26c180",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "sum_96169519e55a",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "sum_e1a327127faa",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "sum_fa93a106e77a",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "sum_sum_mean_bfbe9da220d2",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "sum_sum_mean_e17182ccea6b",
+      "NotImplementedError: \"normal_kernel_cuda\" not implemented for 'Bool'"
+    ],
+    [
+      "sum_sum_sum_1a121d06f359",
+      "AttributeError: '_OpNamespace' 'prims' object has no attribute 'fma'. Did you mean: 'fmax'?"
+    ],
+    [
+      "sum_sum_sum_c47efb36ade5",
+      "AttributeError: '_OpNamespace' 'prims' object has no attribute 'fma'. Did you mean: 'fmax'?"
+    ],
+    [
+      "var_mean_0ed414912696",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_21ea62bab778",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_3ff3c35c48eb",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_7dfad1b1c261",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_dcf1d294b09f",
+      "For debugging consider passing CUDA_LAUNCH_BLOCKING=1"
+    ],
+    [
+      "var_mean_var_mean_4d7aec4343d1",
+      "AttributeError: '_OpNamespace' 'prims' object has no attribute 'inductor_seeds'"
+    ]
+  ]
+}
