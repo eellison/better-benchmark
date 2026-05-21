@@ -11,8 +11,8 @@ fixes/
 repros/canonical/*/graph.py
 
 # Legacy exploration files (not part of the benchmark infrastructure)
-*.md
-!ROADMAP.md
+
+
 captures_hf/
 captures_torchvision/
 output/
