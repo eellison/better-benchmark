@@ -6,10 +6,11 @@
   "origin_ops": [
     "aten.mul.Tensor"
   ],
-  "n_models": 50,
+  "n_models": 51,
   "models": [
     "LearningToPaint",
     "dcgan",
+    "densenet121",
     "mnasnet1_0",
     "mobilenet_v2",
     "mobilenet_v3_large",

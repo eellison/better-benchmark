@@ -2,217 +2,217 @@
   {
     "model": "adv_inception_v3",
     "mode": "infer",
-    "regions": 29,
-    "time": 14.235555171966553
+    "regions": 26,
+    "time": 13.67776894569397
   },
   {
     "model": "adv_inception_v3",
     "mode": "train",
-    "regions": 65,
-    "time": 65.77159333229065
+    "regions": 117,
+    "time": 64.14137005805969
   },
   {
     "model": "beit_base_patch16_224",
     "mode": "infer",
-    "regions": 6,
-    "time": 5.709258317947388
+    "regions": 11,
+    "time": 5.810875654220581
   },
   {
     "model": "beit_base_patch16_224",
     "mode": "train",
-    "regions": 14,
-    "time": 13.994462013244629
+    "regions": 33,
+    "time": 14.318878889083862
   },
   {
     "model": "convnextv2_nano.fcmae_ft_in22k_in1k",
     "mode": "infer",
     "regions": 16,
-    "time": 6.3480072021484375
+    "time": 6.020147800445557
   },
   {
     "model": "convnextv2_nano.fcmae_ft_in22k_in1k",
     "mode": "train",
-    "regions": 31,
-    "time": 17.14767360687256
+    "regions": 60,
+    "time": 18.978086471557617
   },
   {
     "model": "deit_base_distilled_patch16_224",
     "mode": "infer",
-    "regions": 7,
-    "time": 4.566791534423828
+    "regions": 10,
+    "time": 4.398699760437012
   },
   {
     "model": "deit_base_distilled_patch16_224",
     "mode": "train",
-    "regions": 15,
-    "time": 11.627041816711426
+    "regions": 26,
+    "time": 11.279743432998657
   },
   {
     "model": "deit_tiny_patch16_224.fb_in1k",
     "mode": "infer",
-    "regions": 6,
-    "time": 4.153917074203491
+    "regions": 10,
+    "time": 4.062855243682861
   },
   {
     "model": "deit_tiny_patch16_224.fb_in1k",
     "mode": "train",
-    "regions": 13,
-    "time": 11.083287239074707
+    "regions": 23,
+    "time": 10.868939876556396
   },
   {
     "model": "dm_nfnet_f0",
     "mode": "infer",
-    "regions": 33,
-    "time": 16.246175527572632
+    "regions": 46,
+    "time": 15.020198822021484
   },
   {
     "model": "dm_nfnet_f0",
     "mode": "train",
-    "regions": 63,
-    "time": 42.03005337715149
+    "regions": 140,
+    "time": 40.327593088150024
   },
   {
     "model": "ghostnet_100",
     "mode": "infer",
-    "regions": 62,
-    "time": 14.928324460983276
+    "regions": 61,
+    "time": 14.471778631210327
   },
   {
     "model": "ghostnet_100",
     "mode": "train",
-    "regions": 123,
-    "time": 58.17256498336792
+    "regions": 245,
+    "time": 57.80170202255249
   },
   {
     "model": "inception_v3",
     "mode": "infer",
-    "regions": 29,
-    "time": 11.916831731796265
+    "regions": 26,
+    "time": 11.861173868179321
   },
   {
     "model": "inception_v3",
     "mode": "train",
-    "regions": 65,
-    "time": 65.7116219997406
+    "regions": 115,
+    "time": 64.89756274223328
   },
   {
     "model": "mobilenetv2_100",
     "mode": "infer",
     "regions": 24,
-    "time": 6.108701229095459
+    "time": 5.700796127319336
   },
   {
     "model": "mobilenetv2_100",
     "mode": "train",
-    "regions": 49,
-    "time": 26.02045726776123
+    "regions": 100,
+    "time": 24.42492961883545
   },
   {
     "model": "mobilenetv3_large_100",
     "mode": "infer",
     "regions": 43,
-    "time": 8.934134483337402
+    "time": 8.911555290222168
   },
   {
     "model": "mobilenetv3_large_100",
     "mode": "train",
-    "regions": 87,
-    "time": 34.07784628868103
+    "regions": 161,
+    "time": 31.22833013534546
   },
   {
     "model": "mobilevit_s",
     "mode": "infer",
-    "regions": 41,
-    "time": 13.508524894714355
+    "regions": 43,
+    "time": 13.313133478164673
   },
   {
     "model": "mobilevit_s",
     "mode": "train",
-    "regions": 83,
-    "time": 39.34883737564087
+    "regions": 137,
+    "time": 37.8993821144104
   },
   {
     "model": "nfnet_l0",
     "mode": "infer",
-    "regions": 32,
-    "time": 14.789278745651245
+    "regions": 45,
+    "time": 13.846218824386597
   },
   {
     "model": "nfnet_l0",
     "mode": "train",
-    "regions": 61,
-    "time": 38.119263887405396
+    "regions": 131,
+    "time": 36.22460460662842
   },
   {
     "model": "repvgg_a2",
     "mode": "infer",
     "regions": 8,
-    "time": 4.843935251235962
+    "time": 4.840233325958252
   },
   {
     "model": "repvgg_a2",
     "mode": "train",
-    "regions": 17,
-    "time": 25.07161831855774
+    "regions": 40,
+    "time": 23.932764053344727
   },
   {
     "model": "swin_base_patch4_window7_224",
     "mode": "infer",
-    "regions": 39,
-    "time": 36.919493198394775
+    "regions": 46,
+    "time": 37.65313220024109
   },
   {
     "model": "swin_base_patch4_window7_224",
     "mode": "train",
-    "regions": 79,
-    "time": 87.70932388305664
+    "regions": 132,
+    "time": 90.03815150260925
   },
   {
     "model": "tf_efficientnet_b0",
     "mode": "infer",
     "regions": 51,
-    "time": 10.906421184539795
+    "time": 11.17890453338623
   },
   {
     "model": "tf_efficientnet_b0",
     "mode": "train",
-    "regions": 102,
-    "time": 40.78775429725647
+    "regions": 172,
+    "time": 40.17832946777344
   },
   {
     "model": "visformer_small",
     "mode": "infer",
-    "regions": 19,
-    "time": 6.1619203090667725
+    "regions": 21,
+    "time": 6.206540822982788
   },
   {
     "model": "visformer_small",
     "mode": "train",
-    "regions": 37,
-    "time": 21.232414484024048
+    "regions": 68,
+    "time": 20.528478860855103
   },
   {
     "model": "vit_base_patch14_dinov2.lvd142m",
-    "mode": "infer",
-    "regions": 6,
-    "time": 5.017215728759766
-  },
-  {
-    "model": "vit_base_patch14_dinov2.lvd142m",
-    "mode": "train",
-    "regions": 13,
-    "time": 16.29491400718689
-  },
-  {
-    "model": "vit_base_patch16_siglip_256",
     "mode": "infer",
     "regions": 10,
-    "time": 4.581127166748047
+    "time": 5.911515951156616
+  },
+  {
+    "model": "vit_base_patch14_dinov2.lvd142m",
+    "mode": "train",
+    "regions": 25,
+    "time": 15.358884334564209
+  },
+  {
+    "model": "vit_base_patch16_siglip_256",
+    "mode": "infer",
+    "regions": 14,
+    "time": 4.599393129348755
   },
   {
     "model": "vit_base_patch16_siglip_256",
     "mode": "train",
-    "regions": 21,
-    "time": 12.813541650772095
+    "regions": 37,
+    "time": 12.378668546676636
   }
 ]

@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "4eb034ff481c",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.erf.default",
+    "aten.exp.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 7,
+  "models": [
+    "hf_Bert",
+    "hf_Bert_large",
+    "hf_DistilBert",
+    "hf_Longformer",
+    "hf_Roberta_base",
+    "hf_Whisper",
+    "timm_vision_transformer"
+  ]
+}

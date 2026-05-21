@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "5bb978a02297",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.le.Scalar",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "squeezenet1_1"
+  ]
+}

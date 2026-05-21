@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "1ff82fee95ff",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.div.Scalar",
+    "aten.expand.default",
+    "aten.reshape.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Whisper"
+  ]
+}

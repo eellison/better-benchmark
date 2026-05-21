@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "34ae9dcbfe37",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.slice.Tensor",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "squeezenet1_1"
+  ]
+}

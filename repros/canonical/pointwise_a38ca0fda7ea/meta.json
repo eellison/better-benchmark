@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "a38ca0fda7ea",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "soft_actor_critic"
+  ]
+}

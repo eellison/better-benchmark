@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "f60f95cd015c",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf_T5",
+    "hf_T5_base"
+  ]
+}

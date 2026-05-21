@@ -7,10 +7,11 @@
     "aten.le.Scalar",
     "aten.where.self"
   ],
-  "n_models": 20,
+  "n_models": 21,
   "models": [
     "alexnet",
     "demucs",
+    "dlrm",
     "mobilenet_v3_large",
     "timm_dm_nfnet_f0_train",
     "timm_dm_nfnet_f0_train_001",

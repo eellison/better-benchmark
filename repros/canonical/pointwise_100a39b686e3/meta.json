@@ -7,10 +7,11 @@
     "aten.add.Tensor",
     "aten.copy_.default"
   ],
-  "n_models": 44,
+  "n_models": 45,
   "models": [
     "LearningToPaint",
     "dcgan",
+    "densenet121",
     "mnasnet1_0",
     "mobilenet_v2",
     "mobilenet_v3_large",

@@ -16,8 +16,9 @@
     "aten.add.Tensor",
     "aten.add.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf_Albert",
     "hf_AlbertForMaskedLM_train_001"
   ]
 }

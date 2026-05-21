@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "a794fa9bed6c",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.empty.memory_format",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.gather.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.scatter.src",
+    "aten.unsqueeze.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Reformer"
+  ]
+}

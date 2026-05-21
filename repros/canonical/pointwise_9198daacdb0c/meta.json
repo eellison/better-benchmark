@@ -22,8 +22,9 @@
     "aten.reshape.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "BERT_pytorch"
+    "BERT_pytorch",
+    "hf_Bart"
   ]
 }

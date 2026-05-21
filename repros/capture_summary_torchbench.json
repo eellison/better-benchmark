@@ -1,68 +1,560 @@
 [
   {
+    "model": "BERT_pytorch",
+    "mode": "train",
+    "regions": 31,
+    "time": 27.06
+  },
+  {
+    "model": "LearningToPaint",
+    "mode": "train",
+    "regions": 51,
+    "time": 12.32
+  },
+  {
     "model": "Super_SloMo",
-    "mode": "infer",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
+    "model": "alexnet",
+    "mode": "train",
+    "regions": 25,
+    "time": 8.74
+  },
+  {
     "model": "basic_gnn_edgecnn",
-    "mode": "infer",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
     "model": "basic_gnn_gcn",
-    "mode": "infer",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
     "model": "basic_gnn_gin",
-    "mode": "infer",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
     "model": "basic_gnn_sage",
-    "mode": "infer",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
-    "model": "sam",
-    "mode": "infer",
+    "model": "dcgan",
+    "mode": "train",
+    "regions": 23,
+    "time": 5.52
+  },
+  {
+    "model": "demucs",
+    "mode": "train",
+    "regions": 82,
+    "time": 17.0
+  },
+  {
+    "model": "densenet121",
+    "mode": "train",
+    "regions": 276,
+    "time": 157.75
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_101_c4",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
-    "model": "stable_diffusion_text_encoder",
-    "mode": "infer",
+    "model": "detectron2_fasterrcnn_r_101_dc5",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
-    "model": "stable_diffusion_unet",
-    "mode": "infer",
+    "model": "detectron2_fasterrcnn_r_101_fpn",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_50_c4",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_50_dc5",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_50_fpn",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fcos_r_50_fpn",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn_r_101_c4",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn_r_101_fpn",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn_r_50_c4",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn_r_50_fpn",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "dlrm",
+    "mode": "train",
+    "regions": 14,
+    "time": 4.99
+  },
+  {
+    "model": "doctr_det_predictor",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "doctr_reco_predictor",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "drq",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "fastNLP_Bert",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "functorch_dp_cifar10",
+    "mode": "train",
+    "regions": 40,
+    "time": 12.18
+  },
+  {
+    "model": "functorch_maml_omniglot",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "hf_Albert",
+    "mode": "train",
+    "regions": 37,
+    "time": 29.66
+  },
+  {
+    "model": "hf_Bart",
+    "mode": "train",
+    "regions": 41,
+    "time": 18.45
+  },
+  {
+    "model": "hf_Bert",
+    "mode": "train",
+    "regions": 29,
+    "time": 30.95
+  },
+  {
+    "model": "hf_Bert_large",
+    "mode": "train",
+    "regions": 29,
+    "time": 81.0
+  },
+  {
+    "model": "hf_BigBird",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "hf_DistilBert",
+    "mode": "train",
+    "regions": 30,
+    "time": 18.1
+  },
+  {
+    "model": "hf_GPT2",
+    "mode": "train",
+    "regions": 20,
+    "time": 21.96
+  },
+  {
+    "model": "hf_GPT2_large",
+    "mode": "train",
+    "regions": 23,
+    "time": 90.18
+  },
+  {
+    "model": "hf_Longformer",
+    "mode": "train",
+    "regions": 42,
+    "time": 77.85
+  },
+  {
+    "model": "hf_Reformer",
+    "mode": "train",
+    "regions": 29,
+    "time": 43.67
+  },
+  {
+    "model": "hf_Roberta_base",
+    "mode": "train",
+    "regions": 30,
+    "time": 31.43
+  },
+  {
+    "model": "hf_T5",
+    "mode": "train",
+    "regions": 29,
+    "time": 42.21
+  },
+  {
+    "model": "hf_T5_base",
+    "mode": "train",
+    "regions": 29,
+    "time": 130.88
+  },
+  {
+    "model": "hf_T5_large",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "hf_Whisper",
+    "mode": "train",
+    "regions": 19,
+    "time": 9.59
+  },
+  {
+    "model": "hf_clip",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "hf_distil_whisper",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "lennard_jones",
+    "mode": "train",
+    "regions": 7,
+    "time": 2.48
+  },
+  {
+    "model": "llama",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "llava",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "maml",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "maml_omniglot",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "mnasnet1_0",
+    "mode": "train",
+    "regions": 121,
+    "time": 30.05
+  },
+  {
+    "model": "mobilenet_v2",
+    "mode": "train",
+    "regions": 101,
+    "time": 28.16
+  },
+  {
+    "model": "mobilenet_v3_large",
+    "mode": "train",
+    "regions": 162,
+    "time": 36.5
+  },
+  {
+    "model": "moco",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "modded_nanogpt",
+    "mode": "train",
+    "regions": 49,
+    "time": 53.43
+  },
+  {
+    "model": "moondream",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "nanogpt",
+    "mode": "train",
+    "regions": 19,
+    "time": 11.15
+  },
+  {
+    "model": "nvidia_deeprecommender",
+    "mode": "train",
+    "regions": 10,
+    "time": 6.27
+  },
+  {
+    "model": "opacus_cifar10",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "phlippe_densenet",
+    "mode": "train",
+    "regions": 135,
+    "time": 27.21
+  },
+  {
+    "model": "phlippe_resnet",
+    "mode": "train",
+    "regions": 33,
+    "time": 8.61
+  },
+  {
+    "model": "pyhpc_equation_of_state",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "pyhpc_isoneutral_mixing",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "pyhpc_turbulent_kinetic_energy",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "pytorch_CycleGAN_and_pix2pix",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
     "model": "pytorch_stargan",
-    "mode": "infer",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "pytorch_unet",
+    "mode": "train",
+    "regions": 60,
+    "time": 18.49
+  },
+  {
+    "model": "resnet152",
+    "mode": "train",
+    "regions": 66,
+    "time": 122.56
+  },
+  {
+    "model": "resnet18",
+    "mode": "train",
+    "regions": 48,
+    "time": 12.96
+  },
+  {
+    "model": "resnet50",
+    "mode": "train",
+    "regions": 67,
+    "time": 25.17
+  },
+  {
+    "model": "resnext50_32x4d",
+    "mode": "train",
+    "regions": 64,
+    "time": 23.59
+  },
+  {
+    "model": "sam_fast",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "shufflenet_v2_x1_0",
+    "mode": "train",
+    "regions": 71,
+    "time": 34.92
+  },
+  {
+    "model": "simple_gpt",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "soft_actor_critic",
+    "mode": "train",
+    "regions": 7,
+    "time": 3.11
+  },
+  {
+    "model": "speech_transformer",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "squeezenet1_1",
+    "mode": "train",
+    "regions": 41,
+    "time": 11.6
+  },
+  {
+    "model": "stable_diffusion_text_encoder",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "tacotron2",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
     "model": "timm_efficientdet",
-    "mode": "infer",
+    "mode": "train",
     "regions": 0,
     "time": 0.0
   },
   {
-    "model": "timm_vision_transformer_large",
-    "mode": "infer",
-    "regions": 6,
-    "time": 34.14
+    "model": "timm_efficientnet",
+    "mode": "train",
+    "regions": 163,
+    "time": 40.18
+  },
+  {
+    "model": "timm_nfnet",
+    "mode": "train",
+    "regions": 140,
+    "time": 32.18
+  },
+  {
+    "model": "timm_regnet",
+    "mode": "train",
+    "regions": 91,
+    "time": 40.71
+  },
+  {
+    "model": "timm_resnest",
+    "mode": "train",
+    "regions": 92,
+    "time": 24.71
+  },
+  {
+    "model": "timm_vision_transformer",
+    "mode": "train",
+    "regions": 23,
+    "time": 12.4
+  },
+  {
+    "model": "timm_vovnet",
+    "mode": "train",
+    "regions": 81,
+    "time": 20.38
+  },
+  {
+    "model": "torch_multimodal_clip",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "tts_angular",
+    "mode": "train",
+    "regions": 2,
+    "time": 1.92
+  },
+  {
+    "model": "vgg16",
+    "mode": "train",
+    "regions": 37,
+    "time": 7.78
+  },
+  {
+    "model": "vision_maskrcnn",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "yolov3",
+    "mode": "train",
+    "regions": 0,
+    "time": 0.0
   }
 ]

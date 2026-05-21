@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "61d323859fdc",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.as_strided.default",
+    "aten.clone.default",
+    "aten.constant_pad_nd.default",
+    "aten.index_put.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.squeeze.dim"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Longformer"
+  ]
+}

@@ -1,0 +1,58 @@
+"""
+Standalone repro captured via capture_hook.
+Label: torchbench_functorch_dp_cifar10_train
+Pattern hash: a7464964884d
+Shape hash: 3771bf52
+"""
+import sys
+from pathlib import Path
+
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_repro_version = 2
+_shapes_config = "(T([64, 512], f32), T([64, 512], f32), T([64, 32], f32), T([64, 32, 1], f32), T([64, 512], f32), T([64, 32], f32), T([64, 32, 1], f32), S([64, 32, 16]), S([64, 32, 16]), S([512]), S([64, 32, 16]), S([512]))"
+
+class Repro(torch.nn.Module):
+    def forward(self, sum_14: "f32[64, 512]", sum_15: "f32[64, 512]", squeeze_34: "f32[64, 32]", unsqueeze_142: "f32[64, 32, 1]", sum_20: "f32[64, 512]", squeeze_32: "f32[64, 32]", unsqueeze_152: "f32[64, 32, 1]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:100 in forward, code: identity = self.downsample(x)
+        reshape_default: "f32[64, 32, 16]" = torch.ops.aten.reshape.default(sum_14, _shape_param_0);  sum_14 = _shape_param_0 = None
+        reshape_default_1: "f32[64, 32, 16]" = torch.ops.aten.reshape.default(sum_15, _shape_param_1);  sum_15 = _shape_param_1 = None
+        unsqueeze_default: "f32[64, 32, 1]" = torch.ops.aten.unsqueeze.default(squeeze_34, -1);  squeeze_34 = None
+        mul_tensor: "f32[64, 32, 16]" = torch.ops.aten.mul.Tensor(reshape_default_1, unsqueeze_default);  unsqueeze_default = None
+        sub_tensor: "f32[64, 32, 16]" = torch.ops.aten.sub.Tensor(reshape_default, mul_tensor);  reshape_default = mul_tensor = None
+        mul_tensor_1: "f32[64, 32, 16]" = torch.ops.aten.mul.Tensor(sub_tensor, unsqueeze_142);  sub_tensor = unsqueeze_142 = None
+        sum_dim_int_list: "f32[32, 16]" = torch.ops.aten.sum.dim_IntList(mul_tensor_1, [0]);  mul_tensor_1 = None
+        reshape_default_2: "f32[512]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_2);  sum_dim_int_list = _shape_param_2 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:97 in forward, code: out = self.bn2(out)
+        reshape_default_3: "f32[64, 32, 16]" = torch.ops.aten.reshape.default(sum_20, _shape_param_3);  sum_20 = _shape_param_3 = None
+        unsqueeze_default_1: "f32[64, 32, 1]" = torch.ops.aten.unsqueeze.default(squeeze_32, -1);  squeeze_32 = None
+        mul_tensor_2: "f32[64, 32, 16]" = torch.ops.aten.mul.Tensor(reshape_default_1, unsqueeze_default_1);  reshape_default_1 = unsqueeze_default_1 = None
+        sub_tensor_1: "f32[64, 32, 16]" = torch.ops.aten.sub.Tensor(reshape_default_3, mul_tensor_2);  reshape_default_3 = mul_tensor_2 = None
+        mul_tensor_3: "f32[64, 32, 16]" = torch.ops.aten.mul.Tensor(sub_tensor_1, unsqueeze_152);  sub_tensor_1 = unsqueeze_152 = None
+        sum_dim_int_list_1: "f32[32, 16]" = torch.ops.aten.sum.dim_IntList(mul_tensor_3, [0]);  mul_tensor_3 = None
+        reshape_default_4: "f32[512]" = torch.ops.aten.reshape.default(sum_dim_int_list_1, _shape_param_4);  sum_dim_int_list_1 = _shape_param_4 = None
+        return (reshape_default_2, reshape_default_4)
+
+
+
+def _default_make_inputs():
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
+
+
+if __name__ == "__main__":
+    benchmark_repro(__file__, Repro, make_inputs)

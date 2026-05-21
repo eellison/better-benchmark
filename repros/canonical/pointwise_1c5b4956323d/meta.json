@@ -8,8 +8,9 @@
     "aten.embedding.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "hf_Bart",
     "hf_BartForCausalLM_train_003",
     "hf_MBartForCausalLM_train_003"
   ]

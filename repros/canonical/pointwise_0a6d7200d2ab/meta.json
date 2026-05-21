@@ -14,8 +14,9 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 3,
+  "n_models": 4,
   "models": [
+    "densenet121",
     "timm_timm_visformer_small_train_train_000",
     "timm_visformer_small_train",
     "timm_visformer_small_train_000"

@@ -11,8 +11,10 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "BERT_pytorch"
+    "BERT_pytorch",
+    "hf_T5",
+    "hf_T5_base"
   ]
 }

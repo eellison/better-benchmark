@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "0eade0de46c0",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.select.int",
+    "aten.select.int"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Longformer"
+  ]
+}

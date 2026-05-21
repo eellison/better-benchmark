@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "1351f3721c4a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Scalar",
+    "aten.div.Tensor",
+    "aten.full.default",
+    "aten.le.Scalar",
+    "aten.lt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.where.self",
+    "aten.where.self",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "mobilenet_v3_large"
+  ]
+}

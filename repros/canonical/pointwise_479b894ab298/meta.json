@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "479b894ab298",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.mul.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf_Albert",
+    "hf_Bart",
+    "hf_Bert",
+    "hf_Bert_large",
+    "hf_DistilBert",
+    "hf_Roberta_base"
+  ]
+}

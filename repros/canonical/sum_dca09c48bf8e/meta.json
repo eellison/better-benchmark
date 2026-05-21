@@ -9,8 +9,9 @@
     "aten.reshape.default",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "BERT_pytorch"
+    "BERT_pytorch",
+    "hf_Longformer"
   ]
 }

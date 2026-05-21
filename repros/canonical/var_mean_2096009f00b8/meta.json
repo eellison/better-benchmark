@@ -21,9 +21,10 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 29,
+  "n_models": 30,
   "models": [
     "LearningToPaint",
+    "densenet121",
     "mnasnet1_0",
     "mobilenet_v3_large",
     "phlippe_densenet",

@@ -13,10 +13,11 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 43,
+  "n_models": 44,
   "models": [
     "LearningToPaint",
     "dcgan",
+    "densenet121",
     "mnasnet1_0",
     "mobilenet_v2",
     "mobilenet_v3_large",

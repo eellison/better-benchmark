@@ -10,8 +10,16 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 1,
+  "n_models": 9,
   "models": [
-    "BERT_pytorch"
+    "BERT_pytorch",
+    "hf_Albert",
+    "hf_Bart",
+    "hf_Bert",
+    "hf_Bert_large",
+    "hf_DistilBert",
+    "hf_Roberta_base",
+    "hf_T5",
+    "hf_T5_base"
   ]
 }

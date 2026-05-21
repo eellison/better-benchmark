@@ -6,13 +6,18 @@
   "origin_ops": [
     "aten.le.Scalar"
   ],
-  "n_models": 6,
+  "n_models": 11,
   "models": [
     "alexnet",
     "demucs",
+    "dlrm",
     "hf_M2M100ForConditionalGeneration_train_003",
     "hf_M2M100ForConditionalGeneration_train_006",
     "hf_M2M100ForConditionalGeneration_train_012",
-    "hf_MobileBertForMaskedLM_train_000"
+    "hf_MobileBertForMaskedLM_train_000",
+    "hf_T5",
+    "hf_T5_base",
+    "squeezenet1_1",
+    "vgg16"
   ]
 }

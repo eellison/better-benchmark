@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "9ad27f28b9f9",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.relu.default",
+    "prims._low_memory_max_pool_with_offsets.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "vgg16"
+  ]
+}

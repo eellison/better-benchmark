@@ -19,8 +19,9 @@
     "aten.sub.Tensor",
     "aten.var_mean.correction"
   ],
-  "n_models": 6,
+  "n_models": 7,
   "models": [
+    "hf_Albert",
     "nanogpt",
     "timm_deit_base_distilled_patch16_224_train",
     "timm_deit_tiny_patch16_224.fb_in1k_train",

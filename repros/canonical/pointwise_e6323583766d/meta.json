@@ -12,8 +12,15 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 1,
+  "n_models": 8,
   "models": [
-    "BERT_pytorch"
+    "BERT_pytorch",
+    "hf_Bert",
+    "hf_Bert_large",
+    "hf_DistilBert",
+    "hf_Longformer",
+    "hf_Roberta_base",
+    "hf_Whisper",
+    "timm_vision_transformer"
   ]
 }
