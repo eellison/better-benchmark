@@ -17,12 +17,56 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import recapture_full_graphs as recapture
+from ingest_tlparse import load_graph_module
 
 
 FAKE_FULL_GRAPH = """
 class GraphModule(torch.nn.Module):
     def forward(self, x: "f32[2, 2]"):
         return (torch.ops.aten.relu.default(x),)
+"""
+
+
+FULL_GRAPH_WITH_TENSOR_CONSTANT = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]"):
+        _tensor_constant0: "f32[]" = self._tensor_constant0
+        lift_fresh_copy: "f32[]" = torch.ops.aten.lift_fresh_copy.default(_tensor_constant0);  _tensor_constant0 = None
+        add: "f32[2, 2]" = torch.ops.aten.add.Tensor(x, lift_fresh_copy);  x = lift_fresh_copy = None
+        return (add,)
+"""
+
+
+FULL_GRAPH_WITH_PRIMS_FMA = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]", y: "f32[2, 2]", z: "f32[2, 2]"):
+        fma: "f32[2, 2]" = torch.ops.prims.fma.default(x, y, z);  x = y = z = None
+        return (fma,)
+"""
+
+
+FULL_GRAPH_WITH_STRIDED_INPUT = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 3][1, 2]cpu"):
+        add: "f32[2, 3][1, 2]cpu" = torch.ops.aten.add.Tensor(x, 1.0);  x = None
+        return (add,)
+"""
+
+
+FULL_GRAPH_WITH_NO_INPUTS = """
+class GraphModule(torch.nn.Module):
+    def forward(self):
+        iota: "i64[4][1]cpu" = torch.ops.prims.iota.default(4, start = 0, step = 1, dtype = torch.int64, device = device(type='cpu'), requires_grad = False)
+        add: "i64[4][1]cpu" = torch.ops.aten.add.Tensor(iota, 1);  iota = None
+        return (add,)
+"""
+
+
+FULL_GRAPH_WITH_SYM_INPUT = """
+class GraphModule(torch.nn.Module):
+    def forward(self, s0: "Sym(s0)", x: "f32[2, s0]cpu"):
+        view: "f32[2, s0]cpu" = torch.ops.aten.reshape.default(x, [2, s0]);  x = s0 = None
+        return (view,)
 """
 
 
@@ -199,6 +243,82 @@ class RecaptureFullGraphsTests(unittest.TestCase):
             self.assertEqual(len(results), 1)
             self.assertFalse(results[0].ok)
             self.assertIn("load failed", results[0].error)
+
+    def test_isolated_recapture_reports_graph_load_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repros" / "models"
+            graph = _write(root / "genai" / "Broken" / "full_graph_000.py", "x = 1\n")
+            target = recapture.infer_target(graph, models_root=root)
+
+            result = recapture.recapture_target_isolated(
+                target,
+                Path(tmp) / "out",
+                validate=False,
+            )
+
+            self.assertFalse(result.ok)
+            self.assertIn("graph load returned None", result.error)
+
+    def test_loader_recreates_saved_tensor_constants(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            graph = _write(
+                Path(tmp) / "full_graph_000.py",
+                FULL_GRAPH_WITH_TENSOR_CONSTANT,
+            )
+
+            gm = load_graph_module(graph)
+
+            self.assertIsNotNone(gm)
+            self.assertTrue(hasattr(gm, "graph"))
+
+    def test_loader_registers_inductor_prims_for_fma(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            graph = _write(
+                Path(tmp) / "full_graph_000.py",
+                FULL_GRAPH_WITH_PRIMS_FMA,
+            )
+
+            gm = load_graph_module(graph)
+
+            self.assertIsNotNone(gm)
+            self.assertTrue(hasattr(gm, "graph"))
+
+    def test_loader_recreates_printed_input_strides(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            graph = _write(
+                Path(tmp) / "full_graph_000.py",
+                FULL_GRAPH_WITH_STRIDED_INPUT,
+            )
+
+            gm = load_graph_module(graph)
+
+            self.assertIsNotNone(gm)
+            placeholder = next(n for n in gm.graph.nodes if n.op == "placeholder")
+            self.assertEqual(tuple(placeholder.meta["val"].stride()), (1, 2))
+
+    def test_loader_traces_zero_input_graphs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            graph = _write(
+                Path(tmp) / "full_graph_000.py",
+                FULL_GRAPH_WITH_NO_INPUTS,
+            )
+
+            gm = load_graph_module(graph)
+
+            self.assertIsNotNone(gm)
+            self.assertFalse(any(n.op == "placeholder" for n in gm.graph.nodes))
+
+    def test_loader_synthesizes_symint_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            graph = _write(
+                Path(tmp) / "full_graph_000.py",
+                FULL_GRAPH_WITH_SYM_INPUT,
+            )
+
+            gm = load_graph_module(graph)
+
+            self.assertIsNotNone(gm)
+            self.assertTrue(hasattr(gm, "graph"))
 
 
 if __name__ == "__main__":

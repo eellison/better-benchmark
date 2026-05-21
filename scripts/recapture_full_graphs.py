@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import argparse
 import copy
+import multiprocessing as mp
+import queue
+import signal
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -176,6 +179,75 @@ LoadGraphFn = Callable[[Path], object | None]
 ProcessGraphFn = Callable[[object, FullGraphTarget, Path], int]
 
 
+def _isolated_recapture_worker(
+    result_queue,
+    target: FullGraphTarget,
+    canonical_root: Path,
+    validate: bool,
+) -> None:
+    try:
+        gm = load_graph_module(target.path)
+        if gm is None:
+            raise RuntimeError("graph load returned None")
+        regions = process_graph_for_target(
+            copy.deepcopy(gm),
+            target,
+            canonical_root,
+            validate=validate,
+        )
+        result_queue.put({"regions": regions, "error": None})
+    except BaseException as exc:
+        result_queue.put({"regions": 0, "error": str(exc)})
+
+
+def _child_exit_error(exitcode: int | None) -> str:
+    if exitcode is None:
+        return "child process did not exit"
+    if exitcode < 0:
+        signum = -exitcode
+        try:
+            signame = signal.Signals(signum).name
+        except ValueError:
+            signame = f"signal {signum}"
+        return f"child process terminated by {signame}"
+    return f"child process exited with status {exitcode}"
+
+
+def recapture_target_isolated(
+    target: FullGraphTarget,
+    canonical_root: Path,
+    *,
+    validate: bool = True,
+) -> RecaptureResult:
+    """Recapture one target in a child process so crashes do not stop the sweep."""
+    ctx = mp.get_context("fork")
+    result_queue = ctx.Queue()
+    process = ctx.Process(
+        target=_isolated_recapture_worker,
+        args=(result_queue, target, canonical_root, validate),
+    )
+    process.start()
+    process.join()
+
+    try:
+        payload = result_queue.get_nowait()
+    except queue.Empty:
+        payload = None
+    finally:
+        result_queue.close()
+        result_queue.join_thread()
+
+    if payload is not None:
+        return RecaptureResult(
+            target,
+            regions=int(payload.get("regions", 0)),
+            error=payload.get("error"),
+        )
+    if process.exitcode == 0:
+        return RecaptureResult(target, error="child process returned no result")
+    return RecaptureResult(target, error=_child_exit_error(process.exitcode))
+
+
 def recapture_targets(
     targets: Iterable[FullGraphTarget],
     canonical_root: Path,
@@ -183,6 +255,7 @@ def recapture_targets(
     dry_run: bool = False,
     validate: bool = True,
     fail_fast: bool = False,
+    isolate: bool = False,
     load_fn: LoadGraphFn = load_graph_module,
     process_fn: ProcessGraphFn | None = None,
 ) -> list[RecaptureResult]:
@@ -190,6 +263,19 @@ def recapture_targets(
     targets = list(targets)
     if dry_run:
         return [RecaptureResult(target) for target in targets]
+
+    if isolate and load_fn is load_graph_module and process_fn is None:
+        results: list[RecaptureResult] = []
+        for target in targets:
+            result = recapture_target_isolated(
+                target,
+                canonical_root,
+                validate=validate,
+            )
+            results.append(result)
+            if result.error is not None and fail_fast:
+                break
+        return results
 
     if process_fn is None:
         def process_fn(gm, target, canonical_root):
@@ -290,6 +376,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="Stop after the first load or recapture failure.",
     )
+    parser.add_argument(
+        "--isolate",
+        dest="isolate",
+        action="store_true",
+        default=True,
+        help="Run each graph in a child process so crashes are reported per graph (default).",
+    )
+    parser.add_argument(
+        "--no-isolate",
+        dest="isolate",
+        action="store_false",
+        help="Run all selected graphs in the current process.",
+    )
     args = parser.parse_args(argv)
 
     targets = discover_targets(args.paths, models_root=args.models_root)
@@ -306,6 +405,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.canonical_root,
         validate=args.validate,
         fail_fast=args.fail_fast,
+        isolate=args.isolate,
     )
     for i, result in enumerate(results, start=1):
         target = result.target
