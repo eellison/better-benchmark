@@ -903,6 +903,7 @@ sys.path.insert(0, "{args_dict["root"]}")
 
 import torch, torch._dynamo
 import torch._inductor.config as inductor_config
+import torch._inductor.metrics as inductor_metrics
 from triton.testing import do_bench
 import importlib.util, math
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
@@ -1126,9 +1127,11 @@ def bench_one(repro_path):
             torch.cuda.synchronize()
         del src, dst
 
+        inductor_metrics.reset()
         torch._dynamo.reset()
         compiled = torch.compile(instance)
         compiled_us = _bench_with_cudagraph(compiled, inputs, {args_dict["n_warmup"]}, {args_dict["n_rep"]})
+        n_kernels = inductor_metrics.generated_kernel_count
 
         cd_us = None
         if not {args_dict["no_cd"]}:
@@ -1143,6 +1146,7 @@ def bench_one(repro_path):
             "coord_descent_us": cd_us,
             "memcopy_sol_us": sol_us,
             "total_bytes": total_bytes,
+            "n_kernels": n_kernels,
             "gap_default": compiled_us / sol_us if sol_us > 0 else None,
             "gap_cd": cd_us / sol_us if (cd_us and sol_us > 0) else None,
         }}
