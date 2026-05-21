@@ -608,6 +608,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "{shapes_config_line}"
 
 {code}
