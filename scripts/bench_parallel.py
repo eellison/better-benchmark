@@ -244,9 +244,9 @@ def _merge_into_baseline(baseline_path: Path, new_results: dict, new_failures: d
         return
 
     existing = json.loads(baseline_path.read_text())
-    old_failures = existing.pop("__failures__", {})
-    old_summary = existing.pop("__summary__", {})
-    old_meta = existing.pop("_metadata", {})
+    old_failures = existing.pop("__failures__", {}) or {}
+    old_summary = existing.pop("__summary__", {}) or {}
+    old_meta = existing.pop("_metadata", {}) or {}
 
     updated = 0
     for repro_path, results in new_results.items():
