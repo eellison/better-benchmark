@@ -76,8 +76,19 @@ dm_nfnet_f0 128            vit_base_dinov2 128      vit_base_siglip 128
    - **GPU bench lock**: shared/exclusive deadlocks across processes (different fds).
      Using exclusive-only for now (minor noise from concurrent compilation).
    
-8. Investigate: combo_kernels fix (8 of top 20 gaps), horizontal fusion cap (8 of top 20)
-8. Land easy inductor fixes with benchmark evidence:
+8. **PyTorch inductor PR** (`torch/_inductor/runtime/benchmarking.py`):
+   - `_gpu_bench_lock()` context manager around `Benchmarker.benchmark()`
+   - Two modes: `INDUCTOR_GPU_BENCH_LOCK=1` (exclusive-only, fast) and `=strict`
+     (shared during compile, exclusive for timing — correct but deadlocks with
+     multi-process different-fd; needs same-fd or alternative mechanism)
+   - Enables parallel compilation on same GPU with serialized timing
+   - Local change at `/tmp/pytorch-work/torch/_inductor/runtime/benchmarking.py`
+   - Note: strict mode deadlocks across processes (fcntl shared→exclusive upgrade
+     requires same fd, but each process has its own). Fast mode works and gives
+     identical measurements (verified 0% noise).
+
+9. Investigate: combo_kernels fix (8 of top 20 gaps), horizontal fusion cap (8 of top 20)
+10. Land easy inductor fixes with benchmark evidence:
    - combo_kernels enable (3x on 60% of severe gaps)
    - num_warps=2 for persistent INNER (1.28x)
    - Raise persistent RBLOCK to 4096 on B200 (1.4-1.6x)
