@@ -14,6 +14,7 @@ import os
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gpu_lock import gpu_lock, gpu_lock_for_kind
 
@@ -71,52 +72,6 @@ def make_inputs(mod):
         return mod.make_inputs()
     finally:
         torch.randn = old_randn
-
-
-def _count_bytes(inputs, outputs):
-    import torch
-    total = 0
-    for t in inputs:
-        if isinstance(t, torch.Tensor):
-            total += t.nelement() * t.element_size()
-    return total + _count_unique_output_bytes(outputs)
-
-
-def _count_unique_output_bytes(outputs):
-    import torch
-    seen = set()
-    total = 0
-
-    def visit(value):
-        nonlocal total
-        if isinstance(value, torch.Tensor):
-            key = _tensor_alias_key(value)
-            if key in seen:
-                return
-            seen.add(key)
-            total += value.nelement() * value.element_size()
-        elif isinstance(value, (tuple, list)):
-            for item in value:
-                visit(item)
-        elif isinstance(value, dict):
-            for item in value.values():
-                visit(item)
-
-    visit(outputs)
-    return total
-
-
-def _tensor_alias_key(tensor):
-    try:
-        storage_ptr = tensor.untyped_storage().data_ptr()
-    except RuntimeError:
-        storage_ptr = tensor.data_ptr()
-    return (
-        storage_ptr,
-        tensor.storage_offset(),
-        tensor.nelement(),
-        tensor.element_size(),
-    )
 
 
 def _count_kernels(mod, inputs):
@@ -186,6 +141,7 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
     import torch
     import torch._dynamo
     import torch._inductor.config as inductor_config
+    from byte_accounting import count_bytes_effective, count_bytes_naive
     from triton.testing import do_bench
 
     mod, inputs = load_repro(repro_path)
@@ -193,7 +149,13 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
     with torch.no_grad():
         eager_out = mod(*inputs)
 
-    total_bytes = _count_bytes(inputs, eager_out)
+    total_bytes_naive = count_bytes_naive(inputs, eager_out)
+    total_bytes = count_bytes_effective(mod, inputs)
+    if total_bytes_naive > total_bytes * 1.1:
+        print(
+            f"\nBytes adjusted: {total_bytes_naive/1e6:.1f} MB naive "
+            f"-> {total_bytes/1e6:.1f} MB effective"
+        )
 
     n_kernels = _count_kernels(mod, inputs)
 

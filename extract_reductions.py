@@ -332,6 +332,12 @@ def make_inputs():
 
 def _count_bytes(inputs, outputs):
     """Count total read + write bytes for SOL calculation (naive)."""
+    try:
+        from byte_accounting import count_bytes_naive
+        return count_bytes_naive(inputs, outputs)
+    except ImportError:
+        pass
+
     total = 0
     for t in inputs:
         if isinstance(t, torch.Tensor):
@@ -349,8 +355,14 @@ def _count_bytes_adjusted(mod, inputs):
     """Count actual DRAM bytes by tracking op semantics.
 
     Handles: view-only pass-throughs (not counted) and
-    index/gather (count output size, not full input).
+    sparse index/gather/scatter access.
     """
+    try:
+        from byte_accounting import count_bytes_effective
+        return count_bytes_effective(mod, inputs)
+    except ImportError:
+        pass
+
     from torch.utils._python_dispatch import TorchDispatchMode
 
     _VIEW_OPS = {{

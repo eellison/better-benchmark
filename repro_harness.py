@@ -341,113 +341,15 @@ def make_inputs_safely(make_inputs_fn, *args, **kwargs):
 
 
 def count_bytes_naive(inputs, outputs) -> int:
-    total = 0
-    for t in inputs:
-        if isinstance(t, torch.Tensor):
-            total += t.nelement() * t.element_size()
-    if isinstance(outputs, torch.Tensor):
-        total += outputs.nelement() * outputs.element_size()
-    elif isinstance(outputs, (tuple, list)):
-        for o in outputs:
-            if isinstance(o, torch.Tensor):
-                total += o.nelement() * o.element_size()
-    return total
+    from byte_accounting import count_bytes_naive as _count_bytes_naive
+
+    return _count_bytes_naive(inputs, outputs)
 
 
 def count_bytes_adjusted(mod, inputs) -> int:
-    """Count actual DRAM bytes via dispatch-mode op tracing.
+    from byte_accounting import count_bytes_effective
 
-    Handles view-only pass-throughs (not counted) and index/gather
-    (counts output size, not full input).
-    """
-    from torch.utils._python_dispatch import TorchDispatchMode
-
-    _VIEW_OPS = {
-        torch.ops.aten.permute.default, torch.ops.aten.transpose.int,
-        torch.ops.aten.t.default, torch.ops.aten.reshape.default,
-        torch.ops.aten.view.default, torch.ops.aten.expand.default,
-        torch.ops.aten.slice.Tensor, torch.ops.aten.unsqueeze.default,
-        torch.ops.aten.squeeze.default, torch.ops.aten.squeeze.dim,
-        torch.ops.aten.as_strided.default, torch.ops.aten.select.int,
-    }
-    _INDEX_OPS = {
-        torch.ops.aten.index.Tensor, torch.ops.aten.gather.default,
-        torch.ops.aten.index_select.default, torch.ops.aten.embedding.default,
-    }
-
-    class _ByteCount(TorchDispatchMode):
-        def __init__(self):
-            super().__init__()
-            self._produced = set()
-            self._views_of = {}
-            self._input_bytes = {}
-            self._computed_inputs = set()
-            self._gather_adj = {}
-
-        def _root(self, tid):
-            seen = set()
-            while tid in self._views_of and tid not in seen:
-                seen.add(tid)
-                tid = self._views_of[tid]
-            return tid
-
-        def __torch_dispatch__(self, func, types, args=(), kwargs=None):
-            kwargs = kwargs or {}
-
-            def track(x):
-                if isinstance(x, torch.Tensor) and id(x) not in self._produced:
-                    if id(x) not in self._input_bytes:
-                        self._input_bytes[id(x)] = x.numel() * x.element_size()
-
-            torch.utils._pytree.tree_map(
-                lambda x: track(x) if isinstance(x, torch.Tensor) else None, (args, kwargs))
-            result = func(*args, **kwargs)
-
-            def mark(x):
-                if isinstance(x, torch.Tensor):
-                    self._produced.add(id(x))
-
-            torch.utils._pytree.tree_map(
-                lambda x: mark(x) if isinstance(x, torch.Tensor) else None, result)
-
-            if func in _VIEW_OPS and args and isinstance(args[0], torch.Tensor):
-                if isinstance(result, torch.Tensor):
-                    self._views_of[id(result)] = id(args[0])
-            else:
-                def mark_computed(x):
-                    if isinstance(x, torch.Tensor):
-                        root = self._root(id(x))
-                        if root in self._input_bytes:
-                            self._computed_inputs.add(root)
-
-                torch.utils._pytree.tree_map(
-                    lambda x: mark_computed(x) if isinstance(x, torch.Tensor) else None, (args, kwargs))
-                if func in _INDEX_OPS and args and isinstance(args[0], torch.Tensor):
-                    root = self._root(id(args[0]))
-                    if root in self._input_bytes and isinstance(result, torch.Tensor):
-                        gathered = result.numel() * result.element_size()
-                        self._gather_adj[root] = self._gather_adj.get(root, 0) + gathered
-
-            return result
-
-        def total(self, outputs):
-            read = sum(
-                min(self._gather_adj.get(t, self._input_bytes[t]), self._input_bytes[t])
-                for t in self._computed_inputs
-            )
-            write = 0
-            if isinstance(outputs, torch.Tensor):
-                write = outputs.numel() * outputs.element_size()
-            elif isinstance(outputs, (tuple, list)):
-                for o in outputs:
-                    if isinstance(o, torch.Tensor):
-                        write += o.numel() * o.element_size()
-            return read + write
-
-    with _ByteCount() as bc:
-        with torch.no_grad():
-            out = mod(*inputs)
-    return bc.total(out)
+    return count_bytes_effective(mod, inputs)
 
 
 def count_kernels(mod, inputs) -> tuple[int, list[str]]:

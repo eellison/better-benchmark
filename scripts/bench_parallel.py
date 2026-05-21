@@ -281,6 +281,7 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
            args_dict: dict):
     """Worker process: holds GPU lock, benchmarks repros until queue is empty."""
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_idx
+    sys.path.insert(0, str(Path(args_dict["root"])))
 
     import torch
     import torch._dynamo
@@ -288,6 +289,7 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
     from triton.testing import do_bench
     import importlib.util
     import math
+    from byte_accounting import count_bytes_effective
 
     def load_and_bench(repro_path: str, all_shapes: bool, no_cd: bool,
                        n_warmup: int, n_rep: int) -> dict:
@@ -329,17 +331,7 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             with torch.no_grad():
                 eager_out = instance(*inputs)
 
-            # Count bytes
-            total_bytes = 0
-            for t in inputs:
-                if isinstance(t, torch.Tensor):
-                    total_bytes += t.nelement() * t.element_size()
-            if isinstance(eager_out, torch.Tensor):
-                total_bytes += eager_out.nelement() * eager_out.element_size()
-            elif isinstance(eager_out, (tuple, list)):
-                for o in eager_out:
-                    if isinstance(o, torch.Tensor):
-                        total_bytes += o.nelement() * o.element_size()
+            total_bytes = count_bytes_effective(instance, inputs)
 
             # SOL
             copy_elems = max(total_bytes // (2 * 4), 256)
@@ -397,7 +389,6 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
         return results
 
     # Main worker loop
-    sys.path.insert(0, str(Path(args_dict["root"])))
     while True:
         try:
             repro_path = task_queue.get_nowait()
@@ -915,6 +906,7 @@ import torch._inductor.config as inductor_config
 from triton.testing import do_bench
 import importlib.util, math
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+from byte_accounting import count_bytes_effective
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 
@@ -1118,14 +1110,8 @@ def bench_one(repro_path):
             with torch.no_grad():
                 eager_out = instance(*inputs)
             torch.cuda.synchronize()
-
-        total_bytes = sum(t.nelement() * t.element_size() for t in inputs if isinstance(t, torch.Tensor))
-        if isinstance(eager_out, torch.Tensor):
-            total_bytes += eager_out.nelement() * eager_out.element_size()
-        elif isinstance(eager_out, (tuple, list)):
-            for o in eager_out:
-                if isinstance(o, torch.Tensor):
-                    total_bytes += o.nelement() * o.element_size()
+            total_bytes = count_bytes_effective(instance, inputs)
+            torch.cuda.synchronize()
 
         copy_elems = max(total_bytes // 8, 256)
         with gpu_bench_lock():
@@ -1208,6 +1194,7 @@ mod.nan = math.nan
 spec.loader.exec_module(mod)
 
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+from byte_accounting import count_bytes_effective
 
 instance = mod.Repro()
 
@@ -1232,13 +1219,7 @@ for shape_name, shape_config in shape_items:
     with torch.no_grad():
         eager_out = instance(*inputs)
 
-    total_bytes = sum(t.nelement() * t.element_size() for t in inputs if isinstance(t, torch.Tensor))
-    if isinstance(eager_out, torch.Tensor):
-        total_bytes += eager_out.nelement() * eager_out.element_size()
-    elif isinstance(eager_out, (tuple, list)):
-        for o in eager_out:
-            if isinstance(o, torch.Tensor):
-                total_bytes += o.nelement() * o.element_size()
+    total_bytes = count_bytes_effective(instance, inputs)
 
     copy_elems = max(total_bytes // 8, 256)
     src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
