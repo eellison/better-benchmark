@@ -1,0 +1,4 @@
+torchbench_alexnet_infer_34d41de6: (T([1024, 192, 27, 27], f16))
+torchbench_alexnet_infer_b807ba46: (T([1024, 64, 55, 55], f16))
+alexnet_34d41de6: (T([1024, 192, 27, 27], f16))
+alexnet_b807ba46: (T([1024, 64, 55, 55], f16))

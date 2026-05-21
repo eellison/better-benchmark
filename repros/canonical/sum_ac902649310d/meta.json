@@ -34,8 +34,9 @@
     "prims.convert_element_type.default",
     "prims.iota.default"
   ],
-  "n_models": 11,
+  "n_models": 12,
   "models": [
+    "CrossEntropyBackward",
     "genai_ce_bwd_16384x131072",
     "genai_ce_bwd_32768x1024",
     "genai_ce_bwd_32768x16384",

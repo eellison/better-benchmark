@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "d3abab37b3ff",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean",
+    "var"
+  ],
+  "n_ops": 22,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.gt.Scalar",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.sqrt.default",
+    "aten.sub.Tensor",
+    "aten.var.correction",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "BERT_pytorch",
+    "torchbench_BERT_pytorch_train"
+  ]
+}

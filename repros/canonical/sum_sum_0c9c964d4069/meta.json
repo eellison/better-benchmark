@@ -32,11 +32,29 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 3,
+  "n_models": 21,
   "models": [
+    "LearningToPaint",
+    "densenet121",
+    "mnasnet1_0",
+    "mobilenet_v3_large",
+    "pytorch_unet",
+    "resnet18",
+    "resnet50",
+    "resnext50_32x4d",
+    "shufflenet_v2_x1_0",
     "timm_adv_inception_v3_train",
     "timm_inception_v3_train",
-    "timm_mobilenetv3_large_100_train"
+    "timm_mobilenetv3_large_100_train",
+    "torchbench_LearningToPaint_train",
+    "torchbench_densenet121_train",
+    "torchbench_mnasnet1_0_train",
+    "torchbench_mobilenet_v3_large_train",
+    "torchbench_pytorch_unet_train",
+    "torchbench_resnet18_train",
+    "torchbench_resnet50_train",
+    "torchbench_resnext50_32x4d_train",
+    "torchbench_shufflenet_v2_x1_0_train"
   ],
   "perf": {
     "B200": {

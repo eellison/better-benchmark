@@ -23,9 +23,11 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_resnet50_infer"
+    "LearningToPaint",
+    "timm_resnet50_infer",
+    "torchbench_LearningToPaint_infer"
   ],
   "perf": {
     "B200": {

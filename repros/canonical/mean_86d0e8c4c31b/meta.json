@@ -15,8 +15,9 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 15,
+  "n_models": 16,
   "models": [
+    "RMSNormForward",
     "genai_rmsnorm_fwd_1152000x384",
     "genai_rmsnorm_fwd_1152000x512",
     "genai_rmsnorm_fwd_16384x131072",

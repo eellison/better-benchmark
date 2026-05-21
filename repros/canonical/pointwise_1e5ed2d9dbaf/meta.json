@@ -7,11 +7,15 @@
     "aten.permute.default",
     "aten.relu.default"
   ],
-  "n_models": 3,
+  "n_models": 7,
   "models": [
+    "alexnet",
     "hf_OPTForCausalLM_infer",
     "hf_OPTForCausalLM_train",
-    "inductor_torchbench_perf_cuda_h100-1-9-linux.aws.h100_graph62"
+    "inductor_torchbench_perf_cuda_h100-1-9-linux.aws.h100_graph62",
+    "torchbench_alexnet_infer",
+    "torchbench_vgg16_infer",
+    "vgg16"
   ],
   "perf": {
     "B200": {

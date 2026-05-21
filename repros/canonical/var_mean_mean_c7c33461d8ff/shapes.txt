@@ -1,0 +1,8 @@
+torchbench_mobilenet_v3_large_train_6d88cc94: (T([256, 960, 7, 7], f32), T([960], f32), T([960], f32))
+torchbench_mobilenet_v3_large_train_4cce35a7: (T([256, 672, 7, 7], f32), T([672], f32), T([672], f32))
+torchbench_mobilenet_v3_large_train_c98e2262: (T([256, 672, 14, 14], f32), T([672], f32), T([672], f32))
+torchbench_mobilenet_v3_large_train_fe6c5f27: (T([256, 480, 14, 14], f32), T([480], f32), T([480], f32))
+mobilenet_v3_large_6d88cc94: (T([256, 960, 7, 7], f32), T([960], f32), T([960], f32))
+mobilenet_v3_large_4cce35a7: (T([256, 672, 7, 7], f32), T([672], f32), T([672], f32))
+mobilenet_v3_large_c98e2262: (T([256, 672, 14, 14], f32), T([672], f32), T([672], f32))
+mobilenet_v3_large_fe6c5f27: (T([256, 480, 14, 14], f32), T([480], f32), T([480], f32))

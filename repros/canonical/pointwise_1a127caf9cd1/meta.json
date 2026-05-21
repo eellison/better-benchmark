@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "1a127caf9cd1",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor"
+  ],
+  "n_models": 2,
+  "models": [
+    "dcgan",
+    "torchbench_dcgan_train"
+  ]
+}

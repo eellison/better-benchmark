@@ -1,0 +1,2 @@
+torchbench_nvidia_deeprecommender_train_58d86aa3: (T([1024, 1024], b8, gen=Index(2)), T([1024, 1024], f32), T([1024, 1024], f32), T([1024, 512], f32))
+nvidia_deeprecommender_58d86aa3: (T([1024, 1024], b8, gen=Index(2)), T([1024, 1024], f32), T([1024, 1024], f32), T([1024, 512], f32))

@@ -27,11 +27,13 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
+    "BERT_pytorch",
     "hf_MT5ForConditionalGeneration_train",
     "hf_T5ForConditionalGeneration_train",
-    "hf_T5Small_train"
+    "hf_T5Small_train",
+    "torchbench_BERT_pytorch_train"
   ],
   "perf": {
     "B200": {

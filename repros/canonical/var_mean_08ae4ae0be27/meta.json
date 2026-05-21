@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "08ae4ae0be27",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 15,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction"
+  ],
+  "n_models": 2,
+  "models": [
+    "densenet121",
+    "torchbench_densenet121_train"
+  ]
+}

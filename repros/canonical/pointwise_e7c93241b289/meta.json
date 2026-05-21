@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "e7c93241b289",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten._adaptive_avg_pool2d.default",
+    "aten.permute.default",
+    "aten.relu.default",
+    "aten.reshape.default",
+    "prims._low_memory_max_pool_with_offsets.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench_vgg16_train",
+    "vgg16"
+  ]
+}

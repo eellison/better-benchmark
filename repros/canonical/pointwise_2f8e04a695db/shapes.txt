@@ -1,0 +1,2 @@
+torchbench_nvidia_deeprecommender_train_01529673: (T([1024, 197951], f32), T([1024, 197951], f32, stride=(197952, 1)), T([197951, 512], f32))
+nvidia_deeprecommender_01529673: (T([1024, 197951], f32), T([1024, 197951], f32, stride=(197952, 1)), T([197951, 512], f32))

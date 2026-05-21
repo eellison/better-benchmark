@@ -11,8 +11,9 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 27,
+  "n_models": 30,
   "models": [
+    "BERT_pytorch",
     "hf_AlbertForMaskedLM_infer",
     "hf_AlbertForMaskedLM_train",
     "hf_BertForMaskedLM_infer",
@@ -39,7 +40,9 @@
     "hf_XGLMForCausalLM_infer",
     "hf_XGLMForCausalLM_train",
     "timm_swin_base_patch4_window7_224_infer",
-    "timm_swin_base_patch4_window7_224_train"
+    "timm_swin_base_patch4_window7_224_train",
+    "torchbench_BERT_pytorch_infer",
+    "torchbench_BERT_pytorch_train"
   ],
   "perf": {
     "B200": {

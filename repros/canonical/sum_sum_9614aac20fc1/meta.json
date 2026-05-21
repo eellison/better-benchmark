@@ -31,12 +31,18 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 4,
+  "n_models": 10,
   "models": [
+    "mnasnet1_0",
+    "mobilenet_v2",
+    "mobilenet_v3_large",
     "timm_mobilenetv2_100_train",
     "timm_mobilenetv3_large_100_train",
     "timm_mobilevit_s_train",
-    "timm_tf_efficientnet_b0_train"
+    "timm_tf_efficientnet_b0_train",
+    "torchbench_mnasnet1_0_train",
+    "torchbench_mobilenet_v2_train",
+    "torchbench_mobilenet_v3_large_train"
   ],
   "perf": {
     "B200": {

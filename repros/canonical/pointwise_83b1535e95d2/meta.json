@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "83b1535e95d2",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 13,
+  "origin_ops": [
+    "aten.exp.default",
+    "aten.le.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.where.self",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "nvidia_deeprecommender",
+    "torchbench_nvidia_deeprecommender_train"
+  ]
+}

@@ -34,9 +34,11 @@
     "aten.var_mean.correction",
     "aten.var_mean.correction"
   ],
-  "n_models": 1,
+  "n_models": 3,
   "models": [
-    "timm_ghostnet_100_train"
+    "shufflenet_v2_x1_0",
+    "timm_ghostnet_100_train",
+    "torchbench_shufflenet_v2_x1_0_train"
   ],
   "perf": {
     "B200": {

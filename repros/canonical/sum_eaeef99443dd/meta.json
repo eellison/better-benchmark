@@ -1,0 +1,39 @@
+{
+  "pattern_hash": "eaeef99443dd",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 24,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 2,
+  "models": [
+    "LearningToPaint",
+    "torchbench_LearningToPaint_train"
+  ]
+}

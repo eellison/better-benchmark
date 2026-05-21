@@ -1,0 +1,2 @@
+torchbench_nvidia_deeprecommender_train_f09cd101: (T([1024, 1024], f32), T([512, 1024], f32))
+nvidia_deeprecommender_f09cd101: (T([1024, 1024], f32), T([512, 1024], f32))

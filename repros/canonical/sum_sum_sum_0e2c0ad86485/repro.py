@@ -1,0 +1,145 @@
+"""
+Standalone repro captured via capture_hook.
+Label: torchbench_densenet121_train
+Pattern hash: 0e2c0ad86485
+Shape hash: 5d33166a
+"""
+import sys
+from pathlib import Path
+
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+class Repro(torch.nn.Module):
+    def forward(self, mul_1817: "f32[64, 256, 56, 56]", mul_1835: "f32[64, 224, 56, 56]", mul_1853: "f32[64, 192, 56, 56]", mul_1871: "f32[64, 160, 56, 56]", mul_1889: "f32[64, 128, 56, 56]", mul_1907: "f32[64, 96, 56, 56]", relu_1: "f32[64, 64, 56, 56]", full_default: "f32[]", getitem_598: "f32[64, 64, 56, 56]", sub_597: "f32[64, 64, 56, 56]", squeeze_4: "f32[64]", primals_11: "f32[64]", getitem_3: "i8[64, 64, 56, 56]", convolution: "f32[64, 64, 112, 112]", getitem_1: "f32[1, 64, 1, 1]", rsqrt: "f32[1, 64, 1, 1]", primals_6: "f32[64]", primals_7: "f32[64]", _shape_param_0, _shape_param_1, _shape_param_2):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:124 in forward, code: return torch.cat(features, 1)
+        slice_tensor: "f32[64, 64, 56, 56]" = torch.ops.aten.slice.Tensor(mul_1817, 1, 0, 64);  mul_1817 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:48 in bn_function, code: concated_features = torch.cat(inputs, 1)
+        slice_tensor_1: "f32[64, 64, 56, 56]" = torch.ops.aten.slice.Tensor(mul_1835, 1, 0, 64);  mul_1835 = None
+        add_tensor: "f32[64, 64, 56, 56]" = torch.ops.aten.add.Tensor(slice_tensor, slice_tensor_1);  slice_tensor = slice_tensor_1 = None
+        slice_tensor_2: "f32[64, 64, 56, 56]" = torch.ops.aten.slice.Tensor(mul_1853, 1, 0, 64);  mul_1853 = None
+        add_tensor_1: "f32[64, 64, 56, 56]" = torch.ops.aten.add.Tensor(add_tensor, slice_tensor_2);  add_tensor = slice_tensor_2 = None
+        slice_tensor_3: "f32[64, 64, 56, 56]" = torch.ops.aten.slice.Tensor(mul_1871, 1, 0, 64);  mul_1871 = None
+        add_tensor_2: "f32[64, 64, 56, 56]" = torch.ops.aten.add.Tensor(add_tensor_1, slice_tensor_3);  add_tensor_1 = slice_tensor_3 = None
+        slice_tensor_4: "f32[64, 64, 56, 56]" = torch.ops.aten.slice.Tensor(mul_1889, 1, 0, 64);  mul_1889 = None
+        add_tensor_3: "f32[64, 64, 56, 56]" = torch.ops.aten.add.Tensor(add_tensor_2, slice_tensor_4);  add_tensor_2 = slice_tensor_4 = None
+        slice_tensor_5: "f32[64, 64, 56, 56]" = torch.ops.aten.slice.Tensor(mul_1907, 1, 0, 64);  mul_1907 = None
+        add_tensor_4: "f32[64, 64, 56, 56]" = torch.ops.aten.add.Tensor(add_tensor_3, slice_tensor_5);  add_tensor_3 = slice_tensor_5 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:49 in bn_function, code: bottleneck_output = self.conv1(self.relu1(self.norm1(concated_features)))  # noqa: T484
+        le_scalar: "b8[64, 64, 56, 56]" = torch.ops.aten.le.Scalar(relu_1, 0);  relu_1 = None
+        where_self: "f32[64, 64, 56, 56]" = torch.ops.aten.where.self(le_scalar, full_default, getitem_598);  le_scalar = getitem_598 = None
+        sum_dim_int_list: "f32[64]" = torch.ops.aten.sum.dim_IntList(where_self, [0, 2, 3])
+        mul_tensor: "f32[64, 64, 56, 56]" = torch.ops.aten.mul.Tensor(where_self, sub_597)
+        sum_dim_int_list_1: "f32[64]" = torch.ops.aten.sum.dim_IntList(mul_tensor, [0, 2, 3]);  mul_tensor = None
+        mul_tensor_1: "f32[64]" = torch.ops.aten.mul.Tensor(sum_dim_int_list, 4.982461734693877e-06);  sum_dim_int_list = None
+        unsqueeze_default: "f32[1, 64]" = torch.ops.aten.unsqueeze.default(mul_tensor_1, 0);  mul_tensor_1 = None
+        unsqueeze_default_1: "f32[1, 64, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, 2);  unsqueeze_default = None
+        unsqueeze_default_2: "f32[1, 64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_1, 3);  unsqueeze_default_1 = None
+        mul_tensor_2: "f32[64]" = torch.ops.aten.mul.Tensor(sum_dim_int_list_1, 4.982461734693877e-06);  sum_dim_int_list_1 = None
+        mul_tensor_3: "f32[64]" = torch.ops.aten.mul.Tensor(squeeze_4, squeeze_4)
+        mul_tensor_4: "f32[64]" = torch.ops.aten.mul.Tensor(mul_tensor_2, mul_tensor_3);  mul_tensor_2 = mul_tensor_3 = None
+        unsqueeze_default_3: "f32[1, 64]" = torch.ops.aten.unsqueeze.default(mul_tensor_4, 0);  mul_tensor_4 = None
+        unsqueeze_default_4: "f32[1, 64, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_3, 2);  unsqueeze_default_3 = None
+        unsqueeze_default_5: "f32[1, 64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_4, 3);  unsqueeze_default_4 = None
+        mul_tensor_5: "f32[64]" = torch.ops.aten.mul.Tensor(squeeze_4, primals_11);  squeeze_4 = primals_11 = None
+        unsqueeze_default_6: "f32[1, 64]" = torch.ops.aten.unsqueeze.default(mul_tensor_5, 0);  mul_tensor_5 = None
+        unsqueeze_default_7: "f32[1, 64, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, 2);  unsqueeze_default_6 = None
+        unsqueeze_default_8: "f32[1, 64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_7, 3);  unsqueeze_default_7 = None
+        mul_tensor_6: "f32[64, 64, 56, 56]" = torch.ops.aten.mul.Tensor(sub_597, unsqueeze_default_5);  sub_597 = unsqueeze_default_5 = None
+        sub_tensor: "f32[64, 64, 56, 56]" = torch.ops.aten.sub.Tensor(where_self, mul_tensor_6);  where_self = mul_tensor_6 = None
+        sub_tensor_1: "f32[64, 64, 56, 56]" = torch.ops.aten.sub.Tensor(sub_tensor, unsqueeze_default_2);  sub_tensor = unsqueeze_default_2 = None
+        mul_tensor_7: "f32[64, 64, 56, 56]" = torch.ops.aten.mul.Tensor(sub_tensor_1, unsqueeze_default_8);  sub_tensor_1 = unsqueeze_default_8 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:48 in bn_function, code: concated_features = torch.cat(inputs, 1)
+        add_tensor_5: "f32[64, 64, 56, 56]" = torch.ops.aten.add.Tensor(add_tensor_4, mul_tensor_7);  add_tensor_4 = mul_tensor_7 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:213 in forward, code: features = self.features(x)
+        full_default_1: "f32[4096, 12544]" = torch.ops.aten.full.default([4096, 12544], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
+        reshape_default: "f32[4096, 3136]" = torch.ops.aten.reshape.default(add_tensor_5, _shape_param_0);  add_tensor_5 = _shape_param_0 = None
+        _low_memory_max_pool_offsets_to_indices_default: "i64[64, 64, 56, 56]" = torch.ops.prims._low_memory_max_pool_offsets_to_indices.default(getitem_3, [3, 3], [112, 112], [2, 2], [1, 1], [1, 1]);  getitem_3 = None
+        reshape_default_1: "i64[4096, 3136]" = torch.ops.aten.reshape.default(_low_memory_max_pool_offsets_to_indices_default, _shape_param_1);  _low_memory_max_pool_offsets_to_indices_default = _shape_param_1 = None
+        scatter_add_default: "f32[4096, 12544]" = torch.ops.aten.scatter_add.default(full_default_1, 1, reshape_default_1, reshape_default);  full_default_1 = reshape_default_1 = reshape_default = None
+        reshape_default_2: "f32[64, 64, 112, 112]" = torch.ops.aten.reshape.default(scatter_add_default, _shape_param_2);  scatter_add_default = _shape_param_2 = None
+        sub_tensor_2: "f32[64, 64, 112, 112]" = torch.ops.aten.sub.Tensor(convolution, getitem_1)
+        mul_tensor_8: "f32[64, 64, 112, 112]" = torch.ops.aten.mul.Tensor(sub_tensor_2, rsqrt);  sub_tensor_2 = None
+        unsqueeze_default_9: "f32[64, 1]" = torch.ops.aten.unsqueeze.default(primals_6, -1)
+        unsqueeze_default_10: "f32[64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_9, -1);  unsqueeze_default_9 = None
+        mul_tensor_9: "f32[64, 64, 112, 112]" = torch.ops.aten.mul.Tensor(mul_tensor_8, unsqueeze_default_10);  mul_tensor_8 = unsqueeze_default_10 = None
+        unsqueeze_default_11: "f32[64, 1]" = torch.ops.aten.unsqueeze.default(primals_7, -1);  primals_7 = None
+        unsqueeze_default_12: "f32[64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_11, -1);  unsqueeze_default_11 = None
+        add_tensor_6: "f32[64, 64, 112, 112]" = torch.ops.aten.add.Tensor(mul_tensor_9, unsqueeze_default_12);  mul_tensor_9 = unsqueeze_default_12 = None
+        relu_default: "f32[64, 64, 112, 112]" = torch.ops.aten.relu.default(add_tensor_6);  add_tensor_6 = None
+        le_scalar_1: "b8[64, 64, 112, 112]" = torch.ops.aten.le.Scalar(relu_default, 0);  relu_default = None
+        where_self_1: "f32[64, 64, 112, 112]" = torch.ops.aten.where.self(le_scalar_1, full_default, reshape_default_2);  le_scalar_1 = full_default = reshape_default_2 = None
+        squeeze_dims: "f32[64]" = torch.ops.aten.squeeze.dims(getitem_1, [0, 2, 3]);  getitem_1 = None
+        unsqueeze_default_13: "f32[1, 64]" = torch.ops.aten.unsqueeze.default(squeeze_dims, 0);  squeeze_dims = None
+        unsqueeze_default_14: "f32[1, 64, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_13, 2);  unsqueeze_default_13 = None
+        unsqueeze_default_15: "f32[1, 64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_14, 3);  unsqueeze_default_14 = None
+        sum_dim_int_list_2: "f32[64]" = torch.ops.aten.sum.dim_IntList(where_self_1, [0, 2, 3])
+        sub_tensor_3: "f32[64, 64, 112, 112]" = torch.ops.aten.sub.Tensor(convolution, unsqueeze_default_15);  convolution = unsqueeze_default_15 = None
+        mul_tensor_10: "f32[64, 64, 112, 112]" = torch.ops.aten.mul.Tensor(where_self_1, sub_tensor_3)
+        sum_dim_int_list_3: "f32[64]" = torch.ops.aten.sum.dim_IntList(mul_tensor_10, [0, 2, 3]);  mul_tensor_10 = None
+        mul_tensor_11: "f32[64]" = torch.ops.aten.mul.Tensor(sum_dim_int_list_2, 1.2456154336734693e-06);  sum_dim_int_list_2 = None
+        unsqueeze_default_16: "f32[1, 64]" = torch.ops.aten.unsqueeze.default(mul_tensor_11, 0);  mul_tensor_11 = None
+        unsqueeze_default_17: "f32[1, 64, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_16, 2);  unsqueeze_default_16 = None
+        unsqueeze_default_18: "f32[1, 64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_17, 3);  unsqueeze_default_17 = None
+        mul_tensor_12: "f32[64]" = torch.ops.aten.mul.Tensor(sum_dim_int_list_3, 1.2456154336734693e-06);  sum_dim_int_list_3 = None
+        squeeze_dims_1: "f32[64]" = torch.ops.aten.squeeze.dims(rsqrt, [0, 2, 3]);  rsqrt = None
+        mul_tensor_13: "f32[64]" = torch.ops.aten.mul.Tensor(squeeze_dims_1, squeeze_dims_1)
+        mul_tensor_14: "f32[64]" = torch.ops.aten.mul.Tensor(mul_tensor_12, mul_tensor_13);  mul_tensor_12 = mul_tensor_13 = None
+        unsqueeze_default_19: "f32[1, 64]" = torch.ops.aten.unsqueeze.default(mul_tensor_14, 0);  mul_tensor_14 = None
+        unsqueeze_default_20: "f32[1, 64, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_19, 2);  unsqueeze_default_19 = None
+        unsqueeze_default_21: "f32[1, 64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_20, 3);  unsqueeze_default_20 = None
+        mul_tensor_15: "f32[64]" = torch.ops.aten.mul.Tensor(squeeze_dims_1, primals_6);  squeeze_dims_1 = primals_6 = None
+        unsqueeze_default_22: "f32[1, 64]" = torch.ops.aten.unsqueeze.default(mul_tensor_15, 0);  mul_tensor_15 = None
+        unsqueeze_default_23: "f32[1, 64, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_22, 2);  unsqueeze_default_22 = None
+        unsqueeze_default_24: "f32[1, 64, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_23, 3);  unsqueeze_default_23 = None
+        mul_tensor_16: "f32[64, 64, 112, 112]" = torch.ops.aten.mul.Tensor(sub_tensor_3, unsqueeze_default_21);  sub_tensor_3 = unsqueeze_default_21 = None
+        sub_tensor_4: "f32[64, 64, 112, 112]" = torch.ops.aten.sub.Tensor(where_self_1, mul_tensor_16);  where_self_1 = mul_tensor_16 = None
+        sub_tensor_5: "f32[64, 64, 112, 112]" = torch.ops.aten.sub.Tensor(sub_tensor_4, unsqueeze_default_18);  sub_tensor_4 = unsqueeze_default_18 = None
+        mul_tensor_17: "f32[64, 64, 112, 112]" = torch.ops.aten.mul.Tensor(sub_tensor_5, unsqueeze_default_24);  sub_tensor_5 = unsqueeze_default_24 = None
+        return mul_tensor_17
+
+
+def _default_make_inputs():
+    return [
+    torch.randn([64, 256, 56, 56], dtype=torch.float32, device='cuda'),
+    torch.randn([64, 224, 56, 56], dtype=torch.float32, device='cuda'),
+    torch.randn([64, 192, 56, 56], dtype=torch.float32, device='cuda'),
+    torch.randn([64, 160, 56, 56], dtype=torch.float32, device='cuda'),
+    torch.randn([64, 128, 56, 56], dtype=torch.float32, device='cuda'),
+    torch.randn([64, 96, 56, 56], dtype=torch.float32, device='cuda'),
+    torch.randn([64, 64, 56, 56], dtype=torch.float32, device='cuda'),
+    torch.randn([], dtype=torch.float32, device='cuda'),
+    torch.randn([64, 64, 56, 56], dtype=torch.float32, device='cuda'),
+    torch.randn([64, 64, 56, 56], dtype=torch.float32, device='cuda'),
+    torch.randn([64], dtype=torch.float32, device='cuda'),
+    torch.randn([64], dtype=torch.float32, device='cuda'),
+    torch.randint(0, 9, (13107136,), dtype=torch.int8, device='cuda').as_strided([64, 64, 56, 56], [204800, 3200, 56, 1]),  # getitem_3
+    torch.randn([64, 64, 112, 112], dtype=torch.float32, device='cuda'),
+    torch.randn([1, 64, 1, 1], dtype=torch.float32, device='cuda'),
+    torch.randn([1, 64, 1, 1], dtype=torch.float32, device='cuda'),
+    torch.randn([64], dtype=torch.float32, device='cuda'),
+    torch.randn([64], dtype=torch.float32, device='cuda'),
+    [4096, 3136],  # _shape_param_0
+    [4096, 3136],  # _shape_param_1
+    [64, 64, 112, 112],  # _shape_param_2
+    ]
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
+
+
+if __name__ == "__main__":
+    benchmark_repro(__file__, Repro, make_inputs)

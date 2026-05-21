@@ -1,0 +1,2 @@
+torchbench_vgg16_train_5c93fbcd: (T([128, 4096], b8, gen=Index(2)), T([128, 4096], f32), T([128, 4096], b8, gen=Index(2)), T([4096, 4096], f32))
+vgg16_5c93fbcd: (T([128, 4096], b8, gen=Index(2)), T([128, 4096], f32), T([128, 4096], b8, gen=Index(2)), T([4096, 4096], f32))

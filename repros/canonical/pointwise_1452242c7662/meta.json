@@ -7,8 +7,9 @@
     "aten.permute.default",
     "aten.relu.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "facebook_opt-125m",
     "vllm_facebook_opt-125m"
   ],
   "perf": {

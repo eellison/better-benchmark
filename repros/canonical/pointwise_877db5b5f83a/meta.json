@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "877db5b5f83a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sub.Tensor"
+  ],
+  "n_models": 2,
+  "models": [
+    "LearningToPaint",
+    "torchbench_LearningToPaint_train"
+  ]
+}

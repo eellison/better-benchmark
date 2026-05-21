@@ -13,8 +13,9 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 47,
+  "n_models": 49,
   "models": [
+    "BERT_pytorch",
     "hf_AllenaiLongformerBase_infer",
     "hf_AllenaiLongformerBase_train",
     "hf_BartForCausalLM_infer",
@@ -61,7 +62,8 @@
     "timm_vit_base_patch14_dinov2.lvd142m_infer",
     "timm_vit_base_patch14_dinov2.lvd142m_train",
     "timm_vit_base_patch16_siglip_256_infer",
-    "timm_vit_base_patch16_siglip_256_train"
+    "timm_vit_base_patch16_siglip_256_train",
+    "torchbench_BERT_pytorch_infer"
   ],
   "perf": {
     "B200": {

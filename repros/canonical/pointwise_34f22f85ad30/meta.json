@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "34f22f85ad30",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 16,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.gt.Scalar",
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.select.int",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_random.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "BERT_pytorch",
+    "torchbench_BERT_pytorch_train"
+  ]
+}

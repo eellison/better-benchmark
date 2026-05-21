@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "aee060b2e179",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.where.self",
+    "aten.where.self"
+  ],
+  "n_models": 2,
+  "models": [
+    "squeezenet1_1",
+    "torchbench_squeezenet1_1_train"
+  ]
+}

@@ -10,8 +10,9 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 16,
+  "n_models": 18,
   "models": [
+    "BERT_pytorch",
     "hf_AlbertForMaskedLM_train",
     "hf_BertForMaskedLM_train",
     "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_train",
@@ -27,7 +28,8 @@
     "hf_T5ForConditionalGeneration_train",
     "hf_T5Small_train",
     "hf_XGLMForCausalLM_train",
-    "timm_swin_base_patch4_window7_224_train"
+    "timm_swin_base_patch4_window7_224_train",
+    "torchbench_BERT_pytorch_train"
   ],
   "perf": {
     "B200": {

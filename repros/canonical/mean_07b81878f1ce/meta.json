@@ -1,0 +1,40 @@
+{
+  "pattern_hash": "07b81878f1ce",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clamp_max.default",
+    "aten.clamp_min.default",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reciprocal.default",
+    "aten.reshape.default",
+    "aten.sqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "mobilenet_v2",
+    "torchbench_mobilenet_v2_infer"
+  ]
+}

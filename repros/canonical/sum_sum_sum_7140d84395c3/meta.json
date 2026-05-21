@@ -219,8 +219,9 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "mistralai_Mistral-7B-Instruct-v0.3",
     "vllm_mistralai_Mistral-7B-Instruct-v0.3"
   ],
   "perf": {

@@ -17,8 +17,9 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 13,
+  "n_models": 14,
   "models": [
+    "LayerNormForward",
     "genai_layernorm_fwd_1152000x384",
     "genai_layernorm_fwd_1152000x512",
     "genai_layernorm_fwd_32768x1024",

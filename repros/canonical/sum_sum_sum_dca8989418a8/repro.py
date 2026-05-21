@@ -1,0 +1,82 @@
+"""
+Standalone repro captured via capture_hook.
+Label: torchbench_nvidia_deeprecommender_train
+Pattern hash: dca8989418a8
+Shape hash: 056e1304
+"""
+import sys
+from pathlib import Path
+
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+class Repro(torch.nn.Module):
+    def forward(self, where_6: "f32[1024, 197951]", where_7: "f32[1024, 512]", where_8: "f32[1024, 512]", where_9: "f32[1024, 1024]", where_10: "f32[1024, 512]", addmm: "f32[1024, 512]", mm_8: "f32[1024, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5):
+        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/nvidia_deeprecommender/reco_encoder/model/model.py:160 in decode, code: input=F.linear(input=z, weight=w, bias=self.decode_b[ind]),
+        permute_default: "f32[197951, 1024]" = torch.ops.aten.permute.default(where_6, [1, 0])
+        sum_dim_int_list: "f32[1, 197951]" = torch.ops.aten.sum.dim_IntList(where_6, [0], True);  where_6 = None
+        reshape_default: "f32[197951]" = torch.ops.aten.reshape.default(sum_dim_int_list, _shape_param_0);  sum_dim_int_list = _shape_param_0 = None
+        permute_default_1: "f32[512, 1024]" = torch.ops.aten.permute.default(where_7, [1, 0])
+        sum_dim_int_list_1: "f32[1, 512]" = torch.ops.aten.sum.dim_IntList(where_7, [0], True);  where_7 = None
+        reshape_default_1: "f32[512]" = torch.ops.aten.reshape.default(sum_dim_int_list_1, _shape_param_1);  sum_dim_int_list_1 = _shape_param_1 = None
+        permute_default_2: "f32[512, 1024]" = torch.ops.aten.permute.default(where_8, [1, 0])
+        sum_dim_int_list_2: "f32[1, 512]" = torch.ops.aten.sum.dim_IntList(where_8, [0], True);  where_8 = None
+        reshape_default_2: "f32[512]" = torch.ops.aten.reshape.default(sum_dim_int_list_2, _shape_param_2);  sum_dim_int_list_2 = _shape_param_2 = None
+
+        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/nvidia_deeprecommender/reco_encoder/model/model.py:132 in encode, code: input=F.linear(input=x, weight=w, bias=self.encode_b[ind]),
+        permute_default_3: "f32[1024, 1024]" = torch.ops.aten.permute.default(where_9, [1, 0])
+        sum_dim_int_list_3: "f32[1, 1024]" = torch.ops.aten.sum.dim_IntList(where_9, [0], True);  where_9 = None
+        reshape_default_3: "f32[1024]" = torch.ops.aten.reshape.default(sum_dim_int_list_3, _shape_param_3);  sum_dim_int_list_3 = _shape_param_3 = None
+        permute_default_4: "f32[512, 1024]" = torch.ops.aten.permute.default(where_10, [1, 0])
+        sum_dim_int_list_4: "f32[1, 512]" = torch.ops.aten.sum.dim_IntList(where_10, [0], True);  where_10 = None
+        reshape_default_4: "f32[512]" = torch.ops.aten.reshape.default(sum_dim_int_list_4, _shape_param_4);  sum_dim_int_list_4 = _shape_param_4 = None
+
+        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/nvidia_deeprecommender/reco_encoder/model/model.py:12 in activation, code: return F.selu(input)
+        le_scalar: "b8[1024, 512]" = torch.ops.aten.le.Scalar(addmm, 0)
+        mul_tensor: "f32[1024, 512]" = torch.ops.aten.mul.Tensor(mm_8, 1)
+        mul_tensor_1: "f32[1024, 512]" = torch.ops.aten.mul.Tensor(mul_tensor, 1.7580993408473766);  mul_tensor = None
+        mul_tensor_2: "f32[1024, 512]" = torch.ops.aten.mul.Tensor(addmm, 1);  addmm = None
+        exp_default: "f32[1024, 512]" = torch.ops.aten.exp.default(mul_tensor_2);  mul_tensor_2 = None
+        mul_tensor_3: "f32[1024, 512]" = torch.ops.aten.mul.Tensor(mul_tensor_1, exp_default);  mul_tensor_1 = exp_default = None
+        mul_tensor_4: "f32[1024, 512]" = torch.ops.aten.mul.Tensor(mm_8, 1.0507009873554805);  mm_8 = None
+        where_self: "f32[1024, 512]" = torch.ops.aten.where.self(le_scalar, mul_tensor_3, mul_tensor_4);  le_scalar = mul_tensor_3 = mul_tensor_4 = None
+
+        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/nvidia_deeprecommender/reco_encoder/model/model.py:132 in encode, code: input=F.linear(input=x, weight=w, bias=self.encode_b[ind]),
+        permute_default_5: "f32[512, 1024]" = torch.ops.aten.permute.default(where_self, [1, 0])
+        sum_dim_int_list_5: "f32[1, 512]" = torch.ops.aten.sum.dim_IntList(where_self, [0], True);  where_self = None
+        reshape_default_5: "f32[512]" = torch.ops.aten.reshape.default(sum_dim_int_list_5, _shape_param_5);  sum_dim_int_list_5 = _shape_param_5 = None
+        return (permute_default, reshape_default, permute_default_1, reshape_default_1, permute_default_2, reshape_default_2, permute_default_3, reshape_default_3, permute_default_4, reshape_default_4, permute_default_5, reshape_default_5)
+
+
+def _default_make_inputs():
+    return [
+    torch.randn([1024, 197951], dtype=torch.float32, device='cuda'),
+    torch.randn([1024, 512], dtype=torch.float32, device='cuda'),
+    torch.randn([1024, 512], dtype=torch.float32, device='cuda'),
+    torch.randn([1024, 1024], dtype=torch.float32, device='cuda'),
+    torch.randn([1024, 512], dtype=torch.float32, device='cuda'),
+    torch.randn([1024, 512], dtype=torch.float32, device='cuda'),
+    torch.randn([1024, 512], dtype=torch.float32, device='cuda'),
+    [197951],  # _shape_param_0
+    [512],  # _shape_param_1
+    [512],  # _shape_param_2
+    [1024],  # _shape_param_3
+    [512],  # _shape_param_4
+    [512],  # _shape_param_5
+    ]
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
+
+
+if __name__ == "__main__":
+    benchmark_repro(__file__, Repro, make_inputs)

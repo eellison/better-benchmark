@@ -7,12 +7,18 @@
     "aten.le.Scalar",
     "aten.where.self"
   ],
-  "n_models": 4,
+  "n_models": 10,
   "models": [
+    "alexnet",
+    "mobilenet_v3_large",
     "timm_dm_nfnet_f0_train",
     "timm_ghostnet_100_train",
     "timm_mobilenetv3_large_100_train",
-    "timm_nfnet_l0_train"
+    "timm_nfnet_l0_train",
+    "torchbench_alexnet_train",
+    "torchbench_mobilenet_v3_large_train",
+    "torchbench_vgg16_train",
+    "vgg16"
   ],
   "perf": {
     "B200": {

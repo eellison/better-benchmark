@@ -8,8 +8,9 @@
     "<built-in function getitem>",
     "aten.split.Tensor"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "Qwen_Qwen3-30B-A3B",
     "vllm_Qwen_Qwen3-30B-A3B"
   ],
   "perf": {
