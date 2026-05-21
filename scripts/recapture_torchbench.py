@@ -10,7 +10,6 @@ import json
 import os
 import signal
 import sys
-import tempfile
 import time
 from pathlib import Path
 
@@ -26,7 +25,7 @@ import torch._dynamo
 from torch._dynamo.testing import reduce_to_scalar_loss
 from torch._inductor.utils import fresh_inductor_cache
 from capture_hook import install_capture_hook, uninstall_capture_hook
-from merge_captures import merge_one_capture
+from merge_captures import temporary_capture_for_merge
 
 # Models that are known to be problematic (require FB-internal data, hang, or OOM)
 SKIP_MODELS = {
@@ -94,7 +93,6 @@ def capture_torchbench_model(model_name: str, batch_size: int | None, mode: str,
         timeout: Per-model timeout in seconds
     """
     label = f"torchbench_{model_name}_{mode}"
-    cap_dir = Path(tempfile.mkdtemp())
 
     torch._dynamo.reset()
     torch.cuda.empty_cache()
@@ -102,6 +100,7 @@ def capture_torchbench_model(model_name: str, batch_size: int | None, mode: str,
 
     model = None
     example_inputs = None
+    original_dir = os.getcwd()
 
     # Set up timeout (only on Unix)
     old_handler = None
@@ -109,104 +108,105 @@ def capture_torchbench_model(model_name: str, batch_size: int | None, mode: str,
         old_handler = signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(timeout)
 
-    try:
-        # Change to torchbench directory (some models need this)
-        original_dir = os.getcwd()
-        os.chdir(TORCHBENCH_DIR)
+    with temporary_capture_for_merge(
+        OUTPUT_DIR,
+        model_name,
+        suite="torchbench",
+        mode=mode,
+        prefix="recapture_torchbench_",
+    ) as capture:
+        cap_dir = capture.capture_dir
+        try:
+            # Change to torchbench directory (some models need this)
+            os.chdir(TORCHBENCH_DIR)
 
-        # Import the model module directly
-        module = importlib.import_module(f"torchbenchmark.models.{model_name}")
-        benchmark_cls = module.Model
+            # Import the model module directly
+            module = importlib.import_module(f"torchbenchmark.models.{model_name}")
+            benchmark_cls = module.Model
 
-        # Create benchmark instance
-        test_mode = "train" if mode == "train" else "eval"
-        kwargs = {"test": test_mode, "device": "cuda"}
+            # Create benchmark instance
+            test_mode = "train" if mode == "train" else "eval"
+            kwargs = {"test": test_mode, "device": "cuda"}
 
-        # Only pass batch_size if we have one and the model allows it
-        if batch_size is not None:
-            allow_custom = getattr(benchmark_cls, "ALLOW_CUSTOMIZE_BSIZE", True)
-            if allow_custom:
-                kwargs["batch_size"] = batch_size
+            # Only pass batch_size if we have one and the model allows it
+            if batch_size is not None:
+                allow_custom = getattr(benchmark_cls, "ALLOW_CUSTOMIZE_BSIZE", True)
+                if allow_custom:
+                    kwargs["batch_size"] = batch_size
 
-        benchmark = benchmark_cls(**kwargs)
-        model, example_inputs = benchmark.get_module()
+            benchmark = benchmark_cls(**kwargs)
+            model, example_inputs = benchmark.get_module()
 
-        if mode == "train":
-            model.train()
-        else:
-            model.eval()
-
-        # Set up capture directories
-        model_dir = OUTPUT_DIR / "models" / "torchbench" / mode / model_name
-        model_dir.mkdir(parents=True, exist_ok=True)
-        # Skip eager validation during bulk capture - it can trigger CUDA asserts
-        # that poison the GPU context and kill the entire process
-        install_capture_hook(str(cap_dir), label=label, graph_dir=str(model_dir), validate=False)
-
-        t0 = time.time()
-        with fresh_inductor_cache():
-            compiled = torch.compile(model)
             if mode == "train":
-                if isinstance(example_inputs, dict):
-                    pred = compiled(**example_inputs)
-                elif isinstance(example_inputs, (list, tuple)):
-                    pred = compiled(*example_inputs)
-                else:
-                    pred = compiled(example_inputs)
-                loss = reduce_to_scalar_loss(pred)
-                loss.backward()
+                model.train()
             else:
-                with torch.no_grad():
+                model.eval()
+
+            # Set up capture directories
+            model_dir = OUTPUT_DIR / "models" / "torchbench" / mode / model_name
+            model_dir.mkdir(parents=True, exist_ok=True)
+            # Skip eager validation during bulk capture - it can trigger CUDA asserts
+            # that poison the GPU context and kill the entire process
+            install_capture_hook(str(cap_dir), label=label, graph_dir=str(model_dir), validate=False)
+
+            t0 = time.time()
+            with fresh_inductor_cache():
+                compiled = torch.compile(model)
+                if mode == "train":
                     if isinstance(example_inputs, dict):
-                        compiled(**example_inputs)
+                        pred = compiled(**example_inputs)
                     elif isinstance(example_inputs, (list, tuple)):
-                        compiled(*example_inputs)
+                        pred = compiled(*example_inputs)
                     else:
-                        compiled(example_inputs)
-            torch.cuda.synchronize()
-        elapsed = time.time() - t0
+                        pred = compiled(example_inputs)
+                    loss = reduce_to_scalar_loss(pred)
+                    loss.backward()
+                else:
+                    with torch.no_grad():
+                        if isinstance(example_inputs, dict):
+                            compiled(**example_inputs)
+                        elif isinstance(example_inputs, (list, tuple)):
+                            compiled(*example_inputs)
+                        else:
+                            compiled(example_inputs)
+                torch.cuda.synchronize()
+            elapsed = time.time() - t0
 
-        uninstall_capture_hook()
-
-        # Merge into canonical set
-        n = merge_one_capture(cap_dir, OUTPUT_DIR, model_name, suite="torchbench", mode=mode)
-
-        os.chdir(original_dir)
-        return n, elapsed
-
-    except TimeoutError:
-        print(f"  TIMEOUT after {timeout}s")
-        try:
             uninstall_capture_hook()
-        except Exception:
-            pass
-        try:
-            os.chdir(original_dir)
-        except Exception:
-            pass
-        return 0, 0.0
-    except Exception as e:
-        import traceback
-        print(f"  FAILED: {e}")
-        traceback.print_exc()
-        try:
-            uninstall_capture_hook()
-        except Exception:
-            pass
-        try:
-            os.chdir(original_dir)
-        except Exception:
-            pass
-        return 0, 0.0
-    finally:
-        # Cancel alarm
-        if hasattr(signal, 'SIGALRM'):
-            signal.alarm(0)
+
+            # Merge into canonical set
+            n = capture.merge()
+            return n, elapsed
+
+        except TimeoutError:
+            print(f"  TIMEOUT after {timeout}s")
+            try:
+                uninstall_capture_hook()
+            except Exception:
+                pass
+            return 0, 0.0
+        except Exception as e:
+            import traceback
+            print(f"  FAILED: {e}")
+            traceback.print_exc()
+            try:
+                uninstall_capture_hook()
+            except Exception:
+                pass
+            return 0, 0.0
+        finally:
+            # Cancel alarm
+            if hasattr(signal, 'SIGALRM'):
+                signal.alarm(0)
             if old_handler is not None:
                 signal.signal(signal.SIGALRM, old_handler)
-        del model, example_inputs
-        torch.cuda.empty_cache()
-        gc.collect()
+            try:
+                os.chdir(original_dir)
+            except Exception:
+                pass
+            del model, example_inputs
+            torch.cuda.empty_cache()
+            gc.collect()
 
 
 def capture_one_subprocess(model_name: str, batch_size: int | None, mode: str, timeout: int = MODEL_TIMEOUT):
@@ -365,7 +365,8 @@ def main():
         print(f"FAILURES ({len(failures)}): {', '.join(failures)}")
     print(f"{'='*60}")
 
-    summary_path = OUTPUT_DIR / "capture_summary_torchbench.json"
+    summary_path = OUTPUT_DIR.parent / "capture_summary_torchbench.json"
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
     with open(summary_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"Summary: {summary_path}")

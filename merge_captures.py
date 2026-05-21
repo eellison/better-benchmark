@@ -11,8 +11,12 @@ Usage:
     python merge_captures.py /tmp/captures/model_a /tmp/captures/model_b --canonical-dir repros/
 """
 import argparse
+from contextlib import contextmanager
+from dataclasses import dataclass
 import json
+import tempfile
 from pathlib import Path
+from typing import Iterator
 
 from canonicalize_repros import (
     extract_docstring,
@@ -23,6 +27,58 @@ from canonicalize_repros import (
     parse_make_inputs,
     _spec_to_T,
 )
+
+
+@dataclass
+class CaptureMerge:
+    """Temporary raw-capture state for one canonical merge."""
+
+    capture_dir: Path
+    canonical_dir: Path
+    model_name: str
+    suite: str | None = None
+    mode: str | None = None
+    merged: int = 0
+
+    def merge(self) -> int:
+        """Merge the temporary capture into the canonical repro root."""
+        self.merged = merge_one_capture(
+            self.capture_dir,
+            self.canonical_dir,
+            self.model_name,
+            suite=self.suite,
+            mode=self.mode,
+        )
+        return self.merged
+
+
+@contextmanager
+def temporary_capture_for_merge(
+    canonical_dir: Path,
+    model_name: str,
+    *,
+    suite: str | None = None,
+    mode: str | None = None,
+    prefix: str = "repro_capture_",
+) -> Iterator[CaptureMerge]:
+    """Create temporary raw-capture state for a canonical merge.
+
+    Pass ``capture.capture_dir`` to ``install_capture_hook`` or ``_CaptureState``.
+    After a successful capture, call ``capture.merge()`` while still inside the
+    context. Raw capture files are temporary state and are removed automatically
+    when the context exits.
+    """
+    canonical_dir = Path(canonical_dir)
+    with tempfile.TemporaryDirectory(prefix=prefix) as tmp:
+        capture = CaptureMerge(
+            capture_dir=Path(tmp),
+            canonical_dir=canonical_dir,
+            model_name=model_name,
+            suite=suite,
+            mode=mode,
+        )
+        yield capture
+
 
 def _format_compact_config(label: str, input_specs: list[dict]) -> str:
     """Format input specs as compact one-liner: label: (T([...], f32), S([...]), ...)"""

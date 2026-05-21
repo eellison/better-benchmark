@@ -21,7 +21,6 @@ import math
 import os
 import re
 import sys
-import tempfile
 from pathlib import Path
 
 # Ensure project root is on sys.path
@@ -258,24 +257,29 @@ def process_graph_with_hook(gm, label: str, output_dir: Path, suite: str, mode: 
                             validate: bool = True):
     """Run the capture hook's partitioning on a loaded GraphModule."""
     from capture_hook import _CaptureState
-    from merge_captures import merge_one_capture
+    from merge_captures import temporary_capture_for_merge
 
-    cap_dir = Path(tempfile.mkdtemp())
-    state = _CaptureState(str(cap_dir), label=label, validate=validate)
+    with temporary_capture_for_merge(
+        output_dir,
+        label,
+        suite=suite,
+        mode=mode,
+        prefix="repartition_from_graphs_",
+    ) as capture:
+        state = _CaptureState(str(capture.capture_dir), label=label, validate=validate)
 
-    try:
-        state.process_graph(gm)
-        state.finalize()
+        try:
+            state.process_graph(gm)
+            state.finalize()
 
-        index_path = cap_dir / "index.json"
-        if not index_path.exists():
+            index_path = capture.capture_dir / "index.json"
+            if not index_path.exists():
+                return 0
+
+            return capture.merge()
+        except Exception as e:
+            print(f"  Process failed for {label}: {e}")
             return 0
-
-        n = merge_one_capture(cap_dir, output_dir, label, suite=suite, mode=mode)
-        return n
-    except Exception as e:
-        print(f"  Process failed for {label}: {e}")
-        return 0
 
 
 def main():
