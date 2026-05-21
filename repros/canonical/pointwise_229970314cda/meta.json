@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "229970314cda",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.embedding.default",
+    "aten.expand.default",
+    "aten.unsqueeze.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Reformer"
+  ]
+}

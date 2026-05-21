@@ -33,17 +33,13 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 9,
+  "n_models": 5,
   "models": [
     "LearningToPaint",
     "resnet18",
     "resnet50",
     "resnext50_32x4d",
-    "timm_ghostnet_100_train",
-    "torchbench_LearningToPaint_train",
-    "torchbench_resnet18_train",
-    "torchbench_resnet50_train",
-    "torchbench_resnext50_32x4d_train"
+    "timm_ghostnet_100_train"
   ],
   "perf": {
     "B200": {

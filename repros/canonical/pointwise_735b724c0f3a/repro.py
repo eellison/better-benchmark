@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_M2M100ForConditionalGeneration_infer
+Label: torchbench_hf_Reformer_infer
 Pattern hash: 735b724c0f3a
-Shape hash: e5259d2b
+Shape hash: 40747c3a
 """
 import sys
 from pathlib import Path
@@ -15,18 +15,22 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([8192, 4096], f32), T([1024, 4096], f32), S([64, 128, 4096]), S([8192, 4096]))"
+_repro_version = 2
+_shapes_config = "(T([4096, 512], f16), T([256, 512], f16), S([1, 4096, 512]), S([4096, 512]))"
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_190: "f32[8192, 4096]", arg509_1: "f32[1024, 4096]", _shape_param_0, _shape_param_1):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:471 in forward, code: hidden_states = self.activation_fn(self.fc1(hidden_states))
-        reshape_default: "f32[64, 128, 4096]" = torch.ops.aten.reshape.default(addmm_190, _shape_param_0);  addmm_190 = _shape_param_0 = None
-        relu_default: "f32[64, 128, 4096]" = torch.ops.aten.relu.default(reshape_default);  reshape_default = None
+    def forward(self, addmm_10: "f16[4096, 512]", arg74_1: "f16[256, 512]", _shape_param_0, _shape_param_1):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1436 in forward, code: hidden_states = self.dense(hidden_states)
+        reshape_default: "f16[1, 4096, 512]" = torch.ops.aten.reshape.default(addmm_10, _shape_param_0);  addmm_10 = _shape_param_0 = None
 
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:473 in forward, code: hidden_states = self.fc2(hidden_states)
-        reshape_default_1: "f32[8192, 4096]" = torch.ops.aten.reshape.default(relu_default, _shape_param_1);  relu_default = _shape_param_1 = None
-        permute_default: "f32[4096, 1024]" = torch.ops.aten.permute.default(arg509_1, [1, 0]);  arg509_1 = None
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1438 in forward, code: hidden_states = self.act_fn(hidden_states)
+        relu_default: "f16[1, 4096, 512]" = torch.ops.aten.relu.default(reshape_default);  reshape_default = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1450 in forward, code: hidden_states = self.dense(hidden_states)
+        reshape_default_1: "f16[4096, 512]" = torch.ops.aten.reshape.default(relu_default, _shape_param_1);  relu_default = _shape_param_1 = None
+        permute_default: "f16[512, 256]" = torch.ops.aten.permute.default(arg74_1, [1, 0]);  arg74_1 = None
         return (reshape_default_1, permute_default)
+
 
 
 def _default_make_inputs():

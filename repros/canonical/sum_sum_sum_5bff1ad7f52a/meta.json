@@ -27,31 +27,8 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 14,
+  "n_models": 1,
   "models": [
-    "LayerNormBackward",
-    "genai_layernorm_bwd_1152000x384",
-    "genai_layernorm_bwd_1152000x512",
-    "genai_layernorm_bwd_32768x1024",
-    "genai_layernorm_bwd_32768x16384",
-    "genai_layernorm_bwd_32768x2048",
-    "genai_layernorm_bwd_32768x256",
-    "genai_layernorm_bwd_32768x32768",
-    "genai_layernorm_bwd_32768x4096",
-    "genai_layernorm_bwd_32768x512",
-    "genai_layernorm_bwd_32768x65536",
-    "genai_layernorm_bwd_32768x8192",
-    "genai_layernorm_bwd_576000x384",
-    "genai_layernorm_bwd_576000x512"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 31.71199932694435,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 11.008000001311302,
-      "total_bytes": 33818626,
-      "gap_default": 2.880813892002792,
-      "gap_cd": null
-    }
-  }
+    "LayerNormBackward"
+  ]
 }

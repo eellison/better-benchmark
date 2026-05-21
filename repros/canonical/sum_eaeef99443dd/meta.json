@@ -31,9 +31,8 @@
     "aten.reshape.default",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "LearningToPaint",
-    "torchbench_LearningToPaint_train"
+    "LearningToPaint"
   ]
 }

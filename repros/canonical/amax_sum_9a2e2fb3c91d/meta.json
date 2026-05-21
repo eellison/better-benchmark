@@ -35,9 +35,8 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "BERT_pytorch",
-    "torchbench_BERT_pytorch_train"
+    "BERT_pytorch"
   ]
 }

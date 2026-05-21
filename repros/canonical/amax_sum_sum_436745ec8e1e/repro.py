@@ -1,22 +1,35 @@
 """
-Standalone repro captured via capture_hook.
+Standalone reduction kernel repro.
+Extracted from inductor compilation.
+
+Reduction info:
+#   type=amax, ranges=['2048', '1'], reduction_ranges=[]
+#   origins: ['aten.amax.default']
+#   type=sum, ranges=['2048', '1'], reduction_ranges=[]
+#   origins: ['aten.sum.dim_IntList']
+#   type=sum, ranges=[], reduction_ranges=[]
+#   origins: ['aten.sum.default']
+#   type=sum, ranges=[], reduction_ranges=[]
+#   origins: ['aten.sum.default']
 """
 import sys
 from pathlib import Path
 
+import glob
+import os
 import torch
-import torch._inductor.inductor_prims  # noqa: F401
-from math import inf, nan
+from math import inf
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([4, 512], i64, gen=Index(100)), T([2048, 50272], f16))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg2_1: "i64[4, 512]", mm: "f16[2048, 50272]"):
-        # File: /tmp/pytorch-work/torch/nn/functional.py:5461 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:5462 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
         constant_pad_nd_default: "i64[4, 513]" = torch.ops.aten.constant_pad_nd.default(arg2_1, [0, 1], -100.0);  arg2_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:61 in ForCausalLMLoss, code: shift_labels = labels[..., 1:].contiguous()

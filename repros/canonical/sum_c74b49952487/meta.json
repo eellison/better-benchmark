@@ -27,11 +27,10 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 3,
+  "n_models": 2,
   "models": [
     "mobilenet_v3_large",
-    "timm_mobilenetv3_large_100_train",
-    "torchbench_mobilenet_v3_large_train"
+    "timm_mobilenetv3_large_100_train"
   ],
   "perf": {
     "B200": {

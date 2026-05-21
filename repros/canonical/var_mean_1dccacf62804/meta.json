@@ -23,11 +23,10 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 3,
+  "n_models": 2,
   "models": [
     "inductor_timm_perf_cuda_h100-4-7-linux.aws.h100_graph53",
-    "inductor_timm_perf_cuda_h100-5-7-linux.aws.h100_graph55",
-    "inductor_torchbench_perf-4-6-linux.aws.a100_graph24"
+    "inductor_timm_perf_cuda_h100-5-7-linux.aws.h100_graph55"
   ],
   "perf": {
     "B200": {

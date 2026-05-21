@@ -59,9 +59,8 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "densenet121",
-    "torchbench_densenet121_train"
+    "densenet121"
   ]
 }

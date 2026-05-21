@@ -29,9 +29,8 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "shufflenet_v2_x1_0",
-    "torchbench_shufflenet_v2_x1_0_train"
+    "shufflenet_v2_x1_0"
   ]
 }

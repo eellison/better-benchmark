@@ -18,19 +18,8 @@
     "aten.sub.Tensor",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "facebook_opt-125m",
-    "vllm_facebook_opt-125m"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 7.712000049650669,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 9.056000038981438,
-      "total_bytes": 22825984,
-      "gap_default": 0.8515901078240351,
-      "gap_cd": null
-    }
-  }
+    "facebook_opt-125m"
+  ]
 }

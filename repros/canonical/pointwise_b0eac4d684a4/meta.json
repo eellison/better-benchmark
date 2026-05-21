@@ -15,13 +15,15 @@
     "aten.reshape.default",
     "aten.tanh.default"
   ],
-  "n_models": 5,
+  "n_models": 7,
   "models": [
     "hf_AlbertForMaskedLM_train",
     "hf_DistillGPT2_infer",
     "hf_DistillGPT2_train",
+    "hf_GPT2",
     "hf_GPT2ForSequenceClassification_infer",
-    "hf_GPT2ForSequenceClassification_train"
+    "hf_GPT2ForSequenceClassification_train",
+    "hf_GPT2_large"
   ],
   "perf": {
     "B200": {

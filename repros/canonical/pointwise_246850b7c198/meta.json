@@ -6,13 +6,11 @@
   "origin_ops": [
     "aten.sigmoid.default"
   ],
-  "n_models": 5,
+  "n_models": 3,
   "models": [
     "LearningToPaint",
     "dcgan",
-    "inductor_torchbench_perf_cuda_h100-2-9-linux.aws.h100_graph63",
-    "torchbench_LearningToPaint_infer",
-    "torchbench_dcgan_infer"
+    "doctr_det_predictor"
   ],
   "perf": {
     "B200": {

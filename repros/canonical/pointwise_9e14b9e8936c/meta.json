@@ -16,8 +16,9 @@
     "aten.reshape.default",
     "aten.tanh.default"
   ],
-  "n_models": 8,
+  "n_models": 10,
   "models": [
+    "hf_Albert",
     "hf_AlbertForMaskedLM_infer",
     "hf_AlbertForMaskedLM_train",
     "hf_GPTNeoForCausalLM_infer",
@@ -25,7 +26,8 @@
     "hf_GPTNeoForSequenceClassification_infer",
     "hf_GPTNeoForSequenceClassification_train",
     "hf_GoogleFnet_infer",
-    "hf_GoogleFnet_train"
+    "hf_GoogleFnet_train",
+    "nanogpt"
   ],
   "perf": {
     "B200": {

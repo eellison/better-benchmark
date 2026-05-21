@@ -27,9 +27,8 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "mobilenet_v2",
-    "torchbench_mobilenet_v2_infer"
+    "mobilenet_v2"
   ]
 }

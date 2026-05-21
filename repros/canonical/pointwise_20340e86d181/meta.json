@@ -26,7 +26,7 @@
   ],
   "n_models": 2,
   "models": [
-    "pytorch_unet",
-    "torchbench_pytorch_unet_infer"
+    "doctr_reco_predictor",
+    "pytorch_unet"
   ]
 }

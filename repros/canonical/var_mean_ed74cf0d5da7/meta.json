@@ -295,9 +295,8 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "pytorch_unet",
-    "torchbench_pytorch_unet_train"
+    "pytorch_unet"
   ]
 }

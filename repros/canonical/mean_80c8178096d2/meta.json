@@ -33,6 +33,6 @@
   "n_models": 2,
   "models": [
     "densenet121",
-    "torchbench_densenet121_infer"
+    "timm_vovnet"
   ]
 }

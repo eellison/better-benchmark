@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "c6962ab6b6ca",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.slice.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "llama"
+  ]
+}

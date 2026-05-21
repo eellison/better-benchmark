@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([20005, 768], f32), T([128, 128], i64, gen=Index(20005)), T([1, 512, 768], f32), T([3, 768], f32), T([128, 128], i64, gen=Index(3)), T([768], f32), T([768], f32), T([768, 768], f32), T([768, 768], f32), S([16384, 768]), S([16384, 768]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg1_1: "f32[20005, 768]", arg0_1: "i64[128, 128]", arg2_1: "f32[1, 512, 768]", arg3_1: "f32[3, 768]", arg4_1: "i64[128, 128]", arg5_1: "f32[768]", arg6_1: "f32[768]", arg7_1: "f32[768, 768]", arg9_1: "f32[768, 768]", _shape_param_0, _shape_param_1):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/embedding/bert.py:32 in forward, code: x = self.token(sequence) + self.position(sequence) + self.segment(segment_label)
@@ -52,20 +55,10 @@ class Repro(torch.nn.Module):
         return (reshape_default, permute_default, reshape_default_1, permute_default_1)
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([20005, 768], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 20005, [128, 128], dtype=torch.int64, device='cuda'),
-    torch.randn([1, 512, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([3, 768], dtype=torch.float32, device='cuda'),
-    torch.randint(0, 3, [128, 128], dtype=torch.int64, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([768], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([768, 768], dtype=torch.float32, device='cuda'),
-    [16384, 768],  # _shape_param_0
-    [16384, 768],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

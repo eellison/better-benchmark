@@ -26,9 +26,8 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "densenet121",
-    "torchbench_densenet121_infer"
+    "densenet121"
   ]
 }

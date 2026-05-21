@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "923310333f84",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.mean.dim",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "opacus_cifar10"
+  ]
+}

@@ -7,14 +7,13 @@
     "aten.permute.default",
     "aten.relu.default"
   ],
-  "n_models": 7,
+  "n_models": 6,
   "models": [
     "alexnet",
+    "dlrm",
     "hf_OPTForCausalLM_infer",
     "hf_OPTForCausalLM_train",
-    "inductor_torchbench_perf_cuda_h100-1-9-linux.aws.h100_graph62",
-    "torchbench_alexnet_infer",
-    "torchbench_vgg16_infer",
+    "soft_actor_critic",
     "vgg16"
   ],
   "perf": {

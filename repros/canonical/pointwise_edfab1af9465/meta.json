@@ -8,16 +8,6 @@
   ],
   "n_models": 1,
   "models": [
-    "inductor_torchbench_perf-6-6-linux.aws.a100_graph30"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 5.727999843657017,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 5.119999870657921,
-      "total_bytes": 2048,
-      "gap_default": 1.1187499977262632,
-      "gap_cd": null
-    }
-  }
+    "pytorch_CycleGAN_and_pix2pix"
+  ]
 }

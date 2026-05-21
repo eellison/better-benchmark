@@ -15,14 +15,15 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([32768, 256], bf16), T([256], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "bf16[32768, 256]", arg1_1: "f32[256]"):
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:332 in layernorm_fwd, code: x_f32 = x.float()
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:354 in layernorm_fwd, code: x_f32 = x.float()
         convert_element_type_default: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.float32);  arg0_1 = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:333 in layernorm_fwd, code: return F.layer_norm(x_f32, w.shape, w, None, 1e-6).to(x.dtype)
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:355 in layernorm_fwd, code: return F.layer_norm(x_f32, w.shape, w, None, 1e-6).to(x.dtype)
         var_mean_correction = torch.ops.aten.var_mean.correction(convert_element_type_default, [1], correction = 0, keepdim = True)
         getitem: "f32[32768, 1]" = var_mean_correction[0]
         getitem_1: "f32[32768, 1]" = var_mean_correction[1];  var_mean_correction = None
@@ -33,6 +34,7 @@ class Repro(torch.nn.Module):
         mul_tensor_1: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(mul_tensor, arg1_1);  mul_tensor = arg1_1 = None
         convert_element_type_default_1: "bf16[32768, 256]" = torch.ops.prims.convert_element_type.default(mul_tensor_1, torch.bfloat16);  mul_tensor_1 = None
         return convert_element_type_default_1
+
 
 
 def _default_make_inputs():

@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "f57ae4150066",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.constant_pad_nd.default",
+    "aten.permute.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Bart"
+  ]
+}

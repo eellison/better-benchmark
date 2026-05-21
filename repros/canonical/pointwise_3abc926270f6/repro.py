@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_mobilenetv3_large_100_infer
+Label: torchbench_alexnet_infer
 Pattern hash: 3abc926270f6
-Shape hash: 7fab38d3
+Shape hash: 9d97ed0b
 """
 import sys
 from pathlib import Path
@@ -15,13 +15,15 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([512, 240, 1, 1], f32))"
+_repro_version = 2
+_shapes_config = "(T([1024, 256, 13, 13], f16))"
 
 class Repro(torch.nn.Module):
-    def forward(self, convolution_58: "f32[512, 240, 1, 1]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/timm/models/_efficientnet_blocks.py:81 in forward, code: x_se = self.act1(x_se)
-        relu_default: "f32[512, 240, 1, 1]" = torch.ops.aten.relu.default(convolution_58);  convolution_58 = None
+    def forward(self, convolution_3: "f16[1024, 256, 13, 13]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:48 in forward, code: x = self.features(x)
+        relu_default: "f16[1024, 256, 13, 13]" = torch.ops.aten.relu.default(convolution_3);  convolution_3 = None
         return relu_default
+
 
 
 def _default_make_inputs():

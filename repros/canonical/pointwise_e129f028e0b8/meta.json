@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "e129f028e0b8",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.copy_.default",
+    "aten.relu.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "opacus_cifar10"
+  ]
+}

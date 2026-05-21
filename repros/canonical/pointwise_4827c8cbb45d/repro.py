@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([1024, 64, 32, 32], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution: "f32[1024, 64, 32, 32]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dcgan/__init__.py:128 in forward, code: return self.main(input)
@@ -24,10 +27,10 @@ class Repro(torch.nn.Module):
         return where_self
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([1024, 64, 32, 32], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

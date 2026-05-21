@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([1024, 256, 13, 13], f16), T([4096, 9216], f16), S([1024, 9216]))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_4: "f16[1024, 256, 13, 13]", arg11_1: "f16[4096, 9216]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:48 in forward, code: x = self.features(x)
@@ -33,12 +36,10 @@ class Repro(torch.nn.Module):
         return (reshape_default, permute_default)
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([1024, 256, 13, 13], dtype=torch.float16, device='cuda'),
-    torch.randn([4096, 9216], dtype=torch.float16, device='cuda'),
-    [1024, 9216],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

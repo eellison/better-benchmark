@@ -18,9 +18,8 @@
     "prims.inductor_random.default",
     "prims.inductor_seeds.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "nvidia_deeprecommender",
-    "torchbench_nvidia_deeprecommender_train"
+    "nvidia_deeprecommender"
   ]
 }

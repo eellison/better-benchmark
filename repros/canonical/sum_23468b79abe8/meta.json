@@ -30,9 +30,8 @@
     "aten.reshape.default",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "resnet18",
-    "torchbench_resnet18_train"
+    "resnet18"
   ]
 }

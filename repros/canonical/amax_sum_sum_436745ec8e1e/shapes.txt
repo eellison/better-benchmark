@@ -1,5 +1,1 @@
 facebook_opt-125m_5285c703: (T([4, 512], i64, gen=Index(100)), T([2048, 50272], f16))
-qwen_qwen3-0.6b_9e81ce3b: (T([4, 512], i64, gen=Index(100)), T([2048, 151936], bf16))
-meta-llama_llama-3.2-1b_9e2050cd: (T([4, 512], i64, gen=Index(100)), T([2048, 128256], bf16))
-mistralai_mistral-7b-instruct-v0.3_3f1a7412: (T([4, 512], i64, gen=Index(100)), T([2048, 32768], bf16))
-qwen_qwen3-30b-a3b_9e81ce3b: (T([4, 512], i64, gen=Index(100)), T([2048, 151936], bf16))

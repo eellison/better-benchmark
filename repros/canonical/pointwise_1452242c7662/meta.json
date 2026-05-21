@@ -7,19 +7,8 @@
     "aten.permute.default",
     "aten.relu.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "facebook_opt-125m",
-    "vllm_facebook_opt-125m"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 9.920000098645687,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 11.04000024497509,
-      "total_bytes": 34603008,
-      "gap_default": 0.8985507136343428,
-      "gap_cd": null
-    }
-  }
+    "facebook_opt-125m"
+  ]
 }

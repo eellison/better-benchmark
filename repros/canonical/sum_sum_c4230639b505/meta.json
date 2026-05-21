@@ -54,9 +54,8 @@
     "aten.where.self",
     "prims._low_memory_max_pool_offsets_to_indices.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "pytorch_unet",
-    "torchbench_pytorch_unet_train"
+    "pytorch_unet"
   ]
 }

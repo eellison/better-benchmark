@@ -33,11 +33,10 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 3,
+  "n_models": 2,
   "models": [
     "pytorch_unet",
-    "timm_visformer_small_train",
-    "torchbench_pytorch_unet_train"
+    "timm_visformer_small_train"
   ],
   "perf": {
     "B200": {

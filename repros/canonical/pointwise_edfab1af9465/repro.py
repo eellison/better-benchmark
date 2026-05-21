@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: inductor_torchbench_perf-6-6-linux.aws.a100_graph30
+Label: torchbench_pytorch_CycleGAN_and_pix2pix_infer
 Pattern hash: edfab1af9465
-Shape hash: 1e7e7c93
+Shape hash: 25f363be
 """
 import sys
 from pathlib import Path
@@ -15,13 +15,15 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([256, 1], f32))"
+_repro_version = 2
+_shapes_config = "(T([1, 3, 256, 256], f32))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "f32[256, 1]"):
-        # No stacktrace found for following nodes
-        tanh_default: "f32[256, 1]" = torch.ops.aten.tanh.default(arg0_1);  arg0_1 = None
+    def forward(self, convolution_23: "f32[1, 3, 256, 256]"):
+        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_CycleGAN_and_pix2pix/models/networks.py:496 in forward, code: return self.model(input)
+        tanh_default: "f32[1, 3, 256, 256]" = torch.ops.aten.tanh.default(convolution_23);  convolution_23 = None
         return tanh_default
+
 
 
 def _default_make_inputs():

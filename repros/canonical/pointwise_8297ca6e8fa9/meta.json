@@ -10,7 +10,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 9,
+  "n_models": 11,
   "models": [
     "hf_LayoutLMForMaskedLM_infer",
     "hf_LayoutLMForMaskedLM_train",
@@ -20,7 +20,9 @@
     "hf_T5ForConditionalGeneration_infer",
     "hf_T5Small_infer",
     "hf_TrOCRForCausalLM_infer",
-    "hf_TrOCRForCausalLM_train"
+    "hf_TrOCRForCausalLM_train",
+    "hf_Whisper",
+    "hf_distil_whisper"
   ],
   "perf": {
     "B200": {

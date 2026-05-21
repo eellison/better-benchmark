@@ -20,12 +20,11 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 4,
+  "n_models": 3,
   "models": [
     "BERT_pytorch",
     "hf_GPTNeoForCausalLM_infer",
-    "hf_GPTNeoForSequenceClassification_infer",
-    "torchbench_BERT_pytorch_infer"
+    "hf_GPTNeoForSequenceClassification_infer"
   ],
   "perf": {
     "B200": {

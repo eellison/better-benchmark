@@ -18,19 +18,8 @@
     "aten.reshape.default",
     "aten.where.self"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "facebook_opt-125m",
-    "vllm_facebook_opt-125m"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 9.056000038981438,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 9.088000282645226,
-      "total_bytes": 22020096,
-      "gap_default": 0.9964788465373514,
-      "gap_cd": null
-    }
-  }
+    "facebook_opt-125m"
+  ]
 }

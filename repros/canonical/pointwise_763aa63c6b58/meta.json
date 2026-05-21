@@ -11,7 +11,7 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 30,
+  "n_models": 31,
   "models": [
     "BERT_pytorch",
     "hf_AlbertForMaskedLM_infer",
@@ -35,14 +35,15 @@
     "hf_MT5ForConditionalGeneration_infer",
     "hf_RobertaForCausalLM_infer",
     "hf_RobertaForCausalLM_train",
+    "hf_T5",
     "hf_T5ForConditionalGeneration_infer",
     "hf_T5Small_infer",
+    "hf_T5_base",
     "hf_XGLMForCausalLM_infer",
     "hf_XGLMForCausalLM_train",
+    "llama",
     "timm_swin_base_patch4_window7_224_infer",
-    "timm_swin_base_patch4_window7_224_train",
-    "torchbench_BERT_pytorch_infer",
-    "torchbench_BERT_pytorch_train"
+    "timm_swin_base_patch4_window7_224_train"
   ],
   "perf": {
     "B200": {

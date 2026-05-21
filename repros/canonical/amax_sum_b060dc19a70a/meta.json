@@ -30,9 +30,8 @@
     "aten.unsqueeze.default",
     "aten.where.self"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "BERT_pytorch",
-    "torchbench_BERT_pytorch_infer"
+    "BERT_pytorch"
   ]
 }

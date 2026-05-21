@@ -10,9 +10,8 @@
     "aten.permute.default",
     "aten.sub.Tensor"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "LearningToPaint",
-    "torchbench_LearningToPaint_train"
+    "LearningToPaint"
   ]
 }

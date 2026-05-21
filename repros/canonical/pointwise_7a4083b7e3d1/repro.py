@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_resnet18_infer
+Label: torchbench_densenet121_infer
 Pattern hash: 7a4083b7e3d1
-Shape hash: 31e84b47
+Shape hash: 97f3af02
 """
 import sys
 from pathlib import Path
@@ -15,42 +15,39 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-class Repro(torch.nn.Module):
-    def forward(self, arg92_1: "f16[512]", convolution_18: "f16[512, 512, 7, 7]", arg93_1: "f16[512]", arg94_1: "f16[512]", arg95_1: "f16[512]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:93 in forward, code: out = self.bn1(out)
-        convert_element_type_default: "f32[512]" = torch.ops.prims.convert_element_type.default(arg92_1, torch.float32);  arg92_1 = None
-        unsqueeze_default: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
-        unsqueeze_default_1: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
-        sub_tensor: "f32[512, 512, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_18, unsqueeze_default_1);  convolution_18 = unsqueeze_default_1 = None
-        convert_element_type_default_1: "f32[512]" = torch.ops.prims.convert_element_type.default(arg93_1, torch.float32);  arg93_1 = None
-        add_tensor: "f32[512]" = torch.ops.aten.add.Tensor(convert_element_type_default_1, 1e-05);  convert_element_type_default_1 = None
-        sqrt_default: "f32[512]" = torch.ops.aten.sqrt.default(add_tensor);  add_tensor = None
-        reciprocal_default: "f32[512]" = torch.ops.aten.reciprocal.default(sqrt_default);  sqrt_default = None
-        mul_tensor: "f32[512]" = torch.ops.aten.mul.Tensor(reciprocal_default, 1);  reciprocal_default = None
-        unsqueeze_default_2: "f32[512, 1]" = torch.ops.aten.unsqueeze.default(mul_tensor, -1);  mul_tensor = None
-        unsqueeze_default_3: "f32[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_2, -1);  unsqueeze_default_2 = None
-        mul_tensor_1: "f32[512, 512, 7, 7]" = torch.ops.aten.mul.Tensor(sub_tensor, unsqueeze_default_3);  sub_tensor = unsqueeze_default_3 = None
-        unsqueeze_default_4: "f16[512, 1]" = torch.ops.aten.unsqueeze.default(arg94_1, -1);  arg94_1 = None
-        unsqueeze_default_5: "f16[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_4, -1);  unsqueeze_default_4 = None
-        mul_tensor_2: "f32[512, 512, 7, 7]" = torch.ops.aten.mul.Tensor(mul_tensor_1, unsqueeze_default_5);  mul_tensor_1 = unsqueeze_default_5 = None
-        unsqueeze_default_6: "f16[512, 1]" = torch.ops.aten.unsqueeze.default(arg95_1, -1);  arg95_1 = None
-        unsqueeze_default_7: "f16[512, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
-        add_tensor_1: "f32[512, 512, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
-        convert_element_type_default_2: "f16[512, 512, 7, 7]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float16);  add_tensor_1 = None
+_repro_version = 2
+_shapes_config = "(T([128], f16), T([64, 128, 7, 7], f16), T([128], f16), T([128], f16), T([128], f16))"
 
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:94 in forward, code: out = self.relu(out)
-        relu_default: "f16[512, 512, 7, 7]" = torch.ops.aten.relu.default(convert_element_type_default_2);  convert_element_type_default_2 = None
+class Repro(torch.nn.Module):
+    def forward(self, arg596_1: "f16[128]", convolution_118: "f16[64, 128, 7, 7]", arg597_1: "f16[128]", arg598_1: "f16[128]", arg599_1: "f16[128]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:90 in forward, code: new_features = self.conv2(self.relu2(self.norm2(bottleneck_output)))
+        convert_element_type_default: "f32[128]" = torch.ops.prims.convert_element_type.default(arg596_1, torch.float32);  arg596_1 = None
+        unsqueeze_default: "f32[128, 1]" = torch.ops.aten.unsqueeze.default(convert_element_type_default, -1);  convert_element_type_default = None
+        unsqueeze_default_1: "f32[128, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
+        sub_tensor: "f32[64, 128, 7, 7]" = torch.ops.aten.sub.Tensor(convolution_118, unsqueeze_default_1);  convolution_118 = unsqueeze_default_1 = None
+        convert_element_type_default_1: "f32[128]" = torch.ops.prims.convert_element_type.default(arg597_1, torch.float32);  arg597_1 = None
+        add_tensor: "f32[128]" = torch.ops.aten.add.Tensor(convert_element_type_default_1, 1e-05);  convert_element_type_default_1 = None
+        sqrt_default: "f32[128]" = torch.ops.aten.sqrt.default(add_tensor);  add_tensor = None
+        reciprocal_default: "f32[128]" = torch.ops.aten.reciprocal.default(sqrt_default);  sqrt_default = None
+        mul_tensor: "f32[128]" = torch.ops.aten.mul.Tensor(reciprocal_default, 1);  reciprocal_default = None
+        unsqueeze_default_2: "f32[128, 1]" = torch.ops.aten.unsqueeze.default(mul_tensor, -1);  mul_tensor = None
+        unsqueeze_default_3: "f32[128, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_2, -1);  unsqueeze_default_2 = None
+        mul_tensor_1: "f32[64, 128, 7, 7]" = torch.ops.aten.mul.Tensor(sub_tensor, unsqueeze_default_3);  sub_tensor = unsqueeze_default_3 = None
+        unsqueeze_default_4: "f16[128, 1]" = torch.ops.aten.unsqueeze.default(arg598_1, -1);  arg598_1 = None
+        unsqueeze_default_5: "f16[128, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_4, -1);  unsqueeze_default_4 = None
+        mul_tensor_2: "f32[64, 128, 7, 7]" = torch.ops.aten.mul.Tensor(mul_tensor_1, unsqueeze_default_5);  mul_tensor_1 = unsqueeze_default_5 = None
+        unsqueeze_default_6: "f16[128, 1]" = torch.ops.aten.unsqueeze.default(arg599_1, -1);  arg599_1 = None
+        unsqueeze_default_7: "f16[128, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default_6, -1);  unsqueeze_default_6 = None
+        add_tensor_1: "f32[64, 128, 7, 7]" = torch.ops.aten.add.Tensor(mul_tensor_2, unsqueeze_default_7);  mul_tensor_2 = unsqueeze_default_7 = None
+        convert_element_type_default_2: "f16[64, 128, 7, 7]" = torch.ops.prims.convert_element_type.default(add_tensor_1, torch.float16);  add_tensor_1 = None
+        relu_default: "f16[64, 128, 7, 7]" = torch.ops.aten.relu.default(convert_element_type_default_2);  convert_element_type_default_2 = None
         return relu_default
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([512], dtype=torch.float16, device='cuda'),
-    torch.randn([512, 512, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([512], dtype=torch.float16, device='cuda'),
-    torch.randn([512], dtype=torch.float16, device='cuda'),
-    torch.randn([512], dtype=torch.float16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

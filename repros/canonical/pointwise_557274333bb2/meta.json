@@ -24,15 +24,12 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 8,
+  "n_models": 5,
   "models": [
     "mnasnet1_0",
     "mobilenet_v2",
     "mobilenet_v3_large",
     "shufflenet_v2_x1_0",
-    "torchbench_mnasnet1_0_infer",
-    "torchbench_mobilenet_v2_infer",
-    "torchbench_mobilenet_v3_large_infer",
-    "torchbench_shufflenet_v2_x1_0_infer"
+    "timm_efficientnet"
   ]
 }

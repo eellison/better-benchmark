@@ -22,18 +22,21 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 10,
+  "n_models": 13,
   "models": [
     "LearningToPaint",
+    "doctr_det_predictor",
+    "doctr_reco_predictor",
+    "moco",
+    "phlippe_densenet",
+    "phlippe_resnet",
     "pytorch_unet",
     "timm_adv_inception_v3_infer",
     "timm_ghostnet_100_infer",
     "timm_inception_v3_infer",
     "timm_mobilenetv3_large_100_infer",
     "timm_resnet50_infer",
-    "timm_visformer_small_infer",
-    "torchbench_LearningToPaint_infer",
-    "torchbench_pytorch_unet_infer"
+    "timm_visformer_small_infer"
   ],
   "perf": {
     "B200": {

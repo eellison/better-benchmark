@@ -12,8 +12,9 @@
     "aten.unsqueeze.default",
     "prims.iota.default"
   ],
-  "n_models": 7,
+  "n_models": 8,
   "models": [
+    "hf_Bart",
     "hf_BartForCausalLM_train",
     "hf_BlenderbotForCausalLM_train",
     "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_train",

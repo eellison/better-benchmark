@@ -25,21 +25,18 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 14,
+  "n_models": 11,
   "models": [
     "densenet121",
     "mnasnet1_0",
     "mobilenet_v3_large",
+    "resnet152",
     "resnet18",
     "resnet50",
     "resnext50_32x4d",
     "shufflenet_v2_x1_0",
-    "torchbench_densenet121_infer",
-    "torchbench_mnasnet1_0_infer",
-    "torchbench_mobilenet_v3_large_infer",
-    "torchbench_resnet18_infer",
-    "torchbench_resnet50_infer",
-    "torchbench_resnext50_32x4d_infer",
-    "torchbench_shufflenet_v2_x1_0_infer"
+    "timm_regnet",
+    "timm_resnest",
+    "timm_vovnet"
   ]
 }

@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([64, 512, 7, 7], f16), T([64, 32, 7, 7], f16), T([64, 32, 7, 7], f16), T([64, 32, 7, 7], f16), T([64, 32, 7, 7], f16), T([64, 32, 7, 7], f16), T([64, 32, 7, 7], f16), T([704], f16), T([704], f16), T([704], f16), T([704], f16))"
+
 class Repro(torch.nn.Module):
     def forward(self, avg_pool2d_2: "f16[64, 512, 7, 7]", convolution_89: "f16[64, 32, 7, 7]", convolution_91: "f16[64, 32, 7, 7]", convolution_93: "f16[64, 32, 7, 7]", convolution_95: "f16[64, 32, 7, 7]", convolution_97: "f16[64, 32, 7, 7]", convolution_99: "f16[64, 32, 7, 7]", arg501_1: "f16[704]", arg502_1: "f16[704]", arg503_1: "f16[704]", arg504_1: "f16[704]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:48 in bn_function, code: concated_features = torch.cat(inputs, 1)
@@ -44,20 +47,10 @@ class Repro(torch.nn.Module):
         return relu_default
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([64, 512, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([64, 32, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([64, 32, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([64, 32, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([64, 32, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([64, 32, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([64, 32, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([704], dtype=torch.float16, device='cuda'),
-    torch.randn([704], dtype=torch.float16, device='cuda'),
-    torch.randn([704], dtype=torch.float16, device='cuda'),
-    torch.randn([704], dtype=torch.float16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

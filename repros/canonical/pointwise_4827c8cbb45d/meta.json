@@ -8,10 +8,8 @@
     "aten.mul.Tensor",
     "aten.where.self"
   ],
-  "n_models": 3,
+  "n_models": 1,
   "models": [
-    "dcgan",
-    "torchbench_dcgan_infer",
-    "torchbench_dcgan_train"
+    "dcgan"
   ]
 }

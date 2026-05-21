@@ -9,14 +9,17 @@
     "aten.reshape.default",
     "aten.reshape.default"
   ],
-  "n_models": 6,
+  "n_models": 9,
   "models": [
     "hf_M2M100ForConditionalGeneration_infer",
     "hf_M2M100ForConditionalGeneration_train",
     "hf_MobileBertForMaskedLM_infer",
     "hf_MobileBertForMaskedLM_train",
+    "hf_Reformer",
+    "hf_T5",
     "hf_T5ForConditionalGeneration_infer",
-    "hf_T5Small_infer"
+    "hf_T5Small_infer",
+    "hf_T5_base"
   ],
   "perf": {
     "B200": {

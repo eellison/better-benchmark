@@ -62,13 +62,11 @@
     "aten.reshape.default",
     "aten.sum.dim_IntList"
   ],
-  "n_models": 5,
+  "n_models": 3,
   "models": [
     "mnasnet1_0",
     "mobilenet_v2",
-    "timm_mobilenetv2_100_train",
-    "torchbench_mnasnet1_0_train",
-    "torchbench_mobilenet_v2_train"
+    "timm_mobilenetv2_100_train"
   ],
   "perf": {
     "B200": {

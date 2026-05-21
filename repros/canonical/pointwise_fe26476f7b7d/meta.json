@@ -8,12 +8,11 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 4,
+  "n_models": 3,
   "models": [
     "inductor_timm_perf-5-6-linux.aws.a100_graph18",
     "inductor_timm_perf_cuda_h100-2-7-linux.aws.h100_graph49",
-    "inductor_timm_perf_cuda_h100-7-7-linux.aws.h100_graph59",
-    "inductor_torchbench_perf_cuda_h100-9-9-linux.aws.h100_graph75"
+    "inductor_timm_perf_cuda_h100-7-7-linux.aws.h100_graph59"
   ],
   "perf": {
     "B200": {

@@ -20,7 +20,7 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 13,
+  "n_models": 9,
   "models": [
     "mnasnet1_0",
     "mobilenet_v2",
@@ -30,11 +30,7 @@
     "timm_mobilenetv2_100_train",
     "timm_mobilenetv3_large_100_train",
     "timm_mobilevit_s_train",
-    "timm_tf_efficientnet_b0_train",
-    "torchbench_mnasnet1_0_train",
-    "torchbench_mobilenet_v2_train",
-    "torchbench_mobilenet_v3_large_train",
-    "torchbench_shufflenet_v2_x1_0_train"
+    "timm_tf_efficientnet_b0_train"
   ],
   "perf": {
     "B200": {

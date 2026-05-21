@@ -22,11 +22,10 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 3,
+  "n_models": 2,
   "models": [
     "mobilenet_v2",
-    "timm_mobilenetv2_100_train",
-    "torchbench_mobilenet_v2_train"
+    "timm_mobilenetv2_100_train"
   ],
   "perf": {
     "B200": {

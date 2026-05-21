@@ -7,8 +7,9 @@
     "aten.embedding.default",
     "aten.mul.Tensor"
   ],
-  "n_models": 9,
+  "n_models": 10,
   "models": [
+    "hf_Bart",
     "hf_BartForCausalLM_train",
     "hf_BlenderbotForCausalLM_train",
     "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_train",

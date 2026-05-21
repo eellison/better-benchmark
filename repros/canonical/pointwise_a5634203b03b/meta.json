@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "a5634203b03b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.relu.default",
+    "aten.slice.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "demucs"
+  ]
+}

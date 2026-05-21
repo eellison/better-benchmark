@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([16384, 768], f32), T([128, 128, 768], f32), T([2, 768], f32), T([20005, 768], f32), S([128, 128, 768]), S([16384, 768]))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_71: "f32[16384, 768]", add_81: "f32[128, 128, 768]", arg197_1: "f32[2, 768]", arg199_1: "f32[20005, 768]", _shape_param_0, _shape_param_1):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/BERT_pytorch/bert_pytorch/model/utils/feed_forward.py:15 in forward, code: return self.w_2(self.dropout(self.activation(self.w_1(x))))
@@ -33,15 +36,10 @@ class Repro(torch.nn.Module):
         return (select_int, permute_default, reshape_default_1, permute_default_1)
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([16384, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([128, 128, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([2, 768], dtype=torch.float32, device='cuda'),
-    torch.randn([20005, 768], dtype=torch.float32, device='cuda'),
-    [128, 128, 768],  # _shape_param_0
-    [16384, 768],  # _shape_param_1
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

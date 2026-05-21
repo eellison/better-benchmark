@@ -58,9 +58,8 @@
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "pytorch_unet",
-    "torchbench_pytorch_unet_infer"
+    "pytorch_unet"
   ]
 }

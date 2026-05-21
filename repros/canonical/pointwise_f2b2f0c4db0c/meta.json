@@ -26,13 +26,12 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 6,
+  "n_models": 5,
   "models": [
+    "resnet152",
     "resnet18",
     "resnet50",
     "resnext50_32x4d",
-    "torchbench_resnet18_infer",
-    "torchbench_resnet50_infer",
-    "torchbench_resnext50_32x4d_infer"
+    "timm_regnet"
   ]
 }

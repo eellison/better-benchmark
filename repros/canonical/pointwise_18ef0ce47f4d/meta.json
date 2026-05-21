@@ -13,19 +13,8 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "facebook_opt-125m",
-    "vllm_facebook_opt-125m"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 12.415999546647072,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 6.976000033318996,
-      "total_bytes": 6310912,
-      "gap_default": 1.7798164402731327,
-      "gap_cd": null
-    }
-  }
+    "facebook_opt-125m"
+  ]
 }

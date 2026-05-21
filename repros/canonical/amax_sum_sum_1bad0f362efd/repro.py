@@ -15,11 +15,12 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([32768, 256], bf16), T([32768], i64, gen=Index(256)))"
 
 class Repro(torch.nn.Module):
     def forward(self, primals_1: "bf16[32768, 256]", primals_2: "i64[32768]"):
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:191 in ce_bwd, code: loss = F.cross_entropy(x, target, reduction="none")
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:198 in ce_bwd, code: loss = F.cross_entropy(x, target, reduction="none")
         convert_element_type_default: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(primals_1, torch.float32);  primals_1 = None
         amax_default: "f32[32768, 1]" = torch.ops.aten.amax.default(convert_element_type_default, [1], True)
         sub_tensor: "f32[32768, 256]" = torch.ops.aten.sub.Tensor(convert_element_type_default, amax_default);  convert_element_type_default = amax_default = None
@@ -38,9 +39,10 @@ class Repro(torch.nn.Module):
         full_default_1: "bf16[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.bfloat16, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         where_self_1: "bf16[32768]" = torch.ops.aten.where.self(ne_scalar, neg_default, full_default_1);  ne_scalar = neg_default = full_default_1 = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:192 in ce_bwd, code: return loss.sum()
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:199 in ce_bwd, code: return loss.sum()
         sum_default: "bf16[]" = torch.ops.aten.sum.default(where_self_1);  where_self_1 = None
         return sum_default
+
 
 
 def _default_make_inputs():

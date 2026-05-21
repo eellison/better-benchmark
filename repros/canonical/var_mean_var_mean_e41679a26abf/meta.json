@@ -36,17 +36,13 @@
     "aten.var_mean.correction",
     "aten.var_mean.correction"
   ],
-  "n_models": 9,
+  "n_models": 5,
   "models": [
     "LearningToPaint",
     "resnet18",
     "resnet50",
     "resnext50_32x4d",
-    "timm_repvgg_a2_train",
-    "torchbench_LearningToPaint_train",
-    "torchbench_resnet18_train",
-    "torchbench_resnet50_train",
-    "torchbench_resnext50_32x4d_train"
+    "timm_repvgg_a2_train"
   ],
   "perf": {
     "B200": {

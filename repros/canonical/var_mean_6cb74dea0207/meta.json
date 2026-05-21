@@ -21,9 +21,8 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "mobilenet_v2",
-    "torchbench_mobilenet_v2_train"
+    "mobilenet_v2"
   ]
 }

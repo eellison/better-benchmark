@@ -12,7 +12,7 @@
     "aten.reshape.default",
     "aten.unbind.int"
   ],
-  "n_models": 10,
+  "n_models": 11,
   "models": [
     "timm_deit_base_distilled_patch16_224_infer",
     "timm_deit_base_distilled_patch16_224_train",
@@ -20,6 +20,7 @@
     "timm_deit_tiny_patch16_224.fb_in1k_train",
     "timm_mobilevit_s_infer",
     "timm_mobilevit_s_train",
+    "timm_vision_transformer",
     "timm_vit_base_patch14_dinov2.lvd142m_infer",
     "timm_vit_base_patch14_dinov2.lvd142m_train",
     "timm_vit_base_patch16_siglip_256_infer",

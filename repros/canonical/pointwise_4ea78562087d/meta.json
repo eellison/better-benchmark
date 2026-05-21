@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "4ea78562087d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten._unsafe_index.Tensor",
+    "aten._unsafe_index.Tensor",
+    "aten.abs.default",
+    "aten.abs.default",
+    "aten.abs.default",
+    "aten.abs.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "pytorch_CycleGAN_and_pix2pix"
+  ]
+}

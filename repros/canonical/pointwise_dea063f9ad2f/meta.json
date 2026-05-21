@@ -21,10 +21,11 @@
     "aten.reshape.default",
     "aten.tanh.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
     "hf_GPTJForCausalLM_infer",
-    "hf_GPTJForQuestionAnswering_infer"
+    "hf_GPTJForQuestionAnswering_infer",
+    "moondream"
   ],
   "perf": {
     "B200": {

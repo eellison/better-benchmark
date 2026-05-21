@@ -15,20 +15,21 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([], bf16), T([32768, 256], bf16), T([32768, 1], f32), T([256], f32), S([32768, 256]), S([256]), S([32768, 256]))"
 
 class Repro(torch.nn.Module):
     def forward(self, tangents_1: "bf16[]", primals_1: "bf16[32768, 256]", rsqrt: "f32[32768, 1]", primals_2: "f32[256]", _shape_param_0, _shape_param_1, _shape_param_2):
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:306 in rmsnorm_bwd, code: return out.sum()
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:325 in rmsnorm_bwd, code: return out.sum()
         expand_default: "bf16[32768, 256]" = torch.ops.aten.expand.default(tangents_1, _shape_param_0);  tangents_1 = _shape_param_0 = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:305 in rmsnorm_bwd, code: ).to(x.dtype)
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:324 in rmsnorm_bwd, code: ).to(x.dtype)
         convert_element_type_default: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(expand_default, torch.float32);  expand_default = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:300 in rmsnorm_bwd, code: x_f32 = x.float()
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:319 in rmsnorm_bwd, code: x_f32 = x.float()
         convert_element_type_default_1: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(primals_1, torch.float32);  primals_1 = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:302 in rmsnorm_bwd, code: x_f32
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:321 in rmsnorm_bwd, code: x_f32
         mul_tensor: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(convert_element_type_default_1, rsqrt)
         mul_tensor_1: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(convert_element_type_default, mul_tensor);  mul_tensor = None
         mul_tensor_2: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(convert_element_type_default, primals_2);  convert_element_type_default = primals_2 = None
@@ -38,7 +39,7 @@ class Repro(torch.nn.Module):
         mul_tensor_4: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(mul_tensor_2, rsqrt);  mul_tensor_2 = None
         sum_dim_int_list_1: "f32[32768, 1]" = torch.ops.aten.sum.dim_IntList(mul_tensor_3, [1], True);  mul_tensor_3 = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:303 in rmsnorm_bwd, code: * torch.rsqrt(torch.mean(x_f32.square(), dim=-1, keepdim=True) + 1e-6)
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:322 in rmsnorm_bwd, code: * torch.rsqrt(torch.mean(x_f32.square(), dim=-1, keepdim=True) + 1e-6)
         pow_tensor_scalar: "f32[32768, 1]" = torch.ops.aten.pow.Tensor_Scalar(rsqrt, 3);  rsqrt = None
         mul_scalar: "f32[32768, 1]" = torch.ops.aten.mul.Scalar(sum_dim_int_list_1, -0.5);  sum_dim_int_list_1 = None
         mul_tensor_5: "f32[32768, 1]" = torch.ops.aten.mul.Tensor(mul_scalar, pow_tensor_scalar);  mul_scalar = pow_tensor_scalar = None
@@ -49,9 +50,10 @@ class Repro(torch.nn.Module):
         mul_tensor_6: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(div_scalar, mul_scalar_1);  div_scalar = mul_scalar_1 = None
         add_tensor: "f32[32768, 256]" = torch.ops.aten.add.Tensor(mul_tensor_4, mul_tensor_6);  mul_tensor_4 = mul_tensor_6 = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:300 in rmsnorm_bwd, code: x_f32 = x.float()
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:319 in rmsnorm_bwd, code: x_f32 = x.float()
         convert_element_type_default_2: "bf16[32768, 256]" = torch.ops.prims.convert_element_type.default(add_tensor, torch.bfloat16);  add_tensor = None
         return (reshape_default, convert_element_type_default_2)
+
 
 
 def _default_make_inputs():

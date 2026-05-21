@@ -11,9 +11,8 @@
     "aten.permute.default",
     "aten.relu.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "alexnet",
-    "torchbench_alexnet_train"
+    "alexnet"
   ]
 }

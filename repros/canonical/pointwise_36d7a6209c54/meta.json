@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "36d7a6209c54",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.bitwise_and.Tensor",
+    "aten.eq.Tensor",
+    "aten.ge.Tensor",
+    "aten.index.Tensor",
+    "aten.index.Tensor"
+  ],
+  "n_models": 1,
+  "models": [
+    "modded_nanogpt"
+  ]
+}

@@ -54,9 +54,8 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "mnasnet1_0",
-    "torchbench_mnasnet1_0_train"
+    "mnasnet1_0"
   ]
 }

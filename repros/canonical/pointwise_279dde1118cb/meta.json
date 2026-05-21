@@ -53,9 +53,8 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "shufflenet_v2_x1_0",
-    "torchbench_shufflenet_v2_x1_0_infer"
+    "shufflenet_v2_x1_0"
   ]
 }

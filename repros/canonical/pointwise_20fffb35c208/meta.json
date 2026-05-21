@@ -11,10 +11,9 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "inductor_huggingface_perf-4-5-linux.aws.a100_graph10",
-    "inductor_torchbench_perf-1-6-linux.aws.a100_graph22"
+    "inductor_huggingface_perf-4-5-linux.aws.a100_graph10"
   ],
   "perf": {
     "B200": {

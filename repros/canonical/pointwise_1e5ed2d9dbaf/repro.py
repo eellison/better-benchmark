@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_OPTForCausalLM_infer
+Label: torchbench_alexnet_infer
 Pattern hash: 1e5ed2d9dbaf
-Shape hash: 69c9e065
+Shape hash: 88955a70
 """
 import sys
 from pathlib import Path
@@ -15,16 +15,16 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([8192, 3072], f32), T([768, 3072], f32))"
+_repro_version = 2
+_shapes_config = "(T([1024, 4096], f16), T([1000, 4096], f16))"
 
 class Repro(torch.nn.Module):
-    def forward(self, addmm_70: "f32[8192, 3072]", arg193_1: "f32[768, 3072]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:242 in forward, code: hidden_states = self.activation_fn(hidden_states)
-        relu_default: "f32[8192, 3072]" = torch.ops.aten.relu.default(addmm_70);  addmm_70 = None
-
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:244 in forward, code: hidden_states = self.fc2(hidden_states)
-        permute_default: "f32[3072, 768]" = torch.ops.aten.permute.default(arg193_1, [1, 0]);  arg193_1 = None
+    def forward(self, addmm_1: "f16[1024, 4096]", arg15_1: "f16[1000, 4096]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:51 in forward, code: x = self.classifier(x)
+        relu_default: "f16[1024, 4096]" = torch.ops.aten.relu.default(addmm_1);  addmm_1 = None
+        permute_default: "f16[4096, 1000]" = torch.ops.aten.permute.default(arg15_1, [1, 0]);  arg15_1 = None
         return (relu_default, permute_default)
+
 
 
 def _default_make_inputs():

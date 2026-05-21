@@ -8,10 +8,8 @@
     "aten.relu.default",
     "aten.relu.default"
   ],
-  "n_models": 3,
+  "n_models": 1,
   "models": [
-    "squeezenet1_1",
-    "torchbench_squeezenet1_1_infer",
-    "torchbench_squeezenet1_1_train"
+    "squeezenet1_1"
   ]
 }

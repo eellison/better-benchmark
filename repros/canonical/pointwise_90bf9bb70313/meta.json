@@ -26,19 +26,8 @@
     "prims.iota.default",
     "prims.iota.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "facebook_opt-125m",
-    "vllm_facebook_opt-125m"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 5.791999865323305,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 6.0800001956522465,
-      "total_bytes": 1056768,
-      "gap_default": 0.9526315261412511,
-      "gap_cd": null
-    }
-  }
+    "facebook_opt-125m"
+  ]
 }

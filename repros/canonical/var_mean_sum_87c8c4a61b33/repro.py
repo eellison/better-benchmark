@@ -15,14 +15,15 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([32768, 256], bf16), T([256], f32))"
 
 class Repro(torch.nn.Module):
     def forward(self, primals_1: "bf16[32768, 256]", primals_2: "f32[256]"):
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:359 in layernorm_bwd, code: x_f32 = x.float()
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:384 in layernorm_bwd, code: x_f32 = x.float()
         convert_element_type_default: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(primals_1, torch.float32);  primals_1 = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:360 in layernorm_bwd, code: out = F.layer_norm(x_f32, w.shape, w, None, 1e-6).to(x.dtype)
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:385 in layernorm_bwd, code: out = F.layer_norm(x_f32, w.shape, w, None, 1e-6).to(x.dtype)
         var_mean_correction = torch.ops.aten.var_mean.correction(convert_element_type_default, [1], correction = 0, keepdim = True)
         getitem: "f32[32768, 1]" = var_mean_correction[0]
         getitem_1: "f32[32768, 1]" = var_mean_correction[1];  var_mean_correction = None
@@ -33,9 +34,10 @@ class Repro(torch.nn.Module):
         mul_tensor_1: "f32[32768, 256]" = torch.ops.aten.mul.Tensor(mul_tensor, primals_2);  mul_tensor = primals_2 = None
         convert_element_type_default_1: "bf16[32768, 256]" = torch.ops.prims.convert_element_type.default(mul_tensor_1, torch.bfloat16);  mul_tensor_1 = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:361 in layernorm_bwd, code: return out.sum()
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:386 in layernorm_bwd, code: return out.sum()
         sum_default: "bf16[]" = torch.ops.aten.sum.default(convert_element_type_default_1);  convert_element_type_default_1 = None
         return sum_default
+
 
 
 def _default_make_inputs():

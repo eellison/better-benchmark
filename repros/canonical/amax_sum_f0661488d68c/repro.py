@@ -15,11 +15,12 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([32768], i64, gen=Index(256)), T([32768, 256], bf16))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg1_1: "i64[32768]", arg0_1: "bf16[32768, 256]"):
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:165 in ce_fwd, code: return F.cross_entropy(x, target, reduction="none")
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:169 in ce_fwd, code: return F.cross_entropy(x, target, reduction="none")
         ne_scalar: "b8[32768]" = torch.ops.aten.ne.Scalar(arg1_1, -100)
         convert_element_type_default: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.float32);  arg0_1 = None
         amax_default: "f32[32768, 1]" = torch.ops.aten.amax.default(convert_element_type_default, [1], True)
@@ -39,6 +40,7 @@ class Repro(torch.nn.Module):
         full_default_1: "bf16[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.bfloat16, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         where_self_1: "bf16[32768]" = torch.ops.aten.where.self(ne_scalar, neg_default, full_default_1);  ne_scalar = neg_default = full_default_1 = None
         return where_self_1
+
 
 
 def _default_make_inputs():

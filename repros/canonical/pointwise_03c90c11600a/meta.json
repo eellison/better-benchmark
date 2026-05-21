@@ -15,12 +15,11 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 4,
+  "n_models": 3,
   "models": [
     "inductor_huggingface_perf-1-5-linux.aws.a100_graph2",
     "inductor_huggingface_perf-4-5-linux.aws.a100_graph10",
-    "inductor_timm_perf-6-6-linux.aws.a100_graph21",
-    "inductor_torchbench_perf-1-6-linux.aws.a100_graph22"
+    "inductor_timm_perf-6-6-linux.aws.a100_graph21"
   ],
   "perf": {
     "B200": {

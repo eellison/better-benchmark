@@ -39,12 +39,13 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 4,
+  "n_models": 5,
   "models": [
     "LearningToPaint",
+    "doctr_det_predictor",
+    "moco",
     "timm_repvgg_a2_infer",
-    "timm_resnet50_infer",
-    "torchbench_LearningToPaint_infer"
+    "timm_resnet50_infer"
   ],
   "perf": {
     "B200": {

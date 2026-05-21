@@ -22,15 +22,11 @@
     "aten.unsqueeze.default",
     "aten.var_mean.correction"
   ],
-  "n_models": 8,
+  "n_models": 4,
   "models": [
     "LearningToPaint",
     "resnet18",
     "resnet50",
-    "resnext50_32x4d",
-    "torchbench_LearningToPaint_train",
-    "torchbench_resnet18_train",
-    "torchbench_resnet50_train",
-    "torchbench_resnext50_32x4d_train"
+    "resnext50_32x4d"
   ]
 }

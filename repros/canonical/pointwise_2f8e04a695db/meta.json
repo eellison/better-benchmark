@@ -15,9 +15,8 @@
     "aten.permute.default",
     "aten.where.self"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "nvidia_deeprecommender",
-    "torchbench_nvidia_deeprecommender_train"
+    "nvidia_deeprecommender"
   ]
 }

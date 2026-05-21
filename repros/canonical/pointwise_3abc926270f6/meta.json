@@ -6,9 +6,11 @@
   "origin_ops": [
     "aten.relu.default"
   ],
-  "n_models": 22,
+  "n_models": 18,
   "models": [
     "alexnet",
+    "demucs",
+    "dlrm",
     "inductor_timm_perf-2-6-linux.aws.a100_graph15",
     "inductor_timm_perf-4-6-linux.aws.a100_graph17",
     "mobilenet_v3_large",
@@ -19,16 +21,10 @@
     "timm_ghostnet_100_train",
     "timm_mobilenetv3_large_100_infer",
     "timm_mobilenetv3_large_100_train",
+    "timm_nfnet",
     "timm_nfnet_l0_infer",
     "timm_nfnet_l0_train",
-    "torchbench_alexnet_infer",
-    "torchbench_alexnet_train",
-    "torchbench_mobilenet_v3_large_infer",
-    "torchbench_mobilenet_v3_large_train",
-    "torchbench_squeezenet1_1_infer",
-    "torchbench_squeezenet1_1_train",
-    "torchbench_vgg16_infer",
-    "torchbench_vgg16_train",
+    "timm_regnet",
     "vgg16"
   ],
   "perf": {

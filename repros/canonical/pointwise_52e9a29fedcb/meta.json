@@ -10,9 +10,8 @@
     "aten.relu.default",
     "prims._low_memory_max_pool_with_offsets.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "squeezenet1_1",
-    "torchbench_squeezenet1_1_infer"
+    "squeezenet1_1"
   ]
 }

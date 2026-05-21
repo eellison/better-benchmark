@@ -1,0 +1,45 @@
+{
+  "pattern_hash": "6d38b9c1886e",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean",
+    "mean"
+  ],
+  "n_ops": 30,
+  "origin_ops": [
+    "aten.add.Scalar",
+    "aten.add.Scalar",
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.eq.Scalar",
+    "aten.mean.dim",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.pow.Tensor_Scalar",
+    "aten.pow.Tensor_Scalar",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.rsqrt.default",
+    "aten.select.int",
+    "aten.select.int",
+    "aten.select.int",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "modded_nanogpt"
+  ]
+}

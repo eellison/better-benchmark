@@ -17,29 +17,8 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 12,
+  "n_models": 1,
   "models": [
-    "RMSNormBackward",
-    "genai_rmsnorm_bwd_1152000x384",
-    "genai_rmsnorm_bwd_1152000x512",
-    "genai_rmsnorm_bwd_32768x1024",
-    "genai_rmsnorm_bwd_32768x16384",
-    "genai_rmsnorm_bwd_32768x2048",
-    "genai_rmsnorm_bwd_32768x256",
-    "genai_rmsnorm_bwd_32768x4096",
-    "genai_rmsnorm_bwd_32768x512",
-    "genai_rmsnorm_bwd_32768x8192",
-    "genai_rmsnorm_bwd_576000x384",
-    "genai_rmsnorm_bwd_576000x512"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 14.14399966597557,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 8.1599997356534,
-      "total_bytes": 16778242,
-      "gap_default": 1.733333348551023,
-      "gap_cd": null
-    }
-  }
+    "RMSNormBackward"
+  ]
 }

@@ -19,9 +19,8 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "torchbench_vgg16_train",
     "vgg16"
   ]
 }

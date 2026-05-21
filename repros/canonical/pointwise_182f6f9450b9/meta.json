@@ -7,8 +7,10 @@
     "aten.mul.Tensor",
     "aten.sigmoid.default"
   ],
-  "n_models": 2,
+  "n_models": 4,
   "models": [
+    "timm_efficientnet",
+    "timm_regnet",
     "timm_tf_efficientnet_b0_infer",
     "timm_tf_efficientnet_b0_train"
   ],

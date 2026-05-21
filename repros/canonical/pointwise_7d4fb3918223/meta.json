@@ -10,11 +10,10 @@
     "aten.permute.default",
     "aten.where.self"
   ],
-  "n_models": 3,
+  "n_models": 2,
   "models": [
     "alexnet",
-    "hf_OPTForCausalLM_train",
-    "torchbench_alexnet_train"
+    "hf_OPTForCausalLM_train"
   ],
   "perf": {
     "B200": {

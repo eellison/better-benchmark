@@ -57,9 +57,8 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "dcgan",
-    "torchbench_dcgan_train"
+    "dcgan"
   ]
 }

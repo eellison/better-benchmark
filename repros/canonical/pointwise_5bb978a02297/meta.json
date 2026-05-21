@@ -8,9 +8,8 @@
     "aten.le.Scalar",
     "aten.where.self"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "squeezenet1_1",
-    "torchbench_squeezenet1_1_train"
+    "squeezenet1_1"
   ]
 }

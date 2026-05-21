@@ -7,19 +7,8 @@
     "aten.add.Tensor",
     "aten.embedding.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "facebook_opt-125m",
-    "vllm_facebook_opt-125m"
-  ],
-  "perf": {
-    "B200": {
-      "compiled_us": 7.071999832987785,
-      "coord_descent_us": null,
-      "memcopy_sol_us": 6.912000011652708,
-      "total_bytes": 6310912,
-      "gap_default": 1.0231481222606105,
-      "gap_cd": null
-    }
-  }
+    "facebook_opt-125m"
+  ]
 }

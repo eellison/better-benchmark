@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "23920c14f6a2",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean",
+    "any"
+  ],
+  "n_ops": 20,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.abs.default",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.any.dims",
+    "aten.eq.Tensor",
+    "aten.logical_not.default",
+    "aten.logical_not.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf_Bart"
+  ]
+}

@@ -89,9 +89,8 @@
     "aten.where.self",
     "prims._low_memory_max_pool_offsets_to_indices.default"
   ],
-  "n_models": 2,
+  "n_models": 1,
   "models": [
-    "densenet121",
-    "torchbench_densenet121_train"
+    "densenet121"
   ]
 }

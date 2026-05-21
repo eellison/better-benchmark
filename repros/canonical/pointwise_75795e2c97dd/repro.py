@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: hf_M2M100ForConditionalGeneration_infer
+Label: torchbench_hf_Longformer_infer
 Pattern hash: 75795e2c97dd
-Shape hash: 5d9a9b51
+Shape hash: bb9f18fc
 """
 import sys
 from pathlib import Path
@@ -15,14 +15,16 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_shapes_config = "(T([64, 128], i64, gen=Index(128)))"
+_repro_version = 2
+_shapes_config = "(T([1, 4096], i64))"
 
 class Repro(torch.nn.Module):
-    def forward(self, arg1_1: "i64[64, 128]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:177 in create_position_ids_from_input_ids, code: mask = input_ids.ne(padding_idx).int()
-        ne_scalar: "b8[64, 128]" = torch.ops.aten.ne.Scalar(arg1_1, 1);  arg1_1 = None
-        convert_element_type_default: "i32[64, 128]" = torch.ops.prims.convert_element_type.default(ne_scalar, torch.int32);  ne_scalar = None
+    def forward(self, arg0_1: "i64[1, 4096]"):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:378 in create_position_ids_from_input_ids, code: mask = input_ids.ne(padding_idx).int()
+        ne_scalar: "b8[1, 4096]" = torch.ops.aten.ne.Scalar(arg0_1, 1);  arg0_1 = None
+        convert_element_type_default: "i32[1, 4096]" = torch.ops.prims.convert_element_type.default(ne_scalar, torch.int32);  ne_scalar = None
         return convert_element_type_default
+
 
 
 def _default_make_inputs():

@@ -37,10 +37,12 @@ import torch._inductor.config as inductor_config
 
 
 class _CaptureState:
-    def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None):
+    def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
+                 validate: bool = True):
         self.output_dir = output_dir
         self.label = label
         self.graph_dir = graph_dir
+        self.validate = validate
         self.seen_hashes: set[str] = set()
         self.counter = 0
         self.graph_counter = 0
@@ -634,41 +636,38 @@ if __name__ == "__main__":
             f.write(script)
 
         # Validate: the repro must run in eager without error
-        try:
-            import importlib.util
-            import math as _math
-            # Ensure project root is on sys.path so repro_harness is importable
-            # (the generated repro uses parents[3] which only works at final install path)
-            project_root = str(Path(__file__).resolve().parent)
-            if project_root not in sys.path:
-                sys.path.insert(0, project_root)
-            # Use a fake filepath at depth 4+ so the generated code's
-            # `Path(__file__).resolve().parents[3]` resolves correctly
-            fake_path = os.path.join(project_root, "repros", "canonical", "_validation_", filename)
-            spec = importlib.util.spec_from_file_location("_validate", fake_path,
-                                                          submodule_search_locations=[])
-            # Override the loader to read from the actual file
-            import types
-            code = open(filepath).read()
-            compiled_code = compile(code, fake_path, "exec")
-            mod = types.ModuleType("_validate")
-            mod.__file__ = fake_path
-            mod.__loader__ = spec.loader
-            mod.device = torch.device
-            mod.inf = _math.inf
-            mod.nan = float("nan")
-            exec(compiled_code, mod.__dict__)
-            repro_instance = mod.Repro()
-            inputs = mod._default_make_inputs()
-            with torch.no_grad():
-                out = repro_instance(*inputs)
-            if out is None:
-                print(f"  [capture_hook] WARNING: {filename} forward() returned None")
-        except Exception as e:
-            raise RuntimeError(
-                f"Captured repro {filename} failed eager validation: {e}\n"
-                f"This indicates a bug in the capture hook (index bounds, shape params, etc.)"
-            ) from e
+        if self.validate:
+            try:
+                import importlib.util
+                import math as _math
+                import types
+                # Ensure project root is on sys.path so repro_harness is importable
+                # (the generated repro uses parents[3] which only works at final install path)
+                project_root = str(Path(__file__).resolve().parent)
+                if project_root not in sys.path:
+                    sys.path.insert(0, project_root)
+                # Use a fake filepath at depth 4+ so the generated code's
+                # `Path(__file__).resolve().parents[3]` resolves correctly
+                fake_path = os.path.join(project_root, "repros", "canonical", "_validation_", filename)
+                code = open(filepath).read()
+                compiled_code = compile(code, fake_path, "exec")
+                mod = types.ModuleType("_validate")
+                mod.__file__ = fake_path
+                mod.device = torch.device
+                mod.inf = _math.inf
+                mod.nan = float("nan")
+                exec(compiled_code, mod.__dict__)
+                repro_instance = mod.Repro()
+                inputs = mod._default_make_inputs()
+                with torch.no_grad():
+                    out = repro_instance(*inputs)
+                if out is None:
+                    print(f"  [capture_hook] WARNING: {filename} forward() returned None")
+            except Exception as e:
+                raise RuntimeError(
+                    f"Captured repro {filename} failed eager validation: {e}\n"
+                    f"This indicates a bug in the capture hook (index bounds, shape params, etc.)"
+                ) from e
 
         return filepath
 
@@ -828,7 +827,8 @@ if __name__ == "__main__":
 _active_state: _CaptureState | None = None
 
 
-def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str | None = None):
+def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str | None = None,
+                         validate: bool = True):
     """Install the post-grad capture hook.
 
     Call this before torch.compile(). All subsequent compilations will have
@@ -837,9 +837,10 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
     Args:
         output_dir: Directory to write captured repro files.
         label: Human-readable label for the capture session.
+        validate: If True, run eager validation on captured repros (can trigger CUDA errors).
     """
     global _active_state
-    _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir)
+    _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir, validate=validate)
 
     _old_pass = inductor_config.post_grad_custom_pre_pass
 

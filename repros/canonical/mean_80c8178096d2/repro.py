@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([1024], f16), T([64, 1024, 7, 7], f16), T([1024], f16), T([1024], f16), T([1024], f16), T([1000, 1024], f16), S([64, 1024]))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg601_1: "f16[1024]", cat_57: "f16[64, 1024, 7, 7]", arg602_1: "f16[1024]", arg603_1: "f16[1024]", arg604_1: "f16[1024]", arg605_1: "f16[1000, 1024]", _shape_param_0):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/densenet.py:213 in forward, code: features = self.features(x)
@@ -52,16 +55,10 @@ class Repro(torch.nn.Module):
         return (reshape_default, permute_default)
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([1024], dtype=torch.float16, device='cuda'),
-    torch.randn([64, 1024, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([1024], dtype=torch.float16, device='cuda'),
-    torch.randn([1024], dtype=torch.float16, device='cuda'),
-    torch.randn([1024], dtype=torch.float16, device='cuda'),
-    torch.randn([1000, 1024], dtype=torch.float16, device='cuda'),
-    [64, 1024],  # _shape_param_0
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

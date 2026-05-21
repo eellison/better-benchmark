@@ -6,8 +6,10 @@
   "origin_ops": [
     "aten.add.Tensor"
   ],
-  "n_models": 4,
+  "n_models": 6,
   "models": [
+    "demucs",
+    "hf_Reformer",
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer",
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
     "timm_visformer_small_infer",

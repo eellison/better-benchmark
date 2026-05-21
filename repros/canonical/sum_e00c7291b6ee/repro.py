@@ -15,14 +15,15 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
 _shapes_config = "(T([], bf16), T([32768, 256], bf16), T([32768, 1], f32), T([32768, 1], f32), S([32768, 256]))"
 
 class Repro(torch.nn.Module):
     def forward(self, tangents_1: "bf16[]", primals_1: "bf16[32768, 256]", amax: "f32[32768, 1]", sum_1: "f32[32768, 1]", _shape_param_0):
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:243 in sm_bwd, code: return y.sum()
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:256 in sm_bwd, code: return y.sum()
         expand_default: "bf16[32768, 256]" = torch.ops.aten.expand.default(tangents_1, _shape_param_0);  tangents_1 = _shape_param_0 = None
 
-        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:242 in sm_bwd, code: y = F.softmax(x, dim=-1)
+        # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:255 in sm_bwd, code: y = F.softmax(x, dim=-1)
         convert_element_type_default: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(expand_default, torch.float32);  expand_default = None
         convert_element_type_default_1: "f32[32768, 256]" = torch.ops.prims.convert_element_type.default(primals_1, torch.float32);  primals_1 = None
         sub_tensor: "f32[32768, 256]" = torch.ops.aten.sub.Tensor(convert_element_type_default_1, amax);  convert_element_type_default_1 = amax = None
@@ -36,6 +37,7 @@ class Repro(torch.nn.Module):
         fma_default: "f32[32768, 256]" = torch.ops.prims.fma.default(neg_default, sum_dim_int_list, mul_tensor);  neg_default = sum_dim_int_list = mul_tensor = None
         convert_element_type_default_4: "bf16[32768, 256]" = torch.ops.prims.convert_element_type.default(fma_default, torch.bfloat16);  fma_default = None
         return convert_element_type_default_4
+
 
 
 def _default_make_inputs():

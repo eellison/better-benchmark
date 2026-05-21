@@ -24,15 +24,11 @@
     "aten.var_mean.correction",
     "prims._low_memory_max_pool_with_offsets.default"
   ],
-  "n_models": 8,
+  "n_models": 4,
   "models": [
     "resnet18",
     "resnet50",
     "resnext50_32x4d",
-    "shufflenet_v2_x1_0",
-    "torchbench_resnet18_train",
-    "torchbench_resnet50_train",
-    "torchbench_resnext50_32x4d_train",
-    "torchbench_shufflenet_v2_x1_0_train"
+    "shufflenet_v2_x1_0"
   ]
 }
