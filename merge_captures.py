@@ -55,10 +55,27 @@ def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
     if manifest_file.exists():
         existing = json.loads(manifest_file.read_text())
         patterns = sorted(set(existing.get("patterns", []) + patterns))
+        graphs = existing.get("graphs", [])
     else:
         patterns = sorted(set(patterns))
+        graphs = []
 
-    manifest_file.write_text(json.dumps({"patterns": patterns}, indent=2) + "\n")
+    # Discover full_graph files in the model dir
+    graph_files = sorted(f.name for f in out_dir.glob("full_graph_*.py"))
+    if graph_files:
+        graphs = graph_files
+
+    manifest_data = {
+        "schema_version": 1,
+        "source": suite,
+        "model": model_name,
+        "patterns": patterns,
+        "graphs": graphs,
+    }
+    if mode:
+        manifest_data["mode"] = mode
+
+    manifest_file.write_text(json.dumps(manifest_data, indent=2) + "\n")
     return out_dir
 
 
