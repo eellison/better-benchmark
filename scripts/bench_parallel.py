@@ -165,6 +165,65 @@ def _compute_worker_count(
     return min(requested_workers, worker_capacity, num_repros), effective_workers_per_gpu
 
 
+def _results_payload(
+    all_results: dict,
+    failures: dict | None = None,
+    summary: dict | None = None,
+    metadata: dict | None = None,
+) -> dict:
+    """Return the JSON payload for --output.
+
+    Top-level repro-path keys remain the success result schema consumed by
+    bench_report.py. Failure/summary metadata lives under reserved keys so a
+    partially failed sweep is resumable and diagnosable without breaking the
+    existing happy-path consumers.
+    """
+    payload = {}
+    if metadata:
+        payload["_metadata"] = metadata
+    payload.update(all_results)
+    if failures:
+        payload["__failures__"] = failures
+    if summary:
+        payload["__summary__"] = summary
+    return payload
+
+
+def _write_results_output(
+    output_path: Path,
+    all_results: dict,
+    failures: dict,
+    *,
+    total: int,
+    done: int,
+    failed: int,
+    elapsed: float,
+):
+    import subprocess
+
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    ).stdout.strip()
+    output_path.write_text(json.dumps(_results_payload(
+        all_results,
+        failures,
+        {
+            "total": total,
+            "ok": done,
+            "failed": failed,
+            "elapsed_s": elapsed,
+        },
+        {
+            "commit": commit,
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "n_repros": len(all_results),
+        },
+    ), indent=2))
+
+
 def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
            args_dict: dict):
     """Worker process: holds GPU lock, benchmarks repros until queue is empty."""
@@ -439,6 +498,7 @@ def main():
 
     # Collect results
     all_results = {}
+    failures = {}
     done = 0
     failed = 0
     start_time = time.time()
@@ -480,12 +540,26 @@ def main():
             all_results[result["repro"]] = result["results"]
         else:
             failed += 1
+            failures[result["repro"]] = {
+                "status": "failed",
+                "gpu": result.get("gpu"),
+                "elapsed": result.get("elapsed"),
+                "error": result.get("error", ""),
+            }
             print(f"  [{done+failed}/{len(repros)}] FAIL gpu={result['gpu']}  "
                   f"{result['elapsed']:.1f}s  {repro_name}: {result['error'][:80]}", flush=True)
 
         # Incremental save every 50 results
         if args.output and (done + failed) % 50 == 0:
-            args.output.write_text(json.dumps(all_results, indent=2))
+            _write_results_output(
+                args.output,
+                all_results,
+                failures,
+                total=len(repros),
+                done=done,
+                failed=failed,
+                elapsed=time.time() - start_time,
+            )
 
     # Wait for workers
     for p in workers:
@@ -546,20 +620,15 @@ def main():
 
     # Optional JSON output — include metadata for staleness detection
     if args.output:
-        import subprocess
-        commit = subprocess.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True, text=True
-        ).stdout.strip()
-        import time as _time
-        output_data = {
-            "_metadata": {
-                "commit": commit,
-                "timestamp": _time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "n_repros": len(all_results),
-            },
-            **all_results,
-        }
-        args.output.write_text(json.dumps(output_data, indent=2))
+        _write_results_output(
+            args.output,
+            all_results,
+            failures,
+            total=len(repros),
+            done=done,
+            failed=failed,
+            elapsed=elapsed_total,
+        )
         print(f"[output] Wrote {args.output}")
 
 
@@ -596,8 +665,13 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
         def _spawn_worker():
             nonlocal stderr_tail
             stderr_tail = collections.deque(maxlen=20)
+            script_factory = args_dict.get("_persistent_worker_script_factory")
+            if script_factory is None:
+                script = _persistent_worker_script(gpu["index"], args_dict)
+            else:
+                script = script_factory(gpu["index"], args_dict)
             p = subprocess.Popen(
-                [sys.executable, "-u", "-c", _persistent_worker_script(gpu["index"], args_dict)],
+                [sys.executable, "-u", "-c", script],
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE, text=True, bufsize=1,
                 env=env, cwd=args_dict["root"],
