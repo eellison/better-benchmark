@@ -34,8 +34,12 @@
     "aten.where.self",
     "prims.iota.default"
   ],
-  "n_models": 1,
+  "n_models": 5,
   "models": [
-    "hf_Bart"
+    "hf_Albert",
+    "hf_Bart",
+    "hf_Bert",
+    "hf_DistilBert",
+    "hf_Roberta_base"
   ]
 }

@@ -24,8 +24,9 @@
     "aten.view.default",
     "aten.view.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer_000"
+    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer_000",
+    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer_infer_000"
   ]
 }

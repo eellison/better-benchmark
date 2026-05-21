@@ -28,8 +28,9 @@
     "prims.inductor_lookup_seed.default",
     "prims.inductor_random.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
-    "hf_Bert"
+    "hf_Bert",
+    "hf_Roberta_base"
   ]
 }

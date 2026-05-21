@@ -35,8 +35,13 @@
     "aten.where.self",
     "prims.convert_element_type.default"
   ],
-  "n_models": 1,
+  "n_models": 6,
   "models": [
-    "hf_AllenaiLongformerBase_infer_003"
+    "hf_AllenaiLongformerBase_infer_003",
+    "hf_BartForCausalLM_infer_000",
+    "hf_BertForMaskedLM_infer_000",
+    "hf_DistilBertForMaskedLM_infer_000",
+    "hf_LayoutLMForMaskedLM_infer_000",
+    "hf_MBartForCausalLM_infer_000"
   ]
 }

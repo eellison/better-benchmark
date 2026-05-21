@@ -582,7 +582,9 @@ class _CaptureState:
                     stride = info.get("stride", [])
                     bound = index_bounds.get(name)
                     gen_kwarg = ""
-                    if "int" in info["dtype"] and bound:
+                    if name in permutation_indices:
+                        gen_kwarg = f", gen=Perm({permutation_indices[name]})"
+                    elif "int" in info["dtype"] and bound:
                         gen_kwarg = f", gen=Index({bound})"
                     elif "int8" in info["dtype"]:
                         gen_kwarg = ", gen=Index(9)"

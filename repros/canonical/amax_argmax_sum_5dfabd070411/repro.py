@@ -21,10 +21,11 @@ _shapes_config = "(T([4096, 2], f32), T([32, 128], i64), T([32], i64, gen=Index(
 class Repro(torch.nn.Module):
     def forward(self, mm_72: "f32[4096, 2]", arg0_1: "i64[32, 128]", iota_1: "i64[32]", arg342_1: "i64[32]", full_1: "f32[]", _shape_param_0, _shape_param_1, _shape_param_2):
         # No stacktrace found for following nodes
+        iota_extent = _shape_param_0[1]
         view_default: "f32[32, 128, 2]" = torch.ops.aten.view.default(mm_72, _shape_param_0);  mm_72 = _shape_param_0 = None
         ne_scalar: "b8[32, 128]" = torch.ops.aten.ne.Scalar(arg0_1, 0);  arg0_1 = None
         convert_element_type_default: "i32[32, 128]" = torch.ops.prims.convert_element_type.default(ne_scalar, torch.int32);  ne_scalar = None
-        iota_default: "i32[128]" = torch.ops.prims.iota.default(128, start = 0, step = 1, dtype = torch.int32, device = device(type='cuda', index=0), requires_grad = False)
+        iota_default: "i32[128]" = torch.ops.prims.iota.default(iota_extent, start = 0, step = 1, dtype = torch.int32, device = device(type='cuda', index=0), requires_grad = False);  iota_extent = None
         mul_tensor: "i32[32, 128]" = torch.ops.aten.mul.Tensor(iota_default, convert_element_type_default);  iota_default = convert_element_type_default = None
         argmax_default: "i64[32]" = torch.ops.aten.argmax.default(mul_tensor, -1);  mul_tensor = None
         index_tensor: "f32[32, 2]" = torch.ops.aten.index.Tensor(view_default, [iota_1, argmax_default]);  view_default = iota_1 = argmax_default = None
