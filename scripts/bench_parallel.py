@@ -544,9 +544,22 @@ def main():
             print(f"  Mean gap:   {avg_gap:.2f}x")
             print(f"  At SOL (<=1.1x): {at_sol}/{len(gaps)} ({at_sol*100//len(gaps)}%)")
 
-    # Optional JSON output
+    # Optional JSON output — include metadata for staleness detection
     if args.output:
-        args.output.write_text(json.dumps(all_results, indent=2))
+        import subprocess
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+        ).stdout.strip()
+        import time as _time
+        output_data = {
+            "_metadata": {
+                "commit": commit,
+                "timestamp": _time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "n_repros": len(all_results),
+            },
+            **all_results,
+        }
+        args.output.write_text(json.dumps(output_data, indent=2))
         print(f"[output] Wrote {args.output}")
 
 
