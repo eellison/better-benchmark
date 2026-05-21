@@ -3,11 +3,11 @@
 ## Priority Tasks
 
 ### 1. Fix partitioner: no horizontal fusion of independent chains
-- [ ] `CapabilityBasedPartitioner` groups all reachable supported nodes, not just data-dependent ones
-- [ ] After partitioning, split each partition into connected components (by data flow)
-- [ ] Handle `operator.getitem` correctly (it IS a data dependency even though it's "transparent")
-- [ ] Add test: two independent pointwise chains should NOT be one repro
-- [ ] Add test: var_mean → getitem → pointwise SHOULD be one repro (data dependent)
+- [x] `CapabilityBasedPartitioner` groups all reachable supported nodes, not just data-dependent ones
+- [x] After partitioning, split each partition into connected components (by data flow)
+- [x] Handle `operator.getitem` correctly (it IS a data dependency even though it's "transparent")
+- [x] Add test: two independent pointwise chains should NOT be one repro
+- [x] Add test: var_mean → getitem → pointwise SHOULD be one repro (data dependent)
 
 ### 2. Recapture all models with fixed partitioner
 - [ ] Delete old canonical repros
@@ -36,8 +36,8 @@
 - [ ] Remove any repros without `_repro_version`
 
 ## Status
-- Partitioner fix: NOT STARTED
-- Recapture: BLOCKED on partitioner fix
+- Partitioner fix: DONE
+- Recapture: READY TO GO
 - Format: v2 defined, 306/1453 upgraded, rest blocked on partitioner
 - vLLM bounds: NOT STARTED
 - Cleanup: NOT STARTED
