@@ -617,7 +617,7 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
             copy_elems = max(total_bytes // (2 * 4), 256)
             src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
             dst = torch.empty_like(src)
-            sol_ms = do_bench(lambda: torch.add(src, 0, out=dst), warmup=parsed.n_warmup, rep=parsed.n_rep, return_mode="min")
+            sol_ms = do_bench(lambda: torch.add(src, 1, out=dst), warmup=parsed.n_warmup, rep=parsed.n_rep, return_mode="min")
             sol_us = sol_ms * 1000
             del src, dst
 

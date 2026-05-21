@@ -234,7 +234,7 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
             dst = torch.empty_like(src)
             sol_us = do_bench(
-                lambda: torch.add(src, 0, out=dst),
+                lambda: torch.add(src, 1, out=dst),
                 warmup=n_warmup,
                 rep=n_rep,
                 return_mode="min",
@@ -986,7 +986,7 @@ def bench_one(repro_path):
             src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
             dst = torch.empty_like(src)
             sol_us = do_bench(
-                lambda: torch.add(src, 0, out=dst),
+                lambda: torch.add(src, 1, out=dst),
                 warmup={args_dict["n_warmup"]},
                 rep={args_dict["n_rep"]},
                 return_mode="min",
