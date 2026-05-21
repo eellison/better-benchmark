@@ -37,25 +37,29 @@ def _format_compact_config(label: str, input_specs: list[dict]) -> str:
 
 def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
                       suite: str = "other", mode: str | None = None):
-    """Write per-model JSON file with pattern list."""
+    """Write per-model manifest.json into the model directory.
+
+    Writes to models/<suite>/<mode>/<model_name>/manifest.json (or
+    models/<suite>/<model_name>/manifest.json if mode is None).
+    """
     models_dir = canonical_dir / "models"
     if mode:
-        out_dir = models_dir / suite / mode
+        out_dir = models_dir / suite / mode / model_name
     else:
-        out_dir = models_dir / suite
+        out_dir = models_dir / suite / model_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    out_file = out_dir / f"{model_name}.json"
+    manifest_file = out_dir / "manifest.json"
 
     # Merge with existing if present
-    if out_file.exists():
-        existing = json.loads(out_file.read_text())
-        patterns = sorted(set(existing["patterns"] + patterns))
+    if manifest_file.exists():
+        existing = json.loads(manifest_file.read_text())
+        patterns = sorted(set(existing.get("patterns", []) + patterns))
     else:
         patterns = sorted(set(patterns))
 
-    out_file.write_text(json.dumps({"patterns": patterns}, indent=2) + "\n")
-    return out_file
+    manifest_file.write_text(json.dumps({"patterns": patterns}, indent=2) + "\n")
+    return out_dir
 
 
 def _infer_suite_mode(model_name: str) -> tuple[str, str | None, str]:
@@ -198,10 +202,10 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         merged_patterns.append(pattern_hash)
         merged += 1
 
-    # Write per-model JSON
+    # Write per-model manifest
     if merged_patterns:
-        out_file = _write_model_json(canonical_dir, clean_name, merged_patterns, suite, mode)
-        print(f"  Model JSON: {out_file}")
+        model_dir = _write_model_json(canonical_dir, clean_name, merged_patterns, suite, mode)
+        print(f"  Model dir: {model_dir}")
 
     return merged
 

@@ -25,6 +25,7 @@ from merge_captures import merge_one_capture
 from torch._inductor.utils import fresh_inductor_cache
 
 REPRO_DIR = Path("/tmp/scratch_space/better_benchmark/repros")
+OUTPUT_DIR = REPRO_DIR
 DEVICE = "cuda"
 DTYPE = torch.bfloat16
 
@@ -113,10 +114,10 @@ LAYERNORM_BWD_SHAPES = (
 ) + extra_shapes_for_norm
 
 
-def capture_forward(fn, label, tmpdir):
+def capture_forward(fn, label, tmpdir, graph_dir=None):
     """Capture a forward-only computation."""
     torch._dynamo.reset()
-    install_capture_hook(tmpdir, label=label)
+    install_capture_hook(tmpdir, label=label, graph_dir=graph_dir)
     try:
         compiled = torch.compile(fn, fullgraph=True)
         with fresh_inductor_cache():
@@ -128,10 +129,10 @@ def capture_forward(fn, label, tmpdir):
     uninstall_capture_hook()
 
 
-def capture_backward(fwd_fn, label, tmpdir):
+def capture_backward(fwd_fn, label, tmpdir, graph_dir=None):
     """Capture a backward computation via autograd."""
     torch._dynamo.reset()
-    install_capture_hook(tmpdir, label=label)
+    install_capture_hook(tmpdir, label=label, graph_dir=graph_dir)
     try:
         compiled = torch.compile(fwd_fn, fullgraph=True)
         with fresh_inductor_cache():
@@ -150,9 +151,12 @@ def run_all():
     # ======================================================================
     # CrossEntropyForward
     # ======================================================================
+    kernel_name = "CrossEntropyForward"
     print("\n" + "=" * 70)
-    print("CrossEntropyForward - 11 shapes")
+    print(f"{kernel_name} - 11 shapes")
     print("=" * 70)
+    model_dir = OUTPUT_DIR / "models" / "genai" / kernel_name
+    model_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     for M, N in CROSS_ENTROPY_SHAPES:
         label = f"genai_ce_fwd_{M}x{N}"
@@ -164,21 +168,24 @@ def run_all():
         def ce_fwd(x=x, target=target):
             return F.cross_entropy(x, target, reduction="none")
 
-        capture_forward(ce_fwd, label, tmpdir)
-        n = merge_one_capture(Path(tmpdir), REPRO_DIR, label)
+        capture_forward(ce_fwd, label, tmpdir, graph_dir=str(model_dir))
+        n = merge_one_capture(Path(tmpdir), REPRO_DIR, kernel_name, suite="genai")
         count += n
         print(f"merged {n}")
         del x, target
         torch.cuda.empty_cache()
-    results["CrossEntropyForward"] = count
+    results[kernel_name] = count
     print(f"  Total: {count} regions")
 
     # ======================================================================
     # CrossEntropyBackward
     # ======================================================================
+    kernel_name = "CrossEntropyBackward"
     print("\n" + "=" * 70)
-    print("CrossEntropyBackward - 11 shapes")
+    print(f"{kernel_name} - 11 shapes")
     print("=" * 70)
+    model_dir = OUTPUT_DIR / "models" / "genai" / kernel_name
+    model_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     for M, N in CROSS_ENTROPY_SHAPES:
         label = f"genai_ce_bwd_{M}x{N}"
@@ -191,21 +198,24 @@ def run_all():
             loss = F.cross_entropy(x, target, reduction="none")
             return loss.sum()
 
-        capture_backward(ce_bwd, label, tmpdir)
-        n = merge_one_capture(Path(tmpdir), REPRO_DIR, label)
+        capture_backward(ce_bwd, label, tmpdir, graph_dir=str(model_dir))
+        n = merge_one_capture(Path(tmpdir), REPRO_DIR, kernel_name, suite="genai")
         count += n
         print(f"merged {n}")
         del x, target
         torch.cuda.empty_cache()
-    results["CrossEntropyBackward"] = count
+    results[kernel_name] = count
     print(f"  Total: {count} regions")
 
     # ======================================================================
     # SoftmaxForward
     # ======================================================================
+    kernel_name = "SoftmaxForward"
     print("\n" + "=" * 70)
-    print("SoftmaxForward - 11 shapes")
+    print(f"{kernel_name} - 11 shapes")
     print("=" * 70)
+    model_dir = OUTPUT_DIR / "models" / "genai" / kernel_name
+    model_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     for M, N in SOFTMAX_SHAPES:
         label = f"genai_softmax_fwd_{M}x{N}"
@@ -216,21 +226,24 @@ def run_all():
         def sm_fwd(x=x):
             return F.softmax(x, dim=-1)
 
-        capture_forward(sm_fwd, label, tmpdir)
-        n = merge_one_capture(Path(tmpdir), REPRO_DIR, label)
+        capture_forward(sm_fwd, label, tmpdir, graph_dir=str(model_dir))
+        n = merge_one_capture(Path(tmpdir), REPRO_DIR, kernel_name, suite="genai")
         count += n
         print(f"merged {n}")
         del x
         torch.cuda.empty_cache()
-    results["SoftmaxForward"] = count
+    results[kernel_name] = count
     print(f"  Total: {count} regions")
 
     # ======================================================================
     # SoftmaxBackward
     # ======================================================================
+    kernel_name = "SoftmaxBackward"
     print("\n" + "=" * 70)
-    print("SoftmaxBackward - 11 shapes")
+    print(f"{kernel_name} - 11 shapes")
     print("=" * 70)
+    model_dir = OUTPUT_DIR / "models" / "genai" / kernel_name
+    model_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     for M, N in SOFTMAX_SHAPES:
         label = f"genai_softmax_bwd_{M}x{N}"
@@ -242,21 +255,24 @@ def run_all():
             y = F.softmax(x, dim=-1)
             return y.sum()
 
-        capture_backward(sm_bwd, label, tmpdir)
-        n = merge_one_capture(Path(tmpdir), REPRO_DIR, label)
+        capture_backward(sm_bwd, label, tmpdir, graph_dir=str(model_dir))
+        n = merge_one_capture(Path(tmpdir), REPRO_DIR, kernel_name, suite="genai")
         count += n
         print(f"merged {n}")
         del x
         torch.cuda.empty_cache()
-    results["SoftmaxBackward"] = count
+    results[kernel_name] = count
     print(f"  Total: {count} regions")
 
     # ======================================================================
     # RMSNormForward
     # ======================================================================
+    kernel_name = "RMSNormForward"
     print("\n" + "=" * 70)
-    print(f"RMSNormForward - {len(RMSNORM_FWD_SHAPES)} shapes")
+    print(f"{kernel_name} - {len(RMSNORM_FWD_SHAPES)} shapes")
     print("=" * 70)
+    model_dir = OUTPUT_DIR / "models" / "genai" / kernel_name
+    model_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     for M, N in RMSNORM_FWD_SHAPES:
         label = f"genai_rmsnorm_fwd_{M}x{N}"
@@ -273,21 +289,24 @@ def run_all():
                 * w
             ).to(x.dtype)
 
-        capture_forward(rmsnorm_fwd, label, tmpdir)
-        n = merge_one_capture(Path(tmpdir), REPRO_DIR, label)
+        capture_forward(rmsnorm_fwd, label, tmpdir, graph_dir=str(model_dir))
+        n = merge_one_capture(Path(tmpdir), REPRO_DIR, kernel_name, suite="genai")
         count += n
         print(f"merged {n}")
         del x, w
         torch.cuda.empty_cache()
-    results["RMSNormForward"] = count
+    results[kernel_name] = count
     print(f"  Total: {count} regions")
 
     # ======================================================================
     # RMSNormBackward
     # ======================================================================
+    kernel_name = "RMSNormBackward"
     print("\n" + "=" * 70)
-    print(f"RMSNormBackward - {len(RMSNORM_BWD_SHAPES)} shapes")
+    print(f"{kernel_name} - {len(RMSNORM_BWD_SHAPES)} shapes")
     print("=" * 70)
+    model_dir = OUTPUT_DIR / "models" / "genai" / kernel_name
+    model_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     for M, N in RMSNORM_BWD_SHAPES:
         label = f"genai_rmsnorm_bwd_{M}x{N}"
@@ -305,21 +324,24 @@ def run_all():
             ).to(x.dtype)
             return out.sum()
 
-        capture_backward(rmsnorm_bwd, label, tmpdir)
-        n = merge_one_capture(Path(tmpdir), REPRO_DIR, label)
+        capture_backward(rmsnorm_bwd, label, tmpdir, graph_dir=str(model_dir))
+        n = merge_one_capture(Path(tmpdir), REPRO_DIR, kernel_name, suite="genai")
         count += n
         print(f"merged {n}")
         del x, w
         torch.cuda.empty_cache()
-    results["RMSNormBackward"] = count
+    results[kernel_name] = count
     print(f"  Total: {count} regions")
 
     # ======================================================================
     # LayerNormForward
     # ======================================================================
+    kernel_name = "LayerNormForward"
     print("\n" + "=" * 70)
-    print(f"LayerNormForward - {len(LAYERNORM_FWD_SHAPES)} shapes")
+    print(f"{kernel_name} - {len(LAYERNORM_FWD_SHAPES)} shapes")
     print("=" * 70)
+    model_dir = OUTPUT_DIR / "models" / "genai" / kernel_name
+    model_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     for M, N in LAYERNORM_FWD_SHAPES:
         label = f"genai_layernorm_fwd_{M}x{N}"
@@ -332,21 +354,24 @@ def run_all():
             x_f32 = x.float()
             return F.layer_norm(x_f32, w.shape, w, None, 1e-6).to(x.dtype)
 
-        capture_forward(layernorm_fwd, label, tmpdir)
-        n = merge_one_capture(Path(tmpdir), REPRO_DIR, label)
+        capture_forward(layernorm_fwd, label, tmpdir, graph_dir=str(model_dir))
+        n = merge_one_capture(Path(tmpdir), REPRO_DIR, kernel_name, suite="genai")
         count += n
         print(f"merged {n}")
         del x, w
         torch.cuda.empty_cache()
-    results["LayerNormForward"] = count
+    results[kernel_name] = count
     print(f"  Total: {count} regions")
 
     # ======================================================================
     # LayerNormBackward
     # ======================================================================
+    kernel_name = "LayerNormBackward"
     print("\n" + "=" * 70)
-    print(f"LayerNormBackward - {len(LAYERNORM_BWD_SHAPES)} shapes")
+    print(f"{kernel_name} - {len(LAYERNORM_BWD_SHAPES)} shapes")
     print("=" * 70)
+    model_dir = OUTPUT_DIR / "models" / "genai" / kernel_name
+    model_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     for M, N in LAYERNORM_BWD_SHAPES:
         label = f"genai_layernorm_bwd_{M}x{N}"
@@ -360,13 +385,13 @@ def run_all():
             out = F.layer_norm(x_f32, w.shape, w, None, 1e-6).to(x.dtype)
             return out.sum()
 
-        capture_backward(layernorm_bwd, label, tmpdir)
-        n = merge_one_capture(Path(tmpdir), REPRO_DIR, label)
+        capture_backward(layernorm_bwd, label, tmpdir, graph_dir=str(model_dir))
+        n = merge_one_capture(Path(tmpdir), REPRO_DIR, kernel_name, suite="genai")
         count += n
         print(f"merged {n}")
         del x, w
         torch.cuda.empty_cache()
-    results["LayerNormBackward"] = count
+    results[kernel_name] = count
     print(f"  Total: {count} regions")
 
     # ======================================================================

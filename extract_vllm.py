@@ -7,6 +7,7 @@ import os
 import sys
 import torch
 import torch._inductor.config as inductor_config
+from pathlib import Path
 
 sys.path.insert(0, "/tmp/scratch_space/better_benchmark")
 PYTHONPATH = os.environ.get("PYTORCH_DIR", "/tmp/pytorch-work")
@@ -16,19 +17,24 @@ inductor_config.force_disable_caches = True
 inductor_config.split_reductions = False
 
 REPRO_DIR = "/tmp/scratch_space/better_benchmark/repros"
+OUTPUT_DIR = Path(REPRO_DIR)
 
 
 def extract_from_model(model_name, output_name=None, device_id=0,
                        inference_only=False, max_layers=None):
     from extract_reductions import run_aten_extraction
     from merge_captures import merge_one_capture
-    from pathlib import Path
     from transformers import AutoConfig, AutoModelForCausalLM
 
     if output_name is None:
         safe_name = model_name.replace("/", "_")
         suffix = "_inference" if inference_only else ""
         output_name = f"vllm_{safe_name}{suffix}"
+
+    # Model directory for full_graph + manifest
+    model_dir_name = model_name.replace("/", "_")
+    model_dir = OUTPUT_DIR / "models" / "vllm" / model_dir_name
+    model_dir.mkdir(parents=True, exist_ok=True)
 
     output_dir = os.path.join("/tmp/scratch_space/better_benchmark/output", "aten_repros", output_name)
     device = f"cuda:{device_id}"
@@ -66,10 +72,11 @@ def extract_from_model(model_name, output_name=None, device_id=0,
         return [{"input_ids": input_ids, "labels": labels}]
 
     extractor = run_aten_extraction(make_model, make_args, output_dir,
-                        model_name=output_name, inference_only=inference_only)
+                        model_name=output_name, inference_only=inference_only,
+                        graph_dir=str(model_dir))
 
-    # Merge into canonical repro set
-    n = merge_one_capture(Path(output_dir), Path(REPRO_DIR), output_name)
+    # Merge into canonical repro set — use model_dir_name so manifest lands in model_dir
+    n = merge_one_capture(Path(output_dir), Path(REPRO_DIR), model_dir_name, suite="vllm")
     print(f"  Merged {n} regions into {REPRO_DIR}/canonical/")
     return n
 

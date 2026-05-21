@@ -43,6 +43,7 @@ class _CaptureState:
         self.graph_dir = graph_dir
         self.seen_hashes: set[str] = set()
         self.counter = 0
+        self.graph_counter = 0
         self.captured: list[dict] = []
         os.makedirs(output_dir, exist_ok=True)
         if graph_dir:
@@ -592,21 +593,22 @@ if __name__ == "__main__":
         with open(filepath, "w") as f:
             f.write(script)
 
-        # Save full FX graph for recovery (not committed, just local backup)
-        if self.graph_dir:
-            graph_filename = filename.replace(".py", "_graph.py")
-            graph_filepath = os.path.join(self.graph_dir, graph_filename)
-            try:
-                graph_code = gm.print_readable(print_output=False)
-                with open(graph_filepath, "w") as f:
-                    f.write(graph_code)
-            except Exception:
-                pass  # non-critical
+        # Per-region subgraph saving removed — full_graph_*.py + canonical repros are sufficient
 
         return filepath
 
     def process_graph(self, gm: fx.GraphModule):
         """Called by the hook for each post-grad graph. Partitions and captures."""
+        # Save the FULL post-grad graph (before partitioning) for recovery
+        if self.graph_dir:
+            full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
+            self.graph_counter += 1
+            try:
+                full_code = gm.print_readable(print_output=False)
+                with open(full_graph_path, "w") as f:
+                    f.write(full_code)
+            except Exception:
+                pass
         from torch._inductor.fx_passes.fusion_regions import is_fusible_node
         from torch.fx.passes.infra.partitioner import CapabilityBasedPartitioner
         from torch.fx.passes.operator_support import create_op_support
