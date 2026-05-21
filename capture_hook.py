@@ -719,11 +719,14 @@ if __name__ == "__main__":
         support = create_op_support(_is_supported)
         partitioner = CapabilityBasedPartitioner(
             gm, support, allows_single_node_partition=True,
+            skip_horizontal_fusion=True,
         )
         partitions = partitioner.propose_partitions()
         components = [list(p.nodes.keys()) for p in partitions]
 
         # Split each partition into connected components based on data flow.
+        # (Belt-and-suspenders: skip_horizontal_fusion should prevent this,
+        # but we keep the split as a safety net)
         # The CapabilityBasedPartitioner groups ALL reachable supported nodes
         # into one partition even if they have no data dependency. Two independent
         # chains (e.g., reshape+transpose of tensor A, reshape+transpose of tensor B)
