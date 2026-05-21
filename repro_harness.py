@@ -193,6 +193,8 @@ def parse_shapes_config(config_str: str) -> list:
         inputs = [inputs]
     elif isinstance(inputs, tuple):
         inputs = list(inputs)
+    if not inputs and config_str.strip() not in ("()", ""):
+        raise ValueError(f"parse_shapes_config produced empty result for non-empty config: {config_str[:80]}")
     return make_inputs_from_config({"inputs": inputs})
 
 
