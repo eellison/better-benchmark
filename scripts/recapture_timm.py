@@ -7,7 +7,6 @@ import gc
 import json
 import os
 import sys
-import tempfile
 import time
 from pathlib import Path
 
@@ -18,7 +17,7 @@ import torch
 import torch._dynamo
 from torch._inductor.utils import fresh_inductor_cache
 from capture_hook import install_capture_hook, uninstall_capture_hook
-from merge_captures import merge_one_capture
+from merge_captures import temporary_capture_for_merge
 
 TIMM_MODELS = {
     "adv_inception_v3": 128,
@@ -49,65 +48,74 @@ def capture_model(model_name: str, batch_size: int, mode: str):
     import timm
 
     label = f"timm_{model_name}_{mode}"
-    cap_dir = Path(tempfile.mkdtemp())
 
     torch._dynamo.reset()
     torch.cuda.empty_cache()
     gc.collect()
 
-    try:
-        model = timm.create_model(model_name, pretrained=False).cuda()
-        model = model.to(memory_format=torch.channels_last)
-
-        data_config = timm.data.resolve_model_data_config(model)
-        input_size = data_config.get("input_size", (3, 224, 224))
-        inp = torch.randn(batch_size, *input_size, device="cuda")
-        inp = inp.to(memory_format=torch.channels_last)
-
-        if mode == "train":
-            model.train()
-        else:
-            model.eval()
-
-        # Save full graphs to the per-model directory
-        # Use label-derived name to match what merge_captures writes manifest to
-        model_dir = OUTPUT_DIR / "models" / "timm" / mode / label
-        model_dir.mkdir(parents=True, exist_ok=True)
-        install_capture_hook(str(cap_dir), label=label, graph_dir=str(model_dir))
-
-        t0 = time.time()
-        with fresh_inductor_cache():
-            compiled = torch.compile(model)
-            if mode == "train":
-                out = compiled(inp)
-                if isinstance(out, torch.Tensor):
-                    out.sum().backward()
-                elif isinstance(out, (tuple, list)):
-                    loss = sum(o.sum() for o in out if isinstance(o, torch.Tensor))
-                    loss.backward()
-            else:
-                with torch.no_grad():
-                    compiled(inp)
-            torch.cuda.synchronize()
-        elapsed = time.time() - t0
-
-        uninstall_capture_hook()
-
-        # Merge into canonical set
-        n = merge_one_capture(cap_dir, OUTPUT_DIR, label, suite="timm", mode=mode)
-        return n, elapsed
-
-    except Exception as e:
-        print(f"  FAILED: {e}")
+    model = None
+    inp = None
+    with temporary_capture_for_merge(
+        OUTPUT_DIR,
+        label,
+        suite="timm",
+        mode=mode,
+        prefix="recapture_timm_",
+    ) as capture:
+        cap_dir = capture.capture_dir
         try:
+            model = timm.create_model(model_name, pretrained=False).cuda()
+            model = model.to(memory_format=torch.channels_last)
+
+            data_config = timm.data.resolve_model_data_config(model)
+            input_size = data_config.get("input_size", (3, 224, 224))
+            inp = torch.randn(batch_size, *input_size, device="cuda")
+            inp = inp.to(memory_format=torch.channels_last)
+
+            if mode == "train":
+                model.train()
+            else:
+                model.eval()
+
+            # Save full graphs to the per-model directory
+            # Use label-derived name to match what merge_captures writes manifest to
+            model_dir = OUTPUT_DIR / "models" / "timm" / mode / label
+            model_dir.mkdir(parents=True, exist_ok=True)
+            install_capture_hook(str(cap_dir), label=label, graph_dir=str(model_dir))
+
+            t0 = time.time()
+            with fresh_inductor_cache():
+                compiled = torch.compile(model)
+                if mode == "train":
+                    out = compiled(inp)
+                    if isinstance(out, torch.Tensor):
+                        out.sum().backward()
+                    elif isinstance(out, (tuple, list)):
+                        loss = sum(o.sum() for o in out if isinstance(o, torch.Tensor))
+                        loss.backward()
+                else:
+                    with torch.no_grad():
+                        compiled(inp)
+                torch.cuda.synchronize()
+            elapsed = time.time() - t0
+
             uninstall_capture_hook()
-        except Exception:
-            pass
-        return 0, 0.0
-    finally:
-        del model, inp
-        torch.cuda.empty_cache()
-        gc.collect()
+
+            # Merge into canonical set
+            n = capture.merge()
+            return n, elapsed
+
+        except Exception as e:
+            print(f"  FAILED: {e}")
+            try:
+                uninstall_capture_hook()
+            except Exception:
+                pass
+            return 0, 0.0
+        finally:
+            del model, inp
+            torch.cuda.empty_cache()
+            gc.collect()
 
 
 def main():
@@ -154,7 +162,8 @@ def main():
     print(f"{'='*60}")
 
     # Save summary
-    summary_path = OUTPUT_DIR / "capture_summary_timm.json"
+    summary_path = OUTPUT_DIR.parent / "capture_summary_timm.json"
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
     with open(summary_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"Summary: {summary_path}")

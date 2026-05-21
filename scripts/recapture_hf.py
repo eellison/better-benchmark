@@ -7,7 +7,6 @@ import gc
 import json
 import os
 import sys
-import tempfile
 import time
 from pathlib import Path
 
@@ -20,7 +19,7 @@ import torch
 import torch._dynamo
 from torch._inductor.utils import fresh_inductor_cache
 from capture_hook import install_capture_hook, uninstall_capture_hook
-from merge_captures import merge_one_capture
+from merge_captures import temporary_capture_for_merge
 
 # Models that need HF auth or special downloads — skip
 SKIP_MODELS = {
@@ -53,63 +52,70 @@ def capture_hf_model(model_name: str, batch_size: int, mode: str):
     from huggingface import HuggingfaceRunner
 
     label = f"hf_{model_name}_{mode}"
-    cap_dir = Path(tempfile.mkdtemp())
 
     torch._dynamo.reset()
     torch.cuda.empty_cache()
     gc.collect()
 
-    try:
-        sys.argv = ["capture", "--performance",
-                    "--training" if mode == "train" else "--inference",
-                    "--inductor", "--devices", "cuda",
-                    "--batch-size", str(batch_size), "--only", model_name]
-        runner = HuggingfaceRunner()
-        args = common.parse_args(sys.argv[1:])
-        runner.args = args
-        runner.model_iter_fn = runner.forward_and_backward_pass if mode == "train" else runner.forward_pass
-
-        _, _, model, inputs_dict, _ = runner.load_model("cuda", model_name, batch_size)
-
-        if mode == "train":
-            model.train()
-        else:
-            model.eval()
-
-        model_dir = OUTPUT_DIR / "models" / "hf" / mode / model_name
-        model_dir.mkdir(parents=True, exist_ok=True)
-        install_capture_hook(str(cap_dir), label=label, graph_dir=str(model_dir))
-
-        t0 = time.time()
-        with fresh_inductor_cache():
-            compiled = torch.compile(model)
-            if mode == "train":
-                out = compiled(**inputs_dict)
-                if hasattr(out, "loss") and out.loss is not None:
-                    out.loss.backward()
-                elif isinstance(out, torch.Tensor):
-                    out.sum().backward()
-            else:
-                with torch.no_grad():
-                    compiled(**inputs_dict)
-            torch.cuda.synchronize()
-        elapsed = time.time() - t0
-
-        uninstall_capture_hook()
-
-        n = merge_one_capture(cap_dir, OUTPUT_DIR, label, suite="hf", mode=mode)
-        return n, elapsed
-
-    except Exception as e:
-        print(f"  FAILED: {e}")
+    with temporary_capture_for_merge(
+        OUTPUT_DIR,
+        label,
+        suite="hf",
+        mode=mode,
+        prefix="recapture_hf_",
+    ) as capture:
+        cap_dir = capture.capture_dir
         try:
+            sys.argv = ["capture", "--performance",
+                        "--training" if mode == "train" else "--inference",
+                        "--inductor", "--devices", "cuda",
+                        "--batch-size", str(batch_size), "--only", model_name]
+            runner = HuggingfaceRunner()
+            args = common.parse_args(sys.argv[1:])
+            runner.args = args
+            runner.model_iter_fn = runner.forward_and_backward_pass if mode == "train" else runner.forward_pass
+
+            _, _, model, inputs_dict, _ = runner.load_model("cuda", model_name, batch_size)
+
+            if mode == "train":
+                model.train()
+            else:
+                model.eval()
+
+            model_dir = OUTPUT_DIR / "models" / "hf" / mode / model_name
+            model_dir.mkdir(parents=True, exist_ok=True)
+            install_capture_hook(str(cap_dir), label=label, graph_dir=str(model_dir))
+
+            t0 = time.time()
+            with fresh_inductor_cache():
+                compiled = torch.compile(model)
+                if mode == "train":
+                    out = compiled(**inputs_dict)
+                    if hasattr(out, "loss") and out.loss is not None:
+                        out.loss.backward()
+                    elif isinstance(out, torch.Tensor):
+                        out.sum().backward()
+                else:
+                    with torch.no_grad():
+                        compiled(**inputs_dict)
+                torch.cuda.synchronize()
+            elapsed = time.time() - t0
+
             uninstall_capture_hook()
-        except Exception:
-            pass
-        return 0, 0.0
-    finally:
-        torch.cuda.empty_cache()
-        gc.collect()
+
+            n = capture.merge()
+            return n, elapsed
+
+        except Exception as e:
+            print(f"  FAILED: {e}")
+            try:
+                uninstall_capture_hook()
+            except Exception:
+                pass
+            return 0, 0.0
+        finally:
+            torch.cuda.empty_cache()
+            gc.collect()
 
 
 def main():
@@ -149,7 +155,8 @@ def main():
     print(f"DONE: {total_regions} total regions from {len(results)} model runs in {total_time:.0f}s")
     print(f"{'='*60}")
 
-    summary_path = OUTPUT_DIR / "capture_summary_hf.json"
+    summary_path = OUTPUT_DIR.parent / "capture_summary_hf.json"
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
     with open(summary_path, "w") as f:
         json.dump(results, f, indent=2)
 
