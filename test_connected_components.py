@@ -198,3 +198,40 @@ if __name__ == "__main__":
     test_var_mean_single_chain()
     test_chain_plus_independent_scalar()
     print("\nAll tests passed!")
+
+
+def test_channels_last_strides():
+    from capture_hook import _CaptureState
+    """Verify channels-last tensors get non-contiguous strides in _shapes_config."""
+    import tempfile
+    from pathlib import Path
+
+    graph = fx.Graph()
+    # Channels-last input: [N, C, H, W] with stride [C*H*W, 1, C*W, C]
+    x = graph.placeholder('x')
+    x.meta = {'val': torch.randn(128, 64, 56, 56, device='cuda').to(memory_format=torch.channels_last)}
+
+    # Simple pointwise
+    a = graph.call_function(torch.ops.aten.relu.default, args=(x,))
+    a.meta = {'val': torch.randn(128, 64, 56, 56, device='cuda').to(memory_format=torch.channels_last)}
+    graph.output(a)
+
+    gm = fx.GraphModule(torch.nn.Module(), graph)
+    state = _CaptureState(tempfile.mkdtemp(), label='test_cl', validate=False)
+    state.process_graph(gm)
+    state.finalize()
+
+    assert len(state.captured) == 1, f"Expected 1, got {len(state.captured)}"
+    content = Path(state.captured[0]['file']).read_text()
+    assert 'stride=' in content, "channels-last stride not in _shapes_config"
+    # Verify stride is actually channels-last (channel dim has stride 1)
+    assert 'stride=(200704, 1, 3584, 64)' in content, f"Expected channels-last stride, got: {content}"
+    print("PASS: channels-last strides captured correctly")
+
+
+if __name__ == "__main__":
+    test_two_independent_chains()
+    test_var_mean_single_chain()
+    test_chain_plus_independent_scalar()
+    test_channels_last_strides()
+    print("\nAll tests passed!")
