@@ -224,6 +224,59 @@ def _write_results_output(
     ), indent=2))
 
 
+def _merge_into_baseline(baseline_path: Path, new_results: dict, new_failures: dict):
+    """Merge new benchmark results into an existing baseline JSON file."""
+    import subprocess as _sp
+
+    if not baseline_path.exists():
+        print(f"[merge-into] {baseline_path} does not exist, writing fresh")
+        baseline_path.parent.mkdir(parents=True, exist_ok=True)
+        commit = _sp.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
+        ).stdout.strip()
+        payload = _results_payload(
+            new_results, new_failures,
+            {"total": len(new_results) + len(new_failures), "ok": len(new_results), "failed": len(new_failures)},
+            {"commit": commit, "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"), "n_repros": len(new_results)},
+        )
+        baseline_path.write_text(json.dumps(payload, indent=2))
+        print(f"[merge-into] Wrote {baseline_path} ({len(new_results)} repros)")
+        return
+
+    existing = json.loads(baseline_path.read_text())
+    old_failures = existing.pop("__failures__", {})
+    old_summary = existing.pop("__summary__", {})
+    old_meta = existing.pop("_metadata", {})
+
+    updated = 0
+    for repro_path, results in new_results.items():
+        existing[repro_path] = results
+        old_failures.pop(repro_path, None)
+        updated += 1
+
+    for repro_path, failure in new_failures.items():
+        old_failures[repro_path] = failure
+        existing.pop(repro_path, None)
+
+    commit = _sp.run(
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
+    ).stdout.strip()
+    old_meta["commit"] = commit
+    old_meta["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ")
+    old_meta["n_repros"] = len([k for k in existing if not k.startswith("_")])
+    old_meta["last_merge"] = f"updated {updated} repros"
+
+    successes = {k: v for k, v in existing.items() if not k.startswith("_") and not k.startswith("__")}
+    old_summary["total"] = len(successes) + len(old_failures)
+    old_summary["ok"] = len(successes)
+    old_summary["failed"] = len(old_failures)
+
+    payload = _results_payload(successes, old_failures or None, old_summary, old_meta)
+    baseline_path.write_text(json.dumps(payload, indent=2))
+    print(f"[merge-into] Updated {updated} repros in {baseline_path} "
+          f"(total: {len(successes)} ok, {len(old_failures)} failed)")
+
+
 def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
            args_dict: dict):
     """Worker process: holds GPU lock, benchmarks repros until queue is empty."""
@@ -417,6 +470,8 @@ def main():
                         help="Compare two tagged runs from perf.json (no benchmarking, just report)")
     parser.add_argument("--output", type=Path, default=None,
                         help="Write all results to a JSON file")
+    parser.add_argument("--merge-into", type=Path, default=None,
+                        help="Merge results into an existing baseline JSON (updates only the benchmarked repros)")
     args = parser.parse_args()
 
     # Compare mode: just read existing perf.json and diff
@@ -630,6 +685,10 @@ def main():
             elapsed=elapsed_total,
         )
         print(f"[output] Wrote {args.output}")
+
+    # Merge into existing baseline
+    if args.merge_into:
+        _merge_into_baseline(args.merge_into, all_results, failures)
 
 
 def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
