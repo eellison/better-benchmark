@@ -1,5 +1,6 @@
 import fcntl
 import json
+import operator
 import os
 import sys
 import tempfile
@@ -276,6 +277,210 @@ def test_capture_hook_traces_gathered_values_to_embedding_bound():
     assert bounds["positions"] == 512
 
 
+def _real_targets(component):
+    return {
+        node.target
+        for node in component
+        if _CaptureState._is_real_compute_node(node)
+    }
+
+
+class _RecordingCaptureState(_CaptureState):
+    def __init__(self, output_dir):
+        super().__init__(output_dir, validate=False)
+        self.generated_targets = []
+
+    def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
+        self.generated_targets.append(_real_targets(gm.graph.nodes))
+        return str(Path(self.output_dir) / filename)
+
+
+def test_capture_hook_process_graph_splits_horizontal_fusion_regions():
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    x.meta["val"] = torch.empty(4)
+    viewed = graph.call_function(torch.ops.aten.view.default, (x, [4]))
+    viewed.meta["val"] = torch.empty(4)
+    left = graph.call_function(torch.ops.aten.sin.default, (viewed,))
+    left.meta["val"] = torch.empty(4)
+    right = graph.call_function(torch.ops.aten.cos.default, (viewed,))
+    right.meta["val"] = torch.empty(4)
+    graph.output((left, right))
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _RecordingCaptureState(tmp)
+        state.process_graph(gm)
+
+    assert len(state.generated_targets) == 2
+    assert {frozenset(targets) for targets in state.generated_targets} == {
+        frozenset({torch.ops.aten.sin.default}),
+        frozenset({torch.ops.aten.cos.default}),
+    }
+
+
+def test_capture_hook_process_graph_splits_alias_and_detach_branches():
+    for transparent_target in (
+        torch.ops.aten.alias.default,
+        torch.ops.aten.detach.default,
+    ):
+        graph = torch.fx.Graph()
+        x = graph.placeholder("x")
+        x.meta["val"] = torch.empty(4)
+        adapter = graph.call_function(transparent_target, (x,))
+        adapter.meta["val"] = torch.empty(4)
+        left = graph.call_function(torch.ops.aten.sin.default, (adapter,))
+        left.meta["val"] = torch.empty(4)
+        right = graph.call_function(torch.ops.aten.cos.default, (adapter,))
+        right.meta["val"] = torch.empty(4)
+        graph.output((left, right))
+
+        gm = torch.fx.GraphModule({}, graph)
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _RecordingCaptureState(tmp)
+            state.process_graph(gm)
+
+        assert len(state.generated_targets) == 2
+        assert {frozenset(targets) for targets in state.generated_targets} == {
+            frozenset({torch.ops.aten.sin.default}),
+            frozenset({torch.ops.aten.cos.default}),
+        }
+
+
+def test_capture_hook_splits_independent_horizontal_chains():
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    viewed = graph.call_function(torch.ops.aten.view.default, (x, [4]))
+    left = graph.call_function(torch.ops.aten.sin.default, (viewed,))
+    right = graph.call_function(torch.ops.aten.cos.default, (viewed,))
+    graph.output((left, right))
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(tmp)
+        components = state._split_data_dependent_components(
+            [[viewed, left, right]],
+            gm,
+        )
+
+    assert len(components) == 2
+    assert {frozenset(_real_targets(c)) for c in components} == {
+        frozenset({torch.ops.aten.sin.default}),
+        frozenset({torch.ops.aten.cos.default}),
+    }
+    assert all(viewed in component for component in components)
+
+
+def test_capture_hook_hash_distinguishes_getitem_indices():
+    graph = torch.fx.Graph()
+    pair = graph.placeholder("pair")
+    left_input = graph.call_function(operator.getitem, (pair, 0))
+    left_input.meta["val"] = torch.empty(4)
+    right_input = graph.call_function(operator.getitem, (pair, 1))
+    right_input.meta["val"] = torch.empty(4)
+    left = graph.call_function(torch.ops.aten.sin.default, (left_input,))
+    left.meta["val"] = torch.empty(4)
+    right = graph.call_function(torch.ops.aten.sin.default, (right_input,))
+    right.meta["val"] = torch.empty(4)
+    graph.output((left, right))
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _RecordingCaptureState(tmp)
+        state.process_graph(gm)
+
+    assert len(state.generated_targets) == 2
+    assert state.generated_targets == [
+        {torch.ops.aten.sin.default},
+        {torch.ops.aten.sin.default},
+    ]
+
+
+def test_capture_hook_keeps_getitem_data_dependency_together():
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    values_and_indices = graph.call_function(torch.ops.aten.max.dim, (x, 1))
+    values = graph.call_function(operator.getitem, (values_and_indices, 0))
+    out = graph.call_function(torch.ops.aten.sin.default, (values,))
+    graph.output(out)
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(tmp)
+        components = state._split_data_dependent_components(
+            [[values_and_indices, values, out]],
+            gm,
+        )
+
+    assert len(components) == 1
+    assert components[0] == [values_and_indices, values, out]
+
+
+def test_capture_hook_does_not_let_external_getitem_create_horizontal_fusion():
+    graph = torch.fx.Graph()
+    pair = graph.placeholder("pair")
+    left_input = graph.call_function(operator.getitem, (pair, 0))
+    right_input = graph.call_function(operator.getitem, (pair, 1))
+    left = graph.call_function(torch.ops.aten.sin.default, (left_input,))
+    right = graph.call_function(torch.ops.aten.cos.default, (right_input,))
+    graph.output((left, right))
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(tmp)
+        components = state._split_data_dependent_components(
+            [[left_input, right_input, left, right]],
+            gm,
+        )
+
+    assert len(components) == 2
+    assert {frozenset(_real_targets(c)) for c in components} == {
+        frozenset({torch.ops.aten.sin.default}),
+        frozenset({torch.ops.aten.cos.default}),
+    }
+    assert any(left_input in component and right_input not in component for component in components)
+    assert any(right_input in component and left_input not in component for component in components)
+
+
+def test_capture_hook_prunes_unrelated_transparent_nodes_from_single_compute_region():
+    graph = torch.fx.Graph()
+    pair = graph.placeholder("pair")
+    left_input = graph.call_function(operator.getitem, (pair, 0))
+    right_input = graph.call_function(operator.getitem, (pair, 1))
+    out = graph.call_function(torch.ops.aten.sin.default, (left_input,))
+    graph.output((out, right_input))
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(tmp)
+        components = state._split_data_dependent_components(
+            [[left_input, right_input, out]],
+            gm,
+        )
+
+    assert components == [[left_input, out]]
+
+
+def test_capture_hook_prunes_unused_getitem_descendant_from_tuple_compute():
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    values_and_indices = graph.call_function(torch.ops.aten.max.dim, (x, 1))
+    values = graph.call_function(operator.getitem, (values_and_indices, 0))
+    indices = graph.call_function(operator.getitem, (values_and_indices, 1))
+    out = graph.call_function(torch.ops.aten.sin.default, (values,))
+    graph.output((out, indices))
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(tmp)
+        components = state._split_data_dependent_components(
+            [[values_and_indices, values, indices, out]],
+            gm,
+        )
+
+    assert components == [[values_and_indices, values, out]]
+
+
 def test_gpu_lock_metadata_marks_lock_mode():
     with tempfile.TemporaryDirectory() as tmp:
         with gpu_lock_module.gpu_lock(0, lock_dir=tmp, label="exclusive-test") as lock_path:
@@ -339,6 +544,14 @@ if __name__ == "__main__":
     test_parse_make_inputs_preserves_generators()
     test_capture_hook_traces_select_to_index_bound()
     test_capture_hook_traces_gathered_values_to_embedding_bound()
+    test_capture_hook_process_graph_splits_horizontal_fusion_regions()
+    test_capture_hook_process_graph_splits_alias_and_detach_branches()
+    test_capture_hook_splits_independent_horizontal_chains()
+    test_capture_hook_hash_distinguishes_getitem_indices()
+    test_capture_hook_keeps_getitem_data_dependency_together()
+    test_capture_hook_does_not_let_external_getitem_create_horizontal_fusion()
+    test_capture_hook_prunes_unrelated_transparent_nodes_from_single_compute_region()
+    test_capture_hook_prunes_unused_getitem_descendant_from_tuple_compute()
     test_gpu_lock_metadata_marks_lock_mode()
     test_gpu_lock_detects_dead_pid_metadata_while_blocked()
     print("All tests passed.")

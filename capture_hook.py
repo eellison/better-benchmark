@@ -26,6 +26,7 @@ import collections
 import copy
 import hashlib
 import json
+import operator
 import os
 import sys
 from pathlib import Path
@@ -34,6 +35,25 @@ from typing import Any
 import torch
 import torch.fx as fx
 import torch._inductor.config as inductor_config
+
+
+_TRANSPARENT_OPS = {
+    operator.getitem,
+    torch.ops.aten.alias.default,
+    torch.ops.aten.detach.default,
+    torch.ops.aten.view.default,
+    torch.ops.aten.reshape.default,
+    torch.ops.aten.permute.default,
+    torch.ops.aten.slice.Tensor,
+    torch.ops.aten.unsqueeze.default,
+    torch.ops.aten.squeeze.default,
+    torch.ops.aten.squeeze.dim,
+    torch.ops.aten.expand.default,
+    torch.ops.aten.t.default,
+    torch.ops.aten.transpose.int,
+    torch.ops.aten.select.int,
+    torch.ops.aten.as_strided.default,
+}
 
 
 class _CaptureState:
@@ -221,8 +241,9 @@ class _CaptureState:
         predecessor nodes feed each argument (by index), and structural
         literal args (list/tuple values like reduction dims, permute orders).
 
-        Does NOT encode scalar int/float constants (e.g., mul by 3.0,
-        eps=1e-6) — those don't affect kernel structure.
+        Does NOT encode most scalar int/float constants (e.g., mul by 3.0,
+        eps=1e-6) — those don't affect kernel structure. Scalar selector
+        args for transparent indexing/view ops are structural and are encoded.
         """
         nodes = list(gm.graph.nodes)
         node_to_idx = {n: i for i, n in enumerate(nodes)}
@@ -245,6 +266,17 @@ class _CaptureState:
             # Scalar int/float constants — don't encode (same kernel regardless)
             return None
 
+        def _encode_structural_scalar_arg(node, arg, arg_idx):
+            if node.target in {
+                operator.getitem,
+                torch.ops.aten.select.int,
+                torch.ops.aten.slice.Tensor,
+                torch.ops.aten.squeeze.dim,
+                torch.ops.aten.transpose.int,
+            } and isinstance(arg, int):
+                return ("int", arg, arg_idx)
+            return None
+
         signature = []
         for node in nodes:
             if node.op == "placeholder":
@@ -253,6 +285,8 @@ class _CaptureState:
                 encoded_args = []
                 for arg_idx, arg in enumerate(node.args):
                     enc = _encode_arg(arg, arg_idx)
+                    if enc is None:
+                        enc = _encode_structural_scalar_arg(node, arg, arg_idx)
                     if enc is not None:
                         encoded_args.append(enc)
                 # Also encode relevant kwargs (like correction, keepdim)
@@ -272,6 +306,146 @@ class _CaptureState:
                 signature.append(("output", _collect_output_indices(node.args[0])))
 
         return signature
+
+    @staticmethod
+    def _is_transparent_node(node: fx.Node) -> bool:
+        return node.op == "call_function" and node.target in _TRANSPARENT_OPS
+
+    @staticmethod
+    def _is_real_compute_node(node: fx.Node) -> bool:
+        return node.op == "call_function" and node.target not in _TRANSPARENT_OPS
+
+    def _split_data_dependent_components(
+        self,
+        components: list[list[fx.Node]],
+        gm: fx.GraphModule,
+    ) -> list[list[fx.Node]]:
+        """Split partitioner output so independent horizontal chains stay separate.
+
+        CapabilityBasedPartitioner can place independent supported chains in one
+        partition. That matches horizontal fusion, but these repros are meant to
+        isolate kernels that have real producer->consumer data dependencies. We
+        therefore connect real compute nodes only when one feeds another, possibly
+        through transparent ops such as getitem/view/reshape. Transparent nodes
+        that adapt external inputs are duplicated into each resulting component
+        and do not glue sibling compute chains together.
+        """
+        all_graph_nodes = list(gm.graph.nodes)
+        node_order = {node: i for i, node in enumerate(all_graph_nodes)}
+        split_components: list[list[fx.Node]] = []
+
+        for component in components:
+            component_set = set(component)
+            for node in list(component):
+                def add_input_adapter(arg):
+                    if not isinstance(arg, fx.Node) or not self._is_transparent_node(arg):
+                        return
+                    if arg in component_set:
+                        return
+                    component_set.add(arg)
+                    fx.map_arg(arg.args, add_input_adapter)
+                    fx.map_arg(arg.kwargs, add_input_adapter)
+
+                fx.map_arg(node.args, add_input_adapter)
+                fx.map_arg(node.kwargs, add_input_adapter)
+            component = sorted(component_set, key=lambda n: node_order.get(n, 0))
+            real_nodes = [
+                node for node in component if self._is_real_compute_node(node)
+            ]
+            if not real_nodes:
+                split_components.append(sorted(component, key=lambda n: node_order.get(n, 0)))
+                continue
+
+            parent = {node: node for node in real_nodes}
+
+            def find(node):
+                while parent[node] is not node:
+                    parent[node] = parent[parent[node]]
+                    node = parent[node]
+                return node
+
+            def union(a, b):
+                root_a = find(a)
+                root_b = find(b)
+                if root_a is not root_b:
+                    parent[root_b] = root_a
+
+            def real_successors(start: fx.Node):
+                frontier = list(start.users)
+                visited: set[fx.Node] = set()
+                while frontier:
+                    node = frontier.pop()
+                    if node in visited or node not in component_set:
+                        continue
+                    visited.add(node)
+                    if self._is_real_compute_node(node):
+                        yield node
+                    elif self._is_transparent_node(node):
+                        frontier.extend(node.users)
+
+            for node in real_nodes:
+                for successor in real_successors(node):
+                    union(node, successor)
+
+            groups: dict[fx.Node, set[fx.Node]] = collections.defaultdict(set)
+            for node in real_nodes:
+                groups[find(node)].add(node)
+
+            def add_transparent_ancestors(node: fx.Node, selected: set[fx.Node]) -> None:
+                def visit(arg):
+                    if not isinstance(arg, fx.Node) or arg not in component_set:
+                        return
+                    if self._is_transparent_node(arg):
+                        if arg in selected:
+                            return
+                        selected.add(arg)
+                        fx.map_arg(arg.args, visit)
+                        fx.map_arg(arg.kwargs, visit)
+                    elif arg in selected:
+                        return
+
+                fx.map_arg(node.args, visit)
+                fx.map_arg(node.kwargs, visit)
+
+            def reaches_selected_real(node: fx.Node, selected_real: set[fx.Node]) -> bool:
+                frontier = list(node.users)
+                visited: set[fx.Node] = set()
+                while frontier:
+                    user = frontier.pop()
+                    if user in visited or user not in component_set:
+                        continue
+                    visited.add(user)
+                    if user in selected_real:
+                        return True
+                    if self._is_transparent_node(user):
+                        frontier.extend(user.users)
+                return False
+
+            def add_transparent_descendants(
+                node: fx.Node,
+                selected: set[fx.Node],
+                selected_real: set[fx.Node],
+            ) -> None:
+                for user in node.users:
+                    if user not in component_set or not self._is_transparent_node(user):
+                        continue
+                    if not reaches_selected_real(user, selected_real):
+                        continue
+                    if user in selected:
+                        continue
+                    selected.add(user)
+                    add_transparent_descendants(user, selected, selected_real)
+
+            for group in groups.values():
+                selected = set(group)
+                for node in list(group):
+                    add_transparent_ancestors(node, selected)
+                    add_transparent_descendants(node, selected, group)
+                split_components.append(
+                    sorted(selected, key=lambda n: node_order.get(n, 0))
+                )
+
+        return split_components
 
     def _infer_index_bounds(self, gm, placeholder_info) -> dict[str, int]:
         """Infer valid index bounds for integer placeholders by inspecting consumers.
@@ -687,23 +861,6 @@ if __name__ == "__main__":
         from torch.fx.passes.infra.partitioner import CapabilityBasedPartitioner
         from torch.fx.passes.operator_support import create_op_support
 
-        import operator
-        _TRANSPARENT_OPS = {
-            operator.getitem,
-            torch.ops.aten.view.default,
-            torch.ops.aten.reshape.default,
-            torch.ops.aten.permute.default,
-            torch.ops.aten.slice.Tensor,
-            torch.ops.aten.unsqueeze.default,
-            torch.ops.aten.squeeze.default,
-            torch.ops.aten.squeeze.dim,
-            torch.ops.aten.expand.default,
-            torch.ops.aten.t.default,
-            torch.ops.aten.transpose.int,
-            torch.ops.aten.select.int,
-            torch.ops.aten.as_strided.default,
-        }
-
         def _is_supported(_submodules, node):
             if node.op == "call_function" and node.target in _TRANSPARENT_OPS:
                 return True
@@ -721,64 +878,14 @@ if __name__ == "__main__":
             gm, support, allows_single_node_partition=True,
         )
         partitions = partitioner.propose_partitions()
-        components = [list(p.nodes.keys()) for p in partitions]
-
-        # Split each partition into connected components based on data flow.
-        # The CapabilityBasedPartitioner groups ALL reachable supported nodes
-        # into one partition even if they have no data dependency. Two independent
-        # chains (e.g., reshape+transpose of tensor A, reshape+transpose of tensor B)
-        # should be separate repros since inductor compiles them as separate kernels.
-        def _split_connected_components(nodes):
-            """Split a list of nodes into connected components by data flow."""
-            node_set = set(nodes)
-            # Build adjacency: two nodes in the partition are connected if one
-            # feeds directly into another (producer → consumer).
-            from collections import deque
-            adjacency = {n: set() for n in nodes}
-            for n in nodes:
-                # Check all args: if any arg is a node in our partition, link them
-                def _link_arg(x):
-                    if isinstance(x, fx.Node) and x in node_set and x is not n:
-                        adjacency[n].add(x)
-                        adjacency[x].add(n)
-                fx.map_arg(n.args, _link_arg)
-                fx.map_arg(n.kwargs, _link_arg)
-
-            # BFS to find connected components
-            visited = set()
-            result_components = []
-            for start in nodes:
-                if start in visited:
-                    continue
-                component = []
-                queue = deque([start])
-                visited.add(start)
-                while queue:
-                    cur = queue.popleft()
-                    component.append(cur)
-                    for neighbor in adjacency[cur]:
-                        if neighbor not in visited:
-                            visited.add(neighbor)
-                            queue.append(neighbor)
-                result_components.append(component)
-            return result_components
-
-        split_components = []
-        for comp in components:
-            sub_components = _split_connected_components(comp)
-            split_components.extend(sub_components)
-        components = split_components
+        components = self._split_data_dependent_components(
+            [list(p.nodes.keys()) for p in partitions],
+            gm,
+        )
 
         def _has_real_compute(nodes):
             """Check if a partition has at least one non-transparent compute op."""
-            for n in nodes:
-                if n.op != "call_function":
-                    continue
-                if n.target in _TRANSPARENT_OPS:
-                    continue
-                # It's a real compute op (pointwise, reduction, etc.)
-                return True
-            return False
+            return any(self._is_real_compute_node(n) for n in nodes)
 
         for comp in components:
             if not _has_real_compute(comp):

@@ -10,6 +10,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -18,6 +19,33 @@ from typing import Any
 import torch
 import torch._inductor.config as inductor_config
 import torch._inductor.inductor_prims  # noqa: F401
+
+
+UNVERSIONED_REPRO_VERSION = 0
+CURRENT_REPRO_VERSION = 2
+_REPRO_VERSION_RE = re.compile(
+    r"^_repro_version\s*=\s*(\d+)\s*(?:#.*)?$",
+)
+_REPRO_VERSION_ASSIGN_RE = re.compile(r"^_repro_version\s*=.*$", re.MULTILINE)
+
+
+def parse_repro_version(source: str) -> int:
+    """Return the repro format version, or 0 for legacy unversioned source."""
+    assignments = _REPRO_VERSION_ASSIGN_RE.findall(source)
+    if not assignments:
+        return UNVERSIONED_REPRO_VERSION
+    if len(assignments) > 1:
+        raise ValueError("_repro_version must appear exactly once")
+
+    match = _REPRO_VERSION_RE.match(assignments[0])
+    if match is None:
+        raise ValueError("_repro_version must be a top-level integer assignment")
+    return int(match.group(1))
+
+
+def read_repro_version(repro_path: str | Path) -> int:
+    """Read the repro format version from a repro.py path."""
+    return parse_repro_version(Path(repro_path).read_text())
 
 
 def load_shape_configs(repro_file: str) -> dict:
