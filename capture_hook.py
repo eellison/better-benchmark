@@ -560,40 +560,114 @@ class _CaptureState:
 
         inputs_code = "\n".join(input_lines)
 
+        # Build compact shapes config line (same format as shapes.txt)
+        _DTYPE_SHORT = {
+            "torch.float32": "f32", "torch.float16": "f16",
+            "torch.bfloat16": "bf16", "torch.float64": "f64",
+            "torch.int64": "i64", "torch.int32": "i32",
+            "torch.int16": "i16", "torch.int8": "i8",
+            "torch.bool": "b8", "torch.uint8": "u8",
+        }
+        config_parts = []
+        for name in ph_names:
+            if name in shape_params:
+                config_parts.append(f"S({shape_params[name]})")
+            else:
+                info = placeholder_info.get(name)
+                if info and info["dtype"] != "symint":
+                    dt = _DTYPE_SHORT.get(info["dtype"], info["dtype"])
+                    stride = info.get("stride", [])
+                    bound = index_bounds.get(name)
+                    gen_kwarg = ""
+                    if "int" in info["dtype"] and bound:
+                        gen_kwarg = f", gen=Index({bound})"
+                    elif "int8" in info["dtype"]:
+                        gen_kwarg = ", gen=Index(9)"
+                    if stride and info["shape"]:
+                        config_parts.append(f"T({info['shape']}, {dt}, stride={tuple(stride)}{gen_kwarg})")
+                    else:
+                        config_parts.append(f"T({info['shape']}, {dt}{gen_kwarg})")
+                elif info and info.get("dtype") == "symint":
+                    config_parts.append(f"S([{info.get('hint', 1)}])")
+        shapes_config_line = f"({', '.join(config_parts)})"
+
         script = f'''"""
 Standalone repro captured via capture_hook.
 Label: {self.label}
 Pattern hash: {meta.get("pattern_hash", "?")}
 Shape hash: {meta.get("shape_hash", "?")}
 """
+import sys
+from pathlib import Path
+
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_shapes_config = "{shapes_config_line}"
+
 {code}
 
 
-def make_inputs():
-    return [
-{inputs_code}
-    ]
+def _default_make_inputs():
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
 
 
 if __name__ == "__main__":
-    mod = Repro()
-    inputs = make_inputs()
-    compiled = torch.compile(mod)
-    with torch.no_grad():
-        out = compiled(*inputs)
-        torch.cuda.synchronize()
-    print("OK")
+    benchmark_repro(__file__, Repro, make_inputs)
 '''
         filepath = os.path.join(self.output_dir, filename)
         with open(filepath, "w") as f:
             f.write(script)
 
-        # Per-region subgraph saving removed — full_graph_*.py + canonical repros are sufficient
+        # Validate: the repro must run in eager without error
+        try:
+            import importlib.util
+            import math as _math
+            # Ensure project root is on sys.path so repro_harness is importable
+            # (the generated repro uses parents[3] which only works at final install path)
+            project_root = str(Path(__file__).resolve().parent)
+            if project_root not in sys.path:
+                sys.path.insert(0, project_root)
+            # Use a fake filepath at depth 4+ so the generated code's
+            # `Path(__file__).resolve().parents[3]` resolves correctly
+            fake_path = os.path.join(project_root, "repros", "canonical", "_validation_", filename)
+            spec = importlib.util.spec_from_file_location("_validate", fake_path,
+                                                          submodule_search_locations=[])
+            # Override the loader to read from the actual file
+            import types
+            code = open(filepath).read()
+            compiled_code = compile(code, fake_path, "exec")
+            mod = types.ModuleType("_validate")
+            mod.__file__ = fake_path
+            mod.__loader__ = spec.loader
+            mod.device = torch.device
+            mod.inf = _math.inf
+            mod.nan = float("nan")
+            exec(compiled_code, mod.__dict__)
+            repro_instance = mod.Repro()
+            inputs = mod._default_make_inputs()
+            with torch.no_grad():
+                out = repro_instance(*inputs)
+            if out is None:
+                print(f"  [capture_hook] WARNING: {filename} forward() returned None")
+        except Exception as e:
+            raise RuntimeError(
+                f"Captured repro {filename} failed eager validation: {e}\n"
+                f"This indicates a bug in the capture hook (index bounds, shape params, etc.)"
+            ) from e
 
         return filepath
 
