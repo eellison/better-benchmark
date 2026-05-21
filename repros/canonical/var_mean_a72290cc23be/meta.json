@@ -31,5 +31,15 @@
   "models": [
     "hf_AllenaiLongformerBase_train",
     "hf_RobertaForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 69.56800073385239,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 58.27200040221214,
+      "total_bytes": 359577300,
+      "gap_default": 1.1938495375767368,
+      "gap_cd": null
+    }
+  }
 }

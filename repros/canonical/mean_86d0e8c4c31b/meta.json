@@ -32,5 +32,15 @@
     "genai_rmsnorm_fwd_576000x384",
     "genai_rmsnorm_fwd_576000x512",
     "genai_rmsnorm_fwd_8192x262144"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 11.231999844312668,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 11.008000001311302,
+      "total_bytes": 33555456,
+      "gap_default": 1.0203488229446478,
+      "gap_cd": null
+    }
+  }
 }

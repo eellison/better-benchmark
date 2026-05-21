@@ -34,5 +34,15 @@
   "models": [
     "hf_BartForCausalLM_infer",
     "hf_PLBartForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 18.144000321626663,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 55.26399984955788,
+      "total_bytes": 335990784,
+      "gap_default": 0.32831500381838213,
+      "gap_cd": null
+    }
+  }
 }

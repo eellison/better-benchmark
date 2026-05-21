@@ -43,5 +43,15 @@
     "hf_MT5ForConditionalGeneration_infer",
     "hf_T5ForConditionalGeneration_infer",
     "hf_T5Small_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 159.64800119400024,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 76.67200267314911,
+      "total_bytes": 491552772,
+      "gap_default": 2.0822203102555674,
+      "gap_cd": null
+    }
+  }
 }

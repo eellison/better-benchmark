@@ -36,5 +36,15 @@
     "hf_OPTForCausalLM_train",
     "hf_PLBartForCausalLM_train",
     "hf_PegasusForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 5.663999821990728,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.016000173985958,
+      "total_bytes": 1081344,
+      "gap_default": 0.941489304884443,
+      "gap_cd": null
+    }
+  }
 }

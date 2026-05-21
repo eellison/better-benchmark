@@ -94,5 +94,15 @@
   "n_models": 1,
   "models": [
     "hf_GPTJForQuestionAnswering_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 44.76799815893173,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 5.98399993032217,
+      "total_bytes": 29720,
+      "gap_default": 7.48128320190697,
+      "gap_cd": null
+    }
+  }
 }

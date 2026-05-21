@@ -44,5 +44,15 @@
   "models": [
     "hf_LayoutLMForMaskedLM_infer",
     "hf_YituTechConvBert_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 615.4879927635193,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 293.7920093536377,
+      "total_bytes": 2000683012,
+      "gap_default": 2.094978669153169,
+      "gap_cd": null
+    }
+  }
 }

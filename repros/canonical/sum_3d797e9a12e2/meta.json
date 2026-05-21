@@ -21,5 +21,15 @@
     "hf_AlbertForMaskedLM_train",
     "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_train",
     "timm_swin_base_patch4_window7_224_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 175.90400576591492,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 187.3600035905838,
+      "total_bytes": 1258815488,
+      "gap_default": 0.9388556916891272,
+      "gap_cd": null
+    }
+  }
 }

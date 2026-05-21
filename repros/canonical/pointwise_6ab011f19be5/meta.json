@@ -34,5 +34,15 @@
   "n_models": 1,
   "models": [
     "hf_RobertaForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 1077.1839618682861,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 1000.480055809021,
+      "total_bytes": 6904676352,
+      "gap_default": 1.0766671015717948,
+      "gap_cd": null
+    }
+  }
 }

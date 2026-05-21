@@ -30,5 +30,15 @@
     "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_train",
     "hf_M2M100ForConditionalGeneration_train",
     "hf_MegatronBertForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 29.56799976527691,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 28.543999418616295,
+      "total_bytes": 151031808,
+      "gap_default": 1.0358744523373542,
+      "gap_cd": null
+    }
+  }
 }

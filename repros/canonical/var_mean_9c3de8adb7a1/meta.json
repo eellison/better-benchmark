@@ -32,5 +32,15 @@
   "models": [
     "hf_BlenderbotForCausalLM_infer",
     "hf_PegasusForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 23.455999791622162,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 59.36000123620033,
+      "total_bytes": 366481408,
+      "gap_default": 0.3951482362388777,
+      "gap_cd": null
+    }
+  }
 }

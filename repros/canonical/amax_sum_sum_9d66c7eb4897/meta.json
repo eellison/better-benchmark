@@ -43,5 +43,15 @@
     "hf_ElectraForCausalLM_infer",
     "hf_GPTNeoForCausalLM_infer",
     "hf_RobertaForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 1193.824052810669,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 580.6400179862976,
+      "total_bytes": 4001103876,
+      "gap_default": 2.0560485254718386,
+      "gap_cd": null
+    }
+  }
 }

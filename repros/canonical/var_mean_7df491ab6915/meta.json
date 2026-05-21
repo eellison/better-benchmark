@@ -29,5 +29,15 @@
     "hf_GPTNeoForSequenceClassification_infer",
     "hf_M2M100ForConditionalGeneration_infer",
     "hf_XGLMForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 22.52800017595291,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 28.64000014960766,
+      "total_bytes": 151003136,
+      "gap_default": 0.7865921808056109,
+      "gap_cd": null
+    }
+  }
 }

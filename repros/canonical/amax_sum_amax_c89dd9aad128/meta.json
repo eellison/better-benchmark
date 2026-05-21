@@ -30,5 +30,15 @@
   "n_models": 1,
   "models": [
     "inductor_torchbench_perf-1-6-linux.aws.a100_graph22"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 35.679999738931656,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 12.256000190973282,
+      "total_bytes": 40970272,
+      "gap_default": 2.91122708738292,
+      "gap_cd": null
+    }
+  }
 }

@@ -26,5 +26,15 @@
     "hf_DistilBertForMaskedLM_train",
     "hf_GPTNeoForCausalLM_train",
     "hf_GPTNeoForSequenceClassification_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 38.62399980425835,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 35.77600046992302,
+      "total_bytes": 205553664,
+      "gap_default": 1.0796064204194555,
+      "gap_cd": null
+    }
+  }
 }

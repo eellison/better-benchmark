@@ -19,5 +19,15 @@
   "n_models": 1,
   "models": [
     "hf_GPT2ForSequenceClassification_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 30.33600002527237,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 30.527999624609947,
+      "total_bytes": 165347328,
+      "gap_default": 0.9937107048709868,
+      "gap_cd": null
+    }
+  }
 }

@@ -34,5 +34,15 @@
     "genai_layernorm_bwd_32768x8192",
     "genai_layernorm_bwd_576000x384",
     "genai_layernorm_bwd_576000x512"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 15.359999611973763,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.191999979317188,
+      "total_bytes": 16778242,
+      "gap_default": 1.8749999573674359,
+      "gap_cd": null
+    }
+  }
 }

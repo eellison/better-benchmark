@@ -40,5 +40,15 @@
     "genai_ce_bwd_32768x65536",
     "genai_ce_bwd_32768x8192",
     "genai_ce_bwd_8192x262144"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 28.44800055027008,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.128000423312187,
+      "total_bytes": 17039362,
+      "gap_default": 3.499999885417996,
+      "gap_cd": null
+    }
+  }
 }

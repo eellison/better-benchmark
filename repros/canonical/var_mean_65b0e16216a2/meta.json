@@ -29,5 +29,15 @@
   "n_models": 1,
   "models": [
     "hf_PegasusForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 65.47199934720993,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 40.76800122857094,
+      "total_bytes": 234889216,
+      "gap_default": 1.605965398699164,
+      "gap_cd": null
+    }
+  }
 }

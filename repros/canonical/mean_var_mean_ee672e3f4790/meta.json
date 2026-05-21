@@ -49,5 +49,15 @@
   "n_models": 1,
   "models": [
     "timm_beit_base_patch16_224_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 69.37599927186966,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 30.6560005992651,
+      "total_bytes": 165912064,
+      "gap_default": 2.2630479487116393,
+      "gap_cd": null
+    }
+  }
 }

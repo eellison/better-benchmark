@@ -21,5 +21,15 @@
     "hf_T5Small_infer",
     "hf_TrOCRForCausalLM_infer",
     "hf_TrOCRForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 21.407999098300934,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 21.43999934196472,
+      "total_bytes": 105381888,
+      "gap_default": 0.9985074512758425,
+      "gap_cd": null
+    }
+  }
 }

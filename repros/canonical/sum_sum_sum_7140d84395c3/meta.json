@@ -222,5 +222,15 @@
   "n_models": 1,
   "models": [
     "vllm_mistralai_Mistral-7B-Instruct-v0.3"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 667.5840020179749,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 656.3199758529663,
+      "total_bytes": 4513374212,
+      "gap_default": 1.017162400322144,
+      "gap_cd": null
+    }
+  }
 }

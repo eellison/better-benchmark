@@ -47,5 +47,15 @@
     "hf_T5ForConditionalGeneration_train",
     "hf_T5Small_train",
     "hf_XLNetLMHeadModel_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 256.9279968738556,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 223.13599288463593,
+      "total_bytes": 1505345544,
+      "gap_default": 1.1514412961905727,
+      "gap_cd": null
+    }
+  }
 }

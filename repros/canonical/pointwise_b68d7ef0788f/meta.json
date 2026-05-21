@@ -17,5 +17,15 @@
   "n_models": 1,
   "models": [
     "hf_GoogleFnet_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 38.55999931693077,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 643.9359784126282,
+      "total_bytes": 4412932096,
+      "gap_default": 0.05988172832334255,
+      "gap_cd": null
+    }
+  }
 }

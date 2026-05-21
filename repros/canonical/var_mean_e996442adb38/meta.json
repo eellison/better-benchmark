@@ -22,5 +22,15 @@
   "n_models": 1,
   "models": [
     "timm_vit_base_patch16_siglip_256_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 6.399999838322401,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.927999995648861,
+      "total_bytes": 19666944,
+      "gap_default": 0.7168458603765118,
+      "gap_cd": null
+    }
+  }
 }

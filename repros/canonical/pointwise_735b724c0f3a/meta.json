@@ -17,5 +17,15 @@
     "hf_MobileBertForMaskedLM_train",
     "hf_T5ForConditionalGeneration_infer",
     "hf_T5Small_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 44.92799937725067,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 50.04800111055374,
+      "total_bytes": 301989888,
+      "gap_default": 0.8976981773559104,
+      "gap_cd": null
+    }
+  }
 }

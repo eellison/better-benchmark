@@ -28,5 +28,15 @@
     "timm_mobilenetv3_large_100_infer",
     "timm_mobilevit_s_infer",
     "timm_tf_efficientnet_b0_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 16.00000075995922,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.088000006973743,
+      "total_bytes": 48171520,
+      "gap_default": 1.2224939449445187,
+      "gap_cd": null
+    }
+  }
 }

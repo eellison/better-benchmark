@@ -31,5 +31,15 @@
     "timm_deit_base_distilled_patch16_224_train",
     "timm_deit_tiny_patch16_224.fb_in1k_train",
     "timm_vit_base_patch14_dinov2.lvd142m_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 57.11999908089638,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 52.06400156021118,
+      "total_bytes": 311454720,
+      "gap_default": 1.097111197164475,
+      "gap_cd": null
+    }
+  }
 }

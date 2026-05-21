@@ -60,5 +60,15 @@
   "n_models": 1,
   "models": [
     "timm_repvgg_a2_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 870.3680038452148,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 418.8480079174042,
+      "total_bytes": 2877294084,
+      "gap_default": 2.0780044011021044,
+      "gap_cd": null
+    }
+  }
 }

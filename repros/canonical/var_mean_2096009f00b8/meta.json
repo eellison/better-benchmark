@@ -28,5 +28,15 @@
     "timm_inception_v3_train",
     "timm_mobilenetv3_large_100_train",
     "timm_visformer_small_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 108.35199803113937,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 61.47199869155884,
+      "total_bytes": 385352640,
+      "gap_default": 1.7626236390133507,
+      "gap_cd": null
+    }
+  }
 }

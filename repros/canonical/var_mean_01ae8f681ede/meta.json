@@ -33,5 +33,15 @@
     "hf_LayoutLMForMaskedLM_infer",
     "hf_RobertaForCausalLM_infer",
     "hf_YituTechConvBert_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 50.912000238895416,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 51.13599821925163,
+      "total_bytes": 306714624,
+      "gap_default": 0.9956195637485007,
+      "gap_cd": null
+    }
+  }
 }

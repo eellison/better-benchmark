@@ -28,5 +28,15 @@
     "genai_softmax_fwd_32768x65536",
     "genai_softmax_fwd_32768x8192",
     "genai_softmax_fwd_8192x262144"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 14.112000353634357,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 11.04000024497509,
+      "total_bytes": 33554432,
+      "gap_default": 1.2782608732329968,
+      "gap_cd": null
+    }
+  }
 }

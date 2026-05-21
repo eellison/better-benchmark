@@ -36,5 +36,15 @@
   "n_models": 1,
   "models": [
     "hf_RobertaForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 27.488000690937042,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 44.95999962091446,
+      "total_bytes": 266431488,
+      "gap_default": 0.611387920878678,
+      "gap_cd": null
+    }
+  }
 }

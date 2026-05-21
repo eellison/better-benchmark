@@ -35,5 +35,15 @@
     "hf_RobertaForCausalLM_infer",
     "hf_T5ForConditionalGeneration_infer",
     "hf_T5Small_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 67.19999760389328,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 94.2080020904541,
+      "total_bytes": 608698368,
+      "gap_default": 0.7133151761287857,
+      "gap_cd": null
+    }
+  }
 }

@@ -16,5 +16,15 @@
   "models": [
     "hf_XGLMForCausalLM_train",
     "inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph44"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 152.54400670528412,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 159.743994474411,
+      "total_bytes": 1065418752,
+      "gap_default": 0.954927959621792,
+      "gap_cd": null
+    }
+  }
 }

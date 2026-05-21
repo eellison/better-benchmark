@@ -30,5 +30,15 @@
   "models": [
     "hf_AlbertForMaskedLM_infer",
     "hf_ElectraForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 7.7760000713169575,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.991999551653862,
+      "total_bytes": 21956608,
+      "gap_default": 0.8647687343230294,
+      "gap_cd": null
+    }
+  }
 }

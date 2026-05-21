@@ -49,5 +49,15 @@
   "n_models": 1,
   "models": [
     "vllm_Qwen_Qwen3-30B-A3B"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 79.52000200748444,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 161.85599565505981,
+      "total_bytes": 1082486786,
+      "gap_default": 0.4913009350419979,
+      "gap_cd": null
+    }
+  }
 }

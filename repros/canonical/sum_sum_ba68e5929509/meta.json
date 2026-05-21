@@ -36,5 +36,15 @@
   "n_models": 1,
   "models": [
     "timm_swin_base_patch4_window7_224_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 59.13599953055382,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 66.3679987192154,
+      "total_bytes": 413541728,
+      "gap_default": 0.891031832687043,
+      "gap_cd": null
+    }
+  }
 }

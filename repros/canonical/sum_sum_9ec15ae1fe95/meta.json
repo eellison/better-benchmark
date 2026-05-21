@@ -50,5 +50,15 @@
   "models": [
     "hf_AlbertForMaskedLM_train",
     "hf_GoogleFnet_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 9.02399979531765,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.063999935984612,
+      "total_bytes": 10519040,
+      "gap_default": 1.1190476025488487,
+      "gap_cd": null
+    }
+  }
 }

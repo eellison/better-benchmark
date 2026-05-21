@@ -15,5 +15,15 @@
     "hf_PLBartForCausalLM_train",
     "hf_PegasusForCausalLM_train",
     "hf_TrOCRForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 74.78400319814682,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 75.71200281381607,
+      "total_bytes": 478892032,
+      "gap_default": 0.9877430317363113,
+      "gap_cd": null
+    }
+  }
 }

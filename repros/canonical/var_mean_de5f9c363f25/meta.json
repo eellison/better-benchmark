@@ -28,5 +28,15 @@
   "n_models": 1,
   "models": [
     "inductor_timm_perf_cuda_h100-4-7-linux.aws.h100_graph53"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 11.136000044643879,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.111999973654747,
+      "total_bytes": 1969920,
+      "gap_default": 1.821989543953641,
+      "gap_cd": null
+    }
+  }
 }

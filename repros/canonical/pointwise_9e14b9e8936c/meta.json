@@ -26,5 +26,15 @@
     "hf_GPTNeoForSequenceClassification_train",
     "hf_GoogleFnet_infer",
     "hf_GoogleFnet_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 82.75199681520462,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 160.60799360275269,
+      "total_bytes": 1073741824,
+      "gap_default": 0.5152420807888501,
+      "gap_cd": null
+    }
+  }
 }

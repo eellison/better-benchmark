@@ -326,5 +326,15 @@
   "n_models": 1,
   "models": [
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 2624.6719360351562,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 1804.3839931488037,
+      "total_bytes": 11747992160,
+      "gap_default": 1.454608301781086,
+      "gap_cd": null
+    }
+  }
 }

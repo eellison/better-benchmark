@@ -87,5 +87,15 @@
   "n_models": 1,
   "models": [
     "hf_MegatronBertForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 369.59999799728394,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 144.16000247001648,
+      "total_bytes": 955383812,
+      "gap_default": 2.5638179222017996,
+      "gap_cd": null
+    }
+  }
 }

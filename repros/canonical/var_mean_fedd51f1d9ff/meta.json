@@ -24,5 +24,15 @@
   "n_models": 1,
   "models": [
     "timm_vit_base_patch14_dinov2.lvd142m_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 235.45600473880768,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 241.69600009918213,
+      "total_bytes": 1635001344,
+      "gap_default": 0.9741824632686771,
+      "gap_cd": null
+    }
+  }
 }

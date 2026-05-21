@@ -33,5 +33,15 @@
   "models": [
     "hf_DistillGPT2_train",
     "hf_GPT2ForSequenceClassification_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 93.12000125646591,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 96.28800302743912,
+      "total_bytes": 622854144,
+      "gap_default": 0.9670986865303415,
+      "gap_cd": null
+    }
+  }
 }

@@ -21,5 +21,15 @@
     "timm_mobilevit_s_train",
     "timm_vit_base_patch14_dinov2.lvd142m_train",
     "timm_vit_base_patch16_siglip_256_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 81.63200318813324,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 71.68000191450119,
+      "total_bytes": 453482496,
+      "gap_default": 1.138839299774331,
+      "gap_cd": null
+    }
+  }
 }

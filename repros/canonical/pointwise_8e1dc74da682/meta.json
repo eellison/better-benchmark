@@ -12,5 +12,15 @@
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
     "timm_visformer_small_infer",
     "timm_visformer_small_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 13.952000066637993,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.183999806642532,
+      "total_bytes": 48168960,
+      "gap_default": 1.05825244775933,
+      "gap_cd": null
+    }
+  }
 }

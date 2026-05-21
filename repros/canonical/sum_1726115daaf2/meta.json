@@ -108,5 +108,15 @@
   "models": [
     "timm_adv_inception_v3_train",
     "timm_inception_v3_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 137.11999356746674,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.016000173985958,
+      "total_bytes": 1234592,
+      "gap_default": 22.79255146307893,
+      "gap_cd": null
+    }
+  }
 }

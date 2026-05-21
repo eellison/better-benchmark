@@ -15,5 +15,15 @@
   "models": [
     "hf_MobileBertForMaskedLM_infer",
     "hf_MobileBertForMaskedLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 35.711999982595444,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 35.77600046992302,
+      "total_bytes": 203427840,
+      "gap_default": 0.9982110776362109,
+      "gap_cd": null
+    }
+  }
 }

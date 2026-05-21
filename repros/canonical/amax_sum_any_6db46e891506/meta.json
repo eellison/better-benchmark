@@ -37,5 +37,15 @@
   "n_models": 1,
   "models": [
     "hf_DistilBertForMaskedLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 218.04800629615784,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 124.95999783277512,
+      "total_bytes": 822083688,
+      "gap_default": 1.744942462210632,
+      "gap_cd": null
+    }
+  }
 }

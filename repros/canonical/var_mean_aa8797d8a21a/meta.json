@@ -42,5 +42,15 @@
   "n_models": 1,
   "models": [
     "hf_XLNetLMHeadModel_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 33.63199904561043,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 25.312000885605812,
+      "total_bytes": 125838104,
+      "gap_default": 1.3286977666287911,
+      "gap_cd": null
+    }
+  }
 }

@@ -34,5 +34,15 @@
     "hf_ElectraForCausalLM_train",
     "hf_LayoutLMForMaskedLM_train",
     "hf_YituTechConvBert_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 59.29600074887276,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 47.968000173568726,
+      "total_bytes": 288446936,
+      "gap_default": 1.2361574494311725,
+      "gap_cd": null
+    }
+  }
 }

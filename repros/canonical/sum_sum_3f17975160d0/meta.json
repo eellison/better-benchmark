@@ -28,5 +28,15 @@
   "n_models": 1,
   "models": [
     "inductor_huggingface_perf-2-5-linux.aws.a100_graph5"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 13.21600005030632,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 10.111999697983265,
+      "total_bytes": 27137024,
+      "gap_default": 1.3069620693266157,
+      "gap_cd": null
+    }
+  }
 }

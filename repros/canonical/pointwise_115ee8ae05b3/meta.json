@@ -18,5 +18,15 @@
     "inductor_huggingface_perf-3-5-linux.aws.a100_graph7",
     "inductor_huggingface_perf_cuda_h100-1-5-linux.aws.h100_graph33",
     "inductor_huggingface_perf_cuda_h100-4-5-linux.aws.h100_graph40"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 9.952000342309475,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.943999789655209,
+      "total_bytes": 5116416,
+      "gap_default": 1.433179816211317,
+      "gap_cd": null
+    }
+  }
 }

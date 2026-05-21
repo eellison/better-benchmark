@@ -26,5 +26,15 @@
   "n_models": 1,
   "models": [
     "hf_DebertaV2ForMaskedLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 73.63200187683105,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 71.58400118350983,
+      "total_bytes": 452984832,
+      "gap_default": 1.0286097544068689,
+      "gap_cd": null
+    }
+  }
 }

@@ -31,5 +31,15 @@
   "models": [
     "hf_AllenaiLongformerBase_infer",
     "hf_RobertaForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 69.34399902820587,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 58.30400064587593,
+      "total_bytes": 359577300,
+      "gap_default": 1.1893523302008753,
+      "gap_cd": null
+    }
+  }
 }

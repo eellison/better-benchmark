@@ -25,5 +25,15 @@
   "models": [
     "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_train",
     "hf_M2M100ForConditionalGeneration_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 26.464000344276428,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 27.39199995994568,
+      "total_bytes": 142606336,
+      "gap_default": 0.9661215093083297,
+      "gap_cd": null
+    }
+  }
 }

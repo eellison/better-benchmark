@@ -27,5 +27,15 @@
   "n_models": 1,
   "models": [
     "timm_deit_base_distilled_patch16_224_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 31.679999083280563,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 30.688000842928886,
+      "total_bytes": 169703424,
+      "gap_default": 1.0323252806668328,
+      "gap_cd": null
+    }
+  }
 }

@@ -16,5 +16,15 @@
     "hf_RobertaForCausalLM_infer",
     "hf_RobertaForCausalLM_train",
     "inductor_huggingface_perf-1-5-linux.aws.a100_graph0"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 5.663999821990728,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 5.98399993032217,
+      "total_bytes": 98304,
+      "gap_default": 0.9465240454449314,
+      "gap_cd": null
+    }
+  }
 }

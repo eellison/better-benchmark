@@ -112,5 +112,15 @@
   "models": [
     "hf_ElectraForCausalLM_train",
     "hf_RobertaForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 1234.9120378494263,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 1864.4800186157227,
+      "total_bytes": 12866027528,
+      "gap_default": 0.6623358928599744,
+      "gap_cd": null
+    }
+  }
 }

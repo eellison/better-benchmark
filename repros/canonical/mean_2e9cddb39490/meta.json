@@ -27,5 +27,15 @@
   "models": [
     "hf_T5ForConditionalGeneration_train",
     "hf_T5Small_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 27.51999907195568,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 19.168000668287277,
+      "total_bytes": 86837248,
+      "gap_default": 1.4357261118780356,
+      "gap_cd": null
+    }
+  }
 }

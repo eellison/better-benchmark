@@ -13,5 +13,15 @@
   "models": [
     "hf_LayoutLMForMaskedLM_train",
     "hf_MegatronBertForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 21.376000717282295,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 21.27999998629093,
+      "total_bytes": 100663296,
+      "gap_default": 1.0045113125494929,
+      "gap_cd": null
+    }
+  }
 }

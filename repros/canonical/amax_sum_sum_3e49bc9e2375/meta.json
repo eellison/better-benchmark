@@ -39,5 +39,15 @@
   "n_models": 1,
   "models": [
     "hf_GPTJForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 24.320000782608986,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 10.143999941647053,
+      "total_bytes": 25805828,
+      "gap_default": 2.397476431635331,
+      "gap_cd": null
+    }
+  }
 }

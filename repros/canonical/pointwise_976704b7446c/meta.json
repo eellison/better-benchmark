@@ -86,5 +86,15 @@
   "models": [
     "vllm_meta-llama_Llama-3.2-1B",
     "vllm_mistralai_Mistral-7B-Instruct-v0.3"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 27.583999559283257,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 12.256000190973282,
+      "total_bytes": 39866496,
+      "gap_default": 2.2506526704853727,
+      "gap_cd": null
+    }
+  }
 }

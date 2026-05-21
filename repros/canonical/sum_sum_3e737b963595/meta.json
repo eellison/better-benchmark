@@ -36,5 +36,15 @@
   "n_models": 1,
   "models": [
     "timm_visformer_small_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 240.60800671577454,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 125.05599856376648,
+      "total_bytes": 822083968,
+      "gap_default": 1.924002122881676,
+      "gap_cd": null
+    }
+  }
 }

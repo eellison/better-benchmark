@@ -31,5 +31,15 @@
   "n_models": 1,
   "models": [
     "hf_DebertaV2ForMaskedLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 38.94399851560593,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 129.2800009250641,
+      "total_bytes": 853155840,
+      "gap_default": 0.30123761012485945,
+      "gap_cd": null
+    }
+  }
 }

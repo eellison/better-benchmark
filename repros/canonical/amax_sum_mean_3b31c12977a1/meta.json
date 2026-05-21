@@ -46,5 +46,15 @@
   "n_models": 1,
   "models": [
     "hf_MT5ForConditionalGeneration_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 37.696000188589096,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 17.152000218629837,
+      "total_bytes": 70257312,
+      "gap_default": 2.197761177011015,
+      "gap_cd": null
+    }
+  }
 }

@@ -10,5 +10,15 @@
   "n_models": 1,
   "models": [
     "hf_GoogleFnet_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 30.592000111937523,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 28.60799990594387,
+      "total_bytes": 150994944,
+      "gap_default": 1.069351237853627,
+      "gap_cd": null
+    }
+  }
 }

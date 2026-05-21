@@ -27,5 +27,15 @@
     "hf_RobertaForCausalLM_train",
     "hf_T5ForConditionalGeneration_train",
     "hf_T5Small_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 38.784001022577286,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 37.76000067591667,
+      "total_bytes": 218103808,
+      "gap_default": 1.0271186527629943,
+      "gap_cd": null
+    }
+  }
 }

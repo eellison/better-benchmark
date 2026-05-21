@@ -26,5 +26,15 @@
   "n_models": 1,
   "models": [
     "timm_vit_base_patch16_siglip_256_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 50.87999999523163,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 52.032001316547394,
+      "total_bytes": 316548096,
+      "gap_default": 0.9778597537637015,
+      "gap_cd": null
+    }
+  }
 }

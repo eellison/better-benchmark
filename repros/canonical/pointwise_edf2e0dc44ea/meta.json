@@ -11,5 +11,15 @@
     "hf_BlenderbotForCausalLM_train",
     "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_train",
     "hf_PegasusForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 6.207999773323536,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.0800001956522465,
+      "total_bytes": 2622464,
+      "gap_default": 1.0210525614395245,
+      "gap_cd": null
+    }
+  }
 }

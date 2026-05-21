@@ -17,5 +17,15 @@
   "n_models": 1,
   "models": [
     "hf_YituTechConvBert_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 27.55199931561947,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 31.71199932694435,
+      "total_bytes": 176160768,
+      "gap_default": 0.868819371228029,
+      "gap_cd": null
+    }
+  }
 }

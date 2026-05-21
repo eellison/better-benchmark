@@ -31,5 +31,15 @@
   "n_models": 1,
   "models": [
     "timm_mobilevit_s_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 63.1679967045784,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 39.64800015091896,
+      "total_bytes": 227349056,
+      "gap_default": 1.5932202498015349,
+      "gap_cd": null
+    }
+  }
 }

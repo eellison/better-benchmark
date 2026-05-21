@@ -28,5 +28,15 @@
   "n_models": 1,
   "models": [
     "timm_tf_efficientnet_b0_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 128.86400520801544,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 65.5680000782013,
+      "total_bytes": 411075072,
+      "gap_default": 1.9653490277928656,
+      "gap_cd": null
+    }
+  }
 }

@@ -26,5 +26,15 @@
   "n_models": 1,
   "models": [
     "inductor_timm_perf-2-6-linux.aws.a100_graph15"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 35.679999738931656,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 21.31200022995472,
+      "total_bytes": 101059040,
+      "gap_default": 1.674174143860145,
+      "gap_cd": null
+    }
+  }
 }

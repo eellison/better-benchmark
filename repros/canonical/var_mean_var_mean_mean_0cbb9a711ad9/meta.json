@@ -1080,5 +1080,15 @@
   "models": [
     "inductor_timm_perf-5-6-linux.aws.a100_graph18",
     "inductor_timm_perf_cuda_h100-7-7-linux.aws.h100_graph59"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 218.9120054244995,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.191999979317188,
+      "total_bytes": 11417536,
+      "gap_default": 26.722656979638575,
+      "gap_cd": null
+    }
+  }
 }

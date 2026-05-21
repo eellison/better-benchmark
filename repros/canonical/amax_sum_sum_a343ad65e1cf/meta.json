@@ -184,5 +184,15 @@
   "n_models": 1,
   "models": [
     "inductor_huggingface_perf_cuda_h100-1-5-linux.aws.h100_graph33"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 364.3200099468231,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 618.5920238494873,
+      "total_bytes": 4259624964,
+      "gap_default": 0.5889503839374878,
+      "gap_cd": null
+    }
+  }
 }

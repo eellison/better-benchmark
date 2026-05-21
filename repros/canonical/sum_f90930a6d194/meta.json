@@ -35,5 +35,15 @@
     "vllm_Qwen_Qwen3-0.6B",
     "vllm_meta-llama_Llama-3.2-1B",
     "vllm_mistralai_Mistral-7B-Instruct-v0.3"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 10.17600018531084,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.184000082314014,
+      "total_bytes": 29370368,
+      "gap_default": 1.1080139475289377,
+      "gap_cd": null
+    }
+  }
 }

@@ -50,5 +50,15 @@
   "n_models": 1,
   "models": [
     "hf_TrOCRForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 245.728000998497,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 285.535991191864,
+      "total_bytes": 1946210304,
+      "gap_default": 0.860585035087159,
+      "gap_cd": null
+    }
+  }
 }

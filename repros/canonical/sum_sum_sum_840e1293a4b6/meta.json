@@ -373,5 +373,15 @@
   "n_models": 1,
   "models": [
     "timm_deit_tiny_patch16_224.fb_in1k_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 950.1760005950928,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 823.2319951057434,
+      "total_bytes": 5656043168,
+      "gap_default": 1.154201982240794,
+      "gap_cd": null
+    }
+  }
 }

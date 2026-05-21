@@ -32,5 +32,15 @@
   "n_models": 1,
   "models": [
     "hf_GPTNeoForSequenceClassification_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 40.64000025391579,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 49.984000623226166,
+      "total_bytes": 302088192,
+      "gap_default": 0.8130601741996522,
+      "gap_cd": null
+    }
+  }
 }

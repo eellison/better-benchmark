@@ -16,5 +16,15 @@
   "n_models": 1,
   "models": [
     "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_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 21.568000316619873,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 21.27999998629093,
+      "total_bytes": 100663296,
+      "gap_default": 1.0135338501181617,
+      "gap_cd": null
+    }
+  }
 }

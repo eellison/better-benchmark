@@ -23,5 +23,15 @@
   "models": [
     "hf_GPTNeoForCausalLM_train",
     "hf_GPTNeoForSequenceClassification_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 26.335999369621277,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 30.688000842928886,
+      "total_bytes": 167772160,
+      "gap_default": 0.8581855658965026,
+      "gap_cd": null
+    }
+  }
 }

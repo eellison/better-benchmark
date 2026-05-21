@@ -56,5 +56,15 @@
   "n_models": 1,
   "models": [
     "timm_ghostnet_100_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 112.41599917411804,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 34.68799963593483,
+      "total_bytes": 194657284,
+      "gap_default": 3.240774917953509,
+      "gap_cd": null
+    }
+  }
 }

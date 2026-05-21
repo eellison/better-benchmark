@@ -45,5 +45,15 @@
     "hf_PLBartForCausalLM_infer",
     "hf_PegasusForCausalLM_infer",
     "hf_TrOCRForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 1194.8479413986206,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 581.60001039505,
+      "total_bytes": 4001103876,
+      "gap_default": 2.054415268299297,
+      "gap_cd": null
+    }
+  }
 }

@@ -30,5 +30,15 @@
   "models": [
     "hf_BartForCausalLM_train",
     "hf_MBartForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 39.8080013692379,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 26.43200010061264,
+      "total_bytes": 134225920,
+      "gap_default": 1.5060533148346662,
+      "gap_cd": null
+    }
+  }
 }

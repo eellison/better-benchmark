@@ -34,5 +34,15 @@
     "hf_LayoutLMForMaskedLM_train",
     "hf_RobertaForCausalLM_train",
     "hf_YituTechConvBert_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 45.9199994802475,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 37.728000432252884,
+      "total_bytes": 218696704,
+      "gap_default": 1.2171331359769453,
+      "gap_cd": null
+    }
+  }
 }

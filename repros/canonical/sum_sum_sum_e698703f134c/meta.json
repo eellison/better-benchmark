@@ -398,5 +398,15 @@
   "n_models": 1,
   "models": [
     "vllm_meta-llama_Llama-3.2-1B"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 978.879988193512,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 764.959990978241,
+      "total_bytes": 5253791748,
+      "gap_default": 1.27964860873535,
+      "gap_cd": null
+    }
+  }
 }

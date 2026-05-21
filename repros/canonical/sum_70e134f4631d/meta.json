@@ -43,5 +43,15 @@
     "hf_DistilBertForMaskedLM_train",
     "hf_LayoutLMForMaskedLM_train",
     "hf_YituTechConvBert_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 1085.279941558838,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 899.9680280685425,
+      "total_bytes": 6188795912,
+      "gap_default": 1.2059094409031406,
+      "gap_cd": null
+    }
+  }
 }

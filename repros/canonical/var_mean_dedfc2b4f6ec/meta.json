@@ -48,5 +48,15 @@
   "n_models": 1,
   "models": [
     "timm_vit_base_patch14_dinov2.lvd142m_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 208.67200195789337,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 165.98400473594666,
+      "total_bytes": 1110781952,
+      "gap_default": 1.2571813910012373,
+      "gap_cd": null
+    }
+  }
 }

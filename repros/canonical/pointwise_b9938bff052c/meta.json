@@ -20,5 +20,15 @@
   "n_models": 1,
   "models": [
     "hf_LayoutLMForMaskedLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 54.9440011382103,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 49.95200037956238,
+      "total_bytes": 301989888,
+      "gap_default": 1.0999359529291317,
+      "gap_cd": null
+    }
+  }
 }

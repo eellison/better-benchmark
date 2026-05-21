@@ -29,5 +29,15 @@
   "n_models": 1,
   "models": [
     "timm_mobilevit_s_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 12.35199999064207,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.960000239312649,
+      "total_bytes": 20974080,
+      "gap_default": 1.3785713907067523,
+      "gap_cd": null
+    }
+  }
 }

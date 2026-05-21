@@ -31,5 +31,15 @@
   "n_models": 1,
   "models": [
     "hf_AllenaiLongformerBase_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 26.399999856948853,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 19.071999937295914,
+      "total_bytes": 84941088,
+      "gap_default": 1.3842281849698834,
+      "gap_cd": null
+    }
+  }
 }

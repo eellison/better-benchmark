@@ -44,5 +44,15 @@
   "models": [
     "hf_BertForMaskedLM_infer",
     "hf_RobertaForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 140.1280015707016,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 137.08800077438354,
+      "total_bytes": 905969664,
+      "gap_default": 1.0221755425649632,
+      "gap_cd": null
+    }
+  }
 }

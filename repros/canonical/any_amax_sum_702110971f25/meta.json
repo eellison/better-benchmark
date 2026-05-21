@@ -36,5 +36,15 @@
   "n_models": 1,
   "models": [
     "hf_AlbertForMaskedLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 184.09599363803864,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 180.12799322605133,
+      "total_bytes": 1210056704,
+      "gap_default": 1.0220287826501662,
+      "gap_cd": null
+    }
+  }
 }

@@ -31,5 +31,15 @@
   "n_models": 1,
   "models": [
     "hf_M2M100ForConditionalGeneration_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 39.77600112557411,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 33.535998314619064,
+      "total_bytes": 184557568,
+      "gap_default": 1.1860687954601576,
+      "gap_cd": null
+    }
+  }
 }

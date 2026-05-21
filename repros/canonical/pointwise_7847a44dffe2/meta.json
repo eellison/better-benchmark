@@ -29,5 +29,15 @@
     "hf_ElectraForCausalLM_train",
     "hf_MobileBertForMaskedLM_train",
     "hf_RobertaForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 47.040000557899475,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 64.38399851322174,
+      "total_bytes": 402653184,
+      "gap_default": 0.7306163277237193,
+      "gap_cd": null
+    }
+  }
 }

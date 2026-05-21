@@ -45,5 +45,15 @@
     "vllm_facebook_opt-125m",
     "vllm_meta-llama_Llama-3.2-1B",
     "vllm_mistralai_Mistral-7B-Instruct-v0.3"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 138.11199367046356,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 36.73600032925606,
+      "total_bytes": 205930500,
+      "gap_default": 3.7595816755389406,
+      "gap_cd": null
+    }
+  }
 }

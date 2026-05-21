@@ -34,5 +34,15 @@
     "hf_ElectraForCausalLM_infer",
     "hf_LayoutLMForMaskedLM_infer",
     "hf_YituTechConvBert_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 75.58400183916092,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 62.20800057053566,
+      "total_bytes": 389110232,
+      "gap_default": 1.2150205945529247,
+      "gap_cd": null
+    }
+  }
 }

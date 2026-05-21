@@ -27,5 +27,15 @@
   "models": [
     "timm_deit_tiny_patch16_224.fb_in1k_infer",
     "timm_vit_base_patch14_dinov2.lvd142m_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 13.824000023305416,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 12.160000391304493,
+      "total_bytes": 39671808,
+      "gap_default": 1.1368420705965465,
+      "gap_cd": null
+    }
+  }
 }

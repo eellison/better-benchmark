@@ -66,5 +66,15 @@
   "n_models": 1,
   "models": [
     "hf_OPTForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 136.1279934644699,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 107.39199817180634,
+      "total_bytes": 704751616,
+      "gap_default": 1.2675804136420998,
+      "gap_cd": null
+    }
+  }
 }

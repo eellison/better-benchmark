@@ -22,5 +22,15 @@
   "n_models": 1,
   "models": [
     "hf_AlbertForMaskedLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 38.68800029158592,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 35.58399900794029,
+      "total_bytes": 201359360,
+      "gap_default": 1.0872302543329375,
+      "gap_cd": null
+    }
+  }
 }

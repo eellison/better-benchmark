@@ -12,5 +12,15 @@
     "hf_OPTForCausalLM_infer",
     "hf_OPTForCausalLM_train",
     "inductor_torchbench_perf_cuda_h100-1-9-linux.aws.h100_graph62"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 35.77600046992302,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 37.88800165057182,
+      "total_bytes": 220200960,
+      "gap_default": 0.9442567280236347,
+      "gap_cd": null
+    }
+  }
 }

@@ -54,5 +54,15 @@
   "n_models": 1,
   "models": [
     "hf_LayoutLMForMaskedLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 76.64000242948532,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 31.520001590251923,
+      "total_bytes": 172554240,
+      "gap_default": 2.4314720356228503,
+      "gap_cd": null
+    }
+  }
 }

@@ -13,5 +13,15 @@
     "timm_ghostnet_100_train",
     "timm_mobilenetv3_large_100_train",
     "timm_nfnet_l0_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 5.824000108987093,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 5.888000130653381,
+      "total_bytes": 147460,
+      "gap_default": 0.9891304313440655,
+      "gap_cd": null
+    }
+  }
 }

@@ -29,5 +29,15 @@
   "n_models": 1,
   "models": [
     "hf_DistillGPT2_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 91.90399944782257,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 73.56800138950348,
+      "total_bytes": 459789416,
+      "gap_default": 1.2492387683775685,
+      "gap_cd": null
+    }
+  }
 }

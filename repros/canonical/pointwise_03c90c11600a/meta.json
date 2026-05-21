@@ -21,5 +21,15 @@
     "inductor_huggingface_perf-4-5-linux.aws.a100_graph10",
     "inductor_timm_perf-6-6-linux.aws.a100_graph21",
     "inductor_torchbench_perf-1-6-linux.aws.a100_graph22"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 9.920000098645687,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.184000082314014,
+      "total_bytes": 22020096,
+      "gap_default": 1.080139373882304,
+      "gap_cd": null
+    }
+  }
 }

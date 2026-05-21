@@ -46,5 +46,15 @@
     "timm_swin_base_patch4_window7_224_train",
     "timm_vit_base_patch14_dinov2.lvd142m_train",
     "timm_vit_base_patch16_siglip_256_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 142.81600713729858,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 142.36800372600555,
+      "total_bytes": 948436992,
+      "gap_default": 1.003146798434817,
+      "gap_cd": null
+    }
+  }
 }

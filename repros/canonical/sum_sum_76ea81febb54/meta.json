@@ -35,5 +35,15 @@
     "hf_MegatronBertForCausalLM_train",
     "hf_RobertaForCausalLM_train",
     "hf_YituTechConvBert_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 36.57599911093712,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 33.56799855828285,
+      "total_bytes": 182520832,
+      "gap_default": 1.089609171885288,
+      "gap_cd": null
+    }
+  }
 }

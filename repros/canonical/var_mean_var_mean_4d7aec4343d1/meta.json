@@ -29,5 +29,15 @@
   "n_models": 1,
   "models": [
     "vllm_facebook_opt-125m"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 19.360000267624855,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.87999976798892,
+      "total_bytes": 6324224,
+      "gap_default": 2.81395362216472,
+      "gap_cd": null
+    }
+  }
 }

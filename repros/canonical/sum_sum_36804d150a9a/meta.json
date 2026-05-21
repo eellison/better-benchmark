@@ -30,5 +30,15 @@
     "timm_deit_tiny_patch16_224.fb_in1k_train",
     "timm_mobilevit_s_train",
     "timm_vit_base_patch16_siglip_256_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 57.34400078654289,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 49.984000623226166,
+      "total_bytes": 302680640,
+      "gap_default": 1.1472471205095325,
+      "gap_cd": null
+    }
+  }
 }

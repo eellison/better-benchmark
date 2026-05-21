@@ -27,5 +27,15 @@
   "n_models": 1,
   "models": [
     "timm_resnet50_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 234.43199694156647,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 80.76799660921097,
+      "total_bytes": 513803264,
+      "gap_default": 2.9025357416730984,
+      "gap_cd": null
+    }
+  }
 }

@@ -26,5 +26,15 @@
   "n_models": 1,
   "models": [
     "timm_beit_base_patch16_224_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 34.36800092458725,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 29.56799976527691,
+      "total_bytes": 161473536,
+      "gap_default": 1.1623377028346438,
+      "gap_cd": null
+    }
+  }
 }

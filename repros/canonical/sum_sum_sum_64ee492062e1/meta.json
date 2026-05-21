@@ -379,5 +379,15 @@
   "n_models": 1,
   "models": [
     "timm_deit_base_distilled_patch16_224_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 2861.0880374908447,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 3493.920087814331,
+      "total_bytes": 22735524672,
+      "gap_default": 0.8188762094099974,
+      "gap_cd": null
+    }
+  }
 }

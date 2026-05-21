@@ -53,5 +53,15 @@
   "n_models": 1,
   "models": [
     "timm_mobilenetv3_large_100_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 580.5439949035645,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 172.12800681591034,
+      "total_bytes": 1156058884,
+      "gap_default": 3.3727457003812984,
+      "gap_cd": null
+    }
+  }
 }

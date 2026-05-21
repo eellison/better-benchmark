@@ -43,5 +43,15 @@
   "models": [
     "hf_GPTNeoForCausalLM_train",
     "hf_RobertaForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 1916.991949081421,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 1483.6479425430298,
+      "total_bytes": 10191797512,
+      "gap_default": 1.292080077835462,
+      "gap_cd": null
+    }
+  }
 }

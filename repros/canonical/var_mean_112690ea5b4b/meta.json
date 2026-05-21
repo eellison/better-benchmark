@@ -42,5 +42,15 @@
   "n_models": 1,
   "models": [
     "hf_M2M100ForConditionalGeneration_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 30.17600066959858,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 111.48799955844879,
+      "total_bytes": 730447872,
+      "gap_default": 0.2706659083409106,
+      "gap_cd": null
+    }
+  }
 }

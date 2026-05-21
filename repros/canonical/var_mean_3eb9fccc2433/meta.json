@@ -30,5 +30,15 @@
   "models": [
     "hf_BertForMaskedLM_train",
     "hf_RobertaForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 44.89599913358688,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 29.503999277949333,
+      "total_bytes": 160438568,
+      "gap_default": 1.5216919818440073,
+      "gap_cd": null
+    }
+  }
 }

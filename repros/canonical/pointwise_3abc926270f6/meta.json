@@ -18,5 +18,15 @@
     "timm_mobilenetv3_large_100_train",
     "timm_nfnet_l0_infer",
     "timm_nfnet_l0_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 5.791999865323305,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.111999973654747,
+      "total_bytes": 983040,
+      "gap_default": 0.9476439611075302,
+      "gap_cd": null
+    }
+  }
 }

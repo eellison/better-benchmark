@@ -30,5 +30,15 @@
     "timm_mobilenetv3_large_100_infer",
     "timm_resnet50_infer",
     "timm_visformer_small_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 91.0400003194809,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 62.30400130152702,
+      "total_bytes": 385353600,
+      "gap_default": 1.461222368028706,
+      "gap_cd": null
+    }
+  }
 }

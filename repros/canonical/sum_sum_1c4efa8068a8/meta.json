@@ -36,5 +36,15 @@
   "models": [
     "timm_ghostnet_100_train",
     "timm_mobilevit_s_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 79.68000322580338,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 42.87999868392944,
+      "total_bytes": 251659392,
+      "gap_default": 1.8582090874845532,
+      "gap_cd": null
+    }
+  }
 }

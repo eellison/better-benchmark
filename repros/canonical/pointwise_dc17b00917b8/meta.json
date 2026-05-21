@@ -66,5 +66,15 @@
   "n_models": 1,
   "models": [
     "inductor_torchbench_perf_cuda_h100-8-9-linux.aws.h100_graph74"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 104.22399640083313,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 64.28799778223038,
+      "total_bytes": 401693440,
+      "gap_default": 1.6212045793350454,
+      "gap_cd": null
+    }
+  }
 }

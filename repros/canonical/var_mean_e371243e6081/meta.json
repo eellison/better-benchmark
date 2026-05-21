@@ -39,5 +39,15 @@
     "timm_deit_tiny_patch16_224.fb_in1k_infer",
     "timm_mobilevit_s_infer",
     "timm_vit_base_patch16_siglip_256_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 9.983999654650688,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 10.143999941647053,
+      "total_bytes": 24516480,
+      "gap_default": 0.9842271009545781,
+      "gap_cd": null
+    }
+  }
 }

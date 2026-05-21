@@ -36,5 +36,15 @@
     "hf_DistilBertForMaskedLM_train",
     "hf_ElectraForCausalLM_train",
     "hf_RobertaForCausalLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 69.56800073385239,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 121.91999703645706,
+      "total_bytes": 805306368,
+      "gap_default": 0.5706036944296337,
+      "gap_cd": null
+    }
+  }
 }

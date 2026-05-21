@@ -44,5 +44,15 @@
   "models": [
     "hf_GPT2ForSequenceClassification_infer",
     "hf_GPTNeoForSequenceClassification_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 9.312000125646591,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.0800001956522465,
+      "total_bytes": 131140,
+      "gap_default": 1.5315789187483118,
+      "gap_cd": null
+    }
+  }
 }

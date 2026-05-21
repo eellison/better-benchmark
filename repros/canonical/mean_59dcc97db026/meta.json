@@ -120,5 +120,15 @@
   "models": [
     "timm_adv_inception_v3_infer",
     "timm_inception_v3_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 67.23199784755707,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 18.400000408291817,
+      "total_bytes": 84574208,
+      "gap_default": 3.6539128454181715,
+      "gap_cd": null
+    }
+  }
 }

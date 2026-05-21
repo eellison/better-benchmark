@@ -73,5 +73,15 @@
   "n_models": 1,
   "models": [
     "hf_GPTJForQuestionAnswering_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 5.8559998869895935,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 5.98399993032217,
+      "total_bytes": 1044,
+      "gap_default": 0.9786096181779725,
+      "gap_cd": null
+    }
+  }
 }

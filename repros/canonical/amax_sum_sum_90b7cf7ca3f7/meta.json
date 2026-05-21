@@ -108,5 +108,15 @@
   "n_models": 1,
   "models": [
     "hf_BertForMaskedLM_train"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 653.0879735946655,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 2210.848093032837,
+      "total_bytes": 15291383816,
+      "gap_default": 0.2954015590907292,
+      "gap_cd": null
+    }
+  }
 }

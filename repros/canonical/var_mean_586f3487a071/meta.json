@@ -28,5 +28,15 @@
   "models": [
     "hf_DebertaV2ForMaskedLM_infer",
     "hf_MegatronBertForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 20.320000126957893,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 50.36799982190132,
+      "total_bytes": 305143808,
+      "gap_default": 0.40343075362945474,
+      "gap_cd": null
+    }
+  }
 }

@@ -22,5 +22,15 @@
   "n_models": 1,
   "models": [
     "hf_TrOCRForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 69.40799951553345,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 105.27999699115753,
+      "total_bytes": 687865856,
+      "gap_default": 0.6592705309572058,
+      "gap_cd": null
+    }
+  }
 }

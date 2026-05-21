@@ -30,5 +30,15 @@
     "hf_DistilBertForMaskedLM_infer",
     "hf_ElectraForCausalLM_infer",
     "hf_RobertaForCausalLM_infer"
-  ]
+  ],
+  "perf": {
+    "B200": {
+      "compiled_us": 50.944000482559204,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 66.3679987192154,
+      "total_bytes": 412096512,
+      "gap_default": 0.7675988649000726,
+      "gap_cd": null
+    }
+  }
 }
