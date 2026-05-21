@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
-_shapes_config = "(T([250002, 768], f16), T([1, 512], i64, gen=Index(250002)), T([1, 514], i64), T([1, 512], i64), T([1, 512], i32), T([1, 768], f16), T([514, 768], f16), T([768], f16), T([768], f16), S([1, 512]), S([512, 768]), S([512, 768]), S([512, 768]))"
+_shapes_config = "(T([250002, 768], f16), T([1, 512], i64, gen=Index(250002)), T([1, 514], i64, gen=Index(1)), T([1, 512], i64, gen=Index(513)), T([1, 512], i32, gen=Index(2)), T([1, 768], f16), T([514, 768], f16), T([768], f16), T([768], f16), S([1, 512]), S([512, 768]), S([512, 768]), S([512, 768]))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg2_1: "f16[250002, 768]", arg0_1: "i64[1, 512]", arg1_1: "i64[1, 514]", cumsum: "i64[1, 512]", convert_element_type: "i32[1, 512]", arg3_1: "f16[1, 768]", arg4_1: "f16[514, 768]", arg5_1: "f16[768]", arg6_1: "f16[768]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):

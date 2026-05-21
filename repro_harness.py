@@ -184,6 +184,7 @@ def parse_shapes_config(config_str: str) -> list:
         return {"kind": "shape", "dims": dims}
 
     _ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm,
+            "torch": torch,
             "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
             "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
             "b8": "b8", "u8": "u8"}
