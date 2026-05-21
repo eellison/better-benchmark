@@ -38,11 +38,12 @@ import torch._inductor.config as inductor_config
 
 class _CaptureState:
     def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
-                 validate: bool = True):
+                 validate: bool = True, capture_only: bool = False):
         self.output_dir = output_dir
         self.label = label
         self.graph_dir = graph_dir
         self.validate = validate
+        self.capture_only = capture_only
         self.seen_hashes: set[str] = set()
         self.counter = 0
         self.graph_counter = 0
@@ -829,7 +830,7 @@ _active_state: _CaptureState | None = None
 
 
 def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str | None = None,
-                         validate: bool = True):
+                         validate: bool = True, capture_only: bool = False):
     """Install the post-grad capture hook.
 
     Call this before torch.compile(). All subsequent compilations will have
@@ -838,12 +839,18 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
     Args:
         output_dir: Directory to write captured repro files.
         label: Human-readable label for the capture session.
+        capture_only: If True, raise _CaptureComplete after capture to skip
+            expensive inductor compilation. Caller should catch the error.
         validate: If True, run eager validation on captured repros (can trigger CUDA errors).
     """
     global _active_state
-    _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir, validate=validate)
+    _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir, validate=validate, capture_only=capture_only)
 
     _old_pass = inductor_config.post_grad_custom_pre_pass
+
+    class _CaptureComplete(Exception):
+        """Raised after successful capture to skip expensive compilation."""
+        pass
 
     def _capture_pass(graph_or_gm):
         if isinstance(graph_or_gm, fx.GraphModule):
@@ -860,6 +867,10 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
             _active_state.process_graph(copy.deepcopy(gm))
         except Exception as e:
             print(f"[capture_hook] Error processing graph: {e}")
+
+        if _active_state.capture_only:
+            _active_state.finalize()
+            raise _CaptureComplete()
 
         if callable(_old_pass):
             return _old_pass(graph_or_gm)
