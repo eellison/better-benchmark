@@ -582,9 +582,7 @@ class _CaptureState:
                     stride = info.get("stride", [])
                     bound = index_bounds.get(name)
                     gen_kwarg = ""
-                    if name in permutation_indices:
-                        gen_kwarg = f", gen=Perm({permutation_indices[name]})"
-                    elif "int" in info["dtype"] and bound:
+                    if "int" in info["dtype"] and bound:
                         gen_kwarg = f", gen=Index({bound})"
                     elif "int8" in info["dtype"]:
                         gen_kwarg = ", gen=Index(9)"
@@ -681,15 +679,7 @@ if __name__ == "__main__":
             full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
             self.graph_counter += 1
             try:
-<<<<<<< HEAD
                 full_code = gm.print_readable(print_output=False, include_stride=True, include_device=True)
-=======
-                full_code = gm.print_readable(
-                    print_output=False,
-                    include_stride=True,
-                    include_device=True,
-                )
->>>>>>> origin/repro-correctness-loader-fixes
                 with open(full_graph_path, "w") as f:
                     f.write(full_code)
             except Exception:
