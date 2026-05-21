@@ -10,7 +10,7 @@
 - [x] Add test: var_mean → getitem → pointwise SHOULD be one repro (data dependent)
 
 ### 2. Recapture all models with fixed partitioner
-- [ ] Delete old canonical repros
+- [x] Delete old canonical repros
 - [ ] Re-run timm (18 models, infer+train)
 - [ ] Re-run HF (32 models, infer+train)
 - [ ] Re-run torchbench (63 models, infer+train)
@@ -37,7 +37,7 @@
 
 ## Status
 - Partitioner fix: DONE
-- Recapture: READY TO GO
-- Format: v2 defined, 306/1453 upgraded, rest blocked on partitioner
+- Recapture: DONE (repartitioned from 296 saved full graphs)
+- Format: ALL 1341 repros are v2
 - vLLM bounds: NOT STARTED
 - Cleanup: NOT STARTED
