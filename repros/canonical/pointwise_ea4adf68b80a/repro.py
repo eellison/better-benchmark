@@ -7,27 +7,29 @@ Shape hash: c4ec4045
 import sys
 from pathlib import Path
 
-import sys
-from pathlib import Path
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
-from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([64, 64, 8, 8], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg2_1: "f32[64, 64, 8, 8]"):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/utils/_device.py:122 in __torch_function__, code: return func(*args, **kwargs)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:94 in torch_dynamo_resume_in_forward_at_93, code: out = self.relu(out)
         relu_default: "f32[64, 64, 8, 8]" = torch.ops.aten.relu.default(arg2_1)
         copy__default: "f32[64, 64, 8, 8]" = torch.ops.aten.copy_.default(arg2_1, relu_default);  arg2_1 = relu_default = None
         return copy__default
 
 
+
 def _default_make_inputs():
-    return []
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

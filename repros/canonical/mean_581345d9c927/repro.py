@@ -7,21 +7,23 @@ Shape hash: 5bcdea06
 import sys
 from pathlib import Path
 
-import sys
-from pathlib import Path
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
-from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([128, 16, 4, 4], f32), T([128, 168, 4, 4], f32), T([184], f32), T([184], f32), T([184], f32), T([184], f32), T([10, 184], f32), S([128, 184]))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_51: "f32[128, 16, 4, 4]", cat_22: "f32[128, 168, 4, 4]", arg258_1: "f32[184]", arg259_1: "f32[184]", arg260_1: "f32[184]", arg261_1: "f32[184]", arg262_1: "f32[10, 184]", _shape_param_0):
-        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/utils/_device.py:122 in __torch_function__, code: return func(*args, **kwargs)
+        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/phlippe_densenet/__init__.py:33 in forward, code: out = torch.cat([out, x], dim=1)
         cat_default: "f32[128, 184, 4, 4]" = torch.ops.aten.cat.default([convolution_51, cat_22], 1);  convolution_51 = cat_22 = None
+
+        # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/phlippe_densenet/__init__.py:167 in forward, code: x = self.output_net(x)
         unsqueeze_default: "f32[184, 1]" = torch.ops.aten.unsqueeze.default(arg258_1, -1);  arg258_1 = None
         unsqueeze_default_1: "f32[184, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_default, -1);  unsqueeze_default = None
         sub_tensor: "f32[128, 184, 4, 4]" = torch.ops.aten.sub.Tensor(cat_default, unsqueeze_default_1);  cat_default = unsqueeze_default_1 = None
@@ -45,8 +47,10 @@ class Repro(torch.nn.Module):
         return (reshape_default, permute_default)
 
 
+
 def _default_make_inputs():
-    return []
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

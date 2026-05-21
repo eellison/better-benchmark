@@ -1,0 +1,149 @@
+[
+  {
+    "file": "/tmp/tmp7epxt_5x/region_000_var_mean_6e34526980e4_eed64cad.py",
+    "kind": "reduction",
+    "pattern_hash": "6e34526980e4",
+    "shape_hash": "eed64cad",
+    "hash": "6e34526980e4_eed64cad",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 14,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.clone.default",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.select.int",
+      "aten.sub.Tensor",
+      "aten.var_mean.correction"
+    ]
+  },
+  {
+    "file": "/tmp/tmp7epxt_5x/region_001_pointwise_d91702d18dd0_31ca7b26.py",
+    "kind": "pointwise",
+    "pattern_hash": "d91702d18dd0",
+    "shape_hash": "31ca7b26",
+    "hash": "d91702d18dd0_31ca7b26",
+    "reduction_types": [],
+    "n_ops": 8,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.erf.default",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default"
+    ]
+  },
+  {
+    "file": "/tmp/tmp7epxt_5x/region_002_var_mean_fedd51f1d9ff_956846db.py",
+    "kind": "reduction",
+    "pattern_hash": "fedd51f1d9ff",
+    "shape_hash": "956846db",
+    "hash": "fedd51f1d9ff_956846db",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 14,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "aten.var_mean.correction"
+    ]
+  },
+  {
+    "file": "/tmp/tmp7epxt_5x/region_003_pointwise_66a849609a78_64559150.py",
+    "kind": "pointwise",
+    "pattern_hash": "66a849609a78",
+    "shape_hash": "64559150",
+    "hash": "66a849609a78_64559150",
+    "reduction_types": [],
+    "n_ops": 7,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.unbind.int"
+    ]
+  },
+  {
+    "file": "/tmp/tmp7epxt_5x/region_004_var_mean_fedd51f1d9ff_d07fdee4.py",
+    "kind": "reduction",
+    "pattern_hash": "fedd51f1d9ff",
+    "shape_hash": "d07fdee4",
+    "hash": "fedd51f1d9ff_d07fdee4",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 14,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "aten.var_mean.correction"
+    ]
+  },
+  {
+    "file": "/tmp/tmp7epxt_5x/region_005_var_mean_e69c3288347a_ad276e0f.py",
+    "kind": "reduction",
+    "pattern_hash": "e69c3288347a",
+    "shape_hash": "ad276e0f",
+    "hash": "e69c3288347a_ad276e0f",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 16,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.cat.default",
+      "aten.expand.default",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "aten.var_mean.correction"
+    ]
+  }
+]

@@ -132,14 +132,14 @@ class GraphModule(torch.nn.Module):
         sum_19: "bf16[16384, 1]" = torch.ops.aten.sum.dim_IntList(mul_71, [1], True);  mul_71 = None
         squeeze_1: "bf16[16384]" = torch.ops.aten.squeeze.dim(sum_19, -1);  sum_19 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_50: "bf16[2048, 16384]" = torch.ops.aten.permute.default(mul_72, [1, 0])
         _grouped_mm_8: "bf16[128, 2048, 768]" = torch.ops.aten._grouped_mm.default(permute_50, mul_57, cumsum_4);  permute_50 = mul_57 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_44: "bf16[128, 768, 2048]" = torch.ops.aten.permute.default(primals_47, [0, 2, 1]);  primals_47 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_52: "bf16[128, 2048, 768]" = torch.ops.aten.permute.default(permute_44, [0, 2, 1]);  permute_44 = None
         _grouped_mm_9: "bf16[16384, 768]" = torch.ops.aten._grouped_mm.default(mul_72, permute_52, cumsum_4);  mul_72 = permute_52 = None
 
@@ -174,14 +174,14 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:514 in _default_apply_gate, code: gate, up = gate_up_out.chunk(2, dim=-1)  # (S, intermediate_dim)
         cat_9: "bf16[16384, 1536]" = torch.ops.aten.cat.default([convert_element_type_110, mul_73], 1);  convert_element_type_110 = mul_73 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_54: "bf16[1536, 16384]" = torch.ops.aten.permute.default(cat_9, [1, 0])
         _grouped_mm_10: "bf16[128, 1536, 2048]" = torch.ops.aten._grouped_mm.default(permute_54, where_10, cumsum_4);  permute_54 = where_10 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_43: "bf16[128, 2048, 1536]" = torch.ops.aten.permute.default(primals_46, [0, 2, 1]);  primals_46 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_56: "bf16[128, 1536, 2048]" = torch.ops.aten.permute.default(permute_43, [0, 2, 1]);  permute_43 = None
         _grouped_mm_11: "bf16[16384, 2048]" = torch.ops.aten._grouped_mm.default(cat_9, permute_56, cumsum_4);  cat_9 = permute_56 = cumsum_4 = None
 
@@ -598,14 +598,14 @@ class GraphModule(torch.nn.Module):
         sum_32: "bf16[16384, 1]" = torch.ops.aten.sum.dim_IntList(mul_117, [1], True);  mul_117 = None
         squeeze_4: "bf16[16384]" = torch.ops.aten.squeeze.dim(sum_32, -1);  sum_32 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_82: "bf16[2048, 16384]" = torch.ops.aten.permute.default(mul_118, [1, 0])
         _grouped_mm_12: "bf16[128, 2048, 768]" = torch.ops.aten._grouped_mm.default(permute_82, mul_43, cumsum_3);  permute_82 = mul_43 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_33: "bf16[128, 768, 2048]" = torch.ops.aten.permute.default(primals_36, [0, 2, 1]);  primals_36 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_84: "bf16[128, 2048, 768]" = torch.ops.aten.permute.default(permute_33, [0, 2, 1]);  permute_33 = None
         _grouped_mm_13: "bf16[16384, 768]" = torch.ops.aten._grouped_mm.default(mul_118, permute_84, cumsum_3);  mul_118 = permute_84 = None
 
@@ -640,14 +640,14 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:514 in _default_apply_gate, code: gate, up = gate_up_out.chunk(2, dim=-1)  # (S, intermediate_dim)
         cat_10: "bf16[16384, 1536]" = torch.ops.aten.cat.default([convert_element_type_143, mul_119], 1);  convert_element_type_143 = mul_119 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_86: "bf16[1536, 16384]" = torch.ops.aten.permute.default(cat_10, [1, 0])
         _grouped_mm_14: "bf16[128, 1536, 2048]" = torch.ops.aten._grouped_mm.default(permute_86, where_7, cumsum_3);  permute_86 = where_7 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_32: "bf16[128, 2048, 1536]" = torch.ops.aten.permute.default(primals_35, [0, 2, 1]);  primals_35 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_88: "bf16[128, 1536, 2048]" = torch.ops.aten.permute.default(permute_32, [0, 2, 1]);  permute_32 = None
         _grouped_mm_15: "bf16[16384, 2048]" = torch.ops.aten._grouped_mm.default(cat_10, permute_88, cumsum_3);  cat_10 = permute_88 = cumsum_3 = None
 
@@ -1009,14 +1009,14 @@ class GraphModule(torch.nn.Module):
         sum_45: "bf16[16384, 1]" = torch.ops.aten.sum.dim_IntList(mul_163, [1], True);  mul_163 = None
         squeeze_7: "bf16[16384]" = torch.ops.aten.squeeze.dim(sum_45, -1);  sum_45 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_114: "bf16[2048, 16384]" = torch.ops.aten.permute.default(mul_164, [1, 0])
         _grouped_mm_16: "bf16[128, 2048, 768]" = torch.ops.aten._grouped_mm.default(permute_114, mul_29, cumsum_2);  permute_114 = mul_29 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_22: "bf16[128, 768, 2048]" = torch.ops.aten.permute.default(primals_25, [0, 2, 1]);  primals_25 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_116: "bf16[128, 2048, 768]" = torch.ops.aten.permute.default(permute_22, [0, 2, 1]);  permute_22 = None
         _grouped_mm_17: "bf16[16384, 768]" = torch.ops.aten._grouped_mm.default(mul_164, permute_116, cumsum_2);  mul_164 = permute_116 = None
 
@@ -1051,14 +1051,14 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:514 in _default_apply_gate, code: gate, up = gate_up_out.chunk(2, dim=-1)  # (S, intermediate_dim)
         cat_11: "bf16[16384, 1536]" = torch.ops.aten.cat.default([convert_element_type_176, mul_165], 1);  convert_element_type_176 = mul_165 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_118: "bf16[1536, 16384]" = torch.ops.aten.permute.default(cat_11, [1, 0])
         _grouped_mm_18: "bf16[128, 1536, 2048]" = torch.ops.aten._grouped_mm.default(permute_118, where_4, cumsum_2);  permute_118 = where_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_21: "bf16[128, 2048, 1536]" = torch.ops.aten.permute.default(primals_24, [0, 2, 1]);  primals_24 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_120: "bf16[128, 1536, 2048]" = torch.ops.aten.permute.default(permute_21, [0, 2, 1]);  permute_21 = None
         _grouped_mm_19: "bf16[16384, 2048]" = torch.ops.aten._grouped_mm.default(cat_11, permute_120, cumsum_2);  cat_11 = permute_120 = cumsum_2 = None
 
@@ -1420,14 +1420,14 @@ class GraphModule(torch.nn.Module):
         sum_58: "bf16[16384, 1]" = torch.ops.aten.sum.dim_IntList(mul_209, [1], True);  mul_209 = None
         squeeze_10: "bf16[16384]" = torch.ops.aten.squeeze.dim(sum_58, -1);  sum_58 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_146: "bf16[2048, 16384]" = torch.ops.aten.permute.default(mul_210, [1, 0])
         _grouped_mm_20: "bf16[128, 2048, 768]" = torch.ops.aten._grouped_mm.default(permute_146, mul_15, cumsum_1);  permute_146 = mul_15 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_11: "bf16[128, 768, 2048]" = torch.ops.aten.permute.default(primals_14, [0, 2, 1]);  primals_14 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_148: "bf16[128, 2048, 768]" = torch.ops.aten.permute.default(permute_11, [0, 2, 1]);  permute_11 = None
         _grouped_mm_21: "bf16[16384, 768]" = torch.ops.aten._grouped_mm.default(mul_210, permute_148, cumsum_1);  mul_210 = permute_148 = None
 
@@ -1462,14 +1462,14 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:514 in _default_apply_gate, code: gate, up = gate_up_out.chunk(2, dim=-1)  # (S, intermediate_dim)
         cat_12: "bf16[16384, 1536]" = torch.ops.aten.cat.default([convert_element_type_209, mul_211], 1);  convert_element_type_209 = mul_211 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_150: "bf16[1536, 16384]" = torch.ops.aten.permute.default(cat_12, [1, 0])
         _grouped_mm_22: "bf16[128, 1536, 2048]" = torch.ops.aten._grouped_mm.default(permute_150, where_1, cumsum_1);  permute_150 = where_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_10: "bf16[128, 2048, 1536]" = torch.ops.aten.permute.default(primals_13, [0, 2, 1]);  primals_13 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         permute_152: "bf16[128, 1536, 2048]" = torch.ops.aten.permute.default(permute_10, [0, 2, 1]);  permute_10 = None
         _grouped_mm_23: "bf16[16384, 2048]" = torch.ops.aten._grouped_mm.default(cat_12, permute_152, cumsum_1);  cat_12 = permute_152 = cumsum_1 = None
 

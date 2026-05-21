@@ -1,0 +1,43 @@
+{
+  "pattern_hash": "16e152dc577b",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 26,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.cat.default",
+    "aten.embedding.default",
+    "aten.expand.default",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.pow.Tensor_Scalar",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "Qwen_Qwen3-0.6B",
+    "Qwen_Qwen3-30B-A3B",
+    "meta-llama_Llama-3.2-1B",
+    "mistralai_Mistral-7B-Instruct-v0.3"
+  ]
+}

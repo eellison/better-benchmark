@@ -7,16 +7,16 @@ Shape hash: ff015e0f
 import sys
 from pathlib import Path
 
-import sys
-from pathlib import Path
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
-from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_repro_version = 2
+_shapes_config = "(T([32000, 512], f32), T([32, 32], i32, gen=Index(32000)), T([512], f32), T([512, 512], f32), T([512, 512], f32), S([1024, 512]), S([1024, 512]))"
 
 class Repro(torch.nn.Module):
     def forward(self, arg1_1: "f32[32000, 512]", arg0_1: "i32[32, 32]", arg3_1: "f32[512]", arg4_1: "f32[512, 512]", arg5_1: "f32[512, 512]", _shape_param_0, _shape_param_1):
@@ -35,8 +35,10 @@ class Repro(torch.nn.Module):
         return (reshape_default, permute_default, reshape_default_1, permute_default_1)
 
 
+
 def _default_make_inputs():
-    return []
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

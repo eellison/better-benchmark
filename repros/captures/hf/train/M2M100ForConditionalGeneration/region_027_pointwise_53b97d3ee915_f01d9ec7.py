@@ -1,0 +1,47 @@
+"""
+Standalone repro captured via capture_hook.
+Label: hf_M2M100ForConditionalGeneration_train
+Pattern hash: 53b97d3ee915
+Shape hash: f01d9ec7
+"""
+_shapes_config = "(T([8192, 4096], f32), T([64, 128, 4096], b8), T([4096, 1024], f32), S([64, 128, 4096]), S([8192, 4096]))"
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+class Repro(torch.nn.Module):
+    def forward(self, mm: "f32[8192, 4096]", le: "b8[64, 128, 4096]", primals_27: "f32[4096, 1024]", _shape_param_0, _shape_param_1):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:473 in forward, code: hidden_states = self.fc2(hidden_states)
+        reshape_default: "f32[64, 128, 4096]" = torch.ops.aten.reshape.default(mm, _shape_param_0);  mm = _shape_param_0 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:92 in sdpa_attention_forward, code: attn_output = torch.nn.functional.scaled_dot_product_attention(
+        full_default: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:471 in forward, code: hidden_states = self.activation_fn(self.fc1(hidden_states))
+        where_self: "f32[64, 128, 4096]" = torch.ops.aten.where.self(le, full_default, reshape_default);  le = full_default = reshape_default = None
+        reshape_default_1: "f32[8192, 4096]" = torch.ops.aten.reshape.default(where_self, _shape_param_1);  where_self = _shape_param_1 = None
+        permute_default: "f32[1024, 4096]" = torch.ops.aten.permute.default(primals_27, [1, 0]);  primals_27 = None
+        permute_default_1: "f32[4096, 1024]" = torch.ops.aten.permute.default(permute_default, [1, 0]);  permute_default = None
+        return (reshape_default_1, permute_default_1)
+
+
+
+def make_inputs():
+    return [
+    torch.randn([8192, 4096], dtype=torch.float32, device='cuda'),
+    torch.randint(0, 2, [64, 128, 4096], dtype=torch.bool, device='cuda'),
+    torch.randn([4096, 1024], dtype=torch.float32, device='cuda'),
+    [64, 128, 4096],  # _shape_param_0
+    [8192, 4096],  # _shape_param_1
+    ]
+
+
+if __name__ == "__main__":
+    mod = Repro()
+    inputs = make_inputs()
+    compiled = torch.compile(mod)
+    with torch.no_grad():
+        out = compiled(*inputs)
+        torch.cuda.synchronize()
+    print("OK")

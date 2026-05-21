@@ -1,0 +1,104 @@
+"""
+Standalone repro captured via capture_hook.
+Label: hf_T5ForConditionalGeneration_train
+Pattern hash: 3d1e0346817a
+Shape hash: 3fc10a61
+"""
+_shapes_config = "(T([8192, 512], f32), T([64], i64), T([8, 1024, 512], f32), T([512], f32), T([8192, 512], f32), T([8, 1024, 512], f32), T([512], f32), T([512, 512], f32), T([512, 512], f32), S([8, 1024, 512]), S([8, 1024, 512]), S([8192, 512]), S([8192, 512]))"
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+class Repro(torch.nn.Module):
+    def forward(self, mm_35: "f32[8192, 512]", inductor_seeds_default: "i64[64]", add_34: "f32[8, 1024, 512]", primals_52: "f32[512]", mm_39: "f32[8192, 512]", mul_81: "f32[8, 1024, 512]", primals_60: "f32[512]", primals_61: "f32[512, 512]", primals_62: "f32[512, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3):
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:89 in forward, code: hidden_states = self.wo(hidden_states)
+        reshape_default: "f32[8, 1024, 512]" = torch.ops.aten.reshape.default(mm_35, _shape_param_0);  mm_35 = _shape_param_0 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:136 in forward, code: hidden_states = hidden_states + self.dropout(forwarded_states)
+        inductor_lookup_seed_default: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds_default, 24)
+        inductor_random_default: "f32[8, 1024, 512]" = torch.ops.prims.inductor_random.default([8, 1024, 512], inductor_lookup_seed_default, 'rand');  inductor_lookup_seed_default = None
+        gt_scalar: "b8[8, 1024, 512]" = torch.ops.aten.gt.Scalar(inductor_random_default, 0.1);  inductor_random_default = None
+        mul_tensor: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(gt_scalar, reshape_default);  gt_scalar = reshape_default = None
+        mul_tensor_1: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(mul_tensor, 1.1111111111111112);  mul_tensor = None
+        add_tensor: "f32[8, 1024, 512]" = torch.ops.aten.add.Tensor(add_34, mul_tensor_1);  add_34 = mul_tensor_1 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:61 in forward, code: variance = hidden_states.to(torch.float32).pow(2).mean(-1, keepdim=True)
+        pow_tensor_scalar: "f32[8, 1024, 512]" = torch.ops.aten.pow.Tensor_Scalar(add_tensor, 2)
+        mean_dim: "f32[8, 1024, 1]" = torch.ops.aten.mean.dim(pow_tensor_scalar, [-1], True);  pow_tensor_scalar = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:62 in forward, code: hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
+        add_tensor_1: "f32[8, 1024, 1]" = torch.ops.aten.add.Tensor(mean_dim, 1e-06);  mean_dim = None
+        rsqrt_default: "f32[8, 1024, 1]" = torch.ops.aten.rsqrt.default(add_tensor_1);  add_tensor_1 = None
+        mul_tensor_2: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(add_tensor, rsqrt_default);  add_tensor = rsqrt_default = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:68 in forward, code: return self.weight * hidden_states
+        mul_tensor_3: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(primals_52, mul_tensor_2);  primals_52 = mul_tensor_2 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:755 in forward, code: hidden_states = self.dropout(hidden_states)
+        inductor_lookup_seed_default_1: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds_default, 25)
+        inductor_random_default_1: "f32[8, 1024, 512]" = torch.ops.prims.inductor_random.default([8, 1024, 512], inductor_lookup_seed_default_1, 'rand');  inductor_lookup_seed_default_1 = None
+        gt_scalar_1: "b8[8, 1024, 512]" = torch.ops.aten.gt.Scalar(inductor_random_default_1, 0.1);  inductor_random_default_1 = None
+        mul_tensor_4: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(gt_scalar_1, mul_tensor_3);  gt_scalar_1 = mul_tensor_3 = None
+        mul_tensor_5: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(mul_tensor_4, 1.1111111111111112);  mul_tensor_4 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:325 in forward, code: attn_output = self.o(attn_output)
+        reshape_default_1: "f32[8, 1024, 512]" = torch.ops.aten.reshape.default(mm_39, _shape_param_1);  mm_39 = _shape_param_1 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:362 in forward, code: hidden_states = hidden_states + self.dropout(attention_output[0])
+        inductor_lookup_seed_default_2: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds_default, 28);  inductor_seeds_default = None
+        inductor_random_default_2: "f32[8, 1024, 512]" = torch.ops.prims.inductor_random.default([8, 1024, 512], inductor_lookup_seed_default_2, 'rand');  inductor_lookup_seed_default_2 = None
+        gt_scalar_2: "b8[8, 1024, 512]" = torch.ops.aten.gt.Scalar(inductor_random_default_2, 0.1);  inductor_random_default_2 = None
+        mul_tensor_6: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(gt_scalar_2, reshape_default_1);  gt_scalar_2 = reshape_default_1 = None
+        mul_tensor_7: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(mul_tensor_6, 1.1111111111111112);  mul_tensor_6 = None
+        add_tensor_2: "f32[8, 1024, 512]" = torch.ops.aten.add.Tensor(mul_81, mul_tensor_7);  mul_81 = mul_tensor_7 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:61 in forward, code: variance = hidden_states.to(torch.float32).pow(2).mean(-1, keepdim=True)
+        pow_tensor_scalar_1: "f32[8, 1024, 512]" = torch.ops.aten.pow.Tensor_Scalar(add_tensor_2, 2)
+        mean_dim_1: "f32[8, 1024, 1]" = torch.ops.aten.mean.dim(pow_tensor_scalar_1, [-1], True);  pow_tensor_scalar_1 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:62 in forward, code: hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
+        add_tensor_3: "f32[8, 1024, 1]" = torch.ops.aten.add.Tensor(mean_dim_1, 1e-06);  mean_dim_1 = None
+        rsqrt_default_1: "f32[8, 1024, 1]" = torch.ops.aten.rsqrt.default(add_tensor_3);  add_tensor_3 = None
+        mul_tensor_8: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(add_tensor_2, rsqrt_default_1);  add_tensor_2 = rsqrt_default_1 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:68 in forward, code: return self.weight * hidden_states
+        mul_tensor_9: "f32[8, 1024, 512]" = torch.ops.aten.mul.Tensor(primals_60, mul_tensor_8);  primals_60 = mul_tensor_8 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:264 in forward, code: query_states = self.q(hidden_states).view(hidden_shape).transpose(1, 2)
+        permute_default: "f32[512, 512]" = torch.ops.aten.permute.default(primals_61, [1, 0]);  primals_61 = None
+        reshape_default_2: "f32[8192, 512]" = torch.ops.aten.reshape.default(mul_tensor_9, _shape_param_2);  mul_tensor_9 = _shape_param_2 = None
+
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/t5/modeling_t5.py:285 in forward, code: key_states = self.k(current_states).view(kv_shape).transpose(1, 2)
+        permute_default_1: "f32[512, 512]" = torch.ops.aten.permute.default(primals_62, [1, 0]);  primals_62 = None
+        reshape_default_3: "f32[8192, 512]" = torch.ops.aten.reshape.default(mul_tensor_5, _shape_param_3);  mul_tensor_5 = _shape_param_3 = None
+        return (permute_default, reshape_default_2, permute_default_1, reshape_default_3)
+
+
+
+def make_inputs():
+    return [
+    torch.randn([8192, 512], dtype=torch.float32, device='cuda'),
+    torch.randint(0, 64, [64], dtype=torch.int64, device='cuda'),
+    torch.randn([8, 1024, 512], dtype=torch.float32, device='cuda'),
+    torch.randn([512], dtype=torch.float32, device='cuda'),
+    torch.randn([8192, 512], dtype=torch.float32, device='cuda'),
+    torch.randn([8, 1024, 512], dtype=torch.float32, device='cuda'),
+    torch.randn([512], dtype=torch.float32, device='cuda'),
+    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
+    torch.randn([512, 512], dtype=torch.float32, device='cuda'),
+    [8, 1024, 512],  # _shape_param_0
+    [8, 1024, 512],  # _shape_param_1
+    [8192, 512],  # _shape_param_2
+    [8192, 512],  # _shape_param_3
+    ]
+
+
+if __name__ == "__main__":
+    mod = Repro()
+    inputs = make_inputs()
+    compiled = torch.compile(mod)
+    with torch.no_grad():
+        out = compiled(*inputs)
+        torch.cuda.synchronize()
+    print("OK")

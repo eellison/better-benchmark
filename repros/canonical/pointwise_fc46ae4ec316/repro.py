@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([192], f16), T([256, 192, 7, 7], f16), T([192], f16), T([192], f16), T([192], f16), T([256, 192, 7, 7], f16))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg237_1: "f16[192]", convolution_47: "f16[256, 192, 7, 7]", arg238_1: "f16[192]", arg239_1: "f16[192]", arg240_1: "f16[192]", add_98: "f16[256, 192, 7, 7]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mnasnet.py:61 in forward, code: return self.layers(input) + input
@@ -41,15 +44,10 @@ class Repro(torch.nn.Module):
         return add_tensor_2
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([192], dtype=torch.float16, device='cuda'),
-    torch.randn([256, 192, 7, 7], dtype=torch.float16, device='cuda'),
-    torch.randn([192], dtype=torch.float16, device='cuda'),
-    torch.randn([192], dtype=torch.float16, device='cuda'),
-    torch.randn([192], dtype=torch.float16, device='cuda'),
-    torch.randn([256, 192, 7, 7], dtype=torch.float16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

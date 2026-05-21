@@ -1,0 +1,278 @@
+[
+  {
+    "model": "BERT_pytorch",
+    "mode": "infer",
+    "regions": 10,
+    "time": 10.59
+  },
+  {
+    "model": "LearningToPaint",
+    "mode": "infer",
+    "regions": 14,
+    "time": 4.88
+  },
+  {
+    "model": "Super_SloMo",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "alexnet",
+    "mode": "infer",
+    "regions": 7,
+    "time": 3.76
+  },
+  {
+    "model": "basic_gnn_edgecnn",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "basic_gnn_gcn",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "basic_gnn_gin",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "basic_gnn_sage",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "dcgan",
+    "mode": "infer",
+    "regions": 5,
+    "time": 2.88
+  },
+  {
+    "model": "demucs",
+    "mode": "infer",
+    "regions": 25,
+    "time": 6.04
+  },
+  {
+    "model": "densenet121",
+    "mode": "infer",
+    "regions": 66,
+    "time": 28.64
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_101_c4",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_101_dc5",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_101_fpn",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_50_c4",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_50_dc5",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fasterrcnn_r_50_fpn",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_fcos_r_50_fpn",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn_r_101_c4",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn_r_101_fpn",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn_r_50_c4",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "detectron2_maskrcnn_r_50_fpn",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "dlrm",
+    "mode": "infer",
+    "regions": 6,
+    "time": 2.93
+  },
+  {
+    "model": "doctr_det_predictor",
+    "mode": "infer",
+    "regions": 20,
+    "time": 10.96
+  },
+  {
+    "model": "doctr_reco_predictor",
+    "mode": "infer",
+    "regions": 10,
+    "time": 3.8
+  },
+  {
+    "model": "drq",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "fastNLP_Bert",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "functorch_dp_cifar10",
+    "mode": "infer",
+    "regions": 12,
+    "time": 4.3
+  },
+  {
+    "model": "functorch_maml_omniglot",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "hf_Albert",
+    "mode": "infer",
+    "regions": 10,
+    "time": 11.37
+  },
+  {
+    "model": "hf_Bart",
+    "mode": "infer",
+    "regions": 18,
+    "time": 10.97
+  },
+  {
+    "model": "hf_Bert",
+    "mode": "infer",
+    "regions": 10,
+    "time": 11.38
+  },
+  {
+    "model": "hf_Bert_large",
+    "mode": "infer",
+    "regions": 10,
+    "time": 31.77
+  },
+  {
+    "model": "hf_BigBird",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  },
+  {
+    "model": "hf_DistilBert",
+    "mode": "infer",
+    "regions": 10,
+    "time": 6.19
+  },
+  {
+    "model": "hf_GPT2",
+    "mode": "infer",
+    "regions": 7,
+    "time": 8.43
+  },
+  {
+    "model": "hf_GPT2_large",
+    "mode": "infer",
+    "regions": 7,
+    "time": 37.0
+  },
+  {
+    "model": "hf_Longformer",
+    "mode": "infer",
+    "regions": 11,
+    "time": 39.08
+  },
+  {
+    "model": "hf_Reformer",
+    "mode": "infer",
+    "regions": 20,
+    "time": 34.74
+  },
+  {
+    "model": "hf_Roberta_base",
+    "mode": "infer",
+    "regions": 11,
+    "time": 10.99
+  },
+  {
+    "model": "hf_T5",
+    "mode": "infer",
+    "regions": 15,
+    "time": 18.91
+  },
+  {
+    "model": "hf_T5_base",
+    "mode": "infer",
+    "regions": 15,
+    "time": 61.9
+  },
+  {
+    "model": "hf_T5_large",
+    "mode": "infer",
+    "regions": 0,
+    "time": 133.28
+  },
+  {
+    "model": "hf_Whisper",
+    "mode": "infer",
+    "regions": 9,
+    "time": 10.2
+  },
+  {
+    "model": "hf_clip",
+    "mode": "infer",
+    "regions": 0,
+    "time": 0.0
+  }
+]

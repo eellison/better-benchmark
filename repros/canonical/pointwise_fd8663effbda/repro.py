@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([256, 960, 1, 1], f16), T([256, 960, 7, 7], f16))"
+
 class Repro(torch.nn.Module):
     def forward(self, convolution_59: "f16[256, 960, 1, 1]", convert_element_type_183: "f16[256, 960, 7, 7]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/ops/misc.py:257 in _scale, code: return self.scale_activation(scale)
@@ -30,11 +33,10 @@ class Repro(torch.nn.Module):
         return mul_tensor
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([256, 960, 1, 1], dtype=torch.float16, device='cuda'),
-    torch.randn([256, 960, 7, 7], dtype=torch.float16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

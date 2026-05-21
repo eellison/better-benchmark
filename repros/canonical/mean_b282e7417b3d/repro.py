@@ -7,16 +7,16 @@ Shape hash: 06d2847f
 import sys
 from pathlib import Path
 
-import sys
-from pathlib import Path
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
-from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_repro_version = 2
+_shapes_config = "(T([1024, 512], f32), T([32, 32, 512], f32), T([512], f32), T([32000, 512], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), T([64, 1024, 8, 64], f32), S([32, 32, 512]))"
 
 class Repro(torch.nn.Module):
     def forward(self, mm_55: "f32[1024, 512]", add_36: "f32[32, 32, 512]", arg91_1: "f32[512]", arg92_1: "f32[32000, 512]", arg7_1: "f32[64, 1024, 8, 64]", slice_scatter_1: "f32[64, 1024, 8, 64]", arg8_1: "f32[64, 1024, 8, 64]", slice_scatter_3: "f32[64, 1024, 8, 64]", arg18_1: "f32[64, 1024, 8, 64]", slice_scatter_5: "f32[64, 1024, 8, 64]", arg19_1: "f32[64, 1024, 8, 64]", slice_scatter_7: "f32[64, 1024, 8, 64]", arg29_1: "f32[64, 1024, 8, 64]", slice_scatter_9: "f32[64, 1024, 8, 64]", arg30_1: "f32[64, 1024, 8, 64]", slice_scatter_11: "f32[64, 1024, 8, 64]", arg40_1: "f32[64, 1024, 8, 64]", slice_scatter_13: "f32[64, 1024, 8, 64]", arg41_1: "f32[64, 1024, 8, 64]", slice_scatter_15: "f32[64, 1024, 8, 64]", arg51_1: "f32[64, 1024, 8, 64]", slice_scatter_17: "f32[64, 1024, 8, 64]", arg52_1: "f32[64, 1024, 8, 64]", slice_scatter_19: "f32[64, 1024, 8, 64]", arg62_1: "f32[64, 1024, 8, 64]", slice_scatter_21: "f32[64, 1024, 8, 64]", arg63_1: "f32[64, 1024, 8, 64]", slice_scatter_23: "f32[64, 1024, 8, 64]", arg73_1: "f32[64, 1024, 8, 64]", slice_scatter_25: "f32[64, 1024, 8, 64]", arg74_1: "f32[64, 1024, 8, 64]", slice_scatter_27: "f32[64, 1024, 8, 64]", arg84_1: "f32[64, 1024, 8, 64]", slice_scatter_29: "f32[64, 1024, 8, 64]", arg85_1: "f32[64, 1024, 8, 64]", slice_scatter_31: "f32[64, 1024, 8, 64]", _shape_param_0):
@@ -50,8 +50,10 @@ class Repro(torch.nn.Module):
         return (select_int, permute_default, copy__default, copy__default_1, copy__default_2, copy__default_3, copy__default_4, copy__default_5, copy__default_6, copy__default_7, copy__default_8, copy__default_9, copy__default_10, copy__default_11, copy__default_12, copy__default_13, copy__default_14, copy__default_15)
 
 
+
 def _default_make_inputs():
-    return []
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

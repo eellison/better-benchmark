@@ -183,19 +183,43 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             with open(meta_path, "w") as f:
                 json.dump(meta, f, indent=2)
 
-        # Write canonical repro.py if it doesn't exist
+        # Write canonical repro.py if it doesn't exist or needs upgrade to v2
         repro_py = repro_dir / "repro.py"
-        if not repro_py.exists():
+        needs_write = not repro_py.exists()
+        if not needs_write and repro_py.exists():
+            existing = repro_py.read_text()
+            if "_repro_version = 2" not in existing:
+                needs_write = True  # upgrade stale repro to v2
+        if needs_write:
             src_file = Path(entry["file"])
             if src_file.exists():
                 try:
-                    repro_class = extract_repro_class(src_file)
-                    docstring = extract_docstring(src_file)
-                    imports = extract_imports(src_file)
-                    fallback = extract_make_inputs_body(src_file)
-                    if repro_class:
-                        code = generate_canonical_repro(repro_class, docstring, imports, fallback)
-                        repro_py.write_text(code)
+                    src_text = src_file.read_text()
+                    # If source is already v2 format (has _shapes_config), use it directly
+                    if "_repro_version = 2" in src_text and "_shapes_config" in src_text:
+                        repro_py.write_text(src_text)
+                    else:
+                        repro_class = extract_repro_class(src_file)
+                        docstring = extract_docstring(src_file)
+                        imports = extract_imports(src_file)
+                        fallback = extract_make_inputs_body(src_file)
+                        # Compute shapes_config from input specs
+                        input_specs = parse_make_inputs(src_file)
+                        shapes_config = None
+                        if input_specs:
+                            parts = []
+                            for spec in input_specs:
+                                if spec.get("kind") == "shape":
+                                    parts.append(f"S({spec['dims']})")
+                                else:
+                                    parts.append(_spec_to_T(spec))
+                            shapes_config = f"({', '.join(parts)})"
+                        if repro_class:
+                            code = generate_canonical_repro(
+                                repro_class, docstring, imports, fallback,
+                                shapes_config=shapes_config,
+                            )
+                            repro_py.write_text(code)
                 except Exception as e:
                     print(f"  Warning: could not generate canonical repro for {dir_name}: {e}")
 

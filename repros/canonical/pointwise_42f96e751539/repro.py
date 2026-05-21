@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([1024, 512], f32), T([197951, 512], f32))"
+
 class Repro(torch.nn.Module):
     def forward(self, addmm_4: "f32[1024, 512]", arg11_1: "f32[197951, 512]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/nvidia_deeprecommender/reco_encoder/model/model.py:12 in activation, code: return F.selu(input)
@@ -30,11 +33,10 @@ class Repro(torch.nn.Module):
         return (where_self, permute_default)
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([1024, 512], dtype=torch.float32, device='cuda'),
-    torch.randn([197951, 512], dtype=torch.float32, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

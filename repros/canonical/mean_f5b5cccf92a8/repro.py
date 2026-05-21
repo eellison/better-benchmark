@@ -15,6 +15,9 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+_repro_version = 2
+_shapes_config = "(T([120], f16), T([256, 120, 28, 28], f16), T([120], f16), T([120], f16), T([120], f16))"
+
 class Repro(torch.nn.Module):
     def forward(self, arg90_1: "f16[120]", convolution_20: "f16[256, 120, 28, 28]", arg91_1: "f16[120]", arg92_1: "f16[120]", arg93_1: "f16[120]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/mobilenetv3.py:112 in forward, code: result = self.block(input)
@@ -44,14 +47,10 @@ class Repro(torch.nn.Module):
         return mean_dim
 
 
+
 def _default_make_inputs():
-    return [
-    torch.randn([120], dtype=torch.float16, device='cuda'),
-    torch.randn([256, 120, 28, 28], dtype=torch.float16, device='cuda'),
-    torch.randn([120], dtype=torch.float16, device='cuda'),
-    torch.randn([120], dtype=torch.float16, device='cuda'),
-    torch.randn([120], dtype=torch.float16, device='cuda'),
-    ]
+    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)
 
 
 def make_inputs(shape_config=None):

@@ -333,10 +333,21 @@ def generate_canonical_repro(
     docstring: str,
     imports: list[str],
     default_make_inputs_code: str,
+    shapes_config: str | None = None,
 ) -> str:
     """Generate a canonical repro.py that uses repro_harness."""
 
     import_block = "\n".join(imports)
+
+    if shapes_config:
+        version_block = f"""_repro_version = 2
+_shapes_config = "{shapes_config}"
+"""
+        make_inputs_body = """    from repro_harness import parse_shapes_config
+    return parse_shapes_config(_shapes_config)"""
+    else:
+        version_block = "_repro_version = 2\n"
+        make_inputs_body = default_make_inputs_code
 
     return f'''{docstring}
 import sys
@@ -347,11 +358,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
+{version_block}
 {repro_class_code}
 
 
 def _default_make_inputs():
-{default_make_inputs_code}
+{make_inputs_body}
 
 
 def make_inputs(shape_config=None):

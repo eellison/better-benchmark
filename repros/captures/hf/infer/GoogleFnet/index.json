@@ -1,0 +1,217 @@
+[
+  {
+    "file": "/tmp/tmpmii33hsj/region_000_amax_sum_cac065228fee_23f019ef.py",
+    "kind": "reduction",
+    "pattern_hash": "cac065228fee",
+    "shape_hash": "23f019ef",
+    "hash": "cac065228fee_23f019ef",
+    "reduction_types": [
+      "amax",
+      "sum",
+      "sum",
+      "sum"
+    ],
+    "n_ops": 24,
+    "origin_ops": [
+      "aten.amax.default",
+      "aten.div.Tensor",
+      "aten.exp.default",
+      "aten.full.default",
+      "aten.full.default",
+      "aten.gather.default",
+      "aten.log.default",
+      "aten.ne.Scalar",
+      "aten.ne.Scalar",
+      "aten.ne.Scalar",
+      "aten.neg.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.squeeze.dim",
+      "aten.sub.Tensor",
+      "aten.sub.Tensor",
+      "aten.sum.default",
+      "aten.sum.default",
+      "aten.sum.dim_IntList",
+      "aten.unsqueeze.default",
+      "aten.where.self",
+      "aten.where.self",
+      "prims.convert_element_type.default"
+    ]
+  },
+  {
+    "file": "/tmp/tmpmii33hsj/region_001_var_mean_278d11c00219_0cb674cc.py",
+    "kind": "reduction",
+    "pattern_hash": "278d11c00219",
+    "shape_hash": "0cb674cc",
+    "hash": "278d11c00219_0cb674cc",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 20,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.pow.Tensor_Scalar",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "aten.tanh.default",
+      "aten.var_mean.correction"
+    ]
+  },
+  {
+    "file": "/tmp/tmpmii33hsj/region_002_var_mean_01ae8f681ede_a4fcd618.py",
+    "kind": "reduction",
+    "pattern_hash": "01ae8f681ede",
+    "shape_hash": "a4fcd618",
+    "hash": "01ae8f681ede_a4fcd618",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 13,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "aten.var_mean.correction"
+    ]
+  },
+  {
+    "file": "/tmp/tmpmii33hsj/region_003_pointwise_9e14b9e8936c_b3e7b15f.py",
+    "kind": "pointwise",
+    "pattern_hash": "9e14b9e8936c",
+    "shape_hash": "b3e7b15f",
+    "hash": "9e14b9e8936c_b3e7b15f",
+    "reduction_types": [],
+    "n_ops": 11,
+    "origin_ops": [
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.pow.Tensor_Scalar",
+      "aten.reshape.default",
+      "aten.reshape.default",
+      "aten.tanh.default"
+    ]
+  },
+  {
+    "file": "/tmp/tmpmii33hsj/region_004_var_mean_1ed90593b8ed_3e091013.py",
+    "kind": "reduction",
+    "pattern_hash": "1ed90593b8ed",
+    "shape_hash": "3e091013",
+    "hash": "1ed90593b8ed_3e091013",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 13,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.select.int",
+      "aten.sub.Tensor",
+      "aten.var_mean.correction"
+    ]
+  },
+  {
+    "file": "/tmp/tmpmii33hsj/region_005_var_mean_0b57b751c71a_60b8f448.py",
+    "kind": "reduction",
+    "pattern_hash": "0b57b751c71a",
+    "shape_hash": "60b8f448",
+    "hash": "0b57b751c71a_60b8f448",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 12,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "aten.var_mean.correction",
+      "prims.convert_element_type.default"
+    ]
+  },
+  {
+    "file": "/tmp/tmpmii33hsj/region_006_pointwise_495c3f40cd20_e045a23d.py",
+    "kind": "pointwise",
+    "pattern_hash": "495c3f40cd20",
+    "shape_hash": "e045a23d",
+    "hash": "495c3f40cd20_e045a23d",
+    "reduction_types": [],
+    "n_ops": 2,
+    "origin_ops": [
+      "aten.reshape.default",
+      "prims.convert_element_type.default"
+    ]
+  },
+  {
+    "file": "/tmp/tmpmii33hsj/region_007_var_mean_e210c66e72d1_432a2049.py",
+    "kind": "reduction",
+    "pattern_hash": "e210c66e72d1",
+    "shape_hash": "432a2049",
+    "hash": "e210c66e72d1_432a2049",
+    "reduction_types": [
+      "var_mean"
+    ],
+    "n_ops": 17,
+    "origin_ops": [
+      "<built-in function getitem>",
+      "<built-in function getitem>",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.add.Tensor",
+      "aten.embedding.default",
+      "aten.embedding.default",
+      "aten.embedding.default",
+      "aten.expand.default",
+      "aten.mul.Tensor",
+      "aten.mul.Tensor",
+      "aten.permute.default",
+      "aten.reshape.default",
+      "aten.rsqrt.default",
+      "aten.sub.Tensor",
+      "aten.var_mean.correction"
+    ]
+  }
+]

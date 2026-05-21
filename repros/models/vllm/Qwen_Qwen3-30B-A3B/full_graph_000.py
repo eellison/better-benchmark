@@ -338,7 +338,7 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:399 in grouped_mm_experts_forward, code: offsets = torch.cumsum(tokens_per_expert, dim=0, dtype=torch.int32)
         cumsum_1: "i32[128]" = torch.ops.aten.cumsum.default(histc, 0, dtype = torch.int32);  histc = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         _grouped_mm: "bf16[16384, 1536]" = torch.ops.aten._grouped_mm.default(where_1, permute_10, cumsum_1);  where_1 = permute_10 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:514 in _default_apply_gate, code: gate, up = gate_up_out.chunk(2, dim=-1)  # (S, intermediate_dim)
@@ -363,7 +363,7 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_11: "bf16[128, 768, 2048]" = torch.ops.aten.permute.default(arg13_1, [0, 2, 1]);  arg13_1 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         _grouped_mm_1: "bf16[16384, 2048]" = torch.ops.aten._grouped_mm.default(mul_15, permute_11, cumsum_1);  mul_15 = permute_11 = cumsum_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:269 in forward, code: router_top_value /= router_top_value.sum(dim=-1, keepdim=True)
@@ -634,7 +634,7 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:399 in grouped_mm_experts_forward, code: offsets = torch.cumsum(tokens_per_expert, dim=0, dtype=torch.int32)
         cumsum_2: "i32[128]" = torch.ops.aten.cumsum.default(histc_1, 0, dtype = torch.int32);  histc_1 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         _grouped_mm_2: "bf16[16384, 1536]" = torch.ops.aten._grouped_mm.default(where_4, permute_21, cumsum_2);  where_4 = permute_21 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:514 in _default_apply_gate, code: gate, up = gate_up_out.chunk(2, dim=-1)  # (S, intermediate_dim)
@@ -659,7 +659,7 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_22: "bf16[128, 768, 2048]" = torch.ops.aten.permute.default(arg24_1, [0, 2, 1]);  arg24_1 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         _grouped_mm_3: "bf16[16384, 2048]" = torch.ops.aten._grouped_mm.default(mul_29, permute_22, cumsum_2);  mul_29 = permute_22 = cumsum_2 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:269 in forward, code: router_top_value /= router_top_value.sum(dim=-1, keepdim=True)
@@ -930,7 +930,7 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:399 in grouped_mm_experts_forward, code: offsets = torch.cumsum(tokens_per_expert, dim=0, dtype=torch.int32)
         cumsum_3: "i32[128]" = torch.ops.aten.cumsum.default(histc_2, 0, dtype = torch.int32);  histc_2 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         _grouped_mm_4: "bf16[16384, 1536]" = torch.ops.aten._grouped_mm.default(where_7, permute_32, cumsum_3);  where_7 = permute_32 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:514 in _default_apply_gate, code: gate, up = gate_up_out.chunk(2, dim=-1)  # (S, intermediate_dim)
@@ -955,7 +955,7 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_33: "bf16[128, 768, 2048]" = torch.ops.aten.permute.default(arg35_1, [0, 2, 1]);  arg35_1 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         _grouped_mm_5: "bf16[16384, 2048]" = torch.ops.aten._grouped_mm.default(mul_43, permute_33, cumsum_3);  mul_43 = permute_33 = cumsum_3 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:269 in forward, code: router_top_value /= router_top_value.sum(dim=-1, keepdim=True)
@@ -1226,7 +1226,7 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:399 in grouped_mm_experts_forward, code: offsets = torch.cumsum(tokens_per_expert, dim=0, dtype=torch.int32)
         cumsum_4: "i32[128]" = torch.ops.aten.cumsum.default(histc_3, 0, dtype = torch.int32);  histc_3 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         _grouped_mm_6: "bf16[16384, 1536]" = torch.ops.aten._grouped_mm.default(where_10, permute_43, cumsum_4);  where_10 = permute_43 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:514 in _default_apply_gate, code: gate, up = gate_up_out.chunk(2, dim=-1)  # (S, intermediate_dim)
@@ -1234,7 +1234,7 @@ class GraphModule(torch.nn.Module):
         getitem_58: "bf16[16384, 768]" = split_3[0]
         getitem_59: "bf16[16384, 768]" = split_3[1];  split_3 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:5461 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:5462 in pad, code: return torch._C._nn.pad(input, pad, mode, value)
         constant_pad_nd: "i64[4, 513]" = torch.ops.aten.constant_pad_nd.default(arg49_1, [0, 1], -100.0);  arg49_1 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/loss/loss_utils.py:61 in ForCausalLMLoss, code: shift_labels = labels[..., 1:].contiguous()
@@ -1264,7 +1264,7 @@ class GraphModule(torch.nn.Module):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/integrations/moe.py:364 in _grouped_linear, code: out = _grouped_mm(input, weight.transpose(-2, -1), offs=offs)
         permute_44: "bf16[128, 768, 2048]" = torch.ops.aten.permute.default(arg46_1, [0, 2, 1]);  arg46_1 = None
 
-        # File: /tmp/pytorch-work/torch/nn/functional.py:6781 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
+        # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torch/nn/functional.py:6782 in grouped_mm, code: return torch._grouped_mm(mat_a, mat_b, offs=offs, bias=bias, out_dtype=out_dtype)
         _grouped_mm_7: "bf16[16384, 2048]" = torch.ops.aten._grouped_mm.default(mul_57, permute_44, cumsum_4);  mul_57 = permute_44 = cumsum_4 = None
 
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/qwen3_moe/modeling_qwen3_moe.py:269 in forward, code: router_top_value /= router_top_value.sum(dim=-1, keepdim=True)

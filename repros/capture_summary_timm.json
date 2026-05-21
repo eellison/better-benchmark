@@ -1,0 +1,218 @@
+[
+  {
+    "model": "adv_inception_v3",
+    "mode": "infer",
+    "regions": 29,
+    "time": 14.235555171966553
+  },
+  {
+    "model": "adv_inception_v3",
+    "mode": "train",
+    "regions": 65,
+    "time": 65.77159333229065
+  },
+  {
+    "model": "beit_base_patch16_224",
+    "mode": "infer",
+    "regions": 6,
+    "time": 5.709258317947388
+  },
+  {
+    "model": "beit_base_patch16_224",
+    "mode": "train",
+    "regions": 14,
+    "time": 13.994462013244629
+  },
+  {
+    "model": "convnextv2_nano.fcmae_ft_in22k_in1k",
+    "mode": "infer",
+    "regions": 16,
+    "time": 6.3480072021484375
+  },
+  {
+    "model": "convnextv2_nano.fcmae_ft_in22k_in1k",
+    "mode": "train",
+    "regions": 31,
+    "time": 17.14767360687256
+  },
+  {
+    "model": "deit_base_distilled_patch16_224",
+    "mode": "infer",
+    "regions": 7,
+    "time": 4.566791534423828
+  },
+  {
+    "model": "deit_base_distilled_patch16_224",
+    "mode": "train",
+    "regions": 15,
+    "time": 11.627041816711426
+  },
+  {
+    "model": "deit_tiny_patch16_224.fb_in1k",
+    "mode": "infer",
+    "regions": 6,
+    "time": 4.153917074203491
+  },
+  {
+    "model": "deit_tiny_patch16_224.fb_in1k",
+    "mode": "train",
+    "regions": 13,
+    "time": 11.083287239074707
+  },
+  {
+    "model": "dm_nfnet_f0",
+    "mode": "infer",
+    "regions": 33,
+    "time": 16.246175527572632
+  },
+  {
+    "model": "dm_nfnet_f0",
+    "mode": "train",
+    "regions": 63,
+    "time": 42.03005337715149
+  },
+  {
+    "model": "ghostnet_100",
+    "mode": "infer",
+    "regions": 62,
+    "time": 14.928324460983276
+  },
+  {
+    "model": "ghostnet_100",
+    "mode": "train",
+    "regions": 123,
+    "time": 58.17256498336792
+  },
+  {
+    "model": "inception_v3",
+    "mode": "infer",
+    "regions": 29,
+    "time": 11.916831731796265
+  },
+  {
+    "model": "inception_v3",
+    "mode": "train",
+    "regions": 65,
+    "time": 65.7116219997406
+  },
+  {
+    "model": "mobilenetv2_100",
+    "mode": "infer",
+    "regions": 24,
+    "time": 6.108701229095459
+  },
+  {
+    "model": "mobilenetv2_100",
+    "mode": "train",
+    "regions": 49,
+    "time": 26.02045726776123
+  },
+  {
+    "model": "mobilenetv3_large_100",
+    "mode": "infer",
+    "regions": 43,
+    "time": 8.934134483337402
+  },
+  {
+    "model": "mobilenetv3_large_100",
+    "mode": "train",
+    "regions": 87,
+    "time": 34.07784628868103
+  },
+  {
+    "model": "mobilevit_s",
+    "mode": "infer",
+    "regions": 41,
+    "time": 13.508524894714355
+  },
+  {
+    "model": "mobilevit_s",
+    "mode": "train",
+    "regions": 83,
+    "time": 39.34883737564087
+  },
+  {
+    "model": "nfnet_l0",
+    "mode": "infer",
+    "regions": 32,
+    "time": 14.789278745651245
+  },
+  {
+    "model": "nfnet_l0",
+    "mode": "train",
+    "regions": 61,
+    "time": 38.119263887405396
+  },
+  {
+    "model": "repvgg_a2",
+    "mode": "infer",
+    "regions": 8,
+    "time": 4.843935251235962
+  },
+  {
+    "model": "repvgg_a2",
+    "mode": "train",
+    "regions": 17,
+    "time": 25.07161831855774
+  },
+  {
+    "model": "swin_base_patch4_window7_224",
+    "mode": "infer",
+    "regions": 39,
+    "time": 36.919493198394775
+  },
+  {
+    "model": "swin_base_patch4_window7_224",
+    "mode": "train",
+    "regions": 79,
+    "time": 87.70932388305664
+  },
+  {
+    "model": "tf_efficientnet_b0",
+    "mode": "infer",
+    "regions": 51,
+    "time": 10.906421184539795
+  },
+  {
+    "model": "tf_efficientnet_b0",
+    "mode": "train",
+    "regions": 102,
+    "time": 40.78775429725647
+  },
+  {
+    "model": "visformer_small",
+    "mode": "infer",
+    "regions": 19,
+    "time": 6.1619203090667725
+  },
+  {
+    "model": "visformer_small",
+    "mode": "train",
+    "regions": 37,
+    "time": 21.232414484024048
+  },
+  {
+    "model": "vit_base_patch14_dinov2.lvd142m",
+    "mode": "infer",
+    "regions": 6,
+    "time": 5.017215728759766
+  },
+  {
+    "model": "vit_base_patch14_dinov2.lvd142m",
+    "mode": "train",
+    "regions": 13,
+    "time": 16.29491400718689
+  },
+  {
+    "model": "vit_base_patch16_siglip_256",
+    "mode": "infer",
+    "regions": 10,
+    "time": 4.581127166748047
+  },
+  {
+    "model": "vit_base_patch16_siglip_256",
+    "mode": "train",
+    "regions": 21,
+    "time": 12.813541650772095
+  }
+]
