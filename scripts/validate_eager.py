@@ -37,18 +37,30 @@ def _find_repros(paths: list[Path]) -> list[Path]:
 def _load_benchmark_set(path: Path, canonical_dir: Path) -> list[Path]:
     data = json.loads(path.read_text())
     repros = []
+    missing = []
     for entry in data.get("patterns", []):
         name = entry.get("name")
         if name:
             repro = canonical_dir / name / "repro.py"
             if repro.exists():
                 repros.append(repro)
+            else:
+                missing.append(name)
     for entry in data.get("benchmarks", []):
         name = entry.get("repro")
         if name:
             repro = canonical_dir / name / "repro.py"
             if repro.exists():
                 repros.append(repro)
+            else:
+                missing.append(name)
+    if missing:
+        preview = ", ".join(missing[:10])
+        suffix = f" and {len(missing) - 10} more" if len(missing) > 10 else ""
+        raise FileNotFoundError(
+            f"{path} references {len(missing)} missing canonical repros: "
+            f"{preview}{suffix}"
+        )
     return sorted(set(repros))
 
 

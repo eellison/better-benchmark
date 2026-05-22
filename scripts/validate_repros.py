@@ -3,9 +3,9 @@ Validate canonical repros for correctness.
 
 Checks:
 1. repro.py parses (syntax OK)
-2. _default_make_inputs() arg count matches forward() signature
+2. _shapes_config arg count matches forward() signature
 3. Default shape runs without crashing
-4. Each shapes.json config runs without crashing
+4. Each shapes.txt/shapes.json config runs without crashing
 
 Usage:
     python scripts/validate_repros.py                    # validate all
@@ -13,11 +13,9 @@ Usage:
     python scripts/validate_repros.py --repro var_mean_a7cbd072693b  # one repro
 """
 import argparse
+import ast
 import importlib.util
-import inspect
-import json
 import math
-import os
 import sys
 from pathlib import Path
 
@@ -34,36 +32,62 @@ def validate_syntax(repro_path: Path) -> str | None:
         return f"SyntaxError: {e}"
 
 
+def _forward_arg_count(content: str) -> int | None:
+    tree = ast.parse(content)
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == "Repro":
+            for item in node.body:
+                if isinstance(item, ast.FunctionDef) and item.name == "forward":
+                    return len(item.args.args) - 1
+    return None
+
+
+def _shapes_config(content: str) -> str | None:
+    tree = ast.parse(content)
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(
+            isinstance(target, ast.Name) and target.id == "_shapes_config"
+            for target in node.targets
+        ):
+            continue
+        if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+            return node.value.value
+        return None
+    return None
+
+
+def _shape_expr_input_count(expr: str) -> int:
+    tree = ast.parse(expr, mode="eval")
+    return sum(
+        1
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"T", "S"}
+    )
+
+
 def validate_arg_count(repro_path: Path) -> str | None:
-    """Check _default_make_inputs() produces right number of args for forward()."""
+    """Check _shapes_config describes the right number of args for forward()."""
     content = repro_path.read_text()
 
-    # Count forward args (excluding self)
-    import re
-    fwd_match = re.search(r'def forward\(self,([^)]*)\)', content)
-    if not fwd_match:
+    n_fwd = _forward_arg_count(content)
+    if n_fwd is None:
         return "No forward() found"
-    fwd_args = [a.strip() for a in fwd_match.group(1).split(',') if a.strip()]
-    n_fwd = len(fwd_args)
 
-    # Count items in _default_make_inputs
-    # Count lines with tensor creation or shape param lists
-    in_fn = False
-    n_inputs = 0
-    for line in content.split('\n'):
-        if 'def _default_make_inputs' in line:
-            in_fn = True
-            continue
-        if in_fn:
-            stripped = line.strip()
-            if stripped.startswith('return') or stripped == ']':
-                break
-            if stripped and not stripped.startswith('#') and stripped != '[':
-                if 'torch.' in stripped or stripped.startswith('[') or stripped.isdigit():
-                    n_inputs += 1
+    config = _shapes_config(content)
+    if config is None:
+        return "Missing _shapes_config"
+
+    try:
+        n_inputs = _shape_expr_input_count(config)
+    except SyntaxError as e:
+        return f"_shapes_config parse failed: {e}"
 
     if n_fwd != n_inputs:
-        return f"Arg mismatch: forward expects {n_fwd}, _default_make_inputs provides {n_inputs}"
+        return f"Arg mismatch: forward expects {n_fwd}, _shapes_config has {n_inputs}"
     return None
 
 
@@ -79,7 +103,10 @@ def validate_default_runs(repro_path: Path) -> str | None:
         spec.loader.exec_module(mod)
 
         repro = mod.Repro()
-        inputs = mod._default_make_inputs()
+        from repro_harness import make_inputs_safely
+
+        make_inputs = mod.make_inputs if hasattr(mod, "make_inputs") else mod._default_make_inputs
+        inputs = make_inputs_safely(make_inputs)
 
         with torch.no_grad():
             repro(*inputs)
@@ -89,13 +116,13 @@ def validate_default_runs(repro_path: Path) -> str | None:
 
 
 def validate_shapes_configs(repro_path: Path) -> list[str]:
-    """Check each shapes.json config runs."""
+    """Check each shapes.txt/shapes.json config runs."""
     import torch
     from repro_harness import load_shape_configs, make_inputs_from_config
 
     errors = []
-    shapes_json = repro_path.parent / "shapes.json"
-    if not shapes_json.exists():
+    configs = load_shape_configs(str(repro_path))
+    if not configs:
         return []
 
     try:
@@ -109,7 +136,6 @@ def validate_shapes_configs(repro_path: Path) -> list[str]:
     except Exception as e:
         return [f"Load failed: {e}"]
 
-    configs = load_shape_configs(str(repro_path))
     for key, config in configs.items():
         try:
             inputs = make_inputs_from_config(config)
@@ -171,7 +197,7 @@ def main():
             run_fail += 1
             continue
 
-        # 4. Shapes.json configs
+        # 4. Shape configs
         errors = validate_shapes_configs(repro)
         if errors:
             shape_fail += 1
@@ -181,10 +207,9 @@ def main():
             if len(errors) > 3:
                 print(f"  ... and {len(errors) - 3} more")
 
-        shapes_json = d / "shapes.json"
-        if shapes_json.exists():
-            data = json.loads(shapes_json.read_text())
-            shape_configs_tested += len(data.get("configs", {}))
+        from repro_harness import load_shape_configs
+
+        shape_configs_tested += len(load_shape_configs(str(repro)))
 
     print(f"\n{'='*60}")
     print(f"Validated {total} repros")
@@ -195,7 +220,7 @@ def main():
         print(f"  Syntax errors: {syntax_fail}")
         print(f"  Arg count mismatches: {arg_fail}")
         print(f"  Default run failures: {run_fail}")
-        print(f"  Shapes.json failures: {shape_fail} repros ({shape_configs_failed}/{shape_configs_tested} configs)")
+        print(f"  Shape config failures: {shape_fail} repros ({shape_configs_failed}/{shape_configs_tested} configs)")
         print(f"  All pass: {total - syntax_fail - arg_fail - run_fail - shape_fail}")
 
 

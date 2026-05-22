@@ -114,6 +114,7 @@ def load_benchmark_set(
         entries = data.get("patterns") or data.get("benchmarks") or []
 
     repros = []
+    missing = []
     for entry in entries:
         name = _benchmark_entry_name(entry)
         if not name:
@@ -121,6 +122,15 @@ def load_benchmark_set(
         repro_path = canonical_dir / name / "repro.py"
         if repro_path.exists():
             repros.append(repro_path)
+        else:
+            missing.append(name)
+    if missing:
+        preview = ", ".join(missing[:10])
+        suffix = f" and {len(missing) - 10} more" if len(missing) > 10 else ""
+        raise FileNotFoundError(
+            f"{benchmark_set} references {len(missing)} missing canonical repros: "
+            f"{preview}{suffix}"
+        )
     return sorted(set(repros)), len(entries)
 
 

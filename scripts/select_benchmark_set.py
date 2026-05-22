@@ -9,12 +9,24 @@ Strategy:
 Uses quantile-based bucketing (no hardcoded thresholds) so the selection
 adapts to whatever distribution of shapes exists.
 
-Output: a frozen JSON manifest of (repro_dir, shape_config_key) pairs.
+Output: a frozen JSON manifest of canonical repro names, with shape-count metadata.
 """
 import json
 import math
+import sys
 from collections import defaultdict
+from datetime import date
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from repro_harness import load_shape_configs
+
+
+def _kind_from_name(name: str) -> str:
+    reduction_markers = ("sum", "mean", "amax", "amin", "argmax", "argmin", "var")
+    if any(marker in name for marker in reduction_markers):
+        return "reduction"
+    return "pointwise"
 
 
 def _quantile_buckets(values: list[int | float], n_buckets: int) -> list[float]:
@@ -65,17 +77,11 @@ def select_benchmark_set(canonical_dir: Path, n_size_buckets: int = 4,
         if not (d / 'repro.py').exists():
             continue
         meta_path = d / 'meta.json'
-        if not meta_path.exists():
-            continue
-        meta = json.loads(meta_path.read_text())
-        kind = meta.get('kind', 'pointwise')
+        meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
+        kind = meta.get('kind') or _kind_from_name(d.name)
         is_reduction = kind == 'reduction'
 
-        configs = {}
-        sj = d / 'shapes.json'
-        if sj.exists():
-            data = json.loads(sj.read_text())
-            configs = data.get('configs', {})
+        configs = load_shape_configs(str(d / "repro.py"))
 
         config_info = []
         for config_key, config in configs.items():
@@ -194,17 +200,34 @@ def main():
     print(f"  Pointwise: {n_pointwise}")
     print(f"  Estimated time (2 GPUs): {len(selected) * 0.5 / 60 / 2:.0f} min")
 
+    patterns = []
+    for name in sorted({entry["repro"] for entry in selected}):
+        repro_dir = args.canonical_dir / name
+        meta_path = repro_dir / "meta.json"
+        meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
+        configs = load_shape_configs(str(repro_dir / "repro.py"))
+        patterns.append({
+            "name": name,
+            "kind": meta.get("kind") or _kind_from_name(name),
+            "n_shapes": max(len(configs), 1),
+        })
+
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps({
         "version": "v1",
-        "description": f"Auto-selected: {len(selected)} points from {n_repros} repros",
+        "created": date.today().isoformat(),
+        "description": (
+            f"Auto-selected from current canonical corpus: "
+            f"{len(selected)} shape points across {len(patterns)} repros"
+        ),
+        "n_patterns": len(patterns),
         "selection_params": {
             "max_pointwise": args.max_pointwise,
             "max_reduction": args.max_reduction,
             "size_buckets": args.size_buckets,
             "rdim_buckets": args.rdim_buckets,
         },
-        "benchmarks": selected,
+        "patterns": patterns,
     }, indent=2) + "\n")
     print(f"Written to {args.output}")
 
