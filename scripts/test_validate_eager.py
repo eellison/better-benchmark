@@ -6,6 +6,7 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 import unittest
@@ -37,6 +38,22 @@ class ValidateEagerTests(unittest.TestCase):
             )
 
             self.assertEqual(found, sorted({direct_file, nested_repro, sibling_repro}))
+
+    def test_load_benchmark_set_rejects_missing_entries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            canonical = root / "canonical"
+            _write(canonical / "present" / "repro.py")
+            manifest = root / "v1.json"
+            manifest.write_text(json.dumps({
+                "patterns": [
+                    {"name": "present"},
+                    {"name": "missing"},
+                ],
+            }))
+
+            with self.assertRaisesRegex(FileNotFoundError, "missing canonical repros"):
+                validate_eager._load_benchmark_set(manifest, canonical)
 
 
 if __name__ == "__main__":

@@ -13,8 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from bench import _count_bytes, _resolve_input_path
+from bench import _resolve_input_path
 from bench_parallel import _compute_worker_count, _filter_gpus, load_benchmark_set
+from byte_accounting import count_bytes_naive
 from capture_hook import _CaptureState
 import gpu_lock as gpu_lock_module
 from canonicalize_repros import _spec_to_T, parse_make_inputs
@@ -40,7 +41,7 @@ def test_count_bytes_deduplicates_output_aliases():
     inp = torch.empty(4, dtype=torch.float32)
     out = torch.empty(16, dtype=torch.float32)
 
-    assert _count_bytes([inp], (out, out.view(4, 4), out.reshape(2, 8))) == (
+    assert count_bytes_naive([inp], (out, out.view(4, 4), out.reshape(2, 8))) == (
         inp.nelement() + out.nelement()
     ) * inp.element_size()
 
@@ -50,7 +51,7 @@ def test_count_bytes_counts_distinct_outputs():
     out0 = torch.empty(16, dtype=torch.float32)
     out1 = torch.empty(16, dtype=torch.float32)
 
-    assert _count_bytes([inp], (out0, out1)) == (
+    assert count_bytes_naive([inp], (out0, out1)) == (
         inp.nelement() + out0.nelement() + out1.nelement()
     ) * inp.element_size()
 
@@ -128,13 +129,35 @@ def test_load_benchmark_set_accepts_current_patterns_schema():
             "version": "v1",
             "patterns": [
                 {"name": "foo", "kind": "pointwise"},
-                {"name": "missing", "kind": "reduction"},
             ],
         }))
 
         repros, entries = load_benchmark_set(manifest, canonical_dir=canonical_dir)
-        assert entries == 2
+        assert entries == 1
         assert repros == [canonical_dir / "foo" / "repro.py"]
+
+
+def test_load_benchmark_set_rejects_missing_patterns():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        canonical_dir = root / "repros" / "canonical"
+        _touch_repro(canonical_dir, "foo")
+        manifest = root / "v1.json"
+        manifest.write_text(json.dumps({
+            "version": "v1",
+            "patterns": [
+                {"name": "foo", "kind": "pointwise"},
+                {"name": "missing", "kind": "reduction"},
+            ],
+        }))
+
+        try:
+            load_benchmark_set(manifest, canonical_dir=canonical_dir)
+        except FileNotFoundError as exc:
+            assert "missing canonical repros" in str(exc)
+            assert "missing" in str(exc)
+        else:
+            raise AssertionError("missing benchmark-set entries should fail")
 
 
 def test_load_benchmark_set_accepts_legacy_benchmarks_schema():
@@ -381,11 +404,11 @@ def test_capture_hook_process_graph_splits_horizontal_fusion_regions():
     graph = torch.fx.Graph()
     x = graph.placeholder("x")
     x.meta["val"] = torch.empty(4)
-    viewed = graph.call_function(torch.ops.aten.view.default, (x, [4]))
-    viewed.meta["val"] = torch.empty(4)
-    left = graph.call_function(torch.ops.aten.sin.default, (viewed,))
+    unsupported = graph.call_method("relu", (x,))
+    unsupported.meta["val"] = torch.empty(4)
+    left = graph.call_function(torch.ops.aten.sin.default, (unsupported,))
     left.meta["val"] = torch.empty(4)
-    right = graph.call_function(torch.ops.aten.cos.default, (viewed,))
+    right = graph.call_function(torch.ops.aten.cos.default, (unsupported,))
     right.meta["val"] = torch.empty(4)
     graph.output((left, right))
 
