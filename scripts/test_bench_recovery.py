@@ -4,20 +4,23 @@ from __future__ import annotations
 
 import fcntl
 import json
+import multiprocessing as mp
 import os
 import queue
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
+import pytest
 import torch
 
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from bench_parallel import _locked_worker, _results_payload
+from bench_parallel import _locked_worker, _persistent_worker_script, _results_payload
 
 
 def _write_repro(path: Path, source: str) -> Path:
@@ -119,6 +122,30 @@ for line in sys.stdin:
 '''
 
 
+def _strict_lock_stress_worker(
+    script_prefix: str,
+    lock_dir: str,
+    iterations: int,
+    barrier,
+    results,
+) -> None:
+    os.environ["INDUCTOR_GPU_BENCH_LOCK"] = "1"
+    os.environ["INDUCTOR_GPU_BENCH_LOCK_DIR"] = lock_dir
+    namespace = {"__name__": "bench_parallel_generated_worker_stress"}
+    try:
+        exec(script_prefix, namespace)
+        from torch._inductor.runtime import benchmarking as inductor_benchmarking
+
+        for _ in range(iterations):
+            with namespace["gpu_setup_lock"]():
+                barrier.wait(timeout=60)
+                with inductor_benchmarking.maybe_gpu_benchmark_lock():
+                    time.sleep(0.001)
+        results.put(("ok", os.getpid()))
+    except BaseException as exc:
+        results.put(("error", f"{type(exc).__name__}: {exc}"))
+
+
 def test_results_payload_records_failures_without_changing_success_schema():
     successes = {
         "/tmp/ok/repro.py": {
@@ -143,6 +170,111 @@ def test_results_payload_records_failures_without_changing_success_schema():
     assert payload["/tmp/ok/repro.py"] == successes["/tmp/ok/repro.py"]
     assert payload["__failures__"] == failures
     assert payload["__summary__"]["failed"] == 1
+
+
+def test_default_worker_setup_does_not_take_gpu_lock():
+    script = _persistent_worker_script("0", {
+        "root": str(ROOT),
+        "all_shapes": False,
+        "no_cd": True,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": False,
+    })
+
+    assert "def gpu_setup_lock():" in script
+    assert "STRICT_GPU_LOCK = False" in script
+    assert "if STRICT_GPU_LOCK:\n        with gpu_bench_lock(\"shared\"):" in script
+    assert "with gpu_bench_lock():\n                    return do_bench" in script
+
+
+def test_strict_setup_lock_uses_inductor_lock_hook(monkeypatch, tmp_path):
+    try:
+        from torch._inductor.runtime import benchmarking as inductor_benchmarking
+    except Exception as exc:
+        pytest.skip(f"Inductor benchmarking unavailable: {exc}")
+
+    if not hasattr(inductor_benchmarking, "set_gpu_benchmark_lock_context"):
+        pytest.skip("Inductor benchmark lock hook unavailable")
+
+    previous = inductor_benchmarking.set_gpu_benchmark_lock_context(None)
+    script = _persistent_worker_script("0", {
+        "root": str(ROOT),
+        "all_shapes": False,
+        "no_cd": True,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": True,
+    })
+    prefix = script.split("# Main loop:", 1)[0]
+    lock_dir = tmp_path / "locks"
+    monkeypatch.setenv("INDUCTOR_GPU_BENCH_LOCK", "1")
+    monkeypatch.setenv("INDUCTOR_GPU_BENCH_LOCK_DIR", str(lock_dir))
+
+    namespace = {"__name__": "bench_parallel_generated_worker_test"}
+    try:
+        exec(prefix, namespace)
+        with namespace["gpu_setup_lock"]():
+            lock_path = lock_dir / "gpu_0.lock"
+            assert "mode=shared\n" in lock_path.read_text()
+            with inductor_benchmarking.maybe_gpu_benchmark_lock():
+                metadata = lock_path.read_text()
+                assert "mode=exclusive\n" in metadata
+                assert "label=bench_parallel_upgrade\n" in metadata
+            assert "mode=shared\n" in lock_path.read_text()
+    finally:
+        inductor_benchmarking.set_gpu_benchmark_lock_context(previous)
+
+
+def test_strict_setup_lock_stress_does_not_deadlock(tmp_path):
+    try:
+        from torch._inductor.runtime import benchmarking as inductor_benchmarking
+    except Exception as exc:
+        pytest.skip(f"Inductor benchmarking unavailable: {exc}")
+
+    if not hasattr(inductor_benchmarking, "set_gpu_benchmark_lock_context"):
+        pytest.skip("Inductor benchmark lock hook unavailable")
+    if "fork" not in mp.get_all_start_methods():
+        pytest.skip("strict lock stress uses forked worker processes")
+
+    script = _persistent_worker_script("0", {
+        "root": str(ROOT),
+        "all_shapes": False,
+        "no_cd": True,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": True,
+    })
+    prefix = script.split("# Main loop:", 1)[0]
+    ctx = mp.get_context("fork")
+    workers = 4
+    iterations = 25
+    barrier = ctx.Barrier(workers)
+    results = ctx.Queue()
+    procs = [
+        ctx.Process(
+            target=_strict_lock_stress_worker,
+            args=(prefix, str(tmp_path / "locks"), iterations, barrier, results),
+        )
+        for _ in range(workers)
+    ]
+
+    for proc in procs:
+        proc.start()
+    for proc in procs:
+        proc.join(timeout=20)
+
+    alive = [proc.pid for proc in procs if proc.is_alive()]
+    for proc in procs:
+        if proc.is_alive():
+            proc.terminate()
+            proc.join(timeout=5)
+
+    assert not alive, f"strict GPU lock stress deadlocked; live pids={alive}"
+    statuses = [results.get_nowait() for _ in range(results.qsize())]
+    errors = [payload for status, payload in statuses if status != "ok"]
+    assert not errors
+    assert len(statuses) == workers
 
 
 def test_locked_worker_recovers_after_failures_and_releases_gpu_lock(monkeypatch):

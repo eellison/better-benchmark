@@ -1,8 +1,9 @@
 """
 Parallel benchmark runner — distributes repros across all available GPUs.
 
-Each GPU gets a persistent worker process that holds the lock for the entire
-batch, avoiding per-repro torch startup overhead.
+Each GPU gets one or more persistent worker processes. Workers stay alive across
+repros to avoid per-repro torch startup overhead, and coordinate GPU timing with
+per-GPU locks.
 
 Usage:
     python scripts/bench_parallel.py repros/canonical/
@@ -24,10 +25,9 @@ Usage:
 #
 # Phase-split optimization (compile-then-time):
 # ---
-# Ideally we would: (1) compile N repros in parallel on a CPU pool (no GPU
-# lock needed for graph lowering/Triton codegen), then (2) acquire GPU lock
-# around benchmark timing phases. Use --strict-gpu-lock to also serialize
-# CUDA setup/warmup/capture phases when validating measurement variance.
+# Ideally we would: (1) compile N repros in parallel on a CPU pool, then
+# (2) acquire GPU lock around benchmark timing phases. Use --strict-gpu-lock
+# to hold a shared setup lock and upgrade to exclusive for timing/autotune.
 #
 # Challenge: torch.compile uses lazy compilation — the actual Triton kernel
 # generation and autotuning happen during the first few forward() calls, not
@@ -53,7 +53,7 @@ Usage:
 # 4. Adaptive worker count (NEW): --max-workers can exceed GPU count. Extra
 #    workers prepare repros speculatively; benchmark timing serializes on the
 #    per-GPU lock. --strict-gpu-lock additionally serializes CUDA setup,
-#    warmup, and capture to keep SOL/gap measurements stable.
+#    warmup, and capture against timing windows.
 #
 # Future work:
 # - torch._inductor cache-based phase split: compile with TORCH_COMPILE_DEBUG
@@ -463,8 +463,9 @@ def main():
     parser.add_argument("--no-share-cache", dest="share_cache", action="store_false",
                         help="Disable shared inductor cache")
     parser.add_argument("--strict-gpu-lock", action="store_true",
-                        help="Serialize CUDA setup/warmup/capture as well as timing. "
-                             "Slower, but useful for variance validation.")
+                        help="Hold a shared GPU lock during setup/warmup/capture "
+                             "and upgrade to exclusive for timing/autotune. "
+                             "Slower, useful for variance validation.")
     parser.add_argument("--tag", default=None,
                         help="Tag for this run (e.g. 'baseline', 'my_fix'). Used to key results in perf.json for comparison.")
     parser.add_argument("--compare", type=str, nargs=2, metavar=("TAG_A", "TAG_B"),
@@ -697,7 +698,8 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
 
     No process-level batch GPU lock. Workers serialize timing with
     INDUCTOR_GPU_BENCH_LOCK, while CPU-only module loading can overlap. With
-    --strict-gpu-lock, workers also serialize CUDA setup/warmup/capture.
+    --strict-gpu-lock, workers also serialize CUDA setup/warmup/capture against
+    timing windows via shared/exclusive lock upgrades.
     """
     import collections
     import subprocess
@@ -708,7 +710,7 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
         env["CUDA_VISIBLE_DEVICES"] = gpu["index"]
         # Enable the per-GPU exclusive lock used by inductor benchmark calls
         # and the direct harness CUDA setup/timing sections below.
-        env["INDUCTOR_GPU_BENCH_LOCK"] = "strict" if args_dict.get("strict_gpu_lock") else "1"
+        env["INDUCTOR_GPU_BENCH_LOCK"] = "1"
         # Share inductor cache across workers to avoid redundant compilation
         if args_dict.get("share_cache", True):
             env["TORCHINDUCTOR_CACHE_DIR"] = _SHARED_CACHE_DIR
@@ -953,6 +955,28 @@ def _gpu_bench_flock_op(mode):
         return fcntl.LOCK_EX
     raise ValueError(f"Unsupported GPU benchmark lock mode: {{mode!r}}")
 
+def _write_gpu_lock_metadata(fd, gpu, mode, label):
+    try:
+        os.ftruncate(fd, 0)
+        os.write(fd, (
+            f"pid={{os.getpid()}}\\n"
+            f"gpu={{gpu}}\\n"
+            f"mode={{mode}}\\n"
+            f"label={{label}}\\n"
+            f"acquired_unix={{time.time():.0f}}\\n"
+        ).encode())
+        os.fsync(fd)
+    except OSError:
+        pass
+
+def _release_fd(fd):
+    if fd is None:
+        return
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
+
 @contextlib.contextmanager
 def gpu_bench_lock(mode="exclusive"):
     if mode not in _GPU_BENCH_LOCK_MODES:
@@ -973,6 +997,7 @@ def gpu_bench_lock(mode="exclusive"):
     visible = [d.strip() for d in os.environ.get("CUDA_VISIBLE_DEVICES", "").split(",") if d.strip()]
     gpu = _safe_lock_component(visible[0] if visible else "0")
     lock_path = os.path.join(lock_dir, f"gpu_{{gpu}}.lock")
+    gate_path = os.path.join(lock_dir, f"gpu_{{gpu}}.gate")
     state = _gpu_bench_lock_state()
     mutex = state["mutex"]
     local = state["local"]
@@ -988,16 +1013,23 @@ def gpu_bench_lock(mode="exclusive"):
                 local.depth -= 1
             return
         if current_mode == "shared" and mode == "exclusive" and fd is not None:
+            gate_fd = os.open(gate_path, os.O_CREAT | os.O_RDWR, 0o666)
             fcntl.flock(fd, fcntl.LOCK_UN)
+            fcntl.flock(gate_fd, fcntl.LOCK_EX)
             fcntl.flock(fd, _gpu_bench_flock_op("exclusive"))
+            _write_gpu_lock_metadata(fd, gpu, "exclusive", "bench_parallel_upgrade")
             local.mode = "exclusive"
+            local.gate_fd = gate_fd
             local.depth = depth + 1
             try:
                 yield
             finally:
                 local.depth -= 1
                 fcntl.flock(fd, _gpu_bench_flock_op("shared"))
+                _write_gpu_lock_metadata(fd, gpu, "shared", "bench_parallel_setup")
                 local.mode = "shared"
+                local.gate_fd = None
+                _release_fd(gate_fd)
             return
         local.depth = depth + 1
         try:
@@ -1006,42 +1038,71 @@ def gpu_bench_lock(mode="exclusive"):
             local.depth -= 1
         return
     with mutex:
-        fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o666)
+        fd = None
+        gate_fd = None
         try:
-            fcntl.flock(fd, _gpu_bench_flock_op(mode))
-            try:
-                os.ftruncate(fd, 0)
-                os.write(fd, (
-                    f"pid={{os.getpid()}}\\n"
-                    f"gpu={{gpu}}\\n"
-                    f"mode={{mode}}\\n"
-                    "label=bench_parallel_do_bench\\n"
-                    f"acquired_unix={{time.time():.0f}}\\n"
-                ).encode())
-                os.fsync(fd)
-            except OSError:
-                pass
+            fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o666)
+            gate_fd = os.open(gate_path, os.O_CREAT | os.O_RDWR, 0o666)
+            if mode == "shared":
+                # Writer-preferring turnstile: an exclusive waiter holds the
+                # gate exclusively while waiting for existing shared holders to
+                # drain, which prevents new setup work from entering shared.
+                fcntl.flock(gate_fd, fcntl.LOCK_SH)
+                fcntl.flock(fd, fcntl.LOCK_SH)
+                _release_fd(gate_fd)
+                gate_fd = None
+            else:
+                fcntl.flock(gate_fd, fcntl.LOCK_EX)
+                fcntl.flock(fd, fcntl.LOCK_EX)
+            label = "bench_parallel_setup" if mode == "shared" else "bench_parallel_do_bench"
+            _write_gpu_lock_metadata(fd, gpu, mode, label)
             local.depth = 1
             local.mode = mode
             local.fd = fd
+            local.gate_fd = gate_fd
             try:
                 yield
             finally:
                 local.depth = 0
                 local.mode = None
                 local.fd = None
+                local.gate_fd = None
         finally:
-            fcntl.flock(fd, fcntl.LOCK_UN)
-            os.close(fd)
+            _release_fd(fd)
+            _release_fd(gate_fd)
+
+def _install_inductor_gpu_lock_hook():
+    """Register this worker's lock with Inductor internal benchmark calls."""
+    if not STRICT_GPU_LOCK:
+        return
+    try:
+        import torch._inductor.runtime.benchmarking as inductor_benchmarking
+    except Exception as exc:
+        raise RuntimeError("--strict-gpu-lock requires Inductor benchmarking hooks") from exc
+
+    set_context = getattr(inductor_benchmarking, "set_gpu_benchmark_lock_context", None)
+    if set_context is None:
+        raise RuntimeError(
+            "--strict-gpu-lock requires torch._inductor.runtime.benchmarking."
+            "set_gpu_benchmark_lock_context"
+        )
+
+    @contextlib.contextmanager
+    def context_factory():
+        with gpu_bench_lock("exclusive"):
+            yield
+
+    set_context(context_factory)
+
+_install_inductor_gpu_lock_hook()
 
 @contextlib.contextmanager
 def gpu_setup_lock():
     if STRICT_GPU_LOCK:
-        with gpu_bench_lock("exclusive"):
-            yield
-    else:
         with gpu_bench_lock("shared"):
             yield
+    else:
+        yield
 
 def _prefetch_module(repro_path):
     """Load a repro module into the cache (called from background thread)."""
@@ -1087,14 +1148,10 @@ def _bench_with_cudagraph(fn, inps, warmup, rep):
                 with torch.cuda.graph(g):
                     fn(*inps)
                 torch.cuda.synchronize()
-                if STRICT_GPU_LOCK:
-                    return do_bench(lambda: g.replay(), warmup=warmup, rep=rep, return_mode="min") * 1000
                 with gpu_bench_lock():
                     return do_bench(lambda: g.replay(), warmup=warmup, rep=rep, return_mode="min") * 1000
             except Exception:
                 # Fallback: some ops don't support CUDA graph capture
-                if STRICT_GPU_LOCK:
-                    return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep, return_mode="min") * 1000
                 with gpu_bench_lock():
                     return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep, return_mode="min") * 1000
 
