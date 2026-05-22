@@ -439,10 +439,21 @@ class _CaptureState:
                 return None
             return list(n.args[0])
 
-        def _iota_size(n):
+        _IOTA_PASSTHROUGH_OPS = {
+            torch.ops.aten.reshape.default,
+            torch.ops.aten.view.default,
+            torch.ops.aten.expand.default,
+            torch.ops.aten.unsqueeze.default,
+            torch.ops.aten.squeeze.default,
+            torch.ops.aten.squeeze.dim,
+        }
+
+        def _iota_size(n, max_hops=4):
             if n.op != "call_function":
                 return None
             if n.target != torch.ops.prims.iota.default:
+                if max_hops > 0 and n.target in _IOTA_PASSTHROUGH_OPS and n.args:
+                    return _iota_size(n.args[0], max_hops - 1)
                 return None
             if n.args and isinstance(n.args[0], int):
                 return int(n.args[0])
@@ -465,6 +476,20 @@ class _CaptureState:
                 iota_size = _iota_size(user.args[2])
                 if target_shape and iota_size and target_shape[0] == iota_size:
                     permutation_sizes[name] = iota_size
+
+            for user in node.users:
+                if user.op != "call_function" or user.target != torch.ops.aten.scatter.src:
+                    continue
+                if len(user.args) < 4 or user.args[2] is not node:
+                    continue
+                target_shape = _shape_from_alloc(user.args[0])
+                iota_size = _iota_size(user.args[3])
+                dim = user.args[1]
+                if target_shape and iota_size and isinstance(dim, int):
+                    if dim < 0:
+                        dim += len(target_shape)
+                    if 0 <= dim < len(target_shape) and target_shape[dim] == iota_size:
+                        permutation_sizes[name] = iota_size
         return permutation_sizes
 
     def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):

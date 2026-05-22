@@ -234,6 +234,25 @@ def test_make_inputs_from_config_honors_generators_on_cpu():
     assert int(bounded.max()) < 4
 
 
+def test_make_inputs_from_config_honors_batched_permutation_generator_on_cpu():
+    (perm,) = make_inputs_from_config({
+        "inputs": [
+            {
+                "kind": "tensor",
+                "shape": [2, 3, 4],
+                "dtype": "torch.int64",
+                "stride": None,
+                "device": "cpu",
+                "gen": {"kind": "permutation", "size": 4},
+            },
+        ],
+    })
+
+    assert perm.shape == (2, 3, 4)
+    for row in perm.reshape(-1, 4):
+        assert sorted(row.tolist()) == list(range(4))
+
+
 def test_parse_make_inputs_preserves_generators():
     with tempfile.TemporaryDirectory() as tmp:
         repro = Path(tmp) / "repro.py"
@@ -360,6 +379,65 @@ def test_capture_hook_emits_permutation_config_for_inverse_permutation_indices()
         source = (Path(tmp) / "repro.py").read_text()
 
     assert "T([8], i64, gen=Perm(8))" in source
+
+
+def test_capture_hook_emits_batched_permutation_config_for_scatter_inverse_indices():
+    graph = torch.fx.Graph()
+    idx = graph.placeholder("idx")
+    idx.meta["val"] = torch.empty(2, 3, 4, dtype=torch.int64)
+    empty = graph.call_function(
+        torch.ops.aten.empty.memory_format,
+        ([2, 3, 4],),
+        {
+            "dtype": torch.int64,
+            "layout": torch.strided,
+            "device": torch.device("cuda"),
+            "pin_memory": False,
+        },
+    )
+    empty.meta["val"] = torch.empty(2, 3, 4, dtype=torch.int64)
+    iota = graph.call_function(
+        torch.ops.prims.iota.default,
+        (4,),
+        {
+            "start": 0,
+            "step": 1,
+            "dtype": torch.int64,
+            "device": torch.device("cuda"),
+            "requires_grad": False,
+        },
+    )
+    iota.meta["val"] = torch.empty(4, dtype=torch.int64)
+    viewed = graph.call_function(torch.ops.aten.view.default, (iota, [1, 1, -1]))
+    viewed.meta["val"] = torch.empty(1, 1, 4, dtype=torch.int64)
+    expanded = graph.call_function(torch.ops.aten.expand.default, (viewed, [2, 3, 4]))
+    expanded.meta["val"] = torch.empty(2, 3, 4, dtype=torch.int64)
+    inverse = graph.call_function(
+        torch.ops.aten.scatter.src,
+        (empty, -1, idx, expanded),
+    )
+    inverse.meta["val"] = torch.empty(2, 3, 4, dtype=torch.int64)
+    graph.output(inverse)
+
+    gm = torch.fx.GraphModule({}, graph)
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(tmp, validate=False)
+        state._generate_repro_file(
+            gm,
+            {
+                "idx": {
+                    "dtype": "torch.int64",
+                    "shape": [2, 3, 4],
+                    "stride": [],
+                    "device": "cuda",
+                }
+            },
+            {"pattern_hash": "pattern", "shape_hash": "shape"},
+            "repro.py",
+        )
+        source = (Path(tmp) / "repro.py").read_text()
+
+    assert "T([2, 3, 4], i64, gen=Perm(4))" in source
 
 
 def _real_targets(nodes):
@@ -513,10 +591,12 @@ if __name__ == "__main__":
     test_make_inputs_safely_handles_legacy_bool_randn()
     test_shape_configs_accept_general_input_generators()
     test_make_inputs_from_config_honors_generators_on_cpu()
+    test_make_inputs_from_config_honors_batched_permutation_generator_on_cpu()
     test_parse_make_inputs_preserves_generators()
     test_capture_hook_traces_select_to_index_bound()
     test_capture_hook_traces_gathered_values_to_embedding_bound()
     test_capture_hook_emits_permutation_config_for_inverse_permutation_indices()
+    test_capture_hook_emits_batched_permutation_config_for_scatter_inverse_indices()
     test_capture_hook_process_graph_splits_horizontal_fusion_regions()
     test_capture_hook_process_graph_keeps_getitem_data_dependency_together()
     test_gpu_lock_metadata_marks_lock_mode()

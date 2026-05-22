@@ -230,15 +230,27 @@ def _generation_spec(spec: dict) -> dict | None:
 
 
 def _make_permutation_tensor(shape, dtype, device, stride=None, size=None):
-    """Create a tensor containing a random permutation of [0, size)."""
+    """Create a tensor containing random permutations of [0, size).
+
+    If `size` is smaller than the tensor numel and divides it evenly, generate
+    independent row-wise permutations. This covers inverse-permutation index
+    tensors with shape like [batch, heads, N] and gen=Perm(N).
+    """
     logical_numel = _numel(shape)
     size = int(size if size is not None else logical_numel)
-    if size < logical_numel:
+    if size == logical_numel:
+        values = torch.randperm(size, dtype=dtype, device=device).reshape(shape)
+    elif logical_numel % size == 0:
+        rows = logical_numel // size
+        values = torch.stack(
+            [torch.randperm(size, dtype=dtype, device=device) for _ in range(rows)],
+            dim=0,
+        ).reshape(shape)
+    else:
         raise ValueError(
-            f"permutation generator needs size >= numel, got size={size}, numel={logical_numel}"
+            "permutation generator needs size == numel or size to divide numel, "
+            f"got size={size}, numel={logical_numel}"
         )
-
-    values = torch.randperm(size, dtype=dtype, device=device)[:logical_numel].reshape(shape)
     if stride:
         out = torch.empty_strided(shape, stride, dtype=dtype, device=device)
         out.copy_(values)
