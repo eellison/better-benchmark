@@ -1,0 +1,3 @@
+torchbench_dcgan_infer_38702c6e: (T([1024, 64, 32, 32], f32))
+torchbench_dcgan_train_38702c6e: (T([1024, 64, 32, 32], f32))
+dcgan_38702c6e: (T([1024, 64, 32, 32], f32))

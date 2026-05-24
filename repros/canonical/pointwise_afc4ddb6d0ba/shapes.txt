@@ -1,0 +1,3 @@
+hf_mbartforcausallm_train_fd472ddc: (T([8, 1024, 1024], f32), T([8, 1024], i64))
+hf_bartforcausallm_train_fd472ddc: (T([8, 1024, 1024], f32), T([8, 1024], i64))
+hf_trocrforcausallm_train_e4ff80b4: (T([64, 256, 1024], f32), T([64, 256], i64))

@@ -1,0 +1,4 @@
+torchbench_learningtopaint_infer_d69ae404: (T([1024, 65], f32))
+torchbench_dcgan_infer_8712552b: (T([1024, 1, 1, 1], f32))
+learningtopaint_d69ae404: (T([1024, 65], f32))
+dcgan_8712552b: (T([1024, 1, 1, 1], f32))
