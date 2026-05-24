@@ -5,7 +5,9 @@ For each full_graph file:
 1. Load it as an FX GraphModule
 2. Run _CaptureState.process_graph() to partition into regions
 3. For each region, extract pattern_hash and _shapes_config
-4. Write new shapes.txt entries to the corresponding canonical dir
+4. Run bounds inference on the canonical repro.py to annotate i64 tensors
+5. Validate the annotated config via eager execution
+6. Write new shapes.txt entries to the corresponding canonical dir
 
 Every candidate shape entry is validated in eager mode against the canonical
 repro.py BEFORE being written. Entries that fail validation are skipped.
@@ -33,6 +35,7 @@ from scripts.repartition_from_graphs import (
     infer_label_suite_mode,
     load_graph_module,
 )
+from scripts.bounds_inference import infer_bounds_for_config
 from capture_hook import _CaptureState
 
 
@@ -263,12 +266,14 @@ def main():
                     key = line.split(":", 1)[0].strip()
                     existing_keys.add(key)
 
-        # Add new entries (only if they pass eager validation)
+        # Add new entries: run bounds inference, then validate in eager mode
         new_lines = []
         for config_key, shapes_config in sorted(configs.items()):
             if config_key not in existing_keys:
-                if _validate_shape_entry(repro_py, shapes_config, gpu=gpu):
-                    new_lines.append(f"{config_key}: {shapes_config}")
+                # Infer gen=Index(N)/gen=Perm(N) for i64 tensors
+                annotated_config = infer_bounds_for_config(repro_py, shapes_config)
+                if _validate_shape_entry(repro_py, annotated_config, gpu=gpu):
+                    new_lines.append(f"{config_key}: {annotated_config}")
                     new_entries_added += 1
                 else:
                     validation_skipped += 1
