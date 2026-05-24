@@ -1,0 +1,1 @@
+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_infer_000_ab5fb4d2: (T([512, 128, 128], f32), T([16, 1, 128, 128], b8, stride=(0, 128, 1, 0)), S([16, 32, 128, 128]), S([16, 32, 128, 128]), S([512, 128, 128]))

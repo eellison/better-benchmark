@@ -1,0 +1,4 @@
+hf_layoutlmformaskedlm_train_001_e045a23d: (T([16384, 768], f32), S([32, 512, 768]), S([32, 512, 12, 64]))
+hf_layoutlmformaskedlm_train_009_e045a23d: (T([16384, 768], f32), S([32, 512, 768]), S([32, 512, 12, 64]))
+hf_megatronbertforcausallm_train_001_872d291e: (T([8192, 1024], f32), S([16, 512, 1024]), S([16, 512, 16, 64]))
+hf_megatronbertforcausallm_train_008_872d291e: (T([8192, 1024], f32), S([16, 512, 1024]), S([16, 512, 16, 64]))

@@ -1,0 +1,1 @@
+torchbench_llama_infer_000_548395aa: (T([2048, 32], torch.complex64), T([32, 32, 8, 32], torch.complex64), T([32, 32, 8, 32], torch.complex64), S([1, 32, 1, 32]))

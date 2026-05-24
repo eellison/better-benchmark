@@ -1,0 +1,2 @@
+torchbench_hf_distil_whisper_infer_000_5edd32e3: (T([1, 1024, 3000], f16))
+torchbench_hf_whisper_infer_000_9115f773: (T([8, 384, 3000], f16))

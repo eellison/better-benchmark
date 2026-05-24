@@ -2,3 +2,7 @@ timm_mobilenetv3_large_100_infer_6e2d6904: (T([960], f32), T([512, 960, 7, 7], f
 timm_mobilenetv3_large_100_infer_b81bb1f8: (T([672], f32), T([512, 672, 7, 7], f32, stride=(32928, 1, 4704, 672)), T([672], f32), T([672], f32), T([672], f32))
 timm_mobilenetv3_large_100_infer_f34a001b: (T([672], f32), T([512, 672, 14, 14], f32, stride=(131712, 1, 9408, 672)), T([672], f32), T([672], f32), T([672], f32))
 timm_mobilenetv3_large_100_infer_f96185a1: (T([480], f32), T([512, 480, 14, 14], f32, stride=(94080, 1, 6720, 480)), T([480], f32), T([480], f32), T([480], f32))
+timm_timm_mobilenetv3_large_100_infer_infer_000_6e2d6904: (T([960], f32), T([512, 960, 7, 7], f32), T([960], f32), T([960], f32), T([960], f32))
+timm_timm_mobilenetv3_large_100_infer_infer_000_b81bb1f8: (T([672], f32), T([512, 672, 7, 7], f32), T([672], f32), T([672], f32), T([672], f32))
+timm_timm_mobilenetv3_large_100_infer_infer_000_f34a001b: (T([672], f32), T([512, 672, 14, 14], f32), T([672], f32), T([672], f32), T([672], f32))
+timm_timm_mobilenetv3_large_100_infer_infer_000_f96185a1: (T([480], f32), T([512, 480, 14, 14], f32), T([480], f32), T([480], f32), T([480], f32))

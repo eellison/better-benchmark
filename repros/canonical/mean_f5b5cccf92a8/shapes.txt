@@ -2,3 +2,5 @@ torchbench_mobilenet_v3_large_infer_6d5f113c: (T([120], f16), T([256, 120, 28, 2
 torchbench_mobilenet_v3_large_infer_2e2cf244: (T([72], f16), T([256, 72, 28, 28], f16), T([72], f16), T([72], f16), T([72], f16))
 mobilenet_v3_large_6d5f113c: (T([120], f16), T([256, 120, 28, 28], f16), T([120], f16), T([120], f16), T([120], f16))
 mobilenet_v3_large_2e2cf244: (T([72], f16), T([256, 72, 28, 28], f16), T([72], f16), T([72], f16), T([72], f16))
+torchbench_mobilenet_v3_large_infer_000_2e2cf244: (T([72], f16), T([256, 72, 28, 28], f16), T([72], f16), T([72], f16), T([72], f16))
+torchbench_mobilenet_v3_large_infer_000_6d5f113c: (T([120], f16), T([256, 120, 28, 28], f16), T([120], f16), T([120], f16), T([120], f16))

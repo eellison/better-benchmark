@@ -1,0 +1,1 @@
+torchbench_timm_vision_transformer_infer_000_8c137207: (T([6304, 384], f16), T([32, 197, 384], f16), T([384], f16), T([384], f16), S([32, 197, 384]))

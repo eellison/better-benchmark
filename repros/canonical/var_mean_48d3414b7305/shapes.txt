@@ -1,0 +1,1 @@
+torchbench_functorch_dp_cifar10_train_000_ded9fcb8: (T([64, 64, 16, 16], f32), T([64], f32), T([64], f32), S([64, 32, 2, 256]), S([64, 64, 16, 16]))

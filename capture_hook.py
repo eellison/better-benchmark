@@ -749,9 +749,12 @@ if __name__ == "__main__":
             return False
 
         support = create_op_support(_is_supported)
+        _part_kwargs = dict(allows_single_node_partition=True)
+        import inspect
+        if 'skip_horizontal_fusion' in inspect.signature(CapabilityBasedPartitioner.__init__).parameters:
+            _part_kwargs['skip_horizontal_fusion'] = True
         partitioner = CapabilityBasedPartitioner(
-            gm, support, allows_single_node_partition=True,
-            skip_horizontal_fusion=True,
+            gm, support, **_part_kwargs,
         )
         partitions = partitioner.propose_partitions()
         components = [list(p.nodes.keys()) for p in partitions]

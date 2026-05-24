@@ -1,2 +1,4 @@
 timm_tf_efficientnet_b0_infer_75fcb329: (T([672], f32), T([128, 672, 14, 14], f32, stride=(131712, 1, 9408, 672)), T([672], f32), T([672], f32), T([672], f32))
 timm_tf_efficientnet_b0_infer_641a711e: (T([144], f32), T([128, 144, 56, 56], f32, stride=(451584, 1, 8064, 144)), T([144], f32), T([144], f32), T([144], f32))
+timm_timm_tf_efficientnet_b0_infer_infer_000_641a711e: (T([144], f32), T([128, 144, 56, 56], f32), T([144], f32), T([144], f32), T([144], f32))
+timm_timm_tf_efficientnet_b0_infer_infer_000_75fcb329: (T([672], f32), T([128, 672, 14, 14], f32), T([672], f32), T([672], f32), T([672], f32))

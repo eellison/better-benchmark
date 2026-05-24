@@ -1,0 +1,1 @@
+hf_mt5forconditionalgeneration_infer_000_0840feba: (T([250112, 512], f32), T([32, 128], i64, gen=Index(250112)), T([512], f32), S([4096, 512]), S([4096, 512]), S([4096, 512]))

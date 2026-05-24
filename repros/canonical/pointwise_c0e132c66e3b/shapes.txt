@@ -1,0 +1,3 @@
+torchbench_timm_vovnet_infer_000_0e5e31db: (T([512], f16), T([32, 512, 28, 28], f16), T([512], f16), T([512], f16), T([512], f16))
+torchbench_timm_vovnet_infer_000_7cf82d53: (T([256], f16), T([32, 256, 56, 56], f16), T([256], f16), T([256], f16), T([256], f16))
+torchbench_timm_vovnet_infer_000_c445ec58: (T([768], f16), T([32, 768, 14, 14], f16), T([768], f16), T([768], f16), T([768], f16))

@@ -1,0 +1,1 @@
+timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_000_d21da7a9: (T([128, 640, 7, 7], f32), T([128, 640, 7, 7], f32), T([640], f32), T([640], f32), S([128, 640]))

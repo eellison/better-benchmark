@@ -1,2 +1,4 @@
 timm_mobilenetv3_large_100_infer_b7d351f0: (T([120], f32), T([512, 120, 28, 28], f32, stride=(94080, 1, 3360, 120)), T([120], f32), T([120], f32), T([120], f32))
 timm_mobilenetv3_large_100_infer_f3c4f968: (T([72], f32), T([512, 72, 28, 28], f32, stride=(56448, 1, 2016, 72)), T([72], f32), T([72], f32), T([72], f32))
+timm_timm_mobilenetv3_large_100_infer_infer_000_b7d351f0: (T([120], f32), T([512, 120, 28, 28], f32), T([120], f32), T([120], f32), T([120], f32))
+timm_timm_mobilenetv3_large_100_infer_infer_000_f3c4f968: (T([72], f32), T([512, 72, 28, 28], f32), T([72], f32), T([72], f32), T([72], f32))

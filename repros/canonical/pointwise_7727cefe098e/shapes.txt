@@ -1,0 +1,1 @@
+torchbench_doctr_reco_predictor_infer_000_d8a1a12f: (T([512], f32), T([1, 512, 2, 32], f32), T([512], f32), T([512], f32), T([512], f32), S([-1, 512, 32]))

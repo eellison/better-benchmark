@@ -20,3 +20,4 @@ crossentropyforward_efe4203e: (T([32768], i64, gen=Index(32768)), T([32768, 3276
 crossentropyforward_44fa184b: (T([32768], i64, gen=Index(65536)), T([32768, 65536], bf16))
 crossentropyforward_a7df5efe: (T([16384], i64, gen=Index(131072)), T([16384, 131072], bf16))
 crossentropyforward_3700f816: (T([8192], i64, gen=Index(262144)), T([8192, 262144], bf16))
+genai_crossentropyforward_000_3700f816: (T([8192], i64, gen=Index(262144)), T([8192, 262144], bf16))

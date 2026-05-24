@@ -1,2 +1,7 @@
 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_train_d999c84a: (T([128], i64), T([128, 2560], f32))
 hf_blenderbotforcausallm_train_d999c84a: (T([128], i64), T([128, 2560], f32))
+hf_blenderbotforcausallm_train_008_d999c84a: (T([128], i64, gen=Index(128)), T([128, 2560], f32))
+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_train_011_d999c84a: (T([128], i64, gen=Index(128)), T([128, 2560], f32))
+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_train_014_d999c84a: (T([128], i64, gen=Index(128)), T([128, 2560], f32))
+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_train_029_d999c84a: (T([128], i64, gen=Index(128)), T([128, 2560], f32))
+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_train_034_d999c84a: (T([128], i64, gen=Index(128)), T([128, 2560], f32))
