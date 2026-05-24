@@ -188,6 +188,46 @@ def check_no_empty_canonical_dirs() -> list[str]:
     return errors
 
 
+def check_shapes_eager_validation() -> list[str]:
+    """Hard invariant 6: a random sample of shapes must pass eager validation.
+
+    Runs validate_shapes_eager.py --quick (50 random shapes) and fails if any
+    shape entry does not work in eager mode.
+    """
+    import subprocess
+    errors = []
+
+    validate_script = ROOT / "scripts" / "validate_shapes_eager.py"
+    if not validate_script.exists():
+        # Script not present, skip gracefully
+        print("  [SKIP] validate_shapes_eager.py not found")
+        return errors
+
+    try:
+        result = subprocess.run(
+            [sys.executable, str(validate_script), "--quick", "--timeout", "30"],
+            capture_output=True, text=True, timeout=300,
+            cwd=str(ROOT),
+        )
+        if result.returncode != 0:
+            # Extract failure count from output
+            output_lines = result.stdout.strip().split("\n")
+            fail_summary = [l for l in output_lines if "FAIL" in l.upper()]
+            sample = "\n".join(fail_summary[:5]) if fail_summary else result.stdout[-500:]
+            errors.append(
+                f"Eager validation of sampled shapes failed (exit {result.returncode}):\n"
+                f"    {sample}"
+            )
+        else:
+            print("  [PASS] sampled shapes pass eager validation")
+    except subprocess.TimeoutExpired:
+        errors.append("Eager validation timed out after 300s")
+    except Exception as exc:
+        errors.append(f"Eager validation failed to run: {exc}")
+
+    return errors
+
+
 # ---------------------------------------------------------------------------
 # Soft invariants (warnings only)
 # ---------------------------------------------------------------------------
@@ -293,6 +333,7 @@ def main() -> int:
     hard_errors.extend(check_shapes_config())
     hard_errors.extend(check_manifest_consistency())
     hard_errors.extend(check_no_empty_canonical_dirs())
+    hard_errors.extend(check_shapes_eager_validation())
 
     # --- Soft invariants ---
     print("\n--- Soft Invariants (warnings) ---\n")

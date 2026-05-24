@@ -7,12 +7,16 @@ For each full_graph file:
 3. For each region, extract pattern_hash and _shapes_config
 4. Write new shapes.txt entries to the corresponding canonical dir
 
+Every candidate shape entry is validated in eager mode against the canonical
+repro.py BEFORE being written. Entries that fail validation are skipped.
+
 This avoids the full merge pipeline — it ONLY adds shapes.txt entries.
 """
 import copy
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -30,6 +34,37 @@ from scripts.repartition_from_graphs import (
     load_graph_module,
 )
 from capture_hook import _CaptureState
+
+
+def _validate_shape_entry(repro_py: Path, config_str: str, gpu: str = "0") -> bool:
+    """Validate a shape entry runs in eager mode via subprocess.
+
+    Instantiates the canonical Repro() with the candidate shape config and
+    runs forward(*inputs) in eager mode. Returns True only if it succeeds.
+    """
+    code = f'''
+import sys, importlib.util, math, torch, os
+sys.path.insert(0, "{PROJECT_ROOT}")
+from repro_harness import parse_shapes_config
+spec = importlib.util.spec_from_file_location("r", "{repro_py}")
+mod = importlib.util.module_from_spec(spec)
+mod.device = torch.device; mod.inf = math.inf; mod.nan = math.nan
+spec.loader.exec_module(mod)
+inputs = parse_shapes_config("""{config_str}""")
+with torch.no_grad():
+    mod.Repro()(*inputs)
+print("OK")
+'''
+    try:
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True, text=True, timeout=30,
+            env={**os.environ, "CUDA_VISIBLE_DEVICES": gpu},
+            cwd=str(PROJECT_ROOT),
+        )
+        return result.returncode == 0 and "OK" in result.stdout
+    except (subprocess.TimeoutExpired, OSError):
+        return False
 
 
 def find_canonical_dir_for_pattern(canonical_path: Path, pattern_hash: str) -> Path | None:
@@ -77,7 +112,7 @@ def process_one_graph(graph_path: Path, canonical_path: Path,
     results = {}
 
     with tempfile.TemporaryDirectory(prefix="shape_extract_") as tmp:
-        state = _CaptureState(tmp, label=label, validate=False)
+        state = _CaptureState(tmp, label=label, validate=True)
         try:
             state.process_graph(copy.deepcopy(gm))
             state.finalize()
@@ -203,6 +238,9 @@ def main():
     new_entries_added = 0
     patterns_updated = 0
     patterns_without_dir = 0
+    validation_skipped = 0
+
+    gpu = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
 
     for pattern_hash, configs in all_shapes.items():
         canon_dir = pattern_dir_cache.get(pattern_hash)
@@ -211,6 +249,11 @@ def main():
             continue
 
         shapes_path = canon_dir / "shapes.txt"
+        repro_py = canon_dir / "repro.py"
+
+        if not repro_py.exists():
+            patterns_without_dir += 1
+            continue
 
         # Read existing entries
         existing_keys = set()
@@ -220,12 +263,16 @@ def main():
                     key = line.split(":", 1)[0].strip()
                     existing_keys.add(key)
 
-        # Add new entries
+        # Add new entries (only if they pass eager validation)
         new_lines = []
         for config_key, shapes_config in sorted(configs.items()):
             if config_key not in existing_keys:
-                new_lines.append(f"{config_key}: {shapes_config}")
-                new_entries_added += 1
+                if _validate_shape_entry(repro_py, shapes_config, gpu=gpu):
+                    new_lines.append(f"{config_key}: {shapes_config}")
+                    new_entries_added += 1
+                else:
+                    validation_skipped += 1
+                    print(f"  SKIP (validation failed): {config_key} in {canon_dir.name}")
 
         if new_lines:
             patterns_updated += 1
@@ -236,6 +283,7 @@ def main():
     print(f"Results:")
     print(f"  Patterns updated:       {patterns_updated}")
     print(f"  New entries added:       {new_entries_added}")
+    print(f"  Validation skipped:      {validation_skipped}")
     print(f"  Patterns without dir:    {patterns_without_dir}")
     print(f"  Total shapes.txt files:  {len(list(canonical_path.glob('*/shapes.txt')))}")
     print()

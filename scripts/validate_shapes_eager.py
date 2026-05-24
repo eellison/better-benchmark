@@ -282,9 +282,16 @@ def main():
     parser.add_argument("--output", type=str, default=None, help="Write full results JSON to file")
     parser.add_argument("--workers", type=int, default=1, help="Number of parallel workers")
     parser.add_argument("--verbose", action="store_true", help="Print each result as it comes")
+    parser.add_argument("--quick", action="store_true",
+                        help="Sample 50 random repros for a fast smoke check")
     args = parser.parse_args()
 
     repro_dirs = find_repros(args.limit)
+
+    if args.quick:
+        import random
+        sample_size = min(50, len(repro_dirs))
+        repro_dirs = sorted(random.sample(repro_dirs, sample_size))
     print(f"Found {len(repro_dirs)} repros to validate")
     print(f"GPU: {args.gpu}, timeout: {args.timeout}s, workers: {args.workers}")
     print("-" * 60)
@@ -419,6 +426,8 @@ def main():
             }, f, indent=2)
         print(f"\nFull results written to: {args.output}")
 
+    return 1 if fail_count > 0 else 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

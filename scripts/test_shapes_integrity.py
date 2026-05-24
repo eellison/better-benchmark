@@ -307,6 +307,57 @@ def test_timm_graphs_have_stride_info():
         warn("No timm graphs had non-contiguous stride info (may need re-capture)")
 
 
+def test_extraction_validates_before_writing():
+    """The extraction script must not write invalid shapes.
+
+    Creates a synthetic repro that expects 2 args, then tries to validate
+    a shape config with 3 args. Verifies the validator rejects it.
+    """
+    print("--- Test: extraction validates before writing ---")
+    import tempfile
+
+    from scripts.extract_shapes_from_graphs import _validate_shape_entry
+
+    # Create a synthetic repro that expects exactly 2 tensor args
+    with tempfile.TemporaryDirectory(prefix="test_extract_val_") as tmp:
+        repro_py = Path(tmp) / "repro.py"
+        repro_py.write_text('''
+import torch
+import math
+
+device = torch.device
+inf = math.inf
+nan = math.nan
+
+_shapes_config = "(T([4, 4], f32), T([4, 4], f32))"
+
+class Repro(torch.nn.Module):
+    def forward(self, a, b):
+        return a + b
+''')
+
+        # Valid config (2 args) should pass
+        good_config = "(T([4, 4], f32), T([4, 4], f32))"
+        assert _validate_shape_entry(repro_py, good_config), \
+            "Valid 2-arg config should pass validation"
+        passed()
+        print("  valid config accepted: OK")
+
+        # Invalid config (3 args) should fail
+        bad_config = "(T([4, 4], f32), T([4, 4], f32), T([4, 4], f32))"
+        assert not _validate_shape_entry(repro_py, bad_config), \
+            "Invalid 3-arg config should be rejected"
+        passed()
+        print("  invalid config rejected: OK")
+
+        # Completely broken config should fail
+        broken_config = "(NONSENSE)"
+        assert not _validate_shape_entry(repro_py, broken_config), \
+            "Broken config should be rejected"
+        passed()
+        print("  broken config rejected: OK")
+
+
 def main():
     if not CANONICAL.exists():
         print(f"ERROR: {CANONICAL} does not exist")
@@ -318,6 +369,7 @@ def main():
     test_channels_last_stride_preserved()
     test_stride_extraction_from_annotations()
     test_timm_graphs_have_stride_info()
+    test_extraction_validates_before_writing()
 
     print()
     print(f"Results: {PASS_COUNT} passed, {len(ERRORS)} errors, {len(WARNINGS)} warnings")
