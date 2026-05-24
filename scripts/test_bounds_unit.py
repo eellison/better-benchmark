@@ -253,7 +253,7 @@ def test_full_corpus_accuracy():
         total += len(ground_truth)
 
         # Run inference
-        index_bounds, perm_bounds = infer_bounds_from_forward(content)
+        index_bounds, perm_bounds = infer_bounds_from_forward(content, source_path=repro_path)
 
         # Compare
         repro_name = repro_path.parent.name

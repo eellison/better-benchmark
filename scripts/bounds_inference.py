@@ -1,7 +1,7 @@
 """
 Reusable bounds inference for i64 tensor parameters in FX-style forward() methods.
 
-Parses the forward() method AST to build a mini dataflow graph, then infers
+Uses torch.fx.symbolic_trace to build the actual FX graph, then infers
 gen=Index(N) / gen=Perm(N) annotations for integer tensor parameters based on
 how they are consumed (gather, scatter, embedding, index_put, etc.).
 
@@ -9,8 +9,13 @@ Primary entry point:
     infer_bounds_for_config(repro_py, config_str) -> annotated config string
 """
 import re
+import math
+import importlib.util
 from pathlib import Path
 from collections import defaultdict
+
+import torch
+import torch.fx as fx
 
 
 def extract_ground_truth(config_str):
@@ -32,552 +37,600 @@ def extract_ground_truth(config_str):
     return annotations
 
 
-def parse_forward_body(content):
-    """Parse the forward() method body and build a mini dataflow graph.
+def _parse_type_annotation(type_str):
+    """Parse a type annotation string like 'i64[32, 128]' into (dtype, shape).
 
-    Returns:
-        param_names: list of parameter names in order
-        param_shapes: dict of param_name -> shape (from annotation)
-        param_dtypes: dict of param_name -> dtype abbreviation
-        var_shapes: dict of var_name -> shape (inferred from annotations/allocations)
-        operations: list of (result_var, op_name, args_list) tuples
+    Returns (dtype_str, shape_list) or (None, None) if unparseable.
     """
-    fwd_match = re.search(r'def forward\(self,\s*([^)]+)\)', content)
-    if not fwd_match:
-        return None, None, None, None, None
-
-    params_str = fwd_match.group(1)
-    param_names = []
-    param_shapes = {}
-    param_dtypes = {}
-
-    for pmatch in re.finditer(r'(\w+)(?::\s*"(\w+)\[([^\]]*)\]")?', params_str):
-        name = pmatch.group(1)
-        param_names.append(name)
-        if pmatch.group(2) is not None:
-            dtype = pmatch.group(2)
-            dims_str = (pmatch.group(3) or '').strip()
-            if dims_str:
-                shape = [int(x.strip()) for x in dims_str.split(',')]
-            else:
-                shape = []
-            param_shapes[name] = shape
-            param_dtypes[name] = dtype
-
-    var_shapes = dict(param_shapes)
-
-    for amatch in re.finditer(
-        r'(\w+):\s*"(\w+)\[([^\]]*)\]"\s*=\s*(.+)',
-        content
-    ):
-        var_name = amatch.group(1)
-        dtype = amatch.group(2)
-        dims_str = amatch.group(3).strip()
-        if dims_str:
-            shape = [int(x.strip()) for x in dims_str.split(',')]
-        else:
-            shape = []
-        var_shapes[var_name] = shape
-        param_dtypes[var_name] = dtype
-
-    for amatch in re.finditer(r'(\w+):\s*"(\w+)\[\]"\s*=', content):
-        var_name = amatch.group(1)
-        var_shapes[var_name] = []
-        param_dtypes[var_name] = amatch.group(2)
-
-    operations = []
-    for opmatch in re.finditer(
-        r'(\w+)(?::\s*"[^"]*")?\s*=\s*torch\.ops\.(aten|prims)\.(\w+)\.(\w+)\((.+)',
-        content
-    ):
-        result_var = opmatch.group(1)
-        namespace = opmatch.group(2)
-        op_name = opmatch.group(3)
-        overload = opmatch.group(4)
-        args_str = opmatch.group(5)
-
-        args_str = re.sub(r'\)\s*;.*$', '', args_str)
-        if args_str.endswith(')'):
-            args_str = args_str[:-1]
-
-        full_op = f"{namespace}.{op_name}.{overload}"
-        operations.append((result_var, full_op, args_str))
-
-    return param_names, param_shapes, param_dtypes, var_shapes, operations
+    if type_str is None:
+        return None, None
+    if isinstance(type_str, str):
+        m = re.match(r'(\w+)\[([^\]]*)\]', type_str)
+        if m:
+            dtype = m.group(1)
+            dims_str = m.group(2).strip()
+            shape = [int(x.strip()) for x in dims_str.split(',')] if dims_str else []
+            return dtype, shape
+    return None, None
 
 
-def parse_args_simple(args_str):
-    """Parse a simple args string to extract variable references and list literals.
+def _parse_source_shapes(content):
+    """Parse all variable shape annotations from the source text.
 
-    Returns list of parsed arg items: either var name (str), list of ints, list of var names,
-    or None for complex/unparseable args.
+    Returns dict: var_name -> shape (list of ints)
+    Also returns dict: var_name -> dtype string
     """
-    args = []
-    depth = 0
-    current = ""
-    for ch in args_str:
-        if ch in '([':
-            depth += 1
-            current += ch
-        elif ch in ')]':
-            depth -= 1
-            current += ch
-        elif ch == ',' and depth == 0:
-            args.append(current.strip())
-            current = ""
-        else:
-            current += ch
-    if current.strip():
-        args.append(current.strip())
+    var_shapes = {}
+    var_dtypes = {}
 
-    parsed = []
-    for arg in args:
-        arg = re.sub(r';.*', '', arg).strip()
-        if '=' in arg and not arg.startswith('['):
-            parsed.append(('kwarg', arg))
-            continue
-        list_match = re.match(r'\[([^\]]*)\]', arg)
-        if list_match:
-            inner = list_match.group(1).strip()
-            if inner:
-                items = [x.strip() for x in inner.split(',')]
-                try:
-                    parsed.append(('int_list', [int(x) for x in items]))
-                except ValueError:
-                    parsed.append(('var_list', items))
-            else:
-                parsed.append(('int_list', []))
-            continue
-        try:
-            parsed.append(('int', int(arg)))
-            continue
-        except ValueError:
-            pass
-        try:
-            parsed.append(('float', float(arg)))
-            continue
-        except ValueError:
-            pass
-        if re.match(r'\w+$', arg):
-            parsed.append(('var', arg))
-        else:
-            parsed.append(('other', arg))
+    # Match patterns like: var_name: "dtype[d1, d2, ...]" = ...
+    # Also matches parameters: name: "dtype[d1, d2]"
+    for m in re.finditer(r'(\w+):\s*"(\w+)\[([^\]]*)\]"', content):
+        vname = m.group(1)
+        dtype = m.group(2)
+        dims_str = m.group(3).strip()
+        shape = [int(x.strip()) for x in dims_str.split(',')] if dims_str else []
+        var_shapes[vname] = shape
+        var_dtypes[vname] = dtype
 
-    return parsed
+    return var_shapes, var_dtypes
 
 
-def _find_iota_source(var_name, operations, iota_sizes, derives_from):
-    """Check if var_name derives from an iota (possibly through passthrough ops).
+def _load_repro_graph(repro_py):
+    """Load a repro module and trace it to get the FX graph.
+
+    Returns (GraphModule, Repro instance) or raises on failure.
+    """
+    repro_py = Path(repro_py)
+    spec = importlib.util.spec_from_file_location("repro", repro_py)
+    mod = importlib.util.module_from_spec(spec)
+    mod.device = torch.device
+    mod.inf = math.inf
+    mod.nan = math.nan
+    spec.loader.exec_module(mod)
+    repro = mod.Repro()
+    gm = fx.symbolic_trace(repro)
+    return gm, repro
+
+
+def _is_iota_tensor(gm, node):
+    """Check if a node is (or derives from) an iota tensor.
 
     Returns the iota size if found, None otherwise.
+    Handles:
+    - get_attr nodes pointing to tensors containing 0..N-1
+    - prims.iota.default calls with static extent
+    - passthrough ops (expand, view, clone, unsqueeze, etc.) from an iota
     """
-    if var_name in iota_sizes:
-        return iota_sizes[var_name]
+    visited = set()
 
-    PASSTHROUGH_OPS = {
-        'aten.clone.default', 'aten.reshape.default', 'aten.view.default',
-        'aten.expand.default', 'aten.unsqueeze.default', 'aten.squeeze.default',
-        'aten.squeeze.dim',
-    }
+    def _check(n):
+        if n in visited:
+            return None
+        visited.add(n)
 
-    for result_var, op, args_str in operations:
-        if result_var == var_name:
-            if op in PASSTHROUGH_OPS:
-                parsed = parse_args_simple(args_str)
-                if parsed and parsed[0][0] == 'var':
-                    return _find_iota_source(parsed[0][1], operations, iota_sizes, derives_from)
-            if op == 'aten.add.Tensor':
-                parsed = parse_args_simple(args_str)
-                if len(parsed) >= 2 and parsed[0][0] == 'var':
-                    src = parsed[0][1]
-                    if parsed[1][0] == 'int' and parsed[1][1] == 0:
-                        return _find_iota_source(src, operations, iota_sizes, derives_from)
-                    return _find_iota_source(src, operations, iota_sizes, derives_from)
-            break
+        if n.op == 'get_attr':
+            # Check if the tensor is an iota (values 0..N-1)
+            try:
+                tensor = getattr(gm, n.target)
+                if tensor.dtype in (torch.int64, torch.int32) and tensor.numel() > 0:
+                    flat = tensor.flatten()
+                    N = flat.numel()
+                    expected = torch.arange(N, dtype=tensor.dtype, device=tensor.device)
+                    if torch.equal(flat, expected):
+                        return N
+            except (AttributeError, RuntimeError):
+                pass
+            return None
+
+        if n.op == 'call_function':
+            target = n.target
+            # Direct iota call
+            if target == torch.ops.prims.iota.default:
+                extent = n.args[0] if n.args else None
+                if isinstance(extent, int):
+                    return extent
+                return None
+
+            # Passthrough ops
+            PASSTHROUGH_TARGETS = {
+                torch.ops.aten.clone.default,
+                torch.ops.aten.reshape.default,
+                torch.ops.aten.view.default,
+                torch.ops.aten.expand.default,
+                torch.ops.aten.unsqueeze.default,
+                torch.ops.aten.squeeze.default,
+                torch.ops.aten.squeeze.dim,
+            }
+            if target in PASSTHROUGH_TARGETS:
+                if n.args and isinstance(n.args[0], fx.Node):
+                    return _check(n.args[0])
+
+            # add.Tensor(iota, 0) or add.Tensor(iota, K)
+            if target == torch.ops.aten.add.Tensor:
+                if n.args and isinstance(n.args[0], fx.Node):
+                    return _check(n.args[0])
+
+        return None
+
+    return _check(node)
+
+
+def _get_node_shape(node, var_shapes, gm):
+    """Get the shape for a node, using multiple sources.
+
+    Priority:
+    1. Source text annotations (var_shapes dict, keyed by node.name)
+    2. node.type annotation (for placeholders)
+    3. get_attr tensor shape
+    4. Allocation args (for empty/full ops)
+    """
+    # Source text annotations
+    if node.name in var_shapes:
+        return var_shapes[node.name]
+
+    # Placeholder type annotations
+    if node.op == 'placeholder' and node.type is not None:
+        _, shape = _parse_type_annotation(str(node.type))
+        if shape is not None:
+            return shape
+
+    # get_attr tensor shape
+    if node.op == 'get_attr':
+        try:
+            tensor = getattr(gm, node.target)
+            if hasattr(tensor, 'shape'):
+                return list(tensor.shape)
+        except AttributeError:
+            pass
+
+    # Allocation ops
+    if node.op == 'call_function':
+        if node.target in (torch.ops.aten.empty.memory_format, torch.ops.aten.full.default):
+            if node.args and isinstance(node.args[0], (list, tuple)):
+                shape_arg = node.args[0]
+                if all(isinstance(x, int) for x in shape_arg):
+                    return list(shape_arg)
 
     return None
 
 
-def infer_bounds_from_forward(content):
+def _is_alloc_node(node):
+    """Check if a node is an allocation (empty/full)."""
+    if node.op == 'call_function':
+        return node.target in (torch.ops.aten.empty.memory_format,
+                               torch.ops.aten.full.default)
+    return False
+
+
+def infer_bounds_from_forward(content, source_path=None):
     """Infer index bounds and permutation indices from the forward() method.
+
+    Uses torch.fx.symbolic_trace to get the actual FX graph, then performs
+    dataflow analysis on the graph nodes.
+
+    Parameters:
+        content: source code string containing the Repro class
+        source_path: optional Path to the original .py file (enables proper
+                     imports for repros that reference repro_harness)
 
     Returns:
         index_bounds: dict of param_position -> bound (for Index)
         perm_bounds: dict of param_position -> bound (for Perm)
     """
-    result = parse_forward_body(content)
-    if result[0] is None:
-        return {}, {}
+    # Parse source shapes (needed for intermediate node shapes)
+    var_shapes, var_dtypes = _parse_source_shapes(content)
 
-    param_names, param_shapes, param_dtypes, var_shapes, operations = result
+    # Load and trace the module
+    import tempfile
+    import os
 
-    # Build a set of int-typed params (candidates for index inference)
-    int_params = set()
-    for name in param_names:
-        dtype = param_dtypes.get(name, "")
-        if "i64" in dtype or "i32" in dtype or "i8" in dtype:
-            int_params.add(name)
+    if source_path is not None:
+        # Use the actual file path (preserves sys.path resolution)
+        try:
+            gm, repro = _load_repro_graph(source_path)
+        except Exception:
+            return {}, {}
+    else:
+        # Write content to a temp file for tracing (unit tests)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            f.write(content)
+            tmp_path = f.name
+        try:
+            gm, repro = _load_repro_graph(tmp_path)
+        except Exception:
+            return {}, {}
+        finally:
+            os.unlink(tmp_path)
 
-    # Build a "flows from" map: for passthrough ops, track which variable
-    # ultimately derives from which param
-    derives_from = {name: {name} for name in param_names}
+    return _infer_bounds_from_graph(gm, var_shapes, var_dtypes)
 
-    PASSTHROUGH_OPS = {
-        'aten.clone.default', 'aten.reshape.default', 'aten.view.default',
-        'aten.expand.default', 'aten.slice.Tensor', 'aten.unsqueeze.default',
-        'aten.squeeze.default', 'aten.squeeze.dim', 'aten.select.int',
-        'aten.permute.default', 'aten.contiguous.default', 'aten.t.default',
-        'aten.transpose.int', 'aten.where.self',
-        'aten.lift_fresh_copy.default',
-        'aten.add.Tensor', 'aten.mul.Tensor',
-        'prims.convert_element_type.default',
+
+def _infer_bounds_from_graph(gm, var_shapes, var_dtypes):
+    """Core graph-based bounds inference.
+
+    Parameters:
+        gm: fx.GraphModule (traced graph)
+        var_shapes: dict of var_name -> shape (from source annotations)
+        var_dtypes: dict of var_name -> dtype string
+
+    Returns:
+        index_bounds_by_pos: dict of param_position -> bound (for Index)
+        perm_bounds_by_pos: dict of param_position -> bound (for Perm)
+    """
+    graph = gm.graph
+
+    # Step 1: Identify placeholders and their positions
+    placeholders = []  # ordered list of placeholder nodes
+    int_placeholder_set = set()  # set of placeholder nodes with i64/i32/i8 dtype
+
+    for node in graph.nodes:
+        if node.op == 'placeholder':
+            placeholders.append(node)
+            # Check dtype from type annotation or var_dtypes
+            dtype = None
+            if node.type is not None:
+                dtype_str, _ = _parse_type_annotation(str(node.type))
+                dtype = dtype_str
+            if dtype is None:
+                dtype = var_dtypes.get(node.name, "")
+            if dtype and ("i64" in dtype or "i32" in dtype or "i8" in dtype):
+                int_placeholder_set.add(node)
+
+    # Step 2: Build "derives from" map using graph node references
+    # For each node, track which int placeholders it derives from
+    # (through passthrough/view/where/add/mul ops)
+    derives_from = {}  # node -> set of placeholder nodes
+    add_offset = {}    # node -> cumulative additive offset
+
+    # Initialize: each placeholder derives from itself
+    for ph in placeholders:
+        derives_from[ph] = {ph}
+        add_offset[ph] = 0
+
+    PASSTHROUGH_TARGETS = {
+        torch.ops.aten.clone.default,
+        torch.ops.aten.reshape.default,
+        torch.ops.aten.view.default,
+        torch.ops.aten.expand.default,
+        torch.ops.aten.slice.Tensor,
+        torch.ops.aten.unsqueeze.default,
+        torch.ops.aten.squeeze.default,
+        torch.ops.aten.squeeze.dim,
+        torch.ops.aten.select.int,
+        torch.ops.aten.permute.default,
+        torch.ops.aten.contiguous.default,
+        torch.ops.aten.t.default,
+        torch.ops.aten.transpose.int,
+        torch.ops.aten.lift_fresh_copy.default,
+        torch.ops.prims.convert_element_type.default,
     }
 
-    add_offset = defaultdict(int)
+    # Process nodes in topological order (guaranteed by FX graph)
+    for node in graph.nodes:
+        if node.op != 'call_function':
+            continue
+        if node in derives_from:
+            continue  # already handled (shouldn't happen)
 
-    # First pass: trace passthrough ops to build derives_from
-    for result_var, op, args_str in operations:
-        if op in PASSTHROUGH_OPS:
-            parsed = parse_args_simple(args_str)
-            if op == 'aten.where.self':
-                for item in parsed:
-                    if item[0] == 'var' and item[1] in derives_from:
-                        if result_var not in derives_from:
-                            derives_from[result_var] = set()
-                        derives_from[result_var].update(derives_from[item[1]])
-            elif op == 'aten.add.Tensor':
-                if parsed and parsed[0][0] == 'var':
-                    src = parsed[0][1]
-                    if src in derives_from:
-                        derives_from[result_var] = set(derives_from[src])
-                    else:
-                        derives_from[result_var] = {src}
+        target = node.target
+
+        if target == torch.ops.aten.where.self:
+            # where.self(cond, x, y) - result derives from x and y
+            # cond is args[0], x is args[1], y is args[2]
+            sources = set()
+            for arg in node.args[1:]:  # skip condition
+                if isinstance(arg, fx.Node) and arg in derives_from:
+                    sources.update(derives_from[arg])
+            if sources:
+                derives_from[node] = sources
+                add_offset[node] = 0
+
+        elif target == torch.ops.aten.add.Tensor:
+            # add(x, K) or add(x, y)
+            if node.args and isinstance(node.args[0], fx.Node):
+                src = node.args[0]
+                if src in derives_from:
+                    derives_from[node] = set(derives_from[src])
                     offset = add_offset.get(src, 0)
-                    if len(parsed) >= 2 and parsed[1][0] == 'int':
-                        offset += parsed[1][1]
-                    add_offset[result_var] = offset
-            elif op == 'aten.mul.Tensor':
-                if parsed and parsed[0][0] == 'var':
-                    src = parsed[0][1]
-                    if src in derives_from:
-                        derives_from[result_var] = set(derives_from[src])
-                    else:
-                        derives_from[result_var] = {src}
-                    add_offset[result_var] = 0
-            else:
-                if parsed and parsed[0][0] == 'var':
-                    src = parsed[0][1]
-                    if src in derives_from:
-                        derives_from[result_var] = set(derives_from[src])
-                    else:
-                        derives_from[result_var] = {src}
-                    if src in add_offset:
-                        add_offset[result_var] = add_offset[src]
-        elif op == 'aten.gather.default':
-            parsed = parse_args_simple(args_str)
-            if parsed and parsed[0][0] == 'var':
-                src = parsed[0][1]
+                    # Check if second arg is an integer constant
+                    if len(node.args) >= 2 and isinstance(node.args[1], (int, float)):
+                        offset += int(node.args[1])
+                    add_offset[node] = offset
+
+        elif target == torch.ops.aten.mul.Tensor:
+            # mul(x, K) - trace through first arg
+            if node.args and isinstance(node.args[0], fx.Node):
+                src = node.args[0]
                 if src in derives_from:
-                    derives_from[result_var] = set(derives_from[src])
-                else:
-                    derives_from[result_var] = {src}
-                if src in add_offset:
-                    add_offset[result_var] = add_offset[src]
+                    derives_from[node] = set(derives_from[src])
+                    add_offset[node] = 0  # mul resets offset
 
-    # Second pass: handle additional passthrough-like ops
-    for result_var, op, args_str in operations:
-        if 'low_memory_max_pool_offsets_to_indices' in op:
-            parsed = parse_args_simple(args_str)
-            if parsed and parsed[0][0] == 'var':
-                src = parsed[0][1]
+        elif target in PASSTHROUGH_TARGETS:
+            # First arg is source
+            if node.args and isinstance(node.args[0], fx.Node):
+                src = node.args[0]
                 if src in derives_from:
-                    derives_from[result_var] = set(derives_from[src])
-                else:
-                    derives_from[result_var] = {src}
+                    derives_from[node] = set(derives_from[src])
+                    add_offset[node] = add_offset.get(src, 0)
 
-    # Third pass: find index consumer ops and determine bounds
-    index_bounds = {}
-    perm_bounds = {}
+        elif target == torch.ops.aten.gather.default:
+            # gather(input, dim, index) - OUTPUT carries values from input
+            if node.args and isinstance(node.args[0], fx.Node):
+                src = node.args[0]
+                if src in derives_from:
+                    derives_from[node] = set(derives_from[src])
+                    add_offset[node] = add_offset.get(src, 0)
 
-    # Find iota results
-    iota_sizes = {}
-    for result_var, op, args_str in operations:
-        if op == 'prims.iota.default':
-            parsed = parse_args_simple(args_str)
-            if parsed and parsed[0][0] == 'int':
-                iota_sizes[result_var] = parsed[0][1]
+        else:
+            # Check for _low_memory_max_pool_offsets_to_indices
+            target_str = str(target)
+            if 'low_memory_max_pool_offsets_to_indices' in target_str:
+                if node.args and isinstance(node.args[0], fx.Node):
+                    src = node.args[0]
+                    if src in derives_from:
+                        derives_from[node] = set(derives_from[src])
+                        add_offset[node] = 0
 
-    # Find allocations
-    alloc_shapes = {}
-    for result_var, op, args_str in operations:
-        if op in ('aten.empty.memory_format', 'aten.full.default'):
-            parsed = parse_args_simple(args_str)
-            if parsed and parsed[0][0] == 'int_list':
-                alloc_shapes[result_var] = parsed[0][1]
+    # Step 3: Find bounds from index consumer ops
+    index_bounds = {}  # placeholder_node -> bound
+    perm_bounds = {}   # placeholder_node -> bound
 
-    # Handle int8 pool offsets
-    for result_var, op, args_str in operations:
-        if 'low_memory_max_pool_offsets_to_indices' in op:
-            parsed = parse_args_simple(args_str)
-            if parsed and parsed[0][0] == 'var':
-                src = parsed[0][1]
-                source_params = derives_from.get(src, set())
-                int_sources = source_params & int_params
-                if len(parsed) >= 2 and parsed[1][0] == 'int_list':
-                    ks = parsed[1][1]
+    def _set_bound(index_node, raw_bound):
+        """Set bound for all int placeholders that derive into index_node."""
+        source_phs = derives_from.get(index_node, set())
+        int_sources = source_phs & int_placeholder_set
+        offset = add_offset.get(index_node, 0)
+        bound = raw_bound - offset if offset > 0 else raw_bound
+        for ph in int_sources:
+            if ph not in index_bounds or index_bounds[ph] > bound:
+                index_bounds[ph] = bound
+
+    # Handle _low_memory_max_pool_offsets_to_indices: bound = prod(kernel_size)
+    for node in graph.nodes:
+        if node.op != 'call_function':
+            continue
+        target_str = str(node.target)
+        if 'low_memory_max_pool_offsets_to_indices' in target_str:
+            if node.args and isinstance(node.args[0], fx.Node):
+                src = node.args[0]
+                source_phs = derives_from.get(src, set())
+                int_sources = source_phs & int_placeholder_set
+                # kernel_size is args[1]
+                if len(node.args) >= 2 and isinstance(node.args[1], (list, tuple)):
+                    ks = node.args[1]
                     bound = 1
                     for k in ks:
-                        bound *= k
-                    for param in int_sources:
-                        index_bounds[param] = bound
+                        if isinstance(k, int):
+                            bound *= k
+                    for ph in int_sources:
+                        index_bounds[ph] = bound
 
-    # Heuristic for "cumsum as target" pattern
-    for result_var, op, args_str in operations:
-        if op == 'aten.index.Tensor':
-            parsed = parse_args_simple(args_str)
-            if len(parsed) >= 2:
-                target_arg = parsed[0]
-                indices_arg = parsed[1]
-                if target_arg[0] == 'var':
-                    target_var = target_arg[1]
-                    source_params = derives_from.get(target_var, set())
-                    int_targets = source_params & int_params
-                    if int_targets and indices_arg[0] == 'var_list':
-                        for param in int_targets:
-                            if param in param_shapes and param_shapes[param]:
-                                bound = param_shapes[param][0]
-                                if param not in index_bounds:
-                                    index_bounds[param] = bound
+    # Heuristic: i64 param used as TARGET of index.Tensor (cumsum/position pattern)
+    for node in graph.nodes:
+        if node.op != 'call_function':
+            continue
+        if node.target == torch.ops.aten.index.Tensor:
+            if len(node.args) >= 2 and isinstance(node.args[0], fx.Node):
+                target_node = node.args[0]
+                source_phs = derives_from.get(target_node, set())
+                int_targets = source_phs & int_placeholder_set
+                if int_targets and isinstance(node.args[1], (list, tuple)):
+                    # The param is used as TARGET - its values are being READ
+                    for ph in int_targets:
+                        ph_shape = _get_node_shape(ph, var_shapes, gm)
+                        if ph_shape:
+                            bound = ph_shape[0]
+                            if ph not in index_bounds:
+                                index_bounds[ph] = bound
 
-    def _set_bound(index_var, raw_bound):
-        """Set bound for all int params that derive into index_var, accounting for offset."""
-        source_params = derives_from.get(index_var, set())
-        int_sources = source_params & int_params
-        offset = add_offset.get(index_var, 0)
-        bound = raw_bound - offset if offset > 0 else raw_bound
-        for param in int_sources:
-            if param not in index_bounds or index_bounds[param] > bound:
-                index_bounds[param] = bound
+    # Main pass: scan for index consumer ops
+    for node in graph.nodes:
+        if node.op != 'call_function':
+            continue
 
-    # Scan operations for index consumers
-    for result_var, op, args_str in operations:
-        parsed = parse_args_simple(args_str)
+        target = node.target
 
-        if op == 'aten.gather.default':
-            if len(parsed) >= 3:
-                input_arg = parsed[0]
-                dim_arg = parsed[1]
-                index_arg = parsed[2]
+        if target == torch.ops.aten.gather.default:
+            # gather(input, dim, index)
+            if len(node.args) >= 3:
+                input_node = node.args[0]
+                dim = node.args[1]
+                index_node = node.args[2]
 
-                if index_arg[0] == 'var' and dim_arg[0] == 'int':
-                    index_var = index_arg[1]
-                    dim = dim_arg[1]
-                    source_params = derives_from.get(index_var, set())
-                    int_sources = source_params & int_params
+                if isinstance(index_node, fx.Node) and isinstance(dim, int):
+                    source_phs = derives_from.get(index_node, set())
+                    int_sources = source_phs & int_placeholder_set
                     if int_sources:
-                        input_var = input_arg[1] if input_arg[0] == 'var' else None
-                        if input_var and input_var in var_shapes:
-                            input_shape = var_shapes[input_var]
-                            if dim < len(input_shape):
-                                raw_bound = input_shape[dim]
-                                _set_bound(index_var, raw_bound)
+                        input_shape = _get_node_shape(input_node, var_shapes, gm) if isinstance(input_node, fx.Node) else None
+                        if input_shape and dim < len(input_shape):
+                            _set_bound(index_node, input_shape[dim])
 
-        elif op == 'aten.scatter.src':
-            if len(parsed) >= 4:
-                target_arg = parsed[0]
-                dim_arg = parsed[1]
-                index_arg = parsed[2]
+        elif target == torch.ops.aten.scatter.src:
+            # scatter.src(target, dim, index, src)
+            if len(node.args) >= 4:
+                target_node = node.args[0]
+                dim = node.args[1]
+                index_node = node.args[2]
+                src_node = node.args[3]
 
-                if index_arg[0] == 'var' and dim_arg[0] == 'int':
-                    index_var = index_arg[1]
-                    dim = dim_arg[1]
-                    source_params = derives_from.get(index_var, set())
-                    int_sources = source_params & int_params
-                    if int_sources:
-                        target_var = target_arg[1] if target_arg[0] == 'var' else None
-                        target_shape = None
-                        if target_var:
-                            target_shape = var_shapes.get(target_var) or alloc_shapes.get(target_var)
+                if isinstance(index_node, fx.Node) and isinstance(dim, int):
+                    source_phs = derives_from.get(index_node, set())
+                    int_sources = source_phs & int_placeholder_set
+                    if int_sources and isinstance(target_node, fx.Node):
+                        target_shape = _get_node_shape(target_node, var_shapes, gm)
                         if target_shape:
                             actual_dim = dim if dim >= 0 else dim + len(target_shape)
                             if 0 <= actual_dim < len(target_shape):
-                                _set_bound(index_var, target_shape[actual_dim])
+                                _set_bound(index_node, target_shape[actual_dim])
 
-                    # Permutation pattern
-                    src_arg = parsed[3]
-                    if src_arg[0] == 'var':
-                        src_var = src_arg[1]
-                        src_iota = _find_iota_source(src_var, operations, iota_sizes, derives_from)
-                        target_var = target_arg[1] if target_arg[0] == 'var' else None
-                        if src_iota is not None and target_var in alloc_shapes:
-                            t_shape = alloc_shapes[target_var]
-                            actual_dim = dim if dim >= 0 else dim + len(t_shape)
-                            if 0 <= actual_dim < len(t_shape) and t_shape[actual_dim] == src_iota:
-                                for param in int_sources:
-                                    perm_bounds[param] = src_iota
+                    # Permutation pattern: scatter.src(empty, dim, idx, iota_expanded)
+                    if (int_sources and isinstance(target_node, fx.Node)
+                            and isinstance(src_node, fx.Node)):
+                        src_iota = _is_iota_tensor(gm, src_node)
+                        if src_iota is not None:
+                            target_shape = _get_node_shape(target_node, var_shapes, gm)
+                            is_alloc = _is_alloc_node(target_node) or target_node.op == 'get_attr'
+                            if is_alloc and target_shape:
+                                actual_dim = dim if dim >= 0 else dim + len(target_shape)
+                                if (0 <= actual_dim < len(target_shape)
+                                        and target_shape[actual_dim] == src_iota):
+                                    for ph in int_sources:
+                                        perm_bounds[ph] = src_iota
 
-        elif op == 'aten.scatter.value':
-            if len(parsed) >= 3:
-                target_arg = parsed[0]
-                dim_arg = parsed[1]
-                index_arg = parsed[2]
+        elif target == torch.ops.aten.scatter.value:
+            # scatter.value(target, dim, index, value_scalar)
+            if len(node.args) >= 3:
+                target_node = node.args[0]
+                dim = node.args[1]
+                index_node = node.args[2]
 
-                if index_arg[0] == 'var' and dim_arg[0] == 'int':
-                    index_var = index_arg[1]
-                    dim = dim_arg[1]
-                    source_params = derives_from.get(index_var, set())
-                    int_sources = source_params & int_params
-                    if int_sources:
-                        target_var = target_arg[1] if target_arg[0] == 'var' else None
-                        target_shape = None
-                        if target_var:
-                            target_shape = var_shapes.get(target_var) or alloc_shapes.get(target_var)
+                if isinstance(index_node, fx.Node) and isinstance(dim, int):
+                    source_phs = derives_from.get(index_node, set())
+                    int_sources = source_phs & int_placeholder_set
+                    if int_sources and isinstance(target_node, fx.Node):
+                        target_shape = _get_node_shape(target_node, var_shapes, gm)
                         if target_shape:
                             actual_dim = dim if dim >= 0 else dim + len(target_shape)
                             if 0 <= actual_dim < len(target_shape):
-                                _set_bound(index_var, target_shape[actual_dim])
+                                _set_bound(index_node, target_shape[actual_dim])
 
-        elif op == 'aten.scatter_add.default':
-            if len(parsed) >= 3:
-                target_arg = parsed[0]
-                dim_arg = parsed[1]
-                index_arg = parsed[2]
+        elif target == torch.ops.aten.scatter_add.default:
+            # scatter_add(target, dim, index, src)
+            if len(node.args) >= 3:
+                target_node = node.args[0]
+                dim = node.args[1]
+                index_node = node.args[2]
 
-                if index_arg[0] == 'var' and dim_arg[0] == 'int':
-                    index_var = index_arg[1]
-                    dim = dim_arg[1]
-                    source_params = derives_from.get(index_var, set())
-                    int_sources = source_params & int_params
-                    if int_sources:
-                        target_var = target_arg[1] if target_arg[0] == 'var' else None
-                        target_shape = None
-                        if target_var:
-                            target_shape = var_shapes.get(target_var) or alloc_shapes.get(target_var)
+                if isinstance(index_node, fx.Node) and isinstance(dim, int):
+                    source_phs = derives_from.get(index_node, set())
+                    int_sources = source_phs & int_placeholder_set
+                    if int_sources and isinstance(target_node, fx.Node):
+                        target_shape = _get_node_shape(target_node, var_shapes, gm)
                         if target_shape:
                             actual_dim = dim if dim >= 0 else dim + len(target_shape)
                             if 0 <= actual_dim < len(target_shape):
-                                _set_bound(index_var, target_shape[actual_dim])
+                                _set_bound(index_node, target_shape[actual_dim])
 
-        elif op == 'aten.index_put.default':
-            if len(parsed) >= 3:
-                target_arg = parsed[0]
-                indices_arg = parsed[1]
-                values_arg = parsed[2]
+        elif target == torch.ops.aten.index_put.default:
+            # index_put(target, [indices...], values, accumulate?)
+            if len(node.args) >= 3:
+                target_node = node.args[0]
+                indices_arg = node.args[1]
+                values_node = node.args[2]
 
-                target_var = target_arg[1] if target_arg[0] == 'var' else None
-                target_shape = None
-                if target_var:
-                    target_shape = var_shapes.get(target_var) or alloc_shapes.get(target_var)
+                if isinstance(target_node, fx.Node):
+                    target_shape = _get_node_shape(target_node, var_shapes, gm)
+                    target_is_alloc = (_is_alloc_node(target_node)
+                                       or target_node.op == 'get_attr')
 
-                if indices_arg[0] == 'var_list' and target_shape:
-                    target_is_alloc = target_var in alloc_shapes
-                    for dim, idx_name in enumerate(indices_arg[1]):
-                        if dim < len(target_shape):
-                            bound = target_shape[dim]
-                            if (target_is_alloc and len(target_shape) > 1
-                                    and dim > 0 and bound > target_shape[0]):
-                                bound = target_shape[0]
-                            _set_bound(idx_name, bound)
+                    if isinstance(indices_arg, (list, tuple)) and target_shape:
+                        for dim_idx, idx_node in enumerate(indices_arg):
+                            if isinstance(idx_node, fx.Node) and dim_idx < len(target_shape):
+                                bound = target_shape[dim_idx]
+                                # Heuristic: for index_put into an allocation,
+                                # if the indexed dimension is strictly larger than
+                                # the first (batch) dimension, use batch dim
+                                if (target_is_alloc and len(target_shape) > 1
+                                        and dim_idx > 0 and bound > target_shape[0]):
+                                    bound = target_shape[0]
+                                _set_bound(idx_node, bound)
 
-                # Permutation pattern
-                if (indices_arg[0] == 'var_list' and values_arg[0] == 'var'
-                        and target_var in alloc_shapes):
-                    t_shape = alloc_shapes[target_var]
-                    val_var = values_arg[1]
-                    val_iota = _find_iota_source(val_var, operations, iota_sizes, derives_from)
-                    if val_iota is not None and t_shape and t_shape[0] == val_iota:
-                        for idx_name in indices_arg[1]:
-                            source_params = derives_from.get(idx_name, set())
-                            int_sources = source_params & int_params
-                            for param in int_sources:
-                                perm_bounds[param] = val_iota
+                    # Permutation pattern: index_put(empty([N]), [idx], iota(N))
+                    if (isinstance(indices_arg, (list, tuple))
+                            and isinstance(values_node, fx.Node)
+                            and target_is_alloc and target_shape):
+                        val_iota = _is_iota_tensor(gm, values_node)
+                        if val_iota is not None and target_shape and target_shape[0] == val_iota:
+                            for idx_node in indices_arg:
+                                if isinstance(idx_node, fx.Node):
+                                    source_phs = derives_from.get(idx_node, set())
+                                    int_sources = source_phs & int_placeholder_set
+                                    for ph in int_sources:
+                                        perm_bounds[ph] = val_iota
 
-        elif op == 'aten.index.Tensor':
-            if len(parsed) >= 2:
-                input_arg = parsed[0]
-                indices_arg = parsed[1]
+        elif target == torch.ops.aten.index.Tensor:
+            # index.Tensor(input, [indices...])
+            if len(node.args) >= 2:
+                input_node = node.args[0]
+                indices_arg = node.args[1]
 
-                input_var = input_arg[1] if input_arg[0] == 'var' else None
-                input_shape = None
-                if input_var:
-                    input_shape = var_shapes.get(input_var) or alloc_shapes.get(input_var)
+                if isinstance(input_node, fx.Node) and isinstance(indices_arg, (list, tuple)):
+                    input_shape = _get_node_shape(input_node, var_shapes, gm)
+                    if input_shape:
+                        for dim_idx, idx_node in enumerate(indices_arg):
+                            if isinstance(idx_node, fx.Node) and dim_idx < len(input_shape):
+                                _set_bound(idx_node, input_shape[dim_idx])
 
-                if indices_arg[0] == 'var_list' and input_shape:
-                    for dim, idx_name in enumerate(indices_arg[1]):
-                        if dim < len(input_shape):
-                            _set_bound(idx_name, input_shape[dim])
+        elif target == torch.ops.aten.index_select.default:
+            # index_select(input, dim, index)
+            if len(node.args) >= 3:
+                input_node = node.args[0]
+                dim = node.args[1]
+                index_node = node.args[2]
 
-        elif op == 'aten.index_select.default':
-            if len(parsed) >= 3:
-                input_arg = parsed[0]
-                dim_arg = parsed[1]
-                index_arg = parsed[2]
-
-                if index_arg[0] == 'var' and dim_arg[0] == 'int':
-                    index_var = index_arg[1]
-                    dim = dim_arg[1]
-                    source_params = derives_from.get(index_var, set())
-                    int_sources = source_params & int_params
-                    if int_sources:
-                        input_var = input_arg[1] if input_arg[0] == 'var' else None
-                        if input_var and input_var in var_shapes:
-                            input_shape = var_shapes[input_var]
+                if isinstance(index_node, fx.Node) and isinstance(dim, int):
+                    source_phs = derives_from.get(index_node, set())
+                    int_sources = source_phs & int_placeholder_set
+                    if int_sources and isinstance(input_node, fx.Node):
+                        input_shape = _get_node_shape(input_node, var_shapes, gm)
+                        if input_shape:
                             actual_dim = dim if dim >= 0 else dim + len(input_shape)
                             if 0 <= actual_dim < len(input_shape):
-                                _set_bound(index_var, input_shape[actual_dim])
+                                _set_bound(index_node, input_shape[actual_dim])
 
-        elif op == 'aten.embedding.default':
-            if len(parsed) >= 2:
-                weight_arg = parsed[0]
-                indices_arg = parsed[1]
+        elif target == torch.ops.aten.embedding.default:
+            # embedding(weight, indices, ...)
+            if len(node.args) >= 2:
+                weight_node = node.args[0]
+                indices_node = node.args[1]
 
-                if indices_arg[0] == 'var':
-                    index_var = indices_arg[1]
-                    source_params = derives_from.get(index_var, set())
-                    int_sources = source_params & int_params
-                    if int_sources:
-                        weight_var = weight_arg[1] if weight_arg[0] == 'var' else None
-                        if weight_var and weight_var in var_shapes:
-                            weight_shape = var_shapes[weight_var]
-                            if weight_shape:
-                                _set_bound(index_var, weight_shape[0])
+                if isinstance(indices_node, fx.Node):
+                    source_phs = derives_from.get(indices_node, set())
+                    int_sources = source_phs & int_placeholder_set
+                    if int_sources and isinstance(weight_node, fx.Node):
+                        weight_shape = _get_node_shape(weight_node, var_shapes, gm)
+                        if weight_shape:
+                            _set_bound(indices_node, weight_shape[0])
 
     # Constraint backpropagation through mul.Tensor
-    for result_var, op, args_str in operations:
-        if op == 'aten.mul.Tensor':
-            parsed = parse_args_simple(args_str)
-            if len(parsed) >= 2 and parsed[0][0] == 'var' and parsed[1][0] == 'var':
-                arg1_var = parsed[0][1]
-                arg2_var = parsed[1][1]
+    for node in graph.nodes:
+        if node.op != 'call_function':
+            continue
+        if node.target == torch.ops.aten.mul.Tensor:
+            if (len(node.args) >= 2
+                    and isinstance(node.args[0], fx.Node)
+                    and isinstance(node.args[1], fx.Node)):
+                arg1_node = node.args[0]
+                arg2_node = node.args[1]
 
-                arg1_params = derives_from.get(arg1_var, set()) & int_params
+                # Get bound for primary factor's int placeholders
+                arg1_phs = derives_from.get(arg1_node, set()) & int_placeholder_set
                 arg1_bound = None
-                for p in arg1_params:
-                    if p in index_bounds:
-                        b = index_bounds[p]
+                for ph in arg1_phs:
+                    if ph in index_bounds:
+                        b = index_bounds[ph]
                         if arg1_bound is None or b < arg1_bound:
                             arg1_bound = b
 
-                arg2_derives = derives_from.get(arg2_var, set()) if arg2_var in derives_from else {arg2_var}
-                arg2_params = arg2_derives & int_params
+                # Get secondary factor's int placeholders
+                arg2_phs = derives_from.get(arg2_node, set()) & int_placeholder_set
 
-                product_bound = arg1_bound
+                if arg1_bound is not None and arg1_bound > 1 and arg2_phs:
+                    inferred_b2 = arg1_bound // (arg1_bound - 1) + 1
+                    for ph in arg2_phs:
+                        if ph not in index_bounds or index_bounds[ph] > inferred_b2:
+                            index_bounds[ph] = inferred_b2
 
-                if product_bound is not None and product_bound > 1 and arg2_params:
-                    inferred_b2 = product_bound // (arg1_bound - 1) + 1
-                    for p in arg2_params:
-                        if p not in index_bounds or index_bounds[p] > inferred_b2:
-                            index_bounds[p] = inferred_b2
-
-    # Convert param names to positions
+    # Step 4: Convert placeholder nodes to positions
     index_bounds_by_pos = {}
     perm_bounds_by_pos = {}
 
-    for i, name in enumerate(param_names):
-        if name in perm_bounds:
-            perm_bounds_by_pos[i] = perm_bounds[name]
-        elif name in index_bounds:
-            index_bounds_by_pos[i] = index_bounds[name]
+    for i, ph in enumerate(placeholders):
+        if ph in perm_bounds:
+            perm_bounds_by_pos[i] = perm_bounds[ph]
+        elif ph in index_bounds:
+            index_bounds_by_pos[i] = index_bounds[ph]
 
     return index_bounds_by_pos, perm_bounds_by_pos
 
@@ -658,8 +711,17 @@ def infer_bounds_for_config(repro_py, config_str):
     repro_py = Path(repro_py)
     content = repro_py.read_text()
 
-    # Run inference on the forward() body
-    index_bounds, perm_bounds = infer_bounds_from_forward(content)
+    # Parse source shapes
+    var_shapes, var_dtypes = _parse_source_shapes(content)
+
+    # Load and trace the module
+    try:
+        gm, repro = _load_repro_graph(repro_py)
+    except Exception:
+        return config_str
+
+    # Run inference on the graph
+    index_bounds, perm_bounds = _infer_bounds_from_graph(gm, var_shapes, var_dtypes)
 
     # Apply annotations to the config string
     return annotate_config_string(config_str, index_bounds, perm_bounds)

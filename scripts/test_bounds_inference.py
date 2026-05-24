@@ -15,7 +15,8 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
-# We don't need torch for this - pure text parsing
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from bounds_inference import infer_bounds_from_forward as _module_infer_bounds
 
 ROOT = Path(__file__).resolve().parents[1]
 REPROS_DIR = ROOT / "repros" / "canonical"
@@ -776,8 +777,8 @@ def main():
         ground_truth = get_ground_truth_by_param_position(config_str, param_names)
         results['total_annotations'] += len(ground_truth)
 
-        # Run inference
-        index_bounds, perm_bounds = infer_bounds_from_forward(content)
+        # Run inference (using the module's graph-based implementation)
+        index_bounds, perm_bounds = _module_infer_bounds(content, source_path=repro_path)
 
         # Compare
         repro_name = repro_path.parent.name
@@ -918,5 +919,193 @@ def main():
         return 1
 
 
+def run_adversarial_tests():
+    """Adversarial test cases that expose weaknesses in the bounds inference solver.
+
+    These demonstrate confirmed bugs and edge cases where the solver produces
+    incorrect results. Each test documents the expected vs actual behavior.
+    """
+    print("\n" + "=" * 70)
+    print("ADVERSARIAL TEST CASES")
+    print("=" * 70)
+
+    failures = []
+    passes = []
+
+    # --- Bug 1: Reversed operands in add(K, x) ---
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "f32[100, 64]", arg1_1: "i64[32]"):
+        add_tensor: "i64[32]" = torch.ops.aten.add.Tensor(5, arg1_1);  arg1_1 = None
+        unsqueeze_default: "i64[32, 1]" = torch.ops.aten.unsqueeze.default(add_tensor, 1);  add_tensor = None
+        gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
+        return gather_default
+'''
+    idx, perm = infer_bounds_from_forward(content)
+    if 1 not in idx:
+        failures.append(("BUG-1: add(K, x) reversed operands", "MISSED",
+                         "param 1 should have bound 95 (100-5)"))
+    else:
+        passes.append("BUG-1: add(K, x) reversed operands")
+
+    # --- Bug 2: Reversed operands in mul(K, x) ---
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "f32[100, 64]", arg1_1: "i64[32]"):
+        mul_tensor: "i64[32]" = torch.ops.aten.mul.Tensor(2, arg1_1);  arg1_1 = None
+        unsqueeze_default: "i64[32, 1]" = torch.ops.aten.unsqueeze.default(mul_tensor, 1);  mul_tensor = None
+        gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
+        return gather_default
+'''
+    idx, perm = infer_bounds_from_forward(content)
+    if 1 not in idx:
+        failures.append(("BUG-2: mul(K, x) reversed operands", "MISSED",
+                         "param 1 should have bound 100"))
+    else:
+        passes.append("BUG-2: mul(K, x) reversed operands")
+
+    # --- Bug 3: Negative bound from large positive offset ---
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "f32[10, 64]", arg1_1: "i64[32]"):
+        add_tensor: "i64[32]" = torch.ops.aten.add.Tensor(arg1_1, 50);  arg1_1 = None
+        unsqueeze_default: "i64[32, 1]" = torch.ops.aten.unsqueeze.default(add_tensor, 1);  add_tensor = None
+        gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
+        return gather_default
+'''
+    idx, perm = infer_bounds_from_forward(content)
+    if 1 in idx and idx[1] < 0:
+        failures.append(("BUG-3: Negative bound (offset > table size)",
+                         f"got Index({idx[1]})",
+                         "bound should be clamped to 0 or flagged as impossible"))
+    else:
+        passes.append("BUG-3: Negative bound")
+
+    # --- Bug 4: index_put heuristic gives wrong bound when first dim is small ---
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "i64[32]", arg1_1: "i64[32]"):
+        full_default: "f32[1, 1024, 768]" = torch.ops.aten.full.default([1, 1024, 768], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
+        index_put_default: "f32[1, 1024, 768]" = torch.ops.aten.index_put.default(full_default, [arg0_1, arg1_1], 1.0, True);  full_default = arg0_1 = arg1_1 = None
+        return index_put_default
+'''
+    idx, perm = infer_bounds_from_forward(content)
+    if 1 in idx and idx[1] == 1:
+        failures.append(("BUG-4: index_put heuristic [1, 1024, 768] dim=1",
+                         f"got Index({idx[1]})",
+                         "param 1 indexes dim 1 of size 1024, bound should be 1024 not 1"))
+    else:
+        passes.append("BUG-4: index_put heuristic")
+
+    # --- Bug 5: where.self propagates cond param into derives_from ---
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "f32[100, 64]", arg1_1: "i64[32]", arg2_1: "i64[32]"):
+        convert_bool: "b8[32]" = torch.ops.prims.convert_element_type.default(arg1_1, torch.bool)
+        full_default: "i64[]" = torch.ops.aten.full.default([], 0, dtype = torch.int64)
+        where_self: "i64[32]" = torch.ops.aten.where.self(convert_bool, arg2_1, full_default);  convert_bool = arg2_1 = full_default = None
+        unsqueeze_default: "i64[32, 1]" = torch.ops.aten.unsqueeze.default(where_self, 1);  where_self = None
+        gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
+        return gather_default
+'''
+    idx, perm = infer_bounds_from_forward(content)
+    if 1 in idx:
+        failures.append(("BUG-5: where.self propagates cond (convert_element_type) into derives_from",
+                         f"param 1 (cond source) got Index({idx[1]})",
+                         "only param 2 (true-branch) should get a bound"))
+    else:
+        passes.append("BUG-5: where.self cond propagation")
+
+    # --- Bug 6: mul backpropagation always gives bound=2 ---
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "f32[1000, 64]", arg1_1: "i64[32]", arg2_1: "i64[32]"):
+        mul_tensor: "i64[32]" = torch.ops.aten.mul.Tensor(arg1_1, arg2_1);  arg1_1 = None
+        unsqueeze_default: "i64[32, 1]" = torch.ops.aten.unsqueeze.default(mul_tensor, 1);  mul_tensor = None
+        gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
+        return gather_default
+'''
+    idx, perm = infer_bounds_from_forward(content)
+    if 2 in idx and idx[2] == 2:
+        failures.append(("BUG-6: mul backpropagation always gives bound=2",
+                         f"param 2 got Index({idx[2]})",
+                         "secondary factor bound=2 only valid for binary masks"))
+    else:
+        passes.append("BUG-6: mul backpropagation")
+
+    # --- Bug 7: sub.Tensor not handled (missed inference) ---
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "f32[100, 64]", arg1_1: "i64[32]"):
+        sub_tensor: "i64[32]" = torch.ops.aten.sub.Tensor(arg1_1, 5);  arg1_1 = None
+        unsqueeze_default: "i64[32, 1]" = torch.ops.aten.unsqueeze.default(sub_tensor, 1);  sub_tensor = None
+        gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
+        return gather_default
+'''
+    idx, perm = infer_bounds_from_forward(content)
+    if 1 not in idx:
+        failures.append(("BUG-7: sub.Tensor(x, K) not handled",
+                         "MISSED",
+                         "sub(x,5) equivalent to add(x,-5), param should get bound 105"))
+    else:
+        passes.append("BUG-7: sub.Tensor handling")
+
+    # --- Bug 8: Perm detection with iota through add(iota, nonzero) is semantically wrong ---
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "i64[1024]"):
+        empty_memory_format: "i64[1024]" = torch.ops.aten.empty.memory_format([1024], dtype = torch.int64)
+        iota_default: "i64[1024]" = torch.ops.prims.iota.default(1024, start = 0, step = 1, dtype = torch.int64)
+        add_tensor: "i64[1024]" = torch.ops.aten.add.Tensor(iota_default, 5)
+        scatter_src: "i64[1024]" = torch.ops.aten.scatter.src(empty_memory_format, 0, arg0_1, add_tensor);  empty_memory_format = arg0_1 = add_tensor = None
+        return scatter_src
+'''
+    idx, perm = infer_bounds_from_forward(content)
+    if 0 in perm:
+        failures.append(("BUG-8: Perm detected for iota+5 (not a permutation of [0,N))",
+                         f"got Perm({perm[0]})",
+                         "add(iota,5) gives [5,1029), not a perm of [0,1024)"))
+    else:
+        passes.append("BUG-8: Perm with shifted iota")
+
+    # --- Bug 9: cumsum heuristic preempts correct embedding bound ---
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "f32[1000, 64]", arg1_1: "i64[4, 100]", arg2_1: "i64[4, 50]"):
+        embedding: "f32[4, 100, 64]" = torch.ops.aten.embedding.default(arg0_1, arg1_1)
+        index_tensor: "i64[4, 50]" = torch.ops.aten.index.Tensor(arg1_1, [arg2_1]);  arg1_1 = arg2_1 = None
+        return (embedding, index_tensor)
+'''
+    idx, perm = infer_bounds_from_forward(content)
+    if 1 in idx and idx[1] < 1000:
+        failures.append(("BUG-9: cumsum heuristic overrides embedding bound",
+                         f"param 1 got Index({idx[1]})",
+                         "should be Index(1000) from embedding, not Index(4) from heuristic"))
+    else:
+        passes.append("BUG-9: cumsum heuristic vs embedding")
+
+    # --- Print results ---
+    print(f"\nAdversarial tests: {len(failures)} FAILURES, {len(passes)} passes")
+
+    if failures:
+        print(f"\n--- CONFIRMED BUGS ({len(failures)}) ---")
+        for name, got, expected in failures:
+            print(f"  FAIL: {name}")
+            print(f"        Got: {got}")
+            print(f"        Expected: {expected}")
+
+    if passes:
+        print(f"\n--- PASSED ({len(passes)}) ---")
+        for name in passes:
+            print(f"  OK: {name}")
+
+    print("\n" + "=" * 70)
+    return len(failures)
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    exit_code = main()
+    num_adversarial_failures = run_adversarial_tests()
+    # Main test still passes if corpus accuracy is good;
+    # adversarial failures are informational
+    sys.exit(exit_code)
