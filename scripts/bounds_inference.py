@@ -12,7 +12,6 @@ import re
 import math
 import importlib.util
 from pathlib import Path
-from collections import defaultdict
 
 import torch
 import torch.fx as fx
@@ -327,23 +326,45 @@ def _infer_bounds_from_graph(gm, var_shapes, var_dtypes):
                 add_offset[node] = 0
 
         elif target == torch.ops.aten.add.Tensor:
-            # add(x, K) or add(x, y)
-            if node.args and isinstance(node.args[0], fx.Node):
-                src = node.args[0]
-                if src in derives_from:
-                    derives_from[node] = set(derives_from[src])
-                    offset = add_offset.get(src, 0)
-                    # Check if second arg is an integer constant
-                    if len(node.args) >= 2 and isinstance(node.args[1], (int, float)):
-                        offset += int(node.args[1])
+            # add(x, K) or add(K, x) - handle both operand orders
+            if len(node.args) >= 2:
+                arg0, arg1 = node.args[0], node.args[1]
+                if isinstance(arg0, fx.Node) and arg0 in derives_from:
+                    # add(node, K) or add(node, node)
+                    derives_from[node] = set(derives_from[arg0])
+                    offset = add_offset.get(arg0, 0)
+                    if isinstance(arg1, (int, float)):
+                        offset += int(arg1)
+                    add_offset[node] = offset
+                elif isinstance(arg1, fx.Node) and arg1 in derives_from:
+                    # add(K, node) - reversed operands
+                    derives_from[node] = set(derives_from[arg1])
+                    offset = add_offset.get(arg1, 0)
+                    if isinstance(arg0, (int, float)):
+                        offset += int(arg0)
+                    add_offset[node] = offset
+
+        elif target == torch.ops.aten.sub.Tensor:
+            # sub(x, K) is equivalent to add(x, -K)
+            if len(node.args) >= 2:
+                arg0, arg1 = node.args[0], node.args[1]
+                if isinstance(arg0, fx.Node) and arg0 in derives_from:
+                    derives_from[node] = set(derives_from[arg0])
+                    offset = add_offset.get(arg0, 0)
+                    if isinstance(arg1, (int, float)):
+                        offset -= int(arg1)
                     add_offset[node] = offset
 
         elif target == torch.ops.aten.mul.Tensor:
-            # mul(x, K) - trace through first arg
-            if node.args and isinstance(node.args[0], fx.Node):
-                src = node.args[0]
-                if src in derives_from:
-                    derives_from[node] = set(derives_from[src])
+            # mul(x, K) or mul(K, x) - trace through the node operand
+            if len(node.args) >= 2:
+                arg0, arg1 = node.args[0], node.args[1]
+                if isinstance(arg0, fx.Node) and arg0 in derives_from:
+                    derives_from[node] = set(derives_from[arg0])
+                    add_offset[node] = 0  # mul resets offset
+                elif isinstance(arg1, fx.Node) and arg1 in derives_from:
+                    # mul(K, node) - reversed operands
+                    derives_from[node] = set(derives_from[arg1])
                     add_offset[node] = 0  # mul resets offset
 
         elif target in PASSTHROUGH_TARGETS:
@@ -377,11 +398,18 @@ def _infer_bounds_from_graph(gm, var_shapes, var_dtypes):
     perm_bounds = {}   # placeholder_node -> bound
 
     def _set_bound(index_node, raw_bound):
-        """Set bound for all int placeholders that derive into index_node."""
+        """Set bound for all int placeholders that derive into index_node.
+
+        If node = placeholder + offset, and node < raw_bound,
+        then placeholder < raw_bound - offset.
+        Bounds < 1 are discarded (impossible or non-informative).
+        """
         source_phs = derives_from.get(index_node, set())
         int_sources = source_phs & int_placeholder_set
         offset = add_offset.get(index_node, 0)
-        bound = raw_bound - offset if offset > 0 else raw_bound
+        bound = raw_bound - offset
+        if bound < 1:
+            return  # impossible or non-informative bound
         for ph in int_sources:
             if ph not in index_bounds or index_bounds[ph] > bound:
                 index_bounds[ph] = bound
@@ -405,24 +433,6 @@ def _infer_bounds_from_graph(gm, var_shapes, var_dtypes):
                             bound *= k
                     for ph in int_sources:
                         index_bounds[ph] = bound
-
-    # Heuristic: i64 param used as TARGET of index.Tensor (cumsum/position pattern)
-    for node in graph.nodes:
-        if node.op != 'call_function':
-            continue
-        if node.target == torch.ops.aten.index.Tensor:
-            if len(node.args) >= 2 and isinstance(node.args[0], fx.Node):
-                target_node = node.args[0]
-                source_phs = derives_from.get(target_node, set())
-                int_targets = source_phs & int_placeholder_set
-                if int_targets and isinstance(node.args[1], (list, tuple)):
-                    # The param is used as TARGET - its values are being READ
-                    for ph in int_targets:
-                        ph_shape = _get_node_shape(ph, var_shapes, gm)
-                        if ph_shape:
-                            bound = ph_shape[0]
-                            if ph not in index_bounds:
-                                index_bounds[ph] = bound
 
     # Main pass: scan for index consumer ops
     for node in graph.nodes:
@@ -528,12 +538,6 @@ def _infer_bounds_from_graph(gm, var_shapes, var_dtypes):
                         for dim_idx, idx_node in enumerate(indices_arg):
                             if isinstance(idx_node, fx.Node) and dim_idx < len(target_shape):
                                 bound = target_shape[dim_idx]
-                                # Heuristic: for index_put into an allocation,
-                                # if the indexed dimension is strictly larger than
-                                # the first (batch) dimension, use batch dim
-                                if (target_is_alloc and len(target_shape) > 1
-                                        and dim_idx > 0 and bound > target_shape[0]):
-                                    bound = target_shape[0]
                                 _set_bound(idx_node, bound)
 
                     # Permutation pattern: index_put(empty([N]), [idx], iota(N))
@@ -592,35 +596,6 @@ def _infer_bounds_from_graph(gm, var_shapes, var_dtypes):
                         weight_shape = _get_node_shape(weight_node, var_shapes, gm)
                         if weight_shape:
                             _set_bound(indices_node, weight_shape[0])
-
-    # Constraint backpropagation through mul.Tensor
-    for node in graph.nodes:
-        if node.op != 'call_function':
-            continue
-        if node.target == torch.ops.aten.mul.Tensor:
-            if (len(node.args) >= 2
-                    and isinstance(node.args[0], fx.Node)
-                    and isinstance(node.args[1], fx.Node)):
-                arg1_node = node.args[0]
-                arg2_node = node.args[1]
-
-                # Get bound for primary factor's int placeholders
-                arg1_phs = derives_from.get(arg1_node, set()) & int_placeholder_set
-                arg1_bound = None
-                for ph in arg1_phs:
-                    if ph in index_bounds:
-                        b = index_bounds[ph]
-                        if arg1_bound is None or b < arg1_bound:
-                            arg1_bound = b
-
-                # Get secondary factor's int placeholders
-                arg2_phs = derives_from.get(arg2_node, set()) & int_placeholder_set
-
-                if arg1_bound is not None and arg1_bound > 1 and arg2_phs:
-                    inferred_b2 = arg1_bound // (arg1_bound - 1) + 1
-                    for ph in arg2_phs:
-                        if ph not in index_bounds or index_bounds[ph] > inferred_b2:
-                            index_bounds[ph] = inferred_b2
 
     # Step 4: Convert placeholder nodes to positions
     index_bounds_by_pos = {}

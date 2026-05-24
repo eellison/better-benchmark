@@ -932,8 +932,15 @@ def run_adversarial_tests():
     failures = []
     passes = []
 
+    # Common header needed for FX tracing
+    _header = '''import torch
+import torch._inductor.inductor_prims
+from math import inf, nan
+from torch import device
+'''
+
     # --- Bug 1: Reversed operands in add(K, x) ---
-    content = '''
+    content = _header + '''
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[100, 64]", arg1_1: "i64[32]"):
         add_tensor: "i64[32]" = torch.ops.aten.add.Tensor(5, arg1_1);  arg1_1 = None
@@ -941,7 +948,7 @@ class Repro(torch.nn.Module):
         gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
         return gather_default
 '''
-    idx, perm = infer_bounds_from_forward(content)
+    idx, perm = _module_infer_bounds(content)
     if 1 not in idx:
         failures.append(("BUG-1: add(K, x) reversed operands", "MISSED",
                          "param 1 should have bound 95 (100-5)"))
@@ -949,7 +956,7 @@ class Repro(torch.nn.Module):
         passes.append("BUG-1: add(K, x) reversed operands")
 
     # --- Bug 2: Reversed operands in mul(K, x) ---
-    content = '''
+    content = _header + '''
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[100, 64]", arg1_1: "i64[32]"):
         mul_tensor: "i64[32]" = torch.ops.aten.mul.Tensor(2, arg1_1);  arg1_1 = None
@@ -957,7 +964,7 @@ class Repro(torch.nn.Module):
         gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
         return gather_default
 '''
-    idx, perm = infer_bounds_from_forward(content)
+    idx, perm = _module_infer_bounds(content)
     if 1 not in idx:
         failures.append(("BUG-2: mul(K, x) reversed operands", "MISSED",
                          "param 1 should have bound 100"))
@@ -965,7 +972,7 @@ class Repro(torch.nn.Module):
         passes.append("BUG-2: mul(K, x) reversed operands")
 
     # --- Bug 3: Negative bound from large positive offset ---
-    content = '''
+    content = _header + '''
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[10, 64]", arg1_1: "i64[32]"):
         add_tensor: "i64[32]" = torch.ops.aten.add.Tensor(arg1_1, 50);  arg1_1 = None
@@ -973,7 +980,7 @@ class Repro(torch.nn.Module):
         gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
         return gather_default
 '''
-    idx, perm = infer_bounds_from_forward(content)
+    idx, perm = _module_infer_bounds(content)
     if 1 in idx and idx[1] < 0:
         failures.append(("BUG-3: Negative bound (offset > table size)",
                          f"got Index({idx[1]})",
@@ -982,14 +989,14 @@ class Repro(torch.nn.Module):
         passes.append("BUG-3: Negative bound")
 
     # --- Bug 4: index_put heuristic gives wrong bound when first dim is small ---
-    content = '''
+    content = _header + '''
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "i64[32]", arg1_1: "i64[32]"):
         full_default: "f32[1, 1024, 768]" = torch.ops.aten.full.default([1, 1024, 768], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
         index_put_default: "f32[1, 1024, 768]" = torch.ops.aten.index_put.default(full_default, [arg0_1, arg1_1], 1.0, True);  full_default = arg0_1 = arg1_1 = None
         return index_put_default
 '''
-    idx, perm = infer_bounds_from_forward(content)
+    idx, perm = _module_infer_bounds(content)
     if 1 in idx and idx[1] == 1:
         failures.append(("BUG-4: index_put heuristic [1, 1024, 768] dim=1",
                          f"got Index({idx[1]})",
@@ -998,7 +1005,7 @@ class Repro(torch.nn.Module):
         passes.append("BUG-4: index_put heuristic")
 
     # --- Bug 5: where.self propagates cond param into derives_from ---
-    content = '''
+    content = _header + '''
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[100, 64]", arg1_1: "i64[32]", arg2_1: "i64[32]"):
         convert_bool: "b8[32]" = torch.ops.prims.convert_element_type.default(arg1_1, torch.bool)
@@ -1008,7 +1015,7 @@ class Repro(torch.nn.Module):
         gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
         return gather_default
 '''
-    idx, perm = infer_bounds_from_forward(content)
+    idx, perm = _module_infer_bounds(content)
     if 1 in idx:
         failures.append(("BUG-5: where.self propagates cond (convert_element_type) into derives_from",
                          f"param 1 (cond source) got Index({idx[1]})",
@@ -1017,7 +1024,7 @@ class Repro(torch.nn.Module):
         passes.append("BUG-5: where.self cond propagation")
 
     # --- Bug 6: mul backpropagation always gives bound=2 ---
-    content = '''
+    content = _header + '''
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[1000, 64]", arg1_1: "i64[32]", arg2_1: "i64[32]"):
         mul_tensor: "i64[32]" = torch.ops.aten.mul.Tensor(arg1_1, arg2_1);  arg1_1 = None
@@ -1025,7 +1032,7 @@ class Repro(torch.nn.Module):
         gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
         return gather_default
 '''
-    idx, perm = infer_bounds_from_forward(content)
+    idx, perm = _module_infer_bounds(content)
     if 2 in idx and idx[2] == 2:
         failures.append(("BUG-6: mul backpropagation always gives bound=2",
                          f"param 2 got Index({idx[2]})",
@@ -1034,7 +1041,7 @@ class Repro(torch.nn.Module):
         passes.append("BUG-6: mul backpropagation")
 
     # --- Bug 7: sub.Tensor not handled (missed inference) ---
-    content = '''
+    content = _header + '''
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[100, 64]", arg1_1: "i64[32]"):
         sub_tensor: "i64[32]" = torch.ops.aten.sub.Tensor(arg1_1, 5);  arg1_1 = None
@@ -1042,7 +1049,7 @@ class Repro(torch.nn.Module):
         gather_default: "f32[32, 1]" = torch.ops.aten.gather.default(arg0_1, 0, unsqueeze_default);  arg0_1 = unsqueeze_default = None
         return gather_default
 '''
-    idx, perm = infer_bounds_from_forward(content)
+    idx, perm = _module_infer_bounds(content)
     if 1 not in idx:
         failures.append(("BUG-7: sub.Tensor(x, K) not handled",
                          "MISSED",
@@ -1051,16 +1058,16 @@ class Repro(torch.nn.Module):
         passes.append("BUG-7: sub.Tensor handling")
 
     # --- Bug 8: Perm detection with iota through add(iota, nonzero) is semantically wrong ---
-    content = '''
+    content = _header + '''
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "i64[1024]"):
         empty_memory_format: "i64[1024]" = torch.ops.aten.empty.memory_format([1024], dtype = torch.int64)
-        iota_default: "i64[1024]" = torch.ops.prims.iota.default(1024, start = 0, step = 1, dtype = torch.int64)
+        iota_default: "i64[1024]" = torch.ops.prims.iota.default(1024, start = 0, step = 1, dtype = torch.int64, device = device(type='cuda', index=0), requires_grad = False)
         add_tensor: "i64[1024]" = torch.ops.aten.add.Tensor(iota_default, 5)
         scatter_src: "i64[1024]" = torch.ops.aten.scatter.src(empty_memory_format, 0, arg0_1, add_tensor);  empty_memory_format = arg0_1 = add_tensor = None
         return scatter_src
 '''
-    idx, perm = infer_bounds_from_forward(content)
+    idx, perm = _module_infer_bounds(content)
     if 0 in perm:
         failures.append(("BUG-8: Perm detected for iota+5 (not a permutation of [0,N))",
                          f"got Perm({perm[0]})",
@@ -1069,14 +1076,14 @@ class Repro(torch.nn.Module):
         passes.append("BUG-8: Perm with shifted iota")
 
     # --- Bug 9: cumsum heuristic preempts correct embedding bound ---
-    content = '''
+    content = _header + '''
 class Repro(torch.nn.Module):
     def forward(self, arg0_1: "f32[1000, 64]", arg1_1: "i64[4, 100]", arg2_1: "i64[4, 50]"):
         embedding: "f32[4, 100, 64]" = torch.ops.aten.embedding.default(arg0_1, arg1_1)
         index_tensor: "i64[4, 50]" = torch.ops.aten.index.Tensor(arg1_1, [arg2_1]);  arg1_1 = arg2_1 = None
         return (embedding, index_tensor)
 '''
-    idx, perm = infer_bounds_from_forward(content)
+    idx, perm = _module_infer_bounds(content)
     if 1 in idx and idx[1] < 1000:
         failures.append(("BUG-9: cumsum heuristic overrides embedding bound",
                          f"param 1 got Index({idx[1]})",
