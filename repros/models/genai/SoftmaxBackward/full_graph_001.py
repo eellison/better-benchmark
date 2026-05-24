@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "bf16[8192, 262144]", amax: "f32[8192, 1]", sum_1: "f32[8192, 1]", tangents_1: "bf16[]"):
         # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:256 in sm_bwd, code: return y.sum()

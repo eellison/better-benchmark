@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "i64[8, 4096]", gt: "b8[8, 4096, 256]", lt: "b8[8, 64, 1, 1]", tangents_1: "f32[8, 4096, 256]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:249 in forward, code: position_encodings = torch.reshape(dropped_weights, (batch_size, sequence_length, -1))

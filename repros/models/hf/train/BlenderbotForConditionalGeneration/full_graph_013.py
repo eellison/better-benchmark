@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[2560]", primals_3: "f32[16, 128, 2560]", primals_4: "f32[2560, 2560]", primals_6: "f32[2560, 2560]", primals_8: "f32[2560, 2560]", primals_11: "f32[2560, 2560]", primals_13: "f32[2560]", primals_15: "f32[10240, 2560]", primals_17: "f32[2560, 10240]", getitem_1: "f32[16, 128, 1]", rsqrt: "f32[16, 128, 1]", view: "f32[2048, 2560]", where_1: "f32[16, 32, 128, 128]", view_16: "f32[2048, 2560]", addmm_3: "f32[2048, 2560]", gt: "b8[16, 128, 2560]", getitem_3: "f32[16, 128, 1]", rsqrt_1: "f32[16, 128, 1]", view_18: "f32[2048, 2560]", addmm_4: "f32[2048, 10240]", view_20: "f32[2048, 10240]", gt_1: "b8[16, 128, 2560]", permute_25: "f32[512, 80, 128]", permute_26: "f32[512, 80, 128]", permute_27: "f32[512, 128, 80]", tangents_1: "f32[16, 128, 2560]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:293 in forward, code: hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)

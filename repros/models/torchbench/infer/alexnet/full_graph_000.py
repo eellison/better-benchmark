@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f16[64, 3, 11, 11]", arg1_1: "f16[64]", arg2_1: "f16[1024, 3, 224, 224]", arg3_1: "f16[192, 64, 5, 5]", arg4_1: "f16[192]", arg5_1: "f16[384, 192, 3, 3]", arg6_1: "f16[384]", arg7_1: "f16[256, 384, 3, 3]", arg8_1: "f16[256]", arg9_1: "f16[256, 256, 3, 3]", arg10_1: "f16[256]", arg11_1: "f16[4096, 9216]", arg12_1: "f16[4096]", arg13_1: "f16[4096, 4096]", arg14_1: "f16[4096]", arg15_1: "f16[1000, 4096]", arg16_1: "f16[1000]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:48 in forward, code: x = self.features(x)

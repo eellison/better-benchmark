@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[32, 128, 2560]", primals_2: "f32[8008, 2560]", primals_3: "i64[32, 128]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:998 in torch_dynamo_resume_in_forward_at_984, code: logits = self.lm_head(hidden_states[:, slice_indices, :])

@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[1024]", primals_3: "f32[8, 1024, 1024]", primals_4: "f32[1024, 1024]", primals_6: "f32[1024, 1024]", primals_8: "f32[1024, 1024]", primals_11: "f32[1024, 1024]", primals_13: "f32[1024]", primals_15: "f32[4096, 1024]", primals_17: "f32[1024, 4096]", getitem_1: "f32[8, 1024, 1]", rsqrt: "f32[8, 1024, 1]", view: "f32[8192, 1024]", permute_1: "f32[8, 16, 1024, 64]", permute_4: "f32[8, 16, 1024, 64]", permute_5: "f32[8, 16, 1024, 64]", where: "f32[8, 1, 1024, 1024]", getitem_2: "f32[8, 16, 1024, 64]", getitem_3: "f32[8, 16, 1024]", getitem_4: "i64[]", getitem_5: "i64[]", addmm_3: "f32[8192, 1024]", gt: "b8[8, 1024, 1024]", getitem_7: "f32[8, 1024, 1]", rsqrt_1: "f32[8, 1024, 1]", view_12: "f32[8192, 1024]", addmm_4: "f32[8192, 4096]", view_14: "f32[8192, 4096]", gt_1: "b8[8, 1024, 1024]", tangents_1: "f32[8, 1024, 1024]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mbart/modeling_mbart.py:416 in forward, code: hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)

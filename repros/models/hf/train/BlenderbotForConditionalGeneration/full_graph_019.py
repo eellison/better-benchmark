@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[8008, 2560]", primals_4: "i64[16, 128]", view: "f32[2048, 2560]", add: "f32[16, 128, 8008]", amax: "f32[2048, 1]", log: "f32[2048, 1]", convert_element_type: "f32[]", tangents_1: "f32[]", tangents_2: "f32[16, 128, 8008]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:892 in torch_dynamo_resume_in_forward_at_872, code: masked_lm_loss = loss_fct(lm_logits.view(-1, self.config.vocab_size), labels.view(-1))

@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[512, 512]", arg1_1: "f32[512]", arg2_1: "f32[2048, 512]", arg3_1: "f32[64, 512]", arg4_1: "f32[64]", arg5_1: "i64[8, 2048]", arg6_1: "f32[1000000, 64]", arg7_1: "i64[204790]", arg8_1: "f32[1000000, 64]", arg9_1: "i64[204789]", arg10_1: "f32[1000000, 64]", arg11_1: "i64[204793]", arg12_1: "f32[1000000, 64]", arg13_1: "i64[204790]", arg14_1: "f32[1000000, 64]", arg15_1: "i64[204793]", arg16_1: "f32[1000000, 64]", arg17_1: "i64[204784]", arg18_1: "f32[1000000, 64]", arg19_1: "i64[204786]", arg20_1: "f32[1000000, 64]", arg21_1: "i64[204792]", arg22_1: "f32[1024, 100]", arg23_1: "f32[1024]", arg24_1: "f32[1024, 1024]", arg25_1: "f32[1024]", arg26_1: "f32[1024, 1024]", arg27_1: "f32[1024]", arg28_1: "f32[1, 1024]", arg29_1: "f32[1]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dlrm/dlrm_s_pytorch.py:298 in apply_emb, code: sparse_offset_group_batch = lS_o[k]

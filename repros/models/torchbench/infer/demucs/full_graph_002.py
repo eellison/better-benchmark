@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[8, 2048, 92]", arg1_1: "f32[8, 2048, 92]", arg2_1: "f32[4096, 2048, 3]", arg3_1: "f32[4096]", arg4_1: "f32[2048, 1024, 8]", arg5_1: "f32[1024]", arg6_1: "f32[8, 1024, 372]", arg7_1: "f32[2048, 1024, 3]", arg8_1: "f32[2048]", arg9_1: "f32[1024, 512, 8]", arg10_1: "f32[512]", arg11_1: "f32[8, 512, 1493]", arg12_1: "f32[1024, 512, 3]", arg13_1: "f32[1024]", arg14_1: "f32[512, 256, 8]", arg15_1: "f32[256]", arg16_1: "f32[8, 256, 5979]", arg17_1: "f32[512, 256, 3]", arg18_1: "f32[512]", arg19_1: "f32[256, 128, 8]", arg20_1: "f32[128]", arg21_1: "f32[8, 128, 23923]", arg22_1: "f32[256, 128, 3]", arg23_1: "f32[256]", arg24_1: "f32[128, 64, 8]", arg25_1: "f32[64]", arg26_1: "f32[8, 64, 95696]", arg27_1: "f32[128, 64, 3]", arg28_1: "f32[128]", arg29_1: "f32[64, 8, 8]", arg30_1: "f32[8]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/demucs/demucs/model.py:225 in torch_dynamo_resume_in_forward_at_220, code: x = x + skip

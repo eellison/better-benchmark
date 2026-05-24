@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "Sym(s49)", arg1_1: "Sym(s15)", arg2_1: "Sym(s39)", arg3_1: "f32[64, s49, s15, s39]", arg4_1: "f32[64, s49, s15, s39]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:102 in torch_dynamo_resume_in_forward_at_97, code: out += identity

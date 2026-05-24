@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f16[64, 3, 3, 3]", arg1_1: "f16[64]", arg2_1: "f16[512, 3, 224, 224]", arg3_1: "f16[16, 64, 1, 1]", arg4_1: "f16[16]", arg5_1: "f16[64, 16, 1, 1]", arg6_1: "f16[64]", arg7_1: "f16[64, 16, 3, 3]", arg8_1: "f16[64]", arg9_1: "f16[16, 128, 1, 1]", arg10_1: "f16[16]", arg11_1: "f16[64, 16, 1, 1]", arg12_1: "f16[64]", arg13_1: "f16[64, 16, 3, 3]", arg14_1: "f16[64]", arg15_1: "f16[32, 128, 1, 1]", arg16_1: "f16[32]", arg17_1: "f16[128, 32, 1, 1]", arg18_1: "f16[128]", arg19_1: "f16[128, 32, 3, 3]", arg20_1: "f16[128]", arg21_1: "f16[32, 256, 1, 1]", arg22_1: "f16[32]", arg23_1: "f16[128, 32, 1, 1]", arg24_1: "f16[128]", arg25_1: "f16[128, 32, 3, 3]", arg26_1: "f16[128]", arg27_1: "f16[48, 256, 1, 1]", arg28_1: "f16[48]", arg29_1: "f16[192, 48, 1, 1]", arg30_1: "f16[192]", arg31_1: "f16[192, 48, 3, 3]", arg32_1: "f16[192]", arg33_1: "f16[48, 384, 1, 1]", arg34_1: "f16[48]", arg35_1: "f16[192, 48, 1, 1]", arg36_1: "f16[192]", arg37_1: "f16[192, 48, 3, 3]", arg38_1: "f16[192]", arg39_1: "f16[64, 384, 1, 1]", arg40_1: "f16[64]", arg41_1: "f16[256, 64, 1, 1]", arg42_1: "f16[256]", arg43_1: "f16[256, 64, 3, 3]", arg44_1: "f16[256]", arg45_1: "f16[64, 512, 1, 1]", arg46_1: "f16[64]", arg47_1: "f16[256, 64, 1, 1]", arg48_1: "f16[256]", arg49_1: "f16[256, 64, 3, 3]", arg50_1: "f16[256]", arg51_1: "f16[1000, 512, 1, 1]", arg52_1: "f16[1000]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/squeezenet.py:95 in forward, code: x = self.features(x)

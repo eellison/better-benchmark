@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[512, 512]", primals_2: "f32[512]", primals_3: "f32[2048, 512]", primals_4: "f32[64, 512]", primals_5: "f32[64]", primals_6: "i64[8, 2048]", primals_7: "f32[1000000, 64]", primals_8: "i64[204790]", primals_9: "f32[1000000, 64]", primals_10: "i64[204789]", primals_11: "f32[1000000, 64]", primals_12: "i64[204793]", primals_13: "f32[1000000, 64]", primals_14: "i64[204790]", primals_15: "f32[1000000, 64]", primals_16: "i64[204793]", primals_17: "f32[1000000, 64]", primals_18: "i64[204784]", primals_19: "f32[1000000, 64]", primals_20: "i64[204786]", primals_21: "f32[1000000, 64]", primals_22: "i64[204792]", primals_23: "f32[1024, 100]", primals_24: "f32[1024]", primals_25: "f32[1024, 1024]", primals_26: "f32[1024]", primals_27: "f32[1024, 1024]", primals_28: "f32[1024]", primals_29: "f32[1, 1024]", primals_30: "f32[1]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dlrm/dlrm_s_pytorch.py:284 in apply_mlp, code: return layers(x)

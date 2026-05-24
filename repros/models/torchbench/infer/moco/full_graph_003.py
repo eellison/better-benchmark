@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[32, 512, 7, 7]", arg1_1: "f32[512, 512, 3, 3]", arg2_1: "f32[512]", arg3_1: "f32[512]", arg4_1: "f32[512]", arg5_1: "f32[512]", arg6_1: "f32[2048, 512, 1, 1]", arg7_1: "f32[2048]", arg8_1: "f32[2048]", arg9_1: "f32[2048]", arg10_1: "f32[2048]", arg11_1: "f32[32, 2048, 7, 7]", arg12_1: "f32[512, 2048, 1, 1]", arg13_1: "f32[512]", arg14_1: "f32[512]", arg15_1: "f32[512]", arg16_1: "f32[512]", arg17_1: "f32[512, 512, 3, 3]", arg18_1: "f32[512]", arg19_1: "f32[512]", arg20_1: "f32[512]", arg21_1: "f32[512]", arg22_1: "f32[2048, 512, 1, 1]", arg23_1: "f32[2048]", arg24_1: "f32[2048]", arg25_1: "f32[2048]", arg26_1: "f32[2048]", arg27_1: "f32[128, 2048]", arg28_1: "f32[128]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/resnet.py:150 in forward, code: out = self.conv2(out)

@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f16[64, 3, 3, 3]", arg1_1: "f16[64]", arg2_1: "f16[128, 3, 224, 224]", arg3_1: "f16[64, 64, 3, 3]", arg4_1: "f16[64]", arg5_1: "f16[128, 64, 3, 3]", arg6_1: "f16[128]", arg7_1: "f16[128, 128, 3, 3]", arg8_1: "f16[128]", arg9_1: "f16[256, 128, 3, 3]", arg10_1: "f16[256]", arg11_1: "f16[256, 256, 3, 3]", arg12_1: "f16[256]", arg13_1: "f16[256, 256, 3, 3]", arg14_1: "f16[256]", arg15_1: "f16[512, 256, 3, 3]", arg16_1: "f16[512]", arg17_1: "f16[512, 512, 3, 3]", arg18_1: "f16[512]", arg19_1: "f16[512, 512, 3, 3]", arg20_1: "f16[512]", arg21_1: "f16[512, 512, 3, 3]", arg22_1: "f16[512]", arg23_1: "f16[512, 512, 3, 3]", arg24_1: "f16[512]", arg25_1: "f16[512, 512, 3, 3]", arg26_1: "f16[512]", arg27_1: "f16[4096, 25088]", arg28_1: "f16[4096]", arg29_1: "f16[4096, 4096]", arg30_1: "f16[4096]", arg31_1: "f16[1000, 4096]", arg32_1: "f16[1000]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/vgg.py:66 in forward, code: x = self.features(x)

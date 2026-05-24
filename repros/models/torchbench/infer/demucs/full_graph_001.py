@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[64, 2, 8]", arg1_1: "f32[64]", arg2_1: "f32[8, 2, 382788]", arg3_1: "f32[128, 64, 1]", arg4_1: "f32[128]", arg5_1: "f32[128, 64, 8]", arg6_1: "f32[128]", arg7_1: "f32[256, 128, 1]", arg8_1: "f32[256]", arg9_1: "f32[256, 128, 8]", arg10_1: "f32[256]", arg11_1: "f32[512, 256, 1]", arg12_1: "f32[512]", arg13_1: "f32[512, 256, 8]", arg14_1: "f32[512]", arg15_1: "f32[1024, 512, 1]", arg16_1: "f32[1024]", arg17_1: "f32[1024, 512, 8]", arg18_1: "f32[1024]", arg19_1: "f32[2048, 1024, 1]", arg20_1: "f32[2048]", arg21_1: "f32[2048, 1024, 8]", arg22_1: "f32[2048]", arg23_1: "f32[4096, 2048, 1]", arg24_1: "f32[4096]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/demucs/demucs/model.py:215 in forward, code: x = encode(x)

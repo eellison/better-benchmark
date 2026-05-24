@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[384]", primals_3: "f32[8, 1500, 384]", primals_4: "f32[384, 384]", primals_6: "f32[384, 384]", primals_7: "f32[384, 384]", primals_9: "f32[384, 384]", primals_11: "f32[384]", primals_13: "f32[1536, 384]", primals_15: "f32[384, 1536]", getitem_1: "f32[8, 1500, 1]", rsqrt: "f32[8, 1500, 1]", view: "f32[12000, 384]", clone_1: "f32[8, 6, 1500, 64]", clone_2: "f32[8, 6, 1500, 64]", clone_3: "f32[8, 6, 1500, 64]", getitem_2: "f32[8, 6, 1500, 64]", getitem_3: "f32[8, 6, 1504]", getitem_4: "i64[]", getitem_5: "i64[]", addmm_2: "f32[12000, 384]", getitem_7: "f32[8, 1500, 1]", rsqrt_1: "f32[8, 1500, 1]", view_12: "f32[12000, 384]", addmm_3: "f32[12000, 1536]", view_14: "f32[12000, 1536]", tangents_1: "f32[8, 1500, 384]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/whisper/modeling_whisper.py:405 in forward, code: hidden_states = self.fc2(hidden_states)

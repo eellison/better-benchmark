@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[1024]", primals_3: "f32[64, 128, 1024]", primals_4: "f32[1024, 1024]", primals_6: "f32[1024, 1024]", primals_8: "f32[1024, 1024]", primals_10: "b8[64, 1, 128, 128]", primals_11: "f32[1024, 1024]", primals_13: "f32[1024]", primals_15: "f32[4096, 1024]", primals_17: "f32[1024, 4096]", getitem_1: "f32[64, 128, 1]", rsqrt: "f32[64, 128, 1]", view: "f32[8192, 1024]", bmm: "f32[1024, 128, 128]", amax: "f32[64, 16, 128, 1]", sum_1: "f32[64, 16, 128, 1]", logical_not_1: "b8[64, 16, 128, 1]", gt: "b8[64, 16, 128, 128]", view_16: "f32[8192, 1024]", addmm_3: "f32[8192, 1024]", gt_1: "b8[64, 128, 1024]", getitem_3: "f32[64, 128, 1]", rsqrt_1: "f32[64, 128, 1]", view_18: "f32[8192, 1024]", view_20: "f32[8192, 4096]", gt_2: "b8[64, 128, 1024]", le: "b8[64, 128, 4096]", permute_24: "f32[1024, 128, 128]", permute_25: "f32[1024, 64, 128]", permute_26: "f32[1024, 64, 128]", permute_27: "f32[1024, 128, 64]", tangents_1: "f32[64, 128, 1024]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/m2m_100/modeling_m2m_100.py:376 in forward, code: hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)

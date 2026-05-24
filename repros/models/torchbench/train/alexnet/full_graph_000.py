@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[64, 3, 11, 11]", primals_2: "f32[64]", primals_3: "f32[1024, 3, 224, 224]", primals_4: "f32[192, 64, 5, 5]", primals_5: "f32[192]", primals_6: "f32[384, 192, 3, 3]", primals_7: "f32[384]", primals_8: "f32[256, 384, 3, 3]", primals_9: "f32[256]", primals_10: "f32[256, 256, 3, 3]", primals_11: "f32[256]", primals_12: "f32[4096, 9216]", primals_13: "f32[4096]", primals_14: "f32[4096, 4096]", primals_15: "f32[4096]", primals_16: "f32[1000, 4096]", primals_17: "f32[1000]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:48 in forward, code: x = self.features(x)

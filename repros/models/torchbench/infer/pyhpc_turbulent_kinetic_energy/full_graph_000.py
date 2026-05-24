@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f64[204, 204, 26, 3]", arg1_1: "f64[204, 204, 26, 3]", arg2_1: "f64[204, 204, 26]", arg3_1: "i64[204, 204]", arg4_1: "f64[26]", arg5_1: "f64[204, 204, 26]", arg6_1: "f64[26]", arg7_1: "f64[204, 204, 26]", arg8_1: "f64[204, 204, 26]", arg9_1: "f64[204, 204]", arg10_1: "f64[204]", arg11_1: "f64[204]", arg12_1: "f64[204]", arg13_1: "f64[204, 204, 26]", arg14_1: "f64[204]", arg15_1: "f64[204, 204, 26]", arg16_1: "f64[204]", arg17_1: "f64[204]", arg18_1: "f64[204, 204, 26, 3]", arg19_1: "f64[204, 204, 26, 3]", arg20_1: "f64[204, 204, 26, 3]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pyhpc_turbulent_kinetic_energy/tke_pytorch.py:198 in integrate_tke, code: torch.maximum(torch.tensor([0.0], device=tke.device), tke[:, :, :, tau])

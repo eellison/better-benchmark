@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "i64[8, 512]", arg1_1: "i64[1, 512]", arg2_1: "i64[1, 512]", arg3_1: "f32[30000, 128]", arg4_1: "f32[2, 128]", arg5_1: "f32[512, 128]", arg6_1: "f32[128]", arg7_1: "f32[128]", arg8_1: "f32[4096, 128]", arg9_1: "f32[4096]", arg10_1: "f32[4096, 4096]", arg11_1: "f32[4096]", arg12_1: "f32[4096, 4096]", arg13_1: "f32[4096]", arg14_1: "f32[4096, 4096]", arg15_1: "f32[4096]", arg16_1: "f32[4096, 4096]", arg17_1: "f32[4096]", arg18_1: "f32[4096]", arg19_1: "f32[4096]", arg20_1: "f32[16384, 4096]", arg21_1: "f32[16384]", arg22_1: "f32[4096, 16384]", arg23_1: "f32[4096]", arg24_1: "f32[4096]", arg25_1: "f32[4096]", arg26_1: "f32[128, 4096]", arg27_1: "f32[128]", arg28_1: "f32[128]", arg29_1: "f32[128]", arg30_1: "f32[30000]", arg31_1: "i64[8, 512]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:101 in forward, code: inputs_embeds = self.word_embeddings(input_ids)

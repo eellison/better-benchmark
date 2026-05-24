@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_3: "f32[4096, 2048, 3]", primals_5: "f32[2048, 1024, 8]", primals_8: "f32[2048, 1024, 3]", primals_10: "f32[1024, 512, 8]", primals_13: "f32[1024, 512, 3]", primals_15: "f32[512, 256, 8]", primals_18: "f32[512, 256, 3]", primals_20: "f32[256, 128, 8]", primals_23: "f32[256, 128, 3]", primals_25: "f32[128, 64, 8]", primals_28: "f32[128, 64, 3]", primals_30: "f32[64, 8, 8]", add: "f32[64, 2048, 92]", convolution: "f32[64, 4096, 90]", glu: "f32[64, 2048, 90]", add_1: "f32[64, 1024, 364]", convolution_2: "f32[64, 2048, 362]", glu_1: "f32[64, 1024, 362]", add_2: "f32[64, 512, 1452]", convolution_4: "f32[64, 1024, 1450]", glu_2: "f32[64, 512, 1450]", add_3: "f32[64, 256, 5804]", convolution_6: "f32[64, 512, 5802]", glu_3: "f32[64, 256, 5802]", add_4: "f32[64, 128, 23212]", convolution_8: "f32[64, 256, 23210]", glu_4: "f32[64, 128, 23210]", add_5: "f32[64, 64, 92844]", convolution_10: "f32[64, 128, 92842]", glu_5: "f32[64, 64, 92842]", le: "b8[64, 64, 92844]", le_1: "b8[64, 128, 23212]", le_2: "b8[64, 256, 5804]", le_3: "b8[64, 512, 1452]", le_4: "b8[64, 1024, 364]", tangents_1: "f32[64, 4, 2, 371372]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/demucs/demucs/model.py:232 in torch_dynamo_resume_in_forward_at_220, code: x = x.view(x.size(0), self.sources, self.audio_channels, x.size(-1))

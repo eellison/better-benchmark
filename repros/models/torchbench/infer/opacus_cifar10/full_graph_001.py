@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[64]", arg1_1: "f32[64]", arg2_1: "f32[64, 64, 16, 16]"):
         # No stacktrace found for following nodes

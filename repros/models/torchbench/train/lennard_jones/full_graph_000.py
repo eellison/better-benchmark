@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[16, 1]", primals_2: "f32[16]", primals_3: "f32[1000, 1]", primals_4: "f32[16, 16]", primals_5: "f32[16]", primals_6: "f32[16, 16]", primals_7: "f32[16]", primals_8: "f32[16, 16]", primals_9: "f32[16]", primals_10: "f32[1, 16]", primals_11: "f32[1]"):
         # No stacktrace found for following nodes

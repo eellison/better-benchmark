@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "i64[32]", arg1_1: "f32[32, 3, 224, 224]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:97 in torch_dynamo_resume_in__batch_shuffle_ddp_at_94, code: idx_unshuffle = torch.argsort(idx_shuffle)

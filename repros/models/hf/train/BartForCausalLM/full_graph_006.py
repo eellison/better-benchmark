@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_2: "f32[50265, 1024]", primals_3: "i64[8, 1024]", view: "f32[8192, 1024]", view_1: "f32[8, 1024, 50265]", amax: "f32[8192, 1]", log: "f32[8192, 1]", convert_element_type: "f32[]", tangents_1: "f32[]", tangents_2: "f32[8, 1024, 50265]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bart/modeling_bart.py:1300 in torch_dynamo_resume_in_forward_at_1280, code: loss = loss_fct(logits.view(-1, self.config.vocab_size), labels.view(-1))

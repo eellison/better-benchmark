@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f64[204, 204, 26]", arg1_1: "f64[204, 204, 26]", arg2_1: "f64[1, 1, 26]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pyhpc_equation_of_state/eos_pytorch.py:184 in gsw_dHdT, code: 0.1e5

@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "bf16[1152000, 512]", primals_2: "f32[512]", getitem_1: "f32[1152000, 1]", rsqrt: "f32[1152000, 1]", tangents_1: "bf16[]"):
         # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:386 in layernorm_bwd, code: return out.sum()

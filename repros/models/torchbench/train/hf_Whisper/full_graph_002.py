@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[256, 384]", primals_4: "f32[2, 256]", view: "f32[12000, 384]", mean: "f32[8, 256]", tangents_1: "f32[8, 2]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/whisper/modeling_whisper.py:1336 in torch_dynamo_resume_in_forward_at_1314, code: logits = self.classifier(pooled_output)

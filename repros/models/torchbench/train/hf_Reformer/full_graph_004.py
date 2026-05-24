@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[256]", arg1_1: "f32[256]", arg2_1: "f32[8, 4096, 256]", arg3_1: "f32[512, 256]", arg4_1: "f32[512]", arg5_1: "f32[256, 512]", arg6_1: "f32[256]", arg7_1: "f32[8, 4096, 256]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1474 in forward_chunk, code: hidden_states = self.layer_norm(hidden_states)

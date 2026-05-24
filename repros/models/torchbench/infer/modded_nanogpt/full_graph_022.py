@@ -1,3 +1,38 @@
+import torch
+from torch import device
+from math import inf, nan
+
+# Register nanogpt custom ops (from modded_nanogpt benchmark model)
+if not hasattr(torch.ops, 'nanogpt') or not hasattr(torch.ops.nanogpt, 'mm'):
+    @torch.library.custom_op("nanogpt::mm", mutates_args=())
+    def _mm_op(x: torch.Tensor, w: torch.Tensor, x_s: float, w_s: float, grad_s: float) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        x_f8 = x.div(x_s).to(torch.float8_e4m3fn)
+        w_f8 = w.div(w_s).to(torch.float8_e4m3fn)
+        out = torch._scaled_mm(x_f8, w_f8.T, out_dtype=torch.bfloat16,
+                               scale_a=x.new_tensor(x_s, dtype=torch.float32),
+                               scale_b=x.new_tensor(w_s, dtype=torch.float32), use_fast_accum=True)
+        return out, x_f8, w_f8
+
+    @_mm_op.register_fake
+    def _mm_fake(x: torch.Tensor, w: torch.Tensor, *_):
+        return x @ w.T, x.to(torch.float8_e4m3fn), w.to(torch.float8_e4m3fn)
+
+    @torch.library.custom_op("nanogpt::mm_backward", mutates_args=())
+    def _mm_backward_op(g: torch.Tensor, x_f8: torch.Tensor, w_f8: torch.Tensor, x_s: float, w_s: float, grad_s: float) -> tuple[torch.Tensor, torch.Tensor]:
+        grad_f8 = g.div(grad_s).to(torch.float8_e5m2)
+        grad_x = torch._scaled_mm(grad_f8, w_f8.T.contiguous().T, out_dtype=torch.bfloat16,
+                                   scale_a=g.new_tensor(grad_s, dtype=torch.float32),
+                                   scale_b=g.new_tensor(w_s, dtype=torch.float32), use_fast_accum=False)
+        grad_w = torch._scaled_mm(x_f8.T.contiguous(), grad_f8.T.contiguous().T, out_dtype=torch.float32,
+                                  scale_a=g.new_tensor(x_s, dtype=torch.float32),
+                                  scale_b=g.new_tensor(grad_s, dtype=torch.float32), use_fast_accum=False)
+        return grad_x, grad_w.T
+
+    @_mm_backward_op.register_fake
+    def _mm_backward_fake(g: torch.Tensor, x_f8: torch.Tensor, w_f8: torch.Tensor, *_):
+        return x_f8.to(torch.bfloat16), w_f8.T.contiguous().T.to(torch.float32)
+
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "i32[6144]", arg1_1: "bf16[50304, 768]", arg2_1: "bf16[50304, 768]", arg3_1: "bf16[50304, 768]", arg4_1: "i32[]", arg5_1: "bf16[50304, 768]", arg6_1: "f32[64]", arg7_1: "f32[4, 768, 768]", arg8_1: "f32[262144, 64]", arg9_1: "f32[262144, 64]", arg10_1: "f32[6, 12]", arg11_1: "f32[768, 3072]", arg12_1: "f32[768, 3072]", arg13_1: "f32[4, 768, 768]", arg14_1: "f32[262144, 64]", arg15_1: "f32[262144, 64]", arg16_1: "f32[6, 12]", arg17_1: "f32[768, 3072]", arg18_1: "f32[768, 3072]", arg19_1: "f32[4, 768, 768]", arg20_1: "f32[262144, 64]", arg21_1: "f32[262144, 64]", arg22_1: "f32[6, 12]", arg23_1: "f32[768, 3072]", arg24_1: "f32[768, 3072]", arg25_1: "f32[4, 768, 768]", arg26_1: "f32[262144, 64]", arg27_1: "f32[262144, 64]", arg28_1: "f32[6, 12]", arg29_1: "f32[768, 3072]", arg30_1: "f32[768, 3072]", arg31_1: "f32[4, 768, 768]", arg32_1: "f32[262144, 64]", arg33_1: "f32[262144, 64]", arg34_1: "f32[6, 12]", arg35_1: "f32[768, 3072]", arg36_1: "f32[768, 3072]", arg37_1: "f32[4, 768, 768]", arg38_1: "f32[262144, 64]", arg39_1: "f32[262144, 64]", arg40_1: "f32[6, 12]", arg41_1: "f32[768, 3072]", arg42_1: "f32[768, 3072]", arg43_1: "f32[4, 768, 768]", arg44_1: "f32[262144, 64]", arg45_1: "f32[262144, 64]", arg46_1: "f32[6, 12]", arg47_1: "f32[768, 3072]", arg48_1: "f32[768, 3072]", arg49_1: "f32[768, 3072]", arg50_1: "f32[768, 3072]", arg51_1: "f32[4, 768, 768]", arg52_1: "f32[262144, 64]", arg53_1: "f32[262144, 64]", arg54_1: "f32[6, 12]", arg55_1: "f32[768, 3072]", arg56_1: "f32[768, 3072]", arg57_1: "f32[4, 768, 768]", arg58_1: "f32[262144, 64]", arg59_1: "f32[262144, 64]", arg60_1: "f32[6, 12]", arg61_1: "f32[768, 3072]", arg62_1: "f32[768, 3072]", arg63_1: "f32[4, 768, 768]", arg64_1: "f32[262144, 64]", arg65_1: "f32[262144, 64]", arg66_1: "f32[6, 12]", arg67_1: "f32[768, 3072]", arg68_1: "f32[768, 3072]", arg69_1: "f32[4, 768, 768]", arg70_1: "f32[262144, 64]", arg71_1: "f32[262144, 64]", arg72_1: "f32[6, 12]", arg73_1: "f32[768, 3072]", arg74_1: "f32[768, 3072]", arg75_1: "f32[50304, 768]", arg76_1: "i64[6144]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/modded_nanogpt/model.py:842 in create_blockmasks, code: block_idx = torch.arange(NUM_BLOCKS, dtype=torch.int32, device="cuda")

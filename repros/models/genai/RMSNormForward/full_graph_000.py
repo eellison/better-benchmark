@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "bf16[1152000, 512]", arg1_1: "f32[512]"):
         # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:285 in rmsnorm_fwd, code: x_f32 = x.float()

@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[2560]", primals_2: "f32[2560]", primals_3: "f32[32, 128, 2560]", primals_4: "f32[2560, 2560]", primals_5: "f32[2560]", primals_6: "f32[2560, 2560]", primals_7: "f32[2560]", primals_8: "f32[2560, 2560]", primals_9: "f32[2560]", primals_10: "b8[32, 1, 128, 128]", primals_11: "f32[2560, 2560]", primals_12: "f32[2560]", primals_13: "f32[2560]", primals_14: "f32[2560]", primals_15: "f32[10240, 2560]", primals_16: "f32[10240]", primals_17: "f32[2560, 10240]", primals_18: "f32[2560]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:358 in forward, code: hidden_states = self.self_attn_layer_norm(hidden_states)

@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "i64[2, 1024]", primals_5: "f32[768]", full_default: "i64[2, 1024]", add: "i64[2, 1024]", mul_2: "f32[2, 1024, 768]", gt: "b8[2, 1024, 768]", div: "f32[2, 1024, 1]", tangents_1: "f32[2, 1024, 768]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:424 in forward, code: embeddings = self.dropout(embeddings)

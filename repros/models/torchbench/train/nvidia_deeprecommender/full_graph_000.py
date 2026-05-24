@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[512, 197951]", primals_2: "f32[512]", primals_3: "f32[1024, 197951]", primals_4: "f32[512, 512]", primals_5: "f32[512]", primals_6: "f32[1024, 512]", primals_7: "f32[1024]", primals_8: "f32[512, 1024]", primals_9: "f32[512]", primals_10: "f32[512, 512]", primals_11: "f32[512]", primals_12: "f32[197951, 512]", primals_13: "f32[197951]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/nvidia_deeprecommender/reco_encoder/model/model.py:132 in encode, code: input=F.linear(input=x, weight=w, bias=self.encode_b[ind]),

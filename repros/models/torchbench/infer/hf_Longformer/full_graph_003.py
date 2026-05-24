@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f16[768, 768]", arg1_1: "f16[768]", arg2_1: "f16[1, 4096, 768]", arg3_1: "f16[768]", arg4_1: "f16[768]", arg5_1: "f16[50265, 768]", arg6_1: "f16[50265]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:1276 in forward, code: x = self.dense(features)

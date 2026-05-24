@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[64, 2, 8]", primals_3: "f32[64, 2, 382788]", primals_4: "f32[128, 64, 1]", primals_6: "f32[128, 64, 8]", primals_8: "f32[256, 128, 1]", primals_10: "f32[256, 128, 8]", primals_12: "f32[512, 256, 1]", primals_14: "f32[512, 256, 8]", primals_16: "f32[1024, 512, 1]", primals_18: "f32[1024, 512, 8]", primals_20: "f32[2048, 1024, 1]", primals_22: "f32[2048, 1024, 8]", primals_24: "f32[4096, 2048, 1]", relu: "f32[64, 64, 95696]", convolution_1: "f32[64, 128, 95696]", glu: "f32[64, 64, 95696]", relu_1: "f32[64, 128, 23923]", convolution_3: "f32[64, 256, 23923]", glu_1: "f32[64, 128, 23923]", relu_2: "f32[64, 256, 5979]", convolution_5: "f32[64, 512, 5979]", glu_2: "f32[64, 256, 5979]", relu_3: "f32[64, 512, 1493]", convolution_7: "f32[64, 1024, 1493]", glu_3: "f32[64, 512, 1493]", relu_4: "f32[64, 1024, 372]", convolution_9: "f32[64, 2048, 372]", glu_4: "f32[64, 1024, 372]", relu_5: "f32[64, 2048, 92]", convolution_11: "f32[64, 4096, 92]", tangents_1: "f32[64, 2048, 92]", tangents_2: "f32[64, 64, 95696]", tangents_3: "f32[64, 128, 23923]", tangents_4: "f32[64, 256, 5979]", tangents_5: "f32[64, 512, 1493]", tangents_6: "f32[64, 1024, 372]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/demucs/demucs/model.py:215 in forward, code: x = encode(x)

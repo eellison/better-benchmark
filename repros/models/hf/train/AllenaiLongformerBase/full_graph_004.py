@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[768, 768]", primals_4: "f32[768]", primals_6: "f32[50265, 768]", primals_8: "i64[8, 1024]", view: "f32[8192, 768]", addmm: "f32[8192, 768]", getitem_1: "f32[8, 1024, 1]", rsqrt: "f32[8, 1024, 1]", view_2: "f32[8192, 768]", view_3: "f32[8, 1024, 50265]", amax: "f32[8192, 1]", log: "f32[8192, 1]", convert_element_type: "f32[]", tangents_1: "f32[]", tangents_2: "f32[8, 1024, 50265]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:1635 in torch_dynamo_resume_in_forward_at_1616, code: masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))

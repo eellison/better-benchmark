@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[32, 128]", arg1_1: "f32[128, 32000]", arg2_1: "i64[1]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:72 in torch_dynamo_resume_in__dequeue_and_enqueue_at_68, code: self.queue[:, ptr : ptr + batch_size] = keys.T

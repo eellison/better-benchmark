@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[64, 3, 4, 4]", primals_2: "f32[1024, 3, 64, 64]", primals_3: "f32[128, 64, 4, 4]", primals_7: "f32[128]", primals_9: "f32[256, 128, 4, 4]", primals_13: "f32[256]", primals_15: "f32[512, 256, 4, 4]", primals_19: "f32[512]", primals_21: "f32[1, 512, 4, 4]", where: "f32[1024, 64, 32, 32]", convolution_1: "f32[1024, 128, 16, 16]", squeeze_1: "f32[128]", where_1: "f32[1024, 128, 16, 16]", convolution_2: "f32[1024, 256, 8, 8]", squeeze_4: "f32[256]", where_2: "f32[1024, 256, 8, 8]", convolution_3: "f32[1024, 512, 4, 4]", squeeze_7: "f32[512]", where_3: "f32[1024, 512, 4, 4]", sigmoid: "f32[1024, 1, 1, 1]", unsqueeze_14: "f32[1, 512, 1, 1]", unsqueeze_26: "f32[1, 256, 1, 1]", unsqueeze_38: "f32[1, 128, 1, 1]", tangents_1: "f32[1024, 1, 1, 1]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/dcgan/__init__.py:128 in forward, code: return self.main(input)

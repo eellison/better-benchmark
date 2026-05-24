@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f16[768]", arg1_1: "f16[768]", arg2_1: "f16[4, 512, 768]", arg3_1: "f16[768, 768]", arg4_1: "f16[768]", arg5_1: "f16[768, 768]", arg6_1: "f16[768]", arg7_1: "f16[768, 768]", arg8_1: "f16[768]", arg9_1: "b8[4, 1, 512, 512]", arg10_1: "f16[768, 768]", arg11_1: "f16[768]", arg12_1: "f16[768]", arg13_1: "f16[768]", arg14_1: "f16[3072, 768]", arg15_1: "f16[3072]", arg16_1: "f16[768, 3072]", arg17_1: "f16[768]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/opt/modeling_opt.py:215 in forward, code: hidden_states = self.self_attn_layer_norm(hidden_states)

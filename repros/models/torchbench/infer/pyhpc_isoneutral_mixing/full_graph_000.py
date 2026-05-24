@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f64[204, 204, 26]", arg1_1: "f64[204, 204, 26, 3]", arg2_1: "f64[204, 204, 26, 3]", arg3_1: "f64[26]", arg4_1: "f64[204, 204, 26]", arg5_1: "f64[204, 204, 26]", arg6_1: "f64[26]", arg7_1: "f64[204, 204, 26]", arg8_1: "f64[204]", arg9_1: "f64[204]", arg10_1: "f64[204, 204, 26]", arg11_1: "f64[204]", arg12_1: "f64[204, 204, 26]", arg13_1: "f64[204, 204, 26, 2, 2]", arg14_1: "f64[26]", arg15_1: "f64[204, 204, 26, 2, 2]", arg16_1: "f64[204, 204, 26]", arg17_1: "f64[204, 204, 26, 2, 2]", arg18_1: "f64[204]", arg19_1: "f64[204, 204, 26, 2, 2]", arg20_1: "f64[204]", arg21_1: "f64[204]", arg22_1: "f64[204, 204, 26]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pyhpc_isoneutral_mixing/isoneutral_pytorch.py:21 in get_drhodS, code: return betaS * rho0 * torch.ones_like(temp)

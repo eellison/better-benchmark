@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[64, 3, 11, 11]", primals_3: "f32[1024, 3, 224, 224]", primals_4: "f32[192, 64, 5, 5]", primals_6: "f32[384, 192, 3, 3]", primals_8: "f32[256, 384, 3, 3]", primals_10: "f32[256, 256, 3, 3]", primals_12: "f32[4096, 9216]", primals_14: "f32[4096, 4096]", primals_16: "f32[1000, 4096]", getitem: "f32[1024, 64, 27, 27]", getitem_1: "i8[1024, 64, 27, 27]", getitem_2: "f32[1024, 192, 13, 13]", getitem_3: "i8[1024, 192, 13, 13]", relu_2: "f32[1024, 384, 13, 13]", relu_3: "f32[1024, 256, 13, 13]", getitem_4: "f32[1024, 256, 6, 6]", getitem_5: "i8[1024, 256, 6, 6]", gt: "b8[1024, 9216]", mul_1: "f32[1024, 9216]", gt_1: "b8[1024, 4096]", mul_3: "f32[1024, 4096]", relu_6: "f32[1024, 4096]", le_1: "b8[1024, 4096]", le_2: "b8[1024, 256, 13, 13]", le_5: "b8[1024, 192, 27, 27]", le_6: "b8[1024, 64, 55, 55]", tangents_1: "f32[1024, 1000]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/alexnet.py:51 in forward, code: x = self.classifier(x)

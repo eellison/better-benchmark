@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[1024, 3]", arg1_1: "f32[1024]", arg2_1: "f32[256, 3]", arg3_1: "f32[1024, 1024]", arg4_1: "f32[1024]", arg5_1: "f32[2, 1024]", arg6_1: "f32[2]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py:113 in forward, code: x = F.relu(self.fc1(state))

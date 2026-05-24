@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[320, 512]", primals_3: "i64[8, 4096]", view: "f32[32768, 512]", view_1: "f32[8, 4096, 320]", amax: "f32[32768, 1]", log: "f32[32768, 1]", convert_element_type: "f32[]", tangents_1: "f32[]", tangents_2: "f32[8, 4096, 320]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:2396 in torch_dynamo_resume_in_forward_at_2378, code: masked_lm_loss = loss_fct(logits.view(-1, self.config.vocab_size), labels.view(-1))

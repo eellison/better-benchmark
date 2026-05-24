@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[512]", primals_3: "f32[8, 4096, 512]", getitem_1: "f32[8, 4096, 1]", rsqrt: "f32[8, 4096, 1]", gt: "b8[8, 4096, 512]", tangents_1: "f32[8, 4096, 512]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:1799 in torch_dynamo_resume_in_forward_at_1781, code: hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)

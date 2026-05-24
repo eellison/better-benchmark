@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f16[1, 512, 768]", arg1_1: "f16[768, 768]", arg2_1: "f16[768]", arg3_1: "f16[768, 768]", arg4_1: "f16[768]", arg5_1: "f16[768, 768]", arg6_1: "f16[768]", arg7_1: "b8[1, 1, 512, 512]", arg8_1: "f16[768, 768]", arg9_1: "f16[768]", arg10_1: "f16[768]", arg11_1: "f16[768]", arg12_1: "f16[3072, 768]", arg13_1: "f16[3072]", arg14_1: "f16[768, 3072]", arg15_1: "f16[768]", arg16_1: "f16[768]", arg17_1: "f16[768]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bart/modeling_bart.py:207 in forward, code: query_states = self.q_proj(hidden_states).view(hidden_shape).transpose(1, 2)

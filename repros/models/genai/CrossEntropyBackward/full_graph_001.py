@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "bf16[8192, 262144]", primals_2: "i64[8192]", amax: "f32[8192, 1]", log: "f32[8192, 1]", tangents_1: "bf16[]"):
         # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:199 in ce_bwd, code: return loss.sum()

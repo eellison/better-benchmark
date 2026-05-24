@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[64, 3, 3, 3]", primals_2: "f32[64]", primals_3: "f32[128, 3, 224, 224]", primals_4: "f32[64, 64, 3, 3]", primals_5: "f32[64]", primals_6: "f32[128, 64, 3, 3]", primals_7: "f32[128]", primals_8: "f32[128, 128, 3, 3]", primals_9: "f32[128]", primals_10: "f32[256, 128, 3, 3]", primals_11: "f32[256]", primals_12: "f32[256, 256, 3, 3]", primals_13: "f32[256]", primals_14: "f32[256, 256, 3, 3]", primals_15: "f32[256]", primals_16: "f32[512, 256, 3, 3]", primals_17: "f32[512]", primals_18: "f32[512, 512, 3, 3]", primals_19: "f32[512]", primals_20: "f32[512, 512, 3, 3]", primals_21: "f32[512]", primals_22: "f32[512, 512, 3, 3]", primals_23: "f32[512]", primals_24: "f32[512, 512, 3, 3]", primals_25: "f32[512]", primals_26: "f32[512, 512, 3, 3]", primals_27: "f32[512]", primals_28: "f32[4096, 25088]", primals_29: "f32[4096]", primals_30: "f32[4096, 4096]", primals_31: "f32[4096]", primals_32: "f32[1000, 4096]", primals_33: "f32[1000]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/torchvision/models/vgg.py:66 in forward, code: x = self.features(x)

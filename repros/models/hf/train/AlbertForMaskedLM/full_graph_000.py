@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "i64[8, 512]", primals_2: "i64[1, 512]", primals_3: "i64[1, 512]", primals_4: "f32[30000, 128]", primals_5: "f32[2, 128]", primals_6: "f32[512, 128]", primals_7: "f32[128]", primals_8: "f32[128]", primals_9: "f32[4096, 128]", primals_10: "f32[4096]", primals_11: "f32[4096, 4096]", primals_12: "f32[4096]", primals_13: "f32[4096, 4096]", primals_14: "f32[4096]", primals_15: "f32[4096, 4096]", primals_16: "f32[4096]", primals_17: "f32[4096, 4096]", primals_18: "f32[4096]", primals_19: "f32[4096]", primals_20: "f32[4096]", primals_21: "f32[16384, 4096]", primals_22: "f32[16384]", primals_23: "f32[4096, 16384]", primals_24: "f32[4096]", primals_25: "f32[4096]", primals_26: "f32[4096]", primals_27: "f32[128, 4096]", primals_28: "f32[128]", primals_29: "f32[128]", primals_30: "f32[128]", primals_31: "f32[30000]", primals_32: "i64[8, 512]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/albert/modeling_albert.py:94 in forward, code: buffered_token_type_ids = self.token_type_ids.expand(position_ids.shape[0], -1)

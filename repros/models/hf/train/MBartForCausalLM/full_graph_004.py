@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[1024]", primals_2: "f32[1024]", primals_3: "f32[8, 1024, 1024]", primals_4: "f32[1024, 1024]", primals_5: "f32[1024]", primals_6: "f32[1024, 1024]", primals_7: "f32[1024]", primals_8: "f32[1024, 1024]", primals_9: "f32[1024]", primals_10: "b8[8, 1, 1024, 1024]", primals_11: "f32[1024, 1024]", primals_12: "f32[1024]", primals_13: "f32[1024]", primals_14: "f32[1024]", primals_15: "f32[4096, 1024]", primals_16: "f32[4096]", primals_17: "f32[1024, 4096]", primals_18: "f32[1024]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/mbart/modeling_mbart.py:383 in forward, code: hidden_states = self.self_attn_layer_norm(hidden_states)

@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[512, 197951]", arg1_1: "f32[512]", arg2_1: "f32[1024, 197951]", arg3_1: "f32[512, 512]", arg4_1: "f32[512]", arg5_1: "f32[1024, 512]", arg6_1: "f32[1024]", arg7_1: "f32[512, 1024]", arg8_1: "f32[512]", arg9_1: "f32[512, 512]", arg10_1: "f32[512]", arg11_1: "f32[197951, 512]", arg12_1: "f32[197951]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/nvidia_deeprecommender/reco_encoder/model/model.py:132 in encode, code: input=F.linear(input=x, weight=w, bias=self.encode_b[ind]),

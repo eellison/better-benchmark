@@ -1,3 +1,38 @@
+import torch
+from torch import device
+from math import inf, nan
+
+# Register nanogpt custom ops (from modded_nanogpt benchmark model)
+if not hasattr(torch.ops, 'nanogpt') or not hasattr(torch.ops.nanogpt, 'mm'):
+    @torch.library.custom_op("nanogpt::mm", mutates_args=())
+    def _mm_op(x: torch.Tensor, w: torch.Tensor, x_s: float, w_s: float, grad_s: float) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        x_f8 = x.div(x_s).to(torch.float8_e4m3fn)
+        w_f8 = w.div(w_s).to(torch.float8_e4m3fn)
+        out = torch._scaled_mm(x_f8, w_f8.T, out_dtype=torch.bfloat16,
+                               scale_a=x.new_tensor(x_s, dtype=torch.float32),
+                               scale_b=x.new_tensor(w_s, dtype=torch.float32), use_fast_accum=True)
+        return out, x_f8, w_f8
+
+    @_mm_op.register_fake
+    def _mm_fake(x: torch.Tensor, w: torch.Tensor, *_):
+        return x @ w.T, x.to(torch.float8_e4m3fn), w.to(torch.float8_e4m3fn)
+
+    @torch.library.custom_op("nanogpt::mm_backward", mutates_args=())
+    def _mm_backward_op(g: torch.Tensor, x_f8: torch.Tensor, w_f8: torch.Tensor, x_s: float, w_s: float, grad_s: float) -> tuple[torch.Tensor, torch.Tensor]:
+        grad_f8 = g.div(grad_s).to(torch.float8_e5m2)
+        grad_x = torch._scaled_mm(grad_f8, w_f8.T.contiguous().T, out_dtype=torch.bfloat16,
+                                   scale_a=g.new_tensor(grad_s, dtype=torch.float32),
+                                   scale_b=g.new_tensor(w_s, dtype=torch.float32), use_fast_accum=False)
+        grad_w = torch._scaled_mm(x_f8.T.contiguous(), grad_f8.T.contiguous().T, out_dtype=torch.float32,
+                                  scale_a=g.new_tensor(x_s, dtype=torch.float32),
+                                  scale_b=g.new_tensor(grad_s, dtype=torch.float32), use_fast_accum=False)
+        return grad_x, grad_w.T
+
+    @_mm_backward_op.register_fake
+    def _mm_backward_fake(g: torch.Tensor, x_f8: torch.Tensor, w_f8: torch.Tensor, *_):
+        return x_f8.to(torch.bfloat16), w_f8.T.contiguous().T.to(torch.float32)
+
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "i32[6144]", primals_2: "bf16[50304, 768]", primals_3: "bf16[50304, 768]", primals_4: "bf16[50304, 768]", primals_5: "i32[]", primals_6: "bf16[50304, 768]", primals_7: "f32[64]", primals_8: "f32[4, 768, 768]", primals_9: "f32[262144, 64]", primals_10: "f32[262144, 64]", primals_11: "f32[6, 12]", primals_12: "f32[768, 3072]", primals_13: "f32[768, 3072]", primals_14: "f32[4, 768, 768]", primals_15: "f32[262144, 64]", primals_16: "f32[262144, 64]", primals_17: "f32[6, 12]", primals_18: "f32[768, 3072]", primals_19: "f32[768, 3072]", primals_20: "f32[4, 768, 768]", primals_21: "f32[262144, 64]", primals_22: "f32[262144, 64]", primals_23: "f32[6, 12]", primals_24: "f32[768, 3072]", primals_25: "f32[768, 3072]", primals_26: "f32[4, 768, 768]", primals_27: "f32[262144, 64]", primals_28: "f32[262144, 64]", primals_29: "f32[6, 12]", primals_30: "f32[768, 3072]", primals_31: "f32[768, 3072]", primals_32: "f32[4, 768, 768]", primals_33: "f32[262144, 64]", primals_34: "f32[262144, 64]", primals_35: "f32[6, 12]", primals_36: "f32[768, 3072]", primals_37: "f32[768, 3072]", primals_38: "f32[4, 768, 768]", primals_39: "f32[262144, 64]", primals_40: "f32[262144, 64]", primals_41: "f32[6, 12]", primals_42: "f32[768, 3072]", primals_43: "f32[768, 3072]", primals_44: "f32[4, 768, 768]", primals_45: "f32[262144, 64]", primals_46: "f32[262144, 64]", primals_47: "f32[6, 12]", primals_48: "f32[768, 3072]", primals_49: "f32[768, 3072]", primals_50: "f32[768, 3072]", primals_51: "f32[768, 3072]", primals_52: "f32[4, 768, 768]", primals_53: "f32[262144, 64]", primals_54: "f32[262144, 64]", primals_55: "f32[6, 12]", primals_56: "f32[768, 3072]", primals_57: "f32[768, 3072]", primals_58: "f32[4, 768, 768]", primals_59: "f32[262144, 64]", primals_60: "f32[262144, 64]", primals_61: "f32[6, 12]", primals_62: "f32[768, 3072]", primals_63: "f32[768, 3072]", primals_64: "f32[4, 768, 768]", primals_65: "f32[262144, 64]", primals_66: "f32[262144, 64]", primals_67: "f32[6, 12]", primals_68: "f32[768, 3072]", primals_69: "f32[768, 3072]", primals_70: "f32[4, 768, 768]", primals_71: "f32[262144, 64]", primals_72: "f32[262144, 64]", primals_73: "f32[6, 12]", primals_74: "f32[768, 3072]", primals_75: "f32[768, 3072]", primals_76: "f32[50304, 768]", primals_77: "i64[6144]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/modded_nanogpt/model.py:883 in forward, code: ve = [value_embed(input_seq) for value_embed in self.value_embeds]

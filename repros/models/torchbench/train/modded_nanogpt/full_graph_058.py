@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "bf16[6144, 50304]", arg1_1: "f8e4m3fn[50304, 768]", arg2_1: "f8e4m3fn[6144, 768]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/modded_nanogpt/model.py:79 in impl, code: x_inv_s = grad.new_tensor(x_s, dtype=torch.float32)

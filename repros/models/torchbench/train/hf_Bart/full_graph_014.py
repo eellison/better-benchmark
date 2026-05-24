@@ -1,3 +1,8 @@
+import torch
+import torch._inductor.inductor_prims  # registers inductor prims ops
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[4, 512, 768]", primals_2: "f32[768, 768]", primals_4: "f32[768, 768]", primals_6: "f32[768, 768]", primals_8: "b8[4, 1, 512, 512]", primals_9: "f32[768, 768]", primals_11: "f32[768]", primals_13: "f32[3072, 768]", primals_15: "f32[768, 3072]", primals_17: "f32[768]", bmm: "f32[48, 512, 512]", amax: "f32[4, 12, 512, 1]", sum_1: "f32[4, 12, 512, 1]", logical_not_1: "b8[4, 12, 512, 1]", gt: "b8[4, 12, 512, 512]", view_16: "f32[2048, 768]", addmm_3: "f32[2048, 768]", gt_1: "b8[4, 512, 768]", getitem_1: "f32[4, 512, 1]", rsqrt: "f32[4, 512, 1]", view_18: "f32[2048, 768]", addmm_4: "f32[2048, 3072]", gt_2: "b8[4, 512, 3072]", view_20: "f32[2048, 3072]", gt_3: "b8[4, 512, 768]", mul_15: "f32[4, 512, 768]", div_1: "f32[4, 512, 1]", permute_24: "f32[48, 512, 512]", permute_25: "f32[48, 64, 512]", permute_26: "f32[48, 64, 512]", permute_27: "f32[48, 512, 64]", tangents_1: "f32[4, 512, 768]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bart/modeling_bart.py:302 in forward, code: hidden_states = self.final_layer_norm(hidden_states)

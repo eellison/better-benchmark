@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f32[32, 128]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/moco/moco/builder.py:180 in concat_all_gather, code: torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())

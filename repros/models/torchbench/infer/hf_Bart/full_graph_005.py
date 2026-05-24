@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f16[50265, 768]", arg1_1: "f16[1, 512, 768]", arg2_1: "f16[1, 50265]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/bart/modeling_bart.py:939 in torch_dynamo_resume_in_forward_at_926, code: lm_logits = self.lm_head(outputs[0])

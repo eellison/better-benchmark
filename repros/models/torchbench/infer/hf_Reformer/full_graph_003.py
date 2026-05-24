@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "f16[1, 64, 64, 64]", arg1_1: "f16[1, 64, 64, 192]", arg2_1: "i64[1, 4096]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/reformer/modeling_reformer.py:270 in torch_dynamo_resume_in_forward_at_266, code: position_encodings = torch.cat(

@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "bf16[8192, 262144]"):
         # File: /tmp/scratch_space/better_benchmark/capture_genai_kernels.py:227 in sm_fwd, code: return F.softmax(x, dim=-1)

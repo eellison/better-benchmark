@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, arg0_1: "i64[8, 1024]", arg1_1: "f32[50265, 768]", arg2_1: "f32[4098, 768]", arg3_1: "f32[1, 768]", arg4_1: "f32[768]", arg5_1: "f32[768]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/longformer/modeling_longformer.py:1484 in forward, code: attention_mask = torch.ones(input_shape, device=device)

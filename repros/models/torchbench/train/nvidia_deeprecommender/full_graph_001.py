@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_3: "f32[1024, 197951]", primals_4: "f32[512, 512]", primals_6: "f32[1024, 512]", primals_8: "f32[512, 1024]", primals_10: "f32[512, 512]", primals_12: "f32[197951, 512]", addmm: "f32[1024, 512]", where: "f32[1024, 512]", addmm_1: "f32[1024, 512]", where_1: "f32[1024, 512]", addmm_2: "f32[1024, 1024]", gt_3: "b8[1024, 1024]", mul_10: "f32[1024, 1024]", addmm_3: "f32[1024, 512]", where_3: "f32[1024, 512]", addmm_4: "f32[1024, 512]", where_4: "f32[1024, 512]", addmm_5: "f32[1024, 197951]", tangents_1: "f32[1024, 197951]"):
         # File: /tmp/pytorch-work/torchbenchmark/torchbenchmark/models/nvidia_deeprecommender/reco_encoder/model/model.py:12 in activation, code: return F.selu(input)

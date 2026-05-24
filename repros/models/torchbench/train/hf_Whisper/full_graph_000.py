@@ -1,3 +1,7 @@
+import torch
+from torch import device
+from math import inf, nan
+
 class GraphModule(torch.nn.Module):
     def forward(self, primals_1: "f32[384]", primals_2: "f32[384]", primals_3: "f32[8, 1500, 384]", primals_4: "f32[384, 384]", primals_5: "f32[384]", primals_6: "f32[384, 384]", primals_7: "f32[384, 384]", primals_8: "f32[384]", primals_9: "f32[384, 384]", primals_10: "f32[384]", primals_11: "f32[384]", primals_12: "f32[384]", primals_13: "f32[1536, 384]", primals_14: "f32[1536]", primals_15: "f32[384, 1536]", primals_16: "f32[384]"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/whisper/modeling_whisper.py:392 in forward, code: hidden_states = self.self_attn_layer_norm(hidden_states)
