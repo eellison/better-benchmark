@@ -751,13 +751,58 @@ if __name__ == "__main__":
         support = create_op_support(_is_supported)
         _part_kwargs = dict(allows_single_node_partition=True)
         import inspect
-        if 'skip_horizontal_fusion' in inspect.signature(CapabilityBasedPartitioner.__init__).parameters:
+        has_skip_horizontal_fusion = (
+            'skip_horizontal_fusion' in inspect.signature(CapabilityBasedPartitioner.__init__).parameters
+        )
+        if has_skip_horizontal_fusion:
             _part_kwargs['skip_horizontal_fusion'] = True
         partitioner = CapabilityBasedPartitioner(
             gm, support, **_part_kwargs,
         )
         partitions = partitioner.propose_partitions()
         components = [list(p.nodes.keys()) for p in partitions]
+
+        def _split_connected_components(nodes):
+            """Split a list of nodes into connected components by data flow."""
+            node_set = set(nodes)
+            # Build adjacency: two nodes in the partition are connected if one
+            # feeds directly into another (producer -> consumer).
+            from collections import deque
+            adjacency = {n: set() for n in nodes}
+            for n in nodes:
+                # Check all args: if any arg is a node in our partition, link them
+                def _link_arg(x):
+                    if isinstance(x, fx.Node) and x in node_set and x is not n:
+                        adjacency[n].add(x)
+                        adjacency[x].add(n)
+                fx.map_arg(n.args, _link_arg)
+                fx.map_arg(n.kwargs, _link_arg)
+
+            # BFS to find connected components
+            visited = set()
+            result_components = []
+            for start in nodes:
+                if start in visited:
+                    continue
+                component = []
+                queue = deque([start])
+                visited.add(start)
+                while queue:
+                    cur = queue.popleft()
+                    component.append(cur)
+                    for neighbor in adjacency[cur]:
+                        if neighbor not in visited:
+                            visited.add(neighbor)
+                            queue.append(neighbor)
+                result_components.append(component)
+            return result_components
+
+        if not has_skip_horizontal_fusion:
+            split_components = []
+            for comp in components:
+                sub_components = _split_connected_components(comp)
+                split_components.extend(sub_components)
+            components = split_components
 
         def _has_real_compute(nodes):
             """Check if a partition has at least one non-transparent compute op."""
