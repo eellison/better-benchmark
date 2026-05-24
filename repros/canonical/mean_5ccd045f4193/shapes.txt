@@ -1,1 +1,3 @@
 torchbench_hf_whisper_infer_000_243e759c: (T([12000, 256], f16), S([8, 1500, 256]))
+torchbench_hf_distil_whisper_infer_000_8100b78d: (T([1500, 256], f16), S([1, 1500, 256]))
+torchbench_hf_whisper_train_001_12ee39ca: (T([12000, 256], f32), S([8, 1500, 256]))

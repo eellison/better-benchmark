@@ -71,3 +71,4 @@ torchbench_timm_efficientnet_infer_000_80586573: (T([16], f16), T([64, 16, 112, 
 torchbench_timm_efficientnet_infer_000_a1c50908: (T([24], f16), T([64, 24, 56, 56], f16), T([24], f16), T([24], f16), T([24], f16))
 torchbench_timm_efficientnet_infer_000_b0d7d6e4: (T([40], f16), T([64, 40, 28, 28], f16), T([40], f16), T([40], f16), T([40], f16))
 torchbench_timm_efficientnet_infer_000_b54fcbee: (T([112], f16), T([64, 112, 14, 14], f16), T([112], f16), T([112], f16), T([112], f16))
+torchbench_shufflenet_v2_x1_0_infer_000_652561cc: (T([24], f16), T([512, 24, 28, 28], f16), T([24], f16), T([24], f16), T([24], f16))

@@ -1,1 +1,4 @@
 hf_allenailongformerbase_infer_001_0a3b54e6: (T([8, 1024], f32))
+hf_allenailongformerbase_train_001_0a3b54e6: (T([8, 1024], f32))
+torchbench_hf_longformer_infer_001_cf252e4c: (T([1, 4096], f16))
+torchbench_hf_longformer_train_001_0a4aac82: (T([2, 1024], f32))

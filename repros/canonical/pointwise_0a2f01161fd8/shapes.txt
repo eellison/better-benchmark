@@ -1,1 +1,7 @@
 hf_bertformaskedlm_train_001_9c939003: (T([30522, 768], f32))
+hf_distilbertformaskedlm_train_001_9c939003: (T([30522, 768], f32))
+hf_distilbertformaskedlm_train_011_9c939003: (T([30522, 768], f32))
+hf_electraforcausallm_train_001_3eaac093: (T([30522, 128], f32))
+hf_electraforcausallm_train_011_3eaac093: (T([30522, 128], f32))
+hf_layoutlmformaskedlm_train_001_9c939003: (T([30522, 768], f32))
+hf_layoutlmformaskedlm_train_009_9c939003: (T([30522, 768], f32))

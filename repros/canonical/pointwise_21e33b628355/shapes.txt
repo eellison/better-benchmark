@@ -1,1 +1,2 @@
 vllm_qwen_qwen3-30b-a3b_001_58d3bf12: (T([4, 32, 512, 128], bf16), S([2048, 4096]))
+vllm_mistralai_mistral-7b-instruct-v0.3_001_58d3bf12: (T([4, 32, 512, 128], bf16), S([2048, 4096]))

@@ -1,1 +1,5 @@
 torchbench_hf_bert_infer_000_3e5bce14: (T([512, 768], f16), T([768], f16), T([768], f16), S([1, 512, 768]), S([512, 768]))
+torchbench_hf_bert_large_infer_000_2aee0b2c: (T([512, 1024], f16), T([1024], f16), T([1024], f16), S([1, 512, 1024]), S([512, 1024]))
+torchbench_hf_distilbert_infer_000_3e5bce14: (T([512, 768], f16), T([768], f16), T([768], f16), S([1, 512, 768]), S([512, 768]))
+torchbench_hf_longformer_infer_003_8099cdfc: (T([4096, 768], f16), T([768], f16), T([768], f16), S([1, 4096, 768]), S([4096, 768]))
+torchbench_hf_roberta_base_infer_000_3e5bce14: (T([512, 768], f16), T([768], f16), T([768], f16), S([1, 512, 768]), S([512, 768]))

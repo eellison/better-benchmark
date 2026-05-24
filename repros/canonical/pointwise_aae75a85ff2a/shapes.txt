@@ -1,1 +1,7 @@
 hf_bartforcausallm_train_004_3d5038f5: (T([8, 1, 1024, 1024], b8), S([8, 16, 1024, 1024]))
+hf_blenderbotforcausallm_train_004_49b14803: (T([32, 1, 128, 128], b8), S([32, 32, 128, 128]))
+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_train_007_ebbfc30c: (T([16, 1, 128, 128], b8), S([16, 32, 128, 128]))
+hf_m2m100forconditionalgeneration_train_006_01dd35ea: (T([64, 1, 128, 128], b8), S([64, 16, 128, 128]))
+hf_m2m100forconditionalgeneration_train_012_01dd35ea: (T([64, 1, 128, 128], b8), S([64, 16, 128, 128]))
+hf_mbartforcausallm_train_004_3d5038f5: (T([8, 1, 1024, 1024], b8), S([8, 16, 1024, 1024]))
+torchbench_hf_bart_train_008_afa0359d: (T([4, 1, 512, 512], b8), S([4, 12, 512, 512]))

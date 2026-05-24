@@ -1,1 +1,2 @@
 hf_distillgpt2_infer_007_da67baef: (T([32, 512], i64), T([32, 512, 50257], f32), S([-1, 50257]))
+hf_megatronbertforcausallm_infer_000_ea1a5acb: (T([16, 512], i64), T([8192, 29056], f32), S([16, 512, 29056]), S([-1, 29056]))

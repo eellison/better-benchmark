@@ -1,2 +1,6 @@
 timm_beit_base_patch16_224_train_001_bec85e89: (T([128, 768], f32))
 timm_timm_beit_base_patch16_224_train_train_001_bec85e89: (T([128, 768], f32))
+torchbench_functorch_dp_cifar10_train_001_223d45d4: (T([64, 256], f32))
+torchbench_functorch_dp_cifar10_train_001_3e7e052e: (T([64, 64], f32))
+torchbench_functorch_dp_cifar10_train_001_dd448ddb: (T([64, 128], f32))
+torchbench_functorch_dp_cifar10_train_001_eeb68927: (T([64, 512], f32))

@@ -1,1 +1,4 @@
 torchbench_timm_nfnet_infer_000_cd1fbb78: (T([128, 768, 12, 12], f16))
+torchbench_timm_nfnet_infer_000_4a3078ef: (T([128, 768, 24, 24], f16))
+torchbench_timm_nfnet_infer_000_7bb05c26: (T([128, 64, 96, 96], f16))
+torchbench_timm_nfnet_infer_000_b8932194: (T([128, 256, 48, 48], f16))

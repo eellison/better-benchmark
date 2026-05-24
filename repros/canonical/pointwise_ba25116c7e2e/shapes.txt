@@ -1,1 +1,4 @@
 hf_distillgpt2_train_000_e98e13d3: (T([1, 512], i64, gen=Index(512)), T([32, 512], i64, gen=Index(32)), S([32, -1, 512, 512]), S([32, 12, 512, 512]))
+hf_gpt2forsequenceclassification_train_000_f742c790: (T([1, 1024], i64, gen=Index(1024)), T([8, 1024], i64, gen=Index(8)), S([8, -1, 1024, 1024]), S([8, 12, 1024, 1024]))
+torchbench_hf_gpt2_large_train_000_771d9823: (T([1, 512], i64, gen=Index(512)), T([4, 512], i64, gen=Index(4)), S([4, -1, 512, 512]), S([4, 20, 512, 512]))
+torchbench_hf_gpt2_train_000_771d9823: (T([1, 512], i64, gen=Index(512)), T([4, 512], i64, gen=Index(4)), S([4, -1, 512, 512]), S([4, 12, 512, 512]))

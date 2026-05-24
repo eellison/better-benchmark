@@ -1,3 +1,4 @@
 hf_allenailongformerbase_train_003_9fabe7a2: (T([8192, 50268], f32), T([8, 1024], i64), S([8, 1024, 50265]), S([8192, 50265]))
 hf_bartforcausallm_train_005_9fabe7a2: (T([8192, 50268], f32), T([8, 1024], i64), S([8, 1024, 50265]), S([8192, 50265]))
 hf_mbartforcausallm_train_005_9fabe7a2: (T([8192, 50268], f32), T([8, 1024], i64), S([8, 1024, 50265]), S([8192, 50265]))
+hf_layoutlmformaskedlm_train_000_ef250ee2: (T([16384, 30524], f32), T([32, 512], i64), S([32, 512, 30522]), S([16384, 30522]))

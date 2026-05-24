@@ -137,3 +137,4 @@ timm_timm_adv_inception_v3_infer_infer_000_50a24a6c: (T([384], f32), T([128, 384
 timm_timm_adv_inception_v3_infer_infer_000_b2cc4498: (T([48], f32), T([128, 48, 35, 35], f32, stride=(58800, 1, 1680, 48)), T([48], f32), T([48], f32), T([48], f32))
 timm_timm_inception_v3_infer_infer_000_50a24a6c: (T([384], f32), T([128, 384, 8, 8], f32, stride=(24576, 1, 3072, 384)), T([384], f32), T([384], f32), T([384], f32))
 timm_timm_inception_v3_infer_infer_000_b2cc4498: (T([48], f32), T([128, 48, 35, 35], f32, stride=(58800, 1, 1680, 48)), T([48], f32), T([48], f32), T([48], f32))
+torchbench_moco_infer_001_87e6d0a2: (T([512], f32), T([32, 512, 14, 14], f32), T([512], f32), T([512], f32), T([512], f32))
