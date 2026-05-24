@@ -81,13 +81,32 @@ def infer_label_suite_mode(graph_path: Path) -> tuple[str, str, str | None]:
     return label, suite, mode
 
 
+def _is_contiguous_stride(shape, stride):
+    """Check if stride corresponds to the default row-major (contiguous) layout."""
+    if not shape or not stride:
+        return True
+    if len(shape) != len(stride):
+        return True
+    # Compute expected contiguous stride
+    expected = []
+    acc = 1
+    for dim in reversed(shape):
+        expected.append(acc)
+        acc *= dim
+    expected.reverse()
+    return tuple(stride) == tuple(expected)
+
+
 def _parse_input_shapes_from_annotations(content: str):
-    """Parse input tensor shapes/dtypes from forward signature annotations.
+    """Parse input tensor shapes/dtypes/strides from forward signature annotations.
 
     Annotations look like:
-        arg0_1: "f32[768, 768]"
+        arg0_1: "f32[768, 768][768, 1]cuda:0"
+        arg0_1: "f32[128, 3, 299, 299][268203, 1, 897, 3]cuda:0"
         primals_1: "i64[1, 512]"
         arg0_1: "bf16[1152000, 512]"
+        arg1_1: "Sym(s16)"         -- symbolic integer scalar
+        arg3_1: "f32[64, 64, s16, s82]"  -- tensor with symbolic dims
     """
     import torch
 
@@ -103,6 +122,8 @@ def _parse_input_shapes_from_annotations(content: str):
         'f64': torch.float64,
         'c64': torch.complex64,
         'c128': torch.complex128,
+        'f8e4m3fn': torch.float8_e4m3fn,
+        'f8e5m2': torch.float8_e5m2,
     }
 
     # Match the forward signature
@@ -111,21 +132,72 @@ def _parse_input_shapes_from_annotations(content: str):
         return []
 
     sig = fwd_match.group(1)
+    if not sig.strip():
+        # forward(self) with no inputs -- return empty list signaling
+        # the graph uses only self.* buffers and needs no external inputs
+        return []
+
     inputs = []
-    for m in re.finditer(r'\w+:\s*"(\w+)\[([^\]]*)\]', sig):
-        dtype_str, shape_str = m.group(1), m.group(2)
-        dims = []
-        for x in shape_str.split(','):
-            x = x.strip()
-            if not x:
-                continue
-            try:
-                dims.append(int(x))
-            except ValueError:
-                dims.append(32)  # symbolic dim fallback
-        shape = tuple(dims)
-        dtype = dtype_map.get(dtype_str, torch.float32)
-        inputs.append((shape, dtype))
+
+    # Split on parameter boundaries (comma followed by param name + colon)
+    # to handle each parameter annotation independently
+    params = re.findall(r'(\w+)\s*:\s*"([^"]*)"', sig)
+
+    for param_name, annotation in params:
+        # Handle symbolic scalar: "Sym(s16)"
+        sym_match = re.match(r'Sym\(\w+\)', annotation)
+        if sym_match:
+            # Symbolic integer scalar -- use a concrete int value as placeholder
+            inputs.append(('sym_int', None))
+            continue
+
+        # Handle tensor: "dtype[shape][stride]device" or "dtype[shape]device" or "dtype[shape]"
+        # Full format: "f32[128, 3, 299, 299][268203, 1, 897, 3]cuda:0"
+        # Without stride: "f32[768, 768]cuda:0" or "f32[768, 768]"
+        tensor_match = re.match(
+            r'(\w+)\[([^\]]*)\](?:\[([^\]]*)\])?',
+            annotation
+        )
+        if tensor_match:
+            dtype_str = tensor_match.group(1)
+            shape_str = tensor_match.group(2)
+            stride_str = tensor_match.group(3)  # may be None
+
+            dims = []
+            for x in shape_str.split(','):
+                x = x.strip()
+                if not x:
+                    continue
+                try:
+                    dims.append(int(x))
+                except ValueError:
+                    dims.append(32)  # symbolic dim fallback
+            shape = tuple(dims)
+            dtype = dtype_map.get(dtype_str, torch.float32)
+
+            # Parse stride if present
+            stride = None
+            if stride_str:
+                stride_dims = []
+                for x in stride_str.split(','):
+                    x = x.strip()
+                    if not x:
+                        continue
+                    try:
+                        stride_dims.append(int(x))
+                    except ValueError:
+                        stride_dims = []
+                        break
+                if stride_dims and len(stride_dims) == len(dims):
+                    # Only record stride if non-contiguous
+                    if not _is_contiguous_stride(dims, stride_dims):
+                        stride = tuple(stride_dims)
+
+            inputs.append((shape, dtype, stride))
+            continue
+
+        # Fallback: skip unrecognized annotations
+        continue
 
     return inputs
 
@@ -225,8 +297,18 @@ def load_graph_module(graph_path: Path):
         # Otherwise, trace with make_fx (fake mode) to produce a proper GraphModule
         # with metadata (shapes/dtypes on nodes) that process_graph needs.
         if not input_shapes:
-            print(f"  No input shapes found for {graph_path.name}")
-            return None
+            # No-input graphs (forward(self)) use only self.* buffers.
+            # Try tracing with no inputs.
+            from torch._subclasses.fake_tensor import FakeTensorMode
+            from torch.fx.experimental.proxy_tensor import make_fx
+
+            try:
+                with FakeTensorMode() as fake_mode:
+                    gm = make_fx(instance, tracing_mode="fake")()
+                return gm
+            except Exception:
+                print(f"  No input shapes found for {graph_path.name}")
+                return None
 
         from torch._subclasses.fake_tensor import FakeTensorMode
         from torch.fx.experimental.proxy_tensor import make_fx
@@ -236,8 +318,25 @@ def load_graph_module(graph_path: Path):
         dev = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         with FakeTensorMode() as fake_mode:
             inputs = []
-            for shape, dtype in input_shapes:
-                if dtype in (torch.int64, torch.int32, torch.int8, torch.uint8):
+            for entry in input_shapes:
+                if entry[0] == 'sym_int':
+                    # Symbolic integer scalar -- pass a concrete int placeholder
+                    inputs.append(32)
+                    continue
+                shape, dtype, stride = entry
+                if stride:
+                    # Non-contiguous tensor: allocate storage and use as_strided
+                    storage_size = sum(
+                        s * (d - 1) for s, d in zip(stride, shape) if d > 1
+                    ) + 1
+                    if dtype in (torch.int64, torch.int32, torch.int8, torch.uint8):
+                        storage = torch.zeros(storage_size, dtype=dtype, device=dev)
+                    elif dtype == torch.bool:
+                        storage = torch.zeros(storage_size, dtype=torch.bool, device=dev)
+                    else:
+                        storage = torch.randn(storage_size, dtype=dtype, device=dev)
+                    t = storage.as_strided(shape, stride)
+                elif dtype in (torch.int64, torch.int32, torch.int8, torch.uint8):
                     t = torch.zeros(shape, dtype=dtype, device=dev)
                 elif dtype == torch.bool:
                     t = torch.zeros(shape, dtype=torch.bool, device=dev)

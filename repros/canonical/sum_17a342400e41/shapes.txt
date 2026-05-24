@@ -1,2 +1,6 @@
 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_train_010_8b4b7be2: (T([512, 128, 128], f32), T([16, 32, 128, 128], f32), S([16, 32, 128, 128]), S([512, 128, 128]))
 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_train_020_8b4b7be2: (T([512, 128, 128], f32), T([16, 32, 128, 128], f32), S([16, 32, 128, 128]), S([512, 128, 128]))
+timm_timm_swin_base_patch4_window7_224_train_train_001_0910efdc: (T([4096, 49, 49], f32), T([128, 32, 49, 49], f32, stride=(77824, 2432, 49, 1)), S([128, 32, 49, 49]), S([4096, 49, 49]))
+timm_timm_swin_base_patch4_window7_224_train_train_001_092f66b3: (T([32768, 49, 49], f32), T([8192, 4, 49, 49], f32, stride=(9728, 2432, 49, 1)), S([8192, 4, 49, 49]), S([32768, 49, 49]))
+timm_timm_swin_base_patch4_window7_224_train_train_001_313636bb: (T([16384, 49, 49], f32), T([2048, 8, 49, 49], f32, stride=(19456, 2432, 49, 1)), S([2048, 8, 49, 49]), S([16384, 49, 49]))
+timm_timm_swin_base_patch4_window7_224_train_train_001_e58e288a: (T([8192, 49, 49], f32), T([512, 16, 49, 49], f32, stride=(38912, 2432, 49, 1)), S([512, 16, 49, 49]), S([8192, 49, 49]))

@@ -17,3 +17,4 @@ timm_timm_vit_base_patch16_siglip_256_infer_infer_000_52ee260d: (T([32768, 2304]
 timm_timm_vit_base_patch16_siglip_256_train_train_000_52ee260d: (T([32768, 2304], f32), S([128, 256, 2304]), S([128, 256, 3, 12, 64]))
 torchbench_timm_vision_transformer_infer_000_718bca88: (T([6304, 1152], f16), S([32, 197, 1152]), S([32, 197, 3, 6, 64]))
 torchbench_timm_vision_transformer_train_000_4f290540: (T([6304, 1152], f32), S([32, 197, 1152]), S([32, 197, 3, 6, 64]))
+timm_timm_beit_base_patch16_224_train_train_000_5a1fbf8b: (T([25216, 2304], f32), S([128, 197, 2304]), S([128, 197, 3, 12, -1]))

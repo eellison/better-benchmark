@@ -1,1 +1,3 @@
 timm_nfnet_l0_infer_000_a109de2f: (T([128, 2304, 7, 7], f32), S([128, 2304]))
+timm_timm_nfnet_l0_infer_infer_000_a109de2f: (T([128, 2304, 7, 7], f32, stride=(112896, 1, 16128, 2304)), S([128, 2304]))
+timm_timm_nfnet_l0_train_train_000_a109de2f: (T([128, 2304, 7, 7], f32, stride=(112896, 1, 16128, 2304)), S([128, 2304]))

@@ -1,1 +1,4 @@
 timm_timm_visformer_small_infer_infer_000_3c4865ff: (T([768, 49, 49], f32), S([128, 6, 49, 49]), S([128, 6, 49, 49]), S([768, 49, 49]))
+timm_timm_visformer_small_infer_infer_000_1584b102: (T([768, 196, 196], f32), S([128, 6, 196, 196]), S([128, 6, 196, 196]), S([768, 196, 196]))
+timm_timm_visformer_small_train_train_000_1584b102: (T([768, 196, 196], f32), S([128, 6, 196, 196]), S([128, 6, 196, 196]), S([768, 196, 196]))
+timm_timm_visformer_small_train_train_000_3c4865ff: (T([768, 49, 49], f32), S([128, 6, 49, 49]), S([128, 6, 49, 49]), S([768, 49, 49]))

@@ -63,3 +63,7 @@ timm_timm_tf_efficientnet_b0_infer_infer_000_b5982c6b: (T([320], f32), T([128, 3
 timm_timm_tf_efficientnet_b0_infer_infer_000_e41d90d4: (T([112], f32), T([128, 112, 14, 14], f32), T([112], f32), T([112], f32), T([112], f32))
 timm_timm_tf_efficientnet_b0_infer_infer_000_ebdc59a8: (T([40], f32), T([128, 40, 28, 28], f32), T([40], f32), T([40], f32), T([40], f32))
 torchbench_moco_infer_000_fd4f7fd1: (T([1024], f32), T([32, 1024, 14, 14], f32), T([1024], f32), T([1024], f32), T([1024], f32))
+timm_timm_ghostnet_100_infer_infer_000_3a89f512: (T([112], f32), T([512, 112, 7, 7], f32, stride=(5488, 1, 784, 112)), T([112], f32), T([112], f32), T([112], f32))
+timm_timm_ghostnet_100_infer_infer_000_3f1167a5: (T([80], f32), T([512, 80, 14, 14], f32, stride=(15680, 1, 1120, 80)), T([80], f32), T([80], f32), T([80], f32))
+timm_timm_ghostnet_100_infer_infer_000_ce640734: (T([24], f32), T([512, 24, 28, 28], f32, stride=(18816, 1, 672, 24)), T([24], f32), T([24], f32), T([24], f32))
+timm_timm_ghostnet_100_infer_infer_000_fd0d7ba1: (T([16], f32), T([512, 16, 56, 56], f32, stride=(50176, 1, 896, 16)), T([16], f32), T([16], f32), T([16], f32))

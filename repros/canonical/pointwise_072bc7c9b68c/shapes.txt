@@ -1,1 +1,3 @@
 timm_mobilenetv3_large_100_infer_000_04355002: (T([512, 1280, 1, 1], f32), S([512, 1280]))
+timm_timm_mobilenetv3_large_100_infer_infer_000_04355002: (T([512, 1280, 1, 1], f32), S([512, 1280]))
+timm_timm_mobilenetv3_large_100_train_train_000_04355002: (T([512, 1280, 1, 1], f32), S([512, 1280]))

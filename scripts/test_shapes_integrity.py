@@ -5,6 +5,7 @@ Checks:
 1. All shape configs are parseable by parse_shapes_config / _parse_shapes_txt
 2. shapes.txt/shapes.json pattern_hash matches the directory name
 3. Warns if canonical dirs with >1 model in meta.json are missing shapes data
+4. Stride preservation for channels-last tensors
 
 Usage:
     python scripts/test_shapes_integrity.py
@@ -14,6 +15,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import torch
 
 from repro_harness import parse_shapes_config, _parse_shapes_txt
 
@@ -181,6 +184,129 @@ def test_multi_model_patterns_have_shapes():
         print(f"  (These are warnings, not errors)")
 
 
+def test_channels_last_stride_preserved():
+    """Verify that parse_shapes_config correctly produces non-contiguous tensors with strides."""
+    print("--- Test: channels-last stride preservation ---")
+
+    # channels-last 4D tensor: NCHW stored as NHWC
+    config = "(T([128, 3, 299, 299], f32, stride=(268203, 1, 897, 3)))"
+    inputs = parse_shapes_config(config)
+    assert len(inputs) == 1, f"Expected 1 input, got {len(inputs)}"
+    t = inputs[0]
+    assert t.shape == (128, 3, 299, 299), f"Wrong shape: {t.shape}"
+    assert t.stride() == (268203, 1, 897, 3), f"Wrong stride: {t.stride()}"
+    assert t.is_contiguous(memory_format=torch.channels_last), \
+        "Tensor should be channels_last contiguous"
+    assert not t.is_contiguous(), "Tensor should NOT be row-major contiguous"
+    passed()
+    print("  channels_last 4D: OK")
+
+    # Multiple tensors, mix of contiguous and non-contiguous
+    config2 = "(T([32, 3, 3, 3], f32, stride=(27, 1, 9, 3)), T([32], f32))"
+    inputs2 = parse_shapes_config(config2)
+    assert len(inputs2) == 2, f"Expected 2 inputs, got {len(inputs2)}"
+    assert inputs2[0].stride() == (27, 1, 9, 3), f"Wrong stride: {inputs2[0].stride()}"
+    assert inputs2[1].is_contiguous(), "1D tensor should be contiguous"
+    passed()
+    print("  mixed contiguous/non-contiguous: OK")
+
+    # Contiguous tensor should not have stride in config (clean output)
+    config3 = "(T([128, 3, 299, 299], f32))"
+    inputs3 = parse_shapes_config(config3)
+    assert inputs3[0].is_contiguous(), "Tensor without stride should be contiguous"
+    passed()
+    print("  contiguous without stride: OK")
+
+
+def test_stride_extraction_from_annotations():
+    """Verify _parse_input_shapes_from_annotations correctly extracts strides."""
+    print("--- Test: stride extraction from annotation strings ---")
+
+    from scripts.repartition_from_graphs import (
+        _parse_input_shapes_from_annotations,
+        _is_contiguous_stride,
+    )
+
+    # channels-last annotation
+    content = '''class GraphModule(torch.nn.Module):
+    def forward(self, arg0_1: "f32[32, 3, 3, 3][27, 1, 9, 3]cuda:0", arg1_1: "f32[128, 3, 299, 299][268203, 1, 897, 3]cuda:0"):
+        pass
+'''
+    result = _parse_input_shapes_from_annotations(content)
+    assert len(result) == 2, f"Expected 2 inputs, got {len(result)}"
+
+    shape0, dtype0, stride0 = result[0]
+    assert shape0 == (32, 3, 3, 3), f"Wrong shape: {shape0}"
+    assert stride0 == (27, 1, 9, 3), f"Wrong stride: {stride0}"
+    passed()
+    print("  non-contiguous stride parsed: OK")
+
+    shape1, dtype1, stride1 = result[1]
+    assert shape1 == (128, 3, 299, 299), f"Wrong shape: {shape1}"
+    assert stride1 == (268203, 1, 897, 3), f"Wrong stride: {stride1}"
+    passed()
+    print("  channels-last stride parsed: OK")
+
+    # Contiguous tensor should have stride=None
+    content2 = '''class GraphModule(torch.nn.Module):
+    def forward(self, arg0_1: "f32[768, 768][768, 1]cuda:0"):
+        pass
+'''
+    result2 = _parse_input_shapes_from_annotations(content2)
+    shape, dtype, stride = result2[0]
+    assert shape == (768, 768), f"Wrong shape: {shape}"
+    assert stride is None, f"Contiguous stride should be None, got {stride}"
+    passed()
+    print("  contiguous stride omitted: OK")
+
+    # Test _is_contiguous_stride helper
+    # Contiguous stride for [128, 3, 299, 299] is (3*299*299, 299*299, 299, 1) = (268203, 89401, 299, 1)
+    assert _is_contiguous_stride([128, 3, 299, 299], [268203, 89401, 299, 1]) is True
+    assert _is_contiguous_stride([128, 3, 299, 299], [268203, 1, 897, 3]) is False
+    assert _is_contiguous_stride([32], [1]) is True
+    assert _is_contiguous_stride([], []) is True
+    passed()
+    print("  _is_contiguous_stride helper: OK")
+
+
+def test_timm_graphs_have_stride_info():
+    """Check that timm full_graph annotations with non-contiguous strides are parsed."""
+    print("--- Test: timm full_graphs contain stride info ---")
+
+    from scripts.repartition_from_graphs import _parse_input_shapes_from_annotations
+
+    timm_dir = CANONICAL.parent / "models" / "timm"
+    if not timm_dir.exists():
+        print("  SKIP: no timm models directory")
+        return
+
+    graph_files = sorted(timm_dir.rglob("full_graph_*.py"))
+    if not graph_files:
+        print("  SKIP: no timm full_graph files")
+        return
+
+    n_checked = 0
+    n_with_strides = 0
+
+    for gf in graph_files[:20]:  # check up to 20
+        content = gf.read_text()
+        inputs = _parse_input_shapes_from_annotations(content)
+        n_checked += 1
+        has_noncontiguous = any(
+            len(entry) == 3 and entry[2] is not None
+            for entry in inputs
+            if entry[0] != 'sym_int'
+        )
+        if has_noncontiguous:
+            n_with_strides += 1
+
+    print(f"  Checked {n_checked} timm graphs, {n_with_strides} have non-contiguous strides")
+    if n_with_strides > 0:
+        passed()
+    else:
+        warn("No timm graphs had non-contiguous stride info (may need re-capture)")
+
+
 def main():
     if not CANONICAL.exists():
         print(f"ERROR: {CANONICAL} does not exist")
@@ -189,6 +315,9 @@ def main():
     test_shapes_parseable()
     test_pattern_hash_matches_dir()
     test_multi_model_patterns_have_shapes()
+    test_channels_last_stride_preserved()
+    test_stride_extraction_from_annotations()
+    test_timm_graphs_have_stride_info()
 
     print()
     print(f"Results: {PASS_COUNT} passed, {len(ERRORS)} errors, {len(WARNINGS)} warnings")
