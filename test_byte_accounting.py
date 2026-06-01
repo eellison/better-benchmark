@@ -89,5 +89,70 @@ class TestEffectiveByteAccounting(unittest.TestCase):
         self.assertLess(count_bytes_effective(Repro(), [index, src]), count_bytes_naive([index, src], out))
 
 
+    def test_slice_charges_only_accessed_portion(self):
+        class Repro(torch.nn.Module):
+            def forward(self, x):
+                # Only use the first half along dim 1
+                sliced = torch.ops.aten.slice.Tensor(x, 1, 0, 64)
+                return sliced + 1.0
+
+        x = torch.randn(8, 128, 100)
+        out_shape = (8, 64, 100)
+
+        expected_read = 8 * 64 * 100 * 4  # only the slice is read
+        expected_write = 8 * 64 * 100 * 4  # output size
+        expected = expected_read + expected_write
+        actual = count_bytes_effective(Repro(), [x])
+        self.assertEqual(actual, expected)
+        # Should be less than naive (which charges full tensor)
+        out = Repro()(x)
+        self.assertLess(actual, count_bytes_naive([x], out))
+
+    def test_index_put_output_not_inherited_by_downstream(self):
+        """Downstream reductions of index_put should charge actual output size."""
+        class Repro(torch.nn.Module):
+            def forward(self, index, values):
+                base = torch.zeros(100, 16)
+                updated = torch.ops.aten.index_put.default(base, [index], values, False)
+                # Reduce to a small output
+                return torch.ops.aten.sum.dim_IntList(updated, [0])
+
+        index = torch.tensor([1, 3, 5], dtype=torch.int64)
+        values = torch.randn(3, 16)
+        out = Repro()(index, values)
+
+        actual = count_bytes_effective(Repro(), [index, values])
+        # Output should be f32[16] = 64 bytes, not the index_put size
+        # Reads: index (24 bytes) + values (192 bytes)
+        # Sparse read of values into index_put = 192 bytes
+        # Output: f32[16] = 64 bytes
+        expected = self._bytes(index) + self._bytes(values) + self._bytes(out)
+        self.assertEqual(actual, expected)
+
+    def test_id_reuse_does_not_cause_spurious_sparse_write(self):
+        """Freed intermediate tensor IDs should not pollute final output."""
+        class Repro(torch.nn.Module):
+            def forward(self, src, index):
+                # Create an index_put that gets freed
+                base = torch.zeros(100, 16)
+                updated = torch.ops.aten.index_put.default(
+                    base, [index], src[:3], False
+                )
+                # Use it, then discard (simulates ; var = None)
+                partial = updated.sum(dim=0)
+                # Final output is a dense reduction of a different branch
+                return src.sum(dim=0)
+
+        src = torch.randn(10, 16)
+        index = torch.tensor([1, 3, 5], dtype=torch.int64)
+        out = Repro()(src, index)
+
+        actual = count_bytes_effective(Repro(), [src, index])
+        # src is fully read (dense), index is read
+        # output is f32[16] = 64 bytes
+        expected = self._bytes(src) + self._bytes(index) + self._bytes(out)
+        self.assertEqual(actual, expected)
+
+
 if __name__ == "__main__":
     unittest.main()

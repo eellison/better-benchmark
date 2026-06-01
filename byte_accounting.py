@@ -140,11 +140,30 @@ def _is_sparse_source_op(name: str) -> bool:
 
 
 class _EffectiveByteCounter(TorchDispatchMode):
+    """Track effective memory bandwidth for a fused region.
+
+    Key design decisions:
+    - We keep references to all intermediate tensors (_keepalive) to prevent
+      Python from recycling id() values, which would cause spurious matches
+      in our id-keyed dictionaries.
+    - View/slice ops that narrow a tensor only charge the narrowed portion,
+      not the full source tensor. We track per-root the maximum bytes actually
+      accessed through any view chain (capped at full tensor size).
+    - Sparse source ops (embedding, gather, index, index_select) charge the
+      result size as the read from the source, not the full source tensor.
+    - Sparse update ops (index_put, scatter) charge the update size as the
+      write, not the full output tensor.
+    """
+
     def __init__(self):
         super().__init__()
+        self._keepalive: list[Any] = []
         self._produced: set[int] = set()
         self._views_of: dict[int, int] = {}
+        # For each root input tensor id -> total tensor bytes
         self._input_bytes: dict[int, int] = {}
+        # For each root input -> actual bytes accessed (max of view sizes)
+        self._input_accessed_bytes: dict[int, int] = {}
         self._full_read_roots: set[int] = set()
         self._sparse_read_bytes: dict[int, int] = {}
         self._output_write_bytes: dict[int, int] = {}
@@ -162,6 +181,9 @@ class _EffectiveByteCounter(TorchDispatchMode):
         tid = self._root(id(value))
         if tid not in self._produced and tid not in self._input_bytes:
             self._input_bytes[tid] = tensor_nbytes(value)
+            # Start with 0 accessed bytes; actual access is recorded by
+            # _mark_full_read or _mark_sparse_read
+            self._input_accessed_bytes[tid] = 0
 
     def _mark_full_read(self, value: Any) -> None:
         if not isinstance(value, torch.Tensor):
@@ -169,6 +191,11 @@ class _EffectiveByteCounter(TorchDispatchMode):
         root = self._root(id(value))
         if root in self._input_bytes:
             self._full_read_roots.add(root)
+            # Update accessed bytes to the actual size being read
+            accessed = tensor_nbytes(value)
+            self._input_accessed_bytes[root] = max(
+                self._input_accessed_bytes.get(root, 0), accessed
+            )
 
     def _mark_sparse_read(self, value: Any, nbytes: int) -> None:
         if not isinstance(value, torch.Tensor):
@@ -186,6 +213,10 @@ class _EffectiveByteCounter(TorchDispatchMode):
             self._track_external_input(tensor)
 
         result = func(*args, **kwargs)
+
+        # Keep all intermediate tensors alive to prevent id() reuse
+        for tensor in _iter_tensors(result):
+            self._keepalive.append(tensor)
 
         for tensor in _iter_tensors(result):
             self._produced.add(id(tensor))
@@ -227,7 +258,9 @@ class _EffectiveByteCounter(TorchDispatchMode):
         total = 0
         for root, full_bytes in self._input_bytes.items():
             if root in self._full_read_roots:
-                total += full_bytes
+                # Charge the actual accessed portion, not the full tensor
+                accessed = min(self._input_accessed_bytes.get(root, full_bytes), full_bytes)
+                total += accessed
             else:
                 total += min(self._sparse_read_bytes.get(root, 0), full_bytes)
         return total
@@ -243,7 +276,17 @@ class _EffectiveByteCounter(TorchDispatchMode):
             root = self._root(id(tensor))
             if root in self._input_bytes and id(tensor) not in self._produced:
                 continue
-            total += self._output_write_bytes.get(id(tensor), tensor_nbytes(tensor))
+            if id(tensor) in self._output_write_bytes:
+                # Only charge sparse write bytes if this tensor IS the
+                # sparse-update result (same shape). If this is a downstream
+                # reduction of that result, charge actual output size.
+                sparse_bytes = self._output_write_bytes[id(tensor)]
+                actual_bytes = tensor_nbytes(tensor)
+                # If actual output is much smaller than the sparse write
+                # (e.g., a reduction of an index_put result), charge actual
+                total += min(sparse_bytes, actual_bytes)
+            else:
+                total += tensor_nbytes(tensor)
         return total
 
     def total(self, outputs: Any) -> int:
