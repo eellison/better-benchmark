@@ -853,6 +853,32 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                 line = line.strip()
                 if line.startswith("{"):
                     results = json.loads(line)
+                    # Validate result-repro alignment: the worker embeds the
+                    # repro path it actually benchmarked in "_repro". If this
+                    # doesn't match what we sent, the stdout stream is misaligned
+                    # (e.g., due to stray prints from module loading polluting
+                    # the result pipe before our stdout-redirect fix took effect).
+                    result_repro = results.pop("_repro", None)
+                    expected = str(repro_path)
+                    if result_repro is not None and result_repro != expected:
+                        # MISALIGNMENT DETECTED: kill worker to reset the pipe.
+                        # Report as failure — we cannot trust this result.
+                        error = (
+                            f"result misalignment: expected repro "
+                            f"'{Path(expected).parent.name}' but worker returned "
+                            f"result for '{Path(result_repro).parent.name}'. "
+                            f"Killed worker to reset stdout pipe."
+                        )
+                        _kill_worker(proc)
+                        proc = None
+                        result_queue.put({
+                            "repro": str(repro_path),
+                            "gpu": gpu["index"],
+                            "status": "failed",
+                            "elapsed": elapsed,
+                            "error": error[:500],
+                        })
+                        continue
                     result_queue.put({
                         "repro": str(repro_path),
                         "gpu": gpu["index"],
@@ -907,9 +933,15 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     Supports PREFETCH:<path> commands to pre-import the next repro module
     in a background thread, overlapping CPU-bound module loading with
     GPU-bound timing of the current repro.
+
+    PROTOCOL FIX: each JSON result now includes a "_repro" key identifying
+    which repro produced it. The parent validates this matches expectations
+    to detect and recover from stdout pipeline misalignment (e.g., if a
+    prefetch thread or module import prints to stdout, shifting the result
+    stream).
     """
     return f'''
-import builtins, contextlib, fcntl, re, sys, json, os, tempfile, threading, time
+import builtins, contextlib, fcntl, io, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
 sys.path.insert(0, "{args_dict["root"]}")
 
@@ -1105,18 +1137,30 @@ def gpu_setup_lock():
         yield
 
 def _prefetch_module(repro_path):
-    """Load a repro module into the cache (called from background thread)."""
+    """Load a repro module into the cache (called from background thread).
+
+    IMPORTANT: redirects stdout to /dev/null during module loading to prevent
+    any print statements in the loaded module from polluting the JSON result
+    stream on stdout (which would cause result misalignment in the parent).
+    """
     try:
-        spec = importlib.util.spec_from_file_location("repro_prefetch", repro_path)
-        mod = importlib.util.module_from_spec(spec)
-        mod.device = torch.device
-        mod.inf = math.inf
-        mod.nan = math.nan
-        spec.loader.exec_module(mod)
-        instance = mod.Repro()
-        configs = load_shape_configs(repro_path)
-        with _prefetch_lock:
-            _prefetch_cache[repro_path] = (mod, instance, configs)
+        # Redirect stdout in this thread to prevent pollution of the result pipe.
+        # stderr is fine (parent drains it separately).
+        _real_stdout = sys.stdout
+        sys.stdout = io.StringIO()
+        try:
+            spec = importlib.util.spec_from_file_location("repro_prefetch", repro_path)
+            mod = importlib.util.module_from_spec(spec)
+            mod.device = torch.device
+            mod.inf = math.inf
+            mod.nan = math.nan
+            spec.loader.exec_module(mod)
+            instance = mod.Repro()
+            configs = load_shape_configs(repro_path)
+            with _prefetch_lock:
+                _prefetch_cache[repro_path] = (mod, instance, configs)
+        finally:
+            sys.stdout = _real_stdout
     except Exception:
         pass  # prefetch failure is non-fatal; bench_one will load normally
 
@@ -1222,6 +1266,19 @@ def bench_one(repro_path):
 
 # Main loop: read repro paths from stdin, write JSON results to stdout.
 # Supports PREFETCH:<path> to pre-import the next module in background.
+#
+# PROTOCOL: each JSON result includes "_repro" key so the parent can verify
+# the result belongs to the expected repro path. This prevents misattribution
+# when stdout gets polluted by stray prints from module loading or torch internals.
+#
+# We use a dedicated file descriptor for result output to avoid stdout pollution
+# from torch/triton/module prints. The "real" stdout (fd 1) is saved, and
+# sys.stdout is replaced with stderr so any stray prints go to stderr (which
+# the parent drains separately).
+_result_fd = os.dup(1)  # save real stdout fd for result JSON
+_result_file = os.fdopen(_result_fd, "w", buffering=1)  # line-buffered
+sys.stdout = sys.stderr  # redirect any stray prints to stderr
+
 for line in sys.stdin:
     line = line.strip()
     if not line or line == "EXIT":
@@ -1236,12 +1293,17 @@ for line in sys.stdin:
         continue
     try:
         results = bench_one(line)
-        print(json.dumps(results), flush=True)
+        # Include the repro path in the result for parent-side validation
+        results["_repro"] = line
+        _result_file.write(json.dumps(results) + "\\n")
+        _result_file.flush()
     except Exception as e:
         if "CUDA" in str(e) or "device-side assert" in str(e):
-            print(f"CUDA_ERROR: {{str(e)[:150]}}", flush=True)
+            _result_file.write(f"CUDA_ERROR: {{str(e)[:150]}}\\n")
+            _result_file.flush()
             sys.exit(1)  # die so parent respawns
-        print(f"ERROR: {{str(e)[:150]}}", flush=True)
+        _result_file.write(f"ERROR: {{str(e)[:150]}}\\n")
+        _result_file.flush()
 '''
 
 

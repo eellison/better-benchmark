@@ -89,6 +89,11 @@ def _lock_path():
     return os.path.join(lock_dir, f"gpu_{gpu}.lock")
 
 
+# Redirect stdout to a dedicated fd (mirrors real worker protocol)
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+sys.stdout = sys.stderr
+
 for line in sys.stdin:
     line = line.strip()
     if not line or line == "EXIT":
@@ -98,7 +103,8 @@ for line in sys.stdin:
 
     name = os.path.basename(os.path.dirname(line))
     if name.startswith("ok_"):
-        print(json.dumps({
+        result = {
+            "_repro": line,
             "default": {
                 "compiled_us": 1.0,
                 "coord_descent_us": None,
@@ -107,18 +113,71 @@ for line in sys.stdin:
                 "gap_default": 1.0,
                 "gap_cd": None,
             }
-        }), flush=True)
+        }
+        _result_file.write(json.dumps(result) + "\n")
+        _result_file.flush()
     elif name == "normal_fail":
-        print("ERROR: intentional non-cuda repro failure", flush=True)
+        _result_file.write("ERROR: intentional non-cuda repro failure\n")
+        _result_file.flush()
     elif name == "cuda_fail":
         path = _lock_path()
         if path is not None:
             fd = os.open(path, os.O_CREAT | os.O_RDWR, 0o666)
             fcntl.flock(fd, fcntl.LOCK_EX)
-        print("CUDA_ERROR: intentional device failure", flush=True)
+        _result_file.write("CUDA_ERROR: intentional device failure\n")
+        _result_file.flush()
         sys.exit(1)
     else:
-        print(f"ERROR: unknown fake repro {name}", flush=True)
+        _result_file.write(f"ERROR: unknown fake repro {name}\n")
+        _result_file.flush()
+'''
+
+
+def _misaligned_persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
+    """Fake worker that returns results with WRONG _repro paths, simulating
+    the stdout pollution bug that causes result misattribution."""
+    return r'''
+import json
+import os
+import sys
+
+# Redirect stdout to a dedicated fd (mirrors real worker protocol)
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+sys.stdout = sys.stderr
+
+_previous_path = None
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line or line == "EXIT":
+        break
+    if line.startswith("PREFETCH:"):
+        continue
+
+    # Simulate misalignment: return result tagged with the PREVIOUS repro path
+    # (mimics what happens when stdout gets polluted and results shift by one)
+    if _previous_path is None:
+        # First request: return correct result
+        repro_tag = line
+    else:
+        # Subsequent requests: return result tagged as the PREVIOUS repro
+        repro_tag = _previous_path
+    _previous_path = line
+
+    result = {
+        "_repro": repro_tag,
+        "default": {
+            "compiled_us": 1.0,
+            "coord_descent_us": None,
+            "memcopy_sol_us": 1.0,
+            "total_bytes": 4,
+            "gap_default": 1.0,
+            "gap_cd": None,
+        }
+    }
+    _result_file.write(json.dumps(result) + "\n")
+    _result_file.flush()
 '''
 
 
@@ -275,6 +334,64 @@ def test_strict_setup_lock_stress_does_not_deadlock(tmp_path):
     errors = [payload for status, payload in statuses if status != "ok"]
     assert not errors
     assert len(statuses) == workers
+
+
+def test_locked_worker_detects_misaligned_results(monkeypatch):
+    """Test that the parent detects when _repro in the result doesn't match
+    the expected repro path (result misattribution / stdout pipeline shift)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        lock_dir = tmp_path / "locks"
+        monkeypatch.setenv("INDUCTOR_GPU_BENCH_LOCK_DIR", str(lock_dir))
+
+        task_queue = queue.Queue()
+        repros = []
+        for name in ("repro_a", "repro_b", "repro_c"):
+            repro = tmp_path / name / "repro.py"
+            repro.parent.mkdir()
+            repro.write_text("# fake repro\n")
+            repros.append(repro)
+            task_queue.put(repro)
+
+        result_queue = queue.Queue()
+        _locked_worker(
+            {"index": "0", "name": "Fake GPU", "kind": "fake"},
+            task_queue,
+            result_queue,
+            {
+                "root": str(ROOT),
+                "all_shapes": False,
+                "no_cd": True,
+                "n_warmup": 1,
+                "n_rep": 1,
+                "share_cache": False,
+                "strict_gpu_lock": False,
+                "n_workers": 1,
+                "_persistent_worker_script_factory": _misaligned_persistent_worker_script,
+            },
+        )
+
+        results = []
+        while not result_queue.empty():
+            results.append(result_queue.get_nowait())
+
+        # First repro should succeed (misaligned worker returns correct path
+        # for first request)
+        assert results[0]["status"] == "ok"
+        assert Path(results[0]["repro"]).parent.name == "repro_a"
+
+        # Second repro should FAIL due to misalignment detection (worker returns
+        # repro_a's path but parent expected repro_b)
+        assert results[1]["status"] == "failed"
+        assert "misalignment" in results[1]["error"]
+        assert Path(results[1]["repro"]).parent.name == "repro_b"
+
+        # Third repro: after killing the misaligned worker and respawning,
+        # the new worker instance also starts misaligned on its second request.
+        # But since it's the last repro and there's no "next" to shift into,
+        # it should succeed (first request to fresh worker is always correct).
+        assert results[2]["status"] == "ok"
+        assert Path(results[2]["repro"]).parent.name == "repro_c"
 
 
 def test_locked_worker_recovers_after_failures_and_releases_gpu_lock(monkeypatch):
