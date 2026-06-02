@@ -1271,13 +1271,16 @@ def bench_one(repro_path):
 # the result belongs to the expected repro path. This prevents misattribution
 # when stdout gets polluted by stray prints from module loading or torch internals.
 #
-# We use a dedicated file descriptor for result output to avoid stdout pollution
-# from torch/triton/module prints. The "real" stdout (fd 1) is saved, and
-# sys.stdout is replaced with stderr so any stray prints go to stderr (which
-# the parent drains separately).
-_result_fd = os.dup(1)  # save real stdout fd for result JSON
+# Dedicated result fd: results are the ONLY thing written to the parent's
+# result pipe. We preserve the original stdout pipe as a private fd, then point
+# fd 1 itself at stderr (os.dup2). This isolates the result pipe from ALL stdout
+# pollution -- including native C/C++ writes to fd 1 from torch/triton/CUDA,
+# which a Python-only ``sys.stdout`` redirect cannot catch. Any such writes now
+# land on stderr (drained separately by the parent), never the result stream.
+_result_fd = os.dup(1)  # private dup of the original stdout pipe (for results)
 _result_file = os.fdopen(_result_fd, "w", buffering=1)  # line-buffered
-sys.stdout = sys.stderr  # redirect any stray prints to stderr
+os.dup2(2, 1)  # fd 1 -> stderr: native + stray fd-1 writes go to stderr, not results
+sys.stdout = sys.stderr  # python-level prints -> stderr too
 
 for line in sys.stdin:
     line = line.strip()
