@@ -544,10 +544,10 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                 for _ in range(3):
                     compiled(*inputs)
                 torch.cuda.synchronize()
-            g = torch.cuda.CUDAGraph()
-            with torch.cuda.graph(g):
-                compiled(*inputs)
-            torch.cuda.synchronize()
+                g = torch.cuda.CUDAGraph()
+                with torch.cuda.graph(g):
+                    compiled(*inputs)
+                torch.cuda.synchronize()
             compiled_ms = do_bench(lambda: g.replay(), warmup=parsed.n_warmup, rep=parsed.n_rep, return_mode="min")
             compiled_us = compiled_ms * 1000
 
@@ -561,10 +561,10 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                     for _ in range(3):
                         compiled_cd(*inputs)
                     torch.cuda.synchronize()
-                g_cd = torch.cuda.CUDAGraph()
-                with torch.cuda.graph(g_cd):
-                    compiled_cd(*inputs)
-                torch.cuda.synchronize()
+                    g_cd = torch.cuda.CUDAGraph()
+                    with torch.cuda.graph(g_cd):
+                        compiled_cd(*inputs)
+                    torch.cuda.synchronize()
                 cd_ms = do_bench(lambda: g_cd.replay(), warmup=parsed.n_warmup, rep=parsed.n_rep, return_mode="min")
                 cd_us = cd_ms * 1000
                 inductor_config.coordinate_descent_tuning = False
