@@ -55,6 +55,13 @@ A benchmark corpus of 1482 Inductor-generated kernels from real models (vLLM, HF
 - Include `--check` (correctness) and `--bench` (timing) modes
 - Model after: `repros/canonical/sum_sum_6a14a9c9ba88/oracle_multi_output_reduction.py`
 
+#### Oracle Scope Invariant
+- `implemented_unmeasured` means the oracle `--bench` covers the same computation scope as the compiled `repro.py` region.
+- Do not mark subset microbenchmarks as oracle floors. If an oracle only measures a reduction, softmax, scatter, or epilogue subset while the compiled repro includes surrounding layout, dropout, position bias, assembly, or other fused ops, leave `oracle_path` blank and keep the row actionable.
+- Subset kernels are allowed only as diagnosis/prototype artifacts. Their diagnosis must say they are not full-scope floors.
+- If full-scope coverage is impractical, update `next_action` with the missing scope instead of setting `implemented_unmeasured`.
+- Every subagent brief must restate this invariant explicitly before assigning oracle work.
+
 ### Inductor Work (needs pytorch checkout)
 - Branch: work on `pr-184905` with local modifications
 - Test with `scripts/bench_compare.py` (interleaved A/B, min-of-5-rounds)

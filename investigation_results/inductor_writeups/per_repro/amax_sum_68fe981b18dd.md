@@ -5,20 +5,21 @@
 - Rank: 37
 - Family: `online_softmax_cross_entropy`
 - Owner: `Fermi`
-- Closure status: `needs_oracle_measurement`
-- Oracle status: `queued`
+- Closure status: `scope_mismatch_needs_full_scope_oracle`
+- Oracle status: `scope_mismatch_prototype`
 
 ## Current Gap
 
 - Best compile: `665.5359864234924 us`
 - Memcopy SOL: `93.1520015001297 us`
 - Launch-adjusted SOL gap: `4.817418344987695x`
-- Oracle path: `repros/canonical/amax_sum_68fe981b18dd/oracle_online_softmax.py`
+- Oracle path: _none_
 
 ## Oracle State
 
-- No measured oracle row yet.
-- Next oracle action: measure or replace scaffold with a true optimized canonical oracle before treating it as a floor.
+- Existing prototype: `repros/canonical/amax_sum_68fe981b18dd/oracle_online_softmax.py` is diagnosis-only.
+- Gap diagnosis: The prototype times the softmax/mask subset, while the compiled repro includes the Longformer attention assembly surrounding that subset. Inductor cannot be credited with a softmax-template miss from this measurement because the oracle excludes the full work region being timed in `repro.py`. Classification: `NEW_PATTERN`; write a full-scope Longformer assembly oracle before assigning a concrete Inductor fix.
+- Next oracle action: rewrite only if `--bench` covers the full compiled repro scope; otherwise keep this row out of floor measurements.
 
 ## Inductor Closure Path
 
@@ -29,5 +30,5 @@
 
 ## Done Criteria
 
-- Canonical oracle measured or blocker documented.
+- Full-scope canonical oracle measured or blocker documented.
 - Inductor path either reaches the oracle/realistic floor or has a measured, gated implementation plan with regression guardrails.

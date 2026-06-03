@@ -1,44 +1,40 @@
 # amax_sum_55ae6a130879
 
-## Classification: `NON_SOFTMAX_BOTTLENECK`
+## Queue Position
 
-## Pattern
+- Rank: 197
+- Family: `online_softmax_cross_entropy`
+- Owner: `unassigned`
+- Closure status: `scope_mismatch_needs_full_scope_oracle`
+- Oracle status: `scope_mismatch_prototype`
 
-Attention softmax + dropout + permute (DeBERTa attention)
+## Current Gap
 
-- Model: hf_DebertaV2ForMaskedLM_train
-- Shape: bmm [192, 512, 512] f32 (viewed as [8, 24, 512, 512])
-- Reduction dim (rnumel): 512
-- Output: f32[192, 512, 512] (permuted softmax+dropout result)
+- Best compile: `175.87199807167053 us`
+- Memcopy SOL: `64.41599875688553 us`
+- Launch-adjusted SOL gap: `2.6087575844703754x`
+- Oracle path: _none_
 
-## Measurements (NVIDIA B200, CD tuning ON)
+## Prototype Notes
 
-| Metric | Value |
-|--------|-------|
-| Compile (best) | 179 us |
-| Oracle (persistent softmax+dropout) | 113 us |
-| Gap (compile/oracle) | 1.59x |
-| Kernel count | 1 |
-| scalar_reduction_accumulators effect | None (rnumel=512 fits in persistent block) |
+- Existing prototype: `repros/canonical/amax_sum_55ae6a130879/oracle_online_softmax.py` is diagnosis-only.
+- Prior B200 measurement with coordinate-descent tuning reported compile around `179 us`, prototype around `113 us`, and one generated kernel.
+- The prototype note also found `scalar_reduction_accumulators` does not matter here because `rnumel=512` already fits in a persistent reduction tile.
 
-## Diagnosis
+## Gap Diagnosis
 
-Inductor generates a single kernel (rnumel=512 is small enough for a persistent reduction). The `scalar_reduction_accumulators` config has **no effect** because rnumel=512 already fits in a single tile with no looping.
+The prototype measures a softmax/dropout core, while the compiled repro includes fused dropout plus permute work around that core. The prototype also avoids part of the real dropout/RNG and layout path, so it is not a full-scope floor for the compiled `repro.py` region. Inductor cannot use that number as a softmax-reduction target because the reduction strategy is already persistent; the remaining gap is in keeping the surrounding attention assembly work fused and indexed compactly.
 
-The 1.59x gap is NOT from the softmax reduction strategy. With only 1 kernel and a persistent reduction already in use, the gap comes from:
+Classification: `SCHEDULER_FUSION`. A valid fix would keep the surrounding dropout/permute work in the same full-scope optimized path, or a replacement oracle must benchmark that full path before the row can be counted as a floor.
 
-1. **Dropout epilogue overhead**: Inductor materializes the RNG (inductor_random) and applies dropout as fused pointwise, but the oracle integrates the dropout mask application directly into the softmax write-back with a pre-supplied mask, avoiding the RNG compute.
+## Inductor Closure Path
 
-2. **Layout permute**: The repro ends with `permute(0, 2, 1)`, which the oracle handles by writing transposed in the store. Inductor may emit an extra layout adjustment or use suboptimal store indexing.
+- Implementation track: Attention softmax/dropout/layout template recognition.
+- Candidate hook: Expand the online-softmax template or scheduler fusion boundary so dropout and final layout indexing stay in the optimized full-scope path.
+- Benchmark policy: compare default, `coordinate_descent_tuning=True`, forced persistent combo, and forced looped combo; prioritize best runtime over default heuristic purity.
+- Gating policy: gate on the exact attention shape/layout/reduction-size predicate and keep both paths autotuned if sibling regressions appear.
 
-3. **Attention assembly overhead**: The combined softmax+dropout+permute pattern is an attention attention assembly idiom. The oracle is a specialized template; inductor's generic reduction + pointwise fusion path generates correct but less compact code.
+## Done Criteria
 
-### Root cause
-
-The gap is in the attention assembly pattern: fused softmax+dropout+layout is a specialized template that inductor's generic reduction scheduler does not emit. The reduction itself (amax+sum over 512 elements) is already persistent and scalar accumulators are not the bottleneck.
-
-## Inductor Closure
-
-- Implementation track: Attention softmax+dropout template recognition.
-- The `scalar_reduction_accumulators` optimization is irrelevant here (small rnumel, already persistent).
-- Priority: moderate (1.59x gap, 66 us absolute difference, attention-pattern template would close this).
+- Full-scope canonical oracle measured or blocker documented.
+- Inductor path either reaches the oracle/realistic floor or has a measured, gated implementation plan with regression guardrails.

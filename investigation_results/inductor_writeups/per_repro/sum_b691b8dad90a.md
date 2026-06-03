@@ -4,21 +4,22 @@
 
 - Rank: 23
 - Family: `multi_output_reduction_templates`
-- Owner: `Averroes`
-- Closure status: `needs_oracle_measurement`
-- Oracle status: `queued`
+- Owner: `unassigned`
+- Closure status: `not_true_floor_needs_rewrite`
+- Oracle status: `not_true_floor`
 
 ## Current Gap
 
 - Best compile: `2091.8400287628174 us`
 - Memcopy SOL: `687.0719790458679 us`
 - Launch-adjusted SOL gap: `3.018214690547139x`
-- Oracle path: `repros/canonical/sum_b691b8dad90a/oracle_multi_output_reduction.py`
+- Oracle path: _none_
 
 ## Oracle State
 
-- No measured oracle row yet.
-- Next oracle action: measure or replace scaffold with a true optimized canonical oracle before treating it as a floor.
+- Existing prototype: `repros/canonical/sum_b691b8dad90a/oracle_multi_output_reduction.py` is not a valid floor.
+- Gap diagnosis: The script attempts the reduction oracle scope but is slower than the compiled baseline, so it cannot establish an achievable lower bound. Inductor cannot be optimized against this number because the oracle lacks enough parallelism/tiling headroom to beat generated code. Classification: `COOPERATIVE_SPLIT_K`; a valid oracle/fix needs split-K style parallel reduction with safe atomic coordination or another full-scope strategy that actually beats compile.
+- Next oracle action: rewrite before treating this as a floor.
 
 ## Inductor Closure Path
 
@@ -29,5 +30,5 @@
 
 ## Done Criteria
 
-- Canonical oracle measured or blocker documented.
+- Full-scope canonical oracle measured or blocker documented.
 - Inductor path either reaches the oracle/realistic floor or has a measured, gated implementation plan with regression guardrails.

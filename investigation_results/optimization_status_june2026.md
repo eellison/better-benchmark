@@ -75,8 +75,10 @@ Implemented/unmeasured rows in this band:
 | 204 | `pointwise_cf3acd87ba9e` | layout/stencil | `SCHEDULER_FUSION` | Sink channel-shuffle layout indexing into the branch producers. |
 
 Active but not completed in this rank band: `sum_sum_sum_88c9224fa05a`,
-`sum_sum_sum_512dcf4a167b`, `amax_sum_55ae6a130879`, and
-`sum_sum_b7f94adef30f`.
+`sum_sum_sum_512dcf4a167b`, and `sum_sum_b7f94adef30f`.
+`amax_sum_55ae6a130879` was removed from oracle-floor status because the
+existing script is a softmax/dropout prototype, not a full-scope floor for the
+compiled repro region.
 
 ## Recommended Next Steps
 

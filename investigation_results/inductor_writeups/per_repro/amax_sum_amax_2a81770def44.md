@@ -4,21 +4,22 @@
 
 - Rank: 22
 - Family: `online_softmax_cross_entropy`
-- Owner: `Averroes`
-- Closure status: `needs_oracle_measurement`
-- Oracle status: `queued`
+- Owner: `unassigned`
+- Closure status: `scope_mismatch_needs_full_scope_oracle`
+- Oracle status: `scope_mismatch_prototype`
 
 ## Current Gap
 
 - Best compile: `1219.391942024231 us`
 - Memcopy SOL: `238.5919988155365 us`
 - Launch-adjusted SOL gap: `4.985412229056019x`
-- Oracle path: `repros/canonical/amax_sum_amax_2a81770def44/oracle_online_softmax.py`
+- Oracle path: _none_
 
 ## Oracle State
 
-- No measured oracle row yet.
-- Next oracle action: measure or replace scaffold with a true optimized canonical oracle before treating it as a floor.
+- Existing prototype: `repros/canonical/amax_sum_amax_2a81770def44/oracle_online_softmax.py` is diagnosis-only.
+- Gap diagnosis: The prototype times the dual online softmax/dropout core but omits the surrounding T5 position-bias, mask, and dropout scope in the compiled repro. Inductor cannot close the measured full gap with only the scalar-accumulator softmax kernel because the scheduler/template boundary excludes surrounding pointwise/dropout work. Classification: `SCHEDULER_FUSION`; a valid fix would expand the scheduled/template region to keep those surrounding ops in the full softmax path.
+- Next oracle action: rewrite full-scope oracle before treating this as a floor.
 
 ## Inductor Closure Path
 
@@ -29,5 +30,5 @@
 
 ## Done Criteria
 
-- Canonical oracle measured or blocker documented.
+- Full-scope canonical oracle measured or blocker documented.
 - Inductor path either reaches the oracle/realistic floor or has a measured, gated implementation plan with regression guardrails.
