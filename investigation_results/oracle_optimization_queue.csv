@@ -62,21 +62,21 @@ sum_sum_sum_d0496bdeedba,SCHEDULER_FUSION,needs_work,
 sum_sum_sum_dadf6aa035dd,SCATTER_REDUCE,needs_work,UNet bilinear_interp_backward (4x index_put accumulate) + BN backward; compile=1023us vs bad oracle=48317us; 2.81x realistic floor
 sum_sum_sum_f68c9f1fa09b,AT_FLOOR,closed,
 sum_sum_sum_f90d684d32cb,SCATTER_REDUCE,needs_work,UNet bilinear_interp_backward (4x index_put accumulate) + BN backward; compile=3262us vs bad oracle=176388us; 4.47x realistic floor
-amax_sum_sum_846668f0b88f,NEW_PATTERN,needs_work,shifted ignore-index cross-entropy mean (GPT-J train); compile=48us vs oracle=29us; 1.66x gap; online softmax row template needed
-amax_sum_sum_f2d78a465cb5,NEW_PATTERN,needs_work,shifted causal-LM cross-entropy mean (GPT-J infer); compile=46us vs oracle=31us; 1.52x gap; same pattern as 846668f0b88f
+amax_sum_sum_846668f0b88f,AT_FLOOR,closed,Compile beats oracle (15.9us vs 25.4us). Gap was stale cache artifact. Online softmax already optimal.
+amax_sum_sum_f2d78a465cb5,AT_FLOOR,closed,Compile beats oracle (15.9us vs 25.4us). Gap was stale cache artifact. Online softmax already optimal.
 sum_79c6d0673ca2,SCATTER_REDUCE,oracle_needs_rewrite,Longformer index_put+sum+transpose; compile=65us vs bad oracle=799us; oracle uses eager ops not Triton; needs rewrite
 sum_sum_53431ef91176,SCATTER_REDUCE,oracle_needs_rewrite,Qwen3 MoE scatter-add+RMSNorm-bwd; compile=79us vs bad oracle=920us; oracle uses eager ops not Triton; needs rewrite
 sum_sum_609200a71825,SCATTER_REDUCE,needs_work,MobileViT avgpool-backward+SiLU+BN-backward; compile=66us vs oracle=31us; 2.15x gap; Triton one-pass channel kernel eliminates pool-grad materialization
-amax_sum_8764401930db,AT_FLOOR,closed,"compile=19.2us beats oracle kernel=30.5us; MT5 attention softmax+dropout+permute; Inductor already optimal"
-sum_6e4aebb044dd,AT_FLOOR,closed,"compile=35.6us beats oracle=43.0us; NFNet avgpool-backward+SiLU channel-sum; scatter-reduce oracle slower"
-sum_837a32994d31,AT_FLOOR,closed,"compile=57.9us beats oracle=69.7us; Demucs slice_scatter+masked channel sum; oracle fused approach slower"
-sum_86b5dc92d54f,AT_FLOOR,oracle_needs_rewrite,"BAD_ORACLE: compile=31.5us vs oracle=93.7us (3.0x slower); Longformer index_put+sum+transpose"
-sum_a3c9eb6b27f1,AT_FLOOR,oracle_needs_rewrite,"BAD_ORACLE: compile=29.3us vs oracle=50.2us (1.7x slower); Llama RoPE scatter-reduce"
-sum_sum_04bdad42e9ef,AT_FLOOR,closed,"compile=21.1us matches oracle=22.2us; EfficientNet SiLU+BN-backward cooperative split-K"
-sum_sum_98c4811f6ddf,AT_FLOOR,closed,"compile=21.4us beats oracle=25.2us; DenseNet BN-backward cooperative split-K"
-sum_sum_ab550e4e948e,AT_FLOOR,oracle_needs_rewrite,"BAD_ORACLE: compile=29.6us vs oracle=537.1us (18x slower); VoVNet maxpool-backward scatter-reduce"
-sum_sum_sum_3ec568a7ba04,COOPERATIVE_SPLIT_K,needs_work,"compile=33.7us vs oracle=27.6us; 1.22x gap; NFNet sigmoid-gated multi-output split-K reduction"
-sum_sum_sum_93b46c9731d8,AT_FLOOR,closed,"compile=28.5us beats oracle=35.8us; RegNet/ResNeSt dual BN-backward cooperative split-K"
+amax_sum_8764401930db,AT_FLOOR,closed,compile=19.2us beats oracle kernel=30.5us; MT5 attention softmax+dropout+permute; Inductor already optimal
+sum_6e4aebb044dd,AT_FLOOR,closed,compile=35.6us beats oracle=43.0us; NFNet avgpool-backward+SiLU channel-sum; scatter-reduce oracle slower
+sum_837a32994d31,AT_FLOOR,closed,compile=57.9us beats oracle=69.7us; Demucs slice_scatter+masked channel sum; oracle fused approach slower
+sum_86b5dc92d54f,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=31.5us vs oracle=93.7us (3.0x slower); Longformer index_put+sum+transpose
+sum_a3c9eb6b27f1,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=29.3us vs oracle=50.2us (1.7x slower); Llama RoPE scatter-reduce
+sum_sum_04bdad42e9ef,AT_FLOOR,closed,compile=21.1us matches oracle=22.2us; EfficientNet SiLU+BN-backward cooperative split-K
+sum_sum_98c4811f6ddf,AT_FLOOR,closed,compile=21.4us beats oracle=25.2us; DenseNet BN-backward cooperative split-K
+sum_sum_ab550e4e948e,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=29.6us vs oracle=537.1us (18x slower); VoVNet maxpool-backward scatter-reduce
+sum_sum_sum_3ec568a7ba04,COOPERATIVE_SPLIT_K,needs_work,compile=33.7us vs oracle=27.6us; 1.22x gap; NFNet sigmoid-gated multi-output split-K reduction
+sum_sum_sum_93b46c9731d8,AT_FLOOR,closed,compile=28.5us beats oracle=35.8us; RegNet/ResNeSt dual BN-backward cooperative split-K
 var_mean_765fb8f2c85e,BANDWIDTH_BOUND,closed,
 var_mean_e814c09a1fdb,BANDWIDTH_BOUND,closed,
 var_mean_f0d7c08a0622,BANDWIDTH_BOUND,closed,
