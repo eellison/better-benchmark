@@ -170,4 +170,4 @@ sum_sum_ec5520846a41,AT_FLOOR,closed,compile=49.120us(cd) vs oracle=46.944us; 1.
 sum_sum_sum_1b02daac4062,COOPERATIVE_SPLIT_K,needs_work,compile=67.232us(cd) vs oracle=43.648us; 1.54x gap; Swin LN-backward/drop-path cooperative split-K with transposed side output and 4-way column reduction
 sum_sum_sum_69414585b76b,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=74.560us vs oracle=510.976us (6.9x slower); BERT LN/dropout-backward cooperative split-K; TILE_ROWS=4 with TILE_CHANNELS=1024>768 creates massive register pressure and 37MB intermediate partials
 sum_sum_sum_a431ef798d5d,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=78.688us vs oracle=95.040us (1.2x slower); ViT LN-backward cooperative split-K; ROW_SPLIT=16 XBLOCK=4 over [32768x768] suboptimal tiling
-sum_sum_sum_d8e421a07bf7,ALGEBRAIC_ELIMINATION,needs_work,compile=43.872us(cd) vs oracle=24.064us; 1.82x gap; DenseNet BN-backward algebraic dependent-reduction collapse with slice residual-add and dual [32] vector output
+sum_sum_sum_d8e421a07bf7,ALGEBRAIC_ELIMINATION,needs_work,linear_reduction_elimination fires (12% help) but 1.82x gap remains. Needs full multi-accumulator fusion.
