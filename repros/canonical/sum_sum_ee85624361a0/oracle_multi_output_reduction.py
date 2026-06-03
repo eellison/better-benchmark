@@ -10,6 +10,17 @@ The captured repro then uses both channel reductions in a pointwise epilogue.
 This oracle keeps the repro's setup ops in PyTorch, then measures the intended
 Inductor optimization target: one Triton pass feeding both accumulators, followed
 by one fused pointwise epilogue.
+
+Gap diagnosis: this oracle reads where_self and centered once in a single-pass
+dual-accumulator Triton reduction, computing sum(where_self) and
+sum(where_self * centered) together before feeding both results into the fused
+post-reduction batch-norm epilogue; Inductor emits separate sibling reductions
+because its scheduler does not currently group reductions with the same
+iteration domain, reduction domain, and shared inputs when their per-element
+reduction expressions differ. The fix class is SCHEDULER_FUSION: teach the
+scheduler/codegen path to recognize compatible sibling reductions and lower
+them as one multi-output reduction template with multiple accumulators, then
+preserve fusion into the dependent epilogue.
 """
 from __future__ import annotations
 
