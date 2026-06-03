@@ -126,3 +126,4 @@ sum_sum_sum_cad02fe18a69,SCATTER_REDUCE,needs_work,compile=94.2us vs oracle=64.2
 sum_sum_e6f9af9e33b1,SCHEDULER_FUSION,needs_work,compile=82.9us vs oracle=52.2us; 1.59x gap; DenseNet121 BN-backward sibling reductions with slice-limited epilogue
 sum_sum_sum_59e022113eeb,AT_FLOOR,closed,compile=104.5us vs oracle=100.4us; 1.04x gap; DistilBERT LN-backward multi-output reduction; Inductor already near-optimal
 sum_sum_sum_ed8809aa30cf,COOPERATIVE_SPLIT_K,needs_work,compile=100.2us vs oracle=85.0us; 1.18x gap; Blenderbot LN-backward cross-axis multi-output reduction
+amax_sum_4fb4f9a0bf43,BANDWIDTH_BOUND,closed,compile=37.952us beats oracle=38.592us; T5 additive softmax fp16 [8x2048x2048]; Inductor already optimal with combo_kernels config
