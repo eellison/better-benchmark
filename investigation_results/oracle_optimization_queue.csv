@@ -147,3 +147,4 @@ sum_sum_sum_812de8ed33fc,SCATTER_REDUCE,needs_work,compile=112.7us vs oracle=76.
 sum_sum_sum_8fe409430e81,SCATTER_REDUCE,oracle_needs_rewrite,BAD_ORACLE: compile=100.2us vs oracle=169.7us (1.7x slower); Qwen3-30B-A3B MoE RMSNorm+router scatter-reduce
 sum_ab7572b27d2c,AT_FLOOR,closed,compile=31.7us vs oracle=31.6us; 1.00x; LayoutLM attention permute+clone+sum; Inductor already optimal (combo_looped_cd=31.2us)
 sum_sum_02504147c9db,AT_FLOOR,closed,compile=28.6us beats oracle=33.4us; DenseNet BN-backward+avgpool dual reduction; Inductor already optimal
+amax_sum_c147ef68d8e3,NEW_PATTERN,needs_work,compile=22.9us vs oracle=14.5us; 1.58x gap; Reformer LSH equality-masked softmax materialization; bandwidth-bound oracle at 1.7 TB/s (~87% peak)
