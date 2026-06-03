@@ -100,3 +100,10 @@ sum_sum_sum_d574fc7bdc59,COOPERATIVE_SPLIT_K,oracle_needs_rewrite,BAD_ORACLE: co
 sum_sum_sum_db1524bc41dd,RECOMPUTE_FUSION,oracle_needs_rewrite,BAD_ORACLE: compile=1634.3us vs oracle=11625.9us (7.1x slower); UNet
 sum_sum_sum_fb9996974d8f,SCHEDULER_FUSION,closed,compile=245.6us beats oracle=466.8us; GhostNet; Inductor already optimal
 sum_sum_sum_fcd2cc2945b3,SCHEDULER_FUSION,closed,compile=59.3us beats oracle=110.5us; AdvInceptionV3; Inductor already optimal
+sum_sum_5c0f382244aa,COOPERATIVE_SPLIT_K,needs_work,compile=37.7us(cd) vs oracle=34.8us; 1.08x gap; DenseNet121 BN-backward dual reduction with 18-way slice epilogue
+amax_sum_ca987107ccc7,AT_FLOOR,closed,compile=61.9us vs oracle=58.1us; 1.06x gap; GPT-Neo masked softmax materialization; Inductor already near-optimal
+amax_sum_sum_b9ac8700504c,NEW_PATTERN,needs_work,compile=59.5us vs oracle=40.7us; 1.46x gap; Blenderbot/Bart cross-entropy online logsumexp; single-pass row reduction avoids materializing log-softmax
+sum_f4f71b921e96,SCATTER_REDUCE,closed,compile=60.4us beats oracle=63.8us; VGG16 maxpool-backward scatter+mask+reduce; Inductor already optimal
+sum_sum_279d6b97ab68,AT_FLOOR,closed,compile=79.6us vs oracle=77.4us; 1.03x gap; DenseNet121 BN-backward tail 640ch; Inductor already near-optimal
+sum_sum_8bc26e2e1883,AT_FLOOR,closed,compile=79.8us vs oracle=78.0us; 1.02x gap; DenseNet121 BN-backward tail 608ch; Inductor already near-optimal
+sum_sum_sum_4bb798eb542e,SCATTER_REDUCE,needs_work,compile=123.9us vs oracle=79.1us; 1.57x gap; Swin attention fma+scatter-add dual index_put with side output
