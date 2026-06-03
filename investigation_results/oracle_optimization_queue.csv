@@ -62,6 +62,11 @@ sum_sum_sum_d0496bdeedba,SCHEDULER_FUSION,needs_work,
 sum_sum_sum_dadf6aa035dd,SCATTER_REDUCE,needs_work,"UNet bilinear_interp_backward (4x index_put accumulate) + BN backward; compile=1023us vs bad oracle=48317us; 2.81x realistic floor"
 sum_sum_sum_f68c9f1fa09b,AT_FLOOR,closed,
 sum_sum_sum_f90d684d32cb,SCATTER_REDUCE,needs_work,"UNet bilinear_interp_backward (4x index_put accumulate) + BN backward; compile=3262us vs bad oracle=176388us; 4.47x realistic floor"
+amax_sum_sum_846668f0b88f,NEW_PATTERN,needs_work,"shifted ignore-index cross-entropy mean (GPT-J train); compile=48us vs oracle=29us; 1.66x gap; online softmax row template needed"
+amax_sum_sum_f2d78a465cb5,NEW_PATTERN,needs_work,"shifted causal-LM cross-entropy mean (GPT-J infer); compile=46us vs oracle=31us; 1.52x gap; same pattern as 846668f0b88f"
+sum_79c6d0673ca2,SCATTER_REDUCE,oracle_needs_rewrite,"Longformer index_put+sum+transpose; compile=65us vs bad oracle=799us; oracle uses eager ops not Triton; needs rewrite"
+sum_sum_53431ef91176,SCATTER_REDUCE,oracle_needs_rewrite,"Qwen3 MoE scatter-add+RMSNorm-bwd; compile=79us vs bad oracle=920us; oracle uses eager ops not Triton; needs rewrite"
+sum_sum_609200a71825,SCATTER_REDUCE,needs_work,"MobileViT avgpool-backward+SiLU+BN-backward; compile=66us vs oracle=31us; 2.15x gap; Triton one-pass channel kernel eliminates pool-grad materialization"
 var_mean_765fb8f2c85e,BANDWIDTH_BOUND,closed,
 var_mean_e814c09a1fdb,BANDWIDTH_BOUND,closed,
 var_mean_f0d7c08a0622,BANDWIDTH_BOUND,closed,
