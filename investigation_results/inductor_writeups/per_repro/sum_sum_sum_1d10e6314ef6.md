@@ -1,11 +1,80 @@
-# sum_sum_sum_1d10e6314ef6
+# sum_sum_sum_1d10e6314ef6 (Longformer LN-backward)
 
-Full-scope Triton oracle: `repros/canonical/sum_sum_sum_1d10e6314ef6/oracle_multi_output_reduction.py`
+## Classification: COOPERATIVE_SPLIT_K
 
-Gap diagnosis (classification: COOPERATIVE_SPLIT_K): the oracle covers the same scope as `repro.py`, including the `mm_134` view, residual add with `mul_290`, affine multiply by `arg5_1`, the two row-local layernorm-backward reductions, `arg298_1` scaling, boolean mask application from `arg103_1`, the two sibling `[768]` residual-input reductions, the masked-gradient `[768]` reduction, and the returned `[768, 8192]` transpose view. It differs from Inductor by computing each row tile's scalar reductions, masked gradient side-output store, and three column partials in one Triton pass, followed by a small finalizer over row-tile partials, instead of scheduling the row reductions, column sums, mask multiply, and transpose-producing pointwise region as separate template work. Inductor cannot do this today because the scheduler does not represent a dependent multi-output reduction with row-wise scalar intermediates plus a materialized transpose side output as one cooperatively split reduction; the fix is COOPERATIVE_SPLIT_K support for dependent multi-output reductions that accumulate compatible column partials while writing the side output.
+## Measurements (fresh cache, all fixes including combo_kernels)
 
-Correctness with `--check`: PASS. Outputs match the repro shapes and strides; max abs errors were output0 `6.103516e-05`, output1 `7.629395e-05`, output2 `6.250000e-02`, and output3 `2.929688e-03`.
+| Config | Time (us) | Kernels |
+|--------|-----------|---------|
+| compile (cd+combo+scalar_acc) | 56.4 | 3 triton + 2 ATen workspace reductions |
+| oracle (cooperative split-K) | 46.0 | 2 (1 main + 1 tiny finalizer) |
+| gap ratio | 1.22x | |
 
-Benchmark with `--bench --warmup 10 --rep 50`: oracle full-scope Longformer reductions plus transpose `52.128 us`; `coordinate_descent_tuning=True` `104.160 us`; `combo_kernels=True,combo_kernel_per_subkernel_blocks=True,coordinate_descent_tuning=True,benchmark_combo_kernel=True,triton.multi_kernel=3` `129.248 us`.
+## Graph Structure
 
-Valid floor: yes. The timed oracle covers the full compiled repro scope and is faster than both required compile configurations in this run.
+```
+mm_134 [8192,768] + mul_290 [8,1024,768] -> add
+add * arg5_1 [768] -> weighted (used 3 ways)
+weighted -> sum([2]) -> row_sum [8,1024,1]  (row reduction)
+weighted * arg104_1 -> sum([2]) -> row_dot [8,1024,1]  (row reduction)
+layernorm_backward(weighted, row_sum, row_dot, arg298_1) -> mul_tensor_7 [8,1024,768]
+add * arg104_1 -> sum([0,1]) -> sum_dim_int_list_2 [768]  (column reduction)
+add -> sum([0,1]) -> sum_dim_int_list_3 [768]  (column reduction)
+mul_tensor_7 * arg103_1(mask) -> masked_grad [8,1024,768]
+masked_grad -> sum([0,1]) -> view_default_1 [768]  (column reduction)
+masked_grad -> permute([1,0]) -> [768,8192]
+```
+
+## What Inductor Does
+
+1. **Main kernel** (mix-order-reduction): processes each of the 8192 rows
+   persistently, computing the row reductions (sum, dot), the full LN-backward
+   epilogue, the dropout mask, writing `mul_tensor_7`, and accumulating
+   workspace partials for the two [768] column reductions of `add` and
+   `add*arg104_1`.
+2. **Workspace finalization** (ATen .sum(dim=0)): reduces the [1024,768]
+   workspace partials to produce `buf1` and `buf3` (the two [768] vectors).
+3. **Outer reduction** (2 triton kernels): re-reads the materialized
+   `mul_tensor_7` [8,1024,768] = 24MB to compute `sum_dim_int_list_4` [768].
+
+## What the Oracle Does Differently
+
+The oracle streams all rows through **one kernel pass** that simultaneously:
+- Computes the row-local LN-backward (row_sum, row_dot)
+- Writes the masked gradient side output
+- Accumulates **three** column partial buffers (x*rhs, x, grad)
+
+A tiny finalizer kernel sums the partials. Total: 2 kernel launches, 1 pass
+over the 24MB input data, no re-read of the output.
+
+## Root Cause
+
+Inductor cannot attach a dependent column reduction (`sum_dim_int_list_4`) to
+the producer that writes `mul_tensor_7`. The scheduler treats the
+`mul_tensor_7 -> sum([0,1])` as a separate consumer reduction, requiring a
+full re-read of 24MB. The oracle avoids this by accumulating the sum as a
+side-effect of the producer pass.
+
+This is the **COOPERATIVE_SPLIT_K** pattern: a materialized producer that
+should also accumulate a sibling small reduction using partial buffers or
+atomic coordination.
+
+## Inductor Change Needed
+
+Add codegen support for "producer + side reduction" mode: when a materialized
+output (that must be stored) also feeds a column/batch reduction, the producer
+kernel should accumulate partial sums into a workspace buffer, with a small
+finalizer pass. This avoids the 24MB re-read.
+
+Specifically for the Longformer case:
+- The mix-order-reduction kernel already uses workspace for 2 of the 3 column
+  reductions. The third one (`sum_dim_int_list_4`) is missed because it depends
+  on the dropout-masked output which is computed inside the same kernel.
+- The fix is to allow the kernel to also accumulate the output it is writing
+  into a third workspace channel.
+
+## Recommendation
+
+Status: COOPERATIVE_SPLIT_K / needs_work. The 10.4us gap (1.22x) is real and
+addressable. Priority: medium (behind larger scatter-reduce and online-softmax
+wins, but affects Longformer and similar transformer LN-backward patterns).

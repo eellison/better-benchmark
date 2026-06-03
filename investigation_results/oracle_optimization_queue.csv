@@ -113,17 +113,30 @@ sum_sum_sum_94e6cd22ff22,AT_FLOOR,closed,compile=52.9us vs oracle=51.0us; 1.04x 
 sum_sum_sum_f0377fc40fe2,COOPERATIVE_SPLIT_K,needs_work,compile=55.3us vs oracle=36.9us; 1.50x gap; DeiT ViT LN-backward multi-output split-K reduction
 sum_27f8a4b9ab09,AT_FLOOR,closed,compile=39.8us vs oracle=37.8us; 1.05x gap; NFNet GELU-backward channel reduce; Inductor already near-optimal
 sum_41cdfa051fcc,AT_FLOOR,closed,compile=39.7us beats oracle=48.8us; NFNet structured pool+upsample+GELU reduce; Inductor already optimal
-sum_sum_f10bfbcf6729,MULTI_OUTPUT_REDUCTION,needs_work,compile=56.1us vs oracle=50.0us; 1.12x gap; LearningToPaint avgpool-backward dual BN-backward reduction
+sum_sum_f10bfbcf6729,BANDWIDTH_BOUND,closed,compile=54.1us vs oracle=50.0us; 1.08x gap; LearningToPaint BN-backward; single fused kernel already optimal; gap is tiling noise
 sum_sum_sum_335abef71e93,COOPERATIVE_SPLIT_K,needs_work,compile=46.9us vs oracle=37.8us; 1.24x gap; Whisper LayerNorm-backward 5-way split-K reduction
 sum_sum_sum_b30da3bff8d4,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=97.1us vs oracle=136.8us (1.4x slower); GoogleFnet LN-backward+select_scatter cooperative split-K
 amax_sum_sum_0e37ca9164b3,IGNORE_INDEX_CROSS_ENTROPY,needs_work,compile=36.8us vs oracle=33.7us; 1.09x gap; Blenderbot ignore-index cross-entropy mean fused row-reduction
 sum_sum_2f2d7ba72160,COOPERATIVE_SPLIT_K,needs_work,compile=80.0us vs oracle=52.1us; 1.53x gap; DenseNet121 BN-backward cooperative split-K with 9-slice epilogue
 sum_sum_fdefa5604cda,AT_FLOOR,closed,compile=75.7us beats oracle=86.9us; T5 RMSNorm-backward cooperative split-K; Inductor already optimal
-sum_sum_sum_1d10e6314ef6,MULTI_OUTPUT_REDUCTION,needs_work,compile=55.2us vs oracle=45.9us; 1.20x gap; Longformer LN-backward multi-output reduction
-sum_sum_sum_4de1559f24a7,MULTI_OUTPUT_REDUCTION,needs_work,compile=72.5us vs oracle=54.0us; 1.34x gap; MegatronBert LN-backward multi-output reduction
+sum_sum_sum_1d10e6314ef6,COOPERATIVE_SPLIT_K,needs_work,compile=56.4us vs oracle=46.0us; 1.22x gap; Longformer LN-backward; main kernel writes output but re-reads 24MB for dependent column sum; needs side-accumulator in producer
+sum_sum_sum_4de1559f24a7,COOPERATIVE_SPLIT_K,needs_work,compile=72.5us vs oracle=53.2us; 1.36x gap; MegatronBert LN-backward; main kernel writes 32MB output but re-reads for dependent column sum; same fix as Longformer (side-accumulator)
 sum_sum_sum_56cdc50216ea,COOPERATIVE_SPLIT_K,needs_work,compile=63.4us vs oracle=33.4us; 1.90x gap; Swin LN-backward cooperative split-K reduction
 sum_sum_sum_cad02fe18a69,SCATTER_REDUCE,needs_work,compile=94.2us vs oracle=64.2us; 1.47x gap; BERT embedding scatter-reduce with index_put
 sum_sum_e6f9af9e33b1,SCHEDULER_FUSION,needs_work,compile=82.9us vs oracle=52.2us; 1.59x gap; DenseNet121 BN-backward sibling reductions with slice-limited epilogue
 sum_sum_sum_59e022113eeb,AT_FLOOR,closed,compile=104.5us vs oracle=100.4us; 1.04x gap; DistilBERT LN-backward multi-output reduction; Inductor already near-optimal
 sum_sum_sum_ed8809aa30cf,COOPERATIVE_SPLIT_K,needs_work,compile=100.2us vs oracle=85.0us; 1.18x gap; Blenderbot LN-backward cross-axis multi-output reduction
 amax_sum_4fb4f9a0bf43,BANDWIDTH_BOUND,closed,compile=37.952us beats oracle=38.592us; T5 additive softmax fp16 [8x2048x2048]; Inductor already optimal with combo_kernels config
+amax_sum_any_d811783d738f,AT_FLOOR,closed,compile=52.3us beats oracle=98.3us; BERT/RoBERTa attention softmax+dropout+permute; Inductor already optimal
+amax_sum_d112f48ea917,NEW_PATTERN,needs_work,compile=105.4us vs oracle=82.1us; 1.28x gap; Reformer LSH equality-masked softmax materialization
+sum_f160d1f03c1f,AT_FLOOR,closed,compile=114.2us vs oracle=113.1us; 1.01x gap; BEiT QKV concat+transpose sum; Inductor already near-optimal
+sum_sum_63e248035ceb,COOPERATIVE_SPLIT_K,needs_work,compile=44.5us vs oracle=31.2us; 1.43x gap; GhostNet BN-backward cooperative split-K multi-output reduction
+sum_sum_6f518556b3ea,SCATTER_REDUCE,needs_work,compile=48.6us vs oracle=27.7us; 1.76x gap; MobileNetV2 adaptive-avgpool-backward+hard-ReLU6+BN-backward scatter-reduce
+sum_sum_a3ce72227d9d,SCHEDULER_FUSION,needs_work,compile=98.1us vs oracle=56.5us; 1.74x gap; DenseNet121 BN-backward tail 288ch slice-limited epilogue
+sum_sum_adb09ad67b46,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=68.7us vs oracle=183.4us (2.7x slower); VoVNet maxpool-backward scatter-reduce
+sum_sum_sum_43d9d6c4646b,COOPERATIVE_SPLIT_K,needs_work,compile=65.1us vs oracle=33.9us; 1.92x gap; Swin LN-backward cooperative split-K with transposed side output
+sum_sum_sum_73a23287990b,AT_FLOOR,closed,compile=777.2us vs oracle=752.0us; 1.03x gap; BEiT relative-position scatter-reduce; Inductor already near-optimal
+sum_sum_sum_7ebfef460635,SCATTER_REDUCE,needs_work,compile=773.0us vs oracle=521.4us; 1.48x gap; BEiT 12-output relative-position scatter-reduce with index_put
+sum_sum_sum_995d991d6527,AT_FLOOR,closed,compile=88.3us vs oracle=90.6us; 0.97x gap; GoogleFnet LN-backward cooperative split-K; Inductor already optimal
+sum_sum_sum_dd4c673f0928,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=65.4us vs oracle=484.6us (7.4x slower); Qwen3 grouped-RoPE+RMSNorm-backward
+sum_sum_sum_e2d4961f3571,AT_FLOOR,closed,compile=109.0us vs oracle=119.5us; 0.91x gap; MobileBERT LN-backward cooperative split-K; Inductor already optimal

@@ -1,17 +1,36 @@
-# sum_sum_f10bfbcf6729
+# sum_sum_f10bfbcf6729 (LearningToPaint BN-backward)
 
-Full-scope oracle: `repros/canonical/sum_sum_f10bfbcf6729/oracle_multi_output_reduction.py`
+## Classification: BANDWIDTH_BOUND
 
-Gap diagnosis (classification: `BANDWIDTH_BOUND`): The oracle covers the same computation scope as `repro.py`: it replaces the `avg_pool2d_backward(view(mm), ...)` producer with the equivalent `mm / 16` broadcast, applies the `arg102 <= 0` mask, shares that masked producer across both channel reductions, writes the `[512]` side output, and computes the full `[1024,512,4,4]` BN-backward epilogue with matching strides. The tuned Inductor coordinate-descent path is already faster than this full-scope handwritten oracle and close to the byte-accounted floor for the graph, so this does not identify a missing scheduler fusion worth treating as an oracle floor. The corresponding Inductor action is `BANDWIDTH_BOUND`: no fix from this oracle; leave queue integration as diagnosis-only unless a future oracle beats both compile configs.
+## Measurements (fresh cache, all fixes including combo_kernels)
 
-Correctness:
-- `--check`: PASS
-- output 0 `[1024,512,4,4]`: max_abs `1.192093e-07`, max_rel `1.675696e-02`, stride match true
-- output 1 `[512]`: max_abs `1.525879e-05`, max_rel `2.460729e-04`, stride match true
+| Config | Time (us) | Kernels |
+|--------|-----------|---------|
+| compile (cd+combo+scalar_acc) | 54.1 | 1 |
+| oracle (dual channel reduce + epilogue) | 50.0 | 2 |
+| gap ratio | 1.08x | |
 
-Benchmark (`--bench --warmup 10 --rep 50`):
-- Oracle full-scope masked dual reduction + epilogue: `61.888 us`
-- `coordinate_descent_tuning=True`: `59.552 us`
-- `combo_kernels=True,combo_kernel_per_subkernel_blocks=True,coordinate_descent_tuning=True,benchmark_combo_kernel=True,triton.multi_kernel=3`: `69.792 us`
+## Analysis
 
-Valid floor: no. The oracle is full-scope and useful as a diagnosis artifact, but it is slower than the coordinate-descent compile path.
+Inductor generates a **single fused reduction kernel** that performs the
+avg_pool_backward producer, both channel sum reductions (`sum_dim_int_list`
+and `sum_dim_int_list_1`), and the full BN-backward epilogue in one pass.
+This is the ideal structure for this graph.
+
+The oracle uses two kernels (a dual-accumulator channel reduction followed by
+a full epilogue pointwise kernel) and achieves only a marginal 4us improvement,
+likely due to slightly different tiling or memory access patterns.
+
+The oracle's own docstring classifies this as BANDWIDTH_BOUND: "Inductor's
+tuned coordinate-descent reduction path already runs this full graph near the
+byte-accounted floor for this shape, so a handwritten multi-accumulator oracle
+does not expose an actionable missing fusion."
+
+## Root Cause
+
+No actionable Inductor deficiency. The 1.08x gap is within noise/tiling
+variance. The compile path already achieves the ideal single-kernel fusion.
+
+## Recommendation
+
+Close as BANDWIDTH_BOUND / AT_FLOOR. No config or scheduler change needed.
