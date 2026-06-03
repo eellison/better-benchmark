@@ -111,3 +111,8 @@ sum_5eec4697d8ff,AT_FLOOR,closed,compile=47.1us beats oracle=48.9us; Longformer 
 sum_7d7c71d09ef5,AT_FLOOR,closed,compile=197.5us beats oracle=209.3us; Demucs slice_scatter+masked sum; scatter_reduce_fusion already optimal
 sum_sum_sum_94e6cd22ff22,AT_FLOOR,closed,compile=52.9us vs oracle=51.0us; 1.04x gap; DeiT ViT LN-backward multi-output reduction; Inductor already near-optimal
 sum_sum_sum_f0377fc40fe2,COOPERATIVE_SPLIT_K,needs_work,compile=55.3us vs oracle=36.9us; 1.50x gap; DeiT ViT LN-backward multi-output split-K reduction
+sum_27f8a4b9ab09,AT_FLOOR,closed,compile=39.8us vs oracle=37.8us; 1.05x gap; NFNet GELU-backward channel reduce; Inductor already near-optimal
+sum_41cdfa051fcc,AT_FLOOR,closed,compile=39.7us beats oracle=48.8us; NFNet structured pool+upsample+GELU reduce; Inductor already optimal
+sum_sum_f10bfbcf6729,MULTI_OUTPUT_REDUCTION,needs_work,compile=56.1us vs oracle=50.0us; 1.12x gap; LearningToPaint avgpool-backward dual BN-backward reduction
+sum_sum_sum_335abef71e93,COOPERATIVE_SPLIT_K,needs_work,compile=46.9us vs oracle=37.8us; 1.24x gap; Whisper LayerNorm-backward 5-way split-K reduction
+sum_sum_sum_b30da3bff8d4,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=97.1us vs oracle=136.8us (1.4x slower); GoogleFnet LN-backward+select_scatter cooperative split-K
