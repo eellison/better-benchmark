@@ -140,3 +140,5 @@ sum_sum_sum_7ebfef460635,SCATTER_REDUCE,needs_work,compile=773.0us vs oracle=521
 sum_sum_sum_995d991d6527,AT_FLOOR,closed,compile=88.3us vs oracle=90.6us; 0.97x gap; GoogleFnet LN-backward cooperative split-K; Inductor already optimal
 sum_sum_sum_dd4c673f0928,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=65.4us vs oracle=484.6us (7.4x slower); Qwen3 grouped-RoPE+RMSNorm-backward
 sum_sum_sum_e2d4961f3571,AT_FLOOR,closed,compile=109.0us vs oracle=119.5us; 0.91x gap; MobileBERT LN-backward cooperative split-K; Inductor already optimal
+sum_sum_sum_ae9b17407681,SCATTER_REDUCE,needs_work,compile=120.9us vs oracle=75.6us; 1.60x gap; GPT2 LN-backward+embedding scatter-reduce with fused dropout/mask and dual index_put accumulation
+sum_sum_sum_e266124dd032,AT_FLOOR,closed,compile=86.8us beats oracle=111.2us; RepVGG adaptive-avgpool-backward+dual-BN-backward; Inductor already optimal
