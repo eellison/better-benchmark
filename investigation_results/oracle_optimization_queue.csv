@@ -28,7 +28,7 @@ sum_adeaebad93f7,AT_FLOOR,closed,
 sum_b691b8dad90a,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: oracle slower than compile
 sum_e00c7291b6ee,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: oracle slower than compile (naive implementation)
 sum_sum_0930bd38b7d1,AT_FLOOR,oracle_needs_rewrite,"BAD_ORACLE: measures subset, compile is 21% faster for same scope"
-sum_sum_230671a8764d,SCHEDULER_FUSION,needs_work,
+sum_sum_230671a8764d,AT_FLOOR,closed,Compile beats oracle (20.2 vs 22.2us) with fresh cache + all fixes.
 sum_sum_2dc2fbd588d9,SCATTER_REDUCE,implemented,
 sum_sum_6a14a9c9ba88,RECOMPUTE_FUSION,needs_work,
 sum_sum_8bcd6e12dcd4,SCATTER_REDUCE,implemented,
@@ -58,7 +58,7 @@ sum_sum_sum_88c9224fa05a,SCATTER_REDUCE,implemented,
 sum_sum_sum_8e6cde42e572,SCATTER_REDUCE,implemented,Skip-connection extension gives 1.16x.
 sum_sum_sum_95dac16d4328,RECOMPUTE_FUSION,needs_work,GhostNet dual BN backward with CL copy; compile=517us; oracle broken (C=40 non-power-of-2); 3.11x realistic floor; multiple reductions re-read small tensors
 sum_sum_sum_afd118ca907d,SCHEDULER_FUSION,needs_work,T5 dual attention backward: 2 softmax_backward + position_bias_grad + index_put; compile=4275us vs bad oracle=28426us; 2.73x realistic floor; many poorly-fused subgraphs
-sum_sum_sum_d0496bdeedba,SCHEDULER_FUSION,needs_work,
+sum_sum_sum_d0496bdeedba,AT_FLOOR,closed,Compile beats oracle (155 vs 225us). Oracle poorly tuned.
 sum_sum_sum_dadf6aa035dd,SCATTER_REDUCE,implemented,Scatter-reduce fusion gives 1.29x. Remaining gap from BN sub consumer.
 sum_sum_sum_f68c9f1fa09b,AT_FLOOR,closed,
 sum_sum_sum_f90d684d32cb,SCATTER_REDUCE,implemented,Scatter-reduce fusion gives 2.16x.
