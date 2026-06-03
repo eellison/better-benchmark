@@ -153,3 +153,6 @@ sum_sum_sum_1c9995bc990f,AT_FLOOR,closed,
 sum_sum_sum_3eab263249bb,AT_FLOOR,oracle_needs_rewrite,Compile beats oracle (atomics overhead)
 sum_sum_sum_94e3624cdd05,SCATTER_REDUCE,needs_work,DistilBert embedding scatter-reduce 1.31x
 sum_sum_sum_da376d09d2cb,COOPERATIVE_SPLIT_K,needs_work,Swin stochastic depth LN-bwd 1.34x
+sum_bd2fed913c26,SCHEDULER_FUSION,needs_work,required-config compile=48.256/50.048us vs oracle=41.440us; 1.16x gap vs best required config; BERT layout materialization plus feature sum; scheduler lacks materializing multi-output reduction template
+sum_sum_07989f9f05c5,AT_FLOOR,closed,"compile=30.752/28.352us beats full-scope oracle=31.392us; MT5 masked transpose dual reduction; diagnosis-only SCHEDULER_FUSION artifact, Inductor already faster"
+amax_sum_66dc4fac757d,NEW_PATTERN,needs_work,compile=13.184/12.736us vs oracle=10.368us; 1.23x gap vs best required config; Reformer fp32 logsumexp plus fp16 exp materialization; needs dedicated small-row persistent template
