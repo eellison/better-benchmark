@@ -1,0 +1,80 @@
+[
+  {
+    "repro_id": "amax_sum_any_d811783d738f",
+    "oracle_file": "oracle_full_attention_softmax_dropout.py",
+    "compile_us": 52.258,
+    "oracle_us": 98.272
+  },
+  {
+    "repro_id": "amax_sum_d112f48ea917",
+    "oracle_file": "oracle_online_softmax.py",
+    "compile_us": 105.44,
+    "oracle_us": 82.061
+  },
+  {
+    "repro_id": "sum_f160d1f03c1f",
+    "oracle_file": "oracle_multi_output_reduction.py",
+    "compile_us": 114.197,
+    "oracle_us": 113.093
+  },
+  {
+    "repro_id": "sum_sum_63e248035ceb",
+    "oracle_file": "oracle_cooperative_split_k.py",
+    "compile_us": 44.452,
+    "oracle_us": 31.163
+  },
+  {
+    "repro_id": "sum_sum_6f518556b3ea",
+    "oracle_file": "oracle_structured_pool_upsample_reduce.py",
+    "compile_us": 48.61,
+    "oracle_us": 27.672
+  },
+  {
+    "repro_id": "sum_sum_a3ce72227d9d",
+    "oracle_file": "oracle_multi_output_reduction.py",
+    "compile_us": 98.083,
+    "oracle_us": 56.467
+  },
+  {
+    "repro_id": "sum_sum_adb09ad67b46",
+    "oracle_file": "oracle_structured_pool_upsample_reduce.py",
+    "compile_us": 68.682,
+    "oracle_us": 183.435
+  },
+  {
+    "repro_id": "sum_sum_sum_43d9d6c4646b",
+    "oracle_file": "oracle_cooperative_split_k.py",
+    "compile_us": 65.1,
+    "oracle_us": 33.872
+  },
+  {
+    "repro_id": "sum_sum_sum_73a23287990b",
+    "oracle_file": "oracle_relative_position_scatter_reduce.py",
+    "compile_us": 777.199,
+    "oracle_us": 751.965
+  },
+  {
+    "repro_id": "sum_sum_sum_7ebfef460635",
+    "oracle_file": "oracle_structured_pool_upsample_reduce.py",
+    "compile_us": 773.01,
+    "oracle_us": 521.412
+  },
+  {
+    "repro_id": "sum_sum_sum_995d991d6527",
+    "oracle_file": "oracle_cooperative_split_k.py",
+    "compile_us": 88.256,
+    "oracle_us": 90.595
+  },
+  {
+    "repro_id": "sum_sum_sum_dd4c673f0928",
+    "oracle_file": "oracle_rmsnorm_rope_bwd.py",
+    "compile_us": 65.413,
+    "oracle_us": 484.597
+  },
+  {
+    "repro_id": "sum_sum_sum_e2d4961f3571",
+    "oracle_file": "oracle_cooperative_split_k.py",
+    "compile_us": 109.044,
+    "oracle_us": 119.459
+  }
+]
