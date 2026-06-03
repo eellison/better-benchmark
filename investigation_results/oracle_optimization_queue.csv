@@ -171,3 +171,8 @@ sum_sum_sum_1b02daac4062,COOPERATIVE_SPLIT_K,needs_work,compile=67.232us(cd) vs 
 sum_sum_sum_69414585b76b,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=74.560us vs oracle=510.976us (6.9x slower); BERT LN/dropout-backward cooperative split-K; TILE_ROWS=4 with TILE_CHANNELS=1024>768 creates massive register pressure and 37MB intermediate partials
 sum_sum_sum_a431ef798d5d,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=78.688us vs oracle=95.040us (1.2x slower); ViT LN-backward cooperative split-K; ROW_SPLIT=16 XBLOCK=4 over [32768x768] suboptimal tiling
 sum_sum_sum_d8e421a07bf7,ALGEBRAIC_ELIMINATION,needs_work,linear_reduction_elimination fires (12% help) but 1.82x gap remains. Needs full multi-accumulator fusion.
+sum_sum_sum_580d823755af,AT_FLOOR,closed,compile=84.8us beats oracle=125.7us; Swin shifted-window LN-backward/drop-path cooperative split-K; Inductor already optimal
+sum_sum_sum_aa0a63761645,AT_FLOOR,closed,compile=22.4us beats oracle=35.9us; PhilippeNet ResNet BN-backward cooperative split-K; Inductor already optimal
+sum_sum_sum_b0debbb55e8e,AT_FLOOR,closed,compile=77.6us beats oracle=111.5us; Swin window-reverse LN-backward/drop-path cooperative split-K; Inductor already optimal
+sum_sum_sum_c0e210b86b78,SCATTER_REDUCE,needs_work,compile=81.7us vs oracle=39.0us; 2.10x gap; NanoGPT LN-backward+embedding dual index_put scatter-reduce with dense outer-product side output
+sum_sum_sum_fe2bec6738d1,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=67.5us vs oracle=485.4us (7.2x slower); BERT LN-backward/dropout cooperative split-K; TILE_M=4 over [16384x768] serializes work excessively
