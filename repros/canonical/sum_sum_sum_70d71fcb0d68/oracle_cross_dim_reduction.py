@@ -664,7 +664,7 @@ def verify_correctness(device="cuda"):
     return all_ok
 
 
-def benchmark_fn(fn, warmup=10, rep=100, device="cuda"):
+def benchmark_fn(fn, warmup=25, rep=100, device="cuda"):
     """Benchmark with CUDA events for accurate timing."""
     dev = torch.device(device)
 
@@ -698,7 +698,7 @@ def benchmark_fn(fn, warmup=10, rep=100, device="cuda"):
     }
 
 
-def benchmark_all(device="cuda", warmup=10, rep=100):
+def benchmark_all(device="cuda", warmup=25, rep=100):
     """Compare oracle vs torch.compile."""
     inputs = make_inputs(device)
 
@@ -872,7 +872,7 @@ def main():
                        help="Verify correctness only")
     parser.add_argument("--bench", action="store_true",
                        help="Run full benchmark comparison")
-    parser.add_argument("--warmup", type=int, default=10)
+    parser.add_argument("--warmup", type=int, default=25)
     parser.add_argument("--rep", type=int, default=100)
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()

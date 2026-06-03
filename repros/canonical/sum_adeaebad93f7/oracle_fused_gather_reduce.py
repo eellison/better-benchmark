@@ -313,8 +313,8 @@ def parse_args() -> argparse.Namespace:
         help="Use captured Inductor random prims or portable torch RNG for oracle-only smoke tests.",
     )
     parser.add_argument("--seed", type=int, default=0, help="Seed used only with --random-source torch.")
-    parser.add_argument("--warmup", type=int, default=5)
-    parser.add_argument("--rep", type=int, default=20)
+    parser.add_argument("--warmup", type=int, default=25)
+    parser.add_argument("--rep", type=int, default=100)
     parser.add_argument("--check", action="store_true", help="Compare oracle output to captured repro.py.")
     parser.add_argument("--rtol", type=float, default=1e-4)
     parser.add_argument("--atol", type=float, default=1e-3)

@@ -252,8 +252,8 @@ def main() -> None:
     parser.add_argument("--bench", action="store_true", help="run timing benchmark")
     parser.add_argument("--rtol", type=float, default=1e-4)
     parser.add_argument("--atol", type=float, default=1e-4)
-    parser.add_argument("--warmup", type=int, default=5)
-    parser.add_argument("--rep", type=int, default=20)
+    parser.add_argument("--warmup", type=int, default=25)
+    parser.add_argument("--rep", type=int, default=100)
     parser.add_argument("--no-compile", action="store_true", help="skip torch.compile oracle and repro timings")
     args = parser.parse_args()
 

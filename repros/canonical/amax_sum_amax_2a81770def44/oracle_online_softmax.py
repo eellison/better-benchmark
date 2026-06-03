@@ -275,7 +275,7 @@ def softmax_dropout_reference(x: torch.Tensor, p: float = DROPOUT_P) -> torch.Te
 
 # --- Benchmarking ---
 
-def benchmark_cuda_graph(fn, warmup=5, rep=20):
+def benchmark_cuda_graph(fn, warmup=25, rep=100):
     """Benchmark a function using CUDA graphs for minimal launch overhead."""
     for _ in range(warmup):
         fn()
@@ -302,7 +302,7 @@ def benchmark_cuda_graph(fn, warmup=5, rep=20):
     return median_ms * 1000.0  # convert to us
 
 
-def benchmark_triton_single(x: torch.Tensor, warmup=5, rep=20, with_dropout=True):
+def benchmark_triton_single(x: torch.Tensor, warmup=25, rep=100, with_dropout=True):
     """Benchmark a single softmax+dropout kernel."""
     output = torch.empty_like(x)
     BLOCK_N = 1024
@@ -333,7 +333,7 @@ def benchmark_triton_single(x: torch.Tensor, warmup=5, rep=20, with_dropout=True
     return benchmark_cuda_graph(run, warmup=warmup, rep=rep)
 
 
-def benchmark_triton_dual(x1: torch.Tensor, x2: torch.Tensor, warmup=5, rep=20):
+def benchmark_triton_dual(x1: torch.Tensor, x2: torch.Tensor, warmup=25, rep=100):
     """Benchmark the dual softmax+dropout kernel (both passes in one launch)."""
     out1 = torch.empty_like(x1)
     out2 = torch.empty_like(x2)
@@ -357,7 +357,7 @@ def benchmark_triton_dual(x1: torch.Tensor, x2: torch.Tensor, warmup=5, rep=20):
     return benchmark_cuda_graph(run, warmup=warmup, rep=rep)
 
 
-def benchmark_compiled_full(warmup=5, rep=20):
+def benchmark_compiled_full(warmup=25, rep=100):
     """Benchmark the full repro with torch.compile for comparison."""
     repro_mod = _load_repro_module()
     model = repro_mod.Repro()
@@ -458,8 +458,8 @@ def main():
         description="Oracle persistent softmax benchmark (T5 dual attention)"
     )
     parser.add_argument("--check-only", action="store_true", help="Only run correctness check")
-    parser.add_argument("--rep", type=int, default=20, help="Number of benchmark repetitions")
-    parser.add_argument("--warmup", type=int, default=5, help="Number of warmup iterations")
+    parser.add_argument("--rep", type=int, default=100, help="Number of benchmark repetitions")
+    parser.add_argument("--warmup", type=int, default=25, help="Number of warmup iterations")
     parser.add_argument("--csv", type=str, default=None, help="Append results to CSV file")
     parser.add_argument("--no-compile", action="store_true", help="Skip torch.compile baseline")
     args = parser.parse_args()

@@ -353,8 +353,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="run correctness check")
     parser.add_argument("--bench", action="store_true", help="run timing benchmark")
-    parser.add_argument("--rep", type=int, default=20, help="benchmark repetitions")
-    parser.add_argument("--warmup", type=int, default=5, help="warmup iterations")
+    parser.add_argument("--rep", type=int, default=100, help="benchmark repetitions")
+    parser.add_argument("--warmup", type=int, default=25, help="warmup iterations")
     parser.add_argument(
         "--no-compile",
         action="store_true",

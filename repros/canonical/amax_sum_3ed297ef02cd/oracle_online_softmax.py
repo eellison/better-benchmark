@@ -134,7 +134,7 @@ def _load_repro_module():
     return module
 
 
-def benchmark_cuda_graph(fn, warmup=5, rep=20):
+def benchmark_cuda_graph(fn, warmup=25, rep=100):
     """Benchmark a function using CUDA graphs for minimal launch overhead."""
     # Warmup
     for _ in range(warmup):
@@ -165,7 +165,7 @@ def benchmark_cuda_graph(fn, warmup=5, rep=20):
     return median_ms * 1000.0  # convert to us
 
 
-def benchmark_triton_softmax(x: torch.Tensor, warmup=5, rep=20):
+def benchmark_triton_softmax(x: torch.Tensor, warmup=25, rep=100):
     """Benchmark the Triton online softmax kernel."""
     output = torch.empty_like(x)
     BLOCK_N = 8192
@@ -181,7 +181,7 @@ def benchmark_triton_softmax(x: torch.Tensor, warmup=5, rep=20):
     return benchmark_cuda_graph(run, warmup=warmup, rep=rep)
 
 
-def benchmark_compiled(x: torch.Tensor, warmup=5, rep=20):
+def benchmark_compiled(x: torch.Tensor, warmup=25, rep=100):
     """Benchmark torch.compile baseline."""
     repro_mod = _load_repro_module()
     model = repro_mod.Repro().cuda()
@@ -230,8 +230,8 @@ def correctness_check():
 def main():
     parser = argparse.ArgumentParser(description="Oracle online softmax benchmark")
     parser.add_argument("--check-only", action="store_true", help="Only run correctness check")
-    parser.add_argument("--rep", type=int, default=20, help="Number of benchmark repetitions")
-    parser.add_argument("--warmup", type=int, default=5, help="Number of warmup iterations")
+    parser.add_argument("--rep", type=int, default=100, help="Number of benchmark repetitions")
+    parser.add_argument("--warmup", type=int, default=25, help="Number of warmup iterations")
     parser.add_argument("--csv", type=str, default=None, help="Append results to CSV file")
     parser.add_argument("--no-compile", action="store_true", help="Skip torch.compile baseline")
     args = parser.parse_args()

@@ -389,7 +389,7 @@ def parse_args():
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--rtol", type=float, default=1e-4)
     parser.add_argument("--atol", type=float, default=1e-3)
-    parser.add_argument("--warmup", type=int, default=10)
+    parser.add_argument("--warmup", type=int, default=25)
     parser.add_argument("--rep", type=int, default=100)
     return parser.parse_args()
 

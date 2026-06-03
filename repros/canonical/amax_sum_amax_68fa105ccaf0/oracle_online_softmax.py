@@ -229,7 +229,7 @@ def run_check():
 
 # --- Benchmark ---
 
-def run_bench(rep=20, warmup=5):
+def run_bench(rep=100, warmup=25):
     """Benchmark oracle vs torch.compile."""
     print(f"\n{'='*60}")
     print(f"Benchmark: {REPRO_ID} (online_softmax_cross_entropy)")
@@ -303,8 +303,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="Run correctness check")
     parser.add_argument("--bench", action="store_true", help="Run benchmark")
-    parser.add_argument("--rep", type=int, default=20, help="Benchmark repetitions")
-    parser.add_argument("--warmup", type=int, default=5, help="Warmup iterations")
+    parser.add_argument("--rep", type=int, default=100, help="Benchmark repetitions")
+    parser.add_argument("--warmup", type=int, default=25, help="Warmup iterations")
     args = parser.parse_args()
 
     if not args.check and not args.bench:

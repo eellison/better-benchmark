@@ -334,8 +334,8 @@ def parse_args() -> argparse.Namespace:
         default="fused-scatter-reduce",
     )
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--warmup", type=int, default=10)
-    parser.add_argument("--rep", type=int, default=50)
+    parser.add_argument("--warmup", type=int, default=25)
+    parser.add_argument("--rep", type=int, default=100)
     parser.add_argument("--check", action="store_true", help="Verify oracle vs repro.")
     parser.add_argument("--rtol", type=float, default=1e-4)
     parser.add_argument("--atol", type=float, default=1e-3)

@@ -215,7 +215,7 @@ def get_git_commit() -> str:
         return "unknown"
 
 
-def benchmark_cuda_graph(fn, warmup=5, rep=50):
+def benchmark_cuda_graph(fn, warmup=25, rep=100):
     """Benchmark a function using CUDA graphs for minimal launch overhead."""
     # Warmup
     for _ in range(warmup):
