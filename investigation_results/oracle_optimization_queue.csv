@@ -32,7 +32,7 @@ sum_sum_230671a8764d,SCHEDULER_FUSION,needs_work,
 sum_sum_2dc2fbd588d9,SCATTER_REDUCE,implemented,
 sum_sum_6a14a9c9ba88,RECOMPUTE_FUSION,needs_work,
 sum_sum_8bcd6e12dcd4,SCATTER_REDUCE,implemented,
-sum_sum_a42eecd58e57,SCATTER_REDUCE,needs_work,scatter_add(max_pool_backward)+BN_backward; compile=1112us beats broken oracle (C=24 non-power-of-2); 2.04x realistic floor
+sum_sum_a42eecd58e57,SCATTER_REDUCE,closed,Cannot help: where_self has full-tensor consumer (mul_tensor_9). Scatter must materialize.
 sum_sum_a7c7ab7bfcf5,RECOMPUTE_FUSION,needs_work,
 sum_sum_a9f6c9204966,SCHEDULER_FUSION,needs_work,
 sum_sum_b7f94adef30f,COOPERATIVE_SPLIT_K,deferred,
@@ -55,18 +55,18 @@ sum_sum_sum_7b24a3457260,RECOMPUTE_FUSION,needs_work,
 sum_sum_sum_82a3f0084247,RECOMPUTE_FUSION,needs_work,"Swin dual LayerNorm backward: multiple reductions re-reading [128,56,56,128]; compile=608us vs oracle=5974us (BAD); 1.89x realistic floor"
 sum_sum_sum_86dbf5a906db,AT_FLOOR,closed,"UNet BN backward [8,64,640,959]; compile=1521us matches oracle=1619us (0.94x); 1.17x realistic 2-pass floor"
 sum_sum_sum_88c9224fa05a,SCATTER_REDUCE,implemented,
-sum_sum_sum_8e6cde42e572,SCATTER_REDUCE,needs_work,"scatter_add(max_pool_backward)+BN_backward [8,64,640,959]; compile=3568us vs bad oracle=19168us; 1.66x realistic floor; scatter dominates"
+sum_sum_sum_8e6cde42e572,SCATTER_REDUCE,implemented,Skip-connection extension gives 1.16x.
 sum_sum_sum_95dac16d4328,RECOMPUTE_FUSION,needs_work,GhostNet dual BN backward with CL copy; compile=517us; oracle broken (C=40 non-power-of-2); 3.11x realistic floor; multiple reductions re-read small tensors
 sum_sum_sum_afd118ca907d,SCHEDULER_FUSION,needs_work,T5 dual attention backward: 2 softmax_backward + position_bias_grad + index_put; compile=4275us vs bad oracle=28426us; 2.73x realistic floor; many poorly-fused subgraphs
 sum_sum_sum_d0496bdeedba,SCHEDULER_FUSION,needs_work,
-sum_sum_sum_dadf6aa035dd,SCATTER_REDUCE,needs_work,UNet bilinear_interp_backward (4x index_put accumulate) + BN backward; compile=1023us vs bad oracle=48317us; 2.81x realistic floor
+sum_sum_sum_dadf6aa035dd,SCATTER_REDUCE,implemented,Scatter-reduce fusion gives 1.29x. Remaining gap from BN sub consumer.
 sum_sum_sum_f68c9f1fa09b,AT_FLOOR,closed,
-sum_sum_sum_f90d684d32cb,SCATTER_REDUCE,needs_work,UNet bilinear_interp_backward (4x index_put accumulate) + BN backward; compile=3262us vs bad oracle=176388us; 4.47x realistic floor
+sum_sum_sum_f90d684d32cb,SCATTER_REDUCE,implemented,Scatter-reduce fusion gives 2.16x.
 amax_sum_sum_846668f0b88f,AT_FLOOR,closed,Compile beats oracle (15.9us vs 25.4us). Gap was stale cache artifact. Online softmax already optimal.
 amax_sum_sum_f2d78a465cb5,AT_FLOOR,closed,Compile beats oracle (15.9us vs 25.4us). Gap was stale cache artifact. Online softmax already optimal.
 sum_79c6d0673ca2,SCATTER_REDUCE,oracle_needs_rewrite,Longformer index_put+sum+transpose; compile=65us vs bad oracle=799us; oracle uses eager ops not Triton; needs rewrite
 sum_sum_53431ef91176,SCATTER_REDUCE,oracle_needs_rewrite,Qwen3 MoE scatter-add+RMSNorm-bwd; compile=79us vs bad oracle=920us; oracle uses eager ops not Triton; needs rewrite
-sum_sum_609200a71825,SCATTER_REDUCE,needs_work,MobileViT avgpool-backward+SiLU+BN-backward; compile=66us vs oracle=31us; 2.15x gap; Triton one-pass channel kernel eliminates pool-grad materialization
+sum_sum_609200a71825,SCATTER_REDUCE,implemented,as_strided_scatter_elision gives 26%.
 amax_sum_8764401930db,AT_FLOOR,closed,compile=19.2us beats oracle kernel=30.5us; MT5 attention softmax+dropout+permute; Inductor already optimal
 sum_6e4aebb044dd,AT_FLOOR,closed,compile=35.6us beats oracle=43.0us; NFNet avgpool-backward+SiLU channel-sum; scatter-reduce oracle slower
 sum_837a32994d31,AT_FLOOR,closed,compile=57.9us beats oracle=69.7us; Demucs slice_scatter+masked channel sum; oracle fused approach slower
