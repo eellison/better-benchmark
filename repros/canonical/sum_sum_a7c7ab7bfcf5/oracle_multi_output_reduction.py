@@ -1,0 +1,450 @@
+"""
+Oracle kernel for repro sum_sum_a7c7ab7bfcf5 (Inception v3 training backward).
+
+Repro pattern:
+    Batch-norm backward + ReLU backward producing two channel-wise sum
+    reductions over a shared intermediate ``where_self`` of shape
+    [128, 64, 147, 147]:
+      - sum1 = where_self.sum(dim=[0, 2, 3])                    -> [64]
+      - sum2 = (where_self * sub_tensor_1).sum(dim=[0, 2, 3])   -> [64]
+
+    These two reductions read the same large tensor and reduce N*H*W elements
+    per channel (128*147*147 = 2,765,952 elements per channel).
+
+    The oracle fuses them into a single-pass Triton kernel with two
+    accumulators per channel, then applies the downstream pointwise epilogue
+    in one additional pass to produce both final outputs.
+
+    The upstream computation (scatter_add for max_pool backward, batchnorm
+    intermediates, relu backward) is done in PyTorch and is NOT the target of
+    this oracle -- those are separate kernel launches.
+
+    Final outputs:
+      - mul_tensor_9:  shape [128, 64, 147, 147] (batchnorm input gradient)
+      - mul_tensor_10: shape [64] (weight gradient contribution)
+"""
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import sys
+from pathlib import Path
+
+import torch
+import triton
+import triton.language as tl
+
+
+REPRO_ID = "sum_sum_a7c7ab7bfcf5"
+REPRO_DIR = Path(__file__).resolve().parent
+REPO_ROOT = REPRO_DIR.parents[2]
+REPRO_PATH = REPRO_DIR / "repro.py"
+
+
+def _load_repro_module():
+    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+# ---------------------------------------------------------------------------
+# Triton kernels
+# ---------------------------------------------------------------------------
+# Strategy: 2D grid (channel, tile) for partial reduction, then a small
+# finalize kernel to sum the partials.  This gives much better GPU occupancy
+# than a 1D grid with only 64 programs.
+
+@triton.jit
+def _partial_reduction_kernel(
+    where_self_ptr,    # [N*C*HW] contiguous
+    sub_tensor_1_ptr,  # [N*C*HW] contiguous
+    partial_sum1_ptr,  # [C, n_tiles]
+    partial_sum2_ptr,  # [C, n_tiles]
+    N: tl.constexpr,
+    C: tl.constexpr,
+    HW: tl.constexpr,
+    N_TILES: tl.constexpr,
+    BLOCK_SIZE: tl.constexpr,
+):
+    """Partial reduction: each program handles one (channel, tile) pair."""
+    c = tl.program_id(0)
+    tile_id = tl.program_id(1)
+
+    total = N * HW  # elements per channel
+    # Each tile handles a contiguous chunk of the flattened N*HW dimension
+    tile_size = (total + N_TILES - 1) // N_TILES
+    tile_start = tile_id * tile_size
+    tile_end = tl.minimum(tile_start + tile_size, total)
+
+    acc1 = tl.zeros([BLOCK_SIZE], dtype=tl.float32)
+    acc2 = tl.zeros([BLOCK_SIZE], dtype=tl.float32)
+
+    base = c * HW  # channel offset within each N-slice
+
+    for block_start in range(tile_start, tile_end, BLOCK_SIZE):
+        offsets = block_start + tl.arange(0, BLOCK_SIZE)
+        mask = offsets < tile_end
+
+        # Convert flat (within-channel) offset to memory index
+        # Layout is [N, C, HW]: element at (n, c, hw) -> n * (C * HW) + c * HW + hw
+        n = offsets // HW
+        hw = offsets % HW
+        idx = n * (C * HW) + base + hw
+
+        w_val = tl.load(where_self_ptr + idx, mask=mask, other=0.0)
+        s_val = tl.load(sub_tensor_1_ptr + idx, mask=mask, other=0.0)
+
+        acc1 += w_val
+        acc2 += w_val * s_val
+
+    sum1 = tl.sum(acc1, axis=0)
+    sum2 = tl.sum(acc2, axis=0)
+
+    # Store partial results
+    out_idx = c * N_TILES + tile_id
+    tl.store(partial_sum1_ptr + out_idx, sum1)
+    tl.store(partial_sum2_ptr + out_idx, sum2)
+
+
+@triton.jit
+def _finalize_reduction_kernel(
+    partial_sum1_ptr,  # [C, N_TILES]
+    partial_sum2_ptr,  # [C, N_TILES]
+    out_sum1_ptr,      # [C]
+    out_sum2_ptr,      # [C]
+    N_TILES: tl.constexpr,
+):
+    """Sum partial results across tiles for each channel."""
+    c = tl.program_id(0)
+
+    offsets = tl.arange(0, N_TILES)
+    base = c * N_TILES
+
+    p1 = tl.load(partial_sum1_ptr + base + offsets)
+    p2 = tl.load(partial_sum2_ptr + base + offsets)
+
+    tl.store(out_sum1_ptr + c, tl.sum(p1, axis=0))
+    tl.store(out_sum2_ptr + c, tl.sum(p2, axis=0))
+
+
+@triton.jit
+def _fused_epilogue_kernel(
+    where_self_ptr,     # [N*C*HW]
+    sub_tensor_1_ptr,   # [N*C*HW]
+    factor12_ptr,       # [C]
+    factor9_ptr,        # [C]
+    mul_factor_ptr,     # [C]
+    out_ptr,            # [N*C*HW]
+    numel,              # total number of elements
+    C: tl.constexpr,
+    HW: tl.constexpr,
+    BLOCK_SIZE: tl.constexpr,
+):
+    """Epilogue: compute mul_tensor_9 element-wise.
+
+    mul_tensor_9[n,c,h,w] = (where_self[n,c,h,w]
+                              - sub_tensor_1[n,c,h,w] * factor12[c]
+                              - factor9[c]) * mul_factor[c]
+    """
+    pid = tl.program_id(0)
+    offsets = pid * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
+    mask = offsets < numel
+
+    # Determine channel index for each element
+    # Layout: [N, C, HW] contiguous -> c = (offset // HW) % C
+    c_idx = (offsets // HW) % C
+
+    # Load per-channel values
+    f12 = tl.load(factor12_ptr + c_idx, mask=mask, other=0.0)
+    f9 = tl.load(factor9_ptr + c_idx, mask=mask, other=0.0)
+    mf = tl.load(mul_factor_ptr + c_idx, mask=mask, other=0.0)
+
+    # Load element-wise values
+    w_val = tl.load(where_self_ptr + offsets, mask=mask, other=0.0)
+    s_val = tl.load(sub_tensor_1_ptr + offsets, mask=mask, other=0.0)
+
+    # Compute epilogue
+    result = (w_val - s_val * f12 - f9) * mf
+
+    tl.store(out_ptr + offsets, result, mask=mask)
+
+
+# ---------------------------------------------------------------------------
+# Upstream computation (not optimized by this oracle)
+# ---------------------------------------------------------------------------
+
+def compute_upstream(getitem_270, arg246_1, arg242_1, arg243_1, arg244_1,
+                     arg6_1, arg7_1, full_1,
+                     _shape_param_0, _shape_param_1, _shape_param_2):
+    """Compute the upstream portion (scatter_add for max_pool backward,
+    batchnorm intermediates, relu backward).
+
+    Returns where_self and sub_tensor_1 which are inputs to the fused reduction.
+    """
+    device = getitem_270.device
+    N, C, H, W = 128, 64, 147, 147
+
+    # scatter_add for max_pool backward
+    full_default = torch.zeros(8192, 21609, dtype=torch.float32, device=device)
+    clone_default = getitem_270.clone().contiguous()
+    view_default = clone_default.view(8192, 5329)
+
+    offsets_i64 = torch.ops.prims._low_memory_max_pool_offsets_to_indices.default(
+        arg246_1, [3, 3], [147, 147], [2, 2], [0, 0], [1, 1]
+    )
+    clone_default_1 = offsets_i64.clone().contiguous()
+    view_default_1 = clone_default_1.view(8192, 5329)
+
+    scatter_add_default = full_default.scatter_add(1, view_default_1, view_default)
+    view_default_2 = scatter_add_default.view(N, C, H, W)
+    clone_default_2 = view_default_2.to(memory_format=torch.channels_last)
+
+    # Batchnorm backward intermediate
+    sub_tensor = arg242_1 - arg243_1
+    mul_tensor = sub_tensor * arg244_1
+    weight_4d = arg6_1.unsqueeze(-1).unsqueeze(-1)
+    mul_tensor_1 = mul_tensor * weight_4d
+    bias_4d = arg7_1.unsqueeze(-1).unsqueeze(-1)
+    add_tensor = mul_tensor_1 + bias_4d
+
+    # relu backward via where
+    relu_default = torch.relu(add_tensor)
+    le_scalar = relu_default <= 0
+    where_self = torch.where(le_scalar, full_1, clone_default_2)
+
+    # sub_tensor_1 = arg242_1 - squeeze(arg243_1) unsqueezed back to [1,64,1,1]
+    squeeze_dims = arg243_1.squeeze(dim=[0, 2, 3])  # [64]
+    unsqueeze_4d = squeeze_dims.unsqueeze(0).unsqueeze(2).unsqueeze(3)  # [1,64,1,1]
+    sub_tensor_1 = arg242_1 - unsqueeze_4d
+
+    return where_self, sub_tensor_1, arg244_1, arg6_1
+
+
+def fused_reduction_and_epilogue(where_self, sub_tensor_1, arg244_1, arg6_1):
+    """The fused oracle: single-pass two-accumulator reduction + epilogue.
+
+    This is the kernel we're optimizing - it replaces what Inductor generates
+    as separate reduction kernels.
+
+    Computes:
+      sum1 = where_self.sum(dim=[0,2,3])         -> [64]
+      sum2 = (where_self * sub_tensor_1).sum(dim=[0,2,3])  -> [64]
+
+    Then epilogue:
+      scale = 3.6153917349252627e-07 (= 1/(N*H*W) = 1/(128*147*147) = 1/2765952)
+      factor9 = sum1 * scale                      (per-channel mean of where_self)
+      squeeze_dims_1 = arg244_1.squeeze()         (invstd: [64])
+      factor12 = sum2 * scale * squeeze_dims_1^2  (correction term)
+      mul_factor = squeeze_dims_1 * arg6_1        (weight * invstd)
+
+      mul_tensor_9[n,c,h,w] = (where_self - sub_tensor_1 * factor12[c] - factor9[c]) * mul_factor[c]
+      mul_tensor_10 = sum2 * squeeze_dims_1
+    """
+    device = where_self.device
+    N, C, H, W = 128, 64, 147, 147
+    HW = H * W  # 21609
+    total_elements = N * C * HW
+
+    # Ensure contiguous
+    where_self_c = where_self.contiguous()
+    sub_tensor_1_c = sub_tensor_1.contiguous()
+
+    # Phase 1: fused two-output partial reduction with 2D grid
+    N_TILES = 64  # 64 channels * 64 tiles = 4096 programs
+    BLOCK_SIZE = 2048
+
+    partial_sum1 = torch.empty(C, N_TILES, dtype=torch.float32, device=device)
+    partial_sum2 = torch.empty(C, N_TILES, dtype=torch.float32, device=device)
+
+    _partial_reduction_kernel[(C, N_TILES)](
+        where_self_c, sub_tensor_1_c,
+        partial_sum1, partial_sum2,
+        N=N, C=C, HW=HW, N_TILES=N_TILES, BLOCK_SIZE=BLOCK_SIZE,
+    )
+
+    # Finalize: sum partials
+    out_sum1 = torch.empty(C, dtype=torch.float32, device=device)
+    out_sum2 = torch.empty(C, dtype=torch.float32, device=device)
+
+    _finalize_reduction_kernel[(C,)](
+        partial_sum1, partial_sum2,
+        out_sum1, out_sum2,
+        N_TILES=N_TILES,
+    )
+
+    # Phase 2: compute per-channel factors and epilogue
+    squeeze_dims_1 = arg244_1.view(C)  # invstd [64]
+    scale = 3.6153917349252627e-07     # 1 / (N * H * W) = 1 / 2765952
+
+    # mul_tensor_10 = out_sum2 * squeeze_dims_1 (output 2)
+    mul_tensor_10 = out_sum2 * squeeze_dims_1
+
+    # Per-channel factors for epilogue
+    factor12 = out_sum2 * scale * squeeze_dims_1 * squeeze_dims_1  # [C]
+    factor9 = out_sum1 * scale                                      # [C]
+    mul_factor = squeeze_dims_1 * arg6_1                            # [C]
+
+    # Phase 2 epilogue kernel
+    out_9 = torch.empty_like(where_self_c)
+
+    EPILOGUE_BLOCK = 1024
+    n_blocks = (total_elements + EPILOGUE_BLOCK - 1) // EPILOGUE_BLOCK
+    _fused_epilogue_kernel[(n_blocks,)](
+        where_self_c, sub_tensor_1_c,
+        factor12, factor9, mul_factor,
+        out_9,
+        total_elements,
+        C=C, HW=HW, BLOCK_SIZE=EPILOGUE_BLOCK,
+    )
+
+    return out_9, mul_tensor_10
+
+
+def triton_oracle(getitem_270, arg246_1, arg242_1, arg243_1, arg244_1,
+                  arg6_1, arg7_1, full_1,
+                  _shape_param_0, _shape_param_1, _shape_param_2):
+    """Full oracle: upstream (PyTorch) + fused reduction+epilogue (Triton)."""
+    where_self, sub_tensor_1, arg244_1_out, arg6_1_out = compute_upstream(
+        getitem_270, arg246_1, arg242_1, arg243_1, arg244_1,
+        arg6_1, arg7_1, full_1, _shape_param_0, _shape_param_1, _shape_param_2
+    )
+    return fused_reduction_and_epilogue(where_self, sub_tensor_1, arg244_1_out, arg6_1_out)
+
+
+def make_inputs(device: torch.device) -> tuple:
+    module = _load_repro_module()
+    inputs = module.make_inputs()
+    moved = []
+    for value in inputs:
+        if isinstance(value, torch.Tensor):
+            moved.append(value.to(device=device))
+        else:
+            moved.append(value)
+    return tuple(moved)
+
+
+def check_correctness(device: torch.device, rtol: float = 1e-4, atol: float = 1e-3):
+    """Compare oracle outputs against eager reference."""
+    inputs = make_inputs(device)
+    module = _load_repro_module()
+
+    with torch.no_grad():
+        oracle_out = triton_oracle(*inputs)
+        ref_out = module.Repro()(*inputs)
+
+    all_close = True
+    for i, (o, r) in enumerate(zip(oracle_out, ref_out)):
+        max_diff = (o.float() - r.float()).abs().max().item()
+        close = torch.allclose(o.float(), r.float(), rtol=rtol, atol=atol)
+        print(f"  output[{i}]: shape={list(o.shape)}, max_abs_diff={max_diff:.6g}, allclose={close}")
+        if not close:
+            rel_err = ((o.float() - r.float()).abs() / (r.float().abs() + 1e-8)).max().item()
+            print(f"           max_rel_err={rel_err:.6g}")
+            all_close = False
+
+    print(f"  OVERALL: {'PASS' if all_close else 'FAIL'}")
+    return all_close
+
+
+def benchmark_oracle(device: torch.device, warmup: int = 10, rep: int = 100):
+    """Benchmark the fused reduction+epilogue kernel (the oracle target).
+
+    We benchmark just the fused_reduction_and_epilogue portion since that's
+    what a better Inductor template would improve.  The upstream scatter_add etc.
+    are separate kernel launches that Inductor already handles.
+    """
+    inputs = make_inputs(device)
+
+    with torch.no_grad():
+        # Precompute upstream (not part of oracle timing)
+        where_self, sub_tensor_1, arg244_1, arg6_1 = compute_upstream(*inputs)
+        torch.cuda.synchronize()
+
+        # Benchmark just the fused reduction + epilogue
+        def oracle_fn():
+            return fused_reduction_and_epilogue(where_self, sub_tensor_1, arg244_1, arg6_1)
+
+        ms = triton.testing.do_bench(oracle_fn, warmup=warmup, rep=rep)
+        us = ms * 1000.0
+        print(f"  oracle (fused reduction+epilogue) us={us:.3f}")
+
+        # Benchmark the full oracle for comparison
+        def full_oracle_fn():
+            return triton_oracle(*inputs)
+
+        ms_full = triton.testing.do_bench(full_oracle_fn, warmup=warmup, rep=rep)
+        us_full = ms_full * 1000.0
+        print(f"  oracle (full including upstream) us={us_full:.3f}")
+
+        # Benchmark compiled repro
+        module = _load_repro_module()
+        repro_instance = module.Repro()
+
+        compiled = torch.compile(repro_instance)
+        compiled(*inputs)
+        torch.cuda.synchronize()
+        ms_compiled = triton.testing.do_bench(lambda: compiled(*inputs), warmup=warmup, rep=rep)
+        us_compiled = ms_compiled * 1000.0
+        print(f"  compiled (torch.compile) us={us_compiled:.3f}")
+
+        # With coordinate descent tuning
+        import torch._inductor.config as inductor_config
+        inductor_config.coordinate_descent_tuning = True
+        compiled_cd = torch.compile(repro_instance, fullgraph=True)
+        compiled_cd(*inputs)
+        torch.cuda.synchronize()
+        ms_cd = triton.testing.do_bench(lambda: compiled_cd(*inputs), warmup=warmup, rep=rep)
+        us_cd = ms_cd * 1000.0
+        inductor_config.coordinate_descent_tuning = False
+        print(f"  compiled_cd (coordinate_descent_tuning) us={us_cd:.3f}")
+
+        speedup_vs_compile = us_compiled / us_full if us_full > 0 else float('inf')
+        speedup_vs_cd = us_cd / us_full if us_full > 0 else float('inf')
+
+        print(f"\n  Summary:")
+        print(f"    Oracle fused reduction+epilogue: {us:.1f} us")
+        print(f"    Oracle full (incl upstream):     {us_full:.1f} us")
+        print(f"    Compiled full graph:             {us_compiled:.1f} us")
+        print(f"    Compiled + CD tuning:            {us_cd:.1f} us")
+        print(f"    Speedup vs compile:              {speedup_vs_compile:.2f}x")
+        print(f"    Speedup vs compile+CD:           {speedup_vs_cd:.2f}x")
+
+    return us
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="Run correctness check")
+    parser.add_argument("--bench", action="store_true", help="Run benchmark")
+    parser.add_argument("--device", default="cuda")
+    parser.add_argument("--rtol", type=float, default=1e-4)
+    parser.add_argument("--atol", type=float, default=1e-3)
+    parser.add_argument("--warmup", type=int, default=10)
+    parser.add_argument("--rep", type=int, default=100)
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    device = torch.device(args.device)
+
+    if args.check:
+        print(f"Correctness check ({REPRO_ID}):")
+        check_correctness(device, rtol=args.rtol, atol=args.atol)
+
+    if args.bench:
+        print(f"Benchmark ({REPRO_ID}):")
+        benchmark_oracle(device, warmup=args.warmup, rep=args.rep)
+
+    if not args.check and not args.bench:
+        print("Use --check for correctness or --bench for benchmarking")
+        print("Running correctness check by default...")
+        check_correctness(device, rtol=args.rtol, atol=args.atol)
+
+
+if __name__ == "__main__":
+    main()

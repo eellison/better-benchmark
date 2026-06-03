@@ -1,0 +1,4 @@
+label,config,role
+baseline_cd,coordinate_descent_tuning=True,tuned baseline without combo forcing
+combo_persistent_cd,"combo_kernels=True,combo_kernel_per_subkernel_blocks=True,coordinate_descent_tuning=True,benchmark_combo_kernel=True,triton.multi_kernel=2",forced non-looped/persistent combo target
+combo_looped_cd,"combo_kernels=True,combo_kernel_per_subkernel_blocks=True,coordinate_descent_tuning=True,benchmark_combo_kernel=True,triton.multi_kernel=3",forced looped combo target
