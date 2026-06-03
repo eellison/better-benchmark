@@ -1,6 +1,14 @@
 """
 Oracle for repro sum_sum_sum_45f02142ecfd (structured_pool_upsample_backward_reduce, PyTorch-UNet).
 
+Gap diagnosis (classification: SCATTER_REDUCE): this repro is a structured
+bilinear upsample-backward scatter feeding BN/ReLU masking and sibling channel
+reductions. Inductor currently materializes the scattered [8, 64, 320, 479]
+intermediate and schedules the reductions as generic consumers; the missing
+optimization is SCATTER_REDUCE support that recognizes the structured
+index_put(accumulate=True) pattern and accumulates the channel reductions while
+producing or bypassing the scatter result as required.
+
 Pattern:
     Bilinear upsample backward (4x index_put with accumulate=True) -> BN-affine/ReLU mask
     -> 3 channel reductions (sum, sum*centered, final BN-backward linear combination).
@@ -364,7 +372,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--check", action="store_true", default=True, help="Verify oracle vs repro.")
     parser.add_argument("--rtol", type=float, default=1e-3)
     parser.add_argument("--atol", type=float, default=1e-2)
-    parser.add_argument("--no-bench", action="store_true", help="Skip timing.")
+    bench_group = parser.add_mutually_exclusive_group()
+    bench_group.add_argument("--bench", dest="no_bench", action="store_false", help="Run timing.")
+    bench_group.add_argument("--no-bench", dest="no_bench", action="store_true", help="Skip timing.")
+    parser.set_defaults(no_bench=False)
     parser.add_argument("--no-append", action="store_true", help="Skip CSV append.")
     parser.add_argument("--out", type=Path, default=DEFAULT_CSV)
     parser.add_argument("--hardware", default="unknown")

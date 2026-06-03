@@ -37,6 +37,17 @@ Oracle strategy:
     Since arg14_1 has 128 channels that get sliced into two 64-channel halves,
     we treat each half independently. The kernel processes C_BLOCK channels at
     a time from the 64-channel axis.
+
+Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle differs from
+Inductor by exposing the `cat(...).sum(dim=[0,2])` as two sibling channel
+reductions and then split-K reducing each channel over the very large
+batch/time dimension with tile partials and a finalize kernel. Inductor cannot
+currently combine the cat elimination, shared elementwise producers, and
+cooperative reduction partitioning into one multi-output template, so it
+materializes too much of the producer/cat path and leaves the tiny `[128]`
+output reduction under an under-parallel schedule. The fix is
+COOPERATIVE_SPLIT_K support for compatible multi-output reductions after simple
+cat/slice exposure, with one fused producer feeding both accumulators.
 """
 from __future__ import annotations
 
@@ -395,7 +406,9 @@ def main():
 
     if args.check:
         print(f"Correctness check ({REPRO_ID}):")
-        check_correctness(device, rtol=args.rtol, atol=args.atol)
+        ok = check_correctness(device, rtol=args.rtol, atol=args.atol)
+        if not ok:
+            sys.exit(1)
 
     if args.bench:
         print(f"Benchmark ({REPRO_ID}):")

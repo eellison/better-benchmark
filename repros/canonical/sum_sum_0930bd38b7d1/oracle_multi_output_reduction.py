@@ -19,6 +19,17 @@ Oracle strategy:
     - Phase 2: Fused post-reduction pointwise with coalesced I/O
     - Single read of where_self and sub_tensor_1 feeds both accumulators
 
+Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle differs from
+Inductor by treating the two BN-backward channel reductions as one split-K
+dual-accumulator reduction over the large N/H/W dimension, using many spatial
+tiles to cooperatively accumulate the small `[192]` outputs before a dependent
+pointwise epilogue consumes both sums. Inductor cannot express this shape as a
+single cooperative multi-output reduction today, so it leaves the sibling sums
+and epilogue under ordinary scheduler choices with too little reduction-axis
+parallelism and extra reads of the shared inputs. The fix is
+COOPERATIVE_SPLIT_K support for compatible multi-output reductions with atomic
+or partial coordination plus preservation of the dependent epilogue fusion.
+
 The full repro also includes a scatter_add (max pool backward) that produces
 where_self. That scatter is not part of this oracle; we take where_self as
 given (as Inductor would separate the scatter into its own kernel).

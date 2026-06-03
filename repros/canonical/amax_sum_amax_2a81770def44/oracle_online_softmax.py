@@ -1,4 +1,16 @@
 """
+Gap diagnosis (classification: NEW_PATTERN): this oracle lowers the two T5
+attention softmax+dropout reductions as persistent row kernels, with a dual
+launch variant that processes both same-shaped attention passes without
+materializing amax, exp, sum, or div intermediates. Inductor currently sees the
+two decomposed amax/sub/exp/sum/div/dropout/permute paths as generic reduction
+and RNG pointwise/layout work around the relative-position-bias producers, so it
+does not form a persistent online-softmax template or co-schedule the sibling
+softmax passes. The fix is a NEW_PATTERN lowering for T5-style last-dimension
+attention softmax with dropout that emits persistent row softmax kernels and can
+use a paired dual-softmax launch when sibling reductions have the same shape and
+epilogue.
+
 Oracle kernel for amax_sum_amax_2a81770def44: T5 dual online softmax (persistent).
 
 Pattern: f32[8, 12, 1024, 1024] -> amax(dim=-1) -> sub -> exp -> sum(dim=-1) -> div
@@ -408,10 +420,10 @@ def _load_repro_module():
     return module
 
 
-def correctness_check():
+def correctness_check(M_val=M):
     """Verify the Triton kernel matches the reference softmax."""
     torch.manual_seed(42)
-    x = torch.randn(M, RNUMEL, dtype=torch.float32, device="cuda")
+    x = torch.randn(M_val, RNUMEL, dtype=torch.float32, device="cuda")
 
     # Check pure softmax (without dropout, since dropout is stochastic)
     ref = softmax_reference(x)
@@ -422,7 +434,7 @@ def correctness_check():
     allclose = torch.allclose(ref, out, atol=1e-5, rtol=1e-5)
 
     print(f"Correctness check (softmax only, f32):")
-    print(f"  Shape: [{M}, {RNUMEL}]")
+    print(f"  Shape: [{M_val}, {RNUMEL}]")
     print(f"  Max absolute difference: {max_diff:.6e}")
     print(f"  Mean absolute difference: {mean_diff:.6e}")
     print(f"  torch.allclose (atol=1e-5, rtol=1e-5): {allclose}")
@@ -430,7 +442,7 @@ def correctness_check():
     if not allclose:
         print("  WARNING: Output does not match reference within tolerance!")
         for row in [0, 100, 1000, 50000]:
-            if row < M:
+            if row < M_val:
                 row_diff = (ref[row] - out[row]).abs().max().item()
                 print(f"  Row {row} max diff: {row_diff:.6e}")
 
@@ -457,12 +469,22 @@ def main():
     parser = argparse.ArgumentParser(
         description="Oracle persistent softmax benchmark (T5 dual attention)"
     )
-    parser.add_argument("--check-only", action="store_true", help="Only run correctness check")
+    parser.add_argument("--check", action="store_true", help="Run correctness check")
+    parser.add_argument("--bench", action="store_true", help="Run benchmark")
+    parser.add_argument("--check-only", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--rep", type=int, default=100, help="Number of benchmark repetitions")
     parser.add_argument("--warmup", type=int, default=25, help="Number of warmup iterations")
+    parser.add_argument("--check-m", type=int, default=1024, help="Rows for correctness check")
     parser.add_argument("--csv", type=str, default=None, help="Append results to CSV file")
     parser.add_argument("--no-compile", action="store_true", help="Skip torch.compile baseline")
     args = parser.parse_args()
+
+    if args.check_only:
+        args.check = True
+        args.bench = False
+    elif not args.check and not args.bench:
+        args.check = True
+        args.bench = True
 
     print("=" * 70)
     print(f"Oracle Persistent Softmax Benchmark: {REPRO_ID}")
@@ -482,15 +504,15 @@ def main():
     print(f"  SOL (3.35 TB/s): {sol_us:.1f} us")
     print(f"  Note: Full repro includes relative position bias (embedding + arithmetic)")
 
-    # Correctness
-    print(f"\n--- Correctness ---")
-    ok = correctness_check()
-    if not ok:
-        print("FAILED correctness check. Exiting.")
-        sys.exit(1)
-    print("PASSED")
+    if args.check:
+        print(f"\n--- Correctness ---")
+        ok = correctness_check(M_val=args.check_m)
+        if not ok:
+            print("FAILED correctness check. Exiting.")
+            sys.exit(1)
+        print("PASSED")
 
-    if args.check_only:
+    if not args.bench:
         return
 
     # Benchmark

@@ -1,6 +1,14 @@
 """
 Oracle for repro sum_sum_8bcd6e12dcd4 (structured_pool_upsample_backward_reduce, SqueezeNet).
 
+Gap diagnosis (classification: SCATTER_REDUCE): this repro is a structured
+max-pool-backward scatter_add feeding boolean masks and two sibling channel
+reductions. Inductor currently materializes the [65536, 3025] scatter_add output
+and then slices, masks, and reduces it as ordinary tensor work; the missing
+optimization is SCATTER_REDUCE support that treats the pool-backward indices as
+structured scatter destinations and accumulates the masked per-channel sums from
+the source values directly.
+
 Pattern:
     max_pool backward (scatter_add) -> channel slice -> where mask -> sum reduction.
 
@@ -339,7 +347,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--check", action="store_true", help="Verify oracle vs repro.")
     parser.add_argument("--rtol", type=float, default=1e-4)
     parser.add_argument("--atol", type=float, default=1e-3)
-    parser.add_argument("--no-bench", action="store_true", help="Skip timing.")
+    bench_group = parser.add_mutually_exclusive_group()
+    bench_group.add_argument("--bench", dest="no_bench", action="store_false", help="Run timing.")
+    bench_group.add_argument("--no-bench", dest="no_bench", action="store_true", help="Skip timing.")
+    parser.set_defaults(no_bench=False)
     parser.add_argument("--no-append", action="store_true", help="Skip CSV append.")
     parser.add_argument("--out", type=Path, default=DEFAULT_CSV)
     parser.add_argument("--hardware", default="unknown")

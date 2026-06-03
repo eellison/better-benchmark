@@ -1,4 +1,16 @@
 """
+Gap diagnosis (classification: NEW_PATTERN): this oracle computes the
+large-vocabulary cross-entropy sum by reading each logits row once with scalar
+online max and denominator accumulators plus one target-logit load, then
+reducing only the per-row losses to the scalar output. Inductor currently lowers
+the decomposed cast/amax/sub/exp/sum/log/log_softmax/gather/mask/sum graph as
+generic reductions and pointwise work that materializes and rereads full
+row-sized intermediates, because it does not canonicalize this ignore-index
+cross-entropy-sum idiom into an online softmax row template with a scalar
+reduction epilogue. The fix is a NEW_PATTERN lowering for
+log_softmax+gather+masked-sum cross entropy that emits the online accumulator
+kernel and the small final scalar reduction directly.
+
 Oracle kernel for amax_sum_sum_1bad0f362efd: online softmax cross-entropy with scalar reduction.
 
 Pattern: bf16[8192, 262144] logits + i64[8192] labels
@@ -341,14 +353,25 @@ def benchmark_compiled(logits, labels, warmup=25, rep=100):
 
 def main():
     parser = argparse.ArgumentParser(description="Oracle online softmax cross-entropy benchmark")
-    parser.add_argument("--check-only", action="store_true", help="Only run correctness check")
+    parser.add_argument("--check", action="store_true", help="Run correctness check")
+    parser.add_argument("--bench", action="store_true", help="Run benchmark")
+    parser.add_argument("--check-only", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--rep", type=int, default=100, help="Number of benchmark repetitions")
     parser.add_argument("--warmup", type=int, default=25, help="Number of warmup iterations")
     parser.add_argument("--block-n", type=int, default=4096, help="Tile size for reduction")
     parser.add_argument("--num-warps", type=int, default=8, help="Number of warps")
+    parser.add_argument("--check-m", type=int, default=16, help="Rows for correctness check")
+    parser.add_argument("--check-n", type=int, default=1024, help="Columns for correctness check")
     parser.add_argument("--no-compile", action="store_true", help="Skip torch.compile baseline")
     parser.add_argument("--csv", type=str, default=None, help="Append results to CSV file")
     args = parser.parse_args()
+
+    if args.check_only:
+        args.check = True
+        args.bench = False
+    elif not args.check and not args.bench:
+        args.check = True
+        args.bench = True
 
     print("=" * 70)
     print(f"Oracle Online Softmax Cross-Entropy Benchmark: {REPRO_ID}")
@@ -368,15 +391,15 @@ def main():
     print(f"  SOL (3.8 TB/s): {sol_us:.1f} us")
     print(f"\n  NOTE: Single-pass reads logits once. 2-pass stash baseline reads 2x.")
 
-    # Correctness
-    print(f"\n--- Correctness ---")
-    ok = correctness_check()
-    if not ok:
-        print("FAILED correctness check. Exiting.")
-        sys.exit(1)
-    print("PASSED\n")
+    if args.check:
+        print(f"\n--- Correctness ---")
+        ok = correctness_check(M_val=args.check_m, N_val=args.check_n)
+        if not ok:
+            print("FAILED correctness check. Exiting.")
+            sys.exit(1)
+        print("PASSED\n")
 
-    if args.check_only:
+    if not args.bench:
         return
 
     # Benchmark
