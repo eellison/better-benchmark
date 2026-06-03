@@ -107,3 +107,7 @@ sum_f4f71b921e96,SCATTER_REDUCE,closed,compile=60.4us beats oracle=63.8us; VGG16
 sum_sum_279d6b97ab68,AT_FLOOR,closed,compile=79.6us vs oracle=77.4us; 1.03x gap; DenseNet121 BN-backward tail 640ch; Inductor already near-optimal
 sum_sum_8bc26e2e1883,AT_FLOOR,closed,compile=79.8us vs oracle=78.0us; 1.02x gap; DenseNet121 BN-backward tail 608ch; Inductor already near-optimal
 sum_sum_sum_4bb798eb542e,SCATTER_REDUCE,implemented,scatter_reduce_fusion gives 62.4us vs 123.9 baseline (2x). Beats oracle 79.1us.
+sum_5eec4697d8ff,AT_FLOOR,closed,compile=47.1us beats oracle=48.9us; Longformer scatter-add; scatter_reduce_fusion already optimal
+sum_7d7c71d09ef5,AT_FLOOR,closed,compile=197.5us beats oracle=209.3us; Demucs slice_scatter+masked sum; scatter_reduce_fusion already optimal
+sum_sum_sum_94e6cd22ff22,AT_FLOOR,closed,compile=52.9us vs oracle=51.0us; 1.04x gap; DeiT ViT LN-backward multi-output reduction; Inductor already near-optimal
+sum_sum_sum_f0377fc40fe2,COOPERATIVE_SPLIT_K,needs_work,compile=55.3us vs oracle=36.9us; 1.50x gap; DeiT ViT LN-backward multi-output split-K reduction
