@@ -5,29 +5,47 @@
 - Rank: 8
 - Family: `structured_pool_upsample_backward_reduce`
 - Owner: `Kepler`
-- Closure status: `oracle_active_before_gap_closure`
-- Oracle status: `active_oracle_impl`
+- Closure status: `measured`
+- Oracle status: `BAD_ORACLE`
+- Diagnosis: `SCATTER_REDUCE`
 
-## Current Gap
+## Current Gap (measured 2026-06-03, B200)
 
-- Best compile: `1370.1759576797483 us`
-- Memcopy SOL: `63.45599889755249 us`
-- Launch-adjusted SOL gap: `16.82105647495679x`
-- Oracle path: `repros/canonical/sum_sum_sum_dadf6aa035dd/oracle_structured_upsample_reduce.py`
+- Best compile (CD+scatter_reduce_fusion): `1023.1 us`
+- Oracle (torch_fused_bilinear_scatter_reduce): `48317.2 us` (BAD - 47x slower)
+- Bandwidth floor (IO=705MB): `121.5 us`
+- Realistic floor (3-pass: scatter + BN dual reduce + pointwise): `364.5 us`
+- Compile / realistic floor: `2.81x`
+- Oracle path: `repros/canonical/sum_sum_sum_dadf6aa035dd/oracle_structured_scatter_reduce.py`
 
 ## Oracle State
 
-- No measured oracle row yet.
-- Next oracle action: use measured oracle as the target floor, while preserving notes for partial-graph floors.
+- torch_fused_bilinear_scatter_reduce measured at 48317 us (scaffold, not optimized).
+- Compile is 47x faster than the scaffold oracle.
+- Oracle needs complete rewrite with proper Triton scatter-reduce fusion.
+
+## Pattern Analysis
+
+PyTorch UNet bilinear interpolation backward + batch-norm backward:
+1. Slice [8,512,160,239] -> [8,256,160,238] (pad removal)
+2. Bilinear interpolation backward via 4x index_put with accumulate=True:
+   - mul by bilinear weights, scatter into [8,256,80,119] via index tensors
+   - 4 separate index_put calls (corners of the bilinear kernel)
+3. Standard BN backward on the accumulated result [8,256,80,119]:
+   - sum1, sum2 reductions, then pointwise + sum3
+
+The 4x index_put with accumulate=True is a scatter-reduce pattern.
+It materializes the full output and then reads it again for BN backward.
 
 ## Inductor Closure Path
 
-- Implementation track: Structured scatter/upsample gather-reduce.
-- Candidate hook: Pattern-match scatter/index_put/where feeding reductions and replace dense materialization with output-centric gather-reduce templates.
-- Benchmark policy: compare default, `coordinate_descent_tuning=True`, forced persistent combo, and forced looped combo; prioritize best runtime over default heuristic purity.
-- Gating policy: if the optimization closes this repro but regresses a sibling, gate on the exact pattern/shape/reduction-size predicate and keep both paths autotuned.
+- Implementation track: SCATTER_REDUCE.
+- The 4 index_put(accumulate=True) calls dominate: they have random write patterns.
+- Key opportunity: fuse the bilinear scatter with subsequent BN backward to avoid
+  materializing the [8,256,80,119] intermediate.
+- Alternatively: recognize bilinear pattern and use a single structured gather-reduce.
 
 ## Done Criteria
 
-- Canonical oracle measured or blocker documented.
-- Inductor path either reaches the oracle/realistic floor or has a measured, gated implementation plan with regression guardrails.
+- Oracle needs proper Triton implementation.
+- Scatter-reduce pattern recognition for bilinear interpolation backward is the key path.

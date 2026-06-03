@@ -32,7 +32,7 @@ sum_sum_230671a8764d,SCHEDULER_FUSION,needs_work,
 sum_sum_2dc2fbd588d9,SCATTER_REDUCE,implemented,
 sum_sum_6a14a9c9ba88,RECOMPUTE_FUSION,needs_work,
 sum_sum_8bcd6e12dcd4,SCATTER_REDUCE,implemented,
-sum_sum_a42eecd58e57,NEEDS_REVIEW,needs_work,
+sum_sum_a42eecd58e57,SCATTER_REDUCE,needs_work,"scatter_add(max_pool_backward)+BN_backward; compile=1112us beats broken oracle (C=24 non-power-of-2); 2.04x realistic floor"
 sum_sum_a7c7ab7bfcf5,RECOMPUTE_FUSION,needs_work,
 sum_sum_a9f6c9204966,SCHEDULER_FUSION,needs_work,
 sum_sum_b7f94adef30f,COOPERATIVE_SPLIT_K,deferred,
@@ -43,7 +43,7 @@ sum_sum_mean_9af96955f8cc,REDUCTION_CHAINING,deferred,
 sum_sum_sum_1627b1a3a6f6,ALGEBRAIC_ELIMINATION,implemented,
 sum_sum_sum_2c925f59efff,SCATTER_REDUCE,implemented,
 sum_sum_sum_3348817ad678,AT_FLOOR,closed,
-sum_sum_sum_431633879271,NEEDS_REVIEW,needs_work,
+sum_sum_sum_431633879271,RECOMPUTE_FUSION,needs_work,"ConvNextV2 GELU backward: 3 dependent reductions; compile=1032us vs oracle=4261us (BAD); 1.94x realistic floor"
 sum_sum_sum_45f02142ecfd,SCATTER_REDUCE,implemented,
 sum_sum_sum_512dcf4a167b,AT_FLOOR,closed,
 sum_sum_sum_53917171ce11,SCATTER_REDUCE,implemented,
@@ -52,16 +52,16 @@ sum_sum_sum_64f701d26f0a,SCHEDULER_FUSION,needs_work,
 sum_sum_sum_6770dc6efbe8,AT_FLOOR,closed,
 sum_sum_sum_70d71fcb0d68,RECOMPUTE_FUSION,needs_work,
 sum_sum_sum_7b24a3457260,RECOMPUTE_FUSION,needs_work,
-sum_sum_sum_82a3f0084247,NEEDS_REVIEW,needs_work,
-sum_sum_sum_86dbf5a906db,NEEDS_REVIEW,needs_work,
+sum_sum_sum_82a3f0084247,RECOMPUTE_FUSION,needs_work,"Swin dual LayerNorm backward: multiple reductions re-reading [128,56,56,128]; compile=608us vs oracle=5974us (BAD); 1.89x realistic floor"
+sum_sum_sum_86dbf5a906db,AT_FLOOR,closed,"UNet BN backward [8,64,640,959]; compile=1521us matches oracle=1619us (0.94x); 1.17x realistic 2-pass floor"
 sum_sum_sum_88c9224fa05a,SCATTER_REDUCE,implemented,
-sum_sum_sum_8e6cde42e572,NEEDS_REVIEW,needs_work,
-sum_sum_sum_95dac16d4328,NEEDS_REVIEW,needs_work,
-sum_sum_sum_afd118ca907d,NEEDS_REVIEW,needs_work,
+sum_sum_sum_8e6cde42e572,SCATTER_REDUCE,needs_work,"scatter_add(max_pool_backward)+BN_backward [8,64,640,959]; compile=3568us vs bad oracle=19168us; 1.66x realistic floor; scatter dominates"
+sum_sum_sum_95dac16d4328,RECOMPUTE_FUSION,needs_work,"GhostNet dual BN backward with CL copy; compile=517us; oracle broken (C=40 non-power-of-2); 3.11x realistic floor; multiple reductions re-read small tensors"
+sum_sum_sum_afd118ca907d,SCHEDULER_FUSION,needs_work,"T5 dual attention backward: 2 softmax_backward + position_bias_grad + index_put; compile=4275us vs bad oracle=28426us; 2.73x realistic floor; many poorly-fused subgraphs"
 sum_sum_sum_d0496bdeedba,SCHEDULER_FUSION,needs_work,
-sum_sum_sum_dadf6aa035dd,NEEDS_REVIEW,needs_work,
+sum_sum_sum_dadf6aa035dd,SCATTER_REDUCE,needs_work,"UNet bilinear_interp_backward (4x index_put accumulate) + BN backward; compile=1023us vs bad oracle=48317us; 2.81x realistic floor"
 sum_sum_sum_f68c9f1fa09b,AT_FLOOR,closed,
-sum_sum_sum_f90d684d32cb,NEEDS_REVIEW,needs_work,
+sum_sum_sum_f90d684d32cb,SCATTER_REDUCE,needs_work,"UNet bilinear_interp_backward (4x index_put accumulate) + BN backward; compile=3262us vs bad oracle=176388us; 4.47x realistic floor"
 var_mean_765fb8f2c85e,BANDWIDTH_BOUND,closed,
 var_mean_e814c09a1fdb,BANDWIDTH_BOUND,closed,
 var_mean_f0d7c08a0622,BANDWIDTH_BOUND,closed,
