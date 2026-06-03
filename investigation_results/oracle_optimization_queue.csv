@@ -123,3 +123,6 @@ sum_sum_sum_1d10e6314ef6,MULTI_OUTPUT_REDUCTION,needs_work,compile=55.2us vs ora
 sum_sum_sum_4de1559f24a7,MULTI_OUTPUT_REDUCTION,needs_work,compile=72.5us vs oracle=54.0us; 1.34x gap; MegatronBert LN-backward multi-output reduction
 sum_sum_sum_56cdc50216ea,COOPERATIVE_SPLIT_K,needs_work,compile=63.4us vs oracle=33.4us; 1.90x gap; Swin LN-backward cooperative split-K reduction
 sum_sum_sum_cad02fe18a69,SCATTER_REDUCE,needs_work,compile=94.2us vs oracle=64.2us; 1.47x gap; BERT embedding scatter-reduce with index_put
+sum_sum_e6f9af9e33b1,SCHEDULER_FUSION,needs_work,compile=82.9us vs oracle=52.2us; 1.59x gap; DenseNet121 BN-backward sibling reductions with slice-limited epilogue
+sum_sum_sum_59e022113eeb,AT_FLOOR,closed,compile=104.5us vs oracle=100.4us; 1.04x gap; DistilBERT LN-backward multi-output reduction; Inductor already near-optimal
+sum_sum_sum_ed8809aa30cf,COOPERATIVE_SPLIT_K,needs_work,compile=100.2us vs oracle=85.0us; 1.18x gap; Blenderbot LN-backward cross-axis multi-output reduction
