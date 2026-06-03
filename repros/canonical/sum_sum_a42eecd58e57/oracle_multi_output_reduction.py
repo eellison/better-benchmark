@@ -38,6 +38,19 @@ REPO_ROOT = REPRO_DIR.parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 
+def next_power_of_2(n):
+    """Return the smallest power of 2 >= n."""
+    if n <= 0:
+        return 1
+    n -= 1
+    n |= n >> 1
+    n |= n >> 2
+    n |= n >> 4
+    n |= n >> 8
+    n |= n >> 16
+    return n + 1
+
+
 # ---------------------------------------------------------------------------
 # Triton kernel: fused dual reduction
 # ---------------------------------------------------------------------------
@@ -50,6 +63,7 @@ def _dual_reduce_kernel(
     out_sum2_ptr,  # [C] output
     N,
     C: tl.constexpr,
+    C_BLOCK: tl.constexpr,  # next power of 2 >= C
     HW,
     stride_n,  # stride along batch dim
     stride_c,  # stride along channel dim
@@ -61,10 +75,11 @@ def _dual_reduce_kernel(
     spatial_start = pid * BLOCK_SPATIAL
     total_spatial = N * HW
 
-    c_offs = tl.arange(0, C)
+    c_offs = tl.arange(0, C_BLOCK)
+    c_mask = c_offs < C
 
-    acc1 = tl.zeros([C], dtype=tl.float32)
-    acc2 = tl.zeros([C], dtype=tl.float32)
+    acc1 = tl.zeros([C_BLOCK], dtype=tl.float32)
+    acc2 = tl.zeros([C_BLOCK], dtype=tl.float32)
 
     for s in range(BLOCK_SPATIAL):
         spatial_idx = spatial_start + s
@@ -74,14 +89,14 @@ def _dual_reduce_kernel(
             base = n_idx * stride_n + hw_idx * stride_hw
             addrs = base + c_offs * stride_c
 
-            ws_vals = tl.load(where_self_ptr + addrs)
-            sub_vals = tl.load(sub_tensor_1_ptr + addrs)
+            ws_vals = tl.load(where_self_ptr + addrs, mask=c_mask, other=0.0)
+            sub_vals = tl.load(sub_tensor_1_ptr + addrs, mask=c_mask, other=0.0)
 
             acc1 += ws_vals
             acc2 += ws_vals * sub_vals
 
-    tl.atomic_add(out_sum1_ptr + c_offs, acc1)
-    tl.atomic_add(out_sum2_ptr + c_offs, acc2)
+    tl.atomic_add(out_sum1_ptr + c_offs, acc1, mask=c_mask)
+    tl.atomic_add(out_sum2_ptr + c_offs, acc2, mask=c_mask)
 
 
 # ---------------------------------------------------------------------------
@@ -100,6 +115,7 @@ def _post_reduce_pointwise_kernel(
     scale_factor,
     N,
     C: tl.constexpr,
+    C_BLOCK: tl.constexpr,  # next power of 2 >= C
     HW,
     stride_n,
     stride_c,
@@ -111,13 +127,14 @@ def _post_reduce_pointwise_kernel(
     spatial_start = pid * BLOCK_SPATIAL
     total_spatial = N * HW
 
-    c_offs = tl.arange(0, C)
+    c_offs = tl.arange(0, C_BLOCK)
+    c_mask = c_offs < C
 
     # Load per-channel constants once
-    s1 = tl.load(sum1_ptr + c_offs)
-    s2 = tl.load(sum2_ptr + c_offs)
-    rsqrt_val = tl.load(rsqrt_ptr + c_offs)
-    w = tl.load(weight_ptr + c_offs)
+    s1 = tl.load(sum1_ptr + c_offs, mask=c_mask, other=0.0)
+    s2 = tl.load(sum2_ptr + c_offs, mask=c_mask, other=0.0)
+    rsqrt_val = tl.load(rsqrt_ptr + c_offs, mask=c_mask, other=0.0)
+    w = tl.load(weight_ptr + c_offs, mask=c_mask, other=0.0)
 
     s1_scaled = s1 * scale_factor
     rsqrt_sq = rsqrt_val * rsqrt_val
@@ -131,12 +148,12 @@ def _post_reduce_pointwise_kernel(
             base = n_idx * stride_n + hw_idx * stride_hw
             addrs = base + c_offs * stride_c
 
-            ws_val = tl.load(where_self_ptr + addrs)
-            sub_val = tl.load(sub_tensor_1_ptr + addrs)
+            ws_val = tl.load(where_self_ptr + addrs, mask=c_mask, other=0.0)
+            sub_val = tl.load(sub_tensor_1_ptr + addrs, mask=c_mask, other=0.0)
 
             result = (ws_val - sub_val * s2_scaled - s1_scaled) * w
 
-            tl.store(out_ptr + addrs, result)
+            tl.store(out_ptr + addrs, result, mask=c_mask)
 
 
 # ---------------------------------------------------------------------------
@@ -154,6 +171,7 @@ def oracle_fused(where_self, sub_tensor_1, rsqrt_squeezed, primals_weight, scale
     N, C, H, W = where_self.shape
     HW = H * W
     total_spatial = N * HW
+    C_BLOCK = next_power_of_2(C)
 
     # Determine strides - support both contiguous and channels_last
     stride_n = where_self.stride(0)
@@ -187,7 +205,7 @@ def oracle_fused(where_self, sub_tensor_1, rsqrt_squeezed, primals_weight, scale
     _dual_reduce_kernel[(num_programs,)](
         where_self, sub_tensor_1,
         sum1, sum2,
-        N, C=C, HW=HW,
+        N, C=C, C_BLOCK=C_BLOCK, HW=HW,
         stride_n=stride_n, stride_c=stride_c, stride_hw=stride_hw,
         BLOCK_SPATIAL=BLOCK_SPATIAL,
     )
@@ -206,7 +224,7 @@ def oracle_fused(where_self, sub_tensor_1, rsqrt_squeezed, primals_weight, scale
         rsqrt_squeezed, weight,
         out,
         scale_factor,
-        N, C=C, HW=HW,
+        N, C=C, C_BLOCK=C_BLOCK, HW=HW,
         stride_n=stride_n, stride_c=stride_c, stride_hw=stride_hw,
         BLOCK_SPATIAL=PW_BLOCK_SPATIAL,
     )

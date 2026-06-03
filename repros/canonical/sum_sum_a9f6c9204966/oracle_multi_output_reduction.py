@@ -45,6 +45,19 @@ REPO_ROOT = REPRO_DIR.parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 
+def next_power_of_2(n):
+    """Return the smallest power of 2 >= n."""
+    if n <= 0:
+        return 1
+    n -= 1
+    n |= n >> 1
+    n |= n >> 2
+    n |= n >> 4
+    n |= n >> 8
+    n |= n >> 16
+    return n + 1
+
+
 # ---------------------------------------------------------------------------
 # Triton kernel: fused dual reduction (channels-last layout)
 # For channels-last: element [n,c,h,w] at offset = (n*H*W + h*W + w)*C + c
@@ -58,33 +71,35 @@ def _dual_reduce_channels_last_kernel(
     out_sum2_ptr,  # [C] output
     total_spatial,  # N * H * W
     C: tl.constexpr,
+    C_BLOCK: tl.constexpr,  # next power of 2 >= C
+    stride_spatial,  # stride between consecutive spatial positions (= C for CL, 1 for contiguous)
+    stride_c,        # stride along channel dim (= 1 for CL, H*W for contiguous)
     BLOCK_SPATIAL: tl.constexpr,
 ):
-    """Process a block of spatial positions, reduce all C channels per position.
-    Data is channels-last: element at offset = spatial_idx * C + c
-    """
+    """Process a block of spatial positions, reduce all C channels per position."""
     pid = tl.program_id(0)
     spatial_start = pid * BLOCK_SPATIAL
 
-    c_offs = tl.arange(0, C)
+    c_offs = tl.arange(0, C_BLOCK)
+    c_mask = c_offs < C
 
-    acc1 = tl.zeros([C], dtype=tl.float32)
-    acc2 = tl.zeros([C], dtype=tl.float32)
+    acc1 = tl.zeros([C_BLOCK], dtype=tl.float32)
+    acc2 = tl.zeros([C_BLOCK], dtype=tl.float32)
 
     for s in range(BLOCK_SPATIAL):
         spatial_idx = spatial_start + s
         if spatial_idx < total_spatial:
-            base = spatial_idx * C
-            addrs = base + c_offs
+            base = spatial_idx * stride_spatial
+            addrs = base + c_offs * stride_c
 
-            ws_vals = tl.load(where_self_ptr + addrs)
-            sub_vals = tl.load(sub_tensor_1_ptr + addrs)
+            ws_vals = tl.load(where_self_ptr + addrs, mask=c_mask, other=0.0)
+            sub_vals = tl.load(sub_tensor_1_ptr + addrs, mask=c_mask, other=0.0)
 
             acc1 += ws_vals
             acc2 += ws_vals * sub_vals
 
-    tl.atomic_add(out_sum1_ptr + c_offs, acc1)
-    tl.atomic_add(out_sum2_ptr + c_offs, acc2)
+    tl.atomic_add(out_sum1_ptr + c_offs, acc1, mask=c_mask)
+    tl.atomic_add(out_sum2_ptr + c_offs, acc2, mask=c_mask)
 
 
 # ---------------------------------------------------------------------------
@@ -103,18 +118,22 @@ def _post_reduce_pointwise_cl_kernel(
     scale_factor,
     total_spatial,
     C: tl.constexpr,
+    C_BLOCK: tl.constexpr,  # next power of 2 >= C
+    stride_spatial,  # stride between consecutive spatial positions
+    stride_c,        # stride along channel dim
     BLOCK_SPATIAL: tl.constexpr,
 ):
-    """Pointwise kernel with channels-last layout."""
+    """Pointwise kernel supporting both contiguous and channels-last layout."""
     pid = tl.program_id(0)
     spatial_start = pid * BLOCK_SPATIAL
 
-    c_offs = tl.arange(0, C)
+    c_offs = tl.arange(0, C_BLOCK)
+    c_mask = c_offs < C
 
-    s1 = tl.load(sum1_ptr + c_offs)
-    s2 = tl.load(sum2_ptr + c_offs)
-    rsqrt_val = tl.load(rsqrt_ptr + c_offs)
-    w = tl.load(weight_ptr + c_offs)
+    s1 = tl.load(sum1_ptr + c_offs, mask=c_mask, other=0.0)
+    s2 = tl.load(sum2_ptr + c_offs, mask=c_mask, other=0.0)
+    rsqrt_val = tl.load(rsqrt_ptr + c_offs, mask=c_mask, other=0.0)
+    w = tl.load(weight_ptr + c_offs, mask=c_mask, other=0.0)
 
     s1_scaled = s1 * scale_factor
     rsqrt_sq = rsqrt_val * rsqrt_val
@@ -123,15 +142,15 @@ def _post_reduce_pointwise_cl_kernel(
     for s in range(BLOCK_SPATIAL):
         spatial_idx = spatial_start + s
         if spatial_idx < total_spatial:
-            base = spatial_idx * C
-            addrs = base + c_offs
+            base = spatial_idx * stride_spatial
+            addrs = base + c_offs * stride_c
 
-            ws_val = tl.load(where_self_ptr + addrs)
-            sub_val = tl.load(sub_tensor_1_ptr + addrs)
+            ws_val = tl.load(where_self_ptr + addrs, mask=c_mask, other=0.0)
+            sub_val = tl.load(sub_tensor_1_ptr + addrs, mask=c_mask, other=0.0)
 
             result = (ws_val - sub_val * s2_scaled - s1_scaled) * w
 
-            tl.store(out_ptr + addrs, result)
+            tl.store(out_ptr + addrs, result, mask=c_mask)
 
 
 # ---------------------------------------------------------------------------
@@ -148,10 +167,15 @@ def oracle_fused(where_self, sub_tensor_1, rsqrt_squeezed, primals_weight, scale
     """
     N, C, H, W = where_self.shape
     total_spatial = N * H * W
+    C_BLOCK = next_power_of_2(C)
 
-    # Verify channels-last layout
-    assert where_self.stride(1) == 1, f"Expected channels-last, got stride(1)={where_self.stride(1)}"
-    assert sub_tensor_1.stride(1) == 1, f"Expected channels-last, got stride(1)={sub_tensor_1.stride(1)}"
+    # Determine strides - support both contiguous and channels-last
+    stride_c = where_self.stride(1)
+    stride_h = where_self.stride(2)
+    stride_w = where_self.stride(3)
+    # Check linearizability: stride(2) == W * stride(3)
+    assert stride_h == W * stride_w, f"Cannot linearize: stride_h={stride_h}, W*stride_w={W*stride_w}"
+    stride_spatial = stride_w  # distance between consecutive spatial positions
 
     # --- Phase 1: Dual reduction ---
     sum1 = torch.zeros(C, device=where_self.device, dtype=torch.float32)
@@ -165,13 +189,15 @@ def oracle_fused(where_self, sub_tensor_1, rsqrt_squeezed, primals_weight, scale
         sum1, sum2,
         total_spatial,
         C=C,
+        C_BLOCK=C_BLOCK,
+        stride_spatial=stride_spatial,
+        stride_c=stride_c,
         BLOCK_SPATIAL=BLOCK_SPATIAL,
     )
 
     # --- Phase 2: Post-reduction pointwise ---
     weight = rsqrt_squeezed * primals_weight
-    out = torch.empty(N, C, H, W, device=where_self.device, dtype=torch.float32,
-                      memory_format=torch.channels_last)
+    out = torch.empty_like(where_self)
 
     PW_BLOCK_SPATIAL = 64
     pw_num_programs = (total_spatial + PW_BLOCK_SPATIAL - 1) // PW_BLOCK_SPATIAL
@@ -184,6 +210,9 @@ def oracle_fused(where_self, sub_tensor_1, rsqrt_squeezed, primals_weight, scale
         scale_factor,
         total_spatial,
         C=C,
+        C_BLOCK=C_BLOCK,
+        stride_spatial=stride_spatial,
+        stride_c=stride_c,
         BLOCK_SPATIAL=PW_BLOCK_SPATIAL,
     )
 
@@ -245,6 +274,8 @@ def prepare_oracle_inputs(*inputs):
     relu_default = torch.relu(add_tensor_3)
     le_scalar = relu_default <= 0
     where_self = torch.where(le_scalar, full_1, clone_default_2)
+    # Ensure channels-last layout for coalesced access
+    where_self = where_self.to(memory_format=torch.channels_last)
 
     # sub_tensor_1 = conv - mean
     squeeze_dims = arg251_1.squeeze(0).squeeze(-1).squeeze(-1)  # [192]

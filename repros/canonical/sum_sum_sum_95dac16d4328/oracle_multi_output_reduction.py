@@ -41,6 +41,19 @@ REPO_ROOT = REPRO_DIR.parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 
+def next_power_of_2(n):
+    """Return the smallest power of 2 >= n."""
+    if n <= 0:
+        return 1
+    n -= 1
+    n |= n >> 1
+    n |= n >> 2
+    n |= n >> 4
+    n |= n >> 8
+    n |= n >> 16
+    return n + 1
+
+
 # ---------------------------------------------------------------------------
 # Triton kernel: fused dual reduction (contiguous layout, NCHW)
 # ---------------------------------------------------------------------------
@@ -51,35 +64,41 @@ def _dual_reduce_kernel(
     sub_ptr,         # sub_tensor (conv - mean)
     out_sum1_ptr,    # [C] output
     out_sum2_ptr,    # [C] output
+    HW,             # H * W
     total_spatial,   # N * H * W
     C: tl.constexpr,
-    stride_spatial,  # stride between adjacent spatial positions (= C for CL, 1 for contiguous last dim)
+    C_BLOCK: tl.constexpr,  # next power of 2 >= C
+    stride_n,        # stride along batch dim
     stride_c,        # stride along channel dim
+    stride_hw,       # stride along linearized spatial dim (= stride_w)
     BLOCK_SPATIAL: tl.constexpr,
 ):
     """Each program processes BLOCK_SPATIAL spatial positions across all C channels."""
     pid = tl.program_id(0)
     spatial_start = pid * BLOCK_SPATIAL
 
-    c_offs = tl.arange(0, C)
+    c_offs = tl.arange(0, C_BLOCK)
+    c_mask = c_offs < C
 
-    acc1 = tl.zeros([C], dtype=tl.float32)
-    acc2 = tl.zeros([C], dtype=tl.float32)
+    acc1 = tl.zeros([C_BLOCK], dtype=tl.float32)
+    acc2 = tl.zeros([C_BLOCK], dtype=tl.float32)
 
     for s in range(BLOCK_SPATIAL):
         spatial_idx = spatial_start + s
         if spatial_idx < total_spatial:
-            base = spatial_idx * stride_spatial
+            n_idx = spatial_idx // HW
+            hw_idx = spatial_idx % HW
+            base = n_idx * stride_n + hw_idx * stride_hw
             addrs = base + c_offs * stride_c
 
-            in_vals = tl.load(input_ptr + addrs)
-            sub_vals = tl.load(sub_ptr + addrs)
+            in_vals = tl.load(input_ptr + addrs, mask=c_mask, other=0.0)
+            sub_vals = tl.load(sub_ptr + addrs, mask=c_mask, other=0.0)
 
             acc1 += in_vals
             acc2 += in_vals * sub_vals
 
-    tl.atomic_add(out_sum1_ptr + c_offs, acc1)
-    tl.atomic_add(out_sum2_ptr + c_offs, acc2)
+    tl.atomic_add(out_sum1_ptr + c_offs, acc1, mask=c_mask)
+    tl.atomic_add(out_sum2_ptr + c_offs, acc2, mask=c_mask)
 
 
 # ---------------------------------------------------------------------------
@@ -96,22 +115,26 @@ def _post_reduce_pointwise_kernel(
     weight_ptr,      # [C] = rsqrt * primals_weight
     out_ptr,
     scale_factor,
+    HW,
     total_spatial,   # N * H * W
     C: tl.constexpr,
-    stride_spatial,
+    C_BLOCK: tl.constexpr,  # next power of 2 >= C
+    stride_n,
     stride_c,
+    stride_hw,
     BLOCK_SPATIAL: tl.constexpr,
 ):
     """Pointwise kernel. Each program processes BLOCK_SPATIAL spatial positions x all C channels."""
     pid = tl.program_id(0)
     spatial_start = pid * BLOCK_SPATIAL
 
-    c_offs = tl.arange(0, C)
+    c_offs = tl.arange(0, C_BLOCK)
+    c_mask = c_offs < C
 
-    s1 = tl.load(sum1_ptr + c_offs)
-    s2 = tl.load(sum2_ptr + c_offs)
-    rsqrt_val = tl.load(rsqrt_ptr + c_offs)
-    w = tl.load(weight_ptr + c_offs)
+    s1 = tl.load(sum1_ptr + c_offs, mask=c_mask, other=0.0)
+    s2 = tl.load(sum2_ptr + c_offs, mask=c_mask, other=0.0)
+    rsqrt_val = tl.load(rsqrt_ptr + c_offs, mask=c_mask, other=0.0)
+    w = tl.load(weight_ptr + c_offs, mask=c_mask, other=0.0)
 
     s1_scaled = s1 * scale_factor
     rsqrt_sq = rsqrt_val * rsqrt_val
@@ -120,15 +143,17 @@ def _post_reduce_pointwise_kernel(
     for s in range(BLOCK_SPATIAL):
         spatial_idx = spatial_start + s
         if spatial_idx < total_spatial:
-            base = spatial_idx * stride_spatial
+            n_idx = spatial_idx // HW
+            hw_idx = spatial_idx % HW
+            base = n_idx * stride_n + hw_idx * stride_hw
             addrs = base + c_offs * stride_c
 
-            in_val = tl.load(input_ptr + addrs)
-            sub_val = tl.load(sub_ptr + addrs)
+            in_val = tl.load(input_ptr + addrs, mask=c_mask, other=0.0)
+            sub_val = tl.load(sub_ptr + addrs, mask=c_mask, other=0.0)
 
             result = (in_val - sub_val * s2_scaled - s1_scaled) * w
 
-            tl.store(out_ptr + addrs, result)
+            tl.store(out_ptr + addrs, result, mask=c_mask)
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +177,7 @@ def _run_bn_backward_block(input_tensor, sub_tensor, rsqrt_vec, weight_vec, scal
     assert C == C_const
     HW = H * W
     total_spatial = N * HW
+    C_BLOCK = next_power_of_2(C_const)
 
     # Determine layout strides for linearized spatial access
     # For channels-last [N,C,H,W]: strides = (C*H*W, 1, W*C, C)
@@ -163,7 +189,7 @@ def _run_bn_backward_block(input_tensor, sub_tensor, rsqrt_vec, weight_vec, scal
 
     # Check linearizability: stride(2) == W * stride(3)
     assert stride_h == W * stride_w, f"Cannot linearize: stride_h={stride_h}, W*stride_w={W*stride_w}"
-    stride_spatial = stride_w  # distance between consecutive spatial positions
+    stride_hw = stride_w  # distance between consecutive spatial positions within a batch
 
     # Phase 1: Dual reduction
     sum1 = torch.zeros(C, device=input_tensor.device, dtype=torch.float32)
@@ -175,10 +201,13 @@ def _run_bn_backward_block(input_tensor, sub_tensor, rsqrt_vec, weight_vec, scal
     _dual_reduce_kernel[(num_programs,)](
         input_tensor, sub_tensor,
         sum1, sum2,
+        HW,
         total_spatial,
         C=C_const,
-        stride_spatial=stride_spatial,
+        C_BLOCK=C_BLOCK,
+        stride_n=stride_n,
         stride_c=stride_c,
+        stride_hw=stride_hw,
         BLOCK_SPATIAL=BLOCK_SPATIAL,
     )
 
@@ -195,10 +224,13 @@ def _run_bn_backward_block(input_tensor, sub_tensor, rsqrt_vec, weight_vec, scal
         rsqrt_vec, fused_weight,
         out,
         scale_factor,
+        HW,
         total_spatial,
         C=C_const,
-        stride_spatial=stride_spatial,
+        C_BLOCK=C_BLOCK,
+        stride_n=stride_n,
         stride_c=stride_c,
+        stride_hw=stride_hw,
         BLOCK_SPATIAL=PW_BLOCK_SPATIAL,
     )
 
@@ -263,7 +295,8 @@ def prepare_oracle_inputs(*inputs):
     # Block 2 inputs (slice channels [20:40] from the CL copy)
     # In the repro: slice_tensor = copy_default_1[:, 20:40, :, :]
     # copy_default_1 has strides [31360, 1, 1120, 40] (channels-last for 40 channels)
-    slice_cl = copy_cl[:, 20:40, :, :]
+    # Make the slice contiguous so it shares a layout with sub_tensor_20
+    slice_cl = copy_cl[:, 20:40, :, :].contiguous()
     sub_tensor_20 = arg263_1 - arg524_1
     rsqrt_20 = arg264_1  # [20]
     weight_20 = arg49_1   # [20]

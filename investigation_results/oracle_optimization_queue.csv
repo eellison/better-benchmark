@@ -116,3 +116,10 @@ sum_41cdfa051fcc,AT_FLOOR,closed,compile=39.7us beats oracle=48.8us; NFNet struc
 sum_sum_f10bfbcf6729,MULTI_OUTPUT_REDUCTION,needs_work,compile=56.1us vs oracle=50.0us; 1.12x gap; LearningToPaint avgpool-backward dual BN-backward reduction
 sum_sum_sum_335abef71e93,COOPERATIVE_SPLIT_K,needs_work,compile=46.9us vs oracle=37.8us; 1.24x gap; Whisper LayerNorm-backward 5-way split-K reduction
 sum_sum_sum_b30da3bff8d4,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=97.1us vs oracle=136.8us (1.4x slower); GoogleFnet LN-backward+select_scatter cooperative split-K
+amax_sum_sum_0e37ca9164b3,IGNORE_INDEX_CROSS_ENTROPY,needs_work,compile=36.8us vs oracle=33.7us; 1.09x gap; Blenderbot ignore-index cross-entropy mean fused row-reduction
+sum_sum_2f2d7ba72160,COOPERATIVE_SPLIT_K,needs_work,compile=80.0us vs oracle=52.1us; 1.53x gap; DenseNet121 BN-backward cooperative split-K with 9-slice epilogue
+sum_sum_fdefa5604cda,AT_FLOOR,closed,compile=75.7us beats oracle=86.9us; T5 RMSNorm-backward cooperative split-K; Inductor already optimal
+sum_sum_sum_1d10e6314ef6,MULTI_OUTPUT_REDUCTION,needs_work,compile=55.2us vs oracle=45.9us; 1.20x gap; Longformer LN-backward multi-output reduction
+sum_sum_sum_4de1559f24a7,MULTI_OUTPUT_REDUCTION,needs_work,compile=72.5us vs oracle=54.0us; 1.34x gap; MegatronBert LN-backward multi-output reduction
+sum_sum_sum_56cdc50216ea,COOPERATIVE_SPLIT_K,needs_work,compile=63.4us vs oracle=33.4us; 1.90x gap; Swin LN-backward cooperative split-K reduction
+sum_sum_sum_cad02fe18a69,SCATTER_REDUCE,needs_work,compile=94.2us vs oracle=64.2us; 1.47x gap; BERT embedding scatter-reduce with index_put
