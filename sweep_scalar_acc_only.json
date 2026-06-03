@@ -1,0 +1,1848 @@
+{
+  "_metadata": {
+    "commit": "eeaaf9d2a0eceef3af3f786e5422a682d82efe39",
+    "timestamp": "2026-06-01T22:22:20Z",
+    "n_repros": 165
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_17ab35828f89/repro.py": {
+    "default": {
+      "compiled_us": 76.73600316047668,
+      "coord_descent_us": 60.416001826524734,
+      "memcopy_sol_us": 18.400000408291817,
+      "total_bytes": 78716808,
+      "n_kernels": 1,
+      "gap_default": 4.170434861832732,
+      "gap_cd": 3.283478287277577
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_0561785713ab/repro.py": {
+    "default": {
+      "compiled_us": 91.93599969148636,
+      "coord_descent_us": 92.03200042247772,
+      "memcopy_sol_us": 36.639999598264694,
+      "total_bytes": 203424236,
+      "n_kernels": 1,
+      "gap_default": 2.5091703247682497,
+      "gap_cd": 2.5117904320838598
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_0ee54b388f56/repro.py": {
+    "default": {
+      "compiled_us": 12.095999903976917,
+      "coord_descent_us": 9.952000342309475,
+      "memcopy_sol_us": 8.063999935984612,
+      "total_bytes": 14751744,
+      "n_kernels": 1,
+      "gap_default": 1.5,
+      "gap_cd": 1.2341270363730898
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_1a6624550d06/repro.py": {
+    "default": {
+      "compiled_us": 120.54400146007538,
+      "coord_descent_us": 85.91999858617783,
+      "memcopy_sol_us": 29.53599952161312,
+      "total_bytes": 157420376,
+      "n_kernels": 1,
+      "gap_default": 4.0812568869344235,
+      "gap_cd": 2.9089924152830995
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_0f87f6568d0f/repro.py": {
+    "default": {
+      "compiled_us": 216.89599752426147,
+      "coord_descent_us": 174.94399845600128,
+      "memcopy_sol_us": 64.7360011935234,
+      "total_bytes": 404750924,
+      "n_kernels": 1,
+      "gap_default": 3.3504694995890647,
+      "gap_cd": 2.702422071654061
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_230cc68d5501/repro.py": {
+    "default": {
+      "compiled_us": 199.5840072631836,
+      "coord_descent_us": 199.61600005626678,
+      "memcopy_sol_us": 65.47199934720993,
+      "total_bytes": 402653184,
+      "n_kernels": 1,
+      "gap_default": 3.0483872381039303,
+      "gap_cd": 3.048875886585757
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_35490be2986b/repro.py": {
+    "default": {
+      "compiled_us": 120.54400146007538,
+      "coord_descent_us": 85.79199761152267,
+      "memcopy_sol_us": 29.56799976527691,
+      "total_bytes": 157420376,
+      "n_kernels": 1,
+      "gap_default": 4.076839908583734,
+      "gap_cd": 2.9015150937694556
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_3ed297ef02cd/repro.py": {
+    "default": {
+      "compiled_us": 5001.247882843018,
+      "coord_descent_us": 2679.840087890625,
+      "memcopy_sol_us": 1244.223952293396,
+      "total_bytes": 8589934592,
+      "n_kernels": 1,
+      "gap_default": 4.01957209843497,
+      "gap_cd": 2.153824544971227
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_4fb4f9a0bf43/repro.py": {
+    "default": {
+      "compiled_us": 73.5040009021759,
+      "coord_descent_us": 67.32799857854843,
+      "memcopy_sol_us": 35.77600046992302,
+      "total_bytes": 201326592,
+      "n_kernels": 1,
+      "gap_default": 2.0545617155827944,
+      "gap_cd": 1.8819319570154651
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_4bd27b112605/repro.py": {
+    "default": {
+      "compiled_us": 138.2399946451187,
+      "coord_descent_us": 134.97599959373474,
+      "memcopy_sol_us": 26.464000344276428,
+      "total_bytes": 134218240,
+      "n_kernels": 1,
+      "gap_default": 5.223699850616762,
+      "gap_cd": 5.100362675249399
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_55ae6a130879/repro.py": {
+    "default": {
+      "compiled_us": 187.3600035905838,
+      "coord_descent_us": 173.88799786567688,
+      "memcopy_sol_us": 64.67200070619583,
+      "total_bytes": 402653768,
+      "n_kernels": 1,
+      "gap_default": 2.8970806770268047,
+      "gap_cd": 2.688767874302329
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_557afc9e24ea/repro.py": {
+    "default": {
+      "compiled_us": 271.0399925708771,
+      "coord_descent_us": 233.21600258350372,
+      "memcopy_sol_us": 89.02399986982346,
+      "total_bytes": 570425856,
+      "n_kernels": 1,
+      "gap_default": 3.044572171180906,
+      "gap_cd": 2.61969809180139
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_5f0c26b7e967/repro.py": {
+    "default": {
+      "compiled_us": 204.6400010585785,
+      "coord_descent_us": 200.47999918460846,
+      "memcopy_sol_us": 26.75200067460537,
+      "total_bytes": 134218240,
+      "n_kernels": 1,
+      "gap_default": 7.649521377772514,
+      "gap_cd": 7.494018919299606
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_7fea03f0412b/repro.py": {
+    "default": {
+      "compiled_us": 100.16000270843506,
+      "coord_descent_us": 100.22400319576263,
+      "memcopy_sol_us": 35.77600046992302,
+      "total_bytes": 201458152,
+      "n_kernels": 1,
+      "gap_default": 2.7996422571785198,
+      "gap_cd": 2.8014311795423086
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_7493058b895f/repro.py": {
+    "default": {
+      "compiled_us": 72.67200201749802,
+      "coord_descent_us": 60.416001826524734,
+      "memcopy_sol_us": 26.59199945628643,
+      "total_bytes": 134217728,
+      "n_kernels": 1,
+      "gap_default": 2.7328521173054603,
+      "gap_cd": 2.2719616073187834
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_9f4956227a79/repro.py": {
+    "default": {
+      "compiled_us": 71.52000069618225,
+      "coord_descent_us": 56.32000043988228,
+      "memcopy_sol_us": 18.303999677300453,
+      "total_bytes": 78716808,
+      "n_kernels": 1,
+      "gap_default": 3.9073427642635483,
+      "gap_cd": 3.076923155201267
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_ab3238e72dc2/repro.py": {
+    "default": {
+      "compiled_us": 334.78400111198425,
+      "coord_descent_us": 235.35999655723572,
+      "memcopy_sol_us": 122.8799968957901,
+      "total_bytes": 805306880,
+      "n_kernels": 1,
+      "gap_default": 2.7244792445421524,
+      "gap_cd": 1.9153646037022256
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_24355de03713/repro.py": {
+    "default": {
+      "compiled_us": 69.88800317049026,
+      "coord_descent_us": 58.33600088953972,
+      "memcopy_sol_us": 21.344000473618507,
+      "total_bytes": 101711872,
+      "n_kernels": 1,
+      "gap_default": 3.2743628944757965,
+      "gap_cd": 2.7331334143120856
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_a7ede60031ef/repro.py": {
+    "default": {
+      "compiled_us": 110.52799969911575,
+      "coord_descent_us": 90.01599997282028,
+      "memcopy_sol_us": 35.74400022625923,
+      "total_bytes": 201326592,
+      "n_kernels": 1,
+      "gap_default": 3.0922112522234335,
+      "gap_cd": 2.5183527138266486
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_29e1adb86456/repro.py": {
+    "default": {
+      "compiled_us": 191.45600497722626,
+      "coord_descent_us": 187.16800212860107,
+      "memcopy_sol_us": 96.38399630784988,
+      "total_bytes": 620757096,
+      "n_kernels": 1,
+      "gap_default": 1.9863879099359707,
+      "gap_cd": 1.9418991668574068
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_0986fbf8aadc/repro.py": {
+    "default": {
+      "compiled_us": 113.63200098276138,
+      "coord_descent_us": 104.2879968881607,
+      "memcopy_sol_us": 52.06400156021118,
+      "total_bytes": 310378600,
+      "n_kernels": 1,
+      "gap_default": 2.182544514012197,
+      "gap_cd": 2.0030730209538987
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_3e6e6f246ff6/repro.py": {
+    "default": {
+      "compiled_us": 98.01600128412247,
+      "coord_descent_us": 87.87199854850769,
+      "memcopy_sol_us": 35.74400022625923,
+      "total_bytes": 201326696,
+      "n_kernels": 1,
+      "gap_default": 2.742166536025122,
+      "gap_cd": 2.45837057946169
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_0f29a12b9206/repro.py": {
+    "default": {
+      "compiled_us": 61.184000223875046,
+      "coord_descent_us": 56.89600110054016,
+      "memcopy_sol_us": 29.53599952161312,
+      "total_bytes": 155189544,
+      "n_kernels": 1,
+      "gap_default": 2.071505999961279,
+      "gap_cd": 1.9263272623940224
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_5686b4ede363/repro.py": {
+    "default": {
+      "compiled_us": 366.5919899940491,
+      "coord_descent_us": 330.78399300575256,
+      "memcopy_sol_us": 123.03999811410904,
+      "total_bytes": 805306664,
+      "n_kernels": 1,
+      "gap_default": 2.979453800495563,
+      "gap_cd": 2.6884265123198294
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_56d72821daed/repro.py": {
+    "default": {
+      "compiled_us": 71.68000191450119,
+      "coord_descent_us": 65.2799978852272,
+      "memcopy_sol_us": 26.688000187277794,
+      "total_bytes": 134218312,
+      "n_kernels": 1,
+      "gap_default": 2.6858513718338157,
+      "gap_cd": 2.446043069062412
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_64da678446f9/repro.py": {
+    "default": {
+      "compiled_us": 183.23199450969696,
+      "coord_descent_us": 183.1039935350418,
+      "memcopy_sol_us": 64.41599875688553,
+      "total_bytes": 402653288,
+      "n_kernels": 1,
+      "gap_default": 2.844510650238284,
+      "gap_cd": 2.842523551115002
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_747353f99629/repro.py": {
+    "default": {
+      "compiled_us": 79.6160027384758,
+      "coord_descent_us": 73.47200065851212,
+      "memcopy_sol_us": 37.728000432252884,
+      "total_bytes": 205521480,
+      "n_kernels": 1,
+      "gap_default": 2.1102629830976607,
+      "gap_cd": 1.9474130570594044
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_7c109c56b046/repro.py": {
+    "default": {
+      "compiled_us": 70.62400132417679,
+      "coord_descent_us": 70.62400132417679,
+      "memcopy_sol_us": 26.496000587940216,
+      "total_bytes": 135266304,
+      "n_kernels": 1,
+      "gap_default": 2.665458928028619,
+      "gap_cd": 2.665458928028619
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_878cbcb8e8c2/repro.py": {
+    "default": {
+      "compiled_us": 286.75198554992676,
+      "coord_descent_us": 263.16800713539124,
+      "memcopy_sol_us": 132.1280002593994,
+      "total_bytes": 872415528,
+      "n_kernels": 1,
+      "gap_default": 2.1702590290246038,
+      "gap_cd": 1.9917656107617492
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_8b19996123a8/repro.py": {
+    "default": {
+      "compiled_us": 235.52000522613525,
+      "coord_descent_us": 233.37599635124207,
+      "memcopy_sol_us": 239.6160066127777,
+      "total_bytes": 1619001344,
+      "n_kernels": 1,
+      "gap_default": 0.9829059775907975,
+      "gap_cd": 0.9739582912270983
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_a6daa5fac790/repro.py": {
+    "default": {
+      "compiled_us": 65.5359998345375,
+      "coord_descent_us": 54.976001381874084,
+      "memcopy_sol_us": 21.43999934196472,
+      "total_bytes": 101711920,
+      "n_kernels": 1,
+      "gap_default": 3.0567165040095525,
+      "gap_cd": 2.56417924763034
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_d16c257aa03e/repro.py": {
+    "default": {
+      "compiled_us": 67.4239993095398,
+      "coord_descent_us": 67.35999882221222,
+      "memcopy_sol_us": 26.496000587940216,
+      "total_bytes": 135266344,
+      "n_kernels": 1,
+      "gap_default": 2.544685907813127,
+      "gap_cd": 2.5422704305370316
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_d4c975ea57c8/repro.py": {
+    "default": {
+      "compiled_us": 75.55200159549713,
+      "coord_descent_us": 71.3919997215271,
+      "memcopy_sol_us": 39.77600112557411,
+      "total_bytes": 218104000,
+      "n_kernels": 1,
+      "gap_default": 1.8994368327016342,
+      "gap_cd": 1.7948511087411796
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_d811783d738f/repro.py": {
+    "default": {
+      "compiled_us": 53.0879981815815,
+      "coord_descent_us": 47.968000173568726,
+      "memcopy_sol_us": 21.376000717282295,
+      "total_bytes": 100663592,
+      "n_kernels": 1,
+      "gap_default": 2.4835327657273303,
+      "gap_cd": 2.2440119088687647
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_e1163072ce50/repro.py": {
+    "default": {
+      "compiled_us": 423.74399304389954,
+      "coord_descent_us": 386.8800103664398,
+      "memcopy_sol_us": 185.18400192260742,
+      "total_bytes": 1241514280,
+      "n_kernels": 1,
+      "gap_default": 2.2882321833664214,
+      "gap_cd": 2.0891654049474844
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_e20fbe84102b/repro.py": {
+    "default": {
+      "compiled_us": 247.74399399757385,
+      "coord_descent_us": 223.00800681114197,
+      "memcopy_sol_us": 84.09599959850311,
+      "total_bytes": 536871208,
+      "n_kernels": 1,
+      "gap_default": 2.9459664571486184,
+      "gap_cd": 2.6518265776712577
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_any_fd11cc31d3d3/repro.py": {
+    "default": {
+      "compiled_us": 75.83999633789062,
+      "coord_descent_us": 76.73600316047668,
+      "memcopy_sol_us": 26.496000587940216,
+      "total_bytes": 134217728,
+      "n_kernels": 1,
+      "gap_default": 2.8623186388518413,
+      "gap_cd": 2.8961353207171747
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_c79194c2980f/repro.py": {
+    "default": {
+      "compiled_us": 495.5199956893921,
+      "coord_descent_us": 347.9680120944977,
+      "memcopy_sol_us": 181.31199479103088,
+      "total_bytes": 1207960544,
+      "n_kernels": 1,
+      "gap_default": 2.732968639281136,
+      "gap_cd": 1.9191670826607161
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_f5253e4f250e/repro.py": {
+    "default": {
+      "compiled_us": 399.1680145263672,
+      "coord_descent_us": 345.91999650001526,
+      "memcopy_sol_us": 128.06400656700134,
+      "total_bytes": 838861792,
+      "n_kernels": 1,
+      "gap_default": 3.116941482832086,
+      "gap_cd": 2.7011492594449997
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_03851ba8cf43/repro.py": {
+    "default": {
+      "compiled_us": 64.57599997520447,
+      "coord_descent_us": 38.62399980425835,
+      "memcopy_sol_us": 20.479999482631683,
+      "total_bytes": 98319360,
+      "n_kernels": 1,
+      "gap_default": 3.15312507844392,
+      "gap_cd": 1.8859375380850916
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_2cec1142a8d5/repro.py": {
+    "default": {
+      "compiled_us": 65.31199812889099,
+      "coord_descent_us": 40.70400074124336,
+      "memcopy_sol_us": 20.54399996995926,
+      "total_bytes": 98319360,
+      "n_kernels": 1,
+      "gap_default": 3.1791276394272945,
+      "gap_cd": 1.9813084501929195
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_3b7ac433d31c/repro.py": {
+    "default": {
+      "compiled_us": 77.66400277614594,
+      "coord_descent_us": 75.52000135183334,
+      "memcopy_sol_us": 69.5360004901886,
+      "total_bytes": 434688000,
+      "n_kernels": 1,
+      "gap_default": 1.1168891254696793,
+      "gap_cd": 1.0860561553650052
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_432300e645a8/repro.py": {
+    "default": {
+      "compiled_us": 72.73600250482559,
+      "coord_descent_us": 55.1999993622303,
+      "memcopy_sol_us": 31.679999083280563,
+      "total_bytes": 174080000,
+      "n_kernels": 1,
+      "gap_default": 2.2959597414639052,
+      "gap_cd": 1.7424242727128945
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_53257b9cde07/repro.py": {
+    "default": {
+      "compiled_us": 50.97600072622299,
+      "coord_descent_us": 30.432000756263733,
+      "memcopy_sol_us": 17.216000705957413,
+      "total_bytes": 71413760,
+      "n_kernels": 1,
+      "gap_default": 2.9609664635168893,
+      "gap_cd": 1.7676579640086252
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_56f34d7fd13f/repro.py": {
+    "default": {
+      "compiled_us": 65.24799764156342,
+      "coord_descent_us": 40.73600098490715,
+      "memcopy_sol_us": 20.54399996995926,
+      "total_bytes": 98319360,
+      "n_kernels": 1,
+      "gap_default": 3.1760123509040685,
+      "gap_cd": 1.9828660944545327
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_86d0e8c4c31b/repro.py": {
+    "default": {
+      "compiled_us": 343.8720107078552,
+      "coord_descent_us": 343.9039885997772,
+      "memcopy_sol_us": 346.24001383781433,
+      "total_bytes": 2359298048,
+      "n_kernels": 1,
+      "gap_default": 0.9931608045421685,
+      "gap_cd": 0.9932531621283629
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/amax_sum_f0661488d68c/repro.py": {
+    "default": {
+      "compiled_us": 3405.7600498199463,
+      "coord_descent_us": 1399.839997291565,
+      "memcopy_sol_us": 627.5839805603027,
+      "total_bytes": 4295049216,
+      "n_kernels": 1,
+      "gap_default": 5.426779770221838,
+      "gap_cd": 2.2305221940843634
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_a83e003db20c/repro.py": {
+    "default": {
+      "compiled_us": 26.30399912595749,
+      "coord_descent_us": 19.999999552965164,
+      "memcopy_sol_us": 9.983999654650688,
+      "total_bytes": 29509632,
+      "n_kernels": 1,
+      "gap_default": 2.634615388203135,
+      "gap_cd": 2.003205152721423
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/any_amax_sum_727a4ae37fb6/repro.py": {
+    "default": {
+      "compiled_us": 75.52000135183334,
+      "coord_descent_us": 75.55200159549713,
+      "memcopy_sol_us": 66.3359984755516,
+      "total_bytes": 406847488,
+      "n_kernels": 1,
+      "gap_default": 1.1384467421511193,
+      "gap_cd": 1.1389291385030125
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_c9e1a8113328/repro.py": {
+    "default": {
+      "compiled_us": 12.223999947309494,
+      "coord_descent_us": 13.344000093638897,
+      "memcopy_sol_us": 10.015999898314476,
+      "total_bytes": 29097984,
+      "n_kernels": 1,
+      "gap_default": 1.220447291474772,
+      "gap_cd": 1.3322683934815602
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_148ad2fc17ca/repro.py": {
+    "default": {
+      "compiled_us": 42.78400167822838,
+      "coord_descent_us": 30.49599938094616,
+      "memcopy_sol_us": 11.071999557316303,
+      "total_bytes": 32778240,
+      "n_kernels": 1,
+      "gap_default": 3.8641621557830534,
+      "gap_cd": 2.7543353143285314
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_f7170c220032/repro.py": {
+    "default": {
+      "compiled_us": 89.82399851083755,
+      "coord_descent_us": 75.55200159549713,
+      "memcopy_sol_us": 20.416000857949257,
+      "total_bytes": 98311680,
+      "n_kernels": 1,
+      "gap_default": 4.399686262545552,
+      "gap_cd": 3.700626881884162
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_mean_fbdbd1645f6a/repro.py": {
+    "default": {
+      "compiled_us": 58.30400064587593,
+      "coord_descent_us": 52.25599929690361,
+      "memcopy_sol_us": 21.31200022995472,
+      "total_bytes": 100800448,
+      "n_kernels": 1,
+      "gap_default": 2.735735736523113,
+      "gap_cd": 2.4519518925049595
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_var_5f74618c3485/repro.py": {
+    "default": {
+      "compiled_us": 118.59200149774551,
+      "coord_descent_us": 77.504001557827,
+      "memcopy_sol_us": 28.704000636935234,
+      "total_bytes": 151001576,
+      "n_kernels": 1,
+      "gap_default": 4.131549570311316,
+      "gap_cd": 2.700111477077441
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_var_e46ebb5a28fe/repro.py": {
+    "default": {
+      "compiled_us": 56.223999708890915,
+      "coord_descent_us": 56.2559999525547,
+      "memcopy_sol_us": 21.27999998629093,
+      "total_bytes": 101334016,
+      "n_kernels": 1,
+      "gap_default": 2.642105251180062,
+      "gap_cd": 2.6436090220298927
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_0a306c604828/repro.py": {
+    "default": {
+      "compiled_us": 72.80000299215317,
+      "coord_descent_us": 70.56000083684921,
+      "memcopy_sol_us": 32.67199918627739,
+      "total_bytes": 177209344,
+      "n_kernels": 1,
+      "gap_default": 2.2282077866459424,
+      "gap_cd": 2.159647483906807
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_226a109e3e14/repro.py": {
+    "default": {
+      "compiled_us": 9.855999611318111,
+      "coord_descent_us": 9.119999594986439,
+      "memcopy_sol_us": 7.168000098317862,
+      "total_bytes": 10488320,
+      "n_kernels": 1,
+      "gap_default": 1.3749999269156052,
+      "gap_cd": 1.2723213546169816
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/mean_var_d333e54cfcb6/repro.py": {
+    "default": {
+      "compiled_us": 62.39999830722809,
+      "coord_descent_us": 48.79999905824661,
+      "memcopy_sol_us": 28.76799926161766,
+      "total_bytes": 151001576,
+      "n_kernels": 1,
+      "gap_default": 2.1690767487776714,
+      "gap_cd": 1.6963292655306654
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_26086f65d617/repro.py": {
+    "default": {
+      "compiled_us": 36.67199984192848,
+      "coord_descent_us": 36.607999354600906,
+      "memcopy_sol_us": 24.607999250292778,
+      "total_bytes": 123076608,
+      "n_kernels": 1,
+      "gap_default": 1.4902471131005164,
+      "gap_cd": 1.4876463129835862
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_08701284b477/repro.py": {
+    "default": {
+      "compiled_us": 20.160000771284103,
+      "coord_descent_us": 18.36800016462803,
+      "memcopy_sol_us": 13.120000250637531,
+      "total_bytes": 48170240,
+      "n_kernels": 1,
+      "gap_default": 1.536585395286443,
+      "gap_cd": 1.3999999858030099
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_3229f6e30711/repro.py": {
+    "default": {
+      "compiled_us": 72.60800153017044,
+      "coord_descent_us": 72.7040022611618,
+      "memcopy_sol_us": 28.575999662280083,
+      "total_bytes": 151388648,
+      "n_kernels": 1,
+      "gap_default": 2.54087354382258,
+      "gap_cd": 2.5442330319288904
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_0dbfa02ebb68/repro.py": {
+    "default": {
+      "compiled_us": 38.656000047922134,
+      "coord_descent_us": 38.784001022577286,
+      "memcopy_sol_us": 16.224000602960587,
+      "total_bytes": 61538304,
+      "n_kernels": 1,
+      "gap_default": 2.382642912431112,
+      "gap_cd": 2.3905325185638806
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_3698b0e606e1/repro.py": {
+    "default": {
+      "compiled_us": 11.680000461637974,
+      "coord_descent_us": 11.807999573647976,
+      "memcopy_sol_us": 9.344000369310379,
+      "total_bytes": 25171968,
+      "n_kernels": 1,
+      "gap_default": 1.25,
+      "gap_cd": 1.2636985345623921
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_3bd84c5c45de/repro.py": {
+    "default": {
+      "compiled_us": 21.407999098300934,
+      "coord_descent_us": 21.47199958562851,
+      "memcopy_sol_us": 10.143999941647053,
+      "total_bytes": 24092160,
+      "n_kernels": 1,
+      "gap_default": 2.1104100178873795,
+      "gap_cd": 2.116719214229625
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_42ab411e21f6/repro.py": {
+    "default": {
+      "compiled_us": 46.01600021123886,
+      "coord_descent_us": 46.879999339580536,
+      "memcopy_sol_us": 29.503999277949333,
+      "total_bytes": 154159104,
+      "n_kernels": 1,
+      "gap_default": 1.5596529737455034,
+      "gap_cd": 1.5889371097774416
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_42d933d52272/repro.py": {
+    "default": {
+      "compiled_us": 34.591998904943466,
+      "coord_descent_us": 32.44800120592117,
+      "memcopy_sol_us": 23.455999791622162,
+      "total_bytes": 115617792,
+      "n_kernels": 1,
+      "gap_default": 1.4747612215318477,
+      "gap_cd": 1.3833561346428178
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_485ad74a8b0e/repro.py": {
+    "default": {
+      "compiled_us": 757.5039863586426,
+      "coord_descent_us": 750.6240010261536,
+      "memcopy_sol_us": 166.81599617004395,
+      "total_bytes": 1104838656,
+      "n_kernels": 1,
+      "gap_default": 4.540955326529241,
+      "gap_cd": 4.499712367278044
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_556aac88a856/repro.py": {
+    "default": {
+      "compiled_us": 13.98400031030178,
+      "coord_descent_us": 14.047999866306782,
+      "memcopy_sol_us": 7.935999892652035,
+      "total_bytes": 8033280,
+      "n_kernels": 1,
+      "gap_default": 1.762096837129447,
+      "gap_cd": 1.7701612974206142
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_557274333bb2/repro.py": {
+    "default": {
+      "compiled_us": 15.968000516295433,
+      "coord_descent_us": 15.39199985563755,
+      "memcopy_sol_us": 8.191999979317188,
+      "total_bytes": 16058880,
+      "n_kernels": 1,
+      "gap_default": 1.9492188179456493,
+      "gap_cd": 1.878906237121413
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_5af8bce2a228/repro.py": {
+    "default": {
+      "compiled_us": 46.879999339580536,
+      "coord_descent_us": 45.98399996757507,
+      "memcopy_sol_us": 26.655999943614006,
+      "total_bytes": 141295616,
+      "n_kernels": 1,
+      "gap_default": 1.758703460337139,
+      "gap_cd": 1.7250900384471035
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_57287c224f10/repro.py": {
+    "default": {
+      "compiled_us": 20.191999152302742,
+      "coord_descent_us": 20.255999639630318,
+      "memcopy_sol_us": 8.991999551653862,
+      "total_bytes": 19300352,
+      "n_kernels": 1,
+      "gap_default": 2.2455516191155627,
+      "gap_cd": 2.252669111388547
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_69250a3ef9ac/repro.py": {
+    "default": {
+      "compiled_us": 183.07200074195862,
+      "coord_descent_us": 183.1039935350418,
+      "memcopy_sol_us": 64.4799992442131,
+      "total_bytes": 402653672,
+      "n_kernels": 1,
+      "gap_default": 2.839206000120864,
+      "gap_cd": 2.839702166272511
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_6a479e2e07d2/repro.py": {
+    "default": {
+      "compiled_us": 72.64000177383423,
+      "coord_descent_us": 72.64000177383423,
+      "memcopy_sol_us": 25.439999997615814,
+      "total_bytes": 150994944,
+      "n_kernels": 1,
+      "gap_default": 2.8553459819434712,
+      "gap_cd": 2.8553459819434712
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_72ba9dfd2891/repro.py": {
+    "default": {
+      "compiled_us": 16.095999628305435,
+      "coord_descent_us": 16.16000011563301,
+      "memcopy_sol_us": 8.128000423312187,
+      "total_bytes": 14459904,
+      "n_kernels": 1,
+      "gap_default": 1.9803148117635385,
+      "gap_cd": 1.988188887058123
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_6d842b54b40d/repro.py": {
+    "default": {
+      "compiled_us": 265.9519910812378,
+      "coord_descent_us": 256.8640112876892,
+      "memcopy_sol_us": 39.744000881910324,
+      "total_bytes": 227291136,
+      "n_kernels": 1,
+      "gap_default": 6.691626036126804,
+      "gap_cd": 6.462963103561175
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_7a4083b7e3d1/repro.py": {
+    "default": {
+      "compiled_us": 7.712000049650669,
+      "coord_descent_us": 7.168000098317862,
+      "memcopy_sol_us": 6.976000033318996,
+      "total_bytes": 1606656,
+      "n_kernels": 1,
+      "gap_default": 1.1055045889931716,
+      "gap_cd": 1.0275229449658585
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_77c9cc82b91f/repro.py": {
+    "default": {
+      "compiled_us": 77.56800204515457,
+      "coord_descent_us": 77.56800204515457,
+      "memcopy_sol_us": 39.03999924659729,
+      "total_bytes": 226493408,
+      "n_kernels": 1,
+      "gap_default": 1.9868853366311314,
+      "gap_cd": 1.9868853366311314
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_84889e450e5e/repro.py": {
+    "default": {
+      "compiled_us": 57.0559985935688,
+      "coord_descent_us": 52.799999713897705,
+      "memcopy_sol_us": 51.231998950242996,
+      "total_bytes": 308837376,
+      "n_kernels": 1,
+      "gap_default": 1.1136789460232097,
+      "gap_cd": 1.0306058868633559
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_83e53cefde12/repro.py": {
+    "default": {
+      "compiled_us": 17.376000061631203,
+      "coord_descent_us": 17.40800030529499,
+      "memcopy_sol_us": 13.088000006973743,
+      "total_bytes": 42860546,
+      "n_kernels": 1,
+      "gap_default": 1.3276283658597694,
+      "gap_cd": 1.330073372250871
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_849c8a7e937a/repro.py": {
+    "default": {
+      "compiled_us": 9.247999638319016,
+      "coord_descent_us": 9.920000098645687,
+      "memcopy_sol_us": 7.968000136315823,
+      "total_bytes": 12044800,
+      "n_kernels": 1,
+      "gap_default": 1.1606425050332678,
+      "gap_cd": 1.244979910759943
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_8be04df3df80/repro.py": {
+    "default": {
+      "compiled_us": 80.92799782752991,
+      "coord_descent_us": 79.64800298213959,
+      "memcopy_sol_us": 34.88000109791756,
+      "total_bytes": 192683520,
+      "n_kernels": 1,
+      "gap_default": 2.3201833509220147,
+      "gap_cd": 2.2834862521519477
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_9e64ab4c6018/repro.py": {
+    "default": {
+      "compiled_us": 54.207999259233475,
+      "coord_descent_us": 54.368000477552414,
+      "memcopy_sol_us": 28.575999662280083,
+      "total_bytes": 150995456,
+      "n_kernels": 1,
+      "gap_default": 1.8969764802589661,
+      "gap_cd": 1.902575627102817
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_976768b988b8/repro.py": {
+    "default": {
+      "compiled_us": 24.320000782608986,
+      "coord_descent_us": 24.25600029528141,
+      "memcopy_sol_us": 8.1599997356534,
+      "total_bytes": 13448960,
+      "n_kernels": 1,
+      "gap_default": 2.980392349321761,
+      "gap_cd": 2.9725491520912586
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_a5ce2f1040ee/repro.py": {
+    "default": {
+      "compiled_us": 17.311999574303627,
+      "coord_descent_us": 16.256000846624374,
+      "memcopy_sol_us": 8.0960001796484,
+      "total_bytes": 8434944,
+      "n_kernels": 1,
+      "gap_default": 2.1383398209182682,
+      "gap_cd": 2.00790519835813
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_b8e2463e8d92/repro.py": {
+    "default": {
+      "compiled_us": 14.047999866306782,
+      "coord_descent_us": 14.14399966597557,
+      "memcopy_sol_us": 7.296000141650438,
+      "total_bytes": 7631616,
+      "n_kernels": 1,
+      "gap_default": 1.9254385407850285,
+      "gap_cd": 1.9385964078087363
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_d619d8716902/repro.py": {
+    "default": {
+      "compiled_us": 16.127999871969223,
+      "coord_descent_us": 16.00000075995922,
+      "memcopy_sol_us": 8.128000423312187,
+      "total_bytes": 8836608,
+      "n_kernels": 1,
+      "gap_default": 1.9842518494108308,
+      "gap_cd": 1.968503927985669
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_de5d79bbec4a/repro.py": {
+    "default": {
+      "compiled_us": 34.52799841761589,
+      "coord_descent_us": 30.559999868273735,
+      "memcopy_sol_us": 29.56799976527691,
+      "total_bytes": 154424832,
+      "n_kernels": 1,
+      "gap_default": 1.1677488735022157,
+      "gap_cd": 1.033549787299504
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_e0eff9609cf0/repro.py": {
+    "default": {
+      "compiled_us": 22.175999358296394,
+      "coord_descent_us": 22.336000576615334,
+      "memcopy_sol_us": 13.21600005030632,
+      "total_bytes": 48184320,
+      "n_kernels": 1,
+      "gap_default": 1.6779660467527313,
+      "gap_cd": 1.690072676422064
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_e33f44c6dd73/repro.py": {
+    "default": {
+      "compiled_us": 267.90401339530945,
+      "coord_descent_us": 265.0879919528961,
+      "memcopy_sol_us": 62.3680017888546,
+      "total_bytes": 386334720,
+      "n_kernels": 1,
+      "gap_default": 4.295536263969017,
+      "gap_cd": 4.250384561787714
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_e947949b6a0b/repro.py": {
+    "default": {
+      "compiled_us": 62.3680017888546,
+      "coord_descent_us": 61.40799820423126,
+      "memcopy_sol_us": 26.559999212622643,
+      "total_bytes": 134217728,
+      "n_kernels": 1,
+      "gap_default": 2.3481929080485138,
+      "gap_cd": 2.312048193700514
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_a2382a85ee99/repro.py": {
+    "default": {
+      "compiled_us": 122.65600264072418,
+      "coord_descent_us": 79.6160027384758,
+      "memcopy_sol_us": 9.983999654650688,
+      "total_bytes": 25968592,
+      "n_kernels": 1,
+      "gap_default": 12.28525709970245,
+      "gap_cd": 7.974359524480707
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_ece0de807834/repro.py": {
+    "default": {
+      "compiled_us": 63.26399743556976,
+      "coord_descent_us": 63.26399743556976,
+      "memcopy_sol_us": 34.68799963593483,
+      "total_bytes": 192691200,
+      "n_kernels": 1,
+      "gap_default": 1.8238006832204816,
+      "gap_cd": 1.8238006832204816
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_b0c74cbb35c4/repro.py": {
+    "default": {
+      "compiled_us": 24.288000538945198,
+      "coord_descent_us": 24.288000538945198,
+      "memcopy_sol_us": 13.183999806642532,
+      "total_bytes": 48172800,
+      "n_kernels": 1,
+      "gap_default": 1.842233077605789,
+      "gap_cd": 1.842233077605789
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_bc30b7a4c3fd/repro.py": {
+    "default": {
+      "compiled_us": 24.320000782608986,
+      "coord_descent_us": 24.064000695943832,
+      "memcopy_sol_us": 12.160000391304493,
+      "total_bytes": 38710272,
+      "n_kernels": 1,
+      "gap_default": 2.0,
+      "gap_cd": 1.9789473619714506
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_f2b2f0c4db0c/repro.py": {
+    "default": {
+      "compiled_us": 15.48799965530634,
+      "coord_descent_us": 13.60000018030405,
+      "memcopy_sol_us": 8.991999551653862,
+      "total_bytes": 19283968,
+      "n_kernels": 1,
+      "gap_default": 1.7224199763730743,
+      "gap_cd": 1.5124556114777228
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_f564ff7f54c2/repro.py": {
+    "default": {
+      "compiled_us": 34.52799841761589,
+      "coord_descent_us": 33.72799977660179,
+      "memcopy_sol_us": 13.120000250637531,
+      "total_bytes": 48176640,
+      "n_kernels": 1,
+      "gap_default": 2.6317071461898864,
+      "gap_cd": 2.570731641179875
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_ffe1ef7f99e0/repro.py": {
+    "default": {
+      "compiled_us": 11.872000060975552,
+      "coord_descent_us": 10.143999941647053,
+      "memcopy_sol_us": 8.031999692320824,
+      "total_bytes": 16057600,
+      "n_kernels": 1,
+      "gap_default": 1.478087713614587,
+      "gap_cd": 1.2629482482855987
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_f466fd2ff03f/repro.py": {
+    "default": {
+      "compiled_us": 1610.751986503601,
+      "coord_descent_us": 1591.3280248641968,
+      "memcopy_sol_us": 1433.5360527038574,
+      "total_bytes": 9881321472,
+      "n_kernels": 1,
+      "gap_default": 1.1236215395249312,
+      "gap_cd": 1.110071854741791
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_17a342400e41/repro.py": {
+    "default": {
+      "compiled_us": 59.26400050520897,
+      "coord_descent_us": 55.1999993622303,
+      "memcopy_sol_us": 54.11199852824211,
+      "total_bytes": 330825732,
+      "n_kernels": 1,
+      "gap_default": 1.095209974074011,
+      "gap_cd": 1.0201064618491285
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/pointwise_fc46ae4ec316/repro.py": {
+    "default": {
+      "compiled_us": 14.047999866306782,
+      "coord_descent_us": 12.000000104308128,
+      "memcopy_sol_us": 9.02399979531765,
+      "total_bytes": 14452224,
+      "n_kernels": 1,
+      "gap_default": 1.556737609147107,
+      "gap_cd": 1.3297872757637537
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_031c8d6c51f7/repro.py": {
+    "default": {
+      "compiled_us": 71.45600020885468,
+      "coord_descent_us": 64.38399851322174,
+      "memcopy_sol_us": 20.51199972629547,
+      "total_bytes": 94388224,
+      "n_kernels": 1,
+      "gap_default": 3.48361940143999,
+      "gap_cd": 3.1388455232224053
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_1ee37394fb37/repro.py": {
+    "default": {
+      "compiled_us": 120.64000219106674,
+      "coord_descent_us": 94.01600062847137,
+      "memcopy_sol_us": 19.29599978029728,
+      "total_bytes": 88580000,
+      "n_kernels": 1,
+      "gap_default": 6.252073153226794,
+      "gap_cd": 4.872305229007571
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_22b5cd24890b/repro.py": {
+    "default": {
+      "compiled_us": 237.44000494480133,
+      "coord_descent_us": 237.37600445747375,
+      "memcopy_sol_us": 238.52799832820892,
+      "total_bytes": 1610612736,
+      "n_kernels": 1,
+      "gap_default": 0.9954387183432004,
+      "gap_cd": 0.9951704039827222
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_6eb0b2e3c35e/repro.py": {
+    "default": {
+      "compiled_us": 145.1839953660965,
+      "coord_descent_us": 102.20800340175629,
+      "memcopy_sol_us": 101.31199657917023,
+      "total_bytes": 657195012,
+      "n_kernels": 1,
+      "gap_default": 1.4330385370763323,
+      "gap_cd": 1.0088440347919299
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_403da67893be/repro.py": {
+    "default": {
+      "compiled_us": 571.295976638794,
+      "coord_descent_us": 446.3360011577606,
+      "memcopy_sol_us": 275.39199590682983,
+      "total_bytes": 1867022344,
+      "n_kernels": 1,
+      "gap_default": 2.0744828648980556,
+      "gap_cd": 1.62072975174182
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_c7a56ee42903/repro.py": {
+    "default": {
+      "compiled_us": 7.199999876320362,
+      "coord_descent_us": 7.712000049650669,
+      "memcopy_sol_us": 6.0800001956522465,
+      "total_bytes": 516000,
+      "n_kernels": 1,
+      "gap_default": 1.1842104678662704,
+      "gap_cd": 1.2684210199804682
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_e00c7291b6ee/repro.py": {
+    "default": {
+      "compiled_us": 1569.823980331421,
+      "coord_descent_us": 1565.6960010528564,
+      "memcopy_sol_us": 956.4160108566284,
+      "total_bytes": 6587547656,
+      "n_kernels": 1,
+      "gap_default": 1.6413610421738805,
+      "gap_cd": 1.6370449503982238
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_77824d392401/repro.py": {
+    "default": {
+      "compiled_us": 2657.248020172119,
+      "coord_descent_us": 1933.344006538391,
+      "memcopy_sol_us": 1248.255968093872,
+      "total_bytes": 8590065666,
+      "n_kernels": 1,
+      "gap_default": 2.1287685283250233,
+      "gap_cd": 1.5488361810043425
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_0324c264adf7/repro.py": {
+    "default": {
+      "compiled_us": 24.320000782608986,
+      "coord_descent_us": 20.128000527620316,
+      "memcopy_sol_us": 12.032000347971916,
+      "total_bytes": 39280648,
+      "n_kernels": 2,
+      "gap_default": 2.0212766023322386,
+      "gap_cd": 1.672872335896586
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_a8c7f14e9218/repro.py": {
+    "default": {
+      "compiled_us": 77.66400277614594,
+      "coord_descent_us": 66.59200042486191,
+      "memcopy_sol_us": 64.44799900054932,
+      "total_bytes": 393674760,
+      "n_kernels": 1,
+      "gap_default": 1.2050646099265856,
+      "gap_cd": 1.0332671527054598
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_195fab49a949/repro.py": {
+    "default": {
+      "compiled_us": 77.60000228881836,
+      "coord_descent_us": 71.45600020885468,
+      "memcopy_sol_us": 64.44799900054932,
+      "total_bytes": 402685952,
+      "n_kernels": 1,
+      "gap_default": 1.2040715536902387,
+      "gap_cd": 1.1087388486374206
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_2b7bf2b45160/repro.py": {
+    "default": {
+      "compiled_us": 3600.383996963501,
+      "coord_descent_us": 2568.2239532470703,
+      "memcopy_sol_us": 1250.3679990768433,
+      "total_bytes": 8590000130,
+      "n_kernels": 1,
+      "gap_default": 2.8794594868244334,
+      "gap_cd": 2.053974474029414
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_a21529a67761/repro.py": {
+    "default": {
+      "compiled_us": 85.82399785518646,
+      "coord_descent_us": 85.75999736785889,
+      "memcopy_sol_us": 25.599999353289604,
+      "total_bytes": 130114560,
+      "n_kernels": 1,
+      "gap_default": 3.3525000009094947,
+      "gap_cd": 3.3499999818101056
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_9c4f6ec62bfe/repro.py": {
+    "default": {
+      "compiled_us": 395.26399970054626,
+      "coord_descent_us": 384.92798805236816,
+      "memcopy_sol_us": 347.0720052719116,
+      "total_bytes": 2363908098,
+      "n_kernels": 1,
+      "gap_default": 1.1388530152147502,
+      "gap_cd": 1.1090724178425122
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_c50720f2fd4d/repro.py": {
+    "default": {
+      "compiled_us": 73.53600114583969,
+      "coord_descent_us": 65.37599861621857,
+      "memcopy_sol_us": 20.51199972629547,
+      "total_bytes": 97340164,
+      "n_kernels": 1,
+      "gap_default": 3.585023504635182,
+      "gap_cd": 3.1872074633664043
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_cc11724ac17a/repro.py": {
+    "default": {
+      "compiled_us": 63.231997191905975,
+      "coord_descent_us": 54.368000477552414,
+      "memcopy_sol_us": 45.951999723911285,
+      "total_bytes": 268468224,
+      "n_kernels": 1,
+      "gap_default": 1.3760445154033847,
+      "gap_cd": 1.1831476498129816
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_6b931086c555/repro.py": {
+    "default": {
+      "compiled_us": 358.271986246109,
+      "coord_descent_us": 284.60800647735596,
+      "memcopy_sol_us": 117.69600212574005,
+      "total_bytes": 772677124,
+      "n_kernels": 1,
+      "gap_default": 3.04404550515956,
+      "gap_cd": 2.4181620559489874
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_f10bfbcf6729/repro.py": {
+    "default": {
+      "compiled_us": 63.231997191905975,
+      "coord_descent_us": 55.03999814391136,
+      "memcopy_sol_us": 20.447999238967896,
+      "total_bytes": 102768640,
+      "n_kernels": 1,
+      "gap_default": 3.0923317461497315,
+      "gap_cd": 2.6917057997058826
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_b35553d96630/repro.py": {
+    "default": {
+      "compiled_us": 102.20800340175629,
+      "coord_descent_us": 98.11200201511383,
+      "memcopy_sol_us": 66.3679987192154,
+      "total_bytes": 411847680,
+      "n_kernels": 1,
+      "gap_default": 1.5400193673786973,
+      "gap_cd": 1.4783028554198012
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_0bb837cbf30a/repro.py": {
+    "default": {
+      "compiled_us": 64.54399973154068,
+      "coord_descent_us": 64.51199948787689,
+      "memcopy_sol_us": 25.472000241279602,
+      "total_bytes": 125849600,
+      "n_kernels": 1,
+      "gap_default": 2.5339195634483973,
+      "gap_cd": 2.5326632724873157
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_e06c904e550e/repro.py": {
+    "default": {
+      "compiled_us": 184.2239946126938,
+      "coord_descent_us": 155.5200070142746,
+      "memcopy_sol_us": 36.83200106024742,
+      "total_bytes": 207638528,
+      "n_kernels": 1,
+      "gap_default": 5.001737329214126,
+      "gap_cd": 4.222415359944331
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_092e6409d231/repro.py": {
+    "default": {
+      "compiled_us": 100.22400319576263,
+      "coord_descent_us": 98.14400225877762,
+      "memcopy_sol_us": 65.60000032186508,
+      "total_bytes": 411847680,
+      "n_kernels": 1,
+      "gap_default": 1.5278049192685301,
+      "gap_cd": 1.4960975880676226
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_0e7d43725d4d/repro.py": {
+    "default": {
+      "compiled_us": 93.88799965381622,
+      "coord_descent_us": 88.95999938249588,
+      "memcopy_sol_us": 50.11200159788132,
+      "total_bytes": 302127104,
+      "n_kernels": 1,
+      "gap_default": 1.8735631517417917,
+      "gap_cd": 1.7752234304338188
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_0c9738dea136/repro.py": {
+    "default": {
+      "compiled_us": 194.2719966173172,
+      "coord_descent_us": 69.40799951553345,
+      "memcopy_sol_us": 37.79200091958046,
+      "total_bytes": 218372096,
+      "n_kernels": 1,
+      "gap_default": 5.1405586338420814,
+      "gap_cd": 1.8365791126865787
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_1139e33ee710/repro.py": {
+    "default": {
+      "compiled_us": 30.46399913728237,
+      "coord_descent_us": 30.46399913728237,
+      "memcopy_sol_us": 29.56799976527691,
+      "total_bytes": 154144768,
+      "n_kernels": 1,
+      "gap_default": 1.0303030093045955,
+      "gap_cd": 1.0303030093045955
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_26f78838cb62/repro.py": {
+    "default": {
+      "compiled_us": 18.015999346971512,
+      "coord_descent_us": 18.17600056529045,
+      "memcopy_sol_us": 12.095999903976917,
+      "total_bytes": 38787072,
+      "n_kernels": 1,
+      "gap_default": 1.4894179472544655,
+      "gap_cd": 1.5026455613077967
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_15e821204e82/repro.py": {
+    "default": {
+      "compiled_us": 32.416000962257385,
+      "coord_descent_us": 32.32000023126602,
+      "memcopy_sol_us": 29.56799976527691,
+      "total_bytes": 155547648,
+      "n_kernels": 1,
+      "gap_default": 1.0963203875672718,
+      "gap_cd": 1.0930736095723632
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_2f98fd23fbea/repro.py": {
+    "default": {
+      "compiled_us": 95.90400010347366,
+      "coord_descent_us": 96.00000083446503,
+      "memcopy_sol_us": 95.32800316810608,
+      "total_bytes": 618169344,
+      "n_kernels": 1,
+      "gap_default": 1.006042263723408,
+      "gap_cd": 1.0070493207035283
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_3c8a0f3690b9/repro.py": {
+    "default": {
+      "compiled_us": 101.34399682283401,
+      "coord_descent_us": 69.37599927186966,
+      "memcopy_sol_us": 29.53599952161312,
+      "total_bytes": 155547648,
+      "n_kernels": 1,
+      "gap_default": 3.4312025482217057,
+      "gap_cd": 2.348862418592044
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_41a46a395e3a/repro.py": {
+    "default": {
+      "compiled_us": 30.400000512599945,
+      "coord_descent_us": 30.33600002527237,
+      "memcopy_sol_us": 28.831999748945236,
+      "total_bytes": 154543104,
+      "n_kernels": 1,
+      "gap_default": 1.054384044717955,
+      "gap_cd": 1.0521642719694513
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_4f2b9b838832/repro.py": {
+    "default": {
+      "compiled_us": 43.99999976158142,
+      "coord_descent_us": 26.335999369621277,
+      "memcopy_sol_us": 11.04000024497509,
+      "total_bytes": 32117760,
+      "n_kernels": 1,
+      "gap_default": 3.9855071363434287,
+      "gap_cd": 2.3855071363434286
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_4ca91616285c/repro.py": {
+    "default": {
+      "compiled_us": 237.5040054321289,
+      "coord_descent_us": 235.29599606990814,
+      "memcopy_sol_us": 240.6720072031021,
+      "total_bytes": 1616828416,
+      "n_kernels": 1,
+      "gap_default": 0.9868368498364675,
+      "gap_cd": 0.97766249928411
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_52d34178da6e/repro.py": {
+    "default": {
+      "compiled_us": 37.76000067591667,
+      "coord_descent_us": 37.856001406908035,
+      "memcopy_sol_us": 35.61599925160408,
+      "total_bytes": 195089408,
+      "n_kernels": 1,
+      "gap_default": 1.0601977052269853,
+      "gap_cd": 1.0628931435976225
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_6a701483fed1/repro.py": {
+    "default": {
+      "compiled_us": 238.52799832820892,
+      "coord_descent_us": 235.35999655723572,
+      "memcopy_sol_us": 240.63999950885773,
+      "total_bytes": 1616828416,
+      "n_kernels": 1,
+      "gap_default": 0.9912233993311197,
+      "gap_cd": 0.9780584983277991
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_617b759d99fa/repro.py": {
+    "default": {
+      "compiled_us": 13.407999649643898,
+      "coord_descent_us": 14.015999622642994,
+      "memcopy_sol_us": 8.1599997356534,
+      "total_bytes": 15730560,
+      "n_kernels": 1,
+      "gap_default": 1.6431372651962803,
+      "gap_cd": 1.7176470682226908
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_6f5e73770101/repro.py": {
+    "default": {
+      "compiled_us": 64.44799900054932,
+      "coord_descent_us": 60.35200133919716,
+      "memcopy_sol_us": 26.559999212622643,
+      "total_bytes": 134221824,
+      "n_kernels": 1,
+      "gap_default": 2.4265060584008,
+      "gap_cd": 2.2722892744106282
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_792162dbb8a3/repro.py": {
+    "default": {
+      "compiled_us": 74.75200295448303,
+      "coord_descent_us": 69.60000097751617,
+      "memcopy_sol_us": 29.503999277949333,
+      "total_bytes": 154543104,
+      "n_kernels": 1,
+      "gap_default": 2.533622721796604,
+      "gap_cd": 2.3590022600608505
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_7af9076c19a1/repro.py": {
+    "default": {
+      "compiled_us": 18.33599992096424,
+      "coord_descent_us": 18.271999433636665,
+      "memcopy_sol_us": 11.071999557316303,
+      "total_bytes": 38787072,
+      "n_kernels": 1,
+      "gap_default": 1.6560694232369197,
+      "gap_cd": 1.6502890321705848
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_72b736f9ad1b/repro.py": {
+    "default": {
+      "compiled_us": 36.639999598264694,
+      "coord_descent_us": 33.79200026392937,
+      "memcopy_sol_us": 20.447999238967896,
+      "total_bytes": 96340480,
+      "n_kernels": 1,
+      "gap_default": 1.7918623318627473,
+      "gap_cd": 1.6525822340374365
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_819a2cfa3958/repro.py": {
+    "default": {
+      "compiled_us": 94.46399658918381,
+      "coord_descent_us": 94.4959968328476,
+      "memcopy_sol_us": 34.78400036692619,
+      "total_bytes": 195089408,
+      "n_kernels": 1,
+      "gap_default": 2.715731244040676,
+      "gap_cd": 2.7166512142374972
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_7fdb4a765814/repro.py": {
+    "default": {
+      "compiled_us": 96.0640013217926,
+      "coord_descent_us": 85.75999736785889,
+      "memcopy_sol_us": 50.04800111055374,
+      "total_bytes": 301996032,
+      "n_kernels": 1,
+      "gap_default": 1.9194373239720728,
+      "gap_cd": 1.713554896596549
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_8287d162bd36/repro.py": {
+    "default": {
+      "compiled_us": 73.34399968385696,
+      "coord_descent_us": 73.53600114583969,
+      "memcopy_sol_us": 36.768000572919846,
+      "total_bytes": 201398376,
+      "n_kernels": 1,
+      "gap_default": 1.994778028204119,
+      "gap_cd": 2.0
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_8238dd59b2ec/repro.py": {
+    "default": {
+      "compiled_us": 82.91199803352356,
+      "coord_descent_us": 70.68800181150436,
+      "memcopy_sol_us": 35.711999982595444,
+      "total_bytes": 202119168,
+      "n_kernels": 1,
+      "gap_default": 2.3216845338802488,
+      "gap_cd": 1.9793907326936262
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_85854937a51a/repro.py": {
+    "default": {
+      "compiled_us": 237.40799725055695,
+      "coord_descent_us": 235.55199801921844,
+      "memcopy_sol_us": 242.62399971485138,
+      "total_bytes": 1616126976,
+      "n_kernels": 1,
+      "gap_default": 0.9785017044050686,
+      "gap_cd": 0.9708520109142358
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_89031f55973e/repro.py": {
+    "default": {
+      "compiled_us": 344.0319895744324,
+      "coord_descent_us": 343.84000301361084,
+      "memcopy_sol_us": 345.08800506591797,
+      "total_bytes": 2359298048,
+      "n_kernels": 1,
+      "gap_default": 0.9969398661327452,
+      "gap_cd": 0.9963835252631608
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_91fc2812ef17/repro.py": {
+    "default": {
+      "compiled_us": 235.55199801921844,
+      "coord_descent_us": 235.3920042514801,
+      "memcopy_sol_us": 239.77600038051605,
+      "total_bytes": 1616126976,
+      "n_kernels": 1,
+      "gap_default": 0.9823835481674802,
+      "gap_cd": 0.9817162846903831
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_a8fd2a07cabc/repro.py": {
+    "default": {
+      "compiled_us": 78.75200361013412,
+      "coord_descent_us": 62.39999830722809,
+      "memcopy_sol_us": 23.296000435948372,
+      "total_bytes": 115032064,
+      "n_kernels": 1,
+      "gap_default": 3.380494597201795,
+      "gap_cd": 2.678571305782507
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_924906e66d0b/repro.py": {
+    "default": {
+      "compiled_us": 154.6880006790161,
+      "coord_descent_us": 126.78399682044983,
+      "memcopy_sol_us": 97.15200215578079,
+      "total_bytes": 618169344,
+      "n_kernels": 1,
+      "gap_default": 1.5922265856238125,
+      "gap_cd": 1.305006525929902
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_b92e4f945149/repro.py": {
+    "default": {
+      "compiled_us": 148.28799664974213,
+      "coord_descent_us": 122.65600264072418,
+      "memcopy_sol_us": 96.22400254011154,
+      "total_bytes": 616563712,
+      "n_kernels": 1,
+      "gap_default": 1.5410707592206778,
+      "gap_cd": 1.2746923782306219
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_b95eb6ddfcc7/repro.py": {
+    "default": {
+      "compiled_us": 55.03999814391136,
+      "coord_descent_us": 55.03999814391136,
+      "memcopy_sol_us": 33.695999532938,
+      "total_bytes": 201332736,
+      "n_kernels": 1,
+      "gap_default": 1.6334282676526481,
+      "gap_cd": 1.6334282676526481
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_c1b4aa89f4d6/repro.py": {
+    "default": {
+      "compiled_us": 82.84799754619598,
+      "coord_descent_us": 82.94399827718735,
+      "memcopy_sol_us": 51.04000121355057,
+      "total_bytes": 302127208,
+      "n_kernels": 1,
+      "gap_default": 1.623197405493022,
+      "gap_cd": 1.625078297513179
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_9e94237b5daf/repro.py": {
+    "default": {
+      "compiled_us": 77.60000228881836,
+      "coord_descent_us": 77.60000228881836,
+      "memcopy_sol_us": 33.63199904561043,
+      "total_bytes": 192698880,
+      "n_kernels": 1,
+      "gap_default": 2.3073264893823353,
+      "gap_cd": 2.3073264893823353
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_e4d2655a5279/repro.py": {
+    "default": {
+      "compiled_us": 32.48000144958496,
+      "coord_descent_us": 32.44800120592117,
+      "memcopy_sol_us": 29.503999277949333,
+      "total_bytes": 155547648,
+      "n_kernels": 1,
+      "gap_default": 1.100867755032106,
+      "gap_cd": 1.0997831480484113
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_b3c82aa686ce/repro.py": {
+    "default": {
+      "compiled_us": 87.87199854850769,
+      "coord_descent_us": 73.79200309515,
+      "memcopy_sol_us": 35.96799820661545,
+      "total_bytes": 202119168,
+      "n_kernels": 1,
+      "gap_default": 2.4430605796779026,
+      "gap_cd": 2.051601611834426
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_deb7c9191e39/repro.py": {
+    "default": {
+      "compiled_us": 153.4080058336258,
+      "coord_descent_us": 126.71999633312225,
+      "memcopy_sol_us": 96.12800180912018,
+      "total_bytes": 616563712,
+      "n_kernels": 1,
+      "gap_default": 1.5958722010912658,
+      "gap_cd": 1.3182422805869627
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_e8133a6f0de6/repro.py": {
+    "default": {
+      "compiled_us": 56.28800019621849,
+      "coord_descent_us": 57.50399827957153,
+      "memcopy_sol_us": 21.31200022995472,
+      "total_bytes": 102453248,
+      "n_kernels": 1,
+      "gap_default": 2.6411411218503953,
+      "gap_cd": 2.6981980883590535
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_eebe86d9365d/repro.py": {
+    "default": {
+      "compiled_us": 44.79999840259552,
+      "coord_descent_us": 26.528000831604004,
+      "memcopy_sol_us": 11.103999800980091,
+      "total_bytes": 32117760,
+      "n_kernels": 1,
+      "gap_default": 4.034582061019243,
+      "gap_cd": 2.389049109066313
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_fbf523037907/repro.py": {
+    "default": {
+      "compiled_us": 71.58400118350983,
+      "coord_descent_us": 67.4239993095398,
+      "memcopy_sol_us": 28.672000393271446,
+      "total_bytes": 154543104,
+      "n_kernels": 1,
+      "gap_default": 2.4966517927472087,
+      "gap_cd": 2.3515624436641125
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_f2580942698a/repro.py": {
+    "default": {
+      "compiled_us": 40.73600098490715,
+      "coord_descent_us": 34.432001411914825,
+      "memcopy_sol_us": 29.40800040960312,
+      "total_bytes": 154157056,
+      "n_kernels": 1,
+      "gap_default": 1.3852013199647841,
+      "gap_cd": 1.1708378989504886
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_var_mean_7eb8a9047c3e/repro.py": {
+    "default": {
+      "compiled_us": 95.96800059080124,
+      "coord_descent_us": 66.6240006685257,
+      "memcopy_sol_us": 29.472000896930695,
+      "total_bytes": 155547648,
+      "n_kernels": 1,
+      "gap_default": 3.256243134845848,
+      "gap_cd": 2.260586273104522
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_var_mean_99567a16bff5/repro.py": {
+    "default": {
+      "compiled_us": 30.33600002527237,
+      "coord_descent_us": 30.46399913728237,
+      "memcopy_sol_us": 28.76799926161766,
+      "total_bytes": 154543104,
+      "n_kernels": 1,
+      "gap_default": 1.054505033505988,
+      "gap_cd": 1.058954390962027
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_var_mean_0795d88a1e39/repro.py": {
+    "default": {
+      "compiled_us": 189.34400379657745,
+      "coord_descent_us": 108.35199803113937,
+      "memcopy_sol_us": 66.43199920654297,
+      "total_bytes": 411043840,
+      "n_kernels": 1,
+      "gap_default": 2.850192769419601,
+      "gap_cd": 1.6310211844485278
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_var_mean_de5c360021d3/repro.py": {
+    "default": {
+      "compiled_us": 181.15200102329254,
+      "coord_descent_us": 106.27199709415436,
+      "memcopy_sol_us": 65.5359998345375,
+      "total_bytes": 411043840,
+      "n_kernels": 1,
+      "gap_default": 2.7641601788430386,
+      "gap_cd": 1.6215819910044154
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_var_mean_2989608c4b10/repro.py": {
+    "default": {
+      "compiled_us": 124.70400333404541,
+      "coord_descent_us": 69.2799985408783,
+      "memcopy_sol_us": 66.3679987192154,
+      "total_bytes": 411043840,
+      "n_kernels": 1,
+      "gap_default": 1.8789779071331272,
+      "gap_cd": 1.043876565179896
+    }
+  },
+  "/tmp/scratch_space/better_benchmark/repros/canonical/var_mean_var_mean_var_mean_850dfa63ec81/repro.py": {
+    "default": {
+      "compiled_us": 116.54400080442429,
+      "coord_descent_us": 67.391999065876,
+      "memcopy_sol_us": 65.47199934720993,
+      "total_bytes": 411043840,
+      "n_kernels": 1,
+      "gap_default": 1.7800586810610477,
+      "gap_cd": 1.0293255091918603
+    }
+  },
+  "__failures__": {
+    "/tmp/scratch_space/better_benchmark/repros/canonical/sum_011e69da166d/repro.py": {
+      "status": "failed",
+      "gpu": "0",
+      "elapsed": 0.10112214088439941,
+      "error": "ERROR: AttributeError: 'TritonScheduling' object has no attribute '_try_atomic_reduction_producer_consumer'"
+    },
+    "/tmp/scratch_space/better_benchmark/repros/canonical/sum_08a5b63c8198/repro.py": {
+      "status": "failed",
+      "gpu": "0",
+      "elapsed": 1.2636184692382812e-05,
+      "error": ""
+    },
+    "/tmp/scratch_space/better_benchmark/repros/canonical/sum_0becf9609ad7/repro.py": {
+      "status": "failed",
+      "gpu": "0",
+      "elapsed": 3.337860107421875e-06,
+      "error": "Set TORCHDYNAMO_VERBOSE=1 for the internal stack"
+    }
+  },
+  "__summary__": {
+    "total": 168,
+    "ok": 165,
+    "failed": 3,
+    "elapsed_s": 81.36837124824524
+  }
+}

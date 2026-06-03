@@ -1,0 +1,74 @@
+===========================================================================
+3-Config Interleaved Measurement: Impact of Optimization Stash
+===========================================================================
+
+Date: 2026-06-03
+PyTorch: /tmp/pytorch-work (branch pr-184905 + stash applied)
+Corpus: 1482 canonical repros
+GPUs: 2x B200
+Configs: default, combo_persistent (multi_kernel=2), combo_looped (multi_kernel=3)
+Rounds: 5 interleaved per repro
+
+Stash contents: scalar accumulators, tiling scores, R0_BLOCK expansion,
+  persistent threshold, one-hot->gather, online softmax fixes
+
+---------------------------------------------------------------------------
+HEADLINE RESULTS
+---------------------------------------------------------------------------
+
+Best-of-3-configs geomean speedup (stash vs no-stash): 0.9938x
+Median ratio: 1.0000x
+Repros compared: 1482
+  Improved >5%:   132 (8.9%)
+  Regressed >5%:  199 (13.4%)
+  Improved >2%:   252 (17.0%)
+  Regressed >2%:  343 (23.1%)
+  Within +-2%:    887 (59.9%)
+
+---------------------------------------------------------------------------
+PER-CONFIG GEOMEAN SPEEDUP (stash vs no-stash)
+---------------------------------------------------------------------------
+
+  default             : geomean=0.9896x  improved>5%= 242  regressed>5%= 297
+  combo_persistent    : geomean=1.0033x  improved>5%= 224  regressed>5%= 252
+  combo_looped        : geomean=0.9941x  improved>5%= 135  regressed>5%= 181
+
+---------------------------------------------------------------------------
+WIN RATE BY CONFIG
+---------------------------------------------------------------------------
+
+Config                 With Stash  Without Stash
+  default               269 (18.2%)   268 (18.1%)
+  combo_persistent      518 (35.0%)   569 (38.4%)
+  combo_looped          695 (46.9%)   645 (43.5%)
+
+---------------------------------------------------------------------------
+INTERPRETATION
+---------------------------------------------------------------------------
+
+1. The stash optimizations produce NEGLIGIBLE aggregate impact on this corpus.
+   Geomean: 0.9938x (essentially 1.0x). The stash does not meaningfully
+   improve the best-of-3-configs timing beyond what the tuning knobs already capture.
+
+2. Per-config breakdown:
+   - default: 0.9896x (slight regression, likely noise/compile variance)
+   - combo_persistent: 1.0033x (neutral)
+   - combo_looped: 0.9941x (neutral)
+
+3. There are 43 consistent improvements and 56 consistent regressions across ALL
+   3 configs. These likely reflect non-deterministic compilation differences
+   (Triton autotuner, cache state) rather than genuine algorithmic impact.
+
+4. Combo-specific impact (cases where combo gains >5% while default stays flat):
+   Only 64 cases show targeted combo improvement from stash (max 1.39x).
+   Meanwhile, 106 cases show combo-specific regression (up to 0.49x).
+
+5. Where combo was already winning (755 repros): stash slightly HURTS (0.977x).
+   Where combo was NOT winning (727 repros): stash slightly HELPS (1.012x).
+
+CONCLUSION: The optimization stash (scalar accumulators, tiling scores, R0_BLOCK
+expansion, persistent threshold, one-hot->gather, online softmax fixes) does NOT
+produce a measurable positive signal on this 1482-repro corpus when combined with
+the existing combo_kernel + coordinate_descent_tuning + multi_kernel knobs.
+The observed variance (+/- 5% on individual repros) is consistent with
+compilation non-determinism rather than genuine algorithmic improvement.
