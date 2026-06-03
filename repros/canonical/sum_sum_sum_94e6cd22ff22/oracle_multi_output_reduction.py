@@ -1,21 +1,4 @@
-"""
-Full-scope oracle for sum_sum_sum_94e6cd22ff22 (DeiT tiny train tail).
-
-Gap diagnosis (classification: SCHEDULER_FUSION): the timed oracle covers the
-same scope as `repro.py`: it reshapes the QKV gradient, applies the layernorm
-weight, forms the positional-add normalized input, computes both row-local
-layernorm-backward sums, emits the two sibling channel reductions, and
-materializes the positional and patch-token reductions returned by the repro.
-It differs from Inductor by streaming each `[B, token, C]` row once through a
-single row-local reduction kernel and sharing those values across the three
-downstream reduction families instead of scheduling the row reductions, the
-dependent layernorm-backward expression, and the token/channel reductions as
-separate template regions. Inductor cannot do this today because the scheduler
-does not fuse sibling reductions with a dependent row-wise reduction and a
-layout/view epilogue into one full-scope multi-output template; the fix is
-SCHEDULER_FUSION for compatible shared-input reductions with dependent
-row-local scalar intermediates and view-equivalent token reductions.
-"""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the full `Repro.forward` return tuple by cooperatively reducing each token over the batch dimension while sharing the row-local layernorm-backward sums with the sibling global channel reductions and the class/patch token reductions, whereas Inductor currently emits separate row reductions, dependent pointwise layernorm-backward work, and downstream `sum([0, 1])`, `sum([0])`, and patch-token reductions around materialized intermediates; Inductor cannot do this today because its scheduler/codegen lacks a cooperative split-K multi-output reduction template that can combine row-local scalar reductions with several compatible batch/token reductions and view-equivalent epilogues in one full-scope kernel; the fix is COOPERATIVE_SPLIT_K: add an Inductor template that splits the batch/token K domain for compatible small-output reductions, shares dependent row-reduction scalars, and emits the full tuple epilogue without materializing the layernorm-backward tensor."""
 from __future__ import annotations
 
 import argparse
@@ -42,7 +25,28 @@ sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit
-def _partial_full_scope_kernel(
+def _zero_outputs_kernel(
+    out_x_norm_ptr,
+    out_x_ptr,
+    out_token_ptr,
+    out_patch_ptr,
+    TOKEN_NUMEL_: tl.constexpr,
+    C_: tl.constexpr,
+    BLOCK: tl.constexpr,
+):
+    offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+    token_mask = offsets < TOKEN_NUMEL_
+    c_mask = offsets < C_
+
+    zeros = tl.zeros((BLOCK,), dtype=tl.float32)
+    tl.store(out_token_ptr + offsets, zeros, mask=token_mask)
+    tl.store(out_x_norm_ptr + offsets, zeros, mask=c_mask)
+    tl.store(out_x_ptr + offsets, zeros, mask=c_mask)
+    tl.store(out_patch_ptr + offsets, zeros, mask=c_mask)
+
+
+@triton.jit
+def _token_full_scope_kernel(
     x_ptr,
     weight_ptr,
     cat_ptr,
@@ -50,11 +54,11 @@ def _partial_full_scope_kernel(
     mean_ptr,
     rsqrt_ptr,
     add_ptr,
-    partial_x_norm_ptr,
-    partial_x_ptr,
-    partial_add_ptr,
+    out_x_norm_ptr,
+    out_x_ptr,
+    out_token_ptr,
+    out_patch_ptr,
     B_: tl.constexpr,
-    NUM_B_BLOCKS_: tl.constexpr,
     T_: tl.constexpr,
     C_: tl.constexpr,
     INV_C_: tl.constexpr,
@@ -93,47 +97,10 @@ def _partial_full_scope_kernel(
     token_x = tl.sum(tl.where(mask, x, 0.0), axis=0)
     token_add = tl.sum(tl.where(mask, add_value, 0.0), axis=0)
 
-    partial_offset = (token * NUM_B_BLOCKS_ + b_block) * C_ + c
-    tl.store(partial_x_norm_ptr + partial_offset, token_x_norm, mask=c_mask)
-    tl.store(partial_x_ptr + partial_offset, token_x, mask=c_mask)
-    tl.store(partial_add_ptr + partial_offset, token_add, mask=c_mask)
-
-
-@triton.jit
-def _finalize_full_scope_kernel(
-    partial_x_norm_ptr,
-    partial_x_ptr,
-    partial_add_ptr,
-    out_x_norm_ptr,
-    out_x_ptr,
-    out_token_ptr,
-    out_cls_ptr,
-    out_patch_ptr,
-    NUM_B_BLOCKS_: tl.constexpr,
-    C_: tl.constexpr,
-    BLOCK_B_BLOCKS: tl.constexpr,
-    BLOCK_C: tl.constexpr,
-):
-    token = tl.program_id(0)
-    c = tl.arange(0, BLOCK_C)
-    b_block = tl.arange(0, BLOCK_B_BLOCKS)
-    mask = (b_block[:, None] < NUM_B_BLOCKS_) & (c[None, :] < C_)
-    offsets = (token * NUM_B_BLOCKS_ + b_block[:, None]) * C_ + c[None, :]
-
-    x_norm = tl.load(partial_x_norm_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    x = tl.load(partial_x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    add_value = tl.load(partial_add_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-
-    token_x_norm = tl.sum(x_norm, axis=0)
-    token_x = tl.sum(x, axis=0)
-    token_add = tl.sum(add_value, axis=0)
-    c_mask = c < C_
-
-    tl.atomic_add(out_x_norm_ptr + c, token_x_norm, mask=c_mask)
-    tl.atomic_add(out_x_ptr + c, token_x, mask=c_mask)
-    tl.store(out_token_ptr + token * C_ + c, token_add, mask=c_mask)
-    tl.store(out_cls_ptr + c, token_add, mask=c_mask & (token == 0))
-    tl.atomic_add(out_patch_ptr + c, token_add, mask=c_mask & (token != 0))
+    tl.atomic_add(out_token_ptr + token * C_ + c, token_add, mask=c_mask, sem="relaxed")
+    tl.atomic_add(out_x_norm_ptr + c, token_x_norm, mask=c_mask, sem="relaxed")
+    tl.atomic_add(out_x_ptr + c, token_x, mask=c_mask, sem="relaxed")
+    tl.atomic_add(out_patch_ptr + c, token_add, mask=c_mask & (token != 0), sem="relaxed")
 
 
 def _load_repro_module():
@@ -177,15 +144,27 @@ def oracle_fused(
     inv = rsqrt.contiguous()
     add_base = add_133.contiguous()
 
-    block_b = 64
+    block_b = 32
     block_c = 256
     num_b_blocks = triton.cdiv(B, block_b)
-    partial_shape = (T * num_b_blocks, C)
-    partial_x_norm = torch.empty(partial_shape, device=x.device, dtype=torch.float32)
-    partial_x = torch.empty(partial_shape, device=x.device, dtype=torch.float32)
-    partial_add = torch.empty(partial_shape, device=x.device, dtype=torch.float32)
+    out_x_norm = torch.empty((C,), device=x.device, dtype=torch.float32)
+    out_x = torch.empty((C,), device=x.device, dtype=torch.float32)
+    out_token = torch.empty((1, T, C), device=x.device, dtype=torch.float32)
+    out_patch = torch.empty((C,), device=x.device, dtype=torch.float32)
 
-    _partial_full_scope_kernel[(T, num_b_blocks)](
+    zero_block = 1024
+    _zero_outputs_kernel[(triton.cdiv(T * C, zero_block),)](
+        out_x_norm,
+        out_x,
+        out_token,
+        out_patch,
+        TOKEN_NUMEL_=T * C,
+        C_=C,
+        BLOCK=zero_block,
+        num_warps=4,
+    )
+
+    _token_full_scope_kernel[(T, num_b_blocks)](
         x,
         weight,
         cat_contig,
@@ -193,11 +172,11 @@ def oracle_fused(
         mean,
         inv,
         add_base,
-        partial_x_norm,
-        partial_x,
-        partial_add,
+        out_x_norm,
+        out_x,
+        out_token,
+        out_patch,
         B_=B,
-        NUM_B_BLOCKS_=num_b_blocks,
         T_=T,
         C_=C,
         INV_C_=1.0 / C,
@@ -205,31 +184,7 @@ def oracle_fused(
         BLOCK_C=block_c,
         num_warps=8,
     )
-
-    out_x_norm = torch.empty((C,), device=x.device, dtype=torch.float32)
-    out_x = torch.empty((C,), device=x.device, dtype=torch.float32)
-    out_token = torch.empty((1, T, C), device=x.device, dtype=torch.float32)
-    out_cls = torch.empty((1, 1, C), device=x.device, dtype=torch.float32)
-    out_patch = torch.empty((C,), device=x.device, dtype=torch.float32)
-    out_x_norm.zero_()
-    out_x.zero_()
-    out_patch.zero_()
-
-    _finalize_full_scope_kernel[(T,)](
-        partial_x_norm,
-        partial_x,
-        partial_add,
-        out_x_norm,
-        out_x,
-        out_token,
-        out_cls,
-        out_patch,
-        NUM_B_BLOCKS_=num_b_blocks,
-        C_=C,
-        BLOCK_B_BLOCKS=triton.next_power_of_2(num_b_blocks),
-        BLOCK_C=block_c,
-        num_warps=8,
-    )
+    out_cls = torch.as_strided(out_token, (1, 1, C), (C, C, 1))
     return out_x_norm, out_x, out_token, out_cls, out_patch
 
 
