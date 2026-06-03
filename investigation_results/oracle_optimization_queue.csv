@@ -142,3 +142,6 @@ sum_sum_sum_dd4c673f0928,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=65.4u
 sum_sum_sum_e2d4961f3571,AT_FLOOR,closed,compile=109.0us vs oracle=119.5us; 0.91x gap; MobileBERT LN-backward cooperative split-K; Inductor already optimal
 sum_sum_sum_ae9b17407681,SCATTER_REDUCE,needs_work,compile=120.9us vs oracle=75.6us; 1.60x gap; GPT2 LN-backward+embedding scatter-reduce with fused dropout/mask and dual index_put accumulation
 sum_sum_sum_e266124dd032,AT_FLOOR,closed,compile=86.8us beats oracle=111.2us; RepVGG adaptive-avgpool-backward+dual-BN-backward; Inductor already optimal
+sum_51d2ed69e698,AT_FLOOR,closed,compile=46.1us beats oracle=52.4us; Mistral-7B grouped-head RoPE+sum+slice_scatter; Inductor already optimal
+sum_sum_sum_812de8ed33fc,SCATTER_REDUCE,needs_work,compile=112.7us vs oracle=76.6us; 1.47x gap; BERT-large embedding+LN-backward scatter-reduce with 3 index_put accumulators
+sum_sum_sum_8fe409430e81,SCATTER_REDUCE,oracle_needs_rewrite,BAD_ORACLE: compile=100.2us vs oracle=169.7us (1.7x slower); Qwen3-30B-A3B MoE RMSNorm+router scatter-reduce
