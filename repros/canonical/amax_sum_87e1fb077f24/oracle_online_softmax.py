@@ -1,52 +1,16 @@
-"""
-Oracle kernel for amax_sum_87e1fb077f24: Longformer online softmax (persistent, small rnumel).
-
-Pattern: f32[8, 1024, 12, 513] -> amax(dim=-1) -> sub -> exp -> sum(dim=-1) -> div
-         then where(mask, 0, softmax) -> dropout -> permute -> reshape -> transpose
-This is hf_AllenaiLongformerBase_train_002 with sliding window attention.
-
-Key insight: rnumel=513 is SMALL. The entire reduction fits in a single tile
-(no loop needed). This is a "persistent reduction" case where each program
-loads one complete row into registers, computes softmax in a single shot,
-and writes the normalized output.
-
-The full repro includes:
-  1. Complex pre-softmax attention assembly (view/permute/slice/scatter/pad)
-     converting [288, 512, 512] bmm output into [8, 1024, 12, 513] attention scores
-  2. Softmax: amax -> sub -> exp -> sum -> div on last dim (513)
-  3. Masked where (zero out padding positions)
-  4. Dropout (threshold ~1e-30, effectively a no-op mask)
-  5. Post-softmax permute + pad + reshape + transpose to [384, 768, 256]
-
-This oracle measures only the softmax+dropout reduction kernel floor.
-
-Strategy:
-  - Persistent single-tile softmax: BLOCK_N=1024 (next power-of-2 >= 513)
-  - Fuse softmax + conditional mask + dropout into one kernel
-  - One program per row; 98304 total rows (8 * 1024 * 12)
-  - Input is already f32, no dtype conversion needed
-
-Memory traffic (softmax+dropout fused kernel only):
-  - Read: 98304 * 513 * 4 bytes = ~192 MB (f32 input)
-  - Write: 98304 * 513 * 4 bytes = ~192 MB (f32 output)
-  - Total: ~384 MB
-  - SOL at 3.35 TB/s (H100 HBM): ~115 us
-
-Note: The full repro includes extensive pre-softmax attention pattern assembly
-(views/permutes/slices/scatters/pads) that dominates total runtime. This oracle
-measures only the reduction kernel floor.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete Longformer sliding-window score assembly from the captured bmm/base/mask/bias inputs, fuses softmax, query-mask fill, Inductor-RNG dropout, and final strided output layout in a custom Triton path, whereas Inductor currently lowers the graph as separate view/pad/slice/scatter assembly, generic amax/exp/sum/div softmax, random dropout, and layout kernels; Inductor cannot do this today because the scheduler has no Longformer attention pattern that recognizes the skewed chunk assembly plus first/last chunk masks and fuses it with the reduction epilogue and destination-layout scatter; the fix is NEW_PATTERN: add a Longformer sliding-window attention lowering that canonicalizes the structured band assembly and emits one fused softmax/dropout/layout kernel."""
 from __future__ import annotations
 
 import argparse
-import csv
 import importlib.util
+import json
 import math
 import sys
-from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 
 import torch
+import torch._inductor.inductor_prims  # noqa: F401
 import triton
 import triton.language as tl
 
@@ -55,414 +19,451 @@ REPRO_ID = "amax_sum_87e1fb077f24"
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
-DEFAULT_CSV = REPO_ROOT / "investigation_results" / "measured_oracle_floors.csv"
 
-# Problem dimensions for the softmax reduction
-# Input to softmax: [8, 1024, 12, 513] -> flatten first 3 dims = 98304 rows
 BATCH = 8
 SEQ_LEN = 1024
 N_HEADS = 12
-RNUMEL = 513  # reduction dimension (small -- fits in one tile)
-M = BATCH * SEQ_LEN * N_HEADS  # 98304 rows
+BH = BATCH * N_HEADS
+LOCAL_CHUNK = 256
+CHUNKS = 4
+RNUMEL = 513
+PADDED_RNUMEL = 770
+FINAL_INNER = 769
+OUT_M = BH * CHUNKS
+OUT_D = 768
+OUT_T = 256
+OUT_SHAPE = (OUT_M, OUT_D, OUT_T)
+OUT_STRIDE = (LOCAL_CHUNK * PADDED_RNUMEL, 1, FINAL_INNER)
+OUT_STORAGE_SIZE = (OUT_M - 1) * OUT_STRIDE[0] + (OUT_D - 1) + (OUT_T - 1) * OUT_STRIDE[2] + 1
+ROWS = BATCH * SEQ_LEN * N_HEADS
+BLOCK_N = 1024
+SEED_INDEX = 33
+
+SLICE3_BH_STRIDE = 525312
+SLICE3_CHUNK_STRIDE = 131328
+SLICE3_POS_STRIDE = 513
+PERMUTE12_BATCH_STRIDE = 789504
+PERMUTE12_POS_STRIDE = 257
+PERMUTE12_HEAD_STRIDE = 65792
 
 
-# --- Triton Kernel: Persistent Softmax + Dropout (small rnumel) ---
-
-@triton.jit
-def persistent_softmax_dropout_kernel(
-    input_ptr,
-    output_ptr,
-    mask_ptr,
-    seed,
-    M,
-    N: tl.constexpr,
-    BLOCK_N: tl.constexpr,
-    DROPOUT_P: tl.constexpr,
-    HAS_MASK: tl.constexpr,
-):
-    """Fused softmax + optional mask + dropout for rnumel=513 (persistent).
-
-    Since N=513 fits entirely in one tile (BLOCK_N=1024), we load the full row
-    into registers, compute softmax without any loop, apply mask and dropout.
-    Zero intermediate memory traffic.
-    """
-    row_idx = tl.program_id(0)
-    if row_idx >= M:
-        return
-
-    row_start = row_idx * N
-    cols = tl.arange(0, BLOCK_N)
-    valid_mask = cols < N
-
-    # Load entire row (single tile -- no loop needed)
-    x = tl.load(input_ptr + row_start + cols, mask=valid_mask, other=float("-inf"))
-
-    # Softmax: amax -> sub -> exp -> sum -> div (all in registers)
-    row_max = tl.max(x, axis=0)
-    x_shifted = x - row_max
-    exp_x = tl.exp(x_shifted)
-    sum_exp = tl.sum(exp_x, axis=0)
-    softmax_out = exp_x / sum_exp
-
-    # Optional: apply padding mask (where(unsqueeze_11, 0, softmax))
-    if HAS_MASK:
-        padding_mask = tl.load(mask_ptr + row_idx).to(tl.int1)
-        # If mask is True, output is 0 (masking out padded rows)
-        zero = tl.zeros([BLOCK_N], dtype=tl.float32)
-        softmax_out = tl.where(padding_mask, zero, softmax_out)
-
-    # Fused dropout: generate random mask and apply
-    # In the repro, dropout threshold is 1e-30 (effectively keeping everything)
-    rng_offsets = row_idx * BLOCK_N + cols
-    random_vals = tl.rand(seed, rng_offsets)
-    dropout_mask = random_vals > DROPOUT_P
-    result = softmax_out * dropout_mask.to(tl.float32)
-
-    tl.store(output_ptr + row_start + cols, result, mask=valid_mask)
-
-
-@triton.jit
-def persistent_softmax_kernel(
-    input_ptr,
-    output_ptr,
-    M,
-    N: tl.constexpr,
-    BLOCK_N: tl.constexpr,
-):
-    """Pure softmax kernel (no dropout/mask) for rnumel=513 (persistent).
-
-    Single-tile persistent reduction: the entire row fits in registers.
-    """
-    row_idx = tl.program_id(0)
-    if row_idx >= M:
-        return
-
-    row_start = row_idx * N
-    cols = tl.arange(0, BLOCK_N)
-    valid_mask = cols < N
-
-    # Load entire row
-    x = tl.load(input_ptr + row_start + cols, mask=valid_mask, other=float("-inf"))
-
-    # Softmax in registers (no loops, no intermediate writes)
-    row_max = tl.max(x, axis=0)
-    x_shifted = x - row_max
-    exp_x = tl.exp(x_shifted)
-    sum_exp = tl.sum(exp_x, axis=0)
-    softmax_out = exp_x / sum_exp
-
-    tl.store(output_ptr + row_start + cols, softmax_out, mask=valid_mask)
-
-
-def oracle_softmax(x: torch.Tensor, with_dropout: bool = False) -> torch.Tensor:
-    """Launch the persistent softmax Triton kernel.
-
-    Args:
-        x: f32 tensor of shape [M, N] where N=513
-        with_dropout: whether to apply fused dropout
-    """
-    assert x.ndim == 2, f"Expected 2D input, got {x.ndim}D"
-    M_val, N_val = x.shape
-    assert N_val == RNUMEL, f"Expected N={RNUMEL}, got {N_val}"
-    assert x.dtype == torch.float32
-
-    output = torch.empty_like(x)
-
-    # BLOCK_N must be >= N and power of 2
-    BLOCK_N = 1024  # next power of 2 above 513
-
-    grid = (M_val,)
-
-    if with_dropout:
-        seed = torch.randint(0, 2**31, (1,), device=x.device, dtype=torch.int64).item()
-        # No row-level mask for basic benchmark
-        persistent_softmax_dropout_kernel[grid](
-            x, output, x,  # mask_ptr unused when HAS_MASK=False
-            seed,
-            M_val,
-            N=N_val,
-            BLOCK_N=BLOCK_N,
-            DROPOUT_P=1e-30,
-            HAS_MASK=False,
-        )
-    else:
-        persistent_softmax_kernel[grid](
-            x, output,
-            M_val,
-            N=N_val,
-            BLOCK_N=BLOCK_N,
-        )
-    return output
-
-
-# --- Reference implementation ---
-
-def softmax_reference(x: torch.Tensor) -> torch.Tensor:
-    """Reference softmax matching the repro pattern (f32 in, f32 out)."""
-    m = x.max(dim=-1, keepdim=True).values
-    e = torch.exp(x - m)
-    s = e.sum(dim=-1, keepdim=True)
-    return e / s
-
-
-# --- Benchmarking ---
-
-def benchmark_cuda_graph(fn, warmup=25, rep=100):
-    """Benchmark a function using CUDA graphs for minimal launch overhead."""
-    for _ in range(warmup):
-        fn()
-    torch.cuda.synchronize()
-
-    graph = torch.cuda.CUDAGraph()
-    with torch.cuda.graph(graph):
-        fn()
-    torch.cuda.synchronize()
-
-    start_event = torch.cuda.Event(enable_timing=True)
-    end_event = torch.cuda.Event(enable_timing=True)
-
-    times = []
-    for _ in range(rep):
-        start_event.record()
-        graph.replay()
-        end_event.record()
-        torch.cuda.synchronize()
-        times.append(start_event.elapsed_time(end_event))
-
-    times.sort()
-    median_ms = times[len(times) // 2]
-    return median_ms * 1000.0  # convert to us
-
-
-def benchmark_triton_softmax(x: torch.Tensor, warmup=25, rep=100, with_dropout=False):
-    """Benchmark the Triton persistent softmax kernel."""
-    output = torch.empty_like(x)
-    BLOCK_N = 1024
-    grid = (x.shape[0],)
-
-    if with_dropout:
-        seed = 42
-
-        def run():
-            persistent_softmax_dropout_kernel[grid](
-                x, output, x,  # mask_ptr unused
-                seed,
-                x.shape[0],
-                N=x.shape[1],
-                BLOCK_N=BLOCK_N,
-                DROPOUT_P=1e-30,
-                HAS_MASK=False,
-            )
-    else:
-        def run():
-            persistent_softmax_kernel[grid](
-                x, output,
-                x.shape[0],
-                N=x.shape[1],
-                BLOCK_N=BLOCK_N,
-            )
-
-    return benchmark_cuda_graph(run, warmup=warmup, rep=rep)
-
-
-def benchmark_compiled_full(warmup=25, rep=100):
-    """Benchmark the full repro with torch.compile + CUDAGraph."""
-    from repro_harness import parse_shapes_config, make_inputs_safely
-
-    repro_mod = _load_repro_module()
-    model = repro_mod.Repro()
-    inputs = repro_mod._default_make_inputs()
-
-    import torch._inductor.config as inductor_config
-    inductor_config.coordinate_descent_tuning = True
-
-    torch._dynamo.reset()
-    compiled = torch.compile(model)
-
-    with torch.no_grad():
-        for _ in range(warmup):
-            compiled(*inputs)
-        torch.cuda.synchronize()
-
-        graph = torch.cuda.CUDAGraph()
-        with torch.cuda.graph(graph):
-            compiled(*inputs)
-        torch.cuda.synchronize()
-
-    start_event = torch.cuda.Event(enable_timing=True)
-    end_event = torch.cuda.Event(enable_timing=True)
-
-    times = []
-    for _ in range(rep):
-        start_event.record()
-        graph.replay()
-        end_event.record()
-        torch.cuda.synchronize()
-        times.append(start_event.elapsed_time(end_event))
-
-    times.sort()
-    median_ms = times[len(times) // 2]
-    return median_ms * 1000.0
-
-
+@lru_cache(maxsize=1)
 def _load_repro_module():
+    if str(REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(REPO_ROOT))
     spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
     module = importlib.util.module_from_spec(spec)
-    module.device = torch.device
-    module.inf = math.inf
-    module.nan = math.nan
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
 
-def correctness_check():
-    """Verify the Triton kernel matches the reference implementation."""
-    torch.manual_seed(42)
-    # Create input matching the softmax portion: f32[98304, 513]
-    x = torch.randn(M, RNUMEL, dtype=torch.float32, device="cuda")
-
-    ref = softmax_reference(x)
-    out = oracle_softmax(x, with_dropout=False)
-
-    max_diff = (ref - out).abs().max().item()
-    mean_diff = (ref - out).abs().mean().item()
-    allclose = torch.allclose(ref, out, atol=1e-5, rtol=1e-5)
-
-    print(f"Correctness check (softmax only, f32):")
-    print(f"  Shape: [{M}, {RNUMEL}]")
-    print(f"  Max absolute difference: {max_diff:.6e}")
-    print(f"  Mean absolute difference: {mean_diff:.6e}")
-    print(f"  torch.allclose (atol=1e-5, rtol=1e-5): {allclose}")
-
-    if not allclose:
-        print("  WARNING: Output does not match reference within tolerance!")
-        for row in [0, 100, 1000, 50000]:
-            if row < M:
-                row_diff = (ref[row] - out[row]).abs().max().item()
-                print(f"  Row {row} max diff: {row_diff:.6e}")
-    return allclose
+def get_inputs() -> tuple:
+    return _load_repro_module().make_inputs()
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Oracle persistent softmax benchmark")
-    parser.add_argument("--check-only", action="store_true", help="Only run correctness check")
-    parser.add_argument("--rep", type=int, default=100, help="Number of benchmark repetitions")
-    parser.add_argument("--warmup", type=int, default=25, help="Number of warmup iterations")
-    parser.add_argument("--csv", type=str, default=None, help="Append results to CSV file")
-    parser.add_argument("--no-compile", action="store_true", help="Skip torch.compile baseline")
-    parser.add_argument("--with-dropout", action="store_true", help="Include fused dropout")
+def get_repro_instance() -> torch.nn.Module:
+    return _load_repro_module().Repro().eval()
+
+
+def _clone_inputs(inputs: tuple) -> tuple:
+    cloned = []
+    for item in inputs:
+        if isinstance(item, torch.Tensor):
+            if item.dim() == 0:
+                cloned.append(item.clone())
+            else:
+                copy = torch.empty_strided(
+                    tuple(item.shape),
+                    tuple(item.stride()),
+                    device=item.device,
+                    dtype=item.dtype,
+                )
+                copy.copy_(item)
+                cloned.append(copy)
+        else:
+            cloned.append(item)
+    return tuple(cloned)
+
+
+def _inductor_random_like_repro(inductor_seeds: torch.Tensor) -> torch.Tensor:
+    seed = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, SEED_INDEX)
+    return torch.ops.prims.inductor_random.default(
+        [BATCH, SEQ_LEN, N_HEADS, RNUMEL],
+        seed,
+        "rand",
+    )
+
+
+@triton.jit
+def _zero_kernel(out_ptr, n_elements, BLOCK: tl.constexpr):
+    offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+    tl.store(out_ptr + offsets, tl.zeros((BLOCK,), tl.float32), mask=offsets < n_elements)
+
+
+@triton.jit
+def _load_skewed_bmm(
+    bmm_ptr,
+    bh,
+    chunk,
+    skew_row,
+    skew_col,
+    mask,
+):
+    linear = skew_row * 513 + skew_col
+    src_row = linear // 512
+    src_col = linear - src_row * 512
+    valid = mask & (src_row < 512)
+    safe_chunk = tl.where(valid, chunk, 0)
+    safe_row = tl.where(valid, src_row, 0)
+    safe_col = tl.where(valid, src_col, 0)
+    offset = (bh * 3 + safe_chunk) * (512 * 512) + safe_row * 512 + safe_col
+    return tl.load(bmm_ptr + offset, mask=valid, other=0.0).to(tl.float32)
+
+
+@triton.jit
+def _longformer_full_kernel(
+    bmm_ptr,
+    slice3_ptr,
+    first_mask_ptr,
+    first_last_value_ptr,
+    last_mask_ptr,
+    global_bias_ptr,
+    query_mask_ptr,
+    full2_ptr,
+    random_ptr,
+    out_ptr,
+    BLOCK: tl.constexpr,
+    R: tl.constexpr,
+    SEQ: tl.constexpr,
+    HEADS: tl.constexpr,
+    CHUNK: tl.constexpr,
+    CHUNKS_: tl.constexpr,
+    OUT_D_: tl.constexpr,
+    PADDED_R: tl.constexpr,
+    FINAL_R: tl.constexpr,
+    SLICE3_BH_STRIDE_: tl.constexpr,
+    SLICE3_POS_STRIDE_: tl.constexpr,
+    PERMUTE12_BATCH_STRIDE_: tl.constexpr,
+    PERMUTE12_POS_STRIDE_: tl.constexpr,
+    PERMUTE12_HEAD_STRIDE_: tl.constexpr,
+    OUT_M_STRIDE: tl.constexpr,
+    OUT_T_STRIDE: tl.constexpr,
+):
+    row = tl.program_id(0)
+    cols = tl.arange(0, BLOCK)
+    valid_cols = cols < R
+
+    head = row % HEADS
+    row_div_heads = row // HEADS
+    seq = row_div_heads % SEQ
+    batch = row_div_heads // SEQ
+    bh = batch * HEADS + head
+    chunk_id = seq // CHUNK
+    pos = seq - chunk_id * CHUNK
+
+    col_i32 = cols.to(tl.int32)
+    from_right = col_i32 >= CHUNK
+    source_chunk_right = tl.minimum(chunk_id, 2)
+    skew_row_right = tl.where(chunk_id == 3, pos + 256, pos)
+    source_chunk_left = tl.where(chunk_id == 0, 0, chunk_id - 1)
+    skew_row_left = tl.where(chunk_id == 0, pos - 1, pos + 255)
+    source_chunk = tl.where(from_right, source_chunk_right, source_chunk_left)
+    skew_row = tl.where(from_right, skew_row_right, skew_row_left)
+    skew_col = tl.where(from_right, col_i32 - 256, col_i32 + 257)
+    first_left_interior = (chunk_id == 0) & (pos > 0) & (col_i32 > 0) & (col_i32 < 256)
+    has_bmm_source = from_right | (chunk_id != 0) | first_left_interior
+
+    bmm_score = _load_skewed_bmm(
+        bmm_ptr,
+        bh,
+        source_chunk,
+        skew_row,
+        skew_col,
+        valid_cols & has_bmm_source,
+    )
+
+    safe_col = tl.minimum(col_i32, R - 1)
+    first_chunk_base = tl.load(
+        slice3_ptr + bh * SLICE3_BH_STRIDE_ + pos * SLICE3_POS_STRIDE_ + safe_col,
+        mask=valid_cols,
+        other=0.0,
+    ).to(tl.float32)
+    first_select = (chunk_id == 0) & ((pos == 0) | (col_i32 == 0)) & (col_i32 < 256)
+    local_score = tl.where(first_select, first_chunk_base, bmm_score)
+
+    first_mask_offsets = ((batch * CHUNK + pos) * HEADS + head) * 257 + tl.minimum(col_i32, 256)
+    first_value_offsets = (
+        batch * PERMUTE12_BATCH_STRIDE_
+        + pos * PERMUTE12_POS_STRIDE_
+        + head * PERMUTE12_HEAD_STRIDE_
+        + tl.minimum(col_i32, 256)
+    )
+    first_mask = tl.load(
+        first_mask_ptr + first_mask_offsets,
+        mask=(chunk_id == 0) & (col_i32 < 257),
+        other=0,
+    ) != 0
+    first_value = tl.load(
+        first_last_value_ptr + first_value_offsets,
+        mask=(chunk_id == 0) & (col_i32 < 257),
+        other=0.0,
+    ).to(tl.float32)
+    local_score = tl.where((chunk_id == 0) & (col_i32 < 257) & first_mask, first_value, local_score)
+
+    last_col = col_i32 - 256
+    safe_last_col = tl.maximum(tl.minimum(last_col, 256), 0)
+    last_mask_offsets = ((batch * CHUNK + pos) * HEADS + head) * 257 + safe_last_col
+    last_value_offsets = (
+        batch * PERMUTE12_BATCH_STRIDE_
+        + pos * PERMUTE12_POS_STRIDE_
+        + head * PERMUTE12_HEAD_STRIDE_
+        + safe_last_col
+    )
+    last_mask = tl.load(
+        last_mask_ptr + last_mask_offsets,
+        mask=(chunk_id == 3) & (col_i32 >= 256) & valid_cols,
+        other=0,
+    ) != 0
+    last_value = tl.load(
+        first_last_value_ptr + last_value_offsets,
+        mask=(chunk_id == 3) & (col_i32 >= 256) & valid_cols,
+        other=0.0,
+    ).to(tl.float32)
+    local_score = tl.where((chunk_id == 3) & (col_i32 >= 256) & last_mask, last_value, local_score)
+
+    bias = tl.load(
+        global_bias_ptr + (batch * SEQ + seq) * R + safe_col,
+        mask=valid_cols,
+        other=0.0,
+    ).to(tl.float32)
+    scores = tl.where(valid_cols, local_score + bias, -float("inf"))
+
+    row_max = tl.max(scores, axis=0)
+    numer = tl.exp(scores - row_max)
+    denom = tl.sum(numer, axis=0)
+    values = numer / denom
+
+    query_masked = tl.load(query_mask_ptr + batch * SEQ + seq) != 0
+    full2 = tl.load(full2_ptr).to(tl.float32)
+    values = tl.where(query_masked, full2, values)
+
+    keep_dropout = tl.load(random_ptr + row * R + safe_col, mask=valid_cols, other=0.0) > 1.0e-30
+    values = tl.where(keep_dropout, values, 0.0)
+
+    padded_linear = pos * PADDED_R + safe_col
+    out_t = padded_linear // FINAL_R
+    out_d = padded_linear - out_t * FINAL_R
+    out_m = bh * CHUNKS_ + chunk_id
+    out_offsets = out_m * OUT_M_STRIDE + out_d + out_t * OUT_T_STRIDE
+    store_mask = valid_cols & (out_d < OUT_D_)
+    tl.store(out_ptr + out_offsets, values, mask=store_mask)
+
+
+def _launch_oracle(
+    bmm_22: torch.Tensor,
+    slice_3: torch.Tensor,
+    convert_element_type: torch.Tensor,
+    permute_12: torch.Tensor,
+    convert_element_type_1: torch.Tensor,
+    permute_25: torch.Tensor,
+    unsqueeze_11: torch.Tensor,
+    full_2: torch.Tensor,
+    inductor_seeds: torch.Tensor,
+) -> torch.Tensor:
+    random_values = _inductor_random_like_repro(inductor_seeds)
+    out = torch.empty_strided(
+        OUT_SHAPE,
+        OUT_STRIDE,
+        device=bmm_22.device,
+        dtype=bmm_22.dtype,
+    )
+    _zero_kernel[(triton.cdiv(OUT_STORAGE_SIZE, BLOCK_N),)](
+        out,
+        OUT_STORAGE_SIZE,
+        BLOCK=BLOCK_N,
+    )
+    _longformer_full_kernel[(ROWS,)](
+        bmm_22,
+        slice_3,
+        convert_element_type,
+        permute_12,
+        convert_element_type_1,
+        permute_25,
+        unsqueeze_11,
+        full_2,
+        random_values,
+        out,
+        BLOCK=BLOCK_N,
+        R=RNUMEL,
+        SEQ=SEQ_LEN,
+        HEADS=N_HEADS,
+        CHUNK=LOCAL_CHUNK,
+        CHUNKS_=CHUNKS,
+        OUT_D_=OUT_D,
+        PADDED_R=PADDED_RNUMEL,
+        FINAL_R=FINAL_INNER,
+        SLICE3_BH_STRIDE_=SLICE3_BH_STRIDE,
+        SLICE3_POS_STRIDE_=SLICE3_POS_STRIDE,
+        PERMUTE12_BATCH_STRIDE_=PERMUTE12_BATCH_STRIDE,
+        PERMUTE12_POS_STRIDE_=PERMUTE12_POS_STRIDE,
+        PERMUTE12_HEAD_STRIDE_=PERMUTE12_HEAD_STRIDE,
+        OUT_M_STRIDE=OUT_STRIDE[0],
+        OUT_T_STRIDE=OUT_STRIDE[2],
+        num_warps=4,
+    )
+    return out
+
+
+def oracle_forward(inputs: tuple) -> torch.Tensor:
+    bmm_22 = inputs[0]
+    slice_3 = inputs[2]
+    convert_element_type = inputs[4]
+    permute_12 = inputs[5]
+    convert_element_type_1 = inputs[6]
+    permute_25 = inputs[7]
+    unsqueeze_11 = inputs[8]
+    full_2 = inputs[9]
+    inductor_seeds = inputs[10]
+    return _launch_oracle(
+        bmm_22,
+        slice_3,
+        convert_element_type,
+        permute_12,
+        convert_element_type_1,
+        permute_25,
+        unsqueeze_11,
+        full_2,
+        inductor_seeds,
+    )
+
+
+def _as_tuple(value):
+    if isinstance(value, tuple):
+        return value
+    if isinstance(value, list):
+        return tuple(value)
+    return (value,)
+
+
+def _max_diffs(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float]:
+    diff = (actual - expected).abs()
+    max_abs = float(torch.nan_to_num(diff, nan=0.0, posinf=math.inf).max().item())
+    rel = diff / expected.abs().clamp_min(1e-12)
+    max_rel = float(torch.nan_to_num(rel, nan=0.0, posinf=math.inf).max().item())
+    return max_abs, max_rel
+
+
+@torch.no_grad()
+def run_check(rtol: float, atol: float) -> bool:
+    print(f"Checking {REPRO_ID}...")
+    base_inputs = get_inputs()
+    expected_inputs = _clone_inputs(base_inputs)
+    actual_inputs = _clone_inputs(base_inputs)
+    repro = get_repro_instance()
+
+    cpu_rng_state = torch.get_rng_state()
+    cuda_rng_state = torch.cuda.get_rng_state()
+    torch.set_rng_state(cpu_rng_state)
+    torch.cuda.set_rng_state(cuda_rng_state)
+    expected = _as_tuple(repro(*expected_inputs))
+    torch.cuda.synchronize()
+    torch.set_rng_state(cpu_rng_state)
+    torch.cuda.set_rng_state(cuda_rng_state)
+    actual = _as_tuple(oracle_forward(actual_inputs))
+    torch.cuda.synchronize()
+
+    if len(actual) != len(expected):
+        print(f"  SCOPE_MISMATCH: expected {len(expected)} outputs, got {len(actual)}")
+        print("Correctness: FAIL")
+        return False
+
+    ok = True
+    for idx, (act, exp) in enumerate(zip(actual, expected)):
+        item_ok = True
+        if act.shape != exp.shape:
+            print(f"  output {idx}: FAIL shape expected={list(exp.shape)} actual={list(act.shape)}")
+            item_ok = False
+        if act.dtype != exp.dtype:
+            print(f"  output {idx}: FAIL dtype expected={exp.dtype} actual={act.dtype}")
+            item_ok = False
+        if act.stride() != exp.stride():
+            print(f"  output {idx}: FAIL stride expected={exp.stride()} actual={act.stride()}")
+            item_ok = False
+        close = torch.allclose(act, exp, rtol=rtol, atol=atol, equal_nan=True)
+        max_abs, max_rel = _max_diffs(act, exp)
+        item_ok = item_ok and bool(close)
+        print(
+            f"  output {idx}: {'PASS' if item_ok else 'FAIL'} "
+            f"shape={list(act.shape)} dtype={act.dtype} stride={act.stride()} "
+            f"max_abs={max_abs:.6g} max_rel={max_rel:.6g}"
+        )
+        ok = ok and item_ok
+
+    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+@torch.no_grad()
+def _time_cuda(fn, warmup: int, rep: int) -> tuple[float, float]:
+    for _ in range(warmup):
+        fn()
+    torch.cuda.synchronize()
+
+    start = torch.cuda.Event(enable_timing=True)
+    end = torch.cuda.Event(enable_timing=True)
+    times = []
+    for _ in range(rep):
+        start.record()
+        fn()
+        end.record()
+        torch.cuda.synchronize()
+        times.append(start.elapsed_time(end) * 1000.0)
+    times.sort()
+    return min(times), times[len(times) // 2]
+
+
+@torch.no_grad()
+def run_bench(warmup: int, rep: int) -> None:
+    print(f"Benchmarking {REPRO_ID}...")
+    inputs = get_inputs()
+
+    min_us, median_us = _time_cuda(lambda: oracle_forward(inputs), warmup=warmup, rep=rep)
+    result = {
+        "classification": "NEW_PATTERN",
+        "oracle_min_us": min_us,
+        "oracle_us": median_us,
+        "rep": rep,
+        "repro_id": REPRO_ID,
+        "scope": "full_repro_forward",
+        "warmup": warmup,
+    }
+    print(json.dumps(result, sort_keys=True))
+    print(f"Oracle full-scope median: {median_us:.3f} us (min {min_us:.3f} us)")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=f"Full-scope oracle for {REPRO_ID}")
+    parser.add_argument("--check", action="store_true", help="check against Repro()(*make_inputs())")
+    parser.add_argument("--bench", action="store_true", help="benchmark the full oracle path")
+    parser.add_argument("--warmup", type=int, default=3)
+    parser.add_argument("--rep", type=int, default=10)
+    parser.add_argument("--rtol", type=float, default=1e-3)
+    parser.add_argument("--atol", type=float, default=1e-5)
     args = parser.parse_args()
 
-    print(f"=" * 70)
-    print(f"Oracle Persistent Softmax Benchmark: {REPRO_ID}")
-    print(f"Longformer sliding window attention (online softmax cross-entropy)")
-    print(f"Softmax shape: f32[{M}, {RNUMEL}] ({M} rows, {RNUMEL} cols)")
-    print(f"=" * 70)
+    if not args.check and not args.bench:
+        args.check = True
+        args.bench = True
 
-    # Compute memory metrics for the softmax kernel alone
-    total_bytes = M * RNUMEL * 4 * 2  # read + write, f32 = 4 bytes
-    sol_us = total_bytes / 3.35e6  # H100 HBM ~3.35 TB/s
-    print(f"\nMemory (softmax kernel only): {total_bytes / 1e6:.1f} MB total traffic")
-    print(f"SOL (3.35 TB/s): {sol_us:.1f} us")
-    print(f"Note: Full repro includes extensive pre-softmax assembly (views/slices/scatters/pads)")
-
-    # Correctness
-    print(f"\n--- Correctness ---")
-    ok = correctness_check()
-    if not ok:
-        print("FAILED correctness check. Exiting.")
-        sys.exit(1)
-    print("PASSED")
-
-    if args.check_only:
-        return
-
-    # Benchmark
-    print(f"\n--- Benchmark (rep={args.rep}, warmup={args.warmup}) ---")
-    torch.manual_seed(42)
-    x = torch.randn(M, RNUMEL, dtype=torch.float32, device="cuda")
-
-    # Triton oracle (softmax only)
-    triton_us = benchmark_triton_softmax(x, warmup=args.warmup, rep=args.rep,
-                                         with_dropout=args.with_dropout)
-    triton_bw = total_bytes / (triton_us * 1e-6) / 1e12
-    triton_pct_sol = sol_us / triton_us * 100.0
-    label = "softmax+dropout" if args.with_dropout else "softmax"
-    print(f"\nTriton persistent {label} (rnumel={RNUMEL}):")
-    print(f"  Median: {triton_us:.1f} us")
-    print(f"  Effective BW: {triton_bw:.3f} TB/s")
-    print(f"  % of SOL: {triton_pct_sol:.1f}%")
-
-    # With dropout fused
-    if not args.with_dropout:
-        triton_dropout_us = benchmark_triton_softmax(x, warmup=args.warmup, rep=args.rep,
-                                                     with_dropout=True)
-        print(f"\nTriton persistent softmax+dropout:")
-        print(f"  Median: {triton_dropout_us:.1f} us")
-        dropout_bw = total_bytes / (triton_dropout_us * 1e-6) / 1e12
-        print(f"  Effective BW: {dropout_bw:.3f} TB/s")
-
-    # torch.compile full repro baseline
-    compile_us = None
-    if not args.no_compile:
-        print(f"\nRunning torch.compile full repro baseline (with CD tuning)...")
-        try:
-            compile_us = benchmark_compiled_full(warmup=args.warmup, rep=args.rep)
-            print(f"torch.compile (full repro with CD):")
-            print(f"  Median: {compile_us:.1f} us")
-            # Ratio: how much of compiled time is our softmax kernel
-            ratio = triton_us / compile_us * 100.0
-            print(f"  Oracle softmax kernel = {ratio:.1f}% of full compiled time")
-        except Exception as e:
-            print(f"  torch.compile baseline failed: {e}")
-
-    # Summary
-    print(f"\n--- Summary ---")
-    print(f"  Oracle (persistent softmax, BLOCK_N=1024): {triton_us:.1f} us")
-    print(f"  SOL: {sol_us:.1f} us")
-    print(f"  Oracle achieves {triton_pct_sol:.1f}% of SOL")
-    if compile_us:
-        print(f"  Full compiled repro: {compile_us:.1f} us")
-        print(f"  Softmax kernel is {triton_us/compile_us*100:.1f}% of total")
-    print(f"\n  Key observation: rnumel=513 fits entirely in one tile (BLOCK_N=1024)")
-    print(f"  No loop iteration needed - true persistent single-pass reduction")
-
-    # Write CSV if requested
-    csv_path = Path(args.csv) if args.csv else DEFAULT_CSV
-    if args.csv is not None or DEFAULT_CSV.exists():
-        _write_csv(csv_path, triton_us, compile_us, total_bytes)
-
-
-def _write_csv(csv_path: Path, triton_us: float, compile_us: float | None, total_bytes: int):
-    """Append measurement to CSV."""
-    csv_path.parent.mkdir(parents=True, exist_ok=True)
-    write_header = not csv_path.exists()
-
-    row = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "repro_id": REPRO_ID,
-        "kernel_type": "triton_persistent_softmax",
-        "shape": f"f32[{M},{RNUMEL}]",
-        "oracle_us": f"{triton_us:.1f}",
-        "compile_us": f"{compile_us:.1f}" if compile_us else "",
-        "total_bytes": str(total_bytes),
-        "effective_bw_tb_s": f"{total_bytes / (triton_us * 1e-6) / 1e12:.3f}",
-        "sol_us": f"{total_bytes / 3.35e6:.1f}",
-        "pct_sol": f"{(total_bytes / 3.35e6) / triton_us * 100:.1f}",
-    }
-
-    fieldnames = list(row.keys())
-    with open(csv_path, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        if write_header:
-            writer.writeheader()
-        writer.writerow(row)
-    print(f"\nResults appended to {csv_path}")
+    if args.check and not run_check(rtol=args.rtol, atol=args.atol):
+        return 1
+    if args.bench:
+        run_bench(warmup=args.warmup, rep=args.rep)
+    return 0
 
 
 if __name__ == "__main__":
-    with torch.no_grad():
-        main()
+    raise SystemExit(main())

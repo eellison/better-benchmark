@@ -1,179 +1,123 @@
-"""
-Oracle kernel for amax_sum_amax_68fa105ccaf0: dual online softmax forward (T5 training).
-
-Pattern: Two independent softmax operations on f32[8, 8, 1024, 1024] tensors,
-each following: amax(dim=-1) -> sub -> exp -> sum(dim=-1) -> div, followed by
-dropout and transpose.
-
-This is the T5 encoder-decoder cross-attention training forward pass with two
-attention heads, each performing softmax + dropout independently. The two softmax
-operations share the same structure but have different inputs (different relative
-position biases).
-
-Oracle strategy:
-  - Online softmax (Milakov & Gimelshein 2018) with two passes per row.
-  - Each program handles one row of the [M, 1024] input.
-  - Since N=1024 is a power of 2, the entire row fits in one BLOCK_N=1024 load.
-  - We run the kernel twice (once per softmax instance) since they are independent.
-  - Dropout is applied via a separate random comparison (gt.Scalar + mul + mul).
-
-Memory traffic (per softmax):
-  - Read: 8*8*1024*1024 * 4 = 256 MB (f32 input)
-  - Write: 8*8*1024*1024 * 4 = 256 MB (f32 output)
-  - Total per softmax: 512 MB
-  - Grand total (2 softmax): 1024 MB
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete T5 dual relative-position attention softmax/dropout Repro.forward return for the 8-head T5 training repro by recomputing the bidirectional and causal relative-position buckets plus structured masks inside Triton row kernels, adding the viewed BMM scores, applying exact seed-index 1 and 27 Inductor RNG dropout, and returning both required transposed [64,1024,1024] views, whereas Inductor currently lowers the decomposed iota/bucket/embedding/where/view/add/amax/sub/exp/sum/div/inductor_random/dropout/expand/view/permute graph as generic mask and relative-bias producers feeding separate softmax, RNG, and layout kernels; Inductor cannot do this today because its scheduler/codegen pattern library does not canonicalize T5 relative-position attention with sibling stochastic softmax epilogues and trailing transpose views into persistent row-softmax templates that recompute cheap structured bias and mask predicates at point of use; the fix is NEW_PATTERN: add an Inductor lowering for T5-style relative-position attention softmax/dropout that fuses bucket lookup, structured masks, dropout, and output-layout epilogues into the row kernels."""
 from __future__ import annotations
 
 import argparse
 import importlib.util
 import sys
 from pathlib import Path
+from typing import Any
 
 import torch
+import torch._inductor.inductor_prims  # noqa: F401
 import triton
 import triton.language as tl
+
 
 REPRO_ID = "amax_sum_amax_68fa105ccaf0"
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-# Problem dimensions
-# Each softmax operates on [8, 8, 1024, 1024]
-# Flattened: M = 8*8*1024 = 65536 rows, N = 1024 columns
 BATCH = 8
 N_HEADS = 8
-SEQ_LEN = 1024
-N = 1024  # reduction dimension
-M = BATCH * N_HEADS * SEQ_LEN  # 65536
-
-
-# --- Triton Kernel: Online softmax ---
-
-@triton.jit
-def online_softmax_fwd_kernel(
-    input_ptr,
-    output_ptr,
-    N: tl.constexpr,
-    BLOCK_N: tl.constexpr,
-):
-    """Online softmax forward: fused max + sum_exp + normalize.
-
-    Each program handles one row. For N=1024, one block load suffices.
-    """
-    row_idx = tl.program_id(0)
-    row_start = row_idx * N
-
-    cols = tl.arange(0, BLOCK_N)
-    mask = cols < N
-
-    # Load entire row
-    x = tl.load(input_ptr + row_start + cols, mask=mask, other=float("-inf")).to(tl.float32)
-
-    # Compute softmax in one shot (N fits in one block)
-    m = tl.max(x, axis=0)
-    x_shifted = x - m
-    exp_x = tl.exp(x_shifted)
-    sum_exp = tl.sum(exp_x, axis=0)
-    softmax_out = exp_x / sum_exp
-
-    tl.store(output_ptr + row_start + cols, softmax_out, mask=mask)
+Q_LEN = 1024
+K_LEN = 1024
+BH = BATCH * N_HEADS
+N_ROWS = BH * Q_LEN
+DROPOUT_P = 0.1
+DROPOUT_SCALE = 1.0 / (1.0 - DROPOUT_P)
+ENCODER_SEED_INDEX = 1
+DECODER_SEED_INDEX = 27
 
 
 @triton.jit
-def online_softmax_dropout_kernel(
-    input_ptr,
-    seed_ptr,         # scalar seed for this dropout instance
-    output_ptr,
-    N: tl.constexpr,
-    dropout_p: tl.constexpr,  # dropout probability (0.1)
-    scale: tl.constexpr,      # 1 / (1 - dropout_p) = 1.1111...
-    BLOCK_N: tl.constexpr,
+def _t5_relative_softmax_dropout_kernel(
+    bmm_ptr,
+    rel_bias_ptr,
+    random_ptr,
+    out_base_ptr,
+    H: tl.constexpr,
+    Q: tl.constexpr,
+    K: tl.constexpr,
+    BLOCK_K: tl.constexpr,
+    IS_CAUSAL: tl.constexpr,
+    IS_BIDIRECTIONAL_BUCKET: tl.constexpr,
+    DROPOUT_P_CONST: tl.constexpr,
+    DROPOUT_SCALE_CONST: tl.constexpr,
 ):
-    """Fused softmax + dropout forward.
+    row = tl.program_id(0)
+    bh = row // Q
+    head = bh - (bh // H) * H
+    q = row - bh * Q
 
-    Each program handles one row:
-    1. Compute softmax
-    2. Generate random mask (bernoulli with p=1-dropout_p)
-    3. Apply: output = (random > dropout_p) * softmax_out * scale
-    """
-    row_idx = tl.program_id(0)
-    row_start = row_idx * N
+    cols = tl.arange(0, BLOCK_K)
+    col_mask = cols < K
+    rel = cols.to(tl.int32) - q
 
-    cols = tl.arange(0, BLOCK_N)
-    mask = cols < N
+    if IS_BIDIRECTIONAL_BUCKET:
+        distance = tl.where(rel < 0, -rel, rel)
+        bucket = distance
+        bucket = tl.where(distance >= 8, 8, bucket)
+        bucket = tl.where(distance >= 12, 9, bucket)
+        bucket = tl.where(distance >= 16, 10, bucket)
+        bucket = tl.where(distance >= 23, 11, bucket)
+        bucket = tl.where(distance >= 32, 12, bucket)
+        bucket = tl.where(distance >= 46, 13, bucket)
+        bucket = tl.where(distance >= 64, 14, bucket)
+        bucket = tl.where(distance >= 91, 15, bucket)
+        bucket += tl.where(rel > 0, 16, 0)
+    else:
+        distance = tl.where(rel < 0, -rel, 0)
+        bucket = distance
+        bucket = tl.where(distance >= 16, 16, bucket)
+        bucket = tl.where(distance >= 19, 17, bucket)
+        bucket = tl.where(distance >= 21, 18, bucket)
+        bucket = tl.where(distance >= 24, 19, bucket)
+        bucket = tl.where(distance >= 27, 20, bucket)
+        bucket = tl.where(distance >= 31, 21, bucket)
+        bucket = tl.where(distance >= 35, 22, bucket)
+        bucket = tl.where(distance >= 40, 23, bucket)
+        bucket = tl.where(distance >= 46, 24, bucket)
+        bucket = tl.where(distance >= 52, 25, bucket)
+        bucket = tl.where(distance >= 59, 26, bucket)
+        bucket = tl.where(distance >= 67, 27, bucket)
+        bucket = tl.where(distance >= 77, 28, bucket)
+        bucket = tl.where(distance >= 87, 29, bucket)
+        bucket = tl.where(distance >= 99, 30, bucket)
+        bucket = tl.where(distance >= 113, 31, bucket)
 
-    # Load entire row
-    x = tl.load(input_ptr + row_start + cols, mask=mask, other=float("-inf")).to(tl.float32)
+    row_offsets = row * K + cols
+    bias = tl.load(
+        rel_bias_ptr + bucket * H + head,
+        mask=col_mask,
+        other=0.0,
+    ).to(tl.float32)
+    bmm = tl.load(
+        bmm_ptr + row_offsets,
+        mask=col_mask,
+        other=0.0,
+    ).to(tl.float32)
 
-    # Softmax
-    m = tl.max(x, axis=0)
-    x_shifted = x - m
-    exp_x = tl.exp(x_shifted)
-    sum_exp = tl.sum(exp_x, axis=0)
-    softmax_out = exp_x / sum_exp
+    scores = bmm + bias
+    if IS_CAUSAL:
+        scores = tl.where(cols <= q, scores, -3.4028234663852886e38)
+    scores = tl.where(col_mask, scores, -float("inf"))
 
-    # Dropout: generate random values and threshold
-    seed = tl.load(seed_ptr)
-    offsets = row_start + cols
-    random_vals = tl.rand(seed, offsets)
-    keep_mask = random_vals > dropout_p
-    dropped = tl.where(keep_mask, softmax_out * scale, 0.0)
+    row_max = tl.max(scores, axis=0)
+    numer = tl.exp(scores - row_max)
+    denom = tl.sum(numer, axis=0)
+    softmax = numer / denom
 
-    tl.store(output_ptr + row_start + cols, dropped, mask=mask)
+    random = tl.load(random_ptr + row_offsets, mask=col_mask, other=0.0).to(tl.float32)
+    keep = random > DROPOUT_P_CONST
+    out = tl.where(keep, softmax * DROPOUT_SCALE_CONST, 0.0)
 
-
-def oracle_softmax(x: torch.Tensor) -> torch.Tensor:
-    """Launch the online softmax Triton kernel on a 2D tensor."""
-    assert x.ndim == 2
-    M_val, N_val = x.shape
-    output = torch.empty_like(x)
-
-    BLOCK_N = triton.next_power_of_2(N_val)
-    grid = (M_val,)
-
-    online_softmax_fwd_kernel[grid](
-        x, output,
-        N=N_val,
-        BLOCK_N=BLOCK_N,
-    )
-    return output
-
-
-def oracle_dual_softmax(x1: torch.Tensor, x2: torch.Tensor):
-    """Compute softmax on two independent [B, H, S, S] tensors.
-
-    Args:
-        x1: [8, 8, 1024, 1024] first attention logits
-        x2: [8, 8, 1024, 1024] second attention logits
-
-    Returns:
-        (softmax1, softmax2): both [8, 8, 1024, 1024]
-    """
-    shape = x1.shape
-    x1_flat = x1.reshape(-1, shape[-1])
-    x2_flat = x2.reshape(-1, shape[-1])
-
-    out1 = oracle_softmax(x1_flat)
-    out2 = oracle_softmax(x2_flat)
-
-    return out1.reshape(shape), out2.reshape(shape)
-
-
-# --- Reference ---
-
-def softmax_reference(x: torch.Tensor) -> torch.Tensor:
-    """Reference softmax matching repro pattern."""
-    m = x.amax(dim=-1, keepdim=True)
-    e = torch.exp(x - m)
-    s = e.sum(dim=-1, keepdim=True)
-    return e / s
+    tl.store(out_base_ptr + row_offsets, out, mask=col_mask)
 
 
-# --- Load repro module ---
-
-def _load_repro_module():
+def _load_repro_module() -> Any:
     spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
@@ -183,141 +127,416 @@ def _load_repro_module():
     return module
 
 
-def prepare_oracle_inputs():
-    """Generate synthetic inputs matching the dual softmax shapes."""
-    torch.manual_seed(42)
-    # Two attention score tensors: [8, 8, 1024, 1024]
-    x1 = torch.randn(BATCH, N_HEADS, SEQ_LEN, N, device="cuda", dtype=torch.float32)
-    x2 = torch.randn(BATCH, N_HEADS, SEQ_LEN, N, device="cuda", dtype=torch.float32)
-    return x1, x2
+def _as_tuple(value: Any) -> tuple[Any, ...]:
+    if isinstance(value, tuple):
+        return value
+    if isinstance(value, list):
+        return tuple(value)
+    return (value,)
 
 
-# --- Correctness check ---
+def _make_inputs(module: Any, seed: int) -> tuple[Any, ...]:
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    inputs = module.make_inputs()
+    return tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in inputs)
 
-def run_check():
-    """Verify oracle produces same results as reference."""
-    print(f"Correctness check for {REPRO_ID}")
-    print(f"Shape: f32[{BATCH}, {N_HEADS}, {SEQ_LEN}, {N}], reduction dim=-1")
-    print(f"Two independent softmax operations")
 
-    x1, x2 = prepare_oracle_inputs()
+def get_inputs() -> tuple[Any, ...]:
+    module = _load_repro_module()
+    return _make_inputs(module, seed=1234)
+
+
+def get_repro_instance() -> Any:
+    return _load_repro_module().Repro().cuda()
+
+
+def oracle_forward(inputs: tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
+    return oracle_full_t5_relative_position_attention_softmax_dropout(*inputs)
+
+
+def _inductor_random_like_repro(
+    inductor_seeds: torch.Tensor,
+    seed_index: int,
+) -> torch.Tensor:
+    seed = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, seed_index)
+    return torch.ops.prims.inductor_random.default(
+        [BATCH, N_HEADS, Q_LEN, K_LEN],
+        seed,
+        "rand",
+    )
+
+
+def _check_shape_params(
+    _shape_param_0: Any,
+    _shape_param_1: Any,
+    _shape_param_2: Any,
+    _shape_param_3: Any,
+    _shape_param_4: Any,
+    _shape_param_5: Any,
+    _shape_param_6: Any,
+    _shape_param_7: Any,
+) -> None:
+    assert list(_shape_param_0) == [BATCH, -1, Q_LEN, K_LEN]
+    assert list(_shape_param_1) == [BATCH, N_HEADS, Q_LEN, K_LEN]
+    assert list(_shape_param_2) == [BATCH, N_HEADS, Q_LEN, K_LEN]
+    assert list(_shape_param_3) == [BH, Q_LEN, K_LEN]
+    assert list(_shape_param_4) == [BATCH, -1, Q_LEN, K_LEN]
+    assert list(_shape_param_5) == [BATCH, N_HEADS, Q_LEN, K_LEN]
+    assert list(_shape_param_6) == [BATCH, N_HEADS, Q_LEN, K_LEN]
+    assert list(_shape_param_7) == [BH, Q_LEN, K_LEN]
+
+
+def _check_kernel_inputs(
+    bmm: torch.Tensor,
+    rel_bias: torch.Tensor,
+    random_values: torch.Tensor,
+    out_base: torch.Tensor,
+) -> None:
+    assert bmm.is_cuda and rel_bias.is_cuda and random_values.is_cuda
+    assert out_base.is_cuda
+    assert bmm.dtype == torch.float32 and bmm.shape == (BH, Q_LEN, K_LEN)
+    assert rel_bias.dtype == torch.float32 and rel_bias.shape == (32, N_HEADS)
+    assert random_values.dtype == torch.float32
+    assert random_values.shape == (BATCH, N_HEADS, Q_LEN, K_LEN)
+    assert out_base.dtype == torch.float32 and out_base.shape == (BH, Q_LEN, K_LEN)
+    assert bmm.is_contiguous()
+    assert rel_bias.is_contiguous()
+    assert random_values.is_contiguous()
+    assert out_base.is_contiguous()
+
+
+def _launch_attention_branch(
+    bmm: torch.Tensor,
+    rel_bias: torch.Tensor,
+    random_values: torch.Tensor,
+    out_base: torch.Tensor,
+    *,
+    is_causal: bool,
+    is_bidirectional_bucket: bool,
+    block_k: int,
+    num_warps: int,
+) -> torch.Tensor:
+    _check_kernel_inputs(bmm, rel_bias, random_values, out_base)
+    assert block_k >= K_LEN and (block_k & (block_k - 1)) == 0
+
+    _t5_relative_softmax_dropout_kernel[(N_ROWS,)](
+        bmm,
+        rel_bias,
+        random_values,
+        out_base,
+        H=N_HEADS,
+        Q=Q_LEN,
+        K=K_LEN,
+        BLOCK_K=block_k,
+        IS_CAUSAL=is_causal,
+        IS_BIDIRECTIONAL_BUCKET=is_bidirectional_bucket,
+        DROPOUT_P_CONST=DROPOUT_P,
+        DROPOUT_SCALE_CONST=DROPOUT_SCALE,
+        num_warps=num_warps,
+    )
+    return out_base.permute(0, 2, 1)
+
+
+def oracle_full_t5_relative_position_attention_softmax_dropout(
+    bmm: torch.Tensor,
+    arg6_1: torch.Tensor,
+    inductor_seeds: torch.Tensor,
+    bmm_12: torch.Tensor,
+    arg57_1: torch.Tensor,
+    _shape_param_0: Any,
+    _shape_param_1: Any,
+    _shape_param_2: Any,
+    _shape_param_3: Any,
+    _shape_param_4: Any,
+    _shape_param_5: Any,
+    _shape_param_6: Any,
+    _shape_param_7: Any,
+    *,
+    encoder_random: torch.Tensor | None = None,
+    decoder_random: torch.Tensor | None = None,
+    encoder_out_base: torch.Tensor | None = None,
+    decoder_out_base: torch.Tensor | None = None,
+    block_k: int = K_LEN,
+    num_warps: int = 8,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    _check_shape_params(
+        _shape_param_0,
+        _shape_param_1,
+        _shape_param_2,
+        _shape_param_3,
+        _shape_param_4,
+        _shape_param_5,
+        _shape_param_6,
+        _shape_param_7,
+    )
+
+    bmm_view = bmm.view(BH, Q_LEN, K_LEN)
+    bmm_12_view = bmm_12.view(BH, Q_LEN, K_LEN)
+
+    if encoder_random is None:
+        encoder_random = _inductor_random_like_repro(
+            inductor_seeds,
+            ENCODER_SEED_INDEX,
+        )
+    if decoder_random is None:
+        decoder_random = _inductor_random_like_repro(
+            inductor_seeds,
+            DECODER_SEED_INDEX,
+        )
+    if encoder_out_base is None:
+        encoder_out_base = torch.empty_like(bmm_view)
+    if decoder_out_base is None:
+        decoder_out_base = torch.empty_like(bmm_12_view)
+
+    encoder_out = _launch_attention_branch(
+        bmm_view,
+        arg6_1,
+        encoder_random,
+        encoder_out_base,
+        is_causal=False,
+        is_bidirectional_bucket=True,
+        block_k=block_k,
+        num_warps=num_warps,
+    )
+    decoder_out = _launch_attention_branch(
+        bmm_12_view,
+        arg57_1,
+        decoder_random,
+        decoder_out_base,
+        is_causal=True,
+        is_bidirectional_bucket=False,
+        block_k=block_k,
+        num_warps=num_warps,
+    )
+    return decoder_out, encoder_out
+
+
+def _max_diff(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float]:
+    diff = (actual.float() - expected.float()).abs()
+    finite_diff = diff[torch.isfinite(diff)]
+    max_abs = finite_diff.max().item() if finite_diff.numel() else float("nan")
+    rel = diff / expected.float().abs().clamp_min(1e-8)
+    finite_rel = rel[torch.isfinite(rel)]
+    max_rel = finite_rel.max().item() if finite_rel.numel() else float("nan")
+    return max_abs, max_rel
+
+
+def run_check(rtol: float, atol: float, block_k: int, num_warps: int) -> bool:
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is required for the Triton oracle check")
+
+    module = _load_repro_module()
+    inputs = _make_inputs(module, seed=1234)
+    model = module.Repro().cuda()
+
+    cpu_rng_state = torch.get_rng_state()
+    cuda_rng_state = torch.cuda.get_rng_state()
 
     with torch.no_grad():
-        # Reference
-        ref1 = softmax_reference(x1)
-        ref2 = softmax_reference(x2)
-
-        # Oracle
-        out1, out2 = oracle_dual_softmax(x1, x2)
-
-    max_diff1 = (ref1 - out1).abs().max().item()
-    max_diff2 = (ref2 - out2).abs().max().item()
-    allclose1 = torch.allclose(ref1, out1, rtol=1e-4, atol=1e-5)
-    allclose2 = torch.allclose(ref2, out2, rtol=1e-4, atol=1e-5)
-
-    print(f"\n  Softmax 1:")
-    print(f"    Max abs diff: {max_diff1:.6e}")
-    print(f"    allclose: {allclose1}")
-    print(f"\n  Softmax 2:")
-    print(f"    Max abs diff: {max_diff2:.6e}")
-    print(f"    allclose: {allclose2}")
-
-    all_ok = allclose1 and allclose2
-    print(f"\nCorrectness: {'PASS' if all_ok else 'FAIL'}")
-    return all_ok
-
-
-# --- Benchmark ---
-
-def run_bench(rep=100, warmup=25):
-    """Benchmark oracle vs torch.compile."""
-    print(f"\n{'='*60}")
-    print(f"Benchmark: {REPRO_ID} (online_softmax_cross_entropy)")
-    print(f"Oracle: dual persistent online softmax, N={N}")
-    print(f"Shape: f32[{BATCH}, {N_HEADS}, {SEQ_LEN}, {N}] x 2")
-    print(f"M={M} rows per softmax, N={N}")
-    print(f"{'='*60}")
-
-    x1, x2 = prepare_oracle_inputs()
-
-    # Memory metrics: 2 softmax ops, each reads + writes [8,8,1024,1024] f32
-    bytes_per_softmax = 2 * BATCH * N_HEADS * SEQ_LEN * N * 4  # read + write
-    total_bytes = 2 * bytes_per_softmax
-    print(f"\nMemory traffic (2 softmax ops): {total_bytes / 1e6:.1f} MB")
-
-    # Benchmark oracle (dual softmax)
-    with torch.no_grad():
-        _ = oracle_dual_softmax(x1, x2)
-    torch.cuda.synchronize()
-
-    oracle_us = triton.testing.do_bench(
-        lambda: oracle_dual_softmax(x1, x2),
-        warmup=warmup * 20,
-        rep=rep * 10,
-    ) * 1000  # ms -> us
-
-    oracle_bw = total_bytes / (oracle_us * 1e-6) / 1e12
-    print(f"\nOracle (dual persistent softmax):")
-    print(f"  Median: {oracle_us:.1f} us")
-    print(f"  Effective BW: {oracle_bw:.3f} TB/s")
-
-    # Benchmark single softmax
-    x1_flat = x1.reshape(-1, N).contiguous()
-    single_us = triton.testing.do_bench(
-        lambda: oracle_softmax(x1_flat),
-        warmup=warmup * 20,
-        rep=rep * 10,
-    ) * 1000
-
-    print(f"\nOracle (single softmax):")
-    print(f"  Median: {single_us:.1f} us")
-    print(f"  Effective BW: {bytes_per_softmax / (single_us * 1e-6) / 1e12:.3f} TB/s")
-
-    # Benchmark torch.compile on full repro
-    repro_mod = _load_repro_module()
-    model = repro_mod.Repro().cuda()
-    inputs = repro_mod.make_inputs()
-    inputs = tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in inputs)
-
-    with torch.no_grad():
-        compiled = torch.compile(model)
-        _ = compiled(*inputs)
+        torch.set_rng_state(cpu_rng_state)
+        torch.cuda.set_rng_state(cuda_rng_state)
+        expected = _as_tuple(model(*inputs))
         torch.cuda.synchronize()
 
-    compile_us = triton.testing.do_bench(
-        lambda: compiled(*inputs),
-        warmup=warmup * 20,
-        rep=rep * 10,
-    ) * 1000
+        torch.set_rng_state(cpu_rng_state)
+        torch.cuda.set_rng_state(cuda_rng_state)
+        actual = _as_tuple(
+            oracle_full_t5_relative_position_attention_softmax_dropout(
+                *inputs,
+                block_k=block_k,
+                num_warps=num_warps,
+            )
+        )
+        torch.cuda.synchronize()
 
-    print(f"\ntorch.compile (full repro):")
-    print(f"  Median: {compile_us:.1f} us")
+    if len(actual) != len(expected):
+        print(f"output arity mismatch: oracle={len(actual)} ref={len(expected)}")
+        print("Correctness: FAIL")
+        return False
 
-    print(f"\nSpeedup (compile / oracle): {compile_us / oracle_us:.2f}x")
-    print(f"\nNote: Oracle measures the dual softmax kernels only.")
-    print(f"Full repro includes relative position bias computation, dropout,")
-    print(f"and transpose operations.")
+    ok = True
+    for idx, (got_item, ref_item) in enumerate(zip(actual, expected)):
+        if not isinstance(got_item, torch.Tensor) or not isinstance(ref_item, torch.Tensor):
+            item_ok = got_item == ref_item
+            print(f"output[{idx}]: non-tensor equal={item_ok}")
+            ok = ok and bool(item_ok)
+            continue
+
+        metadata_ok = (
+            got_item.shape == ref_item.shape
+            and got_item.dtype == ref_item.dtype
+            and got_item.stride() == ref_item.stride()
+        )
+        max_abs, max_rel = _max_diff(got_item, ref_item)
+        value_ok = torch.allclose(
+            got_item.float(),
+            ref_item.float(),
+            rtol=rtol,
+            atol=atol,
+            equal_nan=True,
+        )
+        item_ok = metadata_ok and value_ok
+        ok = ok and bool(item_ok)
+        print(
+            f"output[{idx}]: shape={list(got_item.shape)} dtype={got_item.dtype} "
+            f"stride={list(got_item.stride())} ref_stride={list(ref_item.stride())} "
+            f"max_abs={max_abs:.6e} max_rel={max_rel:.6e} "
+            f"allclose={value_ok} metadata={metadata_ok}"
+        )
+
+    print(
+        "check compared against full Repro.forward return value, including both "
+        "relative-position biases, structured masks, exact Inductor RNG dropout, "
+        "and transpose views"
+    )
+    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+    return bool(ok)
 
 
-def main():
+def _bench_cuda(fn: Any, warmup: int, rep: int) -> float:
+    for _ in range(warmup):
+        fn()
+    torch.cuda.synchronize()
+
+    start = torch.cuda.Event(enable_timing=True)
+    end = torch.cuda.Event(enable_timing=True)
+    times = []
+    for _ in range(rep):
+        start.record()
+        fn()
+        end.record()
+        torch.cuda.synchronize()
+        times.append(start.elapsed_time(end) * 1000.0)
+    times.sort()
+    return times[len(times) // 2]
+
+
+def run_bench(
+    warmup: int,
+    rep: int,
+    block_k: int,
+    num_warps: int,
+) -> None:
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is required for the Triton oracle benchmark")
+
+    module = _load_repro_module()
+    inputs = _make_inputs(module, seed=4321)
+    (
+        bmm,
+        arg6_1,
+        inductor_seeds,
+        bmm_12,
+        arg57_1,
+        *_shape_params,
+    ) = inputs
+
+    encoder_random = _inductor_random_like_repro(inductor_seeds, ENCODER_SEED_INDEX)
+    decoder_random = _inductor_random_like_repro(inductor_seeds, DECODER_SEED_INDEX)
+    encoder_out_base = torch.empty_like(bmm)
+    decoder_out_base = torch.empty_like(bmm_12)
+
+    elems_per_branch = N_ROWS * K_LEN
+    logical_bytes = 2 * elems_per_branch * 4 * 4
+    print(
+        f"oracle shape: two branches of bmm=f32[{BH}, {Q_LEN}, {K_LEN}], "
+        f"relative_bias=f32[32, {N_HEADS}]"
+    )
+    print(
+        f"steady-row logical fused read+write traffic: {logical_bytes / 1e6:.1f} MB "
+        "(two branches: bmm + random + output + approximate bias-table read)"
+    )
+
+    holder: list[Any] = [None]
+    with torch.no_grad():
+        kernel_us = _bench_cuda(
+            lambda: holder.__setitem__(
+                0,
+                (
+                    _launch_attention_branch(
+                        bmm.view(BH, Q_LEN, K_LEN),
+                        arg6_1,
+                        encoder_random,
+                        encoder_out_base,
+                        is_causal=False,
+                        is_bidirectional_bucket=True,
+                        block_k=block_k,
+                        num_warps=num_warps,
+                    ),
+                    _launch_attention_branch(
+                        bmm_12.view(BH, Q_LEN, K_LEN),
+                        arg57_1,
+                        decoder_random,
+                        decoder_out_base,
+                        is_causal=True,
+                        is_bidirectional_bucket=False,
+                        block_k=block_k,
+                        num_warps=num_warps,
+                    ),
+                ),
+            ),
+            warmup=warmup,
+            rep=rep,
+        )
+        full_us = _bench_cuda(
+            lambda: holder.__setitem__(
+                0,
+                oracle_full_t5_relative_position_attention_softmax_dropout(
+                    *inputs,
+                    encoder_out_base=encoder_out_base,
+                    decoder_out_base=decoder_out_base,
+                    block_k=block_k,
+                    num_warps=num_warps,
+                ),
+            ),
+            warmup=warmup,
+            rep=rep,
+        )
+
+    kernel_bw = logical_bytes / (kernel_us * 1e-6) / 1e12
+    full_bw = logical_bytes / (full_us * 1e-6) / 1e12
+    print(
+        f"oracle full return, precomputed random: {kernel_us:.3f} us "
+        f"({kernel_bw:.3f} TB/s logical bytes)"
+    )
+    print(
+        f"oracle full return including eager inductor_random: {full_us:.3f} us "
+        f"({full_bw:.3f} TB/s logical bytes)"
+    )
+
+
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="Run correctness check")
-    parser.add_argument("--bench", action="store_true", help="Run benchmark")
-    parser.add_argument("--rep", type=int, default=100, help="Benchmark repetitions")
-    parser.add_argument("--warmup", type=int, default=25, help="Warmup iterations")
+    parser.add_argument("--check", action="store_true", help="run correctness check")
+    parser.add_argument("--bench", action="store_true", help="run timing benchmark")
+    parser.add_argument("--warmup", type=int, default=25, help="benchmark warmup iterations")
+    parser.add_argument("--rep", type=int, default=100, help="benchmark repetitions")
+    parser.add_argument("--block-k", type=int, default=K_LEN, help="Triton reduction tile size")
+    parser.add_argument("--num-warps", type=int, default=8, help="Triton warps for each row kernel")
+    parser.add_argument("--rtol", type=float, default=5e-5)
+    parser.add_argument("--atol", type=float, default=5e-6)
     args = parser.parse_args()
 
     if not args.check and not args.bench:
         args.check = True
         args.bench = True
 
-    if args.check:
-        ok = run_check()
-        if not ok:
-            sys.exit(1)
-
+    block_k = max(args.block_k, triton.next_power_of_2(K_LEN))
+    if args.check and not run_check(
+        rtol=args.rtol,
+        atol=args.atol,
+        block_k=block_k,
+        num_warps=args.num_warps,
+    ):
+        sys.exit(1)
     if args.bench:
-        run_bench(rep=args.rep, warmup=args.warmup)
+        run_bench(
+            warmup=args.warmup,
+            rep=args.rep,
+            block_k=block_k,
+            num_warps=args.num_warps,
+        )
 
 
 if __name__ == "__main__":

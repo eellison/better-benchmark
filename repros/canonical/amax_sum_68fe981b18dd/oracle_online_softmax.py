@@ -1,193 +1,55 @@
-"""
-Oracle kernel for amax_sum_68fe981b18dd: online softmax forward (Longformer inference).
-
-Pattern: f32[8, 1024, 12, 513] -> amax(dim=-1) -> sub -> exp -> sum(dim=-1) -> div
-         -> where(mask, 0.0, softmax_result)
-
-This is the Longformer sliding-window attention softmax forward during inference.
-The reduction dimension is 513 (sliding window size), which is small enough for
-a persistent kernel approach.
-
-After the softmax, a post-softmax mask zeros out padding positions, and the result
-goes through diagonal-to-dense reshaping for the BMM.
-
-Oracle strategy:
-  - Online softmax (Milakov & Gimelshein 2018): single pass computing running max
-    and sum_exp, then a second pass to normalize.
-  - Each program handles one row of the [M, 513] flattened input.
-  - Since N=513 is small (fits in registers with BLOCK_N=512), we use a persistent
-    single-pass approach: load entire row, compute max, subtract, exp, sum, divide.
-  - After softmax, apply the padding mask inline.
-
-Memory traffic (softmax + mask only):
-  - Read: 8*1024*12*513 * 4 bytes (input) + 8*1024 * 1 byte (mask)
-  - Write: 8*1024*12*513 * 4 bytes (output)
-  - Total: ~402 MB
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete Longformer inference sliding-window attention path by assembling the structured local scores and key mask directly from `bmm_22`/`arg7_1`, applying the row padding mask, performing the full row softmax, and writing the final strided `[384, 256, 768]` output layout, whereas Inductor currently emits many separate slice/scatter/pad/view kernels around a generic softmax and final layout pipeline; Inductor cannot do this today because its scheduler/codegen lacks a Longformer sliding-window attention pattern that fuses structured band assembly, mask insertion, row softmax, and destination-layout scatter into one custom lowering; the fix is NEW_PATTERN: add a Longformer sliding-window attention lowering that recognizes the chunked band/global-mask assembly and generates a fused softmax/layout kernel for the required output view."""
 from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
+import math
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 import torch
-import triton
-import triton.language as tl
+import torch._inductor.inductor_prims  # noqa: F401
+
+try:
+    import triton
+    import triton.language as tl
+except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful without Triton.
+    triton = None
+    tl = None
+
 
 REPRO_ID = "amax_sum_68fe981b18dd"
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-# Problem dimensions
-# Softmax operates on [8, 1024, 12, 513], flattened to [98304, 513]
+sys.path.insert(0, str(REPO_ROOT))
+
 BATCH = 8
 SEQ_LEN = 1024
 N_HEADS = 12
-WINDOW = 513
-M = BATCH * SEQ_LEN * N_HEADS  # 98304
+RNUMEL = 513
+LOCAL_CHUNK = 256
+CHUNKS = 4
+PADDED_RNUMEL = 770
+FINAL_INNER = 769
+OUT_M = BATCH * N_HEADS * CHUNKS
+OUT_T = 256
+OUT_D = 768
+OUT_SHAPE = (OUT_M, OUT_T, OUT_D)
+OUT_STRIDE = (LOCAL_CHUNK * PADDED_RNUMEL, FINAL_INNER, 1)
+OUT_STORAGE_SIZE = (
+    (OUT_M - 1) * OUT_STRIDE[0]
+    + (OUT_T - 1) * OUT_STRIDE[1]
+    + (OUT_D - 1) * OUT_STRIDE[2]
+    + 1
+)
+ROWS = BATCH * SEQ_LEN * N_HEADS
 
 
-# --- Triton Kernel: Fused softmax + mask ---
-
-@triton.jit
-def online_softmax_masked_kernel(
-    input_ptr,       # [M, N] attention scores
-    mask_ptr,        # [BATCH, SEQ_LEN] padding mask (bool)
-    output_ptr,      # [M, N] softmax output
-    N: tl.constexpr,
-    N_HEADS: tl.constexpr,
-    BLOCK_N: tl.constexpr,
-):
-    """Fused online softmax + padding mask.
-
-    Each program handles one row (one head of one sequence position).
-    After computing softmax, applies the row-level mask:
-        if mask[batch, seq_pos] == True:
-            output[row, :] = 0.0
-    """
-    row_idx = tl.program_id(0)
-    row_start = row_idx * N
-
-    # Determine batch and seq position for masking
-    # row_idx maps to [batch, seq_pos, head] in row-major order
-    # For [8, 1024, 12, 513]: row = batch*1024*12 + seq*12 + head
-    batch_idx = row_idx // (1024 * N_HEADS)
-    seq_idx = (row_idx % (1024 * N_HEADS)) // N_HEADS
-
-    # Load mask for this position
-    mask_val = tl.load(mask_ptr + batch_idx * 1024 + seq_idx)
-
-    # Load row
-    cols = tl.arange(0, BLOCK_N)
-    mask_cols = cols < N
-    x = tl.load(input_ptr + row_start + cols, mask=mask_cols, other=float("-inf")).to(tl.float32)
-
-    # Compute softmax
-    m = tl.max(x, axis=0)
-    x_shifted = x - m
-    exp_x = tl.exp(x_shifted)
-    sum_exp = tl.sum(exp_x, axis=0)
-    softmax_out = exp_x / sum_exp
-
-    # Apply padding mask: if mask is True, zero out the row
-    # mask_val is bool (True = pad position in this repro)
-    result = tl.where(mask_val, 0.0, softmax_out)
-
-    # Store
-    tl.store(output_ptr + row_start + cols, result, mask=mask_cols)
-
-
-@triton.jit
-def online_softmax_kernel(
-    input_ptr,       # [M, N] attention scores
-    output_ptr,      # [M, N] softmax output
-    N: tl.constexpr,
-    BLOCK_N: tl.constexpr,
-):
-    """Simple online softmax without mask (for benchmarking the core pattern).
-
-    Each program handles one row.
-    """
-    row_idx = tl.program_id(0)
-    row_start = row_idx * N
-
-    cols = tl.arange(0, BLOCK_N)
-    mask_cols = cols < N
-    x = tl.load(input_ptr + row_start + cols, mask=mask_cols, other=float("-inf")).to(tl.float32)
-
-    # Softmax
-    m = tl.max(x, axis=0)
-    x_shifted = x - m
-    exp_x = tl.exp(x_shifted)
-    sum_exp = tl.sum(exp_x, axis=0)
-    softmax_out = exp_x / sum_exp
-
-    tl.store(output_ptr + row_start + cols, softmax_out, mask=mask_cols)
-
-
-def oracle_softmax(x: torch.Tensor) -> torch.Tensor:
-    """Launch the softmax kernel on [M, N] input."""
-    assert x.ndim == 2
-    M_val, N_val = x.shape
-    output = torch.empty_like(x)
-
-    BLOCK_N = triton.next_power_of_2(N_val)
-    grid = (M_val,)
-
-    online_softmax_kernel[grid](
-        x, output,
-        N=N_val,
-        BLOCK_N=BLOCK_N,
-    )
-    return output
-
-
-def oracle_softmax_masked(x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-    """Launch the fused softmax + mask kernel.
-
-    Args:
-        x: [8, 1024, 12, 513] attention scores
-        mask: [8, 1024] bool padding mask (True = zeroed)
-    """
-    B, S, H, W = x.shape
-    x_flat = x.reshape(B * S * H, W)
-    output_flat = torch.empty_like(x_flat)
-
-    BLOCK_N = triton.next_power_of_2(W)
-    grid = (B * S * H,)
-
-    online_softmax_masked_kernel[grid](
-        x_flat, mask,
-        output_flat,
-        N=W,
-        N_HEADS=H,
-        BLOCK_N=BLOCK_N,
-    )
-    return output_flat.reshape(B, S, H, W)
-
-
-# --- Reference ---
-
-def softmax_reference(x: torch.Tensor) -> torch.Tensor:
-    """Reference softmax matching repro pattern."""
-    m = x.amax(dim=-1, keepdim=True)
-    e = torch.exp(x - m)
-    s = e.sum(dim=-1, keepdim=True)
-    return e / s
-
-
-def softmax_masked_reference(x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-    """Reference softmax + mask."""
-    softmax_out = softmax_reference(x)
-    # mask shape [8, 1024], expand to [8, 1024, 12, 513]
-    mask_expanded = mask.unsqueeze(-1).unsqueeze(-1)  # [8, 1024, 1, 1]
-    return torch.where(mask_expanded, torch.zeros_like(softmax_out), softmax_out)
-
-
-# --- Load repro module ---
-
+@lru_cache(maxsize=1)
 def _load_repro_module():
     spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
     if spec is None or spec.loader is None:
@@ -198,149 +60,252 @@ def _load_repro_module():
     return module
 
 
-def prepare_oracle_inputs():
-    """Generate synthetic inputs matching the softmax reduction shape."""
-    torch.manual_seed(42)
-    # Attention scores before softmax: [8, 1024, 12, 513]
-    x = torch.randn(BATCH, SEQ_LEN, N_HEADS, WINDOW, device="cuda", dtype=torch.float32)
-    # Padding mask: [8, 1024] bool
-    mask = torch.zeros(BATCH, SEQ_LEN, device="cuda", dtype=torch.bool)
-    # Mark some positions as padding
-    mask[:, 800:] = True
-
-    return x, mask
+def get_inputs() -> tuple[object, ...]:
+    return _load_repro_module().make_inputs()
 
 
-# --- Correctness check ---
-
-def run_check():
-    """Verify oracle produces same results as reference."""
-    print(f"Correctness check for {REPRO_ID}")
-    print(f"Shape: f32[{BATCH}, {SEQ_LEN}, {N_HEADS}, {WINDOW}], reduction dim=-1")
-
-    x, mask = prepare_oracle_inputs()
-
-    with torch.no_grad():
-        # Test basic softmax
-        x_flat = x.reshape(-1, WINDOW)
-        ref_flat = softmax_reference(x_flat)
-        out_flat = oracle_softmax(x_flat)
-
-        max_diff = (ref_flat - out_flat).abs().max().item()
-        allclose_basic = torch.allclose(ref_flat, out_flat, rtol=1e-4, atol=1e-5)
-        print(f"\n  Basic softmax:")
-        print(f"    Max abs diff: {max_diff:.6e}")
-        print(f"    allclose: {allclose_basic}")
-
-        # Test masked softmax
-        ref_masked = softmax_masked_reference(x, mask)
-        out_masked = oracle_softmax_masked(x, mask)
-
-        max_diff_m = (ref_masked - out_masked).abs().max().item()
-        allclose_masked = torch.allclose(ref_masked, out_masked, rtol=1e-4, atol=1e-5)
-        print(f"\n  Masked softmax:")
-        print(f"    Max abs diff: {max_diff_m:.6e}")
-        print(f"    allclose: {allclose_masked}")
-
-    all_ok = allclose_basic and allclose_masked
-    print(f"\nCorrectness: {'PASS' if all_ok else 'FAIL'}")
-    return all_ok
+def get_repro_instance() -> torch.nn.Module:
+    return _load_repro_module().Repro().eval()
 
 
-# --- Benchmark ---
+def _as_tuple(value: object) -> tuple[torch.Tensor, ...]:
+    if isinstance(value, tuple):
+        return value
+    if isinstance(value, list):
+        return tuple(value)
+    return (value,)
 
-def run_bench(rep=100, warmup=25):
-    """Benchmark oracle vs torch.compile."""
-    print(f"\n{'='*60}")
-    print(f"Benchmark: {REPRO_ID} (online_softmax_cross_entropy)")
-    print(f"Oracle: persistent online softmax, N={WINDOW}")
-    print(f"Shape: f32[{BATCH}, {SEQ_LEN}, {N_HEADS}, {WINDOW}]")
-    print(f"M={M} rows, N={WINDOW}")
-    print(f"{'='*60}")
 
-    x, mask = prepare_oracle_inputs()
+if triton is not None:
 
-    # Memory metrics for softmax only (read input + write output)
-    total_bytes = 2 * BATCH * SEQ_LEN * N_HEADS * WINDOW * 4  # read + write, f32
-    print(f"\nMemory traffic (softmax): {total_bytes / 1e6:.1f} MB")
+    @triton.jit
+    def _zero_kernel(out_ptr, n_elements, BLOCK: tl.constexpr):
+        offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+        tl.store(out_ptr + offsets, tl.zeros((BLOCK,), tl.float32), mask=offsets < n_elements)
 
-    # Benchmark oracle (basic softmax)
-    x_flat = x.reshape(-1, WINDOW).contiguous()
-    with torch.no_grad():
-        _ = oracle_softmax(x_flat)
+    @triton.jit
+    def _longformer_softmax_layout_kernel(
+        query_mask_ptr,
+        bmm_ptr,
+        key_mask_ptr,
+        out_ptr,
+        BLOCK_N: tl.constexpr,
+        R: tl.constexpr,
+        SEQ: tl.constexpr,
+        HEADS: tl.constexpr,
+        CHUNK: tl.constexpr,
+        PADDED_R: tl.constexpr,
+        FINAL_INNER_: tl.constexpr,
+        OUT_D_: tl.constexpr,
+        OUT_M_STRIDE: tl.constexpr,
+        OUT_T_STRIDE: tl.constexpr,
+    ):
+        row = tl.program_id(0)
+        cols = tl.arange(0, BLOCK_N)
+        valid_cols = cols < R
+
+        head = row % HEADS
+        row_div_heads = row // HEADS
+        seq = row_div_heads % SEQ
+        batch = row_div_heads // SEQ
+        bh = batch * HEADS + head
+
+        key = seq + cols.to(tl.int32) - CHUNK
+        valid_key = valid_cols & (key >= 0) & (key < SEQ)
+        safe_key = tl.minimum(tl.maximum(key, 0), SEQ - 1)
+        left_chunk = safe_key // CHUNK
+        right_chunk = tl.minimum(seq // CHUNK, 2)
+        source_chunk = tl.where(cols < CHUNK, left_chunk, right_chunk)
+        source_row = seq - source_chunk * CHUNK
+        source_col = safe_key - source_chunk * CHUNK
+        source_row = tl.minimum(tl.maximum(source_row, 0), 511)
+        source_col = tl.minimum(tl.maximum(source_col, 0), 511)
+        bmm_offsets = (bh * 3 + source_chunk) * (512 * 512) + source_row * 512 + source_col
+
+        local_scores = tl.load(bmm_ptr + bmm_offsets, mask=valid_key, other=-float("inf")).to(tl.float32)
+        key_mask = tl.load(key_mask_ptr + batch * SEQ + safe_key, mask=valid_key, other=0.0).to(tl.float32)
+        mask_bias = tl.where(key_mask != 0.0, -3.4028234663852886e38, 0.0)
+        scores = tl.where(valid_key, local_scores + mask_bias, -float("inf"))
+
+        row_max = tl.max(scores, axis=0)
+        numer = tl.exp(scores - row_max)
+        denom = tl.sum(numer, axis=0)
+        values = numer / denom
+
+        keep_row = tl.load(query_mask_ptr + batch * SEQ + seq) == 0
+        chunk_id = seq // CHUNK
+        pos = seq - chunk_id * CHUNK
+        out_m = (batch * HEADS + head) * 4 + chunk_id
+
+        safe_cols = tl.minimum(cols, R - 1)
+        padded_linear = pos * PADDED_R + safe_cols
+        out_t = padded_linear // FINAL_INNER_
+        out_d = padded_linear - out_t * FINAL_INNER_
+        out_offsets = out_m * OUT_M_STRIDE + out_t * OUT_T_STRIDE + out_d
+        store_mask = valid_cols & (out_d < OUT_D_) & keep_row
+        tl.store(out_ptr + out_offsets, values, mask=store_mask)
+
+
+def _longformer_softmax_layout(
+    query_mask: torch.Tensor,
+    bmm: torch.Tensor,
+    key_mask: torch.Tensor,
+) -> torch.Tensor:
+    if triton is None:
+        raise RuntimeError("triton is required for this oracle")
+    if bmm.device.type != "cuda":
+        raise RuntimeError("the Triton oracle requires CUDA inputs")
+    if query_mask.shape != (BATCH, SEQ_LEN) or query_mask.dtype != torch.bool:
+        raise ValueError(f"unexpected query mask: shape={tuple(query_mask.shape)} dtype={query_mask.dtype}")
+    if bmm.shape != (BATCH * N_HEADS * 3, 512, 512) or bmm.dtype != torch.float32:
+        raise ValueError(f"unexpected bmm: shape={tuple(bmm.shape)} dtype={bmm.dtype}")
+    if key_mask.shape != (BATCH, SEQ_LEN) or key_mask.dtype != torch.float32:
+        raise ValueError(f"unexpected key mask: shape={tuple(key_mask.shape)} dtype={key_mask.dtype}")
+
+    out = torch.empty_strided(OUT_SHAPE, OUT_STRIDE, device=bmm.device, dtype=torch.float32)
+    zero_block = 1024
+    _zero_kernel[(triton.cdiv(OUT_STORAGE_SIZE, zero_block),)](
+        out,
+        OUT_STORAGE_SIZE,
+        BLOCK=zero_block,
+    )
+    _longformer_softmax_layout_kernel[(ROWS,)](
+        query_mask,
+        bmm,
+        key_mask,
+        out,
+        BLOCK_N=1024,
+        R=RNUMEL,
+        SEQ=SEQ_LEN,
+        HEADS=N_HEADS,
+        CHUNK=LOCAL_CHUNK,
+        PADDED_R=PADDED_RNUMEL,
+        FINAL_INNER_=FINAL_INNER,
+        OUT_D_=OUT_D,
+        OUT_M_STRIDE=OUT_STRIDE[0],
+        OUT_T_STRIDE=OUT_STRIDE[1],
+        num_warps=4,
+    )
+    return out
+
+
+def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
+    """Compute the full Repro.forward output for this Longformer inference row."""
+    query_mask, bmm, key_mask = inputs[:3]
+    return _longformer_softmax_layout(query_mask, bmm, key_mask)
+
+
+def _max_diffs(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float]:
+    diff = (actual.float() - expected.float()).abs()
+    max_abs = float(torch.nan_to_num(diff, nan=0.0, posinf=math.inf).max().item())
+    rel = diff / expected.float().abs().clamp_min(1e-12)
+    max_rel = float(torch.nan_to_num(rel, nan=0.0, posinf=math.inf).max().item())
+    return max_abs, max_rel
+
+
+@torch.no_grad()
+def run_check(rtol: float, atol: float) -> bool:
+    print(f"Checking {REPRO_ID}...")
+    inputs = get_inputs()
+    repro = get_repro_instance()
+    expected = _as_tuple(repro(*inputs))
+    torch.cuda.synchronize()
+    actual = _as_tuple(oracle_forward(inputs))
     torch.cuda.synchronize()
 
-    oracle_us = triton.testing.do_bench(
-        lambda: oracle_softmax(x_flat),
-        warmup=warmup * 20,
-        rep=rep * 10,
-    ) * 1000  # ms -> us
+    ok = True
+    if len(actual) != len(expected):
+        print(f"  SCOPE_MISMATCH: expected {len(expected)} outputs, got {len(actual)}")
+        return False
 
-    oracle_bw = total_bytes / (oracle_us * 1e-6) / 1e12
-    print(f"\nOracle (persistent softmax):")
-    print(f"  Median: {oracle_us:.1f} us")
-    print(f"  Effective BW: {oracle_bw:.3f} TB/s")
+    for idx, (act, exp) in enumerate(zip(actual, expected)):
+        output_ok = True
+        if act.shape != exp.shape:
+            print(f"  output {idx}: FAIL shape expected={list(exp.shape)} actual={list(act.shape)}")
+            output_ok = False
+        if act.dtype != exp.dtype:
+            print(f"  output {idx}: FAIL dtype expected={exp.dtype} actual={act.dtype}")
+            output_ok = False
+        if act.stride() != exp.stride():
+            print(f"  output {idx}: FAIL stride expected={exp.stride()} actual={act.stride()}")
+            output_ok = False
+        close = torch.allclose(act, exp, rtol=rtol, atol=atol, equal_nan=True)
+        max_abs, max_rel = _max_diffs(act, exp)
+        output_ok = output_ok and bool(close)
+        status = "PASS" if output_ok else "FAIL"
+        print(
+            f"  output {idx}: {status} "
+            f"shape={list(act.shape)} dtype={act.dtype} stride={act.stride()} "
+            f"max_abs={max_abs:.6g} max_rel={max_rel:.6g}"
+        )
+        ok = ok and output_ok
 
-    # Benchmark masked version
-    with torch.no_grad():
-        _ = oracle_softmax_masked(x, mask)
+    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+@torch.no_grad()
+def _time_cuda(fn, warmup: int, rep: int) -> tuple[float, float, list[float]]:
+    for _ in range(warmup):
+        fn()
     torch.cuda.synchronize()
 
-    oracle_masked_us = triton.testing.do_bench(
-        lambda: oracle_softmax_masked(x, mask),
-        warmup=warmup * 20,
-        rep=rep * 10,
-    ) * 1000
-
-    print(f"\nOracle (softmax + mask):")
-    print(f"  Median: {oracle_masked_us:.1f} us")
-
-    # Benchmark torch.compile on full repro
-    repro_mod = _load_repro_module()
-    model = repro_mod.Repro().cuda()
-    inputs = repro_mod.make_inputs()
-    inputs = tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in inputs)
-
-    with torch.no_grad():
-        compiled = torch.compile(model)
-        _ = compiled(*inputs)
+    start = torch.cuda.Event(enable_timing=True)
+    end = torch.cuda.Event(enable_timing=True)
+    times: list[float] = []
+    for _ in range(rep):
+        start.record()
+        fn()
+        end.record()
         torch.cuda.synchronize()
-
-    compile_us = triton.testing.do_bench(
-        lambda: compiled(*inputs),
-        warmup=warmup * 20,
-        rep=rep * 10,
-    ) * 1000
-
-    print(f"\ntorch.compile (full repro):")
-    print(f"  Median: {compile_us:.1f} us")
-
-    print(f"\nSpeedup (compile / oracle): {compile_us / oracle_us:.2f}x")
-    print(f"\nNote: Oracle measures the softmax kernel only.")
-    print(f"Full repro includes sliding-window assembly + post-softmax reshape.")
+        times.append(start.elapsed_time(end) * 1000.0)
+    times.sort()
+    return times[0], times[len(times) // 2], times
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="Run correctness check")
-    parser.add_argument("--bench", action="store_true", help="Run benchmark")
-    parser.add_argument("--rep", type=int, default=100, help="Benchmark repetitions")
-    parser.add_argument("--warmup", type=int, default=25, help="Warmup iterations")
+@torch.no_grad()
+def run_bench(warmup: int, rep: int) -> list[float]:
+    print(f"Benchmarking {REPRO_ID}...")
+    inputs = get_inputs()
+
+    def bench_once():
+        return oracle_forward(inputs)
+
+    min_us, median_us, times = _time_cuda(bench_once, warmup=warmup, rep=rep)
+    result = {
+        "repro_id": REPRO_ID,
+        "oracle_us": median_us,
+        "oracle_min_us": min_us,
+        "warmup": warmup,
+        "rep": rep,
+        "scope": "full_repro_forward",
+        "classification": "NEW_PATTERN",
+    }
+    print(json.dumps(result, sort_keys=True))
+    print(f"Oracle full-scope median: {median_us:.3f} us (min {min_us:.3f} us)")
+    return times
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=f"Full-scope oracle for {REPRO_ID}")
+    parser.add_argument("--check", action="store_true", help="check against Repro()(*make_inputs())")
+    parser.add_argument("--bench", action="store_true", help="benchmark the full oracle path")
+    parser.add_argument("--warmup", type=int, default=3)
+    parser.add_argument("--rep", type=int, default=10)
+    parser.add_argument("--rtol", type=float, default=1e-3)
+    parser.add_argument("--atol", type=float, default=1e-5)
     args = parser.parse_args()
 
     if not args.check and not args.bench:
         args.check = True
         args.bench = True
 
-    if args.check:
-        ok = run_check()
-        if not ok:
-            sys.exit(1)
-
+    if args.check and not run_check(rtol=args.rtol, atol=args.atol):
+        return 1
     if args.bench:
-        run_bench(rep=args.rep, warmup=args.warmup)
+        run_bench(warmup=args.warmup, rep=args.rep)
+    return 0
 
 
 if __name__ == "__main__":
-    with torch.no_grad():
-        main()
+    raise SystemExit(main())

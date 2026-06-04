@@ -15,6 +15,8 @@ REPRO_ID = "sum_sum_sum_fb9996974d8f"
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 SHAPE_LABEL = "timm_ghostnet_100_train_001_7c586a54"
 
 N = 512
@@ -63,6 +65,18 @@ def make_inputs() -> tuple[object, ...]:
         else value
         for value in module.make_inputs()
     )
+
+
+def get_inputs() -> tuple[object, ...]:
+    return make_inputs()
+
+
+def get_repro_instance() -> torch.nn.Module:
+    return _load_repro_module().Repro().cuda()
+
+
+def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    return oracle_full(*inputs)
 
 
 def reference_outputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
