@@ -15,6 +15,7 @@ import triton.language as tl
 
 REPRO_ID = "amax_sum_55ae6a130879"
 REPRO_DIR = Path(__file__).resolve().parent
+REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 BATCH = 8
@@ -57,6 +58,8 @@ def _softmax_dropout_kernel(
 
 
 def _load_repro_module() -> Any:
+    if str(REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(REPO_ROOT))
     spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
@@ -160,6 +163,10 @@ def oracle_full_attention_softmax_dropout(
         block_k=block_k,
         num_warps=num_warps,
     )
+
+
+def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
+    return oracle_full_attention_softmax_dropout(*inputs)
 
 
 def _max_diff(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float]:

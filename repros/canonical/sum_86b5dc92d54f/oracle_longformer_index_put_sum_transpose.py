@@ -11,12 +11,26 @@ from typing import Callable
 
 import torch
 
+try:
+    import triton
+    import triton.language as tl
+except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable without Triton.
+    triton = None
+    tl = None
+
 
 REPRO_ID = "sum_86b5dc92d54f"
 SHAPE_LABEL = "torchbench_hf_longformer_train_005_d621b103"
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+BLOCK = 1024
+REDUCE_BLOCK = 2048
+HIDDEN = 768
+SCATTER_SIZE = 24 * 3 * 512 * 64
 
 
 
@@ -62,6 +76,18 @@ def make_inputs(device: torch.device) -> tuple[object, ...]:
     return tuple(moved)
 
 
+def get_inputs() -> tuple[object, ...]:
+    return make_inputs(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+def get_repro_instance() -> torch.nn.Module:
+    return _load_repro_module().Repro().to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, torch.Tensor]:
+    return oracle_longformer_index_put_sum_transpose(*inputs)
+
+
 def _longformer_update_values(
     bmm_46: torch.Tensor,
     shape_param_0: list[int],
@@ -76,6 +102,95 @@ def _longformer_update_values(
         memory_format=torch.contiguous_format,
     )
     return torch.ops.aten.view.default(contiguous, shape_param_1)
+
+
+if triton is not None:
+
+    @triton.jit
+    def _scatter_index_add_kernel(
+        bmm_ptr,
+        index_ptr,
+        scatter_ptr,
+        TOTAL: tl.constexpr,
+        BLOCK_: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * BLOCK_ + tl.arange(0, BLOCK_)
+        mask = offsets < TOTAL
+
+        dim = offsets % 64
+        tmp = offsets // 64
+        seq = tmp % 512
+        tmp = tmp // 512
+        chunk = tmp % 3
+        block24 = tmp // 3
+        bmm_offsets = ((block24 * 3 + chunk) * 64 + dim) * 512 + seq
+
+        values = tl.load(bmm_ptr + bmm_offsets, mask=mask, other=0.0).to(tl.float32)
+        indices = tl.load(index_ptr + offsets, mask=mask, other=0).to(tl.int64)
+        tl.atomic_add(scatter_ptr + indices, values, sem="relaxed", mask=mask)
+
+    @triton.jit
+    def _hidden_sum_kernel(
+        scatter_ptr,
+        out_ptr,
+        BLOCK_: tl.constexpr,
+    ):
+        hidden = tl.program_id(0)
+        rows = tl.arange(0, BLOCK_)
+        values = tl.load(scatter_ptr + rows * 768 + hidden).to(tl.float32)
+        tl.store(out_ptr + hidden, tl.sum(values, axis=0))
+
+
+def _oracle_triton(
+    bmm_46: torch.Tensor,
+    full_15: torch.Tensor,
+    view_38: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    if triton is None:
+        raise RuntimeError("triton is required for the Triton oracle")
+    scattered = full_15.clone()
+    _scatter_index_add_kernel[(triton.cdiv(SCATTER_SIZE, BLOCK),)](
+        bmm_46,
+        view_38,
+        scattered,
+        TOTAL=SCATTER_SIZE,
+        BLOCK_=BLOCK,
+        num_warps=4,
+    )
+    reduced = torch.empty((HIDDEN,), device=bmm_46.device, dtype=torch.float32)
+    _hidden_sum_kernel[(HIDDEN,)](
+        scattered,
+        reduced,
+        BLOCK_=REDUCE_BLOCK,
+        num_warps=8,
+    )
+    return reduced, scattered.view(2048, HIDDEN).permute(1, 0)
+
+
+def _oracle_torch(
+    bmm_46: torch.Tensor,
+    full_15: torch.Tensor,
+    view_38: torch.Tensor,
+    _shape_param_0,
+    _shape_param_1,
+    _shape_param_4,
+    _shape_param_5,
+    _shape_param_6,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    updates = _longformer_update_values(bmm_46, _shape_param_0, _shape_param_1)
+    scattered = torch.ops.aten.clone.default(full_15)
+    scattered.index_add_(0, view_38, updates)
+
+    logical = torch.ops.aten.view.default(scattered, _shape_param_4)
+    reduced = torch.ops.aten.view.default(
+        torch.ops.aten.sum.dim_IntList(logical, [0, 1], True),
+        _shape_param_5,
+    )
+    transposed = torch.ops.aten.permute.default(
+        torch.ops.aten.view.default(logical, _shape_param_6),
+        [1, 0],
+    )
+    return reduced, transposed
 
 
 def oracle_longformer_index_put_sum_transpose(
@@ -93,22 +208,18 @@ def oracle_longformer_index_put_sum_transpose(
     """Full-pattern oracle for index_put(accumulate=True) -> sum + transpose."""
     del _shape_param_2, _shape_param_3
 
-    updates = _longformer_update_values(bmm_46, _shape_param_0, _shape_param_1)
-    scattered = torch.ops.aten.clone.default(full_15)
-    scattered.index_add_(0, view_38, updates)
-
-    # The captured as_strided/view/permute chain is equivalent to this logical
-    # contiguous view before the sum and transposed side-output view.
-    logical = torch.ops.aten.view.default(scattered, _shape_param_4)
-    reduced = torch.ops.aten.view.default(
-        torch.ops.aten.sum.dim_IntList(logical, [0, 1], True),
+    if bmm_46.device.type == "cuda" and triton is not None:
+        return _oracle_triton(bmm_46, full_15, view_38)
+    return _oracle_torch(
+        bmm_46,
+        full_15,
+        view_38,
+        _shape_param_0,
+        _shape_param_1,
+        _shape_param_4,
         _shape_param_5,
+        _shape_param_6,
     )
-    transposed = torch.ops.aten.permute.default(
-        torch.ops.aten.view.default(logical, _shape_param_6),
-        [1, 0],
-    )
-    return reduced, transposed
 
 
 def reference_outputs(
@@ -169,6 +280,18 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     for _ in range(warmup):
         fn()
     synchronize(device)
+
+    if device.type == "cuda":
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
+        best_ms = math.inf
+        for _ in range(rep):
+            start.record()
+            fn()
+            end.record()
+            torch.cuda.synchronize(device)
+            best_ms = min(best_ms, start.elapsed_time(end))
+        return best_ms * 1000.0
 
     best_s = math.inf
     for _ in range(rep):

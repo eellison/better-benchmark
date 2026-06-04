@@ -23,6 +23,8 @@ REPRO_ID = "sum_a3c9eb6b27f1"
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 SHAPE_LABEL = "vllm_meta-llama_Llama-3.2-1B_001_c9503b4c"
 
 BATCH = 4
@@ -74,6 +76,18 @@ def make_inputs(device: torch.device) -> tuple[object, ...]:
         value.to(device=device) if isinstance(value, torch.Tensor) else value
         for value in inputs
     )
+
+
+def get_inputs() -> tuple[object, ...]:
+    return make_inputs(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+def get_repro_instance() -> torch.nn.Module:
+    return _load_repro_module().Repro().to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, torch.Tensor]:
+    return oracle_rope_scatter_reduce(*inputs)
 
 
 def _rotary_tables(arg2_1: torch.Tensor, dtype: torch.dtype) -> tuple[torch.Tensor, torch.Tensor]:
@@ -354,6 +368,18 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     for _ in range(warmup):
         fn()
     synchronize(device)
+
+    if device.type == "cuda":
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
+        best_ms = math.inf
+        for _ in range(rep):
+            start.record()
+            fn()
+            end.record()
+            torch.cuda.synchronize(device)
+            best_ms = min(best_ms, start.elapsed_time(end))
+        return best_ms * 1000.0
 
     best_s = math.inf
     for _ in range(rep):

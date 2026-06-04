@@ -1,7 +1,7 @@
 repro_id,diagnosis,impl_status,notes
 amax_sum_3ed297ef02cd,AT_FLOOR,implemented,
 amax_sum_4c524f75213e,NEW_PATTERN,implemented,REWRITTEN full-scope oracle: repros/canonical/amax_sum_4c524f75213e/oracle_online_softmax.py
-amax_sum_55ae6a130879,NON_SOFTMAX_BOTTLENECK,oracle_needs_rewrite,"BAD_ORACLE: only measures softmax, not fused dropout+permute"
+amax_sum_55ae6a130879,NEW_PATTERN,implemented,REWRITTEN full-scope oracle: repros/canonical/amax_sum_55ae6a130879/oracle_full_attention_softmax_dropout.py
 amax_sum_68fe981b18dd,NEW_PATTERN,implemented,REWRITTEN full-scope oracle: repros/canonical/amax_sum_68fe981b18dd/oracle_online_softmax.py
 amax_sum_7fea03f0412b,AT_FLOOR,closed,
 amax_sum_87e1fb077f24,NEW_PATTERN,implemented,REWRITTEN full-scope oracle: repros/canonical/amax_sum_87e1fb077f24/oracle_online_softmax.py
@@ -64,14 +64,14 @@ sum_sum_sum_f68c9f1fa09b,AT_FLOOR,closed,
 sum_sum_sum_f90d684d32cb,SCATTER_REDUCE,implemented,Scatter-reduce fusion gives 2.16x.
 amax_sum_sum_846668f0b88f,AT_FLOOR,closed,Compile beats oracle (15.9us vs 25.4us). Gap was stale cache artifact. Online softmax already optimal.
 amax_sum_sum_f2d78a465cb5,AT_FLOOR,closed,Compile beats oracle (15.9us vs 25.4us). Gap was stale cache artifact. Online softmax already optimal.
-sum_79c6d0673ca2,SCATTER_REDUCE,oracle_needs_rewrite,Longformer index_put+sum+transpose; compile=65us vs bad oracle=799us; oracle uses eager ops not Triton; needs rewrite
-sum_sum_53431ef91176,SCATTER_REDUCE,oracle_needs_rewrite,Qwen3 MoE scatter-add+RMSNorm-bwd; compile=79us vs bad oracle=920us; oracle uses eager ops not Triton; needs rewrite
+sum_79c6d0673ca2,SCATTER_REDUCE,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle_median=73.152us; coord_compile=45.7us; not a floor
+sum_sum_53431ef91176,SCATTER_REDUCE,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle=168.885us; reported_compile=79us; not a floor
 sum_sum_609200a71825,SCATTER_REDUCE,implemented,as_strided_scatter_elision gives 26%.
 amax_sum_8764401930db,AT_FLOOR,closed,compile=19.2us beats oracle kernel=30.5us; MT5 attention softmax+dropout+permute; Inductor already optimal
 sum_6e4aebb044dd,AT_FLOOR,closed,compile=35.6us beats oracle=43.0us; NFNet avgpool-backward+SiLU channel-sum; scatter-reduce oracle slower
 sum_837a32994d31,AT_FLOOR,closed,compile=57.9us beats oracle=69.7us; Demucs slice_scatter+masked channel sum; oracle fused approach slower
-sum_86b5dc92d54f,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=31.5us vs oracle=93.7us (3.0x slower); Longformer index_put+sum+transpose
-sum_a3c9eb6b27f1,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=29.3us vs oracle=50.2us (1.7x slower); Llama RoPE scatter-reduce
+sum_86b5dc92d54f,SCATTER_REDUCE,closed,REWRITTEN full-scope Triton scatter oracle but compile remains faster; oracle=80.832us; reported_compile=31.5us; not a floor
+sum_a3c9eb6b27f1,SCATTER_REDUCE,closed,REVALIDATED full-scope Triton RoPE oracle but compile remains faster; oracle=77.472us; reported_compile=29.3us; not a floor
 sum_sum_04bdad42e9ef,AT_FLOOR,closed,compile=21.1us matches oracle=22.2us; EfficientNet SiLU+BN-backward cooperative split-K
 sum_sum_98c4811f6ddf,AT_FLOOR,closed,compile=21.4us beats oracle=25.2us; DenseNet BN-backward cooperative split-K
 sum_sum_ab550e4e948e,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=29.6us vs oracle=537.1us (18x slower); VoVNet maxpool-backward scatter-reduce
