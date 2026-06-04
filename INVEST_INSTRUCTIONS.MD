@@ -50,17 +50,53 @@ A benchmark corpus of 1482 Inductor-generated kernels from real models (vLLM, HF
 4. When done: `status=implemented_unmeasured` or `status=analysis_complete`
 
 ### Oracle Work (any CUDA box with triton)
-- Write optimal Triton kernels establishing performance floors
-- Place in `repros/canonical/<repro_id>/oracle_*.py`
-- Include `--check` (correctness) and `--bench` (timing) modes
-- Model after: `repros/canonical/sum_sum_6a14a9c9ba88/oracle_multi_output_reduction.py`
+
+**Use the standardized template**: `scripts/oracle_template.py`
+
+1. Copy the template to `repros/canonical/<repro_id>/oracle_<name>.py`
+2. Fill in the gap diagnosis docstring (classification + 1-sentence descriptions)
+3. Implement `oracle_forward(inputs)` with your optimized Triton kernel(s)
+4. Verify: `python oracle_<name>.py --check` (must print "PASS" and exit 0)
+5. Benchmark: `python oracle_<name>.py --bench` (prints JSON timing line)
+
+**Standard CLI** (all oracles must support):
+```
+python oracle_<name>.py --check       # correctness vs eager Repro
+python oracle_<name>.py --bench       # timing oracle vs torch.compile
+python oracle_<name>.py               # both (default)
+```
+
+**Standard bench output** (machine-parseable JSON line):
+```json
+{"repro_id": "...", "oracle_us": 1523.45, "compile_us": 4892.12, "ratio": 3.21, "status": "GOOD"}
+```
+
+**Full format documentation**: `scripts/ORACLE_FORMAT.md`
+
+**Reference implementations**:
+- `repros/canonical/sum_e00c7291b6ee/oracle_cooperative_split_k.py` (cooperative split-K)
+- `repros/canonical/amax_sum_3ed297ef02cd/oracle_online_softmax.py` (online softmax)
 
 #### Oracle Scope Invariant
+
+The oracle MUST compute the exact same function as `Repro()(*make_inputs())`:
+- Same inputs (loaded via `get_inputs()` which calls the repro's `make_inputs`)
+- Same outputs (same count, shapes, dtypes as eager `Repro()(*inputs)`)
+- `oracle_forward(inputs)` signature enforces this structurally
+
+Rules:
 - `implemented_unmeasured` means the oracle `--bench` covers the same computation scope as the compiled `repro.py` region.
 - Do not mark subset microbenchmarks as oracle floors. If an oracle only measures a reduction, softmax, scatter, or epilogue subset while the compiled repro includes surrounding layout, dropout, position bias, assembly, or other fused ops, leave `oracle_path` blank and keep the row actionable.
 - Subset kernels are allowed only as diagnosis/prototype artifacts. Their diagnosis must say they are not full-scope floors.
 - If full-scope coverage is impractical, update `next_action` with the missing scope instead of setting `implemented_unmeasured`.
 - Every subagent brief must restate this invariant explicitly before assigning oracle work.
+
+#### Validation
+
+Run `scripts/validate_oracles.py` to check all oracles:
+- Oracles following the template are guaranteed to pass validation
+- The validator calls `--check` via subprocess and parses output for PASS/FAIL
+- It also detects scope mismatches (output count/shape differences)
 
 ### Inductor Work (needs pytorch checkout)
 - Branch: work on `pr-184905` with local modifications

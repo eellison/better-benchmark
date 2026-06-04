@@ -121,6 +121,10 @@ def validate_via_module_loading(
     This is used as a fallback when --check is not available or fails due
     to missing the flag.
 
+    Supports both:
+    - Standard format: oracle has `oracle_forward(inputs)` + `get_inputs()`
+    - Legacy format: oracle has `oracle_*(*inputs)` callable
+
     Returns (status, notes).
     """
     try:
@@ -134,13 +138,17 @@ def validate_via_module_loading(
         repro_spec.loader.exec_module(repro_module)
 
         # Get inputs
-        if not hasattr(repro_module, "make_inputs"):
-            return "ERROR", "Repro has no make_inputs function"
+        if hasattr(repro_module, "make_inputs"):
+            make_fn = repro_module.make_inputs
+        elif hasattr(repro_module, "_default_make_inputs"):
+            make_fn = repro_module._default_make_inputs
+        else:
+            return "ERROR", "Repro has no make_inputs or _default_make_inputs"
 
         torch.manual_seed(42)
         if torch.cuda.is_available():
             torch.cuda.manual_seed(42)
-        inputs = repro_module.make_inputs()
+        inputs = make_fn()
 
         # Run eager
         repro_instance = repro_module.Repro()
@@ -162,28 +170,36 @@ def validate_via_module_loading(
         oracle_module = importlib.util.module_from_spec(oracle_spec)
         oracle_spec.loader.exec_module(oracle_module)
 
-        # Look for common oracle callable patterns
+        # Preferred: standard format oracle_forward(inputs)
         oracle_fn = None
-        for name in dir(oracle_module):
-            if name.startswith("oracle_"):
-                candidate = getattr(oracle_module, name)
-                if callable(candidate):
-                    oracle_fn = candidate
-                    break
+        call_with_tuple = False
+        if hasattr(oracle_module, "oracle_forward"):
+            oracle_fn = oracle_module.oracle_forward
+            call_with_tuple = True  # standard format takes inputs as a tuple
+        else:
+            # Legacy: look for oracle_* callable that takes *inputs
+            for name in dir(oracle_module):
+                if name.startswith("oracle_"):
+                    candidate = getattr(oracle_module, name)
+                    if callable(candidate):
+                        oracle_fn = candidate
+                        break
 
         if oracle_fn is None:
             # Try check_correctness function
             if hasattr(oracle_module, "check_correctness"):
                 return "PASS", "Has check_correctness (use --check for full validation)"
-            return "ERROR", "No callable oracle_* function found in module"
+            return "ERROR", "No callable oracle_forward or oracle_* function found"
 
-        # Run oracle (this is a best-effort approach; many oracles have
-        # non-standard interfaces)
+        # Run oracle
         torch.manual_seed(42)
         if torch.cuda.is_available():
             torch.cuda.manual_seed(42)
         with torch.no_grad():
-            oracle_out = oracle_fn(*inputs)
+            if call_with_tuple:
+                oracle_out = oracle_fn(inputs)
+            else:
+                oracle_out = oracle_fn(*inputs)
 
         oracle_outputs = _normalize_outputs(oracle_out)
 
