@@ -44,12 +44,27 @@ A benchmark corpus of 1482 Inductor-generated kernels from real models (vLLM, HF
 ## How To Contribute
 
 ### Claiming Work
-1. Pick a row from the CSV queues
+
+Use `investigation_results/oracle_kernel_work_queue.csv` for coordination.
+
+1. Pick ANY row where `oracle_path` is empty and `status` is NOT `active_subagent`
 2. Set `status=active_subagent`, `owner=<your_name>`
-3. Only edit files in your claimed scope
-4. When done: `status=implemented_unmeasured` or `status=analysis_complete`
+3. Commit and push the claim before writing the oracle
+4. After writing: set `status=implemented_unmeasured`, fill in `oracle_path`
+
+If the repro isn't in the CSV yet, add a new row with the `repro_id`, set `status=active_subagent`, `owner=<name>`. Most of the 1090 corpus repros should already have rows.
+
+Do NOT filter on `inductor_optimization_per_repro_queue.csv` statuses — those are heuristic guesses. The oracle is what determines the real classification.
 
 ### Oracle Work (any CUDA box with triton)
+
+**ANY repro without an oracle is eligible.** Don't filter on `fix_identified_*` or other heuristic statuses — those are guesses. Don't skip repros because they're "norm_template" or "at_floor" — verify with an actual oracle. The oracle is the ground truth.
+
+**Workflow:** claim -> write -> verify -> push.
+
+**What NOT to do:**
+- Don't filter on `inductor_optimization_per_repro_queue.csv` statuses
+- Don't write subset oracles (must match full `Repro()` scope)
 
 **Use the standardized template**: `scripts/oracle_template.py`
 
