@@ -45,7 +45,8 @@ because <specific scheduler/codegen/pattern limitation>; the fix is <CLASS>:
 ```
 
 Valid classifications: `SCHEDULER_FUSION`, `SCATTER_REDUCE`,
-`COOPERATIVE_SPLIT_K`, `ALGEBRAIC_ELIMINATION`, `NEW_PATTERN`.
+`COOPERATIVE_SPLIT_K`, `ALGEBRAIC_ELIMINATION`, `RECOMPUTE_FUSION`,
+`BANDWIDTH_BOUND`, `NEW_PATTERN`.
 
 ### 2. Standard Constants
 
