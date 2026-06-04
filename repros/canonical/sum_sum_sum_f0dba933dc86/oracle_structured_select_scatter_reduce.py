@@ -1,0 +1,374 @@
+"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the complete DeiT distilled two-token select-scatter layer-norm-backward return tuple by deriving the token-0 and token-1 row reductions directly from the two `[128,768]` sources, scattering only those lanes into the required zero-filled transposed side output, and accumulating all three returned channel reductions from the same sparse producer, whereas Inductor currently materializes the dense `[128,198,768]` zero/select_scatter/add tensor and schedules the row reductions, sibling channel reductions, and permute side output as separate generic work; Inductor cannot do this today because scheduler/codegen does not model zero-fill `select_scatter` as a structured scatter-reduce producer that can feed row-wise layer-norm backward plus full side-output stores and sibling reductions; the fix is SCATTER_REDUCE: add a structured select-scatter lowering that maps sparse token sources directly into row-reduction epilogues, emits required materialized scatter stores, and accumulates compatible channel reductions without materializing the dense producer."""
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import math
+import sys
+import time
+from collections.abc import Callable
+from pathlib import Path
+
+import torch
+
+try:
+    import triton
+    import triton.language as tl
+except ImportError:  # pragma: no cover - keeps CPU-only checks usable.
+    triton = None
+    tl = None
+
+
+REPRO_ID = "sum_sum_sum_f0dba933dc86"
+REPRO_DIR = Path(__file__).resolve().parent
+REPO_ROOT = REPRO_DIR.parents[2]
+REPRO_PATH = REPRO_DIR / "repro.py"
+SHAPE_LABEL = "timm_deit_base_distilled_patch16_224_train_001_2f2590a2"
+
+BATCH = 128
+TOKENS = 198
+CHANNELS = 768
+ROWS = BATCH * TOKENS
+
+sys.path.insert(0, str(REPO_ROOT))
+
+
+if triton is not None:
+
+    @triton.jit
+    def _zero_kernel(ptr, n_elements: tl.constexpr, BLOCK: tl.constexpr):
+        offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+        mask = offsets < n_elements
+        tl.store(ptr + offsets, tl.zeros((BLOCK,), tl.float32), mask=mask)
+
+    @triton.jit
+    def _select_scatter_reduce_kernel(
+        mm_ptr,
+        mm2_ptr,
+        gamma_ptr,
+        xhat_ptr,
+        scale_ptr,
+        out_mul_xhat_ptr,
+        out_scatter_sum_ptr,
+        transposed_ptr,
+        out_grad_sum_ptr,
+        CHANNELS_T: tl.constexpr,
+        TOKENS_T: tl.constexpr,
+        BLOCK_C: tl.constexpr,
+    ):
+        batch = tl.program_id(0)
+        channels = tl.arange(0, BLOCK_C)
+        mask = channels < CHANNELS_T
+
+        row_base = batch * CHANNELS_T
+        token_base = batch * TOKENS_T * CHANNELS_T
+        scale_base = batch * TOKENS_T
+
+        mm_token1 = tl.load(mm_ptr + row_base + channels, mask=mask, other=0.0)
+        mm_token0 = tl.load(mm2_ptr + row_base + channels, mask=mask, other=0.0)
+        gamma = tl.load(gamma_ptr + channels, mask=mask, other=0.0)
+        xhat0 = tl.load(xhat_ptr + token_base + channels, mask=mask, other=0.0)
+        xhat1 = tl.load(xhat_ptr + token_base + CHANNELS_T + channels, mask=mask, other=0.0)
+        scale0 = tl.load(scale_ptr + scale_base)
+        scale1 = tl.load(scale_ptr + scale_base + 1)
+
+        weighted0 = mm_token0 * gamma
+        weighted1 = mm_token1 * gamma
+        row_sum0 = tl.sum(weighted0, axis=0)
+        row_sum1 = tl.sum(weighted1, axis=0)
+        row_dot0 = tl.sum(weighted0 * xhat0, axis=0)
+        row_dot1 = tl.sum(weighted1 * xhat1, axis=0)
+
+        grad0 = scale0 * (weighted0 * CHANNELS_T - row_sum0 - xhat0 * row_dot0)
+        grad1 = scale1 * (weighted1 * CHANNELS_T - row_sum1 - xhat1 * row_dot1)
+
+        # The permuted output has stride (1, CHANNELS), so its backing storage is
+        # the logical [BATCH * TOKENS, CHANNELS] view.
+        token0_storage = (batch * TOKENS_T) * CHANNELS_T + channels
+        token1_storage = (batch * TOKENS_T + 1) * CHANNELS_T + channels
+        tl.store(transposed_ptr + token0_storage, grad0, mask=mask)
+        tl.store(transposed_ptr + token1_storage, grad1, mask=mask)
+
+        tl.atomic_add(
+            out_mul_xhat_ptr + channels,
+            mm_token0 * xhat0 + mm_token1 * xhat1,
+            sem="relaxed",
+            mask=mask,
+        )
+        tl.atomic_add(
+            out_scatter_sum_ptr + channels,
+            mm_token0 + mm_token1,
+            sem="relaxed",
+            mask=mask,
+        )
+        tl.atomic_add(
+            out_grad_sum_ptr + channels,
+            grad0 + grad1,
+            sem="relaxed",
+            mask=mask,
+        )
+
+
+def _load_repro_module():
+    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _as_tuple(out: object) -> tuple[torch.Tensor, ...]:
+    if isinstance(out, tuple):
+        return out
+    return (out,)
+
+
+def make_inputs(device: torch.device) -> tuple[object, ...]:
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    configs = load_shape_configs(str(REPRO_PATH))
+    if configs:
+        config = next(iter(configs.values()))
+        config = {
+            "inputs": [
+                {**spec, "device": str(device)}
+                if isinstance(spec, dict) and spec.get("kind") == "tensor"
+                else spec
+                for spec in config["inputs"]
+            ]
+        }
+        inputs = make_inputs_from_config(config)
+    else:
+        module = _load_repro_module()
+        inputs = module.make_inputs()
+
+    moved: list[object] = []
+    for value in inputs:
+        if isinstance(value, torch.Tensor):
+            moved.append(value.to(device=device))
+        else:
+            moved.append(value)
+    return tuple(moved)
+
+
+def _layernorm_lane_grad(
+    source: torch.Tensor,
+    gamma: torch.Tensor,
+    xhat: torch.Tensor,
+    scale: torch.Tensor,
+) -> torch.Tensor:
+    weighted = source * gamma
+    row_sum = weighted.sum(dim=1, keepdim=True)
+    row_dot = (weighted * xhat).sum(dim=1, keepdim=True)
+    return scale * (weighted * CHANNELS - row_sum - xhat * row_dot)
+
+
+def _oracle_structured_select_scatter_reduce_torch(
+    mm: torch.Tensor,
+    mm_2: torch.Tensor,
+    arg75_1: torch.Tensor,
+    arg236_1: torch.Tensor,
+    arg239_1: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    token0_xhat = arg236_1[:, 0, :]
+    token1_xhat = arg236_1[:, 1, :]
+    token0_scale = arg239_1[:, 0, :]
+    token1_scale = arg239_1[:, 1, :]
+
+    grad_token0 = _layernorm_lane_grad(mm_2, arg75_1, token0_xhat, token0_scale)
+    grad_token1 = _layernorm_lane_grad(mm, arg75_1, token1_xhat, token1_scale)
+
+    out_mul_xhat = (mm_2 * token0_xhat + mm * token1_xhat).sum(dim=0)
+    out_scatter_sum = (mm_2 + mm).sum(dim=0)
+    out_grad_sum = (grad_token0 + grad_token1).sum(dim=0)
+
+    materialized = torch.zeros(
+        (ROWS, CHANNELS),
+        device=grad_token0.device,
+        dtype=grad_token0.dtype,
+    )
+    materialized[0::TOKENS, :] = grad_token0
+    materialized[1::TOKENS, :] = grad_token1
+    transposed_grad = materialized.t()
+    return out_mul_xhat, out_scatter_sum, transposed_grad, out_grad_sum
+
+
+def oracle_structured_select_scatter_reduce(
+    mm: torch.Tensor,
+    mm_2: torch.Tensor,
+    arg75_1: torch.Tensor,
+    arg236_1: torch.Tensor,
+    arg239_1: torch.Tensor,
+    _shape_param_0,
+    _shape_param_1,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    del _shape_param_0, _shape_param_1
+
+    if mm.device.type != "cuda" or triton is None:
+        return _oracle_structured_select_scatter_reduce_torch(
+            mm,
+            mm_2,
+            arg75_1,
+            arg236_1,
+            arg239_1,
+        )
+
+    out_mul_xhat = torch.empty((CHANNELS,), device=mm.device, dtype=mm.dtype)
+    out_scatter_sum = torch.empty((CHANNELS,), device=mm.device, dtype=mm.dtype)
+    out_grad_sum = torch.empty((CHANNELS,), device=mm.device, dtype=mm.dtype)
+    transposed_grad = torch.empty_strided(
+        (CHANNELS, ROWS),
+        (1, CHANNELS),
+        device=mm.device,
+        dtype=mm.dtype,
+    )
+
+    _zero_kernel[(triton.cdiv(CHANNELS, 1024),)](out_mul_xhat, CHANNELS, BLOCK=1024)
+    _zero_kernel[(triton.cdiv(CHANNELS, 1024),)](out_scatter_sum, CHANNELS, BLOCK=1024)
+    _zero_kernel[(triton.cdiv(CHANNELS, 1024),)](out_grad_sum, CHANNELS, BLOCK=1024)
+    _zero_kernel[(triton.cdiv(ROWS * CHANNELS, 1024),)](
+        transposed_grad,
+        ROWS * CHANNELS,
+        BLOCK=1024,
+    )
+    _select_scatter_reduce_kernel[(BATCH,)](
+        mm,
+        mm_2,
+        arg75_1,
+        arg236_1,
+        arg239_1,
+        out_mul_xhat,
+        out_scatter_sum,
+        transposed_grad,
+        out_grad_sum,
+        CHANNELS,
+        TOKENS,
+        triton.next_power_of_2(CHANNELS),
+    )
+    return out_mul_xhat, out_scatter_sum, transposed_grad, out_grad_sum
+
+
+def reference_outputs(
+    inputs: tuple[object, ...],
+    device: torch.device,
+) -> tuple[torch.Tensor, ...]:
+    module = _load_repro_module()
+    if device.type != "cuda":
+        module.device = lambda *unused_args, **unused_kwargs: device
+    model = module.Repro().to(device)
+    return _as_tuple(model(*inputs))
+
+
+def synchronize(device: torch.device) -> None:
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+
+
+def _max_diff(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float]:
+    diff = (actual.float() - expected.float()).abs()
+    rel = diff / (expected.float().abs() + 1.0e-8)
+    return diff.max().item(), rel.max().item()
+
+
+def run_check(device: torch.device, rtol: float, atol: float) -> bool:
+    torch.manual_seed(0)
+    inputs = make_inputs(device)
+    with torch.no_grad():
+        expected = reference_outputs(inputs, device)
+        actual = _as_tuple(oracle_structured_select_scatter_reduce(*inputs))
+        synchronize(device)
+
+    ok = len(actual) == len(expected)
+    if not ok:
+        print(f"output_count: actual={len(actual)} expected={len(expected)} allclose=False")
+
+    for idx, (got, ref) in enumerate(zip(actual, expected)):
+        max_abs, max_rel = _max_diff(got, ref)
+        shape_ok = got.shape == ref.shape
+        dtype_ok = got.dtype == ref.dtype
+        stride_ok = got.stride() == ref.stride()
+        value_ok = torch.allclose(got.float(), ref.float(), rtol=rtol, atol=atol)
+        output_ok = shape_ok and dtype_ok and stride_ok and value_ok
+        ok = ok and output_ok
+        print(
+            f"output[{idx}]: shape={list(got.shape)} dtype={got.dtype} "
+            f"stride={got.stride()} expected_stride={ref.stride()} "
+            f"max_abs={max_abs:.6e} max_rel={max_rel:.6e} "
+            f"shape_match={shape_ok} dtype_match={dtype_ok} "
+            f"stride_match={stride_ok} allclose={value_ok}"
+        )
+
+    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: int) -> float:
+    for _ in range(max(0, warmup)):
+        fn()
+    synchronize(device)
+
+    best_s = math.inf
+    for _ in range(rep):
+        start = time.perf_counter()
+        fn()
+        synchronize(device)
+        best_s = min(best_s, time.perf_counter() - start)
+    return best_s * 1_000_000.0
+
+
+def run_bench(device: torch.device, warmup: int, rep: int) -> None:
+    torch.manual_seed(0)
+    inputs = make_inputs(device)
+
+    logical_read_bytes = (
+        2 * BATCH * CHANNELS * 4
+        + CHANNELS * 4
+        + 2 * BATCH * CHANNELS * 4
+        + 2 * BATCH * 4
+    )
+    logical_write_bytes = (3 * CHANNELS + ROWS * CHANNELS) * 4
+    impl = "triton" if device.type == "cuda" and triton is not None else "torch"
+
+    with torch.no_grad():
+        oracle_structured_select_scatter_reduce(*inputs)
+        synchronize(device)
+        oracle_us = benchmark(
+            lambda: oracle_structured_select_scatter_reduce(*inputs),
+            device,
+            warmup,
+            rep,
+        )
+
+    print(
+        f"oracle_structured_select_scatter_reduce: {oracle_us:.3f} us "
+        f"impl={impl} shape={SHAPE_LABEL} device={device} warmup={warmup} rep={rep}"
+    )
+    print(f"logical traffic: {(logical_read_bytes + logical_write_bytes) / 1e6:.1f} MB")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="compare complete oracle outputs and strides to repro.py")
+    parser.add_argument("--bench", action="store_true", help="time the full-scope oracle")
+    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--rtol", type=float, default=1.0e-4)
+    parser.add_argument("--atol", type=float, default=1.0e-3)
+    parser.add_argument("--warmup", type=int, default=10)
+    parser.add_argument("--rep", type=int, default=50)
+    args = parser.parse_args()
+
+    if not args.check and not args.bench:
+        parser.error("select at least one mode: --check and/or --bench")
+
+    device = torch.device(args.device)
+    with torch.no_grad():
+        if args.check and not run_check(device=device, rtol=args.rtol, atol=args.atol):
+            sys.exit(1)
+        if args.bench:
+            run_bench(device=device, warmup=args.warmup, rep=args.rep)
+
+
+if __name__ == "__main__":
+    main()
