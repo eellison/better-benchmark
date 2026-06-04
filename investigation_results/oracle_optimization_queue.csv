@@ -343,3 +343,15 @@ pointwise_0eade0de46c0,AT_FLOOR,closed,fresh_2026-06-04: compile=5.1us oracle=4.
 pointwise_4e4da02d582f,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=14.4us oracle=5.0us gap=2.89x; SAC split/tanh multi-output pointwise tuple
 pointwise_d54fca93c7e1,AT_FLOOR,closed,fresh_2026-06-04: compile=4.9us oracle=4.8us gap=1.02x; Longformer constant f16 zero mask at launch floor
 sum_7c50e5b80bfe,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=21.4us oracle=6.0us gap=3.56x; SAC cat/permute/sum multi-output reduction fusion
+amax_sum_sum_098a3fee06f9,SCATTER_REDUCE,implemented,fresh_2026-06-04: compile=17.7us oracle=6.2us gap=2.856x; fused softmax-backward+scatter+transpose into one kernel
+amax_sum_sum_6be3e54433a2,SCATTER_REDUCE,implemented,fresh_2026-06-04: compile=25.1us oracle=7.0us gap=3.584x; fused softmax-backward+scatter+pad into two kernels
+pointwise_69b13df5a532,AT_FLOOR,closed,fresh_2026-06-04: compile=5.25us oracle=6.08us gap=0.863x; BAD_ORACLE at launch floor; 3072 f16 silu elements; no real gap
+pointwise_9efa43391431,AT_FLOOR,closed,fresh_2026-06-04: compile=4.86us oracle=4.83us gap=1.006x; 4096 f16 constant fill at launch floor; no real gap
+pointwise_ef7782270e46,AT_FLOOR,closed,fresh_2026-06-04: compile=5.25us oracle=5.18us gap=1.014x; 1024 f32 sigmoid backward at launch floor; no real gap
+pointwise_f9aca3f32296,AT_FLOOR,closed,fresh_2026-06-04: compile=5.15us oracle=5.28us gap=0.975x; 2048 f32->bool relu_le at launch floor; no real gap
+any_17b234fd7f4f,AT_FLOOR,closed,fresh_2026-06-04: compile=7.14us oracle=6.98us gap=1.023x; 8192 f32 gt+any reduction at launch floor; no real gap
+max_448f6b3c8f1d,AT_FLOOR,closed,fresh_2026-06-04: compile=5.66us oracle=6.98us gap=0.811x; BAD_ORACLE 4096 i64 max reduction at launch floor; no real gap
+pointwise_052e3853c721,AT_FLOOR,closed,fresh_2026-06-04: compile=4.7us oracle=4.93us gap=0.953x; f32[8x512x1] constant ones fill at launch floor; no real gap
+pointwise_4d236bfe44e3,AT_FLOOR,closed,fresh_2026-06-04: compile=4.99us oracle=5.28us gap=0.945x; BAD_ORACLE 3x768 f32 cat at launch floor; no real gap
+pointwise_6d6e44c3eeb4,AT_FLOOR,closed,fresh_2026-06-04: compile=4.99us oracle=4.86us gap=1.027x; f32[32x128] constant ones fill at launch floor; no real gap
+sum_227d8bbf9311,AT_FLOOR,closed,fresh_2026-06-04: compile=6.688us oracle=6.72us gap=0.995x; f32[32x128] row L2 norm at launch floor; no real gap
