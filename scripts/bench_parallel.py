@@ -70,7 +70,6 @@ import tempfile
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gpu_lock import gpu_lock_for_kind, discover_gpus, matching_gpus
 
 
@@ -291,7 +290,6 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
            args_dict: dict):
     """Worker process: holds GPU lock, benchmarks repros until queue is empty."""
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_idx
-    sys.path.insert(0, str(Path(args_dict["root"])))
 
     import torch
     import torch._dynamo
@@ -452,6 +450,10 @@ def main():
                         help="Benchmark all shapes from shapes.txt")
     parser.add_argument("--no-cd", action="store_true",
                         help="Skip coordinate descent tuning")
+    parser.add_argument("--combo-kernels", action="store_true",
+                        help="Enable inductor combo_kernels config")
+    parser.add_argument("--multi-kernel", type=int, default=0,
+                        help="Set inductor multi_kernel config (0=off, 1=on)")
     parser.add_argument("--update-perf", action="store_true",
                         help="Write results to each repro's perf.json")
     parser.add_argument("--hardware", default=None,
@@ -537,6 +539,8 @@ def main():
         "share_cache": args.share_cache,
         "strict_gpu_lock": args.strict_gpu_lock,
         "n_workers": n_workers,
+        "combo_kernels": args.combo_kernels,
+        "multi_kernel": args.multi_kernel,
     }
 
     # Use threads — the actual GPU work is in subprocess.Popen children,
@@ -943,7 +947,6 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     return f'''
 import builtins, contextlib, fcntl, io, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
-sys.path.insert(0, "{args_dict["root"]}")
 
 import torch, torch._dynamo
 import torch._inductor.config as inductor_config
@@ -954,6 +957,13 @@ from repro_harness import load_shape_configs, make_inputs_from_config, make_inpu
 from byte_accounting import count_bytes_effective
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
+
+# Extra inductor config knobs
+if {args_dict.get("combo_kernels", False)}:
+    inductor_config.combo_kernels = True
+    inductor_config.combo_kernel_per_subkernel_blocks = True
+if {args_dict.get("multi_kernel", 0)}:
+    inductor_config.triton.multi_kernel = {args_dict.get("multi_kernel", 0)}
 
 # --- Prefetch infrastructure ---
 # Pre-imports the next repro module while the current one is being timed.
@@ -1181,23 +1191,33 @@ def _get_or_load_module(repro_path):
     configs = load_shape_configs(repro_path)
     return (mod, instance, configs)
 
-def _bench_with_cudagraph(fn, inps, warmup, rep):
-    with gpu_setup_lock():
-        with torch.no_grad():
-            for _ in range(3):
+N_ROUNDS = 5  # interleaved timing rounds for min-of-mins
+
+def _capture_cudagraph(fn, inps):
+    """Compile warmup and capture a CUDAGraph. Returns (graph, is_graph).
+
+    If CUDAGraph capture fails (some ops unsupported), returns (fn, False)
+    as a fallback callable.
+    """
+    with torch.no_grad():
+        for _ in range(3):
+            fn(*inps)
+        torch.cuda.synchronize()
+        try:
+            g = torch.cuda.CUDAGraph()
+            with torch.cuda.graph(g):
                 fn(*inps)
             torch.cuda.synchronize()
-            try:
-                g = torch.cuda.CUDAGraph()
-                with torch.cuda.graph(g):
-                    fn(*inps)
-                torch.cuda.synchronize()
-                with gpu_bench_lock():
-                    return do_bench(lambda: g.replay(), warmup=warmup, rep=rep, return_mode="min") * 1000
-            except Exception:
-                # Fallback: some ops don't support CUDA graph capture
-                with gpu_bench_lock():
-                    return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep, return_mode="min") * 1000
+            return g, True
+        except Exception:
+            return fn, False
+
+def _make_bench_callable(graph_or_fn, is_graph, inps):
+    """Return a zero-arg callable suitable for do_bench."""
+    if is_graph:
+        return lambda: graph_or_fn.replay()
+    else:
+        return lambda: graph_or_fn(*inps)
 
 def bench_one(repro_path):
     mod, instance, configs = _get_or_load_module(repro_path)
@@ -1225,8 +1245,38 @@ def bench_one(repro_path):
             total_bytes = count_bytes_effective(instance, inputs)
             torch.cuda.synchronize()
 
+        # --- Phase 1: Compile all configs and capture CUDAGraphs (no exclusive lock) ---
         copy_elems = max(total_bytes // 8, 256)
+
+        # Compile default
+        inductor_metrics.reset()
+        torch._dynamo.reset()
+        compiled = torch.compile(instance)
+        with gpu_setup_lock():
+            with torch.no_grad():
+                graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
+        n_kernels = inductor_metrics.generated_kernel_count
+
+        # Compile coordinate descent
+        do_cd = not {args_dict["no_cd"]}
+        graph_cd = None
+        cd_is_graph = False
+        if do_cd:
+            inductor_config.coordinate_descent_tuning = True
+            torch._dynamo.reset()
+            compiled_cd = torch.compile(instance)
+            with gpu_setup_lock():
+                with torch.no_grad():
+                    graph_cd, cd_is_graph = _capture_cudagraph(compiled_cd, inputs)
+            inductor_config.coordinate_descent_tuning = False
+
+        # Build callables for timing
+        bench_default = _make_bench_callable(graph_default, default_is_graph, inputs)
+        bench_cd = _make_bench_callable(graph_cd, cd_is_graph, inputs) if do_cd else None
+
+        # --- Phase 2: Time ALL configs under a single exclusive lock hold ---
         with gpu_bench_lock():
+            # Memcopy speed-of-light measurement
             src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
             dst = torch.empty_like(src)
             sol_us = do_bench(
@@ -1236,21 +1286,27 @@ def bench_one(repro_path):
                 return_mode="min",
             ) * 1000
             torch.cuda.synchronize()
-        del src, dst
+            del src, dst
 
-        inductor_metrics.reset()
-        torch._dynamo.reset()
-        compiled = torch.compile(instance)
-        compiled_us = _bench_with_cudagraph(compiled, inputs, {args_dict["n_warmup"]}, {args_dict["n_rep"]})
-        n_kernels = inductor_metrics.generated_kernel_count
+            # Warm up all graphs
+            for _ in range(25):
+                bench_default()
+                if bench_cd:
+                    bench_cd()
+            torch.cuda.synchronize()
 
-        cd_us = None
-        if not {args_dict["no_cd"]}:
-            inductor_config.coordinate_descent_tuning = True
-            torch._dynamo.reset()
-            compiled_cd = torch.compile(instance)
-            cd_us = _bench_with_cudagraph(compiled_cd, inputs, {args_dict["n_warmup"]}, {args_dict["n_rep"]})
-            inductor_config.coordinate_descent_tuning = False
+            # Interleaved timing rounds
+            default_times = []
+            cd_times = []
+            for _ in range(N_ROUNDS):
+                t = do_bench(bench_default, warmup=5, rep={args_dict["n_rep"]}, return_mode="min") * 1000
+                default_times.append(t)
+                if bench_cd:
+                    t = do_bench(bench_cd, warmup=5, rep={args_dict["n_rep"]}, return_mode="min") * 1000
+                    cd_times.append(t)
+
+            compiled_us = min(default_times)
+            cd_us = min(cd_times) if cd_times else None
 
         all_results[label] = {{
             "compiled_us": compiled_us,
@@ -1312,12 +1368,19 @@ def _worker_script(repro_path: str, gpu_idx: str, args_dict: dict) -> str:
     return f'''
 import sys, json, os
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
-sys.path.insert(0, "{args_dict["root"]}")
 
 import torch, torch._dynamo
 import torch._inductor.config as inductor_config
+import torch._inductor.metrics as inductor_metrics
 from triton.testing import do_bench
 import importlib.util, math
+
+# Extra inductor config knobs
+if {args_dict.get("combo_kernels", False)}:
+    inductor_config.combo_kernels = True
+    inductor_config.combo_kernel_per_subkernel_blocks = True
+if {args_dict.get("multi_kernel", 0)}:
+    inductor_config.triton.multi_kernel = {args_dict.get("multi_kernel", 0)}
 
 spec = importlib.util.spec_from_file_location("repro", "{repro_path}")
 mod = importlib.util.module_from_spec(spec)
@@ -1339,6 +1402,28 @@ if all_shapes and configs:
 else:
     shape_items = [(None, None)]
 
+N_ROUNDS = 5  # interleaved timing rounds for min-of-mins
+
+def _capture_cudagraph(fn, inps):
+    with torch.no_grad():
+        for _ in range(3):
+            fn(*inps)
+        torch.cuda.synchronize()
+        try:
+            g = torch.cuda.CUDAGraph()
+            with torch.cuda.graph(g):
+                fn(*inps)
+            torch.cuda.synchronize()
+            return g, True
+        except Exception:
+            return fn, False
+
+def _make_bench_callable(graph_or_fn, is_graph, inps):
+    if is_graph:
+        return lambda: graph_or_fn.replay()
+    else:
+        return lambda: graph_or_fn(*inps)
+
 all_results = {{}}
 for shape_name, shape_config in shape_items:
     if shape_config is not None:
@@ -1354,7 +1439,35 @@ for shape_name, shape_config in shape_items:
 
     total_bytes = count_bytes_effective(instance, inputs)
 
+    # --- Phase 1: Compile all configs and capture CUDAGraphs ---
     copy_elems = max(total_bytes // 8, 256)
+
+    # Compile default
+    inductor_metrics.reset()
+    torch._dynamo.reset()
+    compiled = torch.compile(instance)
+    with torch.no_grad():
+        graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
+    n_kernels = inductor_metrics.generated_kernel_count
+
+    # Compile coordinate descent
+    do_cd = not {args_dict["no_cd"]}
+    graph_cd = None
+    cd_is_graph = False
+    if do_cd:
+        inductor_config.coordinate_descent_tuning = True
+        torch._dynamo.reset()
+        compiled_cd = torch.compile(instance)
+        with torch.no_grad():
+            graph_cd, cd_is_graph = _capture_cudagraph(compiled_cd, inputs)
+        inductor_config.coordinate_descent_tuning = False
+
+    # Build callables for timing
+    bench_default = _make_bench_callable(graph_default, default_is_graph, inputs)
+    bench_cd = _make_bench_callable(graph_cd, cd_is_graph, inputs) if do_cd else None
+
+    # --- Phase 2: Time ALL configs together ---
+    # Memcopy speed-of-light
     src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
     dst = torch.empty_like(src)
     sol_us = do_bench(
@@ -1365,37 +1478,32 @@ for shape_name, shape_config in shape_items:
     ) * 1000
     del src, dst
 
-    def _bench_with_cudagraph(fn, inps, warmup, rep):
-        with torch.no_grad():
-            for _ in range(3):
-                fn(*inps)
-            torch.cuda.synchronize()
-            try:
-                g = torch.cuda.CUDAGraph()
-                with torch.cuda.graph(g):
-                    fn(*inps)
-                torch.cuda.synchronize()
-                return do_bench(lambda: g.replay(), warmup=warmup, rep=rep, return_mode="min") * 1000
-            except Exception:
-                return do_bench(lambda: fn(*inps), warmup=warmup, rep=rep, return_mode="min") * 1000
+    # Warm up all graphs
+    for _ in range(25):
+        bench_default()
+        if bench_cd:
+            bench_cd()
+    torch.cuda.synchronize()
 
-    torch._dynamo.reset()
-    compiled = torch.compile(instance)
-    compiled_us = _bench_with_cudagraph(compiled, inputs, {args_dict["n_warmup"]}, {args_dict["n_rep"]})
+    # Interleaved timing rounds
+    default_times = []
+    cd_times = []
+    for _ in range(N_ROUNDS):
+        t = do_bench(bench_default, warmup=5, rep={args_dict["n_rep"]}, return_mode="min") * 1000
+        default_times.append(t)
+        if bench_cd:
+            t = do_bench(bench_cd, warmup=5, rep={args_dict["n_rep"]}, return_mode="min") * 1000
+            cd_times.append(t)
 
-    cd_us = None
-    if not {args_dict["no_cd"]}:
-        inductor_config.coordinate_descent_tuning = True
-        torch._dynamo.reset()
-        compiled_cd = torch.compile(instance)
-        cd_us = _bench_with_cudagraph(compiled_cd, inputs, {args_dict["n_warmup"]}, {args_dict["n_rep"]})
-        inductor_config.coordinate_descent_tuning = False
+    compiled_us = min(default_times)
+    cd_us = min(cd_times) if cd_times else None
 
     all_results[label] = {{
         "compiled_us": compiled_us,
         "coord_descent_us": cd_us,
         "memcopy_sol_us": sol_us,
         "total_bytes": total_bytes,
+        "n_kernels": n_kernels,
         "gap_default": compiled_us / sol_us if sol_us > 0 else None,
         "gap_cd": cd_us / sol_us if (cd_us and sol_us > 0) else None,
     }}

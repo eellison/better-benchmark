@@ -4,15 +4,12 @@ Label: vllm_Qwen_Qwen3-30B-A3B_000
 Pattern hash: 7e55413cb344
 Shape hash: d7bccd87
 """
-import sys
-from pathlib import Path
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
@@ -43,19 +40,15 @@ class Repro(torch.nn.Module):
         convert_element_type_default_1: "i32[16384]" = torch.ops.prims.convert_element_type.default(getitem_2, torch.int32);  getitem_2 = None
         return (where_self, convert_element_type_default_1, getitem)
 
-
-
 def _default_make_inputs():
     from repro_harness import parse_shapes_config
     return parse_shapes_config(_shapes_config)
-
 
 def make_inputs(shape_config=None):
     """Generate inputs for a specific shape config, or default."""
     if shape_config is not None:
         return make_inputs_from_config(shape_config)
     return _default_make_inputs()
-
 
 if __name__ == "__main__":
     benchmark_repro(__file__, Repro, make_inputs)

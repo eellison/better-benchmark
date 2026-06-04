@@ -14,7 +14,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gpu_lock import gpu_lock, gpu_lock_for_kind
 
 

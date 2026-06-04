@@ -4,15 +4,12 @@ Label: torchbench_hf_GPT2_large_infer_000
 Pattern hash: f10cfe5ce46a
 Shape hash: acebc6b2
 """
-import sys
-from pathlib import Path
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
@@ -153,19 +150,15 @@ class Repro(torch.nn.Module):
         where_self_35: "f16[1, 1, 1024, 1024]" = torch.ops.aten.where.self(expand_default, full_default_71, full_default_72);  expand_default = full_default_71 = full_default_72 = None
         return (where_self, where_self_1, where_self_2, where_self_3, where_self_4, where_self_5, where_self_6, where_self_7, where_self_8, where_self_9, where_self_10, where_self_11, where_self_12, where_self_13, where_self_14, where_self_15, where_self_16, where_self_17, where_self_18, where_self_19, where_self_20, where_self_21, where_self_22, where_self_23, where_self_24, where_self_25, where_self_26, where_self_27, where_self_28, where_self_29, where_self_30, where_self_31, where_self_32, where_self_33, where_self_34, where_self_35)
 
-
-
 def _default_make_inputs():
     from repro_harness import parse_shapes_config
     return parse_shapes_config(_shapes_config)
-
 
 def make_inputs(shape_config=None):
     """Generate inputs for a specific shape config, or default."""
     if shape_config is not None:
         return make_inputs_from_config(shape_config)
     return _default_make_inputs()
-
 
 if __name__ == "__main__":
     benchmark_repro(__file__, Repro, make_inputs)
