@@ -337,3 +337,9 @@ sum_sum_8d73a4b5bade,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=15.7u
 sum_sum_8e96ea244bf1,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=11.2us oracle=6.1us gap=1.83x; NFNet weight-standardization backward (channels-last stride variant)
 sum_sum_8f7c059eb6a4,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=12.1us oracle=5.2us gap=2.33x; BERT softmax-backward sibling row+column reduction
 sum_sum_sum_e3016fe2bbb7,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=26.1us oracle=6.9us gap=3.77x; GPT-J cross-entropy backward cat/view/permute multi-output fusion
+amax_argmax_sum_5dfabd070411,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=21.2us oracle=8.0us gap=2.65x; GPTNeo argmax-selected two-class cross-entropy with eq side output
+argmax_amax_sum_fd72c2ef2d40,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=13.8us oracle=8.9us gap=1.54x; GPT2 last-token sequence-classification cross-entropy mean
+pointwise_0eade0de46c0,AT_FLOOR,closed,fresh_2026-06-04: compile=5.1us oracle=4.8us gap=1.05x; Longformer constant-zero select at launch floor
+pointwise_4e4da02d582f,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=14.4us oracle=5.0us gap=2.89x; SAC split/tanh multi-output pointwise tuple
+pointwise_d54fca93c7e1,AT_FLOOR,closed,fresh_2026-06-04: compile=4.9us oracle=4.8us gap=1.02x; Longformer constant f16 zero mask at launch floor
+sum_7c50e5b80bfe,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=21.4us oracle=6.0us gap=3.56x; SAC cat/permute/sum multi-output reduction fusion
