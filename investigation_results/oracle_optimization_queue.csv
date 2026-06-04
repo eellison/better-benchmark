@@ -313,3 +313,15 @@ sum_sum_sum_9d05c4d37c77,AT_FLOOR,closed,fresh_2026-06-04: compile=704.3us oracl
 sum_sum_sum_dc96c4651516,COOPERATIVE_SPLIT_K,needs_work,fresh_2026-06-04: compile=533.5us oracle=259.0us gap=2.06x; compile=613.568/614.208us vs oracle=284.770us; 1.84x gap; historical_best=524.352us; multi_output_reduction_templates; cooperative split k
 sum_sum_sum_ed6c74b5ef96,AT_FLOOR,closed,fresh_2026-06-04: compile=598.0us oracle=821.2us gap=0.73x; full-scope diagnosis-only artifact; oracle=869.184us; historical_best=598.080us; classification=SCATTER_REDUCE; true_floor=no
 var_mean_var_mean_6d7a29cb97f1,RECOMPUTE_FUSION,needs_work,fresh_2026-06-04: compile=443.5us oracle=165.3us gap=2.68x; compile=364.672/360.704us vs oracle=210.464us; 1.71x gap; norm_template_canonicalization; recompute fusion
+amax_sum_f5253e4f250e,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=383.5us oracle=357.8us gap=1.07x; online_softmax_fusion; true_floor=yes
+amax_sum_sum_6fd07d12d98a,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=777.1us oracle=540.6us gap=1.44x; cross_entropy_online_logsumexp; true_floor=yes
+amax_sum_sum_86d05d6810f4,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=777.1us oracle=541.7us gap=1.43x; cross_entropy_online_logsumexp; true_floor=yes
+amax_sum_sum_d5ddd6e16182,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=644.1us oracle=623.5us gap=1.03x; cross_entropy_online_logsumexp; true_floor=yes; borderline gap
+pointwise_100a39b686e3,AT_FLOOR,closed,fresh_2026-06-04: compile=4.8us(combo) oracle=4.9us gap=0.97x; scalar launch-floor bandwidth-bound; true_floor=no
+pointwise_3320bac17d54,AT_FLOOR,closed,fresh_2026-06-04: compile=5.0us oracle=4.8us gap=1.04x; scalar launch-floor bandwidth-bound
+pointwise_36d7a6209c54,AT_FLOOR,closed,fresh_2026-06-04: compile=5.9us oracle=5.8us gap=1.01x; scalar launch-floor bandwidth-bound; true_floor=no
+pointwise_a942dec89d15,AT_FLOOR,closed,fresh_2026-06-04: compile=4.8us oracle=4.8us gap=1.00x; scalar launch-floor bandwidth-bound
+pointwise_ce7169287d93,BAD_ORACLE,closed,fresh_2026-06-04: compile=4.5us oracle=4.9us gap=0.92x; oracle slower than compile; scalar launch-floor
+pointwise_e5d19e73a52c,AT_FLOOR,closed,fresh_2026-06-04: compile=4.8us oracle=5.0us gap=0.96x; scalar launch-floor bandwidth-bound
+pointwise_f9c1d1b08ddb,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=312.2us oracle=112.1us gap=2.78x; relu_cat_maxpool_stencil_fusion; true_floor=yes
+sum_sum_sum_8d668b8fcd9e,SCATTER_REDUCE,needs_work,fresh_2026-06-04: compile=690.1us oracle=79.9us gap=8.64x; structured_scatter_reduce_sparse_producer; true_floor=yes
