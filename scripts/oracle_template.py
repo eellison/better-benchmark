@@ -9,11 +9,7 @@ Gap diagnosis:
 from __future__ import annotations
 
 import argparse
-import importlib.util
-import json
-import math
 import sys
-import time
 from pathlib import Path
 
 import torch
@@ -28,38 +24,33 @@ except ImportError:
 # --- Configuration ---
 REPRO_ID = "<repro_id>"
 REPRO_DIR = Path(__file__).resolve().parent
+# When deployed: repros/canonical/<id>/oracle_*.py -> parents[2] is repo root.
+# When running as template from scripts/: parents[0] (scripts/) -> parent is repo root.
 REPO_ROOT = REPRO_DIR.parents[2]
+if not (REPO_ROOT / "oracle_harness.py").exists():
+    # Fallback: we are in scripts/ directly
+    REPO_ROOT = REPRO_DIR.parent
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-
-# --- Load repro module ---
-def _load_repro_module():
-    """Load the repro.py module from this oracle's directory."""
-    sys.path.insert(0, str(REPO_ROOT))
-    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+# Import shared oracle infrastructure
+sys.path.insert(0, str(REPO_ROOT))
+from oracle_harness import (
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    check_oracle,
+    bench_oracle,
+    has_stochastic_ops,
+)
 
 
 def get_inputs():
     """Load inputs from the repro's make_inputs (scope invariant: same inputs)."""
-    mod = _load_repro_module()
-    if hasattr(mod, "make_inputs"):
-        return mod.make_inputs()
-    elif hasattr(mod, "_default_make_inputs"):
-        return mod._default_make_inputs()
-    else:
-        raise RuntimeError("Repro has no make_inputs or _default_make_inputs")
+    return _harness_get_inputs(REPRO_DIR)
 
 
 def get_repro_instance():
     """Create a Repro() instance for reference comparison."""
-    mod = _load_repro_module()
-    return mod.Repro()
+    return _harness_get_repro_instance(REPRO_DIR)
 
 
 # --- Oracle kernel(s) ---
@@ -100,152 +91,6 @@ def oracle_forward(inputs):
     raise NotImplementedError("Replace with oracle implementation")
 
 
-# --- Standard interface: --check ---
-def run_check(inputs, *, rtol: float = 1e-2, atol: float = 1e-2) -> bool:
-    """Verify oracle produces same outputs as eager Repro.
-
-    Enforces the scope invariant: same inputs, same output structure.
-    Prints per-output PASS/FAIL with max_diff for diagnostics.
-
-    Returns True if all outputs pass.
-    """
-    instance = get_repro_instance()
-
-    with torch.no_grad():
-        eager = instance(*inputs)
-        oracle_out = oracle_forward(inputs)
-
-    # Normalize to list
-    eager_list = _normalize_outputs(eager)
-    oracle_list = _normalize_outputs(oracle_out)
-
-    # Scope check: output count must match
-    if len(oracle_list) != len(eager_list):
-        print(f"  SCOPE_MISMATCH: oracle produces {len(oracle_list)} outputs, "
-              f"eager produces {len(eager_list)}")
-        return False
-
-    all_pass = True
-    for i, (e, o) in enumerate(zip(eager_list, oracle_list)):
-        # Shape check
-        if e.shape != o.shape:
-            print(f"  output {i}: SCOPE_MISMATCH shape oracle={list(o.shape)} "
-                  f"eager={list(e.shape)}")
-            all_pass = False
-            continue
-
-        # Dtype check (warn but don't fail if dtypes differ - cast for comparison)
-        if e.dtype != o.dtype:
-            print(f"  output {i}: WARNING dtype mismatch oracle={o.dtype} eager={e.dtype}")
-
-        # Value check
-        e_f32 = e.float()
-        o_f32 = o.float()
-        max_diff = (e_f32 - o_f32).abs().max().item()
-        ok = torch.allclose(e_f32, o_f32, atol=atol, rtol=rtol)
-
-        status = "PASS" if ok else "FAIL"
-        print(f"  output {i}: {status} (shape={list(e.shape)} dtype={e.dtype} "
-              f"max_diff={max_diff:.2e})")
-        if not ok:
-            all_pass = False
-
-    return all_pass
-
-
-# --- Standard interface: --bench ---
-def run_bench(inputs, *, warmup: int = 25, rep: int = 200) -> dict:
-    """Benchmark oracle vs torch.compile.
-
-    Returns a JSON-serializable dict with machine-parseable timing results.
-    Prints a single JSON line to stdout for automated consumption.
-    """
-    device = _get_device(inputs)
-
-    # Oracle timing
-    with torch.no_grad():
-        oracle_forward(inputs)  # warmup allocation
-        if device.type == "cuda":
-            torch.cuda.synchronize()
-
-        oracle_us = _do_bench(lambda: oracle_forward(inputs), device,
-                              warmup=warmup, rep=rep)
-
-    # Compile timing
-    instance = get_repro_instance()
-    compiled = torch.compile(instance)
-    with torch.no_grad():
-        for _ in range(5):
-            compiled(*inputs)
-        if device.type == "cuda":
-            torch.cuda.synchronize()
-
-        compile_us = _do_bench(lambda: compiled(*inputs), device,
-                               warmup=warmup, rep=rep)
-
-    ratio = compile_us / oracle_us if oracle_us > 0 else 0.0
-    result = {
-        "repro_id": REPRO_ID,
-        "oracle_us": round(oracle_us, 2),
-        "compile_us": round(compile_us, 2),
-        "ratio": round(ratio, 3),
-        "status": "GOOD" if ratio > 1.0 else "BAD_ORACLE",
-    }
-    print(json.dumps(result))
-    return result
-
-
-# --- Helpers ---
-def _normalize_outputs(out) -> list[torch.Tensor]:
-    """Normalize model outputs to a flat list of tensors."""
-    if isinstance(out, torch.Tensor):
-        return [out]
-    if isinstance(out, (tuple, list)):
-        result = []
-        for item in out:
-            if isinstance(item, torch.Tensor):
-                result.append(item)
-            elif isinstance(item, (tuple, list)):
-                result.extend(_normalize_outputs(item))
-        return result
-    return []
-
-
-def _get_device(inputs) -> torch.device:
-    """Extract device from the first tensor in inputs."""
-    for inp in inputs:
-        if isinstance(inp, torch.Tensor):
-            return inp.device
-    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-def _do_bench(fn, device: torch.device, warmup: int = 25, rep: int = 200) -> float:
-    """Benchmark fn, returning time in microseconds (min-of-rep).
-
-    Uses triton.testing.do_bench if available, otherwise manual timing.
-    """
-    if triton is not None and device.type == "cuda":
-        from triton.testing import do_bench
-        # do_bench returns milliseconds; convert to microseconds
-        return do_bench(fn, warmup=warmup, rep=rep, return_mode="min") * 1000.0
-
-    # Fallback: manual timing
-    for _ in range(warmup):
-        fn()
-    if device.type == "cuda":
-        torch.cuda.synchronize()
-
-    best_us = math.inf
-    for _ in range(rep):
-        start = time.perf_counter()
-        fn()
-        if device.type == "cuda":
-            torch.cuda.synchronize()
-        elapsed = time.perf_counter() - start
-        best_us = min(best_us, elapsed * 1_000_000.0)
-    return best_us
-
-
 # --- CLI entry point ---
 def main():
     parser = argparse.ArgumentParser(
@@ -264,6 +109,8 @@ def main():
                         help="Warmup iterations for benchmark")
     parser.add_argument("--rep", type=int, default=200,
                         help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
     args = parser.parse_args()
 
     # Default: run both --check and --bench
@@ -271,17 +118,36 @@ def main():
         args.check = args.bench = True
 
     inputs = get_inputs()
+    instance = get_repro_instance()
+
+    # Report if stochastic ops detected in source
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
 
     if args.check:
         print(f"Checking {REPRO_ID}...")
-        ok = run_check(inputs, rtol=args.rtol, atol=args.atol)
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)
 
     if args.bench:
         print(f"Benchmarking {REPRO_ID}...")
-        result = run_bench(inputs, warmup=args.warmup, rep=args.rep)
+        result = bench_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            REPRO_ID,
+            warmup=args.warmup,
+            rep=args.rep,
+        )
         if result["status"] == "BAD_ORACLE":
             print(f"WARNING: oracle is slower than compile "
                   f"(ratio={result['ratio']:.3f}x)")
