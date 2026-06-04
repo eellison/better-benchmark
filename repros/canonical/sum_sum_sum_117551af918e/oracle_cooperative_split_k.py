@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import math
 import sys
 import time
-from pathlib import Path
 from typing import Callable
 
 import torch
+
+from repro import Repro, make_inputs as repro_make_inputs
 
 try:
     import triton
@@ -20,9 +20,6 @@ except ModuleNotFoundError:  # pragma: no cover - keeps CPU-only syntax checks u
 
 
 REPRO_ID = "sum_sum_sum_117551af918e"
-REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
-REPRO_PATH = REPRO_DIR / "repro.py"
 SHAPE_LABEL = "hf_distillgpt2_train_003_72fdc3f1"
 
 BATCH = 32
@@ -30,27 +27,16 @@ SEQ = 512
 M = BATCH * SEQ
 D = 768
 
-TILE_M = 8
+TILE_M = 4
 TILE_D = 1024
-FINAL_BLOCK_D = 16
-FINAL_BLOCK_TILES = 256
-
-
-
-def _load_repro_module():
-    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+ZERO_BLOCK_D = 1024
+ROW_NUM_WARPS = 2
+ZERO_NUM_WARPS = 1
 
 
 def make_inputs(device: torch.device) -> tuple[object, ...]:
-    module = _load_repro_module()
     moved: list[object] = []
-    for value in module.make_inputs():
+    for value in repro_make_inputs():
         if isinstance(value, torch.Tensor):
             moved.append(value.to(device=device))
         else:
@@ -64,12 +50,8 @@ def _as_tuple(out: object) -> tuple[torch.Tensor, ...]:
     return (out,)
 
 
-def reference_outputs(
-    inputs: tuple[object, ...],
-    device: torch.device,
-) -> tuple[torch.Tensor, ...]:
-    module = _load_repro_module()
-    model = module.Repro().to(device)
+def reference_outputs(inputs: tuple[object, ...], device: torch.device) -> tuple[torch.Tensor, ...]:
+    model = Repro().to(device)
     with torch.no_grad():
         return _as_tuple(model(*inputs))
 
@@ -101,16 +83,32 @@ def oracle_torch(
 if triton is not None:
 
     @triton.jit
-    def _row_partial_reduce_kernel(
+    def _zero_outputs_kernel(
+        out_add_xhat_ptr,
+        out_add_ptr,
+        out_masked_grad_ptr,
+        D_: tl.constexpr,
+        BLOCK_D: tl.constexpr,
+    ):
+        d = tl.program_id(0) * BLOCK_D + tl.arange(0, BLOCK_D)
+        d_mask = d < D_
+        zero = tl.zeros((BLOCK_D,), dtype=tl.float32)
+        tl.store(out_add_xhat_ptr + d, zero, mask=d_mask)
+        tl.store(out_add_ptr + d, zero, mask=d_mask)
+        tl.store(out_masked_grad_ptr + d, zero, mask=d_mask)
+
+
+    @triton.jit
+    def _row_atomic_reduce_kernel(
         mm_ptr,
         residual_ptr,
         gamma_ptr,
         xhat_ptr,
         scale_ptr,
         mask_ptr,
-        partial_add_xhat_ptr,
-        partial_add_ptr,
-        partial_masked_grad_ptr,
+        out_add_xhat_ptr,
+        out_add_ptr,
+        out_masked_grad_ptr,
         M_: tl.constexpr,
         D_: tl.constexpr,
         BLOCK_M: tl.constexpr,
@@ -121,83 +119,36 @@ if triton is not None:
         d = tl.arange(0, BLOCK_D)
         m_mask = m < M_
         d_mask = d < D_
-        mask = m_mask[:, None] & d_mask[None, :]
+        active = m_mask[:, None] & d_mask[None, :]
         offsets = m[:, None] * D_ + d[None, :]
 
-        mm = tl.load(mm_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-        residual = tl.load(residual_ptr + offsets, mask=mask, other=0.0).to(
-            tl.float32
-        )
-        xhat = tl.load(xhat_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        mm = tl.load(mm_ptr + offsets, mask=active, other=0.0).to(tl.float32)
+        residual = tl.load(residual_ptr + offsets, mask=active, other=0.0).to(tl.float32)
+        xhat = tl.load(xhat_ptr + offsets, mask=active, other=0.0).to(tl.float32)
         gamma = tl.load(gamma_ptr + d, mask=d_mask, other=0.0).to(tl.float32)
         scale = tl.load(scale_ptr + m, mask=m_mask, other=0.0).to(tl.float32)
-        keep = tl.load(mask_ptr + offsets, mask=mask, other=0).to(tl.float32)
+        keep = tl.load(mask_ptr + offsets, mask=active, other=0).to(tl.float32)
 
         add = residual + mm
         weighted = add * gamma[None, :]
-        row_sum = tl.sum(tl.where(mask, weighted, 0.0), axis=1)
-        row_dot = tl.sum(tl.where(mask, weighted * xhat, 0.0), axis=1)
+        row_sum = tl.sum(tl.where(active, weighted, 0.0), axis=1)
+        row_dot = tl.sum(tl.where(active, weighted * xhat, 0.0), axis=1)
         grad = scale[:, None] * (
             weighted * D_ - row_sum[:, None] - xhat * row_dot[:, None]
         )
 
-        sum_add_xhat = tl.sum(tl.where(mask, add * xhat, 0.0), axis=0)
-        sum_add = tl.sum(tl.where(mask, add, 0.0), axis=0)
-        sum_masked_grad = tl.sum(tl.where(mask, grad * keep, 0.0), axis=0)
+        sum_add_xhat = tl.sum(tl.where(active, add * xhat, 0.0), axis=0)
+        sum_add = tl.sum(tl.where(active, add, 0.0), axis=0)
+        sum_masked_grad = tl.sum(tl.where(active, grad * keep, 0.0), axis=0)
 
-        partial_offsets = tile_m * D_ + d
-        tl.store(partial_add_xhat_ptr + partial_offsets, sum_add_xhat, mask=d_mask)
-        tl.store(partial_add_ptr + partial_offsets, sum_add, mask=d_mask)
-        tl.store(
-            partial_masked_grad_ptr + partial_offsets,
+        tl.atomic_add(out_add_xhat_ptr + d, sum_add_xhat, sem="relaxed", mask=d_mask)
+        tl.atomic_add(out_add_ptr + d, sum_add, sem="relaxed", mask=d_mask)
+        tl.atomic_add(
+            out_masked_grad_ptr + d,
             sum_masked_grad,
+            sem="relaxed",
             mask=d_mask,
         )
-
-
-    @triton.jit
-    def _finalize_column_sums_kernel(
-        partial_add_xhat_ptr,
-        partial_add_ptr,
-        partial_masked_grad_ptr,
-        out_add_xhat_ptr,
-        out_add_ptr,
-        out_masked_grad_ptr,
-        NUM_M_TILES: tl.constexpr,
-        D_: tl.constexpr,
-        BLOCK_TILES: tl.constexpr,
-        BLOCK_D: tl.constexpr,
-    ):
-        d = tl.program_id(0) * BLOCK_D + tl.arange(0, BLOCK_D)
-        d_mask = d < D_
-        tile_offsets = tl.arange(0, BLOCK_TILES)
-
-        acc_add_xhat = tl.zeros((BLOCK_D,), dtype=tl.float32)
-        acc_add = tl.zeros((BLOCK_D,), dtype=tl.float32)
-        acc_masked_grad = tl.zeros((BLOCK_D,), dtype=tl.float32)
-
-        for tile_start in range(0, NUM_M_TILES, BLOCK_TILES):
-            tiles = tile_start + tile_offsets
-            mask = (tiles[:, None] < NUM_M_TILES) & d_mask[None, :]
-            offsets = tiles[:, None] * D_ + d[None, :]
-
-            add_xhat = tl.load(
-                partial_add_xhat_ptr + offsets, mask=mask, other=0.0
-            ).to(tl.float32)
-            add = tl.load(partial_add_ptr + offsets, mask=mask, other=0.0).to(
-                tl.float32
-            )
-            masked_grad = tl.load(
-                partial_masked_grad_ptr + offsets, mask=mask, other=0.0
-            ).to(tl.float32)
-
-            acc_add_xhat += tl.sum(add_xhat, axis=0)
-            acc_add += tl.sum(add, axis=0)
-            acc_masked_grad += tl.sum(masked_grad, axis=0)
-
-        tl.store(out_add_xhat_ptr + d, acc_add_xhat, mask=d_mask)
-        tl.store(out_add_ptr + d, acc_add, mask=d_mask)
-        tl.store(out_masked_grad_ptr + d, acc_masked_grad, mask=d_mask)
 
 
 def prepare_oracle_inputs(*inputs: object) -> tuple[torch.Tensor, ...]:
@@ -248,45 +199,34 @@ def oracle_triton_prepared(
     assert mask_md.is_contiguous()
 
     device = mm_md.device
+    out_add_xhat = torch.empty((D,), device=device, dtype=torch.float32)
+    out_add = torch.empty((D,), device=device, dtype=torch.float32)
+    out_masked_grad = torch.empty((D,), device=device, dtype=torch.float32)
     num_m_tiles = triton.cdiv(M, TILE_M)
-    partial_add_xhat = torch.empty((num_m_tiles, D), device=device, dtype=torch.float32)
-    partial_add = torch.empty((num_m_tiles, D), device=device, dtype=torch.float32)
-    partial_masked_grad = torch.empty(
-        (num_m_tiles, D), device=device, dtype=torch.float32
-    )
 
-    _row_partial_reduce_kernel[(num_m_tiles,)](
+    _zero_outputs_kernel[(triton.cdiv(D, ZERO_BLOCK_D),)](
+        out_add_xhat,
+        out_add,
+        out_masked_grad,
+        D_=D,
+        BLOCK_D=ZERO_BLOCK_D,
+        num_warps=ZERO_NUM_WARPS,
+    )
+    _row_atomic_reduce_kernel[(num_m_tiles,)](
         mm_md,
         residual_md,
         gamma_d,
         xhat_md,
         scale_m,
         mask_md,
-        partial_add_xhat,
-        partial_add,
-        partial_masked_grad,
+        out_add_xhat,
+        out_add,
+        out_masked_grad,
         M_=M,
         D_=D,
         BLOCK_M=TILE_M,
         BLOCK_D=TILE_D,
-        num_warps=8,
-    )
-
-    out_add_xhat = torch.empty((D,), device=device, dtype=torch.float32)
-    out_add = torch.empty((D,), device=device, dtype=torch.float32)
-    out_masked_grad = torch.empty((D,), device=device, dtype=torch.float32)
-    _finalize_column_sums_kernel[(triton.cdiv(D, FINAL_BLOCK_D),)](
-        partial_add_xhat,
-        partial_add,
-        partial_masked_grad,
-        out_add_xhat,
-        out_add,
-        out_masked_grad,
-        NUM_M_TILES=num_m_tiles,
-        D_=D,
-        BLOCK_TILES=FINAL_BLOCK_TILES,
-        BLOCK_D=FINAL_BLOCK_D,
-        num_warps=8,
+        num_warps=ROW_NUM_WARPS,
     )
 
     return out_add_xhat, out_add, out_masked_grad

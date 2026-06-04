@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the full `Repro.forward` tuple by using one row-tiled producer to share the layer-norm-backward row reductions, write the returned non-contiguous `[768, 32768]` gradient transpose, and emit split-K partials for the three returned `[768]` column sums, whereas Inductor currently schedules the row reductions, gradient materialization/permute, and sibling column reductions as separate generic pointwise and reduction kernels over the same `[32768, 768]` data; Inductor cannot do this today because its scheduler/codegen lacks a cooperative split-K multi-output reduction template that can combine row-local reductions, materialized side-output stores, and several small-output column accumulators in one coordinated producer/finalizer; the fix is COOPERATIVE_SPLIT_K: teach Inductor to split compatible layer-norm-backward column reductions across row tiles, finalize shared partials, and fuse the dependent transposed side store with those accumulators."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the full `Repro.forward` tuple by using one row-tiled producer to share the ViT layer-norm-backward row reductions, write the returned non-contiguous `[768, 32768]` gradient transpose, and emit split-K partials for the three returned `[768]` column sums, whereas Inductor currently schedules the row reductions, gradient materialization/permute, and sibling column reductions as separate generic pointwise and reduction kernels over the same `[32768, 768]` data; Inductor cannot do this today because its scheduler/codegen lacks a cooperative split-K multi-output reduction template that can combine row-local reductions, materialized side-output stores, and several small-output column accumulators in one coordinated producer/finalizer; the fix is COOPERATIVE_SPLIT_K: teach Inductor to split compatible layer-norm-backward column reductions across row tiles, finalize shared partials, and fuse the dependent transposed side store with those accumulators."""
 from __future__ import annotations
 
 import argparse
@@ -13,18 +13,22 @@ import triton.language as tl
 
 REPRO_ID = "sum_sum_sum_a431ef798d5d"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
+SHAPE_LABEL = "timm_vit_base_patch16_siglip_256_train"
 
 B = 128
 T = 256
 C = 768
 ROWS = B * T
 
-ROW_SPLIT = 16
-XBLOCK = 4
+ROW_SPLIT = 32
+XBLOCK = 2
 BLOCK_C = 1024
-FINAL_BLOCK_C = 8
+FINAL_BLOCK_C = 32
+ROW_NUM_WARPS = 1
+FINAL_NUM_WARPS = 8
+CLAIMED_COMPILE_US = 78.688
+HISTORICAL_BAD_ORACLE_US = 95.040
 
 
 
@@ -216,7 +220,7 @@ def oracle_fused(
         ROW_SPLIT_=ROW_SPLIT,
         XBLOCK_=XBLOCK,
         BLOCK_C_=BLOCK_C,
-        num_warps=8,
+        num_warps=ROW_NUM_WARPS,
     )
 
     out_sum_x_xhat = torch.empty((C,), device=device, dtype=torch.float32)
@@ -233,7 +237,7 @@ def oracle_fused(
         C_=C,
         BLOCK_ROW_BLOCKS_=triton.next_power_of_2(num_row_blocks),
         BLOCK_C_=FINAL_BLOCK_C,
-        num_warps=8,
+        num_warps=FINAL_NUM_WARPS,
     )
 
     return out_sum_x_xhat, out_sum_x, out_transposed, out_sum_grad
@@ -304,11 +308,24 @@ def run_bench(warmup: int, rep: int) -> None:
 
     logical_read_bytes = ROWS * C * 4 * 2 + C * 4 + ROWS * 4
     logical_write_bytes = ROWS * C * 4 + C * 4 * 3
+    partial_bytes = triton.cdiv(ROWS, ROW_SPLIT) * C * 4 * 3 * 2
+    beats_claimed_compile = oracle_us < CLAIMED_COMPILE_US
+    beats_historical_bad_oracle = oracle_us < HISTORICAL_BAD_ORACLE_US
+    true_floor = beats_claimed_compile and beats_historical_bad_oracle
     print(
         f"oracle_fused cooperative split-k ViT layernorm backward: "
-        f"{oracle_us:.3f} us"
+        f"{oracle_us:.3f} us shape={SHAPE_LABEL} row_split={ROW_SPLIT} "
+        f"xblock={XBLOCK}"
     )
-    print(f"logical traffic: {(logical_read_bytes + logical_write_bytes) / 1e6:.1f} MB")
+    print(
+        f"estimated traffic including partials: "
+        f"{(logical_read_bytes + logical_write_bytes + partial_bytes) / 1e6:.1f} MB "
+        f"(claimed_compile={CLAIMED_COMPILE_US:.3f} us, "
+        f"historical_bad_oracle={HISTORICAL_BAD_ORACLE_US:.3f} us, "
+        f"beats_claimed_compile={'yes' if beats_claimed_compile else 'no'}, "
+        f"beats_historical_bad_oracle={'yes' if beats_historical_bad_oracle else 'no'}, "
+        f"true_floor={'yes' if true_floor else 'no'})"
+    )
 
 
 def main() -> None:

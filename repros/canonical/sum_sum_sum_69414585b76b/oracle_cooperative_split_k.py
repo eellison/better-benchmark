@@ -13,8 +13,8 @@ import triton.language as tl
 
 REPRO_ID = "sum_sum_sum_69414585b76b"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
+SHAPE_LABEL = "torchbench_bert_pytorch_train_001_f9acc585"
 
 BATCH = 128
 SEQ = 128
@@ -25,10 +25,15 @@ EPS = 1.0e-6
 ROW_BACKWARD_SCALE = 0.002607561929595828
 DROPOUT_SCALE = 1.1111111111111112
 
-TILE_ROWS = 4
-TILE_CHANNELS = 1024
-FINAL_BLOCK_CHANNELS = 16
+ROW_SPLIT = 26
+XBLOCK = 1
+BLOCK_CHANNELS = 1024
+FINAL_BLOCK_CHANNELS = 8
 FINAL_BLOCK_TILES = 1024
+ROW_NUM_WARPS = 4
+FINAL_NUM_WARPS = 16
+HISTORICAL_COMPILE_US = 74.560
+HISTORICAL_BAD_ORACLE_US = 510.976
 
 
 
@@ -131,7 +136,7 @@ def prepare_oracle_inputs(*inputs: object) -> tuple[torch.Tensor, ...]:
 
 
 @triton.jit
-def _row_tile_kernel(
+def _row_split_kernel(
     x_ptr,
     gamma_ptr,
     dy_ptr,
@@ -149,61 +154,73 @@ def _row_tile_kernel(
     EPS_: tl.constexpr,
     ROW_BACKWARD_SCALE_: tl.constexpr,
     DROPOUT_SCALE_: tl.constexpr,
-    BLOCK_ROWS: tl.constexpr,
+    ROW_SPLIT_: tl.constexpr,
+    XBLOCK_: tl.constexpr,
     BLOCK_CHANNELS: tl.constexpr,
 ):
-    tile_row = tl.program_id(0)
-    rows = tile_row * BLOCK_ROWS + tl.arange(0, BLOCK_ROWS)
+    row_block = tl.program_id(0)
     channels = tl.arange(0, BLOCK_CHANNELS)
-    row_mask = rows < ROWS_
     channel_mask = channels < CHANNELS_
-    mask = row_mask[:, None] & channel_mask[None, :]
-    offsets = rows[:, None] * CHANNELS_ + channels[None, :]
-
-    x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    dy = tl.load(dy_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    residual = tl.load(residual_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    keep = tl.load(keep_mask_ptr + offsets, mask=mask, other=0).to(tl.float32)
     gamma = tl.load(gamma_ptr + channels, mask=channel_mask, other=0.0).to(tl.float32)
-    denom_base = tl.load(denom_base_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
     full = tl.load(full_ptr).to(tl.float32)
-    denom = denom_base + EPS_
 
-    x_over_denom = x / denom[:, None]
-    x_gamma_over_denom = x_over_denom * gamma[None, :]
-    row_neg_x_gamma_sum = -tl.sum(
-        tl.where(mask, x_gamma_over_denom, 0.0),
-        axis=1,
-    )
-    row_neg_x_gamma_dy_denom2_sum = -tl.sum(
-        tl.where(mask, x_gamma_over_denom * dy / denom[:, None], 0.0),
-        axis=1,
-    )
-    row_coef = tl.where(
-        denom_base == 0.0,
-        full,
-        row_neg_x_gamma_dy_denom2_sum / (denom_base * 2.0),
-    ) * ROW_BACKWARD_SCALE_
+    acc_sum_x = tl.zeros((BLOCK_CHANNELS,), tl.float32)
+    acc_sum_x_dy_over_denom = tl.zeros((BLOCK_CHANNELS,), tl.float32)
+    acc_sum_out = tl.zeros((BLOCK_CHANNELS,), tl.float32)
 
-    out = (
-        residual
-        + x_gamma_over_denom
-        + row_coef[:, None] * dy
-        + row_neg_x_gamma_sum[:, None] * INV_CHANNELS_
-    ) * keep * DROPOUT_SCALE_
-    tl.store(out_md_ptr + offsets, out, mask=mask)
+    for start in tl.range(0, ROW_SPLIT_, XBLOCK_):
+        rows = row_block * ROW_SPLIT_ + start + tl.arange(0, XBLOCK_)
+        row_mask = rows < ROWS_
+        mask = row_mask[:, None] & channel_mask[None, :]
+        offsets = rows[:, None] * CHANNELS_ + channels[None, :]
 
-    partial_offsets = tile_row * CHANNELS_ + channels
-    sum_x = tl.sum(tl.where(mask, x, 0.0), axis=0)
-    sum_x_dy_over_denom = tl.sum(tl.where(mask, x_over_denom * dy, 0.0), axis=0)
-    sum_out = tl.sum(tl.where(mask, out, 0.0), axis=0)
-    tl.store(partial_sum_x_ptr + partial_offsets, sum_x, mask=channel_mask)
+        x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        dy = tl.load(dy_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        residual = tl.load(residual_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        keep = tl.load(keep_mask_ptr + offsets, mask=mask, other=0).to(tl.float32)
+        denom_base = tl.load(denom_base_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
+        denom = denom_base + EPS_
+        inv_denom = 1.0 / denom
+
+        x_over_denom = x * inv_denom[:, None]
+        x_gamma_over_denom = x_over_denom * gamma[None, :]
+        row_neg_x_gamma_sum = -tl.sum(
+            tl.where(mask, x_gamma_over_denom, 0.0),
+            axis=1,
+        )
+        row_neg_x_gamma_dy_denom2_sum = -tl.sum(
+            tl.where(mask, x_gamma_over_denom * dy * inv_denom[:, None], 0.0),
+            axis=1,
+        )
+        row_coef = tl.where(
+            denom_base == 0.0,
+            full,
+            row_neg_x_gamma_dy_denom2_sum / (denom_base * 2.0),
+        ) * ROW_BACKWARD_SCALE_
+
+        out = (
+            residual
+            + x_gamma_over_denom
+            + row_coef[:, None] * dy
+            + row_neg_x_gamma_sum[:, None] * INV_CHANNELS_
+        ) * keep * DROPOUT_SCALE_
+        tl.store(out_md_ptr + offsets, out, mask=mask)
+
+        acc_sum_x += tl.sum(tl.where(mask, x, 0.0), axis=0)
+        acc_sum_x_dy_over_denom += tl.sum(
+            tl.where(mask, x_over_denom * dy, 0.0),
+            axis=0,
+        )
+        acc_sum_out += tl.sum(tl.where(mask, out, 0.0), axis=0)
+
+    partial_offsets = row_block * CHANNELS_ + channels
+    tl.store(partial_sum_x_ptr + partial_offsets, acc_sum_x, mask=channel_mask)
     tl.store(
         partial_sum_x_dy_over_denom_ptr + partial_offsets,
-        sum_x_dy_over_denom,
+        acc_sum_x_dy_over_denom,
         mask=channel_mask,
     )
-    tl.store(partial_sum_out_ptr + partial_offsets, sum_out, mask=channel_mask)
+    tl.store(partial_sum_out_ptr + partial_offsets, acc_sum_out, mask=channel_mask)
 
 
 @triton.jit
@@ -280,7 +297,7 @@ def oracle_full_prepared(
     assert keep_mask_md.is_contiguous()
 
     device = x_md.device
-    num_row_tiles = triton.cdiv(ROWS, TILE_ROWS)
+    num_row_tiles = triton.cdiv(ROWS, ROW_SPLIT)
     partial_sum_x = torch.empty((num_row_tiles, CHANNELS), device=device, dtype=torch.float32)
     partial_sum_x_dy_over_denom = torch.empty(
         (num_row_tiles, CHANNELS),
@@ -290,7 +307,7 @@ def oracle_full_prepared(
     partial_sum_out = torch.empty((num_row_tiles, CHANNELS), device=device, dtype=torch.float32)
     out_md = torch.empty((ROWS, CHANNELS), device=device, dtype=torch.float32)
 
-    _row_tile_kernel[(num_row_tiles,)](
+    _row_split_kernel[(num_row_tiles,)](
         x_md,
         gamma_d,
         dy_md,
@@ -308,9 +325,10 @@ def oracle_full_prepared(
         EPS_=EPS,
         ROW_BACKWARD_SCALE_=ROW_BACKWARD_SCALE,
         DROPOUT_SCALE_=DROPOUT_SCALE,
-        BLOCK_ROWS=TILE_ROWS,
-        BLOCK_CHANNELS=TILE_CHANNELS,
-        num_warps=8,
+        ROW_SPLIT_=ROW_SPLIT,
+        XBLOCK_=XBLOCK,
+        BLOCK_CHANNELS=BLOCK_CHANNELS,
+        num_warps=ROW_NUM_WARPS,
     )
 
     sum_x = torch.empty((CHANNELS,), device=device, dtype=torch.float32)
@@ -327,7 +345,7 @@ def oracle_full_prepared(
         CHANNELS_=CHANNELS,
         BLOCK_TILES=FINAL_BLOCK_TILES,
         BLOCK_CHANNELS=FINAL_BLOCK_CHANNELS,
-        num_warps=8,
+        num_warps=FINAL_NUM_WARPS,
     )
 
     return sum_x, sum_x_dy_over_denom, out_md.t(), sum_out
@@ -407,11 +425,20 @@ def run_bench(warmup: int, rep: int) -> None:
         + 4
     )
     logical_write_bytes = ROWS * CHANNELS * 4 + CHANNELS * 4 * 3
+    num_row_tiles = triton.cdiv(ROWS, ROW_SPLIT)
+    partial_bytes = num_row_tiles * CHANNELS * 4 * 3 * 2
+    oracle_us = oracle_ms * 1000.0
     print(
-        f"oracle_full cooperative split-k BERT layernorm tail: {oracle_ms * 1000.0:.3f} us "
+        f"oracle_full cooperative split-k BERT layernorm/dropout backward: {oracle_us:.3f} us "
+        f"shape={SHAPE_LABEL} row_split={ROW_SPLIT} "
         f"(warmup={warmup}, rep={rep})"
     )
-    print(f"logical traffic: {(logical_read_bytes + logical_write_bytes) / 1.0e6:.1f} MB")
+    print(
+        f"estimated traffic: {(logical_read_bytes + logical_write_bytes + partial_bytes) / 1.0e6:.1f} MB "
+        f"(historical_compile={HISTORICAL_COMPILE_US:.3f} us, "
+        f"historical_bad_oracle={HISTORICAL_BAD_ORACLE_US:.3f} us, "
+        f"true_floor={'yes' if oracle_us < HISTORICAL_COMPILE_US else 'no'})"
+    )
 
 
 def main() -> None:

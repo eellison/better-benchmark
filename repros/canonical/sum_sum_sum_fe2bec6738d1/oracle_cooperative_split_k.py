@@ -14,7 +14,6 @@ import triton.language as tl
 
 REPRO_ID = "sum_sum_sum_fe2bec6738d1"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 SHAPE_LABEL = "hf_bertformaskedlm_train_001_034147be"
 
@@ -24,10 +23,13 @@ M = BATCH * SEQ
 C = 768
 DROP_SCALE = 1.1111111111111112
 
-TILE_M = 4
+ROW_GROUP = 22
+XBLOCK = 1
 BLOCK_C = 1024
 FINAL_BLOCK_C = 16
-FINAL_BLOCK_TILES = 256
+FINAL_BLOCK_TILES = 512
+ROW_NUM_WARPS = 4
+FINAL_NUM_WARPS = 8
 
 
 
@@ -82,7 +84,7 @@ def prepare_oracle_inputs(*inputs: object) -> tuple[torch.Tensor, ...]:
 
 
 @triton.jit
-def _row_tile_store_and_reduce_kernel(
+def _row_group_store_and_reduce_kernel(
     x_ptr,
     weight_ptr,
     rhs_ptr,
@@ -95,36 +97,46 @@ def _row_tile_store_and_reduce_kernel(
     M_: tl.constexpr,
     C_: tl.constexpr,
     DROP_SCALE_: tl.constexpr,
-    BLOCK_M: tl.constexpr,
+    ROW_GROUP_: tl.constexpr,
+    XBLOCK_: tl.constexpr,
     BLOCK_C_: tl.constexpr,
 ):
-    tile_m = tl.program_id(0)
-    m = tile_m * BLOCK_M + tl.arange(0, BLOCK_M)
+    row_group = tl.program_id(0)
     c = tl.arange(0, BLOCK_C_)
-    m_mask = m < M_
     c_mask = c < C_
-    mask = m_mask[:, None] & c_mask[None, :]
-    offsets = m[:, None] * C_ + c[None, :]
-
-    x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    rhs = tl.load(rhs_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
     weight = tl.load(weight_ptr + c, mask=c_mask, other=0.0).to(tl.float32)
-    row_scale = tl.load(row_scale_ptr + m, mask=m_mask, other=0.0).to(tl.float32)
-    drop_mask = tl.load(drop_mask_ptr + offsets, mask=mask, other=0).to(tl.float32)
 
-    weighted = x * weight[None, :]
-    row_sum = tl.sum(tl.where(mask, weighted, 0.0), axis=1)
-    row_dot = tl.sum(tl.where(mask, weighted * rhs, 0.0), axis=1)
-    grad = row_scale[:, None] * (
-        weighted * C_ - row_sum[:, None] - rhs * row_dot[:, None]
-    )
-    masked_grad = grad * drop_mask * DROP_SCALE_
-    tl.store(out_transposed_ptr + offsets, masked_grad, mask=mask)
+    sum_x_rhs = tl.zeros((BLOCK_C_,), dtype=tl.float32)
+    sum_x = tl.zeros((BLOCK_C_,), dtype=tl.float32)
+    sum_masked_grad = tl.zeros((BLOCK_C_,), dtype=tl.float32)
 
-    partial_offsets = tile_m * C_ + c
-    sum_x_rhs = tl.sum(tl.where(mask, x * rhs, 0.0), axis=0)
-    sum_x = tl.sum(tl.where(mask, x, 0.0), axis=0)
-    sum_masked_grad = tl.sum(tl.where(mask, masked_grad, 0.0), axis=0)
+    for group_offset in tl.range(0, ROW_GROUP_, XBLOCK_):
+        m = row_group * ROW_GROUP_ + group_offset + tl.arange(0, XBLOCK_)
+        m_mask = m < M_
+        mask = m_mask[:, None] & c_mask[None, :]
+        offsets = m[:, None] * C_ + c[None, :]
+
+        x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        rhs = tl.load(rhs_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        row_scale = tl.load(row_scale_ptr + m, mask=m_mask, other=0.0).to(tl.float32)
+        drop_mask = tl.load(drop_mask_ptr + offsets, mask=mask, other=0).to(
+            tl.float32
+        )
+
+        weighted = x * weight[None, :]
+        row_sum = tl.sum(tl.where(mask, weighted, 0.0), axis=1)
+        row_dot = tl.sum(tl.where(mask, weighted * rhs, 0.0), axis=1)
+        grad = row_scale[:, None] * (
+            weighted * C_ - row_sum[:, None] - rhs * row_dot[:, None]
+        )
+        masked_grad = grad * drop_mask * DROP_SCALE_
+        tl.store(out_transposed_ptr + offsets, masked_grad, mask=mask)
+
+        sum_x_rhs += tl.sum(tl.where(mask, x * rhs, 0.0), axis=0)
+        sum_x += tl.sum(tl.where(mask, x, 0.0), axis=0)
+        sum_masked_grad += tl.sum(tl.where(mask, masked_grad, 0.0), axis=0)
+
+    partial_offsets = row_group * C_ + c
     tl.store(partial_x_rhs_ptr + partial_offsets, sum_x_rhs, mask=c_mask)
     tl.store(partial_x_ptr + partial_offsets, sum_x, mask=c_mask)
     tl.store(partial_masked_grad_ptr + partial_offsets, sum_masked_grad, mask=c_mask)
@@ -192,7 +204,7 @@ def oracle_triton_prepared(
     assert drop_mask_mc.is_contiguous()
 
     device = x_mc.device
-    num_m_tiles = triton.cdiv(M, TILE_M)
+    num_m_tiles = triton.cdiv(M, ROW_GROUP)
     partial_x_rhs = torch.empty((num_m_tiles, C), device=device, dtype=torch.float32)
     partial_x = torch.empty((num_m_tiles, C), device=device, dtype=torch.float32)
     partial_masked_grad = torch.empty(
@@ -205,7 +217,7 @@ def oracle_triton_prepared(
         dtype=torch.float32,
     )
 
-    _row_tile_store_and_reduce_kernel[(num_m_tiles,)](
+    _row_group_store_and_reduce_kernel[(num_m_tiles,)](
         x_mc,
         weight_c,
         rhs_mc,
@@ -218,9 +230,10 @@ def oracle_triton_prepared(
         M_=M,
         C_=C,
         DROP_SCALE_=DROP_SCALE,
-        BLOCK_M=TILE_M,
+        ROW_GROUP_=ROW_GROUP,
+        XBLOCK_=XBLOCK,
         BLOCK_C_=BLOCK_C,
-        num_warps=8,
+        num_warps=ROW_NUM_WARPS,
     )
 
     out_x_rhs = torch.empty((C,), device=device, dtype=torch.float32)
@@ -237,7 +250,7 @@ def oracle_triton_prepared(
         C_=C,
         BLOCK_TILES=FINAL_BLOCK_TILES,
         BLOCK_C_=FINAL_BLOCK_C,
-        num_warps=8,
+        num_warps=FINAL_NUM_WARPS,
     )
 
     return out_x_rhs, out_x, out_transposed, out_masked_grad
@@ -311,7 +324,9 @@ def run_bench(warmup: int, rep: int) -> None:
         )
 
     logical_read_bytes = (M * C * 4) * 2 + C * 4 + M * 4 + (M * C)
-    logical_write_bytes = (M * C * 4) + (M // TILE_M) * C * 4 * 3 + C * 4 * 3
+    logical_write_bytes = (
+        (M * C * 4) + triton.cdiv(M, ROW_GROUP) * C * 4 * 3 + C * 4 * 3
+    )
     print(
         f"oracle_full cooperative split-k BERT LN/dropout tuple: "
         f"{oracle_ms * 1000.0:.3f} us shape={SHAPE_LABEL}"
