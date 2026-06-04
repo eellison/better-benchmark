@@ -373,3 +373,9 @@ amax_sum_sum_1458251679be,SCATTER_REDUCE,needs_work,fresh_2026-06-04: compile=9.
 sum_27f326f22f76,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=9.15us oracle=7.04us gap=1.30x; lennard_jones broadcast-mul/sub/permute/sum multi-output reduction; true_floor=yes
 sum_df75f19c9c7a,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=9.18us oracle=7.01us gap=1.31x; lennard_jones mul/sub/permute/sum multi-output reduction; true_floor=yes
 sum_fa194db93388,AT_FLOOR,closed,fresh_2026-06-04: compile=6.08us oracle=6.91us gap=0.880x; BAD_ORACLE where+sum reduction at launch floor; no real gap
+pointwise_5aafedcd8ca4,AT_FLOOR,closed,fresh_2026-06-04: compile=5.06us oracle=5.12us gap=0.987x; f16[1x1x256x257] aten.full(-inf) at launch floor; no real gap
+pointwise_7727cefe098e,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=17.31us oracle=5.82us gap=2.97x; doctr batchnorm+relu+maxpool+permute fused in 1 kernel vs Inductor separate kernels; true_floor=yes
+pointwise_b43349159514,AT_FLOOR,closed,fresh_2026-06-04: compile=5.50us oracle=5.79us gap=0.950x; BAD_ORACLE f16[50272] cat+zero_tail at launch floor; no real gap
+pointwise_edfab1af9465,AT_FLOOR,closed,fresh_2026-06-04: compile=5.76us oracle=6.02us gap=0.957x; BAD_ORACLE f32[1000x16] tanh at launch floor; no real gap
+sum_a963d4e1fcf5,AT_FLOOR,closed,fresh_2026-06-04: compile=7.20us oracle=6.02us gap=1.20x; f32[64x256] row L2 norm borderline; historical_best_compile=5.70us; no actionable gap
+sum_sum_sum_72f8a586759c,SCATTER_REDUCE,needs_work,fresh_2026-06-04: compile=29.34us oracle=6.82us gap=4.30x; nanogpt layernorm-bwd index_put scatter+5 reductions+permute in 1 kernel; true_floor=yes
