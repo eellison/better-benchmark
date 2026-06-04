@@ -22,7 +22,6 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable withou
 
 REPRO_ID = "sum_sum_sum_8fe409430e81"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 SHAPE_LABEL = "vllm_qwen_qwen3-30b-a3b_001_51d90f83"
 HIDDEN_SIZE = 2048
@@ -30,6 +29,8 @@ TOKENS = 2048
 EXPERTS_PER_TOKEN = 8
 SCATTER_ROWS = TOKENS * EXPERTS_PER_TOKEN
 ROUTER_DIM = 128
+MAX_ROW_SOURCES_PER_ROW = 7
+MAX_ROUTE_SOURCES_PER_ROW = 7
 BLOCK_OUT0_COLS = 8
 BLOCK_SCATTER_COLS = 64
 BLOCK_COPY = 1024
@@ -105,7 +106,14 @@ if triton is not None:
         tl.store(dst + offsets, values, mask=mask)
 
     @triton.jit
-    def _scatter_token_grad_kernel(
+    def _fill_i32_kernel(dst, value: tl.constexpr, n_elements: tl.constexpr, BLOCK: tl.constexpr):
+        pid = tl.program_id(0)
+        offsets = pid * BLOCK + tl.arange(0, BLOCK)
+        mask = offsets < n_elements
+        tl.store(dst + offsets, value, mask=mask)
+
+    @triton.jit
+    def _token_grad_kernel(
         mm27,
         mm29,
         mm31,
@@ -114,49 +122,40 @@ if triton is not None:
         arg82,
         add40,
         row_dot,
-        arg80,
-        scatter,
+        token_grad_out,
         HIDDEN_: tl.constexpr,
-        EXPERTS_PER_TOKEN_: tl.constexpr,
         BLOCK_C: tl.constexpr,
     ):
-        src_row = tl.program_id(0)
+        token = tl.program_id(0)
         col_block = tl.program_id(1)
         cols = col_block * BLOCK_C + tl.arange(0, BLOCK_C)
         col_mask = cols < HIDDEN_
-        src_offsets = src_row * HIDDEN_ + cols
+        offsets = token * HIDDEN_ + cols
 
         mm_sum = _bf16_add3(
-            tl.load(mm27 + src_offsets, mask=col_mask, other=0.0).to(tl.float32),
-            tl.load(mm29 + src_offsets, mask=col_mask, other=0.0).to(tl.float32),
-            tl.load(mm31 + src_offsets, mask=col_mask, other=0.0).to(tl.float32),
+            tl.load(mm27 + offsets, mask=col_mask, other=0.0).to(tl.float32),
+            tl.load(mm29 + offsets, mask=col_mask, other=0.0).to(tl.float32),
+            tl.load(mm31 + offsets, mask=col_mask, other=0.0).to(tl.float32),
         )
         gamma = tl.load(arg13 + cols, mask=col_mask, other=0.0).to(tl.float32)
-        norm_in = tl.load(arg81 + src_offsets, mask=col_mask, other=0.0).to(tl.float32)
-        inv_rms = tl.load(arg82 + src_row).to(tl.float32)
-        dot = tl.load(row_dot + src_row).to(tl.float32)
+        norm_in = tl.load(arg81 + offsets, mask=col_mask, other=0.0).to(tl.float32)
+        inv_rms = tl.load(arg82 + token).to(tl.float32)
+        dot = tl.load(row_dot + token).to(tl.float32)
 
         weighted = (mm_sum * gamma).to(tl.bfloat16).to(tl.float32)
         correction = (-0.5 * dot * inv_rms * inv_rms * inv_rms / HIDDEN_) * (norm_in * 2.0)
         input_grad = weighted * inv_rms + correction
         token_grad = (
-            tl.load(add40 + src_offsets, mask=col_mask, other=0.0).to(tl.float32)
+            tl.load(add40 + offsets, mask=col_mask, other=0.0).to(tl.float32)
             + input_grad.to(tl.bfloat16).to(tl.float32)
         ).to(tl.bfloat16)
-
-        expert_offsets = tl.arange(0, EXPERTS_PER_TOKEN_)
-        dest_rows = tl.load(arg80 + src_row * EXPERTS_PER_TOKEN_ + expert_offsets).to(tl.int64)
-        dest_offsets = dest_rows[:, None] * HIDDEN_ + cols[None, :]
-        tl.atomic_add(
-            scatter + dest_offsets,
-            token_grad[None, :],
-            sem="relaxed",
-            mask=col_mask[None, :],
-        )
+        tl.store(token_grad_out + offsets, token_grad, mask=col_mask)
 
     @triton.jit
-    def _output1_and_row_reduce_kernel(
-        scatter,
+    def _output1_and_row_reduce_from_slots_kernel(
+        full2,
+        token_grad,
+        row_slot_sources,
         mask_ptr,
         full3,
         arg79,
@@ -165,14 +164,33 @@ if triton is not None:
         out1_base,
         row_reduce,
         HIDDEN_: tl.constexpr,
+        EXPERTS_PER_TOKEN_: tl.constexpr,
+        MAX_ROW_SOURCES_PER_ROW_: tl.constexpr,
         BLOCK_C: tl.constexpr,
     ):
         row = tl.program_id(0)
         cols = tl.arange(0, BLOCK_C)
         offsets = row * HIDDEN_ + cols
+        scatter_vals = tl.load(full2 + offsets).to(tl.float32)
+        for slot in tl.static_range(0, MAX_ROW_SOURCES_PER_ROW_):
+            src = tl.load(
+                row_slot_sources + row * MAX_ROW_SOURCES_PER_ROW_ + slot
+            ).to(tl.int32)
+            valid = src >= 0
+            token = tl.where(valid, src // EXPERTS_PER_TOKEN_, 0)
+            values = tl.load(
+                token_grad + token * HIDDEN_ + cols,
+                mask=valid,
+                other=0.0,
+            ).to(tl.float32)
+            scatter_vals = tl.where(
+                valid,
+                (scatter_vals + values).to(tl.bfloat16).to(tl.float32),
+                scatter_vals,
+            )
+
         masked = tl.load(mask_ptr + row).to(tl.int1)
         full_value = tl.load(full3).to(tl.float32)
-        scatter_vals = tl.load(scatter + offsets).to(tl.float32)
         where_vals = tl.where(masked, full_value, scatter_vals)
 
         route_index = tl.load(arg72 + row).to(tl.int64)
@@ -185,25 +203,52 @@ if triton is not None:
         tl.store(row_reduce + row, tl.sum(product, axis=0))
 
     @triton.jit
-    def _route_add_kernel(
-        row_reduce,
+    def _build_route_source_slots_kernel(
         arg72,
-        route,
-        SCATTER_ROWS_: tl.constexpr,
-        BLOCK: tl.constexpr,
+        slot_counts,
+        slot_sources,
+        MAX_ROUTE_SOURCES_PER_ROW_: tl.constexpr,
     ):
-        pid = tl.program_id(0)
-        offsets = pid * BLOCK + tl.arange(0, BLOCK)
-        mask = offsets < SCATTER_ROWS_
-        values = tl.load(row_reduce + offsets, mask=mask, other=0.0)
-        dest = tl.load(arg72 + offsets, mask=mask, other=0).to(tl.int64)
-        tl.atomic_add(route + dest, values, sem="relaxed", mask=mask)
+        src = tl.program_id(0)
+        dest = tl.load(arg72 + src).to(tl.int64)
+        slot = tl.atomic_add(slot_counts + dest, 1, sem="relaxed")
+        tl.store(
+            slot_sources + dest * MAX_ROUTE_SOURCES_PER_ROW_ + slot,
+            src,
+            mask=slot < MAX_ROUTE_SOURCES_PER_ROW_,
+        )
 
     @triton.jit
-    def _router_scatter_softmax_backward_kernel(
-        router_grad,
+    def _sort_route_source_slots_kernel(
+        slot_sources,
+        sorted_sources,
+        SCATTER_ROWS_: tl.constexpr,
+        MAX_ROUTE_SOURCES_PER_ROW_: tl.constexpr,
+    ):
+        dest = tl.program_id(0)
+        last = tl.full((), -1, tl.int32)
+        for out_slot in tl.static_range(0, MAX_ROUTE_SOURCES_PER_ROW_):
+            best = tl.full((), SCATTER_ROWS_, tl.int32)
+            for in_slot in tl.static_range(0, MAX_ROUTE_SOURCES_PER_ROW_):
+                candidate = tl.load(
+                    slot_sources + dest * MAX_ROUTE_SOURCES_PER_ROW_ + in_slot
+                ).to(tl.int32)
+                take = (candidate >= 0) & (candidate > last) & (candidate < best)
+                best = tl.where(take, candidate, best)
+            valid = best < SCATTER_ROWS_
+            tl.store(
+                sorted_sources + dest * MAX_ROUTE_SOURCES_PER_ROW_ + out_slot,
+                tl.where(valid, best, -1),
+            )
+            last = best
+
+    @triton.jit
+    def _router_scatter_softmax_backward_from_slots_kernel(
+        row_reduce,
+        route_slot_sources,
         arg71,
         arg70,
+        full4,
         full6,
         arg69,
         arg66,
@@ -212,6 +257,7 @@ if triton is not None:
         out_base,
         EXPERTS_PER_TOKEN_: tl.constexpr,
         ROUTER_DIM_: tl.constexpr,
+        MAX_ROUTE_SOURCES_PER_ROW_: tl.constexpr,
         BLOCK_E: tl.constexpr,
     ):
         row = tl.program_id(0)
@@ -219,7 +265,19 @@ if triton is not None:
         k_offsets = tl.arange(0, EXPERTS_PER_TOKEN_)
         route_offsets = row * EXPERTS_PER_TOKEN_ + k_offsets
 
-        routed = tl.load(router_grad + route_offsets).to(tl.float32)
+        routed = tl.full((EXPERTS_PER_TOKEN_,), 0.0, tl.float32)
+        for k in tl.static_range(0, EXPERTS_PER_TOKEN_):
+            route_offset = row * EXPERTS_PER_TOKEN_ + k
+            accum = tl.load(full4 + route_offset).to(tl.float32)
+            for slot in tl.static_range(0, MAX_ROUTE_SOURCES_PER_ROW_):
+                src = tl.load(
+                    route_slot_sources + route_offset * MAX_ROUTE_SOURCES_PER_ROW_ + slot
+                ).to(tl.int32)
+                valid = src >= 0
+                value = tl.load(row_reduce + src, mask=valid, other=0.0).to(tl.float32)
+                accum = tl.where(valid, accum + value, accum)
+            routed = tl.where(k_offsets == k, accum.to(tl.bfloat16).to(tl.float32), routed)
+
         denom = tl.load(arg70 + row).to(tl.float32)
         route_weights = tl.load(arg71 + route_offsets).to(tl.float32)
         row_sum_correction = -tl.sum(routed * route_weights / denom, axis=0)
@@ -244,28 +302,32 @@ if triton is not None:
         tl.store(out_base + row * ROUTER_DIM_ + experts, out)
 
 
-def _triton_router_softmax_backward(
-    router_grad: torch.Tensor,
+def _triton_router_softmax_backward_from_slots(
+    row_reduce: torch.Tensor,
+    route_slot_sources: torch.Tensor,
     arg71_1: torch.Tensor,
     arg70_1: torch.Tensor,
+    full_4: torch.Tensor,
     full_6: torch.Tensor,
     arg69_1: torch.Tensor,
     arg66_1: torch.Tensor,
     arg67_1: torch.Tensor,
     arg68_1: torch.Tensor,
 ) -> torch.Tensor:
-    if triton is None or router_grad.device.type != "cuda":
+    if triton is None or row_reduce.device.type != "cuda":
         raise RuntimeError("Triton CUDA is required for this oracle")
 
     out_base = torch.empty(
         (TOKENS, ROUTER_DIM),
-        device=router_grad.device,
+        device=row_reduce.device,
         dtype=torch.bfloat16,
     )
-    _router_scatter_softmax_backward_kernel[(TOKENS,)](
-        router_grad,
+    _router_scatter_softmax_backward_from_slots_kernel[(TOKENS,)](
+        row_reduce,
+        route_slot_sources,
         arg71_1,
         arg70_1,
+        full_4,
         full_6,
         arg69_1,
         arg66_1,
@@ -274,6 +336,7 @@ def _triton_router_softmax_backward(
         out_base,
         EXPERTS_PER_TOKEN_=EXPERTS_PER_TOKEN,
         ROUTER_DIM_=ROUTER_DIM,
+        MAX_ROUTE_SOURCES_PER_ROW_=MAX_ROUTE_SOURCES_PER_ROW,
         BLOCK_E=ROUTER_DIM,
         num_warps=4,
     )
@@ -338,14 +401,14 @@ def _triton_rmsnorm_scatter_outputs(
     arg71_1: torch.Tensor,
     arg72_1: torch.Tensor,
     full_4: torch.Tensor,
-) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     if triton is None or mm_27.device.type != "cuda":
         raise RuntimeError("Triton CUDA is required for this oracle")
 
     weight_grad = torch.empty((HIDDEN_SIZE,), device=mm_27.device, dtype=torch.bfloat16)
     row_dot = torch.empty((TOKENS,), device=mm_27.device, dtype=torch.float32)
-    row_scatter = torch.empty(
-        (SCATTER_ROWS, HIDDEN_SIZE),
+    token_grad = torch.empty(
+        (TOKENS, HIDDEN_SIZE),
         device=mm_27.device,
         dtype=torch.bfloat16,
     )
@@ -355,7 +418,27 @@ def _triton_rmsnorm_scatter_outputs(
         dtype=torch.bfloat16,
     )
     row_reduce = torch.empty((SCATTER_ROWS,), device=mm_27.device, dtype=torch.bfloat16)
-    router_grad = torch.empty((SCATTER_ROWS,), device=mm_27.device, dtype=torch.bfloat16)
+    row_slot_counts = torch.empty(
+        (SCATTER_ROWS,),
+        device=mm_27.device,
+        dtype=torch.int32,
+    )
+    row_slot_sources = torch.empty(
+        (SCATTER_ROWS, MAX_ROW_SOURCES_PER_ROW),
+        device=mm_27.device,
+        dtype=torch.int32,
+    )
+    sorted_row_slot_sources = torch.empty_like(row_slot_sources)
+    route_slot_counts = torch.empty(
+        (SCATTER_ROWS,),
+        device=mm_27.device,
+        dtype=torch.int32,
+    )
+    route_slot_sources = torch.empty(
+        (SCATTER_ROWS, MAX_ROUTE_SOURCES_PER_ROW),
+        device=mm_27.device,
+        dtype=torch.int32,
+    )
 
     _row_dot_kernel[(TOKENS,)](
         mm_27,
@@ -380,14 +463,7 @@ def _triton_rmsnorm_scatter_outputs(
         BLOCK_C=BLOCK_OUT0_COLS,
         num_warps=8,
     )
-    _copy_kernel[(triton.cdiv(SCATTER_ROWS * HIDDEN_SIZE, BLOCK_COPY),)](
-        full_2,
-        row_scatter,
-        n_elements=SCATTER_ROWS * HIDDEN_SIZE,
-        BLOCK=BLOCK_COPY,
-        num_warps=4,
-    )
-    _scatter_token_grad_kernel[(TOKENS, triton.cdiv(HIDDEN_SIZE, BLOCK_SCATTER_COLS))](
+    _token_grad_kernel[(TOKENS, triton.cdiv(HIDDEN_SIZE, BLOCK_SCATTER_COLS))](
         mm_27,
         mm_29,
         mm_31,
@@ -396,15 +472,45 @@ def _triton_rmsnorm_scatter_outputs(
         arg82_1,
         add_40,
         row_dot,
-        arg80_1,
-        row_scatter,
+        token_grad,
         HIDDEN_=HIDDEN_SIZE,
-        EXPERTS_PER_TOKEN_=EXPERTS_PER_TOKEN,
         BLOCK_C=BLOCK_SCATTER_COLS,
         num_warps=4,
     )
-    _output1_and_row_reduce_kernel[(SCATTER_ROWS,)](
-        row_scatter,
+    _fill_i32_kernel[(triton.cdiv(SCATTER_ROWS, BLOCK_ROUTE),)](
+        row_slot_counts,
+        value=0,
+        n_elements=SCATTER_ROWS,
+        BLOCK=BLOCK_ROUTE,
+        num_warps=4,
+    )
+    _fill_i32_kernel[
+        (triton.cdiv(SCATTER_ROWS * MAX_ROW_SOURCES_PER_ROW, BLOCK_COPY),)
+    ](
+        row_slot_sources,
+        value=-1,
+        n_elements=SCATTER_ROWS * MAX_ROW_SOURCES_PER_ROW,
+        BLOCK=BLOCK_COPY,
+        num_warps=4,
+    )
+    _build_route_source_slots_kernel[(SCATTER_ROWS,)](
+        arg80_1,
+        row_slot_counts,
+        row_slot_sources,
+        MAX_ROUTE_SOURCES_PER_ROW_=MAX_ROW_SOURCES_PER_ROW,
+        num_warps=4,
+    )
+    _sort_route_source_slots_kernel[(SCATTER_ROWS,)](
+        row_slot_sources,
+        sorted_row_slot_sources,
+        SCATTER_ROWS_=SCATTER_ROWS,
+        MAX_ROUTE_SOURCES_PER_ROW_=MAX_ROW_SOURCES_PER_ROW,
+        num_warps=4,
+    )
+    _output1_and_row_reduce_from_slots_kernel[(SCATTER_ROWS,)](
+        full_2,
+        token_grad,
+        sorted_row_slot_sources,
         arg75_1,
         full_3,
         arg79_1,
@@ -413,25 +519,35 @@ def _triton_rmsnorm_scatter_outputs(
         out1_base,
         row_reduce,
         HIDDEN_=HIDDEN_SIZE,
+        EXPERTS_PER_TOKEN_=EXPERTS_PER_TOKEN,
+        MAX_ROW_SOURCES_PER_ROW_=MAX_ROW_SOURCES_PER_ROW,
         BLOCK_C=HIDDEN_SIZE,
         num_warps=8,
     )
-    _copy_kernel[(triton.cdiv(SCATTER_ROWS, BLOCK_ROUTE),)](
-        full_4,
-        router_grad,
+    _fill_i32_kernel[(triton.cdiv(SCATTER_ROWS, BLOCK_ROUTE),)](
+        route_slot_counts,
+        value=0,
         n_elements=SCATTER_ROWS,
         BLOCK=BLOCK_ROUTE,
         num_warps=4,
     )
-    _route_add_kernel[(triton.cdiv(SCATTER_ROWS, BLOCK_ROUTE),)](
-        row_reduce,
-        arg72_1,
-        router_grad,
-        SCATTER_ROWS_=SCATTER_ROWS,
-        BLOCK=BLOCK_ROUTE,
+    _fill_i32_kernel[
+        (triton.cdiv(SCATTER_ROWS * MAX_ROUTE_SOURCES_PER_ROW, BLOCK_COPY),)
+    ](
+        route_slot_sources,
+        value=-1,
+        n_elements=SCATTER_ROWS * MAX_ROUTE_SOURCES_PER_ROW,
+        BLOCK=BLOCK_COPY,
         num_warps=4,
     )
-    return weight_grad, out1_base.permute(1, 0), router_grad
+    _build_route_source_slots_kernel[(SCATTER_ROWS,)](
+        arg72_1,
+        route_slot_counts,
+        route_slot_sources,
+        MAX_ROUTE_SOURCES_PER_ROW_=MAX_ROUTE_SOURCES_PER_ROW,
+        num_warps=4,
+    )
+    return weight_grad, out1_base.permute(1, 0), row_reduce, route_slot_sources
 
 
 def oracle_qwen_row_scatter_reduce(
@@ -479,28 +595,32 @@ def oracle_qwen_row_scatter_reduce(
         _shape_param_8,
         _shape_param_9,
     )
-    weight_grad, transposed_row_grad, router_grad = _triton_rmsnorm_scatter_outputs(
-        mm_27,
-        mm_29,
-        mm_31,
-        arg13_1,
-        arg81_1,
-        arg82_1,
-        add_40,
-        full_2,
-        arg80_1,
-        arg75_1,
-        full_3,
-        arg79_1,
-        arg71_1,
-        arg72_1,
-        full_4,
+    weight_grad, transposed_row_grad, row_reduce, route_slot_sources = (
+        _triton_rmsnorm_scatter_outputs(
+            mm_27,
+            mm_29,
+            mm_31,
+            arg13_1,
+            arg81_1,
+            arg82_1,
+            add_40,
+            full_2,
+            arg80_1,
+            arg75_1,
+            full_3,
+            arg79_1,
+            arg71_1,
+            arg72_1,
+            full_4,
+        )
     )
 
-    transposed_softmax_grad = _triton_router_softmax_backward(
-        router_grad,
+    transposed_softmax_grad = _triton_router_softmax_backward_from_slots(
+        row_reduce,
+        route_slot_sources,
         arg71_1,
         arg70_1,
+        full_4,
         full_6,
         arg69_1,
         arg66_1,

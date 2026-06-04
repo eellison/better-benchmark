@@ -13,7 +13,6 @@ import triton.language as tl
 
 REPRO_ID = "sum_sum_sum_cb22a50c0d9f"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 BATCH = 128
@@ -27,8 +26,8 @@ DROPOUT_SCALE = 1.1111111111111112
 
 TILE_ROWS = 4
 TILE_CHANNELS = 1024
-FINAL_BLOCK_CHANNELS = 16
-FINAL_BLOCK_TILES = 1024
+FINAL_BLOCK_CHANNELS = 8
+FINAL_BLOCK_TILES = 4096
 
 
 
@@ -255,7 +254,7 @@ def oracle_full_prepared(
         DROPOUT_SCALE_=DROPOUT_SCALE,
         BLOCK_ROWS=TILE_ROWS,
         BLOCK_CHANNELS=TILE_CHANNELS,
-        num_warps=8,
+        num_warps=4,
     )
 
     sum_x = torch.empty((CHANNELS,), device=device, dtype=torch.float32)

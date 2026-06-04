@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the full three-output Swin relative-position-bias backward by reducing both `[512, 16, 49, 49]` sources over batch directly into duplicate `[169, 16]` relative-position buckets while emitting the dependent softmax-backward tensor as `[8192, 49, 49]`, whereas Inductor currently lowers the two `sum(dim=0) -> permute/view -> index_put(accumulate=True)` branches and the `mul/sum/neg/fma/view` branch as separate generic reduction, layout, scatter, and pointwise kernels over materialized intermediates; Inductor cannot do this today because scheduler/codegen does not recognize duplicate-index relative-position `index_put(accumulate=True)` as a structured scatter-reduce that can share the softmax-backward producer with required side-output stores; the fix is SCATTER_REDUCE: add a structured relative-position scatter-reduce lowering that fuses batch reductions with indexed accumulation and emits any full-tensor side output from the same producer."""
+"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the full three-output Swin relative-position-bias backward with one vectorized Triton producer per `(channel, row, batch tile)` that emits the `[8192, 49, 49]` softmax-backward side output and atomically accumulates both tile batch-reduction partials into duplicate `[169, 16]` relative-position buckets, whereas Inductor currently lowers the two `sum(dim=0) -> permute/view -> index_put(accumulate=True)` branches and the `mul/sum/neg/fma/view` branch as separate generic reduction, layout, scatter, and pointwise kernels over materialized intermediates; Inductor cannot do this today because scheduler/codegen does not recognize duplicate-index relative-position `index_put(accumulate=True)` as a structured scatter-reduce that can share the rowwise softmax-backward producer with required side-output stores; the fix is SCATTER_REDUCE: add a structured relative-position scatter-reduce lowering that fuses batch reductions with indexed accumulation and emits any full-tensor side output from the same producer."""
 from __future__ import annotations
 
 import argparse
@@ -21,7 +21,6 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
 
 REPRO_ID = "sum_sum_sum_3eab263249bb"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 SHAPE_LABEL = "timm_swin_base_patch4_window7_224_train_001_37c9ce01"
 
@@ -33,10 +32,25 @@ NC = N * C
 BUCKETS = 169
 BLOCK_N = 16
 BLOCK_W = 64
+N_BLOCKS = (N + BLOCK_N - 1) // BLOCK_N
+ZERO_BLOCK = 1024
 
 
 
 if triton is not None:
+
+    @triton.jit
+    def _zero_pair_kernel(
+        out0_ptr,
+        out1_ptr,
+        total: tl.constexpr,
+        BLOCK: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+        mask = offsets < total
+        zeros = tl.zeros((BLOCK,), tl.float32)
+        tl.store(out0_ptr + offsets, zeros, mask=mask)
+        tl.store(out1_ptr + offsets, zeros, mask=mask)
 
     @triton.jit
     def _relative_position_softmax_bwd_kernel(
@@ -78,56 +92,50 @@ if triton is not None:
         h = tl.program_id(1)
         n_block = tl.program_id(2)
 
-        n_base = n_block * BLOCK_N_
-        w_offsets = tl.arange(0, BLOCK_W_)
-        w_mask = w_offsets < W_
-        partial0 = tl.zeros((BLOCK_W_,), tl.float32)
-        partial1 = tl.zeros((BLOCK_W_,), tl.float32)
+        n_offsets = n_block * BLOCK_N_ + tl.arange(0, BLOCK_N_)[:, None]
+        w_vec = tl.arange(0, BLOCK_W_)
+        w_offsets = w_vec[None, :]
+        mask = (n_offsets < N_) & (w_offsets < W_)
+        m_offsets = n_offsets * C_ + c
 
-        for i in tl.static_range(0, BLOCK_N_):
-            n = n_base + i
-            n_active = n < N_
-            m = n * C_ + c
-            mask = n_active & w_mask
+        fma_2_offsets = (
+            n_offsets * fma_2_stride_n
+            + c * fma_2_stride_c
+            + h * fma_2_stride_h
+            + w_offsets * fma_2_stride_w
+        )
+        fma_2_vals = tl.load(fma_2_ptr + fma_2_offsets, mask=mask, other=0.0).to(tl.float32)
+        partial0 = tl.sum(tl.where(mask, fma_2_vals, 0.0), axis=0)
 
-            fma_2_offsets = (
-                n * fma_2_stride_n
-                + c * fma_2_stride_c
-                + h * fma_2_stride_h
-                + w_offsets * fma_2_stride_w
-            )
-            fma_2_vals = tl.load(fma_2_ptr + fma_2_offsets, mask=mask, other=0.0).to(tl.float32)
-            partial0 += fma_2_vals
+        bmm_offsets = m_offsets * bmm_stride_m + h * bmm_stride_h + w_offsets * bmm_stride_w
+        arg395_offsets = (
+            n_offsets * arg395_stride_n
+            + c * arg395_stride_c
+            + h * arg395_stride_h
+            + w_offsets * arg395_stride_w
+        )
+        bmm_vals = tl.load(bmm_ptr + bmm_offsets, mask=mask, other=0.0).to(tl.float32)
+        arg395_vals = tl.load(arg395_ptr + arg395_offsets, mask=mask, other=0.0).to(tl.float32)
+        mul_vals = bmm_vals * arg395_vals
+        row_sum = tl.sum(tl.where(mask, mul_vals, 0.0), axis=1)
+        fma_vals = mul_vals - arg395_vals * row_sum[:, None]
 
-            bmm_offsets = m * bmm_stride_m + h * bmm_stride_h + w_offsets * bmm_stride_w
-            arg395_offsets = (
-                n * arg395_stride_n
-                + c * arg395_stride_c
-                + h * arg395_stride_h
-                + w_offsets * arg395_stride_w
-            )
-            bmm_vals = tl.load(bmm_ptr + bmm_offsets, mask=mask, other=0.0).to(tl.float32)
-            arg395_vals = tl.load(arg395_ptr + arg395_offsets, mask=mask, other=0.0).to(tl.float32)
-            mul_vals = bmm_vals * arg395_vals
-            row_sum = tl.sum(tl.where(w_mask, mul_vals, 0.0), axis=0)
-            fma_vals = mul_vals - arg395_vals * row_sum
-
-            out2_offsets = m * out2_stride_m + h * out2_stride_h + w_offsets * out2_stride_w
-            tl.store(out2_ptr + out2_offsets, fma_vals, mask=mask)
-            partial1 += fma_vals
+        out2_offsets = m_offsets * out2_stride_m + h * out2_stride_h + w_offsets * out2_stride_w
+        tl.store(out2_ptr + out2_offsets, fma_vals, mask=mask)
+        partial1 = tl.sum(tl.where(mask, fma_vals, 0.0), axis=0)
 
         bucket0 = tl.load(
-            index0_ptr + h * index0_stride_h + w_offsets * index0_stride_w,
-            mask=w_mask,
+            index0_ptr + h * index0_stride_h + w_vec * index0_stride_w,
+            mask=w_vec < W_,
             other=0,
         ).to(tl.int64)
         bucket1 = tl.load(
-            index1_ptr + h * index1_stride_h + w_offsets * index1_stride_w,
-            mask=w_mask,
+            index1_ptr + h * index1_stride_h + w_vec * index1_stride_w,
+            mask=w_vec < W_,
             other=0,
         ).to(tl.int64)
-        scatter0_mask = w_mask & (bucket0 >= 0) & (bucket0 < BUCKETS_)
-        scatter1_mask = w_mask & (bucket1 >= 0) & (bucket1 < BUCKETS_)
+        scatter0_mask = (w_vec < W_) & (bucket0 >= 0) & (bucket0 < BUCKETS_)
+        scatter1_mask = (w_vec < W_) & (bucket1 >= 0) & (bucket1 < BUCKETS_)
         tl.atomic_add(out0_ptr + bucket0 * C_ + c, partial0, sem="relaxed", mask=scatter0_mask)
         tl.atomic_add(out1_ptr + bucket1 * C_ + c, partial1, sem="relaxed", mask=scatter1_mask)
 
@@ -232,10 +240,16 @@ def oracle_relative_position_scatter_reduce(
     out0 = torch.empty_strided((BUCKETS, C), (C, 1), device=fma_2.device, dtype=fma_2.dtype)
     out1 = torch.empty_strided((BUCKETS, C), (C, 1), device=fma_2.device, dtype=fma_2.dtype)
     out2 = torch.empty_strided((NC, H, W), (H * W, W, 1), device=fma_2.device, dtype=fma_2.dtype)
-    out0.zero_()
-    out1.zero_()
 
-    grid = (C, H, triton.cdiv(N, BLOCK_N))
+    _zero_pair_kernel[(triton.cdiv(BUCKETS * C, ZERO_BLOCK),)](
+        out0,
+        out1,
+        total=BUCKETS * C,
+        BLOCK=ZERO_BLOCK,
+        num_warps=4,
+    )
+
+    grid = (C, H, N_BLOCKS)
     _relative_position_softmax_bwd_kernel[grid](
         fma_2,
         arg157_1,
@@ -270,7 +284,7 @@ def oracle_relative_position_scatter_reduce(
         BUCKETS_=BUCKETS,
         BLOCK_N_=BLOCK_N,
         BLOCK_W_=BLOCK_W,
-        num_warps=2,
+        num_warps=4,
     )
     return out0, out1, out2
 
