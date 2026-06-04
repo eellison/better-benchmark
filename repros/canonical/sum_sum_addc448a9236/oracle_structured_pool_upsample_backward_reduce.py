@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import math
-import sys
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -21,7 +20,6 @@ except ImportError:  # pragma: no cover - allows py_compile without Triton.
 
 REPRO_ID = "sum_sum_addc448a9236"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 SHAPE_LABEL = "timm_tf_efficientnet_b0_train_6cf4583b"
 
@@ -34,7 +32,7 @@ N_HW = N * HW
 INV_HW = 1.0 / HW
 REDUCTION_SCALE = 1.0 / N_HW
 BLOCK_M = 128
-BLOCK_C = 16
+BLOCK_C = 32
 BLOCK_TILES = 64
 NUM_M_TILES = triton.cdiv(N_HW, BLOCK_M) if triton is not None else math.ceil(N_HW / BLOCK_M)
 
@@ -45,7 +43,6 @@ def _load_repro_module():
     if spec is None or spec.loader is None:
         raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
     module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -424,6 +421,14 @@ def run_check(device: torch.device, rtol: float, atol: float) -> bool:
 
 
 def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: int) -> float:
+    if device.type == "cuda" and triton is not None:
+        return triton.testing.do_bench(
+            fn,
+            warmup=warmup,
+            rep=rep,
+            return_mode="min",
+        ) * 1_000.0
+
     for _ in range(max(0, warmup)):
         fn()
     synchronize(device)
@@ -479,7 +484,7 @@ def main() -> None:
 
     device = torch.device(args.device)
     if args.check and not run_check(device=device, rtol=args.rtol, atol=args.atol):
-        sys.exit(1)
+        raise SystemExit(1)
     if args.bench:
         run_bench(device=device, warmup=args.warmup, rep=args.rep)
 

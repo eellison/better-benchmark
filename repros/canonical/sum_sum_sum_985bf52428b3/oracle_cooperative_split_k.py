@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete ViT patch-embed/position-add/layer-norm-backward return tuple by row-tiling the `[128, 256, 768]` producer, sharing each row's hidden-dimension reductions while accumulating the two upstream channel sums, the `[1, 256, 768]` token side sum, and the final patch-layout channel sum, whereas Inductor currently schedules the convolution reshape/permute, row reductions, dependent layer-norm-backward pointwise expression, residual add, token reduction, and sibling channel reductions as separate generic pointwise/reduction kernels over materialized intermediates; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K multi-output reduction template that combines row-local scalar reductions with multiple compatible batch/token/channel reductions and view-equivalent patch epilogues in one coordinated producer/finalizer; the fix is COOPERATIVE_SPLIT_K: teach Inductor to split compatible layer-norm-backward tails across row tiles, share row scalars, emit partial accumulators for all channel reductions, and finalize the full tuple without materializing the intermediate gradient tensor."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete ViT patch-embed/position-add/layer-norm-backward return tuple by row-tiling the `[128, 256, 768]` producer, sharing each row's hidden-dimension reductions while accumulating the two upstream channel sums, the `[1, 256, 768]` token side sum, and the view-equivalent patch-layout channel sum, whereas Inductor currently schedules the convolution reshape/permute, row reductions, dependent layer-norm-backward pointwise expression, residual add, token reduction, and sibling channel reductions as separate generic pointwise/reduction kernels over materialized intermediates; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K multi-output reduction template that combines row-local scalar reductions with multiple compatible batch/token/channel reductions and view-equivalent patch epilogues in one coordinated producer/finalizer; the fix is COOPERATIVE_SPLIT_K: teach Inductor to split compatible layer-norm-backward tails across row tiles, share row scalars, emit partial accumulators for the sibling channel reductions, and derive the patch channel sum from the token reduction without materializing the intermediate gradient tensor."""
 from __future__ import annotations
 
 import argparse
@@ -21,7 +21,6 @@ except ModuleNotFoundError:  # pragma: no cover - keeps CPU-only syntax checks u
 
 REPRO_ID = "sum_sum_sum_985bf52428b3"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 SHAPE_LABEL = "timm_vit_base_patch16_siglip_256_train_0a8651c2"
 
@@ -35,8 +34,12 @@ INV_CHANNELS = 1.0 / CHANNELS
 
 TILE_ROWS = 8
 TILE_CHANNELS = 1024
-FINAL_BLOCK_CHANNELS = 16
+FINAL_BLOCK_CHANNELS = 8
 FINAL_BLOCK_TILES = 256
+ROW_NUM_WARPS = 8
+FINAL_NUM_WARPS = 4
+CLAIMED_COMPILE_US = 157.2
+HISTORICAL_BAD_ORACLE_US = 211.7
 
 CONV_STRIDE = (CHANNELS * TOKENS, 1, PATCH_W * CHANNELS, CHANNELS)
 
@@ -127,7 +130,6 @@ if triton is not None:
         residual_ptr,
         partial_x_norm_ptr,
         partial_x_ptr,
-        partial_add_ptr,
         token_sum_ptr,
         ROWS_: tl.constexpr,
         TOKENS_: tl.constexpr,
@@ -186,21 +188,31 @@ if triton is not None:
             tl.sum(tl.where(mask, x, 0.0), axis=0),
             mask=channel_mask,
         )
-        tl.store(
-            partial_add_ptr + partial_offsets,
-            tl.sum(tl.where(mask, add_value, 0.0), axis=0),
-            mask=channel_mask,
-        )
+
+
+    @triton.jit
+    def _finalize_patch_sum_from_token_kernel(
+        token_sum_ptr,
+        out_patch_ptr,
+        TOKENS_: tl.constexpr,
+        CHANNELS_: tl.constexpr,
+        BLOCK_CHANNELS: tl.constexpr,
+    ):
+        channels = tl.program_id(0) * BLOCK_CHANNELS + tl.arange(0, BLOCK_CHANNELS)
+        tokens = tl.arange(0, TOKENS_)
+        channel_mask = channels < CHANNELS_
+        mask = (tokens[:, None] < TOKENS_) & channel_mask[None, :]
+        offsets = tokens[:, None] * CHANNELS_ + channels[None, :]
+        values = tl.load(token_sum_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        tl.store(out_patch_ptr + channels, tl.sum(values, axis=0), mask=channel_mask)
 
 
     @triton.jit
     def _finalize_channel_sums_kernel(
         partial_x_norm_ptr,
         partial_x_ptr,
-        partial_add_ptr,
         out_x_norm_ptr,
         out_x_ptr,
-        out_patch_ptr,
         NUM_ROW_TILES: tl.constexpr,
         CHANNELS_: tl.constexpr,
         BLOCK_TILES: tl.constexpr,
@@ -212,7 +224,6 @@ if triton is not None:
 
         acc_x_norm = tl.zeros((BLOCK_CHANNELS,), dtype=tl.float32)
         acc_x = tl.zeros((BLOCK_CHANNELS,), dtype=tl.float32)
-        acc_add = tl.zeros((BLOCK_CHANNELS,), dtype=tl.float32)
 
         for tile_start in range(0, NUM_ROW_TILES, BLOCK_TILES):
             tiles = tile_start + tile_offsets
@@ -228,16 +239,9 @@ if triton is not None:
                 tl.load(partial_x_ptr + offsets, mask=mask, other=0.0).to(tl.float32),
                 axis=0,
             )
-            acc_add += tl.sum(
-                tl.load(partial_add_ptr + offsets, mask=mask, other=0.0).to(
-                    tl.float32
-                ),
-                axis=0,
-            )
 
         tl.store(out_x_norm_ptr + channels, acc_x_norm, mask=channel_mask)
         tl.store(out_x_ptr + channels, acc_x, mask=channel_mask)
-        tl.store(out_patch_ptr + channels, acc_add, mask=channel_mask)
 
 
 def _cdiv(a: int, b: int) -> int:
@@ -299,7 +303,7 @@ def oracle_triton_prepared(
     device = x_md.device
     num_row_tiles = _cdiv(ROWS, TILE_ROWS)
     partials = torch.empty(
-        (3, num_row_tiles, CHANNELS),
+        (2, num_row_tiles, CHANNELS),
         device=device,
         dtype=torch.float32,
     )
@@ -320,7 +324,6 @@ def oracle_triton_prepared(
         residual_md,
         partials[0],
         partials[1],
-        partials[2],
         token_sum,
         ROWS_=ROWS,
         TOKENS_=TOKENS,
@@ -328,24 +331,31 @@ def oracle_triton_prepared(
         INV_CHANNELS_=INV_CHANNELS,
         BLOCK_ROWS=TILE_ROWS,
         BLOCK_CHANNELS=TILE_CHANNELS,
-        num_warps=8,
+        num_warps=ROW_NUM_WARPS,
     )
 
     out_x_norm = torch.empty((CHANNELS,), device=device, dtype=torch.float32)
     out_x = torch.empty((CHANNELS,), device=device, dtype=torch.float32)
-    out_patch = torch.empty((CHANNELS,), device=device, dtype=torch.float32)
     _finalize_channel_sums_kernel[(_cdiv(CHANNELS, FINAL_BLOCK_CHANNELS),)](
         partials[0],
         partials[1],
-        partials[2],
         out_x_norm,
         out_x,
-        out_patch,
         NUM_ROW_TILES=num_row_tiles,
         CHANNELS_=CHANNELS,
         BLOCK_TILES=FINAL_BLOCK_TILES,
         BLOCK_CHANNELS=FINAL_BLOCK_CHANNELS,
-        num_warps=8,
+        num_warps=FINAL_NUM_WARPS,
+    )
+
+    out_patch = torch.empty((CHANNELS,), device=device, dtype=torch.float32)
+    _finalize_patch_sum_from_token_kernel[(_cdiv(CHANNELS, FINAL_BLOCK_CHANNELS),)](
+        token_sum,
+        out_patch,
+        TOKENS_=TOKENS,
+        CHANNELS_=CHANNELS,
+        BLOCK_CHANNELS=FINAL_BLOCK_CHANNELS,
+        num_warps=FINAL_NUM_WARPS,
     )
 
     return out_x_norm, out_x, token_sum, out_patch
@@ -420,6 +430,14 @@ def run_check(device: torch.device, impl: str, rtol: float, atol: float) -> bool
 
 
 def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: int) -> float:
+    if device.type == "cuda" and triton is not None:
+        return triton.testing.do_bench(
+            fn,
+            warmup=warmup,
+            rep=rep,
+            return_mode="min",
+        ) * 1000.0
+
     for _ in range(warmup):
         fn()
     synchronize(device)
@@ -441,14 +459,25 @@ def run_bench(device: torch.device, impl: str, warmup: int, rep: int) -> None:
         actual_impl = "triton" if device.type == "cuda" and triton is not None else "torch"
 
     with torch.no_grad():
-        oracle_full(*inputs, impl=actual_impl)
-        synchronize(device)
-        oracle_us = benchmark(
-            lambda: oracle_full(*inputs, impl=actual_impl),
-            device,
-            warmup,
-            rep,
-        )
+        if actual_impl == "triton":
+            prepared = prepare_oracle_inputs(*inputs)
+            oracle_triton_prepared(*prepared)
+            synchronize(device)
+            oracle_us = benchmark(
+                lambda: oracle_triton_prepared(*prepared),
+                device,
+                warmup,
+                rep,
+            )
+        else:
+            oracle_full(*inputs, impl=actual_impl)
+            synchronize(device)
+            oracle_us = benchmark(
+                lambda: oracle_full(*inputs, impl=actual_impl),
+                device,
+                warmup,
+                rep,
+            )
 
     num_row_tiles = _cdiv(ROWS, TILE_ROWS)
     logical_read_bytes = (
@@ -459,10 +488,11 @@ def run_bench(device: torch.device, impl: str, warmup: int, rep: int) -> None:
         + ROWS * 4
         + ROWS * 4
         + ROWS * CHANNELS * 4
+        + TOKENS * CHANNELS * 4
     )
     logical_write_bytes = (
         TOKENS * CHANNELS * 4
-        + 3 * num_row_tiles * CHANNELS * 4
+        + 2 * num_row_tiles * CHANNELS * 4
         + 3 * CHANNELS * 4
     )
     print(
@@ -470,6 +500,15 @@ def run_bench(device: torch.device, impl: str, warmup: int, rep: int) -> None:
         f"impl={actual_impl} shape={SHAPE_LABEL} device={device}"
     )
     print(f"logical traffic including partials: {(logical_read_bytes + logical_write_bytes) / 1.0e6:.1f} MB")
+    beats_claimed = oracle_us < CLAIMED_COMPILE_US
+    beats_historical = oracle_us < HISTORICAL_BAD_ORACLE_US
+    print(
+        f"claimed_compile={CLAIMED_COMPILE_US:.1f} us "
+        f"historical_bad_oracle={HISTORICAL_BAD_ORACLE_US:.1f} us "
+        f"beats_claimed_compile={'yes' if beats_claimed else 'no'} "
+        f"beats_historical_bad_oracle={'yes' if beats_historical else 'no'} "
+        f"true_floor={'yes' if beats_claimed and beats_historical else 'no'}"
+    )
 
 
 def main() -> None:

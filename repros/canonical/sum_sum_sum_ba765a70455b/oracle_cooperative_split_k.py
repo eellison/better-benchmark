@@ -2,20 +2,15 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import math
-import sys
-from pathlib import Path
 
 import torch
 import triton
 import triton.language as tl
 
+import repro as repro_module
 
-REPRO_ID = "sum_sum_sum_ba765a70455b"
-REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
-REPRO_PATH = REPRO_DIR / "repro.py"
+
 SHAPE_LABEL = "timm_swin_base_patch4_window7_224_train_001_34e07cb7"
 
 BATCH = 128
@@ -30,19 +25,74 @@ KEEP_PROB = 0.9782608672976494
 
 TILE_ROWS = 8
 TILE_CHANNELS = 512
-FINAL_BLOCK_CHANNELS = 16
-FINAL_BLOCK_TILES = 256
+KERNEL_WARPS = 4
+KERNEL_STAGES = 4
 
 
+@triton.jit
+def _row_tile_store_and_atomic_reduce_kernel(
+    mm_ptr,
+    weight_ptr,
+    rhs_ptr,
+    scale_ptr,
+    residual_ptr,
+    drop_mask_ptr,
+    out_x_rhs_ptr,
+    out_x_ptr,
+    out_dropped_ptr,
+    out_transposed_ptr,
+    ROWS_: tl.constexpr,
+    CHANNELS_: tl.constexpr,
+    HW_: tl.constexpr,
+    WIDTH_: tl.constexpr,
+    WINDOW_: tl.constexpr,
+    WINDOW_BLOCKS_W_: tl.constexpr,
+    KEEP_PROB_: tl.constexpr,
+    BLOCK_ROWS: tl.constexpr,
+    BLOCK_CHANNELS: tl.constexpr,
+):
+    tile_row = tl.program_id(0)
+    rows = tile_row * BLOCK_ROWS + tl.arange(0, BLOCK_ROWS)
+    channels = tl.arange(0, BLOCK_CHANNELS)
 
-def _load_repro_module():
-    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+    spatial = rows % HW_
+    h = spatial // WIDTH_
+    w = spatial - h * WIDTH_
+    block_h = h // WINDOW_
+    inner_h = h - block_h * WINDOW_
+    block_w = w // WINDOW_
+    inner_w = w - block_w * WINDOW_
+    source_rows = (
+        (rows // HW_) * HW_
+        + block_h * (WINDOW_BLOCKS_W_ * WINDOW_ * WINDOW_)
+        + block_w * (WINDOW_ * WINDOW_)
+        + inner_h * WINDOW_
+        + inner_w
+    )
+
+    source_offsets = source_rows[:, None] * CHANNELS_ + channels[None, :]
+    image_offsets = rows[:, None] * CHANNELS_ + channels[None, :]
+
+    x = tl.load(mm_ptr + source_offsets).to(tl.float32)
+    rhs = tl.load(rhs_ptr + image_offsets).to(tl.float32)
+    residual = tl.load(residual_ptr + image_offsets).to(tl.float32)
+    weight = tl.load(weight_ptr + channels).to(tl.float32)
+    scale = tl.load(scale_ptr + rows).to(tl.float32)
+    keep_scale = tl.load(drop_mask_ptr + rows // HW_).to(tl.float32) / KEEP_PROB_
+
+    weighted = x * weight[None, :]
+    row_sum = tl.sum(weighted, axis=1)
+    row_dot = tl.sum(weighted * rhs, axis=1)
+    grad = scale[:, None] * (
+        weighted * CHANNELS_ - row_sum[:, None] - rhs * row_dot[:, None]
+    )
+    dropped = (residual + grad) * keep_scale[:, None]
+
+    tl.store(out_transposed_ptr + image_offsets, dropped)
+
+    tl.atomic_add(out_x_rhs_ptr + channels, tl.sum(x * rhs, axis=0), sem="relaxed")
+    tl.atomic_add(out_x_ptr + channels, tl.sum(x, axis=0), sem="relaxed")
+    tl.atomic_add(out_dropped_ptr + channels, tl.sum(dropped, axis=0), sem="relaxed")
 
 
 def _as_tuple(out: object) -> tuple[torch.Tensor, ...]:
@@ -52,16 +102,14 @@ def _as_tuple(out: object) -> tuple[torch.Tensor, ...]:
 
 
 def make_inputs() -> tuple[object, ...]:
-    module = _load_repro_module()
     return tuple(
         value.cuda() if isinstance(value, torch.Tensor) else value
-        for value in module.make_inputs()
+        for value in repro_module.make_inputs()
     )
 
 
 def reference_outputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
-    module = _load_repro_module()
-    model = module.Repro().cuda()
+    model = repro_module.Repro().cuda()
     with torch.no_grad():
         return _as_tuple(model(*inputs))
 
@@ -87,128 +135,6 @@ def prepare_oracle_inputs(*inputs: object) -> tuple[torch.Tensor, ...]:
     )
 
 
-@triton.jit
-def _row_tile_store_and_reduce_kernel(
-    mm_ptr,
-    weight_ptr,
-    rhs_ptr,
-    scale_ptr,
-    residual_ptr,
-    drop_mask_ptr,
-    partial_x_rhs_ptr,
-    partial_x_ptr,
-    partial_dropped_ptr,
-    out_transposed_ptr,
-    ROWS_: tl.constexpr,
-    CHANNELS_: tl.constexpr,
-    HW_: tl.constexpr,
-    WIDTH_: tl.constexpr,
-    WINDOW_: tl.constexpr,
-    WINDOW_BLOCKS_W_: tl.constexpr,
-    KEEP_PROB_: tl.constexpr,
-    BLOCK_ROWS: tl.constexpr,
-    BLOCK_CHANNELS: tl.constexpr,
-):
-    tile_row = tl.program_id(0)
-    rows = tile_row * BLOCK_ROWS + tl.arange(0, BLOCK_ROWS)
-    channels = tl.arange(0, BLOCK_CHANNELS)
-    row_mask = rows < ROWS_
-    channel_mask = channels < CHANNELS_
-    mask = row_mask[:, None] & channel_mask[None, :]
-
-    spatial = rows % HW_
-    h = spatial // WIDTH_
-    w = spatial - h * WIDTH_
-    block_h = h // WINDOW_
-    inner_h = h - block_h * WINDOW_
-    block_w = w // WINDOW_
-    inner_w = w - block_w * WINDOW_
-    source_rows = (
-        (rows // HW_) * HW_
-        + block_h * (WINDOW_BLOCKS_W_ * WINDOW_ * WINDOW_)
-        + block_w * (WINDOW_ * WINDOW_)
-        + inner_h * WINDOW_
-        + inner_w
-    )
-
-    source_offsets = source_rows[:, None] * CHANNELS_ + channels[None, :]
-    image_offsets = rows[:, None] * CHANNELS_ + channels[None, :]
-
-    x = tl.load(mm_ptr + source_offsets, mask=mask, other=0.0).to(tl.float32)
-    rhs = tl.load(rhs_ptr + image_offsets, mask=mask, other=0.0).to(tl.float32)
-    residual = tl.load(residual_ptr + image_offsets, mask=mask, other=0.0).to(
-        tl.float32
-    )
-    weight = tl.load(weight_ptr + channels, mask=channel_mask, other=0.0).to(
-        tl.float32
-    )
-    scale = tl.load(scale_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
-    keep = tl.load(drop_mask_ptr + rows // HW_, mask=row_mask, other=0).to(tl.float32)
-    keep_scale = keep / KEEP_PROB_
-
-    weighted = x * weight[None, :]
-    row_sum = tl.sum(tl.where(mask, weighted, 0.0), axis=1)
-    row_dot = tl.sum(tl.where(mask, weighted * rhs, 0.0), axis=1)
-    grad = scale[:, None] * (
-        weighted * CHANNELS_ - row_sum[:, None] - rhs * row_dot[:, None]
-    )
-    dropped = (residual + grad) * keep_scale[:, None]
-
-    tl.store(out_transposed_ptr + image_offsets, dropped, mask=mask)
-
-    partial_offsets = tile_row * CHANNELS_ + channels
-    sum_x_rhs = tl.sum(tl.where(mask, x * rhs, 0.0), axis=0)
-    sum_x = tl.sum(tl.where(mask, x, 0.0), axis=0)
-    sum_dropped = tl.sum(tl.where(mask, dropped, 0.0), axis=0)
-    tl.store(partial_x_rhs_ptr + partial_offsets, sum_x_rhs, mask=channel_mask)
-    tl.store(partial_x_ptr + partial_offsets, sum_x, mask=channel_mask)
-    tl.store(partial_dropped_ptr + partial_offsets, sum_dropped, mask=channel_mask)
-
-
-@triton.jit
-def _finalize_column_sums_kernel(
-    partial_x_rhs_ptr,
-    partial_x_ptr,
-    partial_dropped_ptr,
-    out_x_rhs_ptr,
-    out_x_ptr,
-    out_dropped_ptr,
-    NUM_ROW_TILES: tl.constexpr,
-    CHANNELS_: tl.constexpr,
-    BLOCK_TILES: tl.constexpr,
-    BLOCK_CHANNELS: tl.constexpr,
-):
-    channels = tl.program_id(0) * BLOCK_CHANNELS + tl.arange(0, BLOCK_CHANNELS)
-    channel_mask = channels < CHANNELS_
-    tile_offsets = tl.arange(0, BLOCK_TILES)
-
-    acc_x_rhs = tl.zeros((BLOCK_CHANNELS,), dtype=tl.float32)
-    acc_x = tl.zeros((BLOCK_CHANNELS,), dtype=tl.float32)
-    acc_dropped = tl.zeros((BLOCK_CHANNELS,), dtype=tl.float32)
-    for tile_start in range(0, NUM_ROW_TILES, BLOCK_TILES):
-        tiles = tile_start + tile_offsets
-        mask = (tiles[:, None] < NUM_ROW_TILES) & channel_mask[None, :]
-        offsets = tiles[:, None] * CHANNELS_ + channels[None, :]
-        acc_x_rhs += tl.sum(
-            tl.load(partial_x_rhs_ptr + offsets, mask=mask, other=0.0).to(tl.float32),
-            axis=0,
-        )
-        acc_x += tl.sum(
-            tl.load(partial_x_ptr + offsets, mask=mask, other=0.0).to(tl.float32),
-            axis=0,
-        )
-        acc_dropped += tl.sum(
-            tl.load(partial_dropped_ptr + offsets, mask=mask, other=0.0).to(
-                tl.float32
-            ),
-            axis=0,
-        )
-
-    tl.store(out_x_rhs_ptr + channels, acc_x_rhs, mask=channel_mask)
-    tl.store(out_x_ptr + channels, acc_x, mask=channel_mask)
-    tl.store(out_dropped_ptr + channels, acc_dropped, mask=channel_mask)
-
-
 def oracle_triton_prepared(
     mm_mc: torch.Tensor,
     weight_c: torch.Tensor,
@@ -220,6 +146,8 @@ def oracle_triton_prepared(
     if mm_mc.device.type != "cuda":
         raise RuntimeError("triton oracle requires CUDA inputs")
 
+    assert ROWS % TILE_ROWS == 0
+    assert CHANNELS == TILE_CHANNELS
     assert mm_mc.shape == (ROWS, CHANNELS)
     assert weight_c.shape == (CHANNELS,)
     assert rhs_mc.shape == (ROWS, CHANNELS)
@@ -234,35 +162,27 @@ def oracle_triton_prepared(
     assert drop_mask_b.is_contiguous()
 
     device = mm_mc.device
-    num_row_tiles = triton.cdiv(ROWS, TILE_ROWS)
-    partial_x_rhs = torch.empty(
-        (num_row_tiles, CHANNELS),
-        device=device,
-        dtype=torch.float32,
-    )
-    partial_x = torch.empty((num_row_tiles, CHANNELS), device=device, dtype=torch.float32)
-    partial_dropped = torch.empty(
-        (num_row_tiles, CHANNELS),
-        device=device,
-        dtype=torch.float32,
-    )
     out_transposed = torch.empty_strided(
         (CHANNELS, ROWS),
         (1, CHANNELS),
         device=device,
         dtype=torch.float32,
     )
+    out_sums = torch.zeros((3, CHANNELS), device=device, dtype=torch.float32)
+    out_x_rhs = out_sums[0]
+    out_x = out_sums[1]
+    out_dropped = out_sums[2]
 
-    _row_tile_store_and_reduce_kernel[(num_row_tiles,)](
+    _row_tile_store_and_atomic_reduce_kernel[(ROWS // TILE_ROWS,)](
         mm_mc,
         weight_c,
         rhs_mc,
         scale_m,
         residual_mc,
         drop_mask_b,
-        partial_x_rhs,
-        partial_x,
-        partial_dropped,
+        out_x_rhs,
+        out_x,
+        out_dropped,
         out_transposed,
         ROWS_=ROWS,
         CHANNELS_=CHANNELS,
@@ -273,24 +193,8 @@ def oracle_triton_prepared(
         KEEP_PROB_=KEEP_PROB,
         BLOCK_ROWS=TILE_ROWS,
         BLOCK_CHANNELS=TILE_CHANNELS,
-        num_warps=8,
-    )
-
-    out_x_rhs = torch.empty((CHANNELS,), device=device, dtype=torch.float32)
-    out_x = torch.empty((CHANNELS,), device=device, dtype=torch.float32)
-    out_dropped = torch.empty((CHANNELS,), device=device, dtype=torch.float32)
-    _finalize_column_sums_kernel[(triton.cdiv(CHANNELS, FINAL_BLOCK_CHANNELS),)](
-        partial_x_rhs,
-        partial_x,
-        partial_dropped,
-        out_x_rhs,
-        out_x,
-        out_dropped,
-        NUM_ROW_TILES=num_row_tiles,
-        CHANNELS_=CHANNELS,
-        BLOCK_TILES=FINAL_BLOCK_TILES,
-        BLOCK_CHANNELS=FINAL_BLOCK_CHANNELS,
-        num_warps=8,
+        num_warps=KERNEL_WARPS,
+        num_stages=KERNEL_STAGES,
     )
 
     return out_x_rhs, out_x, out_transposed, out_dropped
@@ -374,14 +278,14 @@ def run_bench(warmup: int, rep: int) -> None:
         + BATCH
     )
     logical_write_bytes = ROWS * CHANNELS * 4 + 3 * CHANNELS * 4
-    partial_bytes = triton.cdiv(ROWS, TILE_ROWS) * CHANNELS * 4 * 3
+    atomic_updates = (ROWS // TILE_ROWS) * CHANNELS * 3
     print(
         f"oracle_full cooperative split-k Swin window LN/drop-path tuple: "
         f"{oracle_ms * 1000.0:.3f} us shape={SHAPE_LABEL}"
     )
     print(
         f"logical traffic: {(logical_read_bytes + logical_write_bytes) / 1e6:.1f} MB "
-        f"partial traffic: {partial_bytes / 1e6:.1f} MB"
+        f"atomic_updates: {atomic_updates}"
     )
 
 
@@ -389,8 +293,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="run correctness check")
     parser.add_argument("--bench", action="store_true", help="run timing benchmark")
-    parser.add_argument("--rtol", type=float, default=3e-3)
-    parser.add_argument("--atol", type=float, default=5e-2)
+    parser.add_argument("--rtol", type=float, default=3.0e-3)
+    parser.add_argument("--atol", type=float, default=5.0e-2)
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--rep", type=int, default=50)
     args = parser.parse_args()
@@ -399,7 +303,7 @@ def main() -> None:
         parser.error("select at least one mode: --check and/or --bench")
 
     if args.check and not run_check(rtol=args.rtol, atol=args.atol):
-        sys.exit(1)
+        raise SystemExit(1)
     if args.bench:
         run_bench(warmup=args.warmup, rep=args.rep)
 

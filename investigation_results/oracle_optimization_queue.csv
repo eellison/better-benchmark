@@ -184,7 +184,7 @@ sum_sum_sum_2005ccbce613,AT_FLOOR,closed,compile=68.4us vs oracle=66.4us; 1.03x 
 sum_sum_sum_443ecc71f23f,SCATTER_REDUCE,needs_work,compile=77.6us vs oracle=62.4us; 1.24x gap; Swin dual relative-position softmax-backward scatter-reduce with dual index_put(accumulate) into [2401x32] tables
 sum_sum_sum_6606e7ed59de,AT_FLOOR,closed,compile=56.2us vs oracle=30.5us; 1.84x gap; Swin LN-backward/drop-path cooperative split-K with broadcasted avgpool and transposed masked side output
 sum_sum_sum_9814418db3a9,COOPERATIVE_SPLIT_K,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle=297.696us; reported_compile=83.8us; best_compile=92.160us; not a floor
-sum_sum_sum_ba765a70455b,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=76.6us vs oracle=111.4us (1.5x slower); Swin window LN-backward/drop-path cooperative split-K; oracle sub-optimal tiling over window remap
+sum_sum_sum_ba765a70455b,COOPERATIVE_SPLIT_K,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle=101.440us; reported_compile=76.6us; best_compile=90.176us; not a floor
 sum_sum_sum_bfac9a5afa42,AT_FLOOR,closed,compile=36.5us vs oracle=35.7us; 1.02x gap; Swin avgpool/LN-backward/drop-path cooperative split-K; Inductor already near-optimal
 amax_sum_amax_9faf4a02126a,AT_FLOOR,closed,compile=48.0us(cd) vs oracle=47.2us; 1.02x gap; MT5 dual attention softmax+dropout+relative-position bias; Inductor already near-optimal
 amax_sum_any_d4c975ea57c8,AT_FLOOR,implemented,REMEASURED 2026-06-04 B200: compile=75.2us beats oracle=101.3us (0.74x); oracle not tuned for B200; gap closed
@@ -221,13 +221,13 @@ sum_sum_384d663c041d,AT_FLOOR,closed,compile=137.1us(cd) vs oracle=126.7us; 1.08
 sum_sum_4af669d6f405,COOPERATIVE_SPLIT_K,needs_work,compile=143.4us(cd) vs oracle=120.5us; 1.19x gap; ShuffleNet channel-shuffle BN-backward cooperative split-K
 sum_sum_4bd81dea302d,SCATTER_REDUCE,needs_work,compile=85.8us(cd) vs oracle=64.2us; 1.34x gap; Longformer overlapping-window scatter-reduce with dual output
 sum_sum_505c30a7fb41,COOPERATIVE_SPLIT_K,needs_work,compile=186.6us(cd) vs oracle=109.5us; 1.70x gap; DenseNet121 BN-backward cooperative split-K with full-tensor epilogue
-sum_sum_5fb479045844,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=231.6us(cd) vs oracle=219.1us but compile is 39% faster than oracle with fresh measurement; oracle needs rewrite
+sum_sum_5fb479045844,SCATTER_REDUCE,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle=244.161us; reported_compile=231.6us; best_compile=135.232us; not a floor
 sum_sum_62f7c19427cb,COOPERATIVE_SPLIT_K,needs_work,compile=165.2us(cd) vs oracle=102.3us; 1.62x gap; DenseNet121 BN-backward cooperative split-K with residual slice-adds
-sum_sum_ad05fd3c31c6,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=102.9us(cd) vs oracle=169.8us (1.65x slower); GhostNet avgpool-backward scatter-reduce; oracle sub-optimal tiling
-sum_sum_addc448a9236,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=62.1us(cd) vs oracle=90.3us (1.45x slower); EfficientNet avgpool-backward SiLU/BN scatter-reduce; oracle sub-optimal
+sum_sum_ad05fd3c31c6,SCATTER_REDUCE,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle=201.156us; reported_compile=102.9us; best_compile=112.416us; not a floor
+sum_sum_addc448a9236,SCATTER_REDUCE,implemented,REWRITTEN full-scope Triton oracle; oracle=57.312us; reported_compile=62.1us; best_compile=68.736us; true floor
 sum_sum_c50720f2fd4d,AT_FLOOR,closed,compile=105.7us(cd) beats oracle=119.7us; ShuffleNet ReLU BN-backward cooperative split-K; Inductor already optimal
 sum_sum_sum_1482b693d4f2,AT_FLOOR,closed,compile=179.2us vs oracle=128.0us; 1.40x gap; Swin MLP LN-backward/drop-path/window-reverse cooperative split-K
-sum_sum_sum_985bf52428b3,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=157.2us(cd) vs oracle=211.7us (1.3x slower); ViT SigLIP LN-backward/patch-embed cooperative split-K; oracle suboptimal tiling
+sum_sum_sum_985bf52428b3,COOPERATIVE_SPLIT_K,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle=203.328us; reported_compile=157.2us; best_compile=132.992us; not a floor
 sum_sum_sum_9c4d4a65cd7b,AT_FLOOR,closed,compile=108.2us(cd) vs oracle=115.6us; 0.94x; DeiT LN-backward/pos-embed cooperative split-K; Inductor already optimal
 sum_sum_sum_b3091402bb28,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=143.2us vs oracle=191.2us (1.3x slower); BERT embedding scatter-reduce; oracle slower than compile
 sum_sum_sum_b8d91626261d,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=117.6us(cd) vs oracle=137.0us (1.2x slower); MT5 attention scatter-reduce; oracle slower than compile

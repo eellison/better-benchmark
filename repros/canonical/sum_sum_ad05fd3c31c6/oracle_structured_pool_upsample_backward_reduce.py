@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the complete GhostNet adaptive-average-pool backward, ReLU-gated batch-norm-backward return tuple directly from the original `[512, 960]` pooled gradient and `[512, 960, 7, 7]` activation, emitting both the full input-gradient tensor and gamma-gradient vector without materializing the zero-fill `as_strided_scatter -> as_strided -> expand -> div` pool-gradient tensor, whereas Inductor currently lowers that structured scatter/expand producer, ReLU mask, sibling channel reductions, and dependent full BN-backward epilogue as separate generic kernels over materialized intermediates; Inductor cannot do this today because scheduler/codegen does not model zero-fill view/as_strided scatter followed by broadcasted average-pool backward as a structured scatter-reduce producer that can feed both channel reductions and a required full side-output store; the fix is SCATTER_REDUCE: add a structured average-pool-backward scatter-reduce lowering that maps each pooled-gradient source directly into the ReLU-gated BN reduction template and emits the dependent full output tensor from the same fused schedule."""
+"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle revalidates the complete GhostNet adaptive-average-pool backward, ReLU-gated batch-norm-backward return tuple from the original `[512, 960]` pooled gradient and `[512, 960, 7, 7]` activation, emitting both the full input-gradient tensor and gamma-gradient vector without materializing the zero-fill `as_strided_scatter -> as_strided -> expand -> div` pool-gradient tensor; the measured hand oracle does not beat the historical compiled result because the required full side-output store plus channel reductions force either a strided per-channel fused schedule or a materialized generic producer, and Inductor already generates a competitive fused reduction/materialization schedule for this exact shape; the fix is SCATTER_REDUCE: only a structured average-pool-backward scatter-reduce lowering that maps each pooled-gradient source directly into the ReLU-gated BN reduction template while emitting the dependent full output tensor from the same schedule would establish a true lower floor."""
 from __future__ import annotations
 
 import argparse
@@ -21,7 +21,6 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
 
 REPRO_ID = "sum_sum_ad05fd3c31c6"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 SHAPE_LABEL = "timm_ghostnet_100_train_001_3f38dae0"
 
@@ -33,10 +32,7 @@ HW = H * W
 N_HW = N * HW
 INV_HW = 1.0 / HW
 REDUCTION_SCALE = 1.0 / N_HW
-BLOCK_M = 512
-BLOCK_C = 16
-NUM_M_TILES = math.ceil(N_HW / BLOCK_M)
-BLOCK_TILES = 64
+FULL_BLOCK_SIZE = 32768
 
 
 
@@ -165,7 +161,7 @@ def oracle_torch(
 if triton is not None:
 
     @triton.jit
-    def _partial_relu_bn_sums_kernel(
+    def _onepass_relu_bn_channel_kernel(
         getitem_ptr,
         x_ptr,
         mean_ptr,
@@ -173,176 +169,64 @@ if triton is not None:
         weight_ptr,
         bias_ptr,
         full_ptr,
-        partial0_ptr,
-        partial1_ptr,
-        getitem_stride_n: tl.constexpr,
-        getitem_stride_c: tl.constexpr,
-        x_stride_n: tl.constexpr,
-        x_stride_c: tl.constexpr,
-        x_stride_h: tl.constexpr,
-        x_stride_w: tl.constexpr,
-        mean_stride_c: tl.constexpr,
-        invstd_stride_c: tl.constexpr,
-        weight_stride_c: tl.constexpr,
-        bias_stride_c: tl.constexpr,
-        C_: tl.constexpr,
-        W_: tl.constexpr,
-        HW_: tl.constexpr,
-        N_HW_: tl.constexpr,
-        INV_HW_: tl.constexpr,
-        BLOCK_M_: tl.constexpr,
-        BLOCK_C_: tl.constexpr,
-    ):
-        pid_c = tl.program_id(0)
-        pid_m = tl.program_id(1)
-        m_offsets = pid_m * BLOCK_M_ + tl.arange(0, BLOCK_M_)
-        c_offsets = pid_c * BLOCK_C_ + tl.arange(0, BLOCK_C_)
-        active = (m_offsets[:, None] < N_HW_) & (c_offsets[None, :] < C_)
-
-        n_idx = m_offsets // HW_
-        spatial = m_offsets - n_idx * HW_
-        h_idx = spatial // W_
-        w_idx = spatial - h_idx * W_
-
-        getitem_offsets = n_idx[:, None] * getitem_stride_n + c_offsets[None, :] * getitem_stride_c
-        x_offsets = (
-            n_idx[:, None] * x_stride_n
-            + c_offsets[None, :] * x_stride_c
-            + h_idx[:, None] * x_stride_h
-            + w_idx[:, None] * x_stride_w
-        )
-
-        mean = tl.load(mean_ptr + c_offsets * mean_stride_c, mask=c_offsets < C_, other=0.0).to(tl.float32)
-        invstd = tl.load(invstd_ptr + c_offsets * invstd_stride_c, mask=c_offsets < C_, other=0.0).to(tl.float32)
-        weight = tl.load(weight_ptr + c_offsets * weight_stride_c, mask=c_offsets < C_, other=0.0).to(tl.float32)
-        bias = tl.load(bias_ptr + c_offsets * bias_stride_c, mask=c_offsets < C_, other=0.0).to(tl.float32)
-        full_value = tl.load(full_ptr).to(tl.float32)
-
-        x = tl.load(x_ptr + x_offsets, mask=active, other=0.0).to(tl.float32)
-        pool = tl.load(getitem_ptr + getitem_offsets, mask=active, other=0.0).to(tl.float32) * INV_HW_
-        centered = x - mean[None, :]
-        affine = centered * invstd[None, :] * weight[None, :] + bias[None, :]
-        gate = ((affine > 0.0) | (affine != affine)) & active
-        grad = tl.where(gate, pool, full_value)
-        grad = tl.where(active, grad, 0.0)
-        centered = tl.where(active, centered, 0.0)
-
-        partial_offsets = pid_m * C_ + c_offsets
-        partial_mask = c_offsets < C_
-        tl.store(partial0_ptr + partial_offsets, tl.sum(grad, axis=0), mask=partial_mask)
-        tl.store(partial1_ptr + partial_offsets, tl.sum(grad * centered, axis=0), mask=partial_mask)
-
-    @triton.jit
-    def _finalize_relu_bn_sums_kernel(
-        partial0_ptr,
-        partial1_ptr,
-        invstd_ptr,
-        sum0_ptr,
-        sum1_ptr,
-        out1_ptr,
-        invstd_stride_c: tl.constexpr,
-        C_: tl.constexpr,
-        NUM_M_TILES_: tl.constexpr,
-        BLOCK_C_: tl.constexpr,
-        BLOCK_TILES_: tl.constexpr,
-    ):
-        pid_c = tl.program_id(0)
-        c_offsets = pid_c * BLOCK_C_ + tl.arange(0, BLOCK_C_)
-        tile_offsets = tl.arange(0, BLOCK_TILES_)
-        active = (tile_offsets[:, None] < NUM_M_TILES_) & (c_offsets[None, :] < C_)
-        partial_offsets = tile_offsets[:, None] * C_ + c_offsets[None, :]
-
-        sum0_vals = tl.load(partial0_ptr + partial_offsets, mask=active, other=0.0).to(tl.float32)
-        sum1_vals = tl.load(partial1_ptr + partial_offsets, mask=active, other=0.0).to(tl.float32)
-        sum0 = tl.sum(sum0_vals, axis=0)
-        sum1 = tl.sum(sum1_vals, axis=0)
-        invstd = tl.load(invstd_ptr + c_offsets * invstd_stride_c, mask=c_offsets < C_, other=0.0).to(tl.float32)
-        mask = c_offsets < C_
-
-        tl.store(sum0_ptr + c_offsets, sum0, mask=mask)
-        tl.store(sum1_ptr + c_offsets, sum1, mask=mask)
-        tl.store(out1_ptr + c_offsets, sum1 * invstd, mask=mask)
-
-    @triton.jit
-    def _relu_bn_output_kernel(
-        getitem_ptr,
-        x_ptr,
-        mean_ptr,
-        invstd_ptr,
-        weight_ptr,
-        bias_ptr,
-        full_ptr,
-        sum0_ptr,
-        sum1_ptr,
         out0_ptr,
+        out1_ptr,
         getitem_stride_n: tl.constexpr,
         getitem_stride_c: tl.constexpr,
         x_stride_n: tl.constexpr,
         x_stride_c: tl.constexpr,
-        x_stride_h: tl.constexpr,
-        x_stride_w: tl.constexpr,
         mean_stride_c: tl.constexpr,
         invstd_stride_c: tl.constexpr,
         weight_stride_c: tl.constexpr,
         bias_stride_c: tl.constexpr,
         out_stride_n: tl.constexpr,
         out_stride_c: tl.constexpr,
-        out_stride_h: tl.constexpr,
-        out_stride_w: tl.constexpr,
-        C_: tl.constexpr,
-        W_: tl.constexpr,
         HW_: tl.constexpr,
         N_HW_: tl.constexpr,
         INV_HW_: tl.constexpr,
         REDUCTION_SCALE_: tl.constexpr,
-        BLOCK_M_: tl.constexpr,
-        BLOCK_C_: tl.constexpr,
+        BLOCK_SIZE_: tl.constexpr,
     ):
-        pid_c = tl.program_id(0)
-        pid_m = tl.program_id(1)
-        m_offsets = pid_m * BLOCK_M_ + tl.arange(0, BLOCK_M_)
-        c_offsets = pid_c * BLOCK_C_ + tl.arange(0, BLOCK_C_)
-        active = (m_offsets[:, None] < N_HW_) & (c_offsets[None, :] < C_)
+        channel = tl.program_id(0)
+        offsets = tl.arange(0, BLOCK_SIZE_)
+        active = offsets < N_HW_
+        n_idx = offsets // HW_
+        spatial = offsets - n_idx * HW_
 
-        n_idx = m_offsets // HW_
-        spatial = m_offsets - n_idx * HW_
-        h_idx = spatial // W_
-        w_idx = spatial - h_idx * W_
-
-        getitem_offsets = n_idx[:, None] * getitem_stride_n + c_offsets[None, :] * getitem_stride_c
+        getitem_offsets = n_idx * getitem_stride_n + channel * getitem_stride_c
         x_offsets = (
-            n_idx[:, None] * x_stride_n
-            + c_offsets[None, :] * x_stride_c
-            + h_idx[:, None] * x_stride_h
-            + w_idx[:, None] * x_stride_w
+            n_idx * x_stride_n
+            + channel * x_stride_c
+            + spatial
         )
         out_offsets = (
-            n_idx[:, None] * out_stride_n
-            + c_offsets[None, :] * out_stride_c
-            + h_idx[:, None] * out_stride_h
-            + w_idx[:, None] * out_stride_w
+            n_idx * out_stride_n
+            + channel * out_stride_c
+            + spatial
         )
 
-        mean = tl.load(mean_ptr + c_offsets * mean_stride_c, mask=c_offsets < C_, other=0.0).to(tl.float32)
-        invstd = tl.load(invstd_ptr + c_offsets * invstd_stride_c, mask=c_offsets < C_, other=0.0).to(tl.float32)
-        weight = tl.load(weight_ptr + c_offsets * weight_stride_c, mask=c_offsets < C_, other=0.0).to(tl.float32)
-        bias = tl.load(bias_ptr + c_offsets * bias_stride_c, mask=c_offsets < C_, other=0.0).to(tl.float32)
+        mean = tl.load(mean_ptr + channel * mean_stride_c).to(tl.float32)
+        invstd = tl.load(invstd_ptr + channel * invstd_stride_c).to(tl.float32)
+        weight = tl.load(weight_ptr + channel * weight_stride_c).to(tl.float32)
+        bias = tl.load(bias_ptr + channel * bias_stride_c).to(tl.float32)
         full_value = tl.load(full_ptr).to(tl.float32)
-        sum0 = tl.load(sum0_ptr + c_offsets, mask=c_offsets < C_, other=0.0).to(tl.float32)
-        sum1 = tl.load(sum1_ptr + c_offsets, mask=c_offsets < C_, other=0.0).to(tl.float32)
 
         x = tl.load(x_ptr + x_offsets, mask=active, other=0.0).to(tl.float32)
         pool = tl.load(getitem_ptr + getitem_offsets, mask=active, other=0.0).to(tl.float32) * INV_HW_
-        centered = x - mean[None, :]
-        affine = centered * invstd[None, :] * weight[None, :] + bias[None, :]
+        centered = x - mean
+        affine = centered * invstd * weight + bias
         gate = ((affine > 0.0) | (affine != affine)) & active
         grad = tl.where(gate, pool, full_value)
+        grad = tl.where(active, grad, 0.0)
 
+        sum0 = tl.sum(grad, axis=0)
+        sum1 = tl.sum(grad * tl.where(active, centered, 0.0), axis=0)
         mean_term = sum0 * REDUCTION_SCALE_
         var_term = sum1 * REDUCTION_SCALE_ * invstd * invstd
-        input_scale = invstd * weight
-        out = (grad - centered * var_term[None, :] - mean_term[None, :]) * input_scale[None, :]
+        out = (grad - centered * var_term - mean_term) * invstd * weight
+
         tl.store(out0_ptr + out_offsets, out, mask=active)
+        tl.store(out1_ptr + channel, sum1 * invstd)
 
 
 def oracle_triton(
@@ -369,13 +253,8 @@ def oracle_triton(
         dtype=arg472_1.dtype,
     )
     out1 = torch.empty((C,), device=arg472_1.device, dtype=torch.float32)
-    partial0 = torch.empty((NUM_M_TILES, C), device=arg472_1.device, dtype=torch.float32)
-    partial1 = torch.empty_like(partial0)
-    sum0 = torch.empty((C,), device=arg472_1.device, dtype=torch.float32)
-    sum1 = torch.empty_like(sum0)
 
-    grid = (triton.cdiv(C, BLOCK_C), NUM_M_TILES)
-    _partial_relu_bn_sums_kernel[grid](
+    _onepass_relu_bn_channel_kernel[(C,)](
         getitem,
         arg472_1,
         arg473_1,
@@ -383,75 +262,25 @@ def oracle_triton(
         arg192_1,
         arg193_1,
         full,
-        partial0,
-        partial1,
-        getitem_stride_n=getitem.stride(0),
-        getitem_stride_c=getitem.stride(1),
-        x_stride_n=arg472_1.stride(0),
-        x_stride_c=arg472_1.stride(1),
-        x_stride_h=arg472_1.stride(2),
-        x_stride_w=arg472_1.stride(3),
-        mean_stride_c=arg473_1.stride(1),
-        invstd_stride_c=arg474_1.stride(1),
-        weight_stride_c=arg192_1.stride(0),
-        bias_stride_c=arg193_1.stride(0),
-        C_=C,
-        W_=W,
-        HW_=HW,
-        N_HW_=N_HW,
-        INV_HW_=INV_HW,
-        BLOCK_M_=BLOCK_M,
-        BLOCK_C_=BLOCK_C,
-        num_warps=8,
-    )
-    _finalize_relu_bn_sums_kernel[(triton.cdiv(C, BLOCK_C),)](
-        partial0,
-        partial1,
-        arg474_1,
-        sum0,
-        sum1,
-        out1,
-        invstd_stride_c=arg474_1.stride(1),
-        C_=C,
-        NUM_M_TILES_=NUM_M_TILES,
-        BLOCK_C_=BLOCK_C,
-        BLOCK_TILES_=BLOCK_TILES,
-        num_warps=4,
-    )
-    _relu_bn_output_kernel[grid](
-        getitem,
-        arg472_1,
-        arg473_1,
-        arg474_1,
-        arg192_1,
-        arg193_1,
-        full,
-        sum0,
-        sum1,
         out0,
+        out1,
         getitem_stride_n=getitem.stride(0),
         getitem_stride_c=getitem.stride(1),
         x_stride_n=arg472_1.stride(0),
         x_stride_c=arg472_1.stride(1),
-        x_stride_h=arg472_1.stride(2),
-        x_stride_w=arg472_1.stride(3),
         mean_stride_c=arg473_1.stride(1),
         invstd_stride_c=arg474_1.stride(1),
         weight_stride_c=arg192_1.stride(0),
         bias_stride_c=arg193_1.stride(0),
         out_stride_n=out0.stride(0),
         out_stride_c=out0.stride(1),
-        out_stride_h=out0.stride(2),
-        out_stride_w=out0.stride(3),
-        C_=C,
-        W_=W,
         HW_=HW,
         N_HW_=N_HW,
         INV_HW_=INV_HW,
         REDUCTION_SCALE_=REDUCTION_SCALE,
-        BLOCK_M_=BLOCK_M,
-        BLOCK_C_=BLOCK_C,
+        BLOCK_SIZE_=FULL_BLOCK_SIZE,
         num_warps=8,
+        num_stages=4,
     )
     return out0, out1
 
@@ -565,9 +394,9 @@ def run_bench(device: torch.device, impl: str, warmup: int, rep: int) -> None:
             f"oracle shape: pooled=f32[{N}, {C}], activation=f32[{N}, {C}, {H}, {W}] "
             f"stride={activation.stride()} shape={SHAPE_LABEL}"
         )
-    logical_read_bytes = (N * C + N * C * HW + C * 4 + NUM_M_TILES * C * 2) * 4
-    logical_write_bytes = (N * C * HW + C + NUM_M_TILES * C * 2 + C * 2) * 4
-    print(f"direct logical traffic: {(logical_read_bytes + logical_write_bytes) / 1e6:.1f} MB")
+    logical_read_bytes = (2 * N * C * HW + 4 * C + C) * 4
+    logical_write_bytes = (N * C * HW + C) * 4
+    print(f"one-pass logical traffic: {(logical_read_bytes + logical_write_bytes) / 1e6:.1f} MB")
 
     with torch.no_grad():
         oracle_structured_pool_upsample_backward_reduce(*inputs, impl=actual_impl)
