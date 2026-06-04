@@ -227,3 +227,38 @@ sum_sum_ad05fd3c31c6,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=102.9us(c
 sum_sum_addc448a9236,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=62.1us(cd) vs oracle=90.3us (1.45x slower); EfficientNet avgpool-backward SiLU/BN scatter-reduce; oracle sub-optimal
 sum_sum_c50720f2fd4d,AT_FLOOR,closed,compile=105.7us(cd) beats oracle=119.7us; ShuffleNet ReLU BN-backward cooperative split-K; Inductor already optimal
 sum_sum_sum_1482b693d4f2,COOPERATIVE_SPLIT_K,needs_work,compile=179.2us vs oracle=128.0us; 1.40x gap; Swin MLP LN-backward/drop-path/window-reverse cooperative split-K
+sum_sum_sum_985bf52428b3,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=157.2us(cd) vs oracle=211.7us (1.3x slower); ViT SigLIP LN-backward/patch-embed cooperative split-K; oracle suboptimal tiling
+sum_sum_sum_9c4d4a65cd7b,AT_FLOOR,closed,compile=108.2us(cd) vs oracle=115.6us; 0.94x; DeiT LN-backward/pos-embed cooperative split-K; Inductor already optimal
+sum_sum_sum_b3091402bb28,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=143.2us vs oracle=191.2us (1.3x slower); BERT embedding scatter-reduce; oracle slower than compile
+sum_sum_sum_b8d91626261d,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=117.6us(cd) vs oracle=137.0us (1.2x slower); MT5 attention scatter-reduce; oracle slower than compile
+sum_sum_sum_bc73f5ef21f6,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=94.3us(cd) vs oracle=115.6us (1.2x slower); DeiT LN-backward/dropout cooperative split-K; oracle suboptimal tiling
+sum_sum_sum_be2a8911a995,SCATTER_REDUCE,needs_work,compile=230.0us(cd) vs oracle=187.0us; 1.23x gap; Swin relative-position-bias softmax-backward dual scatter-reduce with fused side output
+sum_sum_sum_be777b3382b6,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=248.1us(cd) vs oracle=294.9us (1.2x slower); Swin LN-backward/window cooperative split-K; oracle suboptimal tiling
+sum_sum_sum_bebd11dba544,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=110.9us(cd) vs oracle=208.4us (1.9x slower); BEiT LN-backward cooperative split-K; oracle serializes work excessively
+sum_sum_sum_c01ffea2a781,SCATTER_REDUCE,needs_work,compile=211.4us vs oracle=195.6us; 1.08x gap; DistillGPT2 LN-backward/dropout embedding scatter-reduce with position+token index_put
+sum_sum_sum_d32f70eaa94d,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=78.5us(cd) vs oracle=297.9us (3.8x slower); DistillGPT2 LN-backward/mask cooperative split-K; oracle extremely suboptimal tiling
+sum_sum_sum_e1f39649886f,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=302.2us(cd) vs oracle=910.3us (3.0x slower); Swin MLP LN-backward/window-reverse cooperative split-K; oracle serializes large row count
+sum_sum_sum_e2388f04f7c2,COOPERATIVE_SPLIT_K,needs_work,compile=129.1us(cd) vs oracle=72.6us; 1.78x gap; Google FNet LN-backward/dropout cooperative split-K with transposed side output and column reductions
+sum_sum_sum_e7a56f82f536,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=216.6us(cd) vs oracle=1373.4us (6.3x slower); Swin LN-backward/window-partition cooperative split-K; oracle extremely suboptimal for large tensor
+sum_sum_sum_f0dba933dc86,SCATTER_REDUCE,needs_work,compile=112.8us(cd) vs oracle=66.7us; 1.69x gap; DeiT distilled two-token select-scatter LN-backward with sparse token scatter into zero-filled side output
+sum_sum_sum_f206fcfd9c32,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=106.3us(cd) vs oracle=561.8us (5.3x slower); BERT LN-backward/transpose cooperative split-K; oracle extremely suboptimal tiling
+sum_sum_sum_f44d03db0b91,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=75.3us(cd) vs oracle=121.8us (1.6x slower); BEiT LN-backward cooperative split-K; oracle suboptimal tiling
+sum_sum_sum_fb068b7d821b,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=110.8us(cd) vs oracle=183.1us (1.7x slower); BEiT LN-backward cooperative split-K; oracle suboptimal tiling
+sum_sum_sum_18cf1bb89c04,SCATTER_REDUCE,needs_work,compile=168.3us(cd) vs oracle=146.2us; 1.15x gap; MegatronBERT embedding/LN-backward scatter-reduce with position+segment+vocab index_put
+sum_sum_sum_1cad42039094,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=118.2us(cd) vs oracle=127.9us (1.1x slower); Swin MLP LN-backward/drop-path/window cooperative split-K; oracle suboptimal
+sum_sum_sum_21910bdd88af,AT_FLOOR,closed,compile=84.6us(cd) vs oracle=78.8us; 1.07x gap; GPT2 LN-backward/dropout embedding scatter-reduce; Inductor already near-optimal
+sum_sum_sum_23d38cb25981,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=216.7us(cd) vs oracle=471.5us (2.2x slower); Swin LN-backward/drop-path/roll/window-reverse cooperative split-K; oracle extremely suboptimal tiling
+sum_sum_sum_26d7add77ccd,AT_FLOOR,closed,compile=167.4us(cd) vs oracle=172.8us; 0.97x; Adv-Inception avg-pool-add BN-backward cooperative split-K; Inductor already optimal
+sum_sum_sum_280231331614,SCATTER_REDUCE,needs_work,compile=180.3us(cd) vs oracle=120.6us; 1.49x gap; GPT2-large LN-backward/dropout embedding scatter-reduce with position+token index_put
+sum_sum_sum_2c3a34d36aa8,SCHEDULER_FUSION,needs_work,compile=153.4us(cd) vs oracle=114.4us; 1.34x gap; NFNet gating backward multi-output reduction with spatial summary and channel sum
+sum_sum_sum_3213336f4c0b,COOPERATIVE_SPLIT_K,needs_work,compile=142.7us(cd) vs oracle=52.1us; 2.74x gap; Longformer LN-backward cooperative split-K with permuted matmul buffers and transposed masked side output
+sum_sum_sum_33dcb3bff2b0,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=75.8us(cd) vs oracle=123.9us (1.6x slower); BEiT LN-backward cooperative split-K with class/patch token reductions; oracle suboptimal tiling
+sum_sum_sum_33f45f532ce3,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=81.7us(cd) vs oracle=193.3us (2.4x slower); DeiT distilled select-scatter LN-backward; oracle suboptimal dense materialization
+sum_sum_sum_3e04a44dd549,AT_FLOOR,closed,compile=57.4us(cd) vs oracle=57.3us; 1.00x gap; GhostNet two-branch BN-backward cooperative split-K; Inductor already at floor
+sum_sum_sum_3e8dba104ec0,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=154.7us(cd) vs oracle=218.0us (1.4x slower); T5-base LN/dropout embedding scatter-reduce; oracle suboptimal
+sum_sum_sum_48033561d121,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=104.4us(cd) vs oracle=147.5us (1.4x slower); MobileViT LN-backward/patch cooperative split-K; oracle suboptimal tiling
+sum_sum_sum_5a4f87bbd879,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=127.7us(cd) vs oracle=214.8us (1.7x slower); T5 dual RMSNorm/dropout embedding scatter-reduce; oracle suboptimal
+sum_sum_sum_68efcf13bb7a,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=108.7us(cd) vs oracle=525.2us (4.8x slower); BERT LN-backward/dropout cooperative split-K; oracle extremely suboptimal tiling
+sum_sum_sum_72d5ffa26b42,AT_FLOOR,closed,compile=61.8us(cd) vs oracle=59.3us; 1.04x gap; Longformer LN-backward/dropout embedding scatter-reduce; Inductor already near-optimal
+sum_sum_sum_78c3940fcbe9,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=59.8us(cd) vs oracle=95.0us (1.6x slower); Qwen RMSNorm/RoPE backward scheduler fusion; oracle suboptimal
+sum_sum_sum_821bf10276d6,SCATTER_REDUCE,needs_work,compile=210.2us(cd) vs oracle=91.0us; 2.31x gap; Swin relative-position-bias backward scatter-reduce with batch reduction into duplicate [169x16] buckets
