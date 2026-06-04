@@ -15,6 +15,7 @@ Provides:
 """
 from __future__ import annotations
 
+import contextlib
 import importlib.util
 import json
 import math
@@ -238,45 +239,91 @@ def bench_oracle(
     *,
     warmup: int = 25,
     rep: int = 200,
+    rounds: int = 5,
 ) -> dict:
     """Standard oracle benchmark: oracle vs torch.compile.
+
+    Delegates to bench_compare's methodology: CUDAGraph capture+replay,
+    exclusive GPU lock, interleaved timing rounds. This ensures oracle
+    measurements use the exact same infrastructure as corpus-wide sweeps.
 
     Args:
         oracle_forward: callable that takes inputs and returns oracle outputs
         instance: Repro() instance
         inputs: list of input tensors/values
         repro_id: string identifier for the repro
-        warmup: warmup iterations
-        rep: benchmark repetitions
+        warmup: warmup iterations per round
+        rep: repetitions per round
+        rounds: number of interleaved rounds (min-of-N)
 
     Returns:
         Dict with repro_id, oracle_us, compile_us, ratio, status.
     """
     device = _get_device(inputs)
 
-    # Oracle timing
-    with torch.no_grad():
-        oracle_forward(inputs)  # warmup allocation
-        if device.type == "cuda":
-            torch.cuda.synchronize()
+    if device.type != "cuda":
+        return _bench_oracle_cpu(oracle_forward, instance, inputs, repro_id,
+                                 warmup=warmup, rep=rep)
 
-        oracle_us = _do_bench(lambda: oracle_forward(inputs), device,
-                              warmup=warmup, rep=rep)
+    from triton.testing import do_bench
 
-    # Compile timing
+    # --- Compile with coordinate_descent + capture CUDAGraph ---
     import torch._inductor.config as cfg
     cfg.coordinate_descent_tuning = True
     compiled = torch.compile(instance)
     with torch.no_grad():
         for _ in range(5):
             compiled(*inputs)
-        if device.type == "cuda":
-            torch.cuda.synchronize()
+        torch.cuda.synchronize()
+        g_compile = _try_capture_graph(lambda: compiled(*inputs))
 
-        compile_us = _do_bench(lambda: compiled(*inputs), device,
-                               warmup=warmup, rep=rep)
+    # --- Warm oracle + capture CUDAGraph ---
+    with torch.no_grad():
+        for _ in range(3):
+            oracle_forward(inputs)
+        torch.cuda.synchronize()
+        g_oracle = _try_capture_graph(lambda: oracle_forward(inputs))
 
-    ratio = compile_us / oracle_us if oracle_us > 0 else 0.0
+    # --- Adaptive rep count based on quick estimate ---
+    quick_oracle = _time_graph_or_fn(g_oracle, lambda: oracle_forward(inputs),
+                                     warmup=5, rep=10)
+    quick_compile = _time_graph_or_fn(g_compile, lambda: compiled(*inputs),
+                                      warmup=5, rep=10)
+    est_us = min(quick_oracle, quick_compile)
+    if est_us < 50:
+        rep = max(rep, 500)
+    elif est_us < 200:
+        rep = max(rep, 300)
+
+    # --- Interleaved timing under EXCLUSIVE GPU LOCK ---
+    best_oracle_us = math.inf
+    best_compile_us = math.inf
+
+    with _gpu_exclusive_lock(repro_id):
+        # Warm under lock
+        for _ in range(warmup):
+            if g_oracle is not None:
+                g_oracle.replay()
+            else:
+                with torch.no_grad():
+                    oracle_forward(inputs)
+            if g_compile is not None:
+                g_compile.replay()
+            else:
+                with torch.no_grad():
+                    compiled(*inputs)
+        torch.cuda.synchronize()
+
+        # Interleaved rounds: oracle then compile, min-of-N
+        for _ in range(rounds):
+            oracle_us = _time_graph_or_fn(g_oracle, lambda: oracle_forward(inputs),
+                                          warmup=warmup, rep=rep)
+            compile_us = _time_graph_or_fn(g_compile, lambda: compiled(*inputs),
+                                           warmup=warmup, rep=rep)
+            best_oracle_us = min(best_oracle_us, oracle_us)
+            best_compile_us = min(best_compile_us, compile_us)
+
+    ratio = best_compile_us / best_oracle_us if best_oracle_us > 0 else 0.0
     if ratio > 1.05:
         status = "GOOD"
     elif ratio < 0.95:
@@ -284,6 +331,30 @@ def bench_oracle(
     else:
         status = "AT_FLOOR"
 
+    result = {
+        "repro_id": repro_id,
+        "oracle_us": round(best_oracle_us, 2),
+        "compile_us": round(best_compile_us, 2),
+        "ratio": round(ratio, 3),
+        "status": status,
+    }
+    print(json.dumps(result))
+    return result
+
+
+def _bench_oracle_cpu(oracle_forward, instance, inputs, repro_id, *, warmup, rep):
+    """Fallback for CPU-only benchmarks (no CUDAGraph)."""
+    with torch.no_grad():
+        oracle_us = _do_bench(lambda: oracle_forward(inputs), torch.device("cpu"),
+                              warmup=warmup, rep=rep)
+    compiled = torch.compile(instance)
+    with torch.no_grad():
+        for _ in range(5):
+            compiled(*inputs)
+        compile_us = _do_bench(lambda: compiled(*inputs), torch.device("cpu"),
+                               warmup=warmup, rep=rep)
+    ratio = compile_us / oracle_us if oracle_us > 0 else 0.0
+    status = "GOOD" if ratio > 1.05 else ("BAD_ORACLE" if ratio < 0.95 else "AT_FLOOR")
     result = {
         "repro_id": repro_id,
         "oracle_us": round(oracle_us, 2),
@@ -330,6 +401,49 @@ def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
+def _try_capture_graph(fn):
+    """Capture a CUDAGraph of fn(). Returns graph or None on failure."""
+    try:
+        g = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(g):
+            fn()
+        torch.cuda.synchronize()
+        return g
+    except Exception:
+        return None
+
+
+def _time_graph_or_fn(graph, fallback_fn, warmup, rep):
+    """Time a CUDAGraph replay (or fallback callable). Returns microseconds."""
+    from triton.testing import do_bench
+    if graph is not None:
+        ms = do_bench(lambda: graph.replay(), warmup=warmup, rep=rep, return_mode="min")
+    else:
+        ms = do_bench(fallback_fn, warmup=warmup, rep=rep, return_mode="min")
+    return ms * 1000.0
+
+
+@contextlib.contextmanager
+def _gpu_exclusive_lock(label="oracle_bench"):
+    """Acquire exclusive GPU lock using scripts/gpu_lock.py infrastructure."""
+    try:
+        # Try importing from scripts directory
+        import importlib.util as _ilu
+        _repo_root = Path(__file__).resolve().parent
+        _lock_path = _repo_root / "scripts" / "gpu_lock.py"
+        if _lock_path.exists():
+            _spec = _ilu.spec_from_file_location("gpu_lock", _lock_path)
+            _mod = _ilu.module_from_spec(_spec)
+            _spec.loader.exec_module(_mod)
+            with _mod.gpu_lock(0, label=label):
+                yield
+            return
+    except Exception:
+        pass
+    # Fallback: no lock available (single-GPU, no contention expected)
+    yield
+
 
 def _normalize_outputs(out) -> list[torch.Tensor]:
     """Normalize model outputs to a flat list of tensors."""
