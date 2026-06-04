@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete wide-row bf16 softmax-backward output by splitting each row across column tiles, cooperatively reducing per-row bf16-rounded probability partials, finalizing one row summary per output row, and recomputing the precision-rounded producer in a parallel tiled epilogue, whereas Inductor currently schedules the exp/div/bf16 round-trip producer, the row sum, and the post-reduction fma/cast as one generic wide-row reduction that serializes too much work inside each row program; Inductor cannot do this today because its scheduler/codegen lacks a cooperative split-K template for extremely wide row reductions with a dependent full-tensor epilogue and precision-preserving producer recompute; the fix is COOPERATIVE_SPLIT_K: add a row-split softmax-backward lowering that emits tiled row-sum partials, finalizes row summaries, and fuses the bf16 output epilogue without full-size f32 intermediates."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete wide-row bf16 softmax-backward output by splitting each row across column tiles, cooperatively reducing bf16-rounded probability partials, and folding row-summary finalization into the tiled output epilogue that recomputes the precision-rounded producer, whereas Inductor currently schedules the exp/div/bf16 round-trip producer, the row sum, and the post-reduction fma/cast as one generic wide-row reduction that serializes too much work inside each row program; Inductor cannot do this today because its scheduler/codegen lacks a cooperative split-K template for extremely wide row reductions with a dependent full-tensor epilogue and precision-preserving producer recompute; the fix is COOPERATIVE_SPLIT_K: add a row-split softmax-backward lowering that emits tiled row-sum partials and fuses row-summary finalization plus the bf16 output epilogue without full-size f32 intermediates."""
 from __future__ import annotations
 
 import argparse
@@ -94,6 +94,43 @@ if triton is not None:
         out = prob * row_scale
         tl.store(out_ptr + offsets, out.to(tl.bfloat16), mask=mask)
 
+    @triton.jit
+    def _softmax_backward_epilogue_from_partials_kernel(
+        logits_ptr,
+        row_max_ptr,
+        row_denom_ptr,
+        grad_scalar_ptr,
+        partial_ptr,
+        out_ptr,
+        N_: tl.constexpr,
+        NUM_TILES_: tl.constexpr,
+        PARTIAL_BLOCK_: tl.constexpr,
+        OUTPUT_BLOCK_N_: tl.constexpr,
+    ):
+        row = tl.program_id(0)
+        tile = tl.program_id(1)
+
+        partial_tiles = tl.arange(0, PARTIAL_BLOCK_)
+        partial_mask = partial_tiles < NUM_TILES_
+        partials = tl.load(
+            partial_ptr + row * NUM_TILES_ + partial_tiles,
+            mask=partial_mask,
+            other=0.0,
+        ).to(tl.float32)
+        prob_sum = tl.sum(partials, axis=0)
+        grad = tl.load(grad_scalar_ptr).to(tl.float32)
+        row_scale = grad * (1.0 - prob_sum)
+
+        cols = tile * OUTPUT_BLOCK_N_ + tl.arange(0, OUTPUT_BLOCK_N_)
+        mask = cols < N_
+        offsets = row * N_ + cols
+        row_max = tl.load(row_max_ptr + row).to(tl.float32)
+        row_denom = tl.load(row_denom_ptr + row).to(tl.float32)
+        x = tl.load(logits_ptr + offsets, mask=mask, other=-float("inf")).to(tl.float32)
+        prob = (tl.exp(x - row_max) / row_denom).to(tl.bfloat16).to(tl.float32)
+        out = prob * row_scale
+        tl.store(out_ptr + offsets, out.to(tl.bfloat16), mask=mask)
+
 
 
 def _load_repro_module():
@@ -167,7 +204,6 @@ def oracle_cooperative_split_k(
     partial_block = triton.next_power_of_2(num_tiles)
     out = torch.empty_strided((m, n), (n, 1), device=arg0_1.device, dtype=torch.bfloat16)
     partials = torch.empty((m, num_tiles), device=arg0_1.device, dtype=torch.float32)
-    row_scales = torch.empty((m,), device=arg0_1.device, dtype=torch.float32)
 
     grid = (m, num_tiles)
     _probability_partial_kernel[grid](
@@ -180,25 +216,25 @@ def oracle_cooperative_split_k(
         BLOCK_N_=block_n,
         num_warps=4,
     )
-    _finalize_row_sum_kernel[(m,)](
-        arg3_1,
-        partials,
-        row_scales,
-        NUM_TILES_=num_tiles,
-        PARTIAL_BLOCK_=partial_block,
-        num_warps=8,
-    )
-    _softmax_backward_epilogue_kernel[(m, output_num_tiles)](
+    _softmax_backward_epilogue_from_partials_kernel[(m, output_num_tiles)](
         arg0_1,
         arg1_1,
         arg2_1,
-        row_scales,
+        arg3_1,
+        partials,
         out,
         N_=n,
+        NUM_TILES_=num_tiles,
+        PARTIAL_BLOCK_=partial_block,
         OUTPUT_BLOCK_N_=output_block_n,
         num_warps=4,
     )
     return out
+
+
+def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
+    """Standard harness entry point: compute the full Repro.forward output."""
+    return oracle_cooperative_split_k(*inputs)
 
 
 def synchronize(device: torch.device) -> None:

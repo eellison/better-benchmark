@@ -1,11 +1,11 @@
 repro_id,diagnosis,impl_status,notes
 amax_sum_3ed297ef02cd,AT_FLOOR,implemented,
-amax_sum_4c524f75213e,AT_FLOOR,oracle_needs_rewrite,"BAD_ORACLE: softmax is 10% of runtime, oracle ignores attention assembly"
+amax_sum_4c524f75213e,NEW_PATTERN,implemented,REWRITTEN full-scope oracle: repros/canonical/amax_sum_4c524f75213e/oracle_online_softmax.py
 amax_sum_55ae6a130879,NON_SOFTMAX_BOTTLENECK,oracle_needs_rewrite,"BAD_ORACLE: only measures softmax, not fused dropout+permute"
 amax_sum_68fe981b18dd,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: same Longformer scope mismatch
 amax_sum_7fea03f0412b,AT_FLOOR,closed,
 amax_sum_87e1fb077f24,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: same Longformer scope mismatch
-amax_sum_amax_2a81770def44,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: misses dropout+position bias (compile includes them)
+amax_sum_amax_2a81770def44,NEW_PATTERN,implemented,REWRITTEN full-scope oracle: repros/canonical/amax_sum_amax_2a81770def44/oracle_full_t5_relative_position_attention_softmax_dropout.py
 amax_sum_amax_68fa105ccaf0,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: misses dropout+position bias
 amax_sum_f0661488d68c,AT_FLOOR,implemented,
 amax_sum_sum_1bad0f362efd,AT_FLOOR,implemented,
@@ -25,9 +25,9 @@ sum_3ee4028cab37,SCATTER_REDUCE,implemented,
 sum_617cd87647d6,AT_FLOOR,oracle_needs_rewrite,"BAD_ORACLE: measures only sum+fma, not full 122-op graph"
 sum_7df61c52c7f8,SCATTER_REDUCE,implemented,
 sum_adeaebad93f7,AT_FLOOR,closed,
-sum_b691b8dad90a,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: oracle slower than compile
-sum_e00c7291b6ee,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: oracle slower than compile (naive implementation)
-sum_sum_0930bd38b7d1,AT_FLOOR,oracle_needs_rewrite,"BAD_ORACLE: measures subset, compile is 21% faster for same scope"
+sum_b691b8dad90a,COOPERATIVE_SPLIT_K,implemented,REWRITTEN full-scope oracle: repros/canonical/sum_b691b8dad90a/oracle_multi_output_reduction.py
+sum_e00c7291b6ee,COOPERATIVE_SPLIT_K,implemented,REWRITTEN full-scope oracle: repros/canonical/sum_e00c7291b6ee/oracle_cooperative_split_k.py
+sum_sum_0930bd38b7d1,SCATTER_REDUCE,implemented,REWRITTEN full-scope oracle: repros/canonical/sum_sum_0930bd38b7d1/oracle_scatter_reduce.py
 sum_sum_230671a8764d,AT_FLOOR,closed,Compile beats oracle (20.2 vs 22.2us) with fresh cache + all fixes.
 sum_sum_2dc2fbd588d9,SCATTER_REDUCE,implemented,
 sum_sum_6a14a9c9ba88,RECOMPUTE_FUSION,needs_work,

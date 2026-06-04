@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
 import sys
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Any
 
 import torch
 
@@ -61,6 +62,16 @@ def make_inputs(device: torch.device) -> tuple[object, ...]:
         value.to(device=device) if isinstance(value, torch.Tensor) else value
         for value in inputs
     )
+
+
+def get_inputs() -> tuple[object, ...]:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    return make_inputs(device)
+
+
+def get_repro_instance() -> torch.nn.Module:
+    module = _load_repro_module()
+    return module.Repro()
 
 
 def reference_outputs(inputs: tuple[object, ...], device: torch.device) -> tuple[torch.Tensor, ...]:
@@ -189,6 +200,10 @@ def oracle_full(
     return out
 
 
+def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
+    return oracle_full(*inputs)
+
+
 def _compare_outputs(
     got_outputs: tuple[torch.Tensor, ...],
     ref_outputs: tuple[torch.Tensor, ...],
@@ -260,7 +275,44 @@ def _time_cuda_us(
     return times[0], times[len(times) // 2]
 
 
-def run_bench(device: torch.device, warmup: int, rep: int) -> tuple[float, float]:
+def _benchmark_compiled_repro(
+    inputs: tuple[object, ...],
+    device: torch.device,
+    warmup: int,
+    rep: int,
+) -> tuple[float, float] | None:
+    try:
+        import torch._dynamo
+    except Exception as exc:
+        print(f"torch.compile live comparison: unavailable ({exc})")
+        return None
+
+    module = _load_repro_module()
+    model = module.Repro().to(device)
+    torch._dynamo.reset()
+    try:
+        compiled = torch.compile(model)
+        with torch.no_grad():
+            compiled(*inputs)
+        synchronize(device)
+        best_us, median_us = _time_cuda_us(lambda: compiled(*inputs), device, warmup, rep)
+    except Exception as exc:
+        print(f"torch.compile live comparison: FAILED ({exc})")
+        return None
+
+    print(
+        f"torch.compile live full repro: best={best_us:.3f} us "
+        f"median={median_us:.3f} us warmup={warmup} rep={rep}"
+    )
+    return best_us, median_us
+
+
+def run_bench(
+    device: torch.device,
+    warmup: int,
+    rep: int,
+    compare_compile: bool,
+) -> tuple[float, float, tuple[float, float] | None]:
     if triton is None:
         raise RuntimeError("triton is required for this oracle")
     if device.type != "cuda":
@@ -285,7 +337,45 @@ def run_bench(device: torch.device, warmup: int, rep: int) -> tuple[float, float
         f"shape=[{BATCH}, {C_HALF}, {TIME}] + [{BATCH}, {C_TOTAL}, {TIME}] "
         f"block_t={BLOCK_T} partials={PARTIAL_COUNT} logical_traffic={logical_bytes / 1e9:.3f} GB"
     )
-    return best_us, median_us
+
+    compile_result = None
+    if compare_compile:
+        compile_result = _benchmark_compiled_repro(inputs, device, warmup, rep)
+
+    if compile_result is not None:
+        compile_best, compile_median = compile_result
+        ratio = compile_best / best_us
+        status = "GOOD" if ratio > 1.0 else "BAD_ORACLE"
+        print(
+            json.dumps(
+                {
+                    "repro_id": REPRO_ID,
+                    "oracle_us": best_us,
+                    "oracle_median_us": median_us,
+                    "compile_us": compile_best,
+                    "compile_median_us": compile_median,
+                    "ratio": ratio,
+                    "status": status,
+                },
+                sort_keys=True,
+            )
+        )
+    else:
+        print(
+            json.dumps(
+                {
+                    "repro_id": REPRO_ID,
+                    "oracle_us": best_us,
+                    "oracle_median_us": median_us,
+                    "compile_us": None,
+                    "compile_median_us": None,
+                    "ratio": None,
+                    "status": "NO_COMPILE_COMPARISON",
+                },
+                sort_keys=True,
+            )
+        )
+    return best_us, median_us, compile_result
 
 
 def main() -> None:
@@ -297,6 +387,7 @@ def main() -> None:
     parser.add_argument("--atol", type=float, default=3e-3)
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--rep", type=int, default=50)
+    parser.add_argument("--no-compile", action="store_true", help="skip live torch.compile comparison in --bench")
     args = parser.parse_args()
 
     if not args.check and not args.bench:
@@ -308,7 +399,12 @@ def main() -> None:
     if args.check and not run_check(device=device, rtol=args.rtol, atol=args.atol):
         sys.exit(1)
     if args.bench:
-        run_bench(device=device, warmup=args.warmup, rep=args.rep)
+        run_bench(
+            device=device,
+            warmup=args.warmup,
+            rep=args.rep,
+            compare_compile=not args.no_compile,
+        )
 
 
 if __name__ == "__main__":

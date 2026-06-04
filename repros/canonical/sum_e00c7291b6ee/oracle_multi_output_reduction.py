@@ -12,6 +12,7 @@ from oracle_cooperative_split_k import (  # noqa: E402
     main,
     make_inputs,
     oracle_cooperative_split_k,
+    oracle_forward,
     run_bench,
     run_check,
 )
