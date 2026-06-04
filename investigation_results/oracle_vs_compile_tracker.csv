@@ -42,3 +42,9 @@ amax_sum_sum_5829d7f5105f,online_softmax_cross_entropy,8.192,5.056,1.620,3.136,o
 pointwise_41aa929b1bf2,pointwise_fill,4.510,4.930,0.916,-0.420,bandwidth_bound,bad_oracle
 pointwise_eaafbb6b8c5a,pointwise_sort,5.500,6.980,0.789,-1.480,bandwidth_bound,bad_oracle
 sum_sum_sum_e3016fe2bbb7,multi_output_reduction_templates,26.140,6.940,3.765,19.200,scheduler_fusion,real_gap
+pointwise_4e68825d6848,pointwise_tuple,5.056,6.016,0.840,-0.960,bandwidth_bound,bad_oracle
+pointwise_bcfec253e455,pointwise_ema_copy,5.056,5.120,0.987,-0.064,bandwidth_bound,at_floor
+sum_d7cc0afd5743,single_reduction,5.184,5.184,1.000,0.000,bandwidth_bound,at_floor
+sum_sum_8d73a4b5bade,multi_output_reduction_templates,15.712,6.208,2.531,9.504,scheduler_fusion,real_gap
+sum_sum_8e96ea244bf1,multi_output_reduction_templates,11.200,6.112,1.832,5.088,scheduler_fusion,real_gap
+sum_sum_8f7c059eb6a4,multi_output_reduction_templates,12.096,5.184,2.333,6.912,scheduler_fusion,real_gap

@@ -1,0 +1,20 @@
+{
+  "repro_id": "sum_d7cc0afd5743",
+  "measured_at": "2026-06-04",
+  "hardware": "NVIDIA B200",
+  "pytorch_version": "2.13.0a0+git111efb8",
+  "fresh_cache": true,
+  "coordinate_descent": true,
+  "oracle_us": 5.184,
+  "compile_us": 5.248,
+  "combo_compile_us": 5.184,
+  "best_compile_us": 5.184,
+  "ratio": 1.000,
+  "status": "AT_FLOOR",
+  "classification": "BANDWIDTH_BOUND",
+  "correctness": "PASS",
+  "max_abs_diff": "3.81e-06",
+  "gap_us": 0.000,
+  "diagnosis": "Simple f32[1000,1] column sum to f32[1]. Inductor already lowers this to a single reduction kernel that matches the oracle exactly. Both are at the hardware floor for a 4KB memory-bound reduction. No scheduler/codegen optimization indicated.",
+  "model_origin": "torchbench_lennard_jones_train_001"
+}

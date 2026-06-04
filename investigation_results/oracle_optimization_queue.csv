@@ -324,4 +324,16 @@ pointwise_a942dec89d15,AT_FLOOR,closed,fresh_2026-06-04: compile=4.8us oracle=4.
 pointwise_ce7169287d93,BAD_ORACLE,closed,fresh_2026-06-04: compile=4.5us oracle=4.9us gap=0.92x; oracle slower than compile; scalar launch-floor
 pointwise_e5d19e73a52c,AT_FLOOR,closed,fresh_2026-06-04: compile=4.8us oracle=5.0us gap=0.96x; scalar launch-floor bandwidth-bound
 pointwise_f9c1d1b08ddb,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=312.2us oracle=112.1us gap=2.78x; relu_cat_maxpool_stencil_fusion; true_floor=yes
-sum_sum_sum_8d668b8fcd9e,SCATTER_REDUCE,needs_work,fresh_2026-06-04: compile=690.1us oracle=79.9us gap=8.64x; structured_scatter_reduce_sparse_producer; true_floor=yes
+sum_sum_sum_8d668b8fcd9e,SCATTER_REDUCE,needs_work,fresh_2026-06-04: compile=690.1us oracle=79.9us gap=8.64x; structured_scatter_reduce_sparse_producer; true_floor=yes; select_scatter_sparsity_pass: 682->84us (8.13x speedup) PASS verified
+amax_sum_a215204c9264,AT_FLOOR,closed,fresh_2026-06-04: compile=7.3us oracle=7.6us gap=0.97x; tiny [128x2] log_softmax at launch floor
+amax_sum_sum_2a28fce37306,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=10.1us oracle=6.2us gap=1.63x; GPT-J two-head ignore-index cross-entropy online-logsumexp+gather
+amax_sum_sum_5829d7f5105f,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=8.2us oracle=5.1us gap=1.62x; GPT-J single-head ignore-index cross-entropy
+pointwise_41aa929b1bf2,BAD_ORACLE,closed,fresh_2026-06-04: compile=4.5us oracle=4.9us gap=0.92x; trivial full(0) fill at launch floor
+pointwise_4e68825d6848,BAD_ORACLE,closed,fresh_2026-06-04: compile=5.1us oracle=6.0us gap=0.84x; tiny [256x2] split/tanh/exp pointwise tuple at launch floor
+pointwise_bcfec253e455,AT_FLOOR,closed,fresh_2026-06-04: compile=5.1us oracle=5.1us gap=0.99x; f32[128] EMA copy at launch floor
+pointwise_eaafbb6b8c5a,BAD_ORACLE,closed,fresh_2026-06-04: compile=5.5us oracle=7.0us gap=0.79x; i64[32] sort at launch floor
+sum_d7cc0afd5743,AT_FLOOR,closed,fresh_2026-06-04: compile=5.2us oracle=5.2us gap=1.00x; f32[1000x1] column sum at launch floor
+sum_sum_8d73a4b5bade,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=15.7us oracle=6.2us gap=2.53x; NFNet weight-standardization backward multi-output reduction
+sum_sum_8e96ea244bf1,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=11.2us oracle=6.1us gap=1.83x; NFNet weight-standardization backward (channels-last stride variant)
+sum_sum_8f7c059eb6a4,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=12.1us oracle=5.2us gap=2.33x; BERT softmax-backward sibling row+column reduction
+sum_sum_sum_e3016fe2bbb7,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=26.1us oracle=6.9us gap=3.77x; GPT-J cross-entropy backward cat/view/permute multi-output fusion
