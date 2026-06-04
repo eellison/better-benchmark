@@ -1,69 +1,34 @@
-"""
-Oracle kernel for sum_b691b8dad90a (Demucs training backward).
-
-Pattern: Pointwise ops + cat + reduction over dims [0,2].
-    Input: arg31_1[64,64,95696], getitem_27[64,64,95696], arg14_1[64,128,95696]
-    Output: f32[128] = cat(mul_tensor_3, mul_tensor_2).sum(dim=[0,2])
-
-Computation graph:
-    add_tensor = arg31_1 + getitem_27
-    slice_0 = arg14_1[:, :64, :]
-    slice_1 = arg14_1[:, 64:128, :]
-    sig = sigmoid(slice_1)
-    sub = 1 - sig
-    mul_a = sub * sig              # sigmoid derivative
-    mul_b = mul_a * slice_0
-    mul_c = mul_b * add_tensor     # -> mul_tensor_2, goes to out[64:128]
-    mul_d = sig * add_tensor       # -> mul_tensor_3, goes to out[0:64]
-    output = cat([mul_d, mul_c], dim=1).sum(dim=[0,2])
-
-Oracle strategy:
-    The cat + sum(dim=[0,2]) is equivalent to two independent sums:
-        out[:64]  = (sig * add_tensor).sum(dim=[0,2])
-        out[64:]  = ((1-sig)*sig*slice_0*add_tensor).sum(dim=[0,2])
-
-    All elementwise ops + both reductions are fused into a single Triton kernel.
-    This avoids materializing any intermediate tensor (especially the [64,128,95696]
-    cat result). The kernel reads each input element exactly once.
-
-    Data volume: 3 inputs totaling ~6GB reads, 128 float output.
-    This is purely bandwidth-bound.
-
-    Grid: 2D (channel_block, spatial_tile). Each program reduces a tile of
-    the (N, spatial) dimensions for a block of channels, accumulating in
-    registers. Partial sums are written to a small buffer, then a finalize
-    kernel sums across tiles.
-
-    Since arg14_1 has 128 channels that get sliced into two 64-channel halves,
-    we treat each half independently. The kernel processes C_BLOCK channels at
-    a time from the 64-channel axis.
-
-Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle differs from
-Inductor by exposing the `cat(...).sum(dim=[0,2])` as two sibling channel
-reductions and then split-K reducing each channel over the very large
-batch/time dimension with tile partials and a finalize kernel. Inductor cannot
-currently combine the cat elimination, shared elementwise producers, and
-cooperative reduction partitioning into one multi-output template, so it
-materializes too much of the producer/cat path and leaves the tiny `[128]`
-output reduction under an under-parallel schedule. The fix is
-COOPERATIVE_SPLIT_K support for compatible multi-output reductions after simple
-cat/slice exposure, with one fused producer feeding both accumulators.
-"""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the full Demucs gated cat-and-sum `Repro.forward` result by fusing the add/slice/sigmoid/sub/mul producer, reducing both cat halves as sibling channel outputs over the large batch/time domain with cooperative Triton partials, and finalizing directly into the contiguous `[128]` return tensor, whereas Inductor currently lowers the slice/sigmoid/sub/mul/cat/sum graph as a generic reduction over the logical concatenated producer without one shared split-K multi-output schedule for the two output slices; Inductor cannot do this today because its scheduler/codegen lacks a cooperative split-K multi-output reduction template that shares the add/sigmoid producer across disjoint cat slices while partitioning the large reduction axis; the fix is COOPERATIVE_SPLIT_K: add a split-K multi-output cat-sum template that emits shared producer partials for both branch reductions and writes the concatenated result without materializing the cat."""
 from __future__ import annotations
 
 import argparse
 import importlib.util
 import sys
 from pathlib import Path
+from typing import Callable
 
 import torch
-import triton
-import triton.language as tl
+
+try:
+    import triton
+    import triton.language as tl
+except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable without Triton.
+    triton = None
+    tl = None
+
 
 REPRO_ID = "sum_b691b8dad90a"
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
+
+BATCH = 64
+C_HALF = 64
+C_TOTAL = 128
+TIME = 95696
+OUT_SIZE = 128
+BLOCK_T = 2048
+PARTIAL_COUNT = BATCH
 
 sys.path.insert(0, str(REPO_ROOT))
 
@@ -78,342 +43,275 @@ def _load_repro_module():
     return module
 
 
-# ---------------------------------------------------------------------------
-# Triton kernel: fused elementwise + dual reduction
-#
-# Layout: all inputs are [N=64, C=64, S=95696] contiguous (row-major).
-# arg14_1 is [N=64, C=128, S=95696] contiguous.
-# We process one channel at a time (from the 64-channel dimension),
-# iterating over (N, S) = 64 * 95696 = 6,124,544 elements per channel.
-# ---------------------------------------------------------------------------
-
-@triton.jit
-def _fused_reduce_kernel(
-    arg31_ptr,        # [N, 64, S] f32
-    getitem27_ptr,    # [N, 64, S] f32
-    arg14_ptr,        # [N, 128, S] f32
-    partial_d_ptr,    # [64, N_TILES] f32 - partials for out[:64]
-    partial_c_ptr,    # [64, N_TILES] f32 - partials for out[64:]
-    N: tl.constexpr,
-    C64: tl.constexpr,     # = 64
-    S: tl.constexpr,       # = 95696
-    C128: tl.constexpr,    # = 128
-    N_TILES: tl.constexpr,
-    BLOCK_SIZE: tl.constexpr,
-):
-    """Each program handles one (channel, tile) pair.
-
-    channel in [0, 64): the channel index for the 64-channel tensors.
-    tile in [0, N_TILES): a spatial tile across the N*S flattened dimension.
-    """
-    c = tl.program_id(0)       # channel index [0, 64)
-    tile_id = tl.program_id(1) # tile index
-
-    total = N * S  # elements per channel to reduce
-    tile_size = (total + N_TILES - 1) // N_TILES
-    tile_start = tile_id * tile_size
-    tile_end = tl.minimum(tile_start + tile_size, total)
-
-    # Strides for [N, C, S] layout: element [n, c, s] at n*C*S + c*S + s
-    # For arg31/getitem27: stride is C64*S per batch, S per channel
-    # For arg14: stride is C128*S per batch, S per channel
-    stride_n_64 = C64 * S    # = 64 * 95696
-    stride_n_128 = C128 * S  # = 128 * 95696
-
-    acc_d = tl.zeros([BLOCK_SIZE], dtype=tl.float32)  # for mul_tensor_3 (out[:64])
-    acc_c = tl.zeros([BLOCK_SIZE], dtype=tl.float32)  # for mul_tensor_2 (out[64:])
-
-    for block_start in range(tile_start, tile_end, BLOCK_SIZE):
-        offsets = block_start + tl.arange(0, BLOCK_SIZE)
-        valid = offsets < tile_end
-
-        # Decompose flat offset into (n, s)
-        n = offsets // S
-        s = offsets % S
-
-        # Load arg31_1[n, c, s] and getitem_27[n, c, s]
-        idx_64 = n * stride_n_64 + c * S + s
-        a31 = tl.load(arg31_ptr + idx_64, mask=valid, other=0.0)
-        g27 = tl.load(getitem27_ptr + idx_64, mask=valid, other=0.0)
-
-        # add_tensor = arg31_1 + getitem_27
-        add_val = a31 + g27
-
-        # Load arg14_1[n, c, s] (slice_0, first 64 channels)
-        idx_128_lo = n * stride_n_128 + c * S + s
-        slice_0 = tl.load(arg14_ptr + idx_128_lo, mask=valid, other=0.0)
-
-        # Load arg14_1[n, c+64, s] (slice_1, second 64 channels)
-        idx_128_hi = n * stride_n_128 + (c + C64) * S + s
-        slice_1 = tl.load(arg14_ptr + idx_128_hi, mask=valid, other=0.0)
-
-        # sigmoid(slice_1)
-        sig = tl.sigmoid(slice_1)
-
-        # mul_tensor_3 = sig * add_tensor (-> out[:64])
-        mul_d = sig * add_val
-
-        # mul_tensor_2 = (1 - sig) * sig * slice_0 * add_tensor (-> out[64:])
-        sub_val = 1.0 - sig
-        mul_a = sub_val * sig
-        mul_b = mul_a * slice_0
-        mul_c_val = mul_b * add_val
-
-        acc_d += mul_d
-        acc_c += mul_c_val
-
-    # Reduce block-level accumulators to scalar
-    sum_d = tl.sum(acc_d, axis=0)
-    sum_c = tl.sum(acc_c, axis=0)
-
-    # Store partial results
-    tl.store(partial_d_ptr + c * N_TILES + tile_id, sum_d)
-    tl.store(partial_c_ptr + c * N_TILES + tile_id, sum_c)
+def _as_tuple(value: object) -> tuple[torch.Tensor, ...]:
+    if isinstance(value, tuple):
+        return value
+    return (value,)
 
 
-@triton.jit
-def _finalize_kernel(
-    partial_d_ptr,  # [64, N_TILES]
-    partial_c_ptr,  # [64, N_TILES]
-    out_ptr,        # [128] output
-    N_TILES: tl.constexpr,
-):
-    """Sum partial results across tiles for each channel."""
-    c = tl.program_id(0)  # [0, 64)
-
-    offsets = tl.arange(0, N_TILES)
-    base = c * N_TILES
-
-    # Sum partials for out[c] (mul_tensor_3 part)
-    partials_d = tl.load(partial_d_ptr + base + offsets)
-    tl.store(out_ptr + c, tl.sum(partials_d, axis=0))
-
-    # Sum partials for out[c+64] (mul_tensor_2 part)
-    partials_c = tl.load(partial_c_ptr + base + offsets)
-    tl.store(out_ptr + c + 64, tl.sum(partials_c, axis=0))
+def synchronize(device: torch.device) -> None:
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
 
 
-# ---------------------------------------------------------------------------
-# Oracle entry point
-# ---------------------------------------------------------------------------
+def make_inputs(device: torch.device) -> tuple[object, ...]:
+    torch.manual_seed(0)
+    module = _load_repro_module()
+    inputs = module.make_inputs()
+    return tuple(
+        value.to(device=device) if isinstance(value, torch.Tensor) else value
+        for value in inputs
+    )
 
-def oracle_fused(arg31_1, getitem_27, arg14_1):
-    """Fused elementwise + dual reduction.
 
-    Args:
-        arg31_1: [64, 64, 95696] f32 contiguous
-        getitem_27: [64, 64, 95696] f32 contiguous
-        arg14_1: [64, 128, 95696] f32 contiguous
+def reference_outputs(inputs: tuple[object, ...], device: torch.device) -> tuple[torch.Tensor, ...]:
+    module = _load_repro_module()
+    model = module.Repro().to(device)
+    with torch.no_grad():
+        return _as_tuple(model(*inputs))
 
-    Returns:
-        out: [128] f32 = cat([sig*add, (1-sig)*sig*slice0*add], dim=1).sum([0,2])
-    """
-    N, C64, S = arg31_1.shape
-    C128 = arg14_1.shape[1]
+
+if triton is not None:
+
+    @triton.jit
+    def _demucs_gate_batch_partial_kernel(
+        arg31_ptr,
+        getitem27_ptr,
+        arg14_ptr,
+        partial_ptr,
+        BATCH_: tl.constexpr,
+        C_HALF_: tl.constexpr,
+        C_TOTAL_: tl.constexpr,
+        TIME_: tl.constexpr,
+        BLOCK_T_: tl.constexpr,
+    ):
+        channel = tl.program_id(0)
+        batch = tl.program_id(1)
+        offsets = tl.arange(0, BLOCK_T_)
+
+        first_acc = tl.full((), 0.0, tl.float32)
+        second_acc = tl.full((), 0.0, tl.float32)
+
+        for start in range(0, TIME_, BLOCK_T_):
+            s = start + offsets
+            mask = s < TIME_
+
+            base64 = batch * C_HALF_ * TIME_ + channel * TIME_ + s
+            base128 = batch * C_TOTAL_ * TIME_ + channel * TIME_ + s
+
+            add_value = (
+                tl.load(arg31_ptr + base64, mask=mask, other=0.0).to(tl.float32)
+                + tl.load(getitem27_ptr + base64, mask=mask, other=0.0).to(tl.float32)
+            )
+            slice0 = tl.load(arg14_ptr + base128, mask=mask, other=0.0).to(tl.float32)
+            slice1 = tl.load(
+                arg14_ptr + base128 + C_HALF_ * TIME_, mask=mask, other=0.0
+            ).to(tl.float32)
+
+            sig = tl.sigmoid(slice1)
+            first_acc += tl.sum(sig * add_value, axis=0)
+            second_acc += tl.sum(sig * (1.0 - sig) * slice0 * add_value, axis=0)
+
+        partial_index = channel * BATCH_ + batch
+        tl.store(partial_ptr + partial_index, first_acc)
+        tl.store(partial_ptr + (C_HALF_ + channel) * BATCH_ + batch, second_acc)
+
+
+    @triton.jit
+    def _demucs_gate_finalize_kernel(
+        partial_ptr,
+        out_ptr,
+        PARTIAL_COUNT_: tl.constexpr,
+        C_HALF_: tl.constexpr,
+        BLOCK_K_: tl.constexpr,
+    ):
+        channel = tl.program_id(0)
+        k = tl.arange(0, BLOCK_K_)
+        mask = k < PARTIAL_COUNT_
+
+        base = channel * PARTIAL_COUNT_ + k
+        first = tl.load(partial_ptr + base, mask=mask, other=0.0)
+        second = tl.load(
+            partial_ptr + (C_HALF_ + channel) * PARTIAL_COUNT_ + k,
+            mask=mask,
+            other=0.0,
+        )
+
+        tl.store(out_ptr + channel, tl.sum(first, axis=0))
+        tl.store(out_ptr + C_HALF_ + channel, tl.sum(second, axis=0))
+
+
+def oracle_full(
+    arg31_1: torch.Tensor,
+    getitem_27: torch.Tensor,
+    arg14_1: torch.Tensor,
+) -> torch.Tensor:
+    if triton is None:
+        raise RuntimeError("triton is required for this oracle")
+    if arg31_1.device.type != "cuda":
+        raise RuntimeError("the Triton oracle requires CUDA tensors")
+    if arg31_1.shape != (BATCH, C_HALF, TIME):
+        raise ValueError(f"expected arg31_1 shape {(BATCH, C_HALF, TIME)}, got {tuple(arg31_1.shape)}")
+    if getitem_27.shape != (BATCH, C_HALF, TIME):
+        raise ValueError(
+            f"expected getitem_27 shape {(BATCH, C_HALF, TIME)}, got {tuple(getitem_27.shape)}"
+        )
+    if arg14_1.shape != (BATCH, C_TOTAL, TIME):
+        raise ValueError(f"expected arg14_1 shape {(BATCH, C_TOTAL, TIME)}, got {tuple(arg14_1.shape)}")
+    if arg31_1.dtype != torch.float32 or getitem_27.dtype != torch.float32 or arg14_1.dtype != torch.float32:
+        raise ValueError("this oracle expects the captured float32 inputs")
+    if not arg31_1.is_contiguous() or not getitem_27.is_contiguous() or not arg14_1.is_contiguous():
+        raise ValueError("this oracle expects the captured contiguous input layouts")
+
     device = arg31_1.device
+    partial = torch.empty((OUT_SIZE, PARTIAL_COUNT), device=device, dtype=torch.float32)
+    out = torch.empty((OUT_SIZE,), device=device, dtype=torch.float32)
 
-    assert arg31_1.is_contiguous()
-    assert getitem_27.is_contiguous()
-    assert arg14_1.is_contiguous()
-    assert C64 == 64
-    assert C128 == 128
-
-    # Tuning parameters
-    # Total elements per channel: 64 * 95696 = 6,124,544
-    # Use enough tiles to saturate GPU: 64 channels * N_TILES programs
-    N_TILES = 64  # 64 * 64 = 4096 programs - good GPU occupancy
-    BLOCK_SIZE = 4096  # elements per iteration in inner loop
-
-    # N_TILES must be power of 2 for the finalize kernel
-    partial_d = torch.empty(C64, N_TILES, dtype=torch.float32, device=device)
-    partial_c = torch.empty(C64, N_TILES, dtype=torch.float32, device=device)
-
-    _fused_reduce_kernel[(C64, N_TILES)](
-        arg31_1, getitem_27, arg14_1,
-        partial_d, partial_c,
-        N=N, C64=C64, S=S, C128=C128,
-        N_TILES=N_TILES,
-        BLOCK_SIZE=BLOCK_SIZE,
+    _demucs_gate_batch_partial_kernel[(C_HALF, BATCH)](
+        arg31_1,
+        getitem_27,
+        arg14_1,
+        partial,
+        BATCH_=BATCH,
+        C_HALF_=C_HALF,
+        C_TOTAL_=C_TOTAL,
+        TIME_=TIME,
+        BLOCK_T_=BLOCK_T,
+        num_warps=16,
     )
-
-    out = torch.empty(128, dtype=torch.float32, device=device)
-
-    _finalize_kernel[(C64,)](
-        partial_d, partial_c, out,
-        N_TILES=N_TILES,
+    _demucs_gate_finalize_kernel[(C_HALF,)](
+        partial,
+        out,
+        PARTIAL_COUNT_=PARTIAL_COUNT,
+        C_HALF_=C_HALF,
+        BLOCK_K_=triton.next_power_of_2(PARTIAL_COUNT),
+        num_warps=8,
     )
-
     return out
 
 
-# ---------------------------------------------------------------------------
-# Reference: eager PyTorch (matches repro.py exactly)
-# ---------------------------------------------------------------------------
+def _compare_outputs(
+    got_outputs: tuple[torch.Tensor, ...],
+    ref_outputs: tuple[torch.Tensor, ...],
+    rtol: float,
+    atol: float,
+) -> bool:
+    if len(got_outputs) != len(ref_outputs):
+        print(f"output_count: got={len(got_outputs)} expected={len(ref_outputs)}")
+        return False
 
-def reference_pytorch(arg31_1, getitem_27, arg14_1):
-    """Direct PyTorch implementation matching repro.py forward()."""
-    add_tensor = arg31_1 + getitem_27
-    slice_tensor = arg14_1[:, :64, :]
-    slice_tensor_1 = arg14_1[:, 64:128, :]
-    sigmoid_default = torch.sigmoid(slice_tensor_1)
-    sub_tensor = 1.0 - sigmoid_default
-    mul_tensor = sub_tensor * sigmoid_default
-    mul_tensor_1 = mul_tensor * slice_tensor
-    mul_tensor_2 = mul_tensor_1 * add_tensor
-    mul_tensor_3 = sigmoid_default * add_tensor
-    cat_default = torch.cat([mul_tensor_3, mul_tensor_2], dim=1)
-    sum_dim_int_list = cat_default.sum(dim=[0, 2])
-    return sum_dim_int_list
+    ok = True
+    for idx, (got, ref) in enumerate(zip(got_outputs, ref_outputs)):
+        shape_ok = tuple(got.shape) == tuple(ref.shape)
+        dtype_ok = got.dtype == ref.dtype
+        stride_ok = got.stride() == ref.stride()
+        value_ok = torch.allclose(got.float(), ref.float(), rtol=rtol, atol=atol)
+        diff = (got.float() - ref.float()).abs()
+        max_abs = diff.max().item() if diff.numel() else 0.0
+        mean_abs = diff.mean().item() if diff.numel() else 0.0
+        denom = ref.float().abs().clamp_min(1e-12)
+        max_rel = (diff / denom).max().item() if diff.numel() else 0.0
+        output_ok = shape_ok and dtype_ok and stride_ok and value_ok
+        ok = ok and output_ok
+        print(
+            f"output[{idx}]: shape={list(got.shape)} dtype={got.dtype} stride={got.stride()} "
+            f"expected_shape={list(ref.shape)} expected_dtype={ref.dtype} expected_stride={ref.stride()} "
+            f"max_abs={max_abs:.6e} mean_abs={mean_abs:.6e} max_rel={max_rel:.6e} "
+            f"allclose={value_ok} shape_match={shape_ok} dtype_match={dtype_ok} stride_match={stride_ok}"
+        )
 
-
-# ---------------------------------------------------------------------------
-# Correctness check
-# ---------------------------------------------------------------------------
-
-def make_inputs(device: torch.device = None):
-    """Generate inputs from the repro module."""
-    module = _load_repro_module()
-    inputs = module.make_inputs()
-    if device is not None:
-        moved = []
-        for value in inputs:
-            if isinstance(value, torch.Tensor):
-                moved.append(value.to(device=device))
-            else:
-                moved.append(value)
-        return tuple(moved)
-    return tuple(inputs)
+    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+    return ok
 
 
-def check_correctness(device: torch.device, rtol: float = 1e-4, atol: float = 1e-3):
-    """Compare oracle output against eager reference."""
+def run_check(device: torch.device, rtol: float, atol: float) -> bool:
+    if triton is None:
+        raise RuntimeError("triton is required for this oracle")
+    if device.type != "cuda":
+        raise RuntimeError("CUDA is required for this Triton oracle check")
+
     inputs = make_inputs(device)
+    with torch.no_grad():
+        ref = reference_outputs(inputs, device)
+        got = _as_tuple(oracle_full(*inputs))
+    synchronize(device)
+    return _compare_outputs(got, ref, rtol=rtol, atol=atol)
+
+
+def _time_cuda_us(
+    fn: Callable[[], object],
+    device: torch.device,
+    warmup: int,
+    rep: int,
+) -> tuple[float, float]:
+    for _ in range(warmup):
+        fn()
+    synchronize(device)
+
+    times: list[float] = []
+    for _ in range(rep):
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
+        start.record()
+        fn()
+        end.record()
+        end.synchronize()
+        times.append(start.elapsed_time(end) * 1000.0)
+    times.sort()
+    return times[0], times[len(times) // 2]
+
+
+def run_bench(device: torch.device, warmup: int, rep: int) -> tuple[float, float]:
+    if triton is None:
+        raise RuntimeError("triton is required for this oracle")
+    if device.type != "cuda":
+        raise RuntimeError("CUDA is required for this Triton oracle benchmark")
+
+    inputs = make_inputs(device)
+    with torch.no_grad():
+        oracle_full(*inputs)
+    synchronize(device)
 
     with torch.no_grad():
-        oracle_out = oracle_fused(*inputs)
-        ref_out = reference_pytorch(*inputs)
+        best_us, median_us = _time_cuda_us(lambda: oracle_full(*inputs), device, warmup, rep)
 
-    max_diff = (oracle_out.float() - ref_out.float()).abs().max().item()
-    rel_diff = ((oracle_out.float() - ref_out.float()).abs() / (ref_out.float().abs() + 1e-8)).max().item()
-    close = torch.allclose(oracle_out.float(), ref_out.float(), rtol=rtol, atol=atol)
-    print(f"  output: shape={list(oracle_out.shape)}, max_abs_diff={max_diff:.6g}, "
-          f"max_rel_diff={rel_diff:.6g}, allclose={close}")
-
-    print(f"  OVERALL: {'PASS' if close else 'FAIL'}")
-    return close
-
-
-# ---------------------------------------------------------------------------
-# Benchmark
-# ---------------------------------------------------------------------------
-
-def benchmark_oracle(device: torch.device, warmup: int = 25, rep: int = 100):
-    """Benchmark oracle vs torch.compile + coordinate descent."""
-    inputs = make_inputs(device)
-    module = _load_repro_module()
-
-    with torch.no_grad():
-        # Warmup oracle
-        for _ in range(3):
-            oracle_fused(*inputs)
-        torch.cuda.synchronize()
-
-        # Benchmark oracle
-        oracle_ms = triton.testing.do_bench(
-            lambda: oracle_fused(*inputs),
-            warmup=warmup,
-            rep=rep,
-        )
-        oracle_us = oracle_ms * 1000.0
-
-        # Benchmark torch.compile
-        import torch._inductor.config as inductor_config
-        model = module.Repro().cuda()
-        torch._dynamo.reset()
-        compiled = torch.compile(model)
-        compiled(*inputs)
-        torch.cuda.synchronize()
-
-        compile_ms = triton.testing.do_bench(
-            lambda: compiled(*inputs),
-            warmup=warmup,
-            rep=rep,
-        )
-        compile_us = compile_ms * 1000.0
-
-        # Benchmark torch.compile + coordinate descent
-        torch._dynamo.reset()
-        inductor_config.coordinate_descent_tuning = True
-        compiled_cd = torch.compile(model)
-        compiled_cd(*inputs)
-        torch.cuda.synchronize()
-
-        compile_cd_ms = triton.testing.do_bench(
-            lambda: compiled_cd(*inputs),
-            warmup=warmup,
-            rep=rep,
-        )
-        compile_cd_us = compile_cd_ms * 1000.0
-        inductor_config.coordinate_descent_tuning = False
-
-        # Memory bandwidth calculation
-        # Reads: arg31_1 (64*64*95696*4) + getitem_27 (same) + arg14_1 (64*128*95696*4)
-        bytes_read = (64 * 64 * 95696 * 4) * 2 + (64 * 128 * 95696 * 4)
-        bytes_written = 128 * 4  # negligible
-        total_bytes = bytes_read + bytes_written
-        bw_achieved_gb_s = total_bytes / (oracle_ms * 1e-3) / 1e9
-
-        print(f"\n{'='*60}")
-        print(f"Benchmark results for {REPRO_ID}")
-        print(f"{'='*60}")
-        print(f"  Oracle (fused reduce):                {oracle_us:.1f} us")
-        print(f"  torch.compile:                        {compile_us:.1f} us")
-        print(f"  torch.compile + coord_descent:        {compile_cd_us:.1f} us")
-        print(f"  Speedup (oracle vs compile):          {compile_us/oracle_us:.2f}x")
-        print(f"  Speedup (oracle vs coord_descent):    {compile_cd_us/oracle_us:.2f}x")
-        print(f"  Achieved bandwidth:                   {bw_achieved_gb_s:.1f} GB/s")
-        print(f"  Data volume:                          {total_bytes/1e9:.2f} GB")
-        print(f"{'='*60}")
-        print(f"\nNote: Oracle fuses all elementwise ops (add, sigmoid, sub, mul)")
-        print(f"and both reductions into a single kernel pass, avoiding the")
-        print(f"materialization of the [64,128,95696] cat intermediate.")
-
-    return oracle_us, compile_us, compile_cd_us
+    input_elements = BATCH * C_HALF * TIME
+    partial_elements = OUT_SIZE * PARTIAL_COUNT
+    logical_bytes = (4 * input_elements + 2 * partial_elements + OUT_SIZE) * 4
+    print(
+        f"oracle_multi_output_reduction full-scope: best={best_us:.3f} us "
+        f"median={median_us:.3f} us warmup={warmup} rep={rep}"
+    )
+    print(
+        f"shape=[{BATCH}, {C_HALF}, {TIME}] + [{BATCH}, {C_TOTAL}, {TIME}] "
+        f"block_t={BLOCK_T} partials={PARTIAL_COUNT} logical_traffic={logical_bytes / 1e9:.3f} GB"
+    )
+    return best_us, median_us
 
 
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
-
-def parse_args():
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="Run correctness check")
-    parser.add_argument("--bench", action="store_true", help="Run benchmark")
-    parser.add_argument("--device", default="cuda")
-    parser.add_argument("--rtol", type=float, default=1e-4)
-    parser.add_argument("--atol", type=float, default=1e-3)
-    parser.add_argument("--warmup", type=int, default=25)
-    parser.add_argument("--rep", type=int, default=100)
-    return parser.parse_args()
-
-
-def main():
-    args = parse_args()
-    device = torch.device(args.device)
+    parser.add_argument("--check", action="store_true", help="compare oracle against Repro.forward")
+    parser.add_argument("--bench", action="store_true", help="run timing benchmark")
+    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--rtol", type=float, default=3e-4)
+    parser.add_argument("--atol", type=float, default=3e-3)
+    parser.add_argument("--warmup", type=int, default=10)
+    parser.add_argument("--rep", type=int, default=50)
+    args = parser.parse_args()
 
     if not args.check and not args.bench:
-        args.check = True
+        parser.error("select at least one mode: --check and/or --bench")
+    if args.warmup < 0 or args.rep <= 0:
+        parser.error("--warmup must be non-negative and --rep must be positive")
 
-    if args.check:
-        print(f"Correctness check ({REPRO_ID}):")
-        ok = check_correctness(device, rtol=args.rtol, atol=args.atol)
-        if not ok:
-            sys.exit(1)
-
+    device = torch.device(args.device)
+    if args.check and not run_check(device=device, rtol=args.rtol, atol=args.atol):
+        sys.exit(1)
     if args.bench:
-        print(f"Benchmark ({REPRO_ID}):")
-        benchmark_oracle(device, warmup=args.warmup, rep=args.rep)
+        run_bench(device=device, warmup=args.warmup, rep=args.rep)
 
 
 if __name__ == "__main__":
-    main()
+    with torch.no_grad():
+        main()
