@@ -1,15 +1,4 @@
-"""
-Oracle for max_448f6b3c8f1d
-
-Gap diagnosis:
-  Classification: BANDWIDTH_BOUND
-  What oracle does differently: The oracle performs the full int64[1,4096] to
-    int64[] max reduction with one specialized Triton block reduction.
-  Why Inductor cannot do it today: The compiled repro is already at the same
-    one-launch small-reduction floor under the required tuned configs.
-  Required Inductor change: BANDWIDTH_BOUND; no repro-specific lowering change
-    is indicated unless generic launch overhead or small-reduction costs improve.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full aten.max.default over the canonical contiguous int64[1, 4096] input as a single one-program Triton block reduction that returns the same int64[] scalar as Repro.forward, whereas Inductor currently lowers this tiny whole-tensor max through its generic reduction template with launch-scale scheduler/codegen overhead around an otherwise single-kernel scalar reduction; Inductor cannot do this today because its reduction codegen does not select a specialized low-overhead integer scalar-reduction template for fixed small power-of-two tensors; the fix is NEW_PATTERN: add a small whole-tensor integer scalar-reduction lowering for max/min/sum-like reductions that emits one compact block reduction directly."""
 from __future__ import annotations
 
 import argparse
@@ -21,7 +10,7 @@ import torch
 try:
     import triton
     import triton.language as tl
-except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
+except ImportError:
     triton = None
     tl = None
 
@@ -39,50 +28,70 @@ from oracle_harness import (
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
-
-N_ELEMS = 4096
-BLOCK = 4096
+N_ELEMENTS = 4096
 
 
-def get_inputs() -> tuple[object, ...]:
-    """Load inputs from the repro's make_inputs (scope invariant: same inputs)."""
-    return tuple(_harness_get_inputs(REPRO_DIR))
+def get_inputs():
+    """Load inputs from the repro's make_inputs."""
+    return _harness_get_inputs(REPRO_DIR)
 
 
-def get_repro_instance() -> torch.nn.Module:
-    """Create Repro() for reference comparison."""
-    return _harness_get_repro_instance(REPRO_DIR).eval()
+def get_repro_instance():
+    """Create a Repro() instance for reference comparison."""
+    return _harness_get_repro_instance(REPRO_DIR)
 
 
 if triton is not None:
 
     @triton.jit
-    def _max_i64_kernel(x_ptr, out_ptr, BLOCK_SIZE: tl.constexpr):
-        offsets = tl.arange(0, BLOCK_SIZE)
-        values = tl.load(x_ptr + offsets)
-        result = tl.max(values, axis=0)
-        tl.store(out_ptr, result)
+    def _max_i64_scalar_kernel(
+        x_ptr,
+        out_ptr,
+        n_elements: tl.constexpr,
+        block_n: tl.constexpr,
+    ):
+        offsets = tl.arange(0, block_n)
+        mask = offsets < n_elements
+        values = tl.load(x_ptr + offsets, mask=mask, other=-9223372036854775808)
+        max_value = tl.max(values, axis=0)
+        tl.store(out_ptr, max_value)
 
 
-def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
-    """Run the full Repro.forward scope with a Triton block reduction."""
+def _require_triton_cuda() -> None:
     if triton is None:
-        raise RuntimeError("triton is required for this oracle")
+        raise RuntimeError("Triton is required for oracle_max_reduce.py")
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is required for oracle_max_reduce.py")
+
+
+def oracle_forward(inputs, *, block_n: int = N_ELEMENTS) -> torch.Tensor:
+    """Compute exactly Repro()(*make_inputs()) for the canonical scalar max."""
+    _require_triton_cuda()
     if len(inputs) != 1:
-        raise ValueError(f"{REPRO_ID} expects one input, got {len(inputs)}")
+        raise ValueError(f"expected one input tensor, got {len(inputs)} inputs")
 
-    (x,) = inputs
-    if not isinstance(x, torch.Tensor):
-        raise TypeError(f"{REPRO_ID} expects a tensor input, got {type(x)!r}")
-    if x.shape != (1, N_ELEMS) or x.dtype != torch.int64:
-        raise ValueError(f"expected int64[1,{N_ELEMS}], got shape={tuple(x.shape)} dtype={x.dtype}")
-    if not x.is_cuda:
-        raise RuntimeError("CUDA input is required for this Triton oracle")
-    if not x.is_contiguous():
-        x = x.contiguous()
+    (arg0_1,) = inputs
+    if not isinstance(arg0_1, torch.Tensor):
+        raise TypeError(f"expected tensor input, got {type(arg0_1)!r}")
+    if tuple(arg0_1.shape) != (1, N_ELEMENTS):
+        raise ValueError(f"expected int64[1, {N_ELEMENTS}], got shape={tuple(arg0_1.shape)}")
+    if arg0_1.dtype is not torch.int64:
+        raise TypeError(f"expected torch.int64 input, got {arg0_1.dtype}")
+    if not arg0_1.is_cuda:
+        raise ValueError("oracle_max_reduce.py expects CUDA inputs")
+    if block_n < arg0_1.numel():
+        raise ValueError(f"block_n={block_n} is too small for {arg0_1.numel()} elements")
+    if not arg0_1.is_contiguous():
+        arg0_1 = arg0_1.contiguous()
 
-    out = torch.empty((), device=x.device, dtype=torch.int64)
-    _max_i64_kernel[(1,)](x, out, BLOCK_SIZE=BLOCK, num_warps=8)
+    out = torch.empty((), device=arg0_1.device, dtype=torch.int64)
+    _max_i64_scalar_kernel[(1,)](
+        arg0_1,
+        out,
+        n_elements=arg0_1.numel(),
+        block_n=block_n,
+        num_warps=8,
+    )
     return out
 
 
@@ -93,15 +102,12 @@ def main() -> None:
     )
     parser.add_argument("--check", action="store_true", help="Verify correctness against eager Repro")
     parser.add_argument("--bench", action="store_true", help="Benchmark oracle vs torch.compile")
-    parser.add_argument("--rtol", type=float, default=1e-2, help="Relative tolerance for correctness check")
-    parser.add_argument("--atol", type=float, default=1e-2, help="Absolute tolerance for correctness check")
+    parser.add_argument("--rtol", type=float, default=0.0, help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=0.0, help="Absolute tolerance for correctness check")
     parser.add_argument("--warmup", type=int, default=25, help="Warmup iterations for benchmark")
     parser.add_argument("--rep", type=int, default=200, help="Repetitions for benchmark")
-    parser.add_argument(
-        "--no-skip-stochastic",
-        action="store_true",
-        help="Disable auto-detection and skipping of stochastic outputs",
-    )
+    parser.add_argument("--block-n", type=int, default=N_ELEMENTS, help="Triton reduction tile size")
+    parser.add_argument("--no-skip-stochastic", action="store_true", help="Disable stochastic output skipping")
     parser.add_argument("--all-shapes", action="store_true", help="Benchmark across all shapes from shapes.txt")
     parser.add_argument("--show-hw", action="store_true", help="Print GPU hardware info and exit")
     args = parser.parse_args()
@@ -115,6 +121,7 @@ def main() -> None:
     if not args.check and not args.bench:
         args.check = args.bench = True
 
+    _require_triton_cuda()
     inputs = get_inputs()
     instance = get_repro_instance()
 
@@ -124,7 +131,7 @@ def main() -> None:
     if args.check:
         print(f"Checking {REPRO_ID}...")
         ok = check_oracle(
-            oracle_forward,
+            lambda values: oracle_forward(values, block_n=args.block_n),
             instance,
             inputs,
             atol=args.atol,
@@ -137,9 +144,10 @@ def main() -> None:
 
     if args.bench:
         print(f"Benchmarking {REPRO_ID}...")
+        bench_fn = lambda values: oracle_forward(values, block_n=args.block_n)
         if args.all_shapes:
             results = bench_oracle_all_shapes(
-                oracle_forward,
+                bench_fn,
                 REPRO_DIR,
                 REPRO_ID,
                 warmup=args.warmup,
@@ -148,12 +156,12 @@ def main() -> None:
             for result in results:
                 if result["status"] == "BAD_ORACLE":
                     print(
-                        f"WARNING: oracle is slower than compile for "
-                        f"{result['repro_id']} (ratio={result['ratio']:.3f}x)"
+                        f"WARNING: oracle is slower than compile for {result['repro_id']} "
+                        f"(ratio={result['ratio']:.3f}x)"
                     )
         else:
             result = bench_oracle(
-                oracle_forward,
+                bench_fn,
                 instance,
                 inputs,
                 REPRO_ID,

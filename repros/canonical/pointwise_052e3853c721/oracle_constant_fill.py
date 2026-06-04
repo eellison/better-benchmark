@@ -1,11 +1,4 @@
-"""
-Oracle for pointwise_052e3853c721
-
-Gap diagnosis:
-  Classification: BANDWIDTH_BOUND
-  What oracle does differently: It directly materializes the no-input f32 [8, 512, 1] constant 1.0 output with one Triton fill kernel and the exact eager layout.
-  What Inductor change would fix: No local scheduler/codegen change is indicated; the remaining work is the launch plus a 16 KiB output store.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full no-input Repro.forward by allocating the fresh contiguous cuda float32[8, 512, 1] result and storing scalar 1.0 to every element with a single minimal Triton fill kernel, whereas Inductor currently lowers aten.full through the generic pointwise scheduler as a generated constant-store kernel; Inductor cannot do this today because its scheduler/codegen pattern library has no dedicated static-shape constant-tensor creation path that bypasses generic pointwise indexing for single-value full; the fix is NEW_PATTERN: add an Inductor constant-fill lowering for static aten.full that emits a minimal fill kernel or backend fill primitive directly."""
 from __future__ import annotations
 
 import argparse
@@ -21,16 +14,7 @@ except ImportError:
     triton = None
     tl = None
 
-
-REPRO_ID = "pointwise_052e3853c721"
-REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
-REPRO_PATH = REPRO_DIR / "repro.py"
-CLASSIFICATION = "BANDWIDTH_BOUND"
-
-sys.path.insert(0, str(REPO_ROOT))
-
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -41,57 +25,57 @@ from oracle_harness import (  # noqa: E402
 )
 
 
-OUTPUT_SHAPE = (8, 512, 1)
-OUTPUT_STRIDE = (512, 1, 1)
-OUTPUT_NUMEL = 8 * 512 * 1
+REPRO_DIR = Path(__file__).resolve().parent
+REPRO_ID = REPRO_DIR.name
+REPRO_PATH = REPRO_DIR / "repro.py"
+
+OUT_SHAPE = (8, 512, 1)
+OUT_STRIDE = (512, 1, 1)
+OUT_NUMEL = OUT_SHAPE[0] * OUT_SHAPE[1] * OUT_SHAPE[2]
+BLOCK = OUT_NUMEL // 4
+OUT_DEVICE = torch.device("cuda", 0)
 
 
 def get_inputs():
-    """Load inputs from the repro's make_inputs."""
+    """Load inputs from the repro's make_inputs (scope invariant: same inputs)."""
     return _harness_get_inputs(REPRO_DIR)
 
 
 def get_repro_instance():
-    """Create Repro() for reference comparison."""
+    """Create a Repro() instance for reference comparison."""
     return _harness_get_repro_instance(REPRO_DIR)
 
 
 if triton is not None:
 
     @triton.jit
-    def _fill_one_kernel(
-        out_ptr,
-        n_elements: tl.constexpr,
-        block_size: tl.constexpr,
-    ):
-        offsets = tl.program_id(0) * block_size + tl.arange(0, block_size)
-        mask = offsets < n_elements
-        values = tl.full((block_size,), 1.0, tl.float32)
-        tl.store(out_ptr + offsets, values, mask=mask)
+    def _constant_fill_f32_kernel(out_ptr, BLOCK_SIZE: tl.constexpr):
+        offsets = tl.arange(0, BLOCK_SIZE)
+        values = tl.full((BLOCK_SIZE,), 1.0, tl.float32)
+        tl.store(out_ptr + offsets, values)
+        tl.store(out_ptr + offsets + BLOCK_SIZE, values)
+        tl.store(out_ptr + offsets + 2 * BLOCK_SIZE, values)
+        tl.store(out_ptr + offsets + 3 * BLOCK_SIZE, values)
 
 
 def oracle_forward(inputs):
-    """Materialize the same f32 [8, 512, 1] ones tensor as Repro.forward()."""
-    if len(inputs) != 0:
+    """Run the full repro computation and return the fresh constant tensor."""
+    if inputs:
         raise AssertionError(f"expected no inputs, got {len(inputs)}")
     if triton is None:
         raise RuntimeError("Triton is required for the timed oracle")
 
-    output = torch.empty_strided(
-        OUTPUT_SHAPE,
-        OUTPUT_STRIDE,
-        device=torch.device("cuda", 0),
+    out = torch.empty(
+        OUT_SHAPE,
+        device=OUT_DEVICE,
         dtype=torch.float32,
     )
-    block_size = 1024
-    grid = (triton.cdiv(OUTPUT_NUMEL, block_size),)
-    _fill_one_kernel[grid](
-        output,
-        n_elements=OUTPUT_NUMEL,
-        block_size=block_size,
+    _constant_fill_f32_kernel[(1,)](
+        out,
+        BLOCK_SIZE=BLOCK,
         num_warps=4,
     )
-    return output
+    return out
 
 
 def main():
@@ -147,8 +131,9 @@ def main():
             layout_out = oracle_forward(inputs)
             torch.cuda.synchronize()
         layout_ok = (
-            tuple(layout_out.shape) == OUTPUT_SHAPE
-            and layout_out.stride() == OUTPUT_STRIDE
+            tuple(layout_out.shape) == OUT_SHAPE
+            and layout_out.stride() == OUT_STRIDE
+            and layout_out.dtype == torch.float32
         )
         print(
             f"  output 0 layout: {'PASS' if layout_ok else 'FAIL'} "
@@ -163,16 +148,13 @@ def main():
         print(f"Benchmarking {REPRO_ID}...")
         if args.all_shapes:
             results = bench_oracle_all_shapes(
-                oracle_forward,
-                REPRO_DIR,
-                REPRO_ID,
-                warmup=args.warmup,
-                rep=args.rep,
+                oracle_forward, REPRO_DIR, REPRO_ID,
+                warmup=args.warmup, rep=args.rep,
             )
             for result in results:
                 if result["status"] == "BAD_ORACLE":
-                    print(f"WARNING: oracle is slower than compile "
-                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+                    print(f"WARNING: oracle is slower than compile for "
+                          f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
         else:
             result = bench_oracle(
                 oracle_forward,
