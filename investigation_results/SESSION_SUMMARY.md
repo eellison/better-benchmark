@@ -9,12 +9,21 @@
 ## Coverage
 
 - **Corpus**: 1090 repros with gap > 1.1x vs SOL (from 1482 total)
-- **Oracle-verified**: 180/1090 (16%) — the other server is producing more
-- **Resolved**: ~95 (53% of oracle-verified)
-  - 70 closed (compile already at floor)
-  - 25 implemented (our fixes close the gap)
-- **Needs work**: ~45 (design TODOs, mostly scheduler-level)
-- **Bad oracles**: ~27 (other server needs to rewrite — scope mismatch or slower than compile)
+- **Oracle files**: 267 across 263 repro dirs (18% of corpus)
+- **Queue entries**: 263 (one per oracle-verified repro)
+- **Resolved**: 126 (48% of queue)
+  - 103 closed (compile already at floor)
+  - 23 implemented (our fixes close the gap)
+- **Needs work**: 77 (design TODOs, mostly scheduler-level)
+  - COOPERATIVE_SPLIT_K: 30
+  - SCATTER_REDUCE: 19
+  - SCHEDULER_FUSION: 10
+  - NEW_PATTERN: 8
+  - RECOMPUTE_FUSION: 7
+  - Others: 3 (MULTI_STORE_CODEGEN, IGNORE_INDEX_CROSS_ENTROPY, ALGEBRAIC_ELIMINATION)
+- **Bad oracles**: 56 (other server needs to rewrite — scope mismatch or slower than compile)
+- **Deferred**: 4
+- **Uncovered**: 1219 repros still need oracles
 
 ## Implemented Optimizations (14 total, on pytorch branch `pr-184905`)
 
@@ -64,22 +73,25 @@
 ## Remaining Work (Design TODOs)
 
 ### High Priority (most repros affected):
-1. **Cooperative split-K / tiled reduction codegen** (17 repros, 1.2-2.0x gaps)
+1. **Cooperative split-K / tiled reduction codegen** (30 repros, 1.2-2.0x gaps)
    - Low-occupancy reductions (few output channels, large spatial)
    - Needs scheduler-level parallelism management, not threshold tweaks
    
-2. **Sibling reduction hint mismatch** (9 SCHEDULER_FUSION repros, 1.4-1.9x)
+2. **Scatter-reduce patterns** (19 SCATTER_REDUCE repros, 1.4-2.1x)
+   - "reduction → scatter" and embedding backward patterns
+   - Needs scheduler-level "multi-output scatter-reduce epilogue" fusion
+
+3. **Sibling reduction hint mismatch** (10 SCHEDULER_FUSION repros, 1.4-1.9x)
    - Two reductions on same data get different INNER/OUTER hints → incompatible iteration spaces
    - Fix: extend MultiOutputReduction for independent sums, or reconcile hints
 
-3. **2-pass re-read epilogue** (7 RECOMPUTE_FUSION repros, 1.2-1.8x)
+4. **2-pass re-read epilogue** (7 RECOMPUTE_FUSION repros, 1.2-1.8x)
    - Reduction result needed for pointwise epilogue → second full data pass
    - Same underlying issue as cooperative split-K
 
 ### Medium Priority:
-4. **Embedding backward scatter-reduce** (6 SCATTER_REDUCE repros, 1.4-2.1x)
-   - "reduction → scatter" pattern (reverse of our existing pass)
-   - Needs scheduler-level "multi-output scatter-reduce epilogue" fusion
+5. **NEW_PATTERN** (8 repros)
+   - Unclassified patterns requiring new analysis
    
 5. **Multi-store codegen** (1 repro, 2.25x)
    - ShuffleNet: iterate half elements, write both branches per thread
@@ -106,7 +118,7 @@
 
 ## What the Other Server Should Do
 
-1. Keep producing oracles (982 repros still uncovered)
-2. Rewrite 27 flagged bad oracles (scope mismatches, slower than compile)
+1. Keep producing oracles (1219 repros still uncovered)
+2. Rewrite 56 flagged bad oracles (scope mismatches, slower than compile)
 3. Follow the Oracle Scope Invariant in INVEST_INSTRUCTIONS.MD
 4. Push to `investigations-june-2026` branch — this session pulls and processes automatically
