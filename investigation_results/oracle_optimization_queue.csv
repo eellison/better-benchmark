@@ -379,3 +379,9 @@ pointwise_b43349159514,AT_FLOOR,closed,fresh_2026-06-04: compile=5.50us oracle=5
 pointwise_edfab1af9465,AT_FLOOR,closed,fresh_2026-06-04: compile=5.76us oracle=6.02us gap=0.957x; BAD_ORACLE f32[1000x16] tanh at launch floor; no real gap
 sum_a963d4e1fcf5,AT_FLOOR,closed,fresh_2026-06-04: compile=7.20us oracle=6.02us gap=1.20x; f32[64x256] row L2 norm borderline; historical_best_compile=5.70us; no actionable gap
 sum_sum_sum_72f8a586759c,SCATTER_REDUCE,needs_work,fresh_2026-06-04: compile=29.34us oracle=6.82us gap=4.30x; nanogpt layernorm-bwd index_put scatter+5 reductions+permute in 1 kernel; true_floor=yes
+pointwise_724b26e60185,BANDWIDTH_BOUND,closed,fresh_2026-06-04: compile=5.4us oracle=7.0us gap=0.77x; BAD_ORACLE f32[30522] cat+zero_tail at launch floor; Inductor already optimal
+sum_sum_sum_6b7ff2251678,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=19.8us oracle=8.3us gap=2.40x; ConvNeXtV2 layernorm-backward multi-output row+channel reduction fusion; true_floor=yes
+sum_sum_sum_dbc10f22635c,ALGEBRAIC_ELIMINATION,needs_work,fresh_2026-06-04: compile=21.7us oracle=10.1us gap=2.16x; ConvNeXtV2 layernorm-backward scatter-expand-reduce tail algebraic elimination; true_floor=yes
+var_mean_2ceed1dd2572,BANDWIDTH_BOUND,closed,fresh_2026-06-04: compile=6.0us oracle=6.6us gap=0.91x; BAD_ORACLE Albert GELU+LayerNorm fp16 [512x128]; Inductor norm template already optimal
+var_mean_35394af84f60,BANDWIDTH_BOUND,implemented,fresh_2026-06-04: compile=6.7us oracle=6.0us gap=1.12x; functorch_dp_cifar10 GroupNorm+affine+ReLU [64x512x1x1]; borderline gap at launch floor
+var_mean_e48f702d6f81,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=11.9us oracle=6.1us gap=1.94x; functorch_dp_cifar10 GroupNorm+affine+ReLU multi-output with exposed mean/rsqrt stats; true_floor=yes
