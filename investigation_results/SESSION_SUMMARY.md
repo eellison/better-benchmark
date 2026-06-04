@@ -1,143 +1,138 @@
-# Inductor Kernel Optimization Session Summary (June 2026)
+# Inductor Kernel Optimization — Session Summary (June 2026)
 
-## Process
+## Playbook: What's Allowed
 
-1. **Other server** writes oracle kernels (optimal Triton implementations) for repros with gaps vs SOL
-2. **This session** pulls oracles → measures compile vs oracle → classifies the gap → implements Inductor fixes
-3. **Pipeline**: pull → investigate → implement/close → commit → repeat
+### Legitimate fixes:
+- Scheduler improvements in Inductor
+- Codegen improvements in Inductor  
+- Algebraic rewrites/optimizations/simplifications (aten FX layer or fx passes)
+- Config value changes are useful for EXPLORATION but we strive for real fixes; if we can't, we log
 
-## Coverage
+### NOT allowed:
+- Dispatch to custom Triton kernel (oracles show the target, Inductor's generic codegen must reach it)
 
-- **Corpus**: 1090 repros with gap > 1.1x vs SOL (from 1482 total)
-- **Oracle files**: 267 across 263 repro dirs (18% of corpus)
-- **Queue entries**: 263 (one per oracle-verified repro)
-- **Resolved**: 126 (48% of queue)
-  - 103 closed (compile already at floor)
-  - 23 implemented (our fixes close the gap)
-- **Needs work**: 77 (design TODOs, mostly scheduler-level)
-  - COOPERATIVE_SPLIT_K: 30
-  - SCATTER_REDUCE: 19
-  - SCHEDULER_FUSION: 10
-  - NEW_PATTERN: 8
-  - RECOMPUTE_FUSION: 7
-  - Others: 3 (MULTI_STORE_CODEGEN, IGNORE_INDEX_CROSS_ENTROPY, ALGEBRAIC_ELIMINATION)
-- **Bad oracles**: 56 (other server needs to rewrite — scope mismatch or slower than compile)
-- **Deferred**: 4
-- **Uncovered**: 1219 repros still need oracles
+### Performance target:
+- Best perf across: combo_kernels ON, coordinate_descent_tuning ON, with either looped or forced persistent reductions (multi_kernel=2 or 3)
+- We assume autotuning through these options in the future — so we want the best achievable with all tuning knobs cranked
+- This is NOT "select the best config per repro" (doesn't scale) — it's "make the generic codegen good enough that autotuning finds the optimum"
 
-## Implemented Optimizations (14 total, on pytorch branch `pr-184905`)
+---
 
-### Committed as separate changes:
-1. `[inductor] All kernel optimizations` — big batch commit with:
-   - Scalar reduction accumulators (2.09x on online softmax, gated on num_load<=3)
-   - Linear reduction algebraic elimination FX pass (1.6x on BN backward)
-   - Scatter-reduce fusion FX pass — scatter_add + bilinear index_put (2.2-2.7x)
-   - Slice_scatter elision FX pass (1.3x on stencil patterns)
-   - as_strided_scatter elision FX pass (26% on MobileViT)
-   - Layout-transform store sinking FX pass (1.19x ShuffleNet)
-   - i32 sort narrowing for topk indices (27% on MoE routing)
-   - Deferred indirect assertions (15% overhead reduction)
-   - Fast_math for online softmax normalization pass (15%)
-   - Logsumexp-stable softmax pattern extension (14% Reformer)
-   - Partitioned scatter enabled by default (7.5x T5 attention)
-   - Split threshold for low-occupancy BN backward (6x)
-   - MOR Triton finalize (35% Swin — needs review re: atomics)
-   - CE gather-into-softmax reduction (0.8% — limited by inner_fn hoisting)
-   - Reduction chaining detection (detection only, no fusion)
+## General Flow
 
-2. `[inductor] CE loop-invariant hoisting` — realize gather before reduction (21-23% on large vocab)
+1. **Other server** writes oracle kernels → pushes to `investigations-june-2026` branch
+2. **This session** pulls → measures compile vs oracle → classifies gap → implements fix or logs as TODO
+3. **Pipeline**: `git pull` → subagent measures → classify → implement if possible → commit → repeat
+4. **Coordination**: `oracle_optimization_queue.csv` tracks every oracle-verified repro with status
 
-3. `[inductor] Relax pointwise_cat guard` — allow view/realized inputs (Reformer 22.9→16us, UNet 4.27x, broad impact)
+---
 
-4. `[inductor] Gate scalar_acc on num_load<=3` — fix 14-22% regressions on bandwidth-bound kernels
+## Where Things Live
 
-## Key Validated Wins (measured per-repro)
+### Tracking:
+- `investigation_results/oracle_optimization_queue.csv` — per-oracle status (closed/implemented/needs_work/oracle_needs_rewrite)
+- `investigation_results/inductor_writeups/per_repro/<id>.md` — detailed investigation per repro
+- `investigation_results/oracle_priority_worklist.csv` — prioritized list for oracle writers (793 remaining)
+- `investigation_results/SESSION_SUMMARY.md` — this file
 
-| Fix | Best Speedup | Repros Helped |
-|-----|-------------|---------------|
-| Partitioned scatter | 7.11x | T5 attention + high-contention |
-| Split threshold | 6.06x | BN backward low-wave |
-| pointwise_cat relaxation | 4.27x | UNet, CE, scatter, softmax (broad!) |
+### Implemented fixes (pytorch branch `pr-184905`):
+All in `/tmp/pytorch-work/torch/_inductor/`:
+- `fx_passes/scatter_reduce_fusion.py` — scatter→gather-reduce (2.2-2.7x)
+- `fx_passes/linear_reduction_elimination.py` — algebraic elimination (1.3-2.1x)
+- `fx_passes/slice_scatter_elision.py` — stencil elision (1.3x)
+- `fx_passes/as_strided_scatter_elision.py` — as_strided elision (26%)
+- `fx_passes/select_scatter_sparsity.py` — sparsity propagation (14.6x on DINOv2!)
+- `fx_passes/layout_transform_store_sinking.py` — channel shuffle (1.19x)
+- `codegen/triton.py` — scalar accumulators, fast_math, deferred assertions, -inf guard
+- `runtime/triton_heuristics.py` — XBLOCK=1 for online softmax, R0_BLOCK configs
+- `config.py` — all new config flags
+- `memory.py` — combo_kernels phantom buffer fix
+- `lowering.py` — pointwise_cat relaxation, CE gather hoisting, i32 sort narrowing
+- `kernel/scatter_reduce_gather.py` — gather-reduce kernel helper
+
+### Validated wins (measured per-repro):
+| Fix | Best Speedup | Scope |
+|-----|-------------|-------|
+| Select_scatter sparsity | 14.6x | DINOv2 ViT (sparse CLS backward) |
+| Partitioned scatter | 7.11x | T5 attention (atomic contention) |
+| Split threshold | 6.06x | BN backward (low-wave) |
+| pointwise_cat relaxation | 4.27x | UNet, CE, scatter, softmax (broad) |
 | Scatter-reduce (bilinear) | 2.74x | UNet bilinear backward |
 | Scatter-reduce (scatter_add) | 2.52x | VGG16, AlexNet |
 | Scalar accumulators | 2.09x | Online softmax large-rnumel |
-| Algebraic elimination | 2.11x | BN backward dependent reductions (11 repros) |
-| MOR Triton finalize | 1.35x | Swin LN backward |
+| Algebraic elimination | 2.11x | BN backward dependent reductions |
+| MOR Triton finalize | 1.35x | Swin LN backward (needs review) |
 | i32 sort narrowing | 1.41x | MoE topk→sort |
 | Slice_scatter elision | 1.32x | Stencil patterns |
 | as_strided_scatter elision | 1.26x | MobileViT avgpool |
+| Combo memory phantom fix | 4→1 kernels | Reformer RNG (combo bug fix) |
 | Layout-transform store sinking | 1.19x | ShuffleNet channel shuffle |
 | Logsumexp-stable pattern | 1.14x | Reformer LSH |
 | CE gather hoisting | 21-23% | Large vocab CE (LLaMA-scale) |
 
-## Remaining Work (Design TODOs)
+---
 
-### High Priority (most repros affected):
-1. **Cooperative split-K / tiled reduction codegen** (30 repros, 1.2-2.0x gaps)
-   - Low-occupancy reductions (few output channels, large spatial)
-   - Needs scheduler-level parallelism management, not threshold tweaks
-   
-2. **Scatter-reduce patterns** (19 SCATTER_REDUCE repros, 1.4-2.1x)
-   - "reduction → scatter" and embedding backward patterns
+## Design TODOs (need further discussion/design)
+
+### High impact, scheduler-level:
+1. **Cooperative split-K / tiled reduction** (~30 repros, 1.2-2.7x)
+   - Low-occupancy reductions need more parallelism
+   - Scheduler must reason about when to split-K with cooperative epilogue
+
+2. **Embedding backward scatter-reduce epilogue** (~15 repros, 1.4-2.1x)
+   - "rowwise producer → multi-target atomic scatter" pattern
    - Needs scheduler-level "multi-output scatter-reduce epilogue" fusion
 
-3. **Sibling reduction hint mismatch** (10 SCHEDULER_FUSION repros, 1.4-1.9x)
-   - Two reductions on same data get different INNER/OUTER hints → incompatible iteration spaces
-   - Fix: extend MultiOutputReduction for independent sums, or reconcile hints
+3. **Sibling reduction fusion / hint reconciliation** (~12 repros, 1.4-1.9x)
+   - Sibling reductions on same data get different INNER/OUTER hints
+   - Need MultiOutputReduction for independent sums, or hint reconciliation
 
-4. **2-pass re-read epilogue** (7 RECOMPUTE_FUSION repros, 1.2-1.8x)
-   - Reduction result needed for pointwise epilogue → second full data pass
-   - Same underlying issue as cooperative split-K
+4. **Fold reduction over cat into producer** (~5 repros, 1.6-3.8x)
+   - `sum(cat([arm1, arm2]))` should be folded into producer as in-register accumulation
+   - Scheduler can't express "write structured output AND accumulate column sums"
 
-### Medium Priority:
-5. **NEW_PATTERN** (8 repros)
-   - Unclassified patterns requiring new analysis
-   
-5. **Multi-store codegen** (1 repro, 2.25x)
-   - ShuffleNet: iterate half elements, write both branches per thread
-   
-6. **Loop-invariant hoisting** (generic, 21-23% on large vocab)
-   - Hoist loop-invariant indirect loads out of reduction inner_fn
-   - Path B (simple CE-specific) already implemented
+### Medium impact, codegen-level:
+5. **Loop-invariant hoisting for inner_fn** (21-23% on large vocab)
+   - Hoist loop-invariant indirect loads out of reduction loop
+   - CE-specific Path B already done; generic version needs refactor
 
-### Low Priority:
-7. **Tridiagonal solve recognition** (2 pyhpc repros)
-8. **Demucs gather+sum fusion** (1 repro, 15.9x — unique pattern)
+6. **Generic channel-independent op commutation with cat** (1.7-2.8x)
+   - `op(cat([a,b], dim=C))` → `cat([op(a), op(b)], dim=C)` for pool/upsample/pad
+   - maxpool case validated (1.69x); generalize to avgpool, upsample
 
-## Files & Branches
+7. **Pointwise→pool fusion** (2.97x doctr)
+   - Scheduler doesn't fuse elementwise producer into _low_memory_max_pool consumer
+   - `realize_hint()` forces materialization before pool reads via stencil
 
-- **better-benchmark repo**: `investigations-june-2026` branch on github.com/eellison/better-benchmark
-- **pytorch working tree**: `/tmp/pytorch-work` branch `pr-184905` with 4 commits on top
-- **Key CSVs**:
-  - `investigation_results/oracle_optimization_queue.csv` — per-oracle tracker
-  - `investigation_results/inductor_optimization_per_repro_queue.csv` — full 1090-repro queue
-  - `investigation_results/inductor_optimization_priority_queue.csv` — family-level priorities
-- **Key scripts**:
-  - `scripts/bench_compare.py` — interleaved A/B benchmarker
-  - `scripts/validate_oracles.py` — auto-validate oracle correctness
+8. **Realize-reads threshold / scheduler-aware realization** (1.4x→1.1x)
+   - Don't realize if all consumers will fuse together
+   - Validated that threshold=30 works globally (no regressions) but want proper scheduler logic
 
-## What the Other Server Should Do
+### Lower impact / narrow:
+9. **Multi-store codegen** (2.25x ShuffleNet) — iterate half elements, write both branches
+10. **Index-based sparsity** (2.4x nanogpt) — extend select_scatter_sparsity for `index_put` with dynamic indices
+11. **Tridiagonal solve recognition** (2 pyhpc repros) — sequential select_scatter chain
+12. **Demucs gather+sum fusion** (15.9x, 1 repro) — unique pattern
 
-1. Keep producing oracles (1219 repros still uncovered)
-2. Rewrite 56 flagged bad oracles (scope mismatches, slower than compile)
-3. Follow the Oracle Scope Invariant in INVEST_INSTRUCTIONS.MD
-4. Push to `investigations-june-2026` branch — this session pulls and processes automatically
+---
 
-## Design Ideas (for future discussion)
+## Coverage Stats (end of session)
 
-### Generic channel-independent op commutation with cat
+- **Oracle files**: 396 across corpus (27% of 1482)
+- **Queue entries**: ~380 oracle-verified repros
+- **Resolved**: ~175 (46%) — closed at floor + implemented
+- **Needs work**: ~85 (design TODOs above)
+- **Bad oracles**: ~55 (other server needs to rewrite)
+- **Remaining uncovered**: ~793 repros need oracles (priority worklist provided)
 
-**Observation:** Any op whose output at channel `c` depends only on input at channel `c` commutes with cat along channels:
-```
-op(cat([a,b], dim=C)) → cat([op(a), op(b)], dim=C)
-```
+---
 
-**Applies to:** all spatial-only ops (pool, upsample, pad), per-channel norms (BN, instance norm), all elementwise.
+## Infrastructure Built
 
-**Does NOT apply to:** conv (cross-channel), linear, attention.
-
-**Current state:** Inductor handles the elementwise case via pointwise_cat. The new opportunity is spatial ops (pool, upsample) that force materialization via `realize_hint()`. An agent is implementing the maxpool case specifically.
-
-**Bigger picture:** This would be trivial with dimension semantics in the IR (like torchdims) — the compiler could prove commutativity automatically without per-op pattern matching. Without it, we pattern-match each op. Worth considering as an IR-level enhancement long-term.
-
-**Impact:** Eliminates large intermediate materializations whenever cat feeds into channel-independent consumers. The SqueezeNet maxpool case alone saves 191MB intermediate (312us → 112us, 2.78x).
+- `oracle_harness.py` — shared oracle helpers (check, bench, stochastic detection, hardware info, all-shapes)
+- `scripts/oracle_template.py` — standardized template for oracle writers
+- `scripts/bench_compare.py` — interleaved A/B benchmarker
+- `scripts/validate_oracles.py` — auto-validate correctness
+- `pyproject.toml` — pip-installable, no sys.path hacks
+- `scripts/ORACLE_FORMAT.md` — format documentation
+- `INVEST_INSTRUCTIONS.MD` — collaboration guide for oracle writers
