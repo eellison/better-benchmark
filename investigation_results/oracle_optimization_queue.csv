@@ -262,3 +262,6 @@ sum_sum_sum_68efcf13bb7a,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=108.7
 sum_sum_sum_72d5ffa26b42,AT_FLOOR,closed,compile=61.8us(cd) vs oracle=59.3us; 1.04x gap; Longformer LN-backward/dropout embedding scatter-reduce; Inductor already near-optimal
 sum_sum_sum_78c3940fcbe9,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=59.8us(cd) vs oracle=95.0us (1.6x slower); Qwen RMSNorm/RoPE backward scheduler fusion; oracle suboptimal
 sum_sum_sum_821bf10276d6,SCATTER_REDUCE,needs_work,compile=210.2us(cd) vs oracle=91.0us; 2.31x gap; Swin relative-position-bias backward scatter-reduce with batch reduction into duplicate [169x16] buckets
+sum_sum_bc10a7742387,SCHEDULER_FUSION,needs_work,compile=10.432/12.864us vs oracle=9.920us; 1.05x gap vs best required config; VoVNet BN-backward where dual reduction epilogue; scheduler fusion
+any_amax_sum_c1a313554420,NEW_PATTERN,needs_work,compile=19.040/14.848us vs oracle=11.360us; 1.31x gap vs best required config; MT5 all-inf-safe masked softmax; needs fused masked-softmax template
+sum_2e0e9617102b,BANDWIDTH_BOUND,closed,historical compile=49.024/50.848us beats oracle=82.272us; ConvNeXt add channel reduction bandwidth-bound; no actionable gap
