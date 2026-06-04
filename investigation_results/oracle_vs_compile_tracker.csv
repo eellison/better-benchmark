@@ -36,3 +36,9 @@ sum_sum_sum_1c9995bc990f,multi_output_reduction_templates,73.600,67.520,1.090,6.
 sum_sum_sum_3eab263249bb,structured_pool_upsample_backward_reduce,120.700,129.120,0.935,-8.420,scatter_reduce_fusion,not_true_floor
 sum_sum_sum_94e3624cdd05,structured_pool_upsample_backward_reduce,102.200,77.792,1.314,24.408,scatter_reduce_fusion,small_gap
 sum_sum_sum_da376d09d2cb,multi_output_reduction_templates,57.900,43.264,1.338,14.636,cooperative_split_k,small_gap
+amax_sum_a215204c9264,online_softmax_cross_entropy,7.328,7.552,0.970,-0.224,bandwidth_bound,at_floor
+amax_sum_sum_2a28fce37306,online_softmax_cross_entropy,10.144,6.208,1.634,3.936,online_softmax_fusion,real_gap
+amax_sum_sum_5829d7f5105f,online_softmax_cross_entropy,8.192,5.056,1.620,3.136,online_softmax_fusion,real_gap
+pointwise_41aa929b1bf2,pointwise_fill,4.510,4.930,0.916,-0.420,bandwidth_bound,bad_oracle
+pointwise_eaafbb6b8c5a,pointwise_sort,5.500,6.980,0.789,-1.480,bandwidth_bound,bad_oracle
+sum_sum_sum_e3016fe2bbb7,multi_output_reduction_templates,26.140,6.940,3.765,19.200,scheduler_fusion,real_gap
