@@ -158,3 +158,29 @@ For oracles that predate this format:
 4. Add `run_check` and `run_bench` functions matching the template
 5. Add the standard argparse CLI with `--check` / `--bench`
 6. Verify with: `python oracle_<name>.py --check`
+
+## Future Enhancement: Shape/Hardware Dispatch Registry
+
+Currently oracles handle shape variation via:
+- `@triton.autotune` (tile size selection)
+- Manual if/else in `oracle_forward()` for algorithm selection
+- `get_hardware_info()` for GPU-specific branching
+
+If the pattern recurs enough, consider a registry:
+```python
+ORACLE_REGISTRY = {}
+
+def register_oracle(shape_pred=None, hw_pred=None):
+    def decorator(fn):
+        ORACLE_REGISTRY[fn.__name__] = (fn, shape_pred, hw_pred)
+        return fn
+    return decorator
+
+@register_oracle(shape_pred=lambda s: s[1] <= 1024)
+def persistent_variant(inputs): ...
+
+@register_oracle(shape_pred=lambda s: s[1] > 1024)  
+def tiled_variant(inputs): ...
+```
+
+For now, simple if/else in oracle_forward() is sufficient.
