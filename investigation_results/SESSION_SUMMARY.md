@@ -122,3 +122,22 @@
 2. Rewrite 56 flagged bad oracles (scope mismatches, slower than compile)
 3. Follow the Oracle Scope Invariant in INVEST_INSTRUCTIONS.MD
 4. Push to `investigations-june-2026` branch — this session pulls and processes automatically
+
+## Design Ideas (for future discussion)
+
+### Generic channel-independent op commutation with cat
+
+**Observation:** Any op whose output at channel `c` depends only on input at channel `c` commutes with cat along channels:
+```
+op(cat([a,b], dim=C)) → cat([op(a), op(b)], dim=C)
+```
+
+**Applies to:** all spatial-only ops (pool, upsample, pad), per-channel norms (BN, instance norm), all elementwise.
+
+**Does NOT apply to:** conv (cross-channel), linear, attention.
+
+**Current state:** Inductor handles the elementwise case via pointwise_cat. The new opportunity is spatial ops (pool, upsample) that force materialization via `realize_hint()`. An agent is implementing the maxpool case specifically.
+
+**Bigger picture:** This would be trivial with dimension semantics in the IR (like torchdims) — the compiler could prove commutativity automatically without per-op pattern matching. Without it, we pattern-match each op. Worth considering as an IR-level enhancement long-term.
+
+**Impact:** Eliminates large intermediate materializations whenever cat feeds into channel-independent consumers. The SqueezeNet maxpool case alone saves 191MB intermediate (312us → 112us, 2.78x).
