@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the full `sum_sum_sum_b30da3bff8d4` FNet layer-norm-backward return tuple by reducing each `[768]` row for the input-gradient lane, writing the returned `[32,512,768,2]` `select_scatter` output while preserving lane 1, and cooperatively accumulating the two `[768]` column reductions from the same row-tiled producer, whereas Inductor currently schedules the row sums, input-gradient lane store, `select_scatter` materialization, and sibling `sum([0, 1])` reductions as separate generic kernels over materialized intermediates; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K multi-output reduction template that keeps row-local reductions, a materialized `select_scatter` side output, and sibling column accumulators in one coordinated producer; the fix is COOPERATIVE_SPLIT_K: teach Inductor to split compatible layer-norm-backward column reductions across row tiles, finalize their partials, and fuse the dependent `select_scatter` side store."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete GoogleFnet layer-norm backward, dgamma/dbeta reductions, and select_scatter output with Triton row reductions plus atomic cooperative split-K column reductions, whereas Inductor currently emits separate generic reduction and select_scatter kernels around materialized intermediates; Inductor cannot do this today because its scheduler/codegen cannot fuse LN-backward row reductions with sibling column reductions and full select_scatter side-output stores while cooperatively splitting the reduction across the batch-sequence dimension; the fix is COOPERATIVE_SPLIT_K: teach Inductor to generate a specialized layer-norm-backward schedule that keeps row reductions and select_scatter stores in one output kernel while accumulating dgamma and dbeta with cooperative split-K reductions."""
 from __future__ import annotations
 
 import argparse
@@ -14,26 +14,24 @@ import torch
 try:
     import triton
     import triton.language as tl
-except ModuleNotFoundError:  # pragma: no cover - keeps CPU-only syntax checks usable.
+except ImportError:  # pragma: no cover - keeps py_compile usable without Triton.
     triton = None
     tl = None
 
 
 REPRO_ID = "sum_sum_sum_b30da3bff8d4"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
-SHAPE_LABEL = "hf_googlefnet_train_001_a1091d37"
+SHAPE_LABEL = "hf_GoogleFnet_train_001_a1091d37"
 
-BATCH = 32
-SEQ = 512
-M = BATCH * SEQ
-D = 768
+B = 32
+S = 512
+M = B * S
+C = 768
 LANES = 2
-
-TILE_M = 8
-TILE_D = 1024
-
+BLOCK_ROW_C = 1024
+ROWS_PER_SPLIT = 4
+NUM_ROW_SPLITS = math.ceil(M / ROWS_PER_SPLIT)
 
 
 def _load_repro_module():
@@ -47,8 +45,24 @@ def _load_repro_module():
 
 
 def make_inputs(device: torch.device) -> tuple[object, ...]:
-    module = _load_repro_module()
-    inputs = module.make_inputs()
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    configs = load_shape_configs(str(REPRO_PATH))
+    if configs:
+        config = next(iter(configs.values()))
+        config = {
+            "inputs": [
+                {**spec, "device": str(device)}
+                if isinstance(spec, dict) and spec.get("kind") == "tensor"
+                else spec
+                for spec in config["inputs"]
+            ]
+        }
+        inputs = make_inputs_from_config(config)
+    else:
+        module = _load_repro_module()
+        inputs = module.make_inputs()
+
     moved: list[object] = []
     for value in inputs:
         if isinstance(value, torch.Tensor):
@@ -58,23 +72,103 @@ def make_inputs(device: torch.device) -> tuple[object, ...]:
     return tuple(moved)
 
 
-def _as_tuple(out: object) -> tuple[torch.Tensor, ...]:
-    if isinstance(out, tuple):
-        return out
-    return (out,)
+if triton is not None:
+
+    @triton.jit
+    def _fused_ln_select_atomic_split_k_kernel(
+        mm_ptr,
+        residual_ptr,
+        gamma_ptr,
+        xhat_ptr,
+        scale_ptr,
+        full_ptr,
+        out_ptr,
+        dgamma_ptr,
+        dbeta_ptr,
+        mm_stride_m: tl.constexpr,
+        mm_stride_c: tl.constexpr,
+        residual_stride_b: tl.constexpr,
+        residual_stride_s: tl.constexpr,
+        residual_stride_c: tl.constexpr,
+        gamma_stride_c: tl.constexpr,
+        xhat_stride_b: tl.constexpr,
+        xhat_stride_s: tl.constexpr,
+        xhat_stride_c: tl.constexpr,
+        scale_stride_b: tl.constexpr,
+        scale_stride_s: tl.constexpr,
+        scale_stride_c: tl.constexpr,
+        full_stride_b: tl.constexpr,
+        full_stride_s: tl.constexpr,
+        full_stride_c: tl.constexpr,
+        full_stride_l: tl.constexpr,
+        out_stride_b: tl.constexpr,
+        out_stride_s: tl.constexpr,
+        out_stride_c: tl.constexpr,
+        out_stride_l: tl.constexpr,
+        ROWS_PER_SPLIT_: tl.constexpr,
+        S_: tl.constexpr,
+        M_: tl.constexpr,
+        C_: tl.constexpr,
+        BLOCK_C_: tl.constexpr,
+    ):
+        pid = tl.program_id(0)
+        c_offsets = tl.arange(0, BLOCK_C_)
+        c_mask = c_offsets < C_
+        gamma = tl.load(gamma_ptr + c_offsets * gamma_stride_c, mask=c_mask, other=0.0).to(tl.float32)
+        accum_dgamma = tl.full([BLOCK_C_], 0.0, tl.float32)
+        accum_dbeta = tl.full([BLOCK_C_], 0.0, tl.float32)
+
+        for row_offset in tl.static_range(0, ROWS_PER_SPLIT_):
+            row = pid * ROWS_PER_SPLIT_ + row_offset
+            row_active = row < M_
+            b_idx = row // S_
+            s_idx = row - b_idx * S_
+            mask = c_mask & row_active
+
+            mm_offsets = row * mm_stride_m + c_offsets * mm_stride_c
+            residual_offsets = (
+                b_idx * residual_stride_b
+                + s_idx * residual_stride_s
+                + c_offsets * residual_stride_c
+            )
+            xhat_offsets = b_idx * xhat_stride_b + s_idx * xhat_stride_s + c_offsets * xhat_stride_c
+            scale_offset = b_idx * scale_stride_b + s_idx * scale_stride_s
+            full_lane1_offsets = (
+                b_idx * full_stride_b
+                + s_idx * full_stride_s
+                + c_offsets * full_stride_c
+                + full_stride_l
+            )
+            out_lane0_offsets = (
+                b_idx * out_stride_b
+                + s_idx * out_stride_s
+                + c_offsets * out_stride_c
+            )
+
+            mm = tl.load(mm_ptr + mm_offsets, mask=mask, other=0.0).to(tl.float32)
+            residual = tl.load(residual_ptr + residual_offsets, mask=mask, other=0.0).to(tl.float32)
+            xhat = tl.load(xhat_ptr + xhat_offsets, mask=mask, other=0.0).to(tl.float32)
+            row_scale = tl.load(scale_ptr + scale_offset + 0 * scale_stride_c, mask=row_active, other=0.0).to(tl.float32)
+
+            upstream = mm + residual
+            weighted = upstream * gamma
+            sum_weighted = tl.sum(weighted, axis=0)
+            sum_weighted_xhat = tl.sum(weighted * xhat, axis=0)
+            dx = row_scale * (weighted * C_ - sum_weighted - xhat * sum_weighted_xhat)
+            lane1 = tl.load(full_ptr + full_lane1_offsets, mask=mask, other=0.0).to(tl.float32)
+
+            lane_offsets = tl.arange(0, 2)
+            out_pair_offsets = out_lane0_offsets[:, None] + lane_offsets[None, :] * out_stride_l
+            out_pair = tl.where(lane_offsets[None, :] == 0, dx[:, None], lane1[:, None])
+            tl.store(out_ptr + out_pair_offsets, out_pair, mask=mask[:, None])
+            accum_dbeta += upstream
+            accum_dgamma += upstream * xhat
+
+        tl.atomic_add(dbeta_ptr + c_offsets, accum_dbeta, sem="relaxed", mask=c_mask)
+        tl.atomic_add(dgamma_ptr + c_offsets, accum_dgamma, sem="relaxed", mask=c_mask)
 
 
-def reference_outputs(
-    inputs: tuple[object, ...],
-    device: torch.device,
-) -> tuple[torch.Tensor, ...]:
-    module = _load_repro_module()
-    model = module.Repro().to(device)
-    with torch.no_grad():
-        return _as_tuple(model(*inputs))
-
-
-def oracle_torch(
+def oracle_cooperative_split_k(
     mm_50: torch.Tensor,
     mul_312: torch.Tensor,
     arg6_1: torch.Tensor,
@@ -83,188 +177,66 @@ def oracle_torch(
     full_2: torch.Tensor,
     _shape_param_0,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    add = mul_312 + mm_50.view(_shape_param_0)
-    weighted = add * arg6_1
-    row_sum = weighted.sum(dim=2, keepdim=True)
-    row_dot = (weighted * arg60_1).sum(dim=2, keepdim=True)
-    grad_lane = arg164_1 * (weighted * D - row_sum - arg60_1 * row_dot)
-    out0 = (add * arg60_1).sum(dim=(0, 1))
-    out1 = add.sum(dim=(0, 1))
-    out2 = torch.ops.aten.select_scatter.default(full_2, grad_lane, 3, 0)
-    return out0, out1, out2
+    del _shape_param_0
+    if triton is None:
+        raise RuntimeError("triton is not available")
+    if mm_50.device.type != "cuda":
+        raise RuntimeError("triton oracle requires CUDA inputs")
 
+    dgamma = torch.empty((C,), device=mm_50.device, dtype=mm_50.dtype)
+    dbeta = torch.empty((C,), device=mm_50.device, dtype=mm_50.dtype)
+    select_scatter = torch.empty_strided(
+        tuple(full_2.shape),
+        tuple(full_2.stride()),
+        device=full_2.device,
+        dtype=full_2.dtype,
+    )
+    dgamma.zero_()
+    dbeta.zero_()
 
-if triton is not None:
-
-    @triton.jit
-    def _row_store_and_partial_reduce_kernel(
-        mm_ptr,
-        residual_ptr,
-        gamma_ptr,
-        xhat_ptr,
-        scale_ptr,
-        full_ptr,
-        partial_sum_add_xhat_ptr,
-        partial_sum_add_ptr,
-        side_ptr,
-        M_: tl.constexpr,
-        D_: tl.constexpr,
-        BLOCK_M: tl.constexpr,
-        BLOCK_D: tl.constexpr,
-    ):
-        tile_m = tl.program_id(0)
-        m = tile_m * BLOCK_M + tl.arange(0, BLOCK_M)
-        d = tl.arange(0, BLOCK_D)
-        m_mask = m < M_
-        d_mask = d < D_
-        mask = m_mask[:, None] & d_mask[None, :]
-        offsets = m[:, None] * D_ + d[None, :]
-
-        mm = tl.load(mm_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-        residual = tl.load(residual_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-        xhat = tl.load(xhat_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-        gamma = tl.load(gamma_ptr + d, mask=d_mask, other=0.0).to(tl.float32)
-        scale = tl.load(scale_ptr + m, mask=m_mask, other=0.0).to(tl.float32)
-
-        add = mm + residual
-        weighted = add * gamma[None, :]
-        row_sum = tl.sum(tl.where(mask, weighted, 0.0), axis=1)
-        row_dot = tl.sum(tl.where(mask, weighted * xhat, 0.0), axis=1)
-        grad = scale[:, None] * (weighted * D_ - row_sum[:, None] - xhat * row_dot[:, None])
-
-        side_offsets = offsets * 2
-        tl.store(side_ptr + side_offsets, grad, mask=mask)
-        lane1 = tl.load(full_ptr + side_offsets + 1, mask=mask, other=0.0).to(tl.float32)
-        tl.store(side_ptr + side_offsets + 1, lane1, mask=mask)
-
-        partial_sum_add_xhat = tl.sum(tl.where(mask, add * xhat, 0.0), axis=0)
-        partial_sum_add = tl.sum(tl.where(mask, add, 0.0), axis=0)
-        partial_offsets = tile_m * D_ + d
-        tl.store(partial_sum_add_xhat_ptr + partial_offsets, partial_sum_add_xhat, mask=d_mask)
-        tl.store(partial_sum_add_ptr + partial_offsets, partial_sum_add, mask=d_mask)
-
-
-    @triton.jit
-    def _finalize_column_sums_kernel(
-        partial_sum_add_xhat_ptr,
-        partial_sum_add_ptr,
-        out_sum_add_xhat_ptr,
-        out_sum_add_ptr,
-        NUM_M_TILES: tl.constexpr,
-        D_: tl.constexpr,
-        BLOCK_TILES: tl.constexpr,
-        BLOCK_D: tl.constexpr,
-    ):
-        tile = tl.arange(0, BLOCK_TILES)
-        d = tl.program_id(0) * BLOCK_D + tl.arange(0, BLOCK_D)
-        mask = (tile[:, None] < NUM_M_TILES) & (d[None, :] < D_)
-        offsets = tile[:, None] * D_ + d[None, :]
-
-        sum_add_xhat = tl.load(partial_sum_add_xhat_ptr + offsets, mask=mask, other=0.0)
-        sum_add = tl.load(partial_sum_add_ptr + offsets, mask=mask, other=0.0)
-        d_mask = d < D_
-        tl.store(out_sum_add_xhat_ptr + d, tl.sum(sum_add_xhat, axis=0), mask=d_mask)
-        tl.store(out_sum_add_ptr + d, tl.sum(sum_add, axis=0), mask=d_mask)
-
-
-def prepare_oracle_inputs(*inputs: object) -> tuple[torch.Tensor, ...]:
-    (
+    _fused_ln_select_atomic_split_k_kernel[(NUM_ROW_SPLITS,)](
         mm_50,
         mul_312,
         arg6_1,
         arg60_1,
         arg164_1,
         full_2,
-        _shape_param_0,
-    ) = inputs
-
-    return (
-        mm_50.reshape(M, D).contiguous(),
-        mul_312.reshape(M, D).contiguous(),
-        arg6_1.contiguous(),
-        arg60_1.reshape(M, D).contiguous(),
-        arg164_1.reshape(M).contiguous(),
-        full_2.contiguous(),
-    )
-
-
-def oracle_triton_prepared(
-    mm_md: torch.Tensor,
-    residual_md: torch.Tensor,
-    gamma_d: torch.Tensor,
-    xhat_md: torch.Tensor,
-    scale_m: torch.Tensor,
-    full: torch.Tensor,
-) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    if triton is None:
-        raise RuntimeError("triton is not available")
-    if mm_md.device.type != "cuda":
-        raise RuntimeError("triton oracle requires CUDA inputs")
-
-    assert mm_md.shape == (M, D)
-    assert residual_md.shape == (M, D)
-    assert gamma_d.shape == (D,)
-    assert xhat_md.shape == (M, D)
-    assert scale_m.shape == (M,)
-    assert full.shape == (BATCH, SEQ, D, LANES)
-
-    device = mm_md.device
-    num_m_tiles = triton.cdiv(M, TILE_M)
-    partial_sum_add_xhat = torch.empty((num_m_tiles, D), device=device, dtype=torch.float32)
-    partial_sum_add = torch.empty((num_m_tiles, D), device=device, dtype=torch.float32)
-    side = torch.empty_like(full)
-
-    _row_store_and_partial_reduce_kernel[(num_m_tiles,)](
-        mm_md,
-        residual_md,
-        gamma_d,
-        xhat_md,
-        scale_m,
-        full,
-        partial_sum_add_xhat,
-        partial_sum_add,
-        side,
+        select_scatter,
+        dgamma,
+        dbeta,
+        mm_stride_m=mm_50.stride(0),
+        mm_stride_c=mm_50.stride(1),
+        residual_stride_b=mul_312.stride(0),
+        residual_stride_s=mul_312.stride(1),
+        residual_stride_c=mul_312.stride(2),
+        gamma_stride_c=arg6_1.stride(0),
+        xhat_stride_b=arg60_1.stride(0),
+        xhat_stride_s=arg60_1.stride(1),
+        xhat_stride_c=arg60_1.stride(2),
+        scale_stride_b=arg164_1.stride(0),
+        scale_stride_s=arg164_1.stride(1),
+        scale_stride_c=arg164_1.stride(2),
+        full_stride_b=full_2.stride(0),
+        full_stride_s=full_2.stride(1),
+        full_stride_c=full_2.stride(2),
+        full_stride_l=full_2.stride(3),
+        out_stride_b=select_scatter.stride(0),
+        out_stride_s=select_scatter.stride(1),
+        out_stride_c=select_scatter.stride(2),
+        out_stride_l=select_scatter.stride(3),
+        ROWS_PER_SPLIT_=ROWS_PER_SPLIT,
+        S_=S,
         M_=M,
-        D_=D,
-        BLOCK_M=TILE_M,
-        BLOCK_D=TILE_D,
-        num_warps=8,
+        C_=C,
+        BLOCK_C_=BLOCK_ROW_C,
+        num_warps=4,
     )
-
-    out0 = torch.empty((D,), device=device, dtype=torch.float32)
-    out1 = torch.empty((D,), device=device, dtype=torch.float32)
-    block_tiles = 1 << (num_m_tiles - 1).bit_length()
-    _finalize_column_sums_kernel[(triton.cdiv(D, 16),)](
-        partial_sum_add_xhat,
-        partial_sum_add,
-        out0,
-        out1,
-        NUM_M_TILES=num_m_tiles,
-        D_=D,
-        BLOCK_TILES=block_tiles,
-        BLOCK_D=16,
-        num_warps=8,
-    )
-
-    return out0, out1, side
+    return dgamma, dbeta, select_scatter
 
 
-def oracle_triton(*inputs: object) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    return oracle_triton_prepared(*prepare_oracle_inputs(*inputs))
-
-
-def oracle_full(
-    *inputs: object,
-    impl: str = "auto",
-) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    first_tensor = next(value for value in inputs if isinstance(value, torch.Tensor))
-    if impl == "auto":
-        impl = "triton" if first_tensor.device.type == "cuda" and triton is not None else "torch"
-    if impl == "triton":
-        return oracle_triton(*inputs)
-    if impl == "torch":
-        return oracle_torch(*inputs)
-    raise ValueError(f"unknown impl: {impl}")
+def reference_outputs(inputs: tuple[object, ...], device: torch.device) -> tuple[torch.Tensor, ...]:
+    module = _load_repro_module()
+    return module.Repro().to(device)(*inputs)
 
 
 def synchronize(device: torch.device) -> None:
@@ -278,30 +250,32 @@ def _max_diff(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, floa
     return diff.max().item(), rel.max().item()
 
 
-def run_check(device: torch.device, impl: str, rtol: float, atol: float) -> bool:
+def run_check(device: torch.device, rtol: float, atol: float) -> bool:
     torch.manual_seed(0)
     inputs = make_inputs(device)
     with torch.no_grad():
         expected = reference_outputs(inputs, device)
-        actual = _as_tuple(oracle_full(*inputs, impl=impl))
+        actual = oracle_cooperative_split_k(*inputs)
         synchronize(device)
 
-    ok = len(actual) == len(expected)
-    if not ok:
-        print(f"output_count: actual={len(actual)} expected={len(expected)} allclose=False")
+    if len(actual) != len(expected):
+        print(f"tuple length mismatch: actual={len(actual)} expected={len(expected)}")
+        return False
 
+    ok = True
     for idx, (got, ref) in enumerate(zip(actual, expected)):
         max_abs, max_rel = _max_diff(got, ref)
-        value_ok = torch.allclose(got.float(), ref.float(), rtol=rtol, atol=atol)
+        shape_ok = got.shape == ref.shape
         dtype_ok = got.dtype == ref.dtype
         stride_ok = got.stride() == ref.stride()
-        output_ok = value_ok and dtype_ok and stride_ok
-        ok = ok and output_ok
+        value_ok = torch.allclose(got.float(), ref.float(), rtol=rtol, atol=atol)
+        ok = ok and shape_ok and dtype_ok and stride_ok and value_ok
         print(
             f"output[{idx}]: shape={list(got.shape)} dtype={got.dtype} "
             f"stride={got.stride()} expected_stride={ref.stride()} "
             f"max_abs={max_abs:.6e} max_rel={max_rel:.6e} "
-            f"allclose={value_ok} dtype_match={dtype_ok} stride_match={stride_ok}"
+            f"shape_match={shape_ok} dtype_match={dtype_ok} "
+            f"stride_match={stride_ok} allclose={value_ok}"
         )
 
     print(f"Correctness: {'PASS' if ok else 'FAIL'}")
@@ -309,7 +283,7 @@ def run_check(device: torch.device, impl: str, rtol: float, atol: float) -> bool
 
 
 def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: int) -> float:
-    for _ in range(warmup):
+    for _ in range(max(0, warmup)):
         fn()
     synchronize(device)
 
@@ -322,48 +296,34 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
-def run_bench(device: torch.device, impl: str, warmup: int, rep: int) -> None:
+def run_bench(device: torch.device, warmup: int, rep: int) -> None:
     torch.manual_seed(0)
     inputs = make_inputs(device)
-    actual_impl = impl
-    if actual_impl == "auto":
-        actual_impl = "triton" if device.type == "cuda" and triton is not None else "torch"
-
-    logical_read_bytes = (
-        M * D * 4
-        + M * D * 4
-        + D * 4
-        + M * D * 4
-        + M * 4
-        + M * D * LANES * 4
+    logical_read_bytes = (M * C * 3 + M + M * C) * 4
+    logical_write_bytes = (M * C * LANES + C * 2) * 4
+    print(
+        f"oracle shape: upstream=f32[{B}, {S}, {C}] full=f32[{B}, {S}, {C}, {LANES}] "
+        f"shape={SHAPE_LABEL} device={device}"
     )
-    logical_write_bytes = D * 4 + D * 4 + M * D * LANES * 4
+    print(f"direct logical traffic: {(logical_read_bytes + logical_write_bytes) / 1e6:.1f} MB")
 
     with torch.no_grad():
-        oracle_full(*inputs, impl=actual_impl)
+        oracle_cooperative_split_k(*inputs)
         synchronize(device)
-        oracle_us = benchmark(
-            lambda: oracle_full(*inputs, impl=actual_impl),
-            device,
-            warmup,
-            rep,
-        )
-
+        oracle_us = benchmark(lambda: oracle_cooperative_split_k(*inputs), device, warmup, rep)
     print(
-        f"oracle_full cooperative split-k layernorm/select_scatter: {oracle_us:.3f} us "
-        f"impl={actual_impl} shape={SHAPE_LABEL} device={device}"
+        f"oracle_cooperative_split_k: {oracle_us:.3f} us "
+        f"impl=triton shape={SHAPE_LABEL} device={device} warmup={warmup} rep={rep}"
     )
-    print(f"logical traffic: {(logical_read_bytes + logical_write_bytes) / 1e6:.1f} MB")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="run correctness check")
-    parser.add_argument("--bench", action="store_true", help="run timing benchmark")
-    parser.add_argument("--impl", choices=("auto", "triton", "torch"), default="auto")
+    parser.add_argument("--check", action="store_true", help="compare complete oracle outputs and strides to repro.py")
+    parser.add_argument("--bench", action="store_true", help="time the Triton oracle")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--rtol", type=float, default=2e-3)
-    parser.add_argument("--atol", type=float, default=3e-2)
+    parser.add_argument("--rtol", type=float, default=1e-4)
+    parser.add_argument("--atol", type=float, default=1e-3)
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--rep", type=int, default=50)
     args = parser.parse_args()
@@ -372,12 +332,11 @@ def main() -> None:
         parser.error("select at least one mode: --check and/or --bench")
 
     device = torch.device(args.device)
-    if args.check and not run_check(device=device, impl=args.impl, rtol=args.rtol, atol=args.atol):
+    if args.check and not run_check(device=device, rtol=args.rtol, atol=args.atol):
         sys.exit(1)
     if args.bench:
-        run_bench(device=device, impl=args.impl, warmup=args.warmup, rep=args.rep)
+        run_bench(device=device, warmup=args.warmup, rep=args.rep)
 
 
 if __name__ == "__main__":
-    with torch.no_grad():
-        main()
+    main()

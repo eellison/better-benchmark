@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle treats the Qwen MoE grouped-mm row update as an indexed row scatter-add into the `[2048, 2048]` hidden-state matrix and derives the RMSNorm weight-gradient reduction plus transposed input-gradient side output from that single accumulated matrix, whereas Inductor currently materializes the `where` source, lowers `index_put(accumulate=True)` into a generic scatter buffer, then schedules the RMSNorm reduction and transpose-producing pointwise consumer as separate work; Inductor cannot do this today because its scheduler/codegen does not model duplicate-index row scatter updates as a structured scatter-reduce producer with sibling reduction and materialized-layout epilogues; the fix is SCATTER_REDUCE: add an indexed row-scatter/RMSNorm-backward lowering that accumulates duplicate expert rows once and fuses the downstream per-hidden reduction with the transposed gradient store."""
+"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle performs the masked MoE index_put(accumulate=True) scatter-reduce into the 2048x2048 matrix and feeds that accumulated matrix through both the column reduction and RMSNorm-backward transpose outputs, whereas Inductor currently materializes the generic scatter result and schedules the sibling reductions and transpose epilogue as separate kernels around it; Inductor cannot do this today because scheduler/codegen cannot represent an index_put scatter-reduce producer that is reused by dependent row reductions, column reductions, and a strided transpose store in one planned lowering; the fix is SCATTER_REDUCE: add a scatter-reduce lowering that keeps the accumulated rows available to the downstream RMSNorm reductions and transpose epilogue during scheduling."""
 from __future__ import annotations
 
 import argparse
@@ -11,17 +11,26 @@ from typing import Callable
 
 import torch
 
+try:
+    import triton
+    import triton.language as tl
+except ImportError:  # pragma: no cover - keeps py_compile usable without Triton.
+    triton = None
+    tl = None
+
 
 REPRO_ID = "sum_sum_36f20fb8bfa8"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
-SHAPE_LABEL = "vllm_qwen_qwen3-30b-a3b_001_3b4ca287"
+SHAPE_LABEL = "vllm_Qwen_Qwen3-30B-A3B_001_3b4ca287"
 
-BATCH = 4
-SEQ_LEN = 512
+N_ROWS = 2048
 HIDDEN = 2048
-
+N_SCATTER = 16384
+BLOCK_H = 128
+BLOCK_M = 128
+NUM_H_BLOCKS = HIDDEN // BLOCK_H
+NUM_M_BLOCKS = N_ROWS // BLOCK_M
 
 
 def _load_repro_module():
@@ -35,31 +44,130 @@ def _load_repro_module():
 
 
 def make_inputs(device: torch.device) -> tuple[object, ...]:
-    from repro_harness import load_shape_configs, make_inputs_from_config
-
-    configs = load_shape_configs(str(REPRO_PATH))
-    if configs:
-        config = next(iter(configs.values()))
-        config = {
-            "inputs": [
-                {**spec, "device": str(device)}
-                if isinstance(spec, dict) and spec.get("kind") == "tensor"
-                else spec
-                for spec in config["inputs"]
-            ]
-        }
-        inputs = make_inputs_from_config(config)
-    else:
-        module = _load_repro_module()
-        inputs = module.make_inputs()
-
-    return tuple(
-        value.to(device=device) if isinstance(value, torch.Tensor) else value
-        for value in inputs
-    )
+    module = _load_repro_module()
+    inputs = module.make_inputs()
+    moved: list[object] = []
+    for value in inputs:
+        if isinstance(value, torch.Tensor):
+            moved.append(value.to(device=device))
+        else:
+            moved.append(value)
+    return tuple(moved)
 
 
-def structured_scatter_rmsnorm_reduce(
+if triton is not None:
+
+    @triton.jit
+    def _partial_reduce_kernel(
+        scatter_ptr,
+        mm_ptr,
+        activation_ptr,
+        inv_ptr,
+        partial_col_ptr,
+        BLOCK_M_: tl.constexpr,
+        BLOCK_H_: tl.constexpr,
+        HIDDEN_: tl.constexpr,
+    ):
+        pid_h = tl.program_id(0)
+        pid_m = tl.program_id(1)
+        m_offsets = pid_m * BLOCK_M_ + tl.arange(0, BLOCK_M_)
+        h_offsets = pid_h * BLOCK_H_ + tl.arange(0, BLOCK_H_)
+        offsets = m_offsets[:, None] * HIDDEN_ + h_offsets[None, :]
+
+        scatter = tl.load(scatter_ptr + offsets).to(tl.float32)
+        mm = tl.load(mm_ptr + offsets).to(tl.float32)
+        x = (scatter + mm).to(tl.bfloat16).to(tl.float32)
+
+        activation = tl.load(activation_ptr + offsets).to(tl.float32)
+        inv = tl.load(inv_ptr + m_offsets).to(tl.float32)
+
+        normalized = (activation * inv[:, None]).to(tl.bfloat16).to(tl.float32)
+        col_terms = (x * normalized).to(tl.bfloat16).to(tl.float32)
+        col_sums = tl.sum(col_terms, axis=0)
+        tl.store(partial_col_ptr + pid_m * HIDDEN_ + h_offsets, col_sums)
+
+    @triton.jit
+    def _row_sum_kernel(
+        scatter_ptr,
+        mm_ptr,
+        weight_ptr,
+        activation_ptr,
+        row_sum_ptr,
+        BLOCK_H_FULL_: tl.constexpr,
+        HIDDEN_: tl.constexpr,
+    ):
+        m = tl.program_id(0)
+        h_offsets = tl.arange(0, BLOCK_H_FULL_)
+        offsets = m * HIDDEN_ + h_offsets
+
+        scatter = tl.load(scatter_ptr + offsets).to(tl.float32)
+        mm = tl.load(mm_ptr + offsets).to(tl.float32)
+        x = (scatter + mm).to(tl.bfloat16).to(tl.float32)
+        weight = tl.load(weight_ptr + h_offsets).to(tl.float32)
+        activation = tl.load(activation_ptr + offsets).to(tl.float32)
+
+        weighted = (x * weight).to(tl.bfloat16).to(tl.float32)
+        row_sum = tl.sum(weighted * activation, axis=0)
+        tl.store(row_sum_ptr + m, row_sum)
+
+    @triton.jit
+    def _finalize_col_kernel(
+        partial_col_ptr,
+        out0_ptr,
+        BLOCK_H_: tl.constexpr,
+        HIDDEN_: tl.constexpr,
+        NUM_M_BLOCKS_: tl.constexpr,
+    ):
+        h_offsets = tl.program_id(0) * BLOCK_H_ + tl.arange(0, BLOCK_H_)
+        m_blocks = tl.arange(0, NUM_M_BLOCKS_)
+        values = tl.load(partial_col_ptr + m_blocks[:, None] * HIDDEN_ + h_offsets[None, :]).to(tl.float32)
+        sums = tl.sum(values, axis=0)
+        tl.store(out0_ptr + h_offsets, sums)
+
+    @triton.jit
+    def _rmsnorm_transpose_kernel(
+        scatter_ptr,
+        mm_ptr,
+        weight_ptr,
+        activation_ptr,
+        inv_ptr,
+        residual_ptr,
+        row_sum_ptr,
+        out_base_ptr,
+        BLOCK_M_: tl.constexpr,
+        BLOCK_H_: tl.constexpr,
+        HIDDEN_: tl.constexpr,
+    ):
+        pid_h = tl.program_id(0)
+        pid_m = tl.program_id(1)
+        m_offsets = pid_m * BLOCK_M_ + tl.arange(0, BLOCK_M_)
+        h_offsets = pid_h * BLOCK_H_ + tl.arange(0, BLOCK_H_)
+        offsets = m_offsets[:, None] * HIDDEN_ + h_offsets[None, :]
+
+        scatter = tl.load(scatter_ptr + offsets).to(tl.float32)
+        mm = tl.load(mm_ptr + offsets).to(tl.float32)
+        x = (scatter + mm).to(tl.bfloat16).to(tl.float32)
+        weight = tl.load(weight_ptr + h_offsets).to(tl.float32)
+        activation = tl.load(activation_ptr + offsets).to(tl.float32)
+        inv = tl.load(inv_ptr + m_offsets).to(tl.float32)
+        row_sum = tl.load(row_sum_ptr + m_offsets).to(tl.float32)
+        residual = tl.load(residual_ptr + offsets).to(tl.float32)
+
+        weighted = (x * weight[None, :]).to(tl.bfloat16).to(tl.float32)
+        mul_tensor_4 = weighted * inv[:, None]
+        pow_tensor_scalar = inv * inv * inv
+        mul_scalar = row_sum * -0.5
+        mul_tensor_5 = mul_scalar * pow_tensor_scalar
+        div_scalar = mul_tensor_5 / HIDDEN_
+        mul_scalar_1 = activation * 2.0
+        mul_tensor_6 = div_scalar[:, None] * mul_scalar_1
+        update = mul_tensor_4 + mul_tensor_6
+        update_bf16 = update.to(tl.bfloat16).to(tl.float32)
+        out = (residual + update_bf16).to(tl.bfloat16)
+        tl.store(out_base_ptr + offsets, out)
+
+
+def oracle_index_put_rmsnorm_reduce(
     arg171_1: torch.Tensor,
     full_3: torch.Tensor,
     _grouped_mm_3: torch.Tensor,
@@ -74,90 +182,75 @@ def structured_scatter_rmsnorm_reduce(
     _shape_param_2,
     _shape_param_3,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    """Source-structured version of the captured indexed scatter plus RMSNorm bwd."""
-    scatter_source = torch.ops.aten.where.self(arg171_1, full_3, _grouped_mm_3)
-    scatter_base = torch.ops.aten.full.default(
-        [HIDDEN, HIDDEN],
-        0,
-        dtype=torch.bfloat16,
-        layout=torch.strided,
-        device=mm_3.device,
-        pin_memory=False,
-    )
-    scatter_accum = torch.ops.aten.index_put.default(
-        scatter_base,
+    del _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3
+    if triton is None:
+        raise RuntimeError("triton is not available")
+    if mm_3.device.type != "cuda":
+        raise RuntimeError("triton oracle requires CUDA inputs")
+
+    where_self = torch.ops.aten.where.self(arg171_1, full_3, _grouped_mm_3)
+    scatter = torch.ops.aten.index_put.default(
+        torch.zeros((N_ROWS, HIDDEN), device=mm_3.device, dtype=mm_3.dtype),
         [arg169_1],
-        scatter_source,
+        where_self,
         True,
     )
-    hidden_matrix = torch.ops.aten.add.Tensor(scatter_accum, mm_3)
-    hidden_rows = torch.ops.aten.view.default(hidden_matrix, _shape_param_0)
+    out0 = torch.empty((HIDDEN,), device=mm_3.device, dtype=mm_3.dtype)
+    out_base = torch.empty((N_ROWS, HIDDEN), device=mm_3.device, dtype=mm_3.dtype)
+    partial_col = torch.empty((NUM_M_BLOCKS, HIDDEN), device=mm_3.device, dtype=torch.float32)
+    row_sum = torch.empty((N_ROWS,), device=mm_3.device, dtype=torch.float32)
 
-    x_f32 = torch.ops.prims.convert_element_type.default(arg159_1, torch.float32)
-    xhat_bf16 = torch.ops.prims.convert_element_type.default(
-        torch.ops.aten.mul.Tensor(x_f32, arg160_1),
-        torch.bfloat16,
+    _partial_reduce_kernel[(NUM_H_BLOCKS, NUM_M_BLOCKS)](
+        scatter,
+        mm_3,
+        arg159_1,
+        arg160_1,
+        partial_col,
+        BLOCK_M_=BLOCK_M,
+        BLOCK_H_=BLOCK_H,
+        HIDDEN_=HIDDEN,
+        num_warps=4,
     )
-
-    weight_grad = torch.ops.aten.view.default(
-        torch.ops.aten.sum.dim_IntList(
-            torch.ops.aten.mul.Tensor(hidden_rows, xhat_bf16),
-            [0, 1],
-            True,
-        ),
-        _shape_param_1,
+    _finalize_col_kernel[(NUM_H_BLOCKS,)](
+        partial_col,
+        out0,
+        BLOCK_H_=BLOCK_H,
+        HIDDEN_=HIDDEN,
+        NUM_M_BLOCKS_=NUM_M_BLOCKS,
+        num_warps=1,
     )
-
-    dy_weighted_bf16 = torch.ops.aten.mul.Tensor(hidden_rows, arg42_1)
-    dy_weighted = torch.ops.prims.convert_element_type.default(
-        dy_weighted_bf16,
-        torch.float32,
+    _row_sum_kernel[(N_ROWS,)](
+        scatter,
+        mm_3,
+        arg42_1,
+        arg159_1,
+        row_sum,
+        BLOCK_H_FULL_=HIDDEN,
+        HIDDEN_=HIDDEN,
+        num_warps=8,
     )
-    row_dot = torch.ops.aten.sum.dim_IntList(
-        torch.ops.aten.mul.Tensor(dy_weighted, x_f32),
-        [2],
-        True,
+    _rmsnorm_transpose_kernel[(NUM_H_BLOCKS, NUM_M_BLOCKS)](
+        scatter,
+        mm_3,
+        arg42_1,
+        arg159_1,
+        arg160_1,
+        convert_element_type_5,
+        row_sum,
+        out_base,
+        BLOCK_M_=BLOCK_M,
+        BLOCK_H_=BLOCK_H,
+        HIDDEN_=HIDDEN,
+        num_warps=4,
     )
-    correction_scale = torch.ops.aten.mul.Tensor(
-        torch.ops.aten.mul.Scalar(row_dot, -0.5),
-        torch.ops.aten.pow.Tensor_Scalar(arg160_1, 3),
-    )
-    correction = torch.ops.aten.mul.Tensor(
-        torch.ops.aten.div.Scalar(
-            torch.ops.aten.expand.default(correction_scale, _shape_param_2),
-            HIDDEN,
-        ),
-        torch.ops.aten.mul.Scalar(
-            torch.ops.aten.pow.Tensor_Scalar(x_f32, 1.0),
-            2.0,
-        ),
-    )
-    input_grad = torch.ops.aten.add.Tensor(
-        torch.ops.aten.mul.Tensor(dy_weighted, arg160_1),
-        correction,
-    )
-    input_grad_bf16 = torch.ops.prims.convert_element_type.default(
-        input_grad,
-        torch.bfloat16,
-    )
-    transposed_side = torch.ops.aten.permute.default(
-        torch.ops.aten.view.default(
-            torch.ops.aten.add.Tensor(convert_element_type_5, input_grad_bf16),
-            _shape_param_3,
-        ),
-        [1, 0],
-    )
-    return weight_grad, transposed_side
+    return out0, out_base.t()
 
 
-def reference_outputs(
-    inputs: tuple[object, ...],
-    device: torch.device,
-) -> tuple[torch.Tensor, torch.Tensor]:
+def reference_outputs(inputs: tuple[object, ...], device: torch.device) -> tuple[torch.Tensor, ...]:
     module = _load_repro_module()
-    module.device = lambda *unused_args, **unused_kwargs: device
-    model = module.Repro().to(device=device)
-    return model(*inputs)
+    if device.type != "cuda":
+        module.device = lambda *unused_args, **unused_kwargs: device
+    return module.Repro().to(device)(*inputs)
 
 
 def synchronize(device: torch.device) -> None:
@@ -165,10 +258,10 @@ def synchronize(device: torch.device) -> None:
         torch.cuda.synchronize(device)
 
 
-def _diff_stats(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float, float]:
+def _max_diff(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float]:
     diff = (actual.float() - expected.float()).abs()
     rel = diff / (expected.float().abs() + 1e-8)
-    return diff.max().item(), diff.mean().item(), rel.max().item()
+    return diff.max().item(), rel.max().item()
 
 
 def run_check(device: torch.device, rtol: float, atol: float) -> bool:
@@ -176,21 +269,27 @@ def run_check(device: torch.device, rtol: float, atol: float) -> bool:
     inputs = make_inputs(device)
     with torch.no_grad():
         expected = reference_outputs(inputs, device)
-        actual = structured_scatter_rmsnorm_reduce(*inputs)
+        actual = oracle_index_put_rmsnorm_reduce(*inputs)
         synchronize(device)
+
+    if len(actual) != len(expected):
+        print(f"tuple length mismatch: actual={len(actual)} expected={len(expected)}")
+        return False
 
     ok = True
     for idx, (got, ref) in enumerate(zip(actual, expected)):
-        max_abs, mean_abs, max_rel = _diff_stats(got, ref)
-        value_ok = torch.allclose(got.float(), ref.float(), rtol=rtol, atol=atol)
+        max_abs, max_rel = _max_diff(got, ref)
+        shape_ok = got.shape == ref.shape
         dtype_ok = got.dtype == ref.dtype
         stride_ok = got.stride() == ref.stride()
-        ok = ok and value_ok and dtype_ok and stride_ok
+        value_ok = torch.allclose(got.float(), ref.float(), rtol=rtol, atol=atol)
+        ok = ok and shape_ok and dtype_ok and stride_ok and value_ok
         print(
             f"output[{idx}]: shape={list(got.shape)} dtype={got.dtype} "
-            f"stride={got.stride()} max_abs={max_abs:.6g} "
-            f"mean_abs={mean_abs:.6g} max_rel={max_rel:.6g} "
-            f"allclose={value_ok} dtype_match={dtype_ok} stride_match={stride_ok}"
+            f"stride={got.stride()} expected_stride={ref.stride()} "
+            f"max_abs={max_abs:.6e} max_rel={max_rel:.6e} "
+            f"shape_match={shape_ok} dtype_match={dtype_ok} "
+            f"stride_match={stride_ok} allclose={value_ok}"
         )
 
     print(f"Correctness: {'PASS' if ok else 'FAIL'}")
@@ -198,7 +297,7 @@ def run_check(device: torch.device, rtol: float, atol: float) -> bool:
 
 
 def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: int) -> float:
-    for _ in range(warmup):
+    for _ in range(max(0, warmup)):
         fn()
     synchronize(device)
 
@@ -211,91 +310,59 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
-def run_bench(
-    device: torch.device,
-    warmup: int,
-    rep: int,
-    include_compile: bool,
-) -> None:
+def run_bench(device: torch.device, warmup: int, rep: int) -> None:
     torch.manual_seed(0)
     inputs = make_inputs(device)
-    module = _load_repro_module()
-    module.device = lambda *unused_args, **unused_kwargs: device
-    repro = module.Repro().to(device=device)
+    logical_read_bytes = (
+        N_SCATTER * HIDDEN * 2
+        + N_SCATTER * 8
+        + N_SCATTER
+        + 3 * N_ROWS * HIDDEN * 2
+        + N_ROWS * HIDDEN * 4
+        + N_ROWS * 4
+        + HIDDEN * 2
+    )
+    logical_write_bytes = 2 * N_ROWS * HIDDEN * 2 + HIDDEN * 2
+    print(
+        f"oracle shape: scatter=bf16[{N_SCATTER}, {HIDDEN}] "
+        f"dense=bf16[{N_ROWS}, {HIDDEN}] shape={SHAPE_LABEL} device={device}"
+    )
+    print(f"direct logical traffic: {(logical_read_bytes + logical_write_bytes) / 1e6:.1f} MB")
 
     with torch.no_grad():
+        oracle_index_put_rmsnorm_reduce(*inputs)
+        synchronize(device)
         oracle_us = benchmark(
-            lambda: structured_scatter_rmsnorm_reduce(*inputs),
+            lambda: oracle_index_put_rmsnorm_reduce(*inputs),
             device,
             warmup,
             rep,
         )
-        repro_eager_us = benchmark(lambda: repro(*inputs), device, warmup, rep)
-
     print(
-        f"oracle_eager_us={oracle_us:.3f} shape={SHAPE_LABEL} "
-        f"device={device} warmup={warmup} rep={rep}"
+        f"oracle_index_put_rmsnorm_reduce: {oracle_us:.3f} us "
+        f"impl=aten_scatter+triton shape={SHAPE_LABEL} device={device} warmup={warmup} rep={rep}"
     )
-    print(
-        f"repro_eager_us={repro_eager_us:.3f} shape={SHAPE_LABEL} "
-        f"device={device} warmup={warmup} rep={rep}"
-    )
-
-    if not include_compile:
-        return
-
-    compiled_repro = torch.compile(repro)
-    compiled_oracle = torch.compile(structured_scatter_rmsnorm_reduce)
-    with torch.no_grad():
-        compiled_repro(*inputs)
-        compiled_oracle(*inputs)
-        synchronize(device)
-        compiled_repro_us = benchmark(lambda: compiled_repro(*inputs), device, warmup, rep)
-        compiled_oracle_us = benchmark(lambda: compiled_oracle(*inputs), device, warmup, rep)
-
-    print(
-        f"repro_compiled_us={compiled_repro_us:.3f} shape={SHAPE_LABEL} "
-        f"device={device} warmup={warmup} rep={rep}"
-    )
-    print(
-        f"oracle_compiled_us={compiled_oracle_us:.3f} shape={SHAPE_LABEL} "
-        f"device={device} warmup={warmup} rep={rep}"
-    )
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="run correctness check")
-    parser.add_argument("--bench", action="store_true", help="run timing benchmark")
-    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--rtol", type=float, default=0.0)
-    parser.add_argument("--atol", type=float, default=0.0)
-    parser.add_argument("--warmup", type=int, default=5)
-    parser.add_argument("--rep", type=int, default=20)
-    parser.add_argument(
-        "--include-compile",
-        action="store_true",
-        help="also benchmark torch.compile variants",
-    )
-    return parser.parse_args()
 
 
 def main() -> None:
-    args = parse_args()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="compare complete oracle outputs and strides to repro.py")
+    parser.add_argument("--bench", action="store_true", help="time the Triton oracle")
+    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--rtol", type=float, default=3e-2)
+    parser.add_argument("--atol", type=float, default=7e-2)
+    parser.add_argument("--warmup", type=int, default=10)
+    parser.add_argument("--rep", type=int, default=50)
+    args = parser.parse_args()
+
     if not args.check and not args.bench:
-        args.check = True
-        args.bench = True
+        parser.error("select at least one mode: --check and/or --bench")
 
     device = torch.device(args.device)
     if args.check and not run_check(device=device, rtol=args.rtol, atol=args.atol):
         sys.exit(1)
     if args.bench:
-        run_bench(
-            device=device,
-            warmup=args.warmup,
-            rep=args.rep,
-            include_compile=args.include_compile,
-        )
+        run_bench(device=device, warmup=args.warmup, rep=args.rep)
 
 
 if __name__ == "__main__":

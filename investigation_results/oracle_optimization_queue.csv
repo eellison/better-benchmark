@@ -74,7 +74,7 @@ sum_86b5dc92d54f,SCATTER_REDUCE,closed,REWRITTEN full-scope Triton scatter oracl
 sum_a3c9eb6b27f1,SCATTER_REDUCE,closed,REVALIDATED full-scope Triton RoPE oracle but compile remains faster; oracle=77.472us; reported_compile=29.3us; not a floor
 sum_sum_04bdad42e9ef,AT_FLOOR,closed,compile=21.1us matches oracle=22.2us; EfficientNet SiLU+BN-backward cooperative split-K
 sum_sum_98c4811f6ddf,AT_FLOOR,closed,compile=21.4us beats oracle=25.2us; DenseNet BN-backward cooperative split-K
-sum_sum_ab550e4e948e,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=29.6us vs oracle=537.1us (18x slower); VoVNet maxpool-backward scatter-reduce
+sum_sum_ab550e4e948e,SCATTER_REDUCE,closed,REWRITTEN full-scope Triton oracle but queue compile remains faster; oracle=47.616us; reported_compile=29.6us; not a floor
 sum_sum_sum_3ec568a7ba04,COOPERATIVE_SPLIT_K,needs_work,compile=33.7us vs oracle=27.6us; 1.22x gap; NFNet sigmoid-gated multi-output split-K reduction
 sum_sum_sum_93b46c9731d8,AT_FLOOR,closed,compile=28.5us beats oracle=35.8us; RegNet/ResNeSt dual BN-backward cooperative split-K
 var_mean_765fb8f2c85e,BANDWIDTH_BOUND,closed,
@@ -87,13 +87,13 @@ sum_cfa532830ff2,SCATTER_REDUCE,closed,compile=102.3us beats oracle=119.4us; Dem
 sum_sum_100fff569d2e,SCHEDULER_FUSION,needs_work,compile=210.7us vs oracle=116.6us; 1.81x gap; DenseNet121
 sum_sum_1efe819604dc,SCATTER_REDUCE,closed,compile=38.6us beats oracle=56.5us; MobileViT-s; Inductor already optimal
 sum_sum_2778c0896f68,SCATTER_REDUCE,closed,compile=27.4us beats oracle=32.4us; Visformer; Inductor already optimal
-sum_sum_36f20fb8bfa8,SCATTER_REDUCE,oracle_needs_rewrite,BAD_ORACLE: compile=35.8us vs oracle=965.4us (27.0x slower); Qwen3-30B-A3B MoE
+sum_sum_36f20fb8bfa8,SCATTER_REDUCE,closed,REWRITTEN full-scope oracle but compile remains faster; oracle=356.392us; reported_compile=35.8us; not a floor
 sum_sum_7a49bf63689f,SCHEDULER_FUSION,closed,compile=36.7us beats oracle=40.4us; DenseNet121; Inductor already optimal
 sum_sum_b16afac198fb,SCHEDULER_FUSION,needs_work,compile=223.1us vs oracle=125.8us; 1.77x gap; DenseNet121
-sum_sum_c39c7b0d801a,SCATTER_REDUCE,oracle_needs_rewrite,BAD_ORACLE: compile=39.7us vs oracle=437.0us (11.0x slower); Qwen3-30B-A3B MoE
+sum_sum_c39c7b0d801a,SCATTER_REDUCE,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle=137.820us; reported_compile=39.7us; not a floor
 sum_sum_df7b99fa3465,SCHEDULER_FUSION,needs_work,compile=266.1us vs oracle=230.2us; 1.16x gap; Visformer
 sum_sum_e75c5e897993,SCATTER_REDUCE,oracle_needs_rewrite,BAD_ORACLE: compile=44.6us vs oracle=110.9us (2.5x slower); MobileNetV2
-sum_sum_sum_2334df16a35d,SCATTER_REDUCE,oracle_needs_rewrite,BAD_ORACLE: compile=46.5us vs oracle=275.0us (5.9x slower); BEiT
+sum_sum_sum_2334df16a35d,SCATTER_REDUCE,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle=136.367us; reported_compile=46.5us; not a floor
 sum_sum_sum_6d6ec1e4f644,COOPERATIVE_SPLIT_K,closed,compile=36.7us beats oracle=37.9us; GPT2; Inductor already optimal
 sum_sum_sum_a29c7a92bc81,COOPERATIVE_SPLIT_K,closed,compile=229.2us beats oracle=286.7us; Swin; Inductor already optimal
 sum_sum_sum_d574fc7bdc59,COOPERATIVE_SPLIT_K,oracle_needs_rewrite,BAD_ORACLE: compile=37.9us vs oracle=112.7us (3.0x slower); Whisper
@@ -115,7 +115,7 @@ sum_27f8a4b9ab09,AT_FLOOR,closed,compile=39.8us vs oracle=37.8us; 1.05x gap; NFN
 sum_41cdfa051fcc,AT_FLOOR,closed,compile=39.7us beats oracle=48.8us; NFNet structured pool+upsample+GELU reduce; Inductor already optimal
 sum_sum_f10bfbcf6729,BANDWIDTH_BOUND,closed,compile=54.1us vs oracle=50.0us; 1.08x gap; LearningToPaint BN-backward; single fused kernel already optimal; gap is tiling noise
 sum_sum_sum_335abef71e93,COOPERATIVE_SPLIT_K,needs_work,compile=46.9us vs oracle=37.8us; 1.24x gap; Whisper LayerNorm-backward 5-way split-K reduction
-sum_sum_sum_b30da3bff8d4,AT_FLOOR,oracle_needs_rewrite,BAD_ORACLE: compile=97.1us vs oracle=136.8us (1.4x slower); GoogleFnet LN-backward+select_scatter cooperative split-K
+sum_sum_sum_b30da3bff8d4,COOPERATIVE_SPLIT_K,closed,REWRITTEN full-scope Triton oracle but compile remains faster; oracle=221.407us; reported_compile=97.1us; not a floor
 amax_sum_sum_0e37ca9164b3,IGNORE_INDEX_CROSS_ENTROPY,needs_work,compile=36.8us vs oracle=33.7us; 1.09x gap; Blenderbot ignore-index cross-entropy mean fused row-reduction
 sum_sum_2f2d7ba72160,COOPERATIVE_SPLIT_K,needs_work,compile=80.0us vs oracle=52.1us; 1.53x gap; DenseNet121 BN-backward cooperative split-K with 9-slice epilogue
 sum_sum_fdefa5604cda,AT_FLOOR,closed,compile=75.7us beats oracle=86.9us; T5 RMSNorm-backward cooperative split-K; Inductor already optimal
