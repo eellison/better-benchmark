@@ -1,18 +1,4 @@
-"""
-Oracle for pointwise_77c5ae8ad1b9
-
-Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete
-causal same-segment attention mask directly into the `[1,1,128,128]` `where`
-result and returns the exact eager `[1,16,128,128]` zero-stride expand view,
-whereas Inductor lowers the captured iota/unsqueeze/advanced-index/equality/
-where/expand chain as generic pointwise work with the indirect cumsum lookups
-inside the decomposed graph; Inductor cannot do this today because it has no
-shape-specialized causal segment-mask pattern that recognizes the paired
-position gathers and final metadata-only head expansion; the fix is NEW_PATTERN:
-add a lowering that emits a triangular segment-mask kernel and preserves the
-expanded output stride contract instead of treating this as unrelated generic
-ops.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete causal same-segment attention mask directly into the f32[1,1,128,128] where result and returns the exact eager f32[1,16,128,128] zero-stride expand view, whereas Inductor lowers the captured iota unsqueeze advanced-index equality where expand chain as generic pointwise work with the indirect cumsum lookups inside the decomposed graph; Inductor cannot do this today because it has no shape-specialized causal segment-mask pattern that recognizes the paired position gathers and final metadata-only head expansion; the fix is NEW_PATTERN: add a lowering that emits a triangular segment-mask kernel and preserves the expanded output stride contract instead of treating this as unrelated generic ops."""
 from __future__ import annotations
 
 import argparse
@@ -35,7 +21,6 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 # Import shared oracle infrastructure. Run first:
 #   python -m pip install --no-build-isolation -e .
-# Do not add oracle-local sys.path or REPO_ROOT import hacks.
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,

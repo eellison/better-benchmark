@@ -1,12 +1,4 @@
-"""
-Oracle for pointwise_8f5229eda25a
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the complete causal segment attention-mask repro as one shape-specialized Triton pointwise kernel over the compact `[1, 1, 128, 128]` base and returns all 28 `[1, 16, 128, 128]` stride-zero expanded aliases, whereas Inductor already has enough pointwise/view scheduling machinery to avoid computing 28 independent full-head masks for this captured graph; Inductor cannot materially improve this today because the remaining cost is one tiny launch plus the required 16 KiB fp32 mask write and 128-element int64 input reads, not a missing fusion/reduction transformation; the fix is BANDWIDTH_BOUND: treat this as an at-floor multi-output expand case unless broader launch-overhead reductions become available.
-
-The 28 outputs intentionally share the same expanded view of one base tensor.
-This matches the eager aliasing/storage contract that every returned expand is
-a view of the same `where_self` storage with stride `(16384, 0, 128, 1)`.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete causal segment attention-mask repro as one shape-specialized Triton pointwise kernel over the compact f32[1,1,128,128] base and returns all 28 f32[1,16,128,128] stride-zero expanded aliases, whereas Inductor lowers the repeated iota cumsum-equality causal-mask and expand returns as generic pointwise/view scheduling around the decomposed graph; Inductor cannot do this today because its pattern library does not canonicalize this causal segment-mask construction while preserving shared expanded alias outputs for the complete return tuple; the fix is NEW_PATTERN: add a segment attention-mask lowering that emits one fused mask-fill kernel and returns all sibling expanded aliases from the same base storage."""
 from __future__ import annotations
 
 import argparse

@@ -1,8 +1,4 @@
-"""
-Oracle for sum_sum_a7f863c76602
-
-Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the full Repro.forward scope by materializing the `tangents_1 / 2` tensor once for the returned `[1000, 128]` permute view and reducing those same scaled values once to produce both duplicate `[1000]` sum outputs, whereas Inductor lowers the two sibling `sum(dim=0)` consumers as separate reductions over the divided tensor alongside the layout-producing output; Inductor cannot do this today because its scheduler does not prove and merge duplicate reductions that share an identical producer while still preserving the separate output contract; the required change is ALGEBRAIC_ELIMINATION: canonicalize identical sibling reductions/views to one computed buffer and allow both returned sum outputs to intentionally alias that single result when aliasing is semantically unobservable.
-"""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the full Repro.forward scope by materializing the tangents_1 / 2 tensor once for the returned f32[1000,128] permute view and reducing those same scaled values once to produce both duplicate f32[1000] sum outputs, whereas Inductor lowers the two sibling sum(dim=0) consumers as separate reductions over the divided tensor alongside the layout-producing output; Inductor cannot do this today because its scheduler does not prove and merge duplicate reductions that share an identical producer while still preserving the separate output contract; the fix is ALGEBRAIC_ELIMINATION: canonicalize identical sibling reductions and views to one computed buffer and allow both returned sum outputs to intentionally alias that single result when aliasing is semantically unobservable."""
 from __future__ import annotations
 
 import argparse

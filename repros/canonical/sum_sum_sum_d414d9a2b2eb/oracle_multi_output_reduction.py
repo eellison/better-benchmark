@@ -1,23 +1,4 @@
-"""
-Oracle for sum_sum_sum_d414d9a2b2eb
-
-Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full
-four-output layernorm-backward-style region with a Triton row kernel that keeps
-the dependent row sums in registers, writes the complete permuted side backing
-tensor, and accumulates all three column reductions, whereas Inductor currently
-schedules the shared row reductions, column reductions, and dependent side-output
-epilogue as generic multi-kernel reduction/pointwise work. Inductor cannot do
-this today because its scheduler has no template for chaining row reductions into
-a transposed side-output epilogue while also producing sibling column reductions
-from the same producer. The required change is SCHEDULER_FUSION: add a
-multi-output chained-reduction template that keeps the row summaries as
-first-class intermediates and fuses the dependent column/transpose epilogue for
-the complete return tuple.
-
-Measurement note: this implementation is full-scope and uses Triton kernels for
-the measured work, but it is diagnosis-only rather than a true floor on the local
-run because the requested combo-kernel Inductor config is slightly faster.
-"""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full four-output layernorm-backward-style region with a Triton row kernel that keeps the dependent row sums in registers writes the complete permuted side backing tensor and accumulates all three column reductions, whereas Inductor currently schedules the shared row reductions column reductions and dependent side-output epilogue as generic multi-kernel reduction/pointwise work; Inductor cannot do this today because its scheduler has no template for chaining row reductions into a transposed side-output epilogue while also producing sibling column reductions from the same producer; the fix is SCHEDULER_FUSION: add a multi-output chained-reduction template that keeps the row summaries as first-class intermediates and fuses the dependent column/transpose epilogue for the complete return tuple."""
 from __future__ import annotations
 
 import argparse

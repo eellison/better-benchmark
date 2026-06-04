@@ -1,17 +1,4 @@
-"""
-Oracle for sum_sum_sum_766837223ded
-
-Gap diagnosis (classification: SCHEDULER_FUSION): this oracle fuses the
-row-wise layernorm-backward algebra with the side-output materialization and
-then computes the three column reductions in one Triton reduction kernel,
-whereas Inductor emits a less direct multi-kernel schedule for the dependent
-row reductions, side transpose, and independent column reductions; Inductor
-cannot do this today because its scheduler does not form a custom full-scope
-multi-output reduction plan that reuses the row-local scalars across the
-materialized transpose and the later reductions; the fix is SCHEDULER_FUSION:
-teach the scheduler/codegen to group this dependent row-reduction plus
-transpose plus column-reduction pattern into a small coordinated kernel set.
-"""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle fuses the full row-wise layernorm-backward algebra with the side-output materialization and then computes the three column reductions in one Triton reduction kernel, whereas Inductor emits a less direct multi-kernel schedule for the dependent row reductions side transpose and independent column reductions; Inductor cannot do this today because its scheduler does not form a custom full-scope multi-output reduction plan that reuses the row-local scalars across the materialized transpose and the later reductions; the fix is SCHEDULER_FUSION: teach the scheduler/codegen to group this dependent row-reduction plus transpose plus column-reduction pattern into a small coordinated kernel set."""
 from __future__ import annotations
 
 import argparse
