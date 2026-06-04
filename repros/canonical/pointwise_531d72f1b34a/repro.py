@@ -4,15 +4,12 @@ Label: torchbench_pyhpc_turbulent_kinetic_energy_infer_000
 Pattern hash: 531d72f1b34a
 Shape hash: 3b8fd76f
 """
-import sys
-from pathlib import Path
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
@@ -1520,19 +1517,15 @@ class Repro(torch.nn.Module):
         slice_scatter_default_32: "f32[204, 204]" = torch.ops.aten.slice_scatter.default(full_default_33, slice_scatter_default_31, 0, 2, -2);  full_default_33 = slice_scatter_default_31 = None
         return (select_int_3, select_int_17, select_int_21, select_int_27, select_int_31, select_int_37, select_int_41, select_int_47, select_int_51, select_int_57, select_int_61, select_int_67, select_int_71, select_int_77, select_int_81, select_int_87, select_int_91, select_int_97, select_int_101, select_int_107, select_int_111, select_int_117, select_int_121, select_int_127, select_int_131, select_int_137, select_int_141, select_int_147, select_int_151, select_int_157, select_int_161, select_int_167, select_int_171, select_int_177, select_int_181, select_int_187, select_int_191, select_int_197, select_int_201, select_int_207, select_int_211, select_int_217, select_int_221, select_int_227, select_int_231, select_int_237, select_int_241, select_int_247, select_int_251, select_int_257, select_int_261, slice_tensor_40, select_int_406, slice_tensor_83, select_int_435, select_int_440, select_int_449, select_int_456, select_scatter_default_149, slice_scatter_default_32)
 
-
-
 def _default_make_inputs():
     from repro_harness import parse_shapes_config
     return parse_shapes_config(_shapes_config)
-
 
 def make_inputs(shape_config=None):
     """Generate inputs for a specific shape config, or default."""
     if shape_config is not None:
         return make_inputs_from_config(shape_config)
     return _default_make_inputs()
-
 
 if __name__ == "__main__":
     benchmark_repro(__file__, Repro, make_inputs)

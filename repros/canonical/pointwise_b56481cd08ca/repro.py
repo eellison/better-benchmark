@@ -4,15 +4,12 @@ Label: vllm_meta-llama_Llama-3.2-1B_000
 Pattern hash: b56481cd08ca
 Shape hash: fc72ed2f
 """
-import sys
-from pathlib import Path
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
@@ -93,19 +90,15 @@ class Repro(torch.nn.Module):
         where_self_15: "bf16[4, 1, 512, 512]" = torch.ops.aten.where.self(expand_default, full_default_31, full_default_32);  expand_default = full_default_31 = full_default_32 = None
         return (where_self, where_self_1, where_self_2, where_self_3, where_self_4, where_self_5, where_self_6, where_self_7, where_self_8, where_self_9, where_self_10, where_self_11, where_self_12, where_self_13, where_self_14, where_self_15)
 
-
-
 def _default_make_inputs():
     from repro_harness import parse_shapes_config
     return parse_shapes_config(_shapes_config)
-
 
 def make_inputs(shape_config=None):
     """Generate inputs for a specific shape config, or default."""
     if shape_config is not None:
         return make_inputs_from_config(shape_config)
     return _default_make_inputs()
-
 
 if __name__ == "__main__":
     benchmark_repro(__file__, Repro, make_inputs)

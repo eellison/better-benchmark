@@ -4,15 +4,12 @@ Label: timm_beit_base_patch16_224_train
 Pattern hash: 73a23287990b
 Shape hash: 485c0134
 """
-import sys
-from pathlib import Path
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
@@ -243,19 +240,15 @@ class Repro(torch.nn.Module):
         index_put_default_11: "f32[732, 12]" = torch.ops.aten.index_put.default(full_default_1, [reshape_default_23], reshape_default_22, True);  full_default_1 = reshape_default_23 = reshape_default_22 = None
         return (index_put_default, index_put_default_1, index_put_default_2, index_put_default_3, index_put_default_4, index_put_default_5, index_put_default_6, index_put_default_7, index_put_default_8, index_put_default_9, index_put_default_10, index_put_default_11)
 
-
-
 def _default_make_inputs():
     from repro_harness import parse_shapes_config
     return parse_shapes_config(_shapes_config)
-
 
 def make_inputs(shape_config=None):
     """Generate inputs for a specific shape config, or default."""
     if shape_config is not None:
         return make_inputs_from_config(shape_config)
     return _default_make_inputs()
-
 
 if __name__ == "__main__":
     benchmark_repro(__file__, Repro, make_inputs)

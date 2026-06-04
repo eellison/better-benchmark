@@ -4,15 +4,12 @@ Label: torchbench_functorch_dp_cifar10_train_000
 Pattern hash: 2d18883a5e64
 Shape hash: d4bb90d7
 """
-import sys
-from pathlib import Path
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
@@ -47,19 +44,15 @@ class Repro(torch.nn.Module):
         le_scalar: "b8[64, 512, 1, 1]" = torch.ops.aten.le.Scalar(relu_default, 0);  relu_default = None
         return (squeeze_dims, squeeze_dims_1, view_default_2, le_scalar)
 
-
-
 def _default_make_inputs():
     from repro_harness import parse_shapes_config
     return parse_shapes_config(_shapes_config)
-
 
 def make_inputs(shape_config=None):
     """Generate inputs for a specific shape config, or default."""
     if shape_config is not None:
         return make_inputs_from_config(shape_config)
     return _default_make_inputs()
-
 
 if __name__ == "__main__":
     benchmark_repro(__file__, Repro, make_inputs)
