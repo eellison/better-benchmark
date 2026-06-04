@@ -24,7 +24,6 @@ TOKENS_WITH_PREFIX = 197
 D = 768
 FLAT_TOKENS = N * TOKENS_WITH_PREFIX
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

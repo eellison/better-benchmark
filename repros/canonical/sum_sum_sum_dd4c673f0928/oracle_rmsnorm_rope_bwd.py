@@ -29,7 +29,6 @@ HALF_DIM = HEAD_DIM // 2
 QUERY_HIDDEN = QUERY_HEADS * HEAD_DIM
 KEY_VALUE_HIDDEN = KEY_VALUE_HEADS * HEAD_DIM
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

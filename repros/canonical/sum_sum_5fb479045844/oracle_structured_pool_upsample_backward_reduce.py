@@ -46,7 +46,6 @@ NUM_M_TILES = math.ceil(N_OUT_HW / BLOCK_M)
 NUM_SRC_TILES = math.ceil(N_SRC_HW / BLOCK_M)
 NUM_TOTAL_REDUCTION_TILES = NUM_M_TILES + NUM_SRC_TILES
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

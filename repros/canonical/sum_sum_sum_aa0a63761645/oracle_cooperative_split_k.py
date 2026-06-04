@@ -29,7 +29,6 @@ BLOCK_K = 1024
 BLOCK_C = 32
 EPILOGUE_BLOCK = 256
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

@@ -357,7 +357,6 @@ def oracle_fused(arg89_1, arg90_1, arg91_1, getitem_126, arg6_1, full_1,
 # ---------------------------------------------------------------------------
 
 def make_inputs(device: torch.device = None) -> tuple:
-    sys.path.insert(0, str(REPO_ROOT))
     module = _load_repro_module()
     inputs = module.make_inputs()
     moved = []

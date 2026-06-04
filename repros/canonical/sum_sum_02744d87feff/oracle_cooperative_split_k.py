@@ -27,7 +27,6 @@ SLICE_C = 32
 SLICE_NUMEL = N * SLICE_C * HW
 SCALE = 4.982461734693877e-06
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

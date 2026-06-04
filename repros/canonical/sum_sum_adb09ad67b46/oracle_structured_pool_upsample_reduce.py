@@ -40,7 +40,6 @@ TOTAL_IN = N * IN_HW
 REDUCTION_SCALE = 1.0 / (N * IH * IW)
 BLOCK_SIZE = 1024
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

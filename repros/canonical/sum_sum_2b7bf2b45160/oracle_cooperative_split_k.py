@@ -31,7 +31,6 @@ SUMMARY_BLOCK_K = 512
 FINAL_BLOCK_C = 16
 EPILOGUE_BLOCK = 256
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

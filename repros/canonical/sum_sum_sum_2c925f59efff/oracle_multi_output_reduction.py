@@ -300,7 +300,6 @@ def triton_oracle(getitem_24, arg89_1, arg88_1, arg85_1, arg87_1, arg86_1,
 # ---------------------------------------------------------------------------
 
 def make_inputs(device: torch.device = None) -> tuple:
-    sys.path.insert(0, str(REPO_ROOT))
     module = _load_repro_module()
     inputs = module.make_inputs()
     moved = []

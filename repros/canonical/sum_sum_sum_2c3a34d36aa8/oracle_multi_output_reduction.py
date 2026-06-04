@@ -25,7 +25,6 @@ SCALE0 = 0.9622504486493761
 SCALE1 = 1.7015043497085571
 POINTWISE_SCALE = 0.2
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

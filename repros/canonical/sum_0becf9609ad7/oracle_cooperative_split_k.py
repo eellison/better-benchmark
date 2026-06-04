@@ -35,7 +35,6 @@ INV_HW = 1.0 / HW
 BLOCK_K = 512
 BLOCK_C = 8
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

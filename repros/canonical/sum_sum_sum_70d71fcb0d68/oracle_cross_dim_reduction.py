@@ -31,7 +31,6 @@ import torch
 import triton
 import triton.language as tl
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 # ---------------------------------------------------------------------------
 # Triton kernel: cross-dimension fused reduction (2D grid: N x C)

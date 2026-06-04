@@ -26,7 +26,6 @@ XBLOCK = 4
 BLOCK_C = 1024
 FINAL_BLOCK_C = 8
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

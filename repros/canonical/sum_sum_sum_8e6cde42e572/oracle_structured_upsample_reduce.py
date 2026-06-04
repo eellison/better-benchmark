@@ -38,7 +38,6 @@ DEFAULT_CSV = REPO_ROOT / "investigation_results" / "measured_oracle_floors.csv"
 CHANNEL_REDUCTION_SCALE = 2.0366266944734097e-07
 SHAPE_LABEL = "torchbench_pytorch_unet_train_001_90a2f096"
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

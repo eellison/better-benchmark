@@ -33,7 +33,6 @@ TILE_C = 128
 FINAL_BLOCK_C = 16
 FINAL_BLOCK_TILES = 512
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

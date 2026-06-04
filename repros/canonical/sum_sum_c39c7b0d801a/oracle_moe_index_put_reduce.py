@@ -19,7 +19,6 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 SHAPE_LABEL = "vllm_qwen_qwen3-30b-a3b_001_f65095c5"
 HIDDEN_SIZE = 2048
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

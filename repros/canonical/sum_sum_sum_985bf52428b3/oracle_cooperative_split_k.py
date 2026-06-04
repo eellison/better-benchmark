@@ -40,7 +40,6 @@ FINAL_BLOCK_TILES = 256
 
 CONV_STRIDE = (CHANNELS * TOKENS, 1, PATCH_W * CHANNELS, CHANNELS)
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

@@ -26,7 +26,6 @@ AVG_SCALE = 1.0 / 9.0
 REDUCE_SCALE = 1.0 / TOTAL_SPATIAL
 SINGLE_PASS_WARPS = 16
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

@@ -40,7 +40,6 @@ BLOCK_CHANNELS = 256
 FINAL_BLOCK_CHANNELS = 16
 FINAL_BLOCK_TILES = 256
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

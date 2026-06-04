@@ -38,7 +38,6 @@ FINAL_BLOCK_TILES = 1024
 ROW_NUM_WARPS = 8
 FINAL_NUM_WARPS = 8
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

@@ -34,7 +34,6 @@ import triton.language as tl
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 # ---------------------------------------------------------------------------

@@ -32,7 +32,6 @@ W = 7
 HW = H * W
 INV_HW = 1.0 / HW
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

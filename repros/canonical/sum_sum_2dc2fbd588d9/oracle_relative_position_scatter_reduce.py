@@ -28,7 +28,6 @@ QUERY = 49
 KEY = 49
 BIAS_ROWS = 169
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

@@ -30,7 +30,6 @@ TOKENS = 198
 CHANNELS = 768
 ROWS = BATCH * TOKENS
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

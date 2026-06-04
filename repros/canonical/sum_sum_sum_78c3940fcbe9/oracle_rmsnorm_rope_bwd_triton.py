@@ -36,7 +36,6 @@ KEY_VALUE_HIDDEN = KEY_VALUE_HEADS * HEAD_DIM
 TABLE_SIZE = SEQ * HEAD_DIM
 ROWS_PER_PROGRAM = 4
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

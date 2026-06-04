@@ -39,7 +39,6 @@ NUM_HW_TILES = 13
 BLOCK_TILES = 16
 BLOCK_BATCH = 32
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

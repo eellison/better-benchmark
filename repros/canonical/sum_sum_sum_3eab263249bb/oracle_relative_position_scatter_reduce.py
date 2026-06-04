@@ -34,7 +34,6 @@ BUCKETS = 169
 BLOCK_N = 16
 BLOCK_W = 64
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

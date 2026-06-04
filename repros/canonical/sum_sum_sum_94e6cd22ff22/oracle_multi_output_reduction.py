@@ -21,7 +21,6 @@ T = 197
 C = 192
 ROWS = B * T
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

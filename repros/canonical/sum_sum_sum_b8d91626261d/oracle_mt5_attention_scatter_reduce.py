@@ -36,7 +36,6 @@ NEG_INF_F32 = -3.4028234663852886e38
 BLOCK_B = 32
 BLOCK_K = 128
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

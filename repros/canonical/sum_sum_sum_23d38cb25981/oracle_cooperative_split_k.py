@@ -45,7 +45,6 @@ FINAL_BLOCK_C = 16
 FINAL_BLOCK_TILES = 256
 KERNEL_WARPS = 4
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

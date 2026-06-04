@@ -323,7 +323,6 @@ def benchmark_compiled(logits, labels, warmup=25, rep=100):
     """Benchmark torch.compile baseline (full repro)."""
     spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
     module = importlib.util.module_from_spec(spec)
-    sys.path.insert(0, str(REPO_ROOT))
     spec.loader.exec_module(module)
 
     model = module.Repro().cuda()

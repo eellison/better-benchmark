@@ -40,7 +40,6 @@ FEATURES = HEADS * HEAD_DIM
 INPUT_BH = BATCH * HEADS
 SCALE = 0.3535533905932738
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

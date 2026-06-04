@@ -37,7 +37,6 @@ C = 1024
 ROWS = BATCH * SEQ
 DROPOUT_SCALE = 1.1111111111111112
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

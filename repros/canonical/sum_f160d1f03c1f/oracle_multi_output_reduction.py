@@ -40,7 +40,6 @@ ROWS = BATCH * SEQ
 
 INPUT_STRIDE_N = SEQ * HEADS * HEAD_DIM
 INPUT_STRIDE_S = HEADS * HEAD_DIM
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

@@ -37,7 +37,6 @@ GROUP_R_BLOCK = 2048
 GROUP_BLOCK_C = 1
 GROUP_FINAL_BLOCK_TILES = 64
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

@@ -35,7 +35,6 @@ BLOCK_SCATTER_COLS = 64
 BLOCK_COPY = 1024
 BLOCK_ROUTE = 256
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

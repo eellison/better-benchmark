@@ -21,19 +21,12 @@ except ImportError:
     triton = None
     tl = None
 
-# --- Configuration ---
-REPRO_ID = "<repro_id>"
+# --- Configuration (auto-derived from file location) ---
 REPRO_DIR = Path(__file__).resolve().parent
-# When deployed: repros/canonical/<id>/oracle_*.py -> parents[2] is repo root.
-# When running as template from scripts/: parents[0] (scripts/) -> parent is repo root.
-REPO_ROOT = REPRO_DIR.parents[2]
-if not (REPO_ROOT / "oracle_harness.py").exists():
-    # Fallback: we are in scripts/ directly
-    REPO_ROOT = REPRO_DIR.parent
+REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-# Import shared oracle infrastructure
-sys.path.insert(0, str(REPO_ROOT))
+# Import shared oracle infrastructure (installed via pip install -e .)
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,

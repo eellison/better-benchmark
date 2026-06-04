@@ -27,7 +27,6 @@ INV_C = 1.0 / C
 TILE_M = 4
 TILE_C = 1024
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

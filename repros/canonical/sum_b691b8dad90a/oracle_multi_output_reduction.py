@@ -30,7 +30,6 @@ OUT_SIZE = 128
 BLOCK_T = 2048
 PARTIAL_COUNT = BATCH
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

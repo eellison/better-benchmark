@@ -37,7 +37,6 @@ HEAD_DIM = 64
 ROWS = BATCH * SEQ
 FEATURES = HEADS * HEAD_DIM
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

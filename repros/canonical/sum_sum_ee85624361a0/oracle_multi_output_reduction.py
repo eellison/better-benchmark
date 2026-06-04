@@ -46,7 +46,6 @@ W = 28
 HW = H * W
 SCALE = 2.4912308673469386e-06
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

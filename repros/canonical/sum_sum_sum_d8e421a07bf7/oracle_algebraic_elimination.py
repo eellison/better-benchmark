@@ -29,7 +29,6 @@ INV_COUNT = 7.62939453125e-06
 BLOCK_K = 2048
 FINAL_BLOCK_C = 16
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

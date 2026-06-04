@@ -70,7 +70,6 @@ import tempfile
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gpu_lock import gpu_lock_for_kind, discover_gpus, matching_gpus
 
 
@@ -291,7 +290,6 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
            args_dict: dict):
     """Worker process: holds GPU lock, benchmarks repros until queue is empty."""
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_idx
-    sys.path.insert(0, str(Path(args_dict["root"])))
 
     import torch
     import torch._dynamo
@@ -949,7 +947,6 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     return f'''
 import builtins, contextlib, fcntl, io, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
-sys.path.insert(0, "{args_dict["root"]}")
 
 import torch, torch._dynamo
 import torch._inductor.config as inductor_config
@@ -1371,7 +1368,6 @@ def _worker_script(repro_path: str, gpu_idx: str, args_dict: dict) -> str:
     return f'''
 import sys, json, os
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
-sys.path.insert(0, "{args_dict["root"]}")
 
 import torch, torch._dynamo
 import torch._inductor.config as inductor_config

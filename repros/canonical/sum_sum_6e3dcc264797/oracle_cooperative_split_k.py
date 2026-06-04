@@ -29,7 +29,6 @@ REDUCE_BLOCK_C = 2
 REDUCE_BLOCK_K = 512
 EPILOGUE_BLOCK_ELEMS = 512
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

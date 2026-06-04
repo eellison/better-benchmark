@@ -22,7 +22,6 @@ BATCH = 4
 SEQ_LEN = 512
 HIDDEN = 2048
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

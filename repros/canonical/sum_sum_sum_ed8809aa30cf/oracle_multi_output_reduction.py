@@ -38,7 +38,6 @@ ROWS = BATCH * SEQ
 CHANNELS = 2560
 INV_CHANNELS = 1.0 / CHANNELS
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

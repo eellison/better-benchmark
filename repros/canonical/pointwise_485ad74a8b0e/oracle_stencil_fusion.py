@@ -37,7 +37,6 @@ REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 DEFAULT_CSV = REPO_ROOT / "investigation_results" / "measured_oracle_floors.csv"
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

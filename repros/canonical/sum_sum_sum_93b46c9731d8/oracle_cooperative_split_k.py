@@ -26,7 +26,6 @@ NUMEL = N * C * HW
 INV_HW = 1.0 / HW
 SCALE = 1.0 / TOTAL_SPATIAL
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

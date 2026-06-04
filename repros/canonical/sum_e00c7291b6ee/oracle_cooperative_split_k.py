@@ -26,7 +26,6 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 DEFAULT_BLOCK_N = 32768
 DEFAULT_OUTPUT_BLOCK_N = 1024
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

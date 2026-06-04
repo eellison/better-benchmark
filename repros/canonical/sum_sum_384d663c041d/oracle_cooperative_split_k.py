@@ -30,7 +30,6 @@ SCALE = 2.4912308673469386e-06
 REDUCE_BLOCK_K = 2048
 EPILOGUE_BLOCK_ELEMS = 1024
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

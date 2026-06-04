@@ -42,7 +42,6 @@ SLICE_START = 192
 SLICE_C = C - SLICE_START
 SCALE = 4.982461734693877e-06
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

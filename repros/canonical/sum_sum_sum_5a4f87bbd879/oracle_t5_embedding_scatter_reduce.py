@@ -34,7 +34,6 @@ DROPOUT_SCALE = 1.1111111111111112
 INIT_BLOCK = 1024
 HIDDEN_BLOCK = 512
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

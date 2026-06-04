@@ -31,7 +31,6 @@ POSITION_ROWS = 1024
 VOCAB = 50257
 BLOCK_SUM_H = 16
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

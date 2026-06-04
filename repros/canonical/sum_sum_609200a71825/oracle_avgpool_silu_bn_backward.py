@@ -37,7 +37,6 @@ BLOCK_SIZE = 1024
 N_TILES = math.ceil(N_HW / BLOCK_SIZE)
 FULL_BLOCK_SIZE = N_HW
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

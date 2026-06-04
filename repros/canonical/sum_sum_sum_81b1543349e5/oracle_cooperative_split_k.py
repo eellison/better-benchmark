@@ -29,7 +29,6 @@ TILE_C = 1024
 FINAL_TILE_C = 16
 FINAL_TILE_M = 256
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

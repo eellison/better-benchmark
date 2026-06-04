@@ -45,7 +45,6 @@ BLOCK_ROWS = 32
 BLOCK_HIDDEN = 32
 NUM_ROW_TILES = math.ceil(ROWS / BLOCK_ROWS)
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

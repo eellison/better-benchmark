@@ -71,11 +71,9 @@ import triton.language as tl
 # --- Configuration ---
 REPRO_ID = "sum_sum_mean_9af96955f8cc"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-# Import shared oracle infrastructure
-sys.path.insert(0, str(REPO_ROOT))
+# Import shared oracle infrastructure (installed via pip install -e .)
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,

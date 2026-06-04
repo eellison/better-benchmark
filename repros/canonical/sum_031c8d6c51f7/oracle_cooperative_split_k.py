@@ -32,7 +32,6 @@ K_TOTAL = BATCH * TIME
 BLOCK_C = 16
 BLOCK_K = 128
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

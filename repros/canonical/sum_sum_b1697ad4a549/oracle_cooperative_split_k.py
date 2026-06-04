@@ -27,7 +27,6 @@ TOTAL_SPATIAL = N * HW
 NUMEL = N * C * HW
 SCALE = 7.62939453125e-06
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

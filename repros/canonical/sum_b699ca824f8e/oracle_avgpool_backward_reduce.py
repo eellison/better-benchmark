@@ -30,7 +30,6 @@ DEFAULT_CSV = REPO_ROOT / "investigation_results" / "measured_oracle_floors.csv"
 SHAPE_LABEL = "timm_nfnet_l0_train_369f714a"
 SPATIAL_SIZE = 49.0
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

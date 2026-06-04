@@ -38,7 +38,6 @@ BLOCK_C = 16
 BLOCK_TILES = 64
 NUM_M_TILES = triton.cdiv(N_HW, BLOCK_M) if triton is not None else math.ceil(N_HW / BLOCK_M)
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

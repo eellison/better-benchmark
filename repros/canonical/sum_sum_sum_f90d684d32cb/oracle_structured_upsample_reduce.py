@@ -37,7 +37,6 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 DEFAULT_CSV = REPO_ROOT / "investigation_results" / "measured_oracle_floors.csv"
 CHANNEL_REDUCTION_SCALE = 3.268828451882845e-06
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

@@ -40,7 +40,6 @@ ROWS = BATCH * TOKENS
 PATCH_TOKENS = TOKENS - 1
 INV_C = 1.0 / CHANNELS
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

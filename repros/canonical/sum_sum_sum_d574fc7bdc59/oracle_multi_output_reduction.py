@@ -37,7 +37,6 @@ ROWS = B * T
 NUMEL = ROWS * C
 INV_C = 1.0 / C
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

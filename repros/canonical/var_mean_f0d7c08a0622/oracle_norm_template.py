@@ -36,8 +36,6 @@ except Exception:
     tl = None
     do_bench = None
 
-# Add project root for repro_harness
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 REPRO_ID = "var_mean_f0d7c08a0622"
 

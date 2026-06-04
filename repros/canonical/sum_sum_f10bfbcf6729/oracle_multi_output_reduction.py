@@ -40,7 +40,6 @@ NUMEL = N * C * HW
 AVGPOOL_SCALE = 0.0625
 BN_SCALE = 6.103515625e-05
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

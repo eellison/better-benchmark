@@ -43,7 +43,6 @@ import threading
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gpu_lock import discover_gpus, matching_gpus
 
 
@@ -120,7 +119,6 @@ def _persistent_compare_worker_script(gpu_idx: str, args_dict: dict) -> str:
     return f'''
 import builtins, contextlib, fcntl, io, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
-sys.path.insert(0, "{args_dict["root"]}")
 
 import torch, torch._dynamo
 import torch._inductor.config as inductor_config

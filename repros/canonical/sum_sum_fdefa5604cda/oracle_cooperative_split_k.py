@@ -23,7 +23,6 @@ D = 512
 INV_D = 1.0 / D
 DROPOUT_SCALE = 1.1111111111111112
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

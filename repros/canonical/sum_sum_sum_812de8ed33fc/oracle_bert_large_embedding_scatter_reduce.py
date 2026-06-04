@@ -27,7 +27,6 @@ ROW_BLOCK = 16
 ROW_BLOCKS = triton.cdiv(ROWS, ROW_BLOCK)
 HIDDEN_BLOCK = 1024
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

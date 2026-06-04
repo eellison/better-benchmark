@@ -267,7 +267,6 @@ def benchmark_triton_softmax(x: torch.Tensor, warmup=25, rep=100, with_dropout=F
 
 def benchmark_compiled_full(warmup=25, rep=100):
     """Benchmark the full repro with torch.compile + CUDAGraph."""
-    sys.path.insert(0, str(REPO_ROOT))
     from repro_harness import parse_shapes_config, make_inputs_safely
 
     repro_mod = _load_repro_module()

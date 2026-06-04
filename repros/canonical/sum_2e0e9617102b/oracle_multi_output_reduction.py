@@ -44,7 +44,6 @@ HW = H * W
 BLOCK_HW = triton.next_power_of_2(HW)
 DEFAULT_GROUP_N = 2
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

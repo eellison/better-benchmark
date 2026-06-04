@@ -22,7 +22,6 @@ ROWS = 2048
 HIDDEN = 768
 SCALE = 0.125
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

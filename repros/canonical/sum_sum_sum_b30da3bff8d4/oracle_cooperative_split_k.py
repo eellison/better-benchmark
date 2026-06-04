@@ -34,7 +34,6 @@ LANES = 2
 TILE_M = 8
 TILE_D = 1024
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

@@ -40,7 +40,6 @@ GROUP_TOTAL = TOKENS * GROUP_HIDDEN
 BLOCK_SIZE = 1024
 TABLE_BLOCK_SIZE = 256
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

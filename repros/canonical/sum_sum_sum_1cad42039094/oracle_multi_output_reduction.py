@@ -33,7 +33,6 @@ ROW_SPLIT = 24
 XBLOCK = 1
 KERNEL_WARPS = 4
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

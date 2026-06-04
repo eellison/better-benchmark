@@ -41,7 +41,6 @@ FINAL_NUM_WARPS = 8
 RSQRT2 = 0.7071067811865476
 NORMAL_PDF_SCALE = 0.3989422804014327
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

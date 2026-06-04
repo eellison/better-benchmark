@@ -33,7 +33,6 @@ TOKEN_ROWS = 50265
 DROPOUT_SCALE = 1.1111111111111112
 BLOCK_H = 1024
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

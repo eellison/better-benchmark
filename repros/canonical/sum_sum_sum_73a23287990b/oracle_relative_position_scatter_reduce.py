@@ -38,7 +38,6 @@ N_REPRO_ARGS = N_TENSOR_ARGS + N_BRANCHES
 BLOCK_N = 4
 BLOCK_S = 256
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

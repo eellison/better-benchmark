@@ -18,7 +18,6 @@ REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

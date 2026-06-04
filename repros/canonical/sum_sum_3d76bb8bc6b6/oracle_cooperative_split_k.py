@@ -28,7 +28,6 @@ OUT_SLICE_C = 16
 OUT_SLICE_NUMEL = N * OUT_SLICE_C * HW
 SCALE = 7.62939453125e-06
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

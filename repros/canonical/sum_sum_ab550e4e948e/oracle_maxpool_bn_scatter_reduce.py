@@ -28,7 +28,6 @@ OUT_W = 14
 OUT_HW = OUT_H * OUT_W
 REDUCTION_SCALE = 1.0 / (N * OUT_H * OUT_W)
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

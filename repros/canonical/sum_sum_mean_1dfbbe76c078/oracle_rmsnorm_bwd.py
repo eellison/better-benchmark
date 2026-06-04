@@ -50,7 +50,6 @@ import torch
 import triton
 import triton.language as tl
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import parse_shapes_config
 
 

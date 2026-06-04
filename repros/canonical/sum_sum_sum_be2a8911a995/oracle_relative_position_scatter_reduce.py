@@ -35,7 +35,6 @@ BLOCK_N = 32
 BLOCK_W = 64
 ZERO_BLOCK = 1024
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

@@ -28,7 +28,6 @@ DROPOUT_P = 0.1
 DROPOUT_SCALE = 1.0 / (1.0 - DROPOUT_P)
 SEED_INDEX = 59
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

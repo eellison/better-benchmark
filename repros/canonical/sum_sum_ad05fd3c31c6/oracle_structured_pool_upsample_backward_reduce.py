@@ -38,7 +38,6 @@ BLOCK_C = 16
 NUM_M_TILES = math.ceil(N_HW / BLOCK_M)
 BLOCK_TILES = 64
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():

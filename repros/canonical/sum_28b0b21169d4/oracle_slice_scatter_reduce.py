@@ -37,7 +37,6 @@ BLOCK_M = 1024
 N_TILES = math.ceil((N * PADDED_W) / BLOCK_M)
 FINAL_BLOCK = 2048
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

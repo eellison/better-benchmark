@@ -32,7 +32,6 @@ INIT_BLOCK = 1024
 HIDDEN_BLOCK = 1024
 FINAL_BLOCK_H = 16
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 if triton is not None:

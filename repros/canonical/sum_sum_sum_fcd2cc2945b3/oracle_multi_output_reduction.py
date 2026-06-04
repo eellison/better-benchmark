@@ -46,7 +46,6 @@ TOTAL_SPATIAL = N * HW
 INV_EXPAND = 1.0 / 64.0
 REDUCE_SCALE = 0.0001220703125
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 @triton.jit

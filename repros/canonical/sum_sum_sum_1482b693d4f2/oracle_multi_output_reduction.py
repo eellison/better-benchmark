@@ -31,7 +31,6 @@ XBLOCK = 1
 USE_ATOMIC_FINALIZE = True
 KERNEL_WARPS = 4
 
-sys.path.insert(0, str(REPO_ROOT))
 
 
 def _load_repro_module():
