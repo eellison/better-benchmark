@@ -385,3 +385,9 @@ sum_sum_sum_dbc10f22635c,ALGEBRAIC_ELIMINATION,needs_work,fresh_2026-06-04: comp
 var_mean_2ceed1dd2572,BANDWIDTH_BOUND,closed,fresh_2026-06-04: compile=6.0us oracle=6.6us gap=0.91x; BAD_ORACLE Albert GELU+LayerNorm fp16 [512x128]; Inductor norm template already optimal
 var_mean_35394af84f60,BANDWIDTH_BOUND,implemented,fresh_2026-06-04: compile=6.7us oracle=6.0us gap=1.12x; functorch_dp_cifar10 GroupNorm+affine+ReLU [64x512x1x1]; borderline gap at launch floor
 var_mean_e48f702d6f81,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=11.9us oracle=6.1us gap=1.94x; functorch_dp_cifar10 GroupNorm+affine+ReLU multi-output with exposed mean/rsqrt stats; true_floor=yes
+pointwise_f33e2464d32f,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=14.4us oracle=6.2us gap=2.33x; doctr_reco_predictor affine-norm+ReLU+maxpool2x1 fused into 1 kernel; true_floor=yes
+sum_dc057cf6da21,BANDWIDTH_BOUND,closed,fresh_2026-06-04: compile=6.1us oracle=6.8us gap=0.91x; BAD_ORACLE siglip f32[128x768] col-sum at launch floor; Inductor already optimal
+sum_sum_sum_8faedc560651,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=19.4us oracle=6.8us gap=2.85x; functorch_dp_cifar10 grouped multi-output reduction where+mul+sum fusion; true_floor=yes
+var_mean_032354ac8a5f,ALGEBRAIC_ELIMINATION,needs_work,fresh_2026-06-04: compile=14.9us oracle=6.2us gap=2.39x; nanogpt_infer LayerNorm+index[-1] dead-row elimination; true_floor=yes
+var_mean_9ded65850d80,NEW_PATTERN,needs_work,fresh_2026-06-04: compile=9.8us oracle=6.9us gap=1.44x; hf_Albert embedding+layernorm fp16 dedicated one-warp row template; true_floor=yes
+var_mean_a0eecc057fbc,ALGEBRAIC_ELIMINATION,needs_work,fresh_2026-06-04: compile=15.3us oracle=6.8us gap=2.24x; nanogpt_train LayerNorm+index[-1]+rsqrt/768 dead-row elimination with multi-output; true_floor=yes
