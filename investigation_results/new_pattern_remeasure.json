@@ -1,0 +1,113 @@
+{
+  "timestamp": "2026-06-04T17:45:35",
+  "config": {
+    "force_pointwise_cat": true,
+    "coordinate_descent_tuning": true,
+    "scatter_reduce_fusion": true,
+    "triton.scalar_reduction_accumulators": true,
+    "linear_reduction_elimination": true,
+    "slice_scatter_elision": true
+  },
+  "gpu": "NVIDIA B200",
+  "results": [
+    {
+      "repro_id": "amax_sum_d112f48ea917",
+      "compile_us": 98.08000177145004,
+      "oracle_us": 80.89599758386612,
+      "ref_oracle_us": 82.1,
+      "gap": 1.2124209441853906,
+      "status": "STILL_GAP"
+    },
+    {
+      "repro_id": "amax_sum_c147ef68d8e3",
+      "compile_us": 16.3199994713068,
+      "oracle_us": 15.424000099301338,
+      "ref_oracle_us": 14.5,
+      "gap": 1.058091245217643,
+      "status": "AT_FLOOR"
+    },
+    {
+      "repro_id": "amax_sum_66dc4fac757d",
+      "compile_us": 13.919999822974205,
+      "oracle_us": 12.000000104308128,
+      "ref_oracle_us": 10.368,
+      "gap": 1.1599999751647316,
+      "status": "STILL_GAP"
+    },
+    {
+      "repro_id": "amax_sum_any_d4c975ea57c8",
+      "compile_us": 75.52000135183334,
+      "oracle_us": 101.1200025677681,
+      "ref_oracle_us": 51.1,
+      "gap": 0.7468354374419811,
+      "status": "AT_FLOOR"
+    },
+    {
+      "repro_id": "amax_sum_17ab35828f89",
+      "compile_us": 60.35200133919716,
+      "oracle_us": 36.639999598264694,
+      "ref_oracle_us": 35.9,
+      "gap": 1.6471616266626676,
+      "status": "STILL_GAP"
+    },
+    {
+      "repro_id": "amax_sum_1a6624550d06",
+      "compile_us": 87.90399879217148,
+      "oracle_us": 64.51199948787689,
+      "ref_oracle_us": 64.2,
+      "gap": 1.3625991984435457,
+      "status": "STILL_GAP"
+    },
+    {
+      "repro_id": "amax_sum_9f4956227a79",
+      "compile_us": 60.416001826524734,
+      "oracle_us": 35.90400144457817,
+      "ref_oracle_us": 36.6,
+      "gap": 1.682709430584877,
+      "status": "STILL_GAP"
+    },
+    {
+      "repro_id": "amax_sum_sum_e2f518f0a274",
+      "compile_us": 157.60000050067902,
+      "oracle_us": 93.37600320577621,
+      "ref_oracle_us": 94.3,
+      "gap": 1.6877998103363876,
+      "status": "STILL_GAP"
+    },
+    {
+      "repro_id": "any_amax_sum_c1a313554420",
+      "compile_us": 13.887999579310417,
+      "oracle_us": 13.279999606311321,
+      "ref_oracle_us": 11.36,
+      "gap": 1.0457831318541715,
+      "status": "AT_FLOOR"
+    },
+    {
+      "repro_id": "any_amax_sum_56d491110e60",
+      "compile_us": 16.1,
+      "oracle_us": 13.9,
+      "ref_oracle_us": 11.04,
+      "gap": 1.154,
+      "status": "STILL_GAP",
+      "note": "oracle_forward(inputs) tuple calling convention; gap vs fresh oracle"
+    },
+    {
+      "repro_id": "amax_sum_cd5b9c2339af",
+      "compile_us": 18.5,
+      "oracle_us": 17.7,
+      "ref_oracle_us": 16.96000061929226,
+      "gap": 1.042,
+      "status": "AT_FLOOR",
+      "note": "oracle_forward(inputs) tuple calling convention; now at floor"
+    },
+    {
+      "repro_id": "amax_sum_4b162354068b",
+      "compile_us": 19.5,
+      "oracle_us": 16.2,
+      "ref_oracle_us": 23.552,
+      "gap": 1.204,
+      "status": "STILL_GAP",
+      "note": "oracle_forward(inputs) tuple calling convention; initial measurement was unstable, stable gap is 1.2x"
+    }
+  ]
+}
