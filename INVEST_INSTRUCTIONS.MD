@@ -47,12 +47,12 @@ A benchmark corpus of 1482 Inductor-generated kernels from real models (vLLM, HF
 
 Use `investigation_results/oracle_kernel_work_queue.csv` for coordination.
 
-1. Pick ANY row where `oracle_path` is empty and `status` is NOT `active_subagent`
-2. Set `status=active_subagent`, `owner=<your_name>`
+1. Pick ANY row where `canonical_oracle_path` is empty and `status` is NOT `active_subagent`
+2. Set `status=active_subagent` and add `owner=<your_name>` to `notes`
 3. Commit and push the claim before writing the oracle
-4. After writing: set `status=implemented_unmeasured`, fill in `oracle_path`
+4. After writing: set `status=implemented_unmeasured`, fill in `canonical_oracle_path`
 
-If the repro isn't in the CSV yet, add a new row with the `repro_id`, set `status=active_subagent`, `owner=<name>`. Most of the 1090 corpus repros should already have rows.
+If the repro isn't in the CSV yet, add a new row with the `repro_id`, set `status=active_subagent`, and add `owner=<name>` to `notes`. Most of the 1090 corpus repros should already have rows.
 
 Do NOT filter on `inductor_optimization_per_repro_queue.csv` statuses — those are heuristic guesses. The oracle is what determines the real classification.
 
@@ -62,9 +62,18 @@ Do NOT filter on `inductor_optimization_per_repro_queue.csv` statuses — those 
 
 **Workflow:** claim -> write -> verify -> push.
 
+Before writing or running an oracle, install the repo into the active Python
+environment:
+
+```
+python -m pip install --no-build-isolation -e .
+```
+
 **What NOT to do:**
 - Don't filter on `inductor_optimization_per_repro_queue.csv` statuses
 - Don't write subset oracles (must match full `Repro()` scope)
+- Don't add oracle-local `sys.path` / `REPO_ROOT` import hacks. If an oracle
+  cannot import shared helpers, install the repo first with the command above.
 
 **Use the standardized template**: `scripts/oracle_template.py`
 

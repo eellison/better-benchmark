@@ -1,10 +1,7 @@
 """
 Oracle for <REPRO_ID>
 
-Gap diagnosis:
-  Classification: <SCHEDULER_FUSION|COOPERATIVE_SPLIT_K|SCATTER_REDUCE|ONLINE_SOFTMAX|...>
-  What oracle does differently: <1 sentence>
-  What Inductor change would fix: <1 sentence>
+Gap diagnosis (classification: <SCHEDULER_FUSION|SCATTER_REDUCE|COOPERATIVE_SPLIT_K|ALGEBRAIC_ELIMINATION|NEW_PATTERN>): this oracle <specific behavior>, whereas Inductor <specific current behavior>; Inductor cannot do this today because <specific scheduler/codegen/pattern limitation>; the fix is <CLASS>: <specific Inductor change>.
 """
 from __future__ import annotations
 
@@ -26,7 +23,9 @@ REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-# Import shared oracle infrastructure (installed via pip install -e .)
+# Import shared oracle infrastructure. Run first:
+#   python -m pip install --no-build-isolation -e .
+# Do not add oracle-local sys.path or REPO_ROOT import hacks.
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,

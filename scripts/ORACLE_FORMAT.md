@@ -17,6 +17,16 @@ follow and existing oracles should be migrated to.
 Copy `scripts/oracle_template.py` into `repros/canonical/<repro_id>/oracle_<name>.py`
 and fill in the marked sections.
 
+Before writing or running an oracle, install this repo into the active Python
+environment:
+
+```bash
+python -m pip install --no-build-isolation -e .
+```
+
+Do not add oracle-local `sys.path` / `REPO_ROOT` import hacks. If imports fail,
+the environment has not been installed correctly.
+
 ## Required Structure
 
 Every oracle file must have:
@@ -27,24 +37,21 @@ Every oracle file must have:
 """
 Oracle for <repro_id>
 
-Gap diagnosis:
-  Classification: <CATEGORY>
-  What oracle does differently: <1 sentence>
-  What Inductor change would fix: <1 sentence>
+Gap diagnosis (classification: <CLASS>): this oracle <specific behavior>,
+whereas Inductor <specific current behavior>; Inductor cannot do this today
+because <specific scheduler/codegen/pattern limitation>; the fix is <CLASS>:
+<specific Inductor change>.
 """
 ```
 
-Valid classifications: `SCHEDULER_FUSION`, `COOPERATIVE_SPLIT_K`,
-`SCATTER_REDUCE`, `ONLINE_SOFTMAX`, `MULTI_OUTPUT_REDUCTION`,
-`SPLIT_THRESHOLD`, `ALGEBRAIC_ELIMINATION`, `DEFERRED_ASSERTIONS`,
-`BANDWIDTH_BOUND` (for at-floor oracles).
+Valid classifications: `SCHEDULER_FUSION`, `SCATTER_REDUCE`,
+`COOPERATIVE_SPLIT_K`, `ALGEBRAIC_ELIMINATION`, `NEW_PATTERN`.
 
 ### 2. Standard Constants
 
 ```python
 REPRO_ID = "<repro_id>"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 ```
 
