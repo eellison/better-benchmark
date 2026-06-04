@@ -1,19 +1,4 @@
-"""
-Oracle for pointwise_18d9dcca560a
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the
-complete no-input `full -> unsqueeze -> unsqueeze -> sub` region by allocating
-the required fresh `float32[32, 1, 1, 512]` output with stride
-`(512, 512, 512, 1)` and using one Triton kernel to store the algebraically
-equivalent `1.0 - 1.0 == 0.0` result directly, whereas Inductor already removes
-the view-only `unsqueeze` work and lowers the constant expression to a single
-Triton zero-fill over an `empty_strided` output. Inductor cannot materially do
-less work for this captured region because the user-visible result is a fresh
-CUDA tensor that must be allocated and materialized, leaving one launch plus a
-64 KiB store as the floor; the fix is BANDWIDTH_BOUND: no targeted Inductor
-scheduler/codegen pattern change is indicated beyond broad launch or allocation
-overhead reductions.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle materializes the full no-input `aten.full([32, 512], 1.0) -> unsqueeze(1) -> unsqueeze(2) -> 1.0 - tensor` repro as the final zero-valued `float32[32, 1, 1, 512]` layout with one dedicated constant-fill Triton kernel, whereas Inductor currently algebraically rewrites the graph to `aten.full([32, 1, 1, 512], 0.0)` but still lowers it through the generic pointwise scheduler as a no-load store kernel; Inductor cannot do this today because codegen has no dedicated constant-fill/memset lowering for small no-input full tensors after simplification; the fix is NEW_PATTERN: add a constant-full lowering path that emits the final fill directly instead of routing through generic pointwise codegen."""
 from __future__ import annotations
 
 import argparse
@@ -25,7 +10,7 @@ import torch
 try:
     import triton
     import triton.language as tl
-except ImportError:  # pragma: no cover - keeps py_compile useful without Triton.
+except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     triton = None
     tl = None
 
@@ -46,7 +31,8 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 OUTPUT_SHAPE = (32, 1, 1, 512)
 OUTPUT_STRIDE = (512, 512, 512, 1)
-N_ELEMENTS = 32 * 512
+OUTPUT_NUMEL = 32 * 1 * 1 * 512
+OUTPUT_DTYPE = torch.float32
 BLOCK_SIZE = 1024
 
 
@@ -57,34 +43,67 @@ def get_inputs() -> list[object]:
 
 def get_repro_instance() -> torch.nn.Module:
     """Create a Repro() instance for reference comparison."""
-    return _harness_get_repro_instance(REPRO_DIR)
+    return _harness_get_repro_instance(REPRO_DIR).eval()
 
 
 if triton is not None:
 
     @triton.jit
-    def _zero_fill_kernel(out_ptr, BLOCK_N: tl.constexpr):
-        offsets = tl.program_id(0) * BLOCK_N + tl.arange(0, BLOCK_N)
-        values = tl.full((BLOCK_N,), 0.0, tl.float32)
+    def _zero_fill_kernel(
+        out_ptr,
+        block_size: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * block_size + tl.arange(0, block_size)
+        values = tl.zeros((block_size,), tl.float32)
         tl.store(out_ptr + offsets, values)
 
 
 def oracle_forward(inputs: list[object] | tuple[object, ...]) -> torch.Tensor:
-    """Run the full Repro.forward scope with a Triton materialization kernel."""
+    """Run the full no-input repro and return the exact eager output layout."""
     if inputs:
         raise ValueError(f"{REPRO_ID} expects no inputs, got {len(inputs)}")
     if triton is None:
-        raise RuntimeError("Triton is required for oracle_layout.py")
+        raise RuntimeError("Triton is required for the timed oracle")
 
-    out = torch.empty_strided(
+    output = torch.empty_strided(
         OUTPUT_SHAPE,
         OUTPUT_STRIDE,
-        device="cuda",
-        dtype=torch.float32,
+        device=torch.device("cuda", 0),
+        dtype=OUTPUT_DTYPE,
     )
-    grid = (triton.cdiv(N_ELEMENTS, BLOCK_SIZE),)
-    _zero_fill_kernel[grid](out, BLOCK_N=BLOCK_SIZE, num_warps=4)
-    return out
+    grid = (triton.cdiv(OUTPUT_NUMEL, BLOCK_SIZE),)
+    _zero_fill_kernel[grid](
+        output,
+        block_size=BLOCK_SIZE,
+        num_warps=4,
+        num_stages=1,
+    )
+    return output
+
+
+def _check_layout_and_bits(
+    instance: torch.nn.Module,
+    inputs: list[object] | tuple[object, ...],
+) -> bool:
+    with torch.no_grad():
+        eager_out = instance(*inputs)
+        oracle_out = oracle_forward(inputs)
+        torch.cuda.synchronize()
+
+    layout_ok = (
+        tuple(oracle_out.shape) == OUTPUT_SHAPE
+        and oracle_out.stride() == OUTPUT_STRIDE
+        and oracle_out.dtype is OUTPUT_DTYPE
+        and oracle_out.storage_offset() == 0
+    )
+    bits_ok = torch.equal(eager_out.view(torch.uint32), oracle_out.view(torch.uint32))
+    print(
+        f"  output 0 layout: {'PASS' if layout_ok else 'FAIL'} "
+        f"(shape={list(oracle_out.shape)} stride={oracle_out.stride()} "
+        f"dtype={oracle_out.dtype})"
+    )
+    print(f"  output 0 bit_pattern: {'PASS' if bits_ok else 'FAIL'}")
+    return layout_ok and bits_ok
 
 
 def main() -> None:
@@ -168,6 +187,7 @@ def main() -> None:
             rtol=args.rtol,
             skip_stochastic=not args.no_skip_stochastic,
         )
+        ok = _check_layout_and_bits(instance, inputs) and ok
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)

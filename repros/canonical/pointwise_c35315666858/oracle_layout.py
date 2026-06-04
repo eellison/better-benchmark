@@ -1,16 +1,4 @@
-"""Full-scope oracle for pointwise_c35315666858.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the
-complete no-input Repro.forward result, including the `full([16, 512], 1)`,
-two `unsqueeze` views, and `sub(1.0, ...)`, by materializing the algebraically
-equivalent zero result in the exact contiguous `float32[16, 1, 1, 512]` output
-layout with one Triton fill kernel, whereas Inductor already has to produce a
-fresh CUDA tensor for the same observable result and the view-only unsqueezes do
-not add material work; Inductor cannot materially do less for this captured
-region because the output allocation, one launch, and 32 KiB store are the
-floor, so the fix is BANDWIDTH_BOUND: no targeted Inductor kernel-pattern change
-is indicated beyond broad launch/allocation overhead reductions.
-"""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the full zero-input Repro.forward by folding `full([16, 512], 1.0)` through both unsqueeze views and `1.0 - tensor` into one fresh contiguous `float32[16, 1, 1, 512]` positive-zero output filled by a single Triton kernel, whereas Inductor currently lowers the graph as a generic generated pointwise constant-sub/fill path for the final tensor instead of canonicalizing the view-threaded scalar-minus-full expression to a zero tensor; Inductor cannot do this today because its algebraic simplifier does not propagate tensor-valued constants through view-only unsqueeze nodes before pointwise scheduling/codegen; the fix is ALGEBRAIC_ELIMINATION: add an Inductor rewrite that propagates constant full tensors through view ops and replaces `scalar - full(c)` with a direct `full(scalar - c)` of the final layout."""
 from __future__ import annotations
 
 import argparse
@@ -40,19 +28,21 @@ from oracle_harness import (
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
-CLASSIFICATION = "BANDWIDTH_BOUND"
 
 OUT_SHAPE = (16, 1, 1, 512)
 OUT_STRIDE = (512, 512, 512, 1)
-OUT_NUMEL = 16 * 1 * 1 * 512
+OUT_NUMEL = OUT_SHAPE[0] * OUT_SHAPE[1] * OUT_SHAPE[2] * OUT_SHAPE[3]
+BLOCK = 512
+GRID = (OUT_NUMEL // BLOCK,)
+OUT_DEVICE = torch.device("cuda", 0)
 
 
-def get_inputs():
+def get_inputs() -> list[object]:
     """Load inputs from the repro's make_inputs (scope invariant: same inputs)."""
     return _harness_get_inputs(REPRO_DIR)
 
 
-def get_repro_instance():
+def get_repro_instance() -> torch.nn.Module:
     """Create a Repro() instance for reference comparison."""
     return _harness_get_repro_instance(REPRO_DIR)
 
@@ -60,60 +50,67 @@ def get_repro_instance():
 if triton is not None:
 
     @triton.jit
-    def _fill_zero_kernel(
+    def _zero_fill_f32_kernel(
         out_ptr,
-        N: tl.constexpr,
-        BLOCK: tl.constexpr,
+        block_size: tl.constexpr,
     ):
-        offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
-        mask = offsets < N
-        values = tl.full((BLOCK,), 0.0, tl.float32)
-        tl.store(out_ptr + offsets, values, mask=mask)
+        offsets = tl.program_id(0) * block_size + tl.arange(0, block_size)
+        tl.store(out_ptr + offsets, 0.0)
+
+    _zero_fill_f32_launcher = _zero_fill_f32_kernel[GRID]
+else:
+
+    def _zero_fill_f32_launcher(*_args, **_kwargs):
+        raise RuntimeError("Triton is required for the timed oracle")
 
 
-def oracle_forward(inputs):
-    """Run the full repro computation and return the exact eager layout."""
-    if len(inputs) != 0:
+def oracle_forward(inputs: list[object] | tuple[object, ...]) -> torch.Tensor:
+    """Run the full repro computation and return the fresh positive-zero tensor."""
+    if inputs:
         raise AssertionError(f"expected no inputs, got {len(inputs)}")
     if triton is None:
         raise RuntimeError("Triton is required for the timed oracle")
 
-    out = torch.empty_strided(
+    out = torch.empty(
         OUT_SHAPE,
-        OUT_STRIDE,
-        device=torch.device("cuda", 0),
+        device=OUT_DEVICE,
         dtype=torch.float32,
     )
-    block = 1024
-    grid = (triton.cdiv(OUT_NUMEL, block),)
-    _fill_zero_kernel[grid](
+    _zero_fill_f32_launcher(
         out,
-        N=OUT_NUMEL,
-        BLOCK=block,
-        num_warps=4,
+        block_size=BLOCK,
+        num_warps=1,
+        num_stages=1,
     )
     return out
 
 
-def _check_layout(inputs) -> bool:
+def _check_layout_and_bits(
+    instance: torch.nn.Module,
+    inputs: list[object] | tuple[object, ...],
+) -> bool:
     with torch.no_grad():
-        expected = get_repro_instance()(*inputs)
-        actual = oracle_forward(inputs)
-    torch.cuda.synchronize()
+        eager_out = instance(*inputs)
+        oracle_out = oracle_forward(inputs)
+        torch.cuda.synchronize()
 
-    ok = (
-        tuple(actual.shape) == tuple(expected.shape)
-        and actual.dtype == expected.dtype
-        and actual.stride() == expected.stride()
+    layout_ok = (
+        tuple(oracle_out.shape) == OUT_SHAPE
+        and oracle_out.stride() == OUT_STRIDE
+        and oracle_out.dtype == torch.float32
+        and oracle_out.storage_offset() == 0
     )
+    bits_ok = torch.equal(eager_out.view(torch.uint32), oracle_out.view(torch.uint32))
     print(
-        f"  output 0 layout: {'PASS' if ok else 'FAIL'} "
-        f"(shape={list(actual.shape)} dtype={actual.dtype} stride={actual.stride()})"
+        f"  output 0 layout: {'PASS' if layout_ok else 'FAIL'} "
+        f"(shape={list(oracle_out.shape)} stride={oracle_out.stride()} "
+        f"dtype={oracle_out.dtype})"
     )
-    return ok
+    print(f"  output 0 bit_pattern: {'PASS' if bits_ok else 'FAIL'}")
+    return layout_ok and bits_ok
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description=f"Oracle for {REPRO_ID}",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -140,6 +137,7 @@ def main():
 
     if args.show_hw:
         import json
+
         print(json.dumps(get_hardware_info(), indent=2))
         return
 
@@ -162,7 +160,7 @@ def main():
             rtol=args.rtol,
             skip_stochastic=not args.no_skip_stochastic,
         )
-        ok = _check_layout(inputs) and ok
+        ok = _check_layout_and_bits(instance, inputs) and ok
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)
@@ -179,8 +177,10 @@ def main():
             )
             for result in results:
                 if result["status"] == "BAD_ORACLE":
-                    print(f"WARNING: oracle is slower than compile for "
-                          f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
+                    print(
+                        f"WARNING: oracle is slower than compile for "
+                        f"{result['repro_id']} (ratio={result['ratio']:.3f}x)"
+                    )
         else:
             result = bench_oracle(
                 oracle_forward,
@@ -191,8 +191,7 @@ def main():
                 rep=args.rep,
             )
             if result["status"] == "BAD_ORACLE":
-                print(f"WARNING: oracle is slower than compile "
-                      f"(ratio={result['ratio']:.3f}x)")
+                print(f"WARNING: oracle is slower than compile (ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":
