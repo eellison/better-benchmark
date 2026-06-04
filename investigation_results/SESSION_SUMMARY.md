@@ -25,6 +25,28 @@
 3. **Pipeline**: `git pull` → subagent measures → classify → implement if possible → commit → repeat
 4. **Coordination**: `oracle_optimization_queue.csv` tracks every oracle-verified repro with status
 
+### Subagent Usage (CRITICAL)
+
+**Always maintain 3-5 subagents running in parallel.** Never work sequentially when parallel work is possible.
+
+Subagents handle:
+- **Measurement**: Fresh cache + all fixes + CD, measure compile vs oracle, classify, add to CSV
+- **Investigation**: Try all configs on a gap, identify root cause, determine if fixable
+- **Implementation**: Write FX passes, codegen changes, test on target repros
+- **Validation**: Re-verify implemented fixes still work, check for regressions
+- **Pulling**: Periodically fetch new oracles from the branch
+
+The main loop MANAGES subagents — it does NOT do the work itself (except quick checks). When an agent finishes, immediately launch another on the next task. The backlog is:
+1. New unqueued oracles (always process immediately)
+2. Top gaps from needs_work (investigate if closeable)
+3. Validation of implemented fixes on new repros
+4. Implementation of identified fixes
+
+Each subagent prompt must include:
+- The constraint: "Do NOT write custom Triton kernels. Only graph rewrites, scheduler changes, or config adjustments."
+- Standard measurement setup (fresh cache + all fixes + CD)
+- What to report (summary table, root cause, whether fixable)
+
 ---
 
 ## Where Things Live
