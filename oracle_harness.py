@@ -9,6 +9,9 @@ Provides:
   - has_stochastic_ops(repro_path): quick source-level check for stochastic ops
   - check_oracle(oracle_forward, instance, inputs, ...): correctness check
   - bench_oracle(oracle_forward, instance, inputs, repro_id, ...): benchmark
+  - get_hardware_info(): get GPU hardware properties for kernel config selection
+  - get_shape_key(inputs): extract hashable shape signature from inputs
+  - bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, ...): benchmark across all shapes
 """
 from __future__ import annotations
 
@@ -20,6 +23,32 @@ import time
 from pathlib import Path
 
 import torch
+
+
+# ---------------------------------------------------------------------------
+# Hardware and shape utilities
+# ---------------------------------------------------------------------------
+
+def get_hardware_info():
+    """Get hardware properties for kernel config selection."""
+    props = torch.cuda.get_device_properties(0)
+    return {
+        "name": props.name,
+        "sm_major": props.major,
+        "sm_minor": props.minor,
+        "num_sms": props.multi_processor_count,
+        "shared_mem_per_sm": props.max_shared_memory_per_multiprocessor,
+        "total_mem_gb": props.total_memory / 1e9,
+    }
+
+
+def get_shape_key(inputs):
+    """Extract shape signature for config dispatch."""
+    shapes = []
+    for inp in inputs:
+        if isinstance(inp, torch.Tensor):
+            shapes.append(tuple(inp.shape))
+    return tuple(shapes)
 
 
 # ---------------------------------------------------------------------------
@@ -264,6 +293,38 @@ def bench_oracle(
     }
     print(json.dumps(result))
     return result
+
+
+def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
+    """Benchmark oracle across all shapes in shapes.txt.
+
+    Args:
+        oracle_forward: callable that takes inputs and returns oracle outputs
+        repro_dir: Path to the repro directory
+        repro_id: string identifier for the repro
+        **kwargs: passed through to bench_oracle (warmup, rep, etc.)
+
+    Returns:
+        List of result dicts from bench_oracle, one per shape config.
+    """
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    repro_dir = Path(repro_dir)
+    shapes_file = repro_dir / "shapes.txt"
+    if not shapes_file.exists():
+        # Just run default
+        inputs = get_inputs(repro_dir)
+        instance = get_repro_instance(repro_dir)
+        return [bench_oracle(oracle_forward, instance, inputs, repro_id, **kwargs)]
+
+    results = []
+    configs = load_shape_configs(shapes_file)
+    for config in configs:
+        inputs = make_inputs_from_config(config)
+        instance = get_repro_instance(repro_dir)
+        result = bench_oracle(oracle_forward, instance, inputs, f"{repro_id}_{config.label}", **kwargs)
+        results.append(result)
+    return results
 
 
 # ---------------------------------------------------------------------------

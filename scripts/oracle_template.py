@@ -39,6 +39,9 @@ from oracle_harness import (
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
     bench_oracle,
+    bench_oracle_all_shapes,
+    get_hardware_info,
+    get_shape_key,
     has_stochastic_ops,
 )
 
@@ -55,14 +58,26 @@ def get_repro_instance():
 
 # --- Oracle kernel(s) ---
 # Replace this section with your optimized Triton kernel(s).
+#
+# Recommended pattern: use @triton.autotune so the kernel auto-selects
+# the best config for each shape encountered via --all-shapes.
 
 if triton is not None:
 
+    @triton.autotune(
+        configs=[
+            triton.Config({"BLOCK_N": 1024}, num_warps=4, num_stages=2),
+            triton.Config({"BLOCK_N": 2048}, num_warps=4, num_stages=2),
+            triton.Config({"BLOCK_N": 4096}, num_warps=8, num_stages=2),
+        ],
+        key=["N"],  # re-tune when N changes
+    )
     @triton.jit
     def oracle_kernel(
         # TODO: Define kernel parameters
         # input_ptr, output_ptr, ...
-        # N: tl.constexpr, BLOCK_N: tl.constexpr,
+        N: tl.constexpr,
+        BLOCK_N: tl.constexpr,
     ):
         """TODO: Implement optimized kernel."""
         pass
@@ -111,7 +126,17 @@ def main():
                         help="Repetitions for benchmark")
     parser.add_argument("--no-skip-stochastic", action="store_true",
                         help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
     args = parser.parse_args()
+
+    # Handle --show-hw early
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
 
     # Default: run both --check and --bench
     if not args.check and not args.bench:
@@ -140,17 +165,27 @@ def main():
 
     if args.bench:
         print(f"Benchmarking {REPRO_ID}...")
-        result = bench_oracle(
-            oracle_forward,
-            instance,
-            inputs,
-            REPRO_ID,
-            warmup=args.warmup,
-            rep=args.rep,
-        )
-        if result["status"] == "BAD_ORACLE":
-            print(f"WARNING: oracle is slower than compile "
-                  f"(ratio={result['ratio']:.3f}x)")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward, REPRO_DIR, REPRO_ID,
+                warmup=args.warmup, rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile for "
+                          f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":

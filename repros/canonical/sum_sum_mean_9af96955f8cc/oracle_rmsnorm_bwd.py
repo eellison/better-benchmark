@@ -1,5 +1,15 @@
 """
-Oracle kernel for sum_sum_mean_9af96955f8cc (Qwen3-30B RMSNorm backward).
+Oracle for sum_sum_mean_9af96955f8cc (Qwen3-30B RMSNorm backward).
+
+Gap diagnosis:
+  Classification: SCHEDULER_FUSION (reduction chaining)
+  What oracle does differently: Fuses the expert-sum reduction (K2) and RMSNorm
+    reduction (K3) into a single persistent Triton kernel, eliminating an 8MB
+    intermediate write+read between the two phases.
+  What Inductor change would fix: Inductor needs to recognize that when a
+    reduction kernel followed by another reduction share the same intermediate
+    dimension, they can be chained into a single persistent kernel that keeps
+    data in registers (reduction chaining optimization).
 
 === Investigation Summary ===
 
@@ -48,7 +58,9 @@ by running sub-kernels sequentially within one dispatch, but the full fusion
 (keeping data in registers across the two phases) requires Inductor to recognize
 the pattern and generate a single fused Triton kernel.
 """
-import os
+from __future__ import annotations
+
+import argparse
 import sys
 from pathlib import Path
 
@@ -56,8 +68,31 @@ import torch
 import triton
 import triton.language as tl
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from repro_harness import parse_shapes_config
+# --- Configuration ---
+REPRO_ID = "sum_sum_mean_9af96955f8cc"
+REPRO_DIR = Path(__file__).resolve().parent
+REPO_ROOT = REPRO_DIR.parents[2]
+REPRO_PATH = REPRO_DIR / "repro.py"
+
+# Import shared oracle infrastructure
+sys.path.insert(0, str(REPO_ROOT))
+from oracle_harness import (
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    check_oracle,
+    bench_oracle,
+    has_stochastic_ops,
+)
+
+
+def get_inputs():
+    """Load inputs from the repro's make_inputs (scope invariant: same inputs)."""
+    return _harness_get_inputs(REPRO_DIR)
+
+
+def get_repro_instance():
+    """Create a Repro() instance for reference comparison."""
+    return _harness_get_repro_instance(REPRO_DIR)
 
 
 # ============================================================================
@@ -176,11 +211,30 @@ def fused_oracle_kernel(
 
 
 # ============================================================================
-# Host-side orchestration
+# Oracle forward
 # ============================================================================
 
-def oracle_forward(getitem_54, getitem_57, grouped_mm_7, unsqueeze_36, add_35, arg47_1):
-    """Execute the oracle fused kernel (2 kernel launches total)."""
+def oracle_forward(inputs):
+    """Run the oracle fused kernel (2 kernel launches total).
+
+    SCOPE INVARIANT: Accepts the same inputs as Repro.forward() and returns
+    the same output (same shape, dtype, strides).
+
+    Args:
+        inputs: list of tensors/values from get_inputs(), identical to what
+                Repro.forward() receives via Repro()(*inputs).
+
+    Returns:
+        Same output structure as Repro()(*inputs).
+    """
+    # Unpack inputs (first 6 are tensors, last 3 are shape params)
+    getitem_54 = inputs[0]   # [2048, 8] f32
+    getitem_57 = inputs[1]   # [16384] i64
+    grouped_mm_7 = inputs[2] # [16384, 2048] bf16
+    unsqueeze_36 = inputs[3] # [16384, 1] b8
+    add_35 = inputs[4]       # [4, 512, 2048] bf16
+    arg47_1 = inputs[5]      # [2048] bf16
+
     device = getitem_54.device
     N_ROWS = 2048
     N_COLS = 2048
@@ -221,163 +275,67 @@ def oracle_forward(getitem_54, getitem_57, grouped_mm_7, unsqueeze_36, add_35, a
     return output
 
 
-def reference_forward(getitem_54, getitem_57, grouped_mm_7, unsqueeze_36, add_35, arg47_1):
-    """Reference implementation using PyTorch ops (matches Repro.forward)."""
-    full_default = torch.full([], 0.0, dtype=torch.bfloat16, device=getitem_54.device)
-    sum_dim = getitem_54.sum(-1, True)
-    div_tensor = getitem_54 / sum_dim
-    convert_bf16 = div_tensor.to(torch.bfloat16)
-    view_flat = convert_bf16.view(-1)
-    index_tensor = view_flat[getitem_57]
-    unsqueeze = index_tensor.unsqueeze(-1)
-    mul_tensor = grouped_mm_7 * unsqueeze
-    where_self = torch.where(unsqueeze_36, full_default, mul_tensor)
+# --- CLI entry point ---
+def main():
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=2e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=2e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    args = parser.parse_args()
 
-    # Build inverse permutation
-    empty_mem = torch.empty(16384, dtype=torch.int64, device=getitem_54.device)
-    iota = torch.arange(16384, dtype=torch.int64, device=getitem_54.device)
-    inv_perm = empty_mem.scatter_(0, getitem_57, iota)
+    # Default: run both --check and --bench
+    if not args.check and not args.bench:
+        args.check = args.bench = True
 
-    index_tensor_1 = where_self[inv_perm]
-    view_2d8 = index_tensor_1.view(2048, 8, 2048)
-    sum_experts = view_2d8.sum(1)
-    view_4d = sum_experts.view(4, 512, 2048)
-    add_tensor = add_35 + view_4d
-    convert_f32 = add_tensor.float()
-    pow_sq = convert_f32 ** 2
-    mean_sq = pow_sq.mean(-1, True)
-    add_eps = mean_sq + 1e-6
-    rsqrt_val = torch.rsqrt(add_eps)
-    mul_norm = convert_f32 * rsqrt_val
-    convert_bf16_out = mul_norm.to(torch.bfloat16)
-    mul_weight = arg47_1 * convert_bf16_out
-    output = mul_weight.view(2048, 2048)
-    return output
+    inputs = get_inputs()
+    instance = get_repro_instance()
 
+    # Report if stochastic ops detected in source
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
 
-def make_inputs():
-    """Generate test inputs."""
-    _shapes_config = "(T([2048, 8], f32), T([16384], i64, gen=Perm(16384)), T([16384, 2048], bf16), T([16384, 1], b8), T([4, 512, 2048], bf16), T([2048], bf16), S([2048, 8, 2048]), S([4, 512, 2048]), S([2048, 2048]))"
-    inputs = parse_shapes_config(_shapes_config)
-    return inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5]
+    if args.check:
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
 
-
-def check_correctness():
-    """Verify oracle matches reference."""
-    torch.manual_seed(42)
-    getitem_54, getitem_57, grouped_mm_7, unsqueeze_36, add_35, arg47_1 = make_inputs()
-
-    ref_out = reference_forward(getitem_54, getitem_57, grouped_mm_7, unsqueeze_36, add_35, arg47_1)
-    oracle_out = oracle_forward(getitem_54, getitem_57, grouped_mm_7, unsqueeze_36, add_35, arg47_1)
-
-    # Compare
-    max_diff = (ref_out.float() - oracle_out.float()).abs().max().item()
-    mean_diff = (ref_out.float() - oracle_out.float()).abs().mean().item()
-    ref_max = ref_out.float().abs().max().item()
-    rel_err = max_diff / (ref_max + 1e-8)
-
-    print(f"Max absolute diff: {max_diff:.6f}")
-    print(f"Mean absolute diff: {mean_diff:.6f}")
-    print(f"Reference max value: {ref_max:.6f}")
-    print(f"Relative error: {rel_err:.6f}")
-
-    # bf16 has ~0.4% relative error tolerance; allow up to 2% for fused accumulation
-    if rel_err < 0.02:
-        print("CORRECTNESS: PASS")
-        return True
-    else:
-        print("CORRECTNESS: FAIL")
-        return False
-
-
-def benchmark():
-    """Benchmark oracle vs compiled default vs compiled with coordinate descent."""
-    import torch._dynamo
-    import torch._inductor.config as cfg
-    from triton.testing import do_bench
-
-    torch.manual_seed(42)
-    getitem_54, getitem_57, grouped_mm_7, unsqueeze_36, add_35, arg47_1 = make_inputs()
-
-    # Warmup oracle
-    for _ in range(5):
-        oracle_forward(getitem_54, getitem_57, grouped_mm_7, unsqueeze_36, add_35, arg47_1)
-    torch.cuda.synchronize()
-
-    # Benchmark oracle with CUDAGraph
-    g = torch.cuda.CUDAGraph()
-    with torch.cuda.graph(g):
-        oracle_forward(getitem_54, getitem_57, grouped_mm_7, unsqueeze_36, add_35, arg47_1)
-    torch.cuda.synchronize()
-
-    oracle_ms = do_bench(lambda: g.replay(), warmup=25, rep=100, return_mode="min")
-    oracle_us = oracle_ms * 1000
-    print(f"Oracle kernel: {oracle_us:.1f} us")
-
-    # Benchmark compiled default
-    sys.path.insert(0, str(Path(__file__).parent))
-    from repro import Repro
-    mod = Repro()
-    all_inputs = list(make_inputs()) + [[2048, 8, 2048], [4, 512, 2048], [2048, 2048]]
-
-    torch._dynamo.reset()
-    compiled = torch.compile(mod)
-    with torch.no_grad():
-        for _ in range(3):
-            compiled(*all_inputs)
-        torch.cuda.synchronize()
-        g2 = torch.cuda.CUDAGraph()
-        with torch.cuda.graph(g2):
-            compiled(*all_inputs)
-        torch.cuda.synchronize()
-
-    default_ms = do_bench(lambda: g2.replay(), warmup=25, rep=100, return_mode="min")
-    default_us = default_ms * 1000
-    print(f"Compiled default: {default_us:.1f} us")
-
-    # Benchmark compiled with coordinate descent
-    cfg.coordinate_descent_tuning = True
-    torch._dynamo.reset()
-    compiled_cd = torch.compile(mod)
-    with torch.no_grad():
-        for _ in range(3):
-            compiled_cd(*all_inputs)
-        torch.cuda.synchronize()
-        g3 = torch.cuda.CUDAGraph()
-        with torch.cuda.graph(g3):
-            compiled_cd(*all_inputs)
-        torch.cuda.synchronize()
-
-    cd_ms = do_bench(lambda: g3.replay(), warmup=25, rep=100, return_mode="min")
-    cd_us = cd_ms * 1000
-    print(f"Compiled (coord descent): {cd_us:.1f} us")
-    cfg.coordinate_descent_tuning = False
-
-    print(f"\nSpeedup oracle vs default: {default_us/oracle_us:.2f}x")
-    print(f"Speedup oracle vs coord_desc: {cd_us/oracle_us:.2f}x")
-
-    # Memory bandwidth analysis
-    # Read: grouped_mm_7 (64MB) + add_35 (8MB) + routing_weights (32KB)
-    #      + inv_perm (128KB) + mask (16KB) + weight (4KB)
-    # Write: output (8MB)
-    total_bytes = 67108864 + 8388608 + 32768 + 131072 + 16384 + 4096 + 8388608
-    bw_gbps = total_bytes / (oracle_us * 1e-6) / 1e9
-    print(f"\nEffective bandwidth: {bw_gbps:.0f} GB/s")
-    print(f"Total bytes: {total_bytes/1e6:.1f} MB")
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        result = bench_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            REPRO_ID,
+            warmup=args.warmup,
+            rep=args.rep,
+        )
+        if result["status"] == "BAD_ORACLE":
+            print(f"WARNING: oracle is slower than compile "
+                  f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--check", action="store_true", help="Run correctness check only")
-    parser.add_argument("--bench", action="store_true", help="Run benchmark")
-    args = parser.parse_args()
-
-    if args.check or not args.bench:
-        print("=== Correctness Check ===")
-        check_correctness()
-        print()
-
-    if args.bench or not args.check:
-        print("=== Benchmark ===")
-        benchmark()
+    main()
