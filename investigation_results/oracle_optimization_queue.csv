@@ -355,3 +355,21 @@ pointwise_052e3853c721,AT_FLOOR,closed,fresh_2026-06-04: compile=4.7us oracle=4.
 pointwise_4d236bfe44e3,AT_FLOOR,closed,fresh_2026-06-04: compile=4.99us oracle=5.28us gap=0.945x; BAD_ORACLE 3x768 f32 cat at launch floor; no real gap
 pointwise_6d6e44c3eeb4,AT_FLOOR,closed,fresh_2026-06-04: compile=4.99us oracle=4.86us gap=1.027x; f32[32x128] constant ones fill at launch floor; no real gap
 sum_227d8bbf9311,AT_FLOOR,closed,fresh_2026-06-04: compile=6.688us oracle=6.72us gap=0.995x; f32[32x128] row L2 norm at launch floor; no real gap
+pointwise_0ca24eb30c3f,AT_FLOOR,closed,fresh_2026-06-04: compile=5.28us oracle=5.25us gap=1.006x; int64[4x512] BART decoder-label shift at launch floor; no real gap
+pointwise_3b19d63866a7,AT_FLOOR,closed,fresh_2026-06-04: compile=6.27us oracle=6.82us gap=0.919x; BAD_ORACLE f32[32x128x1] index gather at launch floor; no real gap
+pointwise_8aed5a56d560,AT_FLOOR,closed,fresh_2026-06-04: compile=4.67us oracle=4.80us gap=0.973x; int64[1x4096] iota fill at launch floor; no real gap
+pointwise_d9f9b7733ca3,AT_FLOOR,closed,fresh_2026-06-04: compile=4.80us oracle=4.99us gap=0.962x; BAD_ORACLE f32[8x1x1x512] neg-zero view/neg at launch floor; no real gap
+pointwise_eba0147d8378,AT_FLOOR,closed,fresh_2026-06-04: compile=5.28us oracle=5.06us gap=1.043x; f32[8x1024] select_scatter at launch floor; no real gap
+pointwise_b869961e6b54,AT_FLOOR,closed,fresh_2026-06-04: compile=4.96us oracle=4.96us gap=1.000x; f32[8x1x1x1024] expand/view at launch floor; no real gap
+pointwise_c35315666858,AT_FLOOR,closed,fresh_2026-06-04: compile=5.02us oracle=5.06us gap=0.992x; f32[16x1x1x512] constant sub at launch floor; no real gap
+pointwise_403020d93ad2,AT_FLOOR,closed,fresh_2026-06-04: compile=5.66us oracle=7.04us gap=0.804x; BAD_ORACLE bool[8x1024] lt at launch floor; no real gap
+pointwise_482b0c1952cd,AT_FLOOR,closed,fresh_2026-06-04: compile=5.76us oracle=7.01us gap=0.822x; BAD_ORACLE f32[1000x16] softmax at launch floor; no real gap
+pointwise_18d9dcca560a,AT_FLOOR,closed,fresh_2026-06-04: compile=4.90us oracle=4.99us gap=0.982x; f32[8x1x1x512] expand/view at launch floor; no real gap
+pointwise_6c03626e988e,AT_FLOOR,closed,fresh_2026-06-04: compile=4.74us oracle=5.02us gap=0.944x; BAD_ORACLE f32[8x1x1x512] neg-zero view/neg at launch floor; no real gap
+pointwise_75795e2c97dd,AT_FLOOR,closed,fresh_2026-06-04: compile=5.66us oracle=6.91us gap=0.819x; BAD_ORACLE int32[8x1024] arange/view at launch floor; no real gap
+pointwise_34dd8044bfe1,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=12.22us oracle=8.93us gap=1.37x; Reformer stochastic dropout [12x64x64] multi-output random; true_floor=yes
+pointwise_f26b1736413f,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=15.39us oracle=8.48us gap=1.81x; Reformer 3-output fp16 random dropout multi-output fusion; true_floor=yes
+amax_sum_sum_1458251679be,SCATTER_REDUCE,needs_work,fresh_2026-06-04: compile=9.15us oracle=8.22us gap=1.11x; GPT2 cross-entropy softmax/pad/scatter backward; borderline gap; true_floor=yes
+sum_27f326f22f76,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=9.15us oracle=7.04us gap=1.30x; lennard_jones broadcast-mul/sub/permute/sum multi-output reduction; true_floor=yes
+sum_df75f19c9c7a,SCHEDULER_FUSION,needs_work,fresh_2026-06-04: compile=9.18us oracle=7.01us gap=1.31x; lennard_jones mul/sub/permute/sum multi-output reduction; true_floor=yes
+sum_fa194db93388,AT_FLOOR,closed,fresh_2026-06-04: compile=6.08us oracle=6.91us gap=0.880x; BAD_ORACLE where+sum reduction at launch floor; no real gap
