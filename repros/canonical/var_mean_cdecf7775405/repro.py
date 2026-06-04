@@ -4,15 +4,12 @@ Label: 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_infer_000
 Pattern hash: cdecf7775405
 Shape hash: e8a99cae
 """
-import sys
-from pathlib import Path
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
@@ -82,19 +79,15 @@ class Repro(torch.nn.Module):
         view_default_48: "f32[2048, 2560]" = torch.ops.aten.view.default(add_tensor_2, _shape_param_48);  add_tensor_2 = _shape_param_48 = None
         return (view_default_1, view_default_2, view_default_3, view_default_4, view_default_5, view_default_6, view_default_7, view_default_8, view_default_9, view_default_10, view_default_11, view_default_12, view_default_13, view_default_14, view_default_15, view_default_16, view_default_17, view_default_18, view_default_19, view_default_20, view_default_21, view_default_22, view_default_23, view_default_24, view_default_25, view_default_26, view_default_27, view_default_28, view_default_29, view_default_30, view_default_31, view_default_32, view_default_33, view_default_34, view_default_35, view_default_36, view_default_37, view_default_38, view_default_39, view_default_40, view_default_41, view_default_42, view_default_43, view_default_44, view_default_45, view_default_46, view_default_47, view_default_48)
 
-
-
 def _default_make_inputs():
     from repro_harness import parse_shapes_config
     return parse_shapes_config(_shapes_config)
-
 
 def make_inputs(shape_config=None):
     """Generate inputs for a specific shape config, or default."""
     if shape_config is not None:
         return make_inputs_from_config(shape_config)
     return _default_make_inputs()
-
 
 if __name__ == "__main__":
     benchmark_repro(__file__, Repro, make_inputs)

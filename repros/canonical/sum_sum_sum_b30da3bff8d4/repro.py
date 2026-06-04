@@ -4,15 +4,12 @@ Label: hf_GoogleFnet_train_001
 Pattern hash: b30da3bff8d4
 Shape hash: a1091d37
 """
-import sys
-from pathlib import Path
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = 2
@@ -38,19 +35,15 @@ class Repro(torch.nn.Module):
         select_scatter_default: "f32[32, 512, 768, 2]" = torch.ops.aten.select_scatter.default(full_2, mul_tensor_4, 3, 0);  full_2 = mul_tensor_4 = None
         return (sum_dim_int_list_2, sum_dim_int_list_3, select_scatter_default)
 
-
-
 def _default_make_inputs():
     from repro_harness import parse_shapes_config
     return parse_shapes_config(_shapes_config)
-
 
 def make_inputs(shape_config=None):
     """Generate inputs for a specific shape config, or default."""
     if shape_config is not None:
         return make_inputs_from_config(shape_config)
     return _default_make_inputs()
-
 
 if __name__ == "__main__":
     benchmark_repro(__file__, Repro, make_inputs)
