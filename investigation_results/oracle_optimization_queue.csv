@@ -265,3 +265,6 @@ sum_sum_sum_821bf10276d6,SCATTER_REDUCE,needs_work,compile=210.2us(cd) vs oracle
 sum_sum_bc10a7742387,SCHEDULER_FUSION,needs_work,compile=10.432/12.864us vs oracle=9.920us; 1.05x gap vs best required config; VoVNet BN-backward where dual reduction epilogue; scheduler fusion
 any_amax_sum_c1a313554420,NEW_PATTERN,needs_work,compile=19.040/14.848us vs oracle=11.360us; 1.31x gap vs best required config; MT5 all-inf-safe masked softmax; needs fused masked-softmax template
 sum_2e0e9617102b,BANDWIDTH_BOUND,closed,historical compile=49.024/50.848us beats oracle=82.272us; ConvNeXt add channel reduction bandwidth-bound; no actionable gap
+amax_sum_sum_b942094d64da,SCHEDULER_FUSION,needs_work,compile=16.992/17.504us vs oracle=12.096us; 1.40x gap vs best required config; ResNeSt split-attention softmax-weighted avgpool; scheduler fusion for chained branch reduction plus pooling epilogue
+sum_c93e126c2639,BANDWIDTH_BOUND,closed,"historical compile=30.144us beats oracle=51.264us; Bart attention-backward full-tensor FMA is bandwidth-bound; diagnosis-only artifact, no actionable gap"
+sum_sum_25d0782111b0,BANDWIDTH_BOUND,closed,combo=22.080us and historical compile=16.480us beat oracle=31.360us; Inception BN-backward where dual reduction is near-floor/bandwidth-bound; diagnosis-only artifact
