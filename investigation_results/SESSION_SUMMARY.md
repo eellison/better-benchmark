@@ -47,6 +47,30 @@ Each subagent prompt must include:
 - Standard measurement setup (fresh cache + all fixes + CD)
 - What to report (summary table, root cause, whether fixable)
 
+### Committing Work in PyTorch (IMPORTANT)
+
+Agents implementing fixes in `/tmp/pytorch-work` MUST commit their work before finishing.
+Even if it's not perfectly clean, a commit preserves the work if the session dies.
+
+Rules:
+- **Always commit working code** — if it passes on the target repro, commit it
+- **Use a descriptive message**: `[inductor] <what it does> (<repro_id>, <speedup>x)`
+- **New config flags only** — do NOT change existing config defaults
+- **Gate behind config**: new features should have a config flag (enabled by default is fine)
+- **Don't worry about polish** — rough commits are fine; we can squash/clean later
+- **If you can't make it work**, still commit a WIP with a note in the message: `[WIP][inductor] ...`
+
+Example:
+```
+git add torch/_inductor/...
+git commit -m "[inductor] Elide bounds checks for constant index tensors (pointwise_3cfc, 1.16x->1.06x)
+
+Gate: config.elide_constant_index_asserts = True (default enabled)
+Checks min/max of graph-constant index tensors at lowering time.
+
+written with claude code"
+```
+
 ---
 
 ## Where Things Live
