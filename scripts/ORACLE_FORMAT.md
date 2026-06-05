@@ -32,13 +32,19 @@ the environment has not been installed correctly.
 All timing must go through `oracle_harness.bench_oracle()` via the copied
 `scripts/oracle_template.py` CLI. Do not write custom `run_bench()` functions
 and do not call `triton.testing.do_bench(lambda: compiled(*inputs))` directly.
-Direct timing of compiled callables can show fake 2x+ gaps on fast kernels
-because Dynamo dispatch overhead dominates unless CUDA graph capture and
-interleaved timing are handled by the shared harness.
+Also do not use `time.perf_counter()` or any other inline timing of
+`compiled(*inputs)`. Direct timing of compiled callables can show fake 2x+ gaps
+on fast kernels because Dynamo dispatch overhead dominates unless CUDA graph
+capture and interleaved timing are handled by the shared harness.
 
-If `python oracle_<name>.py --bench` prints a CUDAGraph capture warning, report
-the warning and do not treat the fallback number as a valid performance floor
-for fast kernels.
+Use:
+
+```bash
+INDUCTOR_GPU_BENCH_LOCK=1 python oracle_<name>.py --bench --warmup 10 --rep 50
+```
+
+If `--bench` prints a CUDAGraph capture warning, report the warning and do not
+treat the fallback number as a valid performance floor for fast kernels.
 
 ## Required Structure
 

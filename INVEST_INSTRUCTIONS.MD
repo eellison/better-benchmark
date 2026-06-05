@@ -74,7 +74,9 @@ python -m pip install --no-build-isolation -e .
 - Don't write subset oracles (must match full `Repro()` scope)
 - Don't add oracle-local `sys.path` / `REPO_ROOT` import hacks. If an oracle
   cannot import shared helpers, install the repo first with the command above.
-- **DO NOT write your own benchmarking/timing logic** (see below)
+- **DO NOT write your own benchmarking/timing logic** (see below). In
+  particular, do not define `run_bench`, do not call `triton.testing.do_bench`,
+  do not use `time.perf_counter`, and do not time `compiled(*inputs)` directly.
 
 #### Benchmarking: MUST use oracle_harness.bench_oracle()
 
@@ -114,7 +116,9 @@ Just implement `oracle_forward(inputs)` and leave the `main()` as-is.
 2. Fill in the gap diagnosis docstring (classification + 1-sentence descriptions)
 3. Implement `oracle_forward(inputs)` with your optimized Triton kernel(s)
 4. Verify: `python oracle_<name>.py --check` (must print "PASS" and exit 0)
-5. Benchmark: `python oracle_<name>.py --bench` (prints JSON timing line)
+5. Benchmark:
+   `INDUCTOR_GPU_BENCH_LOCK=1 python oracle_<name>.py --bench --warmup 10 --rep 50`
+   (prints JSON timing line)
 
 The template's `main()` must remain the timing entry point. It calls
 `oracle_harness.bench_oracle()`, which holds the GPU lock, uses CUDA graph
