@@ -10,6 +10,16 @@ import torch
 import triton
 import triton.language as tl
 
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
+
 
 REPRO_ID = "sum_sum_sum_fb068b7d821b"
 REPRO_DIR = Path(__file__).resolve().parent
@@ -26,7 +36,6 @@ TILE_ROWS = 8
 TILE_CHANNELS = 1024
 FINAL_BLOCK_CHANNELS = 16
 FINAL_BLOCK_TILES = 256
-
 
 
 def _load_repro_module():
@@ -301,94 +310,91 @@ def oracle_full(
     return oracle_triton_prepared(*prepare_oracle_inputs(*inputs))
 
 
-def _max_diff(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float]:
-    diff = (actual.float() - expected.float()).abs()
-    rel = diff / (expected.float().abs() + 1.0e-8)
-    return diff.max().item(), rel.max().item()
-
-
-def run_check(rtol: float, atol: float) -> bool:
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required for the Triton oracle check")
-
-    torch.manual_seed(0)
-    inputs = make_inputs()
-    with torch.no_grad():
-        expected = reference_outputs(inputs)
-        actual = _as_tuple(oracle_full(*inputs))
-        torch.cuda.synchronize()
-
-    ok = len(actual) == len(expected)
-    if not ok:
-        print(f"output_count: actual={len(actual)} expected={len(expected)} allclose=False")
-
-    for idx, (got, ref) in enumerate(zip(actual, expected)):
-        max_abs, max_rel = _max_diff(got, ref)
-        value_ok = torch.allclose(got.float(), ref.float(), rtol=rtol, atol=atol)
-        dtype_ok = got.dtype == ref.dtype
-        stride_ok = got.stride() == ref.stride()
-        output_ok = value_ok and dtype_ok and stride_ok
-        ok = ok and output_ok
-        print(
-            f"output[{idx}]: shape={list(got.shape)} dtype={got.dtype} "
-            f"stride={got.stride()} expected_stride={ref.stride()} "
-            f"max_abs={max_abs:.6e} max_rel={max_rel:.6e} "
-            f"allclose={value_ok} dtype_match={dtype_ok} stride_match={stride_ok}"
-        )
-
-    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
-    return ok
-
-
-def run_bench(warmup: int, rep: int) -> None:
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required for the Triton oracle benchmark")
-
-    torch.manual_seed(0)
-    inputs = make_inputs()
-    oracle_inputs = prepare_oracle_inputs(*inputs)
-    with torch.no_grad():
-        oracle_triton_prepared(*oracle_inputs)
-        torch.cuda.synchronize()
-        oracle_ms = triton.testing.do_bench(
-            lambda: oracle_triton_prepared(*oracle_inputs),
-            warmup=warmup,
-            rep=rep,
-            return_mode="min",
-        )
-
-    logical_read_bytes = (
-        ROWS * CHANNELS * 4 * 4
-        + ROWS * 4
-        + CHANNELS * 4 * 2
-    )
-    logical_write_bytes = ROWS * CHANNELS * 4 + CHANNELS * 4 * 4
-    print(
-        f"oracle_full cooperative split-k BEiT layernorm tail: {oracle_ms * 1000.0:.3f} us "
-        f"shape={SHAPE_LABEL} warmup={warmup} rep={rep}"
-    )
-    print(f"logical traffic: {(logical_read_bytes + logical_write_bytes) / 1.0e6:.1f} MB")
+def oracle_forward(inputs):
+    """Thin wrapper for oracle_harness compatibility."""
+    return oracle_full(*inputs)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="compare against the full Repro.forward tuple")
-    parser.add_argument("--bench", action="store_true", help="run timing benchmark")
-    parser.add_argument("--rtol", type=float, default=1.0e-2)
-    parser.add_argument("--atol", type=float, default=5.0e-2)
-    parser.add_argument("--warmup", type=int, default=10)
-    parser.add_argument("--rep", type=int, default=50)
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
     args = parser.parse_args()
 
-    if not args.check and not args.bench:
-        parser.error("select at least one mode: --check and/or --bench")
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
 
-    if args.check and not run_check(rtol=args.rtol, atol=args.atol):
-        sys.exit(1)
+    if not args.check and not args.bench:
+        args.check = args.bench = True
+
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
+    if args.check:
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
+
     if args.bench:
-        run_bench(warmup=args.warmup, rep=args.rep)
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":
-    with torch.no_grad():
-        main()
+    main()
