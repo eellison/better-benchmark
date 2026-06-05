@@ -57,6 +57,30 @@ When you find a gap > 1.05x, follow this flow:
 
 5. **Always write/update the per-repro writeup** regardless of outcome.
 
+## Classification (be specific!)
+
+Do NOT use generic labels like "SCHEDULER_FUSION." Name the specific mechanism that's failing. Good classifications describe WHAT is happening:
+
+| Specific Classification | What It Means | Example |
+|------------------------|---------------|---------|
+| STENCIL_PRODUCER_INLINE | Pointwise producer can't inline into pool/stencil consumer (shifted indices) | BN+ReLU → maxpool |
+| MULTI_OUTPUT_SHARED_REDUCTION | Reduction result used by multiple consumers but computed separately for each | sum used for both sin*sum and cos*sum |
+| REDUCTION_EPILOGUE_REREAD | Reduction computes stats, then epilogue re-reads the full input to use those stats | BN-backward (compute mean, then re-read input for gradient) |
+| CAT_MATERIALIZATION | cat() materializes large intermediate that could be avoided | cat([a,b,c]) → reduce (FIXED by cat-through-reduction pass) |
+| PERMUTE_SIDE_SIBLING | Write transposed view + column reduction from same producer, can't share | sum(x, dim=0) alongside permute(x) as separate outputs |
+| BN_AFFINE_RECOMPUTATION | Per-channel BN ops (rsqrt) recomputed N×H×W times due to flat tiling | rsqrt computed 6272x instead of once per channel |
+| COOPERATIVE_SPLIT_K | Reduction has too few CTAs — needs more parallelism via splitting | xhint=40 on 148 SMs |
+| SCATTER_REDUCE | Scatter/index_put materializes dense buffer that could be fused | maxpool-backward scatter → reduce |
+| LONGFORMER_DIAGONAL | Diagonal-chunk assembly via scatter chain (87 repros) | view→permute→pad→slice_scatter×N |
+| ONLINE_CROSS_ENTROPY | Two-pass softmax+gather instead of single-pass online accumulator | log_softmax + gather + masked-sum |
+| CONSTANT_FOLDING | Dead computation on constant/data-independent values | iota → adjacent diff → always-False mask |
+| PERSISTENT_THRESHOLD | Persistent reduction threshold too low, forces looped variant | rnumel=6272 but threshold=1024 |
+| DEAD_STORE | Persistent codegen emits store immediately overwritten | tl.store(buf, y1) then tl.store(buf, output) |
+| DEVICE_ASSERT_OVERHEAD | tl.device_assert on provably-in-bounds indices | constant index tensors |
+
+Bad: "SCHEDULER_FUSION" — tells you nothing about the fix direction.
+Good: "REDUCTION_EPILOGUE_REREAD" — immediately tells you the mechanism and what needs to change.
+
 ## Key Principles
 
 1. **Fuse more, tile better** — the answer is almost always "fuse into one kernel with proper tiling." Don't avoid fusion; fix the tiling so it's profitable.
