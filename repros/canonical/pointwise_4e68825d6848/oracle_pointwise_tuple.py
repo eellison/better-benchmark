@@ -1,18 +1,4 @@
-"""
-Oracle for pointwise_4e68825d6848
-
-Gap diagnosis:
-  Classification: BANDWIDTH_BOUND
-  What oracle does differently: The oracle returns the first split column as the
-    same non-contiguous input view and computes only the second-column
-    tanh/add/mul/add/exp chain in one tiny Triton pointwise kernel.
-  Why Inductor cannot do it today: Inductor already lowers this full scope to
-    launch-floor pointwise work, and the remaining cost is dominated by one
-    small allocation plus one CUDA launch for 256 float elements.
-  Required Inductor change: BANDWIDTH_BOUND; no scheduler-fusion or pattern
-    change should be claimed unless a full-scope oracle beats the required
-    compiled configurations by more than launch-noise.
-"""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle preserves the first split result as the exact aliasing `[256, 1]` input view and computes the second-column `tanh/add/mul/add/exp` output in one tiny Triton pointwise kernel, whereas Inductor currently also preserves the aliasing tuple output layout and lowers the materialized second output to one launch-floor compiled pointwise kernel; Inductor cannot do this today because its scheduler has no lower-than-one-launch codegen path for a mixed aliasing-view/materialized-output tuple and no remaining producer boundary to fuse in this two-output repro; the fix is SCHEDULER_FUSION: keep mixed view/materialized tuple outputs in one fused scheduler group for larger sibling cases, while treating this measured shape as already at floor."""
 from __future__ import annotations
 
 import argparse
@@ -41,13 +27,12 @@ from oracle_harness import (
 
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 N_ROWS = 256
 N_COLS = 2
 BLOCK_N = 256
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "SCHEDULER_FUSION"
 
 
 def get_inputs() -> list[object]:

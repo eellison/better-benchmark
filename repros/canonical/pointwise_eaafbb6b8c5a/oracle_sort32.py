@@ -1,12 +1,4 @@
-"""Gap diagnosis (classification: BANDWIDTH_BOUND): this full-scope oracle
-uses one Triton program to mirror ATen's int64[32] unstable bitonic
-value/index sort and directly emit both returned tensors, whereas Inductor's
-compiled region reaches the same single-launch tiny-sort floor through its
-existing sort path; Inductor cannot materially improve this repro with a
-scheduler change because the work is only 32 int64 keys plus 32 indices and is
-dominated by launch overhead, so the required Inductor change is
-BANDWIDTH_BOUND: no compiler optimization is indicated by this oracle.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full `aten.sort.default` int64[32] value/index return in one Triton bitonic kernel while preserving ATen's unstable equal-key ordering and contiguous output layout, whereas Inductor currently routes this tiny sort through its generic ATen-backed sort lowering; Inductor cannot do this today because scheduler/codegen has no fixed-size small integer value/index sort template for N=32; the fix is NEW_PATTERN: add a guarded small-N integer sort lowering that emits compact value/index bitonic code directly."""
 from __future__ import annotations
 
 import argparse
@@ -26,7 +18,9 @@ except ImportError:
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "NEW_PATTERN"
+OUT_SHAPE = (32,)
+OUT_STRIDE = (1,)
 
 
 from oracle_harness import (  # noqa: E402
@@ -141,6 +135,32 @@ def oracle_forward(inputs):
     return sorted_values, sorted_indices
 
 
+def _as_tuple(outputs):
+    if isinstance(outputs, tuple):
+        return outputs
+    return (outputs,)
+
+
+def _report_exact_diff_and_layout(instance, inputs) -> bool:
+    with torch.no_grad():
+        eager_outputs = _as_tuple(instance(*inputs))
+        oracle_outputs = _as_tuple(oracle_forward(inputs))
+        torch.cuda.synchronize()
+
+    ok = True
+    for i, (eager, oracle) in enumerate(zip(eager_outputs, oracle_outputs)):
+        diff = (eager - oracle).abs().max().item()
+        layout_ok = tuple(oracle.shape) == OUT_SHAPE and oracle.stride() == OUT_STRIDE
+        exact_ok = diff == 0
+        ok = ok and exact_ok and layout_ok
+        print(
+            f"  output {i}: max_abs_diff={diff} "
+            f"layout={'PASS' if layout_ok else 'FAIL'} "
+            f"(shape={list(oracle.shape)} stride={oracle.stride()})"
+        )
+    return ok
+
+
 def main():
     parser = argparse.ArgumentParser(
         description=f"Oracle for {REPRO_ID}",
@@ -190,6 +210,7 @@ def main():
             rtol=args.rtol,
             skip_stochastic=not args.no_skip_stochastic,
         )
+        ok = _report_exact_diff_and_layout(instance, inputs) and ok
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)

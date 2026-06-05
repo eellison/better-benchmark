@@ -1,11 +1,4 @@
-"""
-Oracle for pointwise_d54fca93c7e1
-
-Gap diagnosis:
-  Classification: BANDWIDTH_BOUND
-  What oracle does differently: It skips the provably constant ones/unsqueeze/cast/sub chain and directly materializes the returned f16 zero mask with the exact output layout.
-  What Inductor change would fix: Constant-fold this tiny tensor producer to a direct output fill, though the remaining work is launch/materialization limited.
-"""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the full no-input Repro.forward scope by folding the full(1)->unsqueeze->unsqueeze->fp16 cast->1.0-sub chain into a direct fresh float16 [1, 1, 1, 4096] positive-zero tensor with stride (4096, 4096, 4096, 1), whereas Inductor currently lowers the constant full/view/cast/sub expression as generic scheduled pointwise work that still materializes the tiny output through the normal elementwise kernel path; Inductor cannot do this today because its scheduler/codegen simplifier does not propagate scalar constants through metadata-only views, dtype conversion, and scalar-sub before lowering no-input graphs; the fix is ALGEBRAIC_ELIMINATION: add shape-aware constant propagation across full/view/cast/scalar pointwise chains and emit a direct constant-fill output when the full expression collapses to one scalar."""
 from __future__ import annotations
 
 import argparse
@@ -23,13 +16,10 @@ except ImportError:
 
 
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-sys.path.insert(0, str(REPO_ROOT))
-
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -58,20 +48,21 @@ def get_repro_instance():
 if triton is not None:
 
     @triton.jit
-    def _fill_zero_mask_kernel(
-        out_ptr,
+    def _fill_positive_zero_bits_kernel(
+        out_bits_ptr,
         N: tl.constexpr,
         BLOCK_SIZE: tl.constexpr,
     ):
         offsets = tl.program_id(0) * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
         mask = offsets < N
-        zeros = tl.full((BLOCK_SIZE,), 0.0, tl.float32)
-        tl.store(out_ptr + offsets, zeros, mask=mask)
+        zeros = tl.full((BLOCK_SIZE,), 0, tl.uint16)
+        tl.store(out_bits_ptr + offsets, zeros, mask=mask)
 
 
 def oracle_forward(inputs):
     """Materialize the same f16 [1, 1, 1, 4096] zero mask as Repro.forward()."""
-    del inputs
+    if inputs:
+        raise AssertionError(f"expected no inputs, got {len(inputs)}")
     if triton is None:
         raise RuntimeError("Triton is required for the timed oracle")
 
@@ -83,13 +74,23 @@ def oracle_forward(inputs):
     )
     block_size = 1024
     grid = (triton.cdiv(OUTPUT_NUMEL, block_size),)
-    _fill_zero_mask_kernel[grid](
-        output,
+    _fill_positive_zero_bits_kernel[grid](
+        output.view(torch.uint16),
         N=OUTPUT_NUMEL,
         BLOCK_SIZE=block_size,
         num_warps=4,
     )
     return output
+
+
+def _check_layout_and_sign(out):
+    return (
+        tuple(out.shape) == OUTPUT_SHAPE
+        and out.stride() == OUTPUT_STRIDE
+        and out.dtype == torch.float16
+        and out.device.type == "cuda"
+        and not torch.signbit(out).any().item()
+    )
 
 
 def main():
@@ -141,6 +142,16 @@ def main():
             rtol=args.rtol,
             skip_stochastic=not args.no_skip_stochastic,
         )
+        with torch.no_grad():
+            layout_out = oracle_forward(inputs)
+            torch.cuda.synchronize()
+        layout_ok = _check_layout_and_sign(layout_out)
+        print(
+            f"  output 0 layout/sign: {'PASS' if layout_ok else 'FAIL'} "
+            f"(shape={list(layout_out.shape)} stride={layout_out.stride()} "
+            f"dtype={layout_out.dtype} device={layout_out.device})"
+        )
+        ok = ok and layout_ok
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)

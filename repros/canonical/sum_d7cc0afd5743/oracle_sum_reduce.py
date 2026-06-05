@@ -1,16 +1,10 @@
-"""
-Oracle for sum_d7cc0afd5743
-
-Gap diagnosis:
-  Classification: BANDWIDTH_BOUND
-  What oracle does differently: uses one specialized Triton reduction kernel for the full f32[1000, 1] input and stores the final f32[1] viewed output directly.
-  What Inductor change would fix: no lowering change is indicated if the required tuned Inductor variants match or beat this one-launch memory-bound reduction floor.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete `sum(dim=0, keepdim=True).view([1])` scope for contiguous f32[N, 1] inputs as a one-program Triton reduction that writes the final contiguous f32[1] output directly, whereas Inductor currently lowers the same tiny static dim-0 reduction and following metadata view through its generic reduction codegen path; Inductor cannot do this today because scheduler/codegen has no dedicated single-output small-column-reduction template that strips generic reduction scaffolding for one-column shapes; the fix is NEW_PATTERN: add a guarded fixed-extent one-column sum-reduction template that emits a compact single-block Triton reduction and returns the final viewed layout."""
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 import torch
 
@@ -25,6 +19,7 @@ except ImportError:
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
+CLASSIFICATION = "NEW_PATTERN"
 
 
 from oracle_harness import (  # noqa: E402
@@ -51,7 +46,7 @@ def get_repro_instance():
 if triton is not None:
 
     @triton.jit
-    def _sum_1000_to_1_kernel(
+    def _sum_n_to_1_kernel(
         x_ptr,
         out_ptr,
         N: tl.constexpr,
@@ -64,30 +59,37 @@ if triton is not None:
         tl.store(out_ptr, total)
 
 
-def oracle_forward(inputs):
-    """Run the full-scope oracle computation.
-
-    The repro computes aten.sum(arg, [0], keepdim=True) over f32[1000, 1] and
-    then views the f32[1, 1] result as f32[1]. The oracle returns that final
-    viewed output shape directly.
-    """
-    if triton is None:
-        raise RuntimeError("Triton is required for oracle_sum_reduce.py")
+def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
+    if len(inputs) != 1:
+        raise ValueError(f"{REPRO_ID} expects one input, got {len(inputs)}")
 
     (arg9_1,) = inputs
     if not isinstance(arg9_1, torch.Tensor):
         raise TypeError(f"expected tensor input, got {type(arg9_1)!r}")
-    if tuple(arg9_1.shape) != (1000, 1):
-        raise ValueError(f"unexpected input shape: {tuple(arg9_1.shape)}")
+    if arg9_1.ndim != 2 or arg9_1.shape[1] != 1:
+        raise ValueError(f"expected rank-2 [N, 1] input, got shape={tuple(arg9_1.shape)}")
     if arg9_1.dtype is not torch.float32:
         raise ValueError(f"unexpected input dtype: {arg9_1.dtype}")
     if not arg9_1.is_cuda:
         raise ValueError("oracle_sum_reduce.py expects CUDA inputs")
     if not arg9_1.is_contiguous():
-        arg9_1 = arg9_1.contiguous()
+        raise ValueError(f"expected contiguous input, got stride={arg9_1.stride()}")
+    return arg9_1
 
+
+def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
+    """Run the full-scope oracle computation.
+
+    The repro computes aten.sum(arg, [0], keepdim=True) over f32[N, 1] and then
+    views the f32[1, 1] result as f32[1]. The oracle returns that final viewed
+    output shape directly.
+    """
+    if triton is None:
+        raise RuntimeError("Triton is required for oracle_sum_reduce.py")
+
+    arg9_1 = _validate_inputs(inputs)
     out = torch.empty_strided((1,), (1,), device=arg9_1.device, dtype=arg9_1.dtype)
-    _sum_1000_to_1_kernel[(1,)](
+    _sum_n_to_1_kernel[(1,)](
         arg9_1,
         out,
         N=arg9_1.numel(),

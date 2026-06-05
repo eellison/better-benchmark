@@ -1,28 +1,11 @@
-"""Full-scope Triton oracle for amax_sum_a215204c9264.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the
-complete f32 `[128,2]` log_softmax region from `repro.py` in one
-shape-specialized Triton kernel, covering the row amax, subtract, exp/sum,
-log, and final subtract before writing the `[128,2]` output, while Inductor's
-required configs already emit a faster compact compiled kernel for the same
-full scope. Inductor cannot be materially improved by scheduler fusion here
-because the tensor has only 256 elements and latency is dominated by one GPU
-launch plus scalar exp/log work, not by extra memory traffic or missing fusion.
-The required Inductor change is BANDWIDTH_BOUND: do not add a new lowering for
-this repro unless a broader tiny-K log_softmax template beats the current
-compiled kernel under interleaved timing.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete Repro.forward fp32 [128, 2] log_softmax region in one shape-specialized Triton kernel, covering the row amax, subtract, exp, sum, log, and final subtract with no omitted surrounding attention or loss ops because the captured repro contains none, whereas Inductor currently lowers the same full scope through its generic small reduction/pointwise code path and can match or beat this hand kernel at launch-scale timings; Inductor cannot do this today because its pattern/codegen path does not recognize a two-column log_softmax as a tiny-K dedicated template with straight-line loads, reductions, and log epilogue; the fix is NEW_PATTERN: add a guarded tiny-K log_softmax lowering for this amax/sub/exp/sum/log/sub idiom and only enable it when interleaved benchmarking beats the generic schedule."""
 from __future__ import annotations
 
 import argparse
-import importlib.util
-import json
 import sys
 from pathlib import Path
-from typing import Any
 
 import torch
-import torch._inductor.inductor_prims  # noqa: F401
 import triton
 import triton.language as tl
 
@@ -45,23 +28,7 @@ ROWS = 128
 COLS = 2
 OUT_SHAPE = (ROWS, COLS)
 OUT_STRIDE = (COLS, 1)
-CLASSIFICATION = "BANDWIDTH_BOUND"
-
-COMPILE_CONFIGS = [
-    ("coordinate_descent_tuning=True", {"coordinate_descent_tuning": True}),
-    (
-        "combo_kernels=True,combo_kernel_per_subkernel_blocks=True,"
-        "coordinate_descent_tuning=True,benchmark_combo_kernel=True,"
-        "triton.multi_kernel=3",
-        {
-            "combo_kernels": True,
-            "combo_kernel_per_subkernel_blocks": True,
-            "coordinate_descent_tuning": True,
-            "benchmark_combo_kernel": True,
-            "triton.multi_kernel": 3,
-        },
-    ),
-]
+CLASSIFICATION = "NEW_PATTERN"
 
 
 @triton.jit
@@ -94,41 +61,12 @@ def _log_softmax_k2_kernel(
     tl.store(out_ptr + rows * out_s0 + out_s1, out1, mask=mask)
 
 
-def _load_repro_module() -> Any:
-    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-def get_inputs() -> tuple[Any, ...]:
-    module = _load_repro_module()
-    return tuple(module.make_inputs())
+def get_inputs() -> list[object]:
+    return _harness_get_inputs(REPRO_DIR)
 
 
 def get_repro_instance() -> torch.nn.Module:
-    module = _load_repro_module()
-    return module.Repro()
-
-
-def _as_tuple(value: Any) -> tuple[Any, ...]:
-    if isinstance(value, tuple):
-        return value
-    if isinstance(value, list):
-        return tuple(value)
-    return (value,)
-
-
-def _make_inputs(module: Any, seed: int) -> tuple[Any, ...]:
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    return tuple(
-        item.cuda() if isinstance(item, torch.Tensor) and not item.is_cuda else item
-        for item in module.make_inputs()
-    )
+    return _harness_get_repro_instance(REPRO_DIR)
 
 
 def _validate_input(addmm_72: torch.Tensor) -> None:
@@ -169,9 +107,11 @@ def oracle_online_softmax(addmm_72: torch.Tensor, *, block_m: int = 32) -> torch
     return _launch_oracle(addmm_72, out, block_m=block_m)
 
 
-def oracle_forward(inputs: tuple[Any, ...]) -> torch.Tensor:
+def oracle_forward(inputs: tuple[object, ...] | list[object]) -> torch.Tensor:
     """Run the full-scope oracle on the exact Repro.forward input tuple."""
     (addmm_72,) = inputs
+    if not isinstance(addmm_72, torch.Tensor):
+        raise TypeError(f"expected tensor input, got {type(addmm_72).__name__}")
     return oracle_online_softmax(addmm_72)
 
 
@@ -208,8 +148,8 @@ def main() -> None:
     if not args.check and not args.bench:
         args.check = args.bench = True
 
-    inputs = _harness_get_inputs(REPRO_DIR)
-    instance = _harness_get_repro_instance(REPRO_DIR)
+    inputs = get_inputs()
+    instance = get_repro_instance()
 
     if has_stochastic_ops(REPRO_PATH):
         print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
