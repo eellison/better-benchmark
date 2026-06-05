@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
@@ -24,9 +23,7 @@ from oracle_harness import (
 
 REPRO_ID = "sum_0d445802ccc4"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
-SHAPE_LABEL = "timm_dm_nfnet_f0_train_70c9d47c"
 
 N = 128
 C = 3072
@@ -42,22 +39,6 @@ RSQRT2PI = 0.3989422804014327
 BLOCK_K = 32
 BLOCK_C = 64
 K_TILES = triton.cdiv(N_HW, BLOCK_K)
-
-COMPILE_CONFIGS = [
-    ("coordinate_descent_tuning", {"coordinate_descent_tuning": True}),
-    (
-        "combo_looped_cd",
-        {
-            "combo_kernels": True,
-            "combo_kernel_per_subkernel_blocks": True,
-            "coordinate_descent_tuning": True,
-            "benchmark_combo_kernel": True,
-            "triton.multi_kernel": 3,
-        },
-    ),
-]
-
-
 
 @triton.jit
 def _avgpool_gelu_atomic_kernel(
@@ -109,11 +90,6 @@ def _avgpool_gelu_atomic_kernel(
     tl.atomic_add(out_ptr + offsets_c, partial, sem="relaxed", mask=offsets_c < C_)
 
 
-def make_inputs() -> tuple[object, ...]:
-    module = _load_repro_module()
-    return tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in module.make_inputs())
-
-
 def oracle_structured_pool_upsample_reduce(
     mm: torch.Tensor,
     convolution_80: torch.Tensor,
@@ -153,13 +129,6 @@ def oracle_structured_pool_upsample_reduce(
         num_warps=4,
     )
     return out
-
-
-def reference_outputs(inputs: tuple[object, ...]) -> torch.Tensor:
-    module = _load_repro_module()
-    model = module.Repro().cuda()
-    with torch.no_grad():
-        return model(*inputs)
 
 
 def oracle_forward(inputs):

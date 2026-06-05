@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: NEW_PATTERN): this diagnosis-only oracle computes the complete RoBERTa embedding/dropout/layernorm scope in one fixed-hidden Triton row kernel, including cumsum/mask position-id construction, gathered segment ids, word/segment/position embedding gathers, fp32 layernorm with eps=1e-5, affine, Inductor-style generated-seed `tl.rand` dropout, final [2048,768] view, and rsqrt/768 side output, whereas Inductor lowers the same graph through generic embedding gathers, norm-template reduction, RNG, and pointwise/view scheduling; Inductor cannot emit this today because norm-template canonicalization does not recognize gathered embedding producers plus stochastic dropout and a live inverse-std side output as one RoBERTa embedding-layernorm-dropout pattern; the fix is NEW_PATTERN: add an embedding-layernorm-dropout template that folds dynamic position-id construction, indexed embedding loads, fixed-K row reduction, stochastic dropout, and side-output storage into specialized codegen. Exact stochastic equality is not established for the internally generated eager seed, so this oracle is diagnostic/not_true_floor."""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete RoBERTa embedding-layernorm-dropout Repro.forward scope in one fixed-hidden Triton row kernel, including cumsum/mask position-id construction, gathered segment ids, word/segment/position embedding gathers, fp32 layernorm with eps=1e-5, affine, generated-seed dropout, final [2048,768] view, and deterministic rsqrt/768 side output while --check skips only the stochastic dropout value comparison so true_floor=no, whereas Inductor currently lowers the same graph through generic embedding gather, norm-template reduction, RNG/dropout, pointwise, and view scheduling; Inductor cannot do this today because its pattern matcher and normalization scheduler do not canonicalize dynamic RoBERTa position-id construction plus gathered embedding producers, fixed-K layernorm, stochastic dropout, and a live inverse-std side output into one embedding-layernorm-dropout template; the fix is NEW_PATTERN: add a RoBERTa embedding-layernorm-dropout lowering that folds dynamic position-id construction, indexed embedding loads, fixed-K row reduction, dropout, final view, and side-output storage into specialized codegen."""
 from __future__ import annotations
 
 import argparse
@@ -29,7 +29,6 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
-    check_oracle,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -62,6 +61,7 @@ SEED_COUNT = 37
 SEED_INDEX = 0
 BLOCK_H = 1024
 EXACT_STOCHASTIC_EQUALITY = False
+STOCHASTIC_OUTPUTS = (0,)
 
 if triton is not None:
 
@@ -301,6 +301,87 @@ def oracle_forward(inputs):
     return (torch.ops.aten.view.default(dropped, output_shape), invstd_div)
 
 
+def _normalize_outputs(outputs):
+    if isinstance(outputs, tuple):
+        return outputs
+    if isinstance(outputs, list):
+        return tuple(outputs)
+    return (outputs,)
+
+
+def _tensor_metadata_matches(expected: torch.Tensor, actual: torch.Tensor) -> bool:
+    return (
+        expected.shape == actual.shape
+        and expected.dtype == actual.dtype
+        and expected.stride() == actual.stride()
+    )
+
+
+def _check_roberta_oracle(
+    instance,
+    inputs,
+    *,
+    atol: float,
+    rtol: float,
+    skip_stochastic: bool,
+) -> bool:
+    with torch.no_grad():
+        eager = _normalize_outputs(instance(*inputs))
+        oracle_out = _normalize_outputs(oracle_forward(inputs))
+
+    if len(oracle_out) != len(eager):
+        print(
+            f"  SCOPE_MISMATCH: oracle produces {len(oracle_out)} outputs, "
+            f"eager produces {len(eager)}"
+        )
+        return False
+
+    all_pass = True
+    for index, (expected, actual) in enumerate(zip(eager, oracle_out)):
+        if not isinstance(expected, torch.Tensor) or not isinstance(actual, torch.Tensor):
+            ok = expected == actual
+            print(f"  output {index}: {'PASS' if ok else 'FAIL'} (non-tensor)")
+            all_pass = all_pass and bool(ok)
+            continue
+
+        metadata_ok = _tensor_metadata_matches(expected, actual)
+        metadata = (
+            f"shape={list(expected.shape)} dtype={expected.dtype} "
+            f"stride={list(expected.stride())}"
+        )
+        if not metadata_ok:
+            print(
+                f"  output {index}: SCOPE_MISMATCH metadata "
+                f"oracle_shape={list(actual.shape)} eager_shape={list(expected.shape)} "
+                f"oracle_dtype={actual.dtype} eager_dtype={expected.dtype} "
+                f"oracle_stride={list(actual.stride())} eager_stride={list(expected.stride())}"
+            )
+            all_pass = False
+            continue
+
+        if skip_stochastic and index in STOCHASTIC_OUTPUTS:
+            print(f"  output {index}: SKIP values (stochastic dropout; metadata PASS {metadata})")
+            continue
+
+        if not expected.is_floating_point():
+            ok = torch.equal(expected, actual)
+            print(f"  output {index}: {'PASS' if ok else 'FAIL'} (exact, {metadata})")
+            all_pass = all_pass and bool(ok)
+            continue
+
+        expected_f32 = expected.float()
+        actual_f32 = actual.float()
+        max_diff = (expected_f32 - actual_f32).abs().max().item()
+        ok = torch.allclose(expected_f32, actual_f32, atol=atol, rtol=rtol)
+        print(
+            f"  output {index}: {'PASS' if ok else 'FAIL'} "
+            f"({metadata} max_diff={max_diff:.2e})"
+        )
+        all_pass = all_pass and bool(ok)
+
+    return all_pass
+
+
 # --- CLI entry point ---
 def main():
     parser = argparse.ArgumentParser(
@@ -341,13 +422,22 @@ def main():
     instance = get_repro_instance()
 
     # Report if stochastic ops detected in source
-    if has_stochastic_ops(REPRO_PATH):
-        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+    if has_stochastic_ops(REPRO_PATH) or "inductor_random" in REPRO_PATH.read_text():
+        if args.no_skip_stochastic:
+            print(
+                f"NOTE: {REPRO_ID} contains stochastic ops; --no-skip-stochastic "
+                "requested, so dropout-dependent values will be compared"
+            )
+        else:
+            skipped = ", ".join(str(index) for index in STOCHASTIC_OUTPUTS)
+            print(
+                f"NOTE: {REPRO_ID} contains stochastic ops; only value comparison "
+                f"for output {skipped} is skipped"
+            )
 
     if args.check:
         print(f"Checking {REPRO_ID}...")
-        ok = check_oracle(
-            oracle_forward,
+        ok = _check_roberta_oracle(
             instance,
             inputs,
             atol=args.atol,

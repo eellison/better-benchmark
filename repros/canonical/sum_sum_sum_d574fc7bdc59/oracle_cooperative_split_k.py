@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
@@ -24,7 +23,6 @@ from oracle_harness import (
 
 REPRO_ID = "sum_sum_sum_d574fc7bdc59"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 BATCH = 8
@@ -32,11 +30,6 @@ SEQ = 1500
 M = BATCH * SEQ
 D = 384
 INV_D = 1.0 / D
-
-
-def make_inputs() -> tuple[object, ...]:
-    module = _load_repro_module()
-    return tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in module.make_inputs())
 
 
 def prepare_oracle_inputs(*inputs: object) -> tuple[torch.Tensor, ...]:
@@ -220,15 +213,8 @@ def oracle_full(
     return sum_dy_xhat, sum_dy, out_md.reshape(BATCH, SEQ, D)
 
 
-def reference_outputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
-    module = _load_repro_module()
-    model = module.Repro().cuda()
-    with torch.no_grad():
-        return _as_tuple(model(*inputs))
-
-
 def oracle_forward(inputs):
-    return oracle_full(*inputs)
+    return oracle_full(*prepare_oracle_inputs(*inputs))
 
 
 def main():

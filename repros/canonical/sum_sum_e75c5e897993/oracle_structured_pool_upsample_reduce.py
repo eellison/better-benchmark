@@ -2,12 +2,8 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
-import math
 import sys
-import time
 from pathlib import Path
-from typing import Callable
 
 import torch
 
@@ -30,11 +26,9 @@ from oracle_harness import (
     has_stochastic_ops,
 )
 
-REPRO_ID = "sum_sum_e75c5e897993"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
+REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
-SHAPE_LABEL = "timm_mobilenetv2_100_train_6cf4583b_strided"
 
 N = 128
 C = 1280
@@ -47,49 +41,6 @@ REDUCTION_SCALE = 1.0 / (N * HW)
 BLOCK_HW = 64
 BLOCK_N = 128
 BLOCK_C = 64
-
-COMPILE_CONFIGS = [
-    ("coordinate_descent_tuning", {"coordinate_descent_tuning": True}),
-    (
-        "combo_looped_cd",
-        {
-            "combo_kernels": True,
-            "combo_kernel_per_subkernel_blocks": True,
-            "coordinate_descent_tuning": True,
-            "benchmark_combo_kernel": True,
-            "triton.multi_kernel": 3,
-        },
-    ),
-]
-
-
-
-def make_inputs(device: torch.device) -> tuple[object, ...]:
-    from repro_harness import load_shape_configs, make_inputs_from_config
-
-    configs = load_shape_configs(str(REPRO_PATH))
-    if configs:
-        config = next(iter(configs.values()))
-        config = {
-            "inputs": [
-                {**spec, "device": str(device)}
-                if isinstance(spec, dict) and spec.get("kind") == "tensor"
-                else spec
-                for spec in config["inputs"]
-            ]
-        }
-        inputs = make_inputs_from_config(config)
-    else:
-        module = _load_repro_module()
-        inputs = module.make_inputs()
-
-    moved: list[object] = []
-    for value in inputs:
-        if isinstance(value, torch.Tensor):
-            moved.append(value.to(device=device))
-        else:
-            moved.append(value)
-    return tuple(moved)
 
 
 def oracle_torch(
@@ -416,36 +367,6 @@ class OracleModule(torch.nn.Module):
 
     def forward(self, *inputs: object) -> tuple[torch.Tensor, torch.Tensor]:
         return oracle_structured_pool_upsample_reduce(*inputs, impl=self.impl)
-
-
-def reference_outputs(
-    inputs: tuple[object, ...],
-    device: torch.device,
-) -> tuple[torch.Tensor, torch.Tensor]:
-    module = _load_repro_module()
-    if device.type != "cuda":
-        module.device = lambda *unused_args, **unused_kwargs: device
-    model = module.Repro().to(device)
-    return model(*inputs)
-
-
-def synchronize(device: torch.device) -> None:
-    if device.type == "cuda":
-        torch.cuda.synchronize(device)
-
-
-def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: int) -> float:
-    for _ in range(max(1, warmup)):
-        fn()
-    synchronize(device)
-
-    best_s = math.inf
-    for _ in range(rep):
-        start = time.perf_counter()
-        fn()
-        synchronize(device)
-        best_s = min(best_s, time.perf_counter() - start)
-    return best_s * 1_000_000.0
 
 
 def oracle_forward(inputs):

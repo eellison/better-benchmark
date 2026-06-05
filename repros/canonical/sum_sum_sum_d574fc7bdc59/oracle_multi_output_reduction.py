@@ -1,22 +1,7 @@
-"""
-Full-scope oracle for sum_sum_sum_d574fc7bdc59 (Whisper LN-backward tail).
-
-Gap diagnosis (classification: COOPERATIVE_SPLIT_K): The oracle consumes the
-same original inputs as repro.py, computes the row-local normalization backward
-summaries, accumulates the two sibling `[384]` column reductions, and writes the
-returned full `[8, 1500, 384]` residual-add tensor. Inductor currently schedules
-the sibling column reductions and the dependent full-tensor epilogue as ordinary
-producer/consumer work, so it cannot coordinate row-parallel work that both
-materializes the side output and accumulates the reduction outputs without
-extra passes over the same `mm_6 + mm_9 + mm_10` and normalized-input
-expressions. The fix is COOPERATIVE_SPLIT_K: add scheduler/codegen support for
-split row tiles with partial reduction coordination when a pointwise producer
-also has live materialized side outputs.
-"""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle consumes the same original inputs as repro.py, computes the row-local normalization backward summaries, accumulates the two sibling `[384]` column reductions, and writes the returned full `[8, 1500, 384]` residual-add tensor, whereas Inductor currently schedules the sibling column reductions and the dependent full-tensor epilogue as ordinary producer/consumer work with extra passes over the same `mm_6 + mm_9 + mm_10` and normalized-input expressions; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K template that coordinates row-parallel partial accumulators with a live materialized pointwise side output; the fix is COOPERATIVE_SPLIT_K: add scheduler/codegen support for split row tiles with partial reduction coordination when a pointwise producer also has live materialized side outputs."""
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
@@ -38,7 +23,6 @@ from oracle_harness import (
 
 REPRO_ID = "sum_sum_sum_d574fc7bdc59"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 B = 8
@@ -172,11 +156,6 @@ def _epilogue_kernel(
     tl.store(out_ptr + offsets, out, mask=active)
 
 
-def make_inputs() -> tuple[object, ...]:
-    module = _load_repro_module()
-    return tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in module.make_inputs())
-
-
 def oracle_fused(
     mm_6: torch.Tensor,
     mm_9: torch.Tensor,
@@ -268,13 +247,6 @@ def oracle_fused(
     )
 
     return out_col0, out_col1, out
-
-
-def reference_outputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
-    module = _load_repro_module()
-    model = module.Repro().cuda()
-    with torch.no_grad():
-        return model(*inputs)
 
 
 def oracle_forward(inputs):
