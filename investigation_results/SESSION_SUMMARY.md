@@ -44,7 +44,7 @@ The main loop MANAGES subagents — it does NOT do the work itself (except quick
 
 ### Deep Investigation Rule (MANDATORY)
 
-Any oracle measurement showing ratio > 1.2x MUST get a dedicated investigation agent.
+Any oracle measurement showing ratio > 1.05x MUST get a dedicated investigation agent.
 The investigation must produce:
 - Per-repro writeup at `investigation_results/inductor_writeups/per_repro/<repro_id>.md`
 - Root cause (what fusion/optimization the oracle does that Inductor can't)
@@ -53,8 +53,7 @@ The investigation must produce:
 - Classification into a design TODO family or implementable fix
 - If implementable: attempt the fix, commit to /tmp/pytorch-work, measure result
 
-Gaps 1.05-1.2x get classification only (from the measurement agent).
-Gaps > 1.2x get full investigation + writeup + fix attempt.
+Every GOOD oracle (ratio > 1.05) gets a full investigation. No exceptions.
 
 Each subagent prompt must include:
 - The constraint: "Do NOT write custom Triton kernels. Only graph rewrites, scheduler changes, or config adjustments."
