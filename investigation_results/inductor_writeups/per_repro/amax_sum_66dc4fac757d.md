@@ -1,43 +1,24 @@
 # amax_sum_66dc4fac757d
 
-Gap diagnosis (classification: NEW_PATTERN): the oracle covers the full Reformer logsumexp/softmax-style materialization from `repro.py`, including the fp16 `[768,64,128]` input view as `[1,12,64,64,128]`, the fp32 max/exp/sum/log over the last dimension, the `abs(max) == inf` replacement with zero, the fp16 logsumexp cast, the second fp16 subtract/exp, and the final contiguous `[768,64,128]` output view. It differs from Inductor by using a dedicated multi-row Triton template that keeps each 128-wide row in registers across the reduction and epilogue, with 8 rows per program, instead of relying on the generic generated online-softmax schedule. Inductor cannot do this today because it does not canonicalize this exact max/sum/log, fp16 logsumexp cast, and second fp16 exp epilogue into a multi-row persistent softmax template; the existing generic single-kernel reduction schedule covers the scope but leaves small-row overhead on the table. The fix class is NEW_PATTERN.
+## Compile: 13.66us, Oracle: 11.9us, Gap: 1.148x
 
-## Scope
+## Diagnosis: NEW_PATTERN (multi-row persistent softmax template)
 
-Full captured repro scope:
+## Root cause: Inductor already emits a single fused online softmax kernel (`triton_per_fused_add_convert_element_type_exp_log_prepare_softmax_online_sub_view_0`) processing one row at a time. The oracle processes 8 rows per Triton program using a multi-row persistent template with a [BLOCK_ROWS, BLOCK_COLS] tile, reducing kernel launch overhead and improving warp utilization for the 49152 rows x 128 columns workload. The 14.8% gap comes from launch/scheduling overhead amortized across multiple rows and better register/L2 utilization from the wider tile.
 
-- `bmm_10`: `f16[768, 64, 128]`, stride `(8192, 128, 1)`
-- Internal view: `f16[1, 12, 64, 64, 128]`
-- Output: `f16[768, 64, 128]`, stride `(8192, 128, 1)`
+## Fix path: Extend Inductor's persistent reduction template for small-row softmax-like patterns to process multiple rows per program. When the row width is small (128 here) and fits entirely in registers, tile multiple rows (e.g., 4-8) per block to reduce grid size from 49152 to ~6144 blocks, amortizing launch cost and improving SM utilization.
 
-The oracle includes the reshape/view semantics, fp32 last-dimension logsumexp, fp16 logsumexp materialization, final fp16 subtract/exp, expand, and final `[768,64,128]` view. It does not time a reduction-only subset.
+## Status: design_todo
 
-## Correctness
+## Details
 
-Command:
-
-```bash
-python repros/canonical/amax_sum_66dc4fac757d/oracle_online_softmax.py --check
-```
-
-Result: PASS. Shape, dtype, and stride match the eager repro output. Max abs diff was `6.103516e-05`; max relative diff was `8.340284e-04`.
-
-## Measurements
-
-Command:
-
-```bash
-python repros/canonical/amax_sum_66dc4fac757d/oracle_online_softmax.py --bench --warmup 10 --rep 50
-```
-
-CUDA graph replay timings on the default repro shape:
-
-| Metric | Time |
-|---|---:|
-| Full-scope Triton oracle | `10.368 us` |
-| `torch.compile coordinate_descent_tuning=True` | `13.184 us` |
-| `torch.compile combo_kernels=True,combo_kernel_per_subkernel_blocks=True,coordinate_descent_tuning=True,benchmark_combo_kernel=True,triton.multi_kernel=3` | `12.736 us` |
-
-## Floor Status
-
-Valid full-scope floor on this run: yes. The oracle beats both required compile configs while covering the same computation scope, output dtype, output shape, and output stride as `repro.py`.
+- Model: torchbench_hf_Reformer_infer_005
+- Pattern: amax+sum reduction (logsumexp softmax with fp16 rounding)
+- Shape: [768, 64, 128] viewed as [1, 12, 64, 64, 128], reduction over last dim (128 elements)
+- Total rows: 1*12*64*64 = 49152
+- Inductor kernels: 1 (fused online softmax -- good!)
+- Oracle kernels: 1 (multi-row persistent softmax, 8 rows/block)
+- The gap is relatively small (1.15x) since Inductor already fuses correctly; the improvement is purely from multi-row tiling.
+- Config exploration: coordinate_descent_tuning (13.28us), combo+multi3 (13.28us) -- no config closes the gap.
+- The fp16 intermediate rounding (logsumexp cast to fp16, then subtract/exp in fp16) is faithfully reproduced by both.
+- File references: /tmp/pytorch-work/torch/_inductor/codegen/triton.py (persistent reduction template), /tmp/pytorch-work/torch/_inductor/choices.py (reduction strategy selection)
