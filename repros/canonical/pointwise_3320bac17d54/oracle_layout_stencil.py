@@ -1,11 +1,4 @@
-"""
-Oracle for pointwise_3320bac17d54
-
-Gap diagnosis:
-  Classification: BANDWIDTH_BOUND
-  What oracle does differently: stores the selected scalar value with one Triton scalar-write kernel over the complete in-place Repro.forward scope.
-  What Inductor change would fix: no scheduler change is indicated because the computation is a one-element in-place update already at the launch/bandwidth floor.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle covers the full Repro.forward scope by launching a minimal one-store Triton kernel that writes constant int64 32 into the single selected element and returns the same mutated i64[1] input tensor, whereas Inductor currently emits an equivalent generic pointwise Triton kernel for the fused select/full/copy mutation with pointwise scheduling and wrapper overhead; Inductor cannot use this lower-overhead form today because codegen has no dedicated scalar constant-mutation lowering for aliasing select_scatter plus copy_ updates and routes the case through the generic pointwise path; the fix is NEW_PATTERN: add a guarded scalar constant-store lowering for one-element in-place updates after alias-safe mutation simplification."""
 from __future__ import annotations
 
 import argparse

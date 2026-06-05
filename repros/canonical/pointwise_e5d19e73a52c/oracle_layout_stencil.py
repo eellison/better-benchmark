@@ -1,11 +1,4 @@
-"""
-Oracle for pointwise_e5d19e73a52c
-
-Gap diagnosis:
-  Classification: BANDWIDTH_BOUND
-  What oracle does differently: converts the scalar int64 input to a scalar float64 output with one Triton pointwise kernel over the complete Repro.forward scope.
-  What Inductor change would fix: no scheduler change is indicated because the full computation is already a one-launch scalar pointwise conversion at the launch/bandwidth floor.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete zero-rank `lift_fresh_copy` plus int64-to-float64 conversion by loading the scalar CUDA tensor and storing one fresh scalar float64 output with matching shape and stride, whereas Inductor currently lowers the same full scope through its generic one-element pointwise codegen; Inductor cannot do this today because it has no dedicated zero-rank scalar copy/cast lowering that bypasses generic pointwise scheduling overhead for scalar-only tensor returns; the fix is NEW_PATTERN: add a scalar tensor copy/cast lowering for zero-rank tensor graphs that emits the minimal scalar store path while preserving fresh-output semantics."""
 from __future__ import annotations
 
 import argparse
@@ -26,7 +19,11 @@ REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-# Import shared oracle infrastructure (installed via pip install -e .)
+# Import shared oracle infrastructure. Run first:
+#   python -m pip install --no-build-isolation -e .
+# Use the installed oracle_harness package; run editable install before checks.
+# Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
+# GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
@@ -79,7 +76,7 @@ def oracle_forward(inputs):
     (input_scalar,) = inputs
     if tuple(input_scalar.shape) != ():
         raise ValueError(f"unexpected input shape: {tuple(input_scalar.shape)}")
-    if input_scalar.dtype is not torch.int64:
+    if input_scalar.dtype != torch.int64:
         raise ValueError(f"unexpected input dtype: {input_scalar.dtype}")
     if not input_scalar.is_cuda:
         raise ValueError("oracle_layout_stencil.py expects CUDA inputs")
@@ -158,6 +155,8 @@ def main():
                     print(f"WARNING: oracle is slower than compile for "
                           f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
         else:
+            # The shared harness owns timing so graph capture, GPU locking, and
+            # interleaved oracle/compile measurement stay intact.
             result = bench_oracle(
                 oracle_forward,
                 instance,

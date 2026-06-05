@@ -1,9 +1,10 @@
-"""Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the complete EfficientNet BN-inference affine over fp16 [64,1280,7,7], SiLU as x/(exp(-x)+1), explicit fp16 rounding, spatial 7x7 mean, and final [64,1280] view in one Triton reduction kernel that writes only the final output, whereas tuned Inductor already emits a faster full-scope fused persistent reduction with no materialized BN/SiLU intermediate; Inductor cannot materially improve this through this local oracle rewrite because the remaining work is the required input/parameter reads, exp-heavy SiLU evaluation, fp16 rounding point, row reduction, and output store, and this oracle is not a floor; the fix is BANDWIDTH_BOUND: record the artifact as diagnosis-only and revisit only if broader reduction-template or activation-codegen work beats the existing persistent kernel."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete EfficientNet BN-inference affine over fp16 `[64,1280,7,7]`, evaluates SiLU as `x/(exp(-x)+1)`, rounds through fp16 before the spatial 7x7 mean, preserves NaN propagation, and returns the contiguous fp16 `[64,1280]` view from one Triton reduction kernel, whereas Inductor currently lowers the same full scope to a fused persistent reduction kernel for BN/SILU/spatial mean that is faster than this hand-written specialization; Inductor cannot do this today because the scheduler has no reusable guarded template for a BN-affine activation producer with an explicit fp16 rounding boundary feeding a fixed small spatial mean reduction, only the generic persistent reduction schedule; the fix is SCHEDULER_FUSION: add a benchmark-gated scheduler fusion template for BN-affine plus activation plus small spatial mean that preserves the fp16 cast and NaN semantics, and leave the existing persistent schedule selected when it wins."""
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 import torch
 
@@ -27,21 +28,19 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
-    check_oracle,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
-    get_shape_key,
     has_stochastic_ops,
 )
 
 
-def get_inputs():
+def get_inputs() -> list[Any]:
     """Load inputs from the repro's make_inputs (scope invariant: same inputs)."""
     return _harness_get_inputs(REPRO_DIR)
 
 
-def get_repro_instance():
+def get_repro_instance() -> torch.nn.Module:
     """Create a Repro() instance for reference comparison."""
     return _harness_get_repro_instance(REPRO_DIR)
 
@@ -54,6 +53,8 @@ HW = HEIGHT * WIDTH
 EPS = 1.0e-5
 BLOCK_ROWS = 16
 BLOCK_HW = 64
+CLASSIFICATION = "SCHEDULER_FUSION"
+ACTIONABLE = False
 
 if triton is not None:
 
@@ -91,7 +92,12 @@ if triton is not None:
         tl.store(out_ptr + row_offsets, reduced)
 
 
-def _require_f16_tensor(name, value, shape, stride):
+def _require_f16_tensor(
+    name: str,
+    value: Any,
+    shape: tuple[int, ...],
+    stride: tuple[int, ...],
+) -> torch.Tensor:
     if not isinstance(value, torch.Tensor):
         raise TypeError(f"{name} must be a tensor, got {type(value)!r}")
     if tuple(value.shape) != shape:
@@ -105,7 +111,9 @@ def _require_f16_tensor(name, value, shape, stride):
     return value
 
 
-def _validate_inputs(inputs):
+def _validate_inputs(
+    inputs: list[Any] | tuple[Any, ...],
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     if len(inputs) != 6:
         raise ValueError(f"{REPRO_ID} expects 6 inputs, got {len(inputs)}")
 
@@ -128,7 +136,7 @@ def _validate_inputs(inputs):
     return mean_t, x_t, var_t, weight_t, bias_t
 
 
-def oracle_forward(inputs):
+def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the oracle computation.
 
     SCOPE INVARIANT: Must accept the same inputs as Repro.forward() and return
@@ -162,6 +170,70 @@ def oracle_forward(inputs):
         num_stages=3,
     )
     return output
+
+
+def _run_check(
+    instance: torch.nn.Module,
+    inputs: list[Any] | tuple[Any, ...],
+    *,
+    atol: float,
+    rtol: float,
+) -> bool:
+    """Validate the deterministic full-scope output, including matching NaNs."""
+    with torch.no_grad():
+        expected = instance(*inputs)
+        actual = oracle_forward(inputs)
+        torch.cuda.synchronize()
+
+    if not isinstance(expected, torch.Tensor) or not isinstance(actual, torch.Tensor):
+        print("  SCOPE_MISMATCH: expected and oracle outputs must both be tensors")
+        return False
+
+    shape_ok = expected.shape == actual.shape
+    dtype_ok = expected.dtype == actual.dtype
+    layout_ok = expected.stride() == actual.stride()
+
+    if not shape_ok:
+        print(
+            f"  output 0: SCOPE_MISMATCH shape oracle={list(actual.shape)} "
+            f"eager={list(expected.shape)}"
+        )
+        return False
+
+    expected_f32 = expected.float()
+    actual_f32 = actual.float()
+    expected_nan = torch.isnan(expected_f32)
+    actual_nan = torch.isnan(actual_f32)
+    nan_mask_ok = torch.equal(expected_nan, actual_nan)
+    finite = ~expected_nan & ~actual_nan
+
+    if finite.any():
+        finite_expected = expected_f32[finite]
+        finite_actual = actual_f32[finite]
+        max_diff = (finite_expected - finite_actual).abs().max().item()
+        values_ok = torch.allclose(finite_expected, finite_actual, atol=atol, rtol=rtol)
+    else:
+        max_diff = 0.0
+        values_ok = True
+
+    value_status = "PASS" if values_ok and dtype_ok else "FAIL"
+    layout_status = "PASS" if layout_ok else "FAIL"
+    nan_status = "PASS" if nan_mask_ok else "FAIL"
+    print(
+        f"  output 0 values: {value_status} "
+        f"(shape={list(expected.shape)} dtype={expected.dtype} "
+        f"oracle_dtype={actual.dtype} max_finite_diff={max_diff:.2e})"
+    )
+    print(
+        f"  output 0 layout: {layout_status} "
+        f"(expected_stride={expected.stride()}, oracle_stride={actual.stride()})"
+    )
+    print(
+        f"  output 0 NaNs: {nan_status} "
+        f"(expected_nan={int(expected_nan.sum().item())}, "
+        f"oracle_nan={int(actual_nan.sum().item())})"
+    )
+    return values_ok and dtype_ok and layout_ok and nan_mask_ok
 
 
 # --- CLI entry point ---
@@ -209,14 +281,7 @@ def main():
 
     if args.check:
         print(f"Checking {REPRO_ID}...")
-        ok = check_oracle(
-            oracle_forward,
-            instance,
-            inputs,
-            atol=args.atol,
-            rtol=args.rtol,
-            skip_stochastic=not args.no_skip_stochastic,
-        )
+        ok = _run_check(instance, inputs, atol=args.atol, rtol=args.rtol)
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)
@@ -246,6 +311,12 @@ def main():
             if result["status"] == "BAD_ORACLE":
                 print(f"WARNING: oracle is slower than compile "
                       f"(ratio={result['ratio']:.3f}x)")
+            true_floor = result["status"] == "GOOD"
+            print(f"classification: {CLASSIFICATION}")
+            print(f"true_floor: {'yes' if true_floor else 'no'} ({result['status']})")
+            print(f"actionable: {'yes' if ACTIONABLE and true_floor else 'no'}")
+            if not true_floor:
+                print("diagnosis_only: not_true_floor because compiled Inductor is at least as fast as this full-scope oracle")
 
 
 if __name__ == "__main__":
