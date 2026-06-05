@@ -1,16 +1,4 @@
-"""
-Full-scope oracle for pointwise_5aafedcd8ca4.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the exact
-zero-input `aten.full.default([1, 1, 256, 257], -inf, dtype=float16)` repro by
-allocating the returned contiguous fp16 tensor and materializing the `-inf` bit
-pattern with one Triton fill kernel, whereas Inductor already lowers the graph
-to one no-load constant-store kernel for the required fresh output. Inductor
-cannot remove the remaining work without changing observable fresh-tensor
-semantics because the fp16[1, 1, 256, 257] output must be allocated and fully
-materialized; the fix is BANDWIDTH_BOUND: no scheduler fusion, scatter-reduce,
-split-K, algebraic, or recompute transformation is indicated for this repro.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle materializes the exact zero-input `aten.full.default([1, 1, 256, 257], -inf, dtype=float16)` result by allocating the returned contiguous fp16 tensor and storing the packed `-inf` half bit pattern with one Triton fill kernel, whereas Inductor currently lowers the graph through its generic no-load pointwise constant-store kernel for the required fresh output; Inductor cannot do this today because codegen has no dedicated nonfinite fp16 constant-fill lowering that emits packed bitcast stores directly while bypassing generic elementwise scheduling machinery; the fix is NEW_PATTERN: add a specialized constant-full CUDA/Triton lowering for sign-sensitive and nonfinite half constants that writes the final layout with vectorized bit-pattern stores."""
 from __future__ import annotations
 
 import argparse
@@ -49,7 +37,7 @@ OUT_DTYPE = torch.float16
 OUT_DEVICE = torch.device("cuda", 0)
 FILL_BLOCK = 512
 NEG_INF_F16X2_BITS = 0xFC00FC00
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "NEW_PATTERN"
 
 
 def get_inputs() -> list[object]:

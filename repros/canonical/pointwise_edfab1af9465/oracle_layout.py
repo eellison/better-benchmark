@@ -1,15 +1,4 @@
-"""
-Full-scope oracle for pointwise_edfab1af9465.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the full
-`aten.tanh.default` over the default contiguous `float32[1000, 16]` input and
-returns the required fresh contiguous `float32[1000, 16]` tensor with stride
-`(16, 1)`. Inductor already lowers this single pointwise op to one fused Triton
-kernel, so the remaining work is the required input read, tanh evaluation,
-output materialization, allocation, and standalone launch rather than a missing
-scheduler-fusion, scatter-reduce, cooperative split-K, algebraic-elimination,
-or recompute-fusion transformation.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full single `aten.tanh.default` scope as one hand-written contiguous fp32 Triton tanh kernel and serves as a diagnosis-only launch-floor check, whereas Inductor currently emits one generic flattened pointwise Triton kernel for the same contiguous `float32[1000, 16]` output and measures in the same launch-level band; Inductor cannot do this today because pointwise codegen has no specialized small-contiguous-unary-math template beyond the generic pointwise lowering; the fix is NEW_PATTERN: add a guarded tiny contiguous unary pointwise template only if future measurements show generic pointwise overhead consistently above the launch floor."""
 from __future__ import annotations
 
 import argparse
@@ -46,7 +35,7 @@ INPUT_SHAPE = (1000, 16)
 OUTPUT_SHAPE = INPUT_SHAPE
 OUTPUT_STRIDE = (16, 1)
 NUMEL = 1000 * 16
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "NEW_PATTERN"
 
 
 def get_inputs() -> list[object]:

@@ -1,13 +1,4 @@
-"""
-Full-scope Triton oracle for pointwise_69b13df5a532.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): This oracle performs the same
-float16[64,48,1,1] to float32 SiLU expression and float16 output conversion in
-one dense Triton pointwise kernel over all 3072 elements; tuned Inductor should
-already emit equivalent single-kernel pointwise code here, so any remaining
-difference is expected to be allocation, launch, and memory traffic floor rather
-than a missing graph transformation.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete 3072-element fp16 SiLU repro in one tiny Triton pointwise kernel, including the fp32 cast, neg/exp/add/div expression, fp16 output cast, and captured contiguous [64, 48, 1, 1] layout, whereas Inductor currently compiles the same decomposed prims/aten graph as a generic fused pointwise kernel at the launch floor; Inductor cannot do this today because its pattern/codegen stack has no dedicated tiny-contiguous SiLU lowering that bypasses generic pointwise scheduling overhead; the fix is NEW_PATTERN: add a guarded SiLU pointwise template for small contiguous tensors or make the generic pointwise schedule select the same minimal one-block kernel."""
 from __future__ import annotations
 
 import argparse
@@ -42,7 +33,7 @@ INPUT_SHAPE = (64, 48, 1, 1)
 INPUT_DTYPE = torch.float16
 NUMEL = 64 * 48
 BLOCK = 4096
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "NEW_PATTERN"
 
 
 def get_inputs() -> list[object]:

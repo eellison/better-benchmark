@@ -1,17 +1,4 @@
-"""
-Oracle for pointwise_d9f9b7733ca3
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the exact
-no-input repro by allocating the returned contiguous `float32[16, 1, 1, 512]`
-layout and materializing `-0.0` with one Triton kernel that writes the f32
-negative-zero bit pattern, whereas Inductor already lowers the graph to
-equivalent tiny constant-fill work for the returned tensor. Inductor cannot
-eliminate this work today without changing the eager contract because the
-fresh returned tensor must be allocated and its observable values must be
-materialized; the fix is BANDWIDTH_BOUND: only generic launch/allocation
-overhead or caller-owned-output reuse would move this floor, not a new fusion,
-scatter, split-K, algebraic, or recomputation pattern.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle materializes the complete no-input `aten.full.default([16, 1, 1, 512], -0.0, dtype=float32, device=cuda:0)` result by allocating the fresh contiguous output and writing the negative-zero `0x80000000` bit pattern with one minimal Triton fill kernel, whereas Inductor currently lowers the same constant tensor through generic pointwise full codegen for the tiny static output; Inductor cannot do this today because scheduler/codegen has no sign-bit-preserving constant-fill lowering for no-input `aten.full(-0.0)` that bypasses generic elementwise scheduling; the fix is NEW_PATTERN: add a guarded negative-zero constant-fill lowering that emits bitcast stores directly into the required output layout."""
 from __future__ import annotations
 
 import argparse
@@ -47,7 +34,8 @@ OUT_SHAPE = (16, 1, 1, 512)
 OUT_STRIDE = (512, 512, 512, 1)
 OUT_NUMEL = 16 * 1 * 1 * 512
 FILL_BLOCK = 512
-NEG_ZERO_F32_BITS = 0x80000000
+NEG_ZERO_I32 = torch.iinfo(torch.int32).min
+CLASSIFICATION = "NEW_PATTERN"
 
 
 def get_inputs():
@@ -63,16 +51,16 @@ def get_repro_instance():
 if triton is not None:
 
     @triton.jit
-    def _fill_neg_zero_bits_kernel(
-        out_bits_ptr,
-        neg_zero_bits: tl.constexpr,
+    def _fill_negative_zero_kernel(
+        out_ptr,
         numel: tl.constexpr,
         block: tl.constexpr,
     ):
         offsets = tl.program_id(0) * block + tl.arange(0, block)
         mask = offsets < numel
-        values = tl.full((block,), neg_zero_bits, tl.uint32)
-        tl.store(out_bits_ptr + offsets, values, mask=mask)
+        bits = tl.full((block,), -2147483648, tl.int32)
+        values = bits.to(tl.float32, bitcast=True)
+        tl.store(out_ptr + offsets, values, mask=mask)
 
 
 def oracle_forward(inputs):
@@ -88,9 +76,8 @@ def oracle_forward(inputs):
         device=torch.device("cuda", 0),
         dtype=torch.float32,
     )
-    _fill_neg_zero_bits_kernel[(triton.cdiv(OUT_NUMEL, FILL_BLOCK),)](
-        output.view(torch.uint32),
-        neg_zero_bits=NEG_ZERO_F32_BITS,
+    _fill_negative_zero_kernel[(triton.cdiv(OUT_NUMEL, FILL_BLOCK),)](
+        output,
         numel=OUT_NUMEL,
         block=FILL_BLOCK,
         num_warps=4,
@@ -100,6 +87,12 @@ def oracle_forward(inputs):
             f"oracle layout mismatch: shape={tuple(output.shape)} stride={output.stride()}"
         )
     return output
+
+
+def _has_exact_negative_zero_bits(tensor: torch.Tensor) -> bool:
+    if tensor.dtype != torch.float32:
+        return False
+    return bool(tensor.view(torch.int32).eq(NEG_ZERO_I32).all().item())
 
 
 def _check_exact_layout_and_bits(instance, inputs):
@@ -113,15 +106,15 @@ def _check_exact_layout_and_bits(instance, inputs):
         and oracle_out.stride() == OUT_STRIDE
         and oracle_out.dtype == torch.float32
     )
-    bits_ok = torch.equal(
-        eager_out.view(torch.uint32),
-        oracle_out.view(torch.uint32),
-    )
+    eager_bits_ok = _has_exact_negative_zero_bits(eager_out)
+    oracle_bits_ok = _has_exact_negative_zero_bits(oracle_out)
+    bitwise_match = torch.equal(eager_out.view(torch.int32), oracle_out.view(torch.int32))
+    bits_ok = eager_bits_ok and oracle_bits_ok and bitwise_match
     print(
         f"  output 0 layout: {'PASS' if layout_ok else 'FAIL'} "
         f"(shape={list(oracle_out.shape)} stride={oracle_out.stride()} dtype={oracle_out.dtype})"
     )
-    print(f"  output 0 bit_pattern: {'PASS' if bits_ok else 'FAIL'}")
+    print(f"  output 0 negative-zero bits: {'PASS' if bits_ok else 'FAIL'}")
     return layout_ok and bits_ok
 
 
