@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: NEW_PATTERN): this diagnosis-only oracle computes the complete BERT-large embedding, fp32 hidden-size-1024 layernorm, affine, Inductor-style RNG dropout, final [2048,1024] view, and rsqrt/1024 side-output scope by fusing the indexed word/token-type/position embedding producers, fixed-K row normalization, affine epilogue, and dropout store into one Triton row kernel, whereas Inductor lowers the same graph through generic embedding gathers, a normalization-template reduction, generated RNG/dropout pointwise work, and view scheduling; Inductor cannot do this today because norm-template canonicalization does not recognize the gathered BERT embedding assembly plus stochastic dropout and live inverse-std side output as one fixed-hidden semantic pattern; the fix is NEW_PATTERN: add a BERT embedding-layernorm-dropout lowering that folds the gather producers, fixed-K row reduction, affine epilogue, required Inductor RNG dropout, and side-output store into specialized codegen."""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete BERT-large embedding, fp32 hidden-size-1024 layernorm, affine, Inductor-style RNG dropout, final [2048,1024] view, and rsqrt/1024 side-output scope by fusing the indexed word/token-type/position embedding producers, fixed-K row normalization, affine epilogue, and dropout store into one Triton row kernel, whereas Inductor lowers the same graph through generic embedding gathers, a normalization-template reduction, generated RNG/dropout pointwise work, and view scheduling; Inductor cannot do this today because norm-template canonicalization does not recognize the gathered BERT embedding assembly plus stochastic dropout and live inverse-std side output as one fixed-hidden semantic pattern; the fix is NEW_PATTERN: add a BERT embedding-layernorm-dropout lowering that folds the gather producers, fixed-K row reduction, affine epilogue, required Inductor RNG dropout, and side-output store into specialized codegen."""
 from __future__ import annotations
 
 import argparse
@@ -29,7 +29,6 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
-    check_oracle,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -52,6 +51,7 @@ SEED_INDEX = 0
 SEED_LOW = -9223372036854775808
 SEED_HIGH = 9223372036854775807
 BLOCK_H = 1024
+STOCHASTIC_VALUE_OUTPUTS = {0}
 
 
 def get_inputs():
@@ -300,6 +300,91 @@ def oracle_forward(inputs):
     return (torch.ops.aten.view.default(dropped, output_shape), invstd_div)
 
 
+def _normalize_outputs(out) -> list[torch.Tensor]:
+    if isinstance(out, torch.Tensor):
+        return [out]
+    if isinstance(out, (tuple, list)):
+        result: list[torch.Tensor] = []
+        for item in out:
+            result.extend(_normalize_outputs(item))
+        return result
+    return []
+
+
+def _check_oracle_metadata_and_values(
+    instance,
+    inputs,
+    *,
+    atol: float,
+    rtol: float,
+    skip_stochastic: bool,
+) -> bool:
+    with torch.no_grad():
+        eager = instance(*inputs)
+        oracle_out = oracle_forward(inputs)
+
+    eager_list = _normalize_outputs(eager)
+    oracle_list = _normalize_outputs(oracle_out)
+    if len(oracle_list) != len(eager_list):
+        print(
+            f"  SCOPE_MISMATCH: oracle produces {len(oracle_list)} outputs, "
+            f"eager produces {len(eager_list)}"
+        )
+        return False
+
+    all_pass = True
+    for i, (eager_tensor, oracle_tensor) in enumerate(zip(eager_list, oracle_list)):
+        metadata_ok = True
+        if eager_tensor.shape != oracle_tensor.shape:
+            print(
+                f"  output {i}: SCOPE_MISMATCH shape oracle={list(oracle_tensor.shape)} "
+                f"eager={list(eager_tensor.shape)}"
+            )
+            metadata_ok = False
+        if eager_tensor.dtype != oracle_tensor.dtype:
+            print(
+                f"  output {i}: SCOPE_MISMATCH dtype oracle={oracle_tensor.dtype} "
+                f"eager={eager_tensor.dtype}"
+            )
+            metadata_ok = False
+        if eager_tensor.stride() != oracle_tensor.stride():
+            print(
+                f"  output {i}: SCOPE_MISMATCH stride oracle={list(oracle_tensor.stride())} "
+                f"eager={list(eager_tensor.stride())}"
+            )
+            metadata_ok = False
+
+        if not metadata_ok:
+            all_pass = False
+            continue
+
+        metadata = (
+            f"shape={list(eager_tensor.shape)} dtype={eager_tensor.dtype} "
+            f"stride={list(eager_tensor.stride())}"
+        )
+        if skip_stochastic and i in STOCHASTIC_VALUE_OUTPUTS:
+            print(f"  output {i}: SKIP_VALUE (stochastic, metadata PASS {metadata})")
+            continue
+
+        if not eager_tensor.is_floating_point():
+            ok = torch.equal(eager_tensor, oracle_tensor)
+            print(f"  output {i}: {'PASS' if ok else 'FAIL'} (exact, {metadata})")
+            all_pass = all_pass and ok
+            continue
+
+        eager_f32 = eager_tensor.float()
+        oracle_f32 = oracle_tensor.float()
+        max_diff = (eager_f32 - oracle_f32).abs().max().item()
+        ok = torch.allclose(eager_f32, oracle_f32, atol=atol, rtol=rtol)
+        print(
+            f"  output {i}: {'PASS' if ok else 'FAIL'} "
+            f"({metadata} max_diff={max_diff:.2e})"
+        )
+        all_pass = all_pass and ok
+
+    return all_pass
+
+
 # --- CLI entry point ---
 def main():
     parser = argparse.ArgumentParser(
@@ -339,14 +424,15 @@ def main():
     inputs = get_inputs()
     instance = get_repro_instance()
 
-    # Report if stochastic ops detected in source
-    if has_stochastic_ops(REPRO_PATH):
-        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+    if has_stochastic_ops(REPRO_PATH) or STOCHASTIC_VALUE_OUTPUTS:
+        print(
+            f"NOTE: {REPRO_ID} has stochastic dropout; value comparison for "
+            "output 0 is skipped while metadata and deterministic outputs are checked"
+        )
 
     if args.check:
         print(f"Checking {REPRO_ID}...")
-        ok = check_oracle(
-            oracle_forward,
+        ok = _check_oracle_metadata_and_values(
             instance,
             inputs,
             atol=args.atol,

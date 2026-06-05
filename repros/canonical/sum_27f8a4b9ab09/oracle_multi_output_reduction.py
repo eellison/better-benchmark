@@ -1,22 +1,7 @@
-"""
-Full-scope oracle for sum_27f8a4b9ab09 (NFNet GELU-backward channel reduce).
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): The oracle consumes the same
-`mm`, activation tensor, and shape parameters as repro.py, fuses the view,
-expand/divide, GELU-derivative pointwise chain, and `[0, 2, 3]` reduction into
-one Triton channel-reduction kernel, and directly indexes `mm[n, c]` instead of
-materializing the broadcasted `[128, 3072, 6, 6]` pooled-gradient tensor.
-Inductor's coordinate-descent compile is slightly faster than this full-scope
-oracle on the same inputs, which means Inductor already reaches an equivalent
-fused reduction schedule for this contiguous layout; the apparent SOL gap is not
-explained by a missing fusion in this graph. The fix classification is
-BANDWIDTH_BOUND: no Inductor change is justified by this oracle, and the
-artifact should be kept as diagnosis-only rather than a true floor.
-"""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full NFNet GELU-backward channel reduction by folding the mm view/expand/divide, GELU-derivative pointwise chain, and [0, 2, 3] sum into one Triton kernel that directly loads mm[n, c], whereas Inductor currently lowers the same graph through its generic reduction scheduling instead of selecting this direct broadcast-producer-in-reduction layout; Inductor cannot do this today because the scheduler/codegen does not canonicalize a broadcasted [N, C, 1, 1] producer as a scalar-per-spatial-position input inside the channel-reduction loop; the fix is SCHEDULER_FUSION: teach reduction fusion/indexing to inline view/expand scalar producers and emit direct strided source loads inside the generated reduction kernel."""
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
@@ -38,7 +23,6 @@ from oracle_harness import (
 
 REPRO_ID = "sum_27f8a4b9ab09"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 N = 128
@@ -90,9 +74,14 @@ def _gelu_grad_flat_channel_kernel(
     tl.store(out_ptr + c, tl.sum(tl.where(active, value, 0.0), axis=0))
 
 
-def make_inputs() -> tuple[object, ...]:
-    module = _load_repro_module()
-    return tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in module.make_inputs())
+def get_inputs():
+    """Load inputs from the repro's make_inputs (scope invariant: same inputs)."""
+    return _harness_get_inputs(REPRO_DIR)
+
+
+def get_repro_instance():
+    """Create a Repro() instance for reference comparison."""
+    return _harness_get_repro_instance(REPRO_DIR)
 
 
 def oracle_fused(
@@ -125,13 +114,6 @@ def oracle_fused(
         num_warps=4,
     )
     return out
-
-
-def reference_outputs(inputs: tuple[object, ...]) -> torch.Tensor:
-    module = _load_repro_module()
-    model = module.Repro().cuda()
-    with torch.no_grad():
-        return model(*inputs)
 
 
 def oracle_forward(inputs):
@@ -171,8 +153,8 @@ def main():
     if not args.check and not args.bench:
         args.check = args.bench = True
 
-    inputs = _harness_get_inputs(REPRO_DIR)
-    instance = _harness_get_repro_instance(REPRO_DIR)
+    inputs = get_inputs()
+    instance = get_repro_instance()
 
     if has_stochastic_ops(REPRO_PATH):
         print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")

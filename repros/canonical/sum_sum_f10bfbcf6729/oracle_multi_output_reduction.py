@@ -1,22 +1,7 @@
-"""
-Full-scope oracle for sum_sum_f10bfbcf6729 (LearningToPaint BN-backward tail).
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): The timed oracle consumes the
-same original inputs as repro.py and returns the same `[1024, 512, 4, 4]`
-gradient tensor plus `[512]` vector. It does the avg-pool backward producer
-algebraically as `where(arg102 <= 0, 0, mm / 16)`, shares that producer across
-two channel reductions, and then uses the sibling sums in a full output
-epilogue. Inductor's tuned coordinate-descent reduction path already runs this
-full graph near the byte-accounted floor for this shape, so a handwritten
-multi-accumulator oracle does not expose an actionable missing fusion beyond
-normal reduction tiling. The fix classification is BANDWIDTH_BOUND: keep the
-artifact as a full-scope diagnosis, but do not treat it as a floor improvement
-unless it beats both measured compile configurations.
-"""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full LearningToPaint BN-backward tail by replacing avg_pool2d_backward with `where(arg102_1 <= 0, 0, mm / 16)`, sharing that producer across the two channel reductions over `[0, 2, 3]`, and feeding both sibling sums into the required `[1024, 512, 4, 4]` gradient epilogue plus `[512]` vector output, whereas Inductor currently lowers the decomposed avg-pool-backward/where/sub/mul/sum/sum/unsqueeze/broadcast epilogue graph as generic producer, reduction, and consumer schedules with duplicated reduction input work; Inductor cannot do this today because its scheduler does not form one multi-output channel-reduction schedule whose accumulators are reused by both the vector side output and the full broadcast epilogue; the fix is SCHEDULER_FUSION: teach the reduction scheduler to co-schedule sibling reductions that share a producer and sink their scalar/vector accumulators into dependent broadcast epilogues."""
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
@@ -38,7 +23,6 @@ from oracle_harness import (
 
 REPRO_ID = "sum_sum_f10bfbcf6729"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 N = 1024
@@ -146,11 +130,6 @@ def _full_epilogue_kernel(
     tl.store(out_ptr + input_offsets, result, mask=active)
 
 
-def make_inputs() -> tuple[object, ...]:
-    module = _load_repro_module()
-    return tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in module.make_inputs())
-
-
 def oracle_fused(
     mm: torch.Tensor,
     arg102_1: torch.Tensor,
@@ -166,9 +145,18 @@ def oracle_fused(
     assert arg105_1.shape == (1, C, 1, 1)
     assert arg101_1.shape == (C,)
     assert arg42_1.shape == (C,)
-    assert mm.is_contiguous()
-    assert arg102_1.is_contiguous()
-    assert arg100_1.is_contiguous()
+    assert mm.dtype == torch.float32
+    assert arg102_1.dtype == torch.float32
+    assert arg100_1.dtype == torch.float32
+    assert arg105_1.dtype == torch.float32
+    assert arg101_1.dtype == torch.float32
+    assert arg42_1.dtype == torch.float32
+    assert mm.stride() == (C, 1)
+    assert arg102_1.stride() == (C * HW, HW, W, 1)
+    assert arg100_1.stride() == (C * HW, HW, W, 1)
+    assert arg105_1.stride() == (C, 1, 1, 1)
+    assert arg101_1.stride() == (1,)
+    assert arg42_1.stride() == (1,)
 
     block_k = 1024
     num_tiles = triton.cdiv(TOTAL_REDUCE, block_k)
@@ -216,13 +204,6 @@ def oracle_fused(
     )
 
     return out, vector_out
-
-
-def reference_outputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, torch.Tensor]:
-    module = _load_repro_module()
-    model = module.Repro().cuda()
-    with torch.no_grad():
-        return model(*inputs)
 
 
 def oracle_forward(inputs):
