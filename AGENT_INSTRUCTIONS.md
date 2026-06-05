@@ -55,7 +55,18 @@ When you find a gap > 1.05x, follow this flow:
 
 4. **If it's a NEW pattern or fixable**: investigate deeply, try to implement, commit if successful.
 
-5. **Always write/update the per-repro writeup** regardless of outcome.
+5. **Always test ALL standard configs** before concluding a gap is unfixable:
+   ```python
+   # These are table-stakes — try ALL of them:
+   cfg.coordinate_descent_tuning = True
+   cfg.combo_kernels = True
+   cfg.triton.multi_kernel = 1  # default (auto-select)
+   cfg.triton.multi_kernel = 2  # force persistent reduction
+   cfg.triton.multi_kernel = 3  # force looped reduction
+   ```
+   Many gaps close with `multi_kernel=2` or `multi_kernel=3`. Report which config gives the best result.
+
+6. **Always write/update the per-repro writeup** regardless of outcome.
 
 ## Classification (be specific!)
 
