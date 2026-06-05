@@ -1,30 +1,36 @@
 # var_mean_mean_3480e8831bac
 
-## Compile: 37.82us, Oracle: 22.27us, Gap: 1.698x
+## Compile: 32.9us (after fix), Oracle: 21.9us, Gap: 1.50x (was 1.83x)
 
-## Diagnosis: NORM_SPATIAL_MEAN_FUSION_WITH_STOCHASTIC_PRODUCER
+## Diagnosis: PERSISTENT_REDUCTION_WARP_OVERHEAD
 
-## Root cause: The oracle computes the complete Swin drop-path residual add, hidden-size-1024 LayerNorm, rsqrt/1024 side output, and final 7x7 spatial mean directly from the source tensors in 2 kernels (a spatial-chunked norm kernel + a finalize spatial-mean kernel). Inductor schedules this as 3 kernels: (1) stochastic drop-path seed lookup, (2) var_mean+affine per-token normalization, (3) spatial mean reduction consuming the materialized normalized output. The key gap is that Inductor materializes the full [128,49,1024] normalized intermediate before the spatial-mean reduction, while the oracle accumulates the spatial mean on-the-fly during normalization.
+## Root cause: Same as var_mean_mean_2ac1c2eb8544 - the spatial mean kernel uses too many warps for a tiny reduction (rnumel=49). Inductor's norm+mean fusion is already correct (kernel 2 does NOT materialize the full normalized tensor), but the persistent reduction config picks XBLOCK=32/warps=8 when XBLOCK=16/warps=1 is significantly better.
+
+Additionally, this repro has an extra kernel for the stochastic drop-path seed lookup (RNG). The oracle fuses the RNG inline into the normalization kernel, while Inductor generates a separate pointwise kernel for it.
 
 ## Kernel count
-- Inductor: 3 kernels (poi_fused_inductor_lookup_seed_inductor_random, per_fused_add_convert_element_type_div_lt_mul_rsqrt_var_mean_view, per_fused_add_convert_element_type_div_lt_mean_mul_rsqrt_sub_var_mean_view)
-- Oracle: 2 kernels (spatial-chunk norm kernel, finalize spatial-mean kernel)
+- Inductor: 3 kernels (RNG seed lookup, var_mean+drop_path, fused norm+mean)
+- Oracle: 2 kernels (spatial-chunk norm kernel with inline RNG, finalize spatial-mean)
+- Key difference: Oracle fuses RNG into kernel 1, Inductor keeps it separate
 
 ## Config exploration results
-- multi_kernel=1 (default): 37.82us (ratio 1.698x)
-- multi_kernel=2: 37.95us (ratio 1.699x) - no improvement
-- multi_kernel=3: 37.95us (ratio 1.699x) - no improvement
-- coordinate_descent_tuning=True, combo_kernels=True: already enabled
+- Before fix: compile ~40.9us, ratio 1.83x
+- After fix (low-warp persistent config): compile ~32.9us, ratio 1.50x
+- multi_kernel=2/3: no improvement
 
-## Classification: NORM_SPATIAL_MEAN_FUSION_WITH_STOCHASTIC_PRODUCER
+## Fix implemented
+File: `/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py`
+Change: Add single-warp configs (XBLOCK=8,16 with num_warps=1) to `_persistent_reduction_configs()` when rnumel<=128 and xnumel>=4096.
 
-The oracle eliminates the materialized normalized activation by accumulating the spatial mean as a side-effect of the normalization pass. Additionally, the stochastic drop-path (Inductor RNG) producer is inlined into the reduction kernel rather than being a separate seed-lookup kernel.
+Commit: 87bfbfce9a3 on pr-184905 (same fix as var_mean_mean_2ac1c2eb8544)
 
-## Fix path
-Two enhancements needed in `/tmp/pytorch-work/torch/_inductor/scheduler.py`:
-1. Fuse Inductor RNG seed-lookup producers into downstream reduction consumers (eliminate kernel 1)
-2. Allow normalization reduction templates to accumulate a downstream orthogonal-axis mean on-the-fly, avoiding materialization of the normalized intermediate
+## Remaining gap (1.46x)
+Two sources:
+1. Same as var_mean_mean_2ac1c2eb8544: oracle uses serial-loop kernel structure vs Inductor's persistent 2D tile
+2. Extra kernel: Oracle fuses RNG into the norm kernel; Inductor keeps RNG as separate pointwise kernel. This adds ~2-3us of kernel launch overhead.
 
-This is a superset of the general "reduction epilogue feeds another reduction" pattern where materializing the intermediate is wasteful.
+## Classification: PERSISTENT_REDUCTION_WARP_OVERHEAD
 
-## Status: design_doc
+Related: var_mean_mean_2ac1c2eb8544 (same core pattern without stochastic producer)
+
+## Status: fix_implemented (partial)

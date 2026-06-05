@@ -1,35 +1,40 @@
 # var_mean_mean_2ac1c2eb8544
 
-## Compile: 36.26us, Oracle: 24.7us, Gap: 1.468x
+## Compile: 27.5us (after fix), Oracle: 24.3us, Gap: 1.13x (was 1.54x)
 
-## Diagnosis: NORM_SPATIAL_MEAN_FUSION
+## Diagnosis: PERSISTENT_REDUCTION_WARP_OVERHEAD
 
-## Root cause: The oracle computes the complete Swin residual-add, hidden-dimension variance/mean, layernorm affine, and 7x7 spatial mean by staging only per-token layernorm statistics and reducing directly to the final [128,1024] output. Inductor materializes the full normalized [128,49,1024] intermediate before launching a separate spatial mean reduction. The oracle uses a two-kernel approach: (1) compute per-row mean/invstd stats, (2) a fused kernel that reads the raw input, applies normalization using pre-computed stats, applies affine, and accumulates the spatial mean across the 49 spatial positions -- all without materializing the 128*49*1024 normalized activation.
+## Root cause: Inductor already correctly fuses the normalization + spatial mean into one kernel (kernel 1) without materializing the [128,49,1024] normalized intermediate. Both Inductor and the oracle use 2 kernels with the same structure. The gap is purely in the **tiling/config** of the second kernel: Inductor's persistent reduction heuristic assigns too many warps (8) to a kernel with a tiny reduction dimension (rnumel=49, xnumel=131072). The oracle uses an equivalent structure but with 1 warp and a wider feature tile, avoiding shared-memory synchronization overhead.
+
+Specifically, the default `num_warps = total_numel() // 128` formula gives warps=8 for XBLOCK=32 with R0_BLOCK=64. But with rnumel=49, each program does very little reduction work, and multi-warp overhead dominates. XBLOCK=8-16 with num_warps=1 is 30-40% faster because single-warp programs avoid shared memory synchronization and allow more blocks to run concurrently per SM.
 
 ## Kernel count
-- Inductor: 2 kernels (var_mean + affine LayerNorm, then spatial mean reduction)
-- Oracle: 2 kernels (row stats kernel, then spatial-mean-with-affine kernel that avoids materializing normalized activation)
+- Inductor: 2 kernels (var_mean stats, then fused norm+spatial_mean)
+- Oracle: 2 kernels (row stats, then spatial-mean-with-inline-normalization)
+- Note: Inductor's kernel 1 does NOT materialize the normalized tensor; it re-reads inputs + uses pre-computed stats inline.
 
 ## Config exploration results
-- multi_kernel=1 (default): 36.26us (ratio 1.468x)
-- multi_kernel=2: 36.19us (ratio 1.473x) - no improvement
-- multi_kernel=3: 35.84us (ratio 1.451x) - no improvement
-- coordinate_descent_tuning=True, combo_kernels=True: already enabled
+- Before fix: XBLOCK=32 warps=8 (compile: ~37.7us, ratio 1.54x)
+- After fix: XBLOCK=16 warps=1 (compile: ~27.5us, ratio 1.13x)
+- multi_kernel=2/3: no improvement
+- max_autotune: no improvement (same configs explored)
 
-## Classification: NORM_SPATIAL_MEAN_FUSION
+## Fix implemented
+File: `/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py`
+Change: Add single-warp configs (XBLOCK=8,16 with num_warps=1) to `_persistent_reduction_configs()` when rnumel<=128 and xnumel>=4096.
 
-The key insight is that the oracle avoids materializing the normalized intermediate. Instead of: read -> normalize -> write -> read -> spatial_mean -> write, the oracle does: compute stats once, then read raw data -> normalize-in-registers -> accumulate spatial mean -> write final [128,1024]. This eliminates a full 128*49*1024*4 = 25.6MB round-trip.
+Commit: 87bfbfce9a3 on pr-184905
 
-## Fix path
-Scheduler enhancement in `/tmp/pytorch-work/torch/_inductor/scheduler.py` to detect when a normalization output's only consumer is a downstream spatial-axis mean. In this case, the scheduler should generate a fused kernel that:
-1. Reads pre-computed stats (mean, invstd)
-2. Reads raw input
-3. Normalizes in registers
-4. Accumulates spatial reduction
-5. Writes only the final reduced [batch, hidden] output
+## Remaining gap (1.25x)
+The oracle uses a fundamentally different kernel structure for kernel 2:
+- 2D grid (batch, feature_chunks) with a serial `for token in tl.static_range(0, 49)` loop
+- 1D accumulator [BLOCK_FEATURE=64] instead of 2D tile [XBLOCK, R0_BLOCK]
+- Only 2048 programs vs Inductor's 8192
 
-This avoids materializing the full [batch, spatial, hidden] normalized activation.
+This remaining gap requires a codegen enhancement to emit "serial-loop reduction" kernels instead of the standard persistent 2D tile for tiny reduction dimensions with large x.
 
-Related: var_mean_mean_3480e8831bac (same pattern with added stochastic producer)
+## Classification: PERSISTENT_REDUCTION_WARP_OVERHEAD
 
-## Status: design_doc
+Related: var_mean_mean_3480e8831bac (same pattern with stochastic producer, 1.83x->1.46x)
+
+## Status: fix_implemented (partial)
