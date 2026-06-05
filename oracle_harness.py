@@ -16,10 +16,15 @@ Provides:
 from __future__ import annotations
 
 import contextlib
+import fcntl
 import importlib.util
 import json
 import math
+import os
+import re
 import sys
+import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -267,7 +272,7 @@ def bench_oracle(
 
     from triton.testing import do_bench
 
-    # --- Compile with coordinate_descent + capture CUDAGraph ---
+    # --- Compile with coordinate_descent + capture CUDAGraph (MANDATORY) ---
     import torch._inductor.config as cfg
     cfg.coordinate_descent_tuning = True
     compiled = torch.compile(instance)
@@ -275,51 +280,39 @@ def bench_oracle(
         for _ in range(5):
             compiled(*inputs)
         torch.cuda.synchronize()
-        g_compile = _try_capture_graph(lambda: compiled(*inputs))
+        g_compile = _capture_graph(lambda: compiled(*inputs))
 
-    # --- Warm oracle + capture CUDAGraph ---
+    # --- Warm oracle + capture CUDAGraph (MANDATORY) ---
     with torch.no_grad():
         for _ in range(3):
             oracle_forward(inputs)
         torch.cuda.synchronize()
-        g_oracle = _try_capture_graph(lambda: oracle_forward(inputs))
+        g_oracle = _capture_graph(lambda: oracle_forward(inputs))
 
     # --- Adaptive rep count based on quick estimate ---
-    quick_oracle = _time_graph_or_fn(g_oracle, lambda: oracle_forward(inputs),
-                                     warmup=5, rep=10)
-    quick_compile = _time_graph_or_fn(g_compile, lambda: compiled(*inputs),
-                                      warmup=5, rep=10)
+    quick_oracle = _time_graph(g_oracle, warmup=5, rep=10)
+    quick_compile = _time_graph(g_compile, warmup=5, rep=10)
     est_us = min(quick_oracle, quick_compile)
     if est_us < 50:
         rep = max(rep, 500)
     elif est_us < 200:
         rep = max(rep, 300)
 
-    # --- Interleaved timing under EXCLUSIVE GPU LOCK ---
+    # --- Interleaved timing under EXCLUSIVE GPU LOCK (MANDATORY) ---
     best_oracle_us = math.inf
     best_compile_us = math.inf
 
     with _gpu_exclusive_lock(repro_id):
         # Warm under lock
         for _ in range(warmup):
-            if g_oracle is not None:
-                g_oracle.replay()
-            else:
-                with torch.no_grad():
-                    oracle_forward(inputs)
-            if g_compile is not None:
-                g_compile.replay()
-            else:
-                with torch.no_grad():
-                    compiled(*inputs)
+            g_oracle.replay()
+            g_compile.replay()
         torch.cuda.synchronize()
 
         # Interleaved rounds: oracle then compile, min-of-N
         for _ in range(rounds):
-            oracle_us = _time_graph_or_fn(g_oracle, lambda: oracle_forward(inputs),
-                                          warmup=warmup, rep=rep)
-            compile_us = _time_graph_or_fn(g_compile, lambda: compiled(*inputs),
-                                           warmup=warmup, rep=rep)
+            oracle_us = _time_graph(g_oracle, warmup=warmup, rep=rep)
+            compile_us = _time_graph(g_compile, warmup=warmup, rep=rep)
             best_oracle_us = min(best_oracle_us, oracle_us)
             best_compile_us = min(best_compile_us, compile_us)
 
@@ -402,49 +395,163 @@ def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
 # Internal helpers
 # ---------------------------------------------------------------------------
 
-def _try_capture_graph(fn):
-    """Capture a CUDAGraph of fn(). Returns graph or None on failure."""
-    try:
-        g = torch.cuda.CUDAGraph()
-        with torch.no_grad(), torch.cuda.graph(g):
-            fn()
-        torch.cuda.synchronize()
-        return g
-    except Exception as e:
-        import warnings
-        warnings.warn(f"CUDAGraph capture failed, falling back to direct call: {e}")
-        return None
+def _capture_graph(fn):
+    """Capture a CUDAGraph of fn(). Raises on failure (no silent fallback).
+
+    CUDAGraph capture is MANDATORY for reliable benchmarking. If capture fails,
+    the benchmark result would be unreliable due to kernel launch overhead, so
+    we raise instead of silently degrading.
+    """
+    g = torch.cuda.CUDAGraph()
+    with torch.no_grad(), torch.cuda.graph(g):
+        fn()
+    torch.cuda.synchronize()
+    return g
 
 
-def _time_graph_or_fn(graph, fallback_fn, warmup, rep):
-    """Time a CUDAGraph replay (or fallback callable). Returns microseconds."""
+def _time_graph(graph, warmup, rep):
+    """Time a CUDAGraph replay. Returns microseconds."""
     from triton.testing import do_bench
-    if graph is not None:
-        ms = do_bench(lambda: graph.replay(), warmup=warmup, rep=rep, return_mode="min")
-    else:
-        ms = do_bench(fallback_fn, warmup=warmup, rep=rep, return_mode="min")
+    ms = do_bench(lambda: graph.replay(), warmup=warmup, rep=rep, return_mode="min")
     return ms * 1000.0
+
+
+# ---------------------------------------------------------------------------
+# GPU exclusive lock (inlined, never silently skipped)
+# ---------------------------------------------------------------------------
+# This implements the same locking protocol as bench_compare.py's worker script.
+# The lock is controlled by the INDUCTOR_GPU_BENCH_LOCK / TORCHINDUCTOR_GPU_BENCH_LOCK
+# environment variable. If the env var is set, the lock is MANDATORY and will
+# block until acquired. If not set, this is a hard error — callers MUST set the
+# env var to explicitly opt in or out.
+
+_GPU_BENCH_LOCK_STATE_NAME = "_torchinductor_gpu_benchmark_lock_state"
+
+
+def _env_flag_enabled(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _safe_lock_component(value: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", value.strip()) or "unknown"
+
+
+def _gpu_bench_lock_state():
+    import builtins
+    state = getattr(builtins, _GPU_BENCH_LOCK_STATE_NAME, None)
+    if state is None:
+        state = {
+            "mutex": threading.RLock(),
+            "local": threading.local(),
+        }
+        setattr(builtins, _GPU_BENCH_LOCK_STATE_NAME, state)
+    return state
+
+
+def _write_gpu_lock_metadata(fd, gpu, mode, label):
+    try:
+        os.ftruncate(fd, 0)
+        os.write(fd, (
+            f"pid={os.getpid()}\n"
+            f"gpu={gpu}\n"
+            f"mode={mode}\n"
+            f"label={label}\n"
+            f"acquired_unix={time.time():.0f}\n"
+        ).encode())
+        os.fsync(fd)
+    except OSError:
+        pass
+
+
+def _release_fd(fd):
+    if fd is None:
+        return
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
 
 
 @contextlib.contextmanager
 def _gpu_exclusive_lock(label="oracle_bench"):
-    """Acquire exclusive GPU lock using scripts/gpu_lock.py infrastructure."""
-    try:
-        # Try importing from scripts directory
-        import importlib.util as _ilu
-        _repo_root = Path(__file__).resolve().parent
-        _lock_path = _repo_root / "scripts" / "gpu_lock.py"
-        if _lock_path.exists():
-            _spec = _ilu.spec_from_file_location("gpu_lock", _lock_path)
-            _mod = _ilu.module_from_spec(_spec)
-            _spec.loader.exec_module(_mod)
-            with _mod.gpu_lock(0, label=label):
+    """Acquire exclusive GPU lock. NEVER silently skips.
+
+    Respects the same env-var protocol as bench_compare:
+      - INDUCTOR_GPU_BENCH_LOCK=1 or TORCHINDUCTOR_GPU_BENCH_LOCK=1: acquire lock
+      - Neither set: raise RuntimeError (caller must explicitly configure)
+
+    This ensures benchmarks never run without explicit lock configuration,
+    preventing silent measurement corruption from GPU contention.
+    """
+    lock_enabled = (
+        _env_flag_enabled("INDUCTOR_GPU_BENCH_LOCK")
+        or _env_flag_enabled("TORCHINDUCTOR_GPU_BENCH_LOCK")
+    )
+
+    if not lock_enabled:
+        raise RuntimeError(
+            "GPU bench lock is not enabled. Set INDUCTOR_GPU_BENCH_LOCK=1 (or "
+            "TORCHINDUCTOR_GPU_BENCH_LOCK=1) before running oracle benchmarks. "
+            "The lock is required to prevent measurement corruption from GPU "
+            "contention. If you are certain no other GPU work is running, set "
+            "the env var to enable the lock anyway (it will be a no-op if "
+            "uncontended)."
+        )
+
+    lock_dir = (
+        os.environ.get("INDUCTOR_GPU_BENCH_LOCK_DIR")
+        or os.environ.get("TORCHINDUCTOR_GPU_BENCH_LOCK_DIR")
+        or os.environ.get("COMPILE_UTILS_GPU_LOCK_DIR")
+        or os.path.join(tempfile.gettempdir(), "compile_utils_gpu_locks")
+    )
+    os.makedirs(lock_dir, exist_ok=True)
+
+    visible = [
+        d.strip()
+        for d in os.environ.get("CUDA_VISIBLE_DEVICES", "").split(",")
+        if d.strip()
+    ]
+    gpu = _safe_lock_component(visible[0] if visible else "0")
+    lock_path = os.path.join(lock_dir, f"gpu_{gpu}.lock")
+    gate_path = os.path.join(lock_dir, f"gpu_{gpu}.gate")
+
+    state = _gpu_bench_lock_state()
+    mutex = state["mutex"]
+    local = state["local"]
+    depth = getattr(local, "depth", 0)
+
+    # Re-entrant: if we already hold the exclusive lock, just nest
+    if depth > 0:
+        current_mode = getattr(local, "mode", None)
+        if current_mode == "exclusive":
+            local.depth = depth + 1
+            try:
                 yield
+            finally:
+                local.depth -= 1
             return
-    except Exception:
-        pass
-    # Fallback: no lock available (single-GPU, no contention expected)
-    yield
+
+    with mutex:
+        fd = None
+        gate_fd = None
+        try:
+            fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o666)
+            gate_fd = os.open(gate_path, os.O_CREAT | os.O_RDWR, 0o666)
+            fcntl.flock(gate_fd, fcntl.LOCK_EX)
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            _write_gpu_lock_metadata(fd, gpu, "exclusive", label)
+            local.depth = 1
+            local.mode = "exclusive"
+            local.fd = fd
+            try:
+                yield
+            finally:
+                local.depth = 0
+                local.mode = None
+                local.fd = None
+        finally:
+            _release_fd(fd)
+            _release_fd(gate_fd)
 
 
 def _normalize_outputs(out) -> list[torch.Tensor]:
