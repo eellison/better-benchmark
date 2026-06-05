@@ -406,11 +406,13 @@ def _try_capture_graph(fn):
     """Capture a CUDAGraph of fn(). Returns graph or None on failure."""
     try:
         g = torch.cuda.CUDAGraph()
-        with torch.cuda.graph(g):
+        with torch.no_grad(), torch.cuda.graph(g):
             fn()
         torch.cuda.synchronize()
         return g
-    except Exception:
+    except Exception as e:
+        import warnings
+        warnings.warn(f"CUDAGraph capture failed, falling back to direct call: {e}")
         return None
 
 
