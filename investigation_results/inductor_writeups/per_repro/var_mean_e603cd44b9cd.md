@@ -1,34 +1,52 @@
 # var_mean_e603cd44b9cd
 
-## Compile: 19.36us, Oracle: 11.10us, Gap: 1.744x
+## Compile: 13.9us, Oracle: 12.1us, Gap: 1.15x (was 1.74x)
 
-## Diagnosis: CAT_MATERIALIZATION_IN_BN_TRAINING
+## Diagnosis: REDUCTION_EPILOGUE_REREAD
 
-## Root cause: The oracle computes the full DenseNet concat-BatchNorm-ReLU training scope directly from the four channel-concat source tensors (512+32+32+32=608 channels), including per-channel var_mean, invstd and mean side outputs, in-place running mean/variance copy_ returns, and the affine ReLU activation WITHOUT materializing the logical cat. Inductor generates a single fused kernel (triton_red_fused_add_cat_copy__mul_relu_rsqrt_squeeze_sub_unsqueeze_var_mean) that handles the cat inline but achieves poor performance because the channel-concat indexing introduces complex branching and irregular memory access patterns within the reduction loop.
+## Root cause
 
-The oracle's key advantage is channel-tiled scheduling: each CTA handles one channel, loading from the correct source tensor directly without cat-materialization overhead. Inductor's single kernel must handle all 608 channels with complex branch logic to select the correct source buffer for each element.
+The DenseNet BN-training pattern has `var_mean(cat([a,b,c,d], dim=1), [0,2,3])` followed
+by an epilogue `(x - mean) * invstd * weight + bias` that re-reads the same data.
+
+The oracle computes everything in ONE pass per channel: loads all N*H*W=3136 elements into
+registers, computes sum and sum-of-squares for mean/variance, then immediately applies
+the normalization epilogue using the same register data.
+
+Inductor's default codegen used a LOOPED reduction, which requires TWO passes over the
+data: first to compute the Welford reduction (mean/m2), then a second loop to apply the
+normalization epilogue. This 2x memory traffic was the primary source of the 1.74x gap.
+
+The fix: raise the persistent reduction threshold for INNER reductions from 1024 to 4096.
+With rnumel=3136, the persistent codegen now holds all data in registers (R0_BLOCK=4096)
+and computes both the reduction and epilogue in a single pass without re-reading from DRAM.
+
+Remaining ~15% gap (1.15x): the persistent kernel still computes `x - mean` twice (once
+for variance as `sum((x-mean)^2)`, once for normalization). The oracle uses `E[x^2]-E[x]^2`
+which avoids this serial dependency. This is an optimization opportunity but not critical.
 
 ## Kernel count
-- Inductor: 1 kernel (red_fused_add_cat_copy__mul_relu_rsqrt_squeeze_sub_unsqueeze_var_mean)
-- Oracle: 1 kernel (channel-tiled BN-train + cat from multiple sources + ReLU)
+- Inductor: 1 kernel (persistent reduction, single pass)
+- Oracle: 1 kernel (channel-tiled BN-train with sum/sumsq formula)
 
 ## Config exploration results
-- multi_kernel=1 (default): 19.36us (ratio 1.744x)
-- multi_kernel=2: 19.30us (ratio 1.738x) - no improvement
-- multi_kernel=3: 19.33us (ratio 1.751x) - no improvement
+- Default (new threshold=4096): 13.9us (ratio 1.15x)
+- multi_kernel=2 (forced looped): 18.2us (ratio 1.64x) - confirms looped is worse
+- multi_kernel=3 (benchmark both): 12.8us (ratio 1.06x) - AT_FLOOR
 - coordinate_descent_tuning=True, combo_kernels=True: already enabled
 
-## Classification: CAT_MATERIALIZATION_IN_BN_TRAINING
+## Classification: REDUCTION_EPILOGUE_REREAD
 
-The oracle demonstrates that per-channel BN-training with multi-source concat inputs is best served by a channel-tiled approach where each CTA knows which source tensor to read from. Inductor's generic reduction loop handles the cat by inlining complex conditional indexing, which defeats memory coalescing and adds branch overhead.
+The persistent reduction threshold was too conservative (1024) for BN-training patterns
+where rnumel=N*H*W (3136 for densenet with 64x7x7). Raising to 4096 enables single-pass
+persistent reduction that avoids re-reading the input for the normalization epilogue.
 
-## Fix path
-Enhancement needed in `/tmp/pytorch-work/torch/_inductor/scheduler.py` and `/tmp/pytorch-work/torch/_inductor/codegen/triton.py`:
-1. Detect BN-training reductions whose input is a logical cat of multiple tensors
-2. Generate a channel-tiled kernel where each CTA is assigned to one channel
-3. Use the channel index to determine which source tensor to load from (simple offset calculation rather than branching in the inner loop)
-4. This eliminates the complex conditional indexing in the reduction inner loop
+## Fix implemented
+- Commit: f70540fd47b in /tmp/pytorch-work
+- File: `torch/_inductor/choices.py` line 429
+- Config: `config.triton.persistent_reduction_threshold_inner = 4096`
+- Before: 1.74x gap (19.4us compile vs 11.1us oracle)
+- After: 1.15x gap (13.9us compile vs 12.1us oracle)
+- With multi_kernel=3: 1.06x (AT_FLOOR)
 
-This is a 1.74x gap affecting DenseNet-family models with their characteristic dense-concatenation architecture.
-
-## Status: design_doc
+## Status: fix_committed

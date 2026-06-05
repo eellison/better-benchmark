@@ -1,42 +1,41 @@
-# sum_sum_sum_cd47d7ca4703
+# sum_sum_sum_cd47d7ca4703 (hf_AllenaiLongformerBase_train_006)
+
+## Classification: SCATTER_REDUCE (embedding backward)
 
 ## Summary
 
-- Model: Longformer embedding backward (scatter-reduce)
-- Oracle: `oracle_longformer_embedding_backward_scatter_reduce.py`
-- Classification: SCATTER_REDUCE
-- Ratio: 1.718x (oracle 79.74us, compile 136.99us)
-- Kernel count: Inductor multiple kernels, Oracle fused multi-destination scatter-reduce
+| Metric | Value |
+|--------|-------|
+| Baseline gap | 1.72x |
+| Best config | 1.71x (multi_kernel=3) |
+| scatter_add_into impact | None (no add-after-scatter pattern) |
+| Oracle kernels | 3 |
+| Inductor kernels | 4 |
 
 ## Root Cause
 
-The oracle computes the complete Longformer backward-like scope, including both hidden-column reductions and all three duplicate-index accumulate=True embedding scatter-add outputs with the captured mask/where semantics, by emitting the row math once, accumulating hidden-column reductions, and atomically scattering each masked embedding gradient directly into its destination row.
+Same family as Electra/Albert but without the `add(mm_1, scatter)` final pattern.
+Returns raw index_put results directly. The pass `scatter_add_into_fusion` does not
+apply here because there is no `add(existing_grad, scattered)` step.
 
-Inductor schedules the rowwise producer, reductions, masks, and generic index_put scatter-adds as separate kernels, materializing large intermediates.
-
-The 1.718x gap comes from:
-1. Materializing the rowwise producer for separate consumption
-2. Three separate scatter kernels for position/segment/vocab tables
-3. Cannot keep row-local hidden reductions live while feeding multiple sibling reductions and indexed accumulator destinations
+The gap is due to:
+1. Materializing `mul_tensor_6` [8, 1024, 768] for 3 scatter consumers + batch-sum
+2. Separate batch-reduction kernel before the sequence position scatter
+3. Separate reduction kernels for sum_dim_int_list_2/3
 
 ## Config Exploration
 
-| Config | Time (us) | Ratio vs Oracle |
-|--------|-----------|-----------------|
-| Default (CDT) | 136.99 | 1.718x |
-| multi_kernel=2 | 134.30 | 1.685x |
-| multi_kernel=3 | 134.10 | 1.682x |
+| Config | Ratio |
+|--------|-------|
+| Baseline | 1.72x |
+| scatter_add_into_fusion | 1.72x (no pattern match) |
+| multi_kernel=3 | 1.71x |
+| scatter_reduce_fusion (env) | 1.72x (no pattern match for this type) |
 
-multi_kernel=2/3 provide negligible improvement (~2%). The gap is purely structural.
+## Remaining Gap (1.71x)
 
-## Fix Assessment
+Entirely due to REDUCTION_EPILOGUE_REREAD + MULTI_OUTPUT_SHARED_REDUCTION.
+The oracle recomputes layer-norm backward inline in each of its 3 Triton kernels,
+avoiding the materialization of the [8, 1024, 768] intermediate.
 
-**Design doc** -- requires SCATTER_REDUCE multi-destination embedding-backward lowering.
-
-### What's needed:
-Add a multi-destination embedding-backward scatter-reduce lowering that emits the row math once, accumulates hidden-column reductions, and atomically scatters each masked embedding gradient directly into its destination row.
-
-### Files:
-- `torch/_inductor/fx_passes/post_grad.py` (embedding scatter-reduce pattern)
-- `torch/_inductor/scheduler.py` (fusion across scatter boundaries)
-- `torch/_inductor/codegen/triton.py` (multi-destination atomic accumulation)
+Requires scheduler-level recomputation heuristic to close.

@@ -1,42 +1,43 @@
-# sum_sum_sum_83ddb84cc830
+# sum_sum_sum_83ddb84cc830 (hf_MobileBertForMaskedLM_train_014)
+
+## Classification: SCATTER_REDUCE (embedding backward)
 
 ## Summary
 
-- Model: MobileBERT backward (scatter-reduce)
-- Oracle: `oracle_mobilebert_scatter_reduce.py`
-- Classification: SCATTER_REDUCE
-- Ratio: 1.725x (oracle 114.59us, compile 197.63us)
-- Kernel count: Inductor multiple kernels, Oracle fused scatter-reduce with direct side output
+| Metric | Value |
+|--------|-------|
+| Baseline gap | 1.73x |
+| Best config | 1.73x (no fix applies) |
+| scatter_add_into impact | None (no add-after-scatter pattern) |
+| Oracle kernels | 3 |
+| Inductor kernels | 5 |
 
 ## Root Cause
 
-The oracle computes the full MobileBERT backward tuple by producing the dense transposed side output directly while fusing the sibling channel reductions and the two duplicate-preserving indexed accumulations into Triton reduction/scatter kernels.
+MobileBERT backward with shared `[256, 128, 512]` intermediate (= [batch*seq, 512]).
+Unlike Electra/Albert, does NOT have `add(existing_grad, scatter)` - returns raw scatter
+results plus a permuted side output. The scatter_add_into_fusion pass does not apply.
 
-Inductor materializes the shared `[256,128,512]` intermediates and lowers the reductions, `index_put(accumulate=True)`, and transpose as separate generic scheduled work. It does not recognize this gather-mask-reduce/indexed-scatter family as one shared producer with several accumulator destinations.
-
-The 1.725x gap comes from:
-1. Materializing the full `[256,128,512]` intermediate
-2. Separate scatter kernels for each destination
-3. Cannot keep row-local reductions live while writing to multiple scatter targets
+The gap is due to:
+1. Materializing the full [256, 128, 512] intermediate (= 16M elements)
+2. Separate scatter kernels for type-token [2, 512] and position [512, 512] outputs
+3. Separate global reductions for sum_dim_int_list outputs
+4. Additional permute side output forces materialization
 
 ## Config Exploration
 
-| Config | Time (us) | Ratio vs Oracle |
-|--------|-----------|-----------------|
-| Default (CDT) | 197.63 | 1.725x |
-| multi_kernel=2 | error (multi_kernel cache_file_path) | N/A |
-| multi_kernel=3 | error (multi_kernel cache_file_path) | N/A |
+| Config | Ratio |
+|--------|-------|
+| Baseline | 1.73x |
+| scatter_add_into_fusion | 1.73x (no match) |
+| multi_kernel=2 | 1.95x (worse) |
+| multi_kernel=3 | 1.96x (worse) |
 
-multi_kernel=2/3 both error for this workload (multi_kernel cache path issue). Default CDT is the only working config. The gap is purely structural.
+multi_kernel hurts this workload. Default CDT is optimal.
 
-## Fix Assessment
+## Remaining Gap (1.73x)
 
-**Design doc** -- requires SCATTER_REDUCE lowering.
-
-### What's needed:
-Teach Inductor to fuse rowwise producers into direct duplicate-safe scatter-reduce epilogues and sibling reductions without materializing the full intermediates. The scheduler/codegen needs a gather-mask-reduce/indexed-scatter template.
-
-### Files:
-- `torch/_inductor/fx_passes/post_grad.py` (scatter-reduce pattern)
-- `torch/_inductor/scheduler.py` (fusion across scatter boundaries)
-- `torch/_inductor/codegen/triton.py` (atomic accumulation + side output)
+Entirely structural - requires REDUCTION_EPILOGUE_REREAD fix:
+- Scheduler recomputation heuristic to avoid materializing [256, 128, 512]
+- Multi-destination atomic scatter template that iterates rows once and writes all outputs
+- The permute side output (`permute_default: [512, 32768]`) adds complexity

@@ -1,42 +1,43 @@
-# sum_sum_sum_8ffe5090cf87
+# sum_sum_sum_8ffe5090cf87 (hf_AlbertForMaskedLM_train_001)
+
+## Classification: SCATTER_REDUCE (embedding backward)
 
 ## Summary
 
-- Model: ALBERT embedding backward (scatter-reduce)
-- Oracle: `oracle_embedding_scatter_reduce.py`
-- Classification: SCATTER_REDUCE
-- Ratio: 1.606x (oracle 25.98us, compile 41.73us)
-- Kernel count: Inductor multiple kernels, Oracle fused scatter-reduce
+| Metric | Value |
+|--------|-------|
+| Baseline gap | 1.64x |
+| Best with fix | 1.36x (scatter_add_into + multi_kernel=3) |
+| Default config gap | 1.53x (scatter_add_into only) |
+| Oracle kernels | 3 |
+| Inductor kernels (before) | 5 |
+| Inductor kernels (after fix) | 3 |
 
 ## Root Cause
 
-The oracle computes the complete ALBERT embedding-backward return tuple by fusing the shared rowwise hidden producer, both `[128]` sibling reductions, and all three duplicate-index `index_put(accumulate=True)` scatter-add outputs (512-row, 2-row, and 30000-row destinations).
+Same pattern as sum_sum_sum_6a2ad206248c (Electra) but smaller tensors ([8, 512, 128], vocab=30000).
+Layer-norm backward -> 3 scatters + 2 global reductions + add(mm_1, vocab_scatter).
 
-Inductor materializes the `[8, 512, 128]` producer and schedules the two reductions plus the scatter outputs as separate generic kernels.
+## Fix Implemented
 
-The 1.606x gap comes from:
-1. Materializing the intermediate producer
-2. Separate generic scatter kernels for each embedding table destination
-3. Cannot share one row-local reduction producer across multiple indexed accumulation destinations
+**Commit**: e034b931eab in /tmp/pytorch-work (branch pr-184905)
+
+**Pass**: `config.scatter_add_into_fusion = True` (default enabled)
+
+Rewrites: `add(A, index_put(zeros, idx, val, accumulate=True))` -> `index_put(A, idx, val, accumulate=True)`
+
+Eliminates the full(0) init of [30000, 128] and the separate add kernel.
 
 ## Config Exploration
 
-| Config | Time (us) | Ratio vs Oracle |
-|--------|-----------|-----------------|
-| Default (CDT) | 41.73 | 1.606x |
-| multi_kernel=2 | error (multi_kernel cache_file_path) | N/A |
-| multi_kernel=3 | error (multi_kernel cache_file_path) | N/A |
+| Config | Ratio |
+|--------|-------|
+| Baseline (no fix) | 1.64x |
+| scatter_add_into_fusion (default) | 1.53x |
+| + multi_kernel=3 | 1.36x |
 
-multi_kernel=2/3 both error for this workload. Default CDT is the only working config.
+## Remaining Gap (1.36x with best config)
 
-## Fix Assessment
-
-**Design doc** -- requires SCATTER_REDUCE embedding-backward lowering.
-
-### What's needed:
-Add an embedding-backward scatter-reduce lowering that keeps the row algebra in registers, emits the hidden-column reductions, and atomically accumulates every indexed embedding-gradient output directly.
-
-### Files:
-- `torch/_inductor/fx_passes/post_grad.py` (scatter-reduce pattern)
-- `torch/_inductor/scheduler.py` (fusion across scatter boundaries)
-- `torch/_inductor/codegen/triton.py` (atomic accumulation codegen)
+Same as Electra: REDUCTION_EPILOGUE_REREAD for the intermediate producer and
+MULTI_OUTPUT_SHARED_REDUCTION for the global [128] sums. Requires scheduler-level
+recomputation heuristic or cooperative atomic reduction.
