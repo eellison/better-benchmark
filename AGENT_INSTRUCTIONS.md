@@ -35,7 +35,7 @@ The pytorch working tree is at `/tmp/pytorch-work` on branch `pr-184905`.
 
 2. **Don't loosen fusion scoring** — if two ops don't save a shared read, combo_kernels handles them. Real fusion should save memory traffic by eliminating a buffer materialization.
 
-3. **realize_hint blocks fusion** — `realize_hint()` forces materialization. If the consumer (pool, stencil, reduction) can fuse with the producer, the fix is to NOT realize, not to tweak thresholds.
+3. **realize_hint blocks fusion** — `realize_hint()` forces materialization. Investigate why it triggers and whether the scheduler/fusion system could handle this instead. We prefer fixes in the scheduler (which has full information about producers, consumers, and memory traffic) over heuristic tweaks to realize thresholds. If the scheduler can't handle the pattern today (e.g., stencil/pool consumers with shifted indices), document what scheduler enhancement is needed.
 
 4. **Per-channel ops + tiling** — when [C] ops (rsqrt) are fused into [N,C,H,W] kernels, tile by channel so they compute once per tile, not N*H*W times.
 
