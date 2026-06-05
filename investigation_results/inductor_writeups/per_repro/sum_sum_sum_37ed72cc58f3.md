@@ -1,62 +1,42 @@
 # sum_sum_sum_37ed72cc58f3
 
-## Compile: 244.77us, Oracle: 120.77us, Gap: 2.027x
+## Summary
 
-## Classification: COOPERATIVE_SPLIT_K
+- Model: Swin Transformer (window-reverse indexed layernorm-backward / drop-path)
+- Oracle: `oracle_cooperative_split_k.py`
+- Classification: COOPERATIVE_SPLIT_K
+- Ratio: 2.025x (oracle 119.87us, compile 242.69us)
+- Kernel count: Inductor multiple kernels, Oracle 1 fused cooperative split-K kernel
 
 ## Root Cause
 
-The oracle computes the complete Swin Transformer window-reverse / indexed layernorm-backward / drop-path return tuple in a coordinated cooperative split-K multi-output kernel. It applies dynamic height/width index gather (torch.roll emulation via index), reduces each 256-wide row for the input-gradient epilogue, writes the [256, 100352] transposed side output, and accumulates all three [256] column reductions from the same row-tiled producer.
+The repro computes the Swin window-reverse/indexed layernorm-backward/drop-path backward. The oracle applies a dynamic height/width index gather, reduces each 256-wide row for the input-gradient epilogue, writes a `[256, 100352]` transposed side output, and accumulates three returned `[256]` column reductions from the same row-tiled producer in one coordinated split-K Triton kernel.
 
-Inductor generates 6 kernels:
-1. `triton_per_fused_add_clone_index_mul_permute_sub_sum_view_0`: cooperative reduction with workspace
-2. `triton_mor_finalize_sum_1`: finalize cooperative sum
-3. `triton_red_fused_clone_index_permute_sum_view_2`: partial column reduction for transpose output
-4. `triton_poi_fused_convert_element_type_div_mul_view_3`: drop-path pointwise
-5. `triton_red_fused_convert_element_type_div_mul_sum_view_4`: partial reduction
-6. `triton_red_fused_convert_element_type_div_mul_sum_view_5`: final reduction
+Inductor separates the window layout clone/indexing, row reductions, residual/drop-path pointwise epilogue, transposed side-output store, and sibling reductions into separate generic kernels over materialized intermediates.
 
-The fundamental issue is that Inductor cannot coordinate all these operations into a single producer pass: the window layout reconstruction (index gather), row-local reductions for layernorm backward, dependent transpose side-output store, drop-path scaling, and sibling column accumulators all need to share one coordinated pass over the data.
-
-## Kernel Count
-- Oracle: 1-2 kernels (coordinated cooperative split-K)
-- Inductor: 6 kernels (separate reductions, layout ops, and pointwise)
+The 2.025x gap comes from:
+1. Multiple kernel launches with intermediate materialization
+2. No cooperative split-K multi-output reduction template
+3. Cannot keep dynamic indexed layout reconstruction, row-local reductions, a dependent transposed side output, and sibling column accumulators in one producer
 
 ## Config Exploration
-| Config | Time (us) | Notes |
-|--------|-----------|-------|
-| combo_kernels + CDT | 244.77 | baseline (2.027x) |
-| combo + multi_kernel=2 | 258.27 | worse |
-| combo + multi_kernel=3 | 254.18 | worse |
 
-No config changes help. This is a complex structural limitation.
+| Config | Time (us) | Ratio vs Oracle |
+|--------|-----------|-----------------|
+| Default (CDT) | 242.69 | 2.025x |
+| multi_kernel=2 | 243.58 | 2.033x |
+| multi_kernel=3 | 243.58 | 2.033x |
 
-## Fix Assessment: Design doc
+No config helps -- the structural scheduling gap dominates.
 
-This is a complex multi-output reduction + indexed layout reconstruction pattern from Swin Transformer training. The oracle achieves its speedup by:
-1. Applying the window-reverse index gather inline (no materialized intermediate)
-2. Computing layernorm backward row reductions from the gathered data
-3. Writing the transposed side output in the same pass
-4. Accumulating three [256] column sums atomically
+## Fix Assessment
+
+**Design doc** -- requires COOPERATIVE_SPLIT_K scheduler enhancement.
 
 ### What's needed:
-The scheduler needs a cooperative split-K template that coordinates:
-- Dynamic indexed layout reconstruction (window-reverse via index)
-- Row-local reductions (layernorm backward style: sum(x*weight), sum(x))
-- Dependent pointwise epilogue (sub, mul, div for drop-path)
-- Transposed side-output store
-- Multiple sibling column reductions with atomic accumulation
+Teach Inductor to split compatible row-tiled reductions across the indexed window producer, fuse the dependent epilogue/store, and finalize the sibling channel sums together. The scheduler needs a cooperative multi-output reduction template that coordinates dynamic indexed layout reconstruction with finalized per-channel summaries feeding full-tensor side-output epilogues.
 
-### Relevant files:
-- `/tmp/pytorch-work/torch/_inductor/scheduler.py`: cannot fuse index -> reduce -> permute -> reduce chain
-- `/tmp/pytorch-work/torch/_inductor/ir.py`: realize_hint on indexed intermediates
-- `/tmp/pytorch-work/torch/_inductor/choices.py`: cooperative reduction strategy
-
-### Affected repro count:
-This pattern is specific to Swin Transformer training with window attention. Likely 3-5 repros in the corpus with the same cooperative split-K classification.
-
-## Details
-- Model: timm_swin_base_patch4_window7_224 (train)
-- Shape: [100352, 256] f32 (= 128 * 784 tokens * 256 channels)
-- Pattern: window-reverse(index) -> layernorm_bwd(sum, mul, sub) -> drop_path(mul, div) -> permute [256, 100352] + 3x sum(dim=0) [256]
-- This is a 2x gap, one of the largest in the corpus
+### Files:
+- `torch/_inductor/scheduler.py` (can_fuse, score_fusion)
+- `torch/_inductor/choices.py` (cooperative reduction heuristic)
+- `torch/_inductor/codegen/triton.py` (split-K codegen)
