@@ -2,6 +2,17 @@
 
 Read this BEFORE starting work. It contains critical context that prevents wasted effort.
 
+We are looking for the best possible perf while allowing aggressive autotuning. 
+```
+torch._inductor.config.combo_kernels = True
+torch._inductor.config.combo_kernel_per_subkernel_blocks = True
+torch._inductor.config.triton.multi_kernel = 1/2/3 
+```
+and 
+torch._inductor.config.coordinate_descent_tuning = True
+
+Can all be table stakes allowed. 
+
 ## What's Allowed (Playbook)
 
 ### Legitimate fixes:
@@ -9,6 +20,7 @@ Read this BEFORE starting work. It contains critical context that prevents waste
 - Codegen improvements (fewer instructions, better tiling)
 - Algebraic rewrites/optimizations (FX passes)
 - Config value changes are useful for EXPLORATION but we strive for real fixes
+- 
 
 ### NOT allowed:
 - Dispatch to custom Triton kernel (oracles show the target, Inductor's generic codegen must reach it)
@@ -26,8 +38,10 @@ The pytorch working tree is at `/tmp/pytorch-work` on branch `pr-184905`.
 | Tiling (per-channel ops recomputed N*H*W times) | `codegen/triton.py`, `triton_heuristics.py` | pointwise_bc30 BN coefficients |
 | Codegen overhead (asserts, unnecessary ops) | `codegen/triton.py` or `lowering.py` | elide_constant_index_asserts |
 | Realization blocks fusion | `ir.py` (should_realize_on_reuse, realize_hint) | smart_realize_hint |
+    - While this is useful for exploration, we want, where possible, to do scheduler level optimizations. 
 | Constant folding gap | `torch/fx/passes/` or `constant_folding.py` | iota mask elimination |
 | Cooperative reduction heuristic | `choices.py` (should_use_cooperative_reduction) | xhint 17-64 gap |
+    - if this is because of fusion, it's likely that this should not have been a choices fix, but a scheduler level optimization
 
 ## Key Principles
 
