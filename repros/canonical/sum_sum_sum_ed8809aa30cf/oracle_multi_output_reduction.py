@@ -1,24 +1,7 @@
-"""
-Full-scope oracle for sum_sum_sum_ed8809aa30cf (Blenderbot backward tail).
-
-Gap diagnosis (classification: COOPERATIVE_SPLIT_K): The timed oracle consumes
-the same original inputs as repro.py and returns the same two `[2560]`
-reductions plus the full `[32, 128, 2560]` epilogue tensor. It streams the
-shared `mm_6 + mm_8 + mm_10` producer once through a Triton split-tile reduction
-that computes the row-local scalar accumulators needed by the dependent
-epilogue and the sibling column reductions needed for the two vector outputs,
-then finalizes those partials and recomputes the cheap pointwise producer for
-the returned tensor. Inductor cannot do this today because the graph mixes
-reductions over the hidden dimension with reductions over batch/sequence and a
-dependent pointwise consumer, so the scheduler emits separate reductions and an
-epilogue instead of one coordinated multi-output reduction plan. The fix is
-COOPERATIVE_SPLIT_K: add codegen support for cross-axis multi-output reductions
-with row/column partials and recompute in the dependent epilogue.
-"""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the full Blenderbot backward tail from Repro.forward by streaming the shared `mm_6 + mm_8 + mm_10` producer into row-local hidden-dimension partials, column batch/sequence partials, and the returned `[32, 128, 2560]` epilogue tensor while preserving the two `[2560]` reduction outputs, whereas Inductor currently schedules the hidden-dimension reductions, batch/sequence reductions, and dependent epilogue as separate generic regions over materialized intermediates; Inductor cannot do this today because its scheduler/codegen cannot form one coordinated cross-axis multi-output reduction with row partials, column partials, and recomputed pointwise epilogue consumers; the fix is COOPERATIVE_SPLIT_K: add a split-K multi-output reduction template that emits shared producer loads, row/column partial finalization, and the dependent epilogue in one planned schedule."""
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
@@ -40,7 +23,6 @@ from oracle_harness import (
 
 REPRO_ID = "sum_sum_sum_ed8809aa30cf"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 BATCH = 32
@@ -49,11 +31,12 @@ ROWS = BATCH * SEQ
 CHANNELS = 2560
 INV_CHANNELS = 1.0 / CHANNELS
 
+def get_inputs():
+    return _harness_get_inputs(REPRO_DIR)
 
 
-def make_inputs() -> tuple[object, ...]:
-    module = _load_repro_module()
-    return tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in module.make_inputs())
+def get_repro_instance():
+    return _harness_get_repro_instance(REPRO_DIR)
 
 
 @triton.jit
@@ -306,14 +289,6 @@ def oracle_fused(
 
     return vector_outputs[0], vector_outputs[1], out_tensor
 
-
-def reference_outputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
-    module = _load_repro_module()
-    model = module.Repro().cuda()
-    with torch.no_grad():
-        return model(*inputs)
-
-
 def oracle_forward(inputs):
     return oracle_fused(*inputs)
 
@@ -351,8 +326,8 @@ def main():
     if not args.check and not args.bench:
         args.check = args.bench = True
 
-    inputs = _harness_get_inputs(REPRO_DIR)
-    instance = _harness_get_repro_instance(REPRO_DIR)
+    inputs = get_inputs()
+    instance = get_repro_instance()
 
     if has_stochastic_ops(REPRO_PATH):
         print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")

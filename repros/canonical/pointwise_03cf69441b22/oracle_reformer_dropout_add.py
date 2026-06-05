@@ -1,9 +1,10 @@
-"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete Reformer training embedding/position dropout-add region in one shape-specialized Triton path, including the [320,256] embedding gather, first Inductor-RNG dropout, virtual expand/cat/permute of the [64,1,64] and [1,64,192] positional tensors, second row-broadcast Inductor-RNG dropout, final view, and f32 [8,4096,256] add, whereas Inductor currently lowers the decomposed embedding, random/dropout, expand/cat/permute/view, and add graph as generic pointwise/layout work; Inductor cannot do this today because its scheduler and pattern library do not canonicalize this Reformer positional-concat layout with two distinct stochastic dropout domains into one direct output materialization; the fix is NEW_PATTERN: add a guarded Reformer embedding-plus-positional-dropout lowering that fuses the gather, virtual positional concat/layout, RNG masks, and final add into one generated kernel."""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full Reformer embedding plus positional dropout-add region as one shape-specialized Triton kernel with the embedding gather, both Inductor-seeded dropout masks, virtual positional expand/cat/permute/view layout, and final f32[8,4096,256] add, whereas Inductor currently lowers the embedding dropout, positional expand/cat/permute/dropout/view, and add as decomposed generic stochastic pointwise/layout work; Inductor cannot do this today because its scheduler/codegen pattern library does not recognize the Reformer positional-concat layout with two independent RNG domains as one direct output materialization; the fix is NEW_PATTERN: add a guarded Reformer embedding-plus-positional-dropout lowering that fuses the gather, virtual positional layout, RNG masks, and final add into one generated kernel."""
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
@@ -28,11 +29,9 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
-    check_oracle,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
-    get_shape_key,
     has_stochastic_ops,
 )
 
@@ -60,6 +59,8 @@ TOTAL_TOKENS = BATCH * SEQ_LEN
 DROPOUT_P = 0.05
 DROPOUT_KEEP = 1.0 - DROPOUT_P
 DROPOUT_SCALE = 1.0 / DROPOUT_KEEP
+EXACT_STOCHASTIC_EQUALITY = False
+TRUE_FLOOR = False
 
 if triton is not None:
 
@@ -197,6 +198,65 @@ def oracle_forward(inputs):
     return _launch_oracle(weight, indices, pos_left, pos_right)
 
 
+def _normalize_outputs(outputs: Any) -> tuple[torch.Tensor, ...]:
+    if isinstance(outputs, torch.Tensor):
+        return (outputs,)
+    if isinstance(outputs, (tuple, list)):
+        return tuple(outputs)
+    raise TypeError(f"unexpected output type: {type(outputs)!r}")
+
+
+def check_oracle_structural_stochastic(oracle_fn, instance, inputs) -> bool:
+    """Check full output metadata, skipping only stochastic value equality."""
+    with torch.no_grad():
+        eager = _normalize_outputs(instance(*inputs))
+        oracle = _normalize_outputs(oracle_fn(inputs))
+
+    if len(oracle) != len(eager):
+        print(
+            f"  SCOPE_MISMATCH: oracle produces {len(oracle)} outputs, "
+            f"eager produces {len(eager)}"
+        )
+        return False
+
+    all_pass = True
+    for i, (eager_out, oracle_out) in enumerate(zip(eager, oracle)):
+        if not isinstance(eager_out, torch.Tensor) or not isinstance(oracle_out, torch.Tensor):
+            print(f"  output {i}: SCOPE_MISMATCH non-tensor output")
+            all_pass = False
+            continue
+
+        if eager_out.shape != oracle_out.shape:
+            print(
+                f"  output {i}: SCOPE_MISMATCH shape oracle={list(oracle_out.shape)} "
+                f"eager={list(eager_out.shape)}"
+            )
+            all_pass = False
+            continue
+        if eager_out.dtype != oracle_out.dtype:
+            print(
+                f"  output {i}: SCOPE_MISMATCH dtype oracle={oracle_out.dtype} "
+                f"eager={eager_out.dtype}"
+            )
+            all_pass = False
+            continue
+        if eager_out.stride() != oracle_out.stride():
+            print(
+                f"  output {i}: SCOPE_MISMATCH stride oracle={tuple(oracle_out.stride())} "
+                f"eager={tuple(eager_out.stride())}"
+            )
+            all_pass = False
+            continue
+
+        print(
+            f"  output {i}: SKIP_VALUE (stochastic, metadata PASS "
+            f"shape={list(eager_out.shape)} dtype={eager_out.dtype} "
+            f"stride={tuple(eager_out.stride())})"
+        )
+
+    return all_pass
+
+
 # --- CLI entry point ---
 def main():
     parser = argparse.ArgumentParser(
@@ -239,17 +299,12 @@ def main():
     # Report if stochastic ops detected in source
     if has_stochastic_ops(REPRO_PATH):
         print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+    if not EXACT_STOCHASTIC_EQUALITY:
+        print("NOTE: exact stochastic value equality is not established; true_floor=no")
 
     if args.check:
         print(f"Checking {REPRO_ID}...")
-        ok = check_oracle(
-            oracle_forward,
-            instance,
-            inputs,
-            atol=args.atol,
-            rtol=args.rtol,
-            skip_stochastic=not args.no_skip_stochastic,
-        )
+        ok = check_oracle_structural_stochastic(oracle_forward, instance, inputs)
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)
@@ -279,6 +334,8 @@ def main():
             if result["status"] == "BAD_ORACLE":
                 print(f"WARNING: oracle is slower than compile "
                       f"(ratio={result['ratio']:.3f}x)")
+        if not TRUE_FLOOR:
+            print("diagnosis_only: true_floor=no because stochastic values are structurally checked")
 
 
 if __name__ == "__main__":
