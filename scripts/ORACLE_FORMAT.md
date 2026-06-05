@@ -27,6 +27,19 @@ python -m pip install --no-build-isolation -e .
 Do not add oracle-local `sys.path` / `REPO_ROOT` import hacks. If imports fail,
 the environment has not been installed correctly.
 
+## Timing Rules
+
+All timing must go through `oracle_harness.bench_oracle()` via the copied
+`scripts/oracle_template.py` CLI. Do not write custom `run_bench()` functions
+and do not call `triton.testing.do_bench(lambda: compiled(*inputs))` directly.
+Direct timing of compiled callables can show fake 2x+ gaps on fast kernels
+because Dynamo dispatch overhead dominates unless CUDA graph capture and
+interleaved timing are handled by the shared harness.
+
+If `python oracle_<name>.py --bench` prints a CUDAGraph capture warning, report
+the warning and do not treat the fallback number as a valid performance floor
+for fast kernels.
+
 ## Required Structure
 
 Every oracle file must have:

@@ -116,6 +116,12 @@ Just implement `oracle_forward(inputs)` and leave the `main()` as-is.
 4. Verify: `python oracle_<name>.py --check` (must print "PASS" and exit 0)
 5. Benchmark: `python oracle_<name>.py --bench` (prints JSON timing line)
 
+The template's `main()` must remain the timing entry point. It calls
+`oracle_harness.bench_oracle()`, which holds the GPU lock, uses CUDA graph
+capture, and performs interleaved oracle/compile timing. If `--bench` prints a
+CUDAGraph capture warning, report it in your handoff and do not treat the
+fallback timing as a valid floor for fast kernels.
+
 **Standard CLI** (all oracles must support):
 ```
 python oracle_<name>.py --check       # correctness vs eager Repro
