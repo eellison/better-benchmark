@@ -1,0 +1,7 @@
+Gap diagnosis (classification: SCHEDULER_FUSION).
+
+A valid fused oracle would compute the complete stochastic residual-dropout plus hidden-size-768 LayerNorm return in one Triton row kernel, including Inductor `tl.rand(seed, offset)` dropout, fp16 dropout scale and residual-add rounding, fp32 var_mean with eps=1e-5, affine gamma/beta, and the final fp16 [2048,768] output. Inductor currently schedules the random/dropout producer and generic var_mean normalization work as separate general-purpose pieces with extra intermediate traffic.
+
+This is not a canonical oracle floor. Under the standard template, correctness is checked against eager `Repro.forward`; in this PyTorch build, `prims.inductor_random.default` falls back to eager `torch.rand`, while the fused implementation would use backend `tl.rand(seed, offset)`. Those random streams are not bit-exact, so a full-scope fused Triton oracle cannot be validated by the template without either skipping the only output as stochastic or substituting a materialized eager-random tensor. The former would be an unchecked oracle and the latter would benchmark a different floor from the fused Inductor RNG path.
+
+The fix is SCHEDULER_FUSION: allow stochastic pointwise producers with reproducible `tl.rand(seed, offset)` semantics to feed row-normalization templates directly so dropout, residual add, reduction, and affine store are emitted as one scheduled kernel.
