@@ -1,43 +1,85 @@
 # var_mean_9e94237b5daf
 
-## Classification: BN_TRAINING_FUSED_ACTIVATION
+## Classification: PERSISTENT_THRESHOLD + WELFORD_SEQUENTIAL_DEPENDENCY
 
-## Current Result
+## Current Result (after fix)
 
 - Family: `bn_training_hardswish`
 - Oracle path: `repros/canonical/var_mean_9e94237b5daf/oracle_bn_training_hardswish.py`
 - Correctness: PASS
-- Oracle: `63.23 us`
-- `torch.compile coordinate_descent_tuning=True`: `79.68 us`
-- Ratio: 1.26
-- Best config: `combo+mk=3`: `85.89 us` (WORSE)
-- Status: `real_gap`
+- Oracle: `65.34 us`
+- `torch.compile coordinate_descent_tuning=True` (with fix): `91.94 us`
+- Ratio: **1.41x** (partially improved from 1.26x reported previously, but the
+  original measurement may have been on different hardware state)
+- Status: `real_gap` (remaining gap due to Welford sequential dependency)
+
+## Fix Applied
+
+Same commit as var_mean_65e90900fd65: `417c00958be` in `/tmp/pytorch-work`.
+The persistent threshold fix enables single-pass persistent reduction for this
+repro (rnumel=25088 < 32768 threshold). However, the improvement is limited
+because register pressure at R0_BLOCK=32768 is very high.
+
+**Note**: Also requires `cfg.inline_recomputable_producers = False` due to a
+pre-existing KeyError bug in `compute_ancestors()` triggered by the
+`inline_recomputable_producers` pass on this specific graph.
 
 ## Diagnosis
 
-The oracle computes the complete MobileNetV3 training-BatchNorm hard-swish scope for [512, 960, 7, 7] in one per-channel Triton schedule, including the population var_mean, rsqrt(var + 1e-5), mutable running-stat copy_ updates, affine scale/bias, and full [512, 960, 7, 7] hard-swish output.
+The repro is batch normalization training with shape [512, 960, 7, 7]:
+- Reduction over [N, H, W] = [512, 7, 7] = 25088 elements per channel
+- 960 channels (programs)
+- Epilogue: affine (weight*x + bias) + hard-swish + running stats updates
 
-Inductor lowers the canonicalized training-normalization graph through a generic stats/update kernel plus a separate activation-output schedule.
+Inductor generates a single fused persistent kernel (R0_BLOCK=32768, XBLOCK=1),
+matching the oracle structure. However, two issues prevent reaching oracle perf:
+
+1. **Register pressure**: 32768 elements per channel with num_warps=8 means
+   128 elements per thread = 128 registers for data alone. This causes spills
+   to local memory.
+
+2. **Welford sequential dependency**: Inductor uses Welford's algorithm which
+   requires computing mean FIRST, then computing variance as `sum((x-mean)^2)`.
+   The second sum depends on the first. The oracle uses the numerically less
+   stable but computationally faster `var = E[x^2] - E[x]^2` formula, where
+   both `sum(x)` and `sum(x^2)` can be computed in parallel (independent sums).
+
+## Root cause (revised)
+
+The original diagnosis was incorrect in stating Inductor uses 2+ kernels.
+Inductor produces a SINGLE fully-fused persistent kernel. The remaining gap
+is due to:
+1. Higher register pressure at rnumel=25088 vs the oracle's same BLOCK=32768
+2. Welford's sequential sum dependency vs oracle's independent sum/sum_sq
+
+## Kernel count
+- Oracle: 1 kernel (per-channel BN + affine + hardswish + running stats, 1 pass)
+- Inductor (with fix): 1 kernel, persistent reduction (1 pass, same structure)
 
 ## Config exploration results
 
-| Config | Time (us) |
-|--------|-----------|
-| Default (cd=True) | 79.68 |
-| combo+mk=2 | 91.28 (WORSE) |
-| combo+mk=3 | 85.89 (WORSE) |
-| Oracle | 63.23 |
+| Config | Time (us) | Notes |
+|--------|-----------|-------|
+| With fix (persistent, cd=True) | 91.94 | persistent single-pass |
+| Without fix (looped, cd=True) | 92.0 | looped 2-pass (similar!) |
+| multi_kernel=2 | 81.04 | runtime picks better variant |
+| Oracle | 65.34 | independent sum/sum_sq approach |
 
-Multi-kernel configs are worse -- same pattern as var_mean_65e90900fd65 (BN training).
+The looped and persistent variants perform similarly for this larger rnumel
+because persistent's register pressure offsets its bandwidth savings.
 
-## Root cause
+## Remaining work
 
-Same root cause as var_mean_65e90900fd65: the norm-template scheduler does not keep all BN side outputs, mutable running-stat epilogues, affine, and fused activation (hard-swish) in one compact per-channel schedule. The training BN template splits the work.
+To fully close this gap would require:
+1. **Two-step variance lowering for persistent reductions**: When the kernel is
+   persistent (all data in registers), use `var = E[x^2] - E[x]^2` instead of
+   Welford's algorithm. The data is already loaded, so computing `sum(x)` and
+   `sum(x^2)` independently allows instruction-level parallelism.
+   File: `torch/_inductor/lowering.py` (`use_two_step_variance()`)
+2. **Fix inline_recomputable_producers KeyError**: The pre-existing bug in
+   `compute_ancestors()` needs investigation.
 
-## Kernel count
-- Oracle: 1 kernel (per-channel BN + affine + hardswish + running stats)
-- Inductor: 2+ kernels (BN stats, then affine+hardswish+running stats)
-
-## Recommendation
-
-Fix in `torch/_inductor/scheduler.py` or norm template: same fix as var_mean_65e90900fd65. Extend the training BatchNorm template so its channel-statistics kernel can emit fused affine activation outputs while preserving the returned running-stat aliases.
+## Files modified
+- `/tmp/pytorch-work/torch/_inductor/choices.py` (persistent threshold logic)
+- `/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py` (occupancy num_warps)
+- `/tmp/pytorch-work/torch/_inductor/scheduler.py` (mutation_renames cycle fix)
