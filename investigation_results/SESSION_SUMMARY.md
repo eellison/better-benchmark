@@ -90,7 +90,9 @@ The pytorch working tree is at `/tmp/pytorch-work` on branch `pr-184905`.
 | Fix Type | Where | Example |
 |----------|-------|---------|
 | Algebraic rewrite (eliminate redundant ops) | `torch/_inductor/fx_passes/` (new file or extend `post_grad.py`) | linear_reduction_elimination, select_scatter_sparsity |
-| Fusion failure (ops that should be 1 kernel) | `torch/_inductor/scheduler.py` (can_fuse, score_fusion) | realize_hint heuristic, split_reductions |
+| Fusion failure (ops that should be 1 kernel) | `torch/_inductor/scheduler.py` (can_fuse, score_fusion) 
+   - for this work, it's important that we are able actually match exact fusion dependencies to match read/writes, or duplicative reads
+   - we do not want to make the fusion scoring loosey - combo kernels will already fuse kernels which dont save global memory access
 | Codegen overhead (asserts, unnecessary ops) | `torch/_inductor/codegen/triton.py` or `lowering.py` | elide_constant_index_asserts, scalar_acc |
 | Realization too eager | `torch/_inductor/ir.py` (should_realize_on_reuse, realize_hint) | pointwise_e26de fix |
 | Constant folding gap | `torch/fx/passes/` or `torch/_inductor/constant_folding.py` | iota mask elimination |
