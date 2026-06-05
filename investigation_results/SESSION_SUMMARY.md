@@ -96,6 +96,33 @@ All in `/tmp/pytorch-work/torch/_inductor/`:
 
 ## Design TODOs (need further discussion/design)
 
+### HIGHEST PRIORITY: Reduction-with-epilogue fusion (scheduler-level)
+
+**The dominant remaining gap family.** Across 5+ investigated repros (1.17-1.55x), the
+core issue is the same: Inductor cannot fuse a reduction kernel with a dependent
+pointwise epilogue that re-reads the reduction's input data. The oracle keeps tiles
+in registers and computes both reduction and epilogue in one pass.
+
+Variants investigated:
+- **`sum_sum_sum_80113e346555`** (1.55x): BN-backward, reduction produces per-channel stats → epilogue recomputes full-shape output using those stats. K3 re-reads 3MB already loaded by K0.
+- **`sum_sum_sum_ecba845b8a4b`** (1.50x): Grouped BN-backward with CPG=2. Retiling from (batch,channel) to (batch,group) would allow single-pass compute.
+- **`sum_sum_sum_d414d9a2b2eb`** (1.43x): LayerNorm-backward with cross-axis dependency. Oracle uses tl.atomic_add for the dependent column reduction.
+- **`sum_sum_sum_4c5c1859352a`** (1.33x): Same CIFAR10 DP pattern, different sizes.
+- **`sum_08d094f67bb4`** (1.22x): Reduction → select_scatter with 98% zeros. Sparse-write variant.
+- **`sum_6080543764bd`** (1.19x): Shared pointwise → transposed store + column sum.
+
+**Unified fix**: Teach the scheduler that when:
+  1. A persistent reduction R produces output shape S_out
+  2. A downstream pointwise P has iteration domain S_in (= S_out × reduction_dims)
+  3. P reads BOTH the reduction input (at S_in) AND values derived from R's output (at S_out)
+Then fuse R and P into one kernel that reduces, keeps results in registers, and
+writes the epilogue output in the same pass. Sub-variants:
+  - Atomic accumulation for dependent cross-axis reductions
+  - Sparse-write for select_scatter at graph output
+  - Retiling for grouped patterns (CPG > 1)
+
+**Files**: `scheduler.py` (can_fuse, score_fusion), possibly new template or codegen enhancement.
+
 ### High impact, scheduler-level:
 1. **Cooperative split-K / tiled reduction** (~30 repros, 1.2-2.7x)
    - Low-occupancy reductions need more parallelism
@@ -114,35 +141,43 @@ All in `/tmp/pytorch-work/torch/_inductor/`:
    - Scheduler can't express "write structured output AND accumulate column sums"
 
 ### Medium impact, codegen-level:
-5. **Loop-invariant hoisting for inner_fn** (21-23% on large vocab)
+5. **Constant-index assert elision** (~41 repros, 1.12x on target)
+   - `tl.device_assert` on graph-constant index tensors with provably in-bounds values
+   - Fix: elide check at lowering time when all values verified in [0, dim_size)
+   - Implementation in progress (lowering.py)
+
+6. **Loop-invariant hoisting for inner_fn** (21-23% on large vocab)
    - Hoist loop-invariant indirect loads out of reduction loop
    - CE-specific Path B already done; generic version needs refactor
 
-6. **Generic channel-independent op commutation with cat** (1.7-2.8x)
+7. **Generic channel-independent op commutation with cat** (1.7-2.8x)
    - `op(cat([a,b], dim=C))` → `cat([op(a), op(b)], dim=C)` for pool/upsample/pad
    - maxpool case validated (1.69x); generalize to avgpool, upsample
 
-7. **Pointwise→pool fusion** (2.97x doctr)
+8. **Pointwise→pool fusion** (2.97x doctr)
    - Scheduler doesn't fuse elementwise producer into _low_memory_max_pool consumer
    - `realize_hint()` forces materialization before pool reads via stencil
 
-8. **Realize-reads threshold / scheduler-aware realization** (1.4x→1.1x)
+9. **Realize-reads threshold / scheduler-aware realization** (1.4x→1.1x)
    - Don't realize if all consumers will fuse together
    - Validated that threshold=30 works globally (no regressions) but want proper scheduler logic
 
 ### Lower impact / narrow:
-9. **Multi-store codegen** (2.25x ShuffleNet) — iterate half elements, write both branches
-10. **Index-based sparsity** (2.4x nanogpt) — extend select_scatter_sparsity for `index_put` with dynamic indices
-11. **Tridiagonal solve recognition** (2 pyhpc repros) — sequential select_scatter chain
-12. **Demucs gather+sum fusion** (15.9x, 1 repro) — unique pattern
+10. **Multi-store codegen** (2.25x ShuffleNet) — iterate half elements, write both branches
+11. **Index-based sparsity** (2.4x nanogpt) — extend select_scatter_sparsity for `index_put` with dynamic indices
+12. **Tridiagonal solve recognition** (2 pyhpc repros) — sequential select_scatter chain
+13. **Demucs gather+sum fusion** (15.9x, 1 repro) — unique pattern
 
 ---
 
-## Coverage Stats (end of session)
+## Coverage Stats (updated 2026-06-05)
 
-- **Oracle files**: 396 across corpus (27% of 1482)
-- **Queue entries**: ~380 oracle-verified repros
-- **Resolved**: ~175 (46%) — closed at floor + implemented
+- **Oracle files**: 477 across corpus (32% of 1482)
+- **Standardized (use oracle_harness)**: 421/477 (88%), conversion in progress for remainder
+- **Measurement methodology**: CUDAGraph + GPU lock + interleaved timing (mandatory since 06-05)
+- **Confirmed real gaps** (proper measurement): ~15 repros with 1.1-1.55x
+- **Dominant gap family**: reduction-with-epilogue fusion (scheduler-level, 5+ repros, 1.17-1.55x)
+- **Implemented FX-level fix in progress**: constant-index assert elision (~41 repros, ~12%)
 - **Needs work**: ~85 (design TODOs above)
 - **Bad oracles**: ~55 (other server needs to rewrite)
 - **Remaining uncovered**: ~793 repros need oracles (priority worklist provided)

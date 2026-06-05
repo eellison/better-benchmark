@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import sys
 import importlib.util
 import json
-import math
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +21,16 @@ from repro_harness import load_shape_configs, make_inputs_from_config
 
 
 REPRO_DIR = Path(__file__).resolve().parent
+
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
 REPRO_PATH = REPRO_DIR / "repro.py"
 REPRO_ID = REPRO_DIR.name
 HISTORICAL_BEST_COMPILE_US = 5.7
@@ -112,119 +122,86 @@ def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> torch.Tensor:
     return out
 
 
-def _repro_forward(inputs: list[Any]) -> torch.Tensor:
-    module = _load_repro_module()
-    model = module.Repro()
-    with torch.no_grad():
-        return model(*inputs)
-
-
-def _check_one(shape_name: str | None) -> bool:
-    label, inputs = _named_inputs(shape_name)
-    with torch.no_grad():
-        eager = _repro_forward(inputs)
-        oracle = oracle_forward(inputs)
-    if eager.shape != oracle.shape or eager.dtype != oracle.dtype:
-        print(
-            f"{label}: FAIL shape/dtype eager={tuple(eager.shape)} {eager.dtype} "
-            f"oracle={tuple(oracle.shape)} {oracle.dtype}"
-        )
-        return False
-    ok = torch.equal(eager, oracle)
-    print(f"{label}: {'PASS' if ok else 'FAIL'} value eager={bool(eager.item())} oracle={bool(oracle.item())}")
-    return ok
-
-
-def _do_bench(fn: Any, warmup: int, rep: int) -> float:
-    if triton is not None:
-        from triton.testing import do_bench
-
-        return do_bench(fn, warmup=warmup, rep=rep, return_mode="min") * 1000.0
-
-    for _ in range(warmup):
-        fn()
-    torch.cuda.synchronize()
-    best = math.inf
-    for _ in range(rep):
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-        start.record()
-        fn()
-        end.record()
-        torch.cuda.synchronize()
-        best = min(best, start.elapsed_time(end) * 1000.0)
-    return best
-
-
-def _compile_repro(inputs: list[Any], warmup: int) -> Any:
-    import torch._inductor.config as inductor_config
-
-    module = _load_repro_module()
-    inductor_config.coordinate_descent_tuning = True
-    compiled = torch.compile(module.Repro())
-    with torch.no_grad():
-        for _ in range(max(1, warmup)):
-            compiled(*inputs)
-    torch.cuda.synchronize()
-    return compiled
-
-
-def _bench_one(shape_name: str | None, warmup: int, rep: int) -> dict[str, Any]:
-    label, inputs = _named_inputs(shape_name)
-    with torch.no_grad():
-        oracle_forward(inputs)
-    torch.cuda.synchronize()
-    oracle_us = _do_bench(lambda: oracle_forward(inputs), warmup=warmup, rep=rep)
-
-    compiled = _compile_repro(inputs, warmup)
-    compile_us = _do_bench(lambda: compiled(*inputs), warmup=warmup, rep=rep)
-    best_compare_us = min(compile_us, HISTORICAL_BEST_COMPILE_US)
-    result = {
-        "repro_id": REPRO_ID,
-        "shape": label,
-        "oracle_us": round(oracle_us, 3),
-        "compile_us": round(compile_us, 3),
-        "historical_best_compile_us": HISTORICAL_BEST_COMPILE_US,
-        "best_compare_us": round(best_compare_us, 3),
-        "ratio": round(best_compare_us / oracle_us, 3) if oracle_us > 0 else None,
-    }
-    print(json.dumps(result))
-    return result
-
-
-def _shape_names(all_shapes: bool, shape: str | None) -> list[str | None]:
-    if shape is not None:
-        return [shape]
-    if not all_shapes:
-        return [None]
-    return list(load_shape_configs(str(REPRO_PATH)).keys())
-
-
 def main() -> None:
-    parser = argparse.ArgumentParser(description=f"Oracle for {REPRO_ID}")
-    parser.add_argument("--check", action="store_true", help="verify correctness against eager Repro")
-    parser.add_argument("--bench", action="store_true", help="benchmark the full oracle against torch.compile")
-    parser.add_argument("--shape", default=None, help="shape name from shapes.txt")
-    parser.add_argument("--all-shapes", action="store_true", help="run all named shapes from shapes.txt")
-    parser.add_argument("--warmup", type=int, default=25, help="benchmark warmup iterations")
-    parser.add_argument("--rep", type=int, default=200, help="benchmark repetitions")
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
     args = parser.parse_args()
+
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
 
     if not args.check and not args.bench:
         args.check = args.bench = True
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required for this Triton oracle")
 
-    names = _shape_names(args.all_shapes, args.shape)
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
     if args.check:
-        ok = True
-        for name in names:
-            ok = _check_one(name) and ok
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        status = "PASS" if ok else "FAIL"
+        print(f"Correctness: {status}")
         if not ok:
-            raise SystemExit(1)
+            sys.exit(1)
+
     if args.bench:
-        for name in names:
-            _bench_one(name, args.warmup, args.rep)
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":

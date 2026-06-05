@@ -15,13 +15,22 @@ import argparse
 import csv
 import importlib.util
 import json
-import math
 import sys
 from pathlib import Path
 
 import torch
 import triton
 import triton.language as tl
+
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
 
 
 REPRO_ID = "amax_sum_sum_b942094d64da"
@@ -178,190 +187,87 @@ def get_repro_instance() -> torch.nn.Module:
     return module.Repro()
 
 
-def _bench_cuda_graph(fn, warmup: int, rep: int) -> float:
-    for _ in range(warmup):
-        fn()
-    torch.cuda.synchronize()
-
-    graph = torch.cuda.CUDAGraph()
-    with torch.cuda.graph(graph):
-        fn()
-    torch.cuda.synchronize()
-
-    start = torch.cuda.Event(enable_timing=True)
-    end = torch.cuda.Event(enable_timing=True)
-    times = []
-    for _ in range(rep):
-        start.record()
-        graph.replay()
-        end.record()
-        torch.cuda.synchronize()
-        times.append(start.elapsed_time(end) * 1000.0)
-    times.sort()
-    return times[len(times) // 2]
-
-
-def _compile_with_config(module, inputs: tuple, config: dict[str, object], warmup: int):
-    import torch._dynamo
-    import torch._inductor.config as inductor_config
-
-    torch._dynamo.reset()
-    model = module.Repro().cuda()
-    with inductor_config.patch(config):
-        compiled = torch.compile(model)
-        for _ in range(max(1, warmup)):
-            compiled(*inputs)
-        torch.cuda.synchronize()
-    return compiled
-
-
-def _historical_best_compile_us() -> float:
-    if not QUEUE_PATH.exists():
-        return HISTORICAL_BEST_COMPILE_US
-    try:
-        with QUEUE_PATH.open(newline="") as f:
-            for row in csv.DictReader(f):
-                if row.get("repro_id") == REPRO_ID:
-                    value = row.get("best_compile_us") or ""
-                    return float(value) if value else HISTORICAL_BEST_COMPILE_US
-    except Exception:
-        return HISTORICAL_BEST_COMPILE_US
-    return HISTORICAL_BEST_COMPILE_US
-
-
-def run_check(*, block: int, rtol: float, atol: float) -> bool:
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required for the Triton oracle check")
-
-    inputs = get_inputs()
-    model = get_repro_instance().cuda()
-    with torch.no_grad():
-        ref = model(*inputs)
-        got = oracle_forward(inputs, block=block)
-        torch.cuda.synchronize()
-
-    same_shape = got.shape == ref.shape
-    same_dtype = got.dtype == ref.dtype
-    same_stride = got.stride() == ref.stride()
-    max_abs = (got.float() - ref.float()).abs().max().item()
-    ok_values = torch.allclose(got.float(), ref.float(), rtol=rtol, atol=atol)
-    ok = bool(same_shape and same_dtype and same_stride and ok_values)
-
-    print(
-        "check full-scope softmax-weighted avgpool: "
-        f"shape={list(got.shape)} dtype={got.dtype} stride={got.stride()} "
-        f"ref_stride={ref.stride()} max_abs={max_abs:.6e} allclose={ok_values}"
-    )
-    if not same_shape:
-        print(f"  SCOPE_MISMATCH shape oracle={list(got.shape)} eager={list(ref.shape)}")
-    if not same_dtype:
-        print(f"  SCOPE_MISMATCH dtype oracle={got.dtype} eager={ref.dtype}")
-    if not same_stride:
-        print(f"  SCOPE_MISMATCH stride oracle={got.stride()} eager={ref.stride()}")
-    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
-    return ok
-
-
-def run_bench(*, block: int, warmup: int, rep: int, no_compile: bool) -> dict:
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required for the Triton oracle benchmark")
-
-    module = _load_repro_module()
-    inputs = tuple(module.make_inputs())
-    convolution_24, view_15 = inputs[:2]
-    batch, _, channels, height, width = view_15.shape
-    out_height = (height + 2 - 3) // 2 + 1
-    out_width = (width + 2 - 3) // 2 + 1
-    out = torch.empty(
-        (batch, channels, out_height, out_width),
-        device=view_15.device,
-        dtype=view_15.dtype,
-    )
-
-    read_bytes = out.numel() * (2 + 18) * 4
-    write_bytes = out.numel() * 4
-    total_bytes = read_bytes + write_bytes
-
-    with torch.no_grad():
-        oracle_us = _bench_cuda_graph(
-            lambda: _launch_oracle(convolution_24, view_15, out, block=block),
-            warmup=warmup,
-            rep=rep,
-        )
-
-    historical_best = _historical_best_compile_us()
-    compile_results: dict[str, float] = {}
-    if not no_compile:
-        for label, config in COMPILE_CONFIGS:
-            compiled = _compile_with_config(module, inputs, config, warmup)
-            compile_results[label] = _bench_cuda_graph(
-                lambda compiled=compiled: compiled(*inputs),
-                warmup=warmup,
-                rep=rep,
-            )
-
-    measured_best = min(compile_results.values()) if compile_results else math.nan
-    comparison_best = historical_best
-    if compile_results:
-        comparison_best = min(historical_best, measured_best)
-    speedup_vs_best = comparison_best / oracle_us if oracle_us > 0 else math.nan
-    valid_floor = bool(
-        compile_results
-        and all(oracle_us < value for value in compile_results.values())
-        and oracle_us < historical_best
-    )
-
-    result = {
-        "repro_id": REPRO_ID,
-        "oracle_us": round(oracle_us, 3),
-        "compile_us": round(measured_best, 3) if compile_results else None,
-        "compile_configs_us": {k: round(v, 3) for k, v in compile_results.items()},
-        "historical_best_compile_us": round(historical_best, 3),
-        "comparison_best_compile_us": round(comparison_best, 3),
-        "ratio": round(speedup_vs_best, 3),
-        "valid_floor": valid_floor,
-        "status": "GOOD" if valid_floor else "DIAGNOSIS_ONLY",
-        "total_logical_bytes": total_bytes,
-    }
-    print(json.dumps(result))
-    print(f"oracle full-scope softmax-weighted avgpool: {oracle_us:.3f} us")
-    for label, value in compile_results.items():
-        print(f"torch.compile {label}: {value:.3f} us")
-    print(f"historical best_compile_us: {historical_best:.3f} us")
-    print(f"valid floor: {'yes' if valid_floor else 'no'}")
-    return result
-
-
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="run correctness check")
-    parser.add_argument("--bench", action="store_true", help="run timing benchmark")
-    parser.add_argument("--warmup", type=int, default=10, help="benchmark warmup iterations")
-    parser.add_argument("--rep", type=int, default=50, help="benchmark repetitions")
-    parser.add_argument("--block", type=int, default=128, help="Triton output elements per program")
-    parser.add_argument("--rtol", type=float, default=1e-4, help="correctness relative tolerance")
-    parser.add_argument("--atol", type=float, default=1e-4, help="correctness absolute tolerance")
-    parser.add_argument("--no-compile", action="store_true", help="skip torch.compile baselines")
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
     args = parser.parse_args()
 
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
+
     if not args.check and not args.bench:
-        args.check = True
-        args.bench = True
+        args.check = args.bench = True
+
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
 
     if args.check:
-        ok = run_check(block=args.block, rtol=args.rtol, atol=args.atol)
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        status = "PASS" if ok else "FAIL"
+        print(f"Correctness: {status}")
         if not ok:
             sys.exit(1)
 
     if args.bench:
-        run_bench(
-            block=args.block,
-            warmup=args.warmup,
-            rep=args.rep,
-            no_compile=args.no_compile,
-        )
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":
-    with torch.no_grad():
-        main()
+    main()

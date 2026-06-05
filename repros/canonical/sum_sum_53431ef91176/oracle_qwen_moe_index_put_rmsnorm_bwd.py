@@ -3,11 +3,8 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
-import math
 import sys
-import time
 from pathlib import Path
-from typing import Callable
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
@@ -21,6 +18,16 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable withou
 
 
 REPRO_ID = "sum_sum_53431ef91176"
+
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
@@ -462,141 +469,86 @@ def reference_outputs(
     return _as_tuple(model(*inputs))
 
 
-def synchronize(device: torch.device) -> None:
-    if device.type == "cuda":
-        torch.cuda.synchronize(device)
-
-
-def _as_tuple(value: object) -> tuple[torch.Tensor, ...]:
-    if isinstance(value, tuple):
-        return value
-    if isinstance(value, torch.Tensor):
-        return (value,)
-    raise TypeError(f"expected tensor or tuple of tensors, got {type(value)!r}")
-
-
-def _diff_stats(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float, float]:
-    diff = (actual.float() - expected.float()).abs()
-    rel = diff / (expected.float().abs() + 1e-8)
-    return diff.max().item(), diff.mean().item(), rel.max().item()
-
-
-def run_check(device: torch.device, rtol: float, atol: float) -> bool:
-    torch.manual_seed(0)
-    inputs = make_inputs(device)
-    with torch.no_grad():
-        expected = reference_outputs(inputs, device)
-        actual = _as_tuple(oracle_qwen_moe_index_put_rmsnorm_bwd(*inputs))
-        synchronize(device)
-
-    ok = True
-    if len(actual) != len(expected):
-        print(f"tuple_length_match=False actual={len(actual)} expected={len(expected)}")
-        ok = False
-
-    for idx, (got, ref) in enumerate(zip(actual, expected)):
-        max_abs, mean_abs, max_rel = _diff_stats(got, ref)
-        value_ok = torch.allclose(
-            got.float(),
-            ref.float(),
-            rtol=rtol,
-            atol=atol,
-            equal_nan=True,
-        )
-        shape_ok = got.shape == ref.shape
-        dtype_ok = got.dtype == ref.dtype
-        stride_ok = got.stride() == ref.stride()
-        ok = ok and value_ok and shape_ok and dtype_ok and stride_ok
-        print(
-            f"output[{idx}]: shape={list(got.shape)} dtype={got.dtype} "
-            f"stride={got.stride()} max_abs={max_abs:.6e} "
-            f"mean_abs={mean_abs:.6e} max_rel={max_rel:.6e} "
-            f"allclose={value_ok} shape_match={shape_ok} "
-            f"dtype_match={dtype_ok} stride_match={stride_ok}"
-        )
-
-    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
-    return ok
-
-
-def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: int) -> float:
-    for _ in range(warmup):
-        fn()
-    synchronize(device)
-
-    best_s = math.inf
-    for _ in range(rep):
-        start = time.perf_counter()
-        fn()
-        synchronize(device)
-        best_s = min(best_s, time.perf_counter() - start)
-    return best_s * 1_000_000.0
-
-
-def run_bench(device: torch.device, warmup: int, rep: int, compare_eager: bool) -> None:
-    torch.manual_seed(0)
-    inputs = make_inputs(device)
-
-    with torch.no_grad():
-        oracle_qwen_moe_index_put_rmsnorm_bwd(*inputs)
-        synchronize(device)
-        oracle_us = benchmark(
-            lambda: oracle_qwen_moe_index_put_rmsnorm_bwd(*inputs),
-            device,
-            warmup,
-            rep,
-        )
-        print(
-            f"oracle_qwen_moe_index_put_rmsnorm_bwd: {oracle_us:.3f} us "
-            f"shape={SHAPE_LABEL} device={device} warmup={warmup} rep={rep}"
-        )
-
-        if compare_eager:
-            module = _load_repro_module()
-            if device.type != "cuda":
-                module.device = lambda *unused_args, **unused_kwargs: device
-            repro = module.Repro().to(device)
-            repro(*inputs)
-            synchronize(device)
-            repro_us = benchmark(lambda: repro(*inputs), device, warmup, rep)
-            print(
-                f"repro_eager: {repro_us:.3f} us "
-                f"shape={SHAPE_LABEL} device={device} warmup={warmup} rep={rep}"
-            )
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="run correctness check")
-    parser.add_argument("--bench", action="store_true", help="run timing benchmark")
-    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--rtol", type=float, default=2e-2)
-    parser.add_argument("--atol", type=float, default=2e-1)
-    parser.add_argument("--warmup", type=int, default=5)
-    parser.add_argument("--rep", type=int, default=20)
-    parser.add_argument(
-        "--compare-eager",
-        action="store_true",
-        help="include eager repro timing in --bench output",
-    )
-    return parser.parse_args()
-
-
 def main() -> None:
-    args = parse_args()
-    if not args.check and not args.bench:
-        args.check = True
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
+    args = parser.parse_args()
 
-    device = torch.device(args.device)
-    if args.check and not run_check(device=device, rtol=args.rtol, atol=args.atol):
-        sys.exit(1)
-    if args.bench:
-        run_bench(
-            device=device,
-            warmup=args.warmup,
-            rep=args.rep,
-            compare_eager=args.compare_eager,
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
+
+    if not args.check and not args.bench:
+        args.check = args.bench = True
+
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
+    if args.check:
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
         )
+        status = "PASS" if ok else "FAIL"
+        print(f"Correctness: {status}")
+        if not ok:
+            sys.exit(1)
+
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":
