@@ -90,11 +90,16 @@ The pytorch working tree is at `/tmp/pytorch-work` on branch `pr-184905`.
 | Fix Type | Where | Example |
 |----------|-------|---------|
 | Algebraic rewrite (eliminate redundant ops) | `torch/_inductor/fx_passes/` (new file or extend `post_grad.py`) | linear_reduction_elimination, select_scatter_sparsity |
-| Fusion failure (ops that should be 1 kernel) | `torch/_inductor/scheduler.py` (can_fuse, score_fusion) 
-   - for this work, it's important that we are able actually match exact fusion dependencies to match read/writes, or duplicative reads
-   - we do not want to make the fusion scoring loosey - combo kernels will already fuse kernels which dont save global memory access
+| Fusion failure (ops that should be 1 kernel) | `torch/_inductor/scheduler.py` (can_fuse, score_fusion) | realize_hint, split_reductions |
+|   | - Match exact fusion dependencies to read/writes or duplicative reads | |
+|   | - Don't make fusion scoring loosey — combo_kernels already fuses kernels that don't save global memory access | |
+| Tiling/recomputation (per-channel ops in fused kernel) | `torch/_inductor/codegen/triton.py`, `triton_heuristics.py` | pointwise_bc30 (BN coefficients) |
+|   | - When per-channel ops (rsqrt) are fused into a [N,C,H,W] kernel, tile by channel so they're computed once per tile, not N×H×W times | |
+|   | - Fix is in tiling strategy, not fusion decision — we WANT to fuse, just with proper 2D tiling | |
 | Codegen overhead (asserts, unnecessary ops) | `torch/_inductor/codegen/triton.py` or `lowering.py` | elide_constant_index_asserts, scalar_acc |
-| Realization too eager | `torch/_inductor/ir.py` (should_realize_on_reuse, realize_hint) | pointwise_e26de fix |
+| Realization blocks fusion | `torch/_inductor/ir.py` (should_realize_on_reuse, realize_hint) + `scheduler.py` | pointwise_e26de, var_mean_5b0c |
+|   | - realize_hint forces materialization before pool/stencil consumers — fix is to allow fusion instead | |
+|   | - The consumer (pool, reduction) should fuse with the producer, not force a buffer round-trip | |
 | Constant folding gap | `torch/fx/passes/` or `torch/_inductor/constant_folding.py` | iota mask elimination |
 
 **How to test a fix:**
