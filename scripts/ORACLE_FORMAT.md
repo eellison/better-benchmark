@@ -54,7 +54,8 @@ because <specific scheduler/codegen/pattern limitation>; the fix is <CLASS>:
 ```
 
 Valid classifications: `SCHEDULER_FUSION`, `SCATTER_REDUCE`,
-`COOPERATIVE_SPLIT_K`, `ALGEBRAIC_ELIMINATION`, `NEW_PATTERN`.
+`COOPERATIVE_SPLIT_K`, `ALGEBRAIC_ELIMINATION`, `RECOMPUTE_FUSION`,
+`BANDWIDTH_BOUND`, `NEW_PATTERN`.
 
 ### 2. Standard Constants
 
@@ -179,8 +180,9 @@ For oracles that predate this format:
 1. Add the gap diagnosis docstring
 2. Replace custom input loading with `get_inputs()` / `_load_repro_module()`
 3. Wrap the core computation in `oracle_forward(inputs)`
-4. Add `run_check` and `run_bench` functions matching the template
-5. Add the standard argparse CLI with `--check` / `--bench`
+4. Copy the standard template `main()` and leave timing delegated to
+   `oracle_harness.bench_oracle()`
+5. Add the standard argparse CLI with `--check` / `--bench` if missing
 6. Verify with: `python oracle_<name>.py --check`
 
 ## Future Enhancement: Shape/Hardware Dispatch Registry
