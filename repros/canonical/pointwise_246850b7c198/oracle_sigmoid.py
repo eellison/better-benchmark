@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: <SCHEDULER_FUSION|SCATTER_REDUCE|COOPERATIVE_SPLIT_K|ALGEBRAIC_ELIMINATION|NEW_PATTERN>): this oracle <specific behavior>, whereas Inductor <specific current behavior>; Inductor cannot do this today because <specific scheduler/codegen/pattern limitation>; the fix is <CLASS>: <specific Inductor change>."""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full contiguous f32 sigmoid as a single purpose-built Triton pointwise kernel over the flattened output tensor, whereas Inductor currently lowers this graph through its generic unary pointwise codegen path for the same full tensor; Inductor cannot do this today because its pattern library does not have a dedicated tiny-contiguous-unary sigmoid lowering that strips the generic pointwise schedule to the minimal kernel shape for this case; the fix is NEW_PATTERN: add a specialized contiguous unary sigmoid pointwise lowering or prove the generic pointwise lowering is already at the hardware floor."""
 from __future__ import annotations
 
 import argparse
@@ -31,7 +31,6 @@ from oracle_harness import (
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
-    get_shape_key,
     has_stochastic_ops,
 )
 
@@ -47,53 +46,52 @@ def get_repro_instance():
 
 
 # --- Oracle kernel(s) ---
-# Replace this section with your optimized Triton kernel(s).
-#
-# Recommended pattern: use @triton.autotune so the kernel auto-selects
-# the best config for each shape encountered via --all-shapes.
-
 if triton is not None:
 
-    @triton.autotune(
-        configs=[
-            triton.Config({"BLOCK_N": 1024}, num_warps=4, num_stages=2),
-            triton.Config({"BLOCK_N": 2048}, num_warps=4, num_stages=2),
-            triton.Config({"BLOCK_N": 4096}, num_warps=8, num_stages=2),
-        ],
-        key=["N"],  # re-tune when N changes
-    )
     @triton.jit
-    def oracle_kernel(
-        # TODO: Define kernel parameters
-        # input_ptr, output_ptr, ...
-        N: tl.constexpr,
-        BLOCK_N: tl.constexpr,
+    def _sigmoid_kernel(
+        input_ptr,
+        output_ptr,
+        n_elements: tl.constexpr,
+        BLOCK_SIZE: tl.constexpr,
     ):
-        """TODO: Implement optimized kernel."""
-        pass
+        pid = tl.program_id(0)
+        offsets = pid * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
+        mask = offsets < n_elements
+        x = tl.load(input_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        y = 1.0 / (1.0 + tl.exp(-x))
+        tl.store(output_ptr + offsets, y, mask=mask)
 
 
 def oracle_forward(inputs):
-    """Run the oracle computation.
+    """Run the full-scope sigmoid oracle for Repro.forward()."""
+    if triton is None:
+        raise RuntimeError("triton is required for oracle_sigmoid.py")
+    if len(inputs) != 1:
+        raise ValueError(f"{REPRO_ID} expects one input, got {len(inputs)}")
 
-    SCOPE INVARIANT: Must accept the same inputs as Repro.forward() and return
-    the same outputs (same count, same shapes, same dtypes, same strides).
+    (x,) = inputs
+    if not isinstance(x, torch.Tensor):
+        raise TypeError(f"{REPRO_ID} input must be a tensor")
+    if x.dtype is not torch.float32:
+        raise ValueError(f"{REPRO_ID} expects f32 input, got {x.dtype}")
+    if not x.is_cuda:
+        raise ValueError(f"{REPRO_ID} expects CUDA input")
+    if not x.is_contiguous():
+        raise ValueError(f"{REPRO_ID} expects the captured contiguous layout")
 
-    Args:
-        inputs: tuple of tensors/values from get_inputs(), identical to what
-                Repro.forward() receives via Repro()(*inputs).
-
-    Returns:
-        Same output structure as Repro()(*inputs).
-    """
-    # TODO: Implement oracle using the Triton kernel(s) above.
-    # Example:
-    #   x = inputs[0]
-    #   output = torch.empty_like(x)
-    #   grid = (x.shape[0],)
-    #   oracle_kernel[grid](x, output, N=x.shape[1], BLOCK_N=8192)
-    #   return output
-    raise NotImplementedError("Replace with oracle implementation")
+    output = torch.empty_like(x)
+    block_size = 256
+    grid = (triton.cdiv(x.numel(), block_size),)
+    _sigmoid_kernel[grid](
+        x,
+        output,
+        n_elements=x.numel(),
+        BLOCK_SIZE=block_size,
+        num_warps=4,
+        num_stages=4,
+    )
+    return output
 
 
 # --- CLI entry point ---
