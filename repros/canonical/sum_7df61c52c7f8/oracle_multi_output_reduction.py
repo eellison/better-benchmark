@@ -56,6 +56,17 @@ import torch
 import triton
 import triton.language as tl
 
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
+
+
 REPRO_ID = "sum_7df61c52c7f8"
 REPRO_DIR = Path(__file__).resolve().parent
 REPO_ROOT = REPRO_DIR.parents[2]
@@ -63,29 +74,6 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 
 
-def _load_repro_module():
-    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-# ---------------------------------------------------------------------------
-# Triton kernel: fused gather-mask-reduce
-#
-# For each channel c, we iterate over (batch, src_h, src_w) = 1024 * 27 * 27
-# = 746,496 source positions. For each source position, we:
-#   1. Compute the destination index using _low_memory_max_pool_offsets_to_indices logic
-#   2. Check the mask at the destination
-#   3. If not masked, accumulate the source value
-#
-# Grid: 2D (channel, tile). Partials are summed in a finalize pass.
-# ---------------------------------------------------------------------------
-
-@triton.jit
 def _fused_scatter_reduce_kernel(
     src_ptr,          # f32[N, C, src_H, src_W] = [1024, 64, 27, 27]
     offsets_ptr,      # i8[N, C, src_H, src_W]
@@ -449,20 +437,89 @@ def parse_args():
     return parser.parse_args()
 
 
+def oracle_forward(inputs):
+    return oracle_fused_scatter_reduce(*inputs)
+
+
 def main():
-    args = parse_args()
-    device = torch.device(args.device)
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
+    args = parser.parse_args()
+
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
 
     if not args.check and not args.bench:
-        args.check = True
+        args.check = args.bench = True
+
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
 
     if args.check:
-        print(f"Correctness check ({REPRO_ID}):")
-        check_correctness(device, rtol=args.rtol, atol=args.atol)
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
 
     if args.bench:
-        print(f"\nBenchmark ({REPRO_ID}):")
-        benchmark_oracle(device, warmup=args.warmup, rep=args.rep)
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":

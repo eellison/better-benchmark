@@ -34,6 +34,7 @@ TODOs for future tightening:
 from __future__ import annotations
 
 import argparse
+import sys
 import csv
 import math
 import subprocess
@@ -53,7 +54,19 @@ except Exception:  # pragma: no cover - keeps --help/direct mode usable without 
     do_bench = None
 
 
+
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
+
 REPRO_ID = "sum_18262b26934c"
+REPRO_DIR = Path(__file__).resolve().parent
 REPRO_PATH = "repros/canonical/sum_18262b26934c/repro.py"
 ORACLE_PATH = "repros/canonical/sum_18262b26934c/oracle_maxpool_direct_reduce.py"
 
@@ -372,77 +385,89 @@ def append_measurement(args: argparse.Namespace, oracle_us: float, correct: str,
     print(f"appended {args.out}")
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Oracle scaffold for sum_18262b26934c maxpool-offset direct reduction")
-    parser.add_argument("--impl", choices=("triton", "pytorch"), default="triton")
-    parser.add_argument("--device", default="cuda")
-    parser.add_argument("--n", type=int, default=512)
-    parser.add_argument("--c", type=int, default=64)
-    parser.add_argument("--oh", type=int, default=55)
-    parser.add_argument("--ow", type=int, default=55)
-    parser.add_argument("--ih", type=int, default=111)
-    parser.add_argument("--iw", type=int, default=111)
-    parser.add_argument("--mask-prob", type=float, default=0.5)
-    parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--block", type=int, default=1024)
-    parser.add_argument("--warps", type=int, default=4)
-    parser.add_argument("--warmup", type=int, default=25)
-    parser.add_argument("--rep", type=int, default=100)
-    parser.add_argument("--check", action="store_true", help="Compare selected implementation against the direct PyTorch reference")
-    parser.add_argument("--literal-check", action="store_true", help="Also compare direct reference against literal scatter reference; use small shapes")
-    parser.add_argument("--skip-bench", action="store_true")
-    parser.add_argument("--no-append", action="store_true")
-    parser.add_argument("--hardware", default="B200")
-    parser.add_argument("--out", type=Path, default=Path("investigation_results/measured_oracle_floors.csv"))
+def oracle_forward(inputs):
+    return triton_direct_oracle(*inputs)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
     args = parser.parse_args()
 
-    if args.device.startswith("cuda") and not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required for default benchmarking; pass --device cpu --impl pytorch --skip-bench for CPU smoke tests")
-    if args.impl == "triton" and triton is None:
-        raise RuntimeError("Triton is unavailable; use --impl pytorch")
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
 
-    torch.manual_seed(args.seed)
-    grad, offsets, mask, full = make_inputs(args)
+    if not args.check and not args.bench:
+        args.check = args.bench = True
 
-    if args.impl == "triton":
-        run = lambda: triton_direct_oracle(grad, offsets, mask, full, block=args.block, warps=args.warps)
-    else:
-        run = lambda: direct_pytorch_reference(grad, offsets, mask, full)
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
 
-    out = run()
-    if grad.is_cuda:
-        torch.cuda.synchronize()
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
 
-    correct = "not_checked"
-    max_abs_diff = math.nan
     if args.check:
-        ref = direct_pytorch_reference(grad, offsets, mask, full)
-        if grad.is_cuda:
-            torch.cuda.synchronize()
-        max_abs_diff = float((out.float() - ref.float()).abs().max().item())
-        correct = str(bool(torch.allclose(out.float(), ref.float(), rtol=1e-4, atol=1e-3)))
-        print(f"correct={correct} max_abs_diff={max_abs_diff:.6g}")
-
-    if args.literal_check:
-        ref_direct = direct_pytorch_reference(grad, offsets, mask, full)
-        ref_literal = repro_equivalent_reference(grad, offsets, mask, full)
-        if grad.is_cuda:
-            torch.cuda.synchronize()
-        literal_diff = float((ref_direct.float() - ref_literal.float()).abs().max().item())
-        literal_ok = bool(torch.allclose(ref_direct.float(), ref_literal.float(), rtol=1e-4, atol=1e-3))
-        print(f"literal_equivalence={literal_ok} literal_max_abs_diff={literal_diff:.6g}")
-
-    oracle_us = math.nan
-    if not args.skip_bench:
-        oracle_us = benchmark_us(run, warmup=args.warmup, rep=args.rep)
-        print(
-            f"oracle_us={oracle_us:.3f} impl={args.impl} "
-            f"shape=N{args.n},C{args.c},OH{args.oh},OW{args.ow},IH{args.ih},IW{args.iw} "
-            f"block={args.block} warps={args.warps}"
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
         )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
 
-    if not args.no_append and not args.skip_bench:
-        append_measurement(args, oracle_us, correct, max_abs_diff)
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":

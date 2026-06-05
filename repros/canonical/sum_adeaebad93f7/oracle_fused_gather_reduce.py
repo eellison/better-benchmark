@@ -30,6 +30,17 @@ from typing import Callable
 import torch
 from torch import device as torch_device
 
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
+
+
 
 REPRO_ID = "sum_adeaebad93f7"
 REPRO_DIR = Path(__file__).resolve().parent
@@ -39,16 +50,6 @@ DEFAULT_CSV = REPO_ROOT / "investigation_results" / "measured_oracle_floors.csv"
 DEFAULT_TIME = 382_788
 INPUT_TIME = 426_888
 MAX_OFFSET = INPUT_TIME - DEFAULT_TIME
-
-
-def _load_repro_module():
-    spec = importlib.util.spec_from_file_location("sum_adeaebad93f7_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
 
 
 def _inductor_random_inputs(
@@ -325,47 +326,89 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    args = parse_args()
-    device = torch.device(args.device)
-    if args.check and args.random_source != "inductor":
-        raise ValueError("--check compares with repro.py and requires --random-source inductor")
+def oracle_forward(inputs):
+    return triton_fused_gather_reduce_oracle(*inputs)
 
-    inputs = make_inputs(device)
-    if args.impl == "torch-fused":
-        oracle_fn = lambda *values: torch_fused_gather_reduce_oracle(
-            *values,
-            random_source=args.random_source,
-            seed=args.seed,
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
+    args = parser.parse_args()
+
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
+
+    if not args.check and not args.bench:
+        args.check = args.bench = True
+
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
+    if args.check:
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
         )
-    else:
-        oracle_fn = triton_fused_gather_reduce_oracle
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
 
-    with torch.no_grad():
-        out = oracle_fn(*inputs)
-        synchronize(device)
-
-        correct = "not_checked"
-        diff = math.nan
-        if args.check:
-            module = _load_repro_module()
-            ref = module.Repro().to(device)(*inputs)
-            synchronize(device)
-            diff = max_abs_diff(out, ref)
-            correct = str(allclose(out, ref, rtol=args.rtol, atol=args.atol))
-            print(f"correct={correct} max_abs_diff={diff:.6g}")
-
-        if args.no_bench:
-            return
-
-        oracle_us = benchmark(lambda: oracle_fn(*inputs), device, args.warmup, args.rep)
-        print(
-            f"oracle_us={oracle_us:.3f} impl={args.impl} device={device} "
-            f"random_source={args.random_source} warmup={args.warmup} rep={args.rep}"
-        )
-
-        if not args.no_append:
-            append_csv(args.out, args.impl, device, oracle_us, correct, diff, args)
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ sum per row, then reduces row sums to a scalar.
 from __future__ import annotations
 
 import argparse
+import sys
 import csv
 import json
 import math
@@ -22,6 +23,21 @@ import torch
 import triton
 import triton.language as tl
 from triton.testing import do_bench
+
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
+
+REPRO_ID = "amax_sum_sum_dc96a87ba8db"
+REPRO_DIR = Path(__file__).resolve().parent
+REPRO_PATH = REPRO_DIR / "repro.py"
+
 
 
 @triton.jit
@@ -96,82 +112,89 @@ def load_baseline_row() -> dict[str, str]:
     return {}
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--rows", type=int, default=8192)
-    parser.add_argument("--cols", type=int, default=262144)
-    parser.add_argument("--block", type=int, default=8192)
-    parser.add_argument("--warps", type=int, default=8)
-    parser.add_argument("--warmup", type=int, default=25)
-    parser.add_argument("--rep", type=int, default=100)
-    parser.add_argument("--check", action="store_true", help="Run an eager correctness check; expensive for the default shape.")
-    parser.add_argument("--out", type=Path, default=Path("investigation_results/measured_oracle_floors.csv"))
+def oracle_forward(inputs):
+    return oracle_softmax_sum(*inputs)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
     args = parser.parse_args()
 
-    torch.manual_seed(0)
-    x = torch.randn((args.rows, args.cols), device="cuda", dtype=torch.bfloat16)
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
 
-    out = oracle_softmax_sum(x, block=args.block, warps=args.warps)
-    torch.cuda.synchronize()
+    if not args.check and not args.bench:
+        args.check = args.bench = True
 
-    correct = "not_checked"
-    max_abs_diff = math.nan
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
     if args.check:
-        ref = eager_ref(x)
-        torch.cuda.synchronize()
-        max_abs_diff = (out.float() - ref.float()).abs().item()
-        correct = str(bool(torch.allclose(out.float(), ref.float(), rtol=1e-2, atol=1e-2)))
-        print(f"correct={correct} oracle={out.item()} ref={ref.item()} max_abs_diff={max_abs_diff}")
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
 
-    def run_oracle():
-        oracle_softmax_sum(x, block=args.block, warps=args.warps)
-
-    oracle_ms = do_bench(run_oracle, warmup=args.warmup, rep=args.rep, return_mode="min")
-    oracle_us = oracle_ms * 1000.0
-    print(f"oracle_us={oracle_us:.3f} rows={args.rows} cols={args.cols} block={args.block} warps={args.warps}")
-
-    baseline = load_baseline_row()
-    best_compile_us = float(baseline.get("best_compile_us", "nan"))
-    memcopy_sol_us = float(baseline.get("memcopy_sol_us", "nan"))
-    total_bytes = int(float(baseline.get("total_bytes", "0") or 0))
-    n_kernels = int(float(baseline.get("n_kernels", "0") or 0))
-
-    row = {
-        "repro_id": "amax_sum_sum_dc96a87ba8db",
-        "repro_path": "repros/canonical/amax_sum_sum_dc96a87ba8db/repro.py",
-        "shape_label": f"{args.rows}x{args.cols}",
-        "family": "online_softmax_cross_entropy",
-        "oracle_impl": "triton_online_softmax_sum_two_stage",
-        "oracle_path": "repros/canonical/amax_sum_sum_dc96a87ba8db/oracle_softmax_sum.py",
-        "hardware": "B200",
-        "device_name": torch.cuda.get_device_name(0),
-        "git_commit": get_git_commit(),
-        "compiled_us": baseline.get("compiled_us", ""),
-        "coord_descent_us": baseline.get("coord_descent_us", ""),
-        "best_compile_us": best_compile_us,
-        "memcopy_sol_us": memcopy_sol_us,
-        "oracle_us": oracle_us,
-        "total_bytes": total_bytes,
-        "n_kernels": n_kernels,
-        "oracle_over_sol": oracle_us / memcopy_sol_us if memcopy_sol_us == memcopy_sol_us else math.nan,
-        "speedup_vs_best_compile": best_compile_us / oracle_us if best_compile_us == best_compile_us else math.nan,
-        "correct": correct,
-        "max_abs_diff": max_abs_diff,
-        "tolerance": "rtol=1e-2,atol=1e-2" if args.check else "not_checked",
-        "n_warmup": args.warmup,
-        "n_rep": args.rep,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "notes": "Oracle avoids materializing full bf16 softmax; exact repro-equivalent scalar sum within bf16 tolerance.",
-    }
-
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    write_header = not args.out.exists()
-    with args.out.open("a", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(row))
-        if write_header:
-            writer.writeheader()
-        writer.writerow(row)
-    print(f"appended {args.out}")
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":

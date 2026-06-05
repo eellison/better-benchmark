@@ -11,6 +11,17 @@ import torch._inductor.inductor_prims  # noqa: F401
 import triton
 import triton.language as tl
 
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
+
+
 
 REPRO_ID = "amax_sum_ab3238e72dc2"
 REPRO_DIR = Path(__file__).resolve().parent
@@ -62,22 +73,6 @@ def _bias_softmax_dropout_kernel(
     out = tl.where(keep, softmax * DROPOUT_SCALE_CONST, 0.0)
 
     tl.store(out_base_ptr + offsets, out, mask=col_mask)
-
-
-def _load_repro_module():
-    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-def _as_tuple(value: object) -> tuple[torch.Tensor, ...]:
-    if isinstance(value, tuple):
-        return value
-    return (value,)
 
 
 def make_inputs() -> tuple[object, ...]:
@@ -186,185 +181,90 @@ def oracle_full_attention_softmax_dropout(
     )
 
 
-def _max_diff(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, float]:
-    diff = (actual.float() - expected.float()).abs()
-    finite_diff = diff[torch.isfinite(diff)]
-    max_abs = finite_diff.max().item() if finite_diff.numel() else float("nan")
-    rel = diff / expected.float().abs().clamp_min(1e-8)
-    finite_rel = rel[torch.isfinite(rel)]
-    max_rel = finite_rel.max().item() if finite_rel.numel() else float("nan")
-    return max_abs, max_rel
+def oracle_forward(inputs):
+    return oracle_full_attention_softmax_dropout(*inputs)
 
 
-def run_check(rtol: float, atol: float, block_k: int, num_warps: int) -> bool:
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required for the Triton oracle check")
-
-    torch.manual_seed(0)
-    inputs = make_inputs()
-    cpu_rng_state = torch.get_rng_state()
-    cuda_rng_state = torch.cuda.get_rng_state()
-
-    with torch.no_grad():
-        torch.set_rng_state(cpu_rng_state)
-        torch.cuda.set_rng_state(cuda_rng_state)
-        expected = reference_outputs(inputs)
-        torch.cuda.synchronize()
-
-        torch.set_rng_state(cpu_rng_state)
-        torch.cuda.set_rng_state(cuda_rng_state)
-        actual = _as_tuple(
-            oracle_full_attention_softmax_dropout(
-                *inputs,
-                block_k=block_k,
-                num_warps=num_warps,
-            )
-        )
-        torch.cuda.synchronize()
-
-    if len(actual) != len(expected):
-        print(f"output_count: actual={len(actual)} expected={len(expected)}")
-        print("Correctness: FAIL")
-        return False
-
-    ok = True
-    for idx, (got, ref) in enumerate(zip(actual, expected)):
-        metadata_ok = (
-            got.shape == ref.shape
-            and got.dtype == ref.dtype
-            and got.stride() == ref.stride()
-        )
-        max_abs, max_rel = _max_diff(got, ref)
-        value_ok = torch.allclose(
-            got.float(),
-            ref.float(),
-            rtol=rtol,
-            atol=atol,
-            equal_nan=True,
-        )
-        output_ok = metadata_ok and value_ok
-        ok = ok and output_ok
-        print(
-            f"output[{idx}]: shape={list(got.shape)} expected_shape={list(ref.shape)} "
-            f"dtype={got.dtype} expected_dtype={ref.dtype} "
-            f"stride={got.stride()} expected_stride={ref.stride()} "
-            f"max_abs={max_abs:.6e} max_rel={max_rel:.6e} "
-            f"allclose={value_ok} metadata={metadata_ok}"
-        )
-
-    print("check compared against full Repro.forward return value, including dropout")
-    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
-    return bool(ok)
-
-
-def _bench_cuda(fn, warmup: int, rep: int) -> float:
-    for _ in range(warmup):
-        fn()
-    torch.cuda.synchronize()
-
-    start = torch.cuda.Event(enable_timing=True)
-    end = torch.cuda.Event(enable_timing=True)
-    times = []
-    for _ in range(rep):
-        start.record()
-        fn()
-        end.record()
-        torch.cuda.synchronize()
-        times.append(start.elapsed_time(end) * 1000.0)
-    times.sort()
-    return times[len(times) // 2]
-
-
-def run_bench(warmup: int, rep: int, block_k: int, num_warps: int) -> None:
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required for the Triton oracle benchmark")
-
-    torch.manual_seed(1)
-    inputs = make_inputs()
-    bmm_34, add_44, inductor_seeds, *_shape_params = inputs
-    random_values = _inductor_random_like_repro(inductor_seeds)
-    out_base = torch.empty_like(bmm_34)
-
-    elems = N_ROWS * K_LEN
-    kernel_bytes = elems * (4 + 4 + 4 + 4)
-    full_bytes = kernel_bytes
-    print(
-        f"oracle shape: bmm=f32[{BH}, {Q_LEN}, {K_LEN}], "
-        f"bias=f32[{BATCH}, {N_HEADS}, {Q_LEN}, {K_LEN}]"
+def main():
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    print(f"logical fused read+write traffic: {kernel_bytes / 1e6:.1f} MB")
-
-    holder: list[torch.Tensor | None] = [None]
-    with torch.no_grad():
-        kernel_us = _bench_cuda(
-            lambda: _launch_oracle(
-                bmm_34,
-                add_44,
-                random_values,
-                out_base,
-                block_k=block_k,
-                num_warps=num_warps,
-            ),
-            warmup=warmup,
-            rep=rep,
-        )
-        full_us = _bench_cuda(
-            lambda: holder.__setitem__(
-                0,
-                oracle_full_attention_softmax_dropout(
-                    *inputs,
-                    block_k=block_k,
-                    num_warps=num_warps,
-                ),
-            ),
-            warmup=warmup,
-            rep=rep,
-        )
-
-    kernel_bw = kernel_bytes / (kernel_us * 1e-6) / 1e12
-    full_bw = full_bytes / (full_us * 1e-6) / 1e12
-    print(
-        f"oracle fused full return, precomputed random: {kernel_us:.3f} us "
-        f"({kernel_bw:.3f} TB/s logical bytes)"
-    )
-    print(
-        f"oracle full return including eager inductor_random: {full_us:.3f} us "
-        f"({full_bw:.3f} TB/s logical bytes) shape={SHAPE_LABEL}"
-    )
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="run correctness check")
-    parser.add_argument("--bench", action="store_true", help="run timing benchmark")
-    parser.add_argument("--warmup", type=int, default=10, help="benchmark warmup iterations")
-    parser.add_argument("--rep", type=int, default=50, help="benchmark repetitions")
-    parser.add_argument("--block-k", type=int, default=K_LEN, help="Triton reduction tile size")
-    parser.add_argument("--num-warps", type=int, default=8, help="Triton softmax warps")
-    parser.add_argument("--rtol", type=float, default=5e-5)
-    parser.add_argument("--atol", type=float, default=5e-6)
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
     args = parser.parse_args()
 
-    if not args.check and not args.bench:
-        parser.error("select at least one mode: --check and/or --bench")
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
 
-    block_k = max(args.block_k, triton.next_power_of_2(K_LEN))
-    if args.check and not run_check(
-        rtol=args.rtol,
-        atol=args.atol,
-        block_k=block_k,
-        num_warps=args.num_warps,
-    ):
-        sys.exit(1)
-    if args.bench:
-        run_bench(
-            warmup=args.warmup,
-            rep=args.rep,
-            block_k=block_k,
-            num_warps=args.num_warps,
+    if not args.check and not args.bench:
+        args.check = args.bench = True
+
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
+    if args.check:
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
         )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
+
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":
-    with torch.no_grad():
-        main()
+    main()

@@ -40,6 +40,17 @@ import triton
 import triton.language as tl
 from triton.testing import do_bench
 
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
+
+
 
 REPRO_ID = "amax_sum_f0661488d68c"
 REPRO_DIR = Path(__file__).resolve().parent
@@ -334,87 +345,6 @@ def benchmark_compiled(logits, labels, warmup=25, rep=100):
     return benchmark_cuda_graph(run, warmup=warmup, rep=rep)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Oracle cross-entropy forward benchmark")
-    parser.add_argument("--check-only", action="store_true", help="Only run correctness check")
-    parser.add_argument("--rep", type=int, default=100, help="Number of benchmark repetitions")
-    parser.add_argument("--warmup", type=int, default=25, help="Number of warmup iterations")
-    parser.add_argument("--block-n", type=int, default=4096, help="Tile size for reduction")
-    parser.add_argument("--num-warps", type=int, default=8, help="Number of warps")
-    parser.add_argument("--no-compile", action="store_true", help="Skip torch.compile baseline")
-    parser.add_argument("--csv", type=str, default=None, help="Append results to CSV file")
-    args = parser.parse_args()
-
-    print("=" * 70)
-    print(f"Oracle Cross-Entropy Forward Benchmark: {REPRO_ID}")
-    print(f"Shape: bf16[{M}, {N}] logits + i64[{M}] labels -> bf16[{M}] loss")
-    print("=" * 70)
-
-    # Compute memory metrics - single pass, read-only dominated
-    read_bytes = M * N * 2 + M * 8  # bf16 logits + i64 labels
-    write_bytes = M * 2             # bf16 output
-    total_bytes = read_bytes + write_bytes
-    sol_us = total_bytes / 3.8e6
-    print(f"\nMemory traffic (single pass):")
-    print(f"  Read:  {read_bytes / 1e9:.4f} GB (logits) + {M * 8 / 1e6:.3f} MB (labels)")
-    print(f"  Write: {write_bytes / 1e6:.3f} MB")
-    print(f"  Total: {total_bytes / 1e9:.4f} GB")
-    print(f"  SOL (3.8 TB/s): {sol_us:.1f} us")
-    print(f"\n  NOTE: This is 1-pass (read logits once). The stash baseline reads 2x (2-pass).")
-
-    # Correctness
-    print(f"\n--- Correctness ---")
-    ok = correctness_check()
-    if not ok:
-        print("FAILED correctness check. Exiting.")
-        sys.exit(1)
-    print("PASSED")
-
-    if args.check_only:
-        return
-
-    # Benchmark
-    print(f"\n--- Benchmark (rep={args.rep}, warmup={args.warmup}, BLOCK_N={args.block_n}) ---")
-    torch.manual_seed(42)
-    logits = torch.randn(M, N, dtype=torch.bfloat16, device="cuda")
-    labels = torch.randint(0, N, (M,), dtype=torch.int64, device="cuda")
-
-    # Oracle
-    oracle_us = benchmark_oracle(logits, labels, block_n=args.block_n,
-                                  num_warps=args.num_warps, warmup=args.warmup, rep=args.rep)
-    oracle_bw = total_bytes / (oracle_us * 1e-6) / 1e12  # TB/s
-    oracle_pct_sol = sol_us / oracle_us * 100.0
-    print(f"\nOracle (single-pass fused cross-entropy):")
-    print(f"  Median: {oracle_us:.1f} us")
-    print(f"  Effective BW: {oracle_bw:.3f} TB/s")
-    print(f"  % of SOL: {oracle_pct_sol:.1f}%")
-
-    # torch.compile baseline
-    compile_us = None
-    if not args.no_compile:
-        print(f"\nRunning torch.compile baseline...")
-        compile_us = benchmark_compiled(logits, labels, warmup=args.warmup, rep=args.rep)
-        compile_bw = total_bytes / (compile_us * 1e-6) / 1e12
-        print(f"torch.compile:")
-        print(f"  Median: {compile_us:.1f} us")
-        print(f"  Effective BW (vs single-pass bytes): {compile_bw:.3f} TB/s")
-        speedup = compile_us / oracle_us
-        print(f"\nSpeedup (compile / oracle): {speedup:.2f}x")
-
-    # Summary
-    print(f"\n--- Summary ---")
-    print(f"  Oracle (1-pass fused XE fwd): {oracle_us:.1f} us")
-    if compile_us:
-        print(f"  Baseline (torch.compile):     {compile_us:.1f} us")
-    print(f"  SOL (single-pass):            {sol_us:.1f} us")
-    print(f"  Oracle achieves {oracle_pct_sol:.1f}% of single-pass SOL")
-
-    # Write CSV if requested
-    csv_path = Path(args.csv) if args.csv else DEFAULT_CSV
-    if args.csv is not None:
-        _write_csv(csv_path, oracle_us, compile_us, total_bytes, args)
-
-
 def _write_csv(csv_path: Path, oracle_us: float, compile_us: float | None, total_bytes: int, args):
     """Append measurement to CSV."""
     csv_path.parent.mkdir(parents=True, exist_ok=True)
@@ -455,6 +385,90 @@ def _write_csv(csv_path: Path, oracle_us: float, compile_us: float | None, total
     print(f"\nResults appended to {csv_path}")
 
 
+def oracle_forward(inputs):
+    return oracle_cross_entropy_fwd(*inputs)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
+    args = parser.parse_args()
+
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
+
+    if not args.check and not args.bench:
+        args.check = args.bench = True
+
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
+    if args.check:
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
+
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
+
+
 if __name__ == "__main__":
-    with torch.no_grad():
-        main()
+    main()

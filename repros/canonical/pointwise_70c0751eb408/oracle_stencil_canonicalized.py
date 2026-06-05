@@ -38,6 +38,17 @@ from typing import Any, Callable, Iterable
 
 import torch
 
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
+
+
 
 REPRO_ID = "pointwise_70c0751eb408"
 FAMILY = "layout_indexing_stencil_fusion"
@@ -117,16 +128,6 @@ TODO for --impl triton-explicit-offsets:
 - Validate against torch_direct_oracle with f64 tolerances before appending a
   measured floor row.
 """.strip()
-
-
-def _load_repro_module():
-    spec = importlib.util.spec_from_file_location("pointwise_70c0751eb408_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
 
 
 def clone_mutated_inputs(inputs: Iterable[Any]) -> list[Any]:
@@ -304,51 +305,89 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    args = parse_args()
+def oracle_forward(inputs):
+    return triton_explicit_offsets_oracle(*inputs)
 
-    if args.print_plan:
-        print(CANONICALIZATION_NOTES)
-        print("\nInterior regions:")
-        for region in INTERIOR_REGIONS:
-            print(f"- {region.label()}")
-        print("\n" + TRITON_EXPLICIT_OFFSET_TODO)
 
-    if not args.check and not args.benchmark:
+def main():
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
+    args = parser.parse_args()
+
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
         return
 
-    if args.device == "cuda" and not torch.cuda.is_available():
-        raise RuntimeError("CUDA is required to run this repro/oracle")
+    if not args.check and not args.bench:
+        args.check = args.bench = True
 
-    inputs = load_inputs(args.device)
-    oracle_fn: Callable[..., tuple[Any, ...]]
-    if args.impl == "torch-direct":
-        oracle_fn = torch_direct_oracle
-    else:
-        oracle_fn = triton_explicit_offsets_oracle
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
 
-    correct = "not_checked"
-    max_abs_diff = math.nan
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
     if args.check:
-        reference = torch_direct_oracle(*inputs)
-        candidate = oracle_fn(*inputs)
-        if torch.cuda.is_available():
-            torch.cuda.synchronize()
-        is_correct, max_abs_diff = compare_outputs(candidate, reference, args.rtol, args.atol)
-        correct = str(bool(is_correct))
-        print(
-            f"correct={correct} max_abs_diff={max_abs_diff} "
-            f"outputs={len(candidate)} fingerprint={output_fingerprint(candidate)}"
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
         )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
 
-    oracle_us = math.nan
-    if args.benchmark:
-        oracle_us = benchmark(lambda: oracle_fn(*inputs), args.warmup, args.rep)
-        device_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
-        print(f"oracle_us={oracle_us:.3f} impl={args.impl} device={device_name} warmup={args.warmup} rep={args.rep}")
-        if args.append:
-            append_csv(args.out, args.impl, device_name, oracle_us, correct, max_abs_diff, args)
-            print(f"appended {args.out}")
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":
