@@ -96,6 +96,7 @@ The pytorch working tree is at `/tmp/pytorch-work` on branch `pr-184905`.
 | Tiling/recomputation (per-channel ops in fused kernel) | `torch/_inductor/codegen/triton.py`, `triton_heuristics.py` | pointwise_bc30 (BN coefficients) |
 |   | - When per-channel ops (rsqrt) are fused into a [N,C,H,W] kernel, tile by channel so they're computed once per tile, not N×H×W times | |
 |   | - Fix is in tiling strategy, not fusion decision — we WANT to fuse, just with proper 2D tiling | |
+|   | - This is also true for realization ! where possible, we want to fix in the scheduler
 | Codegen overhead (asserts, unnecessary ops) | `torch/_inductor/codegen/triton.py` or `lowering.py` | elide_constant_index_asserts, scalar_acc |
 | Realization blocks fusion | `torch/_inductor/ir.py` (should_realize_on_reuse, realize_hint) + `scheduler.py` | pointwise_e26de, var_mean_5b0c |
 |   | - realize_hint forces materialization before pool/stencil consumers — fix is to allow fusion instead | |
