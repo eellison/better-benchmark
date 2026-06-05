@@ -1,18 +1,4 @@
-"""
-Full-scope oracle for pointwise_724b26e60185.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the exact
-`full([2], 0.0) -> cat([arg204_1, full])` scope in one Triton kernel by writing
-the fresh contiguous `float32[30524]` result directly, copying the `float32[30522]`
-input prefix and storing two trailing zeros, whereas Inductor must also
-materialize the same fresh output for this isolated tiny concat graph. Inductor
-cannot remove that launch, allocation, input read, or output store today because
-the repro has no producer/consumer context to fuse with and `aten.cat` returns a
-new dense tensor; the fixing classification is BANDWIDTH_BOUND: no scheduler,
-scatter, split-K, algebraic, or recompute transformation is indicated beyond
-reducing generic launch/materialization overhead or fusing this cat with
-surrounding graph context outside the captured repro.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle materializes the full `full([2], 0.0) -> cat([arg204_1, full])` repro by copying the contiguous `float32[30522]` prefix and writing the two zero tail elements in one dedicated cat-with-constant-tail Triton kernel, whereas Inductor currently emits a generic pointwise fused_cat_full kernel over the concatenated index space with per-element range predicates, a masked input load, `tl.where` source muxing, and constant-zero fallback; Inductor cannot do this today because cat lowering goes through generic pointwise index codegen and has no segment-aware template for fixed concat of one contiguous tensor with a tiny constant full tail; the fix is NEW_PATTERN: add a fixed-segment cat/full materialization template that emits direct contiguous prefix copies plus constant tail stores without per-element source mux logic."""
 from __future__ import annotations
 
 import argparse
@@ -40,7 +26,7 @@ OUT_STRIDE = (1,)
 DTYPE = torch.float32
 BLOCK_N = 512
 NUM_WARPS = 4
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "NEW_PATTERN"
 
 
 from oracle_harness import (  # noqa: E402

@@ -1,24 +1,10 @@
-"""
-Oracle for sum_f72e20801b8a
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the full
-`view(mm_9, [128, 1, 768]).sum(dim=0, keepdim=True)` scope with one
-shape-specialized Triton column-reduction kernel that writes the final
-contiguous `f32[1, 1, 768]` output directly, whereas Inductor already lowers
-the metadata-only view and reduction into a single compiled reduction for this
-tiny 0.39 MB workload; Inductor cannot expose a scheduler-fusion,
-scatter-reduce, cooperative split-K, algebraic-elimination, recompute-fusion,
-or new-pattern opportunity because the remaining work is just the required
-input read, f32 accumulation, output store, and one GPU launch; the fix is
-BANDWIDTH_BOUND: only generic small-reduction launch/codegen overhead
-reductions would improve both paths, so this file is a diagnosis artifact
-unless the full-scope Triton kernel beats the required tuned Inductor configs.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full `view(mm_9, [128, 1, 768]).sum(dim=0, keepdim=True)` scope with one shape-specialized Triton column-reduction kernel that writes the final contiguous `f32[1, 1, 768]` output directly, whereas Inductor currently lowers the metadata-only view and small static dim-0 reduction through its generic reduction codegen path; Inductor cannot do this today because scheduler/codegen has no dedicated fixed-extent column-reduction template for 128-row reductions that preserves the keepdim view layout and emits a compact column tile; the fix is NEW_PATTERN: add a small-static dim-0 column-reduction template that collapses metadata views and writes the keepdim output layout directly."""
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 import torch
 
@@ -33,6 +19,7 @@ except ImportError:
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
+CLASSIFICATION = "NEW_PATTERN"
 
 
 from oracle_harness import (  # noqa: E402
@@ -97,7 +84,7 @@ if triton is not None:
         tl.store(out_ptr + cols, totals, mask=cols < N_)
 
 
-def _validate_inputs(inputs):
+def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     if len(inputs) != 2:
         raise ValueError(f"expected 2 inputs, got {len(inputs)}")
 
@@ -110,13 +97,15 @@ def _validate_inputs(inputs):
         raise ValueError(f"mm_9 must be float32, got {mm_9.dtype}")
     if tuple(mm_9.shape) != (M, N):
         raise ValueError(f"mm_9 has unexpected shape {tuple(mm_9.shape)}")
+    if not mm_9.is_contiguous():
+        raise ValueError(f"mm_9 must be contiguous for aten.view semantics, got stride={mm_9.stride()}")
     if tuple(shape_param) != VIEW_SHAPE:
         raise ValueError(f"shape_param has unexpected value {shape_param!r}")
 
     return mm_9
 
 
-def oracle_forward(inputs):
+def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full-scope oracle computation.
 
     The captured graph views `mm_9` as `f32[128, 1, 768]`, reduces dim 0 with
@@ -128,8 +117,6 @@ def oracle_forward(inputs):
         raise RuntimeError("Triton is required for oracle_sum.py")
 
     mm_9 = _validate_inputs(inputs)
-    if not mm_9.is_contiguous():
-        mm_9 = mm_9.contiguous()
 
     out = torch.empty_strided(OUTPUT_SHAPE, OUTPUT_STRIDE, device=mm_9.device, dtype=mm_9.dtype)
     block_m = triton.next_power_of_2(M)

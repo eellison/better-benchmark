@@ -1,19 +1,4 @@
-"""
-Oracle for sum_dc057cf6da21
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the full
-`reshape(mm_10, [128, 1, 768]).sum(dim=0, keepdim=True)` scope with one
-shape-specialized Triton column-reduction kernel that writes the final
-contiguous `f32[1, 1, 768]` output directly, whereas Inductor already lowers
-the reshape view and reduction into a single compiled reduction for this tiny
-0.39 MB workload; Inductor cannot expose a distinct scheduler-fusion,
-scatter-reduce, cooperative split-K, algebraic-elimination, or recompute-fusion
-opportunity because the remaining work is the required input read, f32
-accumulation, output store, and one GPU launch; the fix is BANDWIDTH_BOUND:
-only generic small-reduction launch/codegen overhead reductions would improve
-both paths, so this file should be treated as canonical only if the full-scope
-Triton kernel beats the required tuned Inductor configs.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full `reshape(mm_10, [128, 1, 768]).sum(dim=0, keepdim=True)` scope with one shape-specialized Triton column-reduction kernel that writes the final contiguous f32[1, 1, 768] output directly, whereas Inductor currently lowers the metadata-only reshape and short dim-0 keepdim reduction through its generic reduction codegen path; Inductor cannot do this today because scheduler/codegen has no dedicated small-static-column-reduction template for this fixed 128-row extent and contiguous keepdim output layout; the fix is NEW_PATTERN: add a guarded fixed-extent dim-0 column-reduction template that emits a direct column tile for this reshape-preserving reduction."""
 from __future__ import annotations
 
 import argparse

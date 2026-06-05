@@ -1,17 +1,4 @@
-"""
-Full-scope oracle for pointwise_b43349159514.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle materializes the exact
-`cat([arg6_1, full([7], 0, f16)])` result with one Triton kernel that copies the
-contiguous f16[50265] input segment and fills the seven-element zero tail
-directly into the returned contiguous f16[50272] layout. The tuned Inductor
-harness compile path already beats this timed copy/fill artifact, and the
-required interleaved compile configs are in the same one-launch materialization
-range for about 200 KiB of input/output traffic. Inductor cannot materially do
-less work without removing the required fresh output allocation, launch, or
-copy/store traffic; the fix is BANDWIDTH_BOUND: no scheduler, scatter-reduce,
-split-K, algebraic, recompute, or new-pattern compiler change is indicated.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full `full([7], 0.0, dtype=f16) -> cat([arg6_1, full])` Repro.forward scope in one Triton materialization kernel by allocating the fresh contiguous f16[50272] output, copying the f16[50265] input prefix, and storing the seven constant-zero tail elements directly, whereas Inductor currently lowers the isolated full-plus-cat graph through its generic cat materialization path for the same dense output; Inductor cannot do this today because cat lowering does not have a segment-aware constant-tail template for fixed small concat suffixes and instead relies on general pointwise/cat scheduling machinery; the fix is NEW_PATTERN: add a guarded cat-with-constant-tail materialization template for fixed dense cats with a tiny constant suffix."""
 from __future__ import annotations
 
 import argparse
@@ -37,7 +24,7 @@ TAIL_N = 7
 OUT_N = IN_N + TAIL_N
 OUT_SHAPE = (OUT_N,)
 OUT_STRIDE = (1,)
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "NEW_PATTERN"
 
 
 from oracle_harness import (  # noqa: E402
