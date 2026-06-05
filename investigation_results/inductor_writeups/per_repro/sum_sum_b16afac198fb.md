@@ -1,37 +1,38 @@
-# sum_sum_b16afac198fb
+# sum_sum_b16afac198fb Investigation
 
-## Queue Position
+## Summary
+- **Model**: torchbench_densenet121_train_001
+- **Ratio**: 1.796x (oracle: 122.24us, compile: 219.58us)
+- **Classification**: SCHEDULER_FUSION
 
-- Rank: 202
-- Family: `multi_output_reduction_templates`
-- Owner: `Codex-bn-slice`
-- Closure status: `inductor_gap_writeup_ready`
-- Oracle status: `true_oracle_measured`
+## Root Cause
 
-## Current Gap
+DenseNet BN-backward tail pattern. The oracle fuses:
+1. ReLU-mask `where` application
+2. Channel centering (sub mean)
+3. Two sibling channel reductions (sum of masked values, sum of masked*centered values)
+4. Only materializes the returned slice channels 224:255 of the BN-backward pointwise epilogue
 
-- Best compile from queue: `222.9440063238144 us`
-- Memcopy SOL: `96.44799679517746 us`
-- Launch-adjusted SOL gap: `2.241814953628364x`
-- Oracle path: `repros/canonical/sum_sum_b16afac198fb/oracle_multi_output_reduction.py`
-- Measured oracle: `204.672 us`
+Inductor cannot form a full-scope multi-output reduction template that shares the masked/centered producer across different reduction expressions and sinks the downstream slice so only returned channels are materialized.
 
-## Oracle State
+Shape: [64, 256, 56, 56] with reduction over [0, 2, 3] (200704 elements per channel). Only 256 channels means only 256 thread blocks in Inductor's approach.
 
-- Full-scope oracle passes `--check`.
-- Benchmark command: `python repros/canonical/sum_sum_b16afac198fb/oracle_multi_output_reduction.py --bench --warmup 10 --rep 50`.
-- Measured timings: oracle `204.672 us`, `coordinate_descent_tuning=True` compile `405.536 us`, combo-looped-CD compile `403.424 us`.
+## Kernel Count
+- **Oracle**: 3 kernels (split-K partial reduce, finalize stats, write sliced output)
+- **Inductor**: 1 kernel with 256 blocks, massive per-block reduction
 
-## Gap Diagnosis
+## Config Exploration
+Same as sum_sum_67d7103962e7 - combo_kernels and coordinate_descent_tuning already enabled but the issue is reduction parallelism and multi-output scheduling.
 
-The oracle consumes the original repro inputs, fuses the ReLU mask, centered producer, sibling channel reductions, and slice-limited BN-backward epilogue, and materializes only the returned `[64, 32, 56, 56]` channel slice plus the `[256]` reduction vector. Inductor currently schedules the sibling reductions, dependent pointwise epilogue, and final channel slice as ordinary graph regions, so it cannot share the masked producer while also sinking the epilogue materialization to the live slice. Classification: `SCHEDULER_FUSION`.
+## Key Files
+- `/tmp/pytorch-work/torch/_inductor/scheduler.py` - multi-output reduction fusion
+- `/tmp/pytorch-work/torch/_inductor/choices.py` - cooperative reduction threshold
 
-## Inductor Closure Path
+## Design Doc
 
-- Implementation track: Multi-output reduction fusion with dependent slice-limited epilogue.
-- Candidate hook: Let the scheduler form a full-scope multi-output reduction template for compatible sibling reductions, then sink the epilogue materialization to the returned channel slice.
-- Benchmark policy: compare default, `coordinate_descent_tuning=True`, forced persistent combo, and forced looped combo; gate on exact BN-backward shape if sibling regressions appear.
+Same family as sum_sum_67d7103962e7. With 256 channels and 200,704 elements per channel reduction, Inductor gets reasonable but not optimal parallelism. The oracle additionally exploits the slice-limited output (only channels 224:255 of the full [64,256,56,56] result are returned), avoiding computation and memory writes for 224 unused channels in the epilogue.
 
-## Done Criteria
-
-- Inductor path reaches the full-scope oracle or has a measured, gated implementation plan with regression guardrails.
+Fix requires:
+1. Cooperative split-K for the reduction phase
+2. Multi-output reduction template for sibling reductions sharing a producer
+3. Slice-aware epilogue generation (skip channels not in the returned slice)
