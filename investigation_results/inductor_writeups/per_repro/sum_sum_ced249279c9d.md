@@ -117,3 +117,7 @@ The 2.29x gap has two components:
 2. **Split factor (10 vs ~756)**: The remaining ~2x gap after fusion requires improving the split-reduction heuristic to use more parallelism for small-numel large-rnumel cases.
 
 Both fixes are in the scheduler/heuristic layer; no custom Triton kernels needed.
+
+## Current Status
+
+Fix 1 is implemented in pytorch branch `pr-184905` (commit `2b35f4ee83a`). With the fix, the gap is reduced from 2.29x to 1.88x (oracle=189us, compile=356us). Fix 2 (split-reduction factor improvement) remains as future work to close the remaining gap.
