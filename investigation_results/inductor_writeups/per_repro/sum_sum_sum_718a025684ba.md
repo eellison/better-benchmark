@@ -34,7 +34,9 @@ Inductor emits a single combo kernel with only 80+40=120 thread blocks, each red
 ## Config Exploration
 - `combo_kernels=True`: Already enabled, produces the combo kernel with 120 blocks
 - `coordinate_descent_tuning=True`: Already enabled, helps with block sizes but cannot fix the parallelism gap
-- `triton.multi_kernel=1/2/3`: Does not help; the issue is structural (not enough blocks)
+- `triton.multi_kernel=2`: 128.15us (improved from 154.53us default, but still 1.67x vs oracle 76.54us)
+- `triton.multi_kernel=3`: 128.22us (same as multi_kernel=2)
+- Best config (multi_kernel=2) still leaves a 1.67x gap because the fundamental issue is SM underutilization with 120 blocks
 
 ## Design Doc
 
