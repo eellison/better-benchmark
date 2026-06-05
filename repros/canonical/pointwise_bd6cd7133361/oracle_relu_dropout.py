@@ -1,17 +1,20 @@
-"""Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the complete GhostNet head pointwise region from Repro.forward in one Triton pass, including f32[512,1280,1,1] ReLU, reshape to f32[512,1280], Inductor-style tl.rand(seed, flat_offset) dropout with threshold > 0.2 and scale 1.25, and the bool le(relu <= 0) output, whereas Inductor already lowers this as a simple fused pointwise random/dropout kernel plus the same deterministic mask work; the remaining difference is dominated by reading the input and writing one fp32 plus one bool output, so the fix is BANDWIDTH_BOUND. Because Repro.forward creates its random seed internally, this file validates exact Inductor RNG semantics for a supplied seed and uses a scoped stochastic-domain check for the full repro, so its benchmark is diagnosis-only rather than a true canonical floor against eager RNG semantics."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete GhostNet head pointwise scope in one Triton pass, including f32[512,1280,1,1] ReLU, reshape to f32[512,1280], Inductor random dropout with threshold > 0.2 and scale 1.25, and the bool le(relu <= 0) side output, whereas Inductor currently lowers the same stochastic pointwise graph through its generic random/dropout pointwise schedule with internal seed generation and generic multi-output indexing; Inductor cannot do this today because scheduler/codegen does not specialize this fixed contiguous ReLU/dropout/le sibling-output pattern into a single shape-specific stochastic pointwise template whose RNG offsets and output layouts are known statically; the fix is SCHEDULER_FUSION: add a guarded pointwise scheduler path that recognizes fixed-layout ReLU feeding both dropout and le, fuses the stochastic epilogue and bool side output, and emits the direct flat-index Triton loop. Exact stochastic equality against eager Repro.forward cannot be established because Repro.forward creates the Inductor dropout seed internally, so this oracle is diagnostic/not_true_floor and relies on the harness stochastic-output skip for the dropout tensor."""
 from __future__ import annotations
 
 import argparse
-import importlib.util
-import json
 import sys
 from pathlib import Path
-from typing import Any, Callable
+from typing import Sequence
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
-import triton
-import triton.language as tl
+
+try:
+    import triton
+    import triton.language as tl
+except ImportError:
+    triton = None
+    tl = None
 
 from oracle_harness import (
     bench_oracle,
@@ -26,7 +29,6 @@ from oracle_harness import (
 
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 BATCH = 512
@@ -35,120 +37,44 @@ N_ELEMENTS = BATCH * CHANNELS
 INPUT_SHAPE = (BATCH, CHANNELS, 1, 1)
 DROPOUT_SHAPE = (BATCH, CHANNELS)
 LE_SHAPE = (BATCH, CHANNELS, 1, 1)
+CONTIGUOUS_4D_STRIDE = (CHANNELS, 1, 1, 1)
 DROP_THRESHOLD = 0.2
 DROP_SCALE = 1.25
-CLASSIFICATION = "BANDWIDTH_BOUND"
-FULL_SCOPE_EXACT_RNG = False
-
-DEFAULT_BLOCK = 256
-DEFAULT_NUM_WARPS = 4
-
-COMPILE_CONFIGS = [
-    ("coordinate_descent_tuning=True", {"coordinate_descent_tuning": True}),
-    (
-        "combo_kernels=True,combo_kernel_per_subkernel_blocks=True,"
-        "coordinate_descent_tuning=True,benchmark_combo_kernel=True,"
-        "triton.multi_kernel=3",
-        {
-            "combo_kernels": True,
-            "combo_kernel_per_subkernel_blocks": True,
-            "coordinate_descent_tuning": True,
-            "benchmark_combo_kernel": True,
-            "triton.multi_kernel": 3,
-        },
-    ),
-]
+BLOCK_SIZE = 1024
+NUM_WARPS = 4
+CLASSIFICATION = "SCHEDULER_FUSION"
+TRUE_FLOOR = False
 
 
-@triton.jit
-def _relu_dropout_le_kernel(
-    input_ptr,
-    seeds_ptr,
-    dropout_ptr,
-    le_ptr,
-    n_elements: tl.constexpr,
-    block_size: tl.constexpr,
-    drop_threshold: tl.constexpr,
-    drop_scale: tl.constexpr,
-):
-    offsets = tl.program_id(0) * block_size + tl.arange(0, block_size)
-    mask = offsets < n_elements
-
-    x = tl.load(input_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    relu = tl.where(x < 0.0, 0.0, x)
-
-    seed = tl.load(seeds_ptr)
-    random = tl.rand(seed, offsets.to(tl.uint32))
-    keep = random > drop_threshold
-    dropout = relu * keep.to(tl.float32) * drop_scale
-
-    tl.store(dropout_ptr + offsets, dropout, mask=mask)
-    tl.store(le_ptr + offsets, relu <= 0.0, mask=mask)
+def get_inputs():
+    """Load inputs from the repro's make_inputs."""
+    return _harness_get_inputs(REPRO_DIR)
 
 
-def _load_repro_module() -> Any:
-    if str(REPO_ROOT) not in sys.path:
-        sys.path.insert(0, str(REPO_ROOT))
-    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+def get_repro_instance():
+    """Create a Repro() instance for reference comparison."""
+    return _harness_get_repro_instance(REPRO_DIR)
 
 
-def _as_tuple(value: object) -> tuple[object, ...]:
-    if isinstance(value, tuple):
-        return value
-    return (value,)
+def _as_shape_tuple(shape_param: object) -> tuple[int, ...]:
+    if not isinstance(shape_param, Sequence):
+        raise TypeError(f"_shape_param_0 must be a sequence, got {type(shape_param)!r}")
+    return tuple(int(dim) for dim in shape_param)
 
 
-def _make_inputs(module: Any, seed: int) -> tuple[Any, ...]:
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    inputs = module.make_inputs()
-    moved = []
-    for item in inputs:
-        if isinstance(item, torch.Tensor):
-            moved.append(item.cuda())
-        else:
-            moved.append(item)
-    return tuple(moved)
-
-
-def get_inputs() -> tuple[Any, ...]:
-    return _make_inputs(_load_repro_module(), seed=1234)
-
-
-def get_repro_instance() -> torch.nn.Module:
-    return _load_repro_module().Repro().eval()
-
-
-def _validate_shape_param(actual: object) -> None:
-    if tuple(int(dim) for dim in actual) != DROPOUT_SHAPE:
-        raise ValueError(
-            f"_shape_param_0 mismatch: expected {DROPOUT_SHAPE}, got {tuple(actual)}"
-        )
-
-
-def _validate_inputs(convolution_94: torch.Tensor, _shape_param_0: object) -> None:
+def _validate_inputs(convolution_94: torch.Tensor, shape_param: object) -> None:
     if not convolution_94.is_cuda:
         raise RuntimeError("CUDA input is required")
-    if convolution_94.dtype != torch.float32:
+    if convolution_94.dtype is not torch.float32:
         raise TypeError(f"expected fp32 input, got {convolution_94.dtype}")
     if tuple(convolution_94.shape) != INPUT_SHAPE:
         raise ValueError(f"unexpected input shape: {tuple(convolution_94.shape)}")
-    if tuple(convolution_94.stride()) != (CHANNELS, 1, 1, 1):
+    if tuple(convolution_94.stride()) != CONTIGUOUS_4D_STRIDE:
         raise ValueError(f"unexpected input stride: {tuple(convolution_94.stride())}")
-    _validate_shape_param(_shape_param_0)
-
-
-def _validate_seeds(seeds: torch.Tensor) -> None:
-    if not seeds.is_cuda or seeds.dtype != torch.int64 or tuple(seeds.shape) != (1,):
+    if _as_shape_tuple(shape_param) != DROPOUT_SHAPE:
         raise ValueError(
-            "seeds must be a CUDA int64 tensor with shape [1], "
-            f"got shape={tuple(seeds.shape)} dtype={seeds.dtype} device={seeds.device}"
+            f"_shape_param_0 mismatch: expected {DROPOUT_SHAPE}, "
+            f"got {_as_shape_tuple(shape_param)}"
         )
 
 
@@ -158,130 +84,63 @@ def _make_outputs(device: torch.device) -> tuple[torch.Tensor, torch.Tensor]:
     return dropout, le
 
 
-def _launch_oracle(
-    convolution_94: torch.Tensor,
-    seeds: torch.Tensor,
-    dropout: torch.Tensor,
-    le: torch.Tensor,
-    *,
-    block_size: int,
-    num_warps: int,
-) -> tuple[torch.Tensor, torch.Tensor]:
-    _validate_seeds(seeds)
-    if tuple(dropout.shape) != DROPOUT_SHAPE or dropout.dtype != torch.float32:
-        raise ValueError("dropout output must be CUDA fp32[512,1280]")
-    if tuple(le.shape) != LE_SHAPE or le.dtype != torch.bool:
-        raise ValueError("le output must be CUDA bool[512,1280,1,1]")
-    if not dropout.is_cuda or not le.is_cuda:
-        raise RuntimeError("CUDA outputs are required")
+if triton is not None:
 
-    grid = (triton.cdiv(N_ELEMENTS, block_size),)
+    @triton.jit
+    def _relu_dropout_le_kernel(
+        input_ptr,
+        seeds_ptr,
+        dropout_ptr,
+        le_ptr,
+        n_elements: tl.constexpr,
+        block_size: tl.constexpr,
+        drop_threshold: tl.constexpr,
+        drop_scale: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * block_size + tl.arange(0, block_size)
+        mask = offsets < n_elements
+
+        x = tl.load(input_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        relu = tl.where(x < 0.0, 0.0, x)
+
+        seed = tl.load(seeds_ptr)
+        random = tl.rand(seed, offsets.to(tl.uint32))
+        keep = random > drop_threshold
+        dropout = relu * keep.to(tl.float32) * drop_scale
+
+        tl.store(dropout_ptr + offsets, dropout, mask=mask)
+        tl.store(le_ptr + offsets, relu <= 0.0, mask=mask)
+
+
+def oracle_forward(inputs):
+    """Run the full Repro.forward scope with a fused pointwise Triton kernel."""
+    if triton is None:
+        raise RuntimeError("triton is required for this oracle")
+    if len(inputs) != 2:
+        raise ValueError(f"{REPRO_ID} expects 2 inputs, got {len(inputs)}")
+
+    convolution_94, shape_param = inputs
+    _validate_inputs(convolution_94, shape_param)
+
+    dropout, le = _make_outputs(convolution_94.device)
+    seeds = torch.ops.prims.inductor_seeds.default(1, convolution_94.device)
+
+    grid = (triton.cdiv(N_ELEMENTS, BLOCK_SIZE),)
     _relu_dropout_le_kernel[grid](
         convolution_94,
         seeds,
         dropout,
         le,
         n_elements=N_ELEMENTS,
-        block_size=block_size,
+        block_size=BLOCK_SIZE,
         drop_threshold=DROP_THRESHOLD,
         drop_scale=DROP_SCALE,
-        num_warps=num_warps,
+        num_warps=NUM_WARPS,
     )
     return dropout, le
 
 
-def _oracle_with_seeds(
-    inputs: tuple[Any, ...],
-    seeds: torch.Tensor,
-    *,
-    block_size: int = DEFAULT_BLOCK,
-    num_warps: int = DEFAULT_NUM_WARPS,
-    outputs: tuple[torch.Tensor, torch.Tensor] | None = None,
-) -> tuple[torch.Tensor, torch.Tensor]:
-    if len(inputs) != 2:
-        raise ValueError(f"{REPRO_ID} expects 2 inputs, got {len(inputs)}")
-    convolution_94, _shape_param_0 = inputs
-    _validate_inputs(convolution_94, _shape_param_0)
-    if outputs is None:
-        outputs = _make_outputs(convolution_94.device)
-    return _launch_oracle(
-        convolution_94,
-        seeds,
-        outputs[0],
-        outputs[1],
-        block_size=block_size,
-        num_warps=num_warps,
-    )
-
-
-def oracle_forward(inputs: tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
-    """Run the complete Repro.forward scope with a fused Triton pointwise kernel."""
-    if len(inputs) != 2:
-        raise ValueError(f"{REPRO_ID} expects 2 inputs, got {len(inputs)}")
-    convolution_94, _shape_param_0 = inputs
-    _validate_inputs(convolution_94, _shape_param_0)
-    seeds = torch.ops.prims.inductor_seeds.default(1, convolution_94.device)
-    return _oracle_with_seeds(inputs, seeds)
-
-
-class _SeededReference(torch.nn.Module):
-    def forward(
-        self,
-        convolution_94: torch.Tensor,
-        seeds: torch.Tensor,
-        _shape_param_0: object,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        relu_default = torch.ops.aten.relu.default(convolution_94)
-        reshape_default = torch.ops.aten.reshape.default(relu_default, _shape_param_0)
-        lookup_seed = torch.ops.prims.inductor_lookup_seed.default(seeds, 0)
-        random = torch.ops.prims.inductor_random.default(
-            list(DROPOUT_SHAPE),
-            lookup_seed,
-            "rand",
-        )
-        keep = torch.ops.aten.gt.Scalar(random, DROP_THRESHOLD)
-        dropped = torch.ops.aten.mul.Tensor(keep, reshape_default)
-        scaled = torch.ops.aten.mul.Tensor(dropped, DROP_SCALE)
-        le = torch.ops.aten.le.Scalar(relu_default, 0)
-        return scaled, le
-
-
-def _compile_seeded_reference(
-    convolution_94: torch.Tensor,
-    seeds: torch.Tensor,
-    shape_param: object,
-) -> torch.nn.Module:
-    import torch._dynamo
-
-    torch._dynamo.reset()
-    model = _SeededReference().cuda().eval()
-    compiled = torch.compile(model)
-    for _ in range(3):
-        compiled(convolution_94, seeds, shape_param)
-    torch.cuda.synchronize()
-    return compiled
-
-
-def _compile_repro_with_config(
-    module: Any,
-    inputs: tuple[Any, ...],
-    config: dict[str, object],
-    warmup: int,
-) -> Callable[..., object]:
-    import torch._dynamo
-    import torch._inductor.config as inductor_config
-
-    torch._dynamo.reset()
-    model = module.Repro().cuda().eval()
-    with inductor_config.patch(config):
-        compiled = torch.compile(model)
-        for _ in range(max(1, warmup)):
-            compiled(*inputs)
-        torch.cuda.synchronize()
-    return compiled
-
-
-def main() -> None:
+def main():
     parser = argparse.ArgumentParser(
         description=f"Oracle for {REPRO_ID}",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -314,9 +173,13 @@ def main() -> None:
     if not args.check and not args.bench:
         args.check = args.bench = True
 
-    inputs = _harness_get_inputs(REPRO_DIR)
-    instance = _harness_get_repro_instance(REPRO_DIR)
+    inputs = get_inputs()
+    instance = get_repro_instance()
 
+    print(
+        "NOTE: exact stochastic equality is not established for output 0; "
+        "this oracle is diagnostic/not_true_floor."
+    )
     if has_stochastic_ops(REPRO_PATH):
         print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
 
@@ -330,8 +193,7 @@ def main() -> None:
             rtol=args.rtol,
             skip_stochastic=not args.no_skip_stochastic,
         )
-        status = "PASS" if ok else "FAIL"
-        print(f"Correctness: {status}")
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)
 

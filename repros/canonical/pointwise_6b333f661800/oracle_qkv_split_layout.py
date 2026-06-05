@@ -1,7 +1,4 @@
-"""Oracle for pointwise_6b333f661800.
-
-Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle returns the complete three-output Q/K/V split-view-permute result with metadata-only `as_strided` aliases and launches no GPU kernels, whereas local Inductor also returns the same aliases; Inductor cannot expose a useful device-kernel floor here because the shared harness reports an empty CUDA graph and the remaining timing is dispatch/graph overhead rather than missing GPU work; the fix is ALGEBRAIC_ELIMINATION: keep recognizing this chain as metadata-only views and avoid assigning it a kernel floor.
-"""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle returns the complete three-output Q/K/V split-view-permute result as metadata-only `as_strided` aliases of the f32[64,2304] input, whereas Inductor currently also eliminates the view/split/view/permute chain to alias metadata and CUDAGraph capture reports no executable GPU nodes for the oracle path; Inductor cannot provide a meaningful device-kernel floor today because scheduler/codegen receives no materialized producer after layout/view alias elimination; the fix is ALGEBRAIC_ELIMINATION: preserve this metadata-only rewrite and classify empty-graph timing as invalid/not a true floor rather than as a kernel optimization target."""
 from __future__ import annotations
 
 import argparse
@@ -10,13 +7,6 @@ from pathlib import Path
 
 import torch
 
-try:
-    import triton
-    import triton.language as tl
-except ImportError:
-    triton = None
-    tl = None
-
 # --- Configuration (auto-derived from file location) ---
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
@@ -24,7 +14,9 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 # Import shared oracle infrastructure. Run first:
 #   python -m pip install --no-build-isolation -e .
-# Do not add oracle-local sys.path or REPO_ROOT import hacks.
+# Use the installed oracle_harness package; run editable install before checks.
+# Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
+# GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
@@ -32,7 +24,6 @@ from oracle_harness import (
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
-    get_shape_key,
     has_stochastic_ops,
 )
 
@@ -48,17 +39,11 @@ def get_repro_instance():
 
 
 def oracle_forward(inputs):
-    """Run the oracle computation.
+    """Run the full-scope metadata-only QKV split/layout oracle.
 
-    SCOPE INVARIANT: Must accept the same inputs as Repro.forward() and return
-    the same outputs (same count, same shapes, same dtypes, same strides).
-
-    Args:
-        inputs: tuple of tensors/values from get_inputs(), identical to what
-                Repro.forward() receives via Repro()(*inputs).
-
-    Returns:
-        Same output structure as Repro()(*inputs).
+    The captured chain contains only view, split, view, and permute operations,
+    so the correct oracle result is three aliases of the original input storage
+    with the exact output sizes, strides, and storage offsets.
     """
     x = inputs[0]
     view_shape = tuple(inputs[1])
