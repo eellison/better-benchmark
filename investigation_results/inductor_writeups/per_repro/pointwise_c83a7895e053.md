@@ -1,17 +1,21 @@
 # pointwise_c83a7895e053
 
-## Compile: 8.54us, Oracle: 8.99us, Gap: 0.95x (BAD_ORACLE)
+## Summary
 
-## Classification: NO_GAP
+- Model: SiLU activation (pointwise)
+- Oracle: `oracle_silu.py`
+- Classification: AT_FLOOR
+- Ratio: 1.007x (oracle 8.80us, compile 8.86us)
+- Status: Inductor matches oracle performance
 
 ## Root Cause
 
-Compile is already faster than the oracle by 5%. No investigation needed.
+No performance gap. Inductor's compiled output matches the oracle within measurement noise (0.7% difference). SiLU is a simple pointwise operation that Inductor handles optimally.
 
-## Status: closed_no_gap
+## Config Exploration
 
-## Details
-- Model: SiLU activation
-- Shape: [128, 384, 7, 7] f32
-- Oracle attempts fused SiLU but Inductor already matches or beats it
-- No Inductor change needed
+Not needed -- already at floor.
+
+## Fix Assessment
+
+**No fix needed** -- Inductor already achieves oracle-level performance for this pattern.

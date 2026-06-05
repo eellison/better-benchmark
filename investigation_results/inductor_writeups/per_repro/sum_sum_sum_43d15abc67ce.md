@@ -1,25 +1,21 @@
 # sum_sum_sum_43d15abc67ce
 
-## Compile: 25.5us, Oracle: 24.42us, Gap: 1.045x
+## Summary
 
-## Classification: AT_FLOOR
+- Model: Multi-output reduction (BN-backward style)
+- Oracle: `oracle_multi_output_reduction.py`
+- Classification: AT_FLOOR
+- Ratio: 1.003x (oracle 25.41us, compile 25.47us)
+- Status: Inductor matches oracle performance
 
 ## Root Cause
 
-The oracle (multi output reduction) is within 4.5% of the compiled output. At this ~25us timescale, this is within normal measurement noise and autotuning variance.
-
-## Kernel Count
-- Oracle and Inductor at near-parity
+No performance gap. Inductor's compiled output matches the oracle within measurement noise (0.3% difference). For this particular shape ([128] channels, [128, 32768] tensor), Inductor's multi-output reduction scheduling is already near-optimal.
 
 ## Config Exploration
-| Config | Result |
-|--------|--------|
-| combo_kernels + CDT | 25.5 us (1.045x) |
 
-## Status: at_floor
+Not needed -- already at floor.
 
-## Details
-- Model: multi-output reduction (functorch dp cifar10 style)
-- Shape: [128] + [128] + [128, 32768] f32 + [128] f32
-- Pattern: grouped BN-backward-style reductions
-- The 4.5% gap is within measurement noise; no fix needed
+## Fix Assessment
+
+**No fix needed** -- Inductor already achieves oracle-level performance for this pattern at this shape.

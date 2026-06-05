@@ -1,25 +1,21 @@
 # pointwise_438e6bf82c6e
 
-## Compile: 15.04us, Oracle: 14.88us, Gap: 1.011x
+## Summary
 
-## Classification: AT_FLOOR
+- Model: ReLU + MaxPool + Flatten (pointwise)
+- Oracle: `oracle_relu_maxpool_flatten.py`
+- Classification: AT_FLOOR
+- Ratio: 1.006x (oracle 15.14us, compile 15.23us)
+- Status: Inductor matches oracle performance
 
 ## Root Cause
 
-The oracle (ReLU + maxpool + flatten) is within 1.1% of the compiled output. Both are at the performance floor.
-
-## Kernel Count
-- Oracle and Inductor produce equivalent performance
+No performance gap. Inductor's compiled output matches the oracle within measurement noise (0.6% difference). The ReLU + MaxPool + Flatten pattern is well-handled by Inductor's existing codegen.
 
 ## Config Exploration
-| Config | Result |
-|--------|--------|
-| combo_kernels + CDT | 15.04 us (1.011x) |
 
-## Status: at_floor
+Not needed -- already at floor.
 
-## Details
-- Model: ReLU + maxpool + flatten
-- Shape: int8 + [128, 25088] f16 outputs
-- The 1.1% gap is pure measurement noise
-- No Inductor change needed
+## Fix Assessment
+
+**No fix needed** -- Inductor already achieves oracle-level performance for this pattern.
