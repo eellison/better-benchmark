@@ -1,0 +1,280 @@
+"""Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the complete DeiT residual-add LayerNorm scope in one fixed-hidden Triton row kernel, reducing every `[128,197]` token row for the required `rsqrt(var + 1e-6) / 192` side output and applying the affine LayerNorm epilogue only to the live class-token rows returned by `select(..., 1, 0).clone()`, whereas tuned Inductor already measures within the same CUDA-graph floor for this full repro; Inductor cannot materially improve this local norm-template-canonicalization case because the remaining work is dominated by mandatory activation/residual reads, one 192-wide row reduction per token, side-output stores, class-token affine stores, and launch overhead rather than avoidable intermediate traffic; the fix is BANDWIDTH_BOUND: record this as at floor unless broader normalization codegen or launch-overhead work moves both implementations."""
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+from typing import Any
+
+import torch
+
+try:
+    import triton
+    import triton.language as tl
+except ImportError:
+    triton = None
+    tl = None
+
+# --- Configuration (auto-derived from file location) ---
+REPRO_DIR = Path(__file__).resolve().parent
+REPRO_ID = REPRO_DIR.name
+REPRO_PATH = REPRO_DIR / "repro.py"
+
+# Import shared oracle infrastructure. Run first:
+#   python -m pip install --no-build-isolation -e .
+# Use the installed oracle_harness package; run editable install before checks.
+# Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
+# GPU locking, and interleaved oracle/compile measurement are preserved.
+from oracle_harness import (
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    check_oracle,
+    bench_oracle,
+    bench_oracle_all_shapes,
+    get_hardware_info,
+    get_shape_key,
+    has_stochastic_ops,
+)
+
+
+def get_inputs():
+    """Load inputs from the repro's make_inputs (scope invariant: same inputs)."""
+    return _harness_get_inputs(REPRO_DIR)
+
+
+def get_repro_instance():
+    """Create a Repro() instance for reference comparison."""
+    return _harness_get_repro_instance(REPRO_DIR)
+
+
+# --- Oracle kernel(s) ---
+ROWS = 128 * 197
+BATCH = 128
+SEQ_LEN = 197
+HIDDEN = 192
+EPS = 1.0e-6
+BLOCK_H = 256
+CLASSIFICATION = "BANDWIDTH_BOUND"
+
+if triton is not None:
+
+    @triton.autotune(
+        configs=[
+            triton.Config({"BLOCK_M": 1}, num_warps=1, num_stages=3),
+            triton.Config({"BLOCK_M": 2}, num_warps=1, num_stages=3),
+            triton.Config({"BLOCK_M": 4}, num_warps=4, num_stages=3),
+            triton.Config({"BLOCK_M": 8}, num_warps=4, num_stages=3),
+            triton.Config({"BLOCK_M": 8}, num_warps=8, num_stages=3),
+            triton.Config({"BLOCK_M": 16}, num_warps=8, num_stages=3),
+        ],
+        key=["hidden", "seq_len"],
+    )
+    @triton.jit
+    def _class_token_layernorm_kernel(
+        addmm_ptr,
+        residual_ptr,
+        weight_ptr,
+        bias_ptr,
+        class_out_ptr,
+        side_out_ptr,
+        hidden: tl.constexpr,
+        seq_len: tl.constexpr,
+        eps: tl.constexpr,
+        BLOCK_M: tl.constexpr,
+        block_h: tl.constexpr,
+    ):
+        rows = tl.program_id(0) * BLOCK_M + tl.arange(0, BLOCK_M)
+        cols = tl.arange(0, block_h)
+        row_mask = rows < (128 * 197)
+        col_mask = cols < hidden
+        mask = row_mask[:, None] & col_mask[None, :]
+        offsets = rows[:, None] * hidden + cols[None, :]
+
+        x = tl.load(addmm_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        residual = tl.load(residual_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        values = tl.where(mask, x + residual, 0.0)
+
+        mean = tl.sum(values, axis=1) / hidden
+        sum_x2 = tl.sum(values * values, axis=1)
+        variance = tl.maximum(sum_x2 / hidden - mean * mean, 0.0)
+        invstd = tl.rsqrt(variance + eps)
+
+        tl.store(side_out_ptr + rows, invstd / hidden, mask=row_mask)
+
+        token = rows - (rows // seq_len) * seq_len
+        is_class_token = token == 0
+        class_mask = mask & is_class_token[:, None]
+        centered = values - mean[:, None]
+        weight = tl.load(weight_ptr + cols, mask=col_mask, other=0.0).to(tl.float32)
+        bias = tl.load(bias_ptr + cols, mask=col_mask, other=0.0).to(tl.float32)
+        y = centered * invstd[:, None] * weight[None, :] + bias[None, :]
+        batch = rows // seq_len
+        tl.store(class_out_ptr + batch[:, None] * hidden + cols[None, :], y, mask=class_mask)
+
+
+def _shape_tuple(value: Any) -> tuple[int, ...]:
+    try:
+        return tuple(int(dim) for dim in value)
+    except TypeError as exc:
+        raise TypeError(f"expected shape parameter, got {value!r}") from exc
+
+
+def _validate_inputs(
+    inputs: list[Any] | tuple[Any, ...],
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    if len(inputs) != 5:
+        raise ValueError(f"{REPRO_ID} expects 5 inputs, got {len(inputs)}")
+
+    addmm_47, residual, weight, bias, shape_param = inputs
+    tensor_inputs = (addmm_47, residual, weight, bias)
+    if not all(isinstance(value, torch.Tensor) for value in tensor_inputs):
+        raise TypeError("the first four repro inputs must be tensors")
+
+    expected_shapes = ((ROWS, HIDDEN), (BATCH, SEQ_LEN, HIDDEN), (HIDDEN,), (HIDDEN,))
+    for index, (value, expected_shape) in enumerate(zip(tensor_inputs, expected_shapes)):
+        if tuple(value.shape) != expected_shape:
+            raise ValueError(f"input {index} shape {tuple(value.shape)} != {expected_shape}")
+        if value.dtype != torch.float32:
+            raise TypeError(f"input {index} dtype {value.dtype} != torch.float32")
+        if not value.is_cuda:
+            raise RuntimeError("CUDA tensors are required for the Triton oracle")
+        if not value.is_contiguous():
+            raise ValueError(f"input {index} must be contiguous, got stride={value.stride()}")
+
+    if _shape_tuple(shape_param) != (BATCH, SEQ_LEN, HIDDEN):
+        raise ValueError(f"unexpected reshape parameter: {shape_param!r}")
+
+    return addmm_47, residual, weight, bias
+
+
+def oracle_forward(inputs):
+    """Run the oracle computation.
+
+    SCOPE INVARIANT: Must accept the same inputs as Repro.forward() and return
+    the same outputs (same count, same shapes, same dtypes, same strides).
+
+    Args:
+        inputs: tuple of tensors/values from get_inputs(), identical to what
+                Repro.forward() receives via Repro()(*inputs).
+
+    Returns:
+        Same output structure as Repro()(*inputs).
+    """
+    if triton is None:
+        raise RuntimeError("Triton is required for oracle_class_token_layernorm.py")
+
+    addmm_47, residual, weight, bias = _validate_inputs(inputs)
+    class_out = torch.empty_strided(
+        (BATCH, HIDDEN),
+        (HIDDEN, 1),
+        device=addmm_47.device,
+        dtype=torch.float32,
+    )
+    side_out = torch.empty_strided(
+        (BATCH, SEQ_LEN, 1),
+        (SEQ_LEN, 1, 1),
+        device=addmm_47.device,
+        dtype=torch.float32,
+    )
+    grid = lambda meta: (triton.cdiv(ROWS, meta["BLOCK_M"]),)
+    _class_token_layernorm_kernel[grid](
+        addmm_47,
+        residual,
+        weight,
+        bias,
+        class_out,
+        side_out,
+        hidden=HIDDEN,
+        seq_len=SEQ_LEN,
+        eps=EPS,
+        block_h=BLOCK_H,
+    )
+    return class_out, side_out
+
+
+# --- CLI entry point ---
+def main():
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
+    args = parser.parse_args()
+
+    # Handle --show-hw early
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
+
+    # Default: run both --check and --bench
+    if not args.check and not args.bench:
+        args.check = args.bench = True
+
+    inputs = get_inputs()
+    instance = get_repro_instance()
+
+    # Report if stochastic ops detected in source
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
+    if args.check:
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
+
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward, REPRO_DIR, REPRO_ID,
+                warmup=args.warmup, rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile for "
+                          f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            # The shared harness owns timing so graph capture, GPU locking, and
+            # interleaved oracle/compile measurement stay intact.
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
+
+
+if __name__ == "__main__":
+    main()
