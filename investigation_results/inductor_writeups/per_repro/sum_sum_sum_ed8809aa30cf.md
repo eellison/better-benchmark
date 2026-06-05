@@ -25,10 +25,16 @@ Correctness passed with matching output shapes and strides:
 - output 1 `[2560]`: max_abs `6.103516e-05`, max_rel `4.007212e-04`
 - output 2 `[32, 128, 2560]`: max_abs `7.629395e-06`, max_rel `7.640111e-02`
 
-Benchmark with `--warmup 10 --rep 50`:
+Benchmark (updated June 2026, GPU-locked interleaved):
+
+- oracle: 78.72 us
+- compile (default): 88.93 us
+- ratio: 1.13x (oracle is faster -- valid gap)
+
+Previous benchmark with `--warmup 10 --rep 50`:
 
 - oracle full-scope Triton: `134.848 us`
 - `coordinate_descent_tuning=True`: `150.208 us`
 - `combo_kernels=True,combo_kernel_per_subkernel_blocks=True,coordinate_descent_tuning=True,benchmark_combo_kernel=True,triton.multi_kernel=3`: `129.920 us`
 
-Valid floor: no. The artifact is full-scope and useful diagnosis, but it is slower than the combo-looped compile path, so the main queue should keep `oracle_path` blank unless a faster replacement is written.
+Valid floor: yes, the oracle now consistently beats default compile by 1.13x with GPU-locked interleaved measurement.

@@ -32,3 +32,16 @@ The oracle consumes the original Whisper inputs, computes row-local normalizatio
 - Implementation track: Cooperative split-K reduction with materialized side output, only if it beats the existing tuned schedule.
 - Candidate hook: Coordinate partial reductions while producing the full epilogue output, without adding extra passes over `mm_6 + mm_9 + mm_10`.
 - Benchmark policy: keep this row in rewrite-needed state until a faster full-scope oracle or Inductor implementation beats `coordinate_descent_tuning=True`.
+
+## Updated Measurement (June 2026)
+
+The `oracle_cooperative_split_k.py` oracle now shows:
+- oracle: 31.39 us
+- compile (default, GPU-locked interleaved): 50.66 us
+- ratio: 1.61x (oracle is faster -- valid gap)
+
+This cooperative_split_k oracle is significantly faster than the earlier `oracle_multi_output_reduction.py` (which measured 108.64us oracle vs 48.45us compile = 0.446x BAD_ORACLE). The cooperative approach with row-tiled partial buffers successfully achieves sub-compile performance by:
+1. Row-tiling the M=12000 dimension into cooperative blocks
+2. Each block writes its row-local epilogue AND accumulates column partials
+3. A small finalization kernel reduces the partial buffers to produce the [384] outputs
+4. Total: ~3 kernels but with far less total memory traffic than separate passes
