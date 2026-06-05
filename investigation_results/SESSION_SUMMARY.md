@@ -210,6 +210,31 @@ All in `/tmp/pytorch-work/torch/_inductor/`:
 | Constant-fold iota/arange | 1.44x | GPT-2 embedding+LN mask (8+ repros) |
 | Cooperative reduction widening | 1.86x | GhostNet BN-backward (86 repros) |
 | Elide constant-index asserts | 1.12x | DLRM index+cat (41 repros) |
+| Graph-output deduplication | 5.13x→0.71x | Causal mask (beats oracle) |
+| Scatter dtype cast (Llama) | 2.20x→0.87x | 128K vocab embedding backward (beats oracle) |
+| Cat-through-reduction | 1.81x→0.90x | Inception multi-branch (beats oracle) |
+| Swin MOR fusion bug fix | 2.02x→1.04x | Window attention indirect-index hint |
+| SwiGLU shared cat | 2.10x→0.97x | Qwen3 SwiGLU backward |
+| Swin indirect gather realize | 1.62x→0.89x | Relative position bias (5 repros, beats oracle) |
+| T5 causal softmax | 1.52x→1.01x | Clamp embedding indices |
+| Transcendental materialization | 2.19x→1.27x | RoPE sin/cos broadcast |
+| Scatter multi-user | 1.91x→1.37x | MT5 dual-branch embedding |
+| B200 undersaturation split | 1.82x→1.29x | ResNet BN split factor |
+| Small-rnumel persistent configs | 1.54x→1.25x | Swin spatial mean |
+| Optimized argmax | 2.40x→1.21x | DenseNet maxpool |
+| Longformer scatter bypass | 8→5 kernels | Diagonal attention (partial) |
+
+### Remaining gaps in partially-fixed repros:
+
+| Repro | Current | Remaining gap reason | Fix needed |
+|-------|---------|---------------------|------------|
+| sum_51d2ed69e698 | 1.27x | RoPE slice_scatter branchy conditionals | Direct gather codegen for rotation |
+| sum_sum_e9338369070e | 1.59x | Cooperative grid-barrier limits RSPLIT | Decomposed split-K lowering |
+| var_mean_598830735cf6 | 1.29x | BN→maxpool stencil materialization | Fix inline_recomputable_producers index bug |
+| var_mean_mean_2ac1c2eb8544 | 1.25x | Persistent tile vs serial-loop for tiny rnumel | Serial-loop codegen template |
+| sum_sum_sum_04ab10ca59ee | 1.37x | LN-backward 3+ consumer materialization | Shared-buffer recomputation in scheduler |
+| mean_7639bfb9be38 | 1.09x | Flat 1D tiling for BN channel broadcast | 2D/3D channel-outer tiling |
+| pointwise_437415a3398d | 1.21x | Flat tiling misses BN param reuse in stencil | Channel-blocked stencil tiling |
 
 ---
 
