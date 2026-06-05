@@ -206,6 +206,10 @@ All in `/tmp/pytorch-work/torch/_inductor/`:
 | Layout-transform store sinking | 1.19x | ShuffleNet channel shuffle |
 | Logsumexp-stable pattern | 1.14x | Reformer LSH |
 | CE gather hoisting | 21-23% | Large vocab CE (LLaMA-scale) |
+| Smart realize_hint | 1.57x | InceptionV3 BN→MaxPool (49 norm+pool repros) |
+| Constant-fold iota/arange | 1.44x | GPT-2 embedding+LN mask (8+ repros) |
+| Cooperative reduction widening | 1.86x | GhostNet BN-backward (86 repros) |
+| Elide constant-index asserts | 1.12x | DLRM index+cat (41 repros) |
 
 ---
 
