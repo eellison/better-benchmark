@@ -1,19 +1,4 @@
-"""
-Full-scope oracle for pointwise_05d4844325ca.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the exact
-`full([3], 0.0) -> cat([arg6_1, full])` scope in one Triton materialization
-kernel by allocating the fresh contiguous `float32[50268]` output, copying the
-contiguous `float32[50265]` input prefix, and storing three trailing zeros,
-whereas Inductor already lowers the isolated cat/full graph to one fused
-pointwise materialization kernel for the same required output. Inductor cannot
-materially do less work today because `aten.cat` returns a new dense tensor and
-this capture has no surrounding producer or consumer to fuse with; the fixing
-classification is BANDWIDTH_BOUND: no scheduler-fusion, scatter-reduce,
-split-K, algebraic-elimination, recompute-fusion, or new-pattern compiler change
-is indicated beyond generic launch/materialization overhead reduction or fusion
-with graph context outside this repro.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full `full([3], 0.0) -> cat([arg6_1, full])` Repro.forward scope in one Triton materialization kernel by allocating the fresh contiguous f32[50268] output, copying the f32[50265] input prefix, and storing the three constant-zero tail elements directly, whereas Inductor currently lowers the isolated cat/full graph through its generic cat materialization path for the same dense output; Inductor cannot do this today because cat lowering does not have a segment-aware constant-tail template for fixed small concat suffixes and instead relies on general pointwise/cat scheduling machinery; the fix is NEW_PATTERN: add a guarded cat-with-constant-tail materialization template, while measurements that do not beat compiled Inductor should be reported as not a true floor."""
 from __future__ import annotations
 
 import argparse
@@ -40,7 +25,7 @@ OUT_N = IN_N + TAIL_N
 OUT_SHAPE = (OUT_N,)
 OUT_STRIDE = (1,)
 DTYPE = torch.float32
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "NEW_PATTERN"
 
 
 from oracle_harness import (  # noqa: E402

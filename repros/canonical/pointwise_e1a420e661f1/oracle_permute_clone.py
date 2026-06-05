@@ -1,17 +1,4 @@
-"""
-Oracle for pointwise_e1a420e661f1.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the full
-permute-clone-view scope as one direct Triton materialization from
-`arg81_1[0, c, h, w]` to the final contiguous `float32[64, 768]` output,
-whereas Inductor already lowers the isolated graph to a generic one-launch
-layout materialization for the fresh clone output; Inductor cannot materially
-improve this kernel today because the user-visible clone requires reading and
-writing all 49,152 float32 elements and this capture has no surrounding
-consumer to absorb the materialization; the fix is BANDWIDTH_BOUND: no local
-scheduler/codegen change is indicated beyond broader graph fusion that removes
-the clone materialization outside this repro boundary.
-"""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the complete permute -> contiguous clone -> unsafe_view -> final view Repro.forward contract by directly materializing the contiguous float32[64, 768] output from arg81_1[0, c, h, w] in one Triton kernel, whereas Inductor already lowers the isolated graph to one fused clone/permute materialization kernel and the measured oracle is not a faster floor; Inductor cannot do this today because the user-visible clone requires a fresh dense output in this capture and there is no surrounding producer or consumer to algebraically eliminate the materialization; the fix is ALGEBRAIC_ELIMINATION: keep this layout-chain elimination case closed unless broader graph-context simplification can remove the clone materialization altogether."""
 from __future__ import annotations
 
 import argparse
@@ -51,6 +38,7 @@ OUT_N = C * W
 OUT_STRIDE = (OUT_N, 1)
 BLOCK_C = 16
 BLOCK_W = 64
+CLASSIFICATION = "ALGEBRAIC_ELIMINATION"
 
 
 def get_inputs() -> tuple[object, ...]:
@@ -130,6 +118,49 @@ def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
         num_stages=1,
     )
     return output
+
+
+def _as_tuple(value: object) -> tuple[torch.Tensor, ...]:
+    if isinstance(value, torch.Tensor):
+        return (value,)
+    if isinstance(value, (list, tuple)):
+        return tuple(item for item in value if isinstance(item, torch.Tensor))
+    raise TypeError(f"expected tensor output, got {type(value)!r}")
+
+
+def _check_output_layout(
+    instance: torch.nn.Module,
+    inputs: tuple[object, ...],
+) -> bool:
+    with torch.no_grad():
+        eager_outputs = _as_tuple(instance(*inputs))
+        oracle_outputs = _as_tuple(oracle_forward(inputs))
+        if any(output.is_cuda for output in oracle_outputs):
+            torch.cuda.synchronize()
+
+    if len(eager_outputs) != len(oracle_outputs):
+        print(
+            f"  layout: FAIL output count oracle={len(oracle_outputs)} "
+            f"eager={len(eager_outputs)}"
+        )
+        return False
+
+    ok = True
+    for index, (eager, oracle) in enumerate(zip(eager_outputs, oracle_outputs)):
+        layout_ok = (
+            tuple(oracle.shape) == tuple(eager.shape)
+            and oracle.dtype == eager.dtype
+            and tuple(oracle.stride()) == tuple(eager.stride())
+            and oracle.storage_offset() == eager.storage_offset()
+        )
+        status = "PASS" if layout_ok else "FAIL"
+        print(
+            f"  output {index} layout: {status} "
+            f"(shape={list(oracle.shape)} dtype={oracle.dtype} "
+            f"stride={tuple(oracle.stride())} storage_offset={oracle.storage_offset()})"
+        )
+        ok = ok and layout_ok
+    return ok
 
 
 def main() -> None:
@@ -213,6 +244,7 @@ def main() -> None:
             rtol=args.rtol,
             skip_stochastic=not args.no_skip_stochastic,
         )
+        ok = _check_output_layout(instance, inputs) and ok
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)

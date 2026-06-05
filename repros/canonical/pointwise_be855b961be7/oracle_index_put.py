@@ -1,20 +1,4 @@
-"""
-Full-scope oracle for pointwise_be855b961be7.
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this diagnosis oracle computes
-the `mm_5[:, 64:100]` producer, zero materialization, and
-duplicate-preserving `index_put(accumulate=True)` into the returned contiguous
-`float32[2048, 9, 9]` tensor with a Triton gather-reduce over the 36 indexed
-source columns, whereas Inductor's tuned path uses the natural zero-fill plus
-indexed accumulate decomposition. Inductor does not currently lower this as a
-scatter-reduce gather per output cell, but on this small full scope that
-alternate lowering is not a real floor: the best required coordinate-descent
-compile already matches or beats the handwritten Triton path, so the remaining
-cost is launch/allocation plus required 0.6 MB output/input traffic rather than
-a material scatter-reduce opportunity; the fix is BANDWIDTH_BOUND: do not add a
-new lowering for this repro unless a larger shape shows the scatter-reduce
-rewrite winning against tuned compile.
-"""
+"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the complete `mm_5[:, 64:100]` producer, zero materialization, and duplicate-preserving `index_put(accumulate=True)` into the returned contiguous `float32[2048, 9, 9]` tensor with a Triton gather-reduce over the 36 indexed source columns, whereas Inductor currently lowers the slice, zero-fill, and indexed accumulation as the generic decomposed `index_put` path; Inductor cannot do this today because scheduler/codegen does not canonicalize this tiny duplicate-safe column scatter into an output-cell scatter-reduce schedule that folds the sliced producer and zero base into the returned dense layout; the fix is SCATTER_REDUCE: add an indexed-accumulate lowering that recognizes this full-scope pattern and emits the direct output-space reduction only when it beats the tuned generic compile."""
 from __future__ import annotations
 
 import argparse
@@ -46,7 +30,7 @@ REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "SCATTER_REDUCE"
 
 N_COLS = 100
 SLICE_START = 64

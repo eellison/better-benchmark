@@ -1,19 +1,4 @@
-"""
-Oracle for sum_39cf4835a913
-
-Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the full
-`torch.sum(mm, dim=0)` scope with one shape-specialized Triton column-reduction
-kernel that reads the contiguous `f32[M, N]` input once and writes the final
-contiguous `f32[N]` output directly, whereas Inductor already lowers this tiny
-single-reduction graph to one compiled reduction kernel in the same launch and
-memory-traffic regime; Inductor cannot materially do less work today through
-scheduler fusion, scatter-reduce, cooperative split-K, algebraic elimination,
-or recompute fusion because there is no producer/consumer graph around the
-reduction and the required input read, f32 accumulation, output store, and one
-GPU launch dominate; the fix is BANDWIDTH_BOUND: treat this as a diagnosis
-artifact unless the full-scope Triton kernel beats the required tuned compile
-configs on the same shape.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete `torch.sum(mm, dim=0)` Repro.forward scope as a shape-specialized Triton column reduction that reads the contiguous f32[M, N] input once and writes the final contiguous f32[N] output directly, whereas Inductor currently lowers the same small dim-0 reduction through its generic reduction codegen path; Inductor cannot do this today because scheduler/codegen has no dedicated small-static-column-reduction template for the fixed short row extent and contiguous output layout; the fix is NEW_PATTERN: add a fixed-extent dim-0 column-reduction template for this layout and reduction extent."""
 from __future__ import annotations
 
 import argparse
@@ -34,14 +19,19 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
-CLASSIFICATION = "BANDWIDTH_BOUND"
+CLASSIFICATION = "NEW_PATTERN"
 
 
-from oracle_harness import (  # noqa: E402
+# Import shared oracle infrastructure. Run first:
+#   python -m pip install --no-build-isolation -e .
+# Use the installed oracle_harness package; run editable install before checks.
+# Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
+# GPU locking, and interleaved oracle/compile measurement are preserved.
+from oracle_harness import (
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
-    get_hardware_info as _harness_get_hardware_info,
+    get_hardware_info,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     has_stochastic_ops,
@@ -56,25 +46,6 @@ def get_inputs() -> list[Any]:
 def get_repro_instance() -> torch.nn.Module:
     """Create a Repro() instance for reference comparison."""
     return _harness_get_repro_instance(REPRO_DIR)
-
-
-def _get_hardware_info() -> dict[str, float | int | str | None]:
-    try:
-        return _harness_get_hardware_info()
-    except AttributeError:
-        props = torch.cuda.get_device_properties(0)
-        return {
-            "name": props.name,
-            "sm_major": props.major,
-            "sm_minor": props.minor,
-            "num_sms": props.multi_processor_count,
-            "shared_mem_per_sm": getattr(
-                props,
-                "max_shared_memory_per_multiprocessor",
-                getattr(props, "shared_memory_per_multiprocessor", None),
-            ),
-            "total_mem_gb": props.total_memory / 1e9,
-        }
 
 
 if triton is not None:
@@ -176,7 +147,7 @@ def main() -> None:
     if args.show_hw:
         import json
 
-        print(json.dumps(_get_hardware_info(), indent=2))
+        print(json.dumps(get_hardware_info(), indent=2))
         return
 
     if not args.check and not args.bench:
