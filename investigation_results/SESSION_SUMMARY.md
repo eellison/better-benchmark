@@ -46,6 +46,8 @@ Each subagent prompt must include:
 - The constraint: "Do NOT write custom Triton kernels. Only graph rewrites, scheduler changes, or config adjustments."
 - Standard measurement setup (fresh cache + all fixes + CD)
 - What to report (summary table, root cause, whether fixable)
+- "BEFORE FINISHING: commit your work in /tmp/pytorch-work with `git add` + `git commit`. Even rough/WIP commits are fine. Use message format: `[inductor] <what> (<repro_id>, <speedup>)`"
+- "Write investigation results to investigation_results/inductor_writeups/per_repro/<repro_id>.md"
 
 ### Committing Work in PyTorch (IMPORTANT)
 
