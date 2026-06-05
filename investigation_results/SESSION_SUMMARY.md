@@ -37,10 +37,24 @@ Subagents handle:
 - **Pulling**: Periodically fetch new oracles from the branch
 
 The main loop MANAGES subagents — it does NOT do the work itself (except quick checks). When an agent finishes, immediately launch another on the next task. The backlog is:
-1. New unqueued oracles (always process immediately)
-2. Top gaps from needs_work (investigate if closeable)
-3. Validation of implemented fixes on new repros
-4. Implementation of identified fixes
+1. New unqueued oracles (always process immediately — measure with CUDAGraph)
+2. **Every gap > 1.2x gets a deep investigation** (no exceptions)
+3. Implementation of identified fixes (if FX-pass-level or config)
+4. Validation of implemented fixes on new repros
+
+### Deep Investigation Rule (MANDATORY)
+
+Any oracle measurement showing ratio > 1.2x MUST get a dedicated investigation agent.
+The investigation must produce:
+- Per-repro writeup at `investigation_results/inductor_writeups/per_repro/<repro_id>.md`
+- Root cause (what fusion/optimization the oracle does that Inductor can't)
+- Kernel count comparison (Inductor vs oracle)
+- Config exploration (does any config close the gap?)
+- Classification into a design TODO family or implementable fix
+- If implementable: attempt the fix, commit to /tmp/pytorch-work, measure result
+
+Gaps 1.05-1.2x get classification only (from the measurement agent).
+Gaps > 1.2x get full investigation + writeup + fix attempt.
 
 Each subagent prompt must include:
 - The constraint: "Do NOT write custom Triton kernels. Only graph rewrites, scheduler changes, or config adjustments."
