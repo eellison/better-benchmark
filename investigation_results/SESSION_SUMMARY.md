@@ -45,15 +45,34 @@ The main loop MANAGES subagents — it does NOT do the work itself (except quick
 ### Deep Investigation Rule (MANDATORY)
 
 Any oracle measurement showing ratio > 1.05x MUST get a dedicated investigation agent.
-The investigation must produce:
-- Per-repro writeup at `investigation_results/inductor_writeups/per_repro/<repro_id>.md`
+
+The investigation MUST produce a writeup at:
+  `investigation_results/inductor_writeups/per_repro/<repro_id>.md`
+
+The writeup MUST contain:
 - Root cause (what fusion/optimization the oracle does that Inductor can't)
 - Kernel count comparison (Inductor vs oracle)
 - Config exploration (does any config close the gap?)
-- Classification into a design TODO family or implementable fix
-- If implementable: attempt the fix, commit to /tmp/pytorch-work, measure result
+- Concrete references (file paths, line numbers in /tmp/pytorch-work)
+
+Then ONE of two outcomes:
+
+**Outcome A — Fix implemented:**
+- Implement the fix in /tmp/pytorch-work (FX pass, scheduler change, config)
+- Commit it: `git commit -m "[inductor] <what> (<repro_id>, <speedup>x)"`
+- Measure before/after
+- Update writeup with: status=IMPLEMENTED, speedup achieved, commit hash
+
+**Outcome B — Can't fix, design doc:**
+- Explain precisely WHY it can't be fixed with current infrastructure
+- Describe what scheduler/codegen enhancement is needed
+- Reference specific functions/lines that would need to change
+- List all affected repros (grep for similar patterns)
+- Classify into a design TODO family (e.g., "reduction-with-epilogue", "cooperative-split-K")
+- Update writeup with: status=DESIGN_TODO, family, affected repro count
 
 Every GOOD oracle (ratio > 1.05) gets a full investigation. No exceptions.
+The writeup is the deliverable — either a fix or a detailed design doc.
 
 Each subagent prompt must include:
 - The constraint: "Do NOT write custom Triton kernels. Only graph rewrites, scheduler changes, or config adjustments."
