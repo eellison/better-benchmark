@@ -43,10 +43,18 @@ The real fix requires **hoisting loop-invariant loads** out of the reduction loo
 | multi_kernel=2 (persistent) | 396.4 | 4.31x |
 | CrossEntropyOnlineReduction (default) | 146.4 | 1.59x |
 
-## Fix status: design_todo
+## Fix status: partial_commit
 
-The fix requires two changes:
-1. **Codegen: loop-invariant hoisting** for `online_softmax_cross_entropy` — emit target_logit load before the reduction loop
+Commit 564f1c3dcc9 on branch pr-184905: partial codegen fix that hoists target_logit
+when target_idx is already in outside_loop_vars. Does not activate for this repro
+(indirect indexing prevents hoisting) but provides infrastructure for full fix.
+
+The full fix requires:
+1. **Codegen: general loop-invariant hoisting** for indirect loads/compute that don't depend on rindex
+   - Modify `get_load_buffer()` to route indirect loads without rindex to `self.body`
+   - Modify `indirect_indexing()` in common.py to emit to `self.body` when var is in outside_loop_vars
+   - Fix mask inheritance (hoisted loads must strip r0_mask from their mask expression)
+   - Route intermediate ops (where, ne, full, etc.) to `self.body` when loop-invariant
 2. **Codegen: persistent path fix** — reduce [XBLOCK, R0_BLOCK] target tensor to [XBLOCK, 1] before store
 
 ## Affected repros
