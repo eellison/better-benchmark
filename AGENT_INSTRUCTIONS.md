@@ -43,6 +43,20 @@ The pytorch working tree is at `/tmp/pytorch-work` on branch `pr-184905`.
 | Cooperative reduction heuristic | `choices.py` (should_use_cooperative_reduction) | xhint 17-64 gap |
     - if this is because of fusion, it's likely that this should not have been a choices fix, but a scheduler level optimization
 
+## Investigation Workflow
+
+When you find a gap > 1.05x, follow this flow:
+
+1. **Check existing writeups first**: `ls investigation_results/inductor_writeups/per_repro/` — skim 2-3 writeups for similar repro families (same prefix like `sum_sum_`, `var_mean_`, `pointwise_`). Are other repros hitting the same root cause?
+
+2. **If the pattern already has a fix committed**: check if the fix applies to this repro. Test with the fix enabled. If it helps, note "covered by existing fix X" in the writeup.
+
+3. **If the pattern is a known design TODO**: classify it, add to the affected-repro count in the existing writeup, and move on. Don't re-investigate the same root cause.
+
+4. **If it's a NEW pattern or fixable**: investigate deeply, try to implement, commit if successful.
+
+5. **Always write/update the per-repro writeup** regardless of outcome.
+
 ## Key Principles
 
 1. **Fuse more, tile better** — the answer is almost always "fuse into one kernel with proper tiling." Don't avoid fusion; fix the tiling so it's profitable.
