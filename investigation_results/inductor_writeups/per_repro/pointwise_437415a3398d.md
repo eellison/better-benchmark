@@ -8,7 +8,9 @@
 
 ## Fix path: Two potential fixes: (1) Optimize the unrolled argmax combine function in `ir.py` to detect when input is guaranteed non-NaN (e.g., from ReLU) and emit a simpler comparison chain. (2) For maxpool-with-offsets specifically, add a specialized codegen path that tracks the best value and offset in one pass using a simple `>` comparison rather than the full NaN-aware tie-breaking protocol.
 
-## Status: design_todo
+## Status: partially_improved
+
+## Fix applied: Optimized unrolled argmax combine function in `torch/_inductor/ir.py` reduces ratio from 2.40x to 2.29x for this case. The remaining gap is from the BN+ReLU producer fusion through maxpool (SCHEDULER_FUSION classification) which requires deeper scheduler changes. Committed on pr-184905 branch in /tmp/pytorch-work.
 
 ## Details
 

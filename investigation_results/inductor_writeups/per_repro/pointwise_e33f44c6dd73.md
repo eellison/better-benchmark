@@ -8,7 +8,9 @@
 
 ## Fix path: Add a specialized maxpool-with-offsets codegen pattern that replaces the generic argmax unrolled reduction with a simpler "track best value and offset" loop. Since maxpool semantics specify first-index-wins for ties, the specialized pattern can use a simple `>` comparison (or `>=` for NaN propagation) without the full tie-breaking protocol. This could be implemented either as a dedicated lowering in `_max_pool_with_offsets` or as an optimization pass in the unrolled reduction codegen that detects maxpool-style argmax patterns.
 
-## Status: design_todo
+## Status: fix_implemented (partial)
+
+## Fix: Optimized unrolled argmax combine function in `torch/_inductor/ir.py` to skip explicit tie-breaking when processing in ascending index order. Reduces ratio from 1.59x to 1.31x. Committed on pr-184905 branch in /tmp/pytorch-work.
 
 ## Details
 
