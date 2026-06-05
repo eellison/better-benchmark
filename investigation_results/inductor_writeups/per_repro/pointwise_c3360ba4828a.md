@@ -1,9 +1,9 @@
-# pointwise_c3360ba4828a - Virtual Cat + Dropout + Sibling Masks Fusion Gap
+# pointwise_c3360ba4828a - Virtual Cat Dropout Masks (SqueezeNet)
 
 ## Benchmark Result
 - Oracle: 149.44 us
 - Compile: 203.62 us
-- Ratio: 1.363x
+- Ratio: 1.362x
 - Status: GOOD (oracle wins)
 
 ## Classification
@@ -11,66 +11,92 @@ SCHEDULER_FUSION
 
 ## Root Cause
 
-The oracle computes the full SqueezeNet fire module epilogue in **one** kernel:
-1. Two ReLU activations on separate conv outputs (f32[512,256,13,13] each)
-2. Virtual channel-concatenation (no materialized cat buffer)
-3. Seeded Inductor dropout (rand > 0.5, scale by 2.0) over the concatenated [512,512,13,13]
-4. Two boolean backward masks (le_scalar for each ReLU output)
+The repro is from SqueezeNet training (`torchbench_squeezenet1_1_train`). It computes:
+1. ReLU on two [512,256,13,13] inputs
+2. Channel-dimension cat -> [512,512,13,13]
+3. Inductor seeded dropout (p=0.5) on the concatenated result
+4. Two boolean backward masks (le_scalar on the ReLU outputs)
 
-All done in a single pass over the input elements without materializing:
-- The concatenated f32[512,512,13,13] intermediate (saves 512*512*13*13*4 = 173MB write+read)
-- The individual ReLU outputs (computed inline)
+### Oracle approach (1 kernel):
+A single Triton kernel iterates over the full [512,512,13,13] domain and:
+- Determines which input half it belongs to (channel < 256 or >= 256)
+- Reads the appropriate input, computes ReLU inline
+- Uses the full output element index for `tl.rand(seed, offset)` to compute dropout
+- Stores dropout-scaled result + both boolean masks
+- Total: 1 kernel, reads each input once, writes 3 outputs
 
-Inductor emits **two** kernels:
-1. `triton_poi_fused_0`: Computes both ReLUs, writes the le_masks, and writes ReLU outputs to intermediate buffers.
-2. `triton_poi_fused_gt_inductor_lookup_seed_inductor_random_mul_1`: Reads the concatenated ReLU intermediates, applies stochastic dropout, writes the dropout output.
+### Inductor approach (2 kernels):
+1. Kernel 1 (combo or run-twice): Computes ReLU on each input, writes into cat buffer slices, writes boolean masks
+2. Kernel 2: Reads full [512,512,13,13] cat buffer, generates random, applies dropout mask, writes output
 
-The fundamental issue: Inductor materializes the ReLU outputs as intermediate buffers because the cat consumer and the le_mask consumers have different shapes. The cat creates a [512,512,13,13] tensor from two [512,256,13,13] inputs, and the dropout operates on the larger shape. Inductor's scheduler cannot keep the cat as a "virtual" multi-source producer while threading the dropout RNG and sibling mask stores through the same kernel.
+The bottleneck: kernel 2 re-reads 44M elements (512*512*13*13*4 = ~170MB) that kernel 1 just wrote.
 
 ## Kernel Count
-- Inductor: 2 kernels  
-- Oracle: 1 kernel
+- **Oracle: 1 kernel**
+- **Inductor: 2 kernels**
 
-## Memory Traffic Analysis
+## Why Inductor Cannot Do This Today
 
-**Oracle** (1 kernel):
-- Reads: 2 * 512*256*13*13*4 = 173.9 MB (two conv inputs)
-- Writes: 512*512*13*13*4 = 173.9 MB (dropout) + 2*512*256*13*13*1 = 43.5 MB (bool masks)
-- Total: ~391 MB
+There are TWO barriers that BOTH prevent single-kernel execution:
 
-**Inductor** (2 kernels):
-- Kernel 1 reads: 2 * 86.9 MB = 173.9 MB, writes: 2 * 86.9 MB (relu outputs) + 43.5 MB (masks) = ~261 MB
-- Kernel 2 reads: 173.9 MB (relu intermediates via cat), writes: 173.9 MB (dropout) = ~348 MB
-- Total reads+writes: ~783 MB (2x more than oracle)
+### Barrier 1: `result.realize()` in inductor_random (lowering.py:3021)
 
-The extra 173.9 MB write + 173.9 MB read of the ReLU intermediates explains the 1.36x slowdown.
+The `inductor_random` lowering unconditionally calls `result.realize()`. This forces the random output into a separate ComputedBuffer. However, removing this alone does NOT fix the problem — the random gets fused with its downstream consumers (gt, mul) into kernel 2, but kernel 1 (relu+cat writes) and kernel 2 (random+dropout) still remain separate.
+
+Investigation shows that `result.realize()` is actually unnecessary for correctness: the random uses `FixedLayout.make_indexer()` with contiguous strides, so `random_pos(index)` computes deterministic offsets regardless of iteration order. The realize exists as a conservative guard for RNG reproducibility that is overly broad.
+
+### Barrier 2: Domain mismatch between cat writers and cat consumer
+
+The fundamental blocker is that:
+- Cat writers iterate over [512,256,13,13] = 22M elements (one per input half)
+- Cat consumer (dropout) iterates over [512,512,13,13] = 44M elements (full cat)
+
+The scheduler cannot fuse kernels with different iteration domains. The cat is a NopKernel (virtual layout) — it doesn't compute anything, it just assigns storage offsets. But the relu writers MUST write to the cat buffer at specific offsets (one writes to the first 256 channels, the other to channels 256-511). The dropout then reads the full 512-channel buffer.
+
+For single-kernel execution, the kernel would need to:
+- Iterate over [512,512,13,13]
+- For each element, determine which input it came from (channel < 256?)
+- Read from the appropriate input
+- Compute ReLU inline
+- Generate random and apply dropout
+- Write output + both boolean masks
+
+This requires "reading through the virtual cat" — a capability the scheduler does not have.
+
+### What would need to change
+
+1. **For the inductor_random realize**: Remove `result.realize()` at lowering.py:3021, or make it conditional on whether downstream consumers need deterministic layout. This alone doesn't fix the 2-kernel problem but is a prerequisite.
+
+2. **For the domain mismatch**: The scheduler needs a new fusion mode: "inline-through-virtual-concat." When a NopKernel (cat) produces a buffer that is consumed by a pointwise op, and the cat's inputs are cheap pointwise ops, the scheduler should:
+   - Iterate over the cat's output domain
+   - For each element, determine which cat input it belongs to (using offset arithmetic)
+   - Inline the corresponding input's computation
+   - Fuse with the downstream consumer
+
+   This is architecturally similar to the `inline_recomputable_producers` pass (see pointwise_e26de0a669ae writeup) but applied to virtual concat patterns.
 
 ## Config Exploration
-- `combo_kernels=True`: no change (2 kernels)
-- `combo_kernel_per_subkernel_blocks=True`: no change
-- `triton.multi_kernel=3`: no change
-- `coordinate_descent_tuning=True`: already enabled
+- `combo_kernels=True`: Combines the two relu kernels into one combo kernel (still 2 total)
+- `multi_kernel=2`: marginal improvement (197us)
+- Removing `result.realize()`: Still 2 kernels (domain mismatch remains)
 
-No config resolves this.
+## File References
+- `/tmp/pytorch-work/torch/_inductor/lowering.py:3021` — the `result.realize()` call
+- `/tmp/pytorch-work/torch/_inductor/ir.py:6462` — ConcatKernel (NopKernel) definition
+- `/tmp/pytorch-work/torch/_inductor/ir.py:6559` — `realize_into` forces relu inputs to materialize into cat buffer
+- `/tmp/pytorch-work/torch/_inductor/scheduler.py` — fusion scoring and domain matching
 
-## Fix Direction (Design Doc)
+## Relationship to pointwise_e26de0a669ae
 
-**Enhancement needed**: Virtual-cat producer fusion with seeded dropout and sibling stores.
+Both repros share the same fundamental pattern: a cheap producer's computation should be inlined into a consumer that has a DIFFERENT iteration domain. The architectural fix (`inline_recomputable_producers`) applies to both:
 
-The scheduler needs to:
-1. Recognize that `cat([relu(x0), relu(x1)], dim=1)` can be kept virtual -- each element of the concatenated output maps back to exactly one of the two inputs
-2. When the cat feeds into dropout (which uses positional RNG), the dropout can be applied in input-space by computing the correct output offset for each input element
-3. The sibling le_mask outputs (which read the ReLU intermediates) can be written in the same pass
+| Aspect | e26de0a669ae (stencil) | c3360ba4828a (concat) |
+|--------|----------------------|---------------------|
+| Producer | BN+ReLU [128,192,71,71] | ReLU [512,256,13,13] x2 |
+| Consumer | MaxPool [128,192,35,35] | Dropout [512,512,13,13] |
+| Domain change | 4:1 reduction (stride-2) | 1:2 expansion (cat) |
+| Access pattern | 9 shifted reads (stencil) | Conditional read (channel offset) |
+| Key mechanism | Recompute BN at each stencil pos | Inline relu through virtual cat |
 
-This requires the scheduler to model "virtual concat" as a zero-cost layout transformation and fuse through it.
-
-**File references**:
-- `/tmp/pytorch-work/torch/_inductor/scheduler.py` (fusion decisions)
-- `/tmp/pytorch-work/torch/_inductor/ir.py` (ConcatKernel, or virtual cat representation)
-- `/tmp/pytorch-work/torch/_inductor/codegen/triton.py` (RNG indexing for positional dropout)
-
-**Affected repros**: SqueezeNet and other architectures with concat + dropout in training (fire modules, DenseNet dense blocks).
-
-## Source
-- Label: torchbench_squeezenet1_1_train_000
-- Pattern: two ReLUs -> virtual cat -> positional dropout + two backward masks
+## Status
+Design doc only — fix not implemented. Requires both the `inductor_random` realize removal AND a "read-through-virtual-concat" mechanism in the scheduler.
