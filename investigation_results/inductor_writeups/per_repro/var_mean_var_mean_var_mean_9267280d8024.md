@@ -9,7 +9,8 @@
 - Oracle: `82.78 us`
 - `torch.compile`: `93.95 us`
 - Ratio: 1.135x
-- Parent status: `not_fixable_config`
+- `torch.compile coordinate_descent_tuning=True`: `86.9 us` (bench_compare, no CUDAGraph)
+- Parent status: `partially_fixable_config`
 
 ## Diagnosis
 
@@ -48,14 +49,19 @@ memory traffic.
 ### Configs Tried
 
 - Default: 10 kernels, 93.95us
-- Issue is structural: norm-template does not fuse downstream spatial reduction
+- `coordinate_descent_tuning=True`: 86.9us (1.27x improvement over non-CUDAGraph baseline)
+  This improves block size selection for the individual reduction kernels.
+- `triton.multi_kernel=3`: slower (119.7us) due to overhead from multi-kernel selection
+  across 10 kernel launches
 
 ### Fix Assessment
 
-Not fixable via config. Same fundamental issue as var_mean_mean_7a446f7d0ed8:
-Inductor's scheduler does not fuse spatial mean reductions into the normalization
-epilogue. Additionally, the multi-branch structure means many kernel launches for
-what could be more parallel work within fewer kernels.
+Partially fixable via `coordinate_descent_tuning=True` which narrows the gap.
+The remaining gap is structural: Inductor's scheduler does not fuse spatial mean
+reductions into the normalization epilogue. Additionally, the multi-branch structure
+means many kernel launches for what could be more parallel work within fewer kernels.
+The fundamental fix requires teaching the norm-template to accept a downstream
+spatial reduction consumer and emit it in the same kernel pass.
 
 ## Commands
 

@@ -9,6 +9,7 @@
 - Oracle: `52.10 us`
 - `torch.compile`: `61.44 us`
 - Ratio: 1.179x
+- `torch.compile coordinate_descent_tuning=True`: `64.28 us` (measured with CUDAGraph)
 - Parent status: `not_fixable_config`
 
 ## Diagnosis
@@ -46,15 +47,18 @@ mean.
 
 ### Configs Tried
 
-- Default config: 2 kernels, 61.44us
+- Default config: 2 kernels, ~62us (with CUDAGraph)
+- `coordinate_descent_tuning=True`: ~64us (marginal, no structural change)
+- `combo_kernels=True`: no improvement over cd alone
 - The issue is structural scheduler fusion, not autotuning
 
 ### Fix Assessment
 
-Not fixable via config. Requires extending Inductor's BN-training template to
-recognize when a downstream spatial reduction consumer (mean.dim) can be fused
-into the normalization epilogue, avoiding materialization of the full
-normalized tensor.
+Not fixable via config. `coordinate_descent_tuning` improves block sizes slightly
+but cannot fuse the spatial mean into the normalization epilogue. Requires extending
+Inductor's BN-training template to recognize when a downstream spatial reduction
+consumer (mean.dim) can be fused into the normalization epilogue, avoiding
+materialization of the full normalized tensor (256*120*28*28 = ~96MB fp32).
 
 ## Commands
 

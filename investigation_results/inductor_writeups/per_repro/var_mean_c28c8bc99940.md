@@ -9,7 +9,8 @@
 - Oracle: `9.98 us`
 - `torch.compile`: `14.05 us`
 - Ratio: 1.407x
-- Parent status: `not_fixable_config`
+- `torch.compile triton.multi_kernel=3`: `11.10 us` (1.43x speedup)
+- Parent status: `fixable_config`
 
 ## Diagnosis
 
@@ -42,15 +43,26 @@ immediately reused for normalization. Inductor does not currently attempt this
 
 ### Configs Tried
 
-- `persistent_reductions=True` (already default): no change, epilogue still re-reads
+- `persistent_reductions=True` (already default): no change, epilogue still re-reads.
+  The persistent reduction threshold for INNER hints is 1024, but r0_numel=3136 exceeds it.
 - `max_autotune=True`: no structural change to kernel strategy
+- **`triton.multi_kernel=3`: 1.43x faster (11.10us vs 15.84us baseline)**. This config
+  generates both a loop-based and a persistent reduction variant, benchmarks both at
+  compile time, and selects the faster one. The persistent variant uses RBLOCK=4096
+  (next power of 2 above 3136) and avoids the second data read entirely.
 
 ### Fix Assessment
 
-Not fixable via config. Requires Inductor scheduler/codegen changes to recognize
-when a reduction epilogue can reuse values already loaded for the reduction (i.e.,
-when reduction dimension fits in a single block). This is a known limitation of
-Inductor's reduction template.
+FIXABLE via `triton.multi_kernel=3`. This config raises the persistent reduction
+threshold by 16x (1024*16=16384 > 3136), causing Inductor to also generate a
+persistent variant. The persistent kernel holds all 3136 elements in registers and
+computes both the Welford reduction and the normalize+affine+ReLU epilogue in a
+single pass, matching the oracle's strategy.
+
+Alternatively, the persistent reduction threshold heuristic in
+`torch/_inductor/choices.py:should_use_persistent_reduction` could be adjusted
+to allow persistent mode for reductions up to 4096 elements with INNER hints when
+the x dimension (576 channels here) provides sufficient parallelism.
 
 ## Commands
 
