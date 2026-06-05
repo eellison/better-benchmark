@@ -1,8 +1,4 @@
-"""
-Oracle for <REPRO_ID>
-
-Gap diagnosis (classification: <SCHEDULER_FUSION|SCATTER_REDUCE|COOPERATIVE_SPLIT_K|ALGEBRAIC_ELIMINATION|NEW_PATTERN>): this oracle <specific behavior>, whereas Inductor <specific current behavior>; Inductor cannot do this today because <specific scheduler/codegen/pattern limitation>; the fix is <CLASS>: <specific Inductor change>.
-"""
+"""Gap diagnosis (classification: <SCHEDULER_FUSION|SCATTER_REDUCE|COOPERATIVE_SPLIT_K|ALGEBRAIC_ELIMINATION|NEW_PATTERN>): this oracle <specific behavior>, whereas Inductor <specific current behavior>; Inductor cannot do this today because <specific scheduler/codegen/pattern limitation>; the fix is <CLASS>: <specific Inductor change>."""
 from __future__ import annotations
 
 import argparse
@@ -26,6 +22,8 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Import shared oracle infrastructure. Run first:
 #   python -m pip install --no-build-isolation -e .
 # Do not add oracle-local sys.path or REPO_ROOT import hacks.
+# Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
+# GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
@@ -167,6 +165,9 @@ def main():
                     print(f"WARNING: oracle is slower than compile for "
                           f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
         else:
+            # All timing must go through bench_oracle(). Direct do_bench or
+            # compiled(*inputs) timing includes dispatch overhead and can invent
+            # fake gaps for fast kernels.
             result = bench_oracle(
                 oracle_forward,
                 instance,

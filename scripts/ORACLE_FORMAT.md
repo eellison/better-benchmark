@@ -47,19 +47,14 @@ Every oracle file must have:
 ### 1. Docstring with Gap Diagnosis
 
 ```python
-"""
-Oracle for <repro_id>
-
-Gap diagnosis (classification: <CLASS>): this oracle <specific behavior>,
+"""Gap diagnosis (classification: <CLASS>): this oracle <specific behavior>,
 whereas Inductor <specific current behavior>; Inductor cannot do this today
 because <specific scheduler/codegen/pattern limitation>; the fix is <CLASS>:
-<specific Inductor change>.
-"""
+<specific Inductor change>."""
 ```
 
 Valid classifications: `SCHEDULER_FUSION`, `SCATTER_REDUCE`,
-`COOPERATIVE_SPLIT_K`, `ALGEBRAIC_ELIMINATION`, `RECOMPUTE_FUSION`,
-`BANDWIDTH_BOUND`, `NEW_PATTERN`.
+`COOPERATIVE_SPLIT_K`, `ALGEBRAIC_ELIMINATION`, `NEW_PATTERN`.
 
 ### 2. Standard Constants
 
@@ -115,6 +110,14 @@ Correctness: PASS
 Exit code: 0 = pass, 1 = fail.
 
 ### --bench output
+
+All timing must use `bench_oracle()` or `bench_oracle_all_shapes()` from
+`oracle_harness`, as called by `scripts/oracle_template.py`. Do not write custom
+`run_bench` functions, call `triton.testing.do_bench` directly, use
+`time.perf_counter`, or time `compiled(*inputs)` yourself. Those paths miss the
+CUDAGraph/GPU-lock/interleaving behavior in the harness and can create fake
+speedups for fast kernels. If `--bench` reports a CUDAGraph capture warning,
+report it and treat the timing as invalid.
 
 One JSON line (machine-parseable) followed by optional human-readable context:
 
