@@ -74,6 +74,39 @@ python -m pip install --no-build-isolation -e .
 - Don't write subset oracles (must match full `Repro()` scope)
 - Don't add oracle-local `sys.path` / `REPO_ROOT` import hacks. If an oracle
   cannot import shared helpers, install the repo first with the command above.
+- **DO NOT write your own benchmarking/timing logic** (see below)
+
+#### Benchmarking: MUST use oracle_harness.bench_oracle()
+
+**CRITICAL**: Do NOT write inline `run_bench()` functions, do NOT call `do_bench()`
+directly, do NOT use `time.perf_counter()` for timing. All of these produce
+**fake gaps** for fast kernels because dynamo dispatch overhead (~10us) dominates
+without CUDAGraph capture.
+
+We verified this: oracles with inline timing showed 2.3x "gaps" that completely
+vanished (1.00x) when measured properly with CUDAGraph. The gap was pure
+Python-side dispatch overhead, not a kernel performance difference.
+
+**The only correct way to benchmark**:
+```python
+from oracle_harness import bench_oracle
+# ... in main():
+result = bench_oracle(oracle_forward, instance, inputs, REPRO_ID,
+                      warmup=args.warmup, rep=args.rep)
+```
+
+`bench_oracle()` handles:
+- CUDAGraph capture + replay (eliminates dispatch overhead)
+- Exclusive GPU lock (prevents contention from other processes)
+- Interleaved timing rounds (oracle/compile alternating, min-of-N)
+- Adaptive rep count for fast kernels
+
+**If you see a "CUDAGraph capture failed" warning**: the measurement is invalid.
+Fix the issue (usually: ensure the compiled function has no graph breaks) or
+report it — don't accept the fallback number.
+
+**The template (`scripts/oracle_template.py`) already does this correctly.**
+Just implement `oracle_forward(inputs)` and leave the `main()` as-is.
 
 **Use the standardized template**: `scripts/oracle_template.py`
 
