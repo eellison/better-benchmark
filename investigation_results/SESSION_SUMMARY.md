@@ -100,6 +100,7 @@ The pytorch working tree is at `/tmp/pytorch-work` on branch `pr-184905`.
 | Realization blocks fusion | `torch/_inductor/ir.py` (should_realize_on_reuse, realize_hint) + `scheduler.py` | pointwise_e26de, var_mean_5b0c |
 |   | - realize_hint forces materialization before pool/stencil consumers — fix is to allow fusion instead | |
 |   | - The consumer (pool, reduction) should fuse with the producer, not force a buffer round-trip | |
+      - 
 | Constant folding gap | `torch/fx/passes/` or `torch/_inductor/constant_folding.py` | iota mask elimination |
 
 **How to test a fix:**
