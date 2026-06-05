@@ -1,15 +1,4 @@
-"""
-Oracle for sum_sum_sum_9d05c4d37c77
-
-Gap diagnosis:
-  Classification: RECOMPUTE_FUSION
-  What oracle does differently: Computes the full avg-pool-backward/add producer
-    directly inside the sibling BN/ReLU-backward reductions and recomputes it in
-    the dependent tensor epilogue, avoiding materialized slice/where buffers.
-  What Inductor change would fix: Add scheduler support for recompute fusion
-    through shared stencil producers into multi-output channel reductions and
-    their post-reduction epilogues.
-"""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete eight-output Inception backward scope from Repro.forward by recomputing the avg-pool-backward plus three-add shared producer inside the four channel-split BN/ReLU-backward reductions and their dependent tensor epilogues, returning the four input-gradient tensors and four scale-gradient vectors with the eager layouts, whereas Inductor currently materializes the avg-pool/add/slice/where producers and schedules the sibling channel reductions plus tensor epilogues as separate generic kernels; Inductor cannot do this today because the scheduler/codegen cannot keep a shared stencil producer virtual across multiple disjoint channel reductions and reuse the finalized channel summaries inside their full-tensor epilogues; the fix is SCHEDULER_FUSION: add a multi-output reduction schedule that fuses shared stencil/pointwise producers into same-shape channel reductions and emits the dependent BN-backward epilogue stores without materializing the slice/where intermediates."""
 from __future__ import annotations
 
 import argparse
@@ -36,6 +25,7 @@ from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
+    bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
     has_stochastic_ops,
@@ -52,31 +42,11 @@ H = 35
 W = 35
 HW = H * W
 SPATIAL = N * HW
-REDUCE_SCALE = 1.0 / SPATIAL
-HISTORICAL_BEST_COMPILE_US = 706.5920233726501
 
 DEFAULT_BLOCK_C = 4
 DEFAULT_BLOCK_K = 256
 DEFAULT_FINAL_BLOCK_C = 8
 DEFAULT_EPILOGUE_BLOCK_K = 128
-
-COMPILE_CONFIGS = [
-    ("coordinate_descent_tuning=True", {"coordinate_descent_tuning": True}),
-    (
-        (
-            "combo_kernels=True,combo_kernel_per_subkernel_blocks=True,"
-            "coordinate_descent_tuning=True,benchmark_combo_kernel=True,"
-            "triton.multi_kernel=3"
-        ),
-        {
-            "combo_kernels": True,
-            "combo_kernel_per_subkernel_blocks": True,
-            "coordinate_descent_tuning": True,
-            "benchmark_combo_kernel": True,
-            "triton.multi_kernel": 3,
-        },
-    ),
-]
 
 
 def get_inputs():
@@ -730,77 +700,11 @@ def _strict_scope_check(instance, inputs) -> bool:
         ok = ok and shape_ok and dtype_ok and stride_ok
         print(
             f"  strict scope output {idx}: "
-            f"shape_match={shape_ok} dtype_match={dtype_ok} stride_match={stride_ok}"
+            f"shape_match={shape_ok} dtype_match={dtype_ok} stride_match={stride_ok} "
+            f"oracle_stride={got.stride()} eager_stride={expected.stride()}"
         )
     print(f"  strict scope: {'PASS' if ok else 'FAIL'}")
     return ok
-
-
-def _compile_with_config(instance, inputs, config: dict[str, object]):
-    import torch._dynamo
-    import torch._inductor.config as inductor_config
-
-    torch._dynamo.reset()
-    with inductor_config.patch(config):
-        compiled = torch.compile(instance)
-        with torch.no_grad():
-            for _ in range(5):
-                compiled(*inputs)
-            torch.cuda.synchronize()
-    return compiled
-
-
-def _do_cuda_bench(fn, warmup: int, rep: int) -> float:
-    _require_triton()
-    with torch.no_grad():
-        return triton.testing.do_bench(
-            fn,
-            warmup=warmup,
-            rep=rep,
-            return_mode="min",
-        ) * 1000.0
-
-
-def bench_required_configs(inputs, warmup: int, rep: int) -> dict[str, object]:
-    """Benchmark the full-scope oracle and the required compile configs."""
-    with torch.no_grad():
-        oracle_forward(inputs)
-        torch.cuda.synchronize()
-        oracle_us = _do_cuda_bench(lambda: oracle_forward(inputs), warmup, rep)
-
-    timings: dict[str, float] = {"oracle_fused": oracle_us}
-    print(
-        "oracle_fused full-scope avg-pool producer + four BN multi-output reductions: "
-        f"{oracle_us:.3f} us"
-    )
-
-    for label, config in COMPILE_CONFIGS:
-        instance = get_repro_instance()
-        compiled = _compile_with_config(instance, inputs, config)
-        with torch.no_grad():
-            compile_us = _do_cuda_bench(lambda: compiled(*inputs), warmup, rep)
-        timings[label] = compile_us
-        print(f"torch.compile {label}: {compile_us:.3f} us")
-
-    combo_label = COMPILE_CONFIGS[1][0]
-    best_required_compile = min(timings[label] for label, _ in COMPILE_CONFIGS)
-    best_reference = min(best_required_compile, HISTORICAL_BEST_COMPILE_US)
-    valid_floor = oracle_us < best_reference
-    print(f"historical best_compile_us: {HISTORICAL_BEST_COMPILE_US:.3f} us")
-    print(f"Valid floor: {'yes' if valid_floor else 'no (diagnosis-only)'}")
-
-    result = {
-        "repro_id": REPRO_ID,
-        "oracle_us": round(oracle_us, 3),
-        "compile_us": round(timings["coordinate_descent_tuning=True"], 3),
-        "combo_compile_us": round(timings[combo_label], 3),
-        "best_required_compile_us": round(best_required_compile, 3),
-        "historical_best_compile_us": round(HISTORICAL_BEST_COMPILE_US, 3),
-        "valid_floor": valid_floor,
-        "classification": "RECOMPUTE_FUSION",
-    }
-    print(json.dumps(result))
-    return result
 
 
 # --- CLI entry point ---
@@ -870,7 +774,19 @@ def main():
                     print(f"WARNING: oracle is slower than compile for "
                           f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
         else:
-            bench_required_configs(inputs, warmup=args.warmup, rep=args.rep)
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(
+                    f"WARNING: oracle is slower than compile "
+                    f"(ratio={result['ratio']:.3f}x)"
+                )
 
 
 if __name__ == "__main__":

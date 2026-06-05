@@ -1,11 +1,4 @@
-"""
-Oracle for sum_sum_1a663e225990
-
-Gap diagnosis:
-  Classification: ALGEBRAIC_ELIMINATION
-  What oracle does differently: Computes the full masked-LM softmax-backward update, both padded materialized outputs, and the sibling vocabulary reduction directly from labels/logits without constructing the dense one-hot tensor or reducing it.
-  What Inductor change would fix: Add algebraic elimination for one-hot equality masks feeding a row reduction and dense softmax-backward epilogue, then fuse the remaining multi-output stores with the column reduction.
-"""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the full masked-LM softmax-backward scope from `Repro.forward`, including both padded materialized layouts and the vocabulary sum, by replacing the dense `eq(label, arange)` one-hot tensor and its row reduction with sparse label corrections plus fused output and partial-column-sum stores, whereas Inductor currently lowers the decomposed one-hot `where`, row sum, exp update, add, pad/permute, and column sum as generic dense pointwise/reduction kernels over `[16384,30522]` intermediates; Inductor cannot do this today because its scheduler/codegen simplifier does not canonicalize equality-built one-hot tensors into row-scalar label corrections that can feed sibling materialized stores and a column reduction; the fix is ALGEBRAIC_ELIMINATION: add a one-hot label-mask elimination that rewrites the row-sum/update to sparse corrections and exposes the remaining stores/reduction to fused scheduling."""
 from __future__ import annotations
 
 import argparse
@@ -24,7 +17,6 @@ except ImportError:
 # --- Configuration (auto-derived from file location) ---
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 M = 16384
@@ -43,7 +35,6 @@ from oracle_harness import (
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
-    get_shape_key,
     has_stochastic_ops,
 )
 
@@ -201,6 +192,12 @@ if triton is not None:
         tl.store(out2_ptr + cols, sums, mask=cols < N_)
 
 
+def _validate_shape_param(name, actual, expected):
+    actual_tuple = tuple(int(dim) for dim in actual)
+    if actual_tuple != expected:
+        raise ValueError(f"{name} mismatch: expected {expected}, got {actual_tuple}")
+
+
 def _validate_inputs(inputs):
     if triton is None:
         raise RuntimeError("triton is not available")
@@ -226,6 +223,12 @@ def _validate_inputs(inputs):
     tensors = (arg324_1, arg250_1, arg102_1, arg247_1, arg248_1, arg249_1, arg325_1)
     if any(not isinstance(value, torch.Tensor) for value in tensors):
         raise TypeError("oracle expects the repro tensor inputs in positions 0..6")
+    _validate_shape_param("_shape_param_0", _shape_param_0, (1, N))
+    _validate_shape_param("_shape_param_1", _shape_param_1, (M, N))
+    _validate_shape_param("_shape_param_2", _shape_param_2, (-1, N))
+    _validate_shape_param("_shape_param_3", _shape_param_3, (32, 512, N))
+    _validate_shape_param("_shape_param_4", _shape_param_4, (M, N))
+    _validate_shape_param("_shape_param_5", _shape_param_5, (N,))
     if arg247_1.device.type != "cuda":
         raise RuntimeError("Triton oracle requires CUDA inputs")
     if arg324_1.shape != () or arg250_1.shape != ():

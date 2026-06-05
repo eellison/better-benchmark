@@ -1,15 +1,7 @@
-"""
-Oracle for amax_sum_sum_c9a6620c3408
-
-Gap diagnosis:
-  Classification: NEW_PATTERN
-  What oracle does differently: Computes the full MobileBERT masked-LM forward slice, bias add, ignore-index cross-entropy mean, and materialized softmax output with one online row kernel plus one scalar reduction.
-  What Inductor change would fix: Add a semantic lowering for biased log_softmax plus gather plus masked mean that can share online softmax row accumulators with required sibling materialized outputs.
-"""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete MobileBERT masked-LM captured scope from repro.py, including the logits slice, bias add, returned biased logits view, ignore-index cross-entropy mean, and returned materialized softmax probabilities, whereas Inductor currently lowers the same slice/add/log_softmax/gather/masked-mean/probability-materialization graph as generic reductions and pointwise/layout work with separate materialized intermediates; Inductor cannot do this today because its pattern library does not recognize biased log_softmax feeding both gather/masked mean and a sibling exp output as one multi-output online-softmax row template; the fix is NEW_PATTERN: add a guarded biased softmax-cross-entropy lowering that shares row max/sum accumulators across the loss path and required materialized probability/logit outputs."""
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -23,9 +15,12 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
-    check_oracle,
+    bench_oracle,
+    bench_oracle_all_shapes,
+    get_hardware_info,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
 )
 
 
@@ -33,21 +28,10 @@ REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-HISTORICAL_BEST_COMPILE_US = 2980.9279441833496
-
-COMPILE_CONFIGS = [
-    ("coordinate_descent_tuning", {"coordinate_descent_tuning": True}),
-    (
-        "combo_looped_cd",
-        {
-            "combo_kernels": True,
-            "combo_kernel_per_subkernel_blocks": True,
-            "coordinate_descent_tuning": True,
-            "benchmark_combo_kernel": True,
-            "triton.multi_kernel": 3,
-        },
-    ),
-]
+CLASSIFICATION = "NEW_PATTERN"
+ACTIONABLE = True
+BLOCK_N = 2048
+NUM_WARPS = 8
 
 
 def get_inputs():
@@ -163,9 +147,6 @@ def _launch_oracle(
     loss_per_row: torch.Tensor,
     valid_per_row: torch.Tensor,
     mean_out: torch.Tensor,
-    *,
-    block_n: int,
-    num_warps: int,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     _require_triton_cuda()
     n_rows = labels.numel()
@@ -195,8 +176,8 @@ def _launch_oracle(
         valid_per_row,
         n_cols=n_cols,
         mm_row_stride=mm.stride(0),
-        block_n=block_n,
-        num_warps=num_warps,
+        block_n=BLOCK_N,
+        num_warps=NUM_WARPS,
     )
     _mean_reduce_kernel[(1,)](
         loss_per_row,
@@ -227,6 +208,7 @@ def oracle_forward(inputs, *, block_n: int = 2048, num_warps: int = 8):
     mean_out = torch.empty((), device=mm.device, dtype=torch.float32)
 
     labels_1d = labels.reshape(-1)
+    del block_n, num_warps
     return _launch_oracle(
         mm,
         bias,
@@ -237,87 +219,111 @@ def oracle_forward(inputs, *, block_n: int = 2048, num_warps: int = 8):
         loss_per_row,
         valid_per_row,
         mean_out,
-        block_n=block_n,
-        num_warps=num_warps,
     )
 
 
-def _bench_cuda(fn, warmup: int, rep: int) -> float:
-    from triton.testing import do_bench
-
-    return do_bench(fn, warmup=warmup, rep=rep, return_mode="min") * 1000.0
-
-
-def _compile_with_config(instance, inputs, config: dict[str, object], warmup: int):
-    import torch._dynamo
-    import torch._inductor.config as inductor_config
-
-    torch._dynamo.reset()
-    model = instance.__class__().cuda()
-    with inductor_config.patch(config):
-        compiled = torch.compile(model)
-        for _ in range(max(1, warmup)):
-            compiled(*inputs)
-        torch.cuda.synchronize()
-    return compiled
+def _normalize_outputs(out) -> list[torch.Tensor]:
+    if isinstance(out, torch.Tensor):
+        return [out]
+    if isinstance(out, (tuple, list)):
+        flat: list[torch.Tensor] = []
+        for item in out:
+            flat.extend(_normalize_outputs(item))
+        return flat
+    return []
 
 
-def run_check(args: argparse.Namespace) -> bool:
-    inputs = get_inputs()
-    instance = get_repro_instance()
-    ok = check_oracle(
-        lambda values: oracle_forward(values, block_n=args.block_n, num_warps=args.num_warps),
-        instance,
-        inputs,
-        atol=args.atol,
-        rtol=args.rtol,
-        skip_stochastic=False,
-    )
-    print(f"Correctness: {'PASS' if ok else 'FAIL'}")
-    return bool(ok)
+def _floating_close_stats(
+    expected: torch.Tensor,
+    actual: torch.Tensor,
+    *,
+    atol: float,
+    rtol: float,
+    chunk_elements: int = 8 * 1024 * 1024,
+) -> tuple[float, bool]:
+    expected_flat = expected.reshape(-1)
+    actual_flat = actual.reshape(-1)
+    max_diff = 0.0
+    values_ok = True
+
+    for start in range(0, expected_flat.numel(), chunk_elements):
+        end = min(start + chunk_elements, expected_flat.numel())
+        expected_chunk = expected_flat[start:end].to(device="cpu", dtype=torch.float32)
+        actual_chunk = actual_flat[start:end].to(device="cpu", dtype=torch.float32)
+        diff = (expected_chunk - actual_chunk).abs()
+        if diff.numel() > 0:
+            max_diff = max(max_diff, diff.max().item())
+        if values_ok:
+            tolerance = atol + rtol * expected_chunk.abs()
+            values_ok = not bool((diff > tolerance).any().item())
+
+    return max_diff, values_ok
 
 
-def run_bench(args: argparse.Namespace) -> dict[str, object]:
-    inputs = get_inputs()
-    instance = get_repro_instance()
-
+def _run_check(
+    instance: torch.nn.Module,
+    inputs,
+    *,
+    atol: float,
+    rtol: float,
+) -> bool:
     with torch.no_grad():
-        oracle_forward(inputs, block_n=args.block_n, num_warps=args.num_warps)
+        expected = instance(*inputs)
         torch.cuda.synchronize()
-        oracle_us = _bench_cuda(
-            lambda: oracle_forward(inputs, block_n=args.block_n, num_warps=args.num_warps),
-            warmup=args.warmup,
-            rep=args.rep,
+        expected_outputs = [out.detach().cpu() for out in _normalize_outputs(expected)]
+        del expected
+        torch.cuda.empty_cache()
+
+        actual = oracle_forward(inputs)
+        torch.cuda.synchronize()
+
+    actual_outputs = _normalize_outputs(actual)
+    if len(expected_outputs) != len(actual_outputs):
+        print(
+            f"  SCOPE_MISMATCH: oracle produces {len(actual_outputs)} outputs, "
+            f"eager produces {len(expected_outputs)}"
         )
+        return False
 
-    compile_results: dict[str, float] = {}
-    with torch.no_grad():
-        for label, config in COMPILE_CONFIGS:
-            compiled = _compile_with_config(instance, inputs, config, warmup=args.warmup)
-            us = _bench_cuda(lambda: compiled(*inputs), warmup=args.warmup, rep=args.rep)
-            compile_results[label] = us
-            del compiled
-            torch.cuda.empty_cache()
+    all_ok = True
+    for i, (expected_i, actual_i) in enumerate(zip(expected_outputs, actual_outputs)):
+        shape_ok = expected_i.shape == actual_i.shape
+        dtype_ok = expected_i.dtype == actual_i.dtype
+        layout_ok = expected_i.stride() == actual_i.stride()
 
-    best_required_compile_us = min(compile_results.values())
-    best_compare_us = min(best_required_compile_us, HISTORICAL_BEST_COMPILE_US)
-    true_floor = oracle_us < best_compare_us
-    result = {
-        "repro_id": REPRO_ID,
-        "oracle_us": round(oracle_us, 3),
-        "compile_us": round(compile_results["coordinate_descent_tuning"], 3),
-        "combo_compile_us": round(compile_results["combo_looped_cd"], 3),
-        "best_required_compile_us": round(best_required_compile_us, 3),
-        "historical_best_compile_us": HISTORICAL_BEST_COMPILE_US,
-        "ratio": round(best_required_compile_us / oracle_us, 3),
-        "true_floor": true_floor,
-        "status": "GOOD" if true_floor else "DIAGNOSIS_ONLY",
-        "classification": "NEW_PATTERN",
-    }
-    print(json.dumps(result))
-    if not true_floor:
-        print("WARNING: oracle is slower than a required local or historical compile baseline")
-    return result
+        if not shape_ok:
+            print(
+                f"  output {i} values: FAIL "
+                f"(expected_shape={list(expected_i.shape)} oracle_shape={list(actual_i.shape)})"
+            )
+            all_ok = False
+            continue
+
+        if expected_i.is_floating_point():
+            max_diff, values_ok = _floating_close_stats(
+                expected_i,
+                actual_i,
+                atol=atol,
+                rtol=rtol,
+            )
+        else:
+            max_diff = 0.0
+            values_ok = torch.equal(expected_i.cpu(), actual_i.cpu())
+
+        value_status = "PASS" if values_ok and dtype_ok else "FAIL"
+        layout_status = "PASS" if layout_ok else "FAIL"
+        print(
+            f"  output {i} values: {value_status} "
+            f"(shape={list(expected_i.shape)} dtype={expected_i.dtype} "
+            f"oracle_dtype={actual_i.dtype} max_diff={max_diff:.2e})"
+        )
+        print(
+            f"  output {i} layout: {layout_status} "
+            f"(expected_stride={expected_i.stride()}, oracle_stride={actual_i.stride()})"
+        )
+        all_ok = all_ok and values_ok and dtype_ok and layout_ok
+
+    return all_ok
 
 
 def main() -> None:
@@ -326,24 +332,77 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--check", action="store_true", help="Verify correctness against eager Repro")
-    parser.add_argument("--bench", action="store_true", help="Benchmark oracle and required compile configs")
+    parser.add_argument("--bench", action="store_true", help="Benchmark oracle via oracle_harness")
     parser.add_argument("--rtol", type=float, default=1e-2, help="Relative tolerance for correctness check")
     parser.add_argument("--atol", type=float, default=1e-2, help="Absolute tolerance for correctness check")
     parser.add_argument("--warmup", type=int, default=25, help="Warmup iterations for benchmark")
     parser.add_argument("--rep", type=int, default=200, help="Repetitions for benchmark")
-    parser.add_argument("--block-n", type=int, default=2048, help="Triton reduction tile size")
-    parser.add_argument("--num-warps", type=int, default=8, help="Triton warps for the row kernel")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
     args = parser.parse_args()
+
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
 
     if not args.check and not args.bench:
         args.check = args.bench = True
 
     _require_triton_cuda()
+    inputs = get_inputs()
+    instance = get_repro_instance()
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
     with torch.no_grad():
-        if args.check and not run_check(args):
-            sys.exit(1)
+        if args.check:
+            print(f"Checking {REPRO_ID}...")
+            ok = _run_check(instance, inputs, atol=args.atol, rtol=args.rtol)
+            print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+            if not ok:
+                sys.exit(1)
         if args.bench:
-            run_bench(args)
+            print(f"Benchmarking {REPRO_ID}...")
+            if args.all_shapes:
+                results = bench_oracle_all_shapes(
+                    oracle_forward,
+                    REPRO_DIR,
+                    REPRO_ID,
+                    warmup=args.warmup,
+                    rep=args.rep,
+                )
+                for result in results:
+                    if result["status"] == "BAD_ORACLE":
+                        print(
+                            f"WARNING: oracle is slower than compile for "
+                            f"{result['repro_id']} (ratio={result['ratio']:.3f}x)"
+                        )
+            else:
+                result = bench_oracle(
+                    oracle_forward,
+                    instance,
+                    inputs,
+                    REPRO_ID,
+                    warmup=args.warmup,
+                    rep=args.rep,
+                )
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile (ratio={result['ratio']:.3f}x)")
+                true_floor = result["status"] == "GOOD"
+                print(f"classification: {CLASSIFICATION}")
+                print(f"true_floor: {'yes' if true_floor else 'no'} ({result['status']})")
+                print(f"actionable: {'yes' if ACTIONABLE and true_floor else 'no'}")
+                if not true_floor:
+                    print(
+                        "diagnosis_only: not_true_floor because compiled Inductor "
+                        "is at least as fast as this full-scope oracle"
+                    )
 
 
 if __name__ == "__main__":

@@ -1,11 +1,4 @@
-"""
-Oracle for pointwise_a942dec89d15
-
-Gap diagnosis:
-  Classification: BANDWIDTH_BOUND
-  What oracle does differently: copies the scalar lift_fresh_copy/mul-by-one result with a single Triton scalar-write kernel over the complete Repro.forward scope.
-  What Inductor change would fix: no scheduler change is indicated because the full computation is already a one-launch scalar materialization at the launch/bandwidth floor.
-"""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the complete zero-dimensional float32 `lift_fresh_copy(input) * 1` return from Repro.forward by allocating one fresh scalar output and storing the input value directly, whereas Inductor currently emits an equivalent generic one-element pointwise Triton kernel for the full scalar materialization and measures at the graph-captured launch floor; Inductor cannot do this today because its scheduler/codegen simplifier does not turn identity scalar multiplies fed by fresh-copy tensor materialization into a dedicated scalar copy/store path that bypasses generic pointwise scheduling overhead; the fix is ALGEBRAIC_ELIMINATION: canonicalize `mul(x, 1)` on scalar fresh-output graphs to a guarded scalar copy lowering while preserving non-aliasing output semantics."""
 from __future__ import annotations
 
 import argparse
@@ -34,7 +27,6 @@ from oracle_harness import (
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
-    get_shape_key,
     has_stochastic_ops,
 )
 

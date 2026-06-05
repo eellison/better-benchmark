@@ -1,15 +1,4 @@
-"""
-Oracle for sum_sum_sum_ed6c74b5ef96
-
-Gap diagnosis:
-  Classification: SCATTER_REDUCE
-  What oracle does differently: Inverts the max-pool-backward scatter-add in
-    Triton and feeds four BN/ReLU-backward multi-output reductions without
-    materializing the `[128, 288, 35, 35]` scatter result.
-  What Inductor change would fix: Add scatter-reduce fusion support that can
-    sink a structured scatter-add producer into sibling channel reductions and
-    their dependent tensor epilogues.
-"""
+"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the full Repro.forward return by inverting the low-memory max-pool-backward scatter-add from `add_53[:, 480:768]`/`arg336_1`, adding `getitem_198` and `getitem_201`, and feeding the four sibling BN/ReLU-backward channel groups to emit all eight tensor and channel-reduction outputs without materializing the `[128, 288, 35, 35]` scatter result, whereas Inductor currently materializes the scatter-add/view/channels-last clone/add chain and then schedules the four masked BN backward reductions and tensor epilogues as separate generic kernels; Inductor cannot do this today because its scheduler/codegen cannot represent a structured scatter-add producer as a recomputable source for multiple sibling channel reductions plus their dependent per-element epilogues; the fix is SCATTER_REDUCE: add guarded scatter-add producer fusion that sinks low-memory max-pool backward scatter reconstruction into downstream channel reductions and shares the produced channel summaries with the tensor epilogue kernels."""
 from __future__ import annotations
 
 import argparse
@@ -39,7 +28,6 @@ from oracle_harness import (
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
-    get_shape_key,
     has_stochastic_ops,
 )
 
@@ -60,30 +48,12 @@ W = 35
 HW = H * W
 SPATIAL = N * HW
 REDUCE_SCALE = 1.0 / SPATIAL
-HISTORICAL_BEST_COMPILE_US = 598.0799794197083
+CLASSIFICATION = "SCATTER_REDUCE"
 
 DEFAULT_BLOCK_C = 4
 DEFAULT_BLOCK_K = 256
 DEFAULT_FINAL_BLOCK_C = 8
 DEFAULT_EPILOGUE_BLOCK_K = 128
-
-COMPILE_CONFIGS = [
-    ("coordinate_descent_tuning=True", {"coordinate_descent_tuning": True}),
-    (
-        (
-            "combo_kernels=True,combo_kernel_per_subkernel_blocks=True,"
-            "coordinate_descent_tuning=True,benchmark_combo_kernel=True,"
-            "triton.multi_kernel=3"
-        ),
-        {
-            "combo_kernels": True,
-            "combo_kernel_per_subkernel_blocks": True,
-            "coordinate_descent_tuning": True,
-            "benchmark_combo_kernel": True,
-            "triton.multi_kernel": 3,
-        },
-    ),
-]
 
 
 def get_inputs():
@@ -215,6 +185,29 @@ def _validate_inputs(inputs: tuple[object, ...] | list[object]) -> None:
 
 
 if triton is not None:
+
+    # Preserve the repro's separate aten mul/add rounding before the ReLU mask.
+    @triton.jit
+    def _f32_mul(a, b):
+        return tl.inline_asm_elementwise(
+            "mul.rn.f32 $0, $1, $2;",
+            "=f,f,f",
+            [a, b],
+            dtype=tl.float32,
+            is_pure=True,
+            pack=1,
+        )
+
+    @triton.jit
+    def _f32_add(a, b):
+        return tl.inline_asm_elementwise(
+            "add.rn.f32 $0, $1, $2;",
+            "=f,f,f",
+            [a, b],
+            dtype=tl.float32,
+            is_pure=True,
+            pack=1,
+        )
 
     @triton.jit
     def _scatter_candidate(
@@ -447,7 +440,9 @@ if triton is not None:
         fill = tl.load(full_ptr).to(tl.float32)
 
         centered = x - mean[None, :]
-        relu_input = centered * invstd[None, :] * gamma[None, :] + beta[None, :]
+        normalized = _f32_mul(centered, invstd[None, :])
+        scaled = _f32_mul(normalized, gamma[None, :])
+        relu_input = _f32_add(scaled, beta[None, :])
         where_value = tl.where(relu_input <= 0.0, fill, source)
         where_value = tl.where(active, where_value, 0.0)
         centered = tl.where(active, centered, 0.0)
@@ -593,7 +588,9 @@ if triton is not None:
         fill = tl.load(full_ptr).to(tl.float32)
 
         centered = x - mean[None, :]
-        relu_input = centered * invstd[None, :] * gamma[None, :] + beta[None, :]
+        normalized = _f32_mul(centered, invstd[None, :])
+        scaled = _f32_mul(normalized, gamma[None, :])
+        relu_input = _f32_add(scaled, beta[None, :])
         where_value = tl.where(relu_input <= 0.0, fill, source)
         variance_term = (
             total1[None, :] * 0.0000063775510204081635 * invstd[None, :] * invstd[None, :]
@@ -818,87 +815,41 @@ def _strict_scope_check(instance, inputs) -> bool:
         shape_ok = got.shape == expected.shape
         dtype_ok = got.dtype == expected.dtype
         stride_ok = got.stride() == expected.stride()
+        if shape_ok:
+            if got.is_floating_point() and expected.is_floating_point():
+                max_diff = (got.float() - expected.float()).abs().max().item()
+            else:
+                max_diff = 0.0 if torch.equal(got, expected) else float("inf")
+        else:
+            max_diff = float("nan")
         item_ok = shape_ok and dtype_ok and stride_ok
         ok = ok and item_ok
         print(
-            f"  strict scope output {idx}: "
-            f"shape_match={shape_ok} dtype_match={dtype_ok} stride_match={stride_ok}"
+            f"  strict scope output {idx}: shape_match={shape_ok} "
+            f"dtype_match={dtype_ok} stride_match={stride_ok} "
+            f"max_diff={max_diff:.2e} "
+            f"expected_stride={tuple(expected.stride())} "
+            f"oracle_stride={tuple(got.stride())}"
         )
     print(f"  strict scope: {'PASS' if ok else 'FAIL'}")
     return ok
 
 
-def _compile_with_config(instance, inputs, config: dict[str, object]):
-    import torch._dynamo
-    import torch._inductor.config as inductor_config
-
-    torch._dynamo.reset()
-    with inductor_config.patch(config):
-        compiled = torch.compile(instance)
-        with torch.no_grad():
-            for _ in range(5):
-                compiled(*inputs)
-            torch.cuda.synchronize()
-    return compiled
-
-
-def _do_cuda_bench(fn, warmup: int, rep: int) -> float:
-    _require_triton()
-    with torch.no_grad():
-        return triton.testing.do_bench(
-            fn,
-            warmup=warmup,
-            rep=rep,
-            return_mode="min",
-        ) * 1000.0
-
-
-def bench_required_configs(inputs, warmup: int, rep: int) -> dict[str, object]:
-    """Benchmark the full-scope oracle and the required compile configs."""
-    with torch.no_grad():
-        oracle_forward(inputs)
-        torch.cuda.synchronize()
-        oracle_us = _do_cuda_bench(lambda: oracle_forward(inputs), warmup, rep)
-
-    timings: dict[str, float] = {"oracle_fused": oracle_us}
-    print(
-        "oracle_fused full-scope scatter-add + four BN multi-output reductions: "
-        f"{oracle_us:.3f} us"
+def _annotate_result(result: dict[str, object]) -> dict[str, object]:
+    oracle_us = float(result["oracle_us"])
+    compile_us = float(result["compile_us"])
+    true_floor = oracle_us < compile_us
+    annotated = dict(result)
+    annotated.update(
+        {
+            "classification": CLASSIFICATION,
+            "true_floor": true_floor,
+            "actionable": result.get("status") == "GOOD",
+            "scope": "full_repro_forward",
+            "timing": "oracle_harness.bench_oracle",
+        }
     )
-
-    for label, config in COMPILE_CONFIGS:
-        instance = get_repro_instance()
-        compiled = _compile_with_config(instance, inputs, config)
-        with torch.no_grad():
-            compile_us = _do_cuda_bench(lambda: compiled(*inputs), warmup, rep)
-        timings[label] = compile_us
-        print(f"torch.compile {label}: {compile_us:.3f} us")
-
-    best_required_compile = min(timings[label] for label, _ in COMPILE_CONFIGS)
-    best_reference = min(best_required_compile, HISTORICAL_BEST_COMPILE_US)
-    valid_floor = oracle_us < best_reference
-    print(f"historical best_compile_us: {HISTORICAL_BEST_COMPILE_US:.3f} us")
-    print(f"Valid floor: {'yes' if valid_floor else 'no (diagnosis-only)'}")
-
-    result = {
-        "repro_id": REPRO_ID,
-        "oracle_us": round(oracle_us, 3),
-        "compile_us": round(timings["coordinate_descent_tuning=True"], 3),
-        "combo_compile_us": round(
-            timings[
-                "combo_kernels=True,combo_kernel_per_subkernel_blocks=True,"
-                "coordinate_descent_tuning=True,benchmark_combo_kernel=True,"
-                "triton.multi_kernel=3"
-            ],
-            3,
-        ),
-        "best_required_compile_us": round(best_required_compile, 3),
-        "historical_best_compile_us": round(HISTORICAL_BEST_COMPILE_US, 3),
-        "valid_floor": valid_floor,
-        "classification": "SCATTER_REDUCE",
-    }
-    print(json.dumps(result))
-    return result
+    return annotated
 
 
 # --- CLI entry point ---
@@ -910,7 +861,7 @@ def main():
     parser.add_argument("--check", action="store_true",
                         help="Verify correctness against eager Repro")
     parser.add_argument("--bench", action="store_true",
-                        help="Benchmark oracle vs torch.compile")
+                        help="Benchmark oracle vs torch.compile via oracle_harness.bench_oracle")
     parser.add_argument("--rtol", type=float, default=1e-2,
                         help="Relative tolerance for correctness check")
     parser.add_argument("--atol", type=float, default=1e-2,
@@ -929,7 +880,6 @@ def main():
 
     # Handle --show-hw early
     if args.show_hw:
-        import json
         print(json.dumps(get_hardware_info(), indent=2))
         return
 
@@ -941,7 +891,8 @@ def main():
     instance = get_repro_instance()
 
     # Report if stochastic ops detected in source
-    if has_stochastic_ops(REPRO_PATH):
+    source_has_stochastic_ops = has_stochastic_ops(REPRO_PATH)
+    if source_has_stochastic_ops:
         print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
 
     if args.check:
@@ -952,7 +903,7 @@ def main():
             inputs,
             atol=args.atol,
             rtol=args.rtol,
-            skip_stochastic=not args.no_skip_stochastic,
+            skip_stochastic=source_has_stochastic_ops and not args.no_skip_stochastic,
         )
         ok = _strict_scope_check(instance, inputs) and ok
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
@@ -967,11 +918,23 @@ def main():
                 warmup=args.warmup, rep=args.rep,
             )
             for result in results:
+                print(json.dumps(_annotate_result(result), sort_keys=True))
                 if result["status"] == "BAD_ORACLE":
                     print(f"WARNING: oracle is slower than compile for "
                           f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
         else:
-            bench_required_configs(inputs, warmup=args.warmup, rep=args.rep)
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            print(json.dumps(_annotate_result(result), sort_keys=True))
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":
