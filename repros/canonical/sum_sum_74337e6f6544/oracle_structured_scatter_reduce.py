@@ -1,11 +1,4 @@
-"""
-Oracle for sum_sum_74337e6f6544
-
-Gap diagnosis:
-  Classification: ALGEBRAIC_ELIMINATION
-  What oracle does differently: Computes the full Longformer loss-gradient update, both padded materialized outputs, and the sibling vocabulary reduction directly from labels/logits without constructing the dense one-hot tensor or reducing it.
-  What Inductor change would fix: Add algebraic elimination for one-hot equality masks feeding a row reduction and dense softmax-backward epilogue, then fuse the remaining multi-output stores and column reduction.
-"""
+"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the complete Longformer loss-gradient update from `Repro.forward`, including both padded materialized outputs and the sibling vocabulary column sum, by replacing the dense label-vocabulary one-hot construction plus row reduction with a structured valid-label update and sparse label correction, whereas Inductor currently lowers the broadcast equality mask, one-hot `where`, row sum, dense exp/update, padding, transpose, and column sum as generic scheduled work over the full `[8192, 50265]` domain; Inductor cannot do this today because its scatter/reduce recognition does not connect the masked one-hot producer, dependent row reduction, multi-source dense update, two layout stores, and sibling column reduction into one structured scatter-reduce lowering; the fix is SCATTER_REDUCE: extend Inductor's scatter-reduce pass/codegen to canonicalize one-hot label masks with ignore-index guards, emit the dense exp/base update plus sparse label correction, and fuse the padded stores with the column-sum epilogue."""
 from __future__ import annotations
 
 import argparse
@@ -24,7 +17,6 @@ except ImportError:
 # --- Configuration (auto-derived from file location) ---
 REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 M = 8192
@@ -35,7 +27,11 @@ BLOCK_M = 16
 BLOCK_N = 32
 FINAL_BLOCK_C = 4
 
-# Import shared oracle infrastructure (installed via pip install -e .)
+# Import shared oracle infrastructure. Run first:
+#   python -m pip install --no-build-isolation -e .
+# Use the installed oracle_harness package; run editable install before checks.
+# Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
+# GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,

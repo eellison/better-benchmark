@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
@@ -24,7 +23,6 @@ from oracle_harness import (
 
 REPRO_ID = "sum_sum_sum_fcd2cc2945b3"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 N = 128
@@ -35,12 +33,6 @@ HW = H * W
 TOTAL_SPATIAL = N * HW
 INV_HW = 1.0 / HW
 SCALE = 1.0 / TOTAL_SPATIAL
-
-
-
-def make_inputs() -> tuple[object, ...]:
-    module = _load_repro_module()
-    return tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in module.make_inputs())
 
 
 @triton.jit
@@ -721,14 +713,6 @@ def oracle_full(
         grad515,
         weight_grad515,
     )
-
-
-def reference_outputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
-    module = _load_repro_module()
-    model = module.Repro().cuda()
-    with torch.no_grad():
-        return _as_tuple(model(*inputs))
-
 
 def oracle_forward(inputs):
     return oracle_full(*inputs)

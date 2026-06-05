@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: NEW_PATTERN): this diagnosis-only oracle structurally computes the complete GPT-2 training embedding, generated-position embedding, adjacent-position bool side output, Inductor-seeded random dropout, fp32 hidden-size-768 var_mean LayerNorm, transposed affine output, and rsqrt/768 side output with one shape-specialized Triton row kernel, whereas Inductor lowers the same decomposed embedding/iota/cat/slice/ne/random/dropout/var_mean/affine/view/permute graph through generic embedding, stochastic pointwise, normalization, and layout scheduling; Inductor cannot do this today because its pattern library does not canonicalize GPT-2 embedding plus generated-position dropout LayerNorm with sibling bool and invstd side outputs into one fixed-hidden stochastic embedding-layernorm template, and this artifact is not a verified floor because stochastic output values are skipped by the harness; the fix is NEW_PATTERN: add a GPT-2 training embedding-dropout-layernorm lowering that folds token and position gathers, dropout, row normalization, affine transpose epilogue, and side outputs into one specialized schedule."""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the full GPT-2 training embedding plus generated-position embedding, deterministic adjacent-position bool side output, Inductor-seeded dropout feeding fp32 hidden-size-768 var_mean LayerNorm, transposed affine activation output, and rsqrt/768 side output in one shape-specialized Triton row kernel for timing while the harness exact-checks only the deterministic bool output and skips the two dropout-dependent floating outputs by default, whereas Inductor currently lowers the decomposed embedding/iota/cat/slice/ne/inductor_random/dropout/var_mean/affine/view/permute/rsqrt graph through generic gather, stochastic pointwise, normalization, and layout schedules; Inductor cannot do this today because pattern matching and norm-template scheduling do not canonicalize GPT-2 token+position embedding with RNG dropout, sibling bool mask, transposed affine output, and invstd side output into one fixed-hidden stochastic embedding-layernorm template; the fix is NEW_PATTERN: add a GPT-2 training embedding-dropout-layernorm lowering that folds token and position gathers, dropout, row normalization, affine transpose epilogue, and side-output stores into one specialized schedule."""
 from __future__ import annotations
 
 import argparse
@@ -51,6 +51,7 @@ DROPOUT_P = 0.1
 DROPOUT_SCALE = 1.1111111111111112
 BLOCK_H = 1024
 CLASSIFICATION = "NEW_PATTERN"
+STOCHASTIC_OUTPUTS = (1, 2)
 
 
 def get_inputs():
@@ -61,6 +62,10 @@ def get_inputs():
 def get_repro_instance():
     """Create a Repro() instance for reference comparison."""
     return _harness_get_repro_instance(REPRO_DIR)
+
+
+def _repro_has_stochastic_ops() -> bool:
+    return has_stochastic_ops(REPRO_PATH) or "inductor_random" in REPRO_PATH.read_text()
 
 
 if triton is not None:
@@ -282,8 +287,18 @@ def main():
     instance = get_repro_instance()
 
     # Report if stochastic ops detected in source
-    if has_stochastic_ops(REPRO_PATH):
-        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+    if _repro_has_stochastic_ops():
+        if args.no_skip_stochastic:
+            print(
+                f"NOTE: {REPRO_ID} contains stochastic ops; --no-skip-stochastic "
+                "requested, so dropout-dependent outputs will be compared"
+            )
+        else:
+            skipped = ", ".join(str(index) for index in STOCHASTIC_OUTPUTS)
+            print(
+                f"NOTE: {REPRO_ID} contains stochastic ops; output 0 is "
+                f"exact-checked and outputs {skipped} are auto-skipped"
+            )
 
     if args.check:
         print(f"Checking {REPRO_ID}...")

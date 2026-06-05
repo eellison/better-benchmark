@@ -1,7 +1,8 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this diagnosis-only oracle preserves the complete VGG16 training dropout pointwise scope by using the exact seed-index-1 `prims.inductor_random([128,4096], seed, 'rand')` producer and computing the ReLU, `random > 0.5` dropout scale `2.0`, and bool `relu <= 0` sibling output in one Triton pass, whereas Inductor currently lowers the decomposed relu/inductor_lookup_seed/inductor_random/gt/mul/le graph through its generic stochastic pointwise path; Inductor cannot do this today because scheduler/codegen does not thread fixed-layout seeded dropout RNG into the same multi-output pointwise template as the sibling bool store, and this artifact is not a true floor because the exact RNG producer is still materialized separately; the fix is SCHEDULER_FUSION: add a guarded stochastic pointwise fusion rule that threads input seed lookups and Inductor RNG through codegen and emits dropout plus side-mask stores from the shared ReLU producer."""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the full VGG16 training ReLU plus seed-index-1 Inductor dropout plus bool sibling return in one Triton pass by generating the dropout mask inline and folding `relu(addmm_1) <= 0` to `addmm_1 <= 0`, whereas Inductor currently emits one fused stochastic pointwise kernel for the same `relu`/`inductor_lookup_seed`/`inductor_random`/`gt`/`mul`/`le` scope but still computes the bool sibling as `maximum(0, addmm_1) <= 0`; Inductor cannot do this today because pointwise algebraic simplification does not canonicalize zero-threshold comparisons through ReLU before stochastic codegen; the fix is ALGEBRAIC_ELIMINATION: add a ReLU-threshold simplification that rewrites `le(relu(x), 0)` to `le(x, 0)` inside fused pointwise graphs, including graphs that also contain Inductor RNG dropout."""
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -32,7 +33,6 @@ from oracle_harness import (
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
-    get_shape_key,
     has_stochastic_ops,
 )
 
@@ -46,6 +46,10 @@ SEED_INDEX = 1
 DROPOUT_THRESHOLD = 0.5
 DROPOUT_SCALE = 2.0
 BLOCK_N = 1024
+CLASSIFICATION = "ALGEBRAIC_ELIMINATION"
+TRUE_FLOOR = False
+STOCHASTIC_OUTPUTS = {0: "dropout tensor from inline seed-index-1 tl.rand"}
+DETERMINISTIC_OUTPUTS = {1: "bool sibling `relu <= 0`"}
 
 
 def get_inputs():
@@ -69,25 +73,25 @@ if triton is not None:
     @triton.jit
     def oracle_kernel(
         addmm_ptr,
-        random_ptr,
+        seeds_ptr,
         dropout_ptr,
         le_ptr,
-        N: tl.constexpr,
+        SEED_INDEX: tl.constexpr,
         DROPOUT_THRESHOLD: tl.constexpr,
         DROPOUT_SCALE: tl.constexpr,
         BLOCK_N: tl.constexpr,
     ):
         offsets = tl.program_id(0) * BLOCK_N + tl.arange(0, BLOCK_N)
-        mask = offsets < N
 
-        addmm = tl.load(addmm_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        addmm = tl.load(addmm_ptr + offsets).to(tl.float32)
         relu = tl.maximum(addmm, 0.0)
 
-        rand = tl.load(random_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        seed = tl.load(seeds_ptr + SEED_INDEX)
+        rand = tl.rand(seed, offsets.to(tl.uint32))
         keep = rand > DROPOUT_THRESHOLD
 
-        tl.store(dropout_ptr + offsets, relu * keep.to(tl.float32) * DROPOUT_SCALE, mask=mask)
-        tl.store(le_ptr + offsets, relu <= 0.0, mask=mask)
+        tl.store(dropout_ptr + offsets, relu * keep.to(tl.float32) * DROPOUT_SCALE)
+        tl.store(le_ptr + offsets, addmm <= 0.0)
 
 
 def _validate_inputs(addmm: torch.Tensor, inductor_seeds: torch.Tensor) -> None:
@@ -129,16 +133,13 @@ def oracle_forward(inputs):
         device=addmm_1.device,
         dtype=torch.bool,
     )
-    seed = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, SEED_INDEX)
-    random = torch.ops.prims.inductor_random.default([ROWS, COLS], seed, "rand")
-
     grid = (triton.cdiv(N_ELEMENTS, BLOCK_N),)
     oracle_kernel[grid](
         addmm_1,
-        random,
+        inductor_seeds,
         dropout,
         le,
-        N=N_ELEMENTS,
+        SEED_INDEX=SEED_INDEX,
         DROPOUT_THRESHOLD=DROPOUT_THRESHOLD,
         DROPOUT_SCALE=DROPOUT_SCALE,
         BLOCK_N=BLOCK_N,
@@ -146,6 +147,87 @@ def oracle_forward(inputs):
         num_stages=2,
     )
     return dropout, le
+
+
+def _normalize_outputs(out) -> list[torch.Tensor]:
+    if isinstance(out, torch.Tensor):
+        return [out]
+    if isinstance(out, (tuple, list)):
+        result = []
+        for item in out:
+            result.extend(_normalize_outputs(item))
+        return result
+    return []
+
+
+def _has_repro_stochastic_ops() -> bool:
+    content = REPRO_PATH.read_text()
+    return has_stochastic_ops(REPRO_PATH) or "inductor_random" in content
+
+
+@torch.no_grad()
+def _check_scope_metadata(instance, inputs) -> bool:
+    eager = instance(*inputs)
+    oracle_out = oracle_forward(inputs)
+    eager_list = _normalize_outputs(eager)
+    oracle_list = _normalize_outputs(oracle_out)
+
+    if len(oracle_list) != len(eager_list):
+        print(
+            f"  scope metadata: FAIL output_count oracle={len(oracle_list)} "
+            f"eager={len(eager_list)}"
+        )
+        return False
+
+    ok = True
+    for index, (expected, actual) in enumerate(zip(eager_list, oracle_list)):
+        shape_ok = actual.shape == expected.shape
+        dtype_ok = actual.dtype == expected.dtype
+        stride_ok = actual.stride() == expected.stride()
+        item_ok = shape_ok and dtype_ok and stride_ok
+        ok = ok and item_ok
+        print(
+            f"  scope output {index}: {'PASS' if item_ok else 'FAIL'} metadata "
+            f"shape={list(actual.shape)} dtype={actual.dtype} "
+            f"stride={tuple(actual.stride())}"
+        )
+    return ok
+
+
+def _print_check_policy(skip_stochastic: bool) -> None:
+    if skip_stochastic:
+        print(
+            "  check policy: output 0 values are skipped as stochastic dropout; "
+            "only shape/dtype/stride are checked for that tensor, so no exact "
+            "equality is claimed for output 0."
+        )
+    else:
+        print(
+            "  check policy: stochastic skipping disabled; output 0 exact values "
+            "will be compared but this oracle remains diagnosis-only."
+        )
+    for index, reason in STOCHASTIC_OUTPUTS.items():
+        action = "SKIP values" if skip_stochastic else "CHECK values"
+        print(f"  output {index}: {action} ({reason})")
+    for index, reason in DETERMINISTIC_OUTPUTS.items():
+        print(f"  output {index}: CHECK exact ({reason})")
+
+
+def _annotate_result(result: dict[str, object], *, skipped_stochastic: bool) -> dict[str, object]:
+    annotated = dict(result)
+    annotated.update(
+        {
+            "classification": CLASSIFICATION,
+            "true_floor": bool(TRUE_FLOOR and result.get("status") == "GOOD"),
+            "actionable": result.get("status") == "GOOD",
+            "floor_status": "not_true_floor",
+            "scope": "full_relu_dropout_bool_sibling_return",
+            "timing": "oracle_harness.bench_oracle",
+            "stochastic_outputs_skipped": [0] if skipped_stochastic else [],
+            "checked_outputs": [1] if skipped_stochastic else [0, 1],
+        }
+    )
+    return annotated
 
 
 # --- CLI entry point ---
@@ -174,9 +256,7 @@ def main():
                         help="Print GPU hardware info and exit")
     args = parser.parse_args()
 
-    # Handle --show-hw early
     if args.show_hw:
-        import json
         print(json.dumps(get_hardware_info(), indent=2))
         return
 
@@ -187,20 +267,26 @@ def main():
     inputs = get_inputs()
     instance = get_repro_instance()
 
-    # Report if stochastic ops detected in source
-    if has_stochastic_ops(REPRO_PATH):
-        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+    source_has_stochastic_ops = _has_repro_stochastic_ops()
+    skip_stochastic = source_has_stochastic_ops and not args.no_skip_stochastic
+    if source_has_stochastic_ops:
+        print(
+            f"NOTE: {REPRO_ID} contains prims.inductor_random; "
+            "affected stochastic outputs will be auto-skipped by value checks"
+        )
 
     if args.check:
         print(f"Checking {REPRO_ID}...")
+        _print_check_policy(skip_stochastic)
         ok = check_oracle(
             oracle_forward,
             instance,
             inputs,
             atol=args.atol,
             rtol=args.rtol,
-            skip_stochastic=not args.no_skip_stochastic,
+            skip_stochastic=skip_stochastic,
         )
+        ok = _check_scope_metadata(instance, inputs) and ok
         print(f"Correctness: {'PASS' if ok else 'FAIL'}")
         if not ok:
             sys.exit(1)
@@ -213,6 +299,7 @@ def main():
                 warmup=args.warmup, rep=args.rep,
             )
             for result in results:
+                print(json.dumps(_annotate_result(result, skipped_stochastic=skip_stochastic), sort_keys=True))
                 if result["status"] == "BAD_ORACLE":
                     print(f"WARNING: oracle is slower than compile for "
                           f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
@@ -227,6 +314,7 @@ def main():
                 warmup=args.warmup,
                 rep=args.rep,
             )
+            print(json.dumps(_annotate_result(result, skipped_stochastic=skip_stochastic), sort_keys=True))
             if result["status"] == "BAD_ORACLE":
                 print(f"WARNING: oracle is slower than compile "
                       f"(ratio={result['ratio']:.3f}x)")

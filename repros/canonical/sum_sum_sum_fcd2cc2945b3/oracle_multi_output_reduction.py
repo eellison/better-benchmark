@@ -1,29 +1,7 @@
-"""
-Full-scope oracle for sum_sum_sum_fcd2cc2945b3 (Adv-Inception BN-backward fanout).
-
-Gap diagnosis (classification: SCHEDULER_FUSION): this oracle consumes the same
-inputs and produces the same 12 outputs as repro.py, but it treats the six
-BN/ReLU-backward branches as repeated multi-output reduction templates: each
-branch reads its `mm / 64` slice and BN activation once for the two sibling
-channel reductions, then recomputes the cheap mask/centering expression in the
-dependent pointwise epilogue that writes the returned tensor and scale-gradient
-vector. Inductor currently lowers the expanded `mm`, channel slices, ReLU masks,
-sibling reductions, and dependent epilogues as separate scheduled nodes, so it
-does not build one reusable full-scope template that shares the masked producer
-and centered input between reductions and the live epilogue. The fixing change is
-SCHEDULER_FUSION: recognize same-shape sibling reductions with a shared masked
-producer and generate a reduction-plus-dependent-epilogue template, applying it
-independently to each sliced channel group without materializing the expanded
-`mm / 64` intermediates.
-
-Measurement note: this implementation is full-scope and correctness-checked, but
-it is not a measured floor on the local benchmark run. Keep the queue oracle path
-blank unless a faster full-scope implementation replaces it.
-"""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle produces the complete 12-output `Repro.forward` tuple by handling each of the six BN/ReLU-backward branches as a repeated multi-output reduction template that shares the masked `mm / 64` slice producer across sibling channel reductions and the dependent input-gradient/vector epilogue, whereas Inductor currently schedules the expanded `mm`, channel slices, ReLU masks, sibling `sum([0, 2, 3])` reductions, and BN-backward epilogues as separate pointwise/reduction groups; Inductor cannot do this today because its scheduler/codegen does not build a reusable same-shape multi-output reduction template with shared producers and dependent epilogues for each sliced branch; the fix is SCHEDULER_FUSION: add a grouped reduction-plus-epilogue schedule for same-shape sibling reductions that reuses the masked producer and avoids materializing the expanded `mm / 64` intermediates."""
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
@@ -45,7 +23,6 @@ from oracle_harness import (
 
 REPRO_ID = "sum_sum_sum_fcd2cc2945b3"
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 N = 128
@@ -184,12 +161,6 @@ def _bn_branch_epilogue_kernel(
     mean_term = sum1 * REDUCE_SCALE_
     out = (where_self - centered * variance_term - mean_term) * (invstd * gamma)
     tl.store(tensor_out_ptr + offsets, out, mask=active)
-
-
-def make_inputs() -> tuple[object, ...]:
-    module = _load_repro_module()
-    return tuple(x.cuda() if isinstance(x, torch.Tensor) else x for x in module.make_inputs())
-
 
 def _run_bn_branch(
     mm: torch.Tensor,
@@ -341,14 +312,6 @@ def oracle_fused(
         out_f[0],
         out_f[1],
     )
-
-
-def reference_outputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
-    module = _load_repro_module()
-    model = module.Repro().cuda()
-    with torch.no_grad():
-        return model(*inputs)
-
 
 def oracle_forward(inputs):
     return oracle_fused(*inputs)
