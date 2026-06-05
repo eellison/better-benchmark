@@ -1,170 +1,86 @@
-# pointwise_e26de0a669ae
+# pointwise_e26de0a669ae - BN + ReLU + MaxPool + AvgPool Fusion Gap
 
-## Summary
+## Benchmark Result
+- Oracle: 230.43 us
+- Compile: 352.19 us
+- Ratio: 1.528x
+- Status: GOOD (oracle wins)
 
-- **Model**: timm_adv_inception_v3_infer / timm_inception_v3_infer
-- **Pattern**: BatchNorm affine + ReLU + MaxPool2d(3x3, stride=2) + AvgPool2d(3x3, stride=1, pad=1)
-- **Classification**: REALIZE_HINT (not scheduler-fixable)
-- **Oracle**: 239.36 us | **Compile**: 229.15 us | **Ratio**: 0.957x (FIXED, AT_FLOOR)
-- **Input**: f32[128, 192, 71, 71] channels-last (stride 967872, 1, 13632, 192)
-- **Output**: f32[128, 192, 35, 35] channels-last
+## Classification
+SCHEDULER_FUSION
 
-## Fix Status
+## Root Cause
 
-**FIXED** by `config.smart_realize_hint = True` (default enabled) via `_is_broadcast_dominated()` in `ir.py`.
-Measured ratio: 0.957x (Inductor faster than oracle due to better block size tuning).
+The oracle fuses BatchNorm-inference affine + ReLU + 3x3 stride-2 maxpool into **one** Triton kernel, followed by a separate avgpool kernel (2 kernels total). The critical fusion is sinking the BN+ReLU computation into the maxpool stencil so the large intermediate f32[128,192,71,71] (124M elements, ~496MB) is never materialized.
 
-## Computation Structure
+Inductor emits **three** kernels:
+1. `triton_poi_fused_add_mul_reciprocal_relu_sqrt_sub_unsqueeze_0` (124M elements): BN affine + ReLU, writes full f32[128,192,71,71] to memory
+2. `triton_poi_fused__low_memory_max_pool_with_offsets_..._1`: Reads the materialized BN+ReLU output back, computes 3x3 maxpool stencil, writes f32[128,192,35,35]
+3. `triton_poi_fused_avg_pool2d_2`: Reads pool output, computes 3x3 stride-1 avgpool, writes final f32[128,192,35,35]
 
-The graph performs inference-mode BatchNorm on a channels-last convolution output:
-1. **BN affine**: `(x - mean) * rsqrt(var + eps) * weight + bias` (pointwise, broadcast from [192] stats)
-2. **ReLU**: elementwise max(0, x)
-3. **MaxPool2d**: 3x3 kernel, stride 2, no padding -> reduces 71x71 to 35x35
-4. **AvgPool2d**: 3x3 kernel, stride 1, padding 1 -> same 35x35 output
+The key inefficiency is the materialization between kernels 1 and 2. The BN+ReLU output is 128*192*71*71*4 = 496 MB. Writing it and reading it back costs ~992 MB of memory traffic that the oracle avoids.
 
-## Without Fix (smart_realize_hint=False): 3 Kernels
+## Kernel Count
+- Inductor: 3 kernels
+- Oracle: 2 kernels (BN+ReLU+maxpool fused, then avgpool)
 
-| Kernel | Operation | Elements | Notes |
-|--------|-----------|----------|-------|
-| K0 | BN + ReLU pointwise | 123,887,616 (128*192*71*71) | Writes full intermediate buf0 (~474 MB) |
-| K1 | MaxPool 3x3 stride 2 | 30,105,600 (128*192*35*35) | Reads buf0 (9 loads per output) |
-| K2 | AvgPool 3x3 stride 1 | 30,105,600 | Reads buf1 (9 loads per output) |
+## Memory Traffic Analysis
 
-**Memory traffic**: K0 writes 474MB, K1 reads 474MB (with stride-2 selection), K1 writes 115MB, K2 reads 115MB, K2 writes 115MB.
+**Oracle** (2 kernels):
+- Kernel 1 (BN+ReLU+maxpool): Reads input (496 MB channels-last) + BN params (4*192*4 = 3KB), writes pool output (128*192*35*35*4 = 120 MB)
+- Kernel 2 (avgpool): Reads 120 MB, writes 120 MB
+- Total: ~856 MB
 
-## With Fix (smart_realize_hint=True): 2 Kernels
+**Inductor** (3 kernels):
+- Kernel 1: Reads input (496 MB) + params (3KB), writes BN+ReLU result (496 MB)
+- Kernel 2: Reads BN+ReLU (496 MB), writes pool (120 MB)
+- Kernel 3: Reads pool (120 MB), writes avg (120 MB)
+- Total: ~1848 MB (2.16x more traffic)
 
-| Kernel | Operation | Elements |
-|--------|-----------|----------|
-| K0 | BN + ReLU + MaxPool (fused) | 30,105,600 output elements |
-| K1 | AvgPool | 30,105,600 |
+The 1.53x performance gap is explained by the ~2.16x more memory traffic (some of which is hidden by kernel launch overlap).
 
-The fused kernel loads BN stats once (192 floats, stays in L1 cache), then for each of the 9 stencil positions, loads from the original input and computes BN+ReLU inline before taking the max. This eliminates the 474MB intermediate entirely.
+## Why Inductor Cannot Do This Today
 
-## Root Cause Analysis
+The scheduler does not fuse a pointwise producer (BN+ReLU, iterating over [128,192,71,71]) with a stencil consumer (maxpool, which reads a 3x3 window of the producer's output per output element). The iteration domains differ:
+- Producer: 128*192*71*71 = 124M elements
+- Consumer: 128*192*35*35 = 30M elements (each reading 9 producer elements)
 
-**File**: `/tmp/pytorch-work/torch/_inductor/lowering.py` line 5560
-**File**: `/tmp/pytorch-work/torch/_inductor/ir.py` lines 10069-10120
+Additionally, the input is **channels-last** (stride = (967872, 1, 13632, 192)), which complicates the stencil indexing further. The oracle handles this with a 2D tiled iteration (BLOCK_C x BLOCK_S) that loads channel-contiguous strips for each spatial position.
 
-The maxpool lowering calls `x.realize_hint()` on its input. Without `smart_realize_hint`, `realize_hint()` forces realization when `nontrivial_read_count > 1`. For the BN+ReLU node, all 5 reads (1 large input + 4 small broadcast stats) are counted as "nontrivial."
+The `realize_hint` / `should_realize_on_reuse` logic in `ir.py` forces the BN+ReLU result to be materialized because it is consumed by a stencil op that accesses it with shifted indices (the 3x3 window). The scheduler conservatively materializes any buffer that is read at non-trivial offsets.
 
-The fix (`_is_broadcast_dominated()`) detects that most reads access far fewer elements than the output (the [192]-shaped BN stats vs [128,192,71,71] output) and skips materialization.
+## Config Exploration
+- `combo_kernels=True`: no change (3 kernels)
+- `combo_kernel_per_subkernel_blocks=True`: no change
+- `triton.multi_kernel=3`: no change
+- `coordinate_descent_tuning=True`: already enabled
 
-## Scheduler-Based Fix Investigation
+No config resolves this. The issue is fundamental: stencil consumers cannot inline their producers.
 
-### Can the Scheduler Make This Decision?
+## Fix Direction (Design Doc)
 
-**No. The scheduler fundamentally cannot handle this pattern** due to architectural constraints.
+**Enhancement needed**: Pointwise-producer-into-stencil-consumer fusion for channels-last BN+pool patterns.
 
-### Why the Scheduler Fails (detailed analysis)
+The scheduler needs to:
+1. Detect that a pointwise producer (BN+ReLU) feeds exclusively into a stencil consumer (maxpool) and possibly other consumers
+2. Inline the producer computation into the consumer's kernel: for each 3x3 window element loaded by the pool, compute BN+ReLU on-the-fly from the raw input
+3. Handle channels-last layout correctly in the fused kernel's indexing
 
-When `realize_hint` forces materialization, the scheduler sees three nodes with these dependencies:
+This is a significant scheduler enhancement because:
+- The stencil kernel re-reads overlapping regions (each input element is read by up to 9 output elements for a 3x3 kernel)
+- The BN params (mean, var, weight, bias) are per-channel and cheap to reload
+- The net savings (avoiding 992 MB round-trip) far exceed the cost of recomputing BN 9x per input element
 
-```
-op0 (BN+ReLU) writes: MemoryDep('buf0', c0, {c0: 123887616})
-op1 (MaxPool) reads:   MemoryDep('buf0', 967872*c0 + 27264*c1 + 384*c2 + c3, {c0:128, c1:35, c2:35, c3:192})
-                       ... (9 shifted index expressions for the 3x3 stencil)
-op2 (AvgPool) reads:   MemoryDep('buf1', c0 + offset, {c0: 30105600})
-                       ... (9 offset variations)
-```
+A simpler version: when the producer is pure pointwise with cheap per-channel broadcast params, and the consumer is a pooling stencil with known small window, allow fusion with recomputation.
 
-The scheduler has THREE independent blockers:
+**File references**:
+- `/tmp/pytorch-work/torch/_inductor/scheduler.py` (can_fuse, realize decisions)
+- `/tmp/pytorch-work/torch/_inductor/ir.py` (should_realize_on_reuse, realize_hint -- forces materialization for stencil consumers)
+- `/tmp/pytorch-work/torch/_inductor/lowering.py` line 5625 (_low_memory_max_pool_with_offsets)
+- `/tmp/pytorch-work/torch/_inductor/codegen/triton.py` (would need stencil+inline-producer codegen)
 
-**Blocker 1: `score_fusion_memory` returns 0** (scheduler.py line 8541)
-- Deps are compared by equality (`dep in node2_deps`)
-- `MemoryDep('buf0', c0, ...)` != `MemoryDep('buf0', 967872*c0 + ..., ...)` because index expressions differ
-- Score 0 means "no memory savings from fusion"
+**Affected repros**: Inception, VGG, ResNet, and any CNN with BN->ReLU->Pool in inference or channels-last training. This is one of the most common CNN patterns.
 
-**Blocker 2: `V.choices.can_fuse` rejects score=0 pairs** (choices.py line 592-638)
-- When `shared_data_score == 0` and either node is a reduction, fusion is rejected
-- Even with `aggressive_fusion=True`, it still fails because the maxpool (treated as pointwise after unrolling) still has mismatched indices
-
-**Blocker 3: `can_fuse_vertical` fails on index mismatch** (scheduler.py line 8074-8101)
-- `fusable_read_and_write` requires the read index to match the write index (possibly after normalization)
-- `MemoryDep('buf0', c0)` (1D contiguous write) cannot match `MemoryDep('buf0', 967872*c0 + 27264*c1 + ...)` (4D strided stencil read)
-- Result: `remaining_deps & node1_buf_names` is non-empty -> "memory deps did not match" -> return False
-
-### What a Scheduler Enhancement Would Need
-
-To handle this at the scheduler level, you would need:
-
-1. **A new fusion mode: "inline recomputation"** — The scheduler would need to recognize that a cheap pointwise producer can be inlined into a stencil consumer by re-evaluating the producer's `inner_fn` at each of the consumer's read locations.
-
-2. **Cost model for recomputation** — Evaluate: (producer op count) * (consumer stencil size) vs (intermediate buffer size in bytes). For BN+ReLU: ~5 FMA ops * 9 stencil positions = 45 ops per output element, vs writing/reading 474MB.
-
-3. **Buffer "unrealization"** — Once a buffer is materialized into the IR graph, the scheduler currently has no mechanism to undo this. It would need to remove the buffer node and re-merge the producer's inner_fn into the consumer.
-
-4. **Extended `fusable_read_and_write`** — Accept stencil read patterns where the read accesses the producer's entire output domain but at different coordinates. This would need to express "the consumer reads ALL of the producer's output, just at shifted offsets."
-
-### Why realize_hint Is the Right Place
-
-The `realize_hint` approach works because it operates at a fundamentally different level:
-
-- **Timing**: It acts DURING lowering, BEFORE the buffer is created as an IR node
-- **Mechanism**: When `realize_hint` is skipped, the producer remains as an unrealized `inner_fn`. When the consumer (maxpool) calls `x.make_loader()`, it gets the producer's `inner_fn` directly — no buffer ever exists.
-- **Result**: The scheduler sees ONE node (maxpool with BN+ReLU inlined in its computation) rather than two separate nodes connected by a buffer.
-
-This is not a "hack around the scheduler" — it's the architecturally correct decision point. The question "should this intermediate be materialized?" belongs at lowering time, where we know the consumer is a stencil operator that will read the data at shifted indices.
-
-### Removing realize_hint at lowering.py:5560 (Without Any Other Change)
-
-**Yes, simply removing line 5560 works** — even without `smart_realize_hint`:
-- The BN+ReLU computation stays unrealized
-- `x.make_loader()` returns the BN+ReLU inner_fn
-- MaxPool's `fn_inner` inlines the BN+ReLU recomputation at each stencil position
-- Produces correct results and 2 kernels
-
-However, removing it unconditionally is unsafe for cases where:
-- The producer is expensive (e.g., involves transcendental ops like exp, log)
-- The stencil is large (e.g., 7x7 or 11x11 pooling)
-- The producer has multiple expensive input reads (not broadcast-dominated)
-
-The `smart_realize_hint` + `_is_broadcast_dominated()` provides the correct gating.
-
-## Other realize_hint Callsites With Similar Pattern
-
-All pooling/stencil lowerings in `lowering.py` call `realize_hint`:
-
-| Line | Function | Consumer Type |
-|------|----------|---------------|
-| 5109 | `_upsample_gen` | Upsampling (bilinear, nearest) |
-| 5560 | `_max_pool_with_offsets` | MaxPool (our case) |
-| 5796 | `max_pool2d_with_indices_backward` | MaxPool backward |
-| 6067 | `_adaptive_avg_pool2d` | Adaptive average pooling |
-| 6142 | `adaptive_max_pool2d` | Adaptive max pooling |
-| 6272 | `_fractional_max_pool` | Fractional max pooling |
-| 6343 | `upsample_nearest2d_backward` | Upsample backward |
-| 6464 | avg_pool | Standard average pooling |
-| 6601, 6772 | backward pool ops | Gradient computations |
-
-ALL of these benefit from `smart_realize_hint` when preceded by a broadcast-dominated pointwise producer (e.g., BN+ReLU, channel-wise affine transforms, etc.).
-
-## Configs Attempted (Ineffective without smart_realize_hint)
-
-| Config | Result |
-|--------|--------|
-| `aggressive_fusion = True` | No change (3 kernels) — score is still 0 |
-| `realize_reads_threshold = 50` | No change |
-| `realize_opcount_threshold = 100` | No change |
-| `max_fusion_size = 256` | No change |
-| `score_fusion_memory_threshold = -1` | op0->op1 still fails at can_fuse_vertical |
-| `coordinate_descent_tuning = True` | 373 us (tunes block sizes, not fusion) |
-| `max_autotune = True` | 390 us (same) |
-| Full fusion (BN+ReLU+maxpool+avgpool in 1 kernel) | 1266 us (9x9=81 recomputes too expensive) |
-
-None of these help because the scheduler's index-matching architecture cannot express stencil consumer patterns.
-
-## Conclusion
-
-The existing `smart_realize_hint` + `_is_broadcast_dominated()` fix in `ir.py` is the architecturally correct solution. A scheduler-based fix would require a fundamentally new fusion mode ("inline recomputation") that does not exist in the current scheduler architecture and would require substantial refactoring of:
-1. The memory scoring system (to give non-zero scores for stencil reads from producer buffers)
-2. The `can_fuse_vertical` system (to accept index-mismatched producer-consumer pairs)
-3. A buffer elimination mechanism (to "undo" materialization and re-inline the producer)
-
-The realize_hint approach avoids all of these issues by making the correct decision at lowering time: don't materialize cheap producers that will be consumed by stencil operators.
-
-## Impact
-
-- **Models affected**: timm_adv_inception_v3_infer, timm_inception_v3_infer (and likely other models with BN->Pool patterns)
-- **Measured speedup**: 1.57x (229us vs 359us baseline)
-- **Risk**: None — fix is gated by `_is_broadcast_dominated()` cost heuristic
+## Source
+- Label: timm_adv_inception_v3_infer
+- Pattern: channels-last BN affine -> ReLU -> 3x3 stride-2 maxpool -> 3x3 avgpool
