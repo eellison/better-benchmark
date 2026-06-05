@@ -1,0 +1,17 @@
+repro_id: pointwise_e26de0a669ae
+oracle: oracle_bn_relu_pool
+check: PASS
+oracle_us: 235.52
+compile_us: 358.24
+ratio: 1.521
+status: GOOD
+classification: SCHEDULER_FUSION
+
+Gap diagnosis: Oracle computes the full captured channels-last BN-inference affine,
+NaN-preserving ReLU, 3x3 stride-2 maxpool stencil, and padded 3x3 avgpool output for
+the final f32[128,192,35,35] tensor with the BN/ReLU producer fused into the maxpool
+layout-indexing kernel. Inductor lowers the channels-last pointwise producer and stencil
+consumers through generic scheduling with avoidable intermediate traffic.
+
+Fix: Teach the scheduler a guarded channels-last BN-affine/ReLU-to-pooling stencil
+fusion and benchmark it against the generic pool lowering.

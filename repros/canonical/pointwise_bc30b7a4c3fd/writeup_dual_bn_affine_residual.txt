@@ -1,0 +1,18 @@
+repro_id: pointwise_bc30b7a4c3fd
+oracle: oracle_dual_bn_affine_residual
+check: PASS
+oracle_us: 13.95
+compile_us: 25.76
+ratio: 1.846
+status: GOOD
+classification: ALGEBRAIC_ELIMINATION
+
+Gap diagnosis: Oracle folds the full two-stage channelwise BN-inference affine
+chain with the broadcast residual by precomputing per-channel scale/residual-scale/shift
+coefficients and streaming output as a flat storage-order FMA. Inductor emits a generic
+fused pointwise kernel for the decomposed unsqueeze/sub/sqrt/reciprocal/mul/add graph
+and recomputes both normalization affine chains at element granularity.
+
+Fix: Add a guarded BN-affine folding rewrite for serial inference-normalization
+epilogues that lowers the final loop as `x * scale + residual * residual_scale + shift`
+while preserving broadcast layouts and NaN behavior.
