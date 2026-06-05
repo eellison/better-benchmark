@@ -81,6 +81,54 @@ Each subagent prompt must include:
 - "BEFORE FINISHING: commit your work in /tmp/pytorch-work with `git add` + `git commit`. Even rough/WIP commits are fine. Use message format: `[inductor] <what> (<repro_id>, <speedup>)`"
 - "Write investigation results to investigation_results/inductor_writeups/per_repro/<repro_id>.md"
 
+### Fixing Inductor: Practical Guide
+
+The pytorch working tree is at `/tmp/pytorch-work` on branch `pr-184905`.
+
+**Fix categories and where to look:**
+
+| Fix Type | Where | Example |
+|----------|-------|---------|
+| Algebraic rewrite (eliminate redundant ops) | `torch/_inductor/fx_passes/` (new file or extend `post_grad.py`) | linear_reduction_elimination, select_scatter_sparsity |
+| Fusion failure (ops that should be 1 kernel) | `torch/_inductor/scheduler.py` (can_fuse, score_fusion) | realize_hint heuristic, split_reductions |
+| Codegen overhead (asserts, unnecessary ops) | `torch/_inductor/codegen/triton.py` or `lowering.py` | elide_constant_index_asserts, scalar_acc |
+| Realization too eager | `torch/_inductor/ir.py` (should_realize_on_reuse, realize_hint) | pointwise_e26de fix |
+| Constant folding gap | `torch/fx/passes/` or `torch/_inductor/constant_folding.py` | iota mask elimination |
+
+**How to test a fix:**
+```bash
+cd /tmp/scratch_space/better_benchmark
+pip install --no-build-isolation -e . 2>/dev/null
+# Measure before:
+INDUCTOR_GPU_BENCH_LOCK=1 python repros/canonical/<repro_id>/oracle_*.py --bench
+# Make the change in /tmp/pytorch-work/...
+# Measure after (same command — it reloads inductor)
+INDUCTOR_GPU_BENCH_LOCK=1 python repros/canonical/<repro_id>/oracle_*.py --bench
+```
+
+**To inspect what Inductor generates:**
+```bash
+TORCH_LOGS=output_code python -c "
+import torch, torch._inductor.config as cfg
+cfg.coordinate_descent_tuning = True
+# ... load and compile the repro
+" 2>&1 | grep "def triton"   # count kernels
+```
+
+**Key Inductor files:**
+- `scheduler.py`: fusion decisions (can_fuse, score_fusion, ForeachKernel, MixOrderReduction)
+- `ir.py`: IR nodes, should_realize_on_reuse(), realize_hint()
+- `lowering.py`: aten op → IR lowering (where index_impl, assert_indirect_indexing live)
+- `codegen/triton.py`: Triton code emission (scalar_acc, device_assert)
+- `fx_passes/post_grad.py`: post-grad pass registration
+- `config.py`: all config flags (add new ones here, never change existing defaults)
+
+**Rules:**
+- Gate behind a NEW config flag (enabled by default is fine)
+- Never change existing config defaults
+- Test on target repro + spot-check 2-3 other repros for regressions
+- Prefer targeted fixes over broad heuristic changes
+
 ### Committing Work in PyTorch (IMPORTANT)
 
 Agents implementing fixes in `/tmp/pytorch-work` MUST commit their work before finishing.
