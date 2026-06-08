@@ -57,7 +57,7 @@ def capture_model(model_name: str, batch_size: int, mode: str):
     inp = None
     with temporary_capture_for_merge(
         OUTPUT_DIR,
-        label,
+        model_name,
         suite="timm",
         mode=mode,
         prefix="recapture_timm_",
@@ -77,9 +77,8 @@ def capture_model(model_name: str, batch_size: int, mode: str):
             else:
                 model.eval()
 
-            # Save full graphs to the per-model directory
-            # Use label-derived name to match what merge_captures writes manifest to
-            model_dir = OUTPUT_DIR / "models" / "timm" / mode / label
+            # Save full graphs to the same per-model directory as manifest.json.
+            model_dir = OUTPUT_DIR / "models" / "timm" / mode / model_name
             model_dir.mkdir(parents=True, exist_ok=True)
             install_capture_hook(str(cap_dir), label=label, graph_dir=str(model_dir))
 

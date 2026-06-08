@@ -3,4 +3,4 @@ name = "better-benchmark"
 version = "0.1.0"
 
 [tool.setuptools]
-py-modules = ["repro_harness", "oracle_harness", "byte_accounting"]
+py-modules = ["repro_harness", "oracle_harness", "byte_accounting", "full_graph_harness"]

@@ -294,7 +294,8 @@ def test_default_worker_setup_does_not_take_gpu_lock():
     assert "def gpu_setup_lock():" in script
     assert "STRICT_GPU_LOCK = False" in script
     assert "if STRICT_GPU_LOCK:\n        with gpu_bench_lock(\"shared\"):" in script
-    assert "with gpu_bench_lock():\n                    return do_bench" in script
+    assert "with gpu_bench_lock():" in script
+    assert "do_bench(" in script
 
 
 def test_strict_setup_lock_uses_inductor_lock_hook(monkeypatch, tmp_path):

@@ -132,6 +132,51 @@ class MergeCapturesTests(unittest.TestCase):
             self.assertFalse(raw_dir.exists())
             self.assertFalse((output / "canonical").exists())
 
+    def test_graph_only_capture_writes_manifest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            capture_dir = root / "empty_capture"
+            capture_dir.mkdir()
+            model_dir = output / "models" / "hf" / "infer" / "ModelA"
+            model_dir.mkdir(parents=True)
+            (model_dir / "full_graph_000.py").write_text("# graph\n")
+            (model_dir / "full_graph_000.meta.json").write_text("{}\n")
+
+            merged = merge_one_capture(capture_dir, output, "ModelA", suite="hf", mode="infer")
+
+            manifest = json.loads((model_dir / "manifest.json").read_text())
+            self.assertEqual(merged, 0)
+            self.assertEqual(manifest["patterns"], [])
+            self.assertEqual(manifest["graphs"], ["full_graph_000.py"])
+            self.assertEqual(
+                manifest["graph_metadata"],
+                {"full_graph_000.py": "full_graph_000.meta.json"},
+            )
+
+    def test_explicit_suite_preserves_prefixed_model_name(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            capture_dir = root / "empty_capture"
+            capture_dir.mkdir()
+            model_dir = output / "models" / "hf" / "train" / "hf_Foo_train"
+            model_dir.mkdir(parents=True)
+            (model_dir / "full_graph_000.py").write_text("# graph\n")
+
+            merge_one_capture(
+                capture_dir,
+                output,
+                "hf_Foo_train",
+                suite="hf",
+                mode="train",
+            )
+
+            self.assertTrue((model_dir / "manifest.json").exists())
+            self.assertFalse(
+                (output / "models" / "hf" / "train" / "Foo" / "manifest.json").exists()
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
