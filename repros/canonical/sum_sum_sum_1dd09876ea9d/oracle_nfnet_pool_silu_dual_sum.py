@@ -11,11 +11,9 @@ import torch
 try:
     import triton
     import triton.language as tl
-    from torch._inductor.runtime.triton_helpers import libdevice
 except ImportError:  # pragma: no cover - keeps py_compile useful without Triton.
     triton = None
     tl = None
-    libdevice = None
 
 # --- Configuration (auto-derived from file location) ---
 REPRO_DIR = Path(__file__).resolve().parent
@@ -73,7 +71,7 @@ def get_repro_instance():
 
 # --- Oracle kernel(s) ---
 
-if triton is not None and libdevice is not None:
+if triton is not None:
 
     @triton.jit
     def _add_rn_f32(a, b):
@@ -151,8 +149,7 @@ if triton is not None and libdevice is not None:
         mul2 = _mul_rn_f32(mul1, arg460_value)
         base = _mul_rn_f32(mul2, 0.2)
 
-        gate_exp = libdevice.exp(-gate_x)
-        sigmoid = 1.0 / _add_rn_f32(gate_exp, 1.0)
+        sigmoid = tl.sigmoid(gate_x)
 
         scalar_rhs = _mul_rn_f32(arg227_value, sigmoid)
         scalar_rhs = _mul_rn_f32(scalar_rhs, 2.0)
@@ -232,8 +229,8 @@ def _expect_tensor(
 
 
 def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor, ...]:
-    if triton is None or libdevice is None:
-        raise RuntimeError("Triton with libdevice is required for this oracle")
+    if triton is None:
+        raise RuntimeError("Triton is required for this oracle")
     if len(inputs) != 7:
         raise ValueError(f"{REPRO_ID} expects 7 inputs, got {len(inputs)}")
     pool_grad, pool_shape_ref, getitem_165, arg460, gate_input, arg227, arg44 = inputs
