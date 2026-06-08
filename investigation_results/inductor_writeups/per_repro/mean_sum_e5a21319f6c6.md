@@ -10,58 +10,61 @@ casts back to bf16, then sums the entire [1152000, 512] result to a scalar bf16.
 
 ## Measurements
 
+### Before fix
+
 | Config | Time (us) | Ratio vs Oracle |
 |--------|-----------|-----------------|
-| Oracle | 297.92 | 1.000 |
-| torch.compile (cd=True, combo) | 561.09 | 1.883 |
-| torch.compile (cd=True, combo, mk=2) | 721.03 | 2.420 |
-| torch.compile (cd=True, combo, mk=3) | 562.51 | 1.889 |
+| Oracle | 282.34 | 1.000 |
+| torch.compile (cd=True, combo) | 534.27 | 1.892 |
+| torch.compile (cd=True, combo, mk=2) | ~721 | 2.420 |
+| torch.compile (cd=True, combo, mk=3) | ~562 | 1.889 |
 
-Best compile config: default (cd=True, combo_kernels=True) at 561.09 us.
-Ratio: **1.883x** - significant gap.
+### After fix (split_multilayer_second_step=True)
+
+| Config | Time (us) | Ratio vs Oracle |
+|--------|-----------|-----------------|
+| Oracle | 282.18 | 1.000 |
+| torch.compile (cd=True, combo) | 216.74 | 0.768 |
+
+**Result: 1.88x gap eliminated. Compiled is now faster than oracle.**
 
 Correctness: PASS (shape=[] dtype=torch.bfloat16 max_diff=0.00e+00)
 
 ## Kernel Count
 
 - Oracle: 3 kernels (fused RMSNorm+partial-sum, partial-reduce, final-reduce)
-- Inductor: 2 kernels (persistent RMSNorm writing [1152000,512] bf16, then global reduction over 1152000*512 elements)
+- Inductor before: 2 kernels (persistent RMSNorm+row-sum, then single-CTA serial reduction over 1152000 row sums)
+- Inductor after: 3 kernels (persistent RMSNorm+row-sum, 141-CTA parallel partial reduction, 1-CTA final reduction of 141 values)
 
 ## Root Cause
 
-The oracle fuses the global sum INTO the RMSNorm kernel: each row kernel computes
-the RMSNorm affine output, casts to bf16, and accumulates a per-CTA partial sum
-(eliminating the 1152000*512*2 = 1.15 GB intermediate bf16 write + read). A tiny
-2-level tree reduction (1152000 partials -> 1125 -> 1 scalar) finishes the sum.
+The writeup originally blamed buffer materialization, but investigation revealed
+Inductor was ALREADY fusing the row-wise sum into the RMSNorm kernel (via the
+`create_multilayer_existing_ranges` path with split=-1). The intermediate is only
+4.6 MB (1152000 * 4 bytes f32 row sums), not 1.15 GB.
 
-Inductor cannot do this because:
-1. The row-wise RMSNorm template produces a [1152000, 512] output
-2. The downstream `sum.default` is a separate whole-tensor reduction
-3. The scheduler materializes the intermediate because the consumer has a different
-   reduction dimension (global vs row-wise)
+The actual bottleneck was the **second-step reduction**: summing 1152000 row sums
+to a scalar was done in a single CTA looping sequentially (triton_red with
+xnumel=1, rnumel=1152000). This was because `create_multilayer_helper` creates
+the second-step Reduction via the direct `Reduction()` constructor, bypassing the
+split heuristic in `Reduction.create()`.
 
-The memory traffic difference:
-- Oracle: reads x (1.15 GB) + weight (2 KB), writes partials (4.5 MB) = ~1.15 GB
-- Inductor: reads x (1.15 GB) + weight, writes intermediate (1.15 GB bf16),
-  then reads intermediate (1.15 GB), writes scalar = ~3.45 GB
+## Fix
 
-This is a ~3x memory traffic ratio, matching the ~1.9x perf ratio (partially
-hidden by compute).
+**Commit:** `d85ab5508e3` on pr-184905
 
-## Fix Direction
+In `create_multilayer_helper` (ir.py), when the second-step reduction has:
+- numel_hint <= 1 (scalar output)
+- reduction numel > 8192 (large enough to benefit from parallelism)
+- split_reductions enabled
 
-The scheduler needs to recognize that a global reduction over the output of a
-row-wise reduction can be partially accumulated within the row kernel. This is a
-"reduction epilogue sink" optimization: the row-wise kernel should be able to
-compute its output row, accumulate a partial sum per CTA, and skip materializing
-the full intermediate.
+Route through `Reduction.create()` (with `input_node=None` to prevent infinite
+recursion) instead of the direct constructor. This enables the standard split
+heuristic (141 splits for 1152000 elements on B200), turning a single-CTA serial
+loop into a parallel tree reduction.
 
 Relevant files:
-- `/tmp/pytorch-work/torch/_inductor/scheduler.py` (fusion decisions)
-- `/tmp/pytorch-work/torch/_inductor/ir.py` (realize decisions for reduction outputs)
-- `/tmp/pytorch-work/torch/_inductor/codegen/triton.py` (codegen for partial accumulators)
+- `/tmp/pytorch-work/torch/_inductor/ir.py` (line ~2142, create_multilayer_helper)
+- `/tmp/pytorch-work/torch/_inductor/config.py` (split_multilayer_second_step flag)
 
-This pattern affects any "row-norm then global-reduce" workload (RMSNorm+loss,
-LayerNorm+loss, etc.).
-
-## Status: DESIGN_DOC - requires scheduler enhancement for reduction-over-reduction fusion
+## Status: FIX_IMPLEMENTED
