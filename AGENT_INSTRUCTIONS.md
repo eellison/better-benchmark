@@ -66,6 +66,11 @@ When you find a gap > 1.05x, follow this flow:
    ```
    Many gaps close with `multi_kernel=2` or `multi_kernel=3`. Report which config gives the best result.
 
+   Also test `cfg.use_fast_math = True` — if this closes the gap, it means the oracle
+   is using fast/imprecise transcendentals (tl_math.exp vs libdevice.exp). This isn't a
+   valid Inductor gap (the oracle is cheating on precision), but it's useful diagnostic
+   info: it tells you the kernel is compute-bound on transcendental throughput.
+
 6. **Always write/update the per-repro writeup** regardless of outcome.
 
 ## Classification (be specific!)
