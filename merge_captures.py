@@ -91,6 +91,32 @@ def _format_compact_config(label: str, input_specs: list[dict]) -> str:
     return f"{label}: ({', '.join(parts)})"
 
 
+def _model_output_dir(
+    canonical_dir: Path,
+    model_name: str,
+    suite: str = "other",
+    mode: str | None = None,
+) -> Path:
+    models_dir = canonical_dir / "models"
+    if mode:
+        return models_dir / suite / mode / model_name
+    return models_dir / suite / model_name
+
+
+def _resolve_model_identity(
+    model_name: str,
+    suite: str | None,
+    mode: str | None,
+) -> tuple[str, str | None, str]:
+    if suite is None:
+        suite, inferred_mode, clean_name = _infer_suite_mode(model_name)
+        if mode is None:
+            mode = inferred_mode
+    else:
+        clean_name = model_name
+    return suite, mode, clean_name
+
+
 def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
                       suite: str = "other", mode: str | None = None):
     """Write per-model manifest.json into the model directory.
@@ -98,11 +124,7 @@ def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
     Writes to models/<suite>/<mode>/<model_name>/manifest.json (or
     models/<suite>/<model_name>/manifest.json if mode is None).
     """
-    models_dir = canonical_dir / "models"
-    if mode:
-        out_dir = models_dir / suite / mode / model_name
-    else:
-        out_dir = models_dir / suite / model_name
+    out_dir = _model_output_dir(canonical_dir, model_name, suite, mode)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     manifest_file = out_dir / "manifest.json"
@@ -120,6 +142,11 @@ def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
     graph_files = sorted(f.name for f in out_dir.glob("full_graph_*.py"))
     if graph_files:
         graphs = graph_files
+    graph_metadata = {
+        graph: f"{Path(graph).stem}.meta.json"
+        for graph in graphs
+        if (out_dir / f"{Path(graph).stem}.meta.json").exists()
+    }
 
     manifest_data = {
         "schema_version": 1,
@@ -128,6 +155,8 @@ def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
         "patterns": patterns,
         "graphs": graphs,
     }
+    if graph_metadata:
+        manifest_data["graph_metadata"] = graph_metadata
     if mode:
         manifest_data["mode"] = mode
 
@@ -195,9 +224,18 @@ def _infer_suite_mode(model_name: str) -> tuple[str, str | None, str]:
 def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                       suite: str | None = None, mode: str | None = None):
     """Merge a single capture directory into the canonical set."""
+    capture_dir = Path(capture_dir)
+    canonical_dir = Path(canonical_dir)
+    suite, mode, clean_name = _resolve_model_identity(model_name, suite, mode)
+
     index_path = capture_dir / "index.json"
     if not index_path.exists():
-        print(f"  No index.json in {capture_dir}, skipping")
+        model_dir = _model_output_dir(canonical_dir, clean_name, suite, mode)
+        if any(model_dir.glob("full_graph_*.py")):
+            model_dir = _write_model_json(canonical_dir, clean_name, [], suite, mode)
+            print(f"  Model dir: {model_dir}")
+        else:
+            print(f"  No index.json in {capture_dir}, skipping")
         return 0
 
     with open(index_path) as f:
@@ -205,14 +243,6 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
 
     canonical_path = canonical_dir / "canonical"
     canonical_path.mkdir(parents=True, exist_ok=True)
-
-    # Infer suite/mode if not provided
-    if suite is None:
-        suite, inferred_mode, clean_name = _infer_suite_mode(model_name)
-        if mode is None:
-            mode = inferred_mode
-    else:
-        clean_name = model_name
 
     merged_patterns = []
     merged = 0
@@ -314,7 +344,8 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         merged += 1
 
     # Write per-model manifest
-    if merged_patterns:
+    model_dir = _model_output_dir(canonical_dir, clean_name, suite, mode)
+    if merged_patterns or any(model_dir.glob("full_graph_*.py")):
         model_dir = _write_model_json(canonical_dir, clean_name, merged_patterns, suite, mode)
         print(f"  Model dir: {model_dir}")
 

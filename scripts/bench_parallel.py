@@ -70,6 +70,10 @@ import tempfile
 import time
 from pathlib import Path
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 from gpu_lock import gpu_lock_for_kind, discover_gpus, matching_gpus
 
 
@@ -79,6 +83,8 @@ _SHARED_CACHE_DIR = os.environ.get(
     "TORCHINDUCTOR_CACHE_DIR",
     os.path.join(tempfile.gettempdir(), "bench_parallel_inductor_cache"),
 )
+_RESERVED_TOP_LEVEL_KEYS = {"_metadata", "__failures__", "__summary__"}
+_RESERVED_RESULT_LABELS = {"__graph__"}
 
 
 def find_repros(paths: list[Path]) -> list[Path]:
@@ -90,6 +96,53 @@ def find_repros(paths: list[Path]) -> list[Path]:
         elif p.is_dir():
             repros.extend(sorted(p.rglob("repro.py")))
     return repros
+
+
+def find_full_graphs(paths: list[Path]) -> list[Path]:
+    """Resolve paths to saved full_graph_*.py files."""
+    graphs = []
+    seen = set()
+    for p in paths:
+        if p.is_file():
+            candidates = [p]
+        elif p.is_dir():
+            candidates = sorted(p.rglob("full_graph_*.py"))
+        else:
+            continue
+
+        for candidate in candidates:
+            if (
+                candidate.is_file()
+                and candidate.name.startswith("full_graph_")
+                and candidate.suffix == ".py"
+            ):
+                resolved = candidate.resolve()
+                if resolved not in seen:
+                    seen.add(resolved)
+                    graphs.append(candidate)
+    return graphs
+
+
+def _task_display_name(task_path: str) -> str:
+    path = Path(task_path)
+    if path.name == "repro.py":
+        return path.parent.name
+    if path.name.startswith("full_graph_") and path.suffix == ".py":
+        try:
+            from full_graph_harness import infer_full_graph_source
+
+            source = infer_full_graph_source(path)
+            parts = [
+                source.get("kind"),
+                source.get("suite"),
+                source.get("mode"),
+                source.get("model"),
+                source.get("graph"),
+            ]
+            return "/".join(str(part) for part in parts if part)
+        except Exception:
+            pass
+    return f"{path.parent.name}/{path.name}"
 
 
 def _benchmark_entry_name(entry) -> str | None:
@@ -198,6 +251,112 @@ def _results_payload(
     return payload
 
 
+def _metric_result_items(results: dict):
+    """Yield only per-shape/per-run metric entries from one result payload."""
+    for label, result in results.items():
+        if label in _RESERVED_RESULT_LABELS:
+            continue
+        if isinstance(result, dict):
+            yield label, result
+
+
+def _success_items(payload: dict):
+    for key, value in payload.items():
+        if key not in _RESERVED_TOP_LEVEL_KEYS:
+            yield key, value
+
+
+def _infer_workload_kind_from_payload(
+    successes: dict,
+    failures: dict | None = None,
+) -> str | None:
+    saw_full_graph = False
+    saw_repro = False
+
+    def record_path(path: str) -> None:
+        nonlocal saw_full_graph, saw_repro
+        name = Path(path).name
+        if name.startswith("full_graph_") and name.endswith(".py"):
+            saw_full_graph = True
+        elif name == "repro.py":
+            saw_repro = True
+
+    for key, value in successes.items():
+        record_path(str(key))
+        if not isinstance(value, dict):
+            continue
+        if "__graph__" in value:
+            saw_full_graph = True
+        else:
+            saw_repro = True
+
+    for key, value in (failures or {}).items():
+        record_path(str(key))
+        if isinstance(value, dict):
+            repro = value.get("repro")
+            if repro:
+                record_path(str(repro))
+
+    if saw_full_graph and not saw_repro:
+        return "full_graph"
+    if saw_repro and not saw_full_graph:
+        return "repro"
+    if saw_full_graph and saw_repro:
+        return "mixed"
+    return None
+
+
+def _run_metadata(*, workload_kind: str | None, n_results: int) -> dict:
+    import subprocess
+
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    ).stdout.strip()
+    metadata = {
+        "schema_version": 1,
+        "tool": "scripts/bench_parallel.py",
+        "commit": commit,
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "n_repros": n_results,
+        "n_results": n_results,
+    }
+    if workload_kind:
+        metadata["workload_kind"] = workload_kind
+    return metadata
+
+
+def _failure_status_counts(failures: dict | None) -> tuple[int, int]:
+    """Return (failed, skipped) counts from a failure map."""
+    failures = failures or {}
+    skipped = sum(
+        1
+        for failure in failures.values()
+        if isinstance(failure, dict) and failure.get("status") == "skipped"
+    )
+    return len(failures) - skipped, skipped
+
+
+def _atomic_write_json(path: Path, payload: dict) -> None:
+    import os
+    import tempfile
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        delete=False,
+    ) as tmp:
+        json.dump(payload, tmp, indent=2)
+        tmp.write("\n")
+        tmp_path = Path(tmp.name)
+    os.replace(tmp_path, path)
+
+
 def _write_results_output(
     output_path: Path,
     all_results: dict,
@@ -207,48 +366,211 @@ def _write_results_output(
     done: int,
     failed: int,
     elapsed: float,
+    skipped: int = 0,
+    workload_kind: str | None = None,
 ):
-    import subprocess
-
-    commit = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        capture_output=True,
-        text=True,
-        timeout=5,
-    ).stdout.strip()
-    output_path.write_text(json.dumps(_results_payload(
-        all_results,
-        failures,
-        {
-            "total": total,
-            "ok": done,
-            "failed": failed,
-            "elapsed_s": elapsed,
-        },
-        {
-            "commit": commit,
-            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "n_repros": len(all_results),
-        },
-    ), indent=2))
+    _atomic_write_json(
+        output_path,
+        _results_payload(
+            all_results,
+            failures,
+            {
+                "total": total,
+                "ok": done,
+                "failed": failed,
+                "skipped": skipped,
+                "elapsed_s": elapsed,
+            },
+            _run_metadata(workload_kind=workload_kind, n_results=len(all_results)),
+        ),
+    )
 
 
-def _merge_into_baseline(baseline_path: Path, new_results: dict, new_failures: dict):
+def _is_integer_non_bool_dtype_name(dtype_name: object) -> bool:
+    text = str(dtype_name).removeprefix("torch.")
+    return text != "bool" and (text.startswith("int") or text.startswith("uint"))
+
+
+def _is_graph_inferred_integer_input(spec: dict) -> bool:
+    if spec.get("exact") and "data" in spec:
+        return True
+    generator = spec.get("gen") or spec.get("generator") or {}
+    return (
+        generator.get("kind") in {"index", "permutation"}
+        and spec.get("constraint_source") == "graph_inference"
+    )
+
+
+def _classify_full_graph_definition(
+    definition,
+    *,
+    allow_unsafe: bool = False,
+) -> list[dict[str, str]]:
+    """Classify saved full graphs that are not safe to instantiate generically."""
+    reasons: list[dict[str, str]] = []
+    has_sidecar = bool((definition.metadata or {}).get("sidecar"))
+
+    for attr_name, spec in (definition.tensor_attrs or {}).items():
+        if spec.get("requires_exact") and not (spec.get("exact") and "data" in spec):
+            reasons.append({
+                "category": "requires_exact_attr",
+                "reason": (
+                    f"tensor attr {attr_name!r} is integer/bool state without "
+                    "an exact payload"
+                ),
+                "hint": "Recapture this model so full_graph_NNN.meta.json contains exact tensor attr data.",
+            })
+
+    if allow_unsafe:
+        return reasons
+
+    for spec in definition.input_specs or []:
+        name = str(spec.get("name", "<unnamed>"))
+        kind = spec.get("kind")
+        if not has_sidecar and kind == "symint":
+            reasons.append({
+                "category": "symbolic_dim",
+                "reason": f"symbolic input {name!r} only has annotation defaults",
+                "hint": "Recapture with metadata sidecars so symbolic dimensions have concrete values.",
+            })
+            continue
+        if kind != "tensor":
+            continue
+        if not has_sidecar and spec.get("symbolic_dims"):
+            reasons.append({
+                "category": "symbolic_dim",
+                "reason": f"tensor input {name!r} has symbolic dimensions from annotations",
+                "hint": "Recapture with metadata sidecars so symbolic dimensions have concrete values.",
+            })
+        if _is_integer_non_bool_dtype_name(spec.get("dtype", "")) and not _is_graph_inferred_integer_input(spec):
+            reasons.append({
+                "category": "unsafe_integer_input",
+                "reason": (
+                    f"integer tensor input {name!r} lacks graph-inferred "
+                    "index/permutation constraints"
+                ),
+                "hint": "Recapture with metadata sidecars or pass --allow-unsafe-full-graphs for exploratory runs.",
+            })
+
+    return reasons
+
+
+def _full_graph_skip_failure(path: Path, reasons: list[dict[str, str]]) -> dict:
+    reason_text = "; ".join(reason["reason"] for reason in reasons[:3])
+    if len(reasons) > 3:
+        reason_text += f"; {len(reasons) - 3} more"
+    hints = []
+    for reason in reasons:
+        hint = reason.get("hint")
+        if hint and hint not in hints:
+            hints.append(hint)
+    return {
+        "status": "skipped",
+        "category": reasons[0]["category"] if reasons else "unsupported_full_graph",
+        "repro": str(path),
+        "reason": reason_text,
+        "hint": " ".join(hints),
+    }
+
+
+def _full_graph_preflight_error(path: Path, exc: Exception) -> dict:
+    return {
+        "status": "failed",
+        "category": "preflight_error",
+        "repro": str(path),
+        "exception_type": type(exc).__name__,
+        "error": str(exc)[:1000],
+        "reason": "failed to parse saved full graph before queueing",
+        "hint": "Inspect the graph module or recapture it with current exporter metadata.",
+    }
+
+
+def _preflight_full_graphs(
+    repros: list[Path],
+    *,
+    allow_unsafe: bool = False,
+) -> tuple[list[Path], dict[str, dict]]:
+    from full_graph_harness import load_full_graph_definition
+
+    queueable: list[Path] = []
+    failures: dict[str, dict] = {}
+    for repro_path in repros:
+        try:
+            definition = load_full_graph_definition(repro_path)
+            reasons = _classify_full_graph_definition(
+                definition,
+                allow_unsafe=allow_unsafe,
+            )
+        except Exception as exc:
+            failures[str(repro_path)] = _full_graph_preflight_error(repro_path, exc)
+            continue
+        if reasons:
+            failures[str(repro_path)] = _full_graph_skip_failure(repro_path, reasons)
+        else:
+            queueable.append(repro_path)
+    return queueable, failures
+
+
+def _merge_into_baseline(
+    baseline_path: Path,
+    new_results: dict,
+    new_failures: dict,
+    *,
+    workload_kind: str | None = None,
+):
+    """Merge new benchmark results into an existing baseline JSON file."""
+    import fcntl
+
+    baseline_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = baseline_path.with_name(f"{baseline_path.name}.lock")
+    with open(lock_path, "a+") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            return _merge_into_baseline_locked(
+                baseline_path,
+                new_results,
+                new_failures,
+                workload_kind=workload_kind,
+            )
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+def _merge_into_baseline_locked(
+    baseline_path: Path,
+    new_results: dict,
+    new_failures: dict,
+    *,
+    workload_kind: str | None = None,
+):
     """Merge new benchmark results into an existing baseline JSON file."""
     import subprocess as _sp
 
     if not baseline_path.exists():
         print(f"[merge-into] {baseline_path} does not exist, writing fresh")
-        baseline_path.parent.mkdir(parents=True, exist_ok=True)
         commit = _sp.run(
             ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
         ).stdout.strip()
+        failed_count, skipped_count = _failure_status_counts(new_failures)
         payload = _results_payload(
             new_results, new_failures,
-            {"total": len(new_results) + len(new_failures), "ok": len(new_results), "failed": len(new_failures)},
-            {"commit": commit, "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"), "n_repros": len(new_results)},
+            {
+                "total": len(new_results) + len(new_failures),
+                "ok": len(new_results),
+                "failed": failed_count,
+                "skipped": skipped_count,
+            },
+            {
+                "schema_version": 1,
+                "tool": "scripts/bench_parallel.py",
+                "commit": commit,
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "n_repros": len(new_results),
+                "n_results": len(new_results),
+                **({"workload_kind": workload_kind} if workload_kind else {}),
+            },
         )
-        baseline_path.write_text(json.dumps(payload, indent=2))
+        _atomic_write_json(baseline_path, payload)
         print(f"[merge-into] Wrote {baseline_path} ({len(new_results)} repros)")
         return
 
@@ -256,6 +578,25 @@ def _merge_into_baseline(baseline_path: Path, new_results: dict, new_failures: d
     old_failures = existing.pop("__failures__", {}) or {}
     old_summary = existing.pop("__summary__", {}) or {}
     old_meta = existing.pop("_metadata", {}) or {}
+    metadata_kind = old_meta.get("workload_kind")
+    content_kind = _infer_workload_kind_from_payload(
+        existing,
+        old_failures,
+    )
+    if metadata_kind and content_kind and metadata_kind != content_kind:
+        raise ValueError(
+            f"Baseline workload_kind metadata {metadata_kind!r} conflicts with "
+            f"payload content {content_kind!r}"
+        )
+    existing_kind = metadata_kind or content_kind
+    if (
+        workload_kind
+        and existing_kind
+        and existing_kind != workload_kind
+    ):
+        raise ValueError(
+            f"Cannot merge {workload_kind!r} results into {existing_kind!r} baseline"
+        )
 
     updated = 0
     for repro_path, results in new_results.items():
@@ -272,18 +613,25 @@ def _merge_into_baseline(baseline_path: Path, new_results: dict, new_failures: d
     ).stdout.strip()
     old_meta["commit"] = commit
     old_meta["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ")
-    old_meta["n_repros"] = len([k for k in existing if not k.startswith("_")])
+    old_meta.setdefault("schema_version", 1)
+    old_meta.setdefault("tool", "scripts/bench_parallel.py")
+    if workload_kind:
+        old_meta["workload_kind"] = workload_kind
+    successes = dict(_success_items(existing))
+    old_meta["n_repros"] = len(successes)
+    old_meta["n_results"] = len(successes)
     old_meta["last_merge"] = f"updated {updated} repros"
 
-    successes = {k: v for k, v in existing.items() if not k.startswith("_") and not k.startswith("__")}
     old_summary["total"] = len(successes) + len(old_failures)
     old_summary["ok"] = len(successes)
-    old_summary["failed"] = len(old_failures)
+    failed_count, skipped_count = _failure_status_counts(old_failures)
+    old_summary["failed"] = failed_count
+    old_summary["skipped"] = skipped_count
 
     payload = _results_payload(successes, old_failures or None, old_summary, old_meta)
-    baseline_path.write_text(json.dumps(payload, indent=2))
+    _atomic_write_json(baseline_path, payload)
     print(f"[merge-into] Updated {updated} repros in {baseline_path} "
-          f"(total: {len(successes)} ok, {len(old_failures)} failed)")
+          f"(total: {len(successes)} ok, {failed_count} failed, {skipped_count} skipped)")
 
 
 def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
@@ -435,6 +783,14 @@ def main():
     parser = argparse.ArgumentParser(description="Parallel GPU benchmark runner")
     parser.add_argument("paths", nargs="*", type=Path,
                         help="repro.py files or directories to benchmark")
+    parser.add_argument("--full-graphs", action="store_true",
+                        help="Benchmark saved repros/models full_graph_*.py files "
+                             "instead of partition repro.py files")
+    parser.add_argument("--allow-unsafe-full-graphs", action="store_true",
+                        help="Queue annotation-only integer/symbolic full graphs "
+                             "instead of skipping them during preflight")
+    parser.add_argument("--models-root", type=Path, default=Path("repros/models"),
+                        help="Default graph search root for --full-graphs")
     parser.add_argument("--benchmark-set", type=Path, default=None,
                         help="Path to a frozen benchmark set JSON (e.g. benchmarks/v1.json)")
     parser.add_argument("--device-kind", default=None,
@@ -480,13 +836,24 @@ def main():
 
     # Compare mode: just read existing perf.json and diff
     if args.compare:
+        if args.full_graphs:
+            parser.error("--compare reads repro perf.json files and is not supported with --full-graphs")
         paths = args.paths or [Path("repros/canonical")]
         _run_compare(paths, args.compare[0], args.compare[1])
         return
 
+    if args.full_graphs and args.benchmark_set:
+        parser.error("--benchmark-set selects canonical repros and cannot be used with --full-graphs")
+    if args.full_graphs and args.update_perf:
+        parser.error("--update-perf writes repro perf.json files and is not supported with --full-graphs")
+
     # Load benchmark set if specified
     benchmark_entries = None
-    if args.benchmark_set:
+    workload_kind = "full_graph" if args.full_graphs else "repro"
+    if args.full_graphs:
+        graph_paths = args.paths or [args.models_root]
+        repros = find_full_graphs(graph_paths)
+    elif args.benchmark_set:
         repros, benchmark_entries = load_benchmark_set(args.benchmark_set)
         # Enable --all-shapes for benchmark set runs (repro_harness now merges
         # shape params from _default_make_inputs when shapes.json doesn't have them)
@@ -499,8 +866,54 @@ def main():
         repros = find_repros([Path("repros/canonical")])
 
     if not repros:
-        print("No repro.py files found.")
+        if args.full_graphs:
+            print("No full_graph_*.py files found.")
+        else:
+            print("No repro.py files found.")
         return
+
+    total_requested = len(repros)
+    preflight_failures: dict[str, dict] = {}
+    preflight_failed = 0
+    skipped = 0
+    if args.full_graphs:
+        repros, preflight_failures = _preflight_full_graphs(
+            repros,
+            allow_unsafe=args.allow_unsafe_full_graphs,
+        )
+        preflight_failed, skipped = _failure_status_counts(preflight_failures)
+        if preflight_failures:
+            print(
+                "Full-graph preflight: "
+                f"{len(repros)} runnable, {skipped} skipped, {preflight_failed} failed"
+            )
+        if not repros:
+            elapsed_total = 0.0
+            print(
+                f"\nDone: 0 ok, {preflight_failed} failed, {skipped} skipped "
+                f"in {elapsed_total:.1f}s"
+            )
+            if args.output:
+                _write_results_output(
+                    args.output,
+                    {},
+                    preflight_failures,
+                    total=total_requested,
+                    done=0,
+                    failed=preflight_failed,
+                    skipped=skipped,
+                    elapsed=elapsed_total,
+                    workload_kind=workload_kind,
+                )
+                print(f"[output] Wrote {args.output}")
+            if args.merge_into:
+                _merge_into_baseline(
+                    args.merge_into,
+                    {},
+                    preflight_failures,
+                    workload_kind=workload_kind,
+                )
+            return
 
     gpus = _filter_gpus(matching_gpus(args.device_kind), args.gpus)
     try:
@@ -513,7 +926,9 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
 
-    print(f"Benchmarking {len(repros)} repros across {n_workers} workers on {len(gpus)} GPUs")
+    task_label = "full graphs" if args.full_graphs else "repros"
+    task_unit = "graph" if args.full_graphs else "repro"
+    print(f"Benchmarking {len(repros)} {task_label} across {n_workers} workers on {len(gpus)} GPUs")
     gpu_labels = [f"{g['index']}:{g['kind']}" for g in gpus]
     print(f"  GPUs: {', '.join(gpu_labels)}")
     print(f"  Workers per GPU cap: {workers_per_gpu}")
@@ -541,6 +956,7 @@ def main():
         "n_workers": n_workers,
         "combo_kernels": args.combo_kernels,
         "multi_kernel": args.multi_kernel,
+        "workload_kind": workload_kind,
     }
 
     # Use threads — the actual GPU work is in subprocess.Popen children,
@@ -559,7 +975,7 @@ def main():
 
     # Collect results
     all_results = {}
-    failures = {}
+    failures = dict(preflight_failures)
     done = 0
     failed = 0
     start_time = time.time()
@@ -583,15 +999,15 @@ def main():
 
             # Periodic progress update every 30s of silence
             print(f"  [{done+failed}/{len(repros)}] ... {alive} workers alive, "
-                  f"{rate:.1f} repros/min, ETA {eta:.0f}min, elapsed {elapsed/60:.1f}min",
+                  f"{rate:.1f} {task_unit}s/min, ETA {eta:.0f}min, elapsed {elapsed/60:.1f}min",
                   flush=True)
             continue
 
-        repro_name = Path(result["repro"]).parent.name
+        repro_name = _task_display_name(result["repro"])
         if result["status"] == "ok":
             done += 1
             best_gap = None
-            for label, r in result["results"].items():
+            for label, r in _metric_result_items(result["results"]):
                 gap = r.get("gap_cd") or r.get("gap_default")
                 if gap and (best_gap is None or gap > best_gap):
                     best_gap = gap
@@ -601,12 +1017,18 @@ def main():
             all_results[result["repro"]] = result["results"]
         else:
             failed += 1
-            failures[result["repro"]] = {
+            failure = {
                 "status": "failed",
                 "gpu": result.get("gpu"),
                 "elapsed": result.get("elapsed"),
                 "error": result.get("error", ""),
+                "category": result.get("category", "runtime_error"),
+                "reason": result.get("reason") or result.get("error", ""),
+                "hint": result.get("hint") or "Inspect worker stderr or rerun this workload directly.",
             }
+            if result.get("exception_type"):
+                failure["exception_type"] = result["exception_type"]
+            failures[result["repro"]] = failure
             print(f"  [{done+failed}/{len(repros)}] FAIL gpu={result['gpu']}  "
                   f"{result['elapsed']:.1f}s  {repro_name}: {result['error'][:80]}", flush=True)
 
@@ -616,10 +1038,12 @@ def main():
                 args.output,
                 all_results,
                 failures,
-                total=len(repros),
+                total=total_requested,
                 done=done,
-                failed=failed,
+                failed=failed + preflight_failed,
+                skipped=skipped,
                 elapsed=time.time() - start_time,
+                workload_kind=workload_kind,
             )
 
     # Wait for workers
@@ -629,12 +1053,14 @@ def main():
     # Check for unfinished work
     remaining = len(repros) - done - failed
     if remaining > 0:
-        print(f"\n[WARN] {remaining} repros were not completed (workers died)")
-        print(f"  Re-run with same --tag to fill gaps.")
+        print(f"\n[WARN] {remaining} {task_unit}s were not completed (workers died)")
+        if not args.full_graphs:
+            print(f"  Re-run with same --tag to fill gaps.")
 
     elapsed_total = time.time() - start_time
-    print(f"\nDone: {done} ok, {failed} failed in {elapsed_total:.1f}s "
-          f"({elapsed_total/max(done+failed,1):.1f}s/repro effective)")
+    total_failed = failed + preflight_failed
+    print(f"\nDone: {done} ok, {total_failed} failed, {skipped} skipped in {elapsed_total:.1f}s "
+          f"({elapsed_total/max(done+failed,1):.1f}s/{task_unit} effective)")
 
     # Save perf.json per repro
     if args.update_perf and all_results:
@@ -650,7 +1076,7 @@ def main():
                 perf[hardware] = {}
             if tag not in perf[hardware]:
                 perf[hardware][tag] = {}
-            for shape_label, r in results.items():
+            for shape_label, r in _metric_result_items(results):
                 entry = {k: v for k, v in r.items()}
                 entry["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%S")
                 perf[hardware][tag][shape_label] = entry
@@ -661,11 +1087,11 @@ def main():
     if all_results:
         gaps = []
         for repro_path, results in all_results.items():
-            for label, r in results.items():
+            for label, r in _metric_result_items(results):
                 gap = r.get("gap_cd") or r.get("gap_default")
                 if gap is not None:
                     gaps.append((gap, Path(repro_path).parent.name, label,
-                                 r.get("total_bytes", 0)))
+                                 r.get("total_bytes", r.get("naive_io_bytes", 0))))
         if gaps:
             gaps.sort(reverse=True)
             print(f"\n{'='*70}")
@@ -685,16 +1111,23 @@ def main():
             args.output,
             all_results,
             failures,
-            total=len(repros),
+            total=total_requested,
             done=done,
-            failed=failed,
+            failed=total_failed,
+            skipped=skipped,
             elapsed=elapsed_total,
+            workload_kind=workload_kind,
         )
         print(f"[output] Wrote {args.output}")
 
     # Merge into existing baseline
     if args.merge_into:
-        _merge_into_baseline(args.merge_into, all_results, failures)
+        _merge_into_baseline(
+            args.merge_into,
+            all_results,
+            failures,
+            workload_kind=workload_kind,
+        )
 
 
 def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
@@ -850,7 +1283,7 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                         "gpu": gpu["index"],
                         "status": "failed",
                         "elapsed": elapsed,
-                        "error": error[:500],
+                        "error": error[:1000],
                     })
                     continue
 
@@ -869,8 +1302,8 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                         # Report as failure — we cannot trust this result.
                         error = (
                             f"result misalignment: expected repro "
-                            f"'{Path(expected).parent.name}' but worker returned "
-                            f"result for '{Path(result_repro).parent.name}'. "
+                            f"'{_task_display_name(expected)}' but worker returned "
+                            f"result for '{_task_display_name(result_repro)}'. "
                             f"Killed worker to reset stdout pipe."
                         )
                         _kill_worker(proc)
@@ -880,7 +1313,21 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                             "gpu": gpu["index"],
                             "status": "failed",
                             "elapsed": elapsed,
-                            "error": error[:500],
+                            "error": error[:1000],
+                        })
+                        continue
+                    error_payload = results.pop("__error__", None)
+                    if error_payload is not None:
+                        result_queue.put({
+                            "repro": str(repro_path),
+                            "gpu": gpu["index"],
+                            "status": "failed",
+                            "elapsed": elapsed,
+                            "error": str(error_payload.get("error", ""))[:1000],
+                            "category": error_payload.get("category", "runtime_error"),
+                            "reason": error_payload.get("reason"),
+                            "hint": error_payload.get("hint"),
+                            "exception_type": error_payload.get("exception_type"),
                         })
                         continue
                     result_queue.put({
@@ -903,7 +1350,7 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                         "gpu": gpu["index"],
                         "status": "failed",
                         "elapsed": elapsed,
-                        "error": error[:500],
+                        "error": error[:1000],
                     })
                 else:
                     error = line[:200]
@@ -915,7 +1362,7 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                         "gpu": gpu["index"],
                         "status": "failed",
                         "elapsed": elapsed,
-                        "error": error[:500],
+                        "error": error[:1000],
                     })
             except Exception as e:
                 _kill_worker(proc)
@@ -925,7 +1372,9 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                     "gpu": gpu["index"],
                     "status": "failed",
                     "elapsed": time.time() - start,
-                    "error": str(e)[:200],
+                    "error": str(e)[:1000],
+                    "category": "worker_parent_error",
+                    "exception_type": type(e).__name__,
                 })
 
         _kill_worker(proc)
@@ -955,8 +1404,10 @@ from triton.testing import do_bench
 import importlib.util, math
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
 from byte_accounting import count_bytes_effective
+from full_graph_harness import load_full_graph_definition, load_full_graph, result_metadata, tensor_bytes
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
+WORKLOAD_KIND = {args_dict.get("workload_kind", "repro")!r}
 
 # Extra inductor config knobs
 if {args_dict.get("combo_kernels", False)}:
@@ -969,7 +1420,7 @@ if {args_dict.get("multi_kernel", 0)}:
 # Pre-imports the next repro module while the current one is being timed.
 # Module loading (file I/O, AST parse, exec) is CPU-bound and can overlap
 # with the GPU-bound do_bench calls of the previous repro.
-_prefetch_cache = {{}}  # path -> (module, instance, configs)
+_prefetch_cache = {{}}  # path -> repro tuple or FullGraphDefinition
 _prefetch_lock = threading.Lock()
 _GPU_BENCH_LOCK_STATE_NAME = "_torchinductor_gpu_benchmark_lock_state"
 _GPU_BENCH_LOCK_MODES = {{"shared", "exclusive"}}
@@ -1159,6 +1610,11 @@ def _prefetch_module(repro_path):
         _real_stdout = sys.stdout
         sys.stdout = io.StringIO()
         try:
+            if WORKLOAD_KIND == "full_graph":
+                definition = load_full_graph_definition(repro_path)
+                with _prefetch_lock:
+                    _prefetch_cache[repro_path] = definition
+                return
             spec = importlib.util.spec_from_file_location("repro_prefetch", repro_path)
             mod = importlib.util.module_from_spec(spec)
             mod.device = torch.device
@@ -1191,6 +1647,13 @@ def _get_or_load_module(repro_path):
     configs = load_shape_configs(repro_path)
     return (mod, instance, configs)
 
+def _get_or_load_full_graph(repro_path):
+    with _prefetch_lock:
+        cached = _prefetch_cache.pop(repro_path, None)
+    definition = cached if cached is not None else load_full_graph_definition(repro_path)
+    instance, inputs, definition = load_full_graph(definition, default_device="cuda")
+    return instance, inputs, definition
+
 N_ROUNDS = 5  # interleaved timing rounds for min-of-mins
 
 def _capture_cudagraph(fn, inps):
@@ -1219,7 +1682,93 @@ def _make_bench_callable(graph_or_fn, is_graph, inps):
     else:
         return lambda: graph_or_fn(*inps)
 
+def bench_full_graph_one(repro_path):
+    instance, inputs, _definition = _get_or_load_full_graph(repro_path)
+
+    with gpu_setup_lock():
+        with torch.no_grad():
+            eager_out = instance(*inputs)
+        torch.cuda.synchronize()
+        input_bytes = tensor_bytes(inputs)
+        output_bytes = tensor_bytes(eager_out)
+        del eager_out
+
+    # Compile default
+    inductor_metrics.reset()
+    torch._dynamo.reset()
+    compiled = torch.compile(instance)
+    with gpu_setup_lock():
+        with torch.no_grad():
+            graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
+    n_kernels = inductor_metrics.generated_kernel_count
+
+    # Compile coordinate descent
+    do_cd = not {args_dict["no_cd"]}
+    graph_cd = None
+    cd_is_graph = False
+    if do_cd:
+        inductor_config.coordinate_descent_tuning = True
+        try:
+            torch._dynamo.reset()
+            compiled_cd = torch.compile(instance)
+            with gpu_setup_lock():
+                with torch.no_grad():
+                    graph_cd, cd_is_graph = _capture_cudagraph(compiled_cd, inputs)
+        finally:
+            inductor_config.coordinate_descent_tuning = False
+
+    bench_default = _make_bench_callable(graph_default, default_is_graph, inputs)
+    bench_cd = _make_bench_callable(graph_cd, cd_is_graph, inputs) if do_cd else None
+
+    with gpu_bench_lock():
+        for _ in range(25):
+            bench_default()
+            if bench_cd:
+                bench_cd()
+        torch.cuda.synchronize()
+
+        default_times = []
+        cd_times = []
+        for _ in range(N_ROUNDS):
+            t = do_bench(
+                bench_default,
+                warmup={args_dict["n_warmup"]},
+                rep={args_dict["n_rep"]},
+                return_mode="min",
+            ) * 1000
+            default_times.append(t)
+            if bench_cd:
+                t = do_bench(
+                    bench_cd,
+                    warmup={args_dict["n_warmup"]},
+                    rep={args_dict["n_rep"]},
+                    return_mode="min",
+                ) * 1000
+                cd_times.append(t)
+
+    compiled_us = min(default_times)
+    cd_us = min(cd_times) if cd_times else None
+
+    return {{
+        "__graph__": result_metadata(_definition),
+        "default": {{
+            "compiled_us": compiled_us,
+            "coord_descent_us": cd_us,
+            "memcopy_sol_us": None,
+            "input_bytes": input_bytes,
+            "output_bytes": output_bytes,
+            "naive_io_bytes": input_bytes + output_bytes,
+            "n_kernels": n_kernels,
+            "num_inputs": len(inputs),
+            "gap_default": None,
+            "gap_cd": None,
+        }}
+    }}
+
 def bench_one(repro_path):
+    if WORKLOAD_KIND == "full_graph":
+        return bench_full_graph_one(repro_path)
+
     mod, instance, configs = _get_or_load_module(repro_path)
 
     all_shapes = {args_dict["all_shapes"]}
@@ -1299,10 +1848,10 @@ def bench_one(repro_path):
             default_times = []
             cd_times = []
             for _ in range(N_ROUNDS):
-                t = do_bench(bench_default, warmup=5, rep={args_dict["n_rep"]}, return_mode="min") * 1000
+                t = do_bench(bench_default, warmup={args_dict["n_warmup"]}, rep={args_dict["n_rep"]}, return_mode="min") * 1000
                 default_times.append(t)
                 if bench_cd:
-                    t = do_bench(bench_cd, warmup=5, rep={args_dict["n_rep"]}, return_mode="min") * 1000
+                    t = do_bench(bench_cd, warmup={args_dict["n_warmup"]}, rep={args_dict["n_rep"]}, return_mode="min") * 1000
                     cd_times.append(t)
 
             compiled_us = min(default_times)
@@ -1358,10 +1907,20 @@ for line in sys.stdin:
         _result_file.flush()
     except Exception as e:
         if "CUDA" in str(e) or "device-side assert" in str(e):
-            _result_file.write(f"CUDA_ERROR: {{str(e)[:150]}}\\n")
+            _result_file.write(f"CUDA_ERROR: {{str(e)[:1000]}}\\n")
             _result_file.flush()
             sys.exit(1)  # die so parent respawns
-        _result_file.write(f"ERROR: {{str(e)[:150]}}\\n")
+        _result_file.write(json.dumps({{
+            "_repro": line,
+            "__error__": {{
+                "status": "failed",
+                "category": "runtime_error",
+                "exception_type": type(e).__name__,
+                "error": str(e)[:1000],
+                "reason": "worker failed while benchmarking workload",
+                "hint": "Inspect worker stderr or rerun this workload directly.",
+            }},
+        }}) + "\\n")
         _result_file.flush()
 '''
 

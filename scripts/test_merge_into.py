@@ -77,6 +77,29 @@ def _sample_failure(error="CUDA OOM"):
     }
 
 
+def _sample_skip(reason="unsupported graph"):
+    return {
+        "status": "skipped",
+        "category": "unsafe_integer_input",
+        "reason": reason,
+        "hint": "recapture with sidecars",
+    }
+
+
+def _sample_full_graph_result():
+    result = _sample_result()
+    result["__graph__"] = {
+        "source": {
+            "kind": "model",
+            "suite": "hf",
+            "mode": "infer",
+            "model": "Tiny",
+            "graph": "full_graph_000.py",
+        }
+    }
+    return result
+
+
 # ─── Tests ───────────────────────────────────────────────────────────────────
 
 
@@ -279,6 +302,60 @@ class TestMergeIntoBaseline:
         assert "last_merge" in data["_metadata"]
 
     @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_full_graph_into_legacy_repro_baseline(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"commit": "old", "timestamp": "old"},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        with pytest.raises(ValueError, match="Cannot merge"):
+            _merge_into_baseline(
+                baseline,
+                {"repros/models/hf/infer/Tiny/full_graph_000.py": _sample_full_graph_result()},
+                {},
+                workload_kind="full_graph",
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_repro_into_legacy_full_graph_baseline(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {"repros/models/hf/infer/Tiny/full_graph_000.py": _sample_full_graph_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"commit": "old", "timestamp": "old"},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        with pytest.raises(ValueError, match="Cannot merge"):
+            _merge_into_baseline(
+                baseline,
+                {"repro/a/repro.py": _sample_result()},
+                {},
+                workload_kind="repro",
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_failure_only_legacy_repro_baseline_mismatch(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {},
+            {"repro/a/repro.py": _sample_failure()},
+            {"total": 1, "ok": 0, "failed": 1},
+            {"commit": "old", "timestamp": "old"},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        with pytest.raises(ValueError, match="Cannot merge"):
+            _merge_into_baseline(
+                baseline,
+                {"repros/models/hf/infer/Tiny/full_graph_000.py": _sample_full_graph_result()},
+                {},
+                workload_kind="full_graph",
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
     def test_both_success_and_failure_in_same_merge(self, mock_sp, tmp_baseline):
         """A merge batch can have both new successes and new failures."""
         existing = _results_payload(
@@ -299,6 +376,44 @@ class TestMergeIntoBaseline:
         assert data["__summary__"]["ok"] == 2
         assert data["__summary__"]["failed"] == 1
         assert data["__summary__"]["total"] == 3
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_skipped_failures_are_counted_separately(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0, "skipped": 0},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(
+            baseline,
+            {},
+            {"repro/b/repro.py": _sample_skip()},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data["__summary__"]["ok"] == 1
+        assert data["__summary__"]["failed"] == 0
+        assert data["__summary__"]["skipped"] == 1
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_metadata_content_kind_mismatch(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"workload_kind": "full_graph"},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        with pytest.raises(ValueError, match="metadata"):
+            _merge_into_baseline(
+                baseline,
+                {"repros/models/hf/infer/Tiny/full_graph_000.py": _sample_full_graph_result()},
+                {},
+                workload_kind="full_graph",
+            )
 
     @patch("subprocess.run", side_effect=_mock_sp_run)
     def test_empty_new_results_and_failures(self, mock_sp, tmp_baseline):
@@ -322,7 +437,6 @@ class TestMergeIntoBaseline:
     @patch("subprocess.run", side_effect=_mock_sp_run)
     def test_reserved_key_collision(self, mock_sp, tmp_baseline):
         """Repro paths that look like reserved keys (unlikely but adversarial)."""
-        # A pathological repro named "__failures__" or "_metadata"
         existing = _results_payload(
             {"repro/normal/repro.py": _sample_result()},
             None,
@@ -336,16 +450,9 @@ class TestMergeIntoBaseline:
         _merge_into_baseline(baseline, new_results, {})
 
         data = json.loads(baseline.read_text())
-        # The function filters out keys starting with "_" from successes count
-        # so this repro might be invisible to summary. Let's verify behavior.
-        # Based on the code: successes = {k: v for k, v in existing.items()
-        #   if not k.startswith("_") and not k.startswith("__")}
-        # So "_weirdly_named_repro" will be EXCLUDED from the final payload!
-        # This is a bug we should document but not necessarily "fix" for this test.
-        # The test verifies current behavior.
-        assert "_weirdly_named_repro" not in data  # gets filtered out by the success filter
-        # but original repros survive
+        assert "_weirdly_named_repro" in data
         assert "repro/normal/repro.py" in data
+        assert data["__summary__"]["ok"] == 2
 
     @patch("subprocess.run", side_effect=_mock_sp_run)
     def test_json_array_baseline_raises(self, mock_sp, tmp_baseline):
@@ -451,12 +558,13 @@ class TestMergeIntoBaseline:
         with ThreadPoolExecutor(max_workers=4) as pool:
             pool.map(_concurrent_worker, [(i, str(baseline)) for i in range(4)])
 
-        # File should be valid JSON (may not have all 4 workers' results due to races)
         data = json.loads(baseline.read_text())
         assert isinstance(data, dict)
-        # At minimum, existing repros should still be there (or a valid subset)
-        # We can't guarantee all 4 concurrent writes land, but the file must be valid JSON.
-        assert "__summary__" in data
+        for i in range(10):
+            assert f"repro/existing_{i}/repro.py" in data
+        for i in range(4):
+            assert f"repro/concurrent_{i}/repro.py" in data
+        assert data["__summary__"]["ok"] == 14
 
     @patch("subprocess.run", side_effect=_mock_sp_run)
     def test_baseline_with_no_summary_or_metadata(self, mock_sp, tmp_baseline):

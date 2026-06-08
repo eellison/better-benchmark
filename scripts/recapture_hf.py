@@ -59,7 +59,7 @@ def capture_hf_model(model_name: str, batch_size: int, mode: str):
 
     with temporary_capture_for_merge(
         OUTPUT_DIR,
-        label,
+        model_name,
         suite="hf",
         mode=mode,
         prefix="recapture_hf_",

@@ -14,11 +14,33 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from bench import _resolve_input_path
-from bench_parallel import _compute_worker_count, _filter_gpus, load_benchmark_set
+from bench_report import load_results as load_report_results
+from bench_parallel import (
+    _classify_full_graph_definition,
+    _compute_worker_count,
+    _filter_gpus,
+    _preflight_full_graphs,
+    _write_results_output,
+    find_full_graphs,
+    load_benchmark_set,
+)
 from byte_accounting import count_bytes_naive
 from capture_hook import _CaptureState
 import gpu_lock as gpu_lock_module
 from canonicalize_repros import _spec_to_T, parse_make_inputs
+from full_graph_harness import (
+    FullGraphDefinition,
+    graph_constraints_from_gm,
+    infer_index_bounds_from_gm,
+    infer_full_graph_source,
+    infer_permutation_indices_from_gm,
+    load_full_graph,
+    make_tensor_from_spec,
+    parse_full_graph_inputs,
+    parse_full_graph_tensor_attrs,
+    result_metadata,
+    write_full_graph_metadata,
+)
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
 
 
@@ -187,6 +209,496 @@ def test_filter_gpus_selects_physical_indices():
     assert _filter_gpus(gpus, "0,1") == gpus
 
 
+def test_find_full_graphs_accepts_files_and_directories_with_dedupe():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        model_dir = root / "repros" / "models" / "hf" / "infer" / "TinyModel"
+        model_dir.mkdir(parents=True)
+        graph0 = model_dir / "full_graph_000.py"
+        graph1 = model_dir / "full_graph_001.py"
+        graph0.write_text("# graph 0\n")
+        graph1.write_text("# graph 1\n")
+        (model_dir / "repro.py").write_text("# not a full graph\n")
+
+        assert find_full_graphs([graph0, model_dir]) == [graph0, graph1]
+
+
+def _full_graph_definition(
+    *,
+    input_specs=None,
+    tensor_attrs=None,
+    sidecar=None,
+) -> FullGraphDefinition:
+    return FullGraphDefinition(
+        path=Path("full_graph_000.py"),
+        graph_cls=torch.nn.Module,
+        input_specs=input_specs or [],
+        tensor_attrs=tensor_attrs or {},
+        forward_takes_no_inputs=False,
+        metadata={"source": {}, "sidecar": sidecar or {}},
+    )
+
+
+def test_full_graph_preflight_skips_annotation_only_integer_inputs():
+    definition = _full_graph_definition(input_specs=[
+        {
+            "kind": "tensor",
+            "name": "idx",
+            "shape": [8],
+            "dtype": "int64",
+            "gen": {"kind": "index", "low": 0, "high": 8},
+            "constraint_source": "annotation_default",
+        }
+    ])
+
+    reasons = _classify_full_graph_definition(definition)
+
+    assert [reason["category"] for reason in reasons] == ["unsafe_integer_input"]
+    assert _classify_full_graph_definition(definition, allow_unsafe=True) == []
+
+
+def test_full_graph_preflight_allows_graph_inferred_integer_inputs():
+    definition = _full_graph_definition(input_specs=[
+        {
+            "kind": "tensor",
+            "name": "idx",
+            "shape": [8],
+            "dtype": "int64",
+            "gen": {"kind": "index", "low": 0, "high": 1024},
+            "constraint_source": "graph_inference",
+        }
+    ], sidecar={"inputs": []})
+
+    assert _classify_full_graph_definition(definition) == []
+
+
+def test_full_graph_preflight_skips_annotation_symbolic_dims():
+    definition = _full_graph_definition(input_specs=[
+        {"kind": "symint", "name": "s0", "value": 32},
+        {
+            "kind": "tensor",
+            "name": "x",
+            "shape": [2, 32],
+            "dtype": "float32",
+            "symbolic_dims": [{"dim": 1, "symbol": "s0", "default": 32}],
+        },
+    ])
+
+    categories = [reason["category"] for reason in _classify_full_graph_definition(definition)]
+
+    assert categories == ["symbolic_dim", "symbolic_dim"]
+
+
+def test_full_graph_preflight_requires_exact_attrs_even_when_unsafe_allowed():
+    definition = _full_graph_definition(tensor_attrs={
+        "_tensor_constant0": {
+            "kind": "tensor",
+            "name": "_tensor_constant0",
+            "shape": [4],
+            "dtype": "int64",
+            "requires_exact": True,
+        }
+    })
+
+    reasons = _classify_full_graph_definition(definition, allow_unsafe=True)
+
+    assert [reason["category"] for reason in reasons] == ["requires_exact_attr"]
+
+
+def test_full_graph_preflight_records_skips_without_queueing_gpu_work():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, idx: "i64[4]cpu"):
+        return (idx,)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+
+        queueable, failures = _preflight_full_graphs([graph])
+
+    assert queueable == []
+    assert failures[str(graph)]["status"] == "skipped"
+    assert failures[str(graph)]["category"] == "unsafe_integer_input"
+
+
+def test_write_results_output_counts_skipped_and_uses_reserved_failure_key():
+    with tempfile.TemporaryDirectory() as tmp:
+        output = Path(tmp) / "results.json"
+        _write_results_output(
+            output,
+            {},
+            {"full_graph_000.py": {"status": "skipped", "category": "unsafe_integer_input"}},
+            total=1,
+            done=0,
+            failed=0,
+            skipped=1,
+            elapsed=0.0,
+            workload_kind="full_graph",
+        )
+
+        data = json.loads(output.read_text())
+
+    assert data["__summary__"]["skipped"] == 1
+    assert data["__summary__"]["failed"] == 0
+    assert data["_metadata"]["workload_kind"] == "full_graph"
+
+
+def test_full_graph_harness_parses_inputs_and_tensor_attrs():
+    content = '''
+class GraphModule(torch.nn.Module):
+    def forward(self, s0: "Sym(s0)", x: "f32[2, s0][32, 1]cuda:0", idx: "i64[2]cuda:0"):
+        _tensor_constant0: "f32[]" = self._tensor_constant0
+        _tensor_constant1: "i64[4]" = self._tensor_constant1
+        return (x,)
+'''
+    inputs = parse_full_graph_inputs(content)
+    attrs = parse_full_graph_tensor_attrs(content)
+
+    assert inputs[0]["kind"] == "symint"
+    assert inputs[0]["value"] == 32
+    assert inputs[1]["shape"] == (2, 32)
+    assert inputs[1]["stride"] == (32, 1)
+    assert inputs[1]["device"] == "cuda"
+    assert inputs[1]["symbolic_dims"] == [{"dim": 1, "symbol": "s0", "default": 32}]
+    assert inputs[2]["dtype"] == "int64"
+    assert inputs[2]["gen"]["kind"] == "index"
+    assert inputs[2]["gen"]["high"] == 2
+    assert attrs["_tensor_constant0"]["shape"] == ()
+    assert attrs["_tensor_constant1"]["generator"] == {"kind": "constant", "value": 0}
+
+
+def test_full_graph_harness_loads_runnable_cpu_graph():
+    source = '''
+import torch
+from torch import device
+
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]cpu"):
+        _tensor_constant0: "f32[]" = self._tensor_constant0
+        add: "f32[2, 2]cpu" = torch.ops.aten.add.Tensor(x, _tensor_constant0)
+        return (add,)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+
+        instance, inputs, definition = load_full_graph(graph, default_device="cpu")
+
+        assert len(inputs) == 1
+        assert inputs[0].shape == (2, 2)
+        assert inputs[0].device.type == "cpu"
+        assert hasattr(instance, "_tensor_constant0")
+        assert definition.path == graph
+        with torch.no_grad():
+            (out,) = instance(*inputs)
+        assert out.shape == (2, 2)
+
+
+def test_full_graph_harness_rejects_annotation_only_integer_tensor_attrs():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self):
+        _tensor_constant0: "i64[4]" = self._tensor_constant0
+        return (_tensor_constant0,)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+
+        try:
+            load_full_graph(graph, default_device="cpu")
+        except ValueError as exc:
+            assert "requires exact data" in str(exc)
+        else:
+            raise AssertionError("integer tensor attrs without exact payload should fail")
+
+
+def test_full_graph_sidecar_constraints_override_annotations():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]cpu"):
+        return (x,)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "repros" / "models" / "genai" / "MyKernel" / "full_graph_000.py"
+        graph.parent.mkdir(parents=True)
+        graph.write_text(source)
+        (graph.parent / "full_graph_000.meta.json").write_text(json.dumps({
+            "schema_version": 1,
+            "graph": "full_graph_000.py",
+            "source": {
+                "kind": "microbenchmark",
+                "suite": "genai",
+                "mode": None,
+                "model": "MyKernel",
+                "graph": "full_graph_000.py",
+            },
+            "inputs": [
+                {
+                    "kind": "tensor",
+                    "name": "x",
+                    "shape": [2, 2],
+                    "dtype": "float32",
+                    "stride": [2, 1],
+                    "device": "cpu",
+                }
+            ],
+        }))
+
+        instance, inputs, definition = load_full_graph(graph, default_device="cpu")
+        metadata = result_metadata(definition)
+
+        assert inputs[0].shape == (2, 2)
+        assert metadata["source"]["kind"] == "microbenchmark"
+        assert metadata["constraints_source"] == "sidecar"
+        assert metadata["constraints"]["inputs"][0]["shape"] == [2, 2]
+
+
+def test_full_graph_sidecar_validation_rejects_annotation_mismatch():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]cpu"):
+        return (x,)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 1,
+            "graph": "full_graph_000.py",
+            "inputs": [
+                {
+                    "kind": "tensor",
+                    "name": "x",
+                    "shape": [2, 2],
+                    "dtype": "int64",
+                    "stride": [2, 1],
+                    "device": "cpu",
+                }
+            ],
+        }))
+
+        try:
+            load_full_graph(graph, default_device="cpu")
+        except ValueError as exc:
+            assert "dtype does not match" in str(exc)
+        else:
+            raise AssertionError("sidecar dtype mismatch should fail")
+
+
+def test_full_graph_source_inference_distinguishes_models_and_microbenchmarks():
+    model_source = infer_full_graph_source(
+        Path("repros/models/hf/infer/BertForMaskedLM/full_graph_000.py")
+    )
+    genai_source = infer_full_graph_source(
+        Path("repros/models/genai/CrossEntropyForward/full_graph_000.py")
+    )
+
+    assert model_source["kind"] == "model"
+    assert model_source["suite"] == "hf"
+    assert model_source["mode"] == "infer"
+    assert model_source["model"] == "BertForMaskedLM"
+    assert genai_source["kind"] == "microbenchmark"
+    assert genai_source["model"] == "CrossEntropyForward"
+
+
+def test_write_full_graph_metadata_exports_input_constraints():
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    x.meta["val"] = torch.empty(2, 3, dtype=torch.int64)
+    out = graph.call_function(torch.ops.aten.sin.default, (x,))
+    out.meta["val"] = torch.empty(2, 3, dtype=torch.float32)
+    graph.output(out)
+    gm = torch.fx.GraphModule({}, graph)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        graph_path = Path(tmp) / "full_graph_000.py"
+        graph_path.write_text("# graph\n")
+        meta_path = write_full_graph_metadata(graph_path, gm)
+        payload = json.loads(meta_path.read_text())
+
+    constraints = graph_constraints_from_gm(gm)
+    assert payload["inputs"][0]["name"] == "x"
+    assert payload["inputs"][0]["shape"] == [2, 3]
+    assert payload["inputs"][0]["dtype"] == "int64"
+    assert payload["inputs"][0]["exact"] is False
+    assert constraints["outputs"][0]["shape"] == [2, 3]
+
+
+def test_write_full_graph_metadata_exports_exact_get_attr_payloads():
+    graph = torch.fx.Graph()
+    const = graph.get_attr("const")
+    const.meta["val"] = torch.tensor([3, 5], dtype=torch.int64)
+    graph.output(const)
+    gm = torch.fx.GraphModule({"const": torch.tensor([3, 5], dtype=torch.int64)}, graph)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        graph_path = Path(tmp) / "full_graph_000.py"
+        graph_path.write_text("# graph\n")
+        payload = json.loads(write_full_graph_metadata(graph_path, gm).read_text())
+
+    assert payload["tensor_attrs"]["const"]["exact"] is True
+    assert payload["tensor_attrs"]["const"]["data"] == [3, 5]
+
+
+def test_write_full_graph_metadata_marks_meta_integer_attrs_requires_exact():
+    graph = torch.fx.Graph()
+    const = graph.get_attr("const")
+    const.meta["val"] = torch.empty(2, dtype=torch.int64, device="meta")
+    graph.output(const)
+    gm = torch.fx.GraphModule({"const": torch.empty(2, dtype=torch.int64, device="meta")}, graph)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        graph_path = Path(tmp) / "full_graph_000.py"
+        graph_path.write_text("# graph\n")
+        payload = json.loads(write_full_graph_metadata(graph_path, gm).read_text())
+
+    assert payload["tensor_attrs"]["const"]["exact"] is False
+    assert payload["tensor_attrs"]["const"]["requires_exact"] is True
+
+
+def test_write_full_graph_metadata_exports_index_and_permutation_constraints():
+    graph = torch.fx.Graph()
+    idx = graph.placeholder("idx")
+    idx.meta["val"] = torch.empty(8, dtype=torch.int64)
+    token = graph.placeholder("token")
+    token.meta["val"] = torch.empty(16, dtype=torch.int64)
+    graph.output((idx, token))
+    gm = torch.fx.GraphModule({}, graph)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        graph_path = Path(tmp) / "full_graph_000.py"
+        graph_path.write_text("# graph\n")
+        meta_path = write_full_graph_metadata(
+            graph_path,
+            gm,
+            index_bounds={"token": 2048},
+            permutation_indices={"idx": 8},
+        )
+        payload = json.loads(meta_path.read_text())
+
+    assert payload["inputs"][0]["gen"] == {"kind": "permutation", "size": 8}
+    assert payload["inputs"][1]["gen"] == {"kind": "index", "low": 0, "high": 2048}
+
+
+def test_bench_report_flattens_full_graph_and_named_shape_results():
+    with tempfile.TemporaryDirectory() as tmp:
+        results_path = Path(tmp) / "results.json"
+        results_path.write_text(json.dumps({
+            "_metadata": {"workload_kind": "full_graph"},
+            "/tmp/repros/models/genai/Foo/full_graph_000.py": {
+                "__graph__": {
+                    "source": {
+                        "kind": "microbenchmark",
+                        "suite": "genai",
+                        "model": "Foo",
+                        "graph": "full_graph_000.py",
+                    }
+                },
+                "default": {"compiled_us": 10.0},
+                "_shape": {"compiled_us": 11.0},
+            },
+            "__summary__": {"ok": 1},
+        }))
+
+        loaded = load_report_results(results_path)
+
+    assert "microbenchmark/genai/Foo/full_graph_000.py" in loaded
+    assert "microbenchmark/genai/Foo/full_graph_000.py[_shape]" in loaded
+
+
+def test_make_tensor_from_spec_honors_exact_data_stride_and_offset_on_cpu():
+    tensor = make_tensor_from_spec(
+        {
+            "kind": "tensor",
+            "shape": [2],
+            "dtype": "int64",
+            "stride": [2],
+            "device": "cpu",
+            "storage_offset": 1,
+            "exact": True,
+            "data": [7, 9],
+        },
+        default_device="cpu",
+    )
+
+    assert tensor.tolist() == [7, 9]
+    assert tensor.stride() == (2,)
+    assert tensor.storage_offset() == 1
+
+
+def test_make_tensor_from_spec_uses_kernel_like_index_and_permutation_generators():
+    indexed = make_tensor_from_spec(
+        {
+            "kind": "tensor",
+            "shape": [128],
+            "dtype": "int64",
+            "device": "cpu",
+            "gen": {"kind": "index", "low": 3, "high": 7},
+        },
+        default_device="cpu",
+    )
+    perm = make_tensor_from_spec(
+        {
+            "kind": "tensor",
+            "shape": [2, 4],
+            "dtype": "int64",
+            "device": "cpu",
+            "gen": {"kind": "permutation", "size": 4},
+        },
+        default_device="cpu",
+    )
+
+    assert int(indexed.min()) >= 3
+    assert int(indexed.max()) < 7
+    for row in perm.reshape(-1, 4):
+        assert sorted(row.tolist()) == list(range(4))
+
+
+def test_capture_hook_exports_full_graph_constraints_sidecar():
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    x.meta["val"] = torch.empty(4, dtype=torch.float32)
+    out = graph.call_function(torch.ops.aten.relu.default, (x,))
+    out.meta["val"] = torch.empty(4, dtype=torch.float32)
+    graph.output(out)
+    gm = torch.fx.GraphModule({}, graph)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(
+            str(Path(tmp) / "capture"),
+            label="sidecar_test",
+            graph_dir=str(Path(tmp) / "repros" / "models" / "hf" / "infer" / "TinyModel"),
+            validate=False,
+        )
+        state.process_graph(gm)
+
+        meta_path = (
+            Path(tmp)
+            / "repros"
+            / "models"
+            / "hf"
+            / "infer"
+            / "TinyModel"
+            / "full_graph_000.meta.json"
+        )
+        payload = json.loads(meta_path.read_text())
+
+    assert payload["source"]["kind"] == "model"
+    assert payload["source"]["model"] == "TinyModel"
+    assert payload["inputs"][0]["shape"] == [4]
+    assert payload["inputs"][0]["dtype"] == "float32"
+
+
 def test_make_inputs_safely_handles_legacy_bool_randn():
     (value,) = make_inputs_safely(
         lambda: [torch.randn([2, 3], dtype=torch.bool, device="cpu")]
@@ -288,12 +800,10 @@ def test_capture_hook_traces_select_to_index_bound():
     graph.output(indexed)
 
     gm = torch.fx.GraphModule({}, graph)
-    with tempfile.TemporaryDirectory() as tmp:
-        state = _CaptureState(tmp)
-        bounds = state._infer_index_bounds(gm, {
-            "arg1_1": {"dtype": "torch.int64"},
-            "arg0_1": {"dtype": "torch.bfloat16"},
-        })
+    bounds = infer_index_bounds_from_gm(gm, {
+        "arg1_1": {"dtype": "torch.int64"},
+        "arg0_1": {"dtype": "torch.bfloat16"},
+    })
 
     assert bounds["arg1_1"] == 10000
 
@@ -317,13 +827,11 @@ def test_capture_hook_traces_gathered_values_to_embedding_bound():
     graph.output(embedded)
 
     gm = torch.fx.GraphModule({}, graph)
-    with tempfile.TemporaryDirectory() as tmp:
-        state = _CaptureState(tmp)
-        bounds = state._infer_index_bounds(gm, {
-            "token_types": {"dtype": "torch.int64"},
-            "positions": {"dtype": "torch.int64"},
-            "table": {"dtype": "torch.float32"},
-        })
+    bounds = infer_index_bounds_from_gm(gm, {
+        "token_types": {"dtype": "torch.int64"},
+        "positions": {"dtype": "torch.int64"},
+        "table": {"dtype": "torch.float32"},
+    })
 
     assert bounds["token_types"] == 2
     assert bounds["positions"] == 512
@@ -588,6 +1096,21 @@ if __name__ == "__main__":
     test_load_benchmark_set_accepts_current_patterns_schema()
     test_load_benchmark_set_accepts_legacy_benchmarks_schema()
     test_filter_gpus_selects_physical_indices()
+    test_find_full_graphs_accepts_files_and_directories_with_dedupe()
+    test_full_graph_harness_parses_inputs_and_tensor_attrs()
+    test_full_graph_harness_loads_runnable_cpu_graph()
+    test_full_graph_harness_rejects_annotation_only_integer_tensor_attrs()
+    test_full_graph_sidecar_constraints_override_annotations()
+    test_full_graph_sidecar_validation_rejects_annotation_mismatch()
+    test_full_graph_source_inference_distinguishes_models_and_microbenchmarks()
+    test_write_full_graph_metadata_exports_input_constraints()
+    test_write_full_graph_metadata_exports_exact_get_attr_payloads()
+    test_write_full_graph_metadata_marks_meta_integer_attrs_requires_exact()
+    test_write_full_graph_metadata_exports_index_and_permutation_constraints()
+    test_bench_report_flattens_full_graph_and_named_shape_results()
+    test_make_tensor_from_spec_honors_exact_data_stride_and_offset_on_cpu()
+    test_make_tensor_from_spec_uses_kernel_like_index_and_permutation_generators()
+    test_capture_hook_exports_full_graph_constraints_sidecar()
     test_make_inputs_safely_handles_legacy_bool_randn()
     test_shape_configs_accept_general_input_generators()
     test_make_inputs_from_config_honors_generators_on_cpu()

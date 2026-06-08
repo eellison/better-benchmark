@@ -25,6 +25,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REGRESSION_THRESHOLD = 0.05  # 5%
+RESERVED_TOP_LEVEL_KEYS = {"_metadata", "__failures__", "__summary__"}
+RESERVED_RESULT_LABELS = {"__graph__"}
 
 
 @dataclass
@@ -41,9 +43,29 @@ def load_results(path: Path) -> dict[str, dict]:
     data = json.loads(path.read_text())
     results = {}
     for key, val in data.items():
-        if isinstance(val, dict) and "default" in val:
-            name = key.split("/")[-2] if "/" in key else key
-            results[name] = val["default"]
+        if key in RESERVED_TOP_LEVEL_KEYS or not isinstance(val, dict):
+            continue
+        graph_meta = val.get("__graph__")
+        if isinstance(graph_meta, dict):
+            source = graph_meta.get("source", {})
+            parts = [
+                source.get("kind"),
+                source.get("suite"),
+                source.get("mode"),
+                source.get("model"),
+                source.get("graph"),
+            ]
+            base_name = "/".join(str(part) for part in parts if part)
+        else:
+            base_name = key.split("/")[-2] if "/" in key else key
+        for label, result in val.items():
+            if (
+                label in RESERVED_RESULT_LABELS
+                or not isinstance(result, dict)
+            ):
+                continue
+            name = base_name if label == "default" else f"{base_name}[{label}]"
+            results[name] = result
     return results
 
 
