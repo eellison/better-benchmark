@@ -72,6 +72,11 @@ python -m pip install --no-build-isolation -e .
 **What NOT to do:**
 - Don't filter on `inductor_optimization_per_repro_queue.csv` statuses
 - Don't write subset oracles (must match full `Repro()` scope)
+- Don't change numerics. Oracles must use the same math formulation and dtype
+  rounding boundaries as Inductor for the captured repro. Do not substitute
+  fast/approx exp, exp2-based softmax, fast GELU, approximate tanh/sigmoid
+  formulas, fused arithmetic, or moved casts unless Inductor generated that
+  exact formulation.
 - Don't add oracle-local `sys.path` / `REPO_ROOT` import hacks. If an oracle
   cannot import shared helpers, install the repo first with the command above.
 - **DO NOT write your own benchmarking/timing logic** (see below). In
@@ -150,6 +155,8 @@ The oracle MUST compute the exact same function as `Repro()(*make_inputs())`:
 - Same inputs (loaded via `get_inputs()` which calls the repro's `make_inputs`)
 - Same outputs (same count, shapes, dtypes as eager `Repro()(*inputs)`)
 - `oracle_forward(inputs)` signature enforces this structurally
+- Same numerics: preserve Inductor's math functions, explicit casts,
+  accumulation dtype, and operation ordering/rounding boundaries.
 
 Rules:
 - `implemented_unmeasured` means the oracle `--bench` covers the same computation scope as the compiled `repro.py` region.
@@ -157,6 +164,8 @@ Rules:
 - Subset kernels are allowed only as diagnosis/prototype artifacts. Their diagnosis must say they are not full-scope floors.
 - If full-scope coverage is impractical, update `next_action` with the missing scope instead of setting `implemented_unmeasured`.
 - Every subagent brief must restate this invariant explicitly before assigning oracle work.
+- Every subagent handoff must report the numeric choice used, especially for
+  exp/softmax/GELU/sigmoid/tanh or any explicit fp32/fp16/bf16 casts.
 
 #### Validation
 

@@ -27,6 +27,14 @@ python -m pip install --no-build-isolation -e .
 Do not add oracle-local `sys.path` / `REPO_ROOT` import hacks. If imports fail,
 the environment has not been installed correctly.
 
+## Numeric Rules
+
+Oracles must match Inductor numerics for the captured repro. Preserve the same
+math formulation, operation ordering, explicit casts, accumulation dtype, and
+rounding boundaries. Do not substitute fast/approx exp, exp2-based softmax,
+fast GELU, approximate tanh/sigmoid formulas, fused arithmetic, or moved casts
+unless the generated Inductor code for that repro does exactly that.
+
 ## Timing Rules
 
 All timing must go through `oracle_harness.bench_oracle()` via the copied
