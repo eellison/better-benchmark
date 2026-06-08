@@ -36,5 +36,10 @@ The gap (1.07x) is at measurement noise floor for this small shape (16.5 us).
 
 Single persistent kernel already - no multi_kernel improvement possible.
 
-## Status: MINOR_GAP - constant folding of iota predicates would close this
-Same root cause as any_amax_sum_97b43144672a family.
+## Fix Applied
+
+Covered by commit 3e627768c9f (extend uniform value propagation through view/expand).
+Ratio improved from 1.070x to 1.043x (AT_FLOOR).
+
+## Status: AT_FLOOR (1.070x -> 1.043x)
+Residual gap below 1.05x threshold.

@@ -33,5 +33,10 @@ any() guard instructions. The gap is 1.08x (marginal).
 
 Single persistent kernel already - no multi_kernel improvement possible.
 
-## Status: MINOR_GAP - constant folding of iota predicates
-Same root cause as the CONSTANT_FOLDING family.
+## Fix Applied
+
+Covered by commit 3e627768c9f (extend uniform value propagation through view/expand).
+Ratio improved from 1.083x to 1.058x.
+
+## Status: PARTIALLY_FIXED (1.083x -> 1.058x)
+Residual gap is ONLINE_SOFTMAX (oracle fuses all-masked-row guard into softmax).

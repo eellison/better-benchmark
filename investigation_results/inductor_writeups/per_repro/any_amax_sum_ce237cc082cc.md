@@ -33,5 +33,10 @@ does not eliminate the dead mask construction path. The gap is 1.075x
 
 Single persistent kernel - no config improvement.
 
-## Status: MINOR_GAP (1.075x) - constant folding of iota predicates
-Same root cause as the any_amax_sum CONSTANT_FOLDING family.
+## Fix Applied
+
+Covered by commit 3e627768c9f (extend uniform value propagation through view/expand).
+Ratio improved from 1.075x to 1.045x (AT_FLOOR).
+
+## Status: AT_FLOOR (1.075x -> 1.045x)
+Residual gap below 1.05x threshold.
