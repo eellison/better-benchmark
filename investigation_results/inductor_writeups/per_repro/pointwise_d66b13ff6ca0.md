@@ -1,8 +1,10 @@
 # pointwise_d66b13ff6ca0
 
-## Compile: 8.13us, Oracle: 6.05us, Gap: 1.34x
+## Compile: 5.54us, Oracle: 5.7us, Gap: 0.97x (at floor, compile matches oracle)
 
-## Diagnosis: SCHEDULER_FUSION
+**Previous**: Compile: 8.13us, Oracle: 6.05us, Gap: 1.34x
+
+## Diagnosis: CLOSED by inline_recomputable_producers (f58d2545cd2)
 
 ## Root cause
 
@@ -45,4 +47,11 @@ Alternative approach: In `lowering.py:_low_memory_max_pool_with_offsets`, instea
 - torchbench_doctr_reco_predictor_infer_000
 - torchbench_pytorch_unet_infer_000
 
-## Status: design_todo
+## Fix: inline_recomputable_producers extension
+
+The extension to `inline_recomputable_producers` that handles cheap non-broadcast
+producers closed this gap. Compile 5.54us now matches the oracle 5.7us (0.97x ratio).
+The stencil-consumer fusion issue is now moot since the producer is inlined directly.
+Re-measured 2026-06-08.
+
+## Status: closed

@@ -5,18 +5,25 @@
 - Rank: new
 - Family: `online_softmax_cross_entropy`
 - Owner: unassigned
-- Closure status: `needs_inductor_gap_closure`
+- Closure status: `closed_by_inline_recomputable_producers`
 - Oracle status: `true_oracle_measured`
 
 ## Current Gap
 
-- Best compile (perf_counter): `48.439 us`
-- Oracle (CUDA events): `29.184 us`
-- Compile/oracle gap: `1.66x`
+- Best compile: `18.24 us`
+- Oracle: `25.25 us`
+- Compile/oracle gap: `0.72x` (compile beats oracle, no gap remains)
+- Previous gap: `1.66x` (48.44us compile vs 29.18us oracle)
 - Oracle path: `repros/canonical/amax_sum_sum_846668f0b88f/oracle_shifted_ignore_index_cross_entropy_mean.py`
 - Correctness: PASS
 - Model: hf_GPTJForCausalLM_train_000
 - Shape: logits=f32[128, 50400], tokens=i64[1, 128]
+
+## Fix: inline_recomputable_producers (f58d2545cd2)
+
+The extension to `inline_recomputable_producers` that handles cheap non-broadcast
+producers closed this gap completely. Compile now beats the oracle (0.72x ratio).
+Re-measured 2026-06-08.
 
 ## Oracle Description
 
@@ -50,4 +57,4 @@ shifted-target + masked-mean cross-entropy idiom.
 ## Done Criteria
 
 - Canonical oracle measured: YES (29.184 us, correct)
-- Gap actionable: YES (1.66x, pattern needs Inductor support)
+- Gap closed: YES — compile 18.24us beats oracle 25.25us after inline_recomputable_producers fix (f58d2545cd2)
