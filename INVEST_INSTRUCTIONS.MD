@@ -76,7 +76,11 @@ python -m pip install --no-build-isolation -e .
   rounding boundaries as Inductor for the captured repro. Do not substitute
   fast/approx exp, exp2-based softmax, fast GELU, approximate tanh/sigmoid
   formulas, fused arithmetic, or moved casts unless Inductor generated that
-  exact formulation.
+  exact formulation. If the captured graph contains `aten.exp`, use natural
+  exp semantics (for example `libdevice.exp` in Triton), not exp2/fast-exp
+  substitutions. If it contains `aten.tanh` or `aten.sigmoid`, preserve that
+  operation's semantics and document the chosen Triton lowering in the gap
+  diagnosis/CSV notes.
 - Don't add oracle-local `sys.path` / `REPO_ROOT` import hacks. If an oracle
   cannot import shared helpers, install the repo first with the command above.
 - **DO NOT write your own benchmarking/timing logic** (see below). In
