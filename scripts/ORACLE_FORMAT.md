@@ -33,7 +33,10 @@ Oracles must match Inductor numerics for the captured repro. Preserve the same
 math formulation, operation ordering, explicit casts, accumulation dtype, and
 rounding boundaries. Do not substitute fast/approx exp, exp2-based softmax,
 fast GELU, approximate tanh/sigmoid formulas, fused arithmetic, or moved casts
-unless the generated Inductor code for that repro does exactly that.
+unless the generated Inductor code for that repro does exactly that. Captured
+`aten.exp` means natural exp semantics, not exp2/fast-exp. Captured
+`aten.tanh`/`aten.sigmoid` means preserve those operation semantics and record
+the Triton lowering used in the gap diagnosis/CSV notes.
 
 ## Timing Rules
 
