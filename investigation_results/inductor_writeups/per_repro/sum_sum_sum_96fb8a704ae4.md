@@ -1,41 +1,38 @@
 # sum_sum_sum_96fb8a704ae4
 
-## Classification: INDUCTOR_CODEGEN_BUG
+## Classification: MULTI_OUTPUT_SHARED_REDUCTION
 
 ## Current Result
 
 - Oracle path: `repros/canonical/sum_sum_sum_96fb8a704ae4/oracle_multi_output_reduction.py`
 - Correctness: PASS (against eager)
-- Compile: FAILS with NameError (buf4 not defined in generated code)
-- Status: CODEGEN_BUG
+- Oracle: 22.21 us
+- Compiled (coordinate_descent_tuning=True): 25.28 us
+- Ratio: 1.14x
+- Status: FIXED (codegen bug resolved, residual performance gap)
 
-## Root Cause
+## Root Cause (Historical)
 
-torch.compile generates broken Triton code for this repro. The generated output code references `buf4` which is not defined in the function scope:
+Previously, torch.compile generated broken Triton code for this repro -- the generated output code referenced `buf4` which was not defined in the function scope. This codegen buffer naming/elimination bug has been fixed.
 
-```
-return (reinterpret_tensor(buf1, (128, ), (1, ), 0), reinterpret_tensor(buf3, (128, ), (1, ), 0), reinterpret_tensor(buf4, (128, 32768), (1, 128), 0), reinterpret_tensor(buf6, (128, ), (1, ), 0), )
-NameError: name 'buf4' is not defined. Did you mean: 'buf0'?
-```
-
-This is a codegen bug where a buffer is referenced in the return statement but was never allocated/computed in the generated code. The oracle passes correctness check against eager mode, confirming the oracle is correct.
-
-The oracle diagnosis says this is a BANDWIDTH_BOUND MobileBERT pattern with shared `mm_716 + mm_718` producer, elementwise consumers, a materialized transposed product output, and three column reductions.
+The oracle is a BANDWIDTH_BOUND MobileBERT pattern with shared `mm_716 + mm_718` producer, elementwise consumers, a materialized transposed product output, and three column reductions.
 
 ## Kernel Count
 
 - Oracle: 1 kernel (fused multi-output reduction with atomic accumulators)
-- Inductor: BROKEN (codegen bug prevents execution)
+- Inductor: Compiles successfully
 
 ## Config Exploration
 
-Cannot test configs due to codegen failure.
+| Config | Result |
+|--------|--------|
+| coordinate_descent_tuning=True | 25.28 us (1.14x) |
+
+## Residual Gap (1.14x)
+
+The remaining 1.14x gap is a kernel quality issue. The oracle uses a single fused kernel with atomic accumulators that achieves better throughput than Inductor's generated code.
 
 ## File/Line References
 
-- `/tmp/pytorch-work/torch/_inductor/codegen/triton.py`: buffer allocation/reference tracking bug
-- Generated code at `/tmp/torchinductor_dev/hr/chrzioz2tpxol7v7uxgouslbyezdu6d422kqtiy2h65c42mpz5qh.py`
-
-## Design Doc
-
-This is an Inductor codegen bug that needs to be fixed. The buffer allocation tracking loses `buf4` during code generation for this multi-output reduction pattern. Filing as a bug rather than a performance investigation.
+- `/tmp/pytorch-work/torch/_inductor/codegen/triton.py`: buffer allocation (previously buggy, now fixed)
+- `/tmp/pytorch-work/torch/_inductor/scheduler.py`: buffer elimination logic

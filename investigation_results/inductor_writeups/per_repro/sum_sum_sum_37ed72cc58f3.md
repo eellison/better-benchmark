@@ -43,7 +43,7 @@ The fix adds a special case: when both nodes are split reductions on the non-con
 | Default (CDT) | 242.5 | 120.8 | 1.02x |
 | multi_kernel=2 | 243.6 | - | - |
 | multi_kernel=3 | 243.3 | - | - |
-| force_cooperative | crashes | - | - |
+| force_cooperative | previously crashed (now compiles) | - | - |
 
 ## Fix Details
 

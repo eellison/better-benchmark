@@ -1,8 +1,10 @@
 # sum_sum_sum_baf315cfc5f0
 
-## Compile: FAILS (NameError), Oracle: N/A (correctness passes), Gap: N/A
+## Compile: OK, Oracle: 60.1 us, Compiled: 56.19 us, Ratio: 0.94x (Inductor beats oracle)
 
-## Diagnosis: CODEGEN_BUG_DEAD_BUFFER_ELIMINATION
+## Status: AT_FLOOR (codegen bug fixed, Inductor now outperforms oracle)
+
+## Diagnosis (Historical): CODEGEN_BUG_DEAD_BUFFER_ELIMINATION
 
 ## Root cause
 
@@ -39,9 +41,9 @@ The bug reproduces across all configurations tested.
 - Inductor: 3 kernels generated (persistent per-row reduce, looped column reduce, per-column finalize)
 - Oracle: 2 kernels (fused row-store + partial column reduce, column finalize)
 
-## Status: CODEGEN_BUG (blocks benchmarking)
+## Status: AT_FLOOR (codegen bug FIXED)
 
-This is a genuine Inductor codegen bug on the `pr-184905` branch at commit `c465f1751c6`. The scheduler's buffer elimination pass incorrectly removes a buffer needed for a permuted view output when that same buffer's data is also consumed by a reduction.
+This was a genuine Inductor codegen bug on the `pr-184905` branch at commit `c465f1751c6`. The scheduler's buffer elimination pass incorrectly removed a buffer needed for a permuted view output. The bug has been fixed -- Inductor now compiles and outperforms the oracle (0.94x ratio).
 
 ## Fix direction
 

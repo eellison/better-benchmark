@@ -1,37 +1,33 @@
 # pointwise_51020b36ae3c
 
-## Classification: COMPILER_BUG
+## Classification: MULTI_OUTPUT_SHARED_REDUCTION
 
 ## Current Result
 
 - Oracle path: `repros/canonical/pointwise_51020b36ae3c/oracle_shifted_embedding_cat.py`
 - Correctness: PASS
-- Bench: FAIL (InductorError: KeyError: 'buf0')
-- Status: COMPILER_BUG
+- Oracle: 15.62 us
+- Compiled (coordinate_descent_tuning=True): 19.1 us
+- Ratio: 1.22x
+- Status: FIXED (codegen bug resolved, residual performance gap)
 
-## Root Cause
+## Root Cause (Historical)
 
-The repro triggers an Inductor compiler bug in `torch/_inductor/codegen/triton_utils.py` line 168:
-```
-layout = V.graph.scheduler.get_buffer_layout(buf_name)
-         self.name_to_buf[buf_name]  -> KeyError: 'buf0'
-```
+Previously, the repro triggered an Inductor compiler bug in `torch/_inductor/codegen/triton_utils.py` line 168 (KeyError: 'buf0' during alignment check). This bug has been fixed -- the scheduler's buffer tracking is now consistent with the alignment checker.
 
-This occurs during the alignment check phase (`is_unaligned_buffer`) when generating Triton code. The scheduler's `name_to_buf` dict does not contain 'buf0', suggesting a buffer was optimized away or renamed but a stale reference persists.
-
-The oracle itself passes correctness (produces correct `[32768, 384]` output from shifted embedding + cat pattern).
+The oracle produces correct `[32768, 384]` output from shifted embedding + cat pattern.
 
 ## Config Exploration
 
 | Config | Result |
 |--------|--------|
-| Default (cd=True) | KeyError: 'buf0' during compilation |
+| Default (cd=True) | 19.1 us (1.22x) |
 
-## Diagnosis
+## Residual Gap (1.22x)
 
-This is a pre-existing Inductor bug on the `pr-184905` branch. The shifted-embedding-cat pattern exercises a code path where buffer liveness analysis and the alignment checker disagree about which buffers exist.
+The remaining 1.22x gap is a performance issue. The oracle achieves 15.62 us with a more efficient fused kernel. This is now a performance investigation target rather than a crash bug.
 
 ## File References
 
-- `torch/_inductor/codegen/triton_utils.py:168` (`_get_buffer_layout`)
+- `torch/_inductor/codegen/triton_utils.py:168` (`_get_buffer_layout`) - previously crashed here
 - `torch/_inductor/scheduler.py:10454` (`get_buffer_layout`)

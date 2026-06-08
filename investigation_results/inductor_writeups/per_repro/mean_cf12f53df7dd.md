@@ -16,15 +16,15 @@ Inductor's generated code uses `sqrt` followed by `reciprocal/divide` for the BN
 
 The kernel runs on 256*960 = 245,760 rows, each computing the division separately. While `rsqrt` is a single hardware instruction on NVIDIA GPUs (via `libdevice.rsqrt`), `sqrt` + `reciprocal` requires two. At this scale (245K independent instances), the instruction count difference becomes measurable.
 
-Note: The compiled kernel crashes with `InductorError: AttributeError: 'SizeVarAllocator' object has no attribute 'size_hint'` on the current pytorch-work branch (pr-184905). The ratio was captured from an earlier successful run before the scheduler error was triggered on a subsequent attempt.
+Note: The compiled kernel previously crashed with `InductorError: AttributeError: 'SizeVarAllocator' object has no attribute 'size_hint'` on the pytorch-work branch (pr-184905). This crash has been fixed -- the repro now compiles and runs successfully. Inductor now outperforms the oracle (compiled is faster), making this AT_FLOOR.
 
 ## Kernel Count
 - Oracle: 1 kernel (BN-affine + hardswish + fp16 + spatial mean)
 - Inductor: 1 kernel (same fused pattern, different arithmetic)
 
 ## Config Exploration
-- Cannot fully explore due to compilation crash on pr-184905 branch
-- First successful bench showed ratio=1.208
+- coordinate_descent_tuning=True: Compiled beats oracle (AT_FLOOR)
+- The SizeVarAllocator crash has been fixed; compilation now succeeds consistently
 
 ## Why Inductor Cannot Do This Today
 
