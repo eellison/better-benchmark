@@ -1,40 +1,27 @@
 # var_mean_edb38f947d93
 
-## Classification: SWIN_SINGLETON_WINDOW_RESIDUAL_LAYERNORM
+## Classification: AT_FLOOR
 
 ## Current Result
 
 - Family: `swin_residual_layernorm`
 - Oracle path: `repros/canonical/var_mean_edb38f947d93/oracle_swin_residual_layernorm.py`
-- Correctness: PASS (assumed from oracle docstring)
-- Status: `real_gap`
+- Correctness: PASS (max_diff=2.86e-06)
+- Oracle: `17.92 us`
+- `torch.compile coordinate_descent_tuning=True`: `17.86 us`
+- Ratio: 0.996 (compile matches oracle within noise)
+- Status: `at_floor`
 
 ## Diagnosis
 
-The oracle fuses the complete Swin residual add, 1024-channel population var_mean, rsqrt-based affine LayerNorm, singleton-window reshape/permute aliases, and final contiguous flatten into one row kernel. Inductor currently schedules the decomposed add/var_mean/affine/view graph through a generic normalization path with alias handling outside the fused row epilogue.
+Inductor already matches the oracle within noise (ratio < 1.0, compile is actually marginally faster). The Swin residual LayerNorm pattern at [6272, 1024] shape is handled optimally by current Inductor codegen with coordinate_descent_tuning enabled. No performance gap exists.
 
-## Root cause
+The singleton-window reshape/permute operations in this pattern are correctly identified as metadata-only aliases, and Inductor fuses the residual add + LayerNorm + affine into one efficient kernel.
 
-The repro involves a Swin Transformer stage where the window size equals the spatial size (singleton window), making the window reshape/permute operations metadata-only aliases. However, Inductor's scheduler does not canonicalize these singleton-window reshape-permute aliases early enough to sink both the residual-add producer and final flatten into the same normalization schedule. This results in the residual add being separated from the norm, requiring a re-read.
+## Config exploration results
 
-## Kernel count
-
-- Oracle: 1 kernel (fused residual add + LayerNorm + affine + flatten store)
-- Inductor: 1-2 kernels (possibly separate residual add, or suboptimal norm with re-read)
-
-## Config exploration
-
-| Config | Expected Impact |
-|--------|----------------|
-| coordinate_descent_tuning=True | Minor tile improvement |
-| multi_kernel=2 | Persistent may help for hidden=1024 |
-
-## Recommendation
-
-Extend the normalization scheduler to recognize Swin singleton-window aliases (where reshape/permute does not change the data layout) and emit one full-scope residual-add LayerNorm store to the flattened output. The key insight is that when windows=1x1, the permute is a no-op in terms of data movement, and the entire chain from residual-add through affine should fuse trivially.
+- Baseline compile already at oracle level; no further config exploration needed.
 
 ## Relevant files
 
-- `/tmp/pytorch-work/torch/_inductor/scheduler.py` (alias canonicalization before norm fusion)
-- `/tmp/pytorch-work/torch/_inductor/ir.py` (detect no-op reshape/permute for singleton windows)
-- `/tmp/pytorch-work/torch/_inductor/codegen/triton.py` (residual-norm kernel emission)
+- Oracle: `repros/canonical/var_mean_edb38f947d93/oracle_swin_residual_layernorm.py`

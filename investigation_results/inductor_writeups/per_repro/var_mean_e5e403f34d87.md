@@ -1,48 +1,25 @@
 # var_mean_e5e403f34d87
 
-## Classification: RESIDUAL_SCALE_LAYERNORM_FUSION
+## Classification: BAD_ORACLE
 
 ## Current Result
 
 - Family: `scaled_residual_layernorm`
 - Oracle path: `repros/canonical/var_mean_e5e403f34d87/oracle_scaled_residual_layernorm.py`
-- Correctness: PASS (assumed from oracle docstring)
-- Status: `real_gap`
+- Correctness: PASS (max_diff=3.81e-06)
+- Oracle: `45.82 us`
+- `torch.compile coordinate_descent_tuning=True`: `40.70 us`
+- Ratio: 0.888 (oracle is 11% slower than compile)
+- Status: `bad_oracle`
 
 ## Diagnosis
 
-The oracle computes the complete BEiT train residual-scale add plus LayerNorm scope in one row-blocked Triton kernel, sharing the gamma and affine hidden-vector loads across neighboring token rows and returning the final flattened view. Inductor currently lowers the decomposed reshape/mul/add/var_mean/affine chain through a generic normalization schedule that does not form this multi-row producer-plus-epilogue schedule.
+The oracle's scaled residual + LayerNorm kernel is 11% slower than Inductor's generated code on this hardware for the [25216, 768] shape. Inductor's fused norm template with coordinate_descent_tuning already outperforms this oracle. No investigation needed -- the oracle does not represent a valid performance target.
 
-## Root cause
+## Config exploration results
 
-The repro performs:
-1. Reshape input
-2. Scale multiply (element-wise by a scalar or per-channel vector)
-3. Residual add
-4. Population var_mean over hidden=768
-5. Affine epilogue (LayerNorm weight/bias)
-6. Final view
-
-Inductor's norm-template lacks a guarded BEiT residual-scale LayerNorm fusion that row-blocks hidden-size-768 statistics while preserving the final view contract. The oracle processes multiple rows per CTA with shared affine vector loads, reducing the overhead of the small hidden dimension.
-
-## Kernel count
-
-- Oracle: 1 kernel (fused residual-scale + LayerNorm + affine, multi-row blocked)
-- Inductor: 1-2 kernels (may separate the scale/residual from norm, or emit suboptimal norm)
-
-## Config exploration
-
-| Config | Expected Impact |
-|--------|----------------|
-| coordinate_descent_tuning=True | May find better tile sizes |
-| multi_kernel=2 | Persistent may keep values live |
-
-## Recommendation
-
-Teach Inductor's LayerNorm template to fuse broadcast residual-scale producers into a multi-row normalization epilogue with shared hidden-vector loads and direct view-compatible stores.
+No configs needed -- oracle is already slower than baseline compile.
 
 ## Relevant files
 
-- `/tmp/pytorch-work/torch/_inductor/scheduler.py` (norm canonicalization with residual)
-- `/tmp/pytorch-work/torch/_inductor/codegen/triton.py` (multi-row norm kernel emission)
-- `/tmp/pytorch-work/torch/_inductor/choices.py` (persistent reduction for hidden=768)
+- Oracle: `repros/canonical/var_mean_e5e403f34d87/oracle_scaled_residual_layernorm.py`
