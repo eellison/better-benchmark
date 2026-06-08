@@ -1,53 +1,54 @@
 # sum_sum_sum_22bc9d6a43f1
 
-## Classification: ALGEBRAIC_ELIMINATION
+## Classification: MULTI_RESOLUTION_OUTPUT_FUSION
 
 ## Benchmark Results
-- Oracle: 71.46 us
-- Inductor compiled: 146.43 us
-- Ratio: 2.049x
+- Oracle: 67.3 us
+- Inductor compiled: 136.86 us
+- Ratio: 2.03x
+- linear_reduction_elimination fires (2 dependent reductions eliminated algebraically)
 
 ## Kernel Count
-- Inductor: 3 kernels
+- Inductor: 2 kernels (down from 3 thanks to linear_reduction_elimination)
 - Oracle: 2 kernels (spatial summary + final dependent reduction)
 
 ## Root Cause
 
-The oracle computes the complete Visformer double-normalization backward scope. The repro involves:
-1. Two consecutive batch-norm-backward-style patterns (inner and outer normalization)
-2. A materialized `[1, 192, 28, 28]` batch-sum side output
-3. Multiple dependent channel reductions `sum([0,2,3])` over [128, 192, 28, 28] tensors
+This is fundamentally a **scheduler/fusion** issue, not purely algebraic.
 
-The oracle strategy:
-1. First kernel: computes spatial summaries by streaming through the full [128, 192, 28, 28] data once, accumulating `sum(x)`, `sum(x * normalized)` per channel, while also producing the `[1, 192, 28, 28]` batch-sum side output
-2. Second kernel: derives the final dependent channel reductions from the compact block summaries without re-reading the full tensor
+After `linear_reduction_elimination` rewrites the dependent reductions algebraically,
+Inductor still produces 2 kernels with incompatible iteration domains:
 
-Inductor's 3-kernel decomposition:
-1. First reduction: `sum(getitem_162, [0,2,3])` -> [192]
-2. Pointwise BN-backward arithmetic producing large [128, 192, 28, 28] intermediates
-3. Second reduction(s): `sum(mul_tensor_2, [0,2,3])` and dependent reductions
+1. **Kernel 0** (xnumel=192, r0_numel=100352): Per-channel reductions `sum([0,2,3])`
+   - 192 programs, each reducing 128*28*28=100352 elements
+   - Outputs: 4 per-channel [192] vectors
 
-The key issue: Inductor does not recognize that the dependent reduction pattern (where the final sum depends on a broadcast of the first sum's result) can be algebraically collapsed. It materializes full [128, 192, 28, 28] intermediates between kernels.
+2. **Kernel 1** (xnumel=150528, r0_numel=128): Batch-only reduction `sum([0], keepdim=True) -> [1,192,28,28]`
+   - 150528 programs, each reducing 128 elements
+   - Reads the SAME large [128,192,28,28] data as Kernel 0
 
-Shape info: N=128, C=192, H=28, W=28, reduction size = 128*28*28 = 100,352 elements per channel.
+The 2x gap comes from Kernel 1 re-reading ~96MB that Kernel 0 already processed.
 
-## Config Exploration
-- `combo_kernels=True, coordinate_descent_tuning=True`: 146.43 us (baseline)
-- No config combination closes the 2x gap - this requires an algebraic rewrite
+## Why The Scheduler Cannot Fuse These
+
+The two reductions have incompatible grid structures:
+- Kernel 0: 192 programs, reducing ALL spatial positions per channel
+- Kernel 1: 150528 programs, reducing batch per spatial position
+
+Fusing requires multi-resolution output support: one kernel producing both
+per-channel scalars AND per-spatial-position vectors from a single data pass.
 
 ## What Inductor Needs (Design Doc)
 
-**Enhancement needed**: Multi-output algebraic reduction rewrite for BN-backward chains with shared channel summaries.
+**Enhancement needed**: "Multi-resolution output reduction" in the scheduler.
 
-The pass would:
-1. Detect the double-norm-backward pattern: sibling channel reductions -> broadcast arithmetic -> dependent channel reductions, with an intermediate materialized side output
-2. Prove that the final dependent reductions are linear combinations of new sibling summaries
-3. Emit a single multi-accumulator streaming reduction that computes all needed summaries in one pass, plus the batch-sum side output
-4. Derive the final vector outputs from the compact summaries
+When two reductions share the same large input tensor but have different reduction axes
+(`sum([0,2,3])->>[C]` and `sum([0])->[1,C,H,W]`), the per-channel kernel should
+emit atomic_add stores for the finer-grained output as a side effect.
 
 **Files to modify**:
-- `/tmp/pytorch-work/torch/_inductor/fx_passes/post_grad.py` - register BN-backward algebraic pattern
-- `/tmp/pytorch-work/torch/_inductor/fx_passes/` - new algebraic elimination pass
-- `/tmp/pytorch-work/torch/_inductor/ir.py` - multi-output reduction IR node support
+- `/tmp/pytorch-work/torch/_inductor/scheduler.py` - fusion for multi-axis reductions
+- `/tmp/pytorch-work/torch/_inductor/codegen/triton.py` - atomic accumulator codegen
+- `/tmp/pytorch-work/torch/_inductor/ir.py` - multi-resolution output IR support
 
-**Affected repro count**: Visformer and similar double-normalization architectures. Related to sum_sum_sum_d8e421a07bf7 (DenseNet BN-backward). A general BN-backward algebraic rewrite would cover both.
+**Affected repro count**: ~41 sum_sum_sum repros share this pattern.
