@@ -1270,11 +1270,47 @@ def run_aten_extraction(model_fn, model_args_fn, output_dir, model_name="model",
         for g_idx, (gm, _label) in enumerate(all_gms):
             full_graph_path = os.path.join(graph_dir, f"full_graph_{g_idx:03d}.py")
             try:
-                full_code = gm.print_readable(print_output=False)
+                full_code = gm.print_readable(
+                    print_output=False,
+                    include_stride=True,
+                    include_device=True,
+                )
                 with open(full_graph_path, "w") as f:
                     f.write(full_code)
-            except Exception:
-                pass
+                try:
+                    from full_graph_harness import (
+                        infer_index_bounds_from_gm,
+                        infer_full_graph_source,
+                        infer_permutation_indices_from_gm,
+                        placeholder_info_from_gm,
+                        write_full_graph_metadata,
+                    )
+
+                    placeholder_info = placeholder_info_from_gm(gm)
+                    index_bounds = infer_index_bounds_from_gm(gm, placeholder_info)
+                    permutation_indices = infer_permutation_indices_from_gm(
+                        gm,
+                        placeholder_info,
+                    )
+                    write_full_graph_metadata(
+                        full_graph_path,
+                        gm,
+                        extra={"source": infer_full_graph_source(full_graph_path)},
+                        index_bounds=index_bounds,
+                        permutation_indices=permutation_indices,
+                    )
+                except Exception as exc:
+                    print(
+                        f"[extract_reductions] WARNING: could not write full graph metadata "
+                        f"for {full_graph_path}: {exc}",
+                        file=sys.stderr,
+                    )
+            except Exception as exc:
+                print(
+                    f"[extract_reductions] WARNING: could not write full graph "
+                    f"{full_graph_path}: {exc}",
+                    file=sys.stderr,
+                )
 
     for gm_idx, (gm, label) in enumerate(all_gms):
         try:
@@ -1491,6 +1527,8 @@ if __name__ == "__main__":
                         help="Only extract inference (forward) graphs, skip backward")
     parser.add_argument("--canonical-dir", type=str, default=None,
                         help="Path to canonical repro set (e.g., repros/). If set, updates canonical structure after extraction.")
+    parser.add_argument("--graph-dir", type=str, default=None,
+                        help="Directory for full_graph_NNN.py files and sidecars in ATen mode.")
     args = parser.parse_args()
 
     model_name = args.model
@@ -1511,8 +1549,20 @@ if __name__ == "__main__":
         if mode in ("aten", "both"):
             suffix = "_inference" if args.inference_only else ""
             out = os.path.join(base_dir, "output", "aten_repros", name + suffix)
+            graph_dir = None
+            if args.graph_dir:
+                graph_dir = args.graph_dir
+                if args.model == "all" or args.model.endswith(":all"):
+                    graph_dir = os.path.join(args.graph_dir, name + suffix)
             try:
-                extractor = run_aten_extraction(model_fn, args_fn, out, name, inference_only=args.inference_only)
+                extractor = run_aten_extraction(
+                    model_fn,
+                    args_fn,
+                    out,
+                    name,
+                    inference_only=args.inference_only,
+                    graph_dir=graph_dir,
+                )
                 if args.canonical_dir and extractor:
                     update_canonical(extractor, name + suffix, args.canonical_dir)
             except Exception as e:

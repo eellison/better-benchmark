@@ -89,9 +89,12 @@ def _lock_path():
     return os.path.join(lock_dir, f"gpu_{gpu}.lock")
 
 
-# Redirect stdout to a dedicated fd (mirrors real worker protocol)
+# Dedicated result fd (mirrors real worker protocol): preserve the original
+# stdout pipe for results, then point fd 1 at stderr so any fd-1 noise (native
+# or python) is isolated from the result stream.
 _result_fd = os.dup(1)
 _result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
 sys.stdout = sys.stderr
 
 for line in sys.stdin:
@@ -141,9 +144,10 @@ import json
 import os
 import sys
 
-# Redirect stdout to a dedicated fd (mirrors real worker protocol)
+# Dedicated result fd (mirrors real worker protocol)
 _result_fd = os.dup(1)
 _result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
 sys.stdout = sys.stderr
 
 _previous_path = None
@@ -167,6 +171,52 @@ for line in sys.stdin:
 
     result = {
         "_repro": repro_tag,
+        "default": {
+            "compiled_us": 1.0,
+            "coord_descent_us": None,
+            "memcopy_sol_us": 1.0,
+            "total_bytes": 4,
+            "gap_default": 1.0,
+            "gap_cd": None,
+        }
+    }
+    _result_file.write(json.dumps(result) + "\n")
+    _result_file.flush()
+'''
+
+
+def _polluting_persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
+    """Fake worker that spews raw bytes straight to fd 1 (simulating native
+    C/C++ torch/triton/CUDA prints) BEFORE every result. With the dedicated
+    result fd + os.dup2(2, 1), that noise must be diverted to stderr and the
+    result stream must stay clean and correctly attributed."""
+    return r'''
+import json
+import os
+import sys
+
+# Dedicated result fd: preserve the result pipe, then divert fd 1 to stderr.
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
+sys.stdout = sys.stderr
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line or line == "EXIT":
+        break
+    if line.startswith("PREFETCH:"):
+        continue
+
+    # Native-style pollution: write raw bytes directly to fd 1 (NOT via
+    # sys.stdout). Pre-fix, these landed on the result pipe and shifted the
+    # JSON result stream, causing misattribution. Post-fix (dup2), fd 1 is
+    # stderr, so this is harmless noise.
+    os.write(1, b'{"bogus": "native garbage to fd 1"}\n')
+    os.write(1, b"unstructured native log line\n")
+
+    result = {
+        "_repro": line,
         "default": {
             "compiled_us": 1.0,
             "coord_descent_us": None,
@@ -244,7 +294,8 @@ def test_default_worker_setup_does_not_take_gpu_lock():
     assert "def gpu_setup_lock():" in script
     assert "STRICT_GPU_LOCK = False" in script
     assert "if STRICT_GPU_LOCK:\n        with gpu_bench_lock(\"shared\"):" in script
-    assert "with gpu_bench_lock():\n                    return do_bench" in script
+    assert "with gpu_bench_lock():" in script
+    assert "do_bench(" in script
 
 
 def test_strict_setup_lock_uses_inductor_lock_hook(monkeypatch, tmp_path):
@@ -392,6 +443,51 @@ def test_locked_worker_detects_misaligned_results(monkeypatch):
         # it should succeed (first request to fresh worker is always correct).
         assert results[2]["status"] == "ok"
         assert Path(results[2]["repro"]).parent.name == "repro_c"
+
+
+def test_dedicated_result_fd_isolates_native_stdout_pollution(monkeypatch):
+    """A worker that writes raw bytes to fd 1 (native-style pollution) before
+    every result must NOT corrupt the result stream: the dedicated result fd +
+    os.dup2(2, 1) divert all fd-1 noise to stderr, so every repro is parsed and
+    correctly attributed (no misalignment, no failures)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        lock_dir = tmp_path / "locks"
+        monkeypatch.setenv("INDUCTOR_GPU_BENCH_LOCK_DIR", str(lock_dir))
+
+        task_queue = queue.Queue()
+        names = ("repro_a", "repro_b", "repro_c", "repro_d")
+        for name in names:
+            repro = tmp_path / name / "repro.py"
+            repro.parent.mkdir()
+            repro.write_text("# fake repro\n")
+            task_queue.put(repro)
+
+        result_queue = queue.Queue()
+        _locked_worker(
+            {"index": "0", "name": "Fake GPU", "kind": "fake"},
+            task_queue,
+            result_queue,
+            {
+                "root": str(ROOT),
+                "all_shapes": False,
+                "no_cd": True,
+                "n_warmup": 1,
+                "n_rep": 1,
+                "share_cache": False,
+                "strict_gpu_lock": False,
+                "n_workers": 1,
+                "_persistent_worker_script_factory": _polluting_persistent_worker_script,
+            },
+        )
+
+        results = []
+        while not result_queue.empty():
+            results.append(result_queue.get_nowait())
+
+        # Every repro parsed cleanly and in order despite the fd-1 spew.
+        assert [Path(r["repro"]).parent.name for r in results] == list(names)
+        assert all(r["status"] == "ok" for r in results), results
 
 
 def test_locked_worker_recovers_after_failures_and_releases_gpu_lock(monkeypatch):

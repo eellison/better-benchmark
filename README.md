@@ -54,6 +54,12 @@ python repros/canonical/mean_376234b0e316/repro.py
 python scripts/bench_parallel.py repros/canonical --gpus 0,1 --max-workers 2 \
   --output results.json
 
+# Experimental/WIP: parallel sweep of saved model full graphs
+# (latency + input constraints; legacy annotation-only graphs are skipped;
+# no graph SOL yet)
+python scripts/bench_parallel.py --full-graphs --gpus 0,1 \
+  --workers-per-gpu 2 --combo-kernels --output full_graph_results.json
+
 # Re-benchmark a subset and merge into existing baseline
 python scripts/bench_parallel.py repros/canonical/pointwise_904767c8c432 \
   --gpus 0 --merge-into results.json
@@ -62,6 +68,12 @@ python scripts/bench_parallel.py repros/canonical/pointwise_904767c8c432 \
 python scripts/validate_eager.py --gpus 0,1 --max-workers 4
 ```
 
+Full-graph benchmarking is intentionally conservative and still WIP. Newly
+captured graphs get `full_graph_NNN.meta.json` sidecars with explicit input
+constraints; older checked-in graphs without enough constraint metadata are
+reported as `skipped` instead of being run with guessed integer/symbolic inputs.
+Graph-level SOL/oracle accounting is not implemented yet.
+
 ## Extraction
 
 ```python
@@ -69,7 +81,13 @@ from capture_hook import install_capture_hook, uninstall_capture_hook
 from merge_captures import temporary_capture_for_merge
 
 with temporary_capture_for_merge(Path("repros"), "my_model", suite="vllm") as capture:
-    install_capture_hook(str(capture.capture_dir), label="my_model", capture_only=True)
+    graph_dir = Path("repros/models/vllm/my_model")
+    install_capture_hook(
+        str(capture.capture_dir),
+        label="my_model",
+        graph_dir=str(graph_dir),
+        capture_only=True,
+    )
     compiled_model(inputs)  # triggers capture
     uninstall_capture_hook()
     capture.merge()  # dedup + write to repros/canonical/
@@ -95,7 +113,7 @@ bench_parallel.py
 │   └── SOL: torch.add(src, 1, out=dst) at same transfer size
 ├── Shared inductor cache (skip redundant compilation across runs)
 ├── Worker recovery: respawn on CUDA device-side assert
-└── Output: JSON with per-repro metrics + __failures__ + __summary__
+└── Output: JSON with per-repro/per-graph metrics + __failures__ + __summary__
 ```
 
 Timing uses exclusive `flock` on a per-GPU lock file — multiple processes can compile in parallel, but only one times on a given GPU at once.

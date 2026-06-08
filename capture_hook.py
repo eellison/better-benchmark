@@ -35,6 +35,12 @@ import torch
 import torch.fx as fx
 import torch._inductor.config as inductor_config
 
+from full_graph_harness import (
+    infer_index_bounds_from_gm,
+    infer_permutation_indices_from_gm,
+    placeholder_info_from_gm,
+)
+
 
 class _CaptureState:
     def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
@@ -274,223 +280,13 @@ class _CaptureState:
 
         return signature
 
-    def _infer_index_bounds(self, gm, placeholder_info) -> dict[str, int]:
-        """Infer valid index bounds for integer placeholders by inspecting consumers.
+    @staticmethod
+    def _infer_index_bounds(gm, placeholder_info) -> dict[str, int]:
+        return infer_index_bounds_from_gm(gm, placeholder_info)
 
-        Traces up to 3 hops downstream to find scatter/gather/embedding consumers.
-        Also handles:
-        - int8 pool offsets (_low_memory_max_pool_offsets_to_indices)
-        - Multi-hop: placeholder → clone/reshape → scatter_add
-        """
-        _INDEX_CONSUMERS = {
-            torch.ops.aten.scatter.src: (0, 1),        # (target_arg, dim_arg)
-            torch.ops.aten.scatter.value: (0, 1),
-            torch.ops.aten.scatter_add.default: (0, 1),
-            torch.ops.aten.gather.default: (0, 1),
-            torch.ops.aten.index_put.default: (0, None),
-            torch.ops.aten.index.Tensor: (0, None),
-            torch.ops.aten.index_select.default: (0, 1),
-            torch.ops.aten.embedding.default: (0, None),
-        }
-
-        # Ops that pass index values through unchanged
-        _PASSTHROUGH_OPS = {
-            torch.ops.aten.clone.default,
-            torch.ops.aten.reshape.default,
-            torch.ops.aten.view.default,
-            torch.ops.aten.expand.default,
-            torch.ops.aten.slice.Tensor,
-            torch.ops.aten.unsqueeze.default,
-            torch.ops.aten.squeeze.default,
-            torch.ops.aten.squeeze.dim,
-            torch.ops.aten.select.int,
-            torch.ops.aten.permute.default,
-            torch.ops.aten.contiguous.default,
-            torch.ops.aten.t.default,
-            torch.ops.aten.transpose.int,
-            torch.ops.aten.where.self,
-        }
-
-        bounds = {}
-        ph_nodes = {n.name: n for n in gm.graph.nodes if n.op == "placeholder"}
-
-        def _node_shape(n):
-            if not hasattr(n, "meta"):
-                return None
-            val = n.meta.get("val")
-            if isinstance(val, torch.Tensor):
-                return list(val.shape)
-            if n.op == "call_function" and n.target in {
-                torch.ops.aten.empty.memory_format,
-                torch.ops.aten.full.default,
-            }:
-                if n.args and isinstance(n.args[0], (list, tuple)):
-                    return list(n.args[0])
-            return None
-
-        for name, node in ph_nodes.items():
-            info = placeholder_info.get(name, {})
-            dtype = info.get("dtype", "")
-            if "int" not in dtype:
-                continue
-
-            # For int8: almost always pool offsets. Infer from pool kernel size.
-            if "int8" in dtype:
-                for user in node.users:
-                    if user.op == "call_function":
-                        target_name = str(user.target)
-                        if "max_pool_offsets_to_indices" in target_name:
-                            # Args: (offsets, kernel_size, ...) — bound = prod(kernel_size)
-                            if len(user.args) >= 2 and isinstance(user.args[1], (list, tuple)):
-                                ks = user.args[1]
-                                bounds[name] = int(ks[0] * ks[1]) if len(ks) >= 2 else int(ks[0])
-                                break
-                if name not in bounds:
-                    bounds[name] = 9  # default for 3x3 pool
-                continue
-
-            # For int64/int32: trace downstream up to 3 hops to find index consumers
-            def _find_bound(start_node, max_hops=3):
-                frontier = [start_node]
-                for _hop in range(max_hops):
-                    next_frontier = []
-                    for n in frontier:
-                        for user in n.users:
-                            if user.op != "call_function":
-                                continue
-                            target = user.target
-
-                            if target == torch.ops.aten.embedding.default:
-                                weight_arg = user.args[0] if user.args else None
-                                if weight_arg and hasattr(weight_arg, 'meta'):
-                                    val = weight_arg.meta.get('val')
-                                    if isinstance(val, torch.Tensor) and len(val.shape) > 0:
-                                        return int(val.shape[0])
-
-                            if target == torch.ops.aten.index.Tensor:
-                                if len(user.args) >= 2:
-                                    target_shape = _node_shape(user.args[0])
-                                    indices = user.args[1]
-                                    if target_shape and isinstance(indices, (list, tuple)):
-                                        for dim, index_node in enumerate(indices):
-                                            if index_node is n and dim < len(target_shape):
-                                                return int(target_shape[dim])
-
-                            if target == torch.ops.aten.gather.default:
-                                # If `n` is the source tensor, gather passes
-                                # those values through. Their valid bound comes
-                                # from the gathered result's downstream index
-                                # consumers, not from gather's index dimension.
-                                if user.args and user.args[0] is n:
-                                    next_frontier.append(user)
-                                    continue
-
-                            if target in _INDEX_CONSUMERS:
-                                target_arg_idx, dim_arg_idx = _INDEX_CONSUMERS[target]
-                                if len(user.args) > target_arg_idx:
-                                    target_node = user.args[target_arg_idx]
-                                    target_shape = _node_shape(target_node)
-                                    if target_shape:
-                                        if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
-                                            dim = user.args[dim_arg_idx]
-                                            if isinstance(dim, int) and dim < len(target_shape):
-                                                return int(target_shape[dim])
-                                        else:
-                                            return int(target_shape[0])
-
-                            # Passthrough: trace further
-                            if target in _PASSTHROUGH_OPS:
-                                next_frontier.append(user)
-                    frontier = next_frontier
-                    if not frontier:
-                        break
-                return None
-
-            bound = _find_bound(node)
-            if bound is not None:
-                bounds[name] = bound
-
-        return bounds
-
-    def _infer_permutation_indices(self, gm, placeholder_info) -> dict[str, int]:
-        """Find integer placeholders that must be valid permutations.
-
-        Pattern:
-            inverse = empty([N], dtype=int64)
-            inverse = index_put(inverse, [idx], iota(N))
-            use(inverse)
-
-        Random randint indices can leave holes in `inverse`; those holes contain
-        uninitialized values and can trigger device asserts when used later as
-        indices. A randperm preserves the intended inverse-permutation shape.
-        """
-        permutation_sizes = {}
-        ph_nodes = {n.name: n for n in gm.graph.nodes if n.op == "placeholder"}
-
-        def _shape_from_alloc(n):
-            if n.op != "call_function":
-                return None
-            if n.target not in {
-                torch.ops.aten.empty.memory_format,
-                torch.ops.aten.full.default,
-            }:
-                return None
-            if not n.args or not isinstance(n.args[0], (list, tuple)):
-                return None
-            return list(n.args[0])
-
-        _IOTA_PASSTHROUGH_OPS = {
-            torch.ops.aten.reshape.default,
-            torch.ops.aten.view.default,
-            torch.ops.aten.expand.default,
-            torch.ops.aten.unsqueeze.default,
-            torch.ops.aten.squeeze.default,
-            torch.ops.aten.squeeze.dim,
-        }
-
-        def _iota_size(n, max_hops=4):
-            if n.op != "call_function":
-                return None
-            if n.target != torch.ops.prims.iota.default:
-                if max_hops > 0 and n.target in _IOTA_PASSTHROUGH_OPS and n.args:
-                    return _iota_size(n.args[0], max_hops - 1)
-                return None
-            if n.args and isinstance(n.args[0], int):
-                return int(n.args[0])
-            return None
-
-        for name, node in ph_nodes.items():
-            info = placeholder_info.get(name, {})
-            dtype = info.get("dtype", "")
-            if "int" not in dtype:
-                continue
-            for user in node.users:
-                if user.op != "call_function" or user.target != torch.ops.aten.index_put.default:
-                    continue
-                if len(user.args) < 3:
-                    continue
-                indices = user.args[1]
-                if not isinstance(indices, (list, tuple)) or node not in indices:
-                    continue
-                target_shape = _shape_from_alloc(user.args[0])
-                iota_size = _iota_size(user.args[2])
-                if target_shape and iota_size and target_shape[0] == iota_size:
-                    permutation_sizes[name] = iota_size
-
-            for user in node.users:
-                if user.op != "call_function" or user.target != torch.ops.aten.scatter.src:
-                    continue
-                if len(user.args) < 4 or user.args[2] is not node:
-                    continue
-                target_shape = _shape_from_alloc(user.args[0])
-                iota_size = _iota_size(user.args[3])
-                dim = user.args[1]
-                if target_shape and iota_size and isinstance(dim, int):
-                    if dim < 0:
-                        dim += len(target_shape)
-                    if 0 <= dim < len(target_shape) and target_shape[dim] == iota_size:
-                        permutation_sizes[name] = iota_size
-        return permutation_sizes
+    @staticmethod
+    def _infer_permutation_indices(gm, placeholder_info) -> dict[str, int]:
+        return infer_permutation_indices_from_gm(gm, placeholder_info)
 
     def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
         shape_params = shape_params or {}
@@ -713,8 +509,34 @@ if __name__ == "__main__":
                 )
                 with open(full_graph_path, "w") as f:
                     f.write(full_code)
-            except Exception:
-                pass
+                try:
+                    from full_graph_harness import (
+                        infer_full_graph_source,
+                        write_full_graph_metadata,
+                    )
+
+                    placeholder_info = placeholder_info_from_gm(gm)
+                    index_bounds = self._infer_index_bounds(gm, placeholder_info)
+                    permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
+                    write_full_graph_metadata(
+                        full_graph_path,
+                        gm,
+                        extra={"source": infer_full_graph_source(full_graph_path)},
+                        index_bounds=index_bounds,
+                        permutation_indices=permutation_indices,
+                    )
+                except Exception as exc:
+                    print(
+                        f"[capture_hook] WARNING: could not write full graph metadata "
+                        f"for {full_graph_path}: {exc}",
+                        file=sys.stderr,
+                    )
+            except Exception as exc:
+                print(
+                    f"[capture_hook] WARNING: could not write full graph "
+                    f"{full_graph_path}: {exc}",
+                    file=sys.stderr,
+                )
         from torch._inductor.fx_passes.fusion_regions import is_fusible_node
         from torch.fx.passes.infra.partitioner import CapabilityBasedPartitioner
         from torch.fx.passes.operator_support import create_op_support
