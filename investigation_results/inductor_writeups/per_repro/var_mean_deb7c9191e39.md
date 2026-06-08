@@ -1,53 +1,53 @@
 # var_mean_deb7c9191e39
 
-## Classification: SWIN_WINDOW_REVERSE_SHIFTED_LAYERNORM
+## Classification: STENCIL_PRODUCER_INLINE (cheap non-broadcast producer)
 
 ## Current Result
 
 - Family: `swin_window_reverse_shift_layernorm`
 - Oracle path: `repros/canonical/var_mean_deb7c9191e39/oracle_swin_window_reverse_shift_layernorm.py`
-- Correctness: PASS (max_diff=1.91e-06)
-- Oracle: `114.53 us`
-- `torch.compile coordinate_descent_tuning=True`: `161.57 us`
-- Ratio: 1.411
-- Best config: `fast_math=True`: `158.39 us` (ratio 1.383, marginal improvement)
-- Status: `real_gap`
+- Correctness: PASS (max_diff=2.86e-06)
+- Oracle: `113.5 us`
+- `torch.compile coordinate_descent_tuning=True` (AFTER FIX): `124.5 us`
+- Ratio (AFTER FIX): 1.097
+- Previous ratio (BEFORE FIX): 1.411
+- Status: `mostly_closed`
+
+## Fix implemented
+
+**Commit**: `f58d2545cd2` on `pr-184905` branch in `/tmp/pytorch-work`
+
+Extended `inline_recomputable_producers` pass to handle "cheap non-broadcast producers".
+The pass previously required at least one small read (broadcast dominance). The Swin
+window-reverse + cyclic shift + residual add producer has only full-size reads (both
+addmm and residual are 51M elements), but is trivially cheap (11 ops: index math + add).
+
+Added an alternative path in `_is_inlinable_producer_shape`: if `opcount.num_ops <= 16`
+and the intermediate buffer is >= 4MB, allow inlining. The existing profitability check
+(`_is_inline_profitable`) still gates the decision.
+
+Result: 2 kernels -> 1 kernel, 412MB intermediate eliminated, 1.41x -> 1.10x.
 
 ## Diagnosis
 
-The oracle computes the complete Swin window-reverse, 53-step cyclic spatial shift, strided residual add, hidden-size-128 population LayerNorm, affine epilogue, and final contiguous flatten directly from the captured window and residual layouts in a single Triton kernel with 64-row tiles. It maps each output spatial row directly back to the source window row via index arithmetic (window_row, window_col, inner_h, inner_w), avoiding any intermediate materialization.
+The producer `op0` (Pointwise, 51M elements, 11 ops) computes window-reverse + cyclic
+shift + residual add. It reads from two full-size inputs (addmm_5 [401408, 128] and
+view_24 [128, 56, 56, 128]) and outputs a [128, 56, 56, 128] intermediate.
 
-Inductor emits 2 kernels: one for the window-reverse + cyclic shift + residual add materialization, and one for the var_mean LayerNorm + affine epilogue. The intermediate [128, 56, 56, 128] tensor (~412 MB at fp32) is materialized between these kernels, causing significant memory traffic overhead.
+The consumers are:
+- `op1` (WelfordReduction): first pass of var_mean (mean computation)
+- `op2` (WelfordReduction): second pass of var_mean (variance computation)
+- `op4` (Pointwise): LN epilogue (sub, rsqrt, mul, add with weight/bias)
 
-## Root cause
-
-The Swin Transformer's window-reverse + cyclic-shift + residual-add + LayerNorm pipeline requires complex spatial index remapping. Inductor materializes each step (window-reverse clone, index gather, residual add) before the normalization. The oracle maps each final output row directly to its source window row and spatial position, eliminating all intermediate buffers by computing the index transformation on-the-fly within the normalization kernel.
-
-The normalization scheduler cannot inline the window-reverse + cyclic shift producer (which involves non-trivial index arithmetic: modular shift, window partition reverse) into the row-reduction loop.
+After inlining, all three consumers recompute the cheap index math inline instead of
+reading from the 412MB materialized buffer.
 
 ## Kernel count
 
-- Oracle: 1 kernel (fused window-reverse + shift + residual + LayerNorm + affine)
-- Inductor: 2 kernels (materialized reshape/shift/residual, then LN)
-
-## Config exploration results
-
-| Config | Time (us) | Ratio |
-|--------|-----------|-------|
-| Default (cd=True) | 161.57 | 1.411 |
-| combo+mk=2 | 164.27 | 1.434 |
-| combo+mk=3 | 158.50 | 1.384 |
-| fast_math=True | 158.39 | 1.383 |
-| Oracle | 114.53 | 1.000 |
-
-No config closes the gap. The oracle uses only standard `tl.rsqrt` -- no fast/imprecise transcendentals.
-
-## Recommendation
-
-Add a guarded Swin window-reverse shifted LayerNorm lowering that maps final output rows directly to source window rows and emits the residual add, reduction, affine, and final contiguous store in one kernel. Same root cause as var_mean_00824117c097 (SWIN_SHIFTED_WINDOW_LAYERNORM family). The 1.41x gap on [128*3136, 128] shapes makes this one of the larger Swin family gaps due to the large spatial dimension (56x56) amplifying the intermediate buffer cost.
+- Oracle: 1 kernel
+- Inductor BEFORE fix: 2 kernels (poi + red)
+- Inductor AFTER fix: 1 kernel (red with inlined producer)
 
 ## Relevant files
 
-- `/tmp/pytorch-work/torch/_inductor/fx_passes/post_grad.py` (Swin pattern family)
-- `/tmp/pytorch-work/torch/_inductor/scheduler.py` (realize_hint blocking fusion)
-- `/tmp/pytorch-work/torch/_inductor/ir.py` (window-reverse layout detection)
+- `/tmp/pytorch-work/torch/_inductor/scheduler.py` (lines 5681-5696: cheap producer path in `_is_inlinable_producer_shape`)
