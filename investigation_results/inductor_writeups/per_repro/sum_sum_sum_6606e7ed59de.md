@@ -48,3 +48,12 @@ The template would:
 - `/tmp/pytorch-work/torch/_inductor/codegen/triton.py` - multi-output cooperative template
 
 **Note**: The gap here is marginal (1.097x). This repro is near the noise floor and may not warrant immediate fix priority. The same pattern at larger shapes (e.g., sum_sum_sum_6107a2f54029 at 3.02x) is much more impactful.
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 28.35 us
+- Compiled: 30.46 us
+- Ratio: 1.074x (slightly improved from 1.097x, still marginal)
+
+The split-K improvements brought a small improvement (~2.3% reduction in gap). This remains a
+marginal case near the noise floor.

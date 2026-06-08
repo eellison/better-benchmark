@@ -59,9 +59,19 @@ with cd tuning already gets close. This is a lower-priority COOPERATIVE_SPLIT_K 
 
 ## Status
 
-COOPERATIVE_SPLIT_K -- needs_work (1.08x gap with cd, 1.26x gap default)
+CLOSED (AT_FLOOR) -- gap closed by decomposed split-K fix (d75864dea06) and aggressive split threshold (8586e404cc8).
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 32.54 us
+- Compiled: 33.47 us
+- Ratio: 1.029x (AT_FLOOR)
+
+The cooperative split-K improvements in commits d75864dea06 and 8586e404cc8 fully close this gap.
+Inductor now matches the oracle within noise (2.9% gap).
 
 ## Done Criteria
 
 - Inductor fuses sibling BN-backward reductions into cooperative split-K with epilogue fusion.
 - Gap closes to <1.05x vs oracle, or documented as shape-specific limitation.
+- DONE: gap is 1.029x, well below threshold.

@@ -25,8 +25,17 @@ generic reduction strategy is sufficient.
 
 ## Status
 
-AT_FLOOR -- compile matches oracle. No Inductor work needed for this shape.
+AT_FLOOR -- compile BEATS oracle. No Inductor work needed for this shape.
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 19.9 us
+- Compiled: 15.94 us
+- Ratio: 0.801x (BAD_ORACLE -- compile is 20% faster than oracle)
+
+The decomposed split-K fix (d75864dea06) and aggressive split threshold (8586e404cc8) made the
+compiled code significantly faster than the hand-written oracle. The oracle is now outdated.
 
 ## Done Criteria
 
-Closed. Compiled output already at oracle performance.
+Closed. Compiled output beats oracle performance by 20%.

@@ -27,3 +27,12 @@ The gap is very small (1.077x, only 1.3us absolute). coordinate_descent_tuning=T
 ## Design Doc
 
 The gap is marginal (1.077x). The oracle's advantage is in sharing one element load pass across the transpose store, row reduction, and column partial accumulation. Inductor's generic scheduling separates these, causing one extra read of the [4096, 512] intermediate. Given the tiny absolute gap (1.3us), this is low priority but would benefit from a cooperative split-K multi-output template that coordinates row-local ops with column accumulators.
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 16.29 us
+- Compiled: 18.18 us
+- Ratio: 1.116x (slightly regressed from 1.077x)
+
+The gap increased slightly, likely due to the aggressive split threshold changing the auto-selected
+reduction strategy. Still marginal (1.9us absolute gap) and low priority.

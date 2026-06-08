@@ -30,4 +30,16 @@ The oracle computes the MT5 residual dropout/layer-norm-backward return tuple by
 
 ## Fix path: Gap fully closed by `triton.multi_kernel=3`. No scheduler change needed.
 
-## Status: closed_by_config
+## Status: closed_by_config (but see regression note below)
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 15.9 us
+- Compiled (default autotuning): 18.21 us
+- Ratio: 1.145x
+
+NOTE: The default compile path now shows a 1.145x gap. This may be because the aggressive split
+threshold (8586e404cc8) changed which reduction strategy is auto-selected. The gap was previously
+closed by explicitly setting multi_kernel=3. The fix here is that the autotuner should still
+select the looped reduction mode (multi_kernel=3) for this pattern. If multi_kernel=3 is still
+the winning config, this is an autotuning regression, not a codegen regression.

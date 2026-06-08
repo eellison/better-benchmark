@@ -8,7 +8,18 @@
 
 ## Fix path: Teach Inductor to split compatible BN channel reductions across the reduced N/H/W dimension, combine partial summaries, and fuse the downstream vector and slice epilogues with the upstream slice additions. This is the largest gap in this batch (2.09x).
 
-## Status: design_todo
+## Status: design_todo (REGRESSED)
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 81.57 us
+- Compiled: 480.1 us
+- Ratio: 5.886x (REGRESSED from 2.09x)
+
+The aggressive split threshold (8586e404cc8) appears to have caused a significant regression for
+this DenseNet BN-backward pattern. The compiled time went from 183.3us to 480.1us (2.6x slower
+than before the fix). This repro needs investigation -- the aggressive split may be selecting a
+bad split factor for this particular shape [64,96,56,56] with sliced residual epilogues.
 
 ## Details
 

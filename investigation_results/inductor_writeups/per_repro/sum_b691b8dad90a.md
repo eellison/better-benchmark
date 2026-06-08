@@ -10,16 +10,27 @@
 
 ## Current Gap
 
-- Best compile: `2091.8400287628174 us`
+- Best compile: `2091.8400287628174 us` (OLD, pre-fix)
 - Memcopy SOL: `687.0719790458679 us`
-- Launch-adjusted SOL gap: `3.018214690547139x`
-- Oracle path: _none_
+- Launch-adjusted SOL gap: `3.018214690547139x` (OLD)
+- Oracle path: `repros/canonical/sum_b691b8dad90a/oracle_multi_output_reduction.py`
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 877.44 us
+- Compiled: 1711.1 us
+- Ratio: 1.95x (down from 3.018x)
+
+The decomposed split-K fix (d75864dea06) and aggressive split threshold (8586e404cc8) improved the
+compiled code significantly, reducing the gap from 3.02x to 1.95x. The oracle is now a valid floor
+(it beats compiled). The remaining 1.95x gap indicates further multi-output reduction fusion work
+is needed.
 
 ## Oracle State
 
-- Existing prototype: `repros/canonical/sum_b691b8dad90a/oracle_multi_output_reduction.py` is not a valid floor.
-- Gap diagnosis: The script attempts the reduction oracle scope but is slower than the compiled baseline, so it cannot establish an achievable lower bound. Inductor cannot be optimized against this number because the oracle lacks enough parallelism/tiling headroom to beat generated code. Classification: `COOPERATIVE_SPLIT_K`; a valid oracle/fix needs split-K style parallel reduction with safe atomic coordination or another full-scope strategy that actually beats compile.
-- Next oracle action: rewrite before treating this as a floor.
+- Existing prototype: `repros/canonical/sum_b691b8dad90a/oracle_multi_output_reduction.py` is now a valid floor.
+- Gap diagnosis: Oracle beats compile (877us vs 1711us). The remaining gap is from multi-output reduction fusion -- sharing input reads across same-source reductions.
+- Next oracle action: none needed, oracle establishes valid floor.
 
 ## Inductor Closure Path
 

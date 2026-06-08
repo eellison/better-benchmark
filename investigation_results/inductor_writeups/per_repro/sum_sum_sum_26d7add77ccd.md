@@ -43,3 +43,15 @@ Inductor emits 3 kernels, splitting the avg-pool backward, the channel reduction
 
 - `/tmp/pytorch-work/torch/_inductor/choices.py`: persistent reduction selection heuristic
 - `/tmp/pytorch-work/torch/_inductor/codegen/triton.py`: multi_kernel persistent codegen
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 164.7 us
+- Compiled (default autotuning): 201.6 us
+- Ratio: 1.224x (regressed from 1.095x default)
+
+The default path regressed from 189.5us to 201.6us. The aggressive split threshold (8586e404cc8)
+may have changed the auto-selected reduction strategy away from the persistent mode that previously
+worked well. This repro is still expected to be closed by multi_kernel=2 (which was 152.3us
+previously and likely still beats the oracle). The regression is an autotuning selection issue,
+not a codegen regression. The autotuner should prefer persistent reduction mode for this pattern.

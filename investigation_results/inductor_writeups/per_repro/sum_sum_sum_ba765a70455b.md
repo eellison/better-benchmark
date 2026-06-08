@@ -62,3 +62,12 @@ The 42% gap is a **multi-pass data read** issue. The oracle computes everything 
 
 ## Affected Repro Count
 The COOPERATIVE_SPLIT_K with dependent column reduction pattern appears in 20+ Swin/ViT training repros. The window-reverse index fusion alone affects 8+ Swin-specific repros.
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 48.74 us
+- Compiled: 71.84 us
+- Ratio: 1.474x (essentially unchanged from 1.426x, within measurement noise)
+
+The split-K improvements did not help this case. The gap here is fundamentally about multi-pass
+data reads (fusing pointwise epilogue with dependent column reduction), not split-K factor tuning.

@@ -30,3 +30,9 @@ The remaining gap is from the oracle's ability to:
 - Inductor kernels: 2 (fused reduction + sliced residual pointwise)
 - Oracle kernels: 2 (cooperative split-K reduce + epilogue)
 - File references: /tmp/pytorch-work/torch/_inductor/choices.py (reduction_split_factor threshold)
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 86.11 us
+- Compiled: 96.03 us
+- Ratio: 1.115x (essentially unchanged from 1.13x, confirms fix stability)

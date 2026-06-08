@@ -48,3 +48,13 @@ The oracle coordinates all of these in one producer/finalizer pair, avoiding int
 - File: `torch/_inductor/choices.py` (cooperative split-K threshold)
 
 ## Status: needs_work (1.16x gap, multi_kernel does not help)
+
+## Re-measurement (2026-06-08)
+
+- Oracle: 65.31 us
+- Compiled: 73.6 us
+- Ratio: 1.127x (improved from 1.161x)
+
+The split-K improvements reduced the gap slightly (from 16.1% to 12.7%). The remaining gap is
+still the multi-output reduction fusion pattern -- sharing row-local reductions with transposed
+side-output store and column accumulators in one kernel pair.
