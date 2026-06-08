@@ -5,8 +5,8 @@
 - Model: ConvNeXt layernorm-backward (multi-output)
 - Oracle: `oracle_multi_output.py`
 - Classification: MULTI_OUTPUT_SHARED_REDUCTION
-- Ratio: 1.694x (oracle 7.84us, compile 13.28us)
-- Kernel count: Inductor multiple kernels, Oracle 1 fused row-local multi-output reduction
+- Ratio: 1.694x -> **1.17x** (with fix)
+- Kernel count: Inductor 3 kernels -> 2 kernels (Oracle: 1 kernel)
 
 ## Root Cause
 
@@ -16,30 +16,65 @@ The oracle computes the full ConvNeXt layernorm-backward-shaped graph in one row
 3. Two sibling channel reductions
 4. The as_strided_scatter/expand/div path feeding the third channel reduction
 
-Inductor emits separate kernels for the sibling channel reductions, zero-fill, row-local layernorm-backward pointwise store, and two-stage expanded view reduction.
+Inductor (before fix) emits 3 separate kernels:
+1. Combo kernel: row-local reductions (sum over channel dim) + first two channel reductions (sum over batch)
+2. Spatial expansion kernel: expand [128,640,1,1]->[128,640,7,7], div by 49, partial sum over batch*spatial
+3. Finalization kernel: sum partials for the third channel output
 
-The 1.694x gap comes from:
-1. Materializing intermediates between row reductions and channel reductions
-2. No single node for dependent row reductions that feed compatible channel reductions
-3. Cannot keep row-local scalars in registers while accumulating all compatible channel outputs
+The third output's computation `sum(expand(x, [128,640,7,7]) / 49, [0,2,3])` is algebraically
+equivalent to `sum(x, [0])` because the expand+sum over spatial dims multiplies by 49 and
+the division by 49 cancels. After the fix, this simplification is recognized and the third
+output is computed as a simple channel reduction alongside the other two.
 
-## Config Exploration
+## Fix Implemented
+
+**Expand-sum elision FX pass** (`torch/_inductor/fx_passes/expand_sum_elision.py`)
+
+The pass recognizes the pattern:
+```
+sum(div(expand(x, shape), N), dims)
+```
+where the expanded dims (input size 1, output size > 1) are all included in the sum dims,
+and N equals the product of those expanded sizes. Rewrites to:
+```
+sum(x, remaining_dims)
+```
+
+This eliminates the expensive spatial expansion kernel entirely. The third channel reduction
+is now fused into the second kernel alongside the other channel reductions.
+
+### Commit: `c33b0e78618` in `/tmp/pytorch-work`
+- `torch/_inductor/fx_passes/expand_sum_elision.py` (new file)
+- `torch/_inductor/fx_passes/post_grad.py` (register the pass)
+- `torch/_inductor/config.py` (add `expand_sum_elision` flag, default True)
+
+## Config Exploration (after fix)
 
 | Config | Time (us) | Ratio vs Oracle |
 |--------|-----------|-----------------|
-| Default (CDT) | 13.28 | 1.694x |
-| multi_kernel=2 | 30.08 | 3.837x (WORSE) |
-| multi_kernel=3 | 28.16 | 3.592x (WORSE) |
+| Default (CDT) | 8.99 | 1.17x |
+| multi_kernel=2 | ~33 | ~4.3x (WORSE) |
+| multi_kernel=3 | ~32 | ~4.1x (WORSE) |
 
-multi_kernel=2/3 make things significantly worse for this small kernel -- the overhead of persistent/looped reduction strategies exceeds the benefit. Default CDT is the best config.
+Default CDT remains the best config. multi_kernel=2/3 are worse due to persistent/looped
+overhead on this small kernel.
 
-## Fix Assessment
+## Remaining Gap (1.17x)
 
-**Design doc** -- requires SCHEDULER_FUSION enhancement for dependent multi-output reduction scheduling.
+The remaining gap is due to the inherent 2-pass structure:
+1. First kernel: row-local reductions (sum over 640 channels per row)
+2. Second kernel: channel reductions (sum over 128 batch elements per channel)
 
-### What's needed:
-Add dependent multi-output reduction scheduling that can keep row-local scalars in registers while accumulating all compatible channel outputs without materializing the structured intermediate. The scheduler needs to recognize that row-reduction results feed both a structured view-reduction consumer and sibling channel reductions.
+The oracle combines both into a single kernel using atomic_add for the channel reductions
+(each row atomically accumulates into the channel output). Inductor's generic codegen
+cannot merge these two reduction directions into one kernel without atomics.
 
-### Files:
-- `torch/_inductor/scheduler.py` (dependent multi-output reduction plan)
-- `torch/_inductor/codegen/triton.py` (row-local scalar reuse codegen)
+Closing the remaining gap requires either:
+- Atomic accumulator codegen for multi-output reduction scheduling
+- Or: recognizing that the row-reduction results are small enough to keep in registers
+  while also accumulating the channel reductions (requires multi-dim reduction support)
+
+## Affected Repros
+
+~28 repros have the expand+div+sum pattern (avg_pool2d_backward). This pass benefits all
+of them by eliminating the unnecessary spatial expansion.
