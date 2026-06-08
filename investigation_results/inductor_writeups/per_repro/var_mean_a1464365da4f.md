@@ -1,31 +1,23 @@
 # var_mean_a1464365da4f
 
-## Classification: SCHEDULER_FUSION
+## Status: BAD_ORACLE (compile already faster)
 
-## Current Result
+- Oracle: 13.02 us
+- Compile: 11.55 us
+- Ratio: 0.887x (oracle is 1.13x slower than compile)
 
-- Family: `nfnet_channel_normalization`
-- Oracle path: `repros/canonical/var_mean_a1464365da4f/oracle_*`
-- Compiled (coordinate_descent_tuning=True): 11.97 us
-- Status: `real_gap` (marginal)
+## Classification: NO_GAP
 
-## Diagnosis
+Oracle path: `repros/canonical/var_mean_a1464365da4f/oracle_channel_norm_scale.py`
 
-The oracle computes NFNet per-channel population var_mean, rsqrt side output, scalar-gain normalized activation, and keepdim mean side output in one shape-specialized Triton program. Inductor lowers through its generic var_mean normalization schedule without retaining the 1536-element channel tile.
+The compiled Inductor output already outperforms this oracle. No Inductor improvement needed. The oracle's shape-specialized kernel for per-channel normalization does not outperform Inductor's generic schedule at this particular shape.
 
-## Root cause
+## Previous diagnosis (superseded by measurement)
 
-The scheduler lacks a guarded reduction-consumer fusion template for fixed inner-size correction=0 channel normalization with multiple returned reduction consumers.
+The oracle was designed to compute NFNet per-channel population var_mean, rsqrt side output, scalar-gain normalized activation, and keepdim mean side output in one shape-specialized Triton program. However, Inductor's default schedule already achieves better performance.
 
-## Kernel count
-- Oracle: 1 kernel
-- Inductor: 1 kernel
-
-## Recommendation
-
-Add a per-channel var_mean+rsqrt+scale-normalize template that fuses the dependent broadcast epilogue and emits the requested side-output layouts directly.
-
-## Relevant files
-
-- Input: [3072, 1536, 1, 1] f32 (NFNet training)
-- Models: 5 models (timm_dm_nfnet)
+## Details
+- Model: timm_dm_nfnet (training)
+- Pattern: per-channel var_mean + rsqrt + scale-normalize
+- Shape: [3072, 1536, 1, 1] f32, producing [3072] rsqrt, [3072,1536,1,1] normalized, [1,3072,1] mean
+- Correctness: PASS

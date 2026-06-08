@@ -1,31 +1,23 @@
 # var_mean_aa8ab7fa55a7
 
-## Classification: SCHEDULER_FUSION
+## Status: AT_FLOOR (compile matches oracle)
 
-## Current Result
+- Oracle: 29.44 us
+- Compile: 29.31 us
+- Ratio: 0.996x
 
-- Family: `swin_patch_merge_layernorm`
-- Oracle path: `repros/canonical/var_mean_aa8ab7fa55a7/oracle_*`
-- Compiled (coordinate_descent_tuning=True): 36.58 us
-- Status: `real_gap`
+## Classification: NO_GAP
 
-## Diagnosis
+Oracle path: `repros/canonical/var_mean_aa8ab7fa55a7/oracle_swin_patchmerge_layernorm.py`
 
-The oracle computes Swin patch-merge residual add, fixed 2x2 layout clone, population var_mean LayerNorm, affine epilogue, and final [6272, 2048] reshape in one row kernel. Inductor schedules the layout materialization and normalization separately.
+The compiled Inductor output already matches the oracle performance. No Inductor improvement needed.
 
-## Root cause
+## Previous diagnosis (superseded by measurement)
 
-The normalization scheduler does not recognize the deterministic Swin patch-merge reshape/permute/clone producer as a direct row-source for the LayerNorm template.
+The oracle was designed to compute Swin patch-merge residual add, fixed 2x2 layout clone, population var_mean LayerNorm, affine epilogue, and final [6272, 2048] reshape in one row kernel. Measurements show Inductor already achieves equivalent performance.
 
-## Kernel count
-- Oracle: 1 kernel
-- Inductor: 1+ kernels
-
-## Recommendation
-
-Teach the norm-template scheduler to sink fixed patch-merge layout indexing and residual-add producers into the row-wise LayerNorm load plan.
-
-## Relevant files
-
-- Input: [25088, 512] + [128, 196, 512] f32 (Swin transformer inference)
-- Models: timm_swin_base_patch4_window7_224_infer
+## Details
+- Model: timm_swin_base_patch4_window7_224_infer
+- Pattern: patch-merge layout + residual add + var_mean -> LN affine -> view
+- Shape: [6272, 2048] output
+- Correctness: PASS

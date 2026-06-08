@@ -1,31 +1,23 @@
 # var_mean_a8fd2a07cabc
 
-## Classification: NEW_PATTERN
+## Status: BAD_ORACLE (compile already faster)
 
-## Current Result
+- Oracle: 199.55 us
+- Compile: 53.31 us
+- Ratio: 0.267x (oracle is 3.74x slower than compile)
 
-- Family: `fnet_layernorm_complex64`
-- Oracle path: `repros/canonical/var_mean_a8fd2a07cabc/oracle_*`
-- Compiled (coordinate_descent_tuning=True): 52.93 us
-- Status: `real_gap`
+## Classification: NO_GAP
 
-## Diagnosis
+Oracle path: `repros/canonical/var_mean_a8fd2a07cabc/oracle_fnet_complex_layernorm.py`
 
-The oracle computes the FNet residual LayerNorm-to-complex64 scope (view, residual add, fp32 population var_mean over hidden size 768, rsqrt, affine, complex64 conversion) in one kernel. Inductor lowers normalization and complex conversion as separate work.
+The compiled Inductor output massively outperforms this oracle. The oracle is nearly 4x slower than Inductor's compiled output. No Inductor improvement needed.
 
-## Root cause
+## Previous diagnosis (superseded by measurement)
 
-The normalization template does not support a fixed-hidden LayerNorm epilogue with complex64 conversion (real=normalized, imaginary=0).
+The oracle was designed to compute the FNet residual LayerNorm-to-complex64 scope in one kernel. However, at this shape the fused kernel suffers severely from the complex64 conversion overhead and/or register pressure, making Inductor's decomposed approach far superior.
 
-## Kernel count
-- Oracle: 1 kernel
-- Inductor: 1+ kernels
-
-## Recommendation
-
-Add a residual-LayerNorm-to-complex64 template that folds view, add, var_mean, affine, and complex stores into one lowering.
-
-## Relevant files
-
-- Input: [16384, 768] + [32, 512, 768] f32 (Google FNet inference)
-- Models: hf_GoogleFnet_infer_000
+## Details
+- Model: hf_GoogleFnet_infer_000
+- Pattern: view -> add(residual) -> var_mean -> LN affine -> complex64 conversion
+- Shape: [16384, 768] + [32, 512, 768] f32 -> complex64 output
+- Correctness: PASS (exact match)
