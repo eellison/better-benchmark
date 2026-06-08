@@ -28,7 +28,7 @@ A benchmark corpus of 1482 Inductor-generated kernels from real models (vLLM, HF
 3. **Algebraic elimination FX pass** — 1.3x on dependent BN reductions (355 repros)
 4. **Slice_scatter elision pass** — 1.3x on stencil patterns (178 repros)
 5. **Online softmax scalar accumulators** — 2.2x on large-rnumel softmax (106 repros)
-6. **Fast_math for online softmax** — 15% on normalization pass
+6. **Online softmax exact-math cleanup** — 15% on normalization pass without changing captured numerics
 7. **Scatter-reduce FX pass** (prototype, simple cases) — 6.1x potential
 8. **Deferred assertions** — 15% on indirect-indexed reduction loops
 9. **Linear reduction algebraic elimination** — eliminates dependent reduction re-reads
@@ -194,7 +194,7 @@ Run `scripts/validate_oracles.py` to check all oracles:
 | multi_output | 306 | 2-4x | Algebraic elimination (60%), at floor (30%), scatter (10%) | **PARTIAL** |
 | layout_stencil | 178 | 1.1-2x | Slice_scatter elision | **IMPLEMENTED** |
 | scatter_reduce | 143 | 3-6x | Scatter-reduce fusion | **NEEDS WIRING** |
-| online_softmax | 106 | 1.1-2.2x | Scalar acc + fast_math | **IMPLEMENTED** |
+| online_softmax | 106 | 1.1-2.2x | Scalar acc + exact captured math | **IMPLEMENTED** |
 
 ## Key Scripts
 - `scripts/bench_compare.py` — interleaved A/B benchmarker (N configs)
