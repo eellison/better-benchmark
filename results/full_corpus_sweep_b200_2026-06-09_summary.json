@@ -1,0 +1,38 @@
+{
+  "date": "2026-06-09",
+  "device": "NVIDIA B200",
+  "corpus": "repros/canonical",
+  "total": 1482,
+  "ok": 1419,
+  "failed": 63,
+  "pass_rate_pct": 95.7,
+  "elapsed_s": 1610.5,
+  "gap_stats_default": {
+    "median": 1.58,
+    "mean": 2.19,
+    "p90": 3.9,
+    "p99": 11.13,
+    "at_sol_lte_1_1x": 380,
+    "at_sol_pct": 26.8
+  },
+  "gap_stats_coord_descent": {
+    "median": 1.39,
+    "mean": 1.87,
+    "p90": 2.85,
+    "p99": 9.42,
+    "at_sol_lte_1_1x": 443,
+    "at_sol_pct": 31.2
+  },
+  "failure_categories": {
+    "CUDA_OOM": 53,
+    "CUDAGraph_capture": 8,
+    "memory_planning_cycle": 1,
+    "device_busy": 1
+  },
+  "config": {
+    "gpus": "0,1",
+    "workers_per_gpu": 2,
+    "n_warmup": 3,
+    "n_rep": 20
+  }
+}
