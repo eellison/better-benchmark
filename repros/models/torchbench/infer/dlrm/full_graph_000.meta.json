@@ -125,14 +125,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 204790
+        "high": 1000000
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 204790
+        "high": 1000000
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",
@@ -162,14 +162,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 204789
+        "high": 1000000
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 204789
+        "high": 1000000
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",
@@ -199,14 +199,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 204793
+        "high": 1000000
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 204793
+        "high": 1000000
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",
@@ -236,14 +236,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 204790
+        "high": 1000000
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 204790
+        "high": 1000000
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",
@@ -273,14 +273,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 204793
+        "high": 1000000
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 204793
+        "high": 1000000
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",
@@ -310,14 +310,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 204784
+        "high": 1000000
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 204784
+        "high": 1000000
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",
@@ -347,14 +347,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 204786
+        "high": 1000000
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 204786
+        "high": 1000000
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",
@@ -384,14 +384,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 204792
+        "high": 1000000
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 204792
+        "high": 1000000
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",

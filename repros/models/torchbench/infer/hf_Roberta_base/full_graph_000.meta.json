@@ -15,14 +15,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 512
+        "high": 250002
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 512
+        "high": 250002
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",
@@ -38,14 +38,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 514
+        "high": 1
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 514
+        "high": 1
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     },
     {
       "kind": "tensor",

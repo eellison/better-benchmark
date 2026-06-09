@@ -46,14 +46,14 @@
       "generator": {
         "kind": "index",
         "low": 0,
-        "high": 4096
+        "high": 320
       },
       "gen": {
         "kind": "index",
         "low": 0,
-        "high": 4096
+        "high": 320
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     }
   ],
   "outputs": [],

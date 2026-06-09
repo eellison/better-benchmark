@@ -56,7 +56,7 @@
         "low": 0,
         "high": 4096
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "graph_inference"
     }
   ],
   "outputs": [],
