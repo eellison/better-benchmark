@@ -23,6 +23,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -84,6 +85,7 @@ def _validate_input(addmm: torch.Tensor) -> int:
     return addmm.numel()
 
 
+@oracle_impl(hardware="H100", shapes="(T([256, 1280], f16))")
 def oracle_forward(inputs):
     """Compute the exact full Repro.forward scope."""
     (addmm,) = inputs

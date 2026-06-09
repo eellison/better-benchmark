@@ -22,7 +22,8 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 CLASSIFICATION = "NEW_PATTERN"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -105,6 +106,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     return mm_9
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32), S([128, 1, 768]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full-scope oracle computation.
 

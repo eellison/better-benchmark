@@ -13,6 +13,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -284,6 +285,7 @@ def oracle_full_longformer_backward(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([384, 256, 768], f32), T([8, 1024, 12, 513], b8), T([8, 1024], b8), T([8, 1024, 12, 513], f32), T([1, 256, 1, 257], f32), T([1, 256, 1, 257], f32), S([96, 4, 256, 768, 1]), S([96, 4, 196864]), S([96, 4, 256, 770]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 256, 12, 257]), S([96, 4, 256, 513]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 256, 12, 257]), S([96, 4, 256, 513]), S([96, 3, 513, 512]), S([96, 3, 512, 512, 1]), S([288, 512, 512]))")
 def oracle_forward(inputs: tuple[Any, ...]) -> torch.Tensor:
     return oracle_full_longformer_backward(*inputs)
 

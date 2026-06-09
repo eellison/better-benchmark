@@ -20,7 +20,8 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -216,6 +217,7 @@ def _image_to_attention(x: torch.Tensor, shape0, shape1) -> torch.Tensor:
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([768, 49, 128], f32), S([128, 6, 49, 128]), S([128, 768, 7, 7]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope for all captured Visformer layout shapes."""
     if len(inputs) != 3:

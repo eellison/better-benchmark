@@ -42,7 +42,8 @@ OUTPUT_SHAPE = (C,)
 OUTPUT_STRIDE = (1,)
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -118,6 +119,7 @@ def _validate_inputs(inputs):
     return arg408_1, getitem_3
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768, 1, 1], f32), T([128, 768, 1, 1], f32))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation.
 

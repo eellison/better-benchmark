@@ -17,6 +17,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -118,6 +119,7 @@ def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor,
     return addmm, inductor_seeds
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 4096], f32), T([2], i64))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the full ReLU, seeded dropout, and bool sibling-output scope."""
     if triton is None:

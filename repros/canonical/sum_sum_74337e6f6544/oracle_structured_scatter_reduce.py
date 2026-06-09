@@ -33,6 +33,7 @@ FINAL_BLOCK_C = 4
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -242,6 +243,7 @@ def _validate_inputs(inputs):
     return arg13_1, arg12_1, arg3_1, arg9_1, arg10_1, arg11_1, arg14_1
 
 
+@oracle_impl(hardware="H100", shapes="(T([], f32), T([], f32), T([8, 1024], i64), T([8, 1024, 50265], f32), T([8192, 1], f32), T([8192, 1], f32), T([8, 1024, 50265], f32), S([1, 50265]), S([8192, 50265]), S([-1, 50265]), S([8, 1024, 50265]), S([8192, 50265]), S([50265]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

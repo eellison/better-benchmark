@@ -29,6 +29,7 @@ BLOCK_N = 256
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     bench_oracle,
@@ -192,6 +193,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return mean, convolution, var, weight, bias, add177, add170
 
 
+@oracle_impl(hardware="H100", shapes="(T([80], f32), T([512, 80, 7, 7], f32), T([80], f32), T([80], f32), T([80], f32), T([512, 80, 7, 7], f32), T([512, 160, 7, 7], f32))")
 def oracle_forward(inputs):
     """Run the full Repro.forward BN branch, virtual cat, and residual add."""
     if triton is None:

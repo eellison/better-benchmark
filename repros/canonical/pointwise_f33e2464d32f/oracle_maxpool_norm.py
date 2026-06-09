@@ -34,6 +34,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -161,6 +162,7 @@ def _torch_oracle(
     return values, offsets
 
 
+@oracle_impl(hardware="H100", shapes="(T([512], f32), T([1, 512, 4, 32], f32), T([512], f32), T([512], f32), T([512], f32))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope for pointwise_f33e2464d32f."""
     mean, x, var, scale, bias = _validate_inputs(inputs)

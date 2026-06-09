@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -179,6 +180,7 @@ def _check_tensor(name: str, value: torch.Tensor, shape: tuple[int, ...]) -> Non
         raise ValueError(f"{name} must be contiguous, got stride={value.stride()}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([32, 224, 56, 56], f32), T([32, 224, 1, 1], f32), T([32, 224, 1, 1], f32), T([32, 224, 56, 56], f32), T([], f32), T([1, 224, 1, 1], f32), T([32, 224, 56, 56], f32), T([1, 224, 1, 1], f32), T([224], f32), S([32, 224, 56, 56]))")
 def oracle_forward(inputs):
     """Run the full oracle computation for Repro.forward."""
     if triton is None:

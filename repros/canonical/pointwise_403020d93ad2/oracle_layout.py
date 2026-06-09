@@ -15,6 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -61,6 +62,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, values)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 1024], f32))")
 def oracle_forward(inputs: list[object] | tuple[object, ...]) -> torch.Tensor:
     """Run the full Repro.forward scope for the fixed f32[8, 1024] input."""
     if triton is None:

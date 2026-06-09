@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -305,6 +306,7 @@ def oracle_mobilebert_softmax_backward(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 128, 128], f32), T([256, 4, 128, 128], b8), T([1, 1, 128, 1], b8), T([], f32), T([1024, 128, 128], f32), T([256, 4, 128, 1], f32), T([256, 4, 128, 1], f32), T([256, 4, 128, 1], b8), S([256, 4, 128, 128]), S([256, -1, 128, 128]), S([256, 4, 128, 128]), S([1024, 128, 128]))")
 def oracle_forward(inputs):
     """Run the oracle computation for the exact Repro()(*make_inputs()) scope."""
     tensor_inputs = _validate_inputs(inputs)

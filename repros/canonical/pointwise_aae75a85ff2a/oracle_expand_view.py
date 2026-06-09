@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -60,6 +61,7 @@ def _base_numel(mask: torch.Tensor) -> int:
     return mask.numel()
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 1, 1024, 1024], b8), S([8, 16, 1024, 1024]))")
 def oracle_forward(inputs):
     """Compute `where(mask, 0.0, -inf).expand(shape)` for the full repro."""
     if triton is None:

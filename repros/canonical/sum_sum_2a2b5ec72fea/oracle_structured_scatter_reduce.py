@@ -27,6 +27,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -221,6 +222,7 @@ def _validate_inputs(inputs):
     return crop_src, arg180, mean, invstd, weight, bias
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 96, 113, 113], f32), T([128, 96, 112, 112], f32), T([1, 96, 1, 1], f32), T([1, 96, 1, 1], f32), T([96], f32), T([96], f32))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation with structured Triton kernels."""
     crop_src, arg180, mean, invstd, weight, bias = _validate_inputs(inputs)

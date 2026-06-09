@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -179,6 +180,7 @@ def _validate_inputs(inputs: tuple[object, ...] | list[object]) -> tuple[torch.T
     return tensors
 
 
+@oracle_impl(hardware="H100", shapes="(T([192], f32), T([128, 192, 17, 17], f32), T([192], f32), T([192], f32), T([192], f32), T([192], f32), T([128, 192, 17, 17], f32), T([192], f32), T([192], f32), T([192], f32), T([192], f32), T([128, 192, 17, 17], f32), T([192], f32), T([192], f32), T([192], f32), T([192], f32), T([128, 192, 17, 17], f32), T([192], f32), T([192], f32), T([192], f32))")
 def oracle_forward(inputs):
     if triton is None:
         raise RuntimeError("Triton is required for oracle_cat_bn_relu.py")

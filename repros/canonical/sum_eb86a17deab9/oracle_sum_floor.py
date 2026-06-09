@@ -25,7 +25,8 @@ TILE_ROWS = 256
 TILE_COLS = 32
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -98,6 +99,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     return x
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 1024, 768], f32))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the exact full-scope `[B, S, H] -> [H]` reduction."""
     if triton is None:

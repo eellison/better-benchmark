@@ -10,6 +10,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -258,6 +259,7 @@ def oracle_fused(
     return out, vector_out
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 464, 7, 7], f32), T([512, 232, 7, 7], f32), T([1, 232, 1, 1], f32), T([1, 232, 1, 1], f32), T([232], f32), T([232], f32), T([], f32), S([512, 232, 2, 7, 7]), S([512, 464, 7, 7]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle for Repro.forward()."""
     return oracle_fused(*inputs)

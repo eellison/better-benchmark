@@ -28,6 +28,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -298,6 +299,7 @@ def oracle_bert_softmax_backward_512(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([384, 512, 512], f32), T([32, 12, 512, 512], b8), T([1, 1, 512, 1], b8), T([], f32), T([384, 512, 512], f32), T([32, 12, 512, 1], f32), T([32, 12, 512, 1], f32), T([32, 12, 512, 1], b8), S([32, 12, 512, 512]), S([32, -1, 512, 512]), S([32, 12, 512, 512]), S([384, 512, 512]))")
 def oracle_forward(inputs):
     """Run the oracle computation for the exact Repro()(*make_inputs()) scope."""
     tensor_inputs = _validate_inputs(inputs)

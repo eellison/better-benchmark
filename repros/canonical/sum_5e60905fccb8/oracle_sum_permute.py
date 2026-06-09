@@ -41,6 +41,7 @@ COLS = 768
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -120,6 +121,7 @@ def _validate_inputs(inputs):
     return x
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32), S([128, 768]), S([768]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle for both Repro.forward outputs."""
     if triton is None:

@@ -27,6 +27,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -253,6 +254,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return tensors  # type: ignore[return-value]
 
 
+@oracle_impl(hardware="H100", shapes="(T([72, 512, 512], f32), T([24, 3, 256, 257], f32, stride=(525312, 131328, 513, 1)), T([24, 3, 256, 513], f32, stride=(525312, 131328, 513, 1)), T([24, 4, 256, 513], f32), T([2, 256, 12, 257], b8), T([2, 256, 12, 257], f32, stride=(789504, 257, 65792, 1)), T([2, 256, 12, 257], b8), T([2, 1024, 1, 513], f32), T([2, 1024, 1, 1], b8), T([], f32), T([36], i64), S([24, 3, 512, 1, 512]), S([24, 3, 512, 512]), S([24, 3, 512, 513]), S([2, 12, 1024, 513]), S([24, 4, 256, 513]), S([2, 12, 1024, 513]), S([24, 4, 256, 513]), S([24, 4, -1]), S([24, 4, 256, 769]), S([96, 256, 768]))")
 def oracle_forward(inputs):
     """Run the complete Repro.forward scope with fused Longformer indexing."""
     if triton is None:

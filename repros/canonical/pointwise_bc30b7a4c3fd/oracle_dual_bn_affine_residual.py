@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -241,6 +242,7 @@ def _validate_inputs(
     return mean1, x, var1, weight1, bias1, residual, mean2, var2, weight2, bias2, layout
 
 
+@oracle_impl(hardware="H100", shapes="(T([768], f32), T([128, 768, 7, 7], f32), T([768], f32), T([768], f32), T([768], f32), T([1, 768, 7, 7], f32), T([768], f32), T([768], f32), T([768], f32), T([768], f32))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward scope with folded channelwise affine coefficients."""
     (

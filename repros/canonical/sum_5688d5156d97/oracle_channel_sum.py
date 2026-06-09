@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -151,6 +152,7 @@ def _validate_inputs(inputs):
     return x, scale, offset
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 256, 48, 48], f32), T([128, 256, 1, 1], f32), T([128, 256, 1, 1], f32), S([128, 256, 48, 48]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for the captured shape."""
     x, scale, offset = _validate_inputs(inputs)

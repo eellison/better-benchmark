@@ -31,6 +31,7 @@ OUTPUT_COUNT = 8
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -74,6 +75,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[tuple[int, ..
     return output_shapes
 
 
+@oracle_impl(hardware="H100", shapes="(S([32, -1, 128, 128]), S([32, 6, 128, 128]), S([32, 6, 128, 128]), S([32, 6, 128, 128]), S([32, 6, 128, 128]), S([32, 6, 128, 128]), S([32, 6, 128, 128]), S([32, 6, 128, 128]), S([32, 6, 128, 128]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, ...]:
     """Run the full Repro.forward MT5 attention-mask bias construction.
 

@@ -19,6 +19,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable.
 REPRO_ID = "sum_sum_sum_9814418db3a9"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -502,6 +503,7 @@ def oracle_full(
     raise ValueError(f"unknown impl: {impl}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([25088, 512], f32), T([512], f32), T([128, 196, 512], f32), T([128, 196, 1], f32), T([128, 196, 512], f32), T([128, 1, 1, 1], b8), T([14], i64, gen=Index(14)), S([128, 196, 512]), S([128, 14, 14, 512]), S([128, 2, 7, 2, 7, 512]), S([512, 7, 7, 512]), S([512, 49, 512]), S([25088, 512]), S([512]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return oracle_full(*inputs)

@@ -29,6 +29,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -216,6 +217,7 @@ def _launch_oracle(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([3072, 128, 128], f32), T([256, 1, 128, 128], b8, stride=(0, 128, 1, 0)), S([256, 12, 128, 128]), S([256, 12, 128, 128]), S([3072, 128, 128]))")
 def oracle_forward(
     inputs: tuple[Any, ...],
     *,

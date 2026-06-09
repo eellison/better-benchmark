@@ -23,6 +23,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -227,6 +228,7 @@ def _torch_full_scope(inputs: tuple[Any, ...] | list[Any]):
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([50265, 1024], f32), T([8, 1024], i64, gen=Index(50265)), T([1026, 1024], f32), T([1024], f32), T([1024], f32), S([8192, 1024]), S([8192, 1024]), S([8192, 1024]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation and return all three view outputs."""
     token_table, token_ids, position_table, weight, bias, shape0, shape1, shape2 = _validate_inputs(inputs)

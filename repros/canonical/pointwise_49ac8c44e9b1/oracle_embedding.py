@@ -34,6 +34,7 @@ TOTAL = ROWS * HIDDEN
 #   python -m pip install --no-build-isolation -e .
 # Do not add oracle-local sys.path or REPO_ROOT import hacks.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -120,6 +121,7 @@ def oracle_embedding(arg0_1: torch.Tensor) -> torch.Tensor:
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 2560], f32))")
 def oracle_forward(inputs):
     """Run the full-scope oracle for Repro.forward."""
     (arg0_1,) = inputs

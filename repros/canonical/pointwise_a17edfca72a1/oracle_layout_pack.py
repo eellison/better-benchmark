@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -77,6 +78,7 @@ if triton is not None:
         tl.store(out_ptr + out_offsets, values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 12, 197, 64], f32), S([25216, 768]))")
 def oracle_forward(inputs):
     """Run the full Repro() computation for the captured layout conversion."""
     if triton is None:

@@ -29,6 +29,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -208,6 +209,7 @@ def _longformer_online_softmax(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([1, 4096], b8), T([180, 512, 512], f16), T([1, 4096], f16), S([12, 15, 512, 1, 512]), S([12, 15, 512, 512]), S([12, 15, 512, 513]), S([1, 12, 4096, 513]), S([1, 12, 4096, 513]), S([1, 256, 12, 257]), S([1, 12, 4096, 513]), S([12, 16, 256, 513]), S([1, 12, 4096, 513]), S([1, 12, 4096, 513]), S([1, 256, 12, 257]), S([1, 12, 4096, 513]), S([1, 4096, 1]), S([1, 8, 512, 1]), S([1, 4096, 1]), S([1, 8, 512, 1]), S([1, 15, 512, 512]), S([1, 15, 512, 513]), S([1, 1, 4096, 513]), S([1, 1, 4096, 513]), S([1, 256, 1, 257]), S([1, 1, 4096, 513]), S([1, 16, 256, 513]), S([1, 1, 4096, 513]), S([1, 1, 4096, 513]), S([1, 256, 1, 257]), S([1, 1, 4096, 513]), S([12, 16, 256, 513]), S([12, 16, -1]), S([12, 16, 256, 769]), S([192, 256, 768]))")
 def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
     """Run the full Repro.forward scope with a fused Longformer softmax oracle."""
     query_mask, bmm, key_mask = inputs[:3]

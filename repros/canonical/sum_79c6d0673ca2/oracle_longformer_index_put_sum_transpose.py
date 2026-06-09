@@ -13,6 +13,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -229,6 +230,7 @@ def oracle_index_put_sum_transpose(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([72, 512, 64], f32), T([1572864], f32), T([2359296], i64, gen=Index(1572864)), S([24, 3, 512, 64, 1]), S([24, 1024, 64]), S([2, 12, 1024, 64]), S([1024, 2, 768]), S([768]), S([2048, 768]))")
 def oracle_forward(inputs: tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     return oracle_index_put_sum_transpose(*inputs)
 

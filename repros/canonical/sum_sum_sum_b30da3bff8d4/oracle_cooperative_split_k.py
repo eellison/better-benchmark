@@ -21,6 +21,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -259,6 +260,7 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
+@oracle_impl(hardware="H100", shapes="(T([16384, 768], f32), T([32, 512, 768], f32), T([768], f32), T([32, 512, 768], f32), T([32, 512, 1], f32), T([32, 512, 768, 2], f32), S([32, 512, 768]))")
 def oracle_forward(inputs):
     return oracle_cooperative_split_k(*inputs)
 

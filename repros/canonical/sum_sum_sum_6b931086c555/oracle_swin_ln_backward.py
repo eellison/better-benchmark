@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -209,6 +210,7 @@ def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor,
     return mm_183, primals_38, mm, getitem_19, rsqrt_6, view_1324
 
 
+@oracle_impl(hardware="H100", shapes="(T([100352, 256], f32), T([256], f32), T([100352, 256], f32), T([128, 28, 28, 1], f32), T([128, 28, 28, 1], f32), T([128, 28, 28, 256], f32), S([2048, 49, 256]), S([2048, 7, 7, 256]), S([128, 4, 4, 7, 7, 256]), S([128, 28, 28, 256]), S([128, 28, 28, 256]), S([100352, 256]))")
 def oracle_forward(inputs):
     """Run the full repro scope and return the same tuple shapes/dtypes/strides."""
     if triton is None:

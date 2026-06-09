@@ -10,6 +10,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -141,6 +142,7 @@ def oracle_online_cross_entropy_mean(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 50268], f32), T([8, 1024], i64), S([8, 1024, 50265]), S([8192, 50265]))")
 def oracle_forward(inputs):
     addmm_1, arg7_1, _shape_param_0, _shape_param_1 = inputs
     return oracle_online_cross_entropy_mean(addmm_1, arg7_1)

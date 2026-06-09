@@ -28,6 +28,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 #   python -m pip install --no-build-isolation -e .
 # Do not add oracle-local sys.path or REPO_ROOT import hacks.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -111,6 +112,7 @@ def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor,
     return x, weight, bias
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 128], f16), T([128], f16), T([128], f16), S([1, 512, 128]), S([512, 128]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation with a shape-specialized Triton kernel.
 

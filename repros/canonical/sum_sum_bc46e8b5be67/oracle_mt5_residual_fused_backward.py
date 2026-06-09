@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -187,6 +188,7 @@ def oracle_triton(
     return out_col, out_transposed
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 512], f32), T([512], f32), T([32, 128, 512], f32), T([32, 128, 1], f32), T([32, 128, 512], f32), T([32, 128, 512], b8), S([32, 128, 512]), S([512]), S([32, 128, 512]), S([4096, 512]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle for Repro.forward()."""
     (

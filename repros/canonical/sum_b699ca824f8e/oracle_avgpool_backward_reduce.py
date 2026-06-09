@@ -19,6 +19,7 @@ except ImportError:  # pragma: no cover - allows CPU-only syntax checks.
 REPRO_ID = "sum_b699ca824f8e"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -139,6 +140,7 @@ def triton_direct_avgpool_backward_reduce(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 2304], f32), T([128, 2304, 7, 7], f32, stride=(112896, 1, 16128, 2304)), S([128, 2304, 1, 1]), S([128, 2304, 7, 7]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return triton_direct_avgpool_backward_reduce(*inputs)

@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -64,6 +65,7 @@ else:
         raise RuntimeError("Triton is required for the timed oracle")
 
 
+@oracle_impl(hardware="H100", shapes="()")
 def oracle_forward(inputs: list[object] | tuple[object, ...]) -> torch.Tensor:
     """Run the full repro computation and return the fresh positive-zero tensor."""
     if inputs:

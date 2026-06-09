@@ -37,6 +37,7 @@ BLOCK_H = 512
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -131,6 +132,7 @@ def _validate_inputs(
     return mm_52, add_34, arg87_1, view_shapes
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 512], f32), T([32, 32, 512], f32), T([512], f32), S([32, 32, 512]), S([1024, 512]), S([1024, 512]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, ...]:
     """Run the oracle computation.
 

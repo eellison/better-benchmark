@@ -19,6 +19,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -121,6 +122,7 @@ def _validate_inputs(inputs: tuple[object, ...] | list[object]) -> tuple[torch.T
     return idx0, idx1, bmm, relu_1
 
 
+@oracle_impl(hardware="H100", shapes="(T([36], i64, gen=Index(9)), T([36], i64, gen=Index(9)), T([2048, 9, 9], f32), T([2048, 64], f32))")
 def oracle_forward(inputs):
     """Compute the full Repro.forward output: cat([relu_1, bmm[:, idx0, idx1]], dim=1)."""
     idx0, idx1, bmm, relu_1 = _validate_inputs(inputs)

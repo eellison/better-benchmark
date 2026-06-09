@@ -10,6 +10,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -116,6 +117,7 @@ def oracle_fused(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 3072], f32), T([128, 3072, 6, 6], f32), S([128, 3072, 1, 1]), S([128, 3072, 6, 6]))")
 def oracle_forward(inputs):
     return oracle_fused(*inputs)
 

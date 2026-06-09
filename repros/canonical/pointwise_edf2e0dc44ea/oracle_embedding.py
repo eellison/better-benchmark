@@ -22,6 +22,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -184,6 +185,7 @@ def oracle_embedding(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 2560], f32), T([128], i64, gen=Index(128)))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> torch.Tensor:
     """Run the full-scope oracle for Repro.forward."""
     arg1_1, arg0_1 = inputs

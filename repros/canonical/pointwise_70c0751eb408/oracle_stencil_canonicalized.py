@@ -39,6 +39,7 @@ from typing import Any, Callable, Iterable
 import torch
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -305,6 +306,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+@oracle_impl(hardware="H100", shapes="(T([26], f64), T([204, 204, 26], f64), T([204, 204, 26], f64), T([204, 204, 26, 3], f64), T([26], f64), T([204, 204, 26], f64), T([204], f64), T([204], f64), T([204, 204, 26, 3], f64), T([204, 204, 26], f64), T([204, 204, 26, 2, 2], f64), T([204, 204, 26], f64), T([26], f64), T([204, 204, 26], f64), T([204], f64), T([204, 204, 26, 2, 2], f64), T([204, 204, 26], f64), T([204, 204, 26, 2, 2], f64), T([204, 204, 26, 2, 2], f64), T([204, 204, 26], f64), T([204], f64), T([204], f64), T([204], f64))")
 def oracle_forward(inputs):
     return triton_explicit_offsets_oracle(*inputs)
 

@@ -30,6 +30,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -224,6 +225,7 @@ def oracle_fused(
     return out_x_rhs, out_x, out_base.permute(1, 0), out_sum_out
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 2560], f32), T([2560], f32), T([16, 128, 2560], f32), T([16, 128, 1], f32), T([16, 128, 2560], f32), T([16, 128, 2560], b8), S([16, 128, 2560]), S([2048, 2560]), S([2560]))")
 def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
     """Same inputs and outputs as Repro.forward; no subset timing."""
     return oracle_fused(*inputs)

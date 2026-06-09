@@ -17,6 +17,7 @@ except ImportError:  # pragma: no cover
     libdevice = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -123,6 +124,7 @@ def _validate_inputs(inputs):
     return addmm, residual, weight, bias, tuple(shape1), tuple(shape2), tuple(shape3)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 768], f32), T([8, 1024, 768], f32), T([768], f32), T([768], f32), S([8, 1024, 768]), S([8192, 768]), S([8192, 768]), S([8192, 768]))")
 def oracle_forward(inputs):
     """Compute exactly Repro()(*make_inputs()) for this repro."""
     addmm, residual, weight, bias, shape1, shape2, shape3 = _validate_inputs(inputs)

@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -77,6 +78,7 @@ def _next_power_of_2(value: int) -> int:
     return 1 << (value - 1).bit_length()
 
 
+@oracle_impl(hardware="H100", shapes="(T([8008, 2560], f32), T([16, 128], i64, gen=Index(8008)), T([128, 2560], f32), T([2560], f32), T([2560], f32), S([2048, 2560]), S([2048, 2560]), S([2048, 2560]))")
 def oracle_forward(inputs):
     token_table, token_ids, position_table, weight, bias, *_ = inputs
     if triton is None:

@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover - keeps CPU-only checks usable.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -300,6 +301,7 @@ def oracle_full(
     raise ValueError(f"unknown impl: {impl}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 2048], f32), T([4096, 2048], f32), T([4096, 2048], f32), T([2048], f32), T([32, 128, 2048], f32), T([32, 128, 1], f32), T([32, 128, 2048], f32), S([32, 128, 2048]), S([32, 128, 2048]), S([32, 128, 2048]), S([4096, 2048]), S([2048]))")
 def oracle_forward(inputs):
     """Run the oracle computation."""
     return oracle_full(*inputs)

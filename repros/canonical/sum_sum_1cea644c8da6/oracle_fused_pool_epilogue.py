@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -237,6 +238,7 @@ if triton is not None:
         tl.store(out_pool + out_base + 29, pooled, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 1024, 14, 14], f32), T([64, 992, 14, 14], f32), T([64, 960, 14, 14], f32), T([64, 928, 14, 14], f32), T([64, 896, 14, 14], f32), T([64, 864, 14, 14], f32), T([64, 832, 14, 14], f32), T([64, 800, 14, 14], f32), T([64, 768, 14, 14], f32), T([64, 736, 14, 14], f32), T([64, 704, 14, 14], f32), T([64, 672, 14, 14], f32), T([64, 640, 14, 14], f32), T([64, 608, 14, 14], f32), T([64, 576, 14, 14], f32), T([64, 544, 14, 14], f32), T([64, 512, 14, 14], f32), T([64, 480, 14, 14], f32), T([64, 448, 14, 14], f32), T([64, 416, 14, 14], f32), T([64, 384, 14, 14], f32), T([64, 352, 14, 14], f32), T([64, 320, 14, 14], f32), T([64, 288, 14, 14], f32), T([64, 256, 14, 14], f32), T([], f32), T([64, 256, 14, 14], f32), T([64, 256, 14, 14], f32), T([1, 256, 1, 1], f32), T([256], f32), T([256], f32), T([64, 256, 28, 28], f32))")
 def oracle_forward(inputs):
     """Run the full repro-equivalent oracle computation."""
     if triton is None:

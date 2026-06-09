@@ -25,6 +25,7 @@ import triton.language as tl
 from triton.testing import do_bench
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -112,6 +113,7 @@ def load_baseline_row() -> dict[str, str]:
     return {}
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 262144], bf16))")
 def oracle_forward(inputs):
     return oracle_softmax_sum(*inputs)
 

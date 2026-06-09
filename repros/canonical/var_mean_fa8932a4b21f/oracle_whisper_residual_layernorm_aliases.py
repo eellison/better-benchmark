@@ -29,6 +29,7 @@ CLAMP_BOUND = 64504.0
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -199,6 +200,7 @@ def _torch_full_scope(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor
     return tuple(torch.ops.aten.view.default(out_base, shape) for shape in output_shapes)
 
 
+@oracle_impl(hardware="H100", shapes="(T([12000, 384], f16), T([8, 1500, 384], f16, stride=(576000, 1, 1500)), T([384], f16), T([384], f16), S([8, 1500, 384]), S([12000, 384]), S([12000, 384]), S([12000, 384]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

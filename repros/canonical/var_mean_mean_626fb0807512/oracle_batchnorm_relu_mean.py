@@ -18,6 +18,7 @@ except ImportError:  # pragma: no cover - keeps static checks importable.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -301,6 +302,7 @@ def _launch_oracle(
     return buffers["out"], running_mean, running_var
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 16, 4, 4], f32), T([128, 168, 4, 4], f32), T([184], f32), T([184], f32), T([184], f32), T([184], f32), S([128, 184]))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """Run the full Repro.forward scope and return all three outputs.
 

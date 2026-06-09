@@ -21,6 +21,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     bench_oracle,
@@ -229,6 +230,7 @@ def _torch_reference(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return second, running_mean, running_var, first
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 232, 7, 7], f32), T([232], f32), T([232], f32), T([232], f32), T([232], f32), T([512, 232, 7, 7], f32, stride=(22736, 49, 7, 1)), S([512, 2, 232, 7, 7]), S([512, 464, 7, 7]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, ...]:
     """Run the complete BN, running-stat update, channel-shuffle, split-return scope."""
     (

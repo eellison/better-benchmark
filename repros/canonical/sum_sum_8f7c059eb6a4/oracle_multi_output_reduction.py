@@ -30,6 +30,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -89,6 +90,7 @@ if triton is not None:
         tl.store(out_sum_ptr + 1, tl.sum(sub1, axis=0))
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 2], f32), T([128, 2], f32), S([2]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation."""
     if triton is None:

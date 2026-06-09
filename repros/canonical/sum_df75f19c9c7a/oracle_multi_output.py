@@ -31,6 +31,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -106,6 +107,7 @@ def _validate_inputs(inputs) -> None:
         raise ValueError(f"expected _shape_param_0 [{N_COLS}], got {shape}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([1000, 16], f32), T([1000, 16], f32), S([16]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation for both repro outputs."""
     _validate_inputs(inputs)

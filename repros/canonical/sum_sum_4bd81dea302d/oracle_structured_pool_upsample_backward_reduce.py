@@ -19,6 +19,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -361,6 +362,7 @@ def _diff_stats(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, fl
     return diff.max().item(), diff.mean().item(), rel.max().item()
 
 
+@oracle_impl(hardware="H100", shapes="(T([288, 64, 512], f32), T([288, 512, 64], f32), S([96, 3, 64, 512, 1]), S([96, 3, 512, 64, 1]), S([9437184]), S([9437184]), S([96, 1024, 64]), S([8, 12, 1024, 64]), S([1024, 8, 768]), S([96, 1024, 64]), S([8, 12, 1024, 64]), S([1024, 8, 768]), S([768]), S([8192, 768]), S([768]), S([8192, 768]))")
 def oracle_forward(inputs):
     return oracle_structured_pool_upsample_backward_reduce(*inputs)
 

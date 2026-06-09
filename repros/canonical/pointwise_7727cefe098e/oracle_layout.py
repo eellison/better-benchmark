@@ -29,6 +29,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -123,6 +124,7 @@ if triton is not None:
         tl.store(pooled_ptr + linear, pooled, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([512], f32), T([1, 512, 2, 32], f32), T([512], f32), T([512], f32), T([512], f32), S([-1, 512, 32]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with one Triton kernel."""
     if triton is None:

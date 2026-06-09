@@ -21,6 +21,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -216,6 +217,7 @@ def oracle_embedding_layernorm(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([30522, 768], f16), T([1, 512], i64, gen=Index(30522)), T([512, 768], f16), T([1, 512], i64, gen=Index(512)), T([768], f16), T([768], f16), S([512, 768]), S([512, 768]), S([512, 768]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation and return all three view outputs."""
     (

@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -474,6 +475,7 @@ def _validate_inputs(inputs: tuple[Any, ...]) -> None:
             raise ValueError(f"{name} must be contiguous")
 
 
+@oracle_impl(hardware="H100", shapes="(T([1, 1, 26], f64), T([204, 204, 26], f64), T([204, 204, 26], f64))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> torch.Tensor:
     """Run the full Repro.forward computation for the canonical shape."""
     inputs = tuple(inputs)

@@ -37,6 +37,7 @@ EPILOGUE_BLOCK = 1024
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -228,6 +229,7 @@ def _validate_inputs(inputs: tuple[object, ...] | list[object]) -> tuple[torch.T
     return tensors
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 128, 16, 16], f32), T([1024, 128, 16, 16], f32), T([1024, 128, 16, 16], f32), T([1, 128, 1, 1], f32), T([128], f32), T([128], f32))")
 def oracle_forward(inputs):
     """Run the full Repro.forward-equivalent oracle computation."""
     arg12_1, getitem_6, arg10_1, arg22_1, arg11_1, arg3_1 = _validate_inputs(inputs)

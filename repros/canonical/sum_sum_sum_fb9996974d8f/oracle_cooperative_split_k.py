@@ -11,6 +11,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -84,6 +85,7 @@ def get_repro_instance() -> torch.nn.Module:
     return _load_repro_module().Repro().cuda()
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 24, 56, 56], f32), T([512, 24, 56, 56], f32), T([512, 24, 56, 56], f32), T([1, 24, 1, 1], f32), T([24], f32), T([24], f32), T([512, 12, 56, 56], f32), T([1, 12, 1, 1], f32), T([12], f32), T([12], f32))")
 def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     return oracle_full(*inputs)
 

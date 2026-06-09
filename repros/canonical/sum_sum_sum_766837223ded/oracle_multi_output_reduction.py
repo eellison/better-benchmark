@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -112,6 +113,7 @@ if triton is not None:
         tl.store(out3_ptr + out_cols, sum_side, mask=out_mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32), T([768], f32), T([128, 768], f32), T([128, 1, 1], f32), T([128, 1, 1], f32), T([128, 1, 768], f32), S([128, 1, 768]), S([128, 1, 768]), S([128, 768]), S([768]))")
 def oracle_forward(inputs):
     """Compute the exact same four-output function as Repro.forward."""
     if triton is None:

@@ -12,6 +12,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -254,6 +255,7 @@ def _compare_outputs(ref: Any, got: Any, rtol: float, atol: float) -> bool:
     return ok
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 512], i64), T([4096, 30000], f32), S([8, 512, 30000]), S([-1, 30000]))")
 def oracle_forward(inputs):
     return oracle_ignore_index_cross_entropy_mean(*inputs)
 

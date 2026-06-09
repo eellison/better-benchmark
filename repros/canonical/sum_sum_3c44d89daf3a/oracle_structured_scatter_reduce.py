@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover - allows CPU-only syntax checks.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -544,6 +545,7 @@ def oracle_triton_split(inputs):
     return out0, out1
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 960, 1, 1], f32), T([512, 960, 7, 7], f32), T([1, 960, 1, 1], f32), T([1, 960, 1, 1], f32), T([960], f32), T([960], f32), T([], f32), S([512, 960, 7, 7]))")
 def oracle_forward(inputs):
     """Run the oracle computation for the exact Repro() input tuple."""
     return oracle_triton(inputs)

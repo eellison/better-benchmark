@@ -28,6 +28,7 @@ CLASSIFICATION = "NEW_PATTERN"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -100,6 +101,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     return mm
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward column reduction."""
     if triton is None:

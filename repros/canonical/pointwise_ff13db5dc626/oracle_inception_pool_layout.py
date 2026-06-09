@@ -27,6 +27,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     bench_oracle,
@@ -344,6 +345,7 @@ def _torch_oracle(inputs: tuple[torch.Tensor, ...]) -> torch.Tensor:
     return torch.ops.aten.avg_pool2d.default(cat, [3, 3], [1, 1], [1, 1])
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768, 17, 17], f32, stride=(221952, 1, 13056, 768)), T([320], f32), T([128, 320, 8, 8], f32, stride=(20480, 1, 2560, 320)), T([320], f32), T([320], f32), T([320], f32), T([192], f32), T([128, 192, 8, 8], f32, stride=(12288, 1, 1536, 192)), T([192], f32), T([192], f32), T([192], f32))")
 def oracle_forward(inputs):
     """Run the full channels-last maxpool, BN/ReLU, virtual cat, and avgpool scope."""
     checked = _validate_inputs(inputs)

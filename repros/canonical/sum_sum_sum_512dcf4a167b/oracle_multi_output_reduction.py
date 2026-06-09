@@ -20,6 +20,7 @@ import torch
 import triton
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -177,6 +178,7 @@ def run_bench(rep: int, warmup: int, no_compile: bool) -> None:
         print(f"torch.compile {label}: {compiled_us:.3f} us")
 
 
+@oracle_impl(hardware="H100", shapes="(T([25216, 768], f32), T([768], f32), T([25216, 768], f32), T([768], f32), T([128, 197, 768], f32), T([128, 197, 1], f32), T([128, 197, 1], f32), T([128, 197, 768], f32), S([128, 197, 768]), S([128, 197, 768]), S([768]), S([25216, 768]), S([768]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return oracle_fused(*prepare_oracle_inputs(*inputs))

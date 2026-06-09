@@ -13,6 +13,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -86,6 +87,7 @@ def _validate_inputs(
     return addmm, residual, weight, bias
 
 
+@oracle_impl(hardware="H100", shapes="(T([16384, 768], f32), T([32, 512, 768], f32), T([768], f32), T([768], f32), S([32, 512, 768]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the exact full Repro.forward computation."""
     addmm, residual, weight, bias = _validate_inputs(inputs)

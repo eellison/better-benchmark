@@ -35,6 +35,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -421,6 +422,7 @@ def parse_args():
     return parser.parse_args()
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 64, 73, 73], f32), T([128, 64, 73, 73], i8, gen=Index(9)), T([128, 64, 147, 147], f32), T([1, 64, 1, 1], f32), T([1, 64, 1, 1], f32), T([64], f32), T([64], f32), T([], f32), S([8192, 5329]), S([8192, 5329]), S([128, 64, 147, 147]))")
 def oracle_forward(inputs):
     return triton_oracle(*inputs)
 

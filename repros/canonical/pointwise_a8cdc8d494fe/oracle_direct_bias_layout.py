@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -92,6 +93,7 @@ def _check_static_scope(index, table, shape0, shape1):
         raise ValueError(f"expected expand shape {OUT_SHAPE}, got {tuple(shape1)}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([197, 197], i64, gen=Index(732)), T([732, 12], f32), S([197, 197, -1]), S([128, 12, 197, 197]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for pointwise_a8cdc8d494fe."""
     if triton is None:

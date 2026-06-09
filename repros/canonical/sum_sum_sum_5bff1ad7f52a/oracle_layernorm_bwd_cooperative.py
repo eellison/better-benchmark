@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -274,6 +275,7 @@ def _validate_inputs(inputs) -> None:
         raise ValueError(f"unexpected _shape_param_0: {shape_param}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([], bf16), T([512], f32), T([1152000, 512], bf16), T([1152000, 1], f32), T([1152000, 1], f32), S([1152000, 512]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation."""
     _validate_inputs(inputs)

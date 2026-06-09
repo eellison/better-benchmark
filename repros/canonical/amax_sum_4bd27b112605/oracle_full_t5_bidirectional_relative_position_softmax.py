@@ -12,6 +12,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -199,6 +200,7 @@ def oracle_full_t5_bidirectional_relative_position_softmax(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 2048, 2048], f16), T([32, 8], f16), S([1, 8, 2048, 2048]), S([1, -1, 2048, 2048]), S([1, 8, 2048, 2048]), S([8, 2048, 2048]))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> torch.Tensor:
     return oracle_full_t5_bidirectional_relative_position_softmax(*inputs)
 

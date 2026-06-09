@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -194,6 +195,7 @@ def _torch_oracle(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([32, 1024, 1, 1], f16), T([32, 2, 512, 14, 14], f16), S([32, 1, 2, -1]), S([32, -1]), S([32, -1, 1, 1]), S([32, 2, 512, 1, 1]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full split-attention softmax, branch sum, and avg-pool scope."""
     convolution_24, view_15, batch, channels, out_height, out_width = _validate_inputs(inputs)

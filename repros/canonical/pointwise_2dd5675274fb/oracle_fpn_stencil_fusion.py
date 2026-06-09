@@ -25,6 +25,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -277,6 +278,7 @@ def _expect_shape_param(name: str, value, expected: tuple[int, ...]) -> None:
         raise ValueError(f"{name} value {value!r} != {expected}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([256], f32), T([1, 256, 32, 32], f32), T([256], f32), T([256], f32), T([256], f32), T([256], f32), T([1, 256, 64, 64], f32), T([256], f32), T([256], f32), T([256], f32), T([256], f32), T([1, 256, 128, 128], f32), T([256], f32), T([256], f32), T([256], f32), T([256], f32), T([1, 256, 256, 256], f32), T([256], f32), T([256], f32), T([256], f32), S([64, 1]), S([128, 1]), S([256, 1]))")
 def oracle_forward(inputs):
     """Compute the full four-level FPN Repro.forward scope."""
     if triton is None:

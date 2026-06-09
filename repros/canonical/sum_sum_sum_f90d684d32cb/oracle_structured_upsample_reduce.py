@@ -30,6 +30,7 @@ from typing import Callable
 import torch
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -301,6 +302,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 256, 320, 479], f32), T([320, 1], f32), T([478], f32), T([320, 1], i64, gen=Index(8)), T([478], i64, gen=Index(8)), T([478], i64, gen=Index(8)), T([320, 1], i64, gen=Index(8)), T([8, 128, 160, 239], f32), T([1, 128, 1, 1], f32), T([1, 128, 1, 1], f32), T([128], f32), T([128], f32), T([], f32))")
 def oracle_forward(inputs):
     return triton_fused_oracle(*inputs)
 

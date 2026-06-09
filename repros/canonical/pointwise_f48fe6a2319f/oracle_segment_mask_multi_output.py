@@ -20,6 +20,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -119,6 +120,7 @@ if triton is not None:
         tl.store(out23 + offsets, values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([1, 512], i64, gen=Index(1)), S([1, -1, 512, 512]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with Triton compute and 24 outputs."""
     if triton is None:

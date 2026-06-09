@@ -13,6 +13,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -161,6 +162,7 @@ def get_repro_instance() -> Any:
     return _load_repro_module().Repro().cuda()
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 1024, 1024], f32), T([32, 8], f32), T([64], i64), T([64, 1024, 1024], f32), T([32, 8], f32), S([8, -1, 1024, 1024]), S([8, 8, 1024, 1024]), S([8, 8, 1024, 1024]), S([64, 1024, 1024]), S([8, -1, 1024, 1024]), S([8, 8, 1024, 1024]), S([8, 8, 1024, 1024]), S([64, 1024, 1024]))")
 def oracle_forward(inputs: tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     return oracle_full_t5_relative_position_attention_softmax_dropout(*inputs)
 

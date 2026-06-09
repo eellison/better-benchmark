@@ -29,6 +29,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -88,6 +89,7 @@ def _normalize_shape_param(shape_param: object) -> tuple[int, int]:
     return shape
 
 
+@oracle_impl(hardware="H100", shapes="(S([1, 4096]))")
 def oracle_forward(inputs: list[object] | tuple[object, ...]) -> torch.Tensor:
     """Run the full iota/unsqueeze/expand repro scope."""
     if triton is None:

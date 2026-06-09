@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -65,6 +66,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, out, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([32768, 512], f32), T([256, 128, 512], f32), T([512], f32), T([512], f32), S([256, 128, 512]), S([32768, 512]), S([32768, 512]), S([32768, 512]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope and preserve the three aliasing views."""
     addmm_345, add_333, arg1065_1, arg1066_1 = inputs[:4]

@@ -28,6 +28,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 # Import shared oracle infrastructure (installed via pip install -e .)
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -162,6 +163,7 @@ if triton is not None:
         tl.store(out_ptr + v_offsets, total, mask=v_offsets < VOCAB)
 
 
+@oracle_impl(hardware="H100", shapes="(T([], f32), T([], f32), T([256, 128], i64), T([32768, 30522], f32), T([256, 128, 30522], f32), S([1, 30522]), S([32768, 30522]), S([256, 128, 30522]), S([30522]), S([32768, 30522]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

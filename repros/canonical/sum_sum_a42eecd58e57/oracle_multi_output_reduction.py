@@ -33,6 +33,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -376,6 +377,7 @@ def load_repro_module():
     return mod
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 24, 56, 56], f32), T([512, 24, 56, 56], f32), T([512, 24, 56, 56], i8, gen=Index(5, 4)), T([512, 24, 112, 112], f32), T([1, 24, 1, 1], f32), T([1, 24, 1, 1], f32), T([24], f32), T([24], f32), T([], f32), S([12288, 3136]), S([12288, 3136]), S([512, 24, 112, 112]))")
 def oracle_forward(inputs):
     return oracle_fused(*inputs)
 

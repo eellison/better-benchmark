@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # bench_oracle() owns timing so CUDAGraph, GPU locking, and interleaved
 # oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -227,6 +228,7 @@ if triton is not None:
         tl.store(out_ptr + col_vector, reduced, mask=col_vector < cols)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 12, 198, 64], f32, stride=(152064, 64, 768, 1)), T([128, 12, 198, 64], f32, stride=(152064, 64, 768, 1)), T([128, 12, 198, 64], f32, stride=(152064, 64, 768, 1)), S([3, 128, 12, 198, 64]), S([128, 198, 2304]), S([25344, 2304]), S([2304]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

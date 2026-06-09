@@ -10,6 +10,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -73,6 +74,7 @@ def _bn_affine_residual_kernel(
     tl.store(out_ptr + offsets, result, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([192], f16), T([256, 192, 7, 7], f16), T([192], f16), T([192], f16), T([192], f16), T([256, 192, 7, 7], f16))")
 def oracle_forward(inputs):
     mean, x, var, weight, bias, residual = inputs
     n, c, h, w = x.shape

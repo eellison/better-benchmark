@@ -20,7 +20,8 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -157,6 +158,7 @@ def _expect_inputs(inputs):
     return bmm_28, bmm_30, bmm_31, output_shape, batch, heads, dim, positions
 
 
+@oracle_impl(hardware="H100", shapes="(T([768, 196, 64], f32), T([768, 64, 196], f32), T([768, 196, 64], f32), S([128, 6, 196, 64]), S([128, 6, 64, 196]), S([128, 6, 196, 64]), S([3, 128, 6, 196, 64]), S([128, 1152, 14, 14]))")
 def oracle_forward(inputs):
     """Run the complete Repro.forward layout scope and return the final image tensor."""
     bmm_28, bmm_30, bmm_31, output_shape, batch, heads, dim, positions = _expect_inputs(inputs)

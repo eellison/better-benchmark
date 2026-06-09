@@ -16,6 +16,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -95,6 +96,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return x, shape_param
 
 
+@oracle_impl(hardware="H100", shapes="(T([32, 128], f32), S([32, 128]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward row L2 normalization."""
     if triton is None:

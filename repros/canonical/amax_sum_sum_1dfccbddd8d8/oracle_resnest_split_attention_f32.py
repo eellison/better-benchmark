@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -168,6 +169,7 @@ def _torch_oracle(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     return (view * weights).sum([1])
 
 
+@oracle_impl(hardware="H100", shapes="(T([32, 128, 1, 1], f32), T([32, 2, 64, 56, 56], f32), S([32, 1, 2, -1]), S([32, -1]), S([32, -1, 1, 1]), S([32, 2, 64, 1, 1]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full split-attention softmax, broadcast multiply, and branch sum."""
     convolution_6, view, batch, channels, height, width = _validate_inputs(inputs)

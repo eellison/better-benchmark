@@ -27,7 +27,8 @@ OUT_DEVICE = torch.device("cuda", 0)
 NEG_ZERO_I32 = torch.iinfo(torch.int32).min
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -63,6 +64,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="()")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with an exact negative-zero fill."""
     if triton is None:

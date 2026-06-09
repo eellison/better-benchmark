@@ -19,6 +19,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -131,6 +132,7 @@ def _validate_inputs(inputs):
     return mean, conv, var, weight, bias
 
 
+@oracle_impl(hardware="H100", shapes="(T([128], f16), T([64, 128, 7, 7], f16), T([128], f16), T([128], f16), T([128], f16))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with the Triton BN-affine-ReLU kernel."""
     mean, conv, var, weight, bias = _validate_inputs(inputs)

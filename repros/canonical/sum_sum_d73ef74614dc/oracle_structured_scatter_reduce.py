@@ -31,6 +31,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -216,6 +217,7 @@ def _validate_inputs(inputs):
         )
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 2048], bf16), T([2048, 2048], bf16), T([2048, 2048], bf16), T([2048], bf16), T([4, 512, 2048], bf16), T([4, 512, 1], f32), T([4, 512, 2048], bf16), T([4, 512], i64, gen=Index(151936)), T([], f32), S([4, 512, 2048]), S([4, 512, 2048]), S([4, 512, 2048]), S([2048]), S([4, 512, 2048]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle for Repro()(*make_inputs())."""
     _validate_inputs(inputs)

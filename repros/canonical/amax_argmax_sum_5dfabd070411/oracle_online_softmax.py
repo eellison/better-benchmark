@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -123,6 +124,7 @@ def _validate_inputs(inputs) -> None:
     _validate_shape_param("_shape_param_2", shape2, (BATCH, N_CLASSES))
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 2], f32), T([32, 128], i64), T([32], i64, gen=Index(32)), T([32], i64, gen=Index(2)), T([], f32), S([32, 128, 2]), S([1, 2]), S([32, 2]))")
 def oracle_forward(inputs):
     """Run the full argmax-gather, two-class cross-entropy mean, and eq side output."""
     _validate_inputs(inputs)

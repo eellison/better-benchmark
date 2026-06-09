@@ -23,7 +23,8 @@ OUT_SHAPE = (32,)
 OUT_STRIDE = (1,)
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -109,6 +110,7 @@ if triton is not None:
         tl.store(indices_ptr + offsets, idxs)
 
 
+@oracle_impl(hardware="H100", shapes="(T([32], i64))")
 def oracle_forward(inputs):
     """Run the full-scope sort oracle.
 

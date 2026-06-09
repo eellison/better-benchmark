@@ -11,6 +11,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -268,6 +269,7 @@ def oracle_full(*inputs: object) -> tuple[torch.Tensor, torch.Tensor, torch.Tens
     return oracle_triton_prepared(*prepare_oracle_inputs(*inputs))
 
 
+@oracle_impl(hardware="H100", shapes="(T([16384, 768], f32), T([768], f32), T([32, 512, 768], f32), T([32, 512, 1], f32), T([32, 512, 768], b8), S([32, 512, 768]), S([16384, 768]), S([768]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return oracle_full(*inputs)

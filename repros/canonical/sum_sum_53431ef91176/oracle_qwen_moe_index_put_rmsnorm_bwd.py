@@ -20,6 +20,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable withou
 REPRO_ID = "sum_sum_53431ef91176"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -454,6 +455,7 @@ def oracle_qwen_moe_index_put_rmsnorm_bwd(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([16384, 1], b8), T([], bf16), T([16384, 2048], bf16), T([2048, 2048], bf16), T([16384], i64, gen=Index(2048)), T([2048, 2048], bf16), T([2048], bf16), T([2048, 2048], bf16), T([4, 512, 2048], bf16), T([4, 512, 1], f32), T([4, 512, 2048], bf16), S([4, 512, 2048]), S([4, 512, 2048]), S([2048]), S([4, 512, 2048]), S([2048, 2048]))")
 def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     return oracle_qwen_moe_index_put_rmsnorm_bwd(*inputs)
 

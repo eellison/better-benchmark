@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -131,6 +132,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return weight_t, gain_t
 
 
+@oracle_impl(hardware="H100", shapes="(T([3072, 1536, 1, 1], f32), T([3072, 1, 1, 1], f32), S([1, 3072, -1]), S([3072, 1536, 1, 1]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

@@ -19,6 +19,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -93,6 +94,7 @@ if triton is not None:
         tl.store(out_grad_ptr + offsets, out_grad, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([16, 3, 3, 3], f32), T([16, 3, 3, 3], f32), T([1, 16, 1], f32), T([16], f32), T([16, 1, 1, 1], f32), S([1, 16, 27]), S([1, 16, 27]), S([16, 1, 1, 1]), S([16, 3, 3, 3]))")
 def oracle_forward(inputs):
     """Run the full-scope multi-output reduction oracle."""
     if triton is None:

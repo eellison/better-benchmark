@@ -29,6 +29,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -407,6 +408,7 @@ def oracle_forward_with_options(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 16, 112, 112], f32), T([128, 16, 112, 112], f32))")
 def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
     """Scope invariant: same inputs and same single f32[16] output as Repro.forward."""
     return oracle_forward_with_options(inputs)

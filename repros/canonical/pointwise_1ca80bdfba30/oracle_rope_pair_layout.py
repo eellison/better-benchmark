@@ -29,7 +29,8 @@ OUT_STRIDE = (HEADS * SEQ * HEAD_DIM, SEQ * HEAD_DIM, HEAD_DIM, 1)
 CLASSIFICATION = "SCHEDULER_FUSION"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -135,6 +136,7 @@ def _validate_tensor(value: object, shape: tuple[int, ...], dtype: torch.dtype, 
     return value
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 2048], f16), T([1, 512, 32], f16), T([1, 512, 32], f16), T([512, 2048], f16), S([1, 512, 2048]), S([1, 512, -1, 64]), S([1, 512, 2048]), S([1, 512, -1, 64]))")
 def oracle_forward(inputs):
     """Run the exact full Repro.forward scope with one fused Triton kernel."""
     if triton is None:

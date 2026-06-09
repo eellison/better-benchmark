@@ -28,6 +28,7 @@ REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -215,6 +216,7 @@ def _validate_inputs(inputs):
     return getitem_36, arg38_1, arg57_1, full, arg58_1
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 256, 13, 13], f32), T([512, 256, 13, 13], i8, gen=Index(9)), T([512, 128, 27, 27], b8), T([], f32), T([512, 128, 27, 27], b8), S([131072, 169]), S([131072, 169]), S([512, 256, 27, 27]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation with a structured gather-mask-reduce."""
     src, offsets, mask_hi, full, mask_lo = _validate_inputs(inputs)

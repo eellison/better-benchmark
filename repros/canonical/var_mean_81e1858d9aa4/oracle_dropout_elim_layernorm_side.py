@@ -17,6 +17,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -206,6 +207,7 @@ def _torch_full_scope(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor
     return torch.ops.aten.view.default(y, OUTPUT_SHAPE), invstd / HIDDEN
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 768], f32), T([768], f32), T([36], i64), T([8, 1024, 768], f32), T([768], f32), T([768], f32), S([8, 1024, 768]), S([8192, 768]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the repro scope after folding the degenerate dropout producer."""
     mm_47, pre_dropout_bias, _seeds, residual, weight, bias = _validate_inputs(inputs)

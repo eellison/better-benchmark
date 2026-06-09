@@ -22,7 +22,8 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 CLASSIFICATION = "NEW_PATTERN"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -171,6 +172,7 @@ def _torch_full_scope(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor
     return view_default_1, view_default_2
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 4096, 256], f32), T([8, 64, 1, 1], b8), S([8, 64, 64, 256]), S([1, 64, 192]), S([64, 1, 64]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the full masked two-reduction Repro.forward scope."""
     x, mask = _validate_inputs(inputs)

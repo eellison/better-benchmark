@@ -11,6 +11,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -140,6 +141,7 @@ def _check_expected_scope(inputs: tuple[Any, ...] | list[Any]) -> None:
     assert primals_3.dtype == torch.float32
 
 
+@oracle_impl(hardware="H100", shapes="(T([16, 3, 3, 3], f32, stride=(27, 1, 9, 3)), T([16, 3, 3, 3], f32, stride=(27, 1, 9, 3)), T([1, 16, 1], f32), T([16], f32), T([16, 1, 1, 1], f32), S([1, 16, 27]), S([1, 16, 27]), S([16, 1, 1, 1]), S([16, 3, 3, 3]))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the full-scope Triton oracle for Repro.forward()."""
     _check_expected_scope(inputs)

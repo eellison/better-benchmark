@@ -24,6 +24,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -195,6 +196,7 @@ def oracle_online_softmax_xent_mean(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 8008], f32), T([1, 8008], f32), T([16, 128], i64), S([16, 128, 8008]), S([-1, 8008]))")
 def oracle_forward(inputs):
     return oracle_online_softmax_xent_mean(*inputs)
 

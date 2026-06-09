@@ -19,6 +19,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable withou
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -245,6 +246,7 @@ def _diff_stats(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, fl
     return diff.max().item(), diff.mean().item(), rel.max().item()
 
 
+@oracle_impl(hardware="H100", shapes="(T([2, 1024, 768], b8), T([2, 1024, 768], f32), T([768], f32), T([2, 1024, 768], f32), T([2, 1024, 1], f32), T([2, 1024], i64, gen=Index(1)), T([2, 1024], i64, gen=Index(4098)), T([2, 1024], i64, gen=Index(50265)))")
 def oracle_forward(inputs):
     return oracle_longformer_embedding_scatter_reduce(*inputs)
 

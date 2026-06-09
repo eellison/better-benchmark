@@ -20,6 +20,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -150,6 +151,7 @@ if triton is not None:
         tl.atomic_add(side_reduction_ptr + cols, side_token, sem="relaxed", mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 192], f32), T([192], f32), T([128, 197, 192], f32), T([128, 197, 1], f32), S([25216, 192]), S([192]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for the standard oracle harness."""
     if triton is None:

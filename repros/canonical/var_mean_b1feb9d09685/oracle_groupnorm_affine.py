@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -152,6 +153,7 @@ def _launch_shape(group_elems: int) -> tuple[int, int]:
     return 1, 8
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 64, 16, 16], f32), T([64], f32), T([64], f32), S([64, 32, 2, 256]), S([64, 64, 16, 16]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the complete Repro.forward GroupNorm-affine computation."""
     if triton is None:

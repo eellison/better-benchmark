@@ -17,6 +17,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     libdevice = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -133,6 +134,7 @@ def _expect_shape(name: str, value: object, expected: tuple[int, ...]) -> tuple[
     return expected
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 128, 128], f32), T([64, 16, 128, 128], b8), T([64, 1, 128, 128], b8), T([], f32), T([1024, 128, 128], f32), T([64, 16, 128, 1], f32), T([64, 16, 128, 1], f32), T([64, 16, 128, 1], b8), S([64, 16, 128, 128]), S([64, 16, 128, 128]), S([1024, 128, 128]))")
 def oracle_forward(inputs):
     """Run the same computation as Repro.forward for the captured inputs."""
     if triton is None:

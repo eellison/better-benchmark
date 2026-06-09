@@ -38,6 +38,7 @@ import triton.language as tl
 from torch._inductor.runtime.triton_helpers import libdevice
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -259,6 +260,7 @@ def oracle_fused(
     return _oracle_into(x, y, a, partials, out, block_r, partial_chunks, num_warps)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 128, 56, 56], f32), T([128, 128, 56, 56], f32), T([128, 128, 56, 56], f32))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> torch.Tensor:
     x, y, a = inputs
     return oracle_fused(x, y, a)

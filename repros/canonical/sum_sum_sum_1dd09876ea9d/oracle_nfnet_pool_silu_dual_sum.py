@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -244,6 +245,7 @@ def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor,
     return pool_grad, getitem_165, arg460, gate_input, arg227, arg44
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 512, 12, 12], f32), T([128, 512, 24, 24], f32), T([128, 512, 24, 24], f32), T([128, 512, 24, 24], f32), T([128, 512, 1, 1], f32), T([128, 512, 24, 24], f32), T([], f32))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for the canonical NFNet shape."""
     pool_grad, getitem_165, arg460, gate_input, arg227, arg44 = _validate_inputs(inputs)

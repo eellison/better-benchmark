@@ -21,6 +21,7 @@ except ModuleNotFoundError:  # pragma: no cover - allows CPU-only syntax checks.
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -283,6 +284,7 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 512, 1452], f32), T([64, 512, 1452], b8), T([], f32))")
 def oracle_forward(inputs):
     return oracle_triton(*inputs)
 

@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -198,6 +199,7 @@ def _validate_inputs(inputs) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     return mm_5, idx0, idx1
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 100], f32), T([36], i64, gen=Index(9)), T([36], i64, gen=Index(9)))")
 def oracle_forward(inputs):
     """Run the full slice + duplicate-preserving index_put accumulate scope."""
     _require_triton_cuda()

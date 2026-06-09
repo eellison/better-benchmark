@@ -20,7 +20,8 @@ REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -157,6 +158,7 @@ def _validate_inputs(
     return bmm_23, output_shape, (hidden, 1), batch * seq, seq, heads, head_dim
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 512, 64], f32), S([8, 64, 512, 64]), S([8, 512, -1]), S([4096, 4096]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward layout materialization scope."""
     if triton is None:

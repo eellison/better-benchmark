@@ -53,6 +53,7 @@ from pathlib import Path
 import torch
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -236,6 +237,7 @@ def torch_fused_bilinear_scatter_reduce(
     return (out0, out1)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 128, 640, 959], f32), T([640, 1], f32), T([958], f32), T([640, 1], i64, gen=Index(8)), T([958], i64, gen=Index(8)), T([958], i64, gen=Index(8)), T([640, 1], i64, gen=Index(8)), T([8, 64, 320, 479], f32), T([1, 64, 1, 1], f32), T([1, 64, 1, 1], f32), T([64], f32), T([64], f32), T([], f32))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return torch_fused_bilinear_scatter_reduce(*inputs)

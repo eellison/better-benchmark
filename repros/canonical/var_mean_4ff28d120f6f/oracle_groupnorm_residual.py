@@ -29,6 +29,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -168,6 +169,7 @@ def _validate_inputs(
     return x, scale, bias, residual
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 256, 2, 2], f32), T([256], f32), T([256], f32), T([64, 256, 2, 2], f32), S([64, 32, 8, 4]), S([64, 256, 2, 2]))")
 def oracle_forward(
     inputs: list[Any] | tuple[Any, ...],
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:

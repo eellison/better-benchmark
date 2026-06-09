@@ -10,6 +10,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -118,6 +119,7 @@ def _check_output_layout(outputs: tuple[torch.Tensor, torch.Tensor]) -> bool:
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([192, 64, 512], f32), S([8, 24, 512, 64]), S([8, 512, 1536]), S([4096, 1536]), S([1536]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation."""
     bmm_2, shape0, shape1, shape2, shape3 = inputs

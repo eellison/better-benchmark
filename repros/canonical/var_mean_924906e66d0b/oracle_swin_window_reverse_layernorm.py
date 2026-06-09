@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -282,6 +283,7 @@ def _torch_full_scope(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor
     return output, torch.ops.aten.div.Tensor(rsqrt, HIDDEN)
 
 
+@oracle_impl(hardware="H100", shapes="(T([401408, 128], f32), T([128, 56, 56, 128], f32, stride=(401408, 56, 1, 3136)), T([128], f32), T([128], f32), S([8192, 49, 128]), S([-1, 7, 7, 128]), S([-1, 8, 8, 7, 7, 128]), S([-1, 56, 56, 128]), S([128, 3136, 128]))")
 def oracle_forward(inputs):
     """Run the complete Swin window-reverse residual LayerNorm repro scope."""
     addmm, residual, weight, bias = _validate_inputs(inputs)

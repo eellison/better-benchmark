@@ -19,6 +19,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable withou
 REPRO_ID = "sum_86b5dc92d54f"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -90,6 +91,7 @@ def get_repro_instance() -> torch.nn.Module:
     return _load_repro_module().Repro().to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
+@oracle_impl(hardware="H100", shapes="(T([72, 64, 512], f32), T([1572864], f32), T([2359296], i64, gen=Index(1572864)), S([24, 3, 64, 512, 1]), S([2359296]), S([24, 1024, 64]), S([2, 12, 1024, 64]), S([1024, 2, 768]), S([768]), S([2048, 768]))")
 def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     return oracle_longformer_index_put_sum_transpose(*inputs)
 

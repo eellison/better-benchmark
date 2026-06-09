@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -218,6 +219,7 @@ def _torch_full_scope(inputs):
     return view_default_1, view_default_2, permute_default, view_default_4
 
 
+@oracle_impl(hardware="H100", shapes="(T([32768, 128], f32), T([256, 128, 128], f32), T([128], f32), S([256, 128, 128]), S([128]), S([128]), S([32768, 128]), S([128]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with the same output count/layouts."""
     mm_694, arg609_1, arg25_1 = _validate_inputs(inputs)

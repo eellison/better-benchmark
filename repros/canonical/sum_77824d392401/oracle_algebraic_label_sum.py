@@ -17,6 +17,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     libdevice = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -120,6 +121,7 @@ def _validate_inputs(inputs):
     return m, n, grad_scalar, labels, logits, shift0, shift1
 
 
+@oracle_impl(hardware="H100", shapes="(T([], bf16), T([8192], i64), T([8192, 262144], bf16), T([8192, 1], f32), T([8192, 1], f32), S([8192]), S([1, 262144]), S([8192, 262144]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope and return the dense bf16 output."""
     m, n, grad_scalar, labels, logits, shift0, shift1 = _validate_inputs(inputs)

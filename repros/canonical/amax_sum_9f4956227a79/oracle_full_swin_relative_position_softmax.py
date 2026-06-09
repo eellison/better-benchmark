@@ -13,6 +13,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -289,6 +290,7 @@ def oracle_full_swin_relative_position_softmax(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 49, 49], f32), T([49, 49], i64, gen=Index(169)), T([169, 32], f32), S([128, 32, 49, 49]), S([49, 49, -1]), S([128, 32, 49, 49]), S([4096, 49, 49]))")
 def oracle_forward(inputs):
     return oracle_full_swin_relative_position_softmax(*inputs)
 

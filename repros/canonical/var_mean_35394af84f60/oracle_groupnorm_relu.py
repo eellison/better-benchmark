@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -146,6 +147,7 @@ def _validate_inputs(
     return x, weight, bias, (n_batches, channels, height, width)
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 512, 1, 1], f32), T([512], f32), T([512], f32), S([64, 32, 16, 1]), S([64, 512, 1, 1]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward groupnorm affine ReLU computation."""
     if triton is None:

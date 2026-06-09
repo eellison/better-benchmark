@@ -15,6 +15,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -179,6 +180,7 @@ def _longformer_softmax_layout(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([288, 512, 512], f32), T([8, 1024], f32), T([8, 1024], b8), S([96, 3, 512, 1, 512]), S([96, 3, 512, 512]), S([96, 3, 512, 513]), S([8, 256, 12, 257]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 256, 12, 257]), S([8, 12, 1024, 513]), S([8, 1024, 1]), S([8, 1024, 1]), S([8, 2, 512, 1]), S([8, 2, 512, 1]), S([8, 3, 512, 512]), S([8, 3, 512, 513]), S([8, 256, 1, 257]), S([8, 1, 1024, 513]), S([8, 4, 256, 513]), S([8, 256, 1, 257]), S([8, 1, 1024, 513]), S([96, 4, 256, 513]), S([96, 4, -1]), S([96, 4, 256, 769]), S([384, 256, 768]))")
 def oracle_forward(inputs: tuple):
     """Compute the complete Repro.forward output for this Longformer row."""
     bmm, arg7_1, arg8_1 = inputs[:3]

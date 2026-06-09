@@ -26,7 +26,8 @@ REPRO_ID = REPRO_DIR.name
 REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -81,6 +82,7 @@ def _validate_input(addmm_2: torch.Tensor) -> None:
         raise ValueError(f"expected contiguous addmm_2 stride {(COLS, 1)}, got {tuple(addmm_2.stride())}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([256, 2], f32))")
 def oracle_forward(inputs):
     """Run the full-scope oracle on the exact Repro.forward input tuple."""
     (addmm_2,) = inputs

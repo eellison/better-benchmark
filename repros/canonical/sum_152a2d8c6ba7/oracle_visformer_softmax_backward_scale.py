@@ -22,7 +22,8 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -179,6 +180,7 @@ def _torch_full_scope(inputs: tuple[Any, ...] | list[Any]) -> torch.Tensor:
     return torch.ops.aten.view.default(mul_tensor_1, shape1)
 
 
+@oracle_impl(hardware="H100", shapes="(T([768, 196, 196], f32), T([128, 6, 196, 196], f32), S([128, 6, 196, 196]), S([768, 196, 196]))")
 def oracle_forward(inputs):
     """Run the oracle computation for the exact Repro()(*make_inputs()) scope."""
     bmm_29, arg147_1, _view_shape, out_shape = _validate_inputs(inputs)

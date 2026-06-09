@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -194,6 +195,7 @@ def oracle_full_masked_softmax(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 128, 128], f32), T([64, 1, 128, 128], b8, stride=(0, 128, 1, 0)), S([64, 16, 128, 128]), S([64, 16, 128, 128]), S([1024, 128, 128]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for the assigned input tuple."""
     return oracle_full_masked_softmax(*inputs)

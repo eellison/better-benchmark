@@ -19,7 +19,8 @@ REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -128,6 +129,7 @@ def _expect_inputs(inputs: list[object] | tuple[object, ...]) -> torch.Tensor:
     return addmm_66
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 768], f16), S([4096, 1, 768]), S([4096, 1, 12, 64]), S([12, 4096, 64]), S([12, 8, 512, 64]), S([180, 512, 64]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with the same output shape and stride."""
     addmm_66 = _expect_inputs(inputs)

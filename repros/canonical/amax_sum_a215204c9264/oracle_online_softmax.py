@@ -10,6 +10,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -107,6 +108,7 @@ def oracle_online_softmax(addmm_72: torch.Tensor, *, block_m: int = 32) -> torch
     return _launch_oracle(addmm_72, out, block_m=block_m)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 2], f32))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> torch.Tensor:
     """Run the full-scope oracle on the exact Repro.forward input tuple."""
     (addmm_72,) = inputs

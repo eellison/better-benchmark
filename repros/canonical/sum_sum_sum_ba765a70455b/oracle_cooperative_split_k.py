@@ -11,6 +11,7 @@ import triton.language as tl
 import repro as repro_module
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -220,6 +221,7 @@ def oracle_full(
     return oracle_triton_prepared(*prepare_oracle_inputs(*inputs))
 
 
+@oracle_impl(hardware="H100", shapes="(T([25088, 512], f32), T([512], f32), T([128, 14, 14, 512], f32), T([128, 14, 14, 1], f32), T([128, 14, 14, 512], f32), T([128, 1, 1], b8), S([512, 49, 512]), S([512, 7, 7, 512]), S([128, 2, 2, 7, 7, 512]), S([128, 14, 14, 512]), S([128, 196, 512]), S([25088, 512]), S([512]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return oracle_full(*inputs)

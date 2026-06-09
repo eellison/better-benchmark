@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -209,6 +210,7 @@ def _torch_full_scope(inputs):
     return (sum_dim_int_list_2, sum_dim_int_list_3, view_default_3)
 
 
+@oracle_impl(hardware="H100", shapes="(T([131072, 144], f32), T([144], f32), T([512, 256, 144], f32), T([512, 256, 1], f32), T([512, 256, 144], f32), S([512, 256, 144]), S([128, 4, 256, 144]), S([294912, 16, 2, 2]), S([128, 144, 32, 32]))")
 def oracle_forward(inputs):
     """Run the full compiled computation scope for the oracle."""
     mm_72, arg48, arg214, arg417, add_75, shape0, _shape1, _shape2, shape3 = _validate_inputs(inputs)

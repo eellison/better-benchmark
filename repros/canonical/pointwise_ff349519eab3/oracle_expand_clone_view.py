@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -74,6 +75,7 @@ def _contiguous_3d_stride(shape: tuple[int, int, int]) -> tuple[int, int, int]:
     return (shape[1] * shape[2], shape[2], 1)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 4096, 256], f32), S([8, 4096, 2, 256]), S([8, 4096, 512]))")
 def oracle_forward(inputs):
     """Run the exact Repro.forward computation for the captured inputs."""
     arg0_1, expand_shape, view_shape = inputs

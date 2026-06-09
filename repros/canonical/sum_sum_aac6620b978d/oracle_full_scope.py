@@ -10,6 +10,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -111,6 +112,7 @@ def _validate_tensor(name: str, tensor: torch.Tensor, shape: tuple[int, ...], dt
         raise ValueError(f"{name} must be contiguous")
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 1024], bf16), T([2048, 1024], bf16), T([1024], bf16), T([4, 512, 1024], bf16), T([4, 512, 1], f32), T([4, 512, 1024], bf16), S([4, 512, 1024]), S([4, 512, 1024]), S([1024]), S([4, 512, 1024]), S([2048, 1024]))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> tuple[torch.Tensor, torch.Tensor]:
     (
         mm_369,

@@ -11,6 +11,7 @@ from pathlib import Path
 import torch
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -108,6 +109,7 @@ def structured_oracle(
     return weight_grad, input_grad_t
 
 
+@oracle_impl(hardware="H100", shapes="(T([4, 16, 512, 128], bf16), T([1, 1, 512, 128], bf16), T([4, 16, 512, 128], bf16), T([1, 1, 512, 128], bf16), T([128], bf16), T([2048, 2048], bf16), T([4, 512, 16, 1], f32), S([4, 512, 2048]), S([4, 512, -1, 128]), S([128]), S([4, 512, 16, 128]), S([4, 512, 2048]), S([2048, 2048]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return structured_oracle(*inputs)

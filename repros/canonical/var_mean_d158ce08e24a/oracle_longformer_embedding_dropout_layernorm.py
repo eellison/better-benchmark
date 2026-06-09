@@ -17,6 +17,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -205,6 +206,7 @@ def _make_inductor_seed(device: torch.device) -> torch.Tensor:
     return torch.ops.prims.inductor_lookup_seed.default(seeds, SEED_INDEX)
 
 
+@oracle_impl(hardware="H100", shapes="(T([2, 1024], i64, gen=Index(4097)), T([2, 1024], i32, gen=Index(2)), T([50265, 768], f32), T([2, 1024], i64, gen=Index(50265)), T([4098, 768], f32), T([1, 768], f32), T([768], f32), T([768], f32))")
 def oracle_forward(inputs):
     """Run the complete Repro.forward scope."""
     if triton is None:

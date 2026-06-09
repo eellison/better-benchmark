@@ -33,6 +33,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -217,6 +218,7 @@ def _parse_rows_per_block_candidates(raw: str | None) -> tuple[int, ...]:
     return values
 
 
+@oracle_impl(hardware="H100", shapes="(T([32768, 49, 49], f32), T([8192, 4, 49, 49], f32, stride=(9728, 2432, 49, 1)), S([8192, 4, 49, 49]), S([32768, 49, 49]))")
 def oracle_forward(inputs):
     return oracle_fused(*inputs)
 

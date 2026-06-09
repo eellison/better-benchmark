@@ -38,6 +38,7 @@ CLASSIFICATION = "SCHEDULER_FUSION"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -181,6 +182,7 @@ if triton is not None:
         tl.store(ne_ptr + pos, rows != rows, mask=row_mask & (head == 0))
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 64], f32), T([128, 4096], f32), T([128, 4096], f32), S([1, 128, 4096]), S([1, 128, 16, 256]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]), S([1, 128, 16, 64]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]), S([1, 128, 4096]), S([1, 128, 16, 256]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]), S([1, 128, 16, 64]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

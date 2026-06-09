@@ -21,6 +21,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -476,6 +477,7 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
+@oracle_impl(hardware="H100", shapes="(T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([192, 128, 128], f32), T([32, 6, 128, 128], b8), T([32, 6, 128, 128], f32), T([128, 128], i64, gen=Index(32)), T([], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([32, 6, 128, 128], f32), T([192, 128, 128], f32), T([32, 6, 128, 128], b8), T([1, 1, 128, 1], b8), T([192, 128, 128], f32), T([128, 128, 6], f32), T([32, 6, 128, 1], f32), T([32, 6, 128, 1], f32), T([128, 128], i64, gen=Index(32)), S([32, 6, 128, 128]), S([192, 128, 128]), S([32, 6, 128, 128]), S([192, 128, 128]), S([32, 6, 128, 128]), S([32, -1, 128, 128]), S([32, 6, 128, 128]), S([192, 128, 128]), S([32, 6, 128, 128]), S([192, 128, 128]))")
 def oracle_forward(inputs):
     return oracle_mt5_attention_scatter_reduce(*inputs)
 

@@ -42,6 +42,7 @@ OUTPUT_STRIDE = (CHANNELS, 1)
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -208,6 +209,7 @@ def _torch_full_scope(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     return torch.ops.aten.reshape.default(affine, output_shape)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768, 16, 16], f32, stride=(196608, 1, 12288, 768)), T([1, 256, 768], f32), T([768], f32), T([768], f32), S([128, 768, 256]), S([32768, 768]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the complete Repro.forward patch-position LayerNorm computation.
 

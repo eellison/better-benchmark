@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -180,6 +181,7 @@ def oracle_residual_layernorm_aliases(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 4096], f32), T([128, 4096], f32), T([1, 128, 4096], f32), T([4096], f32), T([4096], f32), S([1, 128, 4096]), S([1, 128, 4096]), S([128, 4096]), S([128, 4096]), S([128, 4096]), S([128, 4096]))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """Run the full-scope residual-add LayerNorm oracle."""
     return oracle_residual_layernorm_aliases(*_validate_inputs(inputs))

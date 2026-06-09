@@ -32,7 +32,8 @@ OUT1_STRIDE = (1, COLS)
 CLASSIFICATION = "SCHEDULER_FUSION"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -332,6 +333,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return tuple(tensors)  # type: ignore[return-value]
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 512], f32), T([32, 128, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([4096, 512], f32), T([32, 128, 512], b8), T([512], f32), T([32, 128, 512], f32), T([32, 128, 1], f32), T([32, 128, 512], b8), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([32, 128, 512]), S([512]), S([32, 128, 512]), S([4096, 512]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the exact full Repro.forward scope."""
     (

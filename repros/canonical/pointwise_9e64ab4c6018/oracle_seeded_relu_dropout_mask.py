@@ -17,6 +17,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -146,6 +147,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return mm_94, seeds
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 2048], f32), T([64], i64), S([8, 1024, 2048]), S([8192, 2048]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the full ReLU, explicit-seed dropout, final view, and side-mask scope."""
     mm_94, seeds = _validate_inputs(inputs)

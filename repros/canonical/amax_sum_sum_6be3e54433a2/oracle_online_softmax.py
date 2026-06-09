@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 sys.path.insert(0, str(REPO_ROOT))
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -209,6 +210,7 @@ def _launch_oracle(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([], f32), T([], f32), T([32, 2], b8), T([32, 1], b8), T([32, 2], f32), T([32, 2], f32), T([32], i64, gen=Index(32)), T([32], i64, gen=Index(32)), S([4096, 2]))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> torch.Tensor:
     tensors = _validate_inputs(inputs)
     out = torch.empty((OUT_ROWS, OUT_COLS), device=tensors[0].device, dtype=torch.float32)

@@ -23,6 +23,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -239,6 +240,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return arg191_1, arg192_1, arg193_1, arg6_1, arg7_1, getitem_282, arg196_1
 
 
+@oracle_impl(hardware="H100", shapes="(T([32, 224, 56, 56], f32), T([1, 224, 1, 1], f32), T([1, 224, 1, 1], f32), T([224], f32), T([224], f32), T([32, 224, 56, 56], f32), T([32, 224, 1, 1], f32))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation with the same output shape/dtype/stride."""
     (

@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -187,6 +188,7 @@ def oracle_whisper_gelu_position_layernorm(
     return base.view(shape0), base.view(shape1), base.view(shape2)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 384, 1500], f16), T([1500, 384], f16), T([384], f16), T([384], f16), S([12000, 384]), S([12000, 384]), S([12000, 384]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation.
 

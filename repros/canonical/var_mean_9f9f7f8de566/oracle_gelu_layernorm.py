@@ -25,6 +25,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -109,6 +110,7 @@ def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor,
     return x, weight, bias
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 768], f16), T([768], f16), T([768], f16), S([1, 512, 768]), S([512, 768]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation with a shape-specialized Triton kernel.
 

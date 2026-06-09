@@ -27,6 +27,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     bench_oracle,
@@ -244,6 +245,7 @@ def _make_inductor_seed(device: torch.device) -> torch.Tensor:
     return torch.ops.prims.inductor_lookup_seed.default(seeds, SEED_INDEX)
 
 
+@oracle_impl(hardware="H100", shapes="(T([4, 512], i64, gen=Index(513)), T([4, 512], i32, gen=Index(2)), T([1, 514], i64, gen=Index(1)), T([250002, 768], f32), T([4, 512], i64, gen=Index(250002)), T([1, 768], f32), T([514, 768], f32), T([768], f32), T([768], f32), S([4, -1]), S([4, 512]), S([2048, 768]))")
 def oracle_forward(inputs):
     """Run the complete Repro.forward scope."""
     if triton is None:

@@ -19,6 +19,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps CPU-only syntax checks u
 REPRO_ID = "sum_sum_sum_985bf52428b3"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -385,6 +386,7 @@ def oracle_full(
     raise ValueError(f"unknown impl: {impl}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([32768, 768], f32), T([768], f32), T([128, 768, 16, 16], f32, stride=(196608, 1, 12288, 768)), T([1, 256, 768], f32), T([128, 256, 1], f32), T([128, 256, 1], f32), T([128, 256, 768], f32), S([128, 256, 768]), S([128, 768, 256]), S([128, 768, 16, 16]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return oracle_full(*inputs)

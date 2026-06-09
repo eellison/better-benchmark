@@ -21,6 +21,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -144,6 +145,7 @@ def _validate_inputs(
     return mean_t, x, var_t, weight_t, bias_t
 
 
+@oracle_impl(hardware="H100", shapes="(T([960], f16), T([256, 960, 7, 7], f16), T([960], f16), T([960], f16), T([960], f16))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward BN-inference plus hard-swish pointwise scope."""
     mean, x, var, weight, bias = _validate_inputs(inputs)

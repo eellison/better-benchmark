@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -251,6 +252,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return tensors
 
 
+@oracle_impl(hardware="H100", shapes="(T([50260, 2048], f32), T([4096, 2048], f32), T([4096, 2048], f32), T([4096, 2048], f32), T([2048], f32), T([32, 128, 2048], f32), T([1, 128, 2048], f32), T([32, 128, 1], f32), T([32, 128, 1], f32), T([32, 128, 2048], f32), T([1, 128], i64, gen=Index(2048)), T([], f32), T([32, 128], i64, gen=Index(50257)), S([32, 128, 2048]), S([32, 128, 2048]), S([32, 128, 2048]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """Run the full GPT-Neo layernorm-backward and embedding scatter-reduce scope."""
     if triton is None:

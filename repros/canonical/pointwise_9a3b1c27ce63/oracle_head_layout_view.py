@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -150,6 +151,7 @@ if triton is not None:
         tl.store(clone_ptr + clone_offsets, values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 1536], f32), S([8, 512, 1536]), S([8, 512, 24, -1]), S([-1, 512, 64]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward scope and return the same output layout."""
     addmm_140, clone_shape, clone_stride, total_rows, seq, heads, head_dim = _validate_and_layout(inputs)

@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -104,6 +105,7 @@ def _validate_inputs(inputs: tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tenso
     return arg0_1, arg1_1
 
 
+@oracle_impl(hardware="H100", shapes="(T([128], i64, gen=Index(128)), T([128, 2560], f32))")
 def oracle_forward(inputs: tuple[Any, ...]) -> torch.Tensor:
     """Run the full eq/unsqueeze/where/full/index_put graph on the exact inputs."""
     if triton is None:

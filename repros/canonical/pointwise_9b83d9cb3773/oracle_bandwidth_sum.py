@@ -20,6 +20,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -112,6 +113,7 @@ def _validate_inputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
     return tensors  # type: ignore[return-value]
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32), T([4096, 4096], f32))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for the same input tuple."""
     tensors = _validate_inputs(tuple(inputs))

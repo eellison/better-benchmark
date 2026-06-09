@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -261,6 +262,7 @@ def _oracle_relative_position_scatter_reduce(
     return out0, out1, out2
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 4, 49, 49], f32), T([49, 49], i64, gen=Index(169)), T([32768, 49, 49], f32), T([8192, 4, 49, 49], f32), T([49, 49], i64, gen=Index(169)), S([2401, 4]), S([8192, 4, 49, 49]), S([2401, 4]), S([32768, 49, 49]))")
 def oracle_forward(inputs: tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """Run the oracle computation over the full Repro.forward output scope."""
     _validate_inputs(inputs)

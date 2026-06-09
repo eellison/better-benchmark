@@ -23,6 +23,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -152,6 +153,7 @@ def _launch_oracle(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([32, 1024, 1, 1], f32), T([32, 2, 512, 14, 14], f32), S([32, 1, 2, -1]), S([32, -1]), S([32, -1, 1, 1]), S([32, 2, 512, 1, 1]))")
 def oracle_forward(inputs: tuple, *, block: int = 128) -> torch.Tensor:
     """Compute exactly Repro()(*inputs): same inputs, one f32 NCHW output."""
     convolution_24, view_15 = inputs[:2]

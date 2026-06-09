@@ -34,6 +34,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -113,6 +114,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(S([12, 64, 64]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full stochastic repro scope and return the exact output layout."""
     if triton is None:

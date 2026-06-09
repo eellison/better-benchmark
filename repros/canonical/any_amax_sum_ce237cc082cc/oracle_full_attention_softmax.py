@@ -12,6 +12,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -150,6 +151,7 @@ def oracle_full_attention_softmax(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([3072, 128, 128], f32), S([256, 12, 128, 128]), S([256, -1, 128, 128]), S([256, 12, 128, 128]), S([3072, 128, 128]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for the assigned input tuple."""
     return oracle_full_attention_softmax(*inputs)

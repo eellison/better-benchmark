@@ -15,6 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -113,6 +114,7 @@ if triton is not None:
         tl.store(output_ptr + offsets, values * scale, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 768], f16), S([1, 512, 768]), S([1, 512, -1, 64]), S([1, 12, 64, 512]), S([12, 64, 512]))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> torch.Tensor:
     """Run the full attention-Q layout/cast/scale scope with one Triton kernel."""
     if triton is None:

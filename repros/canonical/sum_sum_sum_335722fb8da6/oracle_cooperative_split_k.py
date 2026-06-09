@@ -10,6 +10,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -153,6 +154,7 @@ def _finalize_kernel(
     tl.store(out0_ptr + d, tl.sum(vals, axis=0).to(tl.bfloat16), mask=d < DIM_)
 
 
+@oracle_impl(hardware="H100", shapes="(T([4, 16, 512, 128], bf16), T([1, 1, 512, 128], bf16), T([4, 8, 512, 128], bf16), T([1, 1, 512, 128], bf16), T([128], bf16), T([2048, 1024], bf16), T([4, 512, 8, 1], f32), S([4, 8, 2, 512, 128]), S([4, 512, 1024]), S([4, 512, -1, 128]), S([128]), S([4, 512, 8, 128]), S([4, 512, 1024]), S([2048, 1024]))")
 def oracle_forward(inputs):
     """Run the full-scope Triton oracle for Repro.forward()."""
     (

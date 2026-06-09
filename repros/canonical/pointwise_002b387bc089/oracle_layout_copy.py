@@ -15,6 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -92,6 +93,7 @@ if triton is not None:
         tl.store(out + out1, vals1, mask=row_mask[:, None])
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 12, 198, 64], f32), S([25344, 768]))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> torch.Tensor:
     """Run the complete permute-clone-view layout materialization."""
     if triton is None:

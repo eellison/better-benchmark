@@ -26,6 +26,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -69,6 +70,7 @@ if triton is not None:
         tl.store(arg321_ptr + offsets, updated, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128], f32), T([128], f32))")
 def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
     """Run the full pointwise EMA copy_ scope and return the mutated input."""
     if triton is None:

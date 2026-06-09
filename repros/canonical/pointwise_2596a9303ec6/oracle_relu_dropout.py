@@ -17,6 +17,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -97,6 +98,7 @@ def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> torch.Tensor:
     return x
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 1280, 1, 1], f32), S([512, 1280]))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]):
     """Run the full ReLU/dropout/side-mask scope."""
     if triton is None:

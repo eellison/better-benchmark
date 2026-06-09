@@ -32,6 +32,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -327,6 +328,7 @@ def oracle_fused(
     return out_sum_add, out_sum_weighted, out_base.permute(1, 0), out_sum_scaled
 
 
+@oracle_impl(hardware="H100", shapes="(T([32768, 512], f32), T([256, 128, 512], f32), T([32768, 512], f32), T([32768, 512], f32), T([256, 128, 512], f32), T([512], f32), S([256, 128, 512]), S([256, 128, 512]), S([256, 128, 512]), S([512]), S([512]), S([32768, 512]), S([512]))")
 def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
     """Run the full-scope oracle on the exact Repro.forward input tuple."""
     return oracle_fused(*inputs)

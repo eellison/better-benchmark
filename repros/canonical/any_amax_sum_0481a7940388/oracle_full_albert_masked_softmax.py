@@ -11,6 +11,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -177,6 +178,7 @@ def oracle_full_albert_masked_softmax(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 512, 512], f32), T([8, 1, 512, 512], b8, stride=(0, 512, 1, 0)), S([8, 64, 512, 512]), S([8, 64, 512, 512]), S([512, 512, 512]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for the assigned input tuple."""
     return oracle_full_albert_masked_softmax(*inputs)

@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -144,6 +145,7 @@ def _validate_inputs(
     return embedding_t, input_ids_t, weight_t, out_shape0, out_shape1, out_shape2
 
 
+@oracle_impl(hardware="H100", shapes="(T([32000, 4096], f16), T([1, 512], i64, gen=Index(32000)), T([4096], f16), S([512, 4096]), S([512, 4096]), S([512, 4096]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]):
     """Run the full-scope LLaVA embedding + RMSNorm computation.
 

@@ -28,7 +28,8 @@ HIDDEN = 2560
 BLOCK_D = 256
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -111,6 +112,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return values, index
 
 
+@oracle_impl(hardware="H100", shapes="(T([32, 128, 2560], f32), T([32, 128], i64, gen=Index(8008)))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward scatter-reduce scope.
 

@@ -11,6 +11,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -234,6 +235,7 @@ def oracle_full(
     return out_grad_scale, out_slice_sum
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 48, 32, 32], f32), T([128, 32, 32, 32], f32), T([], f32), T([128, 32, 32, 32], f32), T([128, 32, 32, 32], f32), T([1, 32, 1, 1], f32), T([32], f32), T([32], f32))")
 def oracle_forward(inputs):
     return oracle_full(*inputs)
 

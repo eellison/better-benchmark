@@ -25,6 +25,7 @@ BLOCK_FLAT = 1024
 BLOCK_NHWC = 256
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -270,6 +271,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return tensors
 
 
+@oracle_impl(hardware="H100", shapes="(T([80], f32), T([512, 80, 7, 7], f32), T([80], f32), T([80], f32), T([80], f32), T([512, 80, 7, 7], f32), T([160], f32), T([512, 160, 7, 7], f32), T([160], f32), T([160], f32), T([160], f32))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation with the channel cat kept virtual."""
     (

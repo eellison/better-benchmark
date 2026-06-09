@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -93,6 +94,7 @@ def _validate_inputs(inputs: list[object]) -> torch.Tensor:
     return arg1_1
 
 
+@oracle_impl(hardware="H100", shapes="(T([50304, 768], f32))")
 def oracle_forward(inputs):
     """Compute the exact Repro.forward output for fp32 divide, fp8 cast, and permute."""
     arg1_1 = _validate_inputs(inputs)

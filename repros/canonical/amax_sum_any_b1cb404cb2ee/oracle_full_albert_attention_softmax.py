@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -145,6 +146,7 @@ def oracle_full_albert_attention_softmax(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([96, 512, 512], f32), S([8, -1, 512, 512]), S([8, 12, 512, 512]), S([8, 12, 512, 512]), S([96, 512, 512]))")
 def oracle_forward(inputs):
     """Run the oracle computation for the exact Repro()(*make_inputs()) scope."""
     return oracle_full_albert_attention_softmax(*inputs)

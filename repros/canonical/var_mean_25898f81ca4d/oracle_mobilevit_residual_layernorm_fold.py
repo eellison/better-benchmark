@@ -21,6 +21,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -190,6 +191,7 @@ def _validate_inputs(
     return addmm, residual, weight, bias, shape0_tuple, shape1_tuple, shape2_tuple, shape3_tuple
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 240], f32), T([512, 16, 240], f32), T([240], f32), T([240], f32), S([512, 16, 240]), S([128, 4, 16, -1]), S([122880, 4, 2, 2]), S([128, 240, 8, 8]))")
 def oracle_forward(inputs):
     """Run the complete Repro.forward residual LayerNorm plus patch-fold layout."""
     if triton is None:

@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -82,6 +83,7 @@ def _validate_input(name: str, value: object) -> torch.Tensor:
     return value
 
 
+@oracle_impl(hardware="H100", shapes="(T([768], f32), T([768], f32), T([768], f32))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> torch.Tensor:
     """Compute exactly Repro()(*make_inputs()) for pointwise_4d236bfe44e3."""
     if triton is None:

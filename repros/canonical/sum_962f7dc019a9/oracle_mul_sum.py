@@ -31,7 +31,8 @@ OUTPUT_SHAPE = (N,)
 OUTPUT_STRIDE = (1,)
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -101,6 +102,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return lhs, rhs
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32), T([128, 768], f32))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward computation.
 

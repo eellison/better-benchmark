@@ -20,6 +20,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -186,6 +187,7 @@ def oracle_residual_layernorm(
     return base.view(shape1), base.view(shape2), base.view(shape3)
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 768], f16), T([1, 512, 768], f16), T([768], f16), T([768], f16), S([1, 512, 768]), S([512, 768]), S([512, 768]), S([512, 768]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """Run the complete Repro.forward residual-add LayerNorm computation.
 

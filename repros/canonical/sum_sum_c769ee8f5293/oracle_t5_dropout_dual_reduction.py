@@ -32,7 +32,8 @@ OUT1_STRIDE = (1, COLS)
 CLASSIFICATION = "BANDWIDTH_BOUND"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -364,6 +365,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return tuple(tensors)  # type: ignore[return-value]
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 768], f32), T([8, 1024, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8, 1024, 768], b8), T([768], f32), T([8, 1024, 768], f32), T([8, 1024, 1], f32), T([8, 1024, 768], b8), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([768]), S([8, 1024, 768]), S([8192, 768]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the exact full Repro.forward scope."""
     (

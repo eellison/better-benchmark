@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -123,6 +124,7 @@ def _validate_inputs(
     return mm_111, addmm_55, add_216, weight, bias
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 4096], f32), T([128, 4096], f32), T([1, 128, 4096], f32), T([4096], f32), T([4096], f32), S([1, 128, 4096]), S([1, 128, 4096]), S([128, 4096]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the full Repro.forward residual LayerNorm computation."""
     if triton is None:

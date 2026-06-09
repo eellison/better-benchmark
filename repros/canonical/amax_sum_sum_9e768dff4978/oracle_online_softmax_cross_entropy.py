@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -172,6 +173,7 @@ def _launch_oracle(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([4, 512], i64), T([2048, 151936], bf16), S([4, 512, 151936]), S([-1, 151936]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for the canonical inputs."""
     labels, logits, shape_3d, shape_2d = inputs

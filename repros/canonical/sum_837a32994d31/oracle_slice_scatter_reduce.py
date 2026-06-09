@@ -21,6 +21,7 @@ except ImportError:  # pragma: no cover - keeps CPU-only syntax checks working.
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -172,6 +173,7 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 1024, 364], f32), T([64, 1024, 364], b8), T([], f32))")
 def oracle_forward(inputs):
     return oracle_triton(*inputs)
 

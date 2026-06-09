@@ -32,6 +32,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -46,6 +47,7 @@ REPRO_DIR = Path(__file__).resolve().parent
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 320, 56, 56], f32, stride=(1003520, 1, 17920, 320)), T([128, 320, 1, 1], f32), T([128, 1, 1, 1], f32), T([128, 320, 56, 56], f32, stride=(1003520, 1, 17920, 320)), T([320], f32), T([], f32), S([320]), S([320]), S([128, 320, 1, 1]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return cross_dim_oracle(*inputs)

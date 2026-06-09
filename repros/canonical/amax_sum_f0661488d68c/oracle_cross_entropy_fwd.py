@@ -41,6 +41,7 @@ import triton.language as tl
 from triton.testing import do_bench
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -385,6 +386,7 @@ def _write_csv(csv_path: Path, oracle_us: float, compile_us: float | None, total
     print(f"\nResults appended to {csv_path}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192], i64, gen=Index(262144)), T([8192, 262144], bf16))")
 def oracle_forward(inputs):
     return oracle_cross_entropy_fwd(*inputs)
 

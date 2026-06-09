@@ -17,6 +17,7 @@ except ModuleNotFoundError:  # pragma: no cover - allows CPU-only syntax checks.
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -369,6 +370,7 @@ class OracleModule(torch.nn.Module):
         return oracle_structured_pool_upsample_reduce(*inputs, impl=self.impl)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 1280], f32), T([128, 1280, 7, 7], f32, stride=(62720, 1, 8960, 1280)), T([1, 1280, 1, 1], f32), T([1, 1280, 1, 1], f32), T([1280], f32), T([1280], f32), S([128, 1280, 1, 1]), S([128, 1280, 7, 7]))")
 def oracle_forward(inputs):
     return oracle_triton(*inputs)
 

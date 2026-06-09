@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -360,6 +361,7 @@ def _oracle_fused(
     return vector_out, add_out
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 512, 28, 28], f32), T([64, 480, 28, 28], f32), T([64, 448, 28, 28], f32), T([64, 416, 28, 28], f32), T([64, 384, 28, 28], f32), T([64, 352, 28, 28], f32), T([64, 320, 28, 28], f32), T([64, 288, 28, 28], f32), T([64, 256, 28, 28], f32), T([64, 224, 28, 28], f32), T([64, 192, 28, 28], f32), T([], f32), T([64, 192, 28, 28], f32), T([64, 192, 28, 28], f32), T([1, 192, 1, 1], f32), T([192], f32), T([192], f32))")
 def oracle_forward(inputs):
     """Run the full-scope oracle for `Repro()(*make_inputs())`."""
     return _oracle_fused(*inputs)

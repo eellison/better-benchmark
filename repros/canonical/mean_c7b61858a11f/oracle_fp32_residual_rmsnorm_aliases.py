@@ -36,6 +36,7 @@ EPS = 1.0e-6
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -137,6 +138,7 @@ def _validate_inputs(
     return mm, residual, weight, output_shapes
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 512], f32), T([32, 128, 512], f32), T([512], f32), S([32, 128, 512]), S([4096, 512]), S([4096, 512]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the complete fp32 residual RMSNorm alias repro computation.
 

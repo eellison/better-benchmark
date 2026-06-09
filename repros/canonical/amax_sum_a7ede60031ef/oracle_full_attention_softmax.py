@@ -13,6 +13,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -143,6 +144,7 @@ def oracle_full_attention_softmax(
     return _launch_oracle(bmm_26, out, block_k=block_k, num_warps=num_warps)
 
 
+@oracle_impl(hardware="H100", shapes="(T([12, 2048, 2048], f16), S([1, 12, 2048, 2048]), S([1, -1, 2048, 2048]), S([1, 12, 2048, 2048]), S([12, 2048, 2048]))")
 def oracle_forward(inputs):
     return oracle_full_attention_softmax(*inputs)
 

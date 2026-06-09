@@ -22,6 +22,7 @@ CLASSIFICATION = "NEW_PATTERN"
 BLOCK_SIZE = 1024
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -103,6 +104,7 @@ def _output_shape_and_stride(input0: torch.Tensor) -> tuple[tuple[int, int, int,
     return shape, stride
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 256, 13, 13], f16), T([512, 256, 13, 13], f16))")
 def oracle_forward(inputs):
     """Run the full Repro.forward relu+channel-cat scope."""
     if triton is None:

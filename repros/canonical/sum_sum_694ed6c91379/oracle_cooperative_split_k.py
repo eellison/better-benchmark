@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -143,6 +144,7 @@ if triton is not None:
         tl.store(out_weight_grad_ptr + channels, acc, mask=channel_mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 1024], bf16), T([2048, 1024], bf16), T([2048, 1024], bf16), T([1024], bf16), T([4, 512, 1024], bf16), T([4, 512, 1], f32), T([4, 512, 1024], bf16), S([4, 512, 1024]), S([4, 512, 1024]), S([4, 512, 1024]), S([1024]), S([4, 512, 1024]), S([2048, 1024]))")
 def oracle_forward(inputs):
     """Run the full-scope Triton oracle."""
     if triton is None:

@@ -33,6 +33,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -130,6 +131,7 @@ def _make_inductor_seed_tensor(device: torch.device) -> torch.Tensor:
     return seeds
 
 
+@oracle_impl(hardware="H100", shapes="(S([12, 64, 64]), S([12, 64, 64]), S([12, 64, 64]))")
 def oracle_forward(inputs):
     """Run the full-scope stochastic oracle.
 

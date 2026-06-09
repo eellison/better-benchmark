@@ -20,6 +20,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -116,6 +117,7 @@ def _validate_inputs(
     return x, weight, bias
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32), T([768], f32), T([768], f32), S([128, 1, 768]), S([128, 768]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward layernorm affine computation.
 

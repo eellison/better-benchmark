@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -268,6 +269,7 @@ if triton is not None:
         tl.store(out2_ptr + physical_offsets, value, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 112, 14, 14], f32), T([512, 112, 14, 14], f32), T([512, 112, 14, 14], f32), T([1, 112, 1, 1], f32), T([112], f32), T([112], f32), T([512, 56, 14, 14], f32), T([1, 56, 1, 1], f32), T([56], f32), T([56], f32))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation with Triton kernels."""
     if triton is None:

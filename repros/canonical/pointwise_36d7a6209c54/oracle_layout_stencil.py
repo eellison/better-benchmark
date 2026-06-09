@@ -24,7 +24,8 @@ CLASSIFICATION = "NEW_PATTERN"
 TABLE_N = 6144
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -82,6 +83,7 @@ def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor,
     return arg2, arg3, table
 
 
+@oracle_impl(hardware="H100", shapes="(T([], i32, gen=Index(6144)), T([], i32, gen=Index(6144)), T([6144], i64, gen=Index(6144)))")
 def oracle_forward(inputs):
     """Run the exact full Repro.forward scope with one scalar Triton kernel."""
     if triton is None:

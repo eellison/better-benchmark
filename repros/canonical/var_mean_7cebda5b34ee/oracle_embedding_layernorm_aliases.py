@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -181,6 +182,7 @@ def oracle_embedding_layernorm_aliases(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([51200, 2048], f16), T([1, 512], i64, gen=Index(51200)), T([2048], f16), T([2048], f16), S([512, 2048]), S([512, 2048]), S([512, 2048]), S([512, 2048]))")
 def oracle_forward(inputs):
     """Run the full-scope Moondream embedding + LayerNorm oracle."""
     return oracle_embedding_layernorm_aliases(*_validate_inputs(inputs))

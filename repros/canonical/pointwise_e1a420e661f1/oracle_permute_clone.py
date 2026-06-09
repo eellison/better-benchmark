@@ -15,6 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -97,6 +98,7 @@ def _validate_inputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, tuple[in
     return arg81_1, out_shape
 
 
+@oracle_impl(hardware="H100", shapes="(T([1, 12, 64, 64], f32), S([64, 768]))")
 def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
     """Run the full permute -> contiguous clone -> unsafe_view -> view scope."""
     if triton is None:

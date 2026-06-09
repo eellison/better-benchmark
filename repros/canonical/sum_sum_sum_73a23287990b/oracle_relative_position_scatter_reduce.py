@@ -21,6 +21,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable withou
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -618,6 +619,7 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), T([128, 12, 197, 197], f32, stride=(491712, 40976, 208, 1)), T([197, 197], i64, gen=Index(732)), S([38809, 12]), S([38809, 12]), S([38809, 12]), S([38809, 12]), S([38809, 12]), S([38809, 12]), S([38809, 12]), S([38809, 12]), S([38809, 12]), S([38809, 12]), S([38809, 12]), S([38809, 12]))")
 def oracle_forward(inputs):
     return oracle_relative_position_scatter_reduce(*inputs)
 

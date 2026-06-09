@@ -28,6 +28,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 # Import shared oracle infrastructure (installed via pip install -e .)
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -1129,6 +1130,7 @@ def _check_expected_shapes(inputs):
     return a_count, batch
 
 
+@oracle_impl(hardware="H100", shapes="(T([384, 256, 768], f32), T([96, 4, 256, 769], f32), T([96, 4, 197120], f32), T([8, 1024, 12, 513], b8), T([8, 1024, 1, 1], b8), T([], f32), T([8, 1024, 12, 513], f32), T([8, 256, 12, 257], f32), T([8, 256, 12, 257], b8), T([8, 256, 12, 513], f32), T([8, 1024, 12, 513], f32), T([8, 256, 12, 257], b8), T([96, 255, 255], f32), T([96, 255, 513], f32), T([96, 512, 513], f32), T([96, 3, 512, 513], f32), T([96, 3, 256, 256], f32), T([96, 3, 256, 513], f32), T([96, 256, 257], f32), T([96, 256, 513], f32), S([96, 4, 256, 768, 1]), S([96, 4, 196864]), S([96, 4, 256, 770]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([96, 4, 256, 513]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([96, 4, 256, 513]), S([96, 3, 513, 512]), S([96, 3, 512, 512, 1]), S([288, 512, 512]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

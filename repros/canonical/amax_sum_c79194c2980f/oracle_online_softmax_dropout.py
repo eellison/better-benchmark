@@ -12,6 +12,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -186,6 +187,7 @@ def oracle_online_softmax_dropout(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([96, 1024, 1024], f32), T([8, 12, 1024, 1024], f32), T([124], i64), S([8, 12, 1024, 1024]), S([8, 12, 1024, 1024]), S([96, 1024, 1024]))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> torch.Tensor:
     """Run the full-scope oracle on the exact Repro.forward input tuple."""
     return oracle_online_softmax_dropout(*inputs)

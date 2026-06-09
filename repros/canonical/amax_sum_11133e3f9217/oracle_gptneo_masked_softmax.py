@@ -12,6 +12,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -95,6 +96,7 @@ def _gptneo_masked_softmax_kernel(
     tl.store(out_ptr + rows[:, None] * SEQ_LEN + cols[None, :], out, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([1, 1, 2048, 2048], b8), T([512, 128, 128], f32), T([32, 128], i64, gen=Index(32)), S([32, 16, 128, 128]), S([32, -1, 128, 128]), S([32, 16, 128, 128]), S([512, 128, 128]))")
 def oracle_forward(inputs):
     arg8_1, bmm, cumsum, _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3 = inputs
     out = torch.empty_strided(

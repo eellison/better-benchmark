@@ -11,6 +11,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -367,6 +368,7 @@ def _compile_with_cd(model: torch.nn.Module, inputs: tuple[object, ...]):
     return compiled
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], f32, stride=(235200, 1, 6720, 192)), T([128, 192, 35, 35], i8, stride=(235200, 1, 6720, 192), gen=Index(9)), T([128, 192, 71, 71], f32, stride=(967872, 1, 13632, 192)), T([1, 192, 1, 1], f32), T([1, 192, 1, 1], f32), T([192], f32), T([192], f32), T([], f32), S([24576, 1225]), S([24576, 1225]), S([128, 192, 71, 71]))")
 def oracle_forward(inputs):
     return oracle_scatter_reduce(*inputs)
 

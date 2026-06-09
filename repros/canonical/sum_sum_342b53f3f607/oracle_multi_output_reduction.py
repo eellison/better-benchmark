@@ -37,6 +37,7 @@ except ImportError:
 REPRO_ID = "sum_sum_342b53f3f607"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -401,6 +402,7 @@ def _assert_inputs(inputs) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, to
     return getitem_3, arg469_1, arg479_1, arg470_1, arg190_1
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 160, 7, 7], f32), T([512, 80, 7, 7], f32), T([1, 80, 1, 1], f32), T([80], f32), T([80], f32))")
 def oracle_forward(inputs, *, variant: str = DEFAULT_VARIANT):
     if triton is None:
         raise RuntimeError("Triton is required for this oracle")

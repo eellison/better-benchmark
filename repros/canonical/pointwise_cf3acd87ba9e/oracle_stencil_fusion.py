@@ -25,6 +25,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -172,6 +173,7 @@ def triton_fused_channel_shuffle(
     return shuffled[:, CHANNELS:, :, :], shuffled[:, :CHANNELS, :, :]
 
 
+@oracle_impl(hardware="H100", shapes="(T([232], f16), T([512, 232, 7, 7], f16), T([232], f16), T([232], f16), T([232], f16), T([232], f16), T([512, 232, 7, 7], f16), T([232], f16), T([232], f16), T([232], f16), S([512, 2, 232, 7, 7]), S([512, 464, 7, 7]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return triton_fused_channel_shuffle(*inputs)

@@ -34,6 +34,7 @@ EPS = 1.0e-6
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -181,6 +182,7 @@ def _validate_inputs(
     return mm, residual_t, weight_t, out_shape1, out_shape2, out_shape3
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 512], f16), T([1, 2048, 512], f16), T([512], f16), S([1, 2048, 512]), S([2048, 512]), S([2048, 512]), S([2048, 512]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]):
     """Run the full Repro.forward T5 RMSNorm computation.
 

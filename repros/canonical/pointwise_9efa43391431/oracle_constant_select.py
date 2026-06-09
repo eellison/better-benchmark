@@ -24,6 +24,7 @@ REPO_ROOT = REPRO_DIR.parents[2]
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -63,6 +64,7 @@ if triton is not None:
         tl.store(out_bits_ptr + offsets, values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="()")
 def oracle_forward(inputs):
     """Run the full repro computation and return the selected constant tensor."""
     if len(inputs) != 0:

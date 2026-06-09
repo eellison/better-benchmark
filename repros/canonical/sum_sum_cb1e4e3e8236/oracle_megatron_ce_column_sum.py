@@ -28,6 +28,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -243,6 +244,7 @@ def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor,
     return numerator, denominator, labels, logits, row_shift0, row_shift1, residual
 
 
+@oracle_impl(hardware="H100", shapes="(T([], f32), T([], f32), T([16, 513], i64), T([16, 512, 29056], f32), T([8192, 1], f32), T([8192, 1], f32), T([16, 512, 29056], f32), S([1, 29056]), S([8192, 29056]), S([-1, 29056]), S([16, 512, 29056]), S([8192, 29056]), S([29056]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation for the canonical MegatronBERT shape."""
     (

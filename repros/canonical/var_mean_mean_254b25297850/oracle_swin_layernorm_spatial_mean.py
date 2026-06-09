@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -188,6 +189,7 @@ def _torch_reference(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     return torch.mean(x, dim=[1, 2])
 
 
+@oracle_impl(hardware="H100", shapes="(T([6272, 1024], f32), T([128, 49, 1024], f32), T([1024], f32), T([1024], f32), S([128, 49, 1024]), S([128, 7, 7, 1024]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward scope and return the same single output."""
     addmm, residual, weight, bias, _shape0, _shape1 = _validate_inputs(inputs)

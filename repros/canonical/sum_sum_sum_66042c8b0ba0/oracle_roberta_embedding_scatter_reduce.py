@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -294,6 +295,7 @@ def oracle_roberta_embedding_scatter_reduce(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 768], f32), T([4, 512, 768], f32), T([2048, 768], f32), T([2048, 768], f32), T([4, 512, 768], b8), T([768], f32), T([4, 512, 768], f32), T([4, 512, 1], f32), T([4, 512], i64, gen=Index(514)), T([], f32), T([4, 512], i64, gen=Index(1)), T([4, 512], i64, gen=Index(250002)), T([250002, 768], f32), S([4, 512, 768]), S([4, 512, 768]), S([4, 512, 768]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation."""
     return oracle_roberta_embedding_scatter_reduce(*inputs)

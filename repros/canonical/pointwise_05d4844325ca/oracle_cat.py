@@ -28,7 +28,8 @@ DTYPE = torch.float32
 CLASSIFICATION = "NEW_PATTERN"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -83,6 +84,7 @@ def _validate_input(value: object) -> torch.Tensor:
     return value
 
 
+@oracle_impl(hardware="H100", shapes="(T([50265], f32))")
 def oracle_forward(inputs):
     """Run the exact Repro.forward scope with one Triton copy/fill kernel."""
     if triton is None:

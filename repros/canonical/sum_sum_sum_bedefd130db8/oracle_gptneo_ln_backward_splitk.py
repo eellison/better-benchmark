@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover - keeps CPU-only syntax checks usable.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -239,6 +240,7 @@ def _oracle_triton(*inputs: object) -> tuple[torch.Tensor, ...]:
     return out_x_rhs, out_x, out_base.permute(1, 0), out_sum_out
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 2048], f32), T([2048], f32), T([32, 128, 2048], f32), T([32, 128, 1], f32), T([32, 128, 2048], f32), S([32, 128, 2048]), S([4096, 2048]), S([2048]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation."""
     return _oracle_triton(*inputs)

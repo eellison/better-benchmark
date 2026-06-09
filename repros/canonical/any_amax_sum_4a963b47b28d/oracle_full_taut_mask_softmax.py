@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -213,6 +214,7 @@ if triton is not None:
         tl.store(output_ptr + offsets, out_vals, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 128, 128], f32), S([64, 16, 128, 128]), S([64, -1, 128, 128]), S([64, 16, 128, 128]), S([1024, 128, 128]))")
 def oracle_forward(inputs):
     """Compute exactly Repro()(*make_inputs()) with the full captured scope."""
     bmm_24, shape_param_0, shape_param_1, shape_param_2, shape_param_3 = inputs

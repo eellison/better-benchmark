@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -130,6 +131,7 @@ def _expect_inputs(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     return addmm_68
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 768], f16), S([4096, 1, 768]), S([4096, 1, 12, 64]), S([12, 4096, 64]), S([192, 768, 64]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Compute the full Repro.forward padded sliding-window materialization."""
     addmm_68 = _expect_inputs(inputs)

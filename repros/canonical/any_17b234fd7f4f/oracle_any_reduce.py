@@ -23,6 +23,7 @@ from repro_harness import load_shape_configs, make_inputs_from_config
 REPRO_DIR = Path(__file__).resolve().parent
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -87,6 +88,7 @@ if triton is not None:
         tl.store(out_ptr, any_positive != 0)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 1024], f32), S([8192]))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> torch.Tensor:
     """Compute exactly Repro()(*make_inputs()) for this captured graph."""
     if triton is None:

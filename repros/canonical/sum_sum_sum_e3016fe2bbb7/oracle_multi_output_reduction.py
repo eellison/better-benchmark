@@ -10,6 +10,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -101,6 +102,7 @@ def _full_graph_kernel(
     tl.store(out_sum_ptr + 1, tl.sum(row1, axis=0))
 
 
+@oracle_impl(hardware="H100", shapes="(T([], f32), T([1], b8), T([1], i64), T([1, 128], f32), T([1, 1], f32), T([1, 1], f32), T([1, 128], f32), T([1], b8), T([1], i64), T([1, 128], f32), T([1, 1], f32), T([1, 1], f32), T([1, 128], f32), S([1, 128]), S([1, 128]), S([1, 128]), S([128, 2]), S([2]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation."""
     (

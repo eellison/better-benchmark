@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -388,6 +389,7 @@ def _validate_inputs(
     return token_table, token_ids, position_ids, position_table, weight, bias, output_shapes
 
 
+@oracle_impl(hardware="H100", shapes="(T([30522, 768], f32), T([256, 128], i64, gen=Index(30522)), T([1, 512], i64, gen=Index(512)), T([512, 768], f32), T([768], f32), T([768], f32), S([32768, 768]), S([32768, 768]), S([32768, 768]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, ...]:
     """Run the complete DistilBERT embedding LayerNorm alias scope.
 

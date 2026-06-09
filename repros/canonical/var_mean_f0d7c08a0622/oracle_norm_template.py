@@ -39,6 +39,7 @@ except Exception:
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -571,6 +572,7 @@ def benchmark_oracle(
 # ============================================================================
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 64, 147, 147], f32), T([64], f32), T([64], f32), T([64], f32), T([64], f32))")
 def oracle_forward(inputs):
     return oracle_full(*inputs)
 

@@ -46,7 +46,8 @@ NUM_WARPS = 4
 CLASSIFICATION = "SCHEDULER_FUSION"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -127,6 +128,7 @@ def _require_tensor(
     return tensor
 
 
+@oracle_impl(hardware="H100", shapes="(T([256, 128, 1, 1], f32), T([256, 128, 1, 1], f32), T([1, 256, 1], f32), T([256], f32), T([256, 1, 1, 1], f32), S([1, 256, 128]), S([1, 256, -1]), S([256, 1, 1, 1]), S([256, 128, 1, 1]))")
 def oracle_forward(inputs):
     """Run the exact Repro.forward scope with one fused reduction/epilogue kernel."""
     if triton is None:

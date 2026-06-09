@@ -25,6 +25,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -130,6 +131,7 @@ def _block_sizes(d2: int, d3: int) -> tuple[int, int, int]:
     return block_d2, block_d3, num_warps
 
 
+@oracle_impl(hardware="H100", shapes="(T([768, 49, 128], f32), S([128, 6, 49, 128]), S([128, 768, 7, 7]))")
 def oracle_forward(inputs):
     """Run the full view -> permute -> contiguous clone -> view scope."""
     if triton is None:

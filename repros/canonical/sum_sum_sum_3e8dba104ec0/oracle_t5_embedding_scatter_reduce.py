@@ -19,6 +19,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable withou
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -334,6 +335,7 @@ def _diff_stats(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, fl
     return diff.max().item(), diff.mean().item(), rel.max().item()
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([768], f32), T([8, 1024, 768], b8), T([8, 1024, 768], f32), T([8, 1024, 1], f32), T([8, 1024, 768], f32), T([8, 1024], i64, gen=Index(32128)), T([], f32), T([32128, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([8192, 768], f32), T([768], f32), T([8, 1024, 768], b8), T([8, 1024, 768], f32), T([8, 1024, 1], f32), T([8, 1024, 768], f32), T([8, 1024], i64, gen=Index(32128)), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([8, 1024, 768]), S([768]), S([8, 1024, 768]))")
 def oracle_forward(inputs):
     return oracle_t5_embedding_scatter_reduce(*inputs)
 

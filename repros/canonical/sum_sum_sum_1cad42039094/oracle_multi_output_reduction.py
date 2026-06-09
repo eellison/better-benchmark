@@ -12,6 +12,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -222,6 +223,7 @@ def oracle_full(
     return out_sum_x_rhs, out_sum_x, out_base.permute(1, 0), out_sum_out
 
 
+@oracle_impl(hardware="H100", shapes="(T([100352, 256], f32), T([256], f32), T([128, 784, 256], f32), T([128, 784, 1], f32), T([128, 784, 256], f32), T([128, 1, 1, 1], b8), S([128, 784, 256]), S([128, 28, 28, 256]), S([128, 4, 7, 4, 7, 256]), S([2048, 7, 7, 256]), S([2048, 49, 256]), S([100352, 256]), S([256]))")
 def oracle_forward(inputs):
     return oracle_full(*inputs)
 

@@ -23,7 +23,8 @@ REPRO_DIR = Path(__file__).resolve().parent
 REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -79,6 +80,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, values + bias, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32), T([768], f32), S([128, 1, 768]), S([128, 1, 12, 64]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with the same output shape and stride."""
     if triton is None:

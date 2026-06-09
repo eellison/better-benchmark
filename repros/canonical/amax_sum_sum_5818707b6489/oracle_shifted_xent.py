@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -139,6 +140,7 @@ def _require_triton_cuda() -> None:
         raise RuntimeError("CUDA is required for this Triton oracle")
 
 
+@oracle_impl(hardware="H100", shapes="(T([32768, 30524], f32), T([64, 512], i64), T([], f32), S([64, 512, 30522]), S([32768, 30522]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation.
 

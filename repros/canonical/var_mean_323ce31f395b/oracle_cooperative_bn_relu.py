@@ -24,6 +24,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     bench_oracle,
@@ -251,6 +252,7 @@ def _torch_reference(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return invstd_1d, relu, mean_out, running_mean, running_var
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 256, 8, 8], f32), T([256], f32), T([256], f32), T([256], f32), T([256], f32), T([1024, 256, 8, 8], f32))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, ...]:
     """Run the full captured computation and return all five repro outputs."""
     x, running_mean, running_var, weight, bias, residual = _validate_inputs(inputs)

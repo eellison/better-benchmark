@@ -17,6 +17,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -186,6 +187,7 @@ def _make_inductor_seeds(device: torch.device) -> torch.Tensor:
     return seeds
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 2560], f32), T([16, 128, 2560], f32), T([2560], f32), T([2560], f32), S([16, 128, 2560]), S([2048, 2560]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the complete Repro.forward computation with a fused Triton kernel."""
     if triton is None:

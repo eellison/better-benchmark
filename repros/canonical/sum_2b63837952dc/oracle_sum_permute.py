@@ -30,6 +30,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -137,6 +138,7 @@ def _validate_inputs(inputs: tuple[Any, ...]) -> torch.Tensor:
     return x
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 12, 1, 64], f32), S([128, 1, 768]), S([768]), S([128, 768]))")
 def oracle_forward(inputs: tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the full permute/view -> sum + materialized transposed-view scope."""
     if triton is None:

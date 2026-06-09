@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     bench_oracle,
@@ -258,6 +259,7 @@ def _padded_output(
     return torch.empty_strided(out_shape, out_stride, device=x.device, dtype=x.dtype)
 
 
+@oracle_impl(hardware="H100", shapes="(T([240], f32), T([128, 240, 28, 28], f32), T([240], f32), T([240], f32), T([240], f32))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward BN-inference, SiLU, and constant-pad scope."""
     mean, x, var, weight, bias, layout = _validate_inputs(inputs)

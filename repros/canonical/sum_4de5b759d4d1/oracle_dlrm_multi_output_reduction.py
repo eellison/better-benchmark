@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -198,6 +199,7 @@ def _validate_inputs(inputs: tuple[object, ...]) -> None:
         raise ValueError(f"unexpected view shape parameter 1: {shape_param_1}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 100], f32), T([2048, 64, 9], f32), T([2048, 9, 64], f32), T([2048, 64], b8), T([], f32), S([2048, 576]), S([64]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle and return the same view structure as Repro.forward."""
     if triton is None:

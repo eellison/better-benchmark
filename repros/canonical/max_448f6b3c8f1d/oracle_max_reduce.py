@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -64,6 +65,7 @@ def _require_triton_cuda() -> None:
         raise RuntimeError("CUDA is required for oracle_max_reduce.py")
 
 
+@oracle_impl(hardware="H100", shapes="(T([1, 4096], i64))")
 def oracle_forward(inputs, *, block_n: int = N_ELEMENTS) -> torch.Tensor:
     """Compute exactly Repro()(*make_inputs()) for the canonical scalar max."""
     _require_triton_cuda()

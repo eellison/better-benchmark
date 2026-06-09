@@ -18,6 +18,7 @@ except ImportError:  # pragma: no cover - keeps non-runtime tooling usable.
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -312,6 +313,7 @@ def _diff_stats(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, fl
     return diff.max().item(), diff.mean().item(), rel.max().item()
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 1024], f32), T([8192, 1024], f32), T([8192, 1024], f32), T([1024], f32), T([16, 512, 1024], f32), T([16, 512, 1], f32), T([16, 512, 1024], f32), T([16, 512, 1024], b8), T([1, 512], i64, gen=Index(512)), T([], f32), T([16, 512], i64, gen=Index(2)), T([16, 512], i64, gen=Index(29056)), T([29056, 1024], f32), S([16, 512, 1024]), S([16, 512, 1024]), S([16, 512, 1024]))")
 def oracle_forward(inputs):
     return oracle_megatronbert_embedding_scatter_reduce(*inputs)
 

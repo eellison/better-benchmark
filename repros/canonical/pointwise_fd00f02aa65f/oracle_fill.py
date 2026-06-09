@@ -24,7 +24,8 @@ OUT_STRIDE = (204 * 26, 26, 1)
 NUMEL = 204 * 204 * 26
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -68,6 +69,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, ones, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="()")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with one Triton fill kernel."""
     if len(inputs) != 0:

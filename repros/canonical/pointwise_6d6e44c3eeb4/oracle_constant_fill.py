@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -64,6 +65,7 @@ else:
         raise RuntimeError("Triton is required for this oracle")
 
 
+@oracle_impl(hardware="H100", shapes="()")
 def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
     """Compute exactly Repro()(*make_inputs()) for this no-input full() repro."""
     del inputs

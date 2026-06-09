@@ -21,6 +21,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -329,6 +330,7 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 512], f32), T([8192, 512], f32), T([8192, 512], f32), T([512], f32), T([8, 1024, 512], b8), T([8, 1024, 512], f32), T([8, 1024, 1], f32), T([8, 1024, 512], f32), T([8, 1024], i64, gen=Index(32128)), T([], f32), T([32128, 512], f32), T([8192, 512], f32), T([8192, 512], f32), T([8192, 512], f32), T([512], f32), T([8, 1024, 512], b8), T([8, 1024, 512], f32), T([8, 1024, 1], f32), T([8, 1024, 512], f32), T([8, 1024], i64, gen=Index(32128)), S([8, 1024, 512]), S([8, 1024, 512]), S([8, 1024, 512]), S([512]), S([8, 1024, 512]), S([8, 1024, 512]), S([8, 1024, 512]), S([8, 1024, 512]), S([512]), S([8, 1024, 512]))")
 def oracle_forward(inputs):
     return oracle_t5_embedding_scatter_reduce(*inputs)
 

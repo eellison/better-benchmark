@@ -11,6 +11,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -292,6 +293,7 @@ def _diff_stats(actual: torch.Tensor, expected: torch.Tensor) -> tuple[float, fl
     return diff.max().item(), diff.mean().item(), rel.max().item()
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 768], f32), T([8, 512, 768], f32), T([4096, 768], f32), T([4096, 768], f32), T([8, 512, 768], b8), T([768], f32), T([8, 512, 768], f32), T([1, 512, 768], f32), T([8, 512, 1], f32), T([8, 512, 1], f32), T([1, 512], i64, gen=Index(512)), T([], f32), T([8, 512], i64, gen=Index(30522)), T([30522, 768], f32), S([8, 512, 768]), S([8, 512, 768]), S([8, 512, 768]))")
 def oracle_forward(inputs):
     return oracle_distilbert_embedding_scatter_reduce(*inputs)
 

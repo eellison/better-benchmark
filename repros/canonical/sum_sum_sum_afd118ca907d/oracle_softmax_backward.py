@@ -34,6 +34,7 @@ from typing import Callable
 import torch
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -379,6 +380,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 8, 1024, 1024], f32), T([8, 8, 1024, 1024], f32), T([8, 8, 1024, 1024], f32), T([8, 8, 1024, 1024], f32), T([8, 8, 1024, 1024], f32), T([64, 1024, 1024], f32), T([8, 8, 1024, 1024], b8), T([8, 8, 1024, 1024], f32), T([1024, 1024], i64, gen=Index(32)), T([], f32), T([8, 8, 1024, 1024], f32), T([8, 8, 1024, 1024], f32), T([8, 8, 1024, 1024], f32), T([8, 8, 1024, 1024], f32), T([8, 8, 1024, 1024], f32), T([64, 1024, 1024], f32), T([8, 8, 1024, 1024], b8), T([1, 1, 1024, 1], b8), T([64, 1024, 1024], f32), T([1024, 1024, 8], f32), T([8, 8, 1024, 1], f32), T([8, 8, 1024, 1], f32), T([1024, 1024], i64, gen=Index(32)), S([8, 8, 1024, 1024]), S([64, 1024, 1024]), S([8, 8, 1024, 1024]), S([64, 1024, 1024]), S([8, 8, 1024, 1024]), S([8, -1, 1024, 1024]), S([8, 8, 1024, 1024]), S([64, 1024, 1024]), S([8, 8, 1024, 1024]), S([64, 1024, 1024]))")
 def oracle_forward(inputs):
     return triton_fused_attention_backward_oracle(*inputs)
 

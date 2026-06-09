@@ -31,6 +31,7 @@ import torch
 from torch import device as torch_device
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -326,6 +327,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 5, 2, 426888], f32), S([-1, -1, -1, 426888]), S([-1, -1, 2, -1]), S([16, 4, 4, 2, 382788]), S([-1, -1, -1, 2, 382788]), S([64, 4, 2, 382788]))")
 def oracle_forward(inputs):
     return triton_fused_gather_reduce_oracle(*inputs)
 

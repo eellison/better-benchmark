@@ -34,6 +34,7 @@ OUT_STRIDE = (ROWS1 * HIDDEN, HIDDEN, 1)
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -137,6 +138,7 @@ def _validate_inputs(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor,
     return cumsum, mask, table, shape_param
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 128], i64, gen=Index(1025)), T([64, 128], i32, gen=Index(2)), T([1026, 1024], f32), S([64, 128, 1024]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with a row-specialized computed gather."""
     cumsum, mask, table, shape_param = _validate_inputs(inputs)

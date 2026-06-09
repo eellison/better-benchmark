@@ -40,7 +40,8 @@ NUMEL = ROWS * COLS
 CLASSIFICATION = "BANDWIDTH_BOUND"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -85,6 +86,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, out_values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 1024], i64))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with one Triton pointwise kernel."""
     if triton is None:

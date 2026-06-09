@@ -15,6 +15,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -327,6 +328,7 @@ def _launch_oracle(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([288, 512, 512], f32), T([96, 3, 256, 257], f32, stride=(525312, 131328, 513, 1)), T([96, 3, 256, 513], f32, stride=(525312, 131328, 513, 1)), T([96, 4, 256, 513], f32), T([8, 256, 12, 257], b8), T([8, 256, 12, 257], f32, stride=(789504, 257, 65792, 1)), T([8, 256, 12, 257], b8), T([8, 1024, 1, 513], f32), T([8, 1024, 1, 1], b8), T([], f32), T([36], i64), S([96, 3, 512, 1, 512]), S([96, 3, 512, 512]), S([96, 3, 512, 513]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([8, 12, 1024, 513]), S([96, 4, 256, 513]), S([96, 4, -1]), S([96, 4, 256, 769]), S([384, 256, 768]))")
 def oracle_forward(inputs: tuple) -> torch.Tensor:
     bmm_22 = inputs[0]
     slice_3 = inputs[2]

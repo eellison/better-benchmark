@@ -21,6 +21,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -146,6 +147,7 @@ def _validate_inputs(
     return x, weight_t, bias_t
 
 
+@oracle_impl(hardware="H100", shapes="(T([32768, 512], f32), T([512], f32), T([512], f32), S([256, 128, 512]), S([32768, 512]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full Repro.forward scope and return the same non-contiguous view."""
     if triton is None:

@@ -26,6 +26,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -94,6 +95,7 @@ def _torch_fallback(inputs):
     return cat.permute(1, 0), cat.sum(dim=[0], keepdim=True).view(shape)
 
 
+@oracle_impl(hardware="H100", shapes="(T([256, 1], f32), T([256, 1], f32), T([256, 1], f32), T([256, 1], f32), T([256, 1], f32), T([256, 1], f32), S([2]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation for both repro outputs."""
     if triton is None:

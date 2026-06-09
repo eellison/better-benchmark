@@ -29,6 +29,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 # Import shared oracle infrastructure (installed via pip install -e .)
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -188,6 +189,7 @@ def _oracle_torch(inputs):
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32), T([768], f32), T([128, 1370, 768], f32), T([128, 1370, 1], f32), T([175360, 768], f32), T([768], f32), S([128, 1370, 768]), S([768]), S([175360, 768]), S([768]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

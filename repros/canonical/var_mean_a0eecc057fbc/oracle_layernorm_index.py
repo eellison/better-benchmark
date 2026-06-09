@@ -42,6 +42,7 @@ CLASSIFICATION = "ALGEBRAIC_ELIMINATION"
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -144,6 +145,7 @@ def _validate_inputs(
     return addmm_47, add_91, arg147_1, arg148_1, shape0_tuple, shape1_tuple
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 768], f32), T([1, 64, 768], f32), T([768], f32), T([768], f32), S([1, 64, 768]), S([1, 768]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward computation with indexed-row elimination.
 

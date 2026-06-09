@@ -27,6 +27,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -164,6 +165,7 @@ def _validate_inputs(
     return mm, seeds, residual, weight, output_shapes
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 512], f32), T([64], i64), T([8, 1024, 512], f32), T([512], f32), S([8, 1024, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]), S([8192, 512]))")
 def oracle_forward(inputs):
     """Run the complete dropout-residual-RMSNorm-dropout repro scope.
 

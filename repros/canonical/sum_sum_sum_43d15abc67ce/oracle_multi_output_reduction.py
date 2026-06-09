@@ -21,6 +21,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -245,6 +246,7 @@ def _torch_full_scope(inputs: tuple[Any, ...] | list[Any]):
     return view_default_1, view_default_2, permute_default, view_default_4
 
 
+@oracle_impl(hardware="H100", shapes="(T([32768, 128], f32), T([256, 128, 128], f32), T([256, 128, 128], f32), T([128], f32), S([256, 128, 128]), S([128]), S([128]), S([32768, 128]), S([128]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

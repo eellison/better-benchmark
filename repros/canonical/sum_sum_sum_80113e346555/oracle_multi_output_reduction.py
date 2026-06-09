@@ -23,6 +23,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -128,6 +129,7 @@ if triton is not None:
         tl.atomic_add(out_vec_2 + channels, (sum_x2 - sum_w * q2) * p2, sem="relaxed")
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 128, 4, 4], f32), T([64, 128, 4, 4], f32), T([64, 128, 4, 4], f32), T([], f32), T([64, 128, 4, 4], f32), T([128], f32), T([64, 32], f32), T([64, 32], f32), T([64, 128, 4, 4], f32), T([128], f32), T([64, 32], f32), T([64, 32], f32), S([64, 128, 16]), S([64, 128, 16]), S([64, 32, 4]), S([64, 32, 4]), S([1, 32, 4]), S([64, 32, 4, 16]), S([64, 32, 4, 16]), S([64, 128, 4, 4]), S([64, 32, 4]), S([64, 32, 4]), S([128]), S([64, 128, 16]), S([64, 32, 4]), S([64, 32, 4]), S([1, 32, 4]), S([64, 32, 4, 16]), S([64, 128, 4, 4]), S([64, 32, 4]), S([128]))")
 def oracle_forward(inputs):
     """Run the full-scope Triton oracle for Repro.forward()."""
     if triton is None:

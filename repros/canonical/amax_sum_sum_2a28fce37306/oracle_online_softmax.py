@@ -28,6 +28,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -171,6 +172,7 @@ def _launch_oracle(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 2], f32), T([1], i64), T([1], i64), T([], f32), S([1, 128, 2]))")
 def oracle_forward(inputs, *, block_n: int = 128) -> torch.Tensor:
     """Run the full-scope oracle computation.
 

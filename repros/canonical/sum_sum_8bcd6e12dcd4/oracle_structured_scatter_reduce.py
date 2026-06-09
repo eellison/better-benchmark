@@ -39,6 +39,7 @@ from pathlib import Path
 import torch
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -211,6 +212,7 @@ def torch_naive_scatter_reduce(
     return (sum_dim_int_list, sum_dim_int_list_1)
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 128, 27, 27], f32), T([512, 128, 27, 27], i8, gen=Index(9)), T([512, 64, 55, 55], b8), T([], f32), T([512, 64, 55, 55], b8), S([65536, 729]), S([65536, 729]), S([512, 128, 55, 55]))")
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return torch_fused_scatter_reduce(*inputs)

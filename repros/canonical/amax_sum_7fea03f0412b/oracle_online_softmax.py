@@ -46,6 +46,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -229,6 +230,7 @@ def oracle_masked_softmax(
     return _launch_oracle(mask, bmm, out_base, dropout_mask, block_k)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 128], i64), T([1536, 128, 128], f32), T([61], i64), S([128, 12, 128, 128]), S([128, 12, 128, 128]), S([1536, 128, 128]))")
 def oracle_forward(inputs):
     return oracle_masked_softmax(*inputs)
 

@@ -20,6 +20,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful on CPU
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -411,6 +412,7 @@ def _bench_callable(fn: Callable[[], object], warmup: int, rep: int, device: tor
     return (time.perf_counter() - start) * 1000.0 / rep
 
 
+@oracle_impl(hardware="H100", shapes="(T([4, 32, 512, 128], bf16), T([64], f32), T([4, 32, 512, 128], bf16), T([128], bf16), T([2048, 512], bf16), T([4, 512, 4, 1], f32), T([128], bf16), T([2048, 4096], bf16), T([4, 512, 32, 1], f32), S([4, 4, 8, 512, 128]), S([1, 64, 1]), S([1, 1, 512]), S([1, 512, 2, 64]), S([1, 512, 128]), S([4, 512, 512]), S([4, 512, -1, 128]), S([128]), S([4, 512, 4, 128]), S([4, 512, 512]), S([2048, 512]), S([4, 512, 4096]), S([4, 512, -1, 128]), S([128]), S([4, 512, 32, 128]), S([4, 512, 4096]), S([2048, 4096]))")
 def oracle_forward(inputs):
     return oracle_call(*inputs)
 

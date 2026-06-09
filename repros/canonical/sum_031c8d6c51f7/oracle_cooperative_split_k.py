@@ -20,6 +20,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps syntax-only checks usabl
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -247,6 +248,7 @@ def _time_cuda_us(fn: Callable[[], object], device: torch.device, warmup: int, r
     return times[0], median
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 4096, 90], f32), T([64, 2048, 90], f32))")
 def oracle_forward(inputs):
     return oracle_full(*inputs)
 

@@ -28,6 +28,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -473,6 +474,7 @@ def _check_one(
     return bool(ok)
 
 
+@oracle_impl(hardware="H100", shapes="(T([192, 128, 128], f32), T([32, 6, 128, 128], f32, stride=(98304, 1, 768, 6)), S([32, 6, 128, 128]), S([32, 6, 128, 128]), S([192, 128, 128]))")
 def oracle_forward(inputs):
     return oracle_online_softmax(*inputs)
 

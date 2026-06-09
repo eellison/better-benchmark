@@ -45,7 +45,8 @@ KERNEL_BLOCK_N = 256
 CLASSIFICATION = "BANDWIDTH_BOUND"
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -108,6 +109,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([1, 3, 256, 256], f32))")
 def oracle_forward(inputs):
     """Run the full reflected-padding repro in one Triton gather kernel."""
     if triton is None:

@@ -25,6 +25,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -86,6 +87,7 @@ def _validate_inputs(arg19: torch.Tensor, arg23: torch.Tensor) -> None:
         raise ValueError("oracle expects contiguous tensors from the repro shape config")
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 1, 1, 1], f32), T([1024, 1, 1, 1], f32))")
 def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
     """Run the full Repro.forward scope with a single Triton pointwise kernel."""
     if triton is None:

@@ -38,6 +38,7 @@ BLOCK_H = 1024
 # Use the installed oracle_harness package. The shared harness owns timing so
 # CUDA graph capture, GPU locking, and interleaved measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -190,6 +191,7 @@ def _torch_full_scope(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     return torch.ops.aten.reshape.default(affine, _shape_tuple(inputs[6]))
 
 
+@oracle_impl(hardware="H100", shapes="(T([25216, 768], f32), T([768], f32), T([128, 197, 768], f32), T([768], f32), T([768], f32), S([128, 197, 768]), S([25216, 768]))")
 def oracle_forward(inputs):
     """Run the complete Repro.forward gamma-residual LayerNorm scope."""
     addmm, gamma, residual, weight, bias = _validate_inputs(inputs)

@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -96,6 +97,7 @@ if triton is not None:
         tl.store(out3_ptr + offsets, values, mask=active)
 
 
+@oracle_impl(hardware="H100", shapes="(T([4, 512], i64, gen=Index(4)), S([4, -1, 512, 512]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, ...]:
     """Run the full segment-causal attention-bias construction."""
     if triton is None:

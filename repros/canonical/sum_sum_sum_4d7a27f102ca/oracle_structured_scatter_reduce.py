@@ -28,6 +28,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 # Import shared oracle infrastructure (installed via pip install -e .)
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -198,6 +199,7 @@ if triton is not None:
         tl.atomic_add(out1_ptr + bucket1 * C_ + c, partial1, sem="relaxed", mask=scatter1_mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 4, 49, 49], f32), T([49, 49], i64, gen=Index(169)), T([32768, 49, 49], f32), T([8192, 4, 49, 49], f32, stride=(9728, 2432, 49, 1)), T([49, 49], i64, gen=Index(169)), S([2401, 4]), S([8192, 4, 49, 49]), S([2401, 4]), S([32768, 49, 49]))")
 def oracle_forward(inputs):
     """Run the full-scope Triton oracle for Repro.forward()."""
     if triton is None:

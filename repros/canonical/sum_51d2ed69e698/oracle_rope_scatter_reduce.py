@@ -21,6 +21,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile working witho
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -318,6 +319,7 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
+@oracle_impl(hardware="H100", shapes="(T([4, 32, 512, 128], bf16), T([64], f32), T([4, 32, 512, 128], bf16), S([4, 8, 4, 512, 128]), S([1, 64, 1]), S([1, 1, 512]), S([1, 512, 2, 64]), S([1, 512, 128]), S([4, 512, 1024]), S([2048, 1024]), S([4, 512, 4096]), S([2048, 4096]))")
 def oracle_forward(inputs):
     return oracle_triton(*inputs)
 

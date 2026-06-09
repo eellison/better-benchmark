@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -102,6 +103,7 @@ if triton is not None:
             )
 
 
+@oracle_impl(hardware="H100", shapes="(T([197, 197], i64, gen=Index(732)), T([732, 12], f32), S([197, 197, -1]), S([128, 12, 197, 197]))")
 def oracle_forward(inputs):
     """Run the full Repro computation with direct destination-strided gather."""
     if triton is None:

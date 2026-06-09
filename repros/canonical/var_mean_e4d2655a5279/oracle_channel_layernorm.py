@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -285,6 +286,7 @@ def _torch_reference(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     return torch.permute(y, (0, 3, 1, 2))
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 640, 7, 7], f32), T([640], f32), T([640], f32))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full captured channel LayerNorm scope."""
     if triton is None:

@@ -19,6 +19,7 @@ except ModuleNotFoundError:  # pragma: no cover - allows CPU-only syntax checks.
 REPRO_ID = "sum_a3c9eb6b27f1"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -92,6 +93,7 @@ def get_repro_instance() -> torch.nn.Module:
     return _load_repro_module().Repro().to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
+@oracle_impl(hardware="H100", shapes="(T([4, 32, 512, 64], bf16), T([32], f32), T([4, 32, 512, 64], bf16), S([4, 8, 4, 512, 64]), S([1, 32, 1]), S([1, 1, 512]), S([1, 512, 2, 32]), S([1, 512, 64]), S([4, 512, 512]), S([2048, 512]), S([4, 512, 2048]), S([2048, 2048]))")
 def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     return oracle_rope_scatter_reduce(*inputs)
 

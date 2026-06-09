@@ -12,6 +12,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -181,6 +182,7 @@ def oracle_full_attention_softmax_dropout(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 1024, 1024], f32), T([8, 8, 1024, 1024], f32), T([64], i64), S([8, 8, 1024, 1024]), S([8, 8, 1024, 1024]), S([64, 1024, 1024]))")
 def oracle_forward(inputs):
     return oracle_full_attention_softmax_dropout(*inputs)
 

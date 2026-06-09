@@ -36,7 +36,8 @@ CLASSIFICATION = "BANDWIDTH_BOUND"
 # Use the installed oracle_harness package; run editable install before checks.
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -202,6 +203,7 @@ if triton is not None:
         tl.store(out1_ptr + offsets, y1, mask=elem_mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 4096], f32), T([128, 4096], f32), T([2048, 64], f32), T([1, 128, 64], i64, gen=Index(2048)), S([1, 128, 4096]), S([1, 128, 4096]), S([1, 128, 16, 256]), S([1, 128, 16, 256]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]), S([1, 128, 1, 32, 2]), S([1, 128, 1, 64]), S([1, 128, 16, 64]), S([1, 128, 16, 64]))")
 def oracle_forward(inputs):
     """Run the exact full Repro.forward scope with one fused Triton kernel."""
     if triton is None:

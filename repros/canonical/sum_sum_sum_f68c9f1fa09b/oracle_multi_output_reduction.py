@@ -15,6 +15,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -251,6 +252,7 @@ def reference_outputs(inputs: tuple[object, ...]) -> tuple[torch.Tensor, ...]:
         return model(*inputs)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 2560, 7, 7], f32), T([128, 2560, 1, 1], f32), T([128, 1, 1, 1], f32), T([128, 2560, 7, 7], f32), T([2560], f32), S([2560]), S([2560]), S([128, 2560, 1, 1]))")
 def oracle_forward(inputs):
     return oracle_fused(*inputs)
 

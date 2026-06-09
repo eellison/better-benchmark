@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -98,6 +99,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return arg21_1, mm, shape_param
 
 
+@oracle_impl(hardware="H100", shapes="(T([1024, 4096], f32), T([1024, 4096], f32), S([4096]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the full Repro.forward scope with the same output count/layouts."""
     if triton is None:

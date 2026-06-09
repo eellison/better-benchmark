@@ -23,6 +23,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -118,6 +119,7 @@ def _check_exact_default_scope(inputs):
         raise RuntimeError("oracle_groupnorm_residual.py expects contiguous default repro inputs")
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 256, 2, 2], f32), T([256], f32), T([256], f32), T([64, 256, 2, 2], f32), S([64, 32, 8, 4]), S([64, 256, 2, 2]))")
 def oracle_forward(inputs):
     """Run the full captured Repro.forward computation."""
     if triton is None:

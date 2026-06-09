@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     get_hardware_info,
@@ -226,6 +227,7 @@ def _validate_inputs(
     return x, running_mean, running_var, weight, bias
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 640, 8, 8], f32, stride=(40960, 1, 5120, 640)), T([640], f32), T([640], f32), T([640], f32), T([640], f32), S([128, 640]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]):
     if triton is None:
         raise RuntimeError("Triton is required for oracle_bn_training_silu_mean.py")

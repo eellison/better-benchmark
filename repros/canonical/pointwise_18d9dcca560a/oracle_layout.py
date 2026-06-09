@@ -15,6 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -58,6 +59,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, values)
 
 
+@oracle_impl(hardware="H100", shapes="()")
 def oracle_forward(inputs: list[object] | tuple[object, ...]) -> torch.Tensor:
     """Run the full no-input repro and return the exact eager output layout."""
     if inputs:

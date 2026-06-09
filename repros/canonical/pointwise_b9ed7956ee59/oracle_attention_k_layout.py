@@ -15,6 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile useful.
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -118,6 +119,7 @@ def _output_stride(hidden: int) -> tuple[int, int, int]:
     return (HEAD_DIM, hidden, 1)
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 768], f16), S([1, 512, 768]), S([1, 512, -1, 64]), S([1, 12, 512, 64]), S([12, 512, 64]))")
 def oracle_forward(inputs: list[object] | tuple[object, ...]) -> torch.Tensor:
     """Run the full attention-K layout graph while preserving eager strides."""
     if triton is None:

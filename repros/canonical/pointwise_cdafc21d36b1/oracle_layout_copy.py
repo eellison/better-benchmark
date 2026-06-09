@@ -32,7 +32,8 @@ IN_STRIDE = (HEADS * SEQ * DIM, SEQ * DIM, DIM, 1)
 BLOCK_ROWS = 4
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    oracle_impl,  # noqa: E402
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -93,6 +94,7 @@ if triton is not None:
         tl.store(out + out1, vals1, mask=row_mask[:, None])
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 12, 256, 64], f32), S([32768, 768]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with one Triton layout-copy kernel."""
     if triton is None:

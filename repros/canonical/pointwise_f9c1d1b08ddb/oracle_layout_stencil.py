@@ -26,6 +26,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -226,6 +227,7 @@ def oracle_layout_stencil(
     return _launch_oracle(lhs, rhs, values, offsets, block_m=block_m, num_warps=num_warps)
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 128, 27, 27], f16), T([512, 128, 27, 27], f16))")
 def oracle_forward(inputs: tuple[Any, ...] | list[Any]) -> tuple[torch.Tensor, torch.Tensor]:
     """Run the full-scope oracle on the exact Repro.forward input tuple."""
     if len(inputs) != 2:

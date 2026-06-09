@@ -21,6 +21,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable withou
 REPRO_ID = "sum_b691b8dad90a"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -209,6 +210,7 @@ def oracle_full(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 64, 95696], f32), T([64, 64, 95696], f32), T([64, 128, 95696], f32))")
 def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
     return oracle_full(*inputs)
 

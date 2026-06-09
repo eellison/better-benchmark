@@ -11,6 +11,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -146,6 +147,7 @@ def oracle_online_softmax(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 128, 128], f32), S([16, 32, 128, 128]), S([16, -1, 128, 128]), S([16, 32, 128, 128]), S([512, 128, 128]))")
 def oracle_forward(inputs):
     """Run the oracle computation with the same inputs as Repro.forward."""
     return oracle_online_softmax(*inputs)

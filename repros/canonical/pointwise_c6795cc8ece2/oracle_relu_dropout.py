@@ -12,6 +12,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -123,6 +124,7 @@ def _launch(
     return out, le
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 4096], f32))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> tuple[torch.Tensor, torch.Tensor]:
     addmm = _validate_inputs(inputs)
     out = torch.empty_like(addmm)

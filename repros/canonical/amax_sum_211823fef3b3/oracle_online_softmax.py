@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -163,6 +164,7 @@ def oracle_online_softmax(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([768, 49, 49], f32), S([128, 6, 49, 49]), S([128, 6, 49, 49]), S([768, 49, 49]))")
 def oracle_forward(inputs):
     """Run the oracle computation."""
     return oracle_online_softmax(*inputs)

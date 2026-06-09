@@ -16,6 +16,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -143,6 +144,7 @@ if triton is not None:
         tl.store(out31 + offsets, values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(S([1, -1, 512, 512]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor, ...]:
     """Run the full 32-output causal-mask repro scope."""
     if triton is None:

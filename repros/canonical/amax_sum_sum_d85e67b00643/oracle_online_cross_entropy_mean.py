@@ -15,6 +15,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -182,6 +183,7 @@ def oracle_online_cross_entropy_mean(
     )
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 1024], i64), T([8192, 50268], f32), S([8, 1024, 50265]), S([8192, 50265]))")
 def oracle_forward(inputs):
     """Run the exact scalar output computation from Repro()(*make_inputs())."""
     return oracle_online_cross_entropy_mean(*inputs)

@@ -11,6 +11,7 @@ import torch
 import triton
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -135,6 +136,7 @@ def _compile_model(model: torch.nn.Module, inputs: tuple[Any, ...]) -> torch.nn.
     return compiled
 
 
+@oracle_impl(hardware="H100", shapes="(T([12, 4096, 64], f16), T([1, 12, 4096, 64], f16, stride=(3145728, 64, 768, 1)), T([4096, 768], f16), S([12, 4096, 1, 1, 1, 64]), S([1, 12, 1, 4096, 64]), S([1, 12, 1, 1]), S([1, 12, 4096]), S([1, 12, 4096]), S([-1, -1, -1, 64]), S([1, 12, -1, 64, 64]), S([1, 12, 64, 64, 64]), S([768, 64, 64]), S([1, 12, 64, 64, 128]), S([768, 64, 128]), S([1, 4096, 768]), S([1, 4096, 12, 64]), S([-1, -1, -1, 64]), S([1, 12, -1, 64, 64]), S([1, 12, 64, 128, 64]), S([768, 128, 64]))")
 def oracle_forward(inputs):
     return oracle_reformer_lsh_routing(*inputs)
 

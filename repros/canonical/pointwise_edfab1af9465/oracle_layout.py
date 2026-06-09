@@ -17,6 +17,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful.
     libdevice = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -86,6 +87,7 @@ def _require_input(value: object) -> torch.Tensor:
     return value
 
 
+@oracle_impl(hardware="H100", shapes="(T([1000, 16], f32))")
 def oracle_forward(inputs: list[object] | tuple[object, ...]) -> torch.Tensor:
     """Run the full Repro.forward scope with one Triton pointwise kernel."""
     if triton is None:

@@ -38,6 +38,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -181,6 +182,7 @@ def torch_fused_bilinear_scatter_reduce(
     return (out0, out1)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8, 512, 160, 239], f32), T([160, 1], f32), T([238], f32), T([160, 1], i64, gen=Index(8)), T([238], i64, gen=Index(8)), T([238], i64, gen=Index(8)), T([160, 1], i64, gen=Index(8)), T([8, 256, 80, 119], f32), T([1, 256, 1, 1], f32), T([1, 256, 1, 1], f32), T([256], f32), T([256], f32), T([], f32))")
 def oracle_forward(inputs):
     """Run the fused bilinear scatter + BN backward reduction oracle.
 

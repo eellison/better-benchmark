@@ -56,6 +56,7 @@ from repro_harness import parse_shapes_config, make_inputs_from_config
 import importlib.util
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -192,6 +193,7 @@ if __name__ == "__main__":
     benchmark()
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 2048], bf16), T([2048], bf16), T([4, 512, 2048], bf16), T([4, 512, 1], f32), T([16384], i64, gen=Index(16384)), T([16384, 1], b8), T([16384, 2048], bf16), T([2048, 8], f32), T([16384], i64, gen=Index(16384)), T([2048, 1], f32), T([2048, 8], i64, gen=Index(128)), T([2048, 128], bf16), T([2048, 1], f32), T([2048, 1], f32), S([4, 512, 2048]), S([2048]), S([4, 512, 2048]), S([2048, 2048]), S([2048, 8, 2048]), S([16384, 2048]), S([2048, 8]), S([2048, 8]))")
 def oracle_forward(inputs):
     return oracle_compiled(*inputs)
 

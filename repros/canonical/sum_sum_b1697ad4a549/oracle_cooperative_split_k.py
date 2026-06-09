@@ -11,6 +11,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -240,6 +241,7 @@ def _compile_default(model: torch.nn.Module, inputs: tuple[object, ...]):
     return compiled
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 192, 32, 32], f32), T([128, 96, 32, 32], f32), T([1, 96, 1, 1], f32), T([1, 96, 1, 1], f32), T([96], f32), T([96], f32))")
 def oracle_forward(inputs):
     return oracle_full(*inputs)
 

@@ -12,6 +12,7 @@ from typing import Callable
 import torch
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -141,6 +142,7 @@ def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: 
     return best_s * 1_000_000.0
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32), T([768], f32), T([128, 768], f32), T([128, 1], f32), T([768], f32), T([25216, 768], f32), S([128, 196, 768]), S([128, 197, 768]), S([768]), S([25216, 768]), S([768]))")
 def oracle_forward(inputs):
     return oracle_scatter_reduce(*inputs)
 

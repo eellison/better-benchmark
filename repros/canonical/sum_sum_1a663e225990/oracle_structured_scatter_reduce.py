@@ -29,6 +29,7 @@ FINAL_BLOCK_C = 8
 
 # Import shared oracle infrastructure (installed via pip install -e .)
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -249,6 +250,7 @@ def _validate_inputs(inputs):
     return arg324_1, arg250_1, arg102_1, arg247_1, arg248_1, arg249_1, arg325_1
 
 
+@oracle_impl(hardware="H100", shapes="(T([], f32), T([], f32), T([32, 512], i64), T([32, 512, 30522], f32), T([16384, 1], f32), T([16384, 1], f32), T([32, 512, 30522], f32), S([1, 30522]), S([16384, 30522]), S([-1, 30522]), S([32, 512, 30522]), S([16384, 30522]), S([30522]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

@@ -26,6 +26,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Do not add custom benchmark functions. bench_oracle() owns timing so CUDAGraph,
 # GPU locking, and interleaved oracle/compile measurement are preserved.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -173,6 +174,7 @@ def _validate_and_layout(
     return mm_199, clone_shape, output_shape, total_elements, seq, heads, head_dim
 
 
+@oracle_impl(hardware="H100", shapes="(T([401408, 128], f32), S([8192, 49, 128]), S([8192, 49, 4, 32]), S([32768, 49, 32]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

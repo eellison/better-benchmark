@@ -25,6 +25,7 @@ import triton
 import triton.language as tl
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -190,6 +191,7 @@ def reference_output(inputs: tuple[object, ...]) -> torch.Tensor:
         return model(*inputs)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 512, 7, 7], f32), T([128, 512, 7, 7], i8, gen=Index(4)), T([128, 512, 14, 14], b8), T([], f32), S([65536, 49]), S([65536, 49]), S([128, 512, 14, 14]))")
 def oracle_forward(inputs):
     return oracle_structured_pool_upsample_reduce(*inputs)
 

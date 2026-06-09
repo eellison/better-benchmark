@@ -28,6 +28,7 @@ CLASSIFICATION = "BANDWIDTH_BOUND"
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -93,6 +94,7 @@ if triton is not None:
         tl.store(out_ptr + offsets, values, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([32], i64, gen=Index(32)), T([32, 128], f32), S([32, 128, 1]))")
 def oracle_forward(inputs):
     """Run the full repro with one Triton gather kernel."""
     if triton is None:

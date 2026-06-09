@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps syntax checks usable without Tri
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -145,6 +146,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return getitem, arg401_1, arg404_1
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 1536, 7, 7], f32), T([128, 1536, 7, 7], f32), T([128, 1536, 1, 1], f32))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full compiled computation scope for Repro.forward."""
     getitem, arg401_1, arg404_1 = _validate_inputs(inputs)

@@ -28,6 +28,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 #   python -m pip install --no-build-isolation -e .
 # Do not add oracle-local sys.path or REPO_ROOT import hacks.
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -218,6 +219,7 @@ def oracle_embedding_layernorm(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([30000, 128], f16), T([1, 512], i64, gen=Index(30000)), T([1, 512], i64, gen=Index(2)), T([1, 512], i64, gen=Index(512)), T([2, 128], f16), T([512, 128], f16), T([128], f16), T([128], f16), S([1, 512]), S([512, 128]))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

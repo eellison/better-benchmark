@@ -22,6 +22,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -108,6 +109,7 @@ def _next_power_of_2(value: int) -> int:
     return triton.next_power_of_2(value)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8], i64, gen=Index(2)), T([8192, 2], f32), T([8, 1024], i64), S([8, 1024, 2]))")
 def oracle_forward(inputs):
     """Run the full-scope oracle computation."""
     _require_triton_cuda()

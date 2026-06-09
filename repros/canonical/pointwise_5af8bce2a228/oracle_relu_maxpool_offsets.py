@@ -21,6 +21,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -131,6 +132,7 @@ def _validate_input(inputs):
     return convolution_9, (batch, channels, h_in, w_in, h_out, w_out)
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 512, 28, 28], f16))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

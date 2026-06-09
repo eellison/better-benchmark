@@ -17,6 +17,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -112,6 +113,7 @@ if triton is not None:
         tl.store(le_ptr + offsets, relu <= 0.0, mask=mask)
 
 
+@oracle_impl(hardware="H100", shapes="(T([512, 1280, 1, 1], f32), S([512, 1280]))")
 def oracle_forward(inputs):
     """Run the full Repro.forward scope with a fused pointwise Triton kernel."""
     if triton is None:

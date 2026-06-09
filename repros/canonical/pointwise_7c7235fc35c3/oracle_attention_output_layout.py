@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - keeps py_compile useful without Triton
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -128,6 +129,7 @@ def _validate_inputs(inputs: Sequence[object]) -> tuple[torch.Tensor, int]:
     return bmm_23, heads
 
 
+@oracle_impl(hardware="H100", shapes="(T([12, 512, 64], f32), S([1, 12, 512, 64]), S([1, 512, -1]), S([512, 768]))")
 def oracle_forward(inputs: Sequence[object]) -> torch.Tensor:
     """Run the full Repro.forward scope and return the final dense fp16 layout."""
     if triton is None:

@@ -22,6 +22,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
     DeviceProperties = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -160,6 +161,7 @@ def _check_shape_param(value: object, expected: tuple[int, ...], name: str) -> N
         raise ValueError(f"unexpected {name}: got={value!r} expected={expected!r}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([4096, 1536], f32), S([8, 512, 1536]), S([8, 512, 24, -1]), S([-1, 512, 64]))")
 def oracle_forward(inputs: tuple[object, ...] | list[object]) -> torch.Tensor:
     """Run the complete view/permute/clone/div/permute computation."""
     if triton is None:

@@ -21,6 +21,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -322,6 +323,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+@oracle_impl(hardware="H100", shapes="(T([384, 768, 64], f32), S([96, 4, 768, 64, 1]), S([18874368]), S([8, 12, 1024, 64]), S([1024, 8, 768]), S([768]), S([8192, 768]))")
 def oracle_forward(inputs):
     return oracle_structured_pool_upsample_backward_reduce(*inputs)
 

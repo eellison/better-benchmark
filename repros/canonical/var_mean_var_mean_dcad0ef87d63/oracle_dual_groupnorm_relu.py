@@ -39,6 +39,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 #   python -m pip install --no-build-isolation -e .
 # Do not add oracle-local sys.path or REPO_ROOT import hacks.
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -206,6 +207,7 @@ def _validate_inputs(
     return x0, x1, weight0, bias0, weight1, bias1, (n_batches, channels, height, width)
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 512, 1, 1], f32), T([64, 512, 1, 1], f32), T([512], f32), T([512], f32), T([512], f32), T([512], f32), S([64, 32, 16, 1]), S([64, 32, 16, 1]), S([64, 512, 1, 1]), S([64, 512, 1, 1]))")
 def oracle_forward(inputs: list[Any] | tuple[Any, ...]) -> torch.Tensor:
     """Run the full dual groupnorm, affine, sum, and ReLU Repro.forward scope."""
     if triton is None:

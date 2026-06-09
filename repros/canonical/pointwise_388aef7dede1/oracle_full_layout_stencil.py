@@ -19,6 +19,7 @@ REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -113,6 +114,7 @@ def _expect_layout_inputs(mm_44: torch.Tensor, arg180_1: torch.Tensor) -> None:
         raise ValueError(f"arg180_1 must be contiguous, got stride={tuple(arg180_1.stride())}")
 
 
+@oracle_impl(hardware="H100", shapes="(T([2048, 768], f32), T([768], f32), S([1024, 2, 768]), S([1024, 2, 12, 64]), S([24, 1024, 64]), S([24, 2, 512, 64]), S([72, 512, 64]))")
 def oracle_forward(inputs):
     """Compute the full Repro.forward scope with one fused Triton materialization."""
     mm_44, arg180_1 = inputs[0], inputs[1]

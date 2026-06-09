@@ -23,6 +23,7 @@ except ImportError:
     tl = None
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -197,6 +198,7 @@ def _launch_oracle(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([64, 512], i64), T([32768, 30524], f32), S([64, 512, 30522]), S([32768, 30522]))")
 def oracle_forward(inputs, *, block_n: int = 16384, num_warps: int = 8):
     """Run the full-scope oracle computation.
 

@@ -20,6 +20,7 @@ except ModuleNotFoundError:  # pragma: no cover - keeps py_compile usable withou
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -240,6 +241,7 @@ def _compare_outputs(ref: Any, got: Any, rtol: float, atol: float) -> bool:
     return ok
 
 
+@oracle_impl(hardware="H100", shapes="(T([4, 512], i64), T([4, 512, 50257], f32), S([-1, 50257]))")
 def oracle_forward(inputs):
     return oracle_shifted_causal_lm_cross_entropy_mean(*inputs)
 

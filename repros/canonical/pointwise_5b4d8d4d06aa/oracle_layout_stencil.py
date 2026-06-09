@@ -53,6 +53,7 @@ COMPILE_CONFIGS = [
 
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -142,6 +143,7 @@ def _validate_inputs(inputs: list[Any] | tuple[Any, ...]) -> tuple[torch.Tensor,
     return mm, bias
 
 
+@oracle_impl(hardware="H100", shapes="(T([128, 768], f32), T([768], f32), S([128, 1, 768]), S([128, 1, 12, 64]))")
 def oracle_forward(inputs):
     """Run the full-scope Triton oracle for Repro.forward()."""
     if triton is None:
