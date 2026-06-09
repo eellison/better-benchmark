@@ -177,32 +177,6 @@ def run_bench(rep: int, warmup: int, no_compile: bool) -> None:
         print(f"torch.compile {label}: {compiled_us:.3f} us")
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="run correctness check")
-    parser.add_argument("--bench", action="store_true", help="run timing benchmark")
-    parser.add_argument("--rtol", type=float, default=2e-3)
-    parser.add_argument("--atol", type=float, default=2e-2)
-    parser.add_argument("--rep", type=int, default=100)
-    parser.add_argument("--warmup", type=int, default=25)
-    parser.add_argument("--no-compile", action="store_true", help="only benchmark oracle")
-    args = parser.parse_args()
-
-    if not args.check and not args.bench:
-        args.check = True
-        args.bench = True
-
-    if args.check and not run_check(rtol=args.rtol, atol=args.atol):
-        sys.exit(1)
-    if args.bench:
-        run_bench(rep=args.rep, warmup=args.warmup, no_compile=args.no_compile)
-
-
-if __name__ == "__main__":
-    with torch.no_grad():
-        main()
-
-
 def oracle_forward(inputs):
     """Thin wrapper for oracle_harness compatibility."""
     return oracle_fused(*prepare_oracle_inputs(*inputs))
