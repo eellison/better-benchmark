@@ -21,3 +21,13 @@
 - The dominant cost is the verbose argmax unrolled code: for each of 8 pairwise comparisons in the 9-element window, Inductor emits ~6 comparison/logic ops (gt, eq, ne, logical_or, logical_and, where) for NaN handling and tie-breaking
 - coord_descent_tuning: 316us (worse), combo_kernels: 619us (worse), multi_kernel=2: 308us (worse)
 - The oracle uses BLOCK_C=4 channels and BLOCK_OUT=128 output positions per thread block with num_warps=8, which gives better data reuse of BN parameters
+
+## Re-measurement 2026-06-09 (current pr-184905 branch)
+
+- Oracle: 117.4-117.6 us, Compile: 106.1-106.2 us, Ratio: **0.90x — AT_FLOOR (compile beats oracle)**
+- Measured twice with fresh cache, CUDAGraph + GPU lock; reproducible.
+- The 2.29x "remaining gap" above is stale: the unrolled argmax tie-break
+  optimization (14b0254f8a9) plus subsequently landed scheduler/codegen fixes
+  (inline_recomputable_producers et al.) closed it entirely.
+- Status: CLOSED (no remaining gap; oracle could be rewritten if a tighter
+  floor is believed to exist)

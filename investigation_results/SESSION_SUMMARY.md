@@ -241,17 +241,22 @@ All in `/tmp/pytorch-work/torch/_inductor/`:
 | Fix split-K regression | 5.89x→1.01x | Tightened aggressive threshold |
 | Fix ND reduction assertion | multi_kernel crash | Clamp to representable numel |
 
-### Remaining gaps in partially-fixed repros:
+### Remaining gaps in partially-fixed repros (re-measured 2026-06-09, fresh cache, CUDAGraph+lock):
 
 | Repro | Current | Remaining gap reason | Fix needed |
 |-------|---------|---------------------|------------|
-| sum_51d2ed69e698 | 1.27x | RoPE slice_scatter branchy conditionals | Direct gather codegen for rotation |
-| sum_sum_e9338369070e | 1.59x | Cooperative grid-barrier limits RSPLIT | Decomposed split-K lowering |
-| var_mean_598830735cf6 | 1.29x | BN→maxpool stencil materialization | Fix inline_recomputable_producers index bug |
-| var_mean_mean_2ac1c2eb8544 | 1.25x | Persistent tile vs serial-loop for tiny rnumel | Serial-loop codegen template |
-| sum_sum_sum_04ab10ca59ee | 1.37x | LN-backward 3+ consumer materialization | Shared-buffer recomputation in scheduler |
-| mean_7639bfb9be38 | 1.09x | Flat 1D tiling for BN channel broadcast | 2D/3D channel-outer tiling |
-| pointwise_437415a3398d | 1.21x | Flat tiling misses BN param reuse in stencil | Channel-blocked stencil tiling |
+| sum_51d2ed69e698 | 1.27x | RoPE slice_scatter branchy conditionals | Direct gather codegen for rotation (in progress) |
+| sum_sum_e9338369070e | AT_FLOOR (0.68x) | — closed by split-K + cooperative widening | none |
+| var_mean_598830735cf6 | 1.40x | BN→maxpool stencil materialization | Fix inline_recomputable_producers index bug |
+| var_mean_mean_2ac1c2eb8544 | 1.24x | Persistent tile vs serial-loop for tiny rnumel | Serial-loop codegen template |
+| sum_sum_sum_04ab10ca59ee | 1.39x | RMSNorm-backward chain not fused into scatter | Pointwise-chain-into-scatter fusion |
+| mean_7639bfb9be38 | AT_FLOOR (0.99x) | — closed by rsqrt canonicalization + fold_bn_affine | none (gate added 6703f38fa2d) |
+| pointwise_437415a3398d | AT_FLOOR (0.90x) | — closed by argmax tie-break opt (14b0254f8a9) + scheduler fixes | none |
+
+Note 2026-06-09: loop-invariant compute/gather hoisting (design TODO #6 generic
+version) implemented and committed as 52d4cadfac0 but measured NEUTRAL on B200
+(memory-bound looped reductions hide the redundant work) — config
+`hoist_invariant_compute`, default OFF. See inductor_writeups/loop_invariant_hoisting.md.
 
 ---
 
