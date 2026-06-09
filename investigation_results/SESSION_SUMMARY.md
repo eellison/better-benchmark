@@ -328,6 +328,23 @@ writes the epilogue output in the same pass. Sub-variants:
 9. **Realize-reads threshold / scheduler-aware realization** (1.4x→1.1x)
    - Don't realize if all consumers will fuse together
    - Validated that threshold=30 works globally (no regressions) but want proper scheduler logic
+   - Design direction (2026-06-09, discussed with user): cost-based realization
+     is valid on its own — heavy transcendentals/gathers are intrinsically
+     expensive, so "realize, don't recompute per consumer" is a general
+     principle. What's missing is the second half: after realizing an expensive
+     broadcast-shaped value, the scheduler should still FUSE it into consumers
+     when tiling guarantees compute-once-per-tile (e.g. channel-outer tiling for
+     a [C] value broadcast into [N,C,H,W]). "Realizing fix (don't
+     double-compute) + scheduler fix (retain fusion & not overcompute)."
+     Realization should mark "expensive — fuse only if tiled right", not
+     permanently sever fusion. One scheduling-time decision subsumes the hint
+     pile (realize_heavy_transcendentals_on_reuse,
+     realize_indirect_indexing_on_reuse, realize_reads_threshold) and removes
+     the need for graph-shape workarounds (rotate_half sign-via-multiply,
+     1406552b9d3). Context: should_realize_on_reuse at ir.py:10194 decides at
+     lowering time with no fusion knowledge; verified the scheduler often
+     re-fuses anyway (2-user rotate_half probe → 1 kernel) but splits kernels
+     when re-fusion fails (pointwise_2cb944a69993).
 
 ### Lower impact / narrow:
 10. **Multi-store codegen** (2.25x ShuffleNet) — iterate half elements, write both branches
