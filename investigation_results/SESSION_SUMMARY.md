@@ -223,6 +223,23 @@ All in `/tmp/pytorch-work/torch/_inductor/`:
 | Small-rnumel persistent configs | 1.54x→1.25x | Swin spatial mean |
 | Optimized argmax | 2.40x→1.21x | DenseNet maxpool |
 | Longformer scatter bypass | 8→5 kernels | Diagonal attention (partial) |
+| Decomposed split-K | 2.96x→0.69x | BN-backward undersaturated (beats oracle) |
+| Scatter-add-into + dtype cast | 2.20x→0.87x | Llama embedding backward (beats oracle) |
+| Scatter multi-user relaxation | 1.91x→1.37x | MT5 dual-branch embedding |
+| Channel-sliced scatter | 1.21x | SqueezeNet fire modules |
+| Inline recomputable (stencil) | 1.43x→0.75x | BN+ReLU→maxpool (beats oracle) |
+| Inline recomputable (avgpool) | 1.44x→0.94x | BN+ReLU→avgpool (beats oracle) |
+| Inline recomputable (cheap) | 1.41x→1.10x | Swin window-reverse+LN |
+| Masked softmax any-elimination | 1.15x→1.13x | HF attention masks |
+| Expand-sum elision | 1.69x→1.17x | avg_pool2d_backward (28 repros) |
+| Materialize heavy transcendentals | 2.19x→1.27x | RoPE sin/cos broadcast |
+| Realize indirect-indexed on reuse | 1.62x→0.89x | Swin position bias (beats oracle) |
+| Clamp embedding indices | 1.52x→1.01x | T5 causal softmax |
+| SwiGLU shared-cat heuristic | 2.10x→0.97x | Qwen3 SwiGLU backward |
+| One-hot reduction elimination | 1.62x→1.03x | CE backward (GPTNeo, 262K vocab) |
+| Fix inline_recomputable crashes | 66+ repros unblocked | Safety checks + StarDep + cycle detection |
+| Fix split-K regression | 5.89x→1.01x | Tightened aggressive threshold |
+| Fix ND reduction assertion | multi_kernel crash | Clamp to representable numel |
 
 ### Remaining gaps in partially-fixed repros:
 
