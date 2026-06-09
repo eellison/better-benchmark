@@ -12,6 +12,9 @@ Provides:
   - get_hardware_info(): get GPU hardware properties for kernel config selection
   - get_shape_key(inputs): extract hashable shape signature from inputs
   - bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, ...): benchmark across all shapes
+  - OracleRegistry: per-file registration-based oracle dispatch
+  - register_oracle: decorator for registering oracle implementations
+  - dispatch_oracle: find and call best-matching oracle for current hw/shape
 """
 from __future__ import annotations
 
@@ -55,6 +58,175 @@ def get_shape_key(inputs):
         if isinstance(inp, torch.Tensor):
             shapes.append(tuple(inp.shape))
     return tuple(shapes)
+
+
+# ---------------------------------------------------------------------------
+# Oracle dispatch: registration-based multi-implementation dispatch
+# ---------------------------------------------------------------------------
+
+def get_gpu_kind() -> str:
+    """Detect GPU kind as a short string like 'B200', 'H100', 'A100'.
+
+    Uses the same detection logic as repro_harness._detect_hardware().
+    Cached after first call.
+    """
+    if not hasattr(get_gpu_kind, "_cached"):
+        try:
+            import subprocess
+            out = subprocess.check_output(
+                ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
+                text=True, timeout=5
+            ).strip().split("\n")[0]
+            for kind in ("B200", "H200", "H100", "A100", "V100"):
+                if kind in out:
+                    get_gpu_kind._cached = kind
+                    break
+            else:
+                get_gpu_kind._cached = out.replace(" ", "_")[:20]
+        except Exception:
+            get_gpu_kind._cached = "unknown"
+    return get_gpu_kind._cached
+
+
+class OracleRegistry:
+    """Per-file oracle registry supporting (hardware, shape) dispatch.
+
+    Each oracle file creates its own registry instance. Registered oracle
+    implementations are standalone callables (their own kernels, own autotune).
+
+    Dispatch priority (first match wins):
+      1. Exact: hardware matches AND shape predicate passes
+      2. Shape-only: no hardware constraint, shape predicate passes
+      3. Hardware-only: hardware matches, no shape constraint
+      4. Default: no constraints at all
+
+    Usage in an oracle file:
+        from oracle_harness import OracleRegistry
+
+        registry = OracleRegistry()
+
+        @registry.register(hardware="B200", shape=lambda inputs: inputs[0].shape[-1] <= 1024)
+        def oracle_persistent_small(inputs):
+            ...
+
+        @registry.register(hardware="B200", shape=lambda inputs: inputs[0].shape[-1] > 1024)
+        def oracle_split_k(inputs):
+            ...
+
+        @registry.register()  # default fallback
+        def oracle_default(inputs):
+            ...
+
+        def oracle_forward(inputs):
+            return registry.dispatch(inputs)
+    """
+
+    def __init__(self):
+        self._entries = []  # list of (hardware, shape_pred, fn, description)
+
+    def register(self, hardware=None, shape=None, description=None):
+        """Decorator to register an oracle implementation.
+
+        Args:
+            hardware: GPU kind string (e.g. "B200", "H100") or None for any.
+            shape: Callable(inputs) -> bool predicate, or None for any shape.
+            description: Human-readable string documenting what this variant
+                targets (e.g. "persistent single-pass, inner <= 1024").
+
+        Returns:
+            Decorator that registers the function and returns it unchanged.
+        """
+        def decorator(fn):
+            desc = description or fn.__name__
+            self._entries.append((hardware, shape, fn, desc))
+            return fn
+        return decorator
+
+    def dispatch(self, inputs):
+        """Find best matching oracle and call it.
+
+        Lookup order:
+          1. hardware+shape match (both constraints satisfied)
+          2. shape-only match (hardware=None, shape predicate passes)
+          3. hardware-only match (hardware matches, shape=None)
+          4. default (both hardware=None and shape=None)
+
+        Raises RuntimeError if no matching implementation is found.
+        """
+        current_hw = get_gpu_kind()
+
+        # Tier 1: exact match (hardware + shape)
+        for hw, shape_pred, fn, _desc in self._entries:
+            if hw is not None and hw == current_hw and shape_pred is not None:
+                try:
+                    if shape_pred(inputs):
+                        return fn(inputs)
+                except Exception:
+                    continue
+
+        # Tier 2: shape-only match (hardware=None, shape predicate passes)
+        for hw, shape_pred, fn, _desc in self._entries:
+            if hw is None and shape_pred is not None:
+                try:
+                    if shape_pred(inputs):
+                        return fn(inputs)
+                except Exception:
+                    continue
+
+        # Tier 3: hardware-only match (hardware matches, no shape constraint)
+        for hw, shape_pred, fn, _desc in self._entries:
+            if hw is not None and hw == current_hw and shape_pred is None:
+                return fn(inputs)
+
+        # Tier 4: default (no constraints)
+        for hw, shape_pred, fn, _desc in self._entries:
+            if hw is None and shape_pred is None:
+                return fn(inputs)
+
+        raise RuntimeError(
+            f"No oracle registered for hardware={current_hw!r} with given input shapes. "
+            f"Registry has {len(self._entries)} entries."
+        )
+
+    def list_entries(self):
+        """List registered entries for debugging."""
+        entries = []
+        for hw, shape_pred, fn, desc in self._entries:
+            entries.append({
+                "hardware": hw,
+                "has_shape_pred": shape_pred is not None,
+                "fn_name": fn.__name__,
+                "description": desc,
+            })
+        return entries
+
+    def clear(self):
+        """Clear all registrations (useful for testing)."""
+        self._entries.clear()
+
+
+# Module-level convenience for simple cases (single oracle file, not imported
+# by multiple files simultaneously). For multi-file use, instantiate your own
+# OracleRegistry per file.
+_default_registry = OracleRegistry()
+
+
+def register_oracle(hardware=None, shape=None, description=None):
+    """Module-level decorator using the default global registry.
+
+    For per-file isolation (recommended), use OracleRegistry() directly.
+    """
+    return _default_registry.register(hardware=hardware, shape=shape, description=description)
+
+
+def dispatch_oracle(inputs):
+    """Module-level dispatch using the default global registry."""
+    return _default_registry.dispatch(inputs)
+
+
+def reset_oracle_registry():
+    """Reset the default global registry (call between oracle file loads)."""
+    _default_registry.clear()
 
 
 # ---------------------------------------------------------------------------
