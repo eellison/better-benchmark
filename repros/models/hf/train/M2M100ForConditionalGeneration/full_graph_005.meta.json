@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "inputs": [],
+  "tensor_attrs": {},
+  "graph": "full_graph_005.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "M2M100ForConditionalGeneration",
+    "graph": "full_graph_005.py"
+  }
+}
