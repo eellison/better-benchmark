@@ -38,6 +38,7 @@ repros/canonical/mean_376234b0e316/
   repro.py       # standalone nn.Module + make_inputs()
   meta.json      # pattern hash, ops, reduction types, model list
   shapes.txt     # per-model shape configs
+  oracle_*.py    # hand-optimized performance floor (see Oracles below)
 ```
 
 Per-model directories hold full post-grad graphs for recapture and a manifest listing which canonical patterns that model produces.
@@ -73,6 +74,64 @@ captured graphs get `full_graph_NNN.meta.json` sidecars with explicit input
 constraints; older checked-in graphs without enough constraint metadata are
 reported as `skipped` instead of being run with guessed integer/symbolic inputs.
 Graph-level SOL/oracle accounting is not implemented yet.
+
+## Oracles
+
+Each canonical repro carries an **oracle** — a hand-optimized reference
+implementation serving as the performance floor for `torch.compile` output.
+Currently written as Triton kernels, but any implementation qualifies (CUDA,
+CUTLASS, another compiler's output).
+
+Oracles must match the repro's full scope and numerics (no fast-math
+substitutions), and are timed exclusively through
+`oracle_harness.bench_oracle()` (CUDAGraph replay, per-GPU lock, interleaved
+min-of-N — inline timing produces fake gaps from dispatch overhead).
+
+```bash
+INDUCTOR_GPU_BENCH_LOCK=1 python repros/canonical/mean_376234b0e316/oracle_*.py --bench
+```
+
+<details>
+<summary>Declaring what an oracle was written for</summary>
+
+Every oracle declares its operating point — the hardware it was tuned on and
+the full input signature it was written for — in one line:
+
+```python
+from oracle_harness import oracle_impl
+
+@oracle_impl(hardware="H100", shapes="(T([8192, 262144], bf16))")  # _shapes_config verbatim
+def oracle_forward(inputs): ...
+```
+
+Benchmark output then reports dispatch honestly:
+
+```json
+{"repro_id": "...", "oracle_us": 1927.0, "compile_us": 2042.7, "ratio": 1.06, "status": "GOOD",
+ "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+```
+
+`matched: "hardware+shape"` means a trustworthy floor; `"shape"` means the
+kernel ran at its tuned shape but on different hardware (the floor may be
+soft). Matching is exact-only — if no registration fits the runtime inputs,
+the bench reports `NO_ORACLE_FOR_SHAPE` rather than silently running a
+shape-specific kernel at the wrong shape.
+
+Hardware/shape variants are additive — register the same kernel body again
+with different launch parameters (any kwarg beyond `hardware`/`shapes`/
+`description` is passed through to the implementation, including strategy
+flags):
+
+```python
+SIG = "(T([32768, 1024], bf16),)"
+oracle_impl(hardware="H100", shapes=SIG, persistent=True,  RBLOCK=512)(_reduction_impl)
+oracle_impl(hardware="B200", shapes=SIG, persistent=False, RBLOCK=128)(_reduction_impl)
+```
+
+To write a new oracle, start from `scripts/oracle_template.py`. Design notes:
+`scripts/oracle_dispatch_design.md`.
+
+</details>
 
 ## Extraction
 
@@ -142,6 +201,7 @@ Timing uses exclusive `flock` on a per-GPU lock file — multiple processes can 
 ```
 capture_hook.py          # post-grad capture hook + partitioner
 repro_harness.py         # shared: parse_shapes_config, SOL measurement, benchmark_repro
+oracle_harness.py        # oracle check/bench infra + oracle_impl dispatch registry
 merge_captures.py        # dedup + merge into canonical set
 canonicalize_repros.py   # v2 format generation
 byte_accounting.py       # effective bytes for gather/scatter/embedding
@@ -150,6 +210,9 @@ extract_vllm.py          # vLLM/HF model capture driver
 
 scripts/
   bench_parallel.py      # parallel GPU benchmark runner
+  bench_oracles_parallel.py  # parallel oracle sweep (resumable)
+  oracle_template.py     # starting point for new oracles
+  validate_oracles.py    # oracle correctness/scope validation
   validate_eager.py      # subprocess-isolated eager validation
   bench_report.py        # before/after comparison reports
   test_adversarial.py    # infrastructure regression tests
@@ -157,7 +220,7 @@ scripts/
   test_bench_recovery.py # worker failure recovery tests
 
 repros/
-  canonical/             # 1482 flat, content-addressed repro dirs
+  canonical/             # 1482 flat, content-addressed repro dirs (each with oracle)
   models/                # per-model: manifest.json + full_graph_*.py
 
 benchmarks/              # frozen benchmark set definitions
