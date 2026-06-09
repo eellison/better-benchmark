@@ -667,7 +667,7 @@ def _pytorch_provenance() -> tuple[str | None, str | None]:
     return commit, ref
 
 
-def _run_metadata(*, workload_kind: str | None, n_results: int) -> dict:
+def _run_metadata(*, workload_kind: str | None, n_results: int, extra_inductor_config: dict | None = None) -> dict:
     commit = _git_query(["rev-parse", "HEAD"]) or ""
     pytorch_commit, pytorch_ref = _pytorch_provenance()
     metadata = {
@@ -689,6 +689,8 @@ def _run_metadata(*, workload_kind: str | None, n_results: int) -> dict:
     }
     if workload_kind:
         metadata["workload_kind"] = workload_kind
+    if extra_inductor_config:
+        metadata["inductor_config"] = extra_inductor_config
     return metadata
 
 
@@ -732,6 +734,7 @@ def _write_results_output(
     elapsed: float,
     skipped: int = 0,
     workload_kind: str | None = None,
+    extra_inductor_config: dict | None = None,
 ):
     _atomic_write_json(
         output_path,
@@ -745,7 +748,11 @@ def _write_results_output(
                 "skipped": skipped,
                 "elapsed_s": elapsed,
             },
-            _run_metadata(workload_kind=workload_kind, n_results=len(all_results)),
+            _run_metadata(
+                workload_kind=workload_kind,
+                n_results=len(all_results),
+                extra_inductor_config=extra_inductor_config,
+            ),
         ),
     )
 
@@ -1359,6 +1366,51 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             })
 
 
+def _parse_inductor_config(pairs):
+    """Parse repeated NAME=VALUE strings into a {name: python_value} dict.
+
+    NAME may be dotted (e.g. triton.multi_kernel). VALUE is parsed with
+    ast.literal_eval (so True/False/ints/floats/None/quoted strings work),
+    falling back to the raw string when it isn't a valid literal.
+    """
+    import ast
+    out = {}
+    for item in pairs or []:
+        if "=" not in item:
+            raise ValueError(f"--inductor-config expects NAME=VALUE, got: {item!r}")
+        name, _, raw = item.partition("=")
+        name = name.strip()
+        if not name or not all(seg.isidentifier() for seg in name.split(".")):
+            raise ValueError(
+                f"--inductor-config NAME must be a (dotted) identifier, got: {name!r}"
+            )
+        try:
+            value = ast.literal_eval(raw)
+        except (ValueError, SyntaxError):
+            value = raw
+        out[name] = value
+    return out
+
+
+def _unknown_inductor_config_names(cfg):
+    """Names in cfg that aren't real torch._inductor.config knobs (dotted ok)."""
+    if not cfg:
+        return []  # avoid the ~1.7s torch._inductor.config import on no-flag runs
+    import torch._inductor.config as ic
+    unknown = []
+    for name in cfg:
+        obj = ic
+        try:
+            *parents, leaf = name.split(".")
+            for parent in parents:
+                obj = getattr(obj, parent)
+            if not hasattr(obj, leaf):
+                unknown.append(name)
+        except AttributeError:
+            unknown.append(name)
+    return unknown
+
+
 def main():
     parser = argparse.ArgumentParser(description="Parallel GPU benchmark runner")
     parser.add_argument("paths", nargs="*", type=Path,
@@ -1397,10 +1449,16 @@ def main():
                         help="Benchmark all shapes from shapes.txt")
     parser.add_argument("--no-cd", action="store_true",
                         help="Skip coordinate descent tuning")
-    parser.add_argument("--combo-kernels", action="store_true",
-                        help="Enable inductor combo_kernels config")
-    parser.add_argument("--multi-kernel", type=int, default=0,
-                        help="Set inductor multi_kernel config (0=off, 1=on)")
+    parser.add_argument("--inductor-config", action="append", metavar="NAME=VALUE",
+                        default=None,
+                        help="Set an arbitrary torch._inductor.config.<NAME> for the "
+                             "sweep. Repeatable. VALUE is parsed as a Python literal "
+                             "(True/False/ints/floats/quoted strings) with a fallback to "
+                             "a raw string. Dotted names like triton.multi_kernel are "
+                             "supported. Applies to every torch.compile, including "
+                             "coordinate descent. Example: --inductor-config "
+                             "combo_kernels=True --inductor-config "
+                             "combo_kernel_max_num_nodes=16")
     parser.add_argument("--update-perf", action="store_true",
                         help="Write results to each repro's perf.json")
     parser.add_argument("--hardware", default=None,
@@ -1441,6 +1499,16 @@ def main():
                              "(useful for back-to-back sweeps). By default we reset on exit any "
                              "GPUs we locked. Only the GPUs we actually locked are ever reset.")
     args = parser.parse_args()
+
+    try:
+        extra_inductor_config = _parse_inductor_config(args.inductor_config)
+    except ValueError as exc:
+        parser.error(str(exc))
+    _unknown_cfg = _unknown_inductor_config_names(extra_inductor_config)
+    if _unknown_cfg:
+        parser.error(
+            "unknown --inductor-config name(s): " + ", ".join(sorted(_unknown_cfg))
+        )
 
     # Compare mode: just read existing perf.json and diff
     if args.compare:
@@ -1551,6 +1619,7 @@ def main():
                     skipped=skipped,
                     elapsed=elapsed_total,
                     workload_kind=workload_kind,
+                    extra_inductor_config=extra_inductor_config,
                 )
                 print(f"[output] Wrote {args.output}")
             if args.merge_into:
@@ -1612,6 +1681,8 @@ def main():
     if args.share_cache:
         print(f"  Shared inductor cache: {_SHARED_CACHE_DIR}")
     print(f"  Prefetch: enabled (overlaps module loading with GPU timing)")
+    if extra_inductor_config:
+        print(f"  Extra inductor config: {extra_inductor_config}")
     print()
 
     # Fill task queue (use regular queue since workers are threads)
@@ -1631,8 +1702,7 @@ def main():
         "share_cache": args.share_cache,
         "strict_gpu_lock": args.strict_gpu_lock,
         "n_workers": n_workers,
-        "combo_kernels": args.combo_kernels,
-        "multi_kernel": args.multi_kernel,
+        "extra_inductor_config": extra_inductor_config,
         "workload_kind": workload_kind,
         "compile_time": args.compile_time,
     }
@@ -1741,6 +1811,7 @@ def main():
                 skipped=skipped,
                 elapsed=time.time() - start_time,
                 workload_kind=workload_kind,
+                extra_inductor_config=extra_inductor_config,
             )
 
     # Wait for workers
@@ -1821,6 +1892,7 @@ def main():
             skipped=skipped,
             elapsed=elapsed_total,
             workload_kind=workload_kind,
+            extra_inductor_config=extra_inductor_config,
         )
         print(f"[output] Wrote {args.output}")
 
@@ -2113,6 +2185,7 @@ def _oracle_worker_script(gpu_idx: str, args_dict: dict) -> str:
     stderr so only our result JSON reaches the parent's result pipe.
     """
     skip_check = bool(args_dict.get("oracle_skip_check", False))
+    extra_inductor_config = args_dict.get("extra_inductor_config", {}) or {}
     return f'''
 import sys, json, os, io
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
@@ -2128,6 +2201,9 @@ from oracle_harness import (
     _INVALID_STATUSES,
 )
 from repro_harness import load_shape_configs, make_inputs_from_config
+import torch._inductor.config as inductor_config
+# --inductor-config knobs (dotted names ok; names validated in the parent).
+inductor_config.load_config({extra_inductor_config!r})
 
 WARMUP = {args_dict["n_warmup"]}
 REP = {args_dict["n_rep"]}
@@ -2288,6 +2364,7 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     prefetch thread or module import prints to stdout, shifting the result
     stream).
     """
+    extra_inductor_config = args_dict.get("extra_inductor_config", {}) or {}
     return f'''
 import builtins, contextlib, fcntl, io, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
@@ -2305,12 +2382,8 @@ from torch._inductor.utils import fresh_cache
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 WORKLOAD_KIND = {args_dict.get("workload_kind", "repro")!r}
 
-# Extra inductor config knobs
-if {args_dict.get("combo_kernels", False)}:
-    inductor_config.combo_kernels = True
-    inductor_config.combo_kernel_per_subkernel_blocks = True
-if {args_dict.get("multi_kernel", 0)}:
-    inductor_config.triton.multi_kernel = {args_dict.get("multi_kernel", 0)}
+# --inductor-config knobs (dotted names ok; names validated in the parent).
+inductor_config.load_config({extra_inductor_config!r})
 
 # --- Prefetch infrastructure ---
 # Pre-imports the next repro module while the current one is being timed.
@@ -2837,6 +2910,7 @@ for line in sys.stdin:
 
 def _worker_script(repro_path: str, gpu_idx: str, args_dict: dict) -> str:
     """Generate a self-contained benchmark script for one repro."""
+    extra_inductor_config = args_dict.get("extra_inductor_config", {}) or {}
     return f'''
 import sys, json, os
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
@@ -2847,12 +2921,8 @@ import torch._inductor.metrics as inductor_metrics
 from triton.testing import do_bench
 import importlib.util, math
 
-# Extra inductor config knobs
-if {args_dict.get("combo_kernels", False)}:
-    inductor_config.combo_kernels = True
-    inductor_config.combo_kernel_per_subkernel_blocks = True
-if {args_dict.get("multi_kernel", 0)}:
-    inductor_config.triton.multi_kernel = {args_dict.get("multi_kernel", 0)}
+# --inductor-config knobs (dotted names ok; names validated in the parent).
+inductor_config.load_config({extra_inductor_config!r})
 
 spec = importlib.util.spec_from_file_location("repro", "{repro_path}")
 mod = importlib.util.module_from_spec(spec)
