@@ -1,4 +1,15 @@
 {
+  "_metadata": {
+    "hardware": "NVIDIA B200",
+    "pytorch_branch": "pr-184905",
+    "pytorch_commit": "6703f38fa2de418e19e2e621250ae203790eb226",
+    "pytorch_tag": "session-june-2026-fixes",
+    "date": "2026-06-09",
+    "oracles_written_on": "H100 (note: oracle configs may be suboptimal for B200)",
+    "methodology": "oracle_harness.bench_oracle: CUDAGraph capture+replay, exclusive GPU lock, interleaved min-of-N",
+    "measured": 1409,
+    "total": 1418
+  },
   "amax_argmax_sum_5dfabd070411": {
     "oracle_us": 7.65,
     "compile_us": 9.76,
