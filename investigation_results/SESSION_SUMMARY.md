@@ -238,6 +238,7 @@ All in `/tmp/pytorch-work/torch/_inductor/`:
 | SwiGLU shared-cat heuristic | 2.10x→0.97x | Qwen3 SwiGLU backward |
 | One-hot reduction elimination | 1.62x→1.03x | CE backward (GPTNeo, 262K vocab) |
 | Fix inline_recomputable crashes | 66+ repros unblocked | Safety checks + StarDep + cycle detection |
+| Rotate-half gather (RoPE) | 1.27x→1.01x | Mistral RoPE rotation single-load gather (beats oracle on sum_a3c9eb6b27f1) |
 | Fix split-K regression | 5.89x→1.01x | Tightened aggressive threshold |
 | Fix ND reduction assertion | multi_kernel crash | Clamp to representable numel |
 
@@ -245,7 +246,7 @@ All in `/tmp/pytorch-work/torch/_inductor/`:
 
 | Repro | Current | Remaining gap reason | Fix needed |
 |-------|---------|---------------------|------------|
-| sum_51d2ed69e698 | 1.27x | RoPE slice_scatter branchy conditionals | Direct gather codegen for rotation (in progress) |
+| sum_51d2ed69e698 | AT_FLOOR (1.01x) | — closed by rotate_half_gather FX pass (1406552b9d3); also improved sum_a3c9eb6b27f1 18.0→13.8us | none |
 | sum_sum_e9338369070e | AT_FLOOR (0.68x) | — closed by split-K + cooperative widening | none |
 | var_mean_598830735cf6 | 1.40x | BN→maxpool stencil materialization | Fix inline_recomputable_producers index bug |
 | var_mean_mean_2ac1c2eb8544 | 1.24x | Persistent tile vs serial-loop for tiny rnumel | Serial-loop codegen template |
