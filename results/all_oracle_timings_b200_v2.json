@@ -1,0 +1,8513 @@
+{
+  "amax_argmax_sum_5dfabd070411": {
+    "oracle_us": 7.65,
+    "compile_us": 9.76,
+    "ratio": 1.276,
+    "status": "GOOD"
+  },
+  "amax_sum_0561785713ab": {
+    "oracle_us": 346.94,
+    "compile_us": 97.63,
+    "ratio": 0.281,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_0ee54b388f56": {
+    "oracle_us": 8.99,
+    "compile_us": 9.73,
+    "ratio": 1.082,
+    "status": "GOOD"
+  },
+  "amax_sum_0f87f6568d0f": {
+    "oracle_us": 184.06,
+    "compile_us": 190.05,
+    "ratio": 1.033,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_11133e3f9217": {
+    "oracle_us": 21.89,
+    "compile_us": 24.32,
+    "ratio": 1.111,
+    "status": "GOOD"
+  },
+  "amax_sum_17ab35828f89": {
+    "oracle_us": 34.46,
+    "compile_us": 30.46,
+    "ratio": 0.884,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_1a6624550d06": {
+    "oracle_us": 60.13,
+    "compile_us": 58.11,
+    "ratio": 0.966,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_211823fef3b3": {
+    "oracle_us": 10.82,
+    "compile_us": 9.54,
+    "ratio": 0.882,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_230cc68d5501": {
+    "oracle_us": 172.93,
+    "compile_us": 186.59,
+    "ratio": 1.079,
+    "status": "GOOD"
+  },
+  "amax_sum_351ca37dddb9": {
+    "oracle_us": 6.88,
+    "compile_us": 6.82,
+    "ratio": 0.991,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_35490be2986b": {
+    "oracle_us": 60.13,
+    "compile_us": 58.11,
+    "ratio": 0.966,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_3ed297ef02cd": {
+    "oracle_us": 1928.29,
+    "compile_us": 2042.66,
+    "ratio": 1.059,
+    "status": "GOOD"
+  },
+  "amax_sum_4b162354068b": {
+    "oracle_us": 14.98,
+    "compile_us": 18.21,
+    "ratio": 1.216,
+    "status": "GOOD"
+  },
+  "amax_sum_4bd27b112605": {
+    "oracle_us": 63.14,
+    "compile_us": 107.3,
+    "ratio": 1.699,
+    "status": "GOOD"
+  },
+  "amax_sum_4c524f75213e": {
+    "status": "no_json_output",
+    "stderr": "ml for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\n\n"
+  },
+  "amax_sum_4fb4f9a0bf43": {
+    "oracle_us": 38.98,
+    "compile_us": 37.02,
+    "ratio": 0.95,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_557afc9e24ea": {
+    "oracle_us": 241.28,
+    "compile_us": 241.34,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_55ae6a130879": {
+    "oracle_us": 314.14,
+    "compile_us": 165.44,
+    "ratio": 0.527,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_5f0c26b7e967": {
+    "oracle_us": 94.82,
+    "compile_us": 101.06,
+    "ratio": 1.066,
+    "status": "GOOD"
+  },
+  "amax_sum_66dc4fac757d": {
+    "oracle_us": 11.65,
+    "compile_us": 13.12,
+    "ratio": 1.126,
+    "status": "GOOD"
+  },
+  "amax_sum_67d7c2666a5c": {
+    "oracle_us": 107.42,
+    "compile_us": 260.06,
+    "ratio": 2.421,
+    "status": "GOOD"
+  },
+  "amax_sum_68fe981b18dd": {
+    "status": "no_json_output",
+    "stderr": "ml for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\n\n"
+  },
+  "amax_sum_7493058b895f": {
+    "oracle_us": 33.6,
+    "compile_us": 32.22,
+    "ratio": 0.959,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_7e55413cb344": {
+    "oracle_us": 133.73,
+    "compile_us": 99.17,
+    "ratio": 0.742,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_7fea03f0412b": {
+    "status": "no_json_output",
+    "stderr": "e 233, in oracle_forward\n    return oracle_masked_softmax(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: oracle_masked_softmax() takes from 2 to 4 positional arguments but 6 were given\n"
+  },
+  "amax_sum_8764401930db": {
+    "oracle_us": 41.63,
+    "compile_us": 18.27,
+    "ratio": 0.439,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_87e1fb077f24": {
+    "oracle_us": 371.49,
+    "compile_us": 936.8,
+    "ratio": 2.522,
+    "status": "GOOD"
+  },
+  "amax_sum_93cb2fd0355b": {
+    "oracle_us": 92.1,
+    "compile_us": 258.91,
+    "ratio": 2.811,
+    "status": "GOOD"
+  },
+  "amax_sum_9940b361e5b4": {
+    "oracle_us": 151.3,
+    "compile_us": 403.1,
+    "ratio": 2.664,
+    "status": "GOOD"
+  },
+  "amax_sum_9f4956227a79": {
+    "oracle_us": 34.46,
+    "compile_us": 30.37,
+    "ratio": 0.881,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_a215204c9264": {
+    "oracle_us": 5.63,
+    "compile_us": 5.41,
+    "ratio": 0.96,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_a7ede60031ef": {
+    "oracle_us": 46.78,
+    "compile_us": 44.58,
+    "ratio": 0.953,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_ab3238e72dc2": {
+    "oracle_us": 359.23,
+    "compile_us": 235.36,
+    "ratio": 0.655,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_amax_2a81770def44": {
+    "oracle_us": 1096.83,
+    "compile_us": 1085.15,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_amax_68fa105ccaf0": {
+    "oracle_us": 741.34,
+    "compile_us": 713.6,
+    "ratio": 0.963,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_amax_9faf4a02126a": {
+    "oracle_us": 72.64,
+    "compile_us": 36.51,
+    "ratio": 0.503,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_027aee0fe13f": {
+    "oracle_us": 13.86,
+    "compile_us": 18.14,
+    "ratio": 1.309,
+    "status": "GOOD"
+  },
+  "amax_sum_any_0986fbf8aadc": {
+    "oracle_us": 174.91,
+    "compile_us": 95.01,
+    "ratio": 0.543,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_0aeb62dc8c27": {
+    "oracle_us": 160.61,
+    "compile_us": 159.46,
+    "ratio": 0.993,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_any_0f29a12b9206": {
+    "oracle_us": 95.46,
+    "compile_us": 59.07,
+    "ratio": 0.619,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_24355de03713": {
+    "oracle_us": 97.34,
+    "compile_us": 60.48,
+    "ratio": 0.621,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_29e1adb86456": {
+    "oracle_us": 168.7,
+    "compile_us": 195.36,
+    "ratio": 1.158,
+    "status": "GOOD"
+  },
+  "amax_sum_any_3e6e6f246ff6": {
+    "oracle_us": 174.11,
+    "compile_us": 88.83,
+    "ratio": 0.51,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_511c5ade6e96": {
+    "oracle_us": 13.31,
+    "compile_us": 18.27,
+    "ratio": 1.373,
+    "status": "GOOD"
+  },
+  "amax_sum_any_5686b4ede363": {
+    "oracle_us": 326.37,
+    "compile_us": 331.49,
+    "ratio": 1.016,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_any_56d72821daed": {
+    "oracle_us": 121.57,
+    "compile_us": 61.12,
+    "ratio": 0.503,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_64da678446f9": {
+    "oracle_us": 172.74,
+    "compile_us": 179.9,
+    "ratio": 1.041,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_any_747353f99629": {
+    "oracle_us": 120.96,
+    "compile_us": 66.21,
+    "ratio": 0.547,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_7c109c56b046": {
+    "oracle_us": 162.62,
+    "compile_us": 72.51,
+    "ratio": 0.446,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_878cbcb8e8c2": {
+    "oracle_us": 237.15,
+    "compile_us": 238.43,
+    "ratio": 1.005,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_any_8b19996123a8": {
+    "oracle_us": 232.19,
+    "compile_us": 259.01,
+    "ratio": 1.115,
+    "status": "GOOD"
+  },
+  "amax_sum_any_a6daa5fac790": {
+    "oracle_us": 95.04,
+    "compile_us": 54.05,
+    "ratio": 0.569,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_b1cb404cb2ee": {
+    "oracle_us": 35.55,
+    "compile_us": 35.46,
+    "ratio": 0.997,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_any_d16c257aa03e": {
+    "oracle_us": 160.61,
+    "compile_us": 67.14,
+    "ratio": 0.418,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_d4c975ea57c8": {
+    "oracle_us": 94.11,
+    "compile_us": 70.4,
+    "ratio": 0.748,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_d811783d738f": {
+    "oracle_us": 96.1,
+    "compile_us": 47.94,
+    "ratio": 0.499,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_any_e1163072ce50": {
+    "oracle_us": 347.74,
+    "compile_us": 355.04,
+    "ratio": 1.021,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_any_e20fbe84102b": {
+    "oracle_us": 220.38,
+    "compile_us": 223.33,
+    "ratio": 1.013,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_any_fd11cc31d3d3": {
+    "oracle_us": 94.05,
+    "compile_us": 71.71,
+    "ratio": 0.763,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_c147ef68d8e3": {
+    "oracle_us": 13.38,
+    "compile_us": 15.74,
+    "ratio": 1.177,
+    "status": "GOOD"
+  },
+  "amax_sum_c79194c2980f": {
+    "oracle_us": 320.19,
+    "compile_us": 348.93,
+    "ratio": 1.09,
+    "status": "GOOD"
+  },
+  "amax_sum_ca987107ccc7": {
+    "oracle_us": 45.89,
+    "compile_us": 26.4,
+    "ratio": 0.575,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_cd5b9c2339af": {
+    "oracle_us": 17.15,
+    "compile_us": 17.79,
+    "ratio": 1.037,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_d112f48ea917": {
+    "oracle_us": 75.42,
+    "compile_us": 100.13,
+    "ratio": 1.328,
+    "status": "GOOD"
+  },
+  "amax_sum_e562199fff3c": {
+    "oracle_us": 75.3,
+    "compile_us": 64.48,
+    "ratio": 0.856,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_f0661488d68c": {
+    "status": "no_json_output",
+    "stderr": "oss_entropy_fwd.py\", line 189, in oracle_cross_entropy_fwd\n    assert logits.ndim == 2 and logits.dtype == torch.bfloat16\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  "amax_sum_f5253e4f250e": {
+    "oracle_us": 337.54,
+    "compile_us": 358.05,
+    "ratio": 1.061,
+    "status": "GOOD"
+  },
+  "amax_sum_f5fb3a355fc1": {
+    "oracle_us": 15.1,
+    "compile_us": 18.11,
+    "ratio": 1.199,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_031b4da8fbb0": {
+    "oracle_us": 11.9,
+    "compile_us": 13.02,
+    "ratio": 1.094,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_098a3fee06f9": {
+    "oracle_us": 6.82,
+    "compile_us": 8.83,
+    "ratio": 1.296,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_0e37ca9164b3": {
+    "oracle_us": 33.66,
+    "compile_us": 44.19,
+    "ratio": 1.313,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_1458251679be": {
+    "oracle_us": 7.55,
+    "compile_us": 10.14,
+    "ratio": 1.343,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_1bad0f362efd": {
+    "oracle_us": 880.51,
+    "compile_us": 973.79,
+    "ratio": 1.106,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_1dfccbddd8d8": {
+    "oracle_us": 19.23,
+    "compile_us": 17.82,
+    "ratio": 0.927,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_2a28fce37306": {
+    "oracle_us": 6.98,
+    "compile_us": 5.89,
+    "ratio": 0.844,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_31600750c3c4": {
+    "oracle_us": 301.82,
+    "compile_us": 536.38,
+    "ratio": 1.777,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_424d7adcff6b": {
+    "oracle_us": 339.84,
+    "compile_us": 320.42,
+    "ratio": 0.943,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_4c98004c3aa3": {
+    "status": "no_json_output",
+    "stderr": "site-packages/triton/runtime/jit.py\", line 576, in compute_cache_key\n    cache_key = kernel_key_cache.get(key, None)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: unhashable type: 'list'\n"
+  },
+  "amax_sum_sum_5352dbff8c2c": {
+    "oracle_us": 186.14,
+    "compile_us": 171.84,
+    "ratio": 0.923,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_5818707b6489": {
+    "oracle_us": 653.09,
+    "compile_us": 608.0,
+    "ratio": 0.931,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_5829d7f5105f": {
+    "oracle_us": 5.86,
+    "compile_us": 6.02,
+    "ratio": 1.027,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_sum_674523e70161": {
+    "oracle_us": 97.15,
+    "compile_us": 99.14,
+    "ratio": 1.02,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_sum_6939e2db29e3": {
+    "status": "no_json_output",
+    "stderr": "enchmark/repros/canonical/amax_sum_sum_6939e2db29e3/oracle_online_softmax.py\", line 151, in _launch_oracle\n    assert tokens.dtype == torch.int64\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  "amax_sum_sum_6be3e54433a2": {
+    "oracle_us": 7.04,
+    "compile_us": 10.37,
+    "ratio": 1.473,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_6fd07d12d98a": {
+    "oracle_us": 520.13,
+    "compile_us": 738.24,
+    "ratio": 1.419,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_7b9c13470fca": {
+    "oracle_us": 25.47,
+    "compile_us": 20.16,
+    "ratio": 0.791,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_846668f0b88f": {
+    "oracle_us": 25.34,
+    "compile_us": 15.68,
+    "ratio": 0.619,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_86d05d6810f4": {
+    "oracle_us": 521.92,
+    "compile_us": 738.34,
+    "ratio": 1.415,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_8b606a2377c7": {
+    "oracle_us": 91.74,
+    "compile_us": 101.98,
+    "ratio": 1.112,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_99c1b87be2ea": {
+    "oracle_us": 1562.53,
+    "compile_us": 1291.07,
+    "ratio": 0.826,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_9e768dff4978": {
+    "oracle_us": 164.7,
+    "compile_us": 252.77,
+    "ratio": 1.535,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_b942094d64da": {
+    "oracle_us": 13.66,
+    "compile_us": 16.26,
+    "ratio": 1.19,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_b9ac8700504c": {
+    "oracle_us": 24.45,
+    "compile_us": 32.29,
+    "ratio": 1.321,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_b9c8bc430873": {
+    "oracle_us": 11.97,
+    "compile_us": 11.94,
+    "ratio": 0.997,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_sum_c9a6620c3408": {
+    "oracle_us": 2755.62,
+    "compile_us": 2523.01,
+    "ratio": 0.916,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_cbc032540f01": {
+    "oracle_us": 103.46,
+    "compile_us": 95.1,
+    "ratio": 0.919,
+    "status": "BAD_ORACLE"
+  },
+  "amax_sum_sum_d5ddd6e16182": {
+    "oracle_us": 591.65,
+    "compile_us": 613.5,
+    "ratio": 1.037,
+    "status": "AT_FLOOR"
+  },
+  "amax_sum_sum_d85e67b00643": {
+    "oracle_us": 354.27,
+    "compile_us": 536.19,
+    "ratio": 1.514,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_dc96a87ba8db": {
+    "oracle_us": 1554.24,
+    "compile_us": 1697.66,
+    "ratio": 1.092,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_e2f518f0a274": {
+    "oracle_us": 91.1,
+    "compile_us": 150.24,
+    "ratio": 1.649,
+    "status": "GOOD"
+  },
+  "amax_sum_sum_f2d78a465cb5": {
+    "status": "no_json_output",
+    "stderr": "fted_causal_lm_cross_entropy_mean.py\", line 111, in _check_power_of_two\n    if value <= 0 or value & (value - 1):\n       ^^^^^^^^^^\nTypeError: '<=' not supported between instances of 'list' and 'int'\n"
+  },
+  "amax_sum_sum_f9833ae619a1": {
+    "oracle_us": 24.38,
+    "compile_us": 31.9,
+    "ratio": 1.308,
+    "status": "GOOD"
+  },
+  "any_17b234fd7f4f": {
+    "oracle_us": 6.08,
+    "compile_us": 6.72,
+    "ratio": 1.105,
+    "status": "GOOD"
+  },
+  "any_amax_sum_0481a7940388": {
+    "oracle_us": 136.77,
+    "compile_us": 159.42,
+    "ratio": 1.166,
+    "status": "GOOD"
+  },
+  "any_amax_sum_0815d0a11243": {
+    "oracle_us": 17.22,
+    "compile_us": 17.18,
+    "ratio": 0.998,
+    "status": "AT_FLOOR"
+  },
+  "any_amax_sum_14151855d365": {
+    "oracle_us": 121.63,
+    "compile_us": 121.73,
+    "ratio": 1.001,
+    "status": "AT_FLOOR"
+  },
+  "any_amax_sum_148048393068": {
+    "oracle_us": 88.9,
+    "compile_us": 83.62,
+    "ratio": 0.941,
+    "status": "BAD_ORACLE"
+  },
+  "any_amax_sum_2da4fabb8348": {
+    "oracle_us": 20.48,
+    "compile_us": 12.99,
+    "ratio": 0.634,
+    "status": "BAD_ORACLE"
+  },
+  "any_amax_sum_48ee4b2cf979": {
+    "oracle_us": 25.92,
+    "compile_us": 28.0,
+    "ratio": 1.08,
+    "status": "GOOD"
+  },
+  "any_amax_sum_4a963b47b28d": {
+    "oracle_us": 25.79,
+    "compile_us": 27.71,
+    "ratio": 1.074,
+    "status": "GOOD"
+  },
+  "any_amax_sum_56d491110e60": {
+    "oracle_us": 11.81,
+    "compile_us": 13.09,
+    "ratio": 1.108,
+    "status": "GOOD"
+  },
+  "any_amax_sum_70169d16c71e": {
+    "oracle_us": 25.18,
+    "compile_us": 28.0,
+    "ratio": 1.112,
+    "status": "GOOD"
+  },
+  "any_amax_sum_727a4ae37fb6": {
+    "oracle_us": 62.46,
+    "compile_us": 69.06,
+    "ratio": 1.106,
+    "status": "GOOD"
+  },
+  "any_amax_sum_7a4583e34c43": {
+    "oracle_us": 24.19,
+    "compile_us": 28.03,
+    "ratio": 1.159,
+    "status": "GOOD"
+  },
+  "any_amax_sum_93fd43445eb0": {
+    "oracle_us": 11.1,
+    "compile_us": 11.84,
+    "ratio": 1.066,
+    "status": "GOOD"
+  },
+  "any_amax_sum_97b43144672a": {
+    "oracle_us": 9.86,
+    "compile_us": 9.95,
+    "ratio": 1.01,
+    "status": "AT_FLOOR"
+  },
+  "any_amax_sum_a0dcc1c8c72b": {
+    "oracle_us": 16.32,
+    "compile_us": 17.6,
+    "ratio": 1.078,
+    "status": "GOOD"
+  },
+  "any_amax_sum_a476543fe91a": {
+    "oracle_us": 10.98,
+    "compile_us": 11.39,
+    "ratio": 1.038,
+    "status": "AT_FLOOR"
+  },
+  "any_amax_sum_b60dfdd114e1": {
+    "oracle_us": 159.46,
+    "compile_us": 159.36,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "any_amax_sum_bc8a6386052c": {
+    "oracle_us": 83.71,
+    "compile_us": 83.65,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "any_amax_sum_c1a313554420": {
+    "oracle_us": 11.14,
+    "compile_us": 13.47,
+    "ratio": 1.21,
+    "status": "GOOD"
+  },
+  "any_amax_sum_c34514991dfb": {
+    "oracle_us": 10.14,
+    "compile_us": 9.98,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "any_amax_sum_ce237cc082cc": {
+    "oracle_us": 64.35,
+    "compile_us": 67.23,
+    "ratio": 1.045,
+    "status": "AT_FLOOR"
+  },
+  "any_amax_sum_f235c5b81536": {
+    "oracle_us": 115.42,
+    "compile_us": 122.46,
+    "ratio": 1.061,
+    "status": "GOOD"
+  },
+  "any_mean_33b10ff8a837": {
+    "oracle_us": 11.74,
+    "compile_us": 11.46,
+    "ratio": 0.975,
+    "status": "AT_FLOOR"
+  },
+  "any_mean_38ea597e5c87": {
+    "oracle_us": 11.17,
+    "compile_us": 11.14,
+    "ratio": 0.997,
+    "status": "AT_FLOOR"
+  },
+  "any_mean_417d9efb98a0": {
+    "oracle_us": 12.03,
+    "compile_us": 12.8,
+    "ratio": 1.064,
+    "status": "GOOD"
+  },
+  "any_mean_6b05ef27be02": {
+    "oracle_us": 11.04,
+    "compile_us": 11.49,
+    "ratio": 1.041,
+    "status": "AT_FLOOR"
+  },
+  "any_mean_fde44ec669a9": {
+    "oracle_us": 11.65,
+    "compile_us": 11.14,
+    "ratio": 0.956,
+    "status": "AT_FLOOR"
+  },
+  "argmax_amax_sum_fd72c2ef2d40": {
+    "oracle_us": 8.86,
+    "compile_us": 8.99,
+    "ratio": 1.014,
+    "status": "AT_FLOOR"
+  },
+  "argmax_mean_180a59791f51": {
+    "status": "no_json_output",
+    "stderr": " oracle_forward\n    return oracle_reformer_lsh_routing(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: oracle_reformer_lsh_routing() takes 3 positional arguments but 21 were given\n"
+  },
+  "argmax_mean_9cf9e9271ff1": {
+    "status": "no_json_output",
+    "stderr": " oracle_forward\n    return oracle_reformer_lsh_routing(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: oracle_reformer_lsh_routing() takes 3 positional arguments but 20 were given\n"
+  },
+  "max_448f6b3c8f1d": {
+    "oracle_us": 6.98,
+    "compile_us": 5.89,
+    "ratio": 0.844,
+    "status": "BAD_ORACLE"
+  },
+  "mean_00c6f66d2b16": {
+    "oracle_us": 14.24,
+    "compile_us": 13.02,
+    "ratio": 0.915,
+    "status": "BAD_ORACLE"
+  },
+  "mean_01c500735869": {
+    "oracle_us": 7.84,
+    "compile_us": 7.71,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "mean_03851ba8cf43": {
+    "oracle_us": 67.23,
+    "compile_us": 23.14,
+    "ratio": 0.344,
+    "status": "BAD_ORACLE"
+  },
+  "mean_148ad2fc17ca": {
+    "oracle_us": 22.11,
+    "compile_us": 16.22,
+    "ratio": 0.734,
+    "status": "BAD_ORACLE"
+  },
+  "mean_1b78c675fe8a": {
+    "oracle_us": 13.06,
+    "compile_us": 13.02,
+    "ratio": 0.998,
+    "status": "AT_FLOOR"
+  },
+  "mean_27e29b31cd8d": {
+    "oracle_us": 21.25,
+    "compile_us": 18.14,
+    "ratio": 0.854,
+    "status": "BAD_ORACLE"
+  },
+  "mean_289ef979584b": {
+    "oracle_us": 30.21,
+    "compile_us": 23.39,
+    "ratio": 0.774,
+    "status": "BAD_ORACLE"
+  },
+  "mean_2accb5140cab": {
+    "oracle_us": 9.95,
+    "compile_us": 9.89,
+    "ratio": 0.994,
+    "status": "AT_FLOOR"
+  },
+  "mean_2cec1142a8d5": {
+    "oracle_us": 65.15,
+    "compile_us": 36.48,
+    "ratio": 0.56,
+    "status": "BAD_ORACLE"
+  },
+  "mean_2ee5edb89c2f": {
+    "oracle_us": 7.33,
+    "compile_us": 7.01,
+    "ratio": 0.956,
+    "status": "AT_FLOOR"
+  },
+  "mean_31dd7d763da1": {
+    "oracle_us": 40.8,
+    "compile_us": 35.62,
+    "ratio": 0.873,
+    "status": "BAD_ORACLE"
+  },
+  "mean_345e85b88ce8": {
+    "oracle_us": 26.59,
+    "compile_us": 13.82,
+    "ratio": 0.52,
+    "status": "BAD_ORACLE"
+  },
+  "mean_3b7ac433d31c": {
+    "oracle_us": 76.51,
+    "compile_us": 73.47,
+    "ratio": 0.96,
+    "status": "AT_FLOOR"
+  },
+  "mean_3bee65342664": {
+    "oracle_us": 7.01,
+    "compile_us": 6.94,
+    "ratio": 0.991,
+    "status": "AT_FLOOR"
+  },
+  "mean_42b19743bdd2": {
+    "oracle_us": 22.21,
+    "compile_us": 24.26,
+    "ratio": 1.092,
+    "status": "GOOD"
+  },
+  "mean_432300e645a8": {
+    "oracle_us": 44.7,
+    "compile_us": 44.74,
+    "ratio": 1.001,
+    "status": "AT_FLOOR"
+  },
+  "mean_453dc6e89dd9": {
+    "oracle_us": 6.88,
+    "compile_us": 6.88,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "mean_53257b9cde07": {
+    "oracle_us": 30.37,
+    "compile_us": 25.82,
+    "ratio": 0.85,
+    "status": "BAD_ORACLE"
+  },
+  "mean_56f34d7fd13f": {
+    "oracle_us": 68.42,
+    "compile_us": 36.48,
+    "ratio": 0.533,
+    "status": "BAD_ORACLE"
+  },
+  "mean_587989b55df0": {
+    "oracle_us": 16.06,
+    "compile_us": 12.35,
+    "ratio": 0.769,
+    "status": "BAD_ORACLE"
+  },
+  "mean_5c93e9826aa8": {
+    "oracle_us": 47.94,
+    "compile_us": 29.63,
+    "ratio": 0.618,
+    "status": "BAD_ORACLE"
+  },
+  "mean_5ccd045f4193": {
+    "oracle_us": 8.99,
+    "compile_us": 9.92,
+    "ratio": 1.103,
+    "status": "GOOD"
+  },
+  "mean_67e840f5877f": {
+    "oracle_us": 11.01,
+    "compile_us": 13.02,
+    "ratio": 1.183,
+    "status": "GOOD"
+  },
+  "mean_686b5dbfcafc": {
+    "oracle_us": 15.49,
+    "compile_us": 13.79,
+    "ratio": 0.89,
+    "status": "BAD_ORACLE"
+  },
+  "mean_72616d93d527": {
+    "oracle_us": 10.08,
+    "compile_us": 9.98,
+    "ratio": 0.99,
+    "status": "AT_FLOOR"
+  },
+  "mean_72eb7eeed84f": {
+    "oracle_us": 10.08,
+    "compile_us": 9.92,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "mean_74636cde8a79": {
+    "oracle_us": 21.7,
+    "compile_us": 18.18,
+    "ratio": 0.838,
+    "status": "BAD_ORACLE"
+  },
+  "mean_7639bfb9be38": {
+    "oracle_us": 11.97,
+    "compile_us": 11.87,
+    "ratio": 0.992,
+    "status": "AT_FLOOR"
+  },
+  "mean_7874ce26c7f3": {
+    "oracle_us": 21.15,
+    "compile_us": 15.26,
+    "ratio": 0.722,
+    "status": "BAD_ORACLE"
+  },
+  "mean_7b48b0105aea": {
+    "oracle_us": 15.01,
+    "compile_us": 9.31,
+    "ratio": 0.62,
+    "status": "BAD_ORACLE"
+  },
+  "mean_86d0e8c4c31b": {
+    "oracle_us": 342.88,
+    "compile_us": 343.84,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "mean_8b70c08405c1": {
+    "oracle_us": 8.42,
+    "compile_us": 8.83,
+    "ratio": 1.049,
+    "status": "AT_FLOOR"
+  },
+  "mean_90ac138392d1": {
+    "oracle_us": 21.34,
+    "compile_us": 19.84,
+    "ratio": 0.93,
+    "status": "BAD_ORACLE"
+  },
+  "mean_90c4736187a1": {
+    "oracle_us": 11.65,
+    "compile_us": 11.1,
+    "ratio": 0.953,
+    "status": "AT_FLOOR"
+  },
+  "mean_9c0fd9fb28b1": {
+    "oracle_us": 6.3,
+    "compile_us": 6.98,
+    "ratio": 1.107,
+    "status": "GOOD"
+  },
+  "mean_9ca8b4d0ba26": {
+    "oracle_us": 31.97,
+    "compile_us": 25.34,
+    "ratio": 0.793,
+    "status": "BAD_ORACLE"
+  },
+  "mean_a38f924d6248": {
+    "oracle_us": 26.11,
+    "compile_us": 13.25,
+    "ratio": 0.507,
+    "status": "BAD_ORACLE"
+  },
+  "mean_a3a8e8f5cc86": {
+    "oracle_us": 17.06,
+    "compile_us": 18.21,
+    "ratio": 1.068,
+    "status": "GOOD"
+  },
+  "mean_a83e003db20c": {
+    "oracle_us": 28.58,
+    "compile_us": 17.22,
+    "ratio": 0.602,
+    "status": "BAD_ORACLE"
+  },
+  "mean_adb36c1811a3": {
+    "oracle_us": 19.3,
+    "compile_us": 14.18,
+    "ratio": 0.735,
+    "status": "BAD_ORACLE"
+  },
+  "mean_b11cd183fe38": {
+    "oracle_us": 9.02,
+    "compile_us": 9.02,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "mean_b1d8f8a4704b": {
+    "oracle_us": 26.3,
+    "compile_us": 34.56,
+    "ratio": 1.314,
+    "status": "GOOD"
+  },
+  "mean_b22538109e2c": {
+    "oracle_us": 26.27,
+    "compile_us": 34.46,
+    "ratio": 1.312,
+    "status": "GOOD"
+  },
+  "mean_b440f707e405": {
+    "oracle_us": 20.06,
+    "compile_us": 19.07,
+    "ratio": 0.951,
+    "status": "AT_FLOOR"
+  },
+  "mean_c14e4442750c": {
+    "oracle_us": 7.3,
+    "compile_us": 7.07,
+    "ratio": 0.969,
+    "status": "AT_FLOOR"
+  },
+  "mean_c324cfc06a94": {
+    "oracle_us": 15.84,
+    "compile_us": 11.94,
+    "ratio": 0.754,
+    "status": "BAD_ORACLE"
+  },
+  "mean_c7b61858a11f": {
+    "oracle_us": 10.02,
+    "compile_us": 9.95,
+    "ratio": 0.994,
+    "status": "AT_FLOOR"
+  },
+  "mean_c9e1a8113328": {
+    "oracle_us": 13.82,
+    "compile_us": 13.06,
+    "ratio": 0.944,
+    "status": "BAD_ORACLE"
+  },
+  "mean_cf12f53df7dd": {
+    "oracle_us": 19.2,
+    "compile_us": 15.2,
+    "ratio": 0.792,
+    "status": "BAD_ORACLE"
+  },
+  "mean_d0fc206717a8": {
+    "oracle_us": 36.54,
+    "compile_us": 31.36,
+    "ratio": 0.858,
+    "status": "BAD_ORACLE"
+  },
+  "mean_d3f53feea982": {
+    "oracle_us": 13.95,
+    "compile_us": 9.09,
+    "ratio": 0.651,
+    "status": "BAD_ORACLE"
+  },
+  "mean_d5150760404d": {
+    "oracle_us": 8.74,
+    "compile_us": 8.77,
+    "ratio": 1.004,
+    "status": "AT_FLOOR"
+  },
+  "mean_d5a027fb314b": {
+    "oracle_us": 18.11,
+    "compile_us": 17.66,
+    "ratio": 0.975,
+    "status": "AT_FLOOR"
+  },
+  "mean_d87780a73e70": {
+    "oracle_us": 30.37,
+    "compile_us": 29.38,
+    "ratio": 0.967,
+    "status": "AT_FLOOR"
+  },
+  "mean_d967249a87fe": {
+    "oracle_us": 11.1,
+    "compile_us": 12.7,
+    "ratio": 1.144,
+    "status": "GOOD"
+  },
+  "mean_ddf2440c0a00": {
+    "oracle_us": 15.94,
+    "compile_us": 13.12,
+    "ratio": 0.823,
+    "status": "BAD_ORACLE"
+  },
+  "mean_e3d4b04ad056": {
+    "oracle_us": 18.53,
+    "compile_us": 17.89,
+    "ratio": 0.965,
+    "status": "AT_FLOOR"
+  },
+  "mean_e9b5d856a37d": {
+    "oracle_us": 40.83,
+    "compile_us": 40.06,
+    "ratio": 0.981,
+    "status": "AT_FLOOR"
+  },
+  "mean_eccc5dff9f55": {
+    "oracle_us": 53.06,
+    "compile_us": 40.48,
+    "ratio": 0.763,
+    "status": "BAD_ORACLE"
+  },
+  "mean_ee17938d7aff": {
+    "oracle_us": 8.83,
+    "compile_us": 8.7,
+    "ratio": 0.986,
+    "status": "AT_FLOOR"
+  },
+  "mean_f362a8f86f2e": {
+    "oracle_us": 26.3,
+    "compile_us": 34.56,
+    "ratio": 1.314,
+    "status": "GOOD"
+  },
+  "mean_f5b5cccf92a8": {
+    "oracle_us": 20.13,
+    "compile_us": 16.13,
+    "ratio": 0.801,
+    "status": "BAD_ORACLE"
+  },
+  "mean_f7170c220032": {
+    "oracle_us": 66.37,
+    "compile_us": 26.43,
+    "ratio": 0.398,
+    "status": "BAD_ORACLE"
+  },
+  "mean_f859bb8c0f42": {
+    "oracle_us": 16.99,
+    "compile_us": 12.03,
+    "ratio": 0.708,
+    "status": "BAD_ORACLE"
+  },
+  "mean_fb3bbfd51007": {
+    "oracle_us": 6.94,
+    "compile_us": 6.91,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "mean_feaf8e3a5f0b": {
+    "oracle_us": 30.27,
+    "compile_us": 29.28,
+    "ratio": 0.967,
+    "status": "AT_FLOOR"
+  },
+  "mean_mean_1b98d81214e6": {
+    "oracle_us": 28.61,
+    "compile_us": 24.77,
+    "ratio": 0.866,
+    "status": "BAD_ORACLE"
+  },
+  "mean_mean_fbdbd1645f6a": {
+    "oracle_us": 49.82,
+    "compile_us": 51.23,
+    "ratio": 1.028,
+    "status": "AT_FLOOR"
+  },
+  "mean_var_5f74618c3485": {
+    "oracle_us": 79.07,
+    "compile_us": 77.38,
+    "ratio": 0.979,
+    "status": "AT_FLOOR"
+  },
+  "mean_var_bdd282a5d658": {
+    "oracle_us": 28.58,
+    "compile_us": 29.47,
+    "ratio": 1.031,
+    "status": "AT_FLOOR"
+  },
+  "mean_mean_6cb471f41ecf": {
+    "oracle_us": 39.68,
+    "compile_us": 37.86,
+    "ratio": 0.954,
+    "status": "AT_FLOOR"
+  },
+  "mean_sum_e5a21319f6c6": {
+    "oracle_us": 282.24,
+    "compile_us": 216.61,
+    "ratio": 0.767,
+    "status": "BAD_ORACLE"
+  },
+  "mean_mean_50d3de630629": {
+    "oracle_us": 32.38,
+    "compile_us": 25.47,
+    "ratio": 0.787,
+    "status": "BAD_ORACLE"
+  },
+  "mean_var_2a871bf52561": {
+    "oracle_us": 19.52,
+    "compile_us": 27.58,
+    "ratio": 1.413,
+    "status": "GOOD"
+  },
+  "mean_mean_fac851fa5f98": {
+    "oracle_us": 15.97,
+    "compile_us": 23.46,
+    "ratio": 1.469,
+    "status": "GOOD"
+  },
+  "mean_var_d333e54cfcb6": {
+    "oracle_us": 46.37,
+    "compile_us": 46.82,
+    "ratio": 1.01,
+    "status": "AT_FLOOR"
+  },
+  "mean_var_e46ebb5a28fe": {
+    "oracle_us": 55.94,
+    "compile_us": 90.11,
+    "ratio": 1.611,
+    "status": "GOOD"
+  },
+  "mean_var_cb9752aff835": {
+    "oracle_us": 28.51,
+    "compile_us": 29.54,
+    "ratio": 1.036,
+    "status": "AT_FLOOR"
+  },
+  "mean_var_mean_e6c3cd7f84ea": {
+    "oracle_us": 33.86,
+    "compile_us": 32.67,
+    "ratio": 0.965,
+    "status": "AT_FLOOR"
+  },
+  "mean_var_mean_d6e91c72f94d": {
+    "oracle_us": 33.66,
+    "compile_us": 32.77,
+    "ratio": 0.973,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_002b387bc089": {
+    "oracle_us": 28.58,
+    "compile_us": 29.44,
+    "ratio": 1.03,
+    "status": "AT_FLOOR"
+  },
+  "mean_var_mean_cf650837b7b1": {
+    "oracle_us": 22.43,
+    "compile_us": 15.04,
+    "ratio": 0.67,
+    "status": "BAD_ORACLE"
+  },
+  "mean_var_mean_f69b8a5457fd": {
+    "oracle_us": 33.7,
+    "compile_us": 32.7,
+    "ratio": 0.971,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_009d1088ee9e": {
+    "oracle_us": 10.14,
+    "compile_us": 10.4,
+    "ratio": 1.025,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_024067e5e6cb": {
+    "oracle_us": 28.67,
+    "compile_us": 28.58,
+    "ratio": 0.997,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_01099867ba2c": {
+    "oracle_us": 20.61,
+    "compile_us": 19.23,
+    "ratio": 0.933,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_035529d03c14": {
+    "oracle_us": 13.82,
+    "compile_us": 12.9,
+    "ratio": 0.933,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_03cf69441b22": {
+    "oracle_us": 44.93,
+    "compile_us": 40.9,
+    "ratio": 0.91,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_05a25aaa8a8e": {
+    "oracle_us": 120.26,
+    "compile_us": 122.56,
+    "ratio": 1.019,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_052e3853c721": {
+    "oracle_us": 5.25,
+    "compile_us": 2.69,
+    "ratio": 0.512,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_072bc7c9b68c": {
+    "oracle_us": 6.75,
+    "compile_us": 6.5,
+    "ratio": 0.962,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_05d4844325ca": {
+    "oracle_us": 5.44,
+    "compile_us": 5.57,
+    "ratio": 1.024,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_083e5f8c7cdc": {
+    "oracle_us": 10.14,
+    "compile_us": 18.5,
+    "ratio": 1.823,
+    "status": "GOOD"
+  },
+  "pointwise_073278de7552": {
+    "oracle_us": 7.94,
+    "compile_us": 9.6,
+    "ratio": 1.21,
+    "status": "GOOD"
+  },
+  "pointwise_08701284b477": {
+    "oracle_us": 15.36,
+    "compile_us": 16.06,
+    "ratio": 1.046,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_086ccf98d441": {
+    "oracle_us": 30.18,
+    "compile_us": 29.5,
+    "ratio": 0.978,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_09d687b1b23f": {
+    "oracle_us": 119.65,
+    "compile_us": 119.65,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_08c0fb1a5e37": {
+    "oracle_us": 7.68,
+    "compile_us": 7.74,
+    "ratio": 1.008,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_0a306c604828": {
+    "oracle_us": 32.38,
+    "compile_us": 70.3,
+    "ratio": 2.171,
+    "status": "GOOD"
+  },
+  "pointwise_0a2f01161fd8": {
+    "oracle_us": 33.63,
+    "compile_us": 33.54,
+    "ratio": 0.997,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_0c71173959e2": {
+    "oracle_us": 707.55,
+    "compile_us": 706.53,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_0ca24eb30c3f": {
+    "oracle_us": 5.6,
+    "compile_us": 5.7,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_0cfac231e64e": {
+    "oracle_us": 18.02,
+    "compile_us": 16.9,
+    "ratio": 0.938,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_0dbfa02ebb68": {
+    "oracle_us": 36.19,
+    "compile_us": 35.81,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_0decf4e7ecd3": {
+    "oracle_us": 5.98,
+    "compile_us": 5.95,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_0de8974bd5cb": {
+    "oracle_us": 10.59,
+    "compile_us": 10.62,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_0f6eed42fa2c": {
+    "oracle_us": 13.86,
+    "compile_us": 13.57,
+    "ratio": 0.979,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_0eade0de46c0": {
+    "oracle_us": 5.02,
+    "compile_us": 5.12,
+    "ratio": 1.019,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_100a39b686e3": {
+    "oracle_us": 4.74,
+    "compile_us": 4.96,
+    "ratio": 1.047,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_106406131986": {
+    "oracle_us": 15.17,
+    "compile_us": 14.98,
+    "ratio": 0.987,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_10ac7858cbe9": {
+    "oracle_us": 9.06,
+    "compile_us": 8.99,
+    "ratio": 0.993,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1383c536f620": {
+    "oracle_us": 14.66,
+    "compile_us": 16.26,
+    "ratio": 1.109,
+    "status": "GOOD"
+  },
+  "pointwise_13f26d420251": {
+    "oracle_us": 1542.05,
+    "compile_us": 482.11,
+    "ratio": 0.313,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_13bd7be3bbab": {
+    "oracle_us": 7.01,
+    "compile_us": 6.85,
+    "ratio": 0.977,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_163ea081d4be": {
+    "oracle_us": 22.18,
+    "compile_us": 24.16,
+    "ratio": 1.089,
+    "status": "GOOD"
+  },
+  "pointwise_1545d889b176": {
+    "oracle_us": 36.42,
+    "compile_us": 36.0,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1688b7f88191": {
+    "oracle_us": 19.84,
+    "compile_us": 17.95,
+    "ratio": 0.905,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_14c6968f5870": {
+    "oracle_us": 15.94,
+    "compile_us": 15.65,
+    "ratio": 0.982,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_16b501864757": {
+    "oracle_us": 65.22,
+    "compile_us": 65.18,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_15094386913f": {
+    "oracle_us": 35.55,
+    "compile_us": 34.91,
+    "ratio": 0.982,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_17498cde41e8": {
+    "oracle_us": 44.0,
+    "compile_us": 44.58,
+    "ratio": 1.013,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_17542057506f": {
+    "oracle_us": 13.73,
+    "compile_us": 11.62,
+    "ratio": 0.846,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_180785427cc3": {
+    "oracle_us": 2.75,
+    "compile_us": 2.72,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_182f6f9450b9": {
+    "oracle_us": 14.98,
+    "compile_us": 15.14,
+    "ratio": 1.011,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_187bbcc9d7ba": {
+    "oracle_us": 15.97,
+    "compile_us": 15.97,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_18d9dcca560a": {
+    "oracle_us": 4.86,
+    "compile_us": 5.02,
+    "ratio": 1.033,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1b2baa94d41f": {
+    "oracle_us": 8.96,
+    "compile_us": 9.02,
+    "ratio": 1.007,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1c5b4956323d": {
+    "oracle_us": 6.05,
+    "compile_us": 6.3,
+    "ratio": 1.042,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1c65af29b270": {
+    "oracle_us": 7.01,
+    "compile_us": 9.25,
+    "ratio": 1.32,
+    "status": "GOOD"
+  },
+  "pointwise_1c71ddeae558": {
+    "oracle_us": 49.95,
+    "compile_us": 48.8,
+    "ratio": 0.977,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1c92ebb90ca9": {
+    "oracle_us": 8.0,
+    "compile_us": 7.71,
+    "ratio": 0.964,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1ca80bdfba30": {
+    "oracle_us": 7.97,
+    "compile_us": 7.26,
+    "ratio": 0.912,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_1cbed7ad9ed9": {
+    "oracle_us": 21.25,
+    "compile_us": 20.67,
+    "ratio": 0.973,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1d416376ef2f": {
+    "oracle_us": 11.3,
+    "compile_us": 11.68,
+    "ratio": 1.034,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1cedd96f5faf": {
+    "oracle_us": 6.72,
+    "compile_us": 6.72,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_1f7516b9892a": {
+    "oracle_us": 299.84,
+    "compile_us": 323.39,
+    "ratio": 1.079,
+    "status": "GOOD"
+  },
+  "pointwise_1eb557d9b42d": {
+    "oracle_us": 24.19,
+    "compile_us": 24.51,
+    "ratio": 1.013,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_226a109e3e14": {
+    "oracle_us": 8.83,
+    "compile_us": 7.71,
+    "ratio": 0.873,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_21e33b628355": {
+    "oracle_us": 11.74,
+    "compile_us": 10.53,
+    "ratio": 0.896,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_2318396ac8f8": {
+    "oracle_us": 28.86,
+    "compile_us": 33.6,
+    "ratio": 1.164,
+    "status": "GOOD"
+  },
+  "pointwise_22e33c17817c": {
+    "oracle_us": 6.69,
+    "compile_us": 6.88,
+    "ratio": 1.029,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_246850b7c198": {
+    "oracle_us": 5.76,
+    "compile_us": 5.89,
+    "ratio": 1.022,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_2596a9303ec6": {
+    "oracle_us": 14.43,
+    "compile_us": 14.27,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_26086f65d617": {
+    "oracle_us": 42.66,
+    "compile_us": 36.58,
+    "ratio": 0.857,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_27183a793fcd": {
+    "oracle_us": 34.72,
+    "compile_us": 36.74,
+    "ratio": 1.058,
+    "status": "GOOD"
+  },
+  "pointwise_298ea8f11903": {
+    "oracle_us": 246.66,
+    "compile_us": 245.34,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_28fded12b2f4": {
+    "oracle_us": 11.84,
+    "compile_us": 10.94,
+    "ratio": 0.924,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_2a606dbbfc3f": {
+    "oracle_us": 15.1,
+    "compile_us": 14.91,
+    "ratio": 0.987,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_2ac760134d16": {
+    "oracle_us": 14.24,
+    "compile_us": 13.92,
+    "ratio": 0.978,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_2babaf917a12": {
+    "oracle_us": 20.96,
+    "compile_us": 21.25,
+    "ratio": 1.014,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_2c0f00bacaa2": {
+    "oracle_us": 12.13,
+    "compile_us": 11.94,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_2cb3b25427b0": {
+    "oracle_us": 7.71,
+    "compile_us": 11.1,
+    "ratio": 1.44,
+    "status": "GOOD"
+  },
+  "pointwise_2cb944a69993": {
+    "oracle_us": 8.64,
+    "compile_us": 8.77,
+    "ratio": 1.015,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_2d7c924b96ca": {
+    "oracle_us": 29.22,
+    "compile_us": 33.12,
+    "ratio": 1.134,
+    "status": "GOOD"
+  },
+  "pointwise_2cc7c346a6db": {
+    "oracle_us": 13.82,
+    "compile_us": 13.7,
+    "ratio": 0.991,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_3229f6e30711": {
+    "oracle_us": 72.35,
+    "compile_us": 72.67,
+    "ratio": 1.004,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_2eae25328292": {
+    "oracle_us": 20.26,
+    "compile_us": 30.4,
+    "ratio": 1.501,
+    "status": "GOOD"
+  },
+  "pointwise_3320bac17d54": {
+    "oracle_us": 4.7,
+    "compile_us": 4.83,
+    "ratio": 1.027,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_331daacd1ee0": {
+    "oracle_us": 22.5,
+    "compile_us": 21.18,
+    "ratio": 0.942,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_34eff5d070b5": {
+    "oracle_us": 26.27,
+    "compile_us": 26.08,
+    "ratio": 0.993,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_34dd8044bfe1": {
+    "oracle_us": 12.06,
+    "compile_us": 12.06,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_355c2d00df8b": {
+    "oracle_us": 22.02,
+    "compile_us": 21.31,
+    "ratio": 0.968,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_352e97c8de09": {
+    "oracle_us": 11.33,
+    "compile_us": 11.94,
+    "ratio": 1.054,
+    "status": "GOOD"
+  },
+  "pointwise_36d7a6209c54": {
+    "oracle_us": 5.28,
+    "compile_us": 5.66,
+    "ratio": 1.073,
+    "status": "GOOD"
+  },
+  "pointwise_3698b0e606e1": {
+    "oracle_us": 9.89,
+    "compile_us": 9.92,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_388aef7dede1": {
+    "oracle_us": 10.37,
+    "compile_us": 8.26,
+    "ratio": 0.796,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_37c9e37865c1": {
+    "oracle_us": 7.84,
+    "compile_us": 7.84,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_3abc926270f6": {
+    "oracle_us": 5.82,
+    "compile_us": 5.76,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_391b0009ff83": {
+    "oracle_us": 12.06,
+    "compile_us": 11.36,
+    "ratio": 0.942,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_3bd84c5c45de": {
+    "oracle_us": 17.95,
+    "compile_us": 14.43,
+    "ratio": 0.804,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_3b19d63866a7": {
+    "oracle_us": 5.57,
+    "compile_us": 5.6,
+    "ratio": 1.006,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_3ce6705cdad5": {
+    "oracle_us": 46.69,
+    "compile_us": 45.95,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_3c320014165a": {
+    "oracle_us": 2.62,
+    "compile_us": 2.66,
+    "ratio": 1.012,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_3d2d379563dc": {
+    "oracle_us": 21.47,
+    "compile_us": 13.82,
+    "ratio": 0.644,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_3cfc4c59af74": {
+    "oracle_us": 5.73,
+    "compile_us": 6.02,
+    "ratio": 1.05,
+    "status": "GOOD"
+  },
+  "pointwise_3dfec9b36ffd": {
+    "oracle_us": 7.9,
+    "compile_us": 7.62,
+    "ratio": 0.964,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_3d31a80e888b": {
+    "oracle_us": 16.26,
+    "compile_us": 15.07,
+    "ratio": 0.927,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_406123b029db": {
+    "oracle_us": 6.24,
+    "compile_us": 6.4,
+    "ratio": 1.026,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_403020d93ad2": {
+    "oracle_us": 5.31,
+    "compile_us": 5.5,
+    "ratio": 1.036,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_419a25045ae7": {
+    "oracle_us": 43.36,
+    "compile_us": 21.31,
+    "ratio": 0.492,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_40d7159db31f": {
+    "oracle_us": 24.54,
+    "compile_us": 28.06,
+    "ratio": 1.143,
+    "status": "GOOD"
+  },
+  "pointwise_42ab411e21f6": {
+    "oracle_us": 23.23,
+    "compile_us": 30.02,
+    "ratio": 1.292,
+    "status": "GOOD"
+  },
+  "pointwise_437415a3398d": {
+    "oracle_us": 116.42,
+    "compile_us": 106.08,
+    "ratio": 0.911,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_41aa929b1bf2": {
+    "oracle_us": 4.48,
+    "compile_us": 2.85,
+    "ratio": 0.636,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_438e6bf82c6e": {
+    "oracle_us": 14.02,
+    "compile_us": 13.82,
+    "ratio": 0.986,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_42d933d52272": {
+    "oracle_us": 28.45,
+    "compile_us": 24.1,
+    "ratio": 0.847,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_4498011749b4": {
+    "oracle_us": 44.83,
+    "compile_us": 44.77,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_43877c71f0eb": {
+    "oracle_us": 8.32,
+    "compile_us": 8.35,
+    "ratio": 1.004,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_4639f3d60037": {
+    "oracle_us": 13.76,
+    "compile_us": 12.93,
+    "ratio": 0.94,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_43aac667469a": {
+    "oracle_us": 16.32,
+    "compile_us": 16.48,
+    "ratio": 1.01,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_4827c8cbb45d": {
+    "oracle_us": 83.58,
+    "compile_us": 83.84,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_482b0c1952cd": {
+    "oracle_us": 5.66,
+    "compile_us": 5.5,
+    "ratio": 0.972,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_4d236bfe44e3": {
+    "oracle_us": 5.73,
+    "compile_us": 5.28,
+    "ratio": 0.922,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_485ad74a8b0e": {
+    "oracle_us": 52046.02,
+    "compile_us": 594.69,
+    "ratio": 0.011,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_49473bb3f273": {
+    "oracle_us": 7.68,
+    "compile_us": 6.72,
+    "ratio": 0.875,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_49ac8c44e9b1": {
+    "oracle_us": 5.98,
+    "compile_us": 5.86,
+    "ratio": 0.979,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_4ac748523d2a": {
+    "oracle_us": 23.2,
+    "compile_us": 27.49,
+    "ratio": 1.185,
+    "status": "GOOD"
+  },
+  "pointwise_4e4da02d582f": {
+    "oracle_us": 5.02,
+    "compile_us": 4.74,
+    "ratio": 0.943,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_4b51537c2edf": {
+    "oracle_us": 30.11,
+    "compile_us": 28.26,
+    "ratio": 0.938,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_4ea254f5c392": {
+    "oracle_us": 27.26,
+    "compile_us": 26.21,
+    "ratio": 0.961,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_4e68825d6848": {
+    "oracle_us": 5.6,
+    "compile_us": 5.54,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_4ea78562087d": {
+    "oracle_us": 5.63,
+    "compile_us": 5.66,
+    "ratio": 1.006,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_4ebc1e147929": {
+    "oracle_us": 5.86,
+    "compile_us": 5.82,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_4f6d85385d17": {
+    "oracle_us": 79.55,
+    "compile_us": 79.14,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_507b6c4f340b": {
+    "oracle_us": 13.98,
+    "compile_us": 12.38,
+    "ratio": 0.886,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_51020b36ae3c": {
+    "oracle_us": 15.74,
+    "compile_us": 18.46,
+    "ratio": 1.173,
+    "status": "GOOD"
+  },
+  "pointwise_517bff747110": {
+    "oracle_us": 28.74,
+    "compile_us": 26.27,
+    "ratio": 0.914,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_5466ad7742f1": {
+    "oracle_us": 32.48,
+    "compile_us": 31.97,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_54f7ee896ad5": {
+    "oracle_us": 30.46,
+    "compile_us": 23.39,
+    "ratio": 0.768,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_5502d55ec49d": {
+    "oracle_us": 8.61,
+    "compile_us": 8.7,
+    "ratio": 1.011,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_552801b1933a": {
+    "oracle_us": 30.66,
+    "compile_us": 30.11,
+    "ratio": 0.982,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_556aac88a856": {
+    "oracle_us": 14.05,
+    "compile_us": 11.52,
+    "ratio": 0.82,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_557274333bb2": {
+    "oracle_us": 10.82,
+    "compile_us": 11.71,
+    "ratio": 1.083,
+    "status": "GOOD"
+  },
+  "pointwise_55a3cc897c83": {
+    "oracle_us": 91.07,
+    "compile_us": 91.78,
+    "ratio": 1.008,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_57287c224f10": {
+    "oracle_us": 18.05,
+    "compile_us": 14.05,
+    "ratio": 0.778,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_59d71b256016": {
+    "oracle_us": 10.56,
+    "compile_us": 9.89,
+    "ratio": 0.936,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_5a066f66776e": {
+    "oracle_us": 11.17,
+    "compile_us": 12.77,
+    "ratio": 1.143,
+    "status": "GOOD"
+  },
+  "pointwise_5aafedcd8ca4": {
+    "oracle_us": 4.93,
+    "compile_us": 5.15,
+    "ratio": 1.045,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_5ae8759ec547": {
+    "oracle_us": 219.9,
+    "compile_us": 261.06,
+    "ratio": 1.187,
+    "status": "GOOD"
+  },
+  "pointwise_5adbbefc8021": {
+    "oracle_us": 65.09,
+    "compile_us": 63.33,
+    "ratio": 0.973,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_5b4d8d4d06aa": {
+    "oracle_us": 5.79,
+    "compile_us": 5.66,
+    "ratio": 0.978,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_5af8bce2a228": {
+    "oracle_us": 44.58,
+    "compile_us": 39.87,
+    "ratio": 0.894,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_5c742054ca2b": {
+    "oracle_us": 13.12,
+    "compile_us": 12.19,
+    "ratio": 0.929,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_5c49f79ad896": {
+    "oracle_us": 25.79,
+    "compile_us": 26.18,
+    "ratio": 1.015,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_5d1974eef120": {
+    "oracle_us": 7.81,
+    "compile_us": 7.71,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_5c9390c2182e": {
+    "oracle_us": 6.82,
+    "compile_us": 8.96,
+    "ratio": 1.315,
+    "status": "GOOD"
+  },
+  "pointwise_5d7c3bd1f499": {
+    "oracle_us": 8.29,
+    "compile_us": 9.6,
+    "ratio": 1.158,
+    "status": "GOOD"
+  },
+  "pointwise_5e8fb91fe0df": {
+    "oracle_us": 16.19,
+    "compile_us": 16.13,
+    "ratio": 0.996,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_5f115aa13d72": {
+    "oracle_us": 16.1,
+    "compile_us": 15.74,
+    "ratio": 0.978,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_604e62335f7c": {
+    "oracle_us": 8.7,
+    "compile_us": 7.9,
+    "ratio": 0.908,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_6086af5ce659": {
+    "oracle_us": 21.15,
+    "compile_us": 20.38,
+    "ratio": 0.964,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_60c504726d51": {
+    "oracle_us": 11.04,
+    "compile_us": 11.07,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_63fa86014ca5": {
+    "oracle_us": 49.92,
+    "compile_us": 49.98,
+    "ratio": 1.001,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_644fbe16a3f2": {
+    "oracle_us": 9.02,
+    "compile_us": 9.06,
+    "ratio": 1.004,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_658333256a97": {
+    "oracle_us": 30.37,
+    "compile_us": 30.18,
+    "ratio": 0.994,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_66a849609a78": {
+    "oracle_us": 2.69,
+    "compile_us": 2.75,
+    "ratio": 1.024,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_69250a3ef9ac": {
+    "oracle_us": 183.04,
+    "compile_us": 172.99,
+    "ratio": 0.945,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_68fe747da2af": {
+    "oracle_us": 15.94,
+    "compile_us": 15.9,
+    "ratio": 0.998,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_69b13df5a532": {
+    "oracle_us": 5.66,
+    "compile_us": 5.7,
+    "ratio": 1.006,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_69399b54497b": {
+    "oracle_us": 14.53,
+    "compile_us": 13.22,
+    "ratio": 0.91,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_6a479e2e07d2": {
+    "oracle_us": 51.17,
+    "compile_us": 71.55,
+    "ratio": 1.398,
+    "status": "GOOD"
+  },
+  "pointwise_6a5649feb1f2": {
+    "oracle_us": 16.99,
+    "compile_us": 13.57,
+    "ratio": 0.798,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_6b333f661800": {
+    "oracle_us": 2.69,
+    "compile_us": 2.66,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_6b84ffe7cd3b": {
+    "oracle_us": 16.29,
+    "compile_us": 13.02,
+    "ratio": 0.8,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_6d6d27100ad9": {
+    "oracle_us": 6.34,
+    "compile_us": 5.95,
+    "ratio": 0.939,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_6c03626e988e": {
+    "oracle_us": 4.93,
+    "compile_us": 5.15,
+    "ratio": 1.045,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_6d842b54b40d": {
+    "oracle_us": 136.7,
+    "compile_us": 164.83,
+    "ratio": 1.206,
+    "status": "GOOD"
+  },
+  "pointwise_6d6e44c3eeb4": {
+    "oracle_us": 5.09,
+    "compile_us": 2.62,
+    "ratio": 0.516,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_71e3a6c09140": {
+    "oracle_us": 1211.1,
+    "compile_us": 523.14,
+    "ratio": 0.432,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_6e25de172ea8": {
+    "oracle_us": 16.0,
+    "compile_us": 15.97,
+    "ratio": 0.998,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_70e5a4aca4b5": {
+    "oracle_us": 68.35,
+    "compile_us": 66.59,
+    "ratio": 0.974,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_724b26e60185": {
+    "oracle_us": 5.44,
+    "compile_us": 5.57,
+    "ratio": 1.024,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_72ba9dfd2891": {
+    "oracle_us": 13.44,
+    "compile_us": 12.77,
+    "ratio": 0.95,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7314654d3afc": {
+    "oracle_us": 5.82,
+    "compile_us": 5.92,
+    "ratio": 1.016,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_73d2b3dfee0b": {
+    "oracle_us": 16.35,
+    "compile_us": 16.13,
+    "ratio": 0.986,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7491ce9dcf71": {
+    "oracle_us": 26.14,
+    "compile_us": 26.05,
+    "ratio": 0.996,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7517fa77d424": {
+    "oracle_us": 5.79,
+    "compile_us": 5.82,
+    "ratio": 1.006,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_750904e8518d": {
+    "oracle_us": 8.42,
+    "compile_us": 7.78,
+    "ratio": 0.924,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_75503c474ccc": {
+    "oracle_us": 30.05,
+    "compile_us": 29.5,
+    "ratio": 0.982,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_75795e2c97dd": {
+    "oracle_us": 5.57,
+    "compile_us": 5.76,
+    "ratio": 1.034,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_75af75329d35": {
+    "oracle_us": 10.08,
+    "compile_us": 10.78,
+    "ratio": 1.07,
+    "status": "GOOD"
+  },
+  "pointwise_75d8fa236ed7": {
+    "oracle_us": 10.27,
+    "compile_us": 9.98,
+    "ratio": 0.972,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7604f7c90ea7": {
+    "oracle_us": 91.87,
+    "compile_us": 138.94,
+    "ratio": 1.512,
+    "status": "GOOD"
+  },
+  "pointwise_7727cefe098e": {
+    "oracle_us": 5.7,
+    "compile_us": 5.82,
+    "ratio": 1.022,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_77c5ae8ad1b9": {
+    "oracle_us": 5.76,
+    "compile_us": 6.72,
+    "ratio": 1.167,
+    "status": "GOOD"
+  },
+  "pointwise_77c9cc82b91f": {
+    "oracle_us": 77.5,
+    "compile_us": 76.61,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_77f01240c31d": {
+    "oracle_us": 54.05,
+    "compile_us": 129.79,
+    "ratio": 2.401,
+    "status": "GOOD"
+  },
+  "pointwise_78060a0d4a6b": {
+    "oracle_us": 22.27,
+    "compile_us": 28.29,
+    "ratio": 1.27,
+    "status": "GOOD"
+  },
+  "pointwise_78e5e6e20190": {
+    "oracle_us": 6.88,
+    "compile_us": 9.22,
+    "ratio": 1.34,
+    "status": "GOOD"
+  },
+  "pointwise_79b3932ba286": {
+    "oracle_us": 7.52,
+    "compile_us": 8.8,
+    "ratio": 1.17,
+    "status": "GOOD"
+  },
+  "pointwise_7a4083b7e3d1": {
+    "oracle_us": 6.75,
+    "compile_us": 6.62,
+    "ratio": 0.981,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7b8697e13f6d": {
+    "oracle_us": 30.3,
+    "compile_us": 30.21,
+    "ratio": 0.997,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7be7ad674239": {
+    "oracle_us": 7.94,
+    "compile_us": 7.84,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7c7235fc35c3": {
+    "oracle_us": 5.98,
+    "compile_us": 6.27,
+    "ratio": 1.048,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7cc5c5d6f90f": {
+    "oracle_us": 5.44,
+    "compile_us": 5.38,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7dbbfd1acea3": {
+    "oracle_us": 14.18,
+    "compile_us": 13.44,
+    "ratio": 0.948,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_7e1a654d52d5": {
+    "oracle_us": 8.99,
+    "compile_us": 8.96,
+    "ratio": 0.996,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7f55bac8afd0": {
+    "oracle_us": 797.41,
+    "compile_us": 890.59,
+    "ratio": 1.117,
+    "status": "GOOD"
+  },
+  "pointwise_7e9403871aac": {
+    "oracle_us": 10.78,
+    "compile_us": 9.86,
+    "ratio": 0.914,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_7fe0a1e563a5": {
+    "oracle_us": 18.11,
+    "compile_us": 18.14,
+    "ratio": 1.002,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7f7eee8e728d": {
+    "oracle_us": 35.62,
+    "compile_us": 36.03,
+    "ratio": 1.012,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_806dab5e6b67": {
+    "oracle_us": 35.62,
+    "compile_us": 35.58,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_7ffbdb600096": {
+    "oracle_us": 62.34,
+    "compile_us": 11.74,
+    "ratio": 0.188,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_8389b1fec310": {
+    "oracle_us": 116.64,
+    "compile_us": 114.4,
+    "ratio": 0.981,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_8337a034adab": {
+    "oracle_us": 60.26,
+    "compile_us": 9.38,
+    "ratio": 0.156,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_83e53cefde12": {
+    "oracle_us": 17.92,
+    "compile_us": 15.94,
+    "ratio": 0.889,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_84889e450e5e": {
+    "oracle_us": 54.05,
+    "compile_us": 53.98,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_85c62511d369": {
+    "oracle_us": 24.35,
+    "compile_us": 22.4,
+    "ratio": 0.92,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_849c8a7e937a": {
+    "oracle_us": 8.16,
+    "compile_us": 8.13,
+    "ratio": 0.996,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_86e6de8ee102": {
+    "oracle_us": 12.99,
+    "compile_us": 13.12,
+    "ratio": 1.01,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_869474330b72": {
+    "oracle_us": 7.84,
+    "compile_us": 7.81,
+    "ratio": 0.996,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_8793407401ab": {
+    "oracle_us": 2883.52,
+    "compile_us": 6881.02,
+    "ratio": 2.386,
+    "status": "GOOD"
+  },
+  "pointwise_88280aa05d1d": {
+    "oracle_us": 46.85,
+    "compile_us": 45.86,
+    "ratio": 0.979,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_88361ec33b7f": {
+    "oracle_us": 7.01,
+    "compile_us": 6.78,
+    "ratio": 0.968,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_8841e05a12b7": {
+    "oracle_us": 13.63,
+    "compile_us": 7.74,
+    "ratio": 0.568,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_8aed5a56d560": {
+    "oracle_us": 4.74,
+    "compile_us": 5.12,
+    "ratio": 1.081,
+    "status": "GOOD"
+  },
+  "pointwise_886d1802a767": {
+    "oracle_us": 32.64,
+    "compile_us": 46.69,
+    "ratio": 1.43,
+    "status": "GOOD"
+  },
+  "pointwise_8b1aa52513f2": {
+    "oracle_us": 83.65,
+    "compile_us": 82.75,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_8b4411ef8328": {
+    "oracle_us": 17.09,
+    "compile_us": 15.87,
+    "ratio": 0.929,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_8e1dc74da682": {
+    "oracle_us": 13.31,
+    "compile_us": 13.38,
+    "ratio": 1.005,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_8be04df3df80": {
+    "oracle_us": 45.66,
+    "compile_us": 57.02,
+    "ratio": 1.249,
+    "status": "GOOD"
+  },
+  "pointwise_902799b6712e": {
+    "oracle_us": 27.23,
+    "compile_us": 26.27,
+    "ratio": 0.965,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_8f5229eda25a": {
+    "oracle_us": 5.28,
+    "compile_us": 6.91,
+    "ratio": 1.309,
+    "status": "GOOD"
+  },
+  "pointwise_92179feb9407": {
+    "oracle_us": 18.53,
+    "compile_us": 16.0,
+    "ratio": 0.864,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_9267d93b08b3": {
+    "oracle_us": 6.43,
+    "compile_us": 6.37,
+    "ratio": 0.99,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_96ec527020cd": {
+    "oracle_us": 24.35,
+    "compile_us": 13.57,
+    "ratio": 0.557,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_9478357f37a0": {
+    "oracle_us": 10.59,
+    "compile_us": 10.69,
+    "ratio": 1.009,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_978fc4b401d5": {
+    "oracle_us": 8.0,
+    "compile_us": 7.87,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_989e66cca754": {
+    "oracle_us": 14.72,
+    "compile_us": 14.85,
+    "ratio": 1.009,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_976768b988b8": {
+    "oracle_us": 15.33,
+    "compile_us": 19.1,
+    "ratio": 1.246,
+    "status": "GOOD"
+  },
+  "pointwise_9827abedee25": {
+    "oracle_us": 29.47,
+    "compile_us": 34.3,
+    "ratio": 1.164,
+    "status": "GOOD"
+  },
+  "pointwise_99db949c0182": {
+    "oracle_us": 42.69,
+    "compile_us": 34.18,
+    "ratio": 0.801,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_9903e70019c2": {
+    "oracle_us": 9.73,
+    "compile_us": 8.22,
+    "ratio": 0.845,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_9a3b1c27ce63": {
+    "oracle_us": 13.92,
+    "compile_us": 12.06,
+    "ratio": 0.867,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_9b4a8ee964f0": {
+    "oracle_us": 95.14,
+    "compile_us": 72.58,
+    "ratio": 0.763,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_9947dfa4af2d": {
+    "oracle_us": 6.88,
+    "compile_us": 8.74,
+    "ratio": 1.27,
+    "status": "GOOD"
+  },
+  "pointwise_9c10ef367694": {
+    "oracle_us": 15.01,
+    "compile_us": 16.03,
+    "ratio": 1.068,
+    "status": "GOOD"
+  },
+  "pointwise_9a647a69cbab": {
+    "oracle_us": 11.9,
+    "compile_us": 5.31,
+    "ratio": 0.446,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_9b83d9cb3773": {
+    "oracle_us": 140.03,
+    "compile_us": 137.92,
+    "ratio": 0.985,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_9d609b482adf": {
+    "oracle_us": 49.47,
+    "compile_us": 77.98,
+    "ratio": 1.576,
+    "status": "GOOD"
+  },
+  "pointwise_9e64ab4c6018": {
+    "oracle_us": 53.09,
+    "compile_us": 53.15,
+    "ratio": 1.001,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_9cc353ec2f96": {
+    "oracle_us": 25.7,
+    "compile_us": 26.11,
+    "ratio": 1.016,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_9efa43391431": {
+    "oracle_us": 4.74,
+    "compile_us": 4.7,
+    "ratio": 0.993,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_9edaf9e5b4c4": {
+    "oracle_us": 6.75,
+    "compile_us": 6.91,
+    "ratio": 1.024,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a17edfca72a1": {
+    "oracle_us": 29.5,
+    "compile_us": 28.19,
+    "ratio": 0.956,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a020dfe84962": {
+    "oracle_us": 13.95,
+    "compile_us": 13.76,
+    "ratio": 0.986,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a14dcfc06344": {
+    "oracle_us": 177.66,
+    "compile_us": 254.69,
+    "ratio": 1.434,
+    "status": "GOOD"
+  },
+  "pointwise_a089fe99095f": {
+    "oracle_us": 9.66,
+    "compile_us": 9.73,
+    "ratio": 1.007,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a2d8f03e6a24": {
+    "oracle_us": 18.56,
+    "compile_us": 18.24,
+    "ratio": 0.983,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a2382a85ee99": {
+    "oracle_us": 81.47,
+    "compile_us": 79.58,
+    "ratio": 0.977,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a4e42370cdb9": {
+    "oracle_us": 100.03,
+    "compile_us": 84.7,
+    "ratio": 0.847,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_a324133c5873": {
+    "oracle_us": 7.87,
+    "compile_us": 8.0,
+    "ratio": 1.016,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a5ce2f1040ee": {
+    "oracle_us": 13.18,
+    "compile_us": 14.18,
+    "ratio": 1.075,
+    "status": "GOOD"
+  },
+  "pointwise_a5634203b03b": {
+    "oracle_us": 93.02,
+    "compile_us": 87.55,
+    "ratio": 0.941,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_a685086ffd8d": {
+    "oracle_us": 48.0,
+    "compile_us": 29.5,
+    "ratio": 0.615,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_a5d52cc24f84": {
+    "oracle_us": 6.18,
+    "compile_us": 6.5,
+    "ratio": 1.052,
+    "status": "GOOD"
+  },
+  "pointwise_a80f6127c2d6": {
+    "oracle_us": 32.22,
+    "compile_us": 31.58,
+    "ratio": 0.98,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a718233d708d": {
+    "oracle_us": 35.49,
+    "compile_us": 34.69,
+    "ratio": 0.977,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a8cdc8d494fe": {
+    "oracle_us": 7.1,
+    "compile_us": 7.2,
+    "ratio": 1.014,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_a863783aadbf": {
+    "oracle_us": 9.25,
+    "compile_us": 9.38,
+    "ratio": 1.014,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_aa194b04264a": {
+    "oracle_us": 80.48,
+    "compile_us": 75.55,
+    "ratio": 0.939,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_a942dec89d15": {
+    "oracle_us": 5.31,
+    "compile_us": 4.93,
+    "ratio": 0.928,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_aae75a85ff2a": {
+    "oracle_us": 11.71,
+    "compile_us": 11.87,
+    "ratio": 1.014,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_aa558b9321ca": {
+    "oracle_us": 18.24,
+    "compile_us": 18.21,
+    "ratio": 0.998,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_acbdd607c506": {
+    "oracle_us": 7.68,
+    "compile_us": 11.17,
+    "ratio": 1.454,
+    "status": "GOOD"
+  },
+  "pointwise_ac47153c2891": {
+    "oracle_us": 38.59,
+    "compile_us": 46.62,
+    "ratio": 1.208,
+    "status": "GOOD"
+  },
+  "pointwise_af2e722aed5d": {
+    "oracle_us": 27.2,
+    "compile_us": 25.95,
+    "ratio": 0.954,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ade37399a51c": {
+    "oracle_us": 10.85,
+    "compile_us": 10.27,
+    "ratio": 0.947,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_b0c74cbb35c4": {
+    "oracle_us": 17.63,
+    "compile_us": 19.04,
+    "ratio": 1.08,
+    "status": "GOOD"
+  },
+  "pointwise_afc4ddb6d0ba": {
+    "oracle_us": 46.94,
+    "compile_us": 47.07,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_b43349159514": {
+    "oracle_us": 5.54,
+    "compile_us": 5.34,
+    "ratio": 0.965,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_b33a9caccca9": {
+    "oracle_us": 7.01,
+    "compile_us": 7.01,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_b51064ab890f": {
+    "oracle_us": 6.62,
+    "compile_us": 6.62,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_b46f81501f11": {
+    "oracle_us": 28.26,
+    "compile_us": 26.18,
+    "ratio": 0.926,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_b556697c6ec2": {
+    "oracle_us": 9.7,
+    "compile_us": 8.1,
+    "ratio": 0.835,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_b55a3e33e658": {
+    "oracle_us": 8.99,
+    "compile_us": 8.93,
+    "ratio": 0.993,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_b56481cd08ca": {
+    "oracle_us": 9.95,
+    "compile_us": 7.84,
+    "ratio": 0.788,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_b673b7143973": {
+    "oracle_us": 10.66,
+    "compile_us": 10.08,
+    "ratio": 0.946,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_b7a851a9ac93": {
+    "oracle_us": 13.12,
+    "compile_us": 5.38,
+    "ratio": 0.41,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_b869961e6b54": {
+    "oracle_us": 4.9,
+    "compile_us": 2.59,
+    "ratio": 0.529,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_b8e2463e8d92": {
+    "oracle_us": 10.3,
+    "compile_us": 11.94,
+    "ratio": 1.158,
+    "status": "GOOD"
+  },
+  "pointwise_b954be2ccd22": {
+    "oracle_us": 35.62,
+    "compile_us": 35.68,
+    "ratio": 1.002,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_b9ed7956ee59": {
+    "oracle_us": 5.92,
+    "compile_us": 5.86,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ba25116c7e2e": {
+    "oracle_us": 15.07,
+    "compile_us": 12.29,
+    "ratio": 0.815,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_baa1198c62c0": {
+    "oracle_us": 11.87,
+    "compile_us": 11.23,
+    "ratio": 0.946,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_bc30b7a4c3fd": {
+    "oracle_us": 14.05,
+    "compile_us": 16.7,
+    "ratio": 1.189,
+    "status": "GOOD"
+  },
+  "pointwise_bcd0a32063dd": {
+    "oracle_us": 29.22,
+    "compile_us": 28.16,
+    "ratio": 0.964,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_bcfec253e455": {
+    "oracle_us": 5.44,
+    "compile_us": 4.99,
+    "ratio": 0.918,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_bd6cd7133361": {
+    "oracle_us": 16.29,
+    "compile_us": 14.24,
+    "ratio": 0.874,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_be855b961be7": {
+    "oracle_us": 8.7,
+    "compile_us": 7.49,
+    "ratio": 0.86,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_c04d168ffc54": {
+    "oracle_us": 9.66,
+    "compile_us": 11.04,
+    "ratio": 1.142,
+    "status": "GOOD"
+  },
+  "pointwise_c0e132c66e3b": {
+    "oracle_us": 17.18,
+    "compile_us": 16.06,
+    "ratio": 0.935,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_c14f03aac63b": {
+    "oracle_us": 7.23,
+    "compile_us": 5.15,
+    "ratio": 0.712,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_c2dc9d900d36": {
+    "oracle_us": 10.94,
+    "compile_us": 10.14,
+    "ratio": 0.927,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_c2e3486ef2f2": {
+    "oracle_us": 33.66,
+    "compile_us": 25.31,
+    "ratio": 0.752,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_c3360ba4828a": {
+    "oracle_us": 142.14,
+    "compile_us": 194.56,
+    "ratio": 1.369,
+    "status": "GOOD"
+  },
+  "pointwise_c35315666858": {
+    "oracle_us": 4.9,
+    "compile_us": 2.56,
+    "ratio": 0.523,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_c5d1c9bcad0e": {
+    "oracle_us": 5.7,
+    "compile_us": 5.09,
+    "ratio": 0.893,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_c6dd83a0bedb": {
+    "oracle_us": 161.5,
+    "compile_us": 161.54,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_c6795cc8ece2": {
+    "oracle_us": 14.11,
+    "compile_us": 12.29,
+    "ratio": 0.871,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_c7ec34b2837b": {
+    "oracle_us": 6.72,
+    "compile_us": 6.62,
+    "ratio": 0.986,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_c7938e4bf86d": {
+    "oracle_us": 15.9,
+    "compile_us": 17.02,
+    "ratio": 1.07,
+    "status": "GOOD"
+  },
+  "pointwise_c83a7895e053": {
+    "oracle_us": 8.77,
+    "compile_us": 8.9,
+    "ratio": 1.015,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_c8cb51f30736": {
+    "oracle_us": 6.24,
+    "compile_us": 5.92,
+    "ratio": 0.949,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_c91baf62713c": {
+    "oracle_us": 27.17,
+    "compile_us": 26.18,
+    "ratio": 0.963,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_c9ccde11c148": {
+    "oracle_us": 7.49,
+    "compile_us": 7.68,
+    "ratio": 1.026,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ca25949bc9c4": {
+    "oracle_us": 21.18,
+    "compile_us": 20.8,
+    "ratio": 0.982,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ca447b754dbe": {
+    "oracle_us": 13.18,
+    "compile_us": 11.71,
+    "ratio": 0.888,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_ccfd75b90652": {
+    "oracle_us": 50.75,
+    "compile_us": 51.87,
+    "ratio": 1.022,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_caf63484ca0a": {
+    "oracle_us": 8.99,
+    "compile_us": 9.63,
+    "ratio": 1.071,
+    "status": "GOOD"
+  },
+  "pointwise_cd1a5696dd36": {
+    "oracle_us": 39.58,
+    "compile_us": 34.43,
+    "ratio": 0.87,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_cdafc21d36b1": {
+    "oracle_us": 36.61,
+    "compile_us": 35.62,
+    "ratio": 0.973,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ce7169287d93": {
+    "oracle_us": 4.51,
+    "compile_us": 2.66,
+    "ratio": 0.589,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_ce864c7b68b3": {
+    "oracle_us": 8.9,
+    "compile_us": 8.22,
+    "ratio": 0.924,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_cf3acd87ba9e": {
+    "oracle_us": 27.17,
+    "compile_us": 40.93,
+    "ratio": 1.506,
+    "status": "GOOD"
+  },
+  "pointwise_cffb7fe32779": {
+    "oracle_us": 2.69,
+    "compile_us": 2.72,
+    "ratio": 1.012,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d1a460fa4449": {
+    "oracle_us": 16.48,
+    "compile_us": 15.97,
+    "ratio": 0.969,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d011ea1daf34": {
+    "oracle_us": 9.63,
+    "compile_us": 10.02,
+    "ratio": 1.04,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d38e6d98a617": {
+    "oracle_us": 73.15,
+    "compile_us": 89.7,
+    "ratio": 1.226,
+    "status": "GOOD"
+  },
+  "pointwise_d4f672d645c1": {
+    "oracle_us": 71.55,
+    "compile_us": 67.39,
+    "ratio": 0.942,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_d29b1b2a009e": {
+    "oracle_us": 21.92,
+    "compile_us": 19.14,
+    "ratio": 0.873,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_d54fca93c7e1": {
+    "oracle_us": 5.06,
+    "compile_us": 2.69,
+    "ratio": 0.532,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_d47c7d477bf3": {
+    "oracle_us": 5.95,
+    "compile_us": 5.76,
+    "ratio": 0.968,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d619d8716902": {
+    "oracle_us": 12.83,
+    "compile_us": 13.28,
+    "ratio": 1.035,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d604053b7cd8": {
+    "oracle_us": 24.51,
+    "compile_us": 26.14,
+    "ratio": 1.067,
+    "status": "GOOD"
+  },
+  "pointwise_d6f684372ab8": {
+    "oracle_us": 6.46,
+    "compile_us": 6.4,
+    "ratio": 0.99,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d66b13ff6ca0": {
+    "oracle_us": 5.57,
+    "compile_us": 5.6,
+    "ratio": 1.006,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d88c39614b6c": {
+    "oracle_us": 5.89,
+    "compile_us": 5.76,
+    "ratio": 0.978,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d76b39ac2742": {
+    "oracle_us": 5.89,
+    "compile_us": 5.86,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d99cb6e56720": {
+    "oracle_us": 56.96,
+    "compile_us": 55.3,
+    "ratio": 0.971,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d89eb45ec337": {
+    "oracle_us": 50.88,
+    "compile_us": 49.06,
+    "ratio": 0.964,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_d9f9b7733ca3": {
+    "oracle_us": 4.83,
+    "compile_us": 2.82,
+    "ratio": 0.583,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_d9e050ab21ca": {
+    "oracle_us": 7.55,
+    "compile_us": 7.68,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_dcfc5ad229c7": {
+    "oracle_us": 2.72,
+    "compile_us": 2.62,
+    "ratio": 0.965,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_dca18e3e98e9": {
+    "oracle_us": 8.67,
+    "compile_us": 8.22,
+    "ratio": 0.948,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_de5d79bbec4a": {
+    "oracle_us": 30.34,
+    "compile_us": 31.26,
+    "ratio": 1.031,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_dd7f99ce5ccb": {
+    "oracle_us": 6.75,
+    "compile_us": 5.86,
+    "ratio": 0.867,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_dfefc071776f": {
+    "oracle_us": 32.45,
+    "compile_us": 11.84,
+    "ratio": 0.365,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_e0498dcba9fe": {
+    "oracle_us": 12.77,
+    "compile_us": 35.97,
+    "ratio": 2.817,
+    "status": "GOOD"
+  },
+  "pointwise_e0eff9609cf0": {
+    "oracle_us": 16.06,
+    "compile_us": 14.4,
+    "ratio": 0.896,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_e129f028e0b8": {
+    "oracle_us": 6.3,
+    "compile_us": 6.21,
+    "ratio": 0.985,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_e26de0a669ae": {
+    "oracle_us": 219.87,
+    "compile_us": 167.68,
+    "ratio": 0.763,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_e1a420e661f1": {
+    "oracle_us": 5.79,
+    "compile_us": 5.63,
+    "ratio": 0.972,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_e33f44c6dd73": {
+    "oracle_us": 157.41,
+    "compile_us": 205.6,
+    "ratio": 1.306,
+    "status": "GOOD"
+  },
+  "pointwise_e31a9c1b437e": {
+    "oracle_us": 27.26,
+    "compile_us": 24.7,
+    "ratio": 0.906,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_e4cfa8694326": {
+    "oracle_us": 38.34,
+    "compile_us": 30.24,
+    "ratio": 0.789,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_e5772e195244": {
+    "oracle_us": 11.97,
+    "compile_us": 11.07,
+    "ratio": 0.925,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_e5a8078b814d": {
+    "oracle_us": 243.1,
+    "compile_us": 153.41,
+    "ratio": 0.631,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_e5d19e73a52c": {
+    "oracle_us": 5.28,
+    "compile_us": 5.28,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_e63526b438e7": {
+    "oracle_us": 7.97,
+    "compile_us": 7.74,
+    "ratio": 0.972,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_e6323583766d": {
+    "oracle_us": 93.95,
+    "compile_us": 95.1,
+    "ratio": 1.012,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_e6457f393f2d": {
+    "oracle_us": 65.12,
+    "compile_us": 65.34,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_e78ab577d6dc": {
+    "oracle_us": 9.12,
+    "compile_us": 7.94,
+    "ratio": 0.87,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_e796eba4dc47": {
+    "oracle_us": 43.26,
+    "compile_us": 19.55,
+    "ratio": 0.452,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_e947949b6a0b": {
+    "oracle_us": 60.16,
+    "compile_us": 58.18,
+    "ratio": 0.967,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_e91604cda8db": {
+    "oracle_us": 6.27,
+    "compile_us": 6.05,
+    "ratio": 0.964,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ea2e2ccbae34": {
+    "oracle_us": 73.06,
+    "compile_us": 73.54,
+    "ratio": 1.007,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_e9c1c1b94d9e": {
+    "oracle_us": 28.29,
+    "compile_us": 28.35,
+    "ratio": 1.002,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_eaafbb6b8c5a": {
+    "oracle_us": 5.6,
+    "compile_us": 5.7,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ea520ec22da7": {
+    "oracle_us": 2.72,
+    "compile_us": 2.69,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_eb5253649308": {
+    "oracle_us": 5.44,
+    "compile_us": 5.31,
+    "ratio": 0.976,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_eae6c9133626": {
+    "oracle_us": 20.61,
+    "compile_us": 18.69,
+    "ratio": 0.907,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_eba0147d8378": {
+    "oracle_us": 4.86,
+    "compile_us": 4.9,
+    "ratio": 1.007,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ece0de807834": {
+    "oracle_us": 39.68,
+    "compile_us": 38.56,
+    "ratio": 0.972,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_edf2e0dc44ea": {
+    "oracle_us": 6.02,
+    "compile_us": 6.53,
+    "ratio": 1.085,
+    "status": "GOOD"
+  },
+  "pointwise_edfab1af9465": {
+    "oracle_us": 5.63,
+    "compile_us": 5.73,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ef7782270e46": {
+    "oracle_us": 5.31,
+    "compile_us": 5.25,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ef9ca88fea46": {
+    "oracle_us": 8.03,
+    "compile_us": 7.01,
+    "ratio": 0.873,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_f0dd9248187e": {
+    "oracle_us": 9.95,
+    "compile_us": 9.12,
+    "ratio": 0.916,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_f10cfe5ce46a": {
+    "oracle_us": 15.3,
+    "compile_us": 7.84,
+    "ratio": 0.513,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_f1d4acfe63b0": {
+    "oracle_us": 7.81,
+    "compile_us": 7.07,
+    "ratio": 0.906,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_f26b1736413f": {
+    "oracle_us": 13.02,
+    "compile_us": 15.78,
+    "ratio": 1.211,
+    "status": "GOOD"
+  },
+  "pointwise_f2b2f0c4db0c": {
+    "oracle_us": 11.81,
+    "compile_us": 10.98,
+    "ratio": 0.93,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_f2df04089ff4": {
+    "oracle_us": 54.24,
+    "compile_us": 55.14,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_f30674e2e5ee": {
+    "oracle_us": 27.2,
+    "compile_us": 23.33,
+    "ratio": 0.858,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_f33e2464d32f": {
+    "oracle_us": 5.82,
+    "compile_us": 5.7,
+    "ratio": 0.978,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_f3fcc01a1b31": {
+    "oracle_us": 29.09,
+    "compile_us": 27.1,
+    "ratio": 0.932,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_f466fd2ff03f": {
+    "oracle_us": 1600.29,
+    "compile_us": 1574.82,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_f48fe6a2319f": {
+    "oracle_us": 7.36,
+    "compile_us": 6.78,
+    "ratio": 0.922,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_f564ff7f54c2": {
+    "oracle_us": 20.06,
+    "compile_us": 24.13,
+    "ratio": 1.203,
+    "status": "GOOD"
+  },
+  "pointwise_f5a70a963d42": {
+    "oracle_us": 14.21,
+    "compile_us": 13.89,
+    "ratio": 0.977,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_f5d9e703009c": {
+    "classification": "BANDWIDTH_BOUND",
+    "compile_results": [
+      {
+        "label": "coordinate_descent_tuning=True",
+        "us": 5.984
+      },
+      {
+        "label": "combo_kernels=True,combo_kernel_per_subkernel_blocks=True,coordinate_descent_tuning=True,benchmark_combo_kernel=True,triton.multi_kernel=3",
+        "us": 5.824
+      }
+    ],
+    "compile_us": 5.824,
+    "oracle_us": 5.856,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_f6d6f135f57e": {
+    "oracle_us": 25.76,
+    "compile_us": 25.28,
+    "ratio": 0.981,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_f9c1d1b08ddb": {
+    "oracle_us": 106.21,
+    "compile_us": 188.35,
+    "ratio": 1.773,
+    "status": "GOOD"
+  },
+  "pointwise_f9aca3f32296": {
+    "oracle_us": 5.66,
+    "compile_us": 5.66,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_fc46ae4ec316": {
+    "oracle_us": 7.04,
+    "compile_us": 9.66,
+    "ratio": 1.373,
+    "status": "GOOD"
+  },
+  "pointwise_f9f5fb61c369": {
+    "oracle_us": 6.05,
+    "compile_us": 5.98,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_fd00f02aa65f": {
+    "oracle_us": 6.21,
+    "compile_us": 6.21,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_fce51fb12af0": {
+    "oracle_us": 7.74,
+    "compile_us": 7.23,
+    "ratio": 0.934,
+    "status": "BAD_ORACLE"
+  },
+  "pointwise_fe13a47e3f19": {
+    "oracle_us": 24.13,
+    "compile_us": 30.46,
+    "ratio": 1.263,
+    "status": "GOOD"
+  },
+  "pointwise_fd8663effbda": {
+    "oracle_us": 14.08,
+    "compile_us": 14.08,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_fe3b8dac57c4": {
+    "oracle_us": 9.28,
+    "compile_us": 9.47,
+    "ratio": 1.021,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_fed52737c4f6": {
+    "oracle_us": 13.86,
+    "compile_us": 14.11,
+    "ratio": 1.018,
+    "status": "AT_FLOOR"
+  },
+  "pointwise_ff13db5dc626": {
+    "oracle_us": 69.02,
+    "compile_us": 78.75,
+    "ratio": 1.141,
+    "status": "GOOD"
+  },
+  "pointwise_ff349519eab3": {
+    "oracle_us": 17.15,
+    "compile_us": 19.23,
+    "ratio": 1.121,
+    "status": "GOOD"
+  },
+  "pointwise_ff7eea75b317": {
+    "oracle_us": 26.21,
+    "compile_us": 30.62,
+    "ratio": 1.168,
+    "status": "GOOD"
+  },
+  "sum_011e69da166d": {
+    "oracle_us": 401.41,
+    "compile_us": 569.12,
+    "ratio": 1.418,
+    "status": "GOOD"
+  },
+  "pointwise_ffe1ef7f99e0": {
+    "oracle_us": 9.12,
+    "compile_us": 8.74,
+    "ratio": 0.958,
+    "status": "AT_FLOOR"
+  },
+  "sum_035e9c596064": {
+    "oracle_us": 25.34,
+    "compile_us": 22.21,
+    "ratio": 0.876,
+    "status": "BAD_ORACLE"
+  },
+  "sum_031c8d6c51f7": {
+    "oracle_us": 35.84,
+    "compile_us": 36.61,
+    "ratio": 1.021,
+    "status": "AT_FLOOR"
+  },
+  "sum_046be72c7ad9": {
+    "oracle_us": 1126.34,
+    "compile_us": 1186.56,
+    "ratio": 1.053,
+    "status": "GOOD"
+  },
+  "sum_050b7d4b9182": {
+    "oracle_us": 38.34,
+    "compile_us": 37.7,
+    "ratio": 0.983,
+    "status": "AT_FLOOR"
+  },
+  "sum_08a5b63c8198": {
+    "oracle_us": 52.9,
+    "compile_us": 61.15,
+    "ratio": 1.156,
+    "status": "GOOD"
+  },
+  "sum_0568508d372d": {
+    "oracle_us": 15.23,
+    "compile_us": 18.37,
+    "ratio": 1.206,
+    "status": "GOOD"
+  },
+  "sum_08d094f67bb4": {
+    "oracle_us": 6.82,
+    "compile_us": 7.81,
+    "ratio": 1.146,
+    "status": "GOOD"
+  },
+  "sum_096e9f1570b5": {
+    "oracle_us": 10.66,
+    "compile_us": 10.82,
+    "ratio": 1.015,
+    "status": "AT_FLOOR"
+  },
+  "sum_0a47e8ca8d9b": {
+    "oracle_us": 262.18,
+    "compile_us": 192.35,
+    "ratio": 0.734,
+    "status": "BAD_ORACLE"
+  },
+  "sum_0becf9609ad7": {
+    "oracle_us": 66.27,
+    "compile_us": 93.82,
+    "ratio": 1.416,
+    "status": "GOOD"
+  },
+  "sum_0c674ef4b13c": {
+    "oracle_us": 238.43,
+    "compile_us": 319.2,
+    "ratio": 1.339,
+    "status": "GOOD"
+  },
+  "sum_0d445802ccc4": {
+    "oracle_us": 30.4,
+    "compile_us": 35.62,
+    "ratio": 1.172,
+    "status": "GOOD"
+  },
+  "sum_12b455c3b1b0": {
+    "oracle_us": 13.98,
+    "compile_us": 27.3,
+    "ratio": 1.952,
+    "status": "GOOD"
+  },
+  "sum_0e9b16fc1230": {
+    "oracle_us": 50.82,
+    "compile_us": 38.08,
+    "ratio": 0.749,
+    "status": "BAD_ORACLE"
+  },
+  "sum_1457ecad8f5c": {
+    "oracle_us": 78.37,
+    "compile_us": 77.63,
+    "ratio": 0.991,
+    "status": "AT_FLOOR"
+  },
+  "sum_152a2d8c6ba7": {
+    "oracle_us": 56.93,
+    "compile_us": 56.22,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "sum_13195092a57b": {
+    "oracle_us": 13.06,
+    "compile_us": 16.0,
+    "ratio": 1.225,
+    "status": "GOOD"
+  },
+  "sum_14fe7b321763": {
+    "oracle_us": 243.26,
+    "compile_us": 278.14,
+    "ratio": 1.143,
+    "status": "GOOD"
+  },
+  "sum_14a86e0f6db4": {
+    "oracle_us": 54.82,
+    "compile_us": 56.26,
+    "ratio": 1.026,
+    "status": "AT_FLOOR"
+  },
+  "sum_17a342400e41": {
+    "oracle_us": 237.31,
+    "compile_us": 237.15,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "sum_1d723a3c4d6f": {
+    "oracle_us": 22.59,
+    "compile_us": 24.64,
+    "ratio": 1.091,
+    "status": "GOOD"
+  },
+  "sum_1ee37394fb37": {
+    "oracle_us": 139.3,
+    "compile_us": 118.43,
+    "ratio": 0.85,
+    "status": "BAD_ORACLE"
+  },
+  "sum_196d0dc5c868": {
+    "oracle_us": 25.25,
+    "compile_us": 30.27,
+    "ratio": 1.199,
+    "status": "GOOD"
+  },
+  "sum_21c4018e2b7b": {
+    "oracle_us": 44.1,
+    "compile_us": 53.38,
+    "ratio": 1.21,
+    "status": "GOOD"
+  },
+  "sum_1fb7f13c05d1": {
+    "oracle_us": 23.58,
+    "compile_us": 24.19,
+    "ratio": 1.026,
+    "status": "AT_FLOOR"
+  },
+  "sum_214ee1a84aa5": {
+    "oracle_us": 29.47,
+    "compile_us": 24.45,
+    "ratio": 0.83,
+    "status": "BAD_ORACLE"
+  },
+  "sum_227d8bbf9311": {
+    "oracle_us": 5.7,
+    "compile_us": 5.57,
+    "ratio": 0.978,
+    "status": "AT_FLOOR"
+  },
+  "sum_231408f55661": {
+    "oracle_us": 128.42,
+    "compile_us": 98.18,
+    "ratio": 0.765,
+    "status": "BAD_ORACLE"
+  },
+  "sum_27da2a9850b6": {
+    "oracle_us": 544.67,
+    "compile_us": 1007.52,
+    "ratio": 1.85,
+    "status": "GOOD"
+  },
+  "sum_22b5cd24890b": {
+    "oracle_us": 6.24,
+    "compile_us": 6.88,
+    "ratio": 1.103,
+    "status": "GOOD"
+  },
+  "sum_27f8a4b9ab09": {
+    "oracle_us": 34.46,
+    "compile_us": 33.44,
+    "ratio": 0.97,
+    "status": "AT_FLOOR"
+  },
+  "sum_27f326f22f76": {
+    "oracle_us": 6.75,
+    "compile_us": 8.74,
+    "ratio": 1.294,
+    "status": "GOOD"
+  },
+  "sum_28b0b21169d4": {
+    "oracle_us": 313.15,
+    "compile_us": 429.89,
+    "ratio": 1.373,
+    "status": "GOOD"
+  },
+  "sum_2bcc7099936f": {
+    "oracle_us": 81.7,
+    "compile_us": 74.59,
+    "ratio": 0.913,
+    "status": "BAD_ORACLE"
+  },
+  "sum_2821c003f795": {
+    "oracle_us": 18.34,
+    "compile_us": 17.54,
+    "ratio": 0.956,
+    "status": "AT_FLOOR"
+  },
+  "sum_2ccb3947c2c9": {
+    "oracle_us": 126.62,
+    "compile_us": 133.89,
+    "ratio": 1.057,
+    "status": "GOOD"
+  },
+  "sum_2b63837952dc": {
+    "oracle_us": 6.62,
+    "compile_us": 5.92,
+    "ratio": 0.894,
+    "status": "BAD_ORACLE"
+  },
+  "sum_2dcafbe8ab05": {
+    "oracle_us": 99.74,
+    "compile_us": 100.06,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "sum_2dab433e3109": {
+    "oracle_us": 562.85,
+    "compile_us": 485.34,
+    "ratio": 0.862,
+    "status": "BAD_ORACLE"
+  },
+  "sum_2e0e9617102b": {
+    "oracle_us": 57.02,
+    "compile_us": 56.22,
+    "ratio": 0.986,
+    "status": "AT_FLOOR"
+  },
+  "sum_30185a37715e": {
+    "oracle_us": 8.83,
+    "compile_us": 9.89,
+    "ratio": 1.12,
+    "status": "GOOD"
+  },
+  "sum_33b494a50932": {
+    "oracle_us": 63.81,
+    "compile_us": 63.26,
+    "ratio": 0.991,
+    "status": "AT_FLOOR"
+  },
+  "sum_31bf563cdf96": {
+    "oracle_us": 93.76,
+    "compile_us": 110.34,
+    "ratio": 1.177,
+    "status": "GOOD"
+  },
+  "sum_399b79c70c7b": {
+    "oracle_us": 60.22,
+    "compile_us": 68.48,
+    "ratio": 1.137,
+    "status": "GOOD"
+  },
+  "sum_34445852895e": {
+    "oracle_us": 16.0,
+    "compile_us": 14.21,
+    "ratio": 0.888,
+    "status": "BAD_ORACLE"
+  },
+  "sum_39cf4835a913": {
+    "oracle_us": 6.62,
+    "compile_us": 6.91,
+    "ratio": 1.043,
+    "status": "AT_FLOOR"
+  },
+  "sum_38c955b52137": {
+    "oracle_us": 7.84,
+    "compile_us": 8.0,
+    "ratio": 1.02,
+    "status": "AT_FLOOR"
+  },
+  "sum_403da67893be": {
+    "oracle_us": 339.71,
+    "compile_us": 361.15,
+    "ratio": 1.063,
+    "status": "GOOD"
+  },
+  "sum_3e7af8b700d3": {
+    "oracle_us": 58.24,
+    "compile_us": 53.76,
+    "ratio": 0.923,
+    "status": "BAD_ORACLE"
+  },
+  "sum_426d5bebb63f": {
+    "oracle_us": 227.07,
+    "compile_us": 184.42,
+    "ratio": 0.812,
+    "status": "BAD_ORACLE"
+  },
+  "sum_41cdfa051fcc": {
+    "oracle_us": 35.46,
+    "compile_us": 33.47,
+    "ratio": 0.944,
+    "status": "BAD_ORACLE"
+  },
+  "sum_50185c527fec": {
+    "oracle_us": 188.19,
+    "compile_us": 153.22,
+    "ratio": 0.814,
+    "status": "BAD_ORACLE"
+  },
+  "sum_43bbf21a2e59": {
+    "oracle_us": 12.35,
+    "compile_us": 12.03,
+    "ratio": 0.974,
+    "status": "AT_FLOOR"
+  },
+  "sum_4de5b759d4d1": {
+    "oracle_us": 13.98,
+    "compile_us": 13.54,
+    "ratio": 0.968,
+    "status": "AT_FLOOR"
+  },
+  "sum_502c40da68e8": {
+    "oracle_us": 70.46,
+    "compile_us": 54.05,
+    "ratio": 0.767,
+    "status": "BAD_ORACLE"
+  },
+  "sum_51676b1433c8": {
+    "oracle_us": 138.72,
+    "compile_us": 96.16,
+    "ratio": 0.693,
+    "status": "BAD_ORACLE"
+  },
+  "sum_51d2ed69e698": {
+    "oracle_us": 19.74,
+    "compile_us": 24.9,
+    "ratio": 1.261,
+    "status": "GOOD"
+  },
+  "sum_530cee9dd34e": {
+    "oracle_us": 36.35,
+    "compile_us": 43.74,
+    "ratio": 1.203,
+    "status": "GOOD"
+  },
+  "sum_558522245da0": {
+    "oracle_us": 96.03,
+    "compile_us": 114.43,
+    "ratio": 1.192,
+    "status": "GOOD"
+  },
+  "sum_5688d5156d97": {
+    "oracle_us": 51.17,
+    "compile_us": 82.88,
+    "ratio": 1.62,
+    "status": "GOOD"
+  },
+  "sum_587e52500b08": {
+    "oracle_us": 112.54,
+    "compile_us": 114.37,
+    "ratio": 1.016,
+    "status": "AT_FLOOR"
+  },
+  "sum_5a4992885bd6": {
+    "oracle_us": 178.02,
+    "compile_us": 187.36,
+    "ratio": 1.052,
+    "status": "GOOD"
+  },
+  "sum_5e60905fccb8": {
+    "oracle_us": 6.62,
+    "compile_us": 6.14,
+    "ratio": 0.928,
+    "status": "BAD_ORACLE"
+  },
+  "sum_5eec4697d8ff": {
+    "oracle_us": 44.96,
+    "compile_us": 43.84,
+    "ratio": 0.975,
+    "status": "AT_FLOOR"
+  },
+  "sum_5f7b790ecd66": {
+    "oracle_us": 190.05,
+    "compile_us": 193.34,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "sum_60071d2e71f2": {
+    "oracle_us": 9.15,
+    "compile_us": 10.24,
+    "ratio": 1.119,
+    "status": "GOOD"
+  },
+  "sum_6080543764bd": {
+    "oracle_us": 8.93,
+    "compile_us": 9.95,
+    "ratio": 1.115,
+    "status": "GOOD"
+  },
+  "sum_62dca72fabd1": {
+    "oracle_us": 17.86,
+    "compile_us": 19.9,
+    "ratio": 1.115,
+    "status": "GOOD"
+  },
+  "sum_6295c187c71d": {
+    "oracle_us": 15.81,
+    "compile_us": 19.3,
+    "ratio": 1.221,
+    "status": "GOOD"
+  },
+  "sum_617cd87647d6": {
+    "oracle_us": 220.9,
+    "compile_us": 664.38,
+    "ratio": 3.008,
+    "status": "GOOD"
+  },
+  "sum_64120dc09bd9": {
+    "oracle_us": 178.14,
+    "compile_us": 130.78,
+    "ratio": 0.734,
+    "status": "BAD_ORACLE"
+  },
+  "sum_66b92a2b30bb": {
+    "oracle_us": 12.8,
+    "compile_us": 16.58,
+    "ratio": 1.295,
+    "status": "GOOD"
+  },
+  "sum_6eb0b2e3c35e": {
+    "oracle_us": 1236.67,
+    "compile_us": 1572.7,
+    "ratio": 1.272,
+    "status": "GOOD"
+  },
+  "sum_6e4aebb044dd": {
+    "oracle_us": 27.42,
+    "compile_us": 28.32,
+    "ratio": 1.033,
+    "status": "AT_FLOOR"
+  },
+  "sum_6f056653b0d6": {
+    "oracle_us": 96.0,
+    "compile_us": 112.48,
+    "ratio": 1.172,
+    "status": "GOOD"
+  },
+  "sum_706f1191d1db": {
+    "oracle_us": 5.98,
+    "compile_us": 6.24,
+    "ratio": 1.043,
+    "status": "AT_FLOOR"
+  },
+  "sum_77824d392401": {
+    "oracle_us": 1518.5,
+    "compile_us": 1434.43,
+    "ratio": 0.945,
+    "status": "BAD_ORACLE"
+  },
+  "sum_7953a8b0bbba": {
+    "oracle_us": 7.62,
+    "compile_us": 12.54,
+    "ratio": 1.647,
+    "status": "GOOD"
+  },
+  "sum_79c6d0673ca2": {
+    "oracle_us": 30.82,
+    "compile_us": 29.63,
+    "ratio": 0.962,
+    "status": "AT_FLOOR"
+  },
+  "sum_7d7c71d09ef5": {
+    "oracle_us": 185.15,
+    "compile_us": 194.37,
+    "ratio": 1.05,
+    "status": "AT_FLOOR"
+  },
+  "sum_7a3340d935e9": {
+    "oracle_us": 16.42,
+    "compile_us": 16.22,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "sum_7de69e2bde32": {
+    "oracle_us": 57.12,
+    "compile_us": 52.77,
+    "ratio": 0.924,
+    "status": "BAD_ORACLE"
+  },
+  "sum_7ee057acd9bc": {
+    "oracle_us": 380.8,
+    "compile_us": 493.44,
+    "ratio": 1.296,
+    "status": "GOOD"
+  },
+  "sum_7c50e5b80bfe": {
+    "oracle_us": 5.38,
+    "compile_us": 7.26,
+    "ratio": 1.351,
+    "status": "GOOD"
+  },
+  "sum_7f12bfc45e1a": {
+    "oracle_us": 83.33,
+    "compile_us": 96.1,
+    "ratio": 1.153,
+    "status": "GOOD"
+  },
+  "sum_7ee65209dbb2": {
+    "oracle_us": 30.66,
+    "compile_us": 30.5,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "sum_8a66186d1ffe": {
+    "oracle_us": 207.71,
+    "compile_us": 146.27,
+    "ratio": 0.704,
+    "status": "BAD_ORACLE"
+  },
+  "sum_80634958a126": {
+    "oracle_us": 65.38,
+    "compile_us": 66.94,
+    "ratio": 1.024,
+    "status": "AT_FLOOR"
+  },
+  "sum_962f7dc019a9": {
+    "oracle_us": 6.66,
+    "compile_us": 6.53,
+    "ratio": 0.981,
+    "status": "AT_FLOOR"
+  },
+  "sum_86b5dc92d54f": {
+    "oracle_us": 38.18,
+    "compile_us": 32.96,
+    "ratio": 0.863,
+    "status": "BAD_ORACLE"
+  },
+  "sum_97633bc3e047": {
+    "oracle_us": 44.77,
+    "compile_us": 61.38,
+    "ratio": 1.371,
+    "status": "GOOD"
+  },
+  "sum_a3c9eb6b27f1": {
+    "oracle_us": 17.18,
+    "compile_us": 18.59,
+    "ratio": 1.082,
+    "status": "GOOD"
+  },
+  "sum_9ba8ffa3e0fb": {
+    "oracle_us": 909.18,
+    "compile_us": 926.53,
+    "ratio": 1.019,
+    "status": "AT_FLOOR"
+  },
+  "sum_9fb0f8852874": {
+    "oracle_us": 9.09,
+    "compile_us": 8.58,
+    "ratio": 0.944,
+    "status": "BAD_ORACLE"
+  },
+  "sum_a58bd57ea950": {
+    "oracle_us": 85.76,
+    "compile_us": 81.6,
+    "ratio": 0.951,
+    "status": "AT_FLOOR"
+  },
+  "sum_a630880e528a": {
+    "oracle_us": 7.01,
+    "compile_us": 9.73,
+    "ratio": 1.388,
+    "status": "GOOD"
+  },
+  "sum_a8c7f14e9218": {
+    "oracle_us": 61.47,
+    "compile_us": 61.38,
+    "ratio": 0.998,
+    "status": "AT_FLOOR"
+  },
+  "sum_a963d4e1fcf5": {
+    "oracle_us": 5.76,
+    "compile_us": 5.79,
+    "ratio": 1.006,
+    "status": "AT_FLOOR"
+  },
+  "sum_a9e8fa1651a2": {
+    "oracle_us": 103.1,
+    "compile_us": 99.81,
+    "ratio": 0.968,
+    "status": "AT_FLOOR"
+  },
+  "sum_ab7572b27d2c": {
+    "oracle_us": 29.86,
+    "compile_us": 26.88,
+    "ratio": 0.9,
+    "status": "BAD_ORACLE"
+  },
+  "sum_ad4468aef9e0": {
+    "oracle_us": 38.75,
+    "compile_us": 42.98,
+    "ratio": 1.109,
+    "status": "GOOD"
+  },
+  "sum_ad5c5ecccffb": {
+    "oracle_us": 32.93,
+    "compile_us": 28.1,
+    "ratio": 0.853,
+    "status": "BAD_ORACLE"
+  },
+  "sum_acbec27412d2": {
+    "oracle_us": 6.18,
+    "compile_us": 5.82,
+    "ratio": 0.943,
+    "status": "BAD_ORACLE"
+  },
+  "sum_b691b8dad90a": {
+    "oracle_us": 880.58,
+    "compile_us": 1305.7,
+    "ratio": 1.483,
+    "status": "GOOD"
+  },
+  "sum_b57af4bf1f43": {
+    "oracle_us": 31.65,
+    "compile_us": 24.32,
+    "ratio": 0.768,
+    "status": "BAD_ORACLE"
+  },
+  "sum_b8db5e701976": {
+    "oracle_us": 24.35,
+    "compile_us": 26.5,
+    "ratio": 1.088,
+    "status": "GOOD"
+  },
+  "sum_b699ca824f8e": {
+    "oracle_us": 27.3,
+    "compile_us": 30.24,
+    "ratio": 1.108,
+    "status": "GOOD"
+  },
+  "sum_bc4a942a8c4f": {
+    "oracle_us": 116.51,
+    "compile_us": 161.6,
+    "ratio": 1.387,
+    "status": "GOOD"
+  },
+  "sum_b97aa5576873": {
+    "oracle_us": 303.01,
+    "compile_us": 318.3,
+    "ratio": 1.05,
+    "status": "GOOD"
+  },
+  "sum_bd0a5d156952": {
+    "oracle_us": 114.62,
+    "compile_us": 128.86,
+    "ratio": 1.124,
+    "status": "GOOD"
+  },
+  "sum_bd2fed913c26": {
+    "oracle_us": 29.47,
+    "compile_us": 28.51,
+    "ratio": 0.967,
+    "status": "AT_FLOOR"
+  },
+  "sum_bf45c3d8f79e": {
+    "oracle_us": 9.22,
+    "compile_us": 9.82,
+    "ratio": 1.066,
+    "status": "GOOD"
+  },
+  "sum_bfc058b2d299": {
+    "oracle_us": 10.34,
+    "compile_us": 11.74,
+    "ratio": 1.136,
+    "status": "GOOD"
+  },
+  "sum_c181ecbfc1ec": {
+    "oracle_us": 9.02,
+    "compile_us": 10.02,
+    "ratio": 1.11,
+    "status": "GOOD"
+  },
+  "sum_c2895e89552b": {
+    "oracle_us": 24.22,
+    "compile_us": 69.18,
+    "ratio": 2.856,
+    "status": "GOOD"
+  },
+  "sum_c89cd4b0ece6": {
+    "oracle_us": 5.98,
+    "compile_us": 5.82,
+    "ratio": 0.973,
+    "status": "AT_FLOOR"
+  },
+  "sum_c7a56ee42903": {
+    "oracle_us": 13.47,
+    "compile_us": 16.16,
+    "ratio": 1.2,
+    "status": "GOOD"
+  },
+  "sum_c836f36190be": {
+    "oracle_us": 151.01,
+    "compile_us": 260.32,
+    "ratio": 1.724,
+    "status": "GOOD"
+  },
+  "sum_c93e126c2639": {
+    "oracle_us": 29.89,
+    "compile_us": 35.3,
+    "ratio": 1.181,
+    "status": "GOOD"
+  },
+  "sum_cb19b2c26400": {
+    "oracle_us": 11.01,
+    "compile_us": 11.2,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "sum_ca52eb919072": {
+    "oracle_us": 6.56,
+    "compile_us": 6.46,
+    "ratio": 0.985,
+    "status": "AT_FLOOR"
+  },
+  "sum_cfe874779dd6": {
+    "oracle_us": 573.25,
+    "compile_us": 588.77,
+    "ratio": 1.027,
+    "status": "AT_FLOOR"
+  },
+  "sum_cfa532830ff2": {
+    "oracle_us": 97.95,
+    "compile_us": 103.68,
+    "ratio": 1.058,
+    "status": "GOOD"
+  },
+  "sum_d7cc0afd5743": {
+    "oracle_us": 5.82,
+    "compile_us": 5.76,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "sum_d1285877843f": {
+    "oracle_us": 90.11,
+    "compile_us": 93.86,
+    "ratio": 1.042,
+    "status": "AT_FLOOR"
+  },
+  "sum_d657e5a1c5df": {
+    "oracle_us": 10.82,
+    "compile_us": 12.16,
+    "ratio": 1.124,
+    "status": "GOOD"
+  },
+  "sum_df75f19c9c7a": {
+    "oracle_us": 6.69,
+    "compile_us": 8.93,
+    "ratio": 1.335,
+    "status": "GOOD"
+  },
+  "sum_dc057cf6da21": {
+    "oracle_us": 6.62,
+    "compile_us": 5.89,
+    "ratio": 0.889,
+    "status": "BAD_ORACLE"
+  },
+  "sum_e00c7291b6ee": {
+    "oracle_us": 2211.58,
+    "compile_us": 3019.65,
+    "ratio": 1.365,
+    "status": "GOOD"
+  },
+  "sum_e82795660886": {
+    "oracle_us": 173.86,
+    "compile_us": 174.85,
+    "ratio": 1.006,
+    "status": "AT_FLOOR"
+  },
+  "sum_e262d057f3c9": {
+    "oracle_us": 6.11,
+    "compile_us": 6.94,
+    "ratio": 1.136,
+    "status": "GOOD"
+  },
+  "sum_ea0933cb9497": {
+    "oracle_us": 9.09,
+    "compile_us": 9.86,
+    "ratio": 1.085,
+    "status": "GOOD"
+  },
+  "sum_eb86a17deab9": {
+    "oracle_us": 13.15,
+    "compile_us": 13.06,
+    "ratio": 0.993,
+    "status": "AT_FLOOR"
+  },
+  "sum_ebebe1ce6cce": {
+    "oracle_us": 24.45,
+    "compile_us": 22.27,
+    "ratio": 0.911,
+    "status": "BAD_ORACLE"
+  },
+  "sum_f160d1f03c1f": {
+    "oracle_us": 108.16,
+    "compile_us": 110.24,
+    "ratio": 1.019,
+    "status": "AT_FLOOR"
+  },
+  "sum_f403c03c9650": {
+    "oracle_us": 89.89,
+    "compile_us": 81.5,
+    "ratio": 0.907,
+    "status": "BAD_ORACLE"
+  },
+  "sum_f4f71b921e96": {
+    "oracle_us": 44.48,
+    "compile_us": 34.4,
+    "ratio": 0.773,
+    "status": "BAD_ORACLE"
+  },
+  "sum_f72e20801b8a": {
+    "oracle_us": 6.43,
+    "compile_us": 6.24,
+    "ratio": 0.97,
+    "status": "AT_FLOOR"
+  },
+  "sum_f95857722916": {
+    "oracle_us": 163.71,
+    "compile_us": 129.7,
+    "ratio": 0.792,
+    "status": "BAD_ORACLE"
+  },
+  "sum_fa194db93388": {
+    "oracle_us": 5.86,
+    "compile_us": 6.02,
+    "ratio": 1.027,
+    "status": "AT_FLOOR"
+  },
+  "sum_fa555e0728c5": {
+    "oracle_us": 41.73,
+    "compile_us": 40.74,
+    "ratio": 0.976,
+    "status": "AT_FLOOR"
+  },
+  "sum_fd44d96c0b10": {
+    "oracle_us": 97.06,
+    "compile_us": 92.74,
+    "ratio": 0.955,
+    "status": "AT_FLOOR"
+  },
+  "sum_mean_273a847a963c": {
+    "oracle_us": 59.04,
+    "compile_us": 60.16,
+    "ratio": 1.019,
+    "status": "AT_FLOOR"
+  },
+  "sum_fe2660cedc0a": {
+    "oracle_us": 61.09,
+    "compile_us": 46.62,
+    "ratio": 0.763,
+    "status": "BAD_ORACLE"
+  },
+  "sum_mean_be3cca3d51c6": {
+    "oracle_us": 59.1,
+    "compile_us": 59.74,
+    "ratio": 1.011,
+    "status": "AT_FLOOR"
+  },
+  "sum_mean_6ea3cb4a159b": {
+    "oracle_us": 11.55,
+    "compile_us": 10.34,
+    "ratio": 0.895,
+    "status": "BAD_ORACLE"
+  },
+  "sum_mean_39228c93d6a4": {
+    "oracle_us": 73.57,
+    "compile_us": 74.53,
+    "ratio": 1.013,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_02744d87feff": {
+    "oracle_us": 93.15,
+    "compile_us": 89.86,
+    "ratio": 0.965,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_02504147c9db": {
+    "oracle_us": 21.38,
+    "compile_us": 42.46,
+    "ratio": 1.987,
+    "status": "GOOD"
+  },
+  "sum_sum_0653152b5266": {
+    "oracle_us": 29.95,
+    "compile_us": 32.83,
+    "ratio": 1.096,
+    "status": "GOOD"
+  },
+  "sum_sum_04bdad42e9ef": {
+    "oracle_us": 19.81,
+    "compile_us": 16.0,
+    "ratio": 0.808,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_067195d29ca4": {
+    "oracle_us": 203.55,
+    "compile_us": 110.27,
+    "ratio": 0.542,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_06ebd69de9aa": {
+    "oracle_us": 5.98,
+    "compile_us": 6.27,
+    "ratio": 1.048,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_07989f9f05c5": {
+    "oracle_us": 22.27,
+    "compile_us": 19.49,
+    "ratio": 0.875,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_09a845b95efe": {
+    "oracle_us": 14.05,
+    "compile_us": 20.22,
+    "ratio": 1.44,
+    "status": "GOOD"
+  },
+  "sum_sum_100fff569d2e": {
+    "oracle_us": 100.06,
+    "compile_us": 110.46,
+    "ratio": 1.104,
+    "status": "GOOD"
+  },
+  "sum_sum_0324c264adf7": {
+    "oracle_us": 398.46,
+    "compile_us": 372.48,
+    "ratio": 0.935,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_145a8857ebf2": {
+    "oracle_us": 383.36,
+    "compile_us": 710.43,
+    "ratio": 1.853,
+    "status": "GOOD"
+  },
+  "sum_sum_195fab49a949": {
+    "oracle_us": 71.65,
+    "compile_us": 56.67,
+    "ratio": 0.791,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_12bf0466c00c": {
+    "oracle_us": 5.79,
+    "compile_us": 6.08,
+    "ratio": 1.05,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_0930bd38b7d1": {
+    "oracle_us": 944.1,
+    "compile_us": 1324.0,
+    "ratio": 1.402,
+    "status": "GOOD"
+  },
+  "sum_sum_17a11b547fed": {
+    "oracle_us": 163.74,
+    "compile_us": 231.04,
+    "ratio": 1.411,
+    "status": "GOOD"
+  },
+  "sum_sum_1a663e225990": {
+    "oracle_us": 1579.94,
+    "compile_us": 2218.08,
+    "ratio": 1.404,
+    "status": "GOOD"
+  },
+  "sum_sum_1cea644c8da6": {
+    "oracle_us": 81.7,
+    "compile_us": 134.91,
+    "ratio": 1.651,
+    "status": "GOOD"
+  },
+  "sum_sum_25d0782111b0": {
+    "oracle_us": 26.21,
+    "compile_us": 19.14,
+    "ratio": 0.73,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_1efe819604dc": {
+    "oracle_us": 34.3,
+    "compile_us": 37.7,
+    "ratio": 1.099,
+    "status": "GOOD"
+  },
+  "sum_sum_2770b50af765": {
+    "oracle_us": 212.7,
+    "compile_us": 212.7,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_230671a8764d": {
+    "oracle_us": 247.68,
+    "compile_us": 20.61,
+    "ratio": 0.083,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_279d6b97ab68": {
+    "oracle_us": 29.31,
+    "compile_us": 39.68,
+    "ratio": 1.354,
+    "status": "GOOD"
+  },
+  "sum_sum_28e704df4454": {
+    "oracle_us": 28.51,
+    "compile_us": 32.51,
+    "ratio": 1.14,
+    "status": "GOOD"
+  },
+  "sum_sum_2847f46e0c5a": {
+    "oracle_us": 96.38,
+    "compile_us": 177.47,
+    "ratio": 1.841,
+    "status": "GOOD"
+  },
+  "sum_sum_2a2b5ec72fea": {
+    "oracle_us": 537.47,
+    "compile_us": 843.71,
+    "ratio": 1.57,
+    "status": "GOOD"
+  },
+  "sum_sum_2d5b06e4c2a8": {
+    "oracle_us": 46.46,
+    "compile_us": 45.73,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_2b7bf2b45160": {
+    "oracle_us": 56.64,
+    "compile_us": 44.8,
+    "ratio": 0.791,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_2dc2fbd588d9": {
+    "oracle_us": 74.43,
+    "compile_us": 190.05,
+    "ratio": 2.553,
+    "status": "GOOD"
+  },
+  "sum_sum_2eb4fbbc04e1": {
+    "oracle_us": 81.86,
+    "compile_us": 79.07,
+    "ratio": 0.966,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_2f2d7ba72160": {
+    "oracle_us": 45.31,
+    "compile_us": 50.94,
+    "ratio": 1.124,
+    "status": "GOOD"
+  },
+  "sum_sum_3219a09ab96a": {
+    "oracle_us": 204.74,
+    "compile_us": 737.44,
+    "ratio": 3.602,
+    "status": "GOOD"
+  },
+  "sum_sum_342b53f3f607": {
+    "oracle_us": 12.26,
+    "compile_us": 20.19,
+    "ratio": 1.648,
+    "status": "GOOD"
+  },
+  "sum_sum_36f20fb8bfa8": {
+    "oracle_us": 274.24,
+    "compile_us": 36.77,
+    "ratio": 0.134,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_384d663c041d": {
+    "oracle_us": 120.51,
+    "compile_us": 132.9,
+    "ratio": 1.103,
+    "status": "GOOD"
+  },
+  "sum_sum_3c44d89daf3a": {
+    "oracle_us": 88.06,
+    "compile_us": 92.06,
+    "ratio": 1.045,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_3c5efeeb4188": {
+    "oracle_us": 7.74,
+    "compile_us": 8.7,
+    "ratio": 1.124,
+    "status": "GOOD"
+  },
+  "sum_sum_3d76bb8bc6b6": {
+    "oracle_us": 28.42,
+    "compile_us": 43.01,
+    "ratio": 1.514,
+    "status": "GOOD"
+  },
+  "sum_sum_4af669d6f405": {
+    "oracle_us": 113.5,
+    "compile_us": 123.78,
+    "ratio": 1.09,
+    "status": "GOOD"
+  },
+  "sum_sum_4bd81dea302d": {
+    "oracle_us": 58.27,
+    "compile_us": 81.82,
+    "ratio": 1.404,
+    "status": "GOOD"
+  },
+  "sum_sum_505c30a7fb41": {
+    "oracle_us": 107.42,
+    "compile_us": 104.42,
+    "ratio": 0.972,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_4dbee302662f": {
+    "oracle_us": 37.54,
+    "compile_us": 34.59,
+    "ratio": 0.922,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_547322643473": {
+    "oracle_us": 48.96,
+    "compile_us": 50.82,
+    "ratio": 1.038,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_53431ef91176": {
+    "oracle_us": 83.46,
+    "compile_us": 43.94,
+    "ratio": 0.526,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_57e5518c4d1d": {
+    "oracle_us": 83.84,
+    "compile_us": 86.82,
+    "ratio": 1.035,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_5c0f382244aa": {
+    "oracle_us": 28.16,
+    "compile_us": 32.64,
+    "ratio": 1.159,
+    "status": "GOOD"
+  },
+  "sum_sum_5c61feb6340e": {
+    "oracle_us": 27.97,
+    "compile_us": 24.32,
+    "ratio": 0.87,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_609200a71825": {
+    "oracle_us": 14.94,
+    "compile_us": 22.05,
+    "ratio": 1.475,
+    "status": "GOOD"
+  },
+  "sum_sum_62f7c19427cb": {
+    "oracle_us": 100.32,
+    "compile_us": 98.08,
+    "ratio": 0.978,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_5fb479045844": {
+    "oracle_us": 152.38,
+    "compile_us": 132.74,
+    "ratio": 0.871,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_666d023699ba": {
+    "oracle_us": 340.8,
+    "compile_us": 290.66,
+    "ratio": 0.853,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_66d579ce122c": {
+    "oracle_us": 81.6,
+    "compile_us": 72.58,
+    "ratio": 0.889,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_63e248035ceb": {
+    "oracle_us": 21.44,
+    "compile_us": 35.87,
+    "ratio": 1.673,
+    "status": "GOOD"
+  },
+  "sum_sum_67196354e2ae": {
+    "oracle_us": 147.42,
+    "compile_us": 128.83,
+    "ratio": 0.874,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_67d7103962e7": {
+    "oracle_us": 53.25,
+    "compile_us": 58.05,
+    "ratio": 1.09,
+    "status": "GOOD"
+  },
+  "sum_sum_6a040ef6b4ab": {
+    "oracle_us": 145.12,
+    "compile_us": 151.2,
+    "ratio": 1.042,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_694ed6c91379": {
+    "oracle_us": 15.42,
+    "compile_us": 15.9,
+    "ratio": 1.031,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_6dbca49c2393": {
+    "oracle_us": 20.38,
+    "compile_us": 24.22,
+    "ratio": 1.188,
+    "status": "GOOD"
+  },
+  "sum_sum_6f518556b3ea": {
+    "oracle_us": 24.0,
+    "compile_us": 30.78,
+    "ratio": 1.283,
+    "status": "GOOD"
+  },
+  "sum_sum_6e3dcc264797": {
+    "oracle_us": 48.83,
+    "compile_us": 35.42,
+    "ratio": 0.725,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_7246c400da84": {
+    "oracle_us": 272.29,
+    "compile_us": 275.42,
+    "ratio": 1.012,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_7388c7a6f044": {
+    "oracle_us": 361.15,
+    "compile_us": 307.07,
+    "ratio": 0.85,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_75ee5fc5ea19": {
+    "oracle_us": 5019.49,
+    "compile_us": 4204.38,
+    "ratio": 0.838,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_74337e6f6544": {
+    "oracle_us": 2039.68,
+    "compile_us": 2456.58,
+    "ratio": 1.204,
+    "status": "GOOD"
+  },
+  "sum_sum_79eb2b561a83": {
+    "oracle_us": 282.62,
+    "compile_us": 271.23,
+    "ratio": 0.96,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_7684f6d93e46": {
+    "oracle_us": 108.22,
+    "compile_us": 138.08,
+    "ratio": 1.276,
+    "status": "GOOD"
+  },
+  "sum_sum_7a49bf63689f": {
+    "oracle_us": 32.64,
+    "compile_us": 32.58,
+    "ratio": 0.998,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_7af057233a52": {
+    "oracle_us": 24.45,
+    "compile_us": 16.86,
+    "ratio": 0.69,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_82d023e49f62": {
+    "oracle_us": 77.22,
+    "compile_us": 99.3,
+    "ratio": 1.286,
+    "status": "GOOD"
+  },
+  "sum_sum_7c6679a3489a": {
+    "oracle_us": 6.02,
+    "compile_us": 5.86,
+    "ratio": 0.973,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_855d8ce522fb": {
+    "oracle_us": 81.73,
+    "compile_us": 68.42,
+    "ratio": 0.837,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_847b1e4f73dd": {
+    "oracle_us": 288.29,
+    "compile_us": 286.5,
+    "ratio": 0.994,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_86cb93483e23": {
+    "oracle_us": 93.86,
+    "compile_us": 216.74,
+    "ratio": 2.309,
+    "status": "GOOD"
+  },
+  "sum_sum_876992e24e09": {
+    "oracle_us": 14.24,
+    "compile_us": 16.29,
+    "ratio": 1.144,
+    "status": "GOOD"
+  },
+  "sum_sum_8bc26e2e1883": {
+    "oracle_us": 32.7,
+    "compile_us": 33.7,
+    "ratio": 1.03,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_8d73a4b5bade": {
+    "oracle_us": 5.7,
+    "compile_us": 5.6,
+    "ratio": 0.983,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_8e96ea244bf1": {
+    "oracle_us": 5.34,
+    "compile_us": 5.28,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_8f7c059eb6a4": {
+    "oracle_us": 5.54,
+    "compile_us": 6.34,
+    "ratio": 1.145,
+    "status": "GOOD"
+  },
+  "sum_sum_975c7af7df3e": {
+    "oracle_us": 75.46,
+    "compile_us": 59.58,
+    "ratio": 0.79,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_9891e3d83122": {
+    "oracle_us": 28.06,
+    "compile_us": 26.62,
+    "ratio": 0.949,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_98c4811f6ddf": {
+    "oracle_us": 15.62,
+    "compile_us": 15.68,
+    "ratio": 1.004,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_9a2392d9eb48": {
+    "oracle_us": 59.36,
+    "compile_us": 53.06,
+    "ratio": 0.894,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_990e3735ef09": {
+    "oracle_us": 36.48,
+    "compile_us": 30.18,
+    "ratio": 0.827,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_9c4f6ec62bfe": {
+    "oracle_us": 216.77,
+    "compile_us": 239.46,
+    "ratio": 1.105,
+    "status": "GOOD"
+  },
+  "sum_sum_9c8d365c6ff7": {
+    "oracle_us": 12.96,
+    "compile_us": 13.95,
+    "ratio": 1.077,
+    "status": "GOOD"
+  },
+  "sum_sum_9e5f39617df9": {
+    "oracle_us": 49.09,
+    "compile_us": 41.6,
+    "ratio": 0.847,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_a114cf26ba31": {
+    "oracle_us": 29.09,
+    "compile_us": 30.08,
+    "ratio": 1.034,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_a21529a67761": {
+    "oracle_us": 74.53,
+    "compile_us": 63.36,
+    "ratio": 0.85,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_a25a5817ed69": {
+    "oracle_us": 73.28,
+    "compile_us": 61.25,
+    "ratio": 0.836,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_a3da3e05e5db": {
+    "oracle_us": 444.48,
+    "compile_us": 665.79,
+    "ratio": 1.498,
+    "status": "GOOD"
+  },
+  "sum_sum_a3ce72227d9d": {
+    "oracle_us": 52.83,
+    "compile_us": 52.03,
+    "ratio": 0.985,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_a55455ad36bb": {
+    "oracle_us": 429.86,
+    "compile_us": 397.06,
+    "ratio": 0.924,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_a793eef69186": {
+    "oracle_us": 34.66,
+    "compile_us": 31.52,
+    "ratio": 0.91,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_ac29e2b6282b": {
+    "oracle_us": 30.11,
+    "compile_us": 28.93,
+    "ratio": 0.961,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_a7f863c76602": {
+    "oracle_us": 6.24,
+    "compile_us": 7.01,
+    "ratio": 1.123,
+    "status": "GOOD"
+  },
+  "sum_sum_ad05fd3c31c6": {
+    "oracle_us": 73.5,
+    "compile_us": 87.71,
+    "ratio": 1.193,
+    "status": "GOOD"
+  },
+  "sum_sum_aac6620b978d": {
+    "oracle_us": 15.81,
+    "compile_us": 15.94,
+    "ratio": 1.008,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_adb09ad67b46": {
+    "oracle_us": 59.14,
+    "compile_us": 60.83,
+    "ratio": 1.029,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_ab550e4e948e": {
+    "oracle_us": 29.92,
+    "compile_us": 24.22,
+    "ratio": 0.81,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_ae22004e3b1e": {
+    "oracle_us": 32.03,
+    "compile_us": 23.33,
+    "ratio": 0.728,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_b1697ad4a549": {
+    "oracle_us": 61.15,
+    "compile_us": 55.01,
+    "ratio": 0.9,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_addc448a9236": {
+    "oracle_us": 71.58,
+    "compile_us": 63.14,
+    "ratio": 0.882,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_baa6d8522274": {
+    "oracle_us": 82.82,
+    "compile_us": 85.79,
+    "ratio": 1.036,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_b16afac198fb": {
+    "oracle_us": 120.48,
+    "compile_us": 221.06,
+    "ratio": 1.835,
+    "status": "GOOD"
+  },
+  "sum_sum_ba803596a087": {
+    "oracle_us": 1831.74,
+    "compile_us": 3612.48,
+    "ratio": 1.972,
+    "status": "GOOD"
+  },
+  "sum_sum_bc46e8b5be67": {
+    "oracle_us": 15.42,
+    "compile_us": 18.11,
+    "ratio": 1.174,
+    "status": "GOOD"
+  },
+  "sum_sum_bc10a7742387": {
+    "oracle_us": 9.06,
+    "compile_us": 11.23,
+    "ratio": 1.24,
+    "status": "GOOD"
+  },
+  "sum_sum_bc769517a232": {
+    "oracle_us": 32.42,
+    "compile_us": 28.61,
+    "ratio": 0.883,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_c50720f2fd4d": {
+    "oracle_us": 112.19,
+    "compile_us": 89.76,
+    "ratio": 0.8,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_c39c7b0d801a": {
+    "oracle_us": 42.59,
+    "compile_us": 40.61,
+    "ratio": 0.953,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_c775e4f2e227": {
+    "oracle_us": 27.84,
+    "compile_us": 21.98,
+    "ratio": 0.79,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_cc11724ac17a": {
+    "oracle_us": 43.23,
+    "compile_us": 37.54,
+    "ratio": 0.868,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_cb1e4e3e8236": {
+    "oracle_us": 747.26,
+    "compile_us": 552.74,
+    "ratio": 0.74,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_c769ee8f5293": {
+    "oracle_us": 130.85,
+    "compile_us": 129.09,
+    "ratio": 0.987,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_ced249279c9d": {
+    "oracle_us": 184.13,
+    "compile_us": 403.42,
+    "ratio": 2.191,
+    "status": "GOOD"
+  },
+  "sum_sum_cd0753365f8e": {
+    "oracle_us": 32.74,
+    "compile_us": 32.7,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_ceb449ea29e4": {
+    "oracle_us": 200.7,
+    "compile_us": 179.04,
+    "ratio": 0.892,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_d550f2d61c6c": {
+    "oracle_us": 161.82,
+    "compile_us": 276.38,
+    "ratio": 1.708,
+    "status": "GOOD"
+  },
+  "sum_sum_d6a05dc5c646": {
+    "oracle_us": 122.78,
+    "compile_us": 193.7,
+    "ratio": 1.578,
+    "status": "GOOD"
+  },
+  "sum_sum_d421c7208527": {
+    "oracle_us": 46.94,
+    "compile_us": 44.64,
+    "ratio": 0.951,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_df7b99fa3465": {
+    "oracle_us": 219.94,
+    "compile_us": 228.16,
+    "ratio": 1.037,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_d73ef74614dc": {
+    "oracle_us": 180.93,
+    "compile_us": 457.66,
+    "ratio": 2.53,
+    "status": "GOOD"
+  },
+  "sum_sum_e036cf2d1ccb": {
+    "oracle_us": 16.06,
+    "compile_us": 18.21,
+    "ratio": 1.133,
+    "status": "GOOD"
+  },
+  "sum_sum_e106b4fbe172": {
+    "oracle_us": 48.83,
+    "compile_us": 49.95,
+    "ratio": 1.023,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_e5ce94282cc7": {
+    "oracle_us": 110.18,
+    "compile_us": 105.38,
+    "ratio": 0.956,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_e6b32bb1b384": {
+    "oracle_us": 32.86,
+    "compile_us": 26.27,
+    "ratio": 0.799,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_e6f9af9e33b1": {
+    "oracle_us": 50.85,
+    "compile_us": 51.49,
+    "ratio": 1.013,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_e75c5e897993": {
+    "oracle_us": 46.62,
+    "compile_us": 42.88,
+    "ratio": 0.92,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_e776df017e4a": {
+    "oracle_us": 190.08,
+    "compile_us": 243.65,
+    "ratio": 1.282,
+    "status": "GOOD"
+  },
+  "sum_sum_e9338369070e": {
+    "oracle_us": 41.73,
+    "compile_us": 30.14,
+    "ratio": 0.722,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_eb165dcc9940": {
+    "oracle_us": 40.67,
+    "compile_us": 64.45,
+    "ratio": 1.585,
+    "status": "GOOD"
+  },
+  "sum_sum_ec5520846a41": {
+    "oracle_us": 43.78,
+    "compile_us": 42.59,
+    "ratio": 0.973,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_ed9e2feedf2a": {
+    "oracle_us": 30.53,
+    "compile_us": 32.54,
+    "ratio": 1.066,
+    "status": "GOOD"
+  },
+  "sum_sum_ece81a19042b": {
+    "oracle_us": 221.41,
+    "compile_us": 221.25,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_f02e7183ed27": {
+    "oracle_us": 122.46,
+    "compile_us": 104.29,
+    "ratio": 0.852,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_f2cf5a9eac50": {
+    "oracle_us": 228.1,
+    "compile_us": 229.06,
+    "ratio": 1.004,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_f10bfbcf6729": {
+    "oracle_us": 44.8,
+    "compile_us": 36.19,
+    "ratio": 0.808,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_f669fb74a93c": {
+    "oracle_us": 10.98,
+    "compile_us": 15.58,
+    "ratio": 1.42,
+    "status": "GOOD"
+  },
+  "sum_sum_fdefa5604cda": {
+    "oracle_us": 85.57,
+    "compile_us": 73.6,
+    "ratio": 0.86,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_f4d29f9ee6ad": {
+    "oracle_us": 958.37,
+    "compile_us": 1001.47,
+    "ratio": 1.045,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_mean_9af96955f8cc": {
+    "oracle_us": 34.02,
+    "compile_us": 41.76,
+    "ratio": 1.228,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_041aaca79573": {
+    "oracle_us": 265.12,
+    "compile_us": 528.22,
+    "ratio": 1.992,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_04ff2f31b226": {
+    "oracle_us": 19.49,
+    "compile_us": 17.79,
+    "ratio": 0.913,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_117551af918e": {
+    "oracle_us": 57.02,
+    "compile_us": 85.57,
+    "ratio": 1.501,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_04ab10ca59ee": {
+    "oracle_us": 239.14,
+    "compile_us": 328.51,
+    "ratio": 1.374,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_109f690634a7": {
+    "oracle_us": 204.58,
+    "compile_us": 178.14,
+    "ratio": 0.871,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_1482b693d4f2": {
+    "oracle_us": 122.85,
+    "compile_us": 122.91,
+    "ratio": 1.001,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_1cad42039094": {
+    "oracle_us": 122.75,
+    "compile_us": 122.62,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_1aa511fcc737": {
+    "oracle_us": 325.31,
+    "compile_us": 401.12,
+    "ratio": 1.233,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_17d1ea77dce0": {
+    "oracle_us": 163.58,
+    "compile_us": 289.73,
+    "ratio": 1.771,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_18cf1bb89c04": {
+    "oracle_us": 143.33,
+    "compile_us": 110.4,
+    "ratio": 0.77,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_1d1edd983280": {
+    "oracle_us": 134.11,
+    "compile_us": 81.7,
+    "ratio": 0.609,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_1b02daac4062": {
+    "oracle_us": 40.96,
+    "compile_us": 39.78,
+    "ratio": 0.971,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_0147fd1c4296": {
+    "oracle_us": 1062.98,
+    "compile_us": 661.34,
+    "ratio": 0.622,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_1c9995bc990f": {
+    "oracle_us": 63.26,
+    "compile_us": 67.46,
+    "ratio": 1.066,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_1dd09876ea9d": {
+    "oracle_us": 103.39,
+    "compile_us": 148.64,
+    "ratio": 1.438,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_1d10e6314ef6": {
+    "oracle_us": 42.78,
+    "compile_us": 36.26,
+    "ratio": 0.847,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_22bc9d6a43f1": {
+    "oracle_us": 67.26,
+    "compile_us": 135.2,
+    "ratio": 2.01,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_2334df16a35d": {
+    "oracle_us": 42.72,
+    "compile_us": 46.02,
+    "ratio": 1.077,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_2005ccbce613": {
+    "oracle_us": 61.06,
+    "compile_us": 57.5,
+    "ratio": 0.942,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_26d1711c064d": {
+    "oracle_us": 115.65,
+    "compile_us": 149.18,
+    "ratio": 1.29,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_1f1e92d38dc4": {
+    "oracle_us": 335.52,
+    "compile_us": 290.59,
+    "ratio": 0.866,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_280231331614": {
+    "oracle_us": 216.9,
+    "compile_us": 100.38,
+    "ratio": 0.463,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_21910bdd88af": {
+    "oracle_us": 75.07,
+    "compile_us": 79.26,
+    "ratio": 1.056,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_2c3a34d36aa8": {
+    "oracle_us": 104.16,
+    "compile_us": 149.41,
+    "ratio": 1.434,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_26d7add77ccd": {
+    "oracle_us": 163.39,
+    "compile_us": 201.54,
+    "ratio": 1.233,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_23d38cb25981": {
+    "oracle_us": 409.38,
+    "compile_us": 229.15,
+    "ratio": 0.56,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_335722fb8da6": {
+    "oracle_us": 17.18,
+    "compile_us": 15.81,
+    "ratio": 0.92,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_3213336f4c0b": {
+    "oracle_us": 45.02,
+    "compile_us": 72.58,
+    "ratio": 1.612,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_3579253dcf89": {
+    "oracle_us": 705.18,
+    "compile_us": 861.02,
+    "ratio": 1.221,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_34c857ab7db3": {
+    "oracle_us": 622.59,
+    "compile_us": 701.44,
+    "ratio": 1.127,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_3814c418da03": {
+    "oracle_us": 32.48,
+    "compile_us": 43.3,
+    "ratio": 1.333,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_3a7d18b5e969": {
+    "oracle_us": 94.18,
+    "compile_us": 84.9,
+    "ratio": 0.901,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_37ed72cc58f3": {
+    "oracle_us": 110.66,
+    "compile_us": 148.32,
+    "ratio": 1.34,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_33dcb3bff2b0": {
+    "oracle_us": 116.38,
+    "compile_us": 75.78,
+    "ratio": 0.651,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_33f45f532ce3": {
+    "oracle_us": 85.76,
+    "compile_us": 69.5,
+    "ratio": 0.81,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_3e04a44dd549": {
+    "oracle_us": 42.46,
+    "compile_us": 63.71,
+    "ratio": 1.5,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_3cd8c07ebace": {
+    "oracle_us": 580.54,
+    "compile_us": 454.46,
+    "ratio": 0.783,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_3ec568a7ba04": {
+    "oracle_us": 24.48,
+    "compile_us": 31.04,
+    "ratio": 1.268,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_3eab263249bb": {
+    "oracle_us": 88.0,
+    "compile_us": 114.46,
+    "ratio": 1.301,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_3e8dba104ec0": {
+    "oracle_us": 206.56,
+    "compile_us": 122.69,
+    "ratio": 0.594,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_3c3d7e533ce5": {
+    "oracle_us": 284.45,
+    "compile_us": 215.9,
+    "ratio": 0.759,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_43d15abc67ce": {
+    "oracle_us": 22.5,
+    "compile_us": 24.03,
+    "ratio": 1.068,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_443ecc71f23f": {
+    "oracle_us": 44.8,
+    "compile_us": 69.41,
+    "ratio": 1.549,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_4bb798eb542e": {
+    "oracle_us": 50.75,
+    "compile_us": 54.62,
+    "ratio": 1.076,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_43d9d6c4646b": {
+    "oracle_us": 27.97,
+    "compile_us": 30.24,
+    "ratio": 1.081,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_4d7a27f102ca": {
+    "oracle_us": 270.11,
+    "compile_us": 729.98,
+    "ratio": 2.703,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_4c5c1859352a": {
+    "oracle_us": 9.82,
+    "compile_us": 14.02,
+    "ratio": 1.427,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_41857d0f0554": {
+    "oracle_us": 851.78,
+    "compile_us": 667.65,
+    "ratio": 0.784,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_48033561d121": {
+    "oracle_us": 116.48,
+    "compile_us": 98.08,
+    "ratio": 0.842,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_508eb468b8d9": {
+    "oracle_us": 113.6,
+    "compile_us": 155.46,
+    "ratio": 1.368,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_45f02142ecfd": {
+    "oracle_us": 171767.81,
+    "compile_us": 17997.92,
+    "ratio": 0.105,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_4fdc0c9d691f": {
+    "oracle_us": 8.83,
+    "compile_us": 10.59,
+    "ratio": 1.199,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_56cdc50216ea": {
+    "oracle_us": 28.48,
+    "compile_us": 28.77,
+    "ratio": 1.01,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_55426f9a4493": {
+    "oracle_us": 452.51,
+    "compile_us": 487.58,
+    "ratio": 1.078,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_53917171ce11": {
+    "oracle_us": 216.86,
+    "compile_us": 46.27,
+    "ratio": 0.213,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_56ca14eaee84": {
+    "oracle_us": 272.06,
+    "compile_us": 215.9,
+    "ratio": 0.794,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_5a4f87bbd879": {
+    "oracle_us": 184.22,
+    "compile_us": 104.48,
+    "ratio": 0.567,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_5f0c557e2169": {
+    "oracle_us": 9.82,
+    "compile_us": 12.64,
+    "ratio": 1.287,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_5c7c5e63becb": {
+    "oracle_us": 44.64,
+    "compile_us": 36.74,
+    "ratio": 0.823,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_66042c8b0ba0": {
+    "oracle_us": 270.02,
+    "compile_us": 262.08,
+    "ratio": 0.971,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_612b509be4a7": {
+    "oracle_us": 380.7,
+    "compile_us": 151.33,
+    "ratio": 0.397,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_6107a2f54029": {
+    "oracle_us": 168.992,
+    "compile_us": 217.056,
+    "ratio": 1.284,
+    "status": "GOOD",
+    "combo_compile_us": 221.984,
+    "best_required_compile_us": 217.056,
+    "required_ratio": 1.284,
+    "historical_best_compile_us": 525.2799987792969,
+    "true_floor": true,
+    "classification": "COOPERATIVE_SPLIT_K"
+  },
+  "sum_sum_sum_6a2ad206248c": {
+    "oracle_us": 83.1,
+    "compile_us": 163.42,
+    "ratio": 1.966,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_6b7ff2251678": {
+    "oracle_us": 7.65,
+    "compile_us": 8.86,
+    "ratio": 1.159,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_6606e7ed59de": {
+    "oracle_us": 28.29,
+    "compile_us": 32.19,
+    "ratio": 1.138,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_69414585b76b": {
+    "oracle_us": 66.34,
+    "compile_us": 69.28,
+    "ratio": 1.044,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_68efcf13bb7a": {
+    "oracle_us": 496.54,
+    "compile_us": 82.78,
+    "ratio": 0.167,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_5bff1ad7f52a": {
+    "oracle_us": 376.67,
+    "compile_us": 380.45,
+    "ratio": 1.01,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_6f9b333ed892": {
+    "oracle_us": 302.82,
+    "compile_us": 587.42,
+    "ratio": 1.94,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_718a025684ba": {
+    "oracle_us": 72.64,
+    "compile_us": 70.5,
+    "ratio": 0.97,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_728df9734dbe": {
+    "oracle_us": 11.49,
+    "compile_us": 13.63,
+    "ratio": 1.187,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_72d5ffa26b42": {
+    "oracle_us": 55.14,
+    "compile_us": 63.42,
+    "ratio": 1.15,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_72f8a586759c": {
+    "oracle_us": 6.62,
+    "compile_us": 11.87,
+    "ratio": 1.792,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_6b931086c555": {
+    "oracle_us": 110.37,
+    "compile_us": 77.28,
+    "ratio": 0.7,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_758c2b3673ba": {
+    "oracle_us": 250.75,
+    "compile_us": 149.22,
+    "ratio": 0.595,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_73a23287990b": {
+    "oracle_us": 499.42,
+    "compile_us": 716.54,
+    "ratio": 1.435,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_766837223ded": {
+    "oracle_us": 9.98,
+    "compile_us": 11.07,
+    "ratio": 1.109,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_7baf7f118798": {
+    "oracle_us": 247.46,
+    "compile_us": 169.79,
+    "ratio": 0.686,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_7ebfef460635": {
+    "oracle_us": 495.52,
+    "compile_us": 710.62,
+    "ratio": 1.434,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_812de8ed33fc": {
+    "oracle_us": 75.65,
+    "compile_us": 76.74,
+    "ratio": 1.014,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_81b1543349e5": {
+    "oracle_us": 41.18,
+    "compile_us": 42.69,
+    "ratio": 1.037,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_80113e346555": {
+    "oracle_us": 8.77,
+    "compile_us": 14.98,
+    "ratio": 1.708,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_821bf10276d6": {
+    "oracle_us": 93.98,
+    "compile_us": 204.48,
+    "ratio": 2.176,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_8d668b8fcd9e": {
+    "oracle_us": 79.46,
+    "compile_us": 81.66,
+    "ratio": 1.028,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_83ddb84cc830": {
+    "oracle_us": 112.45,
+    "compile_us": 193.98,
+    "ratio": 1.725,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_82a3f0084247": {
+    "oracle_us": 5691.3,
+    "compile_us": 637.95,
+    "ratio": 0.112,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_8dc0ac508cce": {
+    "oracle_us": 188.29,
+    "compile_us": 350.11,
+    "ratio": 1.859,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_8faedc560651": {
+    "oracle_us": 29.44,
+    "compile_us": 8.96,
+    "combo_compile_us": 8.96,
+    "best_required_compile_us": 8.96,
+    "ratio": 0.304,
+    "status": "BAD_ORACLE",
+    "true_floor": false,
+    "classification": "SCHEDULER_FUSION"
+  },
+  "sum_sum_sum_8fe409430e81": {
+    "oracle_us": 177.34,
+    "compile_us": 92.58,
+    "ratio": 0.522,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_8fe65349c733": {
+    "oracle_us": 405.25,
+    "compile_us": 427.87,
+    "ratio": 1.056,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_8ffe5090cf87": {
+    "oracle_us": 25.41,
+    "compile_us": 36.7,
+    "ratio": 1.445,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_87fd4ec7f051": {
+    "oracle_us": 298.85,
+    "compile_us": 425.79,
+    "ratio": 1.425,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_93b46c9731d8": {
+    "oracle_us": 32.45,
+    "compile_us": 26.4,
+    "ratio": 0.814,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_92327e661e73": {
+    "oracle_us": 56.96,
+    "compile_us": 113.5,
+    "ratio": 1.993,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_94e6cd22ff22": {
+    "oracle_us": 36.45,
+    "compile_us": 46.82,
+    "ratio": 1.284,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_96fb8a704ae4": {
+    "oracle_us": 21.86,
+    "compile_us": 24.13,
+    "ratio": 1.104,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_995d991d6527": {
+    "oracle_us": 84.0,
+    "compile_us": 75.1,
+    "ratio": 0.894,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_9e60972dd685": {
+    "oracle_us": 120.74,
+    "compile_us": 126.62,
+    "ratio": 1.049,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_9e7a546b859f": {
+    "oracle_us": 36.38,
+    "compile_us": 34.62,
+    "ratio": 0.952,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_97999676281e": {
+    "oracle_us": 78.62,
+    "compile_us": 76.0,
+    "ratio": 0.967,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_9d05c4d37c77": {
+    "oracle_us": 672.58,
+    "compile_us": 524.1,
+    "ratio": 0.779,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_985bf52428b3": {
+    "oracle_us": 173.28,
+    "compile_us": 105.89,
+    "ratio": 0.611,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_9fe928f49216": {
+    "oracle_us": 211.81,
+    "compile_us": 196.13,
+    "ratio": 0.926,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_a190850c7f80": {
+    "oracle_us": 366.4,
+    "compile_us": 291.87,
+    "ratio": 0.797,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_9c4d4a65cd7b": {
+    "oracle_us": 110.53,
+    "compile_us": 92.58,
+    "ratio": 0.838,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_a970af617f4c": {
+    "oracle_us": 160.51,
+    "compile_us": 196.22,
+    "ratio": 1.222,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_a9940aaceefe": {
+    "oracle_us": 83.78,
+    "compile_us": 72.67,
+    "ratio": 0.867,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_aa0a63761645": {
+    "oracle_us": 15.87,
+    "compile_us": 18.05,
+    "ratio": 1.137,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_a3f8e893e349": {
+    "oracle_us": 270.05,
+    "compile_us": 249.79,
+    "ratio": 0.925,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_a431ef798d5d": {
+    "oracle_us": 65.22,
+    "compile_us": 79.68,
+    "ratio": 1.222,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_b30da3bff8d4": {
+    "oracle_us": 83.74,
+    "compile_us": 89.95,
+    "ratio": 1.074,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_b0debbb55e8e": {
+    "oracle_us": 106.3,
+    "compile_us": 71.23,
+    "ratio": 0.67,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_ba765a70455b": {
+    "oracle_us": 48.93,
+    "compile_us": 69.73,
+    "ratio": 1.425,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_b3091402bb28": {
+    "oracle_us": 182.18,
+    "compile_us": 99.26,
+    "ratio": 0.545,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_b42d335bef54": {
+    "oracle_us": 28.83,
+    "compile_us": 24.45,
+    "ratio": 0.848,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_ba4095e1d04a": {
+    "oracle_us": 255.65,
+    "compile_us": 277.34,
+    "ratio": 1.085,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_bab40cbb0446": {
+    "oracle_us": 177.12,
+    "compile_us": 173.89,
+    "ratio": 0.982,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_b8d91626261d": {
+    "oracle_us": 93.82,
+    "compile_us": 114.27,
+    "ratio": 1.218,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_be2a8911a995": {
+    "oracle_us": 151.1,
+    "compile_us": 223.14,
+    "ratio": 1.477,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_bc73f5ef21f6": {
+    "oracle_us": 110.53,
+    "compile_us": 84.83,
+    "ratio": 0.768,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_baf315cfc5f0": {
+    "oracle_us": 60.22,
+    "compile_us": 55.2,
+    "ratio": 0.917,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_be777b3382b6": {
+    "oracle_us": 282.53,
+    "compile_us": 225.41,
+    "ratio": 0.798,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_bfac9a5afa42": {
+    "oracle_us": 33.15,
+    "compile_us": 32.13,
+    "ratio": 0.969,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_c0e210b86b78": {
+    "oracle_us": 34.43,
+    "compile_us": 32.64,
+    "ratio": 0.948,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_c13919905d9b": {
+    "oracle_us": 77.76,
+    "compile_us": 53.79,
+    "ratio": 0.692,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_c01ffea2a781": {
+    "oracle_us": 248.64,
+    "compile_us": 134.98,
+    "ratio": 0.543,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_c1b0c5dbde1f": {
+    "oracle_us": 97.89,
+    "compile_us": 80.35,
+    "ratio": 0.821,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_c6666009132a": {
+    "oracle_us": 202.59,
+    "compile_us": 265.25,
+    "ratio": 1.309,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_bebd11dba544": {
+    "oracle_us": 175.33,
+    "compile_us": 118.43,
+    "ratio": 0.675,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_bedefd130db8": {
+    "oracle_us": 42.14,
+    "compile_us": 38.5,
+    "ratio": 0.913,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_cad09d5cca79": {
+    "oracle_us": 553.15,
+    "compile_us": 299.97,
+    "ratio": 0.542,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_cad02fe18a69": {
+    "oracle_us": 59.55,
+    "compile_us": 59.42,
+    "ratio": 0.998,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_cd459367a1c3": {
+    "oracle_us": 208.83,
+    "compile_us": 194.37,
+    "ratio": 0.931,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_cb22a50c0d9f": {
+    "oracle_us": 260.96,
+    "compile_us": 67.36,
+    "ratio": 0.258,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_ccb3a106dd79": {
+    "oracle_us": 343.52,
+    "compile_us": 552.61,
+    "ratio": 1.609,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_cd47d7ca4703": {
+    "oracle_us": 77.54,
+    "compile_us": 132.64,
+    "ratio": 1.711,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_d414d9a2b2eb": {
+    "oracle_us": 8.93,
+    "compile_us": 10.75,
+    "ratio": 1.204,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_d32f70eaa94d": {
+    "oracle_us": 253.66,
+    "compile_us": 79.49,
+    "ratio": 0.313,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_d06bf12e10d0": {
+    "oracle_us": 497.38,
+    "compile_us": 516.0,
+    "ratio": 1.037,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_d574fc7bdc59": {
+    "oracle_us": 31.62,
+    "compile_us": 49.12,
+    "ratio": 1.554,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_d138e6df4d0c": {
+    "oracle_us": 191.36,
+    "compile_us": 371.55,
+    "ratio": 1.942,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_d8e421a07bf7": {
+    "oracle_us": 21.28,
+    "compile_us": 25.54,
+    "ratio": 1.2,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_da376d09d2cb": {
+    "oracle_us": 41.82,
+    "compile_us": 46.27,
+    "ratio": 1.106,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_dbc10f22635c": {
+    "oracle_us": 9.73,
+    "compile_us": 9.06,
+    "ratio": 0.931,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_dadf6aa035dd": {
+    "oracle_us": 42792.06,
+    "compile_us": 1505.18,
+    "ratio": 0.035,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_dc96c4651516": {
+    "oracle_us": 247.52,
+    "compile_us": 214.91,
+    "ratio": 0.868,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_e2388f04f7c2": {
+    "oracle_us": 69.38,
+    "compile_us": 116.61,
+    "ratio": 1.681,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_e1f39649886f": {
+    "oracle_us": 874.27,
+    "compile_us": 229.15,
+    "ratio": 0.262,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_e266124dd032": {
+    "oracle_us": 62.37,
+    "compile_us": 74.5,
+    "ratio": 1.194,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_e06c904e550e": {
+    "oracle_us": 60.38,
+    "compile_us": 48.83,
+    "ratio": 0.809,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_e3016fe2bbb7": {
+    "oracle_us": 7.33,
+    "compile_us": 8.77,
+    "ratio": 1.197,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_e4f9a61a4b53": {
+    "oracle_us": 14.85,
+    "compile_us": 15.94,
+    "ratio": 1.073,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_e58ca1d0ccf4": {
+    "oracle_us": 78.05,
+    "compile_us": 225.15,
+    "ratio": 2.885,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_e51450a39c69": {
+    "oracle_us": 17.89,
+    "compile_us": 19.49,
+    "ratio": 1.089,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_e7a56f82f536": {
+    "oracle_us": 1313.98,
+    "compile_us": 227.3,
+    "ratio": 0.173,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_e2d4961f3571": {
+    "oracle_us": 112.32,
+    "compile_us": 54.11,
+    "ratio": 0.482,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_e77e7007d695": {
+    "oracle_us": 184.29,
+    "compile_us": 238.5,
+    "ratio": 1.294,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_eb29178ac0d2": {
+    "oracle_us": 155.68,
+    "compile_us": 245.31,
+    "ratio": 1.576,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_ed8809aa30cf": {
+    "oracle_us": 79.87,
+    "compile_us": 73.66,
+    "ratio": 0.922,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_ecba845b8a4b": {
+    "oracle_us": 9.28,
+    "compile_us": 14.46,
+    "ratio": 1.559,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_ed6c74b5ef96": {
+    "oracle_us": 786.37,
+    "compile_us": 460.16,
+    "ratio": 0.585,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_f0377fc40fe2": {
+    "oracle_us": 34.4,
+    "compile_us": 47.84,
+    "ratio": 1.391,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_f44d03db0b91": {
+    "oracle_us": 114.75,
+    "compile_us": 76.06,
+    "ratio": 0.663,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_f0dba933dc86": {
+    "oracle_us": 21.5,
+    "compile_us": 70.43,
+    "ratio": 3.275,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_f206fcfd9c32": {
+    "oracle_us": 533.34,
+    "compile_us": 77.66,
+    "ratio": 0.146,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_f48adec0ff36": {
+    "oracle_us": 332.8,
+    "compile_us": 302.91,
+    "ratio": 0.91,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_f5c107db3be9": {
+    "oracle_us": 196.48,
+    "compile_us": 168.86,
+    "ratio": 0.859,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_fcd2cc2945b3": {
+    "oracle_us": 82.69,
+    "compile_us": 57.15,
+    "ratio": 0.691,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_f2c6042682bc": {
+    "oracle_us": 51.94,
+    "compile_us": 36.29,
+    "ratio": 0.699,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_fb9996974d8f": {
+    "oracle_us": 249.82,
+    "compile_us": 587.71,
+    "ratio": 2.353,
+    "status": "GOOD"
+  },
+  "sum_sum_sum_fe2bec6738d1": {
+    "oracle_us": 78.75,
+    "compile_us": 55.07,
+    "ratio": 0.699,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_fb068b7d821b": {
+    "oracle_us": 173.38,
+    "compile_us": 116.29,
+    "ratio": 0.671,
+    "status": "BAD_ORACLE"
+  },
+  "sum_sum_sum_ffedd26b0c42": {
+    "oracle_us": 9.73,
+    "compile_us": 12.77,
+    "ratio": 1.313,
+    "status": "GOOD"
+  },
+  "var_mean_032354ac8a5f": {
+    "oracle_us": 6.69,
+    "compile_us": 6.14,
+    "ratio": 0.919,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_00824117c097": {
+    "oracle_us": 47.81,
+    "compile_us": 48.86,
+    "ratio": 1.022,
+    "status": "AT_FLOOR"
+  },
+  "sum_sum_sum_fefa336f7504": {
+    "oracle_us": 205.7,
+    "compile_us": 186.14,
+    "ratio": 0.905,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_0361de9eae81": {
+    "oracle_us": 41.09,
+    "compile_us": 40.64,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_035991ff3d2b": {
+    "oracle_us": 9.98,
+    "compile_us": 9.89,
+    "ratio": 0.99,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_034578d167c5": {
+    "oracle_us": 15.3,
+    "compile_us": 16.06,
+    "ratio": 1.05,
+    "status": "GOOD"
+  },
+  "var_mean_045455ff6e84": {
+    "oracle_us": 7.87,
+    "compile_us": 7.68,
+    "ratio": 0.976,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_036b334353a4": {
+    "oracle_us": 21.31,
+    "compile_us": 19.87,
+    "ratio": 0.932,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_06924cc70cb4": {
+    "oracle_us": 28.35,
+    "compile_us": 33.41,
+    "ratio": 1.178,
+    "status": "GOOD"
+  },
+  "var_mean_052df521537f": {
+    "oracle_us": 26.53,
+    "compile_us": 26.14,
+    "ratio": 0.986,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_092e6409d231": {
+    "oracle_us": 23.42,
+    "compile_us": 17.79,
+    "ratio": 0.76,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_0854c7adb682": {
+    "oracle_us": 53.09,
+    "compile_us": 56.19,
+    "ratio": 1.058,
+    "status": "GOOD"
+  },
+  "var_mean_0a0eec8ae477": {
+    "oracle_us": 30.85,
+    "compile_us": 29.89,
+    "ratio": 0.969,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_0990c69ae9bb": {
+    "oracle_us": 7.36,
+    "compile_us": 7.94,
+    "ratio": 1.078,
+    "status": "GOOD"
+  },
+  "var_mean_0bb837cbf30a": {
+    "oracle_us": 48.9,
+    "compile_us": 44.93,
+    "ratio": 0.919,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_0b554bb6615a": {
+    "oracle_us": 29.25,
+    "compile_us": 29.31,
+    "ratio": 1.002,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_0be1fe6c2ec4": {
+    "oracle_us": 6.43,
+    "compile_us": 6.05,
+    "ratio": 0.94,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_0c9738dea136": {
+    "oracle_us": 97.92,
+    "compile_us": 93.06,
+    "ratio": 0.95,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_0e7d43725d4d": {
+    "oracle_us": 83.46,
+    "compile_us": 87.3,
+    "ratio": 1.046,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_1139e33ee710": {
+    "oracle_us": 31.65,
+    "compile_us": 36.26,
+    "ratio": 1.146,
+    "status": "GOOD"
+  },
+  "var_mean_12542e903d57": {
+    "oracle_us": 10.88,
+    "compile_us": 10.24,
+    "ratio": 0.941,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_13d90438bcbd": {
+    "oracle_us": 131.74,
+    "compile_us": 103.17,
+    "ratio": 0.783,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_12b6b115a741": {
+    "oracle_us": 17.6,
+    "compile_us": 17.76,
+    "ratio": 1.009,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_15b838f5d029": {
+    "oracle_us": 6.27,
+    "compile_us": 6.37,
+    "ratio": 1.015,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_13eb1aa0a32d": {
+    "oracle_us": 20.7,
+    "compile_us": 21.06,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_170cb6646cc0": {
+    "oracle_us": 40.86,
+    "compile_us": 40.93,
+    "ratio": 1.002,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_15e821204e82": {
+    "oracle_us": 50.88,
+    "compile_us": 63.2,
+    "ratio": 1.242,
+    "status": "GOOD"
+  },
+  "var_mean_1b02c576e1eb": {
+    "oracle_us": 18.59,
+    "compile_us": 20.67,
+    "ratio": 1.112,
+    "status": "GOOD"
+  },
+  "var_mean_1711c4ddc910": {
+    "oracle_us": 41.12,
+    "compile_us": 40.38,
+    "ratio": 0.982,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_19d5741628ce": {
+    "oracle_us": 16.7,
+    "compile_us": 20.1,
+    "ratio": 1.203,
+    "status": "GOOD"
+  },
+  "var_mean_1b88cfe94b3c": {
+    "oracle_us": 5.89,
+    "compile_us": 6.02,
+    "ratio": 1.022,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_1bab7e80cec1": {
+    "oracle_us": 6.94,
+    "compile_us": 6.94,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_1c62090e8573": {
+    "oracle_us": 33.44,
+    "compile_us": 25.95,
+    "ratio": 0.776,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_1c7b809d512d": {
+    "oracle_us": 5.89,
+    "compile_us": 10.18,
+    "ratio": 1.728,
+    "status": "GOOD"
+  },
+  "var_mean_1e1a2b2c1b0a": {
+    "oracle_us": 20.29,
+    "compile_us": 18.69,
+    "ratio": 0.921,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_1f499ddad801": {
+    "oracle_us": 27.2,
+    "compile_us": 26.43,
+    "ratio": 0.972,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_1fad4754680a": {
+    "oracle_us": 6.88,
+    "compile_us": 6.72,
+    "ratio": 0.977,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_219e8e620fdc": {
+    "oracle_us": 14.08,
+    "compile_us": 13.92,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_21efaf61742a": {
+    "oracle_us": 84.74,
+    "compile_us": 127.81,
+    "ratio": 1.508,
+    "status": "GOOD"
+  },
+  "var_mean_23c4efbb09b5": {
+    "oracle_us": 18.82,
+    "compile_us": 13.41,
+    "ratio": 0.713,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_23f0e798b604": {
+    "oracle_us": 9.79,
+    "compile_us": 11.65,
+    "ratio": 1.19,
+    "status": "GOOD"
+  },
+  "var_mean_24db25e30504": {
+    "oracle_us": 9.57,
+    "compile_us": 9.41,
+    "ratio": 0.983,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_24e1d446bfed": {
+    "oracle_us": 6.66,
+    "compile_us": 6.14,
+    "ratio": 0.923,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_262248c8386b": {
+    "oracle_us": 107.9,
+    "compile_us": 155.55,
+    "ratio": 1.442,
+    "status": "GOOD"
+  },
+  "var_mean_25898f81ca4d": {
+    "oracle_us": 15.26,
+    "compile_us": 15.52,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_2743dc883057": {
+    "oracle_us": 23.26,
+    "compile_us": 20.54,
+    "ratio": 0.883,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_280a583d97c6": {
+    "oracle_us": 10.34,
+    "compile_us": 8.54,
+    "ratio": 0.827,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_2aeefcdb8c7b": {
+    "oracle_us": 9.73,
+    "compile_us": 12.06,
+    "ratio": 1.24,
+    "status": "GOOD"
+  },
+  "var_mean_2ad1aa26eb79": {
+    "oracle_us": 12.32,
+    "compile_us": 11.84,
+    "ratio": 0.961,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_2ceed1dd2572": {
+    "oracle_us": 6.56,
+    "compile_us": 5.95,
+    "ratio": 0.907,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_2b4c7da7cf99": {
+    "oracle_us": 18.02,
+    "compile_us": 19.94,
+    "ratio": 1.107,
+    "status": "GOOD"
+  },
+  "var_mean_2e61b19a52bc": {
+    "oracle_us": 8.74,
+    "compile_us": 8.48,
+    "ratio": 0.971,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_2ec780efd8cf": {
+    "oracle_us": 30.3,
+    "compile_us": 40.67,
+    "ratio": 1.342,
+    "status": "GOOD"
+  },
+  "var_mean_2f7685c1567b": {
+    "oracle_us": 28.58,
+    "compile_us": 25.38,
+    "ratio": 0.888,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_323ce31f395b": {
+    "oracle_us": 68.16,
+    "compile_us": 44.8,
+    "ratio": 0.657,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_32352a093910": {
+    "oracle_us": 44.7,
+    "compile_us": 46.88,
+    "ratio": 1.049,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_2fcef21b360d": {
+    "oracle_us": 24.42,
+    "compile_us": 29.66,
+    "ratio": 1.215,
+    "status": "GOOD"
+  },
+  "var_mean_349ca1a29d3f": {
+    "oracle_us": 14.69,
+    "compile_us": 16.19,
+    "ratio": 1.102,
+    "status": "GOOD"
+  },
+  "var_mean_327c3b97bf10": {
+    "oracle_us": 8.42,
+    "compile_us": 7.23,
+    "ratio": 0.859,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_36eed06607f1": {
+    "oracle_us": 20.48,
+    "compile_us": 22.56,
+    "ratio": 1.102,
+    "status": "GOOD"
+  },
+  "var_mean_3c8a0f3690b9": {
+    "oracle_us": 60.7,
+    "compile_us": 67.33,
+    "ratio": 1.109,
+    "status": "GOOD"
+  },
+  "var_mean_35394af84f60": {
+    "oracle_us": 5.95,
+    "compile_us": 5.79,
+    "ratio": 0.973,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_3dd5772aac72": {
+    "oracle_us": 7.87,
+    "compile_us": 8.0,
+    "ratio": 1.016,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_3711a161734e": {
+    "oracle_us": 6.53,
+    "compile_us": 6.82,
+    "ratio": 1.044,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_3ea42611b4f0": {
+    "oracle_us": 10.14,
+    "compile_us": 10.05,
+    "ratio": 0.991,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_3e029dc6a6fc": {
+    "oracle_us": 183.94,
+    "compile_us": 170.88,
+    "ratio": 0.929,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_3f319cc01bd1": {
+    "oracle_us": 16.93,
+    "compile_us": 15.46,
+    "ratio": 0.913,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_3eaa1c7a7442": {
+    "oracle_us": 7.3,
+    "compile_us": 7.26,
+    "ratio": 0.996,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_4018778d8833": {
+    "oracle_us": 5.95,
+    "compile_us": 5.95,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_40bf68989e6d": {
+    "oracle_us": 30.4,
+    "compile_us": 30.5,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_40d5a5a49ffd": {
+    "oracle_us": 40.13,
+    "compile_us": 40.74,
+    "ratio": 1.015,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_41a46a395e3a": {
+    "oracle_us": 16.51,
+    "compile_us": 20.19,
+    "ratio": 1.223,
+    "status": "GOOD"
+  },
+  "var_mean_427eaae2cf58": {
+    "oracle_us": 48.96,
+    "compile_us": 40.54,
+    "ratio": 0.828,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_4581dbce69e5": {
+    "oracle_us": 14.21,
+    "compile_us": 16.22,
+    "ratio": 1.142,
+    "status": "GOOD"
+  },
+  "var_mean_42b3beb8ea30": {
+    "oracle_us": 11.94,
+    "compile_us": 11.68,
+    "ratio": 0.979,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_484b1072f657": {
+    "oracle_us": 13.02,
+    "compile_us": 11.3,
+    "ratio": 0.867,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_47219141cddf": {
+    "oracle_us": 33.63,
+    "compile_us": 26.18,
+    "ratio": 0.778,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_48ed6e5abc45": {
+    "oracle_us": 14.02,
+    "compile_us": 14.02,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_48d3414b7305": {
+    "oracle_us": 10.08,
+    "compile_us": 10.62,
+    "ratio": 1.054,
+    "status": "GOOD"
+  },
+  "var_mean_4c529682a7a5": {
+    "oracle_us": 15.1,
+    "compile_us": 13.89,
+    "ratio": 0.919,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_4a0c3a2ad6fb": {
+    "oracle_us": 29.54,
+    "compile_us": 34.94,
+    "ratio": 1.183,
+    "status": "GOOD"
+  },
+  "var_mean_4ca91616285c": {
+    "oracle_us": 235.1,
+    "compile_us": 326.43,
+    "ratio": 1.388,
+    "status": "GOOD"
+  },
+  "var_mean_4c9e3e3af443": {
+    "oracle_us": 31.58,
+    "compile_us": 26.11,
+    "ratio": 0.827,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_4df459ab207d": {
+    "oracle_us": 30.46,
+    "compile_us": 33.89,
+    "ratio": 1.112,
+    "status": "GOOD"
+  },
+  "var_mean_4df40c420c41": {
+    "oracle_us": 29.22,
+    "compile_us": 44.61,
+    "ratio": 1.527,
+    "status": "GOOD"
+  },
+  "var_mean_4e03c7a2956d": {
+    "oracle_us": 62.53,
+    "compile_us": 91.68,
+    "ratio": 1.466,
+    "status": "GOOD"
+  },
+  "var_mean_4f2b9b838832": {
+    "oracle_us": 63.71,
+    "compile_us": 59.36,
+    "ratio": 0.932,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_4f85d2df9fc7": {
+    "oracle_us": 9.95,
+    "compile_us": 8.93,
+    "ratio": 0.897,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_4ff28d120f6f": {
+    "oracle_us": 5.79,
+    "compile_us": 5.89,
+    "ratio": 1.017,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_52ba5f6bf2a0": {
+    "oracle_us": 14.02,
+    "compile_us": 12.67,
+    "ratio": 0.904,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_525fd66a1241": {
+    "oracle_us": 29.47,
+    "compile_us": 37.82,
+    "ratio": 1.283,
+    "status": "GOOD"
+  },
+  "var_mean_549fdfa09721": {
+    "oracle_us": 20.1,
+    "compile_us": 16.86,
+    "ratio": 0.839,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_54ad7896eb18": {
+    "oracle_us": 18.53,
+    "compile_us": 17.54,
+    "ratio": 0.946,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_55b78000aab0": {
+    "oracle_us": 8.74,
+    "compile_us": 8.13,
+    "ratio": 0.93,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_58cdb69fc823": {
+    "oracle_us": 16.42,
+    "compile_us": 18.66,
+    "ratio": 1.136,
+    "status": "GOOD"
+  },
+  "var_mean_550595226896": {
+    "oracle_us": 17.76,
+    "compile_us": 35.58,
+    "ratio": 2.004,
+    "status": "GOOD"
+  },
+  "var_mean_598830735cf6": {
+    "oracle_us": 80.77,
+    "compile_us": 113.28,
+    "ratio": 1.403,
+    "status": "GOOD"
+  },
+  "var_mean_5989a301601b": {
+    "oracle_us": 17.18,
+    "compile_us": 15.81,
+    "ratio": 0.92,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_59d8965968f1": {
+    "oracle_us": 19.2,
+    "compile_us": 18.08,
+    "ratio": 0.942,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_5b0c15caa439": {
+    "oracle_us": 26.46,
+    "compile_us": 46.88,
+    "ratio": 1.771,
+    "status": "GOOD"
+  },
+  "var_mean_5bea7483a354": {
+    "oracle_us": 40.32,
+    "compile_us": 40.74,
+    "ratio": 1.01,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_5c52dd510532": {
+    "oracle_us": 18.72,
+    "compile_us": 13.18,
+    "ratio": 0.704,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_5e94b32b5fac": {
+    "oracle_us": 58.02,
+    "compile_us": 48.22,
+    "ratio": 0.831,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_5d4b04bc0f0f": {
+    "oracle_us": 5.89,
+    "compile_us": 6.08,
+    "ratio": 1.033,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_5fa359332f2e": {
+    "oracle_us": 11.97,
+    "compile_us": 11.55,
+    "ratio": 0.965,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_6084e124876c": {
+    "oracle_us": 20.38,
+    "compile_us": 18.37,
+    "ratio": 0.901,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_62a3b5ef3579": {
+    "oracle_us": 28.06,
+    "compile_us": 38.72,
+    "ratio": 1.38,
+    "status": "GOOD"
+  },
+  "var_mean_617b759d99fa": {
+    "oracle_us": 30.3,
+    "compile_us": 33.76,
+    "ratio": 1.114,
+    "status": "GOOD"
+  },
+  "var_mean_640a50e812af": {
+    "oracle_us": 12.0,
+    "compile_us": 11.87,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_68e4555a2a35": {
+    "oracle_us": 17.28,
+    "compile_us": 13.86,
+    "ratio": 0.802,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_68f956ca0908": {
+    "oracle_us": 10.88,
+    "compile_us": 13.82,
+    "ratio": 1.271,
+    "status": "GOOD"
+  },
+  "var_mean_67e607b197fd": {
+    "oracle_us": 15.07,
+    "compile_us": 15.81,
+    "ratio": 1.049,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_6a701483fed1": {
+    "oracle_us": 326.27,
+    "compile_us": 326.56,
+    "ratio": 1.001,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_65e90900fd65": {
+    "oracle_us": 11.1,
+    "compile_us": 10.98,
+    "ratio": 0.988,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_6d9f14e83fbb": {
+    "oracle_us": 25.15,
+    "compile_us": 89.89,
+    "ratio": 3.574,
+    "status": "GOOD"
+  },
+  "var_mean_6e34526980e4": {
+    "oracle_us": 6.85,
+    "compile_us": 6.53,
+    "ratio": 0.953,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_74d079cfbdcb": {
+    "oracle_us": 21.22,
+    "compile_us": 20.54,
+    "ratio": 0.968,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_7188729904dd": {
+    "oracle_us": 36.16,
+    "compile_us": 35.62,
+    "ratio": 0.985,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_6f5e73770101": {
+    "oracle_us": 93.25,
+    "compile_us": 102.37,
+    "ratio": 1.098,
+    "status": "GOOD"
+  },
+  "var_mean_72b736f9ad1b": {
+    "oracle_us": 83.46,
+    "compile_us": 71.39,
+    "ratio": 0.855,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_78804fb104a5": {
+    "oracle_us": 25.18,
+    "compile_us": 30.37,
+    "ratio": 1.206,
+    "status": "GOOD"
+  },
+  "var_mean_76c15aa5b174": {
+    "oracle_us": 20.32,
+    "compile_us": 22.27,
+    "ratio": 1.096,
+    "status": "GOOD"
+  },
+  "var_mean_7aa52d6922c5": {
+    "oracle_us": 40.61,
+    "compile_us": 40.74,
+    "ratio": 1.003,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_792162dbb8a3": {
+    "oracle_us": 69.34,
+    "compile_us": 68.45,
+    "ratio": 0.987,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_7b0bd4f35599": {
+    "oracle_us": 29.54,
+    "compile_us": 44.48,
+    "ratio": 1.506,
+    "status": "GOOD"
+  },
+  "var_mean_7af9076c19a1": {
+    "oracle_us": 23.9,
+    "compile_us": 17.7,
+    "ratio": 0.74,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_7cebda5b34ee": {
+    "oracle_us": 7.52,
+    "compile_us": 7.01,
+    "ratio": 0.932,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_7bd119719d27": {
+    "oracle_us": 18.02,
+    "compile_us": 18.66,
+    "ratio": 1.036,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_7e167c86e389": {
+    "oracle_us": 32.35,
+    "compile_us": 28.7,
+    "ratio": 0.887,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_7d9e5a9d28a4": {
+    "oracle_us": 24.1,
+    "compile_us": 18.05,
+    "ratio": 0.749,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_7f13aadfc66c": {
+    "oracle_us": 19.3,
+    "compile_us": 20.42,
+    "ratio": 1.058,
+    "status": "GOOD"
+  },
+  "var_mean_7ee28ad3c38a": {
+    "oracle_us": 19.26,
+    "compile_us": 17.54,
+    "ratio": 0.91,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_7fd0d03bbf2d": {
+    "oracle_us": 11.26,
+    "compile_us": 9.95,
+    "ratio": 0.884,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_7f6c23807d7b": {
+    "oracle_us": 26.69,
+    "compile_us": 36.54,
+    "ratio": 1.369,
+    "status": "GOOD"
+  },
+  "var_mean_7fdb4a765814": {
+    "oracle_us": 79.71,
+    "compile_us": 81.76,
+    "ratio": 1.026,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_810878ea0ac7": {
+    "oracle_us": 7.68,
+    "compile_us": 8.7,
+    "ratio": 1.133,
+    "status": "GOOD"
+  },
+  "var_mean_819a2cfa3958": {
+    "oracle_us": 377.54,
+    "compile_us": 343.68,
+    "ratio": 0.91,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_8238dd59b2ec": {
+    "oracle_us": 298.72,
+    "compile_us": 327.26,
+    "ratio": 1.096,
+    "status": "GOOD"
+  },
+  "var_mean_765fb8f2c85e": {
+    "oracle_us": 3217.41,
+    "compile_us": 657.25,
+    "ratio": 0.204,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_82d73c9df4ab": {
+    "oracle_us": 13.95,
+    "compile_us": 13.7,
+    "ratio": 0.982,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_81e1858d9aa4": {
+    "oracle_us": 18.37,
+    "compile_us": 26.14,
+    "ratio": 1.423,
+    "status": "GOOD"
+  },
+  "var_mean_85854937a51a": {
+    "oracle_us": 299.71,
+    "compile_us": 327.36,
+    "ratio": 1.092,
+    "status": "GOOD"
+  },
+  "var_mean_8287d162bd36": {
+    "oracle_us": 41.86,
+    "compile_us": 69.28,
+    "ratio": 1.655,
+    "status": "GOOD"
+  },
+  "var_mean_83a48287f334": {
+    "oracle_us": 232.19,
+    "compile_us": 173.15,
+    "ratio": 0.746,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_83eed019e52b": {
+    "oracle_us": 7.71,
+    "compile_us": 7.04,
+    "ratio": 0.913,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_867f4204961b": {
+    "oracle_us": 13.89,
+    "compile_us": 15.17,
+    "ratio": 1.092,
+    "status": "GOOD"
+  },
+  "var_mean_86e48ec77294": {
+    "oracle_us": 18.75,
+    "compile_us": 16.13,
+    "ratio": 0.86,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_87ad70406872": {
+    "oracle_us": 13.73,
+    "compile_us": 14.24,
+    "ratio": 1.037,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_8a34de8cccf6": {
+    "oracle_us": 12.9,
+    "compile_us": 11.78,
+    "ratio": 0.913,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_899b2afef412": {
+    "oracle_us": 19.87,
+    "compile_us": 18.94,
+    "ratio": 0.953,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_89031f55973e": {
+    "oracle_us": 68.58,
+    "compile_us": 68.7,
+    "ratio": 1.002,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_8bea515a2fe0": {
+    "oracle_us": 167.74,
+    "compile_us": 169.86,
+    "ratio": 1.013,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_8c67fcfa62ca": {
+    "oracle_us": 40.64,
+    "compile_us": 28.77,
+    "ratio": 0.708,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_8ca6d493f065": {
+    "oracle_us": 30.4,
+    "compile_us": 38.46,
+    "ratio": 1.265,
+    "status": "GOOD"
+  },
+  "var_mean_8e122e47d0a5": {
+    "oracle_us": 38.4,
+    "compile_us": 36.48,
+    "ratio": 0.95,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_8f9c444fb5ff": {
+    "oracle_us": 7.81,
+    "compile_us": 8.0,
+    "ratio": 1.025,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_9010cd062526": {
+    "oracle_us": 41.7,
+    "compile_us": 37.66,
+    "ratio": 0.903,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_9079d4d58779": {
+    "oracle_us": 7.52,
+    "compile_us": 6.56,
+    "ratio": 0.872,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_90925aa2d616": {
+    "oracle_us": 30.88,
+    "compile_us": 24.38,
+    "ratio": 0.79,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_912a9c5978b4": {
+    "oracle_us": 13.95,
+    "compile_us": 12.03,
+    "ratio": 0.862,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_91cae54437d5": {
+    "oracle_us": 9.18,
+    "compile_us": 8.03,
+    "ratio": 0.875,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_91fc2812ef17": {
+    "oracle_us": 100.13,
+    "compile_us": 122.53,
+    "ratio": 1.224,
+    "status": "GOOD"
+  },
+  "var_mean_924906e66d0b": {
+    "oracle_us": 108.32,
+    "compile_us": 129.89,
+    "ratio": 1.199,
+    "status": "GOOD"
+  },
+  "var_mean_94d545103c46": {
+    "oracle_us": 9.22,
+    "compile_us": 8.03,
+    "ratio": 0.872,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_9af0513b0d3e": {
+    "oracle_us": 12.32,
+    "compile_us": 11.65,
+    "ratio": 0.945,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_9b424e0dd1da": {
+    "oracle_us": 16.93,
+    "compile_us": 15.39,
+    "ratio": 0.909,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_9c26314b1282": {
+    "oracle_us": 7.33,
+    "compile_us": 7.14,
+    "ratio": 0.974,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_9ce39d6fae7b": {
+    "oracle_us": 21.41,
+    "compile_us": 21.82,
+    "ratio": 1.019,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_9d062f8786e2": {
+    "oracle_us": 10.11,
+    "compile_us": 9.54,
+    "ratio": 0.943,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_9d1c4396c2c8": {
+    "oracle_us": 7.94,
+    "compile_us": 7.71,
+    "ratio": 0.972,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_9da5c1fb26f0": {
+    "oracle_us": 7.23,
+    "compile_us": 7.07,
+    "ratio": 0.978,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_9ded65850d80": {
+    "oracle_us": 6.62,
+    "compile_us": 6.94,
+    "ratio": 1.048,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_9e94237b5daf": {
+    "oracle_us": 61.06,
+    "compile_us": 76.61,
+    "ratio": 1.255,
+    "status": "GOOD"
+  },
+  "var_mean_a0625e4095a0": {
+    "oracle_us": 255.68,
+    "compile_us": 163.46,
+    "ratio": 0.639,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_9f9f7f8de566": {
+    "oracle_us": 7.01,
+    "compile_us": 6.69,
+    "ratio": 0.954,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_a1464365da4f": {
+    "oracle_us": 13.12,
+    "compile_us": 11.71,
+    "ratio": 0.893,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_a0eecc057fbc": {
+    "oracle_us": 6.88,
+    "compile_us": 8.32,
+    "ratio": 1.209,
+    "status": "GOOD"
+  },
+  "var_mean_a5d43c43648a": {
+    "oracle_us": 15.07,
+    "compile_us": 18.56,
+    "ratio": 1.231,
+    "status": "GOOD"
+  },
+  "var_mean_a4b0facb2977": {
+    "oracle_us": 7.3,
+    "compile_us": 7.55,
+    "ratio": 1.035,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_a88cd01397d1": {
+    "oracle_us": 37.82,
+    "compile_us": 36.83,
+    "ratio": 0.974,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_a829696594a0": {
+    "oracle_us": 13.25,
+    "compile_us": 17.34,
+    "ratio": 1.309,
+    "status": "GOOD"
+  },
+  "var_mean_a8fd2a07cabc": {
+    "oracle_us": 200.42,
+    "compile_us": 53.82,
+    "ratio": 0.269,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_aa8ab7fa55a7": {
+    "oracle_us": 30.69,
+    "compile_us": 30.05,
+    "ratio": 0.979,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_aab92b38df11": {
+    "oracle_us": 56.83,
+    "compile_us": 35.58,
+    "ratio": 0.626,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_aabf4b70dc64": {
+    "oracle_us": 22.14,
+    "compile_us": 23.07,
+    "ratio": 1.042,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_ab319cc25097": {
+    "oracle_us": 16.0,
+    "compile_us": 16.16,
+    "ratio": 1.01,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_abb7e67d11ad": {
+    "oracle_us": 33.5,
+    "compile_us": 32.35,
+    "ratio": 0.966,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_any_e86b9ea56684": {
+    "oracle_us": 8.32,
+    "compile_us": 7.94,
+    "ratio": 0.954,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_afe9cb36192d": {
+    "oracle_us": 33.5,
+    "compile_us": 33.47,
+    "ratio": 0.999,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_ac3c4a9016c7": {
+    "oracle_us": 26.11,
+    "compile_us": 28.29,
+    "ratio": 1.083,
+    "status": "GOOD"
+  },
+  "var_mean_b0e2cade591e": {
+    "oracle_us": 38.88,
+    "compile_us": 34.62,
+    "ratio": 0.891,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_b1a4a4630c41": {
+    "oracle_us": 22.85,
+    "compile_us": 21.28,
+    "ratio": 0.931,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_b1feb9d09685": {
+    "oracle_us": 7.68,
+    "compile_us": 8.0,
+    "ratio": 1.042,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_b31c33bdc684": {
+    "oracle_us": 40.83,
+    "compile_us": 38.78,
+    "ratio": 0.95,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_b3c82aa686ce": {
+    "oracle_us": 67.46,
+    "compile_us": 71.36,
+    "ratio": 1.058,
+    "status": "GOOD"
+  },
+  "var_mean_b3ec7ad4195e": {
+    "oracle_us": 38.56,
+    "compile_us": 36.74,
+    "ratio": 0.953,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_b551e8ee78b4": {
+    "oracle_us": 23.2,
+    "compile_us": 21.34,
+    "ratio": 0.92,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_b6092fb107d0": {
+    "oracle_us": 8.29,
+    "compile_us": 9.02,
+    "ratio": 1.089,
+    "status": "GOOD"
+  },
+  "var_mean_b7b154e2f8c6": {
+    "oracle_us": 10.05,
+    "compile_us": 9.6,
+    "ratio": 0.955,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_b7d516740b38": {
+    "oracle_us": 11.84,
+    "compile_us": 9.38,
+    "ratio": 0.792,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_b815b1a264a5": {
+    "oracle_us": 65.41,
+    "compile_us": 42.66,
+    "ratio": 0.652,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_b9134215f891": {
+    "oracle_us": 18.24,
+    "compile_us": 18.56,
+    "ratio": 1.018,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_b92e4f945149": {
+    "oracle_us": 85.47,
+    "compile_us": 82.59,
+    "ratio": 0.966,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_b95eb6ddfcc7": {
+    "oracle_us": 50.88,
+    "compile_us": 62.94,
+    "ratio": 1.237,
+    "status": "GOOD"
+  },
+  "var_mean_b95d34ef7580": {
+    "oracle_us": 16.86,
+    "compile_us": 15.52,
+    "ratio": 0.92,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_bb7b5fefc1d5": {
+    "oracle_us": 21.28,
+    "compile_us": 19.71,
+    "ratio": 0.926,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_ba48651e0c04": {
+    "oracle_us": 29.47,
+    "compile_us": 32.64,
+    "ratio": 1.107,
+    "status": "GOOD"
+  },
+  "var_mean_bbc2387d0095": {
+    "oracle_us": 11.71,
+    "compile_us": 9.41,
+    "ratio": 0.803,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_bc6eb324bf67": {
+    "oracle_us": 19.23,
+    "compile_us": 15.97,
+    "ratio": 0.83,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_bd299b8b72c8": {
+    "oracle_us": 18.11,
+    "compile_us": 20.16,
+    "ratio": 1.113,
+    "status": "GOOD"
+  },
+  "var_mean_bccbe164e3a1": {
+    "oracle_us": 38.59,
+    "compile_us": 36.54,
+    "ratio": 0.947,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_bdb10d34fe50": {
+    "oracle_us": 15.65,
+    "compile_us": 19.36,
+    "ratio": 1.237,
+    "status": "GOOD"
+  },
+  "var_mean_bf21b62ff8f8": {
+    "oracle_us": 6.78,
+    "compile_us": 6.88,
+    "ratio": 1.014,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c057f7372279": {
+    "oracle_us": 15.26,
+    "compile_us": 15.71,
+    "ratio": 1.029,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_bfedec863d1b": {
+    "oracle_us": 15.71,
+    "compile_us": 16.0,
+    "ratio": 1.018,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_bff30f530d6e": {
+    "oracle_us": 13.79,
+    "compile_us": 14.4,
+    "ratio": 1.044,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_bfff119087f0": {
+    "oracle_us": 33.28,
+    "compile_us": 32.35,
+    "ratio": 0.972,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c07ce112a2ac": {
+    "oracle_us": 24.0,
+    "compile_us": 24.0,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c0993161a0af": {
+    "oracle_us": 14.98,
+    "compile_us": 14.91,
+    "ratio": 0.996,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c1b4aa89f4d6": {
+    "oracle_us": 72.45,
+    "compile_us": 64.48,
+    "ratio": 0.89,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_c10adfe3a9e3": {
+    "oracle_us": 40.61,
+    "compile_us": 32.22,
+    "ratio": 0.794,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_c3179bad0f03": {
+    "oracle_us": 6.91,
+    "compile_us": 6.91,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c28c8bc99940": {
+    "oracle_us": 9.92,
+    "compile_us": 10.24,
+    "ratio": 1.032,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c408b9eb8855": {
+    "oracle_us": 7.55,
+    "compile_us": 7.62,
+    "ratio": 1.008,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c48b435e6a2b": {
+    "oracle_us": 29.31,
+    "compile_us": 44.45,
+    "ratio": 1.516,
+    "status": "GOOD"
+  },
+  "var_mean_c4eed3e5da72": {
+    "oracle_us": 7.01,
+    "compile_us": 7.26,
+    "ratio": 1.037,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c5067e6e3750": {
+    "oracle_us": 35.23,
+    "compile_us": 40.54,
+    "ratio": 1.151,
+    "status": "GOOD"
+  },
+  "var_mean_c70ae7a95adc": {
+    "oracle_us": 18.21,
+    "compile_us": 18.02,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c564fa4c6115": {
+    "oracle_us": 17.28,
+    "compile_us": 16.06,
+    "ratio": 0.93,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_c7f1676ab603": {
+    "oracle_us": 44.54,
+    "compile_us": 46.82,
+    "ratio": 1.051,
+    "status": "GOOD"
+  },
+  "var_mean_c78c72732a00": {
+    "oracle_us": 46.59,
+    "compile_us": 44.83,
+    "ratio": 0.962,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c85e3e57e8c4": {
+    "oracle_us": 40.54,
+    "compile_us": 38.59,
+    "ratio": 0.952,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c8869fd6a3b6": {
+    "oracle_us": 40.67,
+    "compile_us": 41.92,
+    "ratio": 1.031,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_c97d1570c0ff": {
+    "oracle_us": 38.46,
+    "compile_us": 36.48,
+    "ratio": 0.948,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_c9d97f0d1948": {
+    "oracle_us": 19.33,
+    "compile_us": 15.94,
+    "ratio": 0.825,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_cad253ba584f": {
+    "oracle_us": 20.35,
+    "compile_us": 27.39,
+    "ratio": 1.346,
+    "status": "GOOD"
+  },
+  "var_mean_ccc838fc023d": {
+    "oracle_us": 29.5,
+    "compile_us": 29.41,
+    "ratio": 0.997,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_cdecf7775405": {
+    "oracle_us": 18.21,
+    "compile_us": 16.06,
+    "ratio": 0.882,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_cf1ffb1a79d8": {
+    "oracle_us": 12.1,
+    "compile_us": 21.22,
+    "ratio": 1.754,
+    "status": "GOOD"
+  },
+  "var_mean_cf2474e318ae": {
+    "oracle_us": 56.13,
+    "compile_us": 103.17,
+    "ratio": 1.838,
+    "status": "GOOD"
+  },
+  "var_mean_cff5d49516af": {
+    "oracle_us": 33.47,
+    "compile_us": 32.35,
+    "ratio": 0.967,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_d06ef4a692a2": {
+    "oracle_us": 27.17,
+    "compile_us": 26.27,
+    "ratio": 0.967,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_d10ed8104f03": {
+    "oracle_us": 6.94,
+    "compile_us": 6.78,
+    "ratio": 0.977,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_d158ce08e24a": {
+    "oracle_us": 24.48,
+    "compile_us": 20.38,
+    "ratio": 0.833,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_d22940b03b5c": {
+    "oracle_us": 6.91,
+    "compile_us": 6.66,
+    "ratio": 0.963,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_d30f3928376b": {
+    "oracle_us": 11.33,
+    "compile_us": 10.78,
+    "ratio": 0.952,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_d3bbb85efc8c": {
+    "oracle_us": 35.62,
+    "compile_us": 31.62,
+    "ratio": 0.888,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_d3e9f404842a": {
+    "oracle_us": 22.53,
+    "compile_us": 21.47,
+    "ratio": 0.953,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_d4fb0346ff2a": {
+    "oracle_us": 33.47,
+    "compile_us": 32.45,
+    "ratio": 0.969,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_d549c16798a1": {
+    "oracle_us": 31.49,
+    "compile_us": 38.75,
+    "ratio": 1.231,
+    "status": "GOOD"
+  },
+  "var_mean_d61716dfd9dd": {
+    "oracle_us": 8.58,
+    "compile_us": 7.23,
+    "ratio": 0.843,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_d61c9475e968": {
+    "oracle_us": 6.56,
+    "compile_us": 6.02,
+    "ratio": 0.917,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_d6e662ef37f6": {
+    "oracle_us": 13.63,
+    "compile_us": 14.08,
+    "ratio": 1.033,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_d8fae237d769": {
+    "oracle_us": 6.78,
+    "compile_us": 6.82,
+    "ratio": 1.005,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_dc2d388af48f": {
+    "oracle_us": 18.08,
+    "compile_us": 20.0,
+    "ratio": 1.106,
+    "status": "GOOD"
+  },
+  "var_mean_dd2f7ee1cf42": {
+    "oracle_us": 24.42,
+    "compile_us": 27.33,
+    "ratio": 1.119,
+    "status": "GOOD"
+  },
+  "var_mean_dd3ccbc569e6": {
+    "oracle_us": 18.24,
+    "compile_us": 21.41,
+    "ratio": 1.174,
+    "status": "GOOD"
+  },
+  "var_mean_dd5260d15336": {
+    "oracle_us": 19.01,
+    "compile_us": 15.78,
+    "ratio": 0.83,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_de1f9ecb99e2": {
+    "oracle_us": 9.5,
+    "compile_us": 8.0,
+    "ratio": 0.842,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_deb7c9191e39": {
+    "oracle_us": 114.43,
+    "compile_us": 124.54,
+    "ratio": 1.088,
+    "status": "GOOD"
+  },
+  "var_mean_de5dfb8583e7": {
+    "oracle_us": 7.55,
+    "compile_us": 7.14,
+    "ratio": 0.945,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_e44de9a60b6b": {
+    "oracle_us": 26.62,
+    "compile_us": 24.45,
+    "ratio": 0.918,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_e3c259686c7b": {
+    "oracle_us": 20.48,
+    "compile_us": 22.69,
+    "ratio": 1.108,
+    "status": "GOOD"
+  },
+  "var_mean_e4d2655a5279": {
+    "oracle_us": 45.98,
+    "compile_us": 20.06,
+    "ratio": 0.436,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_e48f702d6f81": {
+    "oracle_us": 5.92,
+    "compile_us": 5.89,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_e5cd7a30f952": {
+    "oracle_us": 12.06,
+    "compile_us": 11.84,
+    "ratio": 0.981,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_e53e1ab6f33f": {
+    "oracle_us": 9.95,
+    "compile_us": 9.79,
+    "ratio": 0.984,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_e5e403f34d87": {
+    "oracle_us": 45.82,
+    "compile_us": 40.48,
+    "ratio": 0.883,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_e603cd44b9cd": {
+    "oracle_us": 12.0,
+    "compile_us": 14.05,
+    "ratio": 1.171,
+    "status": "GOOD"
+  },
+  "var_mean_e74dde6c3e2b": {
+    "oracle_us": 23.46,
+    "compile_us": 26.4,
+    "ratio": 1.126,
+    "status": "GOOD"
+  },
+  "var_mean_e7e57aea37e1": {
+    "oracle_us": 9.44,
+    "compile_us": 9.54,
+    "ratio": 1.01,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_e8133a6f0de6": {
+    "oracle_us": 73.15,
+    "compile_us": 68.38,
+    "ratio": 0.935,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_e98948176b90": {
+    "oracle_us": 27.65,
+    "compile_us": 36.32,
+    "ratio": 1.314,
+    "status": "GOOD"
+  },
+  "var_mean_e92ed08dee3a": {
+    "oracle_us": 22.3,
+    "compile_us": 21.66,
+    "ratio": 0.971,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_edb38f947d93": {
+    "oracle_us": 16.16,
+    "compile_us": 16.64,
+    "ratio": 1.03,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_edac0b24cfa0": {
+    "oracle_us": 7.46,
+    "compile_us": 7.01,
+    "ratio": 0.94,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_eebe86d9365d": {
+    "oracle_us": 61.38,
+    "compile_us": 67.23,
+    "ratio": 1.095,
+    "status": "GOOD"
+  },
+  "var_mean_f0d7c08a0622": {
+    "oracle_us": 944.99,
+    "compile_us": 802.56,
+    "ratio": 0.849,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_ef88cc4744f1": {
+    "oracle_us": 6.98,
+    "compile_us": 7.17,
+    "ratio": 1.028,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_f1b58e17db66": {
+    "oracle_us": 26.14,
+    "compile_us": 25.98,
+    "ratio": 0.994,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_f2580942698a": {
+    "oracle_us": 29.92,
+    "compile_us": 29.41,
+    "ratio": 0.983,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_f3432607acca": {
+    "oracle_us": 18.11,
+    "compile_us": 26.24,
+    "ratio": 1.449,
+    "status": "GOOD"
+  },
+  "var_mean_f1119c959a09": {
+    "oracle_us": 11.46,
+    "compile_us": 10.27,
+    "ratio": 0.897,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_f7fb2d4dff1b": {
+    "oracle_us": 40.45,
+    "compile_us": 30.43,
+    "ratio": 0.752,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_f3f130d2784c": {
+    "oracle_us": 40.77,
+    "compile_us": 42.4,
+    "ratio": 1.04,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_f58b743b2264": {
+    "oracle_us": 13.82,
+    "compile_us": 11.84,
+    "ratio": 0.856,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_f8560e5925aa": {
+    "oracle_us": 14.08,
+    "compile_us": 18.24,
+    "ratio": 1.295,
+    "status": "GOOD"
+  },
+  "var_mean_fa3e7894ff61": {
+    "oracle_us": 30.46,
+    "compile_us": 31.26,
+    "ratio": 1.026,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_fa8932a4b21f": {
+    "oracle_us": 16.67,
+    "compile_us": 19.33,
+    "ratio": 1.159,
+    "status": "GOOD"
+  },
+  "var_mean_fb5b7bc4d7e5": {
+    "oracle_us": 13.63,
+    "compile_us": 11.78,
+    "ratio": 0.864,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_fbcfb4ae8581": {
+    "oracle_us": 34.56,
+    "compile_us": 36.7,
+    "ratio": 1.062,
+    "status": "GOOD"
+  },
+  "var_mean_fbf523037907": {
+    "oracle_us": 43.94,
+    "compile_us": 36.51,
+    "ratio": 0.831,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_fc43e261f9f8": {
+    "oracle_us": 43.87,
+    "compile_us": 36.32,
+    "ratio": 0.828,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_0593cda589d5": {
+    "oracle_us": 56.9,
+    "compile_us": 46.66,
+    "ratio": 0.82,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_0805988a80e9": {
+    "oracle_us": 55.26,
+    "compile_us": 41.15,
+    "ratio": 0.745,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_08131211a12e": {
+    "oracle_us": 16.58,
+    "compile_us": 14.05,
+    "ratio": 0.847,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_1310120283dc": {
+    "oracle_us": 67.3,
+    "compile_us": 44.83,
+    "ratio": 0.666,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_188f42114f68": {
+    "oracle_us": 9.57,
+    "compile_us": 9.63,
+    "ratio": 1.007,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_mean_1e867cdb78f5": {
+    "oracle_us": 66.24,
+    "compile_us": 48.96,
+    "ratio": 0.739,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_254b25297850": {
+    "oracle_us": 27.46,
+    "compile_us": 30.34,
+    "ratio": 1.105,
+    "status": "GOOD"
+  },
+  "var_mean_mean_25b1bb0b8d63": {
+    "oracle_us": 26.18,
+    "compile_us": 25.98,
+    "ratio": 0.993,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_mean_2ac1c2eb8544": {
+    "oracle_us": 24.06,
+    "compile_us": 30.34,
+    "ratio": 1.261,
+    "status": "GOOD"
+  },
+  "var_mean_mean_2d18883a5e64": {
+    "oracle_us": 5.92,
+    "compile_us": 5.89,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_mean_2fedd7a79265": {
+    "oracle_us": 63.17,
+    "compile_us": 48.77,
+    "ratio": 0.772,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_3480e8831bac": {
+    "oracle_us": 21.79,
+    "compile_us": 31.71,
+    "ratio": 1.455,
+    "status": "GOOD"
+  },
+  "var_mean_mean_34a86d931d28": {
+    "oracle_us": 5.79,
+    "compile_us": 5.79,
+    "ratio": 1.0,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_mean_358f7ae19b62": {
+    "oracle_us": 53.22,
+    "compile_us": 22.02,
+    "ratio": 0.414,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_3a508adb31ac": {
+    "oracle_us": 21.28,
+    "compile_us": 23.46,
+    "ratio": 1.102,
+    "status": "GOOD"
+  },
+  "var_mean_mean_4b1dcaa1d7e1": {
+    "oracle_us": 46.53,
+    "compile_us": 28.13,
+    "ratio": 0.605,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_626fb0807512": {
+    "oracle_us": 7.46,
+    "compile_us": 9.18,
+    "ratio": 1.232,
+    "status": "GOOD"
+  },
+  "var_mean_mean_61303c3fa6f4": {
+    "oracle_us": 28.64,
+    "compile_us": 25.34,
+    "ratio": 0.885,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_7a446f7d0ed8": {
+    "oracle_us": 50.78,
+    "compile_us": 60.26,
+    "ratio": 1.187,
+    "status": "GOOD"
+  },
+  "var_mean_mean_6b2793eaa579": {
+    "oracle_us": 46.4,
+    "compile_us": 30.46,
+    "ratio": 0.657,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_8d6fc761298a": {
+    "oracle_us": 38.82,
+    "compile_us": 29.41,
+    "ratio": 0.758,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_935376ba22dc": {
+    "oracle_us": 30.4,
+    "compile_us": 26.46,
+    "ratio": 0.871,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_c8322953c7ea": {
+    "oracle_us": 99.9,
+    "compile_us": 46.98,
+    "ratio": 0.47,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_e2206aa32217": {
+    "oracle_us": 90.02,
+    "compile_us": 111.87,
+    "ratio": 1.243,
+    "status": "GOOD"
+  },
+  "var_mean_mean_e5a5cf78a7cf": {
+    "oracle_us": 46.66,
+    "compile_us": 20.13,
+    "ratio": 0.431,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_e8eb2875e359": {
+    "oracle_us": 14.78,
+    "compile_us": 17.73,
+    "ratio": 1.199,
+    "status": "GOOD"
+  },
+  "var_mean_mean_ebf25f51023b": {
+    "oracle_us": 32.35,
+    "compile_us": 30.43,
+    "ratio": 0.941,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_f6d34778b88d": {
+    "oracle_us": 45.86,
+    "compile_us": 32.13,
+    "ratio": 0.701,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_sum_87c8c4a61b33": {
+    "oracle_us": 366.11,
+    "compile_us": 265.12,
+    "ratio": 0.724,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_mean_fd0f75820e35": {
+    "oracle_us": 17.15,
+    "compile_us": 13.28,
+    "ratio": 0.774,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_0795d88a1e39": {
+    "oracle_us": 149.44,
+    "compile_us": 84.9,
+    "ratio": 0.568,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_sum_mean_c177cfce7234": {
+    "oracle_us": 20.22,
+    "compile_us": 17.18,
+    "ratio": 0.85,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_7eb8a9047c3e": {
+    "oracle_us": 149.38,
+    "compile_us": 83.87,
+    "ratio": 0.561,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_2989608c4b10": {
+    "oracle_us": 84.9,
+    "compile_us": 71.36,
+    "ratio": 0.841,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_73e1a842318f": {
+    "oracle_us": 28.29,
+    "compile_us": 46.82,
+    "ratio": 1.655,
+    "status": "GOOD"
+  },
+  "var_mean_var_mean_8c8eb33a711a": {
+    "oracle_us": 30.43,
+    "compile_us": 28.51,
+    "ratio": 0.937,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_40a0055bb26e": {
+    "oracle_us": 43.84,
+    "compile_us": 55.14,
+    "ratio": 1.258,
+    "status": "GOOD"
+  },
+  "var_mean_var_mean_6d7a29cb97f1": {
+    "oracle_us": 159.33,
+    "compile_us": 245.41,
+    "ratio": 1.54,
+    "status": "GOOD"
+  },
+  "var_mean_var_mean_99567a16bff5": {
+    "oracle_us": 79.36,
+    "compile_us": 71.33,
+    "ratio": 0.899,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_98a1510ddc30": {
+    "oracle_us": 21.44,
+    "compile_us": 20.35,
+    "ratio": 0.949,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_dcad0ef87d63": {
+    "oracle_us": 5.92,
+    "compile_us": 5.89,
+    "ratio": 0.995,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_var_mean_aabd7680d8e0": {
+    "oracle_us": 22.34,
+    "compile_us": 22.37,
+    "ratio": 1.001,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_var_mean_ca75e017814e": {
+    "oracle_us": 85.63,
+    "compile_us": 83.42,
+    "ratio": 0.974,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_var_mean_d850ee31d68b": {
+    "oracle_us": 5.98,
+    "compile_us": 6.18,
+    "ratio": 1.032,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_var_mean_mean_93065d5c677b": {
+    "oracle_us": 35.55,
+    "compile_us": 24.67,
+    "ratio": 0.694,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_de5c360021d3": {
+    "oracle_us": 44.32,
+    "compile_us": 46.59,
+    "ratio": 1.051,
+    "status": "GOOD"
+  },
+  "var_mean_var_mean_mean_b49a8ed53342": {
+    "oracle_us": 52.77,
+    "compile_us": 40.29,
+    "ratio": 0.763,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_var_mean_0407b3e7c77f": {
+    "oracle_us": 215.04,
+    "compile_us": 212.74,
+    "ratio": 0.989,
+    "status": "AT_FLOOR"
+  },
+  "var_mean_var_mean_mean_e12f05530897": {
+    "oracle_us": 56.77,
+    "compile_us": 42.62,
+    "ratio": 0.751,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_var_mean_850152d806da": {
+    "oracle_us": 123.71,
+    "compile_us": 106.4,
+    "ratio": 0.86,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_var_mean_97062ec87370": {
+    "oracle_us": 69.5,
+    "compile_us": 55.01,
+    "ratio": 0.791,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_var_mean_9267280d8024": {
+    "oracle_us": 82.82,
+    "compile_us": 65.31,
+    "ratio": 0.789,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_var_mean_850dfa63ec81": {
+    "oracle_us": 71.58,
+    "compile_us": 62.34,
+    "ratio": 0.871,
+    "status": "BAD_ORACLE"
+  },
+  "var_mean_var_mean_var_mean_5d12643e9b78": {
+    "oracle_us": 106.27,
+    "compile_us": 120.83,
+    "ratio": 1.137,
+    "status": "GOOD"
+  }
+}
