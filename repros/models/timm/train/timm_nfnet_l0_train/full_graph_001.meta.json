@@ -1,0 +1,9843 @@
+{
+  "schema_version": 1,
+  "inputs": [
+    {
+      "kind": "tensor",
+      "name": "primals_1",
+      "shape": [
+        16,
+        3,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        27,
+        1,
+        9,
+        3
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_2",
+      "shape": [
+        16,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_4",
+      "shape": [
+        128,
+        3,
+        224,
+        224
+      ],
+      "dtype": "float32",
+      "stride": [
+        150528,
+        1,
+        672,
+        3
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_5",
+      "shape": [
+        32,
+        16,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        144,
+        1,
+        48,
+        16
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_6",
+      "shape": [
+        32,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_8",
+      "shape": [
+        64,
+        32,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        288,
+        1,
+        96,
+        32
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_9",
+      "shape": [
+        64,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_11",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_12",
+      "shape": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_14",
+      "shape": [
+        256,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        128,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_15",
+      "shape": [
+        256,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_17",
+      "shape": [
+        64,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        128,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_18",
+      "shape": [
+        64,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_20",
+      "shape": [
+        64,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_21",
+      "shape": [
+        64,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_23",
+      "shape": [
+        64,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_24",
+      "shape": [
+        64,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_26",
+      "shape": [
+        256,
+        64,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        64,
+        1,
+        64,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_27",
+      "shape": [
+        256,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_29",
+      "shape": [
+        64,
+        256,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        256,
+        1,
+        256,
+        256
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_31",
+      "shape": [
+        256,
+        64,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        64,
+        1,
+        64,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_33",
+      "shape": [
+        512,
+        256,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        256,
+        1,
+        256,
+        256
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_34",
+      "shape": [
+        512,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_36",
+      "shape": [
+        128,
+        256,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        256,
+        1,
+        256,
+        256
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_37",
+      "shape": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_39",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_40",
+      "shape": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_42",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_43",
+      "shape": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_45",
+      "shape": [
+        512,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        128,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_46",
+      "shape": [
+        512,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_48",
+      "shape": [
+        128,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        512,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_50",
+      "shape": [
+        512,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        128,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_52",
+      "shape": [
+        128,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        512,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_53",
+      "shape": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_55",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_56",
+      "shape": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_58",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_59",
+      "shape": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_61",
+      "shape": [
+        512,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        128,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_62",
+      "shape": [
+        512,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_64",
+      "shape": [
+        128,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        512,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_66",
+      "shape": [
+        512,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        128,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_68",
+      "shape": [
+        1536,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        512,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_69",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_71",
+      "shape": [
+        384,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        512,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_72",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_74",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_75",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_77",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_78",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_80",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_81",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_83",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_85",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_87",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_88",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_90",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_91",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_93",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_94",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_96",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_97",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_99",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_101",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_103",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_104",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_106",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_107",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_109",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_110",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_112",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_113",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_115",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_117",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_119",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_120",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_122",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_123",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_125",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_126",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_128",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_129",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_131",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_133",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_135",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_136",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_138",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_139",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_141",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_142",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_144",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_145",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_147",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_149",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_151",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_152",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_154",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_155",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_157",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_158",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_160",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_161",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_163",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_165",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_167",
+      "shape": [
+        1536,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_168",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_170",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_171",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_173",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_174",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_176",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_177",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_179",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_180",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_182",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_184",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_186",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_187",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_189",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_190",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_192",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_193",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_195",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_196",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_198",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_200",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_202",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_203",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_205",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_206",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_208",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        1,
+        192,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_209",
+      "shape": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_211",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_212",
+      "shape": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_214",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_216",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_218",
+      "shape": [
+        2304,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_219",
+      "shape": [
+        2304,
+        1,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "primals_221",
+      "shape": [
+        1000,
+        2304
+      ],
+      "dtype": "float32",
+      "stride": [
+        2304,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_1",
+      "shape": [
+        16
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_2",
+      "shape": [
+        16,
+        3,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        27,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution",
+      "shape": [
+        128,
+        16,
+        112,
+        112
+      ],
+      "dtype": "float32",
+      "stride": [
+        200704,
+        1,
+        1792,
+        16
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div",
+      "shape": [
+        128,
+        16,
+        112,
+        112
+      ],
+      "dtype": "float32",
+      "stride": [
+        200704,
+        1,
+        1792,
+        16
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_3",
+      "shape": [
+        32
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_5",
+      "shape": [
+        32,
+        16,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        144,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_1",
+      "shape": [
+        128,
+        32,
+        112,
+        112
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        3584,
+        32
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_1",
+      "shape": [
+        128,
+        32,
+        112,
+        112
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        3584,
+        32
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_5",
+      "shape": [
+        64
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_8",
+      "shape": [
+        64,
+        32,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        288,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_2",
+      "shape": [
+        128,
+        64,
+        112,
+        112
+      ],
+      "dtype": "float32",
+      "stride": [
+        802816,
+        1,
+        7168,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_2",
+      "shape": [
+        128,
+        64,
+        112,
+        112
+      ],
+      "dtype": "float32",
+      "stride": [
+        802816,
+        1,
+        7168,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_7",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_11",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_3",
+      "shape": [
+        128,
+        128,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        7168,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_12",
+      "shape": [
+        128,
+        128,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        7168,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_9",
+      "shape": [
+        256
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_14",
+      "shape": [
+        256,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_4",
+      "shape": [
+        128,
+        256,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        802816,
+        1,
+        14336,
+        256
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_11",
+      "shape": [
+        64
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_17",
+      "shape": [
+        64,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_5",
+      "shape": [
+        128,
+        64,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        200704,
+        1,
+        3584,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_4",
+      "shape": [
+        128,
+        64,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        200704,
+        1,
+        3584,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_13",
+      "shape": [
+        64
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_20",
+      "shape": [
+        64,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_6",
+      "shape": [
+        128,
+        64,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        200704,
+        1,
+        3584,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_5",
+      "shape": [
+        128,
+        64,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        200704,
+        1,
+        3584,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_15",
+      "shape": [
+        64
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_23",
+      "shape": [
+        64,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_7",
+      "shape": [
+        128,
+        64,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        200704,
+        1,
+        3584,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_6",
+      "shape": [
+        128,
+        64,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        200704,
+        1,
+        3584,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_17",
+      "shape": [
+        256
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_26",
+      "shape": [
+        256,
+        64,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        64,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_8",
+      "shape": [
+        128,
+        256,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        802816,
+        1,
+        14336,
+        256
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean",
+      "shape": [
+        128,
+        256,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        256,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu",
+      "shape": [
+        128,
+        64,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        64,
+        1,
+        64,
+        64
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_10",
+      "shape": [
+        128,
+        256,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        256,
+        1,
+        256,
+        256
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_31",
+      "shape": [
+        128,
+        256,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        802816,
+        1,
+        14336,
+        256
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "avg_pool2d",
+      "shape": [
+        128,
+        256,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        200704,
+        1,
+        7168,
+        256
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_19",
+      "shape": [
+        512
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_29",
+      "shape": [
+        512,
+        256,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        256,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_11",
+      "shape": [
+        128,
+        512,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        14336,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_21",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_32",
+      "shape": [
+        128,
+        256,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        256,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_12",
+      "shape": [
+        128,
+        128,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        7168,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_8",
+      "shape": [
+        128,
+        128,
+        56,
+        56
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        7168,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_23",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_35",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_13",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_9",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_25",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_38",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_14",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_10",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_27",
+      "shape": [
+        512
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_41",
+      "shape": [
+        512,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_15",
+      "shape": [
+        128,
+        512,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        14336,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_1",
+      "shape": [
+        128,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_1",
+      "shape": [
+        128,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        128,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_17",
+      "shape": [
+        128,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        512,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_50",
+      "shape": [
+        128,
+        512,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        14336,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_29",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_44",
+      "shape": [
+        128,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_18",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_12",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_31",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_47",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_19",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_13",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_33",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_50",
+      "shape": [
+        128,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_20",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_14",
+      "shape": [
+        128,
+        128,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        3584,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_35",
+      "shape": [
+        512
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_53",
+      "shape": [
+        512,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_21",
+      "shape": [
+        128,
+        512,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        14336,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_2",
+      "shape": [
+        128,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_2",
+      "shape": [
+        128,
+        128,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        128,
+        128
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_23",
+      "shape": [
+        128,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        512,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "add_35",
+      "shape": [
+        128,
+        512,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        14336,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_66",
+      "shape": [
+        128,
+        512,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        401408,
+        1,
+        14336,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "avg_pool2d_1",
+      "shape": [
+        128,
+        512,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        100352,
+        1,
+        7168,
+        512
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_37",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_56",
+      "shape": [
+        1536,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_24",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_39",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_59",
+      "shape": [
+        384,
+        512,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_25",
+      "shape": [
+        128,
+        384,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        10752,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_16",
+      "shape": [
+        128,
+        384,
+        28,
+        28
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        10752,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_41",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_62",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_26",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_17",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_43",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_65",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_27",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_18",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_45",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_68",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_28",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_3",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_3",
+      "shape": [
+        128,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_30",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_85",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_47",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_71",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_31",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_20",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_49",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_74",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_32",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_21",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_51",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_77",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_33",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_22",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_53",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_80",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_34",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_4",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_4",
+      "shape": [
+        128,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_36",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "add_54",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_101",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_55",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_83",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_37",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_24",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_57",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_86",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_38",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_25",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_59",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_89",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_39",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_26",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_61",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_92",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_40",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_5",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_5",
+      "shape": [
+        128,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_42",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "add_63",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_117",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_63",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_95",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_43",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_28",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_65",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_98",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_44",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_29",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_67",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_101",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_45",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_30",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_69",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_104",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_46",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_6",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_6",
+      "shape": [
+        128,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_48",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "add_72",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_133",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_71",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_107",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_49",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_32",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_73",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_110",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_50",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_33",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_75",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_113",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_51",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_34",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_77",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_116",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_52",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_7",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_7",
+      "shape": [
+        128,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_54",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "add_81",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_149",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_79",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_119",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_55",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_36",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_81",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_122",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_56",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_37",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_83",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_125",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_57",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_38",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_85",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_128",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_58",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_8",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_8",
+      "shape": [
+        128,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_60",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "add_90",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_165",
+      "shape": [
+        128,
+        1536,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        301056,
+        1,
+        21504,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "avg_pool2d_2",
+      "shape": [
+        128,
+        1536,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        10752,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_87",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_131",
+      "shape": [
+        1536,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_61",
+      "shape": [
+        128,
+        1536,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        10752,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_89",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_134",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_62",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_40",
+      "shape": [
+        128,
+        384,
+        14,
+        14
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        5376,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_91",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_137",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_63",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_41",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_93",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_140",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_64",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_42",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_95",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_143",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_65",
+      "shape": [
+        128,
+        1536,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        10752,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_9",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_9",
+      "shape": [
+        128,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_67",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_184",
+      "shape": [
+        128,
+        1536,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        10752,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_97",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_146",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_68",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_44",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_99",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_149",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_69",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_45",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_101",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_152",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_70",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_46",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_103",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_155",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_71",
+      "shape": [
+        128,
+        1536,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        10752,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_10",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_10",
+      "shape": [
+        128,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_73",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "add_109",
+      "shape": [
+        128,
+        1536,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        10752,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mul_200",
+      "shape": [
+        128,
+        1536,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        10752,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_105",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_158",
+      "shape": [
+        384,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_74",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_48",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_107",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_161",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_75",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_49",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_109",
+      "shape": [
+        384
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_164",
+      "shape": [
+        384,
+        64,
+        3,
+        3
+      ],
+      "dtype": "float32",
+      "stride": [
+        576,
+        9,
+        3,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_76",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "div_50",
+      "shape": [
+        128,
+        384,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        18816,
+        1,
+        2688,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_111",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_167",
+      "shape": [
+        1536,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_77",
+      "shape": [
+        128,
+        1536,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        10752,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "mean_11",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "relu_11",
+      "shape": [
+        128,
+        384,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        384,
+        384
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_79",
+      "shape": [
+        128,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1536,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "add_118",
+      "shape": [
+        128,
+        1536,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        75264,
+        1,
+        10752,
+        1536
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "squeeze_113",
+      "shape": [
+        2304
+      ],
+      "dtype": "float32",
+      "stride": [
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_170",
+      "shape": [
+        2304,
+        1536,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "convolution_80",
+      "shape": [
+        128,
+        2304,
+        7,
+        7
+      ],
+      "dtype": "float32",
+      "stride": [
+        112896,
+        1,
+        16128,
+        2304
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "view_171",
+      "shape": [
+        128,
+        2304
+      ],
+      "dtype": "float32",
+      "stride": [
+        2304,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_58",
+      "shape": [
+        1,
+        2304,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        2304,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_66",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_74",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_82",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_90",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_98",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_106",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_114",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_122",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_130",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_138",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_146",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_154",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_162",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_170",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_178",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_186",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_194",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_202",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_210",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_218",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_226",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_234",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_242",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_250",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_258",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_266",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_274",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_282",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_290",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_298",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_306",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_314",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_322",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_330",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_338",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_346",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_354",
+      "shape": [
+        1,
+        384,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        384,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_362",
+      "shape": [
+        1,
+        1536,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        1536,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_370",
+      "shape": [
+        1,
+        512,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_378",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_386",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_394",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_402",
+      "shape": [
+        1,
+        512,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_410",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_418",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_426",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_434",
+      "shape": [
+        1,
+        512,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        512,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_442",
+      "shape": [
+        1,
+        256,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        256,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_450",
+      "shape": [
+        1,
+        64,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        64,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_458",
+      "shape": [
+        1,
+        64,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        64,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_466",
+      "shape": [
+        1,
+        64,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        64,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_474",
+      "shape": [
+        1,
+        256,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        256,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_482",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        128,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_490",
+      "shape": [
+        1,
+        64,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        64,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_498",
+      "shape": [
+        1,
+        32,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        32,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "unsqueeze_506",
+      "shape": [
+        1,
+        16,
+        1
+      ],
+      "dtype": "float32",
+      "stride": [
+        16,
+        1,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "tangents_1",
+      "shape": [
+        128,
+        1000
+      ],
+      "dtype": "float32",
+      "stride": [
+        1000,
+        1
+      ],
+      "device": "cuda",
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    }
+  ],
+  "outputs": [],
+  "tensor_attrs": {},
+  "graph": "full_graph_001.py",
+  "source": {
+    "kind": "model",
+    "suite": "timm",
+    "mode": "train",
+    "model": "timm_nfnet_l0_train",
+    "graph": "full_graph_001.py"
+  }
+}

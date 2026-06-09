@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "inputs": [],
+  "outputs": [],
+  "tensor_attrs": {},
+  "graph": "full_graph_002.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "MBartForCausalLM",
+    "graph": "full_graph_002.py"
+  }
+}
