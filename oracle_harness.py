@@ -212,143 +212,65 @@ class OracleRegistry:
             f"shape must be a tuple of ints or a tuple of tuples, got {shape!r}"
         )
 
-    # -- shape distance ------------------------------------------------------
+    # -- dispatch ------------------------------------------------------------
+    #
+    # Matching is EXACT-ONLY. Every repro has a small, known, finite set of
+    # shapes (its shapes.txt lines) — there is no continuous shape space to
+    # interpolate over. An implementation either exactly matches the runtime
+    # signature, or it declared shapes=None ("shape-general: computes its grid
+    # from input dims, works at any shape"). No fuzzy nearest-shape matching:
+    # silently running a shape-specific kernel at a different shape is how you
+    # get garbage floor measurements.
 
     @staticmethod
-    def _dim_distance(actual_dims, registered_dims):
-        """Distance between two single-tensor shapes.
-
-        Same rank required (else inf). Distance is the sum of
-        |log(actual_dim / registered_dim)| across dims, so 0.0 means exact.
-        """
-        if len(actual_dims) != len(registered_dims):
-            return math.inf
-        dist = 0.0
-        for a, r in zip(actual_dims, registered_dims):
-            if a == r:
-                continue
-            if a <= 0 or r <= 0:
-                return math.inf
-            dist += abs(math.log(a / r))
-        return dist
-
-    @classmethod
-    def _entry_distance(cls, entry, actual_shapes):
-        """Distance between an entry's registered shape and actual input shapes.
-
-        Returns math.inf for incompatible rank/arity, None for entries with no
-        shape constraint, 0.0 for exact matches.
-        """
+    def _signature_matches(entry, actual_shapes):
+        """True iff entry's registered signature exactly matches the inputs."""
         if entry["shape"] is None:
-            return None
-        if not actual_shapes:
-            return math.inf
+            return False  # shape-general entries handled separately
         if entry["full_sig"]:
-            if len(entry["shape"]) != len(actual_shapes):
-                return math.inf
-            return sum(
-                cls._dim_distance(a, r)
-                for a, r in zip(actual_shapes, entry["shape"])
-            )
-        # Key-shape registration: compare against the first tensor input.
-        return cls._dim_distance(actual_shapes[0], entry["shape"][0])
-
-    # -- dispatch ------------------------------------------------------------
+            return tuple(entry["shape"]) == tuple(actual_shapes)
+        # Key-shape registration: compare the first tensor input only.
+        return bool(actual_shapes) and tuple(entry["shape"][0]) == tuple(actual_shapes[0])
 
     def select(self, inputs):
         """Select the best-matching entry for the given inputs (no call).
 
-        Tiers (first tier with a match wins; within a tier the smallest shape
-        distance wins, with registration order breaking ties):
-          1. exact (hardware, shape): hardware == current GPU and distance == 0
-          2. same shape, any hardware: distance == 0
-          3. same hardware, nearest shape: hardware == current GPU, finite
-             distance (entries with hardware match but no shape constraint
-             qualify after any finite-distance entry)
-          4. any registration, nearest shape: finite distance on any hardware
-          5. default: registered with no constraints at all
+        Match order (first hit wins; registration order breaks ties):
+          1. "hardware+shape": signature exact AND hardware == current GPU
+          2. "shape":          signature exact, tuned on other/any hardware
+          3. "hardware":       shape-general (shapes=None), hardware == current
+          4. "any":            shape-general, no hardware constraint
+        Nothing matches -> RuntimeError. A loud failure beats silently running
+        a shape-specific kernel at the wrong shape.
 
-        Returns (entry, info_dict). Also stores info_dict on
-        self.last_dispatch_info. Raises RuntimeError if nothing matches.
+        Returns (entry, info_dict); info_dict also stored on
+        self.last_dispatch_info. info["matched"] is one of the strings above;
+        info["fallback"] is True for anything but "hardware+shape".
         """
         current_hw = get_gpu_kind()
         actual_shapes = get_shape_key(inputs)
 
-        scored = []  # (entry, distance_or_None, hw_match)
-        for entry in self._entries:
-            hw = entry["hardware"]
-            hw_match = (hw is not None and hw == current_hw)
-            dist = self._entry_distance(entry, actual_shapes)
-            scored.append((entry, dist, hw_match))
-
-        def pick(candidates):
-            """Pick smallest-distance candidate; ties go to registration order."""
-            best = None
-            best_dist = math.inf
-            for entry, dist, _hw in candidates:
-                d = 0.0 if dist is None else dist
-                if d < best_dist:
-                    best, best_dist = entry, d
-            return best, best_dist
-
         chosen = None
-        tier = None
-        tier_name = None
-        distance = None
-
-        # Tier 1: exact (hardware, shape)
-        t1 = [(e, d, h) for e, d, h in scored if h and d == 0.0]
-        if t1:
-            chosen, distance = t1[0][0], 0.0
-            tier, tier_name = 1, "exact_hw_shape"
-
-        # Tier 2: same shape, any hardware
+        matched = None
+        for entry in self._entries:  # 1: exact signature + hardware
+            if self._signature_matches(entry, actual_shapes) and entry["hardware"] == current_hw:
+                chosen, matched = entry, "hardware+shape"
+                break
         if chosen is None:
-            t2 = [(e, d, h) for e, d, h in scored if d == 0.0]
-            if t2:
-                chosen, distance = t2[0][0], 0.0
-                tier, tier_name = 2, "shape_any_hw"
-
-        # Tiers 3/4 are nearest-SHAPE fallback: running an implementation at a
-        # shape it wasn't written for. That is only safe for impls explicitly
-        # marked shape-general (exact=False). Shape-specific impls
-        # (exact=True, the default) match their declared signature only —
-        # silently running them at the wrong shape is the footgun this guards.
-        def _general(e):
-            return not e.get("exact", True)
-
-        # Tier 3: same hardware, nearest shape (shape-general impls only)
+            for entry in self._entries:  # 2: exact signature, any hardware
+                if self._signature_matches(entry, actual_shapes):
+                    chosen, matched = entry, "shape"
+                    break
         if chosen is None:
-            t3 = [(e, d, h) for e, d, h in scored
-                  if h and d is not None and math.isfinite(d) and d > 0.0
-                  and _general(e)]
-            if t3:
-                chosen, distance = pick(t3)
-                tier, tier_name = 3, "hw_nearest_shape"
-            else:
-                # Hardware match with no shape constraint ("any shape on this
-                # hardware") — still a hardware-correct choice.
-                t3b = [(e, d, h) for e, d, h in scored if h and d is None]
-                if t3b:
-                    chosen, distance = t3b[0][0], None
-                    tier, tier_name = 3, "hw_no_shape_constraint"
-
-        # Tier 4: any registration, nearest shape (shape-general impls only)
+            for entry in self._entries:  # 3: shape-general, hardware match
+                if entry["shape"] is None and entry["hardware"] == current_hw:
+                    chosen, matched = entry, "hardware"
+                    break
         if chosen is None:
-            t4 = [(e, d, h) for e, d, h in scored
-                  if d is not None and math.isfinite(d) and d > 0.0
-                  and _general(e)]
-            if t4:
-                chosen, distance = pick(t4)
-                tier, tier_name = 4, "any_nearest_shape"
-
-        # Tier 5: default (no constraints at all)
-        if chosen is None:
-            t5 = [(e, d, h) for e, d, h in scored
-                  if e["hardware"] is None and e["shape"] is None]
-            if t5:
-                chosen, distance = t5[0][0], None
-                tier, tier_name = 5, "default"
+            for entry in self._entries:  # 4: shape-general, unconstrained
+                if entry["shape"] is None and entry["hardware"] is None:
+                    chosen, matched = entry, "any"
+                    break
 
         if chosen is None:
             self.last_dispatch_info = None
@@ -359,15 +281,13 @@ class OracleRegistry:
             )
 
         info = {
-            "tier": tier,
-            "tier_name": tier_name,
-            "fallback": tier > 1,  # tier > 1 => may be suboptimal, worth logging
+            "matched": matched,
+            "fallback": matched != "hardware+shape",
             "fn_name": chosen["fn"].__name__,
             "description": chosen["description"],
-            "registered_hardware": chosen["hardware"],
+            "tuned_hardware": chosen["hardware"],
             "registered_shape": chosen["shape"],
             "configs": chosen["configs"],
-            "distance": distance,
             "current_hardware": current_hw,
             "actual_shapes": actual_shapes,
         }
@@ -378,10 +298,9 @@ class OracleRegistry:
         """Find the best-matching oracle and call it.
 
         Calls fn(inputs, **configs) if the matched registration has configs,
-        else fn(inputs). After this returns, self.last_dispatch_info describes
-        which tier matched (tier > 1 means fallback dispatch — the chosen
-        implementation was tuned for different hardware and/or shape and may
-        be suboptimal).
+        else fn(inputs). self.last_dispatch_info afterwards describes the
+        match; fallback=True means the impl was tuned on other hardware (or is
+        a shape-general default), so the measurement may be a soft floor.
         """
         entry, _info = self.select(inputs)
         if entry["configs"]:
@@ -431,13 +350,10 @@ class OracleRegistry:
 #                  configs={"BLOCK": 2048, "num_warps": 8})
 #     def _b200(inputs, *, BLOCK, num_warps): ...
 #
-# `exact` semantics (footgun protection):
-#   - exact=True (DEFAULT): the impl has baked-in shape assumptions
-#     (hardcoded BLOCK dividing rnumel, persistent kernel fitting only small
-#     rnumel, unrolled loops). It matches its declared signature ONLY and is
-#     never selected by nearest-shape fallback.
-#   - exact=False: the impl is shape-general (grid computed from input dims).
-#     It is eligible for nearest-shape dispatch at other shapes.
+# Matching is EXACT-ONLY (no fuzzy nearest-shape interpolation): each repro
+# has a small finite set of shapes (its shapes.txt lines), so an impl either
+# exactly matches the runtime signature, or it declared shapes=None
+# ("shape-general: grid computed from input dims, works at any shape").
 # If no registration matches the runtime inputs, dispatch raises
 # OracleDispatchError — a loud failure beats a silently-wrong floor
 # measurement from running a shape-specific kernel at the wrong shape.
@@ -500,8 +416,7 @@ def parse_shapes_signature(shapes):
                  if is_entry(entry) and entry[0] == "T")
 
 
-def oracle_impl(hardware=None, shapes=None, configs=None, exact=True,
-                description=None):
+def oracle_impl(hardware=None, shapes=None, configs=None, description=None):
     """Register an oracle implementation: one line declaring what it was
     written for.
 
@@ -511,12 +426,14 @@ def oracle_impl(hardware=None, shapes=None, configs=None, exact=True,
         shapes: FULL input signature the impl was written for, as the
             T()/S() string from the repro's `_shapes_config` (copy it
             verbatim), or a pre-parsed tuple of shape tuples.
-            None = no shape constraint (unconstrained default).
+            shapes=None means the impl is SHAPE-GENERAL: it computes its
+            grid from input dims and works at any shape. There is no fuzzy
+            matching in between — each repro has a small finite set of
+            shapes (shapes.txt); register the impl at each shape it was
+            tuned for, or declare it shape-general.
         configs: optional launch-config kwargs passed through at dispatch:
             fn(inputs, **configs). Lets one kernel body serve many
             (hardware, shapes) points.
-        exact: True (default) = shape-specific, matches declared signature
-            only. False = shape-general, eligible for nearest-shape fallback.
         description: optional human-readable note.
 
     Returns the function unchanged, so one body can be registered N times.
@@ -531,8 +448,6 @@ def oracle_impl(hardware=None, shapes=None, configs=None, exact=True,
                            configs=configs,
                            description=description)
         dec(fn)
-        # Stamp exactness on the entry we just added.
-        reg._entries[-1]["exact"] = bool(exact)
         return fn
     return decorator
 
@@ -559,8 +474,6 @@ def resolve_oracle(oracle_forward, inputs):
         entry, info = reg.select(inputs)
     except RuntimeError as e:
         raise OracleDispatchError(str(e)) from e
-    info = dict(info)
-    info["exact"] = entry.get("exact", True)
     if entry["configs"]:
         fn, cfgs = entry["fn"], entry["configs"]
         return (lambda inp: fn(inp, **cfgs)), info
@@ -867,10 +780,9 @@ def bench_oracle(
     }
     if dispatch_info is not None:
         result["dispatch"] = {
-            "tier": dispatch_info["tier"],
-            "tuned_hardware": dispatch_info["registered_hardware"],
-            "current_hardware": dispatch_info["current_hardware"],
-            "exact": dispatch_info.get("exact", True),
+            "matched": dispatch_info["matched"],
+            "tuned_on": dispatch_info["tuned_hardware"],
+            "running_on": dispatch_info["current_hardware"],
             "fallback": dispatch_info["fallback"],
         }
     print(json.dumps(result))

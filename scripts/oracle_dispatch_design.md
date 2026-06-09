@@ -40,7 +40,7 @@ Design decisions (each iterated with the user):
 - **dtype is documentation, not a match key.** The corpus dedupes patterns
   across dtypes — the same oracle gets f32 inputs when written against bf16.
   Matching is shape-only.
-- **`exact=True` is the default** (footgun protection, see below).
+- **Matching is exact-only** (footgun protection, see below).
 
 ### Shared kernels, different configs
 
@@ -58,41 +58,41 @@ oracle_impl(hardware="B200", shapes=SIG, configs={"BLOCK": 2048, "num_warps": 8}
 
 A genuinely different algorithm is just another decorated function.
 
-### `exact` semantics — the shape-fallback footgun
+### Exact-only matching — no fuzzy shape fallback
 
-Automatic nearest-shape fallback is dangerous: silently running a kernel with
-a hardcoded `BLOCK` dividing rnumel (or a persistent kernel that only fits
-small rnumel) at a different shape either crashes or — worse — produces a
-garbage "floor" that poisons gap data.
+There is no continuous shape space to interpolate over: each repro has a
+small, known, finite set of shapes (its shapes.txt lines, typically 5-15).
+Fuzzy "nearest shape" matching would solve a problem we don't have while
+creating a real footgun — silently running a kernel with a hardcoded `BLOCK`
+dividing rnumel (or a persistent kernel that only fits small rnumel) at a
+different shape either crashes or, worse, produces a garbage "floor" that
+poisons gap data.
 
-- `exact=True` (**default**): impl has baked-in shape assumptions. Matches
-  its declared signature ONLY; never selected by nearest-shape fallback.
-- `exact=False`: impl is shape-general (grid computed from input dims,
-  autotuned). Opts into nearest-shape dispatch.
-- **No match → `OracleDispatchError`.** `bench_oracle` reports
-  `"status": "NO_ORACLE_FOR_SHAPE"` instead of a fake ratio. A loud failure
-  beats a quiet wrong number.
+So an implementation either:
+- **exactly matches** the runtime signature (it was registered for it), or
+- declared **`shapes=None`** — shape-general: grid computed from input dims,
+  works anywhere.
 
-### Dispatch tiers
+A kernel tuned at 3 of the 12 shapes.txt lines gets 3 registrations (same
+body, different `configs`). **No match → `OracleDispatchError`**;
+`bench_oracle` reports `"status": "NO_ORACLE_FOR_SHAPE"` instead of a fake
+ratio. A loud failure beats a quiet wrong number.
 
-Given actual runtime inputs (their tuple of tensor shapes):
+### Match order
 
-| Tier | Match | Eligible impls |
-|------|-------|----------------|
-| 1 | hardware matches AND signature exact | any |
-| 2 | signature exact, any hardware | any |
-| 3 | hardware matches, nearest shape | `exact=False` only |
-| 4 | any hardware, nearest shape | `exact=False` only |
-| 5 | unconstrained registration (no shapes declared) | any |
-| — | nothing matches | raise `OracleDispatchError` |
+| `matched` | Meaning |
+|-----------|---------|
+| `"hardware+shape"` | signature exact AND tuned on this GPU — trustworthy floor |
+| `"shape"` | signature exact, tuned on other hardware (e.g. H100 kernel on B200) |
+| `"hardware"` | shape-general impl for this GPU |
+| `"any"` | shape-general, unconstrained |
+| — | nothing matches → `OracleDispatchError` |
 
-Nearest = smallest sum of `|log(actual_dim / registered_dim)|` over all
-tensors/dims; tensor count and per-tensor ranks must match (else infinite
-distance). Ties break by registration order.
+First match wins; registration order breaks ties. `fallback` is true for
+anything but `"hardware+shape"`.
 
-Today, every migrated H100 oracle measured on B200 dispatches at **tier 2**
-(same signature, other hardware) and the bench output says so — that is the
-honest description of the entire current corpus.
+Today, every migrated H100 oracle measured on B200 reports
+`"matched": "shape"` — the honest description of the entire current corpus.
 
 ### bench_oracle integration
 
@@ -100,8 +100,8 @@ honest description of the entire current corpus.
 `oracle_impl` registrations, and adds to the result JSON line:
 
 ```json
-"dispatch": {"tier": 2, "tuned_hardware": "H100", "current_hardware": "B200",
-             "exact": true, "fallback": true}
+"dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200",
+             "fallback": true}
 ```
 
 Unmigrated modules (no registrations) behave byte-identically to before — no
@@ -130,7 +130,7 @@ kernel bodies and re-measure — the registration mechanism makes each fix a
 ## Self-test
 
 `python scripts/test_oracle_dispatch.py` — covers signature parsing
-(including S()-skipping and no-trailing-comma single-tensor strings), all
-five tiers, exact=True exclusion from nearest-shape (even when closer),
-structure mismatch, configs passthrough, dtype-agnostic matching, and
-unmigrated-module passthrough. No GPU required.
+(including S()-skipping and no-trailing-comma single-tensor strings), every
+match level, wrong-shape raising, exact-beats-general precedence, per-shape
+configs on one body, multi-tensor signatures, configs passthrough,
+dtype-agnostic matching, and unmigrated-module passthrough. No GPU required.

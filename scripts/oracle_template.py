@@ -80,10 +80,11 @@ if triton is not None:
 # tuned on; bench output then reports dispatch tier / fallback honestly
 # (e.g. an H100-tuned kernel measured on B200 reports tier 2, fallback=true).
 #
-# exact=True (default): this impl has baked-in shape assumptions and matches
-# its declared signature ONLY. Set exact=False only if the impl is genuinely
-# shape-general (grid computed from input dims) — that opts it into
-# nearest-shape fallback dispatch at other shapes.
+# Matching is exact-only: this impl runs ONLY at its declared signature.
+# If the impl is genuinely shape-general (grid computed from input dims,
+# autotuned), register it with shapes=None instead — it then serves any
+# shape. To tune several shapes.txt lines, add one registration per line
+# (same body, different configs).
 @oracle_impl(hardware="H100", shapes="(T([32768, 1024], bf16),)")  # <- _shapes_config
 def oracle_forward(inputs):
     """Run the oracle computation.
@@ -131,12 +132,11 @@ def oracle_forward(inputs):
 #              description="split-K two-pass for huge inner dim")
 # def _oracle_split_k(inputs): ...
 #
-# Dispatch tiers: 1) exact (hardware, signature); 2) same signature, any
-# hardware; 3) same hardware, nearest shape (exact=False impls ONLY);
-# 4) any registration, nearest shape (exact=False ONLY); 5) unconstrained.
-# No match -> NO_ORACLE_FOR_SHAPE in bench output, never a silent wrong-shape
-# run. dtypes in the signature are documentation; matching is shape-only
-# (the corpus dedupes patterns across dtypes).
+# Match order: "hardware+shape" (exact sig + this GPU) > "shape" (exact
+# sig, tuned elsewhere) > "hardware" (shape-general, this GPU) > "any"
+# (shape-general, unconstrained). No match -> NO_ORACLE_FOR_SHAPE in bench
+# output — never a silent wrong-shape run. dtypes in the signature are
+# documentation; matching is shape-only (the corpus dedupes across dtypes).
 
 
 # --- CLI entry point ---
