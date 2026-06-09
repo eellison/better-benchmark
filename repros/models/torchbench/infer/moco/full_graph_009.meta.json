@@ -51,7 +51,7 @@
         "low": 0,
         "high": 1
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     }
   ],
   "outputs": [],

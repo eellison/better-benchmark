@@ -1298,7 +1298,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -1318,7 +1318,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -1561,7 +1561,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -1581,7 +1581,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -1825,7 +1825,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -1845,7 +1845,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -2089,7 +2089,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -2109,7 +2109,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -2353,7 +2353,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -2373,7 +2373,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -2617,7 +2617,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -2637,7 +2637,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -2881,7 +2881,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -2901,7 +2901,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -3145,7 +3145,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -3165,7 +3165,7 @@
         "low": 0,
         "high": 100
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
@@ -3343,7 +3343,7 @@
         "low": 0,
         "high": 513
       },
-      "constraint_source": "annotation_default"
+      "constraint_source": "comparison_only_safe"
     },
     {
       "kind": "tensor",
