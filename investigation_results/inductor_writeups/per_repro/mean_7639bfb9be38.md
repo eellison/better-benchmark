@@ -1,6 +1,28 @@
 # mean_7639bfb9be38 - Dual BN ReLU Spatial Mean (RegNet)
 
-## Benchmark Results
+## Status: FIXED (2026-06-09)
+
+Fix implemented on branch pr-184905 (B200 measurements):
+- Before (rsqrt canonicalization + fold_bn_affine disabled): oracle 11.87 us, compile 16.06 us, ratio 1.353x
+- rsqrt canonicalization only (fold_bn_affine off): compile 12.93 us, ratio 1.08x
+- After (defaults, both passes on): oracle 11.97 us, compile 11.87 us, ratio 0.992x (AT_FLOOR)
+- Correctness: PASS (max_finite_diff 6.25e-02 within fp16 tolerance, NaN masks match)
+
+Implementation: post-grad graph patterns `reciprocal(sqrt(x)) -> rsqrt(x)` and
+`div(1, sqrt(x)) -> rsqrt(x)` in `torch/_inductor/fx_passes/post_grad.py`,
+gated behind new config flag `config.rsqrt_canonicalization`
+(env `TORCHINDUCTOR_RSQRT_CANONICALIZATION`, default True). The remaining gap is
+closed by the existing `fold_bn_affine` pass (BN affine folding), which depends on
+the rsqrt-canonicalized form.
+
+Commits: a73d1583b34 (patterns), 6703f38fa2d (config gate + verification).
+
+Regression spot-check (defaults vs gate off, no slowdown, correctness PASS):
+- var_mean_598830735cf6: 1.387x vs 1.395x
+- mean_a3a8e8f5cc86: 1.088x vs 1.130x
+- var_mean_0854c7adb682: 1.045x vs 1.038x
+
+## Benchmark Results (original, before fix)
 - Oracle: 12.16 us
 - Compiled: 17.12 us
 - Ratio: 1.408x (oracle wins)
