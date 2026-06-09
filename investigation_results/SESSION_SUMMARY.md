@@ -328,6 +328,16 @@ writes the epilogue output in the same pass. Sub-variants:
 9. **Realize-reads threshold / scheduler-aware realization** (1.4x→1.1x)
    - Don't realize if all consumers will fuse together
    - Validated that threshold=30 works globally (no regressions) but want proper scheduler logic
+   - 2026-06-09 addendum: `should_realize_on_reuse` (ir.py:10194; indirect-indexing
+     branch at :10233) realizes multi-user gathers at lowering time, where fusion
+     outcomes are unknown. Often harmless (scheduler re-fuses the realized buffer —
+     verified on a 2-user rotate_half probe, still 1 kernel), but when re-fusion
+     fails it splits kernels (seen on pointwise_2cb944a69993). This forced the
+     rotate_half_gather pass (1406552b9d3) to apply sign via multiply instead of
+     the natural where(cond, g, -g) — a workaround, not a fix. Proper fix:
+     scheduler-level "inline back realized buffer if all consumers co-scheduled"
+     (or defer the realize decision to scheduling). The inline_recomputable_producers
+     machinery is the natural home.
 
 ### Lower impact / narrow:
 10. **Multi-store codegen** (2.25x ShuffleNet) — iterate half elements, write both branches
