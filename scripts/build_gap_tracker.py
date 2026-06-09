@@ -13,7 +13,7 @@ import math
 import re
 from pathlib import Path
 
-ROOT = Path("/tmp/scratch_space/better_benchmark")
+ROOT = Path(__file__).resolve().parents[1]
 QUEUE_CSV = ROOT / "investigation_results" / "oracle_kernel_work_queue.csv"
 SWEEP_JSON = ROOT / "sweep_3config_interleaved.json"
 OUTPUT_CSV = ROOT / "investigation_results" / "oracle_vs_compile_tracker.csv"

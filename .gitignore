@@ -54,3 +54,4 @@ triton_permute_bench.py
 tritonbench_reference_impls/
 tune_kernel.py
 validation_results.json
+*.best_config
