@@ -12,7 +12,7 @@ Provides:
   - get_hardware_info(): get GPU hardware properties for kernel config selection
   - get_shape_key(inputs): extract hashable shape signature from inputs
   - bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, ...): benchmark across all shapes
-  - OracleRegistry: per-file registration-based oracle dispatch
+  - OracleRegistry: per-file (hardware, shape, configs) oracle dispatch
   - register_oracle: decorator for registering oracle implementations
   - dispatch_oracle: find and call best-matching oracle for current hw/shape
 """
@@ -89,120 +89,315 @@ def get_gpu_kind() -> str:
 
 
 class OracleRegistry:
-    """Per-file oracle registry supporting (hardware, shape) dispatch.
+    """Per-file oracle registry: explicit (hardware, shape, configs) dispatch.
 
-    Each oracle file creates its own registry instance. Registered oracle
-    implementations are standalone callables (their own kernels, own autotune).
+    Each oracle file creates its own registry instance. Every registration
+    declares the ONE concrete shape the implementation was written/tuned for —
+    the shape is documentation: "this implementation was tuned for THIS shape."
 
-    Dispatch priority (first match wins):
-      1. Exact: hardware matches AND shape predicate passes
-      2. Shape-only: no hardware constraint, shape predicate passes
-      3. Hardware-only: hardware matches, no shape constraint
-      4. Default: no constraints at all
+    The same kernel function can be registered multiple times with different
+    launch configs (different hardware or shapes need different BLOCK sizes /
+    num_warps, but the kernel body is identical). `configs` is passed through
+    to the implementation as keyword arguments at dispatch time.
 
     Usage in an oracle file:
         from oracle_harness import OracleRegistry
 
         registry = OracleRegistry()
 
-        @registry.register(hardware="B200", shape=lambda inputs: inputs[0].shape[-1] <= 1024)
-        def oracle_persistent_small(inputs):
-            ...
+        def _softmax_impl(inputs, *, BLOCK=1024, num_warps=4):
+            ...one kernel body...
 
-        @registry.register(hardware="B200", shape=lambda inputs: inputs[0].shape[-1] > 1024)
-        def oracle_split_k(inputs):
-            ...
+        registry.register(hardware="H100", shape=(32768, 1024),
+                          configs={"BLOCK": 1024, "num_warps": 4})(_softmax_impl)
+        registry.register(hardware="B200", shape=(32768, 1024),
+                          configs={"BLOCK": 2048, "num_warps": 8})(_softmax_impl)
+        registry.register(hardware="B200", shape=(8192, 262144),
+                          configs={"BLOCK": 4096, "num_warps": 16})(_softmax_impl)
 
-        @registry.register()  # default fallback
+        @registry.register()  # unconstrained default fallback
         def oracle_default(inputs):
             ...
 
         def oracle_forward(inputs):
             return registry.dispatch(inputs)
+
+    Dispatch tiers (see dispatch() for details):
+      1. exact (hardware, shape) match
+      2. same shape, any hardware
+      3. same hardware, nearest shape
+      4. any registration, nearest shape
+      5. default (registered with no constraints)
+
+    Registration is OPT-IN: oracle files that just define oracle_forward(inputs)
+    with no registry keep working with the rest of the harness.
     """
 
     def __init__(self):
-        self._entries = []  # list of (hardware, shape_pred, fn, description)
+        # Each entry: dict(hardware, shape, full_sig, fn, configs, description)
+        self._entries = []
+        #: Info about the most recent dispatch (tier, fn, distance, ...).
+        #: Benchmarks can inspect this to log "fallback dispatch, may be
+        #: suboptimal" when tier > 1.
+        self.last_dispatch_info = None
 
-    def register(self, hardware=None, shape=None, description=None):
+    # -- registration -------------------------------------------------------
+
+    def register(self, hardware=None, shape=None, configs=None, description=None):
         """Decorator to register an oracle implementation.
 
         Args:
             hardware: GPU kind string (e.g. "B200", "H100") or None for any.
-            shape: Callable(inputs) -> bool predicate, or None for any shape.
-            description: Human-readable string documenting what this variant
-                targets (e.g. "persistent single-pass, inner <= 1024").
+            shape: The CONCRETE shape this implementation was written/tuned
+                for. Either a tuple of ints — the key (first tensor) input
+                shape, e.g. (8192, 262144) — or a tuple of tuples covering
+                ALL tensor input shapes, e.g. ((8192, 262144), (262144,)).
+                None means "no shape constraint" (only sensible for defaults).
+                Lambda/callable predicates are NOT supported: each oracle is
+                tuned for one concrete shape, so declare it.
+            configs: Optional dict of launch-config kwargs passed through to
+                the implementation at dispatch time: fn(inputs, **configs).
+                This lets ONE kernel body serve many (hardware, shape) points
+                with different BLOCK sizes / num_warps. configs=None means the
+                implementation is called plain: fn(inputs).
+            description: Human-readable note (e.g. "split-K, tuned on B200").
 
         Returns:
-            Decorator that registers the function and returns it unchanged.
+            Decorator that registers the function and returns it UNCHANGED,
+            so the same function can be registered repeatedly under different
+            (hardware, shape, configs) combinations.
         """
+        if callable(shape):
+            raise TypeError(
+                "shape must be a concrete tuple (key input shape) or tuple of "
+                "tuples (all input shapes), not a callable predicate. Each "
+                "oracle is tuned for ONE shape — declare it explicitly, e.g. "
+                "shape=(8192, 262144)."
+            )
+        norm_shape, full_sig = self._normalize_shape(shape)
+        if configs is not None and not isinstance(configs, dict):
+            raise TypeError(f"configs must be a dict or None, got {type(configs).__name__}")
+
         def decorator(fn):
-            desc = description or fn.__name__
-            self._entries.append((hardware, shape, fn, desc))
+            self._entries.append({
+                "hardware": hardware,
+                "shape": norm_shape,        # tuple of tuples, or None
+                "full_sig": full_sig,       # True if shape covers ALL inputs
+                "fn": fn,
+                "configs": dict(configs) if configs else None,
+                "description": description or fn.__name__,
+            })
             return fn
         return decorator
 
-    def dispatch(self, inputs):
-        """Find best matching oracle and call it.
+    @staticmethod
+    def _normalize_shape(shape):
+        """Normalize shape spec to (tuple_of_tuples, is_full_signature).
 
-        Lookup order:
-          1. hardware+shape match (both constraints satisfied)
-          2. shape-only match (hardware=None, shape predicate passes)
-          3. hardware-only match (hardware matches, shape=None)
-          4. default (both hardware=None and shape=None)
-
-        Raises RuntimeError if no matching implementation is found.
+        - None -> (None, False): no shape constraint.
+        - tuple of ints (key input shape) -> ((shape,), False)
+        - tuple of tuples (all input shapes) -> (shapes, True)
         """
-        current_hw = get_gpu_kind()
-
-        # Tier 1: exact match (hardware + shape)
-        for hw, shape_pred, fn, _desc in self._entries:
-            if hw is not None and hw == current_hw and shape_pred is not None:
-                try:
-                    if shape_pred(inputs):
-                        return fn(inputs)
-                except Exception:
-                    continue
-
-        # Tier 2: shape-only match (hardware=None, shape predicate passes)
-        for hw, shape_pred, fn, _desc in self._entries:
-            if hw is None and shape_pred is not None:
-                try:
-                    if shape_pred(inputs):
-                        return fn(inputs)
-                except Exception:
-                    continue
-
-        # Tier 3: hardware-only match (hardware matches, no shape constraint)
-        for hw, shape_pred, fn, _desc in self._entries:
-            if hw is not None and hw == current_hw and shape_pred is None:
-                return fn(inputs)
-
-        # Tier 4: default (no constraints)
-        for hw, shape_pred, fn, _desc in self._entries:
-            if hw is None and shape_pred is None:
-                return fn(inputs)
-
-        raise RuntimeError(
-            f"No oracle registered for hardware={current_hw!r} with given input shapes. "
-            f"Registry has {len(self._entries)} entries."
+        if shape is None:
+            return None, False
+        shape = tuple(shape)
+        if len(shape) == 0:
+            # 0-d key input shape (scalar tensor)
+            return ((),), False
+        if all(isinstance(d, int) for d in shape):
+            return (shape,), False
+        if all(isinstance(s, (tuple, list, torch.Size)) for s in shape):
+            return tuple(tuple(s) for s in shape), True
+        raise TypeError(
+            f"shape must be a tuple of ints or a tuple of tuples, got {shape!r}"
         )
 
+    # -- shape distance ------------------------------------------------------
+
+    @staticmethod
+    def _dim_distance(actual_dims, registered_dims):
+        """Distance between two single-tensor shapes.
+
+        Same rank required (else inf). Distance is the sum of
+        |log(actual_dim / registered_dim)| across dims, so 0.0 means exact.
+        """
+        if len(actual_dims) != len(registered_dims):
+            return math.inf
+        dist = 0.0
+        for a, r in zip(actual_dims, registered_dims):
+            if a == r:
+                continue
+            if a <= 0 or r <= 0:
+                return math.inf
+            dist += abs(math.log(a / r))
+        return dist
+
+    @classmethod
+    def _entry_distance(cls, entry, actual_shapes):
+        """Distance between an entry's registered shape and actual input shapes.
+
+        Returns math.inf for incompatible rank/arity, None for entries with no
+        shape constraint, 0.0 for exact matches.
+        """
+        if entry["shape"] is None:
+            return None
+        if not actual_shapes:
+            return math.inf
+        if entry["full_sig"]:
+            if len(entry["shape"]) != len(actual_shapes):
+                return math.inf
+            return sum(
+                cls._dim_distance(a, r)
+                for a, r in zip(actual_shapes, entry["shape"])
+            )
+        # Key-shape registration: compare against the first tensor input.
+        return cls._dim_distance(actual_shapes[0], entry["shape"][0])
+
+    # -- dispatch ------------------------------------------------------------
+
+    def select(self, inputs):
+        """Select the best-matching entry for the given inputs (no call).
+
+        Tiers (first tier with a match wins; within a tier the smallest shape
+        distance wins, with registration order breaking ties):
+          1. exact (hardware, shape): hardware == current GPU and distance == 0
+          2. same shape, any hardware: distance == 0
+          3. same hardware, nearest shape: hardware == current GPU, finite
+             distance (entries with hardware match but no shape constraint
+             qualify after any finite-distance entry)
+          4. any registration, nearest shape: finite distance on any hardware
+          5. default: registered with no constraints at all
+
+        Returns (entry, info_dict). Also stores info_dict on
+        self.last_dispatch_info. Raises RuntimeError if nothing matches.
+        """
+        current_hw = get_gpu_kind()
+        actual_shapes = get_shape_key(inputs)
+
+        scored = []  # (entry, distance_or_None, hw_match)
+        for entry in self._entries:
+            hw = entry["hardware"]
+            hw_match = (hw is not None and hw == current_hw)
+            dist = self._entry_distance(entry, actual_shapes)
+            scored.append((entry, dist, hw_match))
+
+        def pick(candidates):
+            """Pick smallest-distance candidate; ties go to registration order."""
+            best = None
+            best_dist = math.inf
+            for entry, dist, _hw in candidates:
+                d = 0.0 if dist is None else dist
+                if d < best_dist:
+                    best, best_dist = entry, d
+            return best, best_dist
+
+        chosen = None
+        tier = None
+        tier_name = None
+        distance = None
+
+        # Tier 1: exact (hardware, shape)
+        t1 = [(e, d, h) for e, d, h in scored if h and d == 0.0]
+        if t1:
+            chosen, distance = t1[0][0], 0.0
+            tier, tier_name = 1, "exact_hw_shape"
+
+        # Tier 2: same shape, any hardware
+        if chosen is None:
+            t2 = [(e, d, h) for e, d, h in scored if d == 0.0]
+            if t2:
+                chosen, distance = t2[0][0], 0.0
+                tier, tier_name = 2, "shape_any_hw"
+
+        # Tier 3: same hardware, nearest shape
+        if chosen is None:
+            t3 = [(e, d, h) for e, d, h in scored
+                  if h and d is not None and math.isfinite(d)]
+            if t3:
+                chosen, distance = pick(t3)
+                tier, tier_name = 3, "hw_nearest_shape"
+            else:
+                # Hardware match with no shape constraint ("any shape on this
+                # hardware") — still a hardware-correct choice.
+                t3b = [(e, d, h) for e, d, h in scored if h and d is None]
+                if t3b:
+                    chosen, distance = t3b[0][0], None
+                    tier, tier_name = 3, "hw_no_shape_constraint"
+
+        # Tier 4: any registration, nearest shape
+        if chosen is None:
+            t4 = [(e, d, h) for e, d, h in scored
+                  if d is not None and math.isfinite(d)]
+            if t4:
+                chosen, distance = pick(t4)
+                tier, tier_name = 4, "any_nearest_shape"
+
+        # Tier 5: default (no constraints at all)
+        if chosen is None:
+            t5 = [(e, d, h) for e, d, h in scored
+                  if e["hardware"] is None and e["shape"] is None]
+            if t5:
+                chosen, distance = t5[0][0], None
+                tier, tier_name = 5, "default"
+
+        if chosen is None:
+            self.last_dispatch_info = None
+            raise RuntimeError(
+                f"No oracle registered for hardware={current_hw!r} "
+                f"shapes={actual_shapes!r}. Registry has {len(self._entries)} "
+                f"entries: {[e['description'] for e in self._entries]}"
+            )
+
+        info = {
+            "tier": tier,
+            "tier_name": tier_name,
+            "fallback": tier > 1,  # tier > 1 => may be suboptimal, worth logging
+            "fn_name": chosen["fn"].__name__,
+            "description": chosen["description"],
+            "registered_hardware": chosen["hardware"],
+            "registered_shape": chosen["shape"],
+            "configs": chosen["configs"],
+            "distance": distance,
+            "current_hardware": current_hw,
+            "actual_shapes": actual_shapes,
+        }
+        self.last_dispatch_info = info
+        return chosen, info
+
+    def dispatch(self, inputs):
+        """Find the best-matching oracle and call it.
+
+        Calls fn(inputs, **configs) if the matched registration has configs,
+        else fn(inputs). After this returns, self.last_dispatch_info describes
+        which tier matched (tier > 1 means fallback dispatch — the chosen
+        implementation was tuned for different hardware and/or shape and may
+        be suboptimal).
+        """
+        entry, _info = self.select(inputs)
+        if entry["configs"]:
+            return entry["fn"](inputs, **entry["configs"])
+        return entry["fn"](inputs)
+
+    # -- introspection -------------------------------------------------------
+
     def list_entries(self):
-        """List registered entries for debugging."""
-        entries = []
-        for hw, shape_pred, fn, desc in self._entries:
-            entries.append({
-                "hardware": hw,
-                "has_shape_pred": shape_pred is not None,
-                "fn_name": fn.__name__,
-                "description": desc,
-            })
-        return entries
+        """List registered entries for debugging / CI."""
+        return [
+            {
+                "hardware": e["hardware"],
+                "shape": e["shape"][0] if (e["shape"] is not None and not e["full_sig"]) else e["shape"],
+                "full_signature": e["full_sig"],
+                "fn_name": e["fn"].__name__,
+                "configs": e["configs"],
+                "description": e["description"],
+            }
+            for e in self._entries
+        ]
 
     def clear(self):
         """Clear all registrations (useful for testing)."""
         self._entries.clear()
+        self.last_dispatch_info = None
 
 
 # Module-level convenience for simple cases (single oracle file, not imported
@@ -211,12 +406,14 @@ class OracleRegistry:
 _default_registry = OracleRegistry()
 
 
-def register_oracle(hardware=None, shape=None, description=None):
+def register_oracle(hardware=None, shape=None, configs=None, description=None):
     """Module-level decorator using the default global registry.
 
     For per-file isolation (recommended), use OracleRegistry() directly.
     """
-    return _default_registry.register(hardware=hardware, shape=shape, description=description)
+    return _default_registry.register(
+        hardware=hardware, shape=shape, configs=configs, description=description
+    )
 
 
 def dispatch_oracle(inputs):
