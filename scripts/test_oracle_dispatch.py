@@ -128,11 +128,11 @@ def run_tests():
     fresh()
     shared = make("shared", expect_configs=True)
     oracle_impl(hardware="B200", shapes="(T([32768, 256], bf16),)",
-                configs={"BLOCK": 256})(shared)
+                BLOCK=256)(shared)
     oracle_impl(hardware="B200", shapes="(T([32768, 1024], bf16),)",
-                configs={"BLOCK": 1024})(shared)
+                BLOCK=1024)(shared)
     oracle_impl(hardware="B200", shapes="(T([8192, 262144], bf16),)",
-                configs={"BLOCK": 4096})(shared)
+                BLOCK=4096)(shared)
     fn, info = resolve_oracle(make("entry"), fake_inputs((8192, 262144)))
     assert info["matched"] == "hardware+shape"
     fn(fake_inputs((8192, 262144)))
@@ -160,9 +160,9 @@ def run_tests():
     shared = make("shared_hw", expect_configs=True)
     SIG = "(T([32768, 1024], bf16),)"
     oracle_impl(hardware="H100", shapes=SIG,
-                configs={"BLOCK": 1024, "num_warps": 4})(shared)
+                BLOCK=1024, num_warps=4)(shared)
     oracle_impl(hardware="B200", shapes=SIG,
-                configs={"BLOCK": 2048, "num_warps": 8})(shared)
+                BLOCK=2048, num_warps=8)(shared)
     fn, info = resolve_oracle(make("entry"), fake_inputs((32768, 1024)))
     assert info["matched"] == "hardware+shape"
     fn(fake_inputs((32768, 1024)))
@@ -176,6 +176,28 @@ def run_tests():
     _, info = resolve_oracle(make("entry"), fake_inputs((7, 7)))
     assert info["matched"] == "any" and info["fn_name"] == "default"
     print("PASS matched=any (unconstrained default)")
+
+    # --- dtype honesty: bf16-tuned kernel serving f32 inputs is flagged -----
+    fresh()
+    oracle_impl(hardware="B200", shapes="(T([32768, 1024], bf16),)")(make("bf16_tuned"))
+    _, info = resolve_oracle(make("entry"), fake_inputs((32768, 1024), dtype=torch.float32))
+    assert info.get("dtypes_differ") is True, info
+    assert info["tuned_dtypes"] == ("bf16",) and info["actual_dtypes"] == ("f32",)
+    _, info = resolve_oracle(make("entry"), fake_inputs((32768, 1024), dtype=torch.bfloat16))
+    assert "dtypes_differ" not in info, info
+    print("PASS dtype honesty flag")
+
+    # --- strategy kwargs: looped vs persistent on one body ------------------
+    fresh()
+    body = make("reduction", expect_configs=True)
+    oracle_impl(hardware="H100", shapes="(T([4096, 512], f32),)",
+                persistent=True, RBLOCK=512)(body)
+    oracle_impl(hardware="B200", shapes="(T([4096, 512], f32),)",
+                persistent=False, RBLOCK=128)(body)
+    fn, _ = resolve_oracle(make("entry"), fake_inputs((4096, 512)))
+    fn(fake_inputs((4096, 512)))
+    assert CALLS[-1] == ("reduction", {"persistent": False, "RBLOCK": 128}), CALLS[-1]
+    print("PASS strategy kwargs (looped vs persistent)")
 
     # --- unmigrated module: resolve is a no-op ------------------------------
     def plain_oracle(inputs):

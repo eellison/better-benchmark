@@ -123,8 +123,12 @@ def oracle_forward(inputs):
 #     return out
 #
 # SIG = "(T([32768, 1024], bf16),)"  # _shapes_config, shared across variants
-# oracle_impl(hardware="H100", shapes=SIG, configs={"BLOCK": 1024, "num_warps": 4})(_softmax_impl)
-# oracle_impl(hardware="B200", shapes=SIG, configs={"BLOCK": 2048, "num_warps": 8})(_softmax_impl)
+# oracle_impl(hardware="H100", shapes=SIG, BLOCK=1024, num_warps=4)(_softmax_impl)
+# oracle_impl(hardware="B200", shapes=SIG, BLOCK=2048, num_warps=8)(_softmax_impl)
+#
+# Any kwarg beyond hardware/shapes/description is passed to the impl at
+# dispatch — including strategy flags, e.g. persistent=True vs persistent=False
+# to pick looped vs persistent reduction from the same body.
 #
 # A genuinely different algorithm is just another decorated function:
 #

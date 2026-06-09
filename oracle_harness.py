@@ -291,6 +291,24 @@ class OracleRegistry:
             "current_hardware": current_hw,
             "actual_shapes": actual_shapes,
         }
+        # dtype honesty: the corpus dedupes patterns across dtypes, so a
+        # bf16-tuned kernel legitimately serves f32 inputs — but flag it so
+        # the data can tell us if dtype ever matters for floors.
+        reg_dtypes = chosen.get("dtypes")
+        if reg_dtypes:
+            _DT = {torch.float32: "f32", torch.float16: "f16",
+                   torch.bfloat16: "bf16", torch.float64: "f64",
+                   torch.int64: "i64", torch.int32: "i32",
+                   torch.int16: "i16", torch.int8: "i8",
+                   torch.bool: "b8", torch.uint8: "u8"}
+            actual_dtypes = tuple(_DT.get(t.dtype, str(t.dtype)) for t in inputs
+                                  if isinstance(t, torch.Tensor))
+            if (len(actual_dtypes) == len(reg_dtypes)
+                    and any(r is not None and a != r
+                            for a, r in zip(actual_dtypes, reg_dtypes))):
+                info["dtypes_differ"] = True
+                info["tuned_dtypes"] = reg_dtypes
+                info["actual_dtypes"] = actual_dtypes
         self.last_dispatch_info = info
         return chosen, info
 
@@ -370,23 +388,27 @@ class OracleDispatchError(RuntimeError):
     """No registered oracle implementation matches the runtime inputs."""
 
 
-def parse_shapes_signature(shapes):
+def parse_shapes_signature(shapes, *, with_dtypes=False):
     """Parse a T()/S() signature string into a tuple of shape tuples.
 
     Accepts the exact `_shapes_config` / shapes.txt format, e.g.
     "(T([512, 256, 13, 13], f32), T([512, 128, 27, 27], b8), S([131072, 169]))"
     Only tensor entries (T) contribute shapes; S() entries are shape params,
-    not tensors, and are skipped. dtypes are ignored for matching.
+    not tensors, and are skipped. dtypes are NOT used for matching (the
+    corpus dedupes patterns across dtypes) but are recorded for honesty:
+    with_dtypes=True returns (shape_tuples, dtype_tuple) so dispatch can
+    flag when e.g. a bf16-tuned kernel is serving f32 inputs.
     Already-parsed tuples of tuples pass through unchanged.
     """
     if shapes is None:
-        return None
+        return (None, None) if with_dtypes else None
     if not isinstance(shapes, str):
         # programmatic: tuple of shape tuples
-        return tuple(tuple(s) for s in shapes)
+        parsed_prog = tuple(tuple(s) for s in shapes)
+        return (parsed_prog, None) if with_dtypes else parsed_prog
 
     def T(shape, dtype=None, *args, **kwargs):
-        return ("T", tuple(shape))
+        return ("T", tuple(shape), dtype)
 
     def S(dims):
         return ("S", tuple(dims))
@@ -403,7 +425,7 @@ def parse_shapes_signature(shapes):
     parsed = eval(shapes, ns)  # noqa: S307 - trusted repo-internal strings
 
     def is_entry(x):
-        return (isinstance(x, tuple) and len(x) == 2 and x[0] in ("T", "S")
+        return (isinstance(x, tuple) and len(x) >= 2 and x[0] in ("T", "S")
                 and isinstance(x[1], tuple))
 
     # Single-tensor signatures without a trailing comma — "(T([8192], bf16))"
@@ -412,11 +434,15 @@ def parse_shapes_signature(shapes):
         parsed = (parsed,)
     elif not isinstance(parsed, tuple):
         parsed = (parsed,)
-    return tuple(entry[1] for entry in parsed
-                 if is_entry(entry) and entry[0] == "T")
+    tensors = [e for e in parsed if is_entry(e) and e[0] == "T"]
+    shape_tuples = tuple(e[1] for e in tensors)
+    if with_dtypes:
+        dtypes = tuple((e[2] if len(e) > 2 else None) for e in tensors)
+        return shape_tuples, dtypes
+    return shape_tuples
 
 
-def oracle_impl(hardware=None, shapes=None, configs=None, description=None):
+def oracle_impl(hardware=None, shapes=None, description=None, **kwargs):
     """Register an oracle implementation: one line declaring what it was
     written for.
 
@@ -431,23 +457,28 @@ def oracle_impl(hardware=None, shapes=None, configs=None, description=None):
             matching in between — each repro has a small finite set of
             shapes (shapes.txt); register the impl at each shape it was
             tuned for, or declare it shape-general.
-        configs: optional launch-config kwargs passed through at dispatch:
-            fn(inputs, **configs). Lets one kernel body serve many
-            (hardware, shapes) points.
         description: optional human-readable note.
+        **kwargs: any other keyword arguments are passed through to the
+            implementation at dispatch time: fn(inputs, **kwargs). This is
+            how one kernel body serves many (hardware, shapes) points with
+            different launch parameters:
+
+                oracle_impl(hardware="H100", shapes=SIG, BLOCK=1024, num_warps=4)(_impl)
+                oracle_impl(hardware="B200", shapes=SIG, BLOCK=2048, num_warps=8)(_impl)
 
     Returns the function unchanged, so one body can be registered N times.
     """
-    parsed = parse_shapes_signature(shapes)
+    parsed, dtypes = parse_shapes_signature(shapes, with_dtypes=True)
 
     def decorator(fn):
         reg = _module_registries.setdefault(fn.__module__, OracleRegistry())
         entry_shapes = parsed if parsed is None else tuple(parsed)
         dec = reg.register(hardware=hardware,
                            shape=entry_shapes,
-                           configs=configs,
+                           configs=kwargs or None,
                            description=description)
         dec(fn)
+        reg._entries[-1]["dtypes"] = dtypes
         return fn
     return decorator
 
@@ -785,6 +816,10 @@ def bench_oracle(
             "running_on": dispatch_info["current_hardware"],
             "fallback": dispatch_info["fallback"],
         }
+        if dispatch_info.get("dtypes_differ"):
+            result["dispatch"]["dtypes_differ"] = True
+            result["dispatch"]["tuned_dtypes"] = list(dispatch_info["tuned_dtypes"])
+            result["dispatch"]["actual_dtypes"] = list(dispatch_info["actual_dtypes"])
     print(json.dumps(result))
     return result
 

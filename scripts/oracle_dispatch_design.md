@@ -38,8 +38,11 @@ Design decisions (each iterated with the user):
   existing `T()/S()` string — copy `_shapes_config` from the repro verbatim.
   `S()` entries (shape params) are skipped; only tensors matter.
 - **dtype is documentation, not a match key.** The corpus dedupes patterns
-  across dtypes — the same oracle gets f32 inputs when written against bf16.
-  Matching is shape-only.
+  across dtypes — the same oracle gets f32 inputs when written against bf16,
+  so requiring dtype match would leave most inputs unmatched. Matching is
+  shape-only, BUT dispatch flags `dtypes_differ` (with tuned vs actual
+  dtypes) in its info and in the bench JSON, so if dtype ever matters for
+  floors, the data will show it.
 - **Matching is exact-only** (footgun protection, see below).
 
 ### Shared kernels, different configs
@@ -52,8 +55,17 @@ the decorator returns the function unchanged so it can be registered N times:
 def _softmax_impl(inputs, *, BLOCK, num_warps): ...
 
 SIG = "(T([32768, 1024], bf16),)"
-oracle_impl(hardware="H100", shapes=SIG, configs={"BLOCK": 1024, "num_warps": 4})(_softmax_impl)
-oracle_impl(hardware="B200", shapes=SIG, configs={"BLOCK": 2048, "num_warps": 8})(_softmax_impl)
+oracle_impl(hardware="H100", shapes=SIG, BLOCK=1024, num_warps=4)(_softmax_impl)
+oracle_impl(hardware="B200", shapes=SIG, BLOCK=2048, num_warps=8)(_softmax_impl)
+```
+
+There is no blessed `configs` dict — any keyword argument beyond
+`hardware`/`shapes`/`description` is passed straight to the implementation
+at dispatch. That includes algorithm-strategy flags, not just numeric knobs:
+
+```python
+oracle_impl(hardware="H100", shapes=SIG, persistent=True,  RBLOCK=512)(_reduction)
+oracle_impl(hardware="B200", shapes=SIG, persistent=False, RBLOCK=128)(_reduction)
 ```
 
 A genuinely different algorithm is just another decorated function.
