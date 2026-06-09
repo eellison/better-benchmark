@@ -309,10 +309,19 @@ class OracleRegistry:
                 chosen, distance = t2[0][0], 0.0
                 tier, tier_name = 2, "shape_any_hw"
 
-        # Tier 3: same hardware, nearest shape
+        # Tiers 3/4 are nearest-SHAPE fallback: running an implementation at a
+        # shape it wasn't written for. That is only safe for impls explicitly
+        # marked shape-general (exact=False). Shape-specific impls
+        # (exact=True, the default) match their declared signature only —
+        # silently running them at the wrong shape is the footgun this guards.
+        def _general(e):
+            return not e.get("exact", True)
+
+        # Tier 3: same hardware, nearest shape (shape-general impls only)
         if chosen is None:
             t3 = [(e, d, h) for e, d, h in scored
-                  if h and d is not None and math.isfinite(d)]
+                  if h and d is not None and math.isfinite(d) and d > 0.0
+                  and _general(e)]
             if t3:
                 chosen, distance = pick(t3)
                 tier, tier_name = 3, "hw_nearest_shape"
@@ -324,10 +333,11 @@ class OracleRegistry:
                     chosen, distance = t3b[0][0], None
                     tier, tier_name = 3, "hw_no_shape_constraint"
 
-        # Tier 4: any registration, nearest shape
+        # Tier 4: any registration, nearest shape (shape-general impls only)
         if chosen is None:
             t4 = [(e, d, h) for e, d, h in scored
-                  if d is not None and math.isfinite(d)]
+                  if d is not None and math.isfinite(d) and d > 0.0
+                  and _general(e)]
             if t4:
                 chosen, distance = pick(t4)
                 tier, tier_name = 4, "any_nearest_shape"
@@ -400,30 +410,169 @@ class OracleRegistry:
         self.last_dispatch_info = None
 
 
-# Module-level convenience for simple cases (single oracle file, not imported
-# by multiple files simultaneously). For multi-file use, instantiate your own
-# OracleRegistry per file.
-_default_registry = OracleRegistry()
+# ---------------------------------------------------------------------------
+# oracle_impl: the standard one-line registration decorator
+# ---------------------------------------------------------------------------
+#
+# An oracle implements the WHOLE repro (multiple input tensors, possibly
+# multiple kernels), so its operating point is the complete input shape
+# signature — the same string format as `_shapes_config` in each repro.py
+# and each shapes.txt line. One concise decorator line documents exactly
+# what the implementation was written and tuned for:
+#
+#     from oracle_harness import oracle_impl
+#
+#     @oracle_impl(hardware="H100", shapes="(T([32768, 1024], bf16),)")
+#     def oracle_forward(inputs): ...
+#
+# Variant for other hardware — same kernel body, different launch configs:
+#
+#     @oracle_impl(hardware="B200", shapes="(T([32768, 1024], bf16),)",
+#                  configs={"BLOCK": 2048, "num_warps": 8})
+#     def _b200(inputs, *, BLOCK, num_warps): ...
+#
+# `exact` semantics (footgun protection):
+#   - exact=True (DEFAULT): the impl has baked-in shape assumptions
+#     (hardcoded BLOCK dividing rnumel, persistent kernel fitting only small
+#     rnumel, unrolled loops). It matches its declared signature ONLY and is
+#     never selected by nearest-shape fallback.
+#   - exact=False: the impl is shape-general (grid computed from input dims).
+#     It is eligible for nearest-shape dispatch at other shapes.
+# If no registration matches the runtime inputs, dispatch raises
+# OracleDispatchError — a loud failure beats a silently-wrong floor
+# measurement from running a shape-specific kernel at the wrong shape.
+#
+# dtype note: the corpus dedupes patterns across dtypes, so the same oracle
+# is called with f32 inputs even if written against bf16. dtypes in the
+# signature are recorded for documentation but NOT required to match.
+
+# Per-module registries: fn.__module__ -> OracleRegistry
+_module_registries = {}
 
 
-def register_oracle(hardware=None, shape=None, configs=None, description=None):
-    """Module-level decorator using the default global registry.
+class OracleDispatchError(RuntimeError):
+    """No registered oracle implementation matches the runtime inputs."""
 
-    For per-file isolation (recommended), use OracleRegistry() directly.
+
+def parse_shapes_signature(shapes):
+    """Parse a T()/S() signature string into a tuple of shape tuples.
+
+    Accepts the exact `_shapes_config` / shapes.txt format, e.g.
+    "(T([512, 256, 13, 13], f32), T([512, 128, 27, 27], b8), S([131072, 169]))"
+    Only tensor entries (T) contribute shapes; S() entries are shape params,
+    not tensors, and are skipped. dtypes are ignored for matching.
+    Already-parsed tuples of tuples pass through unchanged.
     """
-    return _default_registry.register(
-        hardware=hardware, shape=shape, configs=configs, description=description
-    )
+    if shapes is None:
+        return None
+    if not isinstance(shapes, str):
+        # programmatic: tuple of shape tuples
+        return tuple(tuple(s) for s in shapes)
+
+    def T(shape, dtype=None, *args, **kwargs):
+        return ("T", tuple(shape))
+
+    def S(dims):
+        return ("S", tuple(dims))
+
+    def Index(high, low=0):
+        return None
+
+    def Perm(size=None):
+        return None
+
+    ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm}
+    for d in ("f32", "f16", "bf16", "f64", "i64", "i32", "i16", "i8", "b8", "u8"):
+        ns[d] = d
+    parsed = eval(shapes, ns)  # noqa: S307 - trusted repo-internal strings
+
+    def is_entry(x):
+        return (isinstance(x, tuple) and len(x) == 2 and x[0] in ("T", "S")
+                and isinstance(x[1], tuple))
+
+    # Single-tensor signatures without a trailing comma — "(T([8192], bf16))"
+    # — eval to the entry itself rather than a 1-tuple of entries.
+    if is_entry(parsed):
+        parsed = (parsed,)
+    elif not isinstance(parsed, tuple):
+        parsed = (parsed,)
+    return tuple(entry[1] for entry in parsed
+                 if is_entry(entry) and entry[0] == "T")
 
 
-def dispatch_oracle(inputs):
-    """Module-level dispatch using the default global registry."""
-    return _default_registry.dispatch(inputs)
+def oracle_impl(hardware=None, shapes=None, configs=None, exact=True,
+                description=None):
+    """Register an oracle implementation: one line declaring what it was
+    written for.
+
+    Args:
+        hardware: GPU kind the impl was tuned on ("H100", "B200", ...).
+            None = no hardware constraint.
+        shapes: FULL input signature the impl was written for, as the
+            T()/S() string from the repro's `_shapes_config` (copy it
+            verbatim), or a pre-parsed tuple of shape tuples.
+            None = no shape constraint (unconstrained default).
+        configs: optional launch-config kwargs passed through at dispatch:
+            fn(inputs, **configs). Lets one kernel body serve many
+            (hardware, shapes) points.
+        exact: True (default) = shape-specific, matches declared signature
+            only. False = shape-general, eligible for nearest-shape fallback.
+        description: optional human-readable note.
+
+    Returns the function unchanged, so one body can be registered N times.
+    """
+    parsed = parse_shapes_signature(shapes)
+
+    def decorator(fn):
+        reg = _module_registries.setdefault(fn.__module__, OracleRegistry())
+        entry_shapes = parsed if parsed is None else tuple(parsed)
+        dec = reg.register(hardware=hardware,
+                           shape=entry_shapes,
+                           configs=configs,
+                           description=description)
+        dec(fn)
+        # Stamp exactness on the entry we just added.
+        reg._entries[-1]["exact"] = bool(exact)
+        return fn
+    return decorator
 
 
-def reset_oracle_registry():
-    """Reset the default global registry (call between oracle file loads)."""
-    _default_registry.clear()
+def get_module_registry(module_name):
+    """Return the OracleRegistry for a module (None if no registrations)."""
+    return _module_registries.get(module_name)
+
+
+def resolve_oracle(oracle_forward, inputs):
+    """Resolve dispatch for an oracle callable against runtime inputs.
+
+    If the oracle's module has `oracle_impl` registrations, select the best
+    match and return (callable, dispatch_info). The returned callable has
+    configs already bound. If the module has no registrations, returns
+    (oracle_forward, None) — unmigrated oracles behave exactly as before.
+
+    Raises OracleDispatchError if registrations exist but none match.
+    """
+    reg = _module_registries.get(getattr(oracle_forward, "__module__", None))
+    if reg is None or not reg._entries:
+        return oracle_forward, None
+    try:
+        entry, info = reg.select(inputs)
+    except RuntimeError as e:
+        raise OracleDispatchError(str(e)) from e
+    info = dict(info)
+    info["exact"] = entry.get("exact", True)
+    if entry["configs"]:
+        fn, cfgs = entry["fn"], entry["configs"]
+        return (lambda inp: fn(inp, **cfgs)), info
+    return entry["fn"], info
+
+
+def reset_oracle_registry(module_name=None):
+    """Reset registries (all, or one module's). Useful between test loads."""
+    if module_name is None:
+        _module_registries.clear()
+    else:
+        _module_registries.pop(module_name, None)
 
 
 # ---------------------------------------------------------------------------
@@ -631,8 +780,24 @@ def bench_oracle(
         rounds: number of interleaved rounds (min-of-N)
 
     Returns:
-        Dict with repro_id, oracle_us, compile_us, ratio, status.
+        Dict with repro_id, oracle_us, compile_us, ratio, status — plus a
+        "dispatch" field when the oracle module uses oracle_impl registration
+        (tier > 1 / fallback=True means the selected implementation was tuned
+        for different hardware and/or shape, so the floor may be soft).
     """
+    # --- Resolve oracle_impl dispatch (no-op for unmigrated oracles) ---
+    dispatch_info = None
+    try:
+        oracle_forward, dispatch_info = resolve_oracle(oracle_forward, inputs)
+    except OracleDispatchError as e:
+        result = {
+            "repro_id": repro_id,
+            "status": "NO_ORACLE_FOR_SHAPE",
+            "error": str(e)[:300],
+        }
+        print(json.dumps(result))
+        return result
+
     device = _get_device(inputs)
 
     if device.type != "cuda":
@@ -700,6 +865,14 @@ def bench_oracle(
         "ratio": round(ratio, 3),
         "status": status,
     }
+    if dispatch_info is not None:
+        result["dispatch"] = {
+            "tier": dispatch_info["tier"],
+            "tuned_hardware": dispatch_info["registered_hardware"],
+            "current_hardware": dispatch_info["current_hardware"],
+            "exact": dispatch_info.get("exact", True),
+            "fallback": dispatch_info["fallback"],
+        }
     print(json.dumps(result))
     return result
 

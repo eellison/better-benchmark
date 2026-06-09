@@ -33,7 +33,7 @@ from oracle_harness import (
     get_hardware_info,
     get_shape_key,
     has_stochastic_ops,
-    OracleRegistry,  # optional: per-(hardware, shape) dispatch, see below
+    oracle_impl,  # standard: declare what hw/shapes this oracle was written for
 )
 
 
@@ -74,6 +74,17 @@ if triton is not None:
         pass
 
 
+# STANDARD: declare what this oracle was written for — one line. Copy the
+# `shapes` string verbatim from the repro's `_shapes_config`. It documents the
+# exact operating point (full input signature) and hardware this kernel was
+# tuned on; bench output then reports dispatch tier / fallback honestly
+# (e.g. an H100-tuned kernel measured on B200 reports tier 2, fallback=true).
+#
+# exact=True (default): this impl has baked-in shape assumptions and matches
+# its declared signature ONLY. Set exact=False only if the impl is genuinely
+# shape-general (grid computed from input dims) — that opts it into
+# nearest-shape fallback dispatch at other shapes.
+@oracle_impl(hardware="H100", shapes="(T([32768, 1024], bf16),)")  # <- _shapes_config
 def oracle_forward(inputs):
     """Run the oracle computation.
 
@@ -97,59 +108,35 @@ def oracle_forward(inputs):
     raise NotImplementedError("Replace with oracle implementation")
 
 
-# --- OPTIONAL: per-(hardware, shape) registration ---
-# Registration is opt-in. A plain oracle_forward(inputs) (above) is all that
-# is required. Use a registry when the oracle needs different launch configs
-# (or different kernels) per hardware or per shape — e.g. H100-tuned configs
-# are often BAD_ORACLE on B200; add a B200 registration instead of forking
-# the kernel.
+# --- OPTIONAL: variants for other hardware / shapes ---
+# When an oracle's configs don't transfer (e.g. H100-tuned BLOCK sizes are
+# BAD_ORACLE on B200), add a variant instead of forking the file. One kernel
+# body can be registered N times with different launch configs — `configs`
+# is passed to the function as kwargs at dispatch:
 #
-# Each registration declares the ONE concrete shape the implementation was
-# written/tuned for. The shape is documentation: "this implementation was
-# tuned for THIS shape." Pass a tuple (key/first input shape) or a tuple of
-# tuples (all input shapes).
-#
-# Dispatch tiers at runtime: 1) exact (hardware, shape); 2) same shape, any
-# hardware; 3) same hardware, nearest shape; 4) any registration, nearest
-# shape; 5) unconstrained default. registry.last_dispatch_info reports which
-# tier matched (tier > 1 = fallback, may be suboptimal).
-#
-# registry = OracleRegistry()
-#
-# # SHARED KERNEL, DIFFERENT CONFIGS — the common case. One kernel body,
-# # registered multiple times; `configs` is passed as kwargs at dispatch:
-# def _softmax_impl(inputs, *, BLOCK=1024, num_warps=4):
+# def _softmax_impl(inputs, *, BLOCK, num_warps):
 #     x = inputs[0]
 #     out = torch.empty_like(x)
 #     oracle_kernel[(x.shape[0],)](x, out, N=x.shape[1],
 #                                  BLOCK_N=BLOCK, num_warps=num_warps)
 #     return out
 #
-# registry.register(hardware="H100", shape=(32768, 1024),
-#                   configs={"BLOCK": 1024, "num_warps": 4})(_softmax_impl)
-# registry.register(hardware="B200", shape=(32768, 1024),
-#                   configs={"BLOCK": 2048, "num_warps": 8})(_softmax_impl)
-# registry.register(hardware="B200", shape=(8192, 262144),
-#                   configs={"BLOCK": 4096, "num_warps": 16})(_softmax_impl)
+# SIG = "(T([32768, 1024], bf16),)"  # _shapes_config, shared across variants
+# oracle_impl(hardware="H100", shapes=SIG, configs={"BLOCK": 1024, "num_warps": 4})(_softmax_impl)
+# oracle_impl(hardware="B200", shapes=SIG, configs={"BLOCK": 2048, "num_warps": 8})(_softmax_impl)
 #
-# # A genuinely different algorithm for one (hardware, shape) point:
-# @registry.register(hardware="B200", shape=(8192, 262144),
-#                    description="split-K two-pass for huge inner dim")
-# def _oracle_split_k(inputs):
-#     ...
+# A genuinely different algorithm is just another decorated function:
 #
-# # Unconstrained default fallback (no hardware/shape constraints):
-# @registry.register(description="conservative default, any hw/shape")
-# def _oracle_default(inputs):
-#     ...
+# @oracle_impl(hardware="B200", shapes="(T([8192, 262144], bf16),)",
+#              description="split-K two-pass for huge inner dim")
+# def _oracle_split_k(inputs): ...
 #
-# def oracle_forward(inputs):
-#     out = registry.dispatch(inputs)
-#     info = registry.last_dispatch_info
-#     if info["fallback"]:
-#         print(f"NOTE: fallback dispatch tier={info['tier']} "
-#               f"({info['tier_name']}) -> {info['fn_name']}; may be suboptimal")
-#     return out
+# Dispatch tiers: 1) exact (hardware, signature); 2) same signature, any
+# hardware; 3) same hardware, nearest shape (exact=False impls ONLY);
+# 4) any registration, nearest shape (exact=False ONLY); 5) unconstrained.
+# No match -> NO_ORACLE_FOR_SHAPE in bench output, never a silent wrong-shape
+# run. dtypes in the signature are documentation; matching is shape-only
+# (the corpus dedupes patterns across dtypes).
 
 
 # --- CLI entry point ---

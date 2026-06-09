@@ -42,6 +42,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 # Import shared oracle infrastructure. Run first:
 #   python -m pip install --no-build-isolation -e .
 from oracle_harness import (
+    oracle_impl,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     check_oracle,
@@ -134,6 +135,7 @@ def get_repro_instance():
     return _harness_get_repro_instance(REPRO_DIR)
 
 
+@oracle_impl(hardware="H100", shapes="(T([8192, 262144], bf16))")
 def oracle_forward(inputs):
     """Run the oracle computation.
 

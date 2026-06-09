@@ -20,6 +20,7 @@ except ImportError:  # pragma: no cover - keeps py_compile usable without Triton
 REPRO_ID = "sum_e00c7291b6ee"
 
 from oracle_harness import (
+    oracle_impl,
     bench_oracle,
     bench_oracle_all_shapes,
     check_oracle,
@@ -238,6 +239,7 @@ def oracle_cooperative_split_k(
     return out
 
 
+@oracle_impl(hardware="H100", shapes="(T([], bf16), T([8192, 262144], bf16), T([8192, 1], f32), T([8192, 1], f32), S([8192, 262144]))")
 def oracle_forward(inputs: tuple[object, ...]) -> torch.Tensor:
     """Standard harness entry point: compute the full Repro.forward output."""
     return oracle_cooperative_split_k(*inputs)
