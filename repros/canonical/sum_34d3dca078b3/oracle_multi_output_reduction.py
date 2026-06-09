@@ -58,6 +58,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 
 
+@triton.jit
 def _fused_where_sum_partial_kernel(
     scatter_result_ptr,  # [N, C, H, W] contiguous float32
     mask_ptr,            # [N, C, H, W] contiguous bool

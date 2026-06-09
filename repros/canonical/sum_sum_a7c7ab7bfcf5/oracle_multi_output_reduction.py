@@ -422,7 +422,7 @@ def parse_args():
 
 
 def oracle_forward(inputs):
-    return oracle_fn(*inputs)
+    return triton_oracle(*inputs)
 
 
 def main():

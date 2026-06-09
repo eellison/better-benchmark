@@ -52,7 +52,11 @@ COMPILE_CONFIGS = [
 ]
 
 
-from oracle_harness import (  # noqa: E402
+from oracle_harness import (
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
     get_inputs as _harness_get_inputs,
     get_repro_instance as _harness_get_repro_instance,
     has_stochastic_ops,
@@ -319,7 +323,7 @@ def run_bench(warmup: int, rep: int) -> dict[str, object]:
     return result
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description=f"Oracle for {REPRO_ID}",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -333,37 +337,72 @@ def main():
     parser.add_argument("--atol", type=float, default=1e-2,
                         help="Absolute tolerance for correctness check")
     parser.add_argument("--warmup", type=int, default=25,
-                        help="Warmup milliseconds for Triton do_bench")
+                        help="Warmup iterations for benchmark")
     parser.add_argument("--rep", type=int, default=200,
-                        help="Benchmark milliseconds for Triton do_bench")
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
     parser.add_argument("--all-shapes", action="store_true",
-                        help="Accepted for template compatibility; all listed shapes share the same signature")
+                        help="Benchmark across all shapes from shapes.txt")
     parser.add_argument("--show-hw", action="store_true",
                         help="Print GPU hardware info and exit")
     args = parser.parse_args()
 
     if args.show_hw:
+        import json
         print(json.dumps(get_hardware_info(), indent=2))
         return
 
     if not args.check and not args.bench:
         args.check = args.bench = True
 
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
     if has_stochastic_ops(REPRO_PATH):
         print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
 
     if args.check:
         print(f"Checking {REPRO_ID}...")
-        ok = run_check(atol=args.atol, rtol=args.rtol)
-        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        status = "PASS" if ok else "FAIL"
+        print(f"Correctness: {status}")
         if not ok:
             sys.exit(1)
 
     if args.bench:
-        if args.all_shapes:
-            print("NOTE: --all-shapes requested; all listed shapes share the same signature")
         print(f"Benchmarking {REPRO_ID}...")
-        run_bench(warmup=args.warmup, rep=args.rep)
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":

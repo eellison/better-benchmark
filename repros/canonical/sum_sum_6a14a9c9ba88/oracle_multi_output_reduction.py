@@ -43,6 +43,7 @@ from oracle_harness import (
 
 
 REPRO_DIR = Path(__file__).resolve().parent
+REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
 REPO_ROOT = REPRO_DIR.parents[2]
 

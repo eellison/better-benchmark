@@ -49,5 +49,7 @@
     "timm_ghostnet_100_train",
     "timm_ghostnet_100_train_001",
     "timm_timm_ghostnet_100_train_train_001"
-  ]
+  ],
+  "oracle_status": "broken",
+  "oracle_broken_reason": "oracle signature mismatch (wrong arg count)"
 }

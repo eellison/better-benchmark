@@ -53,6 +53,7 @@ C = 768
 
 
 
+@triton.jit
 def _full_scope_partial_kernel(
     mm_ptr,
     residual_ptr,

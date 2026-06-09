@@ -29,5 +29,7 @@
   "n_models": 1,
   "models": [
     "genai_CrossEntropyForward_000"
-  ]
+  ],
+  "oracle_status": "broken",
+  "oracle_broken_reason": "assertion failure (dtype/shape assumption)"
 }

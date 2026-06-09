@@ -43,5 +43,7 @@
     "timm_timm_visformer_small_train_train_001",
     "timm_visformer_small_train_001",
     "timm_visformer_small_train_019"
-  ]
+  ],
+  "oracle_status": "broken",
+  "oracle_broken_reason": "kernel function never defined (stub)"
 }

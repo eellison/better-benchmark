@@ -28,5 +28,7 @@
   "models": [
     "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_000",
     "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_000"
-  ]
+  ],
+  "oracle_status": "broken",
+  "oracle_broken_reason": "CUDA no kernel image (SM version mismatch)"
 }

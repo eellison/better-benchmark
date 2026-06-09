@@ -42,6 +42,7 @@ Oracle: simply enables coordinate_descent_tuning to demonstrate that the gap
 is an autotuning quality issue, not a fundamental fusion limitation.
 """
 
+import argparse
 import sys
 from pathlib import Path
 

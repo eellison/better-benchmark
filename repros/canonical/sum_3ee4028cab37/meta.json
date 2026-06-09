@@ -18,5 +18,7 @@
   "n_models": 1,
   "models": [
     "torchbench_vgg16_train_001"
-  ]
+  ],
+  "oracle_status": "old_format",
+  "oracle_broken_reason": "old output format (runs but does not emit harness JSON)"
 }

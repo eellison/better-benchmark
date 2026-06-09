@@ -74,6 +74,7 @@ REPRO_PATH = REPRO_DIR / "repro.py"
 
 
 
+@triton.jit
 def _fused_scatter_reduce_kernel(
     src_ptr,          # f32[N, C, src_H, src_W] = [1024, 64, 27, 27]
     offsets_ptr,      # i8[N, C, src_H, src_W]

@@ -7,14 +7,13 @@ from pathlib import Path
 ORACLE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(ORACLE_DIR))
 
+from oracle_harness import bench_oracle  # noqa: E402, F401
+
 from oracle_cooperative_split_k import (  # noqa: E402
-    benchmark,
     main,
     make_inputs,
     oracle_cooperative_split_k,
     oracle_forward,
-    run_bench,
-    run_check,
 )
 
 oracle_multi_output_reduction = oracle_cooperative_split_k

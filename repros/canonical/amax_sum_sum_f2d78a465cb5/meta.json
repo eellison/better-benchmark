@@ -39,5 +39,7 @@
   "n_models": 1,
   "models": [
     "hf_GPTJForCausalLM_infer_000"
-  ]
+  ],
+  "oracle_status": "broken",
+  "oracle_broken_reason": "type error in kernel config (list vs int)"
 }

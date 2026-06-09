@@ -27,39 +27,41 @@ Implementation:
 from __future__ import annotations
 
 import argparse
-import csv
-import importlib.util
-import math
-import subprocess
 import sys
-import time
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable
 
 import torch
 
-
-REPRO_ID = "sum_sum_sum_dadf6aa035dd"
+# --- Configuration (auto-derived from file location) ---
 REPRO_DIR = Path(__file__).resolve().parent
-REPO_ROOT = REPRO_DIR.parents[2]
+REPRO_ID = REPRO_DIR.name
 REPRO_PATH = REPRO_DIR / "repro.py"
-DEFAULT_CSV = REPO_ROOT / "investigation_results" / "measured_oracle_floors.csv"
+
+from oracle_harness import (
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    check_oracle,
+    bench_oracle,
+    bench_oracle_all_shapes,
+    get_hardware_info,
+    has_stochastic_ops,
+)
+
 # Scale factor from the repro: 1 / (N * H_out * W_out) = 1 / (8 * 80 * 119)
 CHANNEL_REDUCTION_SCALE = 1.3130252100840337e-05
-SHAPE_LABEL = "torchbench_pytorch_unet_train_001_14c7e53c"
 
 
+def get_inputs():
+    """Load inputs from the repro's make_inputs (scope invariant: same inputs)."""
+    return _harness_get_inputs(REPRO_DIR)
 
-def _load_repro_module():
-    spec = importlib.util.spec_from_file_location("sum_sum_sum_dadf6aa035dd_repro", REPRO_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
 
+def get_repro_instance():
+    """Create a Repro() instance for reference comparison."""
+    return _harness_get_repro_instance(REPRO_DIR)
+
+
+# --- Oracle implementation ---
 
 def structured_bilinear_index_put(
     getitem_18: torch.Tensor,
@@ -179,186 +181,102 @@ def torch_fused_bilinear_scatter_reduce(
     return (out0, out1)
 
 
-def make_inputs(device: torch.device) -> tuple:
-    from repro_harness import load_shape_configs, make_inputs_from_config
+def oracle_forward(inputs):
+    """Run the fused bilinear scatter + BN backward reduction oracle.
 
-    configs = load_shape_configs(str(REPRO_PATH))
-    if not configs:
-        module = _load_repro_module()
-        inputs = module.make_inputs()
-    else:
-        config = next(iter(configs.values()))
-        config = {
-            "inputs": [
-                {**spec, "device": str(device)} if isinstance(spec, dict) and spec.get("kind") == "tensor" else spec
-                for spec in config["inputs"]
-            ]
-        }
-        inputs = make_inputs_from_config(config)
-    moved = []
-    for value in inputs:
-        if isinstance(value, torch.Tensor):
-            moved.append(value.to(device=device))
-        else:
-            moved.append(value)
-    return tuple(moved)
+    SCOPE INVARIANT: Must accept the same inputs as Repro.forward() and return
+    the same outputs (same count, same shapes, same dtypes, same strides).
+
+    Args:
+        inputs: list of tensors from get_inputs(), identical to what
+                Repro.forward() receives via Repro()(*inputs).
+
+    Returns:
+        Same output structure as Repro()(*inputs).
+    """
+    return torch_fused_bilinear_scatter_reduce(*inputs)
 
 
-def synchronize(device: torch.device) -> None:
-    if device.type == "cuda":
-        torch.cuda.synchronize(device)
-
-
-def benchmark(fn: Callable[[], object], device: torch.device, warmup: int, rep: int) -> float:
-    for _ in range(warmup):
-        fn()
-    synchronize(device)
-
-    best_s = math.inf
-    for _ in range(rep):
-        start = time.perf_counter()
-        fn()
-        synchronize(device)
-        best_s = min(best_s, time.perf_counter() - start)
-    return best_s * 1_000_000.0
-
-
-def max_abs_diff(actual: tuple[torch.Tensor, ...], expected: tuple[torch.Tensor, ...]) -> float:
-    return max((a.float() - e.float()).abs().max().item() for a, e in zip(actual, expected))
-
-
-def allclose_check(actual: tuple[torch.Tensor, ...], expected: tuple[torch.Tensor, ...], rtol: float, atol: float) -> bool:
-    return all(torch.allclose(a.float(), e.float(), rtol=rtol, atol=atol) for a, e in zip(actual, expected))
-
-
-def get_git_commit() -> str:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True
-        ).strip()
-    except Exception:
-        return "unknown"
-
-
-def load_baseline_row() -> dict[str, str]:
-    path = REPO_ROOT / "investigation_results" / "sol_gap_candidates.csv"
-    if not path.exists():
-        return {}
-    with path.open() as handle:
-        for row in csv.DictReader(handle):
-            if row.get("repro_id") == REPRO_ID:
-                return row
-    return {}
-
-
-def append_csv(
-    path: Path,
-    impl: str,
-    device: torch.device,
-    oracle_us: float,
-    correct: str,
-    diff: float,
-    args: argparse.Namespace,
-) -> None:
-    baseline = load_baseline_row()
-    best_compile_us = float(baseline.get("best_compile_us", "nan"))
-    memcopy_sol_us = float(baseline.get("memcopy_sol_us", "nan"))
-    total_bytes = int(float(baseline.get("total_bytes", "0") or 0))
-    n_kernels = int(float(baseline.get("n_kernels", "0") or 0))
-
-    row = {
-        "repro_id": REPRO_ID,
-        "repro_path": str(REPRO_PATH.relative_to(REPO_ROOT)),
-        "shape_label": SHAPE_LABEL,
-        "family": "structured_pool_upsample_backward_reduce",
-        "oracle_impl": impl,
-        "oracle_path": str(Path(__file__).resolve().relative_to(REPO_ROOT)),
-        "hardware": args.hardware,
-        "device_name": torch.cuda.get_device_name(device) if device.type == "cuda" else str(device),
-        "git_commit": get_git_commit(),
-        "compiled_us": baseline.get("compiled_us", ""),
-        "coord_descent_us": baseline.get("coord_descent_us", ""),
-        "best_compile_us": best_compile_us,
-        "memcopy_sol_us": memcopy_sol_us,
-        "oracle_us": oracle_us,
-        "total_bytes": total_bytes,
-        "n_kernels": n_kernels,
-        "oracle_over_sol": oracle_us / memcopy_sol_us if memcopy_sol_us == memcopy_sol_us else math.nan,
-        "speedup_vs_best_compile": best_compile_us / oracle_us if best_compile_us == best_compile_us else math.nan,
-        "correct": correct,
-        "max_abs_diff": diff,
-        "tolerance": f"rtol={args.rtol},atol={args.atol}" if args.check else "not_checked",
-        "n_warmup": args.warmup,
-        "n_rep": args.rep,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "notes": "Fused bilinear scatter + BN backward reduction; avoids separate reduction passes.",
-    }
-
-    path.parent.mkdir(parents=True, exist_ok=True)
-    write_header = not path.exists()
-    with path.open("a", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(row))
-        if write_header:
-            writer.writeheader()
-        writer.writerow(row)
-    print(f"appended {path}")
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--impl",
-        choices=("fused-scatter-reduce",),
-        default="fused-scatter-reduce",
+# --- CLI entry point ---
+def main():
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--warmup", type=int, default=25)
-    parser.add_argument("--rep", type=int, default=100)
-    parser.add_argument("--check", action="store_true", default=True, help="Verify oracle vs repro.")
-    parser.add_argument("--rtol", type=float, default=1e-3)
-    parser.add_argument("--atol", type=float, default=1e-2)
-    parser.add_argument("--no-bench", action="store_true", help="Skip timing.")
-    parser.add_argument("--no-append", action="store_true", help="Skip CSV append.")
-    parser.add_argument("--out", type=Path, default=DEFAULT_CSV)
-    parser.add_argument("--hardware", default="unknown")
-    return parser.parse_args()
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
+    args = parser.parse_args()
 
+    # Handle --show-hw early
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
 
-def main() -> None:
-    args = parse_args()
-    device = torch.device(args.device)
-    inputs = make_inputs(device)
+    # Default: run both --check and --bench
+    if not args.check and not args.bench:
+        args.check = args.bench = True
 
-    oracle_fn = torch_fused_bilinear_scatter_reduce
+    inputs = get_inputs()
+    instance = get_repro_instance()
 
-    with torch.no_grad():
-        out = oracle_fn(*inputs)
-        synchronize(device)
+    # Report if stochastic ops detected in source
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
 
-        correct = "not_checked"
-        diff = math.nan
-        if args.check:
-            module = _load_repro_module()
-            repro = module.Repro()
-            ref = repro(*inputs)
-            synchronize(device)
-            diff = max_abs_diff(out, ref)
-            correct = str(allclose_check(out, ref, rtol=args.rtol, atol=args.atol))
-            print(f"correct={correct} max_abs_diff={diff:.6g}")
-            if correct != "True":
-                for i, (a, e) in enumerate(zip(out, ref)):
-                    d = (a.float() - e.float()).abs().max().item()
-                    rel = ((a.float() - e.float()).abs() / (e.float().abs() + 1e-8)).max().item()
-                    print(f"  output[{i}]: max_abs_diff={d:.6g}, max_rel_diff={rel:.6g}")
+    if args.check:
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        print(f"Correctness: {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            sys.exit(1)
 
-        if args.no_bench:
-            return
-
-        oracle_us = benchmark(lambda: oracle_fn(*inputs), device, args.warmup, args.rep)
-        print(f"oracle_us={oracle_us:.3f} impl={args.impl} device={device} warmup={args.warmup} rep={args.rep}")
-
-        if not args.no_append:
-            append_csv(args.out, args.impl, device, oracle_us, correct, diff, args)
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward, REPRO_DIR, REPRO_ID,
+                warmup=args.warmup, rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile for "
+                          f"{result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
 
 
 if __name__ == "__main__":

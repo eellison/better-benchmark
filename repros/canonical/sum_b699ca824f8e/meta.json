@@ -29,5 +29,7 @@
   "n_models": 1,
   "models": [
     "timm_nfnet_l0_train"
-  ]
+  ],
+  "oracle_status": "old_format",
+  "oracle_broken_reason": "old output format (runs but does not emit harness JSON)"
 }

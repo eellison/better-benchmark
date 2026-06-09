@@ -38,6 +38,7 @@ POINTWISE_SCALE = 0.2
 
 
 
+@triton.jit
 def _spatial_summary_kernel(
     getitem_ptr,
     arg450_ptr,

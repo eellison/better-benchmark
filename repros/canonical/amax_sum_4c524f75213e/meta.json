@@ -198,5 +198,7 @@
   "n_models": 1,
   "models": [
     "hf_AllenaiLongformerBase_train_002"
-  ]
+  ],
+  "oracle_status": "broken",
+  "oracle_broken_reason": "CUDA illegal memory access (kernel OOB bug)"
 }
