@@ -1,5 +1,11 @@
 # var_mean_c9d97f0d1948
 
+
+## Measured Timings
+- Oracle: 19.71 us
+- Compile (CDT): 16.13 us
+- Ratio: 0.82x
+
 ## Classification: SCHEDULER_FUSION
 
 ## Current Result

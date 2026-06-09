@@ -1,5 +1,11 @@
 # sum_sum_6dbca49c2393 (T5 LN/dropout backward)
 
+
+## Measured Timings
+- Oracle: 20.93 us
+- Compile (CDT): 24.19 us
+- Ratio: 1.16x
+
 ## Classification: BANDWIDTH_BOUND
 
 ## Scope

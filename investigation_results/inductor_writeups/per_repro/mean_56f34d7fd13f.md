@@ -1,5 +1,11 @@
 # mean_56f34d7fd13f
 
+
+## Measured Timings
+- Oracle: 71.52 us
+- Compile (CDT): 24.29 us
+- Ratio: 0.34x
+
 ## Classification: BAD_ORACLE
 
 ## Pattern

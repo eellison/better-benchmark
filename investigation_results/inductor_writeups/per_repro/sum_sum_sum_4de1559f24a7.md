@@ -1,5 +1,11 @@
 # sum_sum_sum_4de1559f24a7 (MegatronBert LN-backward)
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 61.25 us
+- Ratio: N/A
+
 ## Classification: COOPERATIVE_SPLIT_K
 
 ## Measurements (fresh cache, all fixes including combo_kernels)

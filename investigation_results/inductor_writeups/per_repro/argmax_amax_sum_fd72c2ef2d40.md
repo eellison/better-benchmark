@@ -1,5 +1,11 @@
 # argmax_amax_sum_fd72c2ef2d40
 
+
+## Measured Timings
+- Oracle: 8.51 us
+- Compile (CDT): 9.22 us
+- Ratio: 1.08x
+
 ## Summary
 
 - Family: `online_softmax_cross_entropy`

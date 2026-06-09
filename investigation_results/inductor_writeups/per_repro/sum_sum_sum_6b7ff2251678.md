@@ -1,5 +1,11 @@
 # sum_sum_sum_6b7ff2251678
 
+
+## Measured Timings
+- Oracle: 7.74 us
+- Compile (CDT): 8.83 us
+- Ratio: 1.14x
+
 ## Summary
 
 - Model: ConvNeXt layernorm-backward (multi-output)

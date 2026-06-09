@@ -1,5 +1,11 @@
 # amax_sum_cd5b9c2339af
 
+
+## Measured Timings
+- Oracle: 16.96 us
+- Compile (CDT): 18.05 us
+- Ratio: 1.06x
+
 ## Classification: `NEW_PATTERN`
 
 Artifact: `repros/canonical/amax_sum_cd5b9c2339af/oracle_online_softmax.py`

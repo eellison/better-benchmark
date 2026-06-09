@@ -1,5 +1,11 @@
 # var_mean_f0d7c08a0622
 
+
+## Measured Timings
+- Oracle: 946.02 us
+- Compile (CDT): 909.15 us
+- Ratio: 0.96x
+
 ## Queue Position
 
 - Rank: 25

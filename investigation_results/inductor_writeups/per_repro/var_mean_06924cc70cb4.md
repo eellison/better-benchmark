@@ -1,5 +1,11 @@
 # var_mean_06924cc70cb4
 
+
+## Measured Timings
+- Oracle: 28.35 us
+- Compile (CDT): 34.43 us
+- Ratio: 1.21x
+
 ## Classification: PERSISTENT_THRESHOLD
 
 ## Current Result

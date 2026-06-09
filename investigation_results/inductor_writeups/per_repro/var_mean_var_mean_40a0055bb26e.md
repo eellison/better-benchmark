@@ -1,5 +1,11 @@
 # var_mean_var_mean_40a0055bb26e - oracle_bn_shuffle
 
+
+## Measured Timings
+- Oracle: 42.88 us
+- Compile (CDT): 61.12 us
+- Ratio: 1.43x
+
 ## Classification
 SCHEDULER_FUSION
 

@@ -1,5 +1,11 @@
 # pointwise_f48fe6a2319f
 
+
+## Measured Timings
+- Oracle: 7.30 us
+- Compile (CDT): 7.62 us
+- Ratio: 1.04x
+
 Full-scope oracle: `repros/canonical/pointwise_f48fe6a2319f/oracle_segment_mask_multi_output.py`.
 
 Gap diagnosis (classification: BANDWIDTH_BOUND): the oracle implements a segment mask computation with multi-output (24 outputs of shape `[1, 1, 512, 512]`). Inductor's compiled output significantly outperforms the oracle.

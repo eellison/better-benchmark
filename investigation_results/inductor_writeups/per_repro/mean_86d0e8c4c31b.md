@@ -1,5 +1,11 @@
 # mean_86d0e8c4c31b
 
+
+## Measured Timings
+- Oracle: 339.90 us
+- Compile (CDT): 344.06 us
+- Ratio: 1.01x
+
 ## Classification: AT_FLOOR
 
 ## Pattern

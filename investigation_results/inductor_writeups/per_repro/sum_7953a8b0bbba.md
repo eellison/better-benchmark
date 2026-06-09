@@ -1,5 +1,11 @@
 # sum_7953a8b0bbba - oracle_sum_permute
 
+
+## Measured Timings
+- Oracle: 7.62 us
+- Compile (CDT): 12.16 us
+- Ratio: 1.60x
+
 ## Classification
 SCHEDULER_FUSION
 

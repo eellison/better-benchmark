@@ -1,5 +1,11 @@
 # mean_ddf2440c0a00 - MobileNet BN+ReLU6+Spatial Mean (1.115x)
 
+
+## Measured Timings
+- Oracle: 16.13 us
+- Compile (CDT): 13.28 us
+- Ratio: 0.82x
+
 ## Classification
 BANDWIDTH_BOUND (tiling heuristic gap)
 

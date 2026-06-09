@@ -1,5 +1,11 @@
 # pointwise_f5d9e703009c
 
+
+## Measured Timings
+- Oracle: 6.43 us
+- Compile (CDT): 5.98 us
+- Ratio: 0.93x
+
 Full-scope oracle: `repros/canonical/pointwise_f5d9e703009c/oracle_attention_q_layout.py`.
 
 Gap diagnosis (classification: BANDWIDTH_BOUND): the oracle implements an attention Q-projection layout transformation producing `float32[12, 512, 64]` with stride `(64, 768, 1)`. Inductor's compiled output already exceeds oracle speed.

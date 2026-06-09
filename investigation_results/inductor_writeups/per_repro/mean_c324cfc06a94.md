@@ -1,5 +1,11 @@
 # mean_c324cfc06a94 - BN SiLU Spatial Mean
 
+
+## Measured Timings
+- Oracle: 15.87 us
+- Compile (CDT): 11.71 us
+- Ratio: 0.74x
+
 ## Benchmark Results
 - Oracle: slower than compiled (ratio: 0.826x - BAD_ORACLE)
 

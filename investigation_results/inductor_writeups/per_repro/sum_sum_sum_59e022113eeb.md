@@ -1,5 +1,11 @@
 # sum_sum_sum_59e022113eeb
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 86.94 us
+- Ratio: N/A
+
 Gap diagnosis (classification: COOPERATIVE_SPLIT_K): the full-scope Triton oracle covers the same scope as `repro.py`, including the `mm_66` view, residual add with `mul_152`, affine multiply by `arg8_1`, the two row-local reductions over the last dimension, `arg164_1` scaling, the two sibling `[768]` reductions over the residual input, the `[768]` reduction of the scaled gradient, and the returned `[768, 32768]` transpose view. It differs from Inductor by computing each row tile's scalar reductions, transpose backing store, and three compatible column partials in one Triton pass, followed by a small split-K finalizer for the three vector outputs, instead of scheduling row reductions, the dependent pointwise epilogue, column reductions, and transpose-producing view as separate template work. Inductor cannot do this today because the scheduler does not represent a dependent multi-output reduction with row-wise scalar intermediates plus a materialized transpose side output as one cooperatively split reduction; the fix is COOPERATIVE_SPLIT_K support for dependent multi-output reductions that accumulate compatible column partials while writing the side output.
 
 Full-scope Triton oracle: `repros/canonical/sum_sum_sum_59e022113eeb/oracle_multi_output_reduction.py`

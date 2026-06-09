@@ -1,5 +1,11 @@
 # amax_sum_4c524f75213e
 
+
+## Measured Timings
+- Oracle: no oracle timing available (scope mismatch)
+- Compile (CDT): 962.59 us
+- Ratio: N/A
+
 ## Queue Position
 
 - Rank: 21

@@ -1,5 +1,11 @@
 # amax_sum_any_511c5ade6e96
 
+
+## Measured Timings
+- Oracle: 13.22 us
+- Compile (CDT): 19.33 us
+- Ratio: 1.46x
+
 ## Classification: `BANDWIDTH_BOUND`
 
 Artifact: `repros/canonical/amax_sum_any_511c5ade6e96/oracle_online_softmax.py`

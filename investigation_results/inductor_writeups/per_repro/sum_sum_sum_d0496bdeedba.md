@@ -1,5 +1,11 @@
 # Gap Diagnosis: sum_sum_sum_d0496bdeedba (fused_embedding_scatter)
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): not available
+- Ratio: N/A
+
 ## Classification: SCHEDULER_FUSION (new pattern -- multi-output reduction/scatter)
 
 ## Measurements

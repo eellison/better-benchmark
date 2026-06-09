@@ -1,5 +1,11 @@
 # var_mean_13d90438bcbd
 
+
+## Measured Timings
+- Oracle: 131.90 us
+- Compile (CDT): not available
+- Ratio: N/A
+
 ## Classification: CHECK_FAIL
 
 ## Current Result

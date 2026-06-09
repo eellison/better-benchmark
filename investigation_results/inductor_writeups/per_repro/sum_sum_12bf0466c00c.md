@@ -1,5 +1,11 @@
 # sum_sum_12bf0466c00c
 
+
+## Measured Timings
+- Oracle: 4.19 us
+- Compile (CDT): 6.11 us
+- Ratio: 1.46x
+
 Full-scope oracle: `repros/canonical/sum_sum_12bf0466c00c/oracle_sum_sum.py`
 
 Classification: `SCHEDULER_FUSION`.

@@ -1,5 +1,11 @@
 # pointwise_ef7782270e46
 
+
+## Measured Timings
+- Oracle: 3.68 us
+- Compile (CDT): 5.70 us
+- Ratio: 1.55x
+
 Gap diagnosis (classification: BANDWIDTH_BOUND): the full-scope Triton oracle computes `arg23 * arg19 * (1 - arg19)` for the complete f32 `[1024, 1, 1, 1]` output in one pointwise launch and stores directly to the fresh contiguous result, while the compiled Inductor parent already performs the same fused one-launch pointwise expression, so the remaining difference is measurement noise plus unavoidable allocation, launch, and 12 KiB memory traffic rather than a missing scheduling transformation.
 
 Oracle path: `repros/canonical/pointwise_ef7782270e46/oracle_sigmoid_backward.py`

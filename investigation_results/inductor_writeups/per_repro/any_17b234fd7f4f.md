@@ -1,5 +1,11 @@
 # any_17b234fd7f4f
 
+
+## Measured Timings
+- Oracle: 4.38 us
+- Compile (CDT): 5.70 us
+- Ratio: 1.30x
+
 ## Queue Position
 
 - Rank: 633

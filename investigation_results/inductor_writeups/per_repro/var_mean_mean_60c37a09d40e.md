@@ -1,5 +1,11 @@
 # var_mean_mean_60c37a09d40e
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): not available
+- Ratio: N/A
+
 ## Compile: N/A, Oracle: N/A, Gap: N/A
 
 ## Diagnosis: CUDA_DRIVER_ERROR

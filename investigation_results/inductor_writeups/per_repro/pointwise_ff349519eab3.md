@@ -1,5 +1,11 @@
 # pointwise_ff349519eab3
 
+
+## Measured Timings
+- Oracle: 16.74 us
+- Compile (CDT): 19.36 us
+- Ratio: 1.16x
+
 ## Classification: EXPAND_CLONE_SOURCE_DRIVEN_STORE
 
 ## Current Result

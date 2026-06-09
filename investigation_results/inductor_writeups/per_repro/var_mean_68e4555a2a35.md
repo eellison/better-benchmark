@@ -1,5 +1,11 @@
 # var_mean_68e4555a2a35
 
+
+## Measured Timings
+- Oracle: 17.15 us
+- Compile (CDT): 15.78 us
+- Ratio: 0.92x
+
 ## Classification: BAD_ORACLE
 
 ## Current Result

@@ -1,5 +1,11 @@
 # Gap Diagnosis: sum_sum_sum_559e754b2ff4 (cooperative_split_k)
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 15.90 us
+- Ratio: N/A
+
 ## Classification: COOPERATIVE_SPLIT_K
 
 ## Measurements

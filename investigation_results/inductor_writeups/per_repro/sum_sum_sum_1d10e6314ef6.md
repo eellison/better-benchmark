@@ -1,5 +1,11 @@
 # sum_sum_sum_1d10e6314ef6 (Longformer LN-backward)
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 38.59 us
+- Ratio: N/A
+
 ## Classification: COOPERATIVE_SPLIT_K
 
 ## Measurements (fresh cache, all fixes including combo_kernels)

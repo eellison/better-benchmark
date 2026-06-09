@@ -1,5 +1,11 @@
 # Gap Diagnosis: sum_sum_sum_53917171ce11 (scatter_reduce)
 
+
+## Measured Timings
+- Oracle: 218.88 us
+- Compile (CDT): 46.75 us
+- Ratio: 0.21x
+
 ## Classification: SCATTER_REDUCE
 
 ## Measurements

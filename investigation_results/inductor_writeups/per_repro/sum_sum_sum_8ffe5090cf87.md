@@ -1,5 +1,11 @@
 # sum_sum_sum_8ffe5090cf87 (hf_AlbertForMaskedLM_train_001)
 
+
+## Measured Timings
+- Oracle: 25.47 us
+- Compile (CDT): 35.74 us
+- Ratio: 1.40x
+
 ## Classification: SCATTER_REDUCE (embedding backward)
 
 ## Summary

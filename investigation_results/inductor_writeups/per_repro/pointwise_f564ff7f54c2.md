@@ -1,5 +1,11 @@
 # pointwise_f564ff7f54c2
 
+
+## Measured Timings
+- Oracle: 20.29 us
+- Compile (CDT): 24.10 us
+- Ratio: 1.19x
+
 Full-scope oracle: `repros/canonical/pointwise_f564ff7f54c2/oracle_bn_hardswish_pointwise.py`.
 
 ## Root Cause

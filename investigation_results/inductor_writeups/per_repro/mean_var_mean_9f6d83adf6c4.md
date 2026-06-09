@@ -1,5 +1,11 @@
 # mean_var_mean_9f6d83adf6c4
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 33.50 us
+- Ratio: N/A
+
 ## Classification: CUDA_ERROR
 
 ## Pattern

@@ -1,5 +1,11 @@
 # pointwise_6d6e44c3eeb4
 
+
+## Measured Timings
+- Oracle: 3.33 us
+- Compile (CDT): 2.78 us
+- Ratio: 0.84x
+
 Full-scope oracle: `repros/canonical/pointwise_6d6e44c3eeb4/oracle_constant_fill.py`.
 
 Gap diagnosis (classification: BANDWIDTH_BOUND): this zero-input repro returns a fresh contiguous `float32[32,128]` tensor filled with `1.0`; the oracle covers the full scope by allocating the same output layout with `torch.empty_strided((32, 128), (128, 1), dtype=torch.float32, device="cuda")` and launching one Triton kernel that stores `1.0` across all 4096 elements. The remaining cost is the launch/allocation and 16 KiB output materialization floor, not a missing fusion or scheduling transformation.

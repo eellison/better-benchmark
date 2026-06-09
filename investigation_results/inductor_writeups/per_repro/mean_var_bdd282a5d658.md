@@ -1,5 +1,11 @@
 # mean_var_bdd282a5d658
 
+
+## Measured Timings
+- Oracle: 29.54 us
+- Compile (CDT): 29.57 us
+- Ratio: 1.00x
+
 ## Classification: AT_FLOOR
 
 ## Pattern

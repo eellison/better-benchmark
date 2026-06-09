@@ -1,5 +1,11 @@
 # var_mean_fa3e7894ff61
 
+
+## Measured Timings
+- Oracle: 30.21 us
+- Compile (CDT): 32.42 us
+- Ratio: 1.07x
+
 ## Classification: SWIN_PATCHMERGE_DROPPATH_LAYERNORM
 
 ## Current Result

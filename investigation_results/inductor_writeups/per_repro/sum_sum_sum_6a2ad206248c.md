@@ -1,5 +1,11 @@
 # sum_sum_sum_6a2ad206248c (hf_ElectraForCausalLM_train_001)
 
+
+## Measured Timings
+- Oracle: 85.54 us
+- Compile (CDT): 164.74 us
+- Ratio: 1.93x
+
 ## Classification: REDUCTION_EPILOGUE_REREAD + SCATTER_REDUCE
 
 ## Summary

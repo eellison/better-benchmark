@@ -1,5 +1,11 @@
 # Gap Diagnosis: sum_sum_sum_3348817ad678 (moe_router_bwd)
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 72.96 us
+- Ratio: N/A
+
 ## Classification: ALREADY_FIXED_BY_CD
 
 ## Measurements

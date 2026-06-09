@@ -1,5 +1,11 @@
 # sum_sum_sum_72f8a586759c
 
+
+## Measured Timings
+- Oracle: 6.72 us
+- Compile (CDT): 13.66 us
+- Ratio: 2.03x
+
 ## Status
 
 - Family: `structured_pool_upsample_backward_reduce`

@@ -1,5 +1,11 @@
 # sum_sum_sum_ecba845b8a4b
 
+
+## Measured Timings
+- Oracle: 9.50 us
+- Compile (CDT): 13.15 us
+- Ratio: 1.38x
+
 - **Gap**: 1.50x (confirmed with CUDAGraph measurement)
 - **Classification**: SCHEDULER_FUSION
 - **Root cause**: Grouped BatchNorm backward with channels_per_group=2. Same family as 80113e346555 -- K3 re-reads 3MB of data already loaded by K0. Retiling from (batch, channel) to (batch, group) would allow a single-pass kernel that performs the reduction and writes the epilogue together.

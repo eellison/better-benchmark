@@ -1,5 +1,11 @@
 # sum_df75f19c9c7a
 
+
+## Measured Timings
+- Oracle: 4.93 us
+- Compile (CDT): 9.15 us
+- Ratio: 1.86x
+
 Full-scope oracle: `repros/canonical/sum_df75f19c9c7a/oracle_multi_output.py`
 
 Classification: `SCHEDULER_FUSION`.

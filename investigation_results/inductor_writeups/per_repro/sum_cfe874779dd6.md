@@ -1,5 +1,11 @@
 # sum_cfe874779dd6 - oracle_gptneo_ce_backward_dual_pad
 
+
+## Measured Timings
+- Oracle: 572.42 us
+- Compile (CDT): 929.50 us
+- Ratio: 1.62x
+
 ## Classification
 ALGEBRAIC_ELIMINATION
 

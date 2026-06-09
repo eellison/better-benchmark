@@ -1,5 +1,11 @@
 # sum_sum_sum_83ddb84cc830 (hf_MobileBertForMaskedLM_train_014)
 
+
+## Measured Timings
+- Oracle: 114.27 us
+- Compile (CDT): 185.25 us
+- Ratio: 1.62x
+
 ## Classification: SCATTER_REDUCE (embedding backward)
 
 ## Summary

@@ -1,5 +1,11 @@
 # pointwise_f5a70a963d42
 
+
+## Measured Timings
+- Oracle: 14.78 us
+- Compile (CDT): 13.92 us
+- Ratio: 0.94x
+
 ## Classification: BANDWIDTH_BOUND
 
 ## Current Result

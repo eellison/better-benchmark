@@ -1,5 +1,11 @@
 # var_mean_4a0c3a2ad6fb
 
+
+## Measured Timings
+- Oracle: 29.31 us
+- Compile (CDT): 44.93 us
+- Ratio: 1.53x
+
 ## Classification: BENCH_FAIL
 
 ## Current Result

@@ -1,5 +1,11 @@
 # pointwise_c14f03aac63b - Multi-Output Causal Mask (5.13x -> 0.71x FIXED)
 
+
+## Measured Timings
+- Oracle: 7.39 us
+- Compile (CDT): 5.66 us
+- Ratio: 0.77x
+
 ## Classification
 ALGEBRAIC_REWRITE (FX pass: graph-output deduplication)
 

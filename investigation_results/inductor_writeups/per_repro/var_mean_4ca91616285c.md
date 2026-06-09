@@ -1,5 +1,11 @@
 # var_mean_4ca91616285c
 
+
+## Measured Timings
+- Oracle: 238.40 us
+- Compile (CDT): not available
+- Ratio: N/A
+
 ## Classification: NORMALIZATION_SIDE_OUTPUT
 
 ## Current Result

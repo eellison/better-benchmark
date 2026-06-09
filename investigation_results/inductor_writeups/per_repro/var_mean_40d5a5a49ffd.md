@@ -1,5 +1,11 @@
 # var_mean_40d5a5a49ffd
 
+
+## Measured Timings
+- Oracle: 40.35 us
+- Compile (CDT): 41.98 us
+- Ratio: 1.04x
+
 ## Classification: AT_FLOOR
 
 ## Current Result

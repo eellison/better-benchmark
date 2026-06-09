@@ -1,5 +1,11 @@
 # any_amax_sum_48ee4b2cf979
 
+
+## Measured Timings
+- Oracle: 26.21 us
+- Compile (CDT): 28.16 us
+- Ratio: 1.07x
+
 ## Classification: CONSTANT_FOLDING
 
 ## Pattern

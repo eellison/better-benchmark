@@ -1,5 +1,11 @@
 # sum_sum_sum_37ed72cc58f3
 
+
+## Measured Timings
+- Oracle: 111.81 us
+- Compile (CDT): 145.09 us
+- Ratio: 1.30x
+
 ## Summary
 
 - Model: Swin Transformer (window-reverse indexed layernorm-backward / drop-path)

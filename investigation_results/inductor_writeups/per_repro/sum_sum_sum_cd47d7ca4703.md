@@ -1,5 +1,11 @@
 # sum_sum_sum_cd47d7ca4703 (hf_AllenaiLongformerBase_train_006)
 
+
+## Measured Timings
+- Oracle: 77.47 us
+- Compile (CDT): 132.93 us
+- Ratio: 1.72x
+
 ## Classification: SCATTER_REDUCE (embedding backward)
 
 ## Summary

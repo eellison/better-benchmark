@@ -1,5 +1,11 @@
 # pointwise_3b19d63866a7
 
+
+## Measured Timings
+- Oracle: 3.97 us
+- Compile (CDT): 5.63 us
+- Ratio: 1.42x
+
 Full-scope oracle: `repros/canonical/pointwise_3b19d63866a7/oracle_layout.py`.
 
 Gap diagnosis (classification: BANDWIDTH_BOUND): The repro views the `int64[32]` index tensor as `[1, 32]`, selects it back to `[32]`, gathers `32` rows from `float32[32, 128]`, and views the dense result as `float32[32, 128, 1]` with stride `(128, 1, 1)`. The oracle performs that full computation with one Triton row-gather kernel that writes the final viewed layout directly. Inductor cannot eliminate the gather because the index tensor is dynamic and the advanced-index result is a materialized dense tensor, so any remaining gap is the launch plus 16 KiB indexed load/store floor rather than a missing fusion opportunity.

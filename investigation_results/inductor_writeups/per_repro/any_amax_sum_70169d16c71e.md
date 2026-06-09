@@ -1,5 +1,11 @@
 # any_amax_sum_70169d16c71e
 
+
+## Measured Timings
+- Oracle: 25.25 us
+- Compile (CDT): 28.26 us
+- Ratio: 1.12x
+
 ## Classification: MASKED_SOFTMAX_PATTERN
 
 ## Pattern

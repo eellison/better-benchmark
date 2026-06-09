@@ -1,5 +1,11 @@
 # sum_sum_sum_94e6cd22ff22
 
+
+## Measured Timings
+- Oracle: 36.54 us
+- Compile (CDT): 48.22 us
+- Ratio: 1.32x
+
 Classification: `SCHEDULER_FUSION`
 
 The full-scope oracle covers the same region as `repro.py`: the QKV-gradient

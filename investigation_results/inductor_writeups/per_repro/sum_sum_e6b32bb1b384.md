@@ -1,5 +1,11 @@
 # sum_sum_e6b32bb1b384
 
+
+## Measured Timings
+- Oracle: 32.45 us
+- Compile (CDT): 26.24 us
+- Ratio: 0.81x
+
 ## Oracle State
 
 - Family: `multi_output_reduction_templates`

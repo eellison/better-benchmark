@@ -1,5 +1,11 @@
 # pointwise_edf2e0dc44ea
 
+
+## Measured Timings
+- Oracle: 7.42 us
+- Compile (CDT): 6.43 us
+- Ratio: 0.87x
+
 Full-scope oracle: `repros/canonical/pointwise_edf2e0dc44ea/oracle_embedding.py`.
 
 Gap diagnosis (classification: BANDWIDTH_BOUND): the oracle implements an embedding lookup producing `float32[128, 2560]`. Inductor's compiled output already matches or exceeds the oracle speed.

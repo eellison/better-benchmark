@@ -1,5 +1,11 @@
 # sum_2dcafbe8ab05
 
+
+## Measured Timings
+- Oracle: 100.03 us
+- Compile (CDT): 100.13 us
+- Ratio: 1.00x
+
 ## Classification: BANDWIDTH_BOUND
 
 ## Current Result

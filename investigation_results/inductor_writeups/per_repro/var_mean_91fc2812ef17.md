@@ -1,5 +1,11 @@
 # var_mean_91fc2812ef17 - oracle_swin_window_reverse_layernorm
 
+
+## Measured Timings
+- Oracle: 99.94 us
+- Compile (CDT): 123.74 us
+- Ratio: 1.24x
+
 ## Classification
 SCHEDULER_FUSION
 

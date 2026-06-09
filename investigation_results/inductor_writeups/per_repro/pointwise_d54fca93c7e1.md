@@ -1,5 +1,11 @@
 # pointwise_d54fca93c7e1
 
+
+## Measured Timings
+- Oracle: 3.30 us
+- Compile (CDT): 2.88 us
+- Ratio: 0.87x
+
 ## Current Result
 
 - Family: `pointwise`

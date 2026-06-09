@@ -1,5 +1,11 @@
 # pointwise_f1d4acfe63b0
 
+
+## Measured Timings
+- Oracle: 7.74 us
+- Compile (CDT): 7.74 us
+- Ratio: 1.00x
+
 Full-scope oracle: `repros/canonical/pointwise_f1d4acfe63b0/oracle_index_put.py`.
 
 Gap diagnosis (classification: BANDWIDTH_BOUND): the oracle implements an index_put operation producing `float32[128, 2560]`. Inductor already matches the oracle performance.

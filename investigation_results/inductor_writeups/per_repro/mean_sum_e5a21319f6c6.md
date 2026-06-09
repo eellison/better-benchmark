@@ -1,5 +1,11 @@
 # mean_sum_e5a21319f6c6
 
+
+## Measured Timings
+- Oracle: 282.34 us
+- Compile (CDT): 534.27 us
+- Ratio: 1.89x
+
 ## Classification: REDUCTION_EPILOGUE_GLOBAL_SUM
 
 ## Pattern

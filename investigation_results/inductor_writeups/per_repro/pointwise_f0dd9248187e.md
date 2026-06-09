@@ -1,5 +1,11 @@
 # pointwise_f0dd9248187e
 
+
+## Measured Timings
+- Oracle: 10.18 us
+- Compile (CDT): 9.79 us
+- Ratio: 0.96x
+
 Full-scope oracle: `repros/canonical/pointwise_f0dd9248187e/oracle_stencil_fusion.py`.
 
 Gap diagnosis (classification: SCHEDULER_FUSION): the oracle fuses a stencil computation into a single kernel on `float16[64, 512, 7, 7]`. However, Inductor's compiled output already matches or exceeds the oracle speed.

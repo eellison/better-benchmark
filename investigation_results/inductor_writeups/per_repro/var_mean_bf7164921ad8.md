@@ -1,5 +1,11 @@
 # var_mean_bf7164921ad8
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 39.78 us
+- Ratio: N/A
+
 ## Classification: BROKEN_ORACLE
 
 ## Current Result

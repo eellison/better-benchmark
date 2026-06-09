@@ -1,5 +1,11 @@
 # sum_sum_sum_f0377fc40fe2
 
+
+## Measured Timings
+- Oracle: 34.59 us
+- Compile (CDT): 48.03 us
+- Ratio: 1.39x
+
 Full-scope oracle for the DeiT tiny layernorm-backward tail. The oracle computes the same five outputs as `repro.py`: the two `[192]` reductions over the original `mm`/normalized producer, the `[1,197,192]` batch reduction after the residual add, the cls-token `[1,1,192]` reduction, and the patch-grid `[192]` reduction.
 
 Gap diagnosis: the oracle differs from Inductor by computing the row-local layernorm backward scalars, sibling column partials, and token-sum atomics in one split-row Triton pass, then using small finalize kernels for the column, cls-token, and patch-grid outputs. Inductor cannot do this today because the graph mixes reductions over C, batch, token, and patch dimensions with a dependent row reduction; the scheduler therefore materializes/interleaves producer-consumer reductions instead of coordinating one multi-output reduction with row-tile partials and atomic/reduction finalization. Classification: `COOPERATIVE_SPLIT_K`.

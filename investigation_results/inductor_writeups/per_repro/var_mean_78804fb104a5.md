@@ -1,5 +1,11 @@
 # var_mean_78804fb104a5
 
+
+## Measured Timings
+- Oracle: 24.61 us
+- Compile (CDT): 30.37 us
+- Ratio: 1.23x
+
 ## Classification: EMBEDDING_PRODUCER_FUSION
 
 ## Current Result

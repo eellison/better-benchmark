@@ -1,5 +1,11 @@
 # var_mean_9e94237b5daf
 
+
+## Measured Timings
+- Oracle: 61.12 us
+- Compile (CDT): 75.39 us
+- Ratio: 1.23x
+
 ## Classification
 SCHEDULER_FUSION (BN_AFFINE_RECOMPUTATION residual)
 

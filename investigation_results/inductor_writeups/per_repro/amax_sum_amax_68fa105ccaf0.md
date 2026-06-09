@@ -1,5 +1,11 @@
 # amax_sum_amax_68fa105ccaf0
 
+
+## Measured Timings
+- Oracle: 742.34 us
+- Compile (CDT): 714.34 us
+- Ratio: 0.96x
+
 ## Queue Position
 
 - Rank: 38

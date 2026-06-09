@@ -1,5 +1,11 @@
 # pointwise_eba0147d8378
 
+
+## Measured Timings
+- Oracle: 3.17 us
+- Compile (CDT): 5.41 us
+- Ratio: 1.71x
+
 Full-scope oracle: `repros/canonical/pointwise_eba0147d8378/oracle_layout.py`.
 
 Gap diagnosis (classification: BANDWIDTH_BOUND): this zero-input repro creates `float32[8, 1, 1, 1024]` filled with `-0.0`, selects singleton dimensions 1 and 1, and returns the selected `float32[8, 1024]` view with stride `(1024, 1)`. The oracle covers the full scope by allocating the same 4D base layout, using one Triton kernel to write the negative-zero bit pattern across all 8192 live elements, and returning the same selected view. The remaining runtime is the launch/allocation plus 32 KiB output materialization floor, not a missing Inductor fusion or scheduling change.

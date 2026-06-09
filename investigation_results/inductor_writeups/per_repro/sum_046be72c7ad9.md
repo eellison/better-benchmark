@@ -1,5 +1,11 @@
 # sum_046be72c7ad9
 
+
+## Measured Timings
+- Oracle: 1121.25 us
+- Compile (CDT): 1693.73 us
+- Ratio: 1.51x
+
 ## Classification: ALGEBRAIC_ELIMINATION
 
 ## Current Result

@@ -1,5 +1,11 @@
 # sum_7f12bfc45e1a - oracle_fused_layout_sum
 
+
+## Measured Timings
+- Oracle: 81.76 us
+- Compile (CDT): 95.30 us
+- Ratio: 1.17x
+
 ## Classification
 SCHEDULER_FUSION
 

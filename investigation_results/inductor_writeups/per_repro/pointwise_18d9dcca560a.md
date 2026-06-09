@@ -1,5 +1,11 @@
 # pointwise_18d9dcca560a
 
+
+## Measured Timings
+- Oracle: 3.23 us
+- Compile (CDT): 5.06 us
+- Ratio: 1.57x
+
 Full-scope oracle: `repros/canonical/pointwise_18d9dcca560a/oracle_layout.py`.
 
 Gap diagnosis (classification: `BANDWIDTH_BOUND`): this no-input repro creates a `float32[32, 512]` tensor filled with `1.0`, applies two view-only `unsqueeze` operations, subtracts from scalar `1.0`, and returns a fresh contiguous `float32[32, 1, 1, 512]` zero tensor with stride `(512, 512, 512, 1)`. The oracle computes that full scope by allocating the same `empty_strided` result and using one Triton kernel to store the algebraically equivalent zero output directly. Inductor already removes the view-only work and lowers the constant full/sub expression to one Triton zero-fill kernel, so it cannot materially do less work for this captured region without avoiding the required fresh output allocation, GPU launch, or 64 KiB materialization.

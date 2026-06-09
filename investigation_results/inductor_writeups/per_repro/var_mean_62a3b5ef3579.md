@@ -1,5 +1,11 @@
 # var_mean_62a3b5ef3579
 
+
+## Measured Timings
+- Oracle: 27.94 us
+- Compile (CDT): 32.16 us
+- Ratio: 1.15x
+
 ## Classification: RNG_PRODUCER_FUSION
 
 ## Current Result

@@ -1,5 +1,11 @@
 # pointwise_f3fcc01a1b31
 
+
+## Measured Timings
+- Oracle: 30.37 us
+- Compile (CDT): 27.46 us
+- Ratio: 0.90x
+
 Full-scope oracle: `repros/canonical/pointwise_f3fcc01a1b31/oracle_gelu_dropout.py`.
 
 Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): the oracle implements fused GELU + dropout. However, Inductor's compiled output already matches or exceeds the oracle speed.

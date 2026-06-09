@@ -1,5 +1,11 @@
 # var_mean_2ec780efd8cf
 
+
+## Measured Timings
+- Oracle: 30.18 us
+- Compile (CDT): 41.98 us
+- Ratio: 1.39x
+
 ## Classification: ALGEBRAIC_ELIMINATION
 
 ## Current Result

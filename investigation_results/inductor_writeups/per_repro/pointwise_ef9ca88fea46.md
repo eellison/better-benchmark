@@ -1,5 +1,11 @@
 # pointwise_ef9ca88fea46
 
+
+## Measured Timings
+- Oracle: 8.10 us
+- Compile (CDT): 7.17 us
+- Ratio: 0.88x
+
 Full-scope oracle: `repros/canonical/pointwise_ef9ca88fea46/oracle_relu_dropout.py`.
 
 Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): the oracle implements a fused ReLU + dropout with boolean mask sibling return. The compiled Inductor output already matches or exceeds the oracle speed.

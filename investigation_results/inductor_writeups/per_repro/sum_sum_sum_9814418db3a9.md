@@ -1,5 +1,11 @@
 # sum_sum_sum_9814418db3a9
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 63.36 us
+- Ratio: N/A
+
 ## Classification: BROKEN_ORACLE
 
 ## Oracle: oracle_cooperative_split_k.py

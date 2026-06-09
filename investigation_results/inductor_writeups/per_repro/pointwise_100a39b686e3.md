@@ -1,5 +1,11 @@
 # pointwise_100a39b686e3
 
+
+## Measured Timings
+- Oracle: 3.81 us
+- Compile (CDT): 5.02 us
+- Ratio: 1.32x
+
 ## Current Result
 
 - Family: `layout_indexing_stencil_fusion` from the expanded worklist, but the

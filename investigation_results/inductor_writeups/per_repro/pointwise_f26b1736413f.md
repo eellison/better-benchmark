@@ -1,5 +1,11 @@
 # pointwise_f26b1736413f
 
+
+## Measured Timings
+- Oracle: 13.02 us
+- Compile (CDT): 16.42 us
+- Ratio: 1.26x
+
 Full-scope oracle: `repros/canonical/pointwise_f26b1736413f/oracle_layout.py`.
 
 Gap diagnosis (classification: `SCHEDULER_FUSION`): this repro has only three

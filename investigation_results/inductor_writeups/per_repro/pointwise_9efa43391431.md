@@ -1,5 +1,11 @@
 # pointwise_9efa43391431
 
+
+## Measured Timings
+- Oracle: 3.26 us
+- Compile (CDT): 5.06 us
+- Ratio: 1.55x
+
 Full-scope oracle: `repros/canonical/pointwise_9efa43391431/oracle_constant_select.py`.
 
 Gap diagnosis (classification: BANDWIDTH_BOUND): The repro has no inputs, creates `float16[1, 1, 1, 4096]` filled with `-0.0`, selects dimensions 1 and 1, and returns the materialized `float16[1, 4096]` result with stride `(4096, 1)`; the oracle performs exactly that output materialization with one Triton fill kernel, and the measured gap is the launch plus 8192-byte store floor rather than a missing compiler optimization.

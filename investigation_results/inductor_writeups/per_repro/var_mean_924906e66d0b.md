@@ -1,5 +1,11 @@
 # var_mean_924906e66d0b - oracle_swin_window_reverse_layernorm
 
+
+## Measured Timings
+- Oracle: 110.30 us
+- Compile (CDT): 131.94 us
+- Ratio: 1.20x
+
 ## Classification
 NEW_PATTERN
 

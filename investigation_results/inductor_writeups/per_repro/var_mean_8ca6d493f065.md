@@ -1,5 +1,11 @@
 # var_mean_8ca6d493f065 - oracle_swin_window_reverse_droppath_layernorm
 
+
+## Measured Timings
+- Oracle: 30.24 us
+- Compile (CDT): 32.51 us
+- Ratio: 1.08x
+
 ## Classification
 NEW_PATTERN
 

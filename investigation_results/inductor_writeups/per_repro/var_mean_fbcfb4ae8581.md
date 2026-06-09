@@ -1,5 +1,11 @@
 # var_mean_fbcfb4ae8581
 
+
+## Measured Timings
+- Oracle: 34.98 us
+- Compile (CDT): 37.18 us
+- Ratio: 1.06x
+
 ## Classification: RESIDUAL_LAYERNORM_ALIAS_FUSION
 
 ## Current Result

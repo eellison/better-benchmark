@@ -1,5 +1,11 @@
 # amax_sum_f0661488d68c
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 1007.52 us
+- Ratio: N/A
+
 ## Queue Position
 
 - Rank: 14

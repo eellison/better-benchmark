@@ -1,5 +1,11 @@
 # pointwise_ff7eea75b317
 
+
+## Measured Timings
+- Oracle: 26.37 us
+- Compile (CDT): 31.58 us
+- Ratio: 1.20x
+
 ## Classification: MULTI_OUTPUT_SIBLING_LAYOUT_FUSION
 
 ## Current Result

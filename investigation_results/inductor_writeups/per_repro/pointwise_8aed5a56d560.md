@@ -1,5 +1,11 @@
 # pointwise_8aed5a56d560
 
+
+## Measured Timings
+- Oracle: 5.15 us
+- Compile (CDT): 4.99 us
+- Ratio: 0.97x
+
 Full-scope oracle: `repros/canonical/pointwise_8aed5a56d560/oracle_layout.py`.
 
 ## Classification: `BANDWIDTH_BOUND`

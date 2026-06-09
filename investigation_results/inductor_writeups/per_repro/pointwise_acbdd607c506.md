@@ -1,5 +1,11 @@
 # pointwise_acbdd607c506 — Complex RoPE Slice Mul
 
+
+## Measured Timings
+- Oracle: 7.84 us
+- Compile (CDT): 11.78 us
+- Ratio: 1.50x
+
 ## Summary
 - **Model**: torchbench_llama_infer_000
 - **Classification**: CORRECTNESS_FAIL

@@ -1,5 +1,11 @@
 # pointwise_2cb3b25427b0 — oracle_complex_rope_mul
 
+
+## Measured Timings
+- Oracle: 7.68 us
+- Compile (CDT): 11.71 us
+- Ratio: 1.52x
+
 ## Status: CORRECTNESS FAIL (oracle fails check)
 
 ## Benchmark Results

@@ -1,5 +1,11 @@
 # var_mean_var_mean_var_mean_850dfa63ec81 - oracle_triple_bn_sum_relu
 
+
+## Measured Timings
+- Oracle: 72.45 us
+- Compile (CDT): not available
+- Ratio: N/A
+
 ## Classification
 SCHEDULER_FUSION (multi-reduction tiling)
 

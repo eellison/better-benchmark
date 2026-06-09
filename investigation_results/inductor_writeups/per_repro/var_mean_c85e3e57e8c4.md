@@ -1,5 +1,11 @@
 # var_mean_c85e3e57e8c4
 
+
+## Measured Timings
+- Oracle: 40.61 us
+- Compile (CDT): 40.51 us
+- Ratio: 1.00x
+
 ## Classification: BANDWIDTH_BOUND
 
 ## Current Result

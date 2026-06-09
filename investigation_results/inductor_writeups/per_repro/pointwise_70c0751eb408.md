@@ -1,5 +1,11 @@
 # pointwise_70c0751eb408
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 939.78 us
+- Ratio: N/A
+
 ## Queue Position
 
 - Rank: 17

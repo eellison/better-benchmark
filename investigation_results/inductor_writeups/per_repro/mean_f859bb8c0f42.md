@@ -1,5 +1,11 @@
 # mean_f859bb8c0f42 - BN-SiLU Spatial Mean
 
+
+## Measured Timings
+- Oracle: 16.90 us
+- Compile (CDT): 13.22 us
+- Ratio: 0.78x
+
 ## Classification: BAD_ORACLE
 ## True Floor: No
 ## Actionable: No

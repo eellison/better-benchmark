@@ -1,5 +1,11 @@
 # sum_sum_sum_b35553d96630
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 77.76 us
+- Ratio: N/A
+
 ## Classification: SCHEDULER_FUSION
 
 ## Oracle: oracle_swin_layernorm_bwd_splitk.py

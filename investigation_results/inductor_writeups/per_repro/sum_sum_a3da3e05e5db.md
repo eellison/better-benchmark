@@ -1,5 +1,11 @@
 # sum_sum_a3da3e05e5db
 
+
+## Measured Timings
+- Oracle: 448.26 us
+- Compile (CDT): 672.61 us
+- Ratio: 1.50x
+
 ## Classification: CHECK_FAIL
 
 ## Current Result

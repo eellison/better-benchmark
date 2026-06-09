@@ -1,5 +1,11 @@
 # sum_sum_sum_580d823755af
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 65.18 us
+- Ratio: N/A
+
 ## Compile: ERROR, Oracle: ERROR, Gap: N/A
 
 ## Classification: BROKEN_ORACLE

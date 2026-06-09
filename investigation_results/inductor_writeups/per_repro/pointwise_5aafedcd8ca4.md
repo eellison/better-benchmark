@@ -1,5 +1,11 @@
 # pointwise_5aafedcd8ca4
 
+
+## Measured Timings
+- Oracle: 3.36 us
+- Compile (CDT): 5.18 us
+- Ratio: 1.54x
+
 Full-scope oracle: `repros/canonical/pointwise_5aafedcd8ca4/oracle_layout.py`.
 
 Gap diagnosis (classification: `BANDWIDTH_BOUND`): the repro has no inputs and

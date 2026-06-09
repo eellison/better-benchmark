@@ -1,5 +1,11 @@
 # sum_31bf563cdf96
 
+
+## Measured Timings
+- Oracle: 91.74 us
+- Compile (CDT): 110.40 us
+- Ratio: 1.20x
+
 ## Classification: SCHEDULER_FUSION
 
 ## Current Result

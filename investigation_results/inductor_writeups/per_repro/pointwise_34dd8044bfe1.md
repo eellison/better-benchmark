@@ -1,5 +1,11 @@
 # pointwise_34dd8044bfe1
 
+
+## Measured Timings
+- Oracle: 7.01 us
+- Compile (CDT): 13.18 us
+- Ratio: 1.88x
+
 Full-scope oracle: `repros/canonical/pointwise_34dd8044bfe1/oracle_layout.py`.
 
 Gap diagnosis (classification: `BANDWIDTH_BOUND`): this repro draws two Inductor RNG seeds, uses seed 0 for `prims.inductor_random.default([12, 64, 1, 64], ..., "randn")`, applies two view-only `unsqueeze` operations, and returns the final contiguous `float32[12, 64, 64]` view with stride `(4096, 64, 1)`. The oracle covers the full scope by using the same `aten.randint.low_out` seed lowering that Inductor emits, materializing every randn element with Triton `tl.randn(seed, offset)`, and returning the exact output shape/dtype/stride. Inductor already eliminates the view-only layout work and emits one random-generation kernel after the seed draw, so the remaining gap is the required stochastic generation/materialization cost rather than a scheduler fusion opportunity.

@@ -1,5 +1,11 @@
 # sum_e00c7291b6ee
 
+
+## Measured Timings
+- Oracle: 2210.78 us
+- Compile (CDT): 2461.73 us
+- Ratio: 1.11x
+
 ## Queue Position
 
 - Rank: 24

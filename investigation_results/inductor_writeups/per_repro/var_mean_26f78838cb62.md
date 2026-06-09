@@ -1,5 +1,11 @@
 # var_mean_26f78838cb62
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): not available
+- Ratio: N/A
+
 ## Classification: CHECK_FAIL
 
 ## Current Result

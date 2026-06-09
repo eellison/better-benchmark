@@ -1,5 +1,11 @@
 # var_mean_var_mean_var_mean_97062ec87370 - oracle_bn_relu_spatial_mean
 
+
+## Measured Timings
+- Oracle: 69.28 us
+- Compile (CDT): 52.80 us
+- Ratio: 0.76x
+
 ## Classification
 SCHEDULER_FUSION
 

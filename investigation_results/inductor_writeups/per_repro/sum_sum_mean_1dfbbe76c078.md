@@ -1,5 +1,11 @@
 # Gap Diagnosis: sum_sum_mean_1dfbbe76c078 (rmsnorm_bwd)
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 41.92 us
+- Ratio: N/A
+
 ## Classification: REDUCTION_CHAINING
 
 ## Measurements

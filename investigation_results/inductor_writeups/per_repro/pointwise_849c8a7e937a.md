@@ -1,5 +1,11 @@
 # pointwise_849c8a7e937a - BN Affine + Residual (1.075x)
 
+
+## Measured Timings
+- Oracle: 8.48 us
+- Compile (CDT): 8.03 us
+- Ratio: 0.95x
+
 ## Classification
 NEW_PATTERN (minor codegen gap)
 

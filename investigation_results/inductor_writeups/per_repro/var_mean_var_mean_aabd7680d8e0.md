@@ -1,5 +1,11 @@
 # var_mean_var_mean_aabd7680d8e0 -- Chained BN Recompute-Fusion
 
+
+## Measured Timings
+- Oracle: 22.24 us
+- Compile (CDT): 21.31 us
+- Ratio: 0.96x
+
 **Classification:** RECOMPUTE_FUSION  
 **Gap:** 1.55-1.77x (oracle ~22 us, Inductor ~36 us)  
 **Source model:** timm_visformer_small (training)  

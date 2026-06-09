@@ -1,5 +1,11 @@
 # var_mean_var_mean_73e1a842318f - oracle_dual_bn_residual_cat
 
+
+## Measured Timings
+- Oracle: 28.16 us
+- Compile (CDT): 47.97 us
+- Ratio: 1.70x
+
 ## Classification
 SCHEDULER_FUSION
 

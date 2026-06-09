@@ -1,5 +1,11 @@
 # var_mean_f1119c959a09
 
+
+## Measured Timings
+- Oracle: 11.26 us
+- Compile (CDT): 12.06 us
+- Ratio: 1.07x
+
 ## Classification: LAYERNORM_CLONE_POPULATION_VARIANCE
 
 ## Current Result

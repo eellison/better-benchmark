@@ -1,5 +1,11 @@
 # Gap Diagnosis: argmax_mean_180a59791f51 (reformer_lsh_routing)
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 287.74 us
+- Ratio: N/A
+
 ## Classification: NEW_PATTERN (LSH routing idiom)
 
 ## Measurements

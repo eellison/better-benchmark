@@ -1,5 +1,11 @@
 # pointwise_ce7169287d93
 
+
+## Measured Timings
+- Oracle: 3.07 us
+- Compile (CDT): 2.88 us
+- Ratio: 0.94x
+
 ## Classification: `BANDWIDTH_BOUND`
 
 Artifact: `repros/canonical/pointwise_ce7169287d93/oracle_layout_stencil.py`

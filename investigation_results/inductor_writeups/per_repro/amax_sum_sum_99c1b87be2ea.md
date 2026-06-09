@@ -1,5 +1,11 @@
 # amax_sum_sum_99c1b87be2ea
 
+
+## Measured Timings
+- Oracle: 1693.60 us
+- Compile (CDT): 1300.45 us
+- Ratio: 0.77x
+
 ## Classification: BAD_ORACLE
 
 ## Pattern

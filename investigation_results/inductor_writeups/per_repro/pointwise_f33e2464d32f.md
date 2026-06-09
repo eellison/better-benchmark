@@ -1,5 +1,11 @@
 # pointwise_f33e2464d32f
 
+
+## Measured Timings
+- Oracle: 5.79 us
+- Compile (CDT): 5.79 us
+- Ratio: 1.00x
+
 Full-scope oracle: `repros/canonical/pointwise_f33e2464d32f/oracle_maxpool_norm.py`.
 
 ## Root Cause

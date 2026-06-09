@@ -1,5 +1,11 @@
 # pointwise_f2b2f0c4db0c
 
+
+## Measured Timings
+- Oracle: 12.03 us
+- Compile (CDT): 11.17 us
+- Ratio: 0.93x
+
 Full-scope oracle: `repros/canonical/pointwise_f2b2f0c4db0c/oracle_bn_residual_relu.py`.
 
 Gap diagnosis (classification: SCHEDULER_FUSION): the oracle fuses batch normalization + residual add + ReLU into a single kernel on `float16[32, 2048, 7, 7]`. However, Inductor's compiled output already matches or exceeds the oracle speed.

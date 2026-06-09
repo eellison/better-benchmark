@@ -1,5 +1,11 @@
 # sum_f160d1f03c1f
 
+
+## Measured Timings
+- Oracle: 108.38 us
+- Compile (CDT): 109.60 us
+- Ratio: 1.01x
+
 Gap diagnosis (classification: `SCHEDULER_FUSION`): the oracle differs from Inductor by treating the `cat -> view -> permute -> clone -> view` QKV path as one materializing multi-output reduction: it writes the returned `[2304, 25216]` transposed view with stride `(1, 2304)` while accumulating the two live `[768]` Q and V reduction slices from the same loaded values. Inductor cannot do this today because the scheduler keeps the cat/permute/clone materialization, returned transpose view, and sum/slice consumers as separate graph regions rather than forming a single template with a required materialized side output and side accumulators. The fix class is `SCHEDULER_FUSION`: add a scheduler template that can fuse layout-copy materialization with compatible side reductions.
 
 Full-scope oracle: `repros/canonical/sum_f160d1f03c1f/oracle_multi_output_reduction.py`

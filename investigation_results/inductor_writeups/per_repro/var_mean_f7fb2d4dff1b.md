@@ -1,5 +1,11 @@
 # var_mean_f7fb2d4dff1b
 
+
+## Measured Timings
+- Oracle: 40.70 us
+- Compile (CDT): 30.50 us
+- Ratio: 0.75x
+
 ## Classification: SWIN_DROPPATH_WINDOW_LAYERNORM
 
 ## Current Result

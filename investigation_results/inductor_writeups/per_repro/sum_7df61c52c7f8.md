@@ -1,5 +1,11 @@
 # sum_7df61c52c7f8
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 708.54 us
+- Ratio: N/A
+
 ## Queue Position
 
 - Rank: 30

@@ -1,5 +1,11 @@
 # argmax_mean_9cf9e9271ff1
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 68.32 us
+- Ratio: N/A
+
 ## Summary
 - **Model**: torchbench_hf_Reformer (LSH routing)
 - **Pattern**: Reformer LSH routing with argmax(cat([x,-x])), sort, gather, RMS normalization

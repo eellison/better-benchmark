@@ -1,5 +1,11 @@
 # mean_var_2a871bf52561
 
+
+## Measured Timings
+- Oracle: 20.26 us
+- Compile (CDT): 28.22 us
+- Ratio: 1.39x
+
 ## Classification: EMBEDDING_LAYERNORM_PERSISTENT_THRESHOLD
 
 ## Pattern

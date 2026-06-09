@@ -1,5 +1,11 @@
 # pointwise_f9c1d1b08ddb
 
+
+## Measured Timings
+- Oracle: 126.88 us
+- Compile (CDT): 188.22 us
+- Ratio: 1.48x
+
 ## Classification: `SCHEDULER_FUSION`
 
 Artifact: `repros/canonical/pointwise_f9c1d1b08ddb/oracle_layout_stencil.py`

@@ -1,5 +1,11 @@
 # pointwise_c8cb51f30736 - Full Fill (Zero Constant)
 
+
+## Measured Timings
+- Oracle: 6.08 us
+- Compile (CDT): 5.89 us
+- Ratio: 0.97x
+
 ## Summary
 - **Status**: AT_FLOOR (ratio 1.053x -- effectively at parity)
 - **Category**: BANDWIDTH_BOUND

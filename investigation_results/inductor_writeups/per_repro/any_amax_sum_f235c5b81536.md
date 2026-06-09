@@ -1,5 +1,11 @@
 # any_amax_sum_f235c5b81536
 
+
+## Measured Timings
+- Oracle: 119.58 us
+- Compile (CDT): 122.56 us
+- Ratio: 1.02x
+
 ## Classification: AT_FLOOR
 
 ## Pattern

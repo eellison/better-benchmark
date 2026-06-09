@@ -1,5 +1,11 @@
 # sum_sum_sum_dd4c673f0928
 
+
+## Measured Timings
+- Oracle: measurement failed (runtime error)
+- Compile (CDT): 34.66 us
+- Ratio: N/A
+
 ## Classification: BROKEN_ORACLE
 
 ## Oracle: oracle_rmsnorm_rope_bwd.py

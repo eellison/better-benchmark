@@ -1,5 +1,11 @@
 # pointwise_fe13a47e3f19
 
+
+## Measured Timings
+- Oracle: 26.34 us
+- Compile (CDT): 30.50 us
+- Ratio: 1.16x
+
 ## Classification: REAL_TO_COMPLEX_CAST_MATERIALIZATION
 
 ## Current Result
