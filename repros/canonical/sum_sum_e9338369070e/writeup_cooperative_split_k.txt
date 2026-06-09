@@ -1,0 +1,20 @@
+repro_id: sum_sum_e9338369070e
+oracle: oracle_cooperative_split_k
+check: PASS
+oracle_us: 43.97
+compile_us: 107.46
+ratio: 2.444
+status: GOOD
+classification: COOPERATIVE_SPLIT_K
+
+Gap diagnosis: Oracle reads the sliced add producer directly from the two original
+[512, 80, 14, 14] inputs, cooperatively split-K reduces the two sibling per-channel
+sums, and fuses the dependent affine epilogue into the final channels-last
+[512, 40, 14, 14] output plus [40] side vector. Inductor currently lowers the
+add/copy/clone/slice, compatible sum([0,2,3]) reductions, and dependent BN-backward
+epilogue as generic scheduled reduction and pointwise work with avoidable intermediate
+materialization and insufficient reduction-axis parallelism.
+
+Fix: Teach Inductor to split compatible per-channel reductions across the reduced
+N/H/W dimension, combine the partials, and fuse the sliced-add producer plus
+BN-backward epilogue and side vector output into the same reduction plan.

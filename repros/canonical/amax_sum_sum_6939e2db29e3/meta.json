@@ -38,5 +38,7 @@
   "n_models": 1,
   "models": [
     "hf_MegatronBertForCausalLM_train_000"
-  ]
+  ],
+  "oracle_status": "broken",
+  "oracle_broken_reason": "assertion failure (dtype/shape assumption)"
 }

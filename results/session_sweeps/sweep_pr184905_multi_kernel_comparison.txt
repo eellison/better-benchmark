@@ -1,0 +1,71 @@
+======================================================================
+MULTI_KERNEL=1 SWEEP COMPARISON (vs baseline)
+======================================================================
+
+Baseline: {'commit': '3be1b1ac8948b762711998aa791a80af29f574f8', 'timestamp': '2026-06-02T23:36:40Z', 'n_repros': 1482}
+Multi-kernel: {'commit': '3be1b1ac8948b762711998aa791a80af29f574f8', 'timestamp': '2026-06-03T02:27:10Z', 'n_repros': 1482}
+
+Baseline: 1482/1483 passed, 0 errors
+Multi-kernel: 1482/1483 passed, 0 errors
+
+Common repros: 1483
+
+--- DEFAULT TIMING (compiled_us) ---
+Repros compared: 1482
+Geomean speedup (multi_kernel vs baseline): 1.0302x
+
+Improved >5%: 330 (22.3%)
+Regressed >5%: 143 (9.6%)
+Neutral (within 5%): 1009 (68.1%)
+
+--- COORDINATE DESCENT TIMING (coord_descent_us) ---
+Repros compared: 1482
+Geomean speedup (multi_kernel vs baseline): 1.0084x
+Improved >5%: 232 (15.7%)
+Regressed >5%: 203 (13.7%)
+Neutral (within 5%): 1047 (70.6%)
+
+--- TOP 10 WINS (default timing, multi_kernel faster) ---
+  2.102x  var_mean_b95eb6ddfcc7  (66.6us -> 31.7us)
+  2.055x  var_mean_15e821204e82  (66.6us -> 32.4us)
+  1.992x  var_mean_26f78838cb62  (60.5us -> 30.4us)
+  1.989x  var_mean_fbf523037907  (60.5us -> 30.4us)
+  1.944x  var_mean_6e34526980e4  (314.4us -> 161.7us)
+  1.927x  var_mean_3e029dc6a6fc  (319.4us -> 165.7us)
+  1.926x  var_mean_8bea515a2fe0  (319.3us -> 165.8us)
+  1.908x  var_mean_52d34178da6e  (77.5us -> 40.6us)
+  1.872x  var_mean_9079d4d58779  (314.2us -> 167.9us)
+  1.774x  amax_sum_a7ede60031ef  (111.6us -> 62.9us)
+
+--- TOP 10 REGRESSIONS (default timing, multi_kernel slower) ---
+  0.548x  var_mean_mean_0593cda589d5  (69.4us -> 126.8us)
+  0.639x  var_mean_c1b4aa89f4d6  (59.5us -> 93.2us)
+  0.708x  var_mean_550595226896  (37.7us -> 53.3us)
+  0.739x  var_mean_4df40c420c41  (46.7us -> 63.2us)
+  0.741x  var_mean_c48b435e6a2b  (46.8us -> 63.3us)
+  0.741x  var_mean_7b0bd4f35599  (46.9us -> 63.3us)
+  0.742x  var_mean_b92e4f945149  (87.7us -> 118.2us)
+  0.751x  var_mean_f1b58e17db66  (27.5us -> 36.6us)
+  0.755x  var_mean_052df521537f  (27.6us -> 36.5us)
+  0.758x  var_mean_c78c72732a00  (48.0us -> 63.3us)
+
+--- SPEEDUP DISTRIBUTION (default timing) ---
+  p01: 0.7706x
+  p05: 0.8993x
+  p10: 0.9547x
+  p25: 0.9924x
+  p50: 1.0015x
+  p75: 1.0372x
+  p90: 1.1812x
+  p95: 1.3054x
+  p99: 1.6488x
+
+--- SUMMARY ---
+The cache deserialization fix completely resolved the multi_kernel failure.
+Previous failure rate: 87.6%. Current failure rate: 0%.
+
+multi_kernel=1 provides a 1.0302x geomean speedup on default timing
+and 1.0084x geomean speedup on coordinate descent timing
+across 1482 repros.
+
+======================================================================

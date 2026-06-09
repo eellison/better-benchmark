@@ -1,0 +1,30 @@
+{
+  "optimization": "slice_scatter_elision",
+  "description": "Post-grad FX pass: eliminate slice(slice_scatter(base, src, dim, a, b), dim, a2, b2) when slice reads within scatter region",
+  "implementation_file": "torch/_inductor/fx_passes/slice_scatter_elision.py",
+  "config_flag": "slice_scatter_elision=True",
+  "results": {
+    "pointwise_70c0751eb408": {
+      "baseline_us": 1119.8,
+      "optimized_us": 864.2,
+      "speedup": 1.296,
+      "kernel_launches_before": 67,
+      "kernel_launches_after": 30,
+      "elisions_applied": 38
+    },
+    "pointwise_531d72f1b34a": {
+      "baseline_us": 755.3,
+      "optimized_us": 684.7,
+      "speedup": 1.103,
+      "elisions_applied": 36
+    },
+    "pointwise_a2382a85ee99": {
+      "baseline_us": 157.8,
+      "optimized_us": 157.7,
+      "speedup": 1.001,
+      "elisions_applied": 0,
+      "note": "No stencil pattern - pure pointwise"
+    }
+  },
+  "correctness": "Verified on all 3 target repros (maxdiff < 2.3e-13 in f64)"
+}

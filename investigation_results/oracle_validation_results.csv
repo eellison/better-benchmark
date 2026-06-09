@@ -1,0 +1,116 @@
+repro_id,oracle_file,status,notes
+amax_sum_3ed297ef02cd,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_4c524f75213e,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_55ae6a130879,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_68fe981b18dd,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_7fea03f0412b,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_8764401930db,oracle_full_attention_softmax_dropout.py,PASS,Oracle --check passed
+amax_sum_87e1fb077f24,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_amax_2a81770def44,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_amax_68fa105ccaf0,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_ca987107ccc7,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_f0661488d68c,oracle_cross_entropy_fwd.py,PASS,Oracle --check passed
+amax_sum_sum_1bad0f362efd,oracle_online_softmax.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+amax_sum_sum_4c98004c3aa3,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_sum_6939e2db29e3,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_sum_846668f0b88f,oracle_shifted_ignore_index_cross_entropy_mean.py,PASS,Oracle --check passed
+amax_sum_sum_b9ac8700504c,oracle_online_softmax.py,PASS,Oracle --check passed
+amax_sum_sum_dc96a87ba8db,oracle_softmax_sum.py,PASS,Oracle --check passed
+amax_sum_sum_f2d78a465cb5,oracle_shifted_causal_lm_cross_entropy_mean.py,PASS,Oracle --check passed
+amax_sum_sum_f9833ae619a1,oracle_online_softmax.py,PASS,Oracle --check passed
+argmax_mean_180a59791f51,oracle_reformer_lsh_routing.py,PASS,Oracle --check passed
+pointwise_13f26d420251,oracle_stencil_fusion.py,PASS,Oracle --check passed
+pointwise_485ad74a8b0e,oracle_stencil_fusion.py,PASS,Oracle --check passed
+pointwise_70c0751eb408,oracle_stencil_canonicalized.py,PASS,Oracle --check passed
+pointwise_71e3a6c09140,oracle_stencil_fusion.py,PASS,Oracle --check passed
+pointwise_8793407401ab,oracle_stencil_fusion.py,PASS,Oracle --check passed
+pointwise_cf3acd87ba9e,oracle_stencil_fusion.py,PASS,Oracle --check passed
+sum_0d445802ccc4,oracle_structured_pool_upsample_reduce.py,PASS,Oracle --check passed
+sum_18262b26934c,oracle_maxpool_direct_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_34d3dca078b3,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_3ee4028cab37,oracle_structured_scatter_reduce.py,PASS,Oracle --check passed
+sum_5eec4697d8ff,oracle_longformer_scatter_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_617cd87647d6,oracle_multi_output_reduction.py,PASS,Oracle --check passed
+sum_6e4aebb044dd,oracle_avgpool_silu_reduce.py,PASS,Oracle --check passed
+sum_79c6d0673ca2,oracle_longformer_index_put_sum_transpose.py,PASS,Oracle --check passed
+sum_7d7c71d09ef5,oracle_structured_pool_upsample_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output; source mentions scope mismatch]
+sum_7df61c52c7f8,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_837a32994d31,oracle_slice_scatter_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_86b5dc92d54f,oracle_longformer_index_put_sum_transpose.py,PASS,Oracle --check passed
+sum_a3c9eb6b27f1,oracle_rope_scatter_reduce.py,PASS,Oracle --check passed
+sum_adeaebad93f7,oracle_fused_gather_reduce.py,PASS,Oracle --check passed
+sum_b691b8dad90a,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_b699ca824f8e,oracle_avgpool_backward_reduce.py,PASS,Oracle --check passed
+sum_cfa532830ff2,oracle_structured_scatter_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_e00c7291b6ee,oracle_multi_output_reduction.py,PASS,Oracle --check passed
+sum_f4f71b921e96,oracle_structured_pool_upsample_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_04bdad42e9ef,oracle_cooperative_split_k.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_0930bd38b7d1,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_100fff569d2e,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_1efe819604dc,oracle_structured_pool_upsample_reduce.py,PASS,Oracle --check passed; [source hint: source mentions scope mismatch]
+sum_sum_230671a8764d,oracle_rmsnorm_rope_bwd.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_2778c0896f68,oracle_scatter_reduce.py,PASS,Oracle --check passed
+sum_sum_279d6b97ab68,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_2dc2fbd588d9,oracle_relative_position_scatter_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_36f20fb8bfa8,oracle_index_put_rmsnorm_reduce.py,PASS,Oracle --check passed
+sum_sum_53431ef91176,oracle_qwen_moe_index_put_rmsnorm_bwd.py,PASS,Oracle --check passed
+sum_sum_5c0f382244aa,oracle_cooperative_split_k.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_609200a71825,oracle_avgpool_silu_bn_backward.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_6a14a9c9ba88,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_7a49bf63689f,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_8bc26e2e1883,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_8bcd6e12dcd4,oracle_structured_scatter_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_98c4811f6ddf,oracle_cooperative_split_k.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_a42eecd58e57,oracle_multi_output_reduction.py,ERROR,exit=1; triton.compiler.errors.CompilationError: at 19:13:; [source hint: source mentions partial output]
+sum_sum_a7c7ab7bfcf5,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_a9f6c9204966,oracle_multi_output_reduction.py,ERROR,"exit=1; AssertionError: Expected channels-last, got stride(1)=5041; [source hint: source mentions partial output]"
+sum_sum_ab550e4e948e,oracle_maxpool_bn_scatter_reduce.py,PASS,Oracle --check passed
+sum_sum_b16afac198fb,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_b7f94adef30f,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_c39c7b0d801a,oracle_moe_index_put_reduce.py,PASS,Oracle --check passed
+sum_sum_cdaed89f373c,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_df7b99fa3465,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_e75c5e897993,oracle_structured_pool_upsample_reduce.py,PASS,Oracle --check passed; [source hint: source mentions scope mismatch]
+sum_sum_ee85624361a0,oracle_multi_output_reduction.py,PASS,Oracle --check passed
+sum_sum_mean_1dfbbe76c078,oracle_rmsnorm_bwd.py,PASS,Oracle --check passed
+sum_sum_mean_9af96955f8cc,oracle_rmsnorm_bwd.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_1627b1a3a6f6,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_2334df16a35d,oracle_scatter_reduce.py,PASS,Oracle --check passed
+sum_sum_sum_2c925f59efff,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_3348817ad678,oracle_moe_router_bwd.py,PASS,Oracle --check passed
+sum_sum_sum_3ec568a7ba04,oracle_cooperative_split_k.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_431633879271,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_45f02142ecfd,oracle_structured_scatter_reduce.py,PASS,Oracle --check passed
+sum_sum_sum_4bb798eb542e,oracle_structured_scatter_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_512dcf4a167b,oracle_multi_output_reduction.py,PASS,Oracle --check passed
+sum_sum_sum_53917171ce11,oracle_scatter_reduce.py,PASS,Oracle --check passed
+sum_sum_sum_559e754b2ff4,oracle_cooperative_split_k.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_64f701d26f0a,oracle_multi_output_reduction.py,PASS,Oracle --check passed
+sum_sum_sum_6770dc6efbe8,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_6d6ec1e4f644,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_70d71fcb0d68,oracle_cross_dim_reduction.py,INCORRECT,"exit=1; output[2]: max_abs_diff=2.708480e+05, max_rel_diff=3.107957e-03 [FAIL]; [source hint: source mentions partial output]"
+sum_sum_sum_70d71fcb0d68,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_7b24a3457260,oracle_multi_output_reduction.py,PASS,Oracle --check passed
+sum_sum_sum_82a3f0084247,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_86dbf5a906db,oracle_multi_output_reduction.py,INCORRECT,exit=1; Correctness: FAIL; [source hint: source mentions partial output]
+sum_sum_sum_88c9224fa05a,oracle_fused_embedding_scatter.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_8e6cde42e572,oracle_structured_upsample_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_93b46c9731d8,oracle_cooperative_split_k.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_94e6cd22ff22,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_95dac16d4328,oracle_multi_output_reduction.py,ERROR,exit=1; triton.compiler.errors.CompilationError: at 16:13:
+sum_sum_sum_a29c7a92bc81,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_afd118ca907d,oracle_softmax_backward.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_d0496bdeedba,oracle_fused_embedding_scatter.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_d574fc7bdc59,oracle_cooperative_split_k.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_d574fc7bdc59,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_dadf6aa035dd,oracle_structured_scatter_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_db1524bc41dd,oracle_multi_output_reduction.py,INCORRECT,exit=1; Correctness: FAIL
+sum_sum_sum_f0377fc40fe2,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_f68c9f1fa09b,oracle_multi_output_reduction.py,PASS,Oracle --check passed
+sum_sum_sum_f90d684d32cb,oracle_structured_upsample_reduce.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_fb9996974d8f,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+sum_sum_sum_fcd2cc2945b3,oracle_cooperative_split_k.py,PASS,Oracle --check passed
+sum_sum_sum_fcd2cc2945b3,oracle_multi_output_reduction.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+var_mean_765fb8f2c85e,oracle_bn_training_forward.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+var_mean_e814c09a1fdb,oracle_norm_template.py,PASS,Oracle --check passed; [source hint: source mentions partial output]
+var_mean_f0d7c08a0622,oracle_norm_template.py,PASS,Oracle --check passed; [source hint: source mentions partial output]

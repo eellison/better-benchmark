@@ -1,0 +1,20 @@
+{
+  "repro_id": "amax_sum_sum_2a28fce37306",
+  "measured_at": "2026-06-04",
+  "hardware": "NVIDIA B200",
+  "pytorch_version": "2.13.0a0+git111efb8",
+  "fresh_cache": true,
+  "coordinate_descent": true,
+  "oracle_us": 6.208,
+  "compile_us": 10.144,
+  "combo_compile_us": 10.720,
+  "best_compile_us": 10.144,
+  "ratio": 1.634,
+  "status": "GOOD",
+  "classification": "NEW_PATTERN",
+  "correctness": "PASS",
+  "max_abs_diff": "0.00e+00",
+  "gap_us": 3.936,
+  "diagnosis": "Two-head ignore-index cross-entropy from GPT-J training. Oracle folds the entire decomposed view/split/clone/amax/sub/exp/sum/log/gather/mask/count/div graph into one scalar Triton kernel using online logsumexp accumulators. Inductor cannot recognize that materialized log-softmax rows are only consumed by one gathered negative log-likelihood per head. 1.63x real gap (3.9us absolute) indicates a new lowering pattern for small multi-head log_softmax+gather+xent.",
+  "model_origin": "hf_GPTJForQuestionAnswering_train_000"
+}

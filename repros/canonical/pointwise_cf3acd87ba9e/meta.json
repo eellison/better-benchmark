@@ -56,5 +56,7 @@
   "n_models": 1,
   "models": [
     "torchbench_shufflenet_v2_x1_0_infer_000"
-  ]
+  ],
+  "oracle_status": "old_format",
+  "oracle_broken_reason": "old output format (runs but does not emit harness JSON)"
 }

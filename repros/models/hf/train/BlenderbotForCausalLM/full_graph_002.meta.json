@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "inputs": [],
+  "tensor_attrs": {},
+  "graph": "full_graph_002.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "BlenderbotForCausalLM",
+    "graph": "full_graph_002.py"
+  }
+}

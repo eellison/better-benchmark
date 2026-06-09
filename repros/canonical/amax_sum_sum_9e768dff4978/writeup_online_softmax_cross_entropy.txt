@@ -1,0 +1,18 @@
+repro_id: amax_sum_sum_9e768dff4978
+oracle: oracle_online_softmax_cross_entropy
+check: PASS
+oracle_us: 171.78
+compile_us: 266.14
+ratio: 1.549
+status: GOOD
+classification: NEW_PATTERN
+
+Gap diagnosis: Oracle computes the complete shifted-label ignore-index cross-entropy mean
+(label shift, bf16/f16 logits fp32 conversion, stable online row logsumexp, safe masked
+target gather, valid-loss sum, valid-count sum, and final scalar division) in one Triton
+kernel. Inductor lowers the decomposed pad/slice/view/amax/sub/exp/sum/log/gather/mask/
+sum/count/div graph as generic row reductions plus pointwise and gather work that
+materializes full log-softmax-sized intermediates.
+
+Fix: Add an online cross-entropy lowering that recognizes label-shift producers, masked
+target gather, and sibling valid-count reduction (NEW_PATTERN).

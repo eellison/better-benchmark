@@ -49,5 +49,7 @@
   "models": [
     "vllm_Qwen_Qwen3-0.6B_001",
     "vllm_Qwen_Qwen3-30B-A3B_001"
-  ]
+  ],
+  "oracle_status": "old_format",
+  "oracle_broken_reason": "old output format (runs but does not emit harness JSON)"
 }

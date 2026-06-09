@@ -1,0 +1,418 @@
+"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the full Llama RoPE return tuple by applying the grouped-head sum, half-rotation slice-scatter, and both required transposed stores directly from the source tensors, whereas Inductor currently materializes the grouped sum, rotary `slice_scatter` reconstructions, clones, views, and permutes as separate generic pointwise/layout work; Inductor cannot do this today because its scheduler/codegen does not model rotary slice-scatter reconstruction with a grouped-head reduction and materialized layout-changing side outputs as one structured scatter-reduce template; the fix is SCATTER_REDUCE: add a RoPE slice-scatter lowering that accumulates grouped heads once, applies the half-rotation in source space, and emits the transposed side-output stores directly."""
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import sys
+from pathlib import Path
+
+import torch
+
+try:
+    import triton
+    import triton.language as tl
+except ModuleNotFoundError:  # pragma: no cover - allows CPU-only syntax checks.
+    triton = None
+    tl = None
+
+
+REPRO_ID = "sum_a3c9eb6b27f1"
+
+from oracle_harness import (
+    oracle_impl,
+    bench_oracle,
+    bench_oracle_all_shapes,
+    check_oracle,
+    get_hardware_info,
+    get_inputs as _harness_get_inputs,
+    get_repro_instance as _harness_get_repro_instance,
+    has_stochastic_ops,
+)
+REPRO_DIR = Path(__file__).resolve().parent
+REPO_ROOT = REPRO_DIR.parents[2]
+REPRO_PATH = REPRO_DIR / "repro.py"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+SHAPE_LABEL = "vllm_meta-llama_Llama-3.2-1B_001_c9503b4c"
+
+BATCH = 4
+HEADS = 32
+GROUPS = 8
+HEADS_PER_GROUP = HEADS // GROUPS
+SEQ = 512
+HEAD_DIM = 64
+HALF_DIM = HEAD_DIM // 2
+TOKENS = BATCH * SEQ
+HIDDEN = HEADS * HEAD_DIM
+GROUP_HIDDEN = GROUPS * HEAD_DIM
+FULL_TOTAL = TOKENS * HIDDEN
+GROUP_TOTAL = TOKENS * GROUP_HIDDEN
+BLOCK_SIZE = 1024
+TABLE_BLOCK_SIZE = 256
+
+
+def _load_repro_module():
+    spec = importlib.util.spec_from_file_location(f"{REPRO_ID}_repro", REPRO_PATH)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"could not load repro module from {REPRO_PATH}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def make_inputs(device: torch.device) -> tuple[object, ...]:
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    configs = load_shape_configs(str(REPRO_PATH))
+    if configs:
+        config = next(iter(configs.values()))
+        config = {
+            "inputs": [
+                {**spec, "device": str(device)}
+                if isinstance(spec, dict) and spec.get("kind") == "tensor"
+                else spec
+                for spec in config["inputs"]
+            ]
+        }
+        inputs = make_inputs_from_config(config)
+    else:
+        inputs = _load_repro_module().make_inputs()
+
+    return tuple(
+        value.to(device=device) if isinstance(value, torch.Tensor) else value
+        for value in inputs
+    )
+
+
+def get_inputs() -> tuple[object, ...]:
+    return make_inputs(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+def get_repro_instance() -> torch.nn.Module:
+    return _load_repro_module().Repro().to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+@oracle_impl(hardware="H100", shapes="(T([4, 32, 512, 64], bf16), T([32], f32), T([4, 32, 512, 64], bf16), S([4, 8, 4, 512, 64]), S([1, 32, 1]), S([1, 1, 512]), S([1, 512, 2, 32]), S([1, 512, 64]), S([4, 512, 512]), S([2048, 512]), S([4, 512, 2048]), S([2048, 2048]))")
+def oracle_forward(inputs: tuple[object, ...]) -> tuple[torch.Tensor, torch.Tensor]:
+    return oracle_rope_scatter_reduce(*inputs)
+
+
+def _rotary_tables(arg2_1: torch.Tensor, dtype: torch.dtype) -> tuple[torch.Tensor, torch.Tensor]:
+    positions = torch.arange(SEQ, device=arg2_1.device, dtype=torch.float32)
+    freqs = positions[:, None] * arg2_1[None, :]
+    angles = torch.cat((freqs, freqs), dim=1)
+    return torch.sin(angles).to(dtype), torch.cos(angles).to(dtype)
+
+
+def _apply_rope_torch(x: torch.Tensor, sin: torch.Tensor, cos: torch.Tensor) -> torch.Tensor:
+    sin = sin[None, None, :, :]
+    cos = cos[None, None, :, :]
+    x_sin = x * sin
+    rotated = torch.cat((x_sin[..., HALF_DIM:], -x_sin[..., :HALF_DIM]), dim=-1)
+    return rotated + x * cos
+
+
+def oracle_torch(
+    getitem_1: torch.Tensor,
+    arg2_1: torch.Tensor,
+    getitem: torch.Tensor,
+    _shape_param_0,
+    _shape_param_1,
+    _shape_param_2,
+    _shape_param_3,
+    _shape_param_4,
+    _shape_param_5,
+    _shape_param_6,
+    _shape_param_7,
+    _shape_param_8,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    del (
+        _shape_param_0,
+        _shape_param_1,
+        _shape_param_2,
+        _shape_param_3,
+        _shape_param_4,
+        _shape_param_5,
+        _shape_param_6,
+        _shape_param_7,
+        _shape_param_8,
+    )
+
+    sin, cos = _rotary_tables(arg2_1, getitem.dtype)
+    grouped = getitem_1.view(BATCH, GROUPS, HEADS_PER_GROUP, SEQ, HEAD_DIM).sum(dim=2)
+
+    grouped_rope = _apply_rope_torch(grouped, sin, cos)
+    full_rope = _apply_rope_torch(getitem, sin, cos)
+
+    out0 = (
+        grouped_rope.permute(0, 2, 1, 3)
+        .contiguous()
+        .view(TOKENS, GROUP_HIDDEN)
+        .permute(1, 0)
+    )
+    out1 = (
+        full_rope.permute(0, 2, 1, 3)
+        .contiguous()
+        .view(TOKENS, HIDDEN)
+        .permute(1, 0)
+    )
+    return out0, out1
+
+
+if triton is not None:
+
+    @triton.jit
+    def _rotary_table_kernel(
+        arg2_ptr,
+        sin_ptr,
+        cos_ptr,
+        TABLE_BLOCK_SIZE_: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * TABLE_BLOCK_SIZE_ + tl.arange(0, TABLE_BLOCK_SIZE_)
+        mask = offsets < 32768
+        seq = offsets // 64
+        dim = offsets - seq * 64
+        freq_dim = dim % 32
+        freq = seq.to(tl.float32) * tl.load(arg2_ptr + freq_dim, mask=mask, other=0.0)
+        tl.store(sin_ptr + offsets, tl.sin(freq).to(tl.bfloat16), mask=mask)
+        tl.store(cos_ptr + offsets, tl.cos(freq).to(tl.bfloat16), mask=mask)
+
+
+    @triton.jit
+    def _full_rope_kernel(
+        x_ptr,
+        sin_ptr,
+        cos_ptr,
+        out_ptr,
+        BLOCK_SIZE_: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * BLOCK_SIZE_ + tl.arange(0, BLOCK_SIZE_)
+        mask = offsets < 4194304
+
+        hidden = offsets % 2048
+        token = offsets // 2048
+        batch = token // 512
+        seq = token - batch * 512
+        head = hidden // 64
+        dim = hidden - head * 64
+
+        src_dim = tl.where(dim < 32, dim + 32, dim - 32)
+        sign = tl.where(dim < 32, 1.0, -1.0)
+        x_offset = ((batch * 32 + head) * 512 + seq) * 64 + dim
+        src_offset = ((batch * 32 + head) * 512 + seq) * 64 + src_dim
+
+        x_val = tl.load(x_ptr + x_offset, mask=mask, other=0.0).to(tl.float32)
+        src_val = tl.load(x_ptr + src_offset, mask=mask, other=0.0).to(tl.float32)
+        sin_val = tl.load(sin_ptr + seq * 64 + src_dim, mask=mask, other=0.0).to(tl.float32)
+        cos_val = tl.load(cos_ptr + seq * 64 + dim, mask=mask, other=0.0).to(tl.float32)
+
+        rotated = (src_val * sin_val).to(tl.bfloat16).to(tl.float32) * sign
+        scaled = (x_val * cos_val).to(tl.bfloat16).to(tl.float32)
+        tl.store(out_ptr + offsets, (rotated + scaled).to(tl.bfloat16), mask=mask)
+
+
+    @triton.jit
+    def _grouped_rope_kernel(
+        x_ptr,
+        sin_ptr,
+        cos_ptr,
+        out_ptr,
+        BLOCK_SIZE_: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * BLOCK_SIZE_ + tl.arange(0, BLOCK_SIZE_)
+        mask = offsets < 1048576
+
+        hidden = offsets % 512
+        token = offsets // 512
+        batch = token // 512
+        seq = token - batch * 512
+        group = hidden // 64
+        dim = hidden - group * 64
+
+        src_dim = tl.where(dim < 32, dim + 32, dim - 32)
+        sign = tl.where(dim < 32, 1.0, -1.0)
+        head_base = group * 4
+
+        offset0 = ((batch * 32 + head_base + 0) * 512 + seq) * 64 + dim
+        offset1 = ((batch * 32 + head_base + 1) * 512 + seq) * 64 + dim
+        offset2 = ((batch * 32 + head_base + 2) * 512 + seq) * 64 + dim
+        offset3 = ((batch * 32 + head_base + 3) * 512 + seq) * 64 + dim
+        src_offset0 = ((batch * 32 + head_base + 0) * 512 + seq) * 64 + src_dim
+        src_offset1 = ((batch * 32 + head_base + 1) * 512 + seq) * 64 + src_dim
+        src_offset2 = ((batch * 32 + head_base + 2) * 512 + seq) * 64 + src_dim
+        src_offset3 = ((batch * 32 + head_base + 3) * 512 + seq) * 64 + src_dim
+
+        x_sum = (
+            tl.load(x_ptr + offset0, mask=mask, other=0.0).to(tl.float32)
+            + tl.load(x_ptr + offset1, mask=mask, other=0.0).to(tl.float32)
+            + tl.load(x_ptr + offset2, mask=mask, other=0.0).to(tl.float32)
+            + tl.load(x_ptr + offset3, mask=mask, other=0.0).to(tl.float32)
+        ).to(tl.bfloat16).to(tl.float32)
+        src_sum = (
+            tl.load(x_ptr + src_offset0, mask=mask, other=0.0).to(tl.float32)
+            + tl.load(x_ptr + src_offset1, mask=mask, other=0.0).to(tl.float32)
+            + tl.load(x_ptr + src_offset2, mask=mask, other=0.0).to(tl.float32)
+            + tl.load(x_ptr + src_offset3, mask=mask, other=0.0).to(tl.float32)
+        ).to(tl.bfloat16).to(tl.float32)
+
+        sin_val = tl.load(sin_ptr + seq * 64 + src_dim, mask=mask, other=0.0).to(tl.float32)
+        cos_val = tl.load(cos_ptr + seq * 64 + dim, mask=mask, other=0.0).to(tl.float32)
+        rotated = (src_sum * sin_val).to(tl.bfloat16).to(tl.float32) * sign
+        scaled = (x_sum * cos_val).to(tl.bfloat16).to(tl.float32)
+        tl.store(out_ptr + offsets, (rotated + scaled).to(tl.bfloat16), mask=mask)
+
+
+def oracle_triton(
+    getitem_1: torch.Tensor,
+    arg2_1: torch.Tensor,
+    getitem: torch.Tensor,
+    *shape_params: object,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    del shape_params
+    if triton is None:
+        raise RuntimeError("triton is not available")
+    if getitem.device.type != "cuda":
+        raise RuntimeError("triton oracle requires CUDA inputs")
+
+    sin = torch.empty((SEQ, HEAD_DIM), device=getitem.device, dtype=getitem.dtype)
+    cos = torch.empty_like(sin)
+    _rotary_table_kernel[(triton.cdiv(SEQ * HEAD_DIM, TABLE_BLOCK_SIZE),)](
+        arg2_1,
+        sin,
+        cos,
+        TABLE_BLOCK_SIZE_=TABLE_BLOCK_SIZE,
+        num_warps=8,
+    )
+    base0 = torch.empty((TOKENS, GROUP_HIDDEN), device=getitem.device, dtype=getitem.dtype)
+    base1 = torch.empty((TOKENS, HIDDEN), device=getitem.device, dtype=getitem.dtype)
+
+    _grouped_rope_kernel[(triton.cdiv(GROUP_TOTAL, BLOCK_SIZE),)](
+        getitem_1,
+        sin,
+        cos,
+        base0,
+        BLOCK_SIZE_=BLOCK_SIZE,
+        num_warps=4,
+    )
+    _full_rope_kernel[(triton.cdiv(FULL_TOTAL, BLOCK_SIZE),)](
+        getitem,
+        sin,
+        cos,
+        base1,
+        BLOCK_SIZE_=BLOCK_SIZE,
+        num_warps=4,
+    )
+    return base0.permute(1, 0), base1.permute(1, 0)
+
+
+def oracle_rope_scatter_reduce(
+    *inputs: object,
+    impl: str = "auto",
+) -> tuple[torch.Tensor, torch.Tensor]:
+    first_tensor = inputs[0]
+    if not isinstance(first_tensor, torch.Tensor):
+        raise TypeError("first input must be a tensor")
+    if impl == "auto":
+        impl = "triton" if first_tensor.device.type == "cuda" and triton is not None else "torch"
+    if impl == "triton":
+        return oracle_triton(*inputs)
+    if impl == "torch":
+        return oracle_torch(*inputs)
+    raise ValueError(f"unknown impl: {impl}")
+
+
+def reference_outputs(
+    inputs: tuple[object, ...],
+    device: torch.device,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    module = _load_repro_module()
+    module.device = lambda *unused_args, **unused_kwargs: device
+    model = module.Repro().to(device)
+    return model(*inputs)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description=f"Oracle for {REPRO_ID}",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--check", action="store_true",
+                        help="Verify correctness against eager Repro")
+    parser.add_argument("--bench", action="store_true",
+                        help="Benchmark oracle vs torch.compile")
+    parser.add_argument("--rtol", type=float, default=1e-2,
+                        help="Relative tolerance for correctness check")
+    parser.add_argument("--atol", type=float, default=1e-2,
+                        help="Absolute tolerance for correctness check")
+    parser.add_argument("--warmup", type=int, default=25,
+                        help="Warmup iterations for benchmark")
+    parser.add_argument("--rep", type=int, default=200,
+                        help="Repetitions for benchmark")
+    parser.add_argument("--no-skip-stochastic", action="store_true",
+                        help="Disable auto-detection and skipping of stochastic outputs")
+    parser.add_argument("--all-shapes", action="store_true",
+                        help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--show-hw", action="store_true",
+                        help="Print GPU hardware info and exit")
+    args = parser.parse_args()
+
+    if args.show_hw:
+        import json
+        print(json.dumps(get_hardware_info(), indent=2))
+        return
+
+    if not args.check and not args.bench:
+        args.check = args.bench = True
+
+    inputs = _harness_get_inputs(REPRO_DIR)
+    instance = _harness_get_repro_instance(REPRO_DIR)
+
+    if has_stochastic_ops(REPRO_PATH):
+        print(f"NOTE: {REPRO_ID} contains stochastic ops; affected outputs will be auto-skipped")
+
+    if args.check:
+        print(f"Checking {REPRO_ID}...")
+        ok = check_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            atol=args.atol,
+            rtol=args.rtol,
+            skip_stochastic=not args.no_skip_stochastic,
+        )
+        status = "PASS" if ok else "FAIL"
+        print(f"Correctness: {status}")
+        if not ok:
+            sys.exit(1)
+
+    if args.bench:
+        print(f"Benchmarking {REPRO_ID}...")
+        if args.all_shapes:
+            results = bench_oracle_all_shapes(
+                oracle_forward,
+                REPRO_DIR,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            for result in results:
+                if result["status"] == "BAD_ORACLE":
+                    print(f"WARNING: oracle is slower than compile "
+                          f"for {result['repro_id']} (ratio={result['ratio']:.3f}x)")
+        else:
+            result = bench_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                REPRO_ID,
+                warmup=args.warmup,
+                rep=args.rep,
+            )
+            if result["status"] == "BAD_ORACLE":
+                print(f"WARNING: oracle is slower than compile "
+                      f"(ratio={result['ratio']:.3f}x)")
+
+
+if __name__ == "__main__":
+    main()

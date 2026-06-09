@@ -1,0 +1,20 @@
+repro_id: amax_sum_67d7c2666a5c
+oracle: oracle_longformer_full_scope
+check: PASS
+oracle_us: 112.58
+compile_us: 237.60
+ratio: 2.111
+status: GOOD
+classification: NEW_PATTERN
+
+Gap diagnosis: Oracle computes the complete Longformer sliding-window attention scope
+(skewed bmm band assembly, triangular masking, key-mask bias, query zeroing, dropout,
+and final padded strided layout) in one fused Triton row kernel. Inductor lowers the
+decomposed pad/view/slice/scatter/mask/amax/sum/dropout/layout graph as separate generic
+assembly, reduction, random, and layout kernels over large intermediates because its
+pattern library does not recognize Longformer diagonal chunk assembly as the producer
+of a stochastic attention-softmax epilogue with destination-layout scatter.
+
+Fix: Add a Longformer sliding-window attention lowering that canonicalizes the structured
+band assembly, generated edge masks, key/query masks, dropout, and final layout into one
+fused schedule (NEW_PATTERN).

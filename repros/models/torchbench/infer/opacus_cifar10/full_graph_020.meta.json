@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "inputs": [
+    {
+      "kind": "symint",
+      "name": "arg0_1",
+      "value": 32
+    },
+    {
+      "kind": "tensor",
+      "name": "arg1_1",
+      "shape": [
+        64,
+        32,
+        1,
+        1
+      ],
+      "dtype": "float32",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      },
+      "symbolic_dims": [
+        {
+          "dim": 1,
+          "symbol": "s67",
+          "default": 32
+        }
+      ]
+    }
+  ],
+  "outputs": [],
+  "tensor_attrs": {},
+  "graph": "full_graph_020.py",
+  "source": {
+    "kind": "model",
+    "suite": "torchbench",
+    "mode": "infer",
+    "model": "opacus_cifar10",
+    "graph": "full_graph_020.py"
+  }
+}

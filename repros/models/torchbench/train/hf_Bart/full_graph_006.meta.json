@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "inputs": [],
+  "outputs": [],
+  "tensor_attrs": {},
+  "graph": "full_graph_006.py",
+  "source": {
+    "kind": "model",
+    "suite": "torchbench",
+    "mode": "train",
+    "model": "hf_Bart",
+    "graph": "full_graph_006.py"
+  }
+}

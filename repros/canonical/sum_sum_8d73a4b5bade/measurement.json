@@ -1,0 +1,20 @@
+{
+  "repro_id": "sum_sum_8d73a4b5bade",
+  "measured_at": "2026-06-04",
+  "hardware": "NVIDIA B200",
+  "pytorch_version": "2.13.0a0+git111efb8",
+  "fresh_cache": true,
+  "coordinate_descent": true,
+  "oracle_us": 6.208,
+  "compile_us": 16.224,
+  "combo_compile_us": 15.712,
+  "best_compile_us": 15.712,
+  "ratio": 2.531,
+  "status": "GOOD",
+  "classification": "SCHEDULER_FUSION",
+  "correctness": "PASS",
+  "max_abs_diff": "5.96e-08",
+  "gap_us": 9.504,
+  "diagnosis": "NFNet weight-standardization backward tail. Oracle fuses the two sibling channel reductions over [16,3,3,3], all dependent scalar broadcasts, and both returned output tensors (scale vector + full gradient tensor) into one 16-wide Triton kernel. Inductor emits 3+ scheduled kernels because it cannot form a multi-output reduction region whose results feed both a vector and a full-tensor side output in the same kernel. 2.53x real gap (9.5us absolute) is a SCHEDULER_FUSION opportunity.",
+  "model_origin": "timm_dm_nfnet_f0_train_001"
+}

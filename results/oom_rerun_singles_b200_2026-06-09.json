@@ -1,0 +1,387 @@
+{
+  "_metadata": {
+    "description": "OOM rerun - single worker, one at a time",
+    "source_sweep": "results/full_corpus_sweep_b200_2026-06-09.json",
+    "total_repros": 63,
+    "passed": 60,
+    "failed": 3,
+    "timeout_seconds": 180
+  },
+  "results": {
+    "repros/canonical/mean_sum_e5a21319f6c6/repro.py": {
+      "status": "ok",
+      "time_us": 307.9040050506592,
+      "compile_time_s": 1.1863977909088135,
+      "elapsed": 6.508558511734009
+    },
+    "repros/canonical/pointwise_2dd5675274fb/repro.py": {
+      "status": "failed",
+      "error": "timeout (180s)",
+      "elapsed": 180.35969591140747
+    },
+    "repros/canonical/pointwise_531d72f1b34a/repro.py": {
+      "status": "failed",
+      "error": "timeout (180s)",
+      "elapsed": 180.3765242099762
+    },
+    "repros/canonical/pointwise_70c0751eb408/repro.py": {
+      "status": "failed",
+      "error": "InductorError: RuntimeError: Cycle detected in memory planning graphPath containing cycle (i -> j: j is a dependency of i): op22 -> op102 -> op22 This indicates invalid dependency relationships in the scheduler graph\n\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\n",
+      "elapsed": 11.6224205493927
+    },
+    "repros/canonical/sum_sum_sum_0147fd1c4296/repro.py": {
+      "status": "ok",
+      "time_us": 1140.6079530715942,
+      "compile_time_s": 1.2503504753112793,
+      "elapsed": 6.465449571609497
+    },
+    "repros/canonical/sum_sum_sum_041aaca79573/repro.py": {
+      "status": "ok",
+      "time_us": 571.1359977722168,
+      "compile_time_s": 1.2233538627624512,
+      "elapsed": 6.4301676750183105
+    },
+    "repros/canonical/sum_sum_sum_9c4d4a65cd7b/repro.py": {
+      "status": "ok",
+      "time_us": 165.6319946050644,
+      "compile_time_s": 1.276477575302124,
+      "elapsed": 6.533484220504761
+    },
+    "repros/canonical/sum_sum_sum_9d05c4d37c77/repro.py": {
+      "status": "ok",
+      "time_us": 816.9599771499634,
+      "compile_time_s": 1.305039882659912,
+      "elapsed": 6.402577877044678
+    },
+    "repros/canonical/sum_sum_sum_b0debbb55e8e/repro.py": {
+      "status": "ok",
+      "time_us": 100.16000270843506,
+      "compile_time_s": 1.278949499130249,
+      "elapsed": 6.680080890655518
+    },
+    "repros/canonical/sum_sum_sum_b8d91626261d/repro.py": {
+      "status": "ok",
+      "time_us": 136.9599997997284,
+      "compile_time_s": 1.2298693656921387,
+      "elapsed": 6.612489461898804
+    },
+    "repros/canonical/sum_sum_sum_bfac9a5afa42/repro.py": {
+      "status": "ok",
+      "time_us": 48.96000027656555,
+      "compile_time_s": 1.1980080604553223,
+      "elapsed": 6.515904664993286
+    },
+    "repros/canonical/sum_sum_sum_cad09d5cca79/repro.py": {
+      "status": "ok",
+      "time_us": 364.3839955329895,
+      "compile_time_s": 1.2192127704620361,
+      "elapsed": 6.507317543029785
+    },
+    "repros/canonical/sum_sum_sum_ccb3a106dd79/repro.py": {
+      "status": "ok",
+      "time_us": 858.0800294876099,
+      "compile_time_s": 1.157952070236206,
+      "elapsed": 6.54809045791626
+    },
+    "repros/canonical/sum_sum_sum_d0496bdeedba/repro.py": {
+      "status": "ok",
+      "time_us": 124.67200309038162,
+      "compile_time_s": 1.2946345806121826,
+      "elapsed": 6.731121063232422
+    },
+    "repros/canonical/sum_sum_sum_da376d09d2cb/repro.py": {
+      "status": "ok",
+      "time_us": 61.15199998021126,
+      "compile_time_s": 1.2126319408416748,
+      "elapsed": 6.671504974365234
+    },
+    "repros/canonical/sum_sum_sum_dadf6aa035dd/repro.py": {
+      "status": "ok",
+      "time_us": 1583.0719470977783,
+      "compile_time_s": 1.2755646705627441,
+      "elapsed": 6.369736671447754
+    },
+    "repros/canonical/sum_sum_sum_db1524bc41dd/repro.py": {
+      "status": "ok",
+      "time_us": 704.2239904403687,
+      "compile_time_s": 1.4524405002593994,
+      "elapsed": 6.480300188064575
+    },
+    "repros/canonical/sum_sum_sum_dbc10f22635c/repro.py": {
+      "status": "ok",
+      "time_us": 10.015999898314476,
+      "compile_time_s": 1.1897716522216797,
+      "elapsed": 6.682953357696533
+    },
+    "repros/canonical/sum_sum_sum_e06c904e550e/repro.py": {
+      "status": "ok",
+      "time_us": 175.90400576591492,
+      "compile_time_s": 1.2702407836914062,
+      "elapsed": 6.721753835678101
+    },
+    "repros/canonical/sum_sum_sum_e266124dd032/repro.py": {
+      "status": "ok",
+      "time_us": 83.77599716186523,
+      "compile_time_s": 1.2714848518371582,
+      "elapsed": 6.704381465911865
+    },
+    "repros/canonical/sum_sum_sum_e2d4961f3571/repro.py": {
+      "status": "ok",
+      "time_us": 108.31999778747559,
+      "compile_time_s": 1.2382516860961914,
+      "elapsed": 7.019004583358765
+    },
+    "repros/canonical/sum_sum_sum_e77e7007d695/repro.py": {
+      "status": "ok",
+      "time_us": 286.5599989891052,
+      "compile_time_s": 1.1873574256896973,
+      "elapsed": 6.535834312438965
+    },
+    "repros/canonical/sum_sum_sum_e7a56f82f536/repro.py": {
+      "status": "ok",
+      "time_us": 343.968003988266,
+      "compile_time_s": 1.1678731441497803,
+      "elapsed": 6.3995585441589355
+    },
+    "repros/canonical/sum_sum_sum_ed6c74b5ef96/repro.py": {
+      "status": "ok",
+      "time_us": 779.9040079116821,
+      "compile_time_s": 1.3578908443450928,
+      "elapsed": 6.956578969955444
+    },
+    "repros/canonical/sum_sum_sum_f206fcfd9c32/repro.py": {
+      "status": "ok",
+      "time_us": 130.91200590133667,
+      "compile_time_s": 1.2919957637786865,
+      "elapsed": 6.916295528411865
+    },
+    "repros/canonical/sum_sum_sum_f5c107db3be9/repro.py": {
+      "status": "ok",
+      "time_us": 569.1519975662231,
+      "compile_time_s": 1.1713426113128662,
+      "elapsed": 6.92522120475769
+    },
+    "repros/canonical/sum_sum_sum_fefa336f7504/repro.py": {
+      "status": "ok",
+      "time_us": 190.88000059127808,
+      "compile_time_s": 1.217696189880371,
+      "elapsed": 6.376091003417969
+    },
+    "repros/canonical/var_mean_12b6b115a741/repro.py": {
+      "status": "ok",
+      "time_us": 18.17600056529045,
+      "compile_time_s": 1.2320125102996826,
+      "elapsed": 6.348649263381958
+    },
+    "repros/canonical/var_mean_13d90438bcbd/repro.py": {
+      "status": "ok",
+      "time_us": 197.60000705718994,
+      "compile_time_s": 1.4818673133850098,
+      "elapsed": 7.329306602478027
+    },
+    "repros/canonical/var_mean_13eb1aa0a32d/repro.py": {
+      "status": "ok",
+      "time_us": 22.272000089287758,
+      "compile_time_s": 1.1233081817626953,
+      "elapsed": 6.958592414855957
+    },
+    "repros/canonical/var_mean_19d5741628ce/repro.py": {
+      "status": "ok",
+      "time_us": 26.367999613285065,
+      "compile_time_s": 1.246192455291748,
+      "elapsed": 6.423067808151245
+    },
+    "repros/canonical/var_mean_1b02c576e1eb/repro.py": {
+      "status": "ok",
+      "time_us": 22.336000576615334,
+      "compile_time_s": 1.1967883110046387,
+      "elapsed": 6.433823585510254
+    },
+    "repros/canonical/var_mean_262248c8386b/repro.py": {
+      "status": "ok",
+      "time_us": 157.44000673294067,
+      "compile_time_s": 1.1413393020629883,
+      "elapsed": 6.3954691886901855
+    },
+    "repros/canonical/var_mean_26f78838cb62/repro.py": {
+      "status": "ok",
+      "time_us": 57.023998349905014,
+      "compile_time_s": 1.1495862007141113,
+      "elapsed": 6.521810531616211
+    },
+    "repros/canonical/var_mean_2aeefcdb8c7b/repro.py": {
+      "status": "ok",
+      "time_us": 11.96799986064434,
+      "compile_time_s": 1.17903733253479,
+      "elapsed": 6.711223840713501
+    },
+    "repros/canonical/var_mean_2b4c7da7cf99/repro.py": {
+      "status": "ok",
+      "time_us": 24.383999407291412,
+      "compile_time_s": 1.3079729080200195,
+      "elapsed": 6.8748767375946045
+    },
+    "repros/canonical/var_mean_40bf68989e6d/repro.py": {
+      "status": "ok",
+      "time_us": 32.48000144958496,
+      "compile_time_s": 1.1978068351745605,
+      "elapsed": 6.582475423812866
+    },
+    "repros/canonical/var_mean_4ca91616285c/repro.py": {
+      "status": "ok",
+      "time_us": 368.4479892253876,
+      "compile_time_s": 1.4143579006195068,
+      "elapsed": 6.404456853866577
+    },
+    "repros/canonical/var_mean_6a701483fed1/repro.py": {
+      "status": "ok",
+      "time_us": 368.4160113334656,
+      "compile_time_s": 1.3687412738800049,
+      "elapsed": 6.711543560028076
+    },
+    "repros/canonical/var_mean_792162dbb8a3/repro.py": {
+      "status": "ok",
+      "time_us": 73.05599749088287,
+      "compile_time_s": 1.206202745437622,
+      "elapsed": 6.357388257980347
+    },
+    "repros/canonical/var_mean_7b0bd4f35599/repro.py": {
+      "status": "ok",
+      "time_us": 44.38399896025658,
+      "compile_time_s": 1.235896348953247,
+      "elapsed": 6.592017650604248
+    },
+    "repros/canonical/var_mean_819a2cfa3958/repro.py": {
+      "status": "ok",
+      "time_us": 345.8560109138489,
+      "compile_time_s": 1.1603641510009766,
+      "elapsed": 6.367058515548706
+    },
+    "repros/canonical/var_mean_8238dd59b2ec/repro.py": {
+      "status": "ok",
+      "time_us": 368.19198727607727,
+      "compile_time_s": 1.4185442924499512,
+      "elapsed": 6.94155478477478
+    },
+    "repros/canonical/var_mean_89031f55973e/repro.py": {
+      "status": "ok",
+      "time_us": 106.49599879980087,
+      "compile_time_s": 1.3395335674285889,
+      "elapsed": 6.459039211273193
+    },
+    "repros/canonical/var_mean_8bea515a2fe0/repro.py": {
+      "status": "ok",
+      "time_us": 302.8799891471863,
+      "compile_time_s": 1.1484897136688232,
+      "elapsed": 6.560336589813232
+    },
+    "repros/canonical/var_mean_9ce39d6fae7b/repro.py": {
+      "status": "ok",
+      "time_us": 22.272000089287758,
+      "compile_time_s": 1.230654239654541,
+      "elapsed": 6.658001899719238
+    },
+    "repros/canonical/var_mean_9d1c4396c2c8/repro.py": {
+      "status": "ok",
+      "time_us": 7.872000336647034,
+      "compile_time_s": 1.2188217639923096,
+      "elapsed": 6.717093467712402
+    },
+    "repros/canonical/var_mean_a0625e4095a0/repro.py": {
+      "status": "ok",
+      "time_us": 194.33599710464478,
+      "compile_time_s": 1.255424976348877,
+      "elapsed": 6.659846544265747
+    },
+    "repros/canonical/var_mean_a8fd2a07cabc/repro.py": {
+      "status": "ok",
+      "time_us": 55.135998874902725,
+      "compile_time_s": 1.1746177673339844,
+      "elapsed": 6.745501279830933
+    },
+    "repros/canonical/var_mean_ac3c4a9016c7/repro.py": {
+      "status": "ok",
+      "time_us": 46.81599885225296,
+      "compile_time_s": 1.3311820030212402,
+      "elapsed": 6.50856876373291
+    },
+    "repros/canonical/var_mean_b7b154e2f8c6/repro.py": {
+      "status": "ok",
+      "time_us": 10.015999898314476,
+      "compile_time_s": 1.1354045867919922,
+      "elapsed": 6.368155002593994
+    },
+    "repros/canonical/var_mean_bff30f530d6e/repro.py": {
+      "status": "ok",
+      "time_us": 13.919999822974205,
+      "compile_time_s": 1.1564579010009766,
+      "elapsed": 6.871129989624023
+    },
+    "repros/canonical/var_mean_bfff119087f0/repro.py": {
+      "status": "ok",
+      "time_us": 34.40000116825104,
+      "compile_time_s": 1.1698377132415771,
+      "elapsed": 6.839327096939087
+    },
+    "repros/canonical/var_mean_cf2474e318ae/repro.py": {
+      "status": "ok",
+      "time_us": 164.06400501728058,
+      "compile_time_s": 1.2707180976867676,
+      "elapsed": 6.857208490371704
+    },
+    "repros/canonical/var_mean_deb7c9191e39/repro.py": {
+      "status": "ok",
+      "time_us": 147.2959965467453,
+      "compile_time_s": 1.176093339920044,
+      "elapsed": 6.722910404205322
+    },
+    "repros/canonical/var_mean_e8133a6f0de6/repro.py": {
+      "status": "ok",
+      "time_us": 73.47200065851212,
+      "compile_time_s": 1.1612598896026611,
+      "elapsed": 6.307243347167969
+    },
+    "repros/canonical/var_mean_ef88cc4744f1/repro.py": {
+      "status": "ok",
+      "time_us": 7.840000092983246,
+      "compile_time_s": 1.2185494899749756,
+      "elapsed": 7.092767953872681
+    },
+    "repros/canonical/var_mean_f0d7c08a0622/repro.py": {
+      "status": "ok",
+      "time_us": 866.1119937896729,
+      "compile_time_s": 1.2076165676116943,
+      "elapsed": 7.009436845779419
+    },
+    "repros/canonical/var_mean_f2580942698a/repro.py": {
+      "status": "ok",
+      "time_us": 30.400000512599945,
+      "compile_time_s": 1.2107930183410645,
+      "elapsed": 6.99678373336792
+    },
+    "repros/canonical/var_mean_mean_4b1dcaa1d7e1/repro.py": {
+      "status": "ok",
+      "time_us": 28.384000062942505,
+      "compile_time_s": 1.2347607612609863,
+      "elapsed": 6.4830849170684814
+    },
+    "repros/canonical/var_mean_mean_60c37a09d40e/repro.py": {
+      "status": "ok",
+      "time_us": 71.19999825954437,
+      "compile_time_s": 1.143221139907837,
+      "elapsed": 6.331845045089722
+    },
+    "repros/canonical/var_mean_var_mean_0795d88a1e39/repro.py": {
+      "status": "ok",
+      "time_us": 165.69599509239197,
+      "compile_time_s": 1.2319200038909912,
+      "elapsed": 6.7605814933776855
+    },
+    "repros/canonical/var_mean_var_mean_var_mean_850dfa63ec81/repro.py": {
+      "status": "ok",
+      "time_us": 83.8719978928566,
+      "compile_time_s": 1.1957616806030273,
+      "elapsed": 6.604203462600708
+    }
+  }
+}

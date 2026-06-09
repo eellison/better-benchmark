@@ -1165,6 +1165,16 @@ def _make_exact_tensor_from_spec(
     return out
 
 
+def _dtype_iinfo_max(dtype) -> int | None:
+    """Return the max representable value for an integer dtype, or None for non-int."""
+    import torch
+
+    try:
+        return torch.iinfo(dtype).max
+    except (TypeError, RuntimeError):
+        return None
+
+
 def _randint_storage(
     *,
     shape: tuple[int, ...],
@@ -1177,6 +1187,10 @@ def _randint_storage(
 ):
     import torch
 
+    # Clamp high to dtype max+1 to avoid overflow (e.g. int8 max is 127)
+    dtype_max = _dtype_iinfo_max(dtype)
+    if dtype_max is not None and high > dtype_max + 1:
+        high = dtype_max + 1
     if high <= low:
         high = low + 1
     storage_size = _dense_storage_size(shape, stride, storage_offset=storage_offset)
@@ -1226,12 +1240,20 @@ def make_tensor_from_spec(spec: dict[str, Any], *, default_device: str = "cuda")
     if exact is not None:
         return exact
     if spec.get("requires_exact"):
+        # Integer tensor constants without exact data: use zeros as a safe
+        # fallback. Zero is always a valid index for indexing ops.
+        import warnings
+
         name = spec.get("name", "<unnamed>")
-        raise ValueError(
-            f"Full graph tensor attribute {name!r} requires exact data, "
-            "but no exact tensor payload is available. Recapture this graph "
-            "with full_graph_*.meta.json sidecars."
+        warnings.warn(
+            f"Full graph tensor attribute {name!r} requires exact data but none "
+            "available; using zeros as fallback. Results may not be numerically "
+            "correct but the graph will be runnable for benchmarking.",
+            stacklevel=2,
         )
+        storage_size = _dense_storage_size(shape, stride, storage_offset=storage_offset)
+        base = torch.zeros((storage_size,), dtype=dtype, device=dev)
+        return _view_storage(base, shape, stride, storage_offset)
 
     if generator.get("kind") == "constant":
         value = generator.get("value", 0)

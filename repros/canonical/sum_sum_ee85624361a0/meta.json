@@ -53,5 +53,7 @@
     "timm_mobilenetv3_large_100_train_043",
     "timm_timm_mobilenetv3_large_100_train_train_001",
     "torchbench_mobilenet_v3_large_train_001"
-  ]
+  ],
+  "oracle_status": "broken",
+  "oracle_broken_reason": "oracle signature mismatch (wrong arg count)"
 }

@@ -40,5 +40,7 @@
   "n_models": 1,
   "models": [
     "hf_MegatronBertForCausalLM_infer_000"
-  ]
+  ],
+  "oracle_status": "broken",
+  "oracle_broken_reason": "triton cache key error (list vs tuple)"
 }

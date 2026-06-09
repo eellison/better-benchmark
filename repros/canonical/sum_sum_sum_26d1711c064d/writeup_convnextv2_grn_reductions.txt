@@ -1,0 +1,16 @@
+repro_id: sum_sum_sum_26d1711c064d
+oracle: oracle_convnextv2_grn_reductions
+check: PASS
+oracle_us: 122.66
+compile_us: 155.49
+ratio: 1.268
+status: GOOD
+classification: SCHEDULER_FUSION
+
+Gap diagnosis: Oracle stages shared per-batch/per-channel spatial statistics for
+the three returned f32[2560] reductions in the ConvNeXtV2 exact-GELU plus GRN backward
+reduction fragment. Inductor lowers the same graph as generic pointwise/reduction pieces
+with repeated GELU/GRN math around reductions with different axes.
+
+Fix: Recognize this reduction DAG, compute the shared spatial statistics once, and
+fuse the downstream channel reductions through a small template.
