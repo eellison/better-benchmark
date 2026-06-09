@@ -199,6 +199,17 @@ def run_tests():
     assert CALLS[-1] == ("reduction", {"persistent": False, "RBLOCK": 128}), CALLS[-1]
     print("PASS strategy kwargs (looped vs persistent)")
 
+    # --- empty signature: repro with zero tensor inputs (29 in corpus) ------
+    fresh()
+    oracle_impl(hardware="H100", shapes="()")(make("no_tensors"))
+    _, info = resolve_oracle(make("entry"), [512, 3.0])  # scalars only
+    assert info["matched"] == "shape" and info["fn_name"] == "no_tensors", info
+    fresh()
+    oracle_impl(hardware="H100", shapes="(S([1, -1, 512, 512]))")(make("s_only"))
+    _, info = resolve_oracle(make("entry"), [512])
+    assert info["matched"] == "shape" and info["fn_name"] == "s_only", info
+    print("PASS empty / S()-only signatures match scalar-only inputs")
+
     # --- unmigrated module: resolve is a no-op ------------------------------
     def plain_oracle(inputs):
         return "plain"

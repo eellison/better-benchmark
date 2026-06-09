@@ -202,8 +202,12 @@ class OracleRegistry:
             return None, False
         shape = tuple(shape)
         if len(shape) == 0:
-            # 0-d key input shape (scalar tensor)
-            return ((),), False
+            # Empty FULL signature: the repro has zero tensor inputs (29
+            # corpus repros have _shapes_config of "()" or S()-only — all
+            # inputs are shape params/scalars). Matches an empty
+            # get_shape_key(). (A scalar tensor registers as ((),) — a
+            # 1-tuple containing the empty shape — not as ().)
+            return (), True
         if all(isinstance(d, int) for d in shape):
             return (shape,), False
         if all(isinstance(s, (tuple, list, torch.Size)) for s in shape):
@@ -301,6 +305,12 @@ class OracleRegistry:
                    torch.int64: "i64", torch.int32: "i32",
                    torch.int16: "i16", torch.int8: "i8",
                    torch.bool: "b8", torch.uint8: "u8"}
+            for _name, _tok in (("float8_e4m3fn", "f8e4m3fn"),
+                                ("float8_e5m2", "f8e5m2"),
+                                ("float8_e4m3fnuz", "f8e4m3fnuz"),
+                                ("float8_e5m2fnuz", "f8e5m2fnuz")):
+                if hasattr(torch, _name):
+                    _DT[getattr(torch, _name)] = _tok
             actual_dtypes = tuple(_DT.get(t.dtype, str(t.dtype)) for t in inputs
                                   if isinstance(t, torch.Tensor))
             if (len(actual_dtypes) == len(reg_dtypes)
@@ -420,7 +430,8 @@ def parse_shapes_signature(shapes, *, with_dtypes=False):
         return None
 
     ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm}
-    for d in ("f32", "f16", "bf16", "f64", "i64", "i32", "i16", "i8", "b8", "u8"):
+    for d in ("f32", "f16", "bf16", "f64", "i64", "i32", "i16", "i8", "b8", "u8",
+              "f8e4m3fn", "f8e5m2", "f8e4m3fnuz", "f8e5m2fnuz"):
         ns[d] = d
     parsed = eval(shapes, ns)  # noqa: S307 - trusted repo-internal strings
 
