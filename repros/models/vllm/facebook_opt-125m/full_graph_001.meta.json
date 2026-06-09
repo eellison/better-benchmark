@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "inputs": [
+    {
+      "kind": "tensor",
+      "name": "arg0_1",
+      "shape": [
+        4,
+        512
+      ],
+      "dtype": "int64",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "index",
+        "low": 0,
+        "high": 512
+      },
+      "gen": {
+        "kind": "index",
+        "low": 0,
+        "high": 512
+      },
+      "constraint_source": "annotation_default"
+    },
+    {
+      "kind": "tensor",
+      "name": "arg1_1",
+      "shape": [
+        2050,
+        768
+      ],
+      "dtype": "float16",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    }
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_001.py",
+  "source": {
+    "kind": "model",
+    "suite": "vllm",
+    "mode": null,
+    "model": "facebook_opt-125m",
+    "graph": "full_graph_001.py"
+  }
+}
