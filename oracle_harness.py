@@ -179,6 +179,13 @@ class OracleRegistry:
             raise TypeError(f"configs must be a dict or None, got {type(configs).__name__}")
 
         def decorator(fn):
+            for prev in self._entries:
+                if prev["hardware"] == hardware and prev["shape"] == norm_shape:
+                    print(f"WARNING: duplicate oracle registration for "
+                          f"(hardware={hardware!r}, shape={norm_shape!r}): "
+                          f"{prev['description']} shadows {description or fn.__name__}",
+                          file=sys.stderr)
+                    break
             self._entries.append({
                 "hardware": hardware,
                 "shape": norm_shape,        # tuple of tuples, or None
@@ -650,6 +657,14 @@ def check_oracle(
     Returns:
         True if all non-stochastic outputs pass.
     """
+    # Resolve oracle_impl dispatch so --check verifies the SAME callable that
+    # --bench times (e.g. a B200 kwargs variant, not the undecorated default).
+    try:
+        oracle_forward, _dispatch_info = resolve_oracle(oracle_forward, inputs)
+    except OracleDispatchError as e:
+        print(f"  NO_ORACLE_FOR_SHAPE: {str(e)[:200]}")
+        return False
+
     stochastic = detect_stochastic_outputs(instance, inputs) if skip_stochastic else set()
 
     with torch.no_grad():
