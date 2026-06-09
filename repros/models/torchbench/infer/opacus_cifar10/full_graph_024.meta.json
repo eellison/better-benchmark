@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "inputs": [
+    {
+      "kind": "tensor",
+      "name": "arg0_1",
+      "shape": [
+        10,
+        512
+      ],
+      "dtype": "float32",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "arg1_1",
+      "shape": [
+        10
+      ],
+      "dtype": "float32",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "arg2_1",
+      "shape": [
+        64,
+        512
+      ],
+      "dtype": "float32",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    }
+  ],
+  "outputs": [],
+  "tensor_attrs": {},
+  "graph": "full_graph_024.py",
+  "source": {
+    "kind": "model",
+    "suite": "torchbench",
+    "mode": "infer",
+    "model": "opacus_cifar10",
+    "graph": "full_graph_024.py"
+  }
+}

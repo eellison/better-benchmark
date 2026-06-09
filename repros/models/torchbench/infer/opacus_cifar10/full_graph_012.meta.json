@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "inputs": [
+    {
+      "kind": "symint",
+      "name": "arg0_1",
+      "value": 32
+    },
+    {
+      "kind": "symint",
+      "name": "arg1_1",
+      "value": 32
+    },
+    {
+      "kind": "tensor",
+      "name": "arg2_1",
+      "shape": [
+        64,
+        128,
+        32,
+        32
+      ],
+      "dtype": "float32",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      },
+      "symbolic_dims": [
+        {
+          "dim": 2,
+          "symbol": "s57",
+          "default": 32
+        },
+        {
+          "dim": 3,
+          "symbol": "s39",
+          "default": 32
+        }
+      ]
+    },
+    {
+      "kind": "tensor",
+      "name": "arg3_1",
+      "shape": [
+        64,
+        128,
+        32,
+        32
+      ],
+      "dtype": "float32",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      },
+      "symbolic_dims": [
+        {
+          "dim": 2,
+          "symbol": "s57",
+          "default": 32
+        },
+        {
+          "dim": 3,
+          "symbol": "s39",
+          "default": 32
+        }
+      ]
+    }
+  ],
+  "outputs": [],
+  "tensor_attrs": {},
+  "graph": "full_graph_012.py",
+  "source": {
+    "kind": "model",
+    "suite": "torchbench",
+    "mode": "infer",
+    "model": "opacus_cifar10",
+    "graph": "full_graph_012.py"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "inputs": [
+    {
+      "kind": "tensor",
+      "name": "arg0_1",
+      "shape": [
+        204,
+        204,
+        26
+      ],
+      "dtype": "float64",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "arg1_1",
+      "shape": [
+        204,
+        204,
+        26
+      ],
+      "dtype": "float64",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    },
+    {
+      "kind": "tensor",
+      "name": "arg2_1",
+      "shape": [
+        1,
+        1,
+        26
+      ],
+      "dtype": "float64",
+      "stride": null,
+      "device": null,
+      "storage_offset": 0,
+      "generator": {
+        "kind": "randn"
+      }
+    }
+  ],
+  "outputs": [],
+  "tensor_attrs": {},
+  "graph": "full_graph_000.py",
+  "source": {
+    "kind": "model",
+    "suite": "torchbench",
+    "mode": "infer",
+    "model": "pyhpc_equation_of_state",
+    "graph": "full_graph_000.py"
+  }
+}
