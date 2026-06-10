@@ -76,19 +76,34 @@ DISTRIBUTED_ERROR_PATTERNS = [
 # Model list loading
 # ============================================================================
 
+def _parse_model_list_line(line: str) -> tuple[str, int] | None:
+    """Parse a model list line (supports both comma and space separators)."""
+    line = line.strip()
+    if not line or line.startswith("#"):
+        return None
+    # Try comma first, then whitespace
+    if "," in line:
+        parts = line.split(",")
+    else:
+        parts = line.split()
+    if len(parts) >= 2:
+        name = parts[0].strip()
+        try:
+            bs = int(parts[1].strip())
+            return name, bs
+        except ValueError:
+            return None
+    return None
+
+
 def load_timm_models() -> dict[str, int]:
     """Load timm model names and batch sizes from the dynamo runner list."""
     path = PYTORCH_DYNAMO_DIR / "timm_models_list.txt"
     models = {}
     for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        parts = line.split(",")
-        if len(parts) >= 2:
-            name = parts[0].strip()
-            bs = int(parts[1].strip())
-            models[name] = bs
+        parsed = _parse_model_list_line(line)
+        if parsed:
+            models[parsed[0]] = parsed[1]
     return models
 
 
@@ -103,15 +118,9 @@ def load_hf_models() -> dict[str, int]:
     }
     models = {}
     for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        parts = line.split(",")
-        if len(parts) >= 2:
-            name = parts[0].strip()
-            bs = int(parts[1].strip())
-            if name not in skip:
-                models[name] = bs
+        parsed = _parse_model_list_line(line)
+        if parsed and parsed[0] not in skip:
+            models[parsed[0]] = parsed[1]
     return models
 
 
@@ -130,15 +139,9 @@ def load_torchbench_models() -> dict[str, int]:
     }
     models = {}
     for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        parts = line.split(",")
-        if len(parts) >= 2:
-            name = parts[0].strip()
-            bs = int(parts[1].strip())
-            if name not in skip:
-                models[name] = bs
+        parsed = _parse_model_list_line(line)
+        if parsed and parsed[0] not in skip:
+            models[parsed[0]] = parsed[1]
     return models
 
 
