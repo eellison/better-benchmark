@@ -243,3 +243,32 @@ special path.
 | 4 | Flip granularity: per-suite vs corpus-wide | First flip | Per-suite — smaller blast radius, earlier feedback |
 | 5 | Oracle translation ownership: which floors port mechanically vs re-written | Phase §5 | Oracle server decides per pattern; dispatch registration makes either a 2-line landing |
 | 6 | Ladder policy for wave-2 families (which BS/seq points) | Wave 2 bench | Per-family policy doc; decode ladder for vllm (1,2,4,...,64), seq ladder for LMs |
+
+---
+
+## Appendix: Wave 0 findings (2026-06-10, mobilenetv2_100 bf16)
+
+Wave 0 ran GREEN — full chain validated (capture/stamps → refcounts →
+zero-UNMATCHED accounting → roll-up → per-fusion improvement table).
+Found and FIXED before wave 1: write-gate TracingContext bug (every
+sidecar would have stamped roundtrip:failed; fix `1a17b643f`).
+
+Known properties to carry into wave-1 interpretation:
+1. **Tiny-kernel launch floor**: a single CUDAGraph replay has a ~6us
+   launch floor on B200; standalone times for tiny kernels (<~30us)
+   include it, so Σ(parts × occurrences) modestly overcounts fusible time
+   for many-small-kernel CNNs (mobilenetv2: 1027us standalone-sum vs
+   ~763us in-model). DECISION: keep the benchmarking methodology
+   untouched (pure CUDAGraph, no profiler mixing, no correction factors
+   in the harness); launch-overhead accounting is done elsewhere
+   (analysis layer) if/when needed.
+2. **Survivor floors don't carry across dtype/hardware**: ported
+   BN-affine oracle (H100/f16 → B200/bf16) showed Inductor at/below the
+   old floor (0.78–1.00x) — apparent headroom deflated to ~0. Floors are
+   re-validated, never dtype-swapped (§5 confirmed empirically).
+3. **Exact-shape dispatch refusal works**: survivor oracles correctly
+   reported NO_ORACLE_FOR_SHAPE at the new capture point instead of
+   emitting soft floors.
+4. Soft-invariant candidate for capture: infer non-negativity for
+   variance-position inputs (randn currently yields NaN through
+   sqrt(var); harmless for timing, numerics checks must be NaN-aware).
