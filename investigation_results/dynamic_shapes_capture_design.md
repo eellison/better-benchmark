@@ -386,3 +386,41 @@ Requires recapture:
 5. Retroactive opacus parser upgrade + recapture of opacus_cifar10 (2.6).
 6. Restore the untrusted-sidecar skip for annotation-backfilled symints
    (2.5, last bullet).
+
+---
+
+## SETTLED: repro-level serialization is shapes.json (decision 2026-06-10)
+
+Per discussion: JSON sidecar instead of comment-headers in shapes.txt, for
+design flexibility. Per repro:
+
+```json
+{
+  "symbols": {"s0": {"hint": 8, "range": [1, 256]}, "s1": {"hint": 512, "range": [1, 4096]}},
+  "family": [{"shape_exprs": ["s0", "s1", 1024], "dtype": "bf16"},
+             {"shape_exprs": ["s0", "s1"], "dtype": "i64", "gen": {"kind": "index", "high": 32128}}],
+  "points": [
+    {"label": "vllm_llama_decode_bs1", "bindings": {"s0": 1, "s1": 1}, "source": "captured"},
+    {"label": "vllm_llama_decode_bs64", "bindings": {"s0": 64, "s1": 1}, "source": "ladder"}
+  ]
+}
+```
+
+- `symbols`: shared table — cross-input dim sharing is expressible (both
+  inputs binding s0 move together). Ranges from shape_env when available.
+- `family`: per-input shape exprs (ints for static dims, symbol names or
+  expr strings like "2*s0" for dynamic). dtype + gen constraints live here
+  once, not per point.
+- `points`: a concrete point is just a symbol binding. `source` records
+  provenance: "captured" (observed) vs "ladder" (added for evaluation).
+  Point SELECTION is a benchmarking-policy decision, not capture's job —
+  capture records only what it observed.
+- TRANSITION: shapes.txt is GENERATED from shapes.json (concrete lines,
+  same format) so load_shape_configs / oracle signatures / dispatch keep
+  working unchanged. Consumers migrate to the JSON at leisure.
+- Static repros get a degenerate shapes.json (no symbols, one captured
+  point). Model-level sidecars (full_graph meta.json) carry the same
+  symbols/shape_exprs structure per the design above.
+- Oracles and dispatch stay EXACT-SHAPE per the settled oracle_impl design;
+  the family exists to generate points and document structure, never to
+  fuzzy-match.
