@@ -106,3 +106,17 @@ OUTPUT (Swin rel-pos bias table / Qwen vocab gradient), not consumed by
 reductions — the reduction-over-scatter identity does not apply. They need
 a different optimization (duplicate-index scatter materialization);
 unchanged by this work, separate diagnosis required.
+
+## E2E validation (2026-06-10): PARTITIONER ARTIFACT for squeezenet1_1
+Full-model backward validation shows the pass NEVER fires on
+torchbench/train/squeezenet1_1/full_graph_001.py: in the real graph every
+where(mask, 0, scatter_view_slice) feeds BOTH sum.dim_IntList (bias grad)
+AND convolution_backward (weight grad), so the scatter output must
+materialize and the pass's all-users-rewritable guard correctly rejects all
+chains. Fix ON vs OFF on the full graph: 16769us vs 16787us (0.1%, noise),
+identical kernel sets. The repro's "scatter consumed only by sums" property
+was manufactured by the capture partitioner dropping the conv_backward
+consumer. Repro-level result (737->99us) is real for the isolated pattern
+and the other 10 rewritten repros stand, but the squeezenet model
+attribution does not compose. Full analysis:
+investigation_results/squeezenet_scatter_e2e_validation.md
