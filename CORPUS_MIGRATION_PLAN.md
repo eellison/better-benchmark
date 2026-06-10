@@ -254,14 +254,19 @@ Found and FIXED before wave 1: write-gate TracingContext bug (every
 sidecar would have stamped roundtrip:failed; fix `1a17b643f`).
 
 Known properties to carry into wave-1 interpretation:
-1. **Tiny-kernel launch floor**: a single CUDAGraph replay has a ~6us
-   launch floor on B200; standalone times for tiny kernels (<~30us)
-   include it, so Σ(parts × occurrences) modestly overcounts fusible time
-   for many-small-kernel CNNs (mobilenetv2: 1027us standalone-sum vs
-   ~763us in-model). DECISION: keep the benchmarking methodology
-   untouched (pure CUDAGraph, no profiler mixing, no correction factors
-   in the harness); launch-overhead accounting is done elsewhere
-   (analysis layer) if/when needed.
+1. **Many-tiny-kernel models are a structural limit of standalone repro
+   benchmarking, not a measurement artifact.** For models like
+   mobilenetv2 (52 fusible launches of 7–23us), the real optimization
+   lever is horizontal fusion / combo kernels / launch scheduling — which
+   is INVISIBLE to a standalone repro by construction: a repro is one
+   partition; horizontal-fusion profit exists only among sibling kernels
+   in the model. Per-kernel headroom numbers miss the lever entirely.
+   DECISION: benchmarking methodology stays untouched (pure CUDAGraph, no
+   profiler mixing, no correction factors). For launch-granularity-bound
+   models, the accounting should CLASSIFY them as such and route the
+   question to the full-model runner (e2e with/without combo_kernels
+   etc.) rather than emit per-pattern headroom. Launch-overhead
+   accounting, if ever needed, lives in the analysis layer.
 2. **Survivor floors don't carry across dtype/hardware**: ported
    BN-affine oracle (H100/f16 → B200/bf16) showed Inductor at/below the
    old floor (0.78–1.00x) — apparent headroom deflated to ~0. Floors are
