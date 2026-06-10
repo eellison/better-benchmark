@@ -182,6 +182,17 @@ def check_partition_determinism(gm) -> tuple[bool, str | None]:
 # Invariant C: partition round-trip (with spelling-equivalence classification)
 # ---------------------------------------------------------------------------
 
+# Ops whose presence/spelling drifts when a saved graph is re-traced with
+# make_fx, without changing the partition's compute:
+#   - aten._unsafe_view.default: older traces spell reshape-of-contiguous as
+#     _unsafe_view; current re-traces emit aten.view (transparent).
+#   - aten.clone.default: reshape of non-contiguous decomposes to
+#     clone + _unsafe_view in some traces and is re-absorbed as plain
+#     view/clone placement drift in others.
+_VIEW_SPELLING_DRIFT_OPS = {"aten._unsafe_view.default"}
+_COPY_SPELLING_DRIFT_OPS = {"aten._unsafe_view.default", "aten.clone.default"}
+
+
 def _transparent_op_names() -> set[str]:
     from capture_hook import TRANSPARENT_OPS
 
@@ -192,8 +203,16 @@ def nontransparent_key(ops: list[str]) -> tuple[str, ...]:
     """Multiset of a partition's ops with transparent view/metadata ops
     removed — re-tracing only re-spells those (reshape->view, t->permute,
     getitem placement), so two partitions with the same non-transparent key
-    describe the same compute."""
-    transparent = _transparent_op_names()
+    describe the same compute. aten._unsafe_view is also dropped: it is a
+    pure view op that TRANSPARENT_OPS happens not to list."""
+    transparent = _transparent_op_names() | _VIEW_SPELLING_DRIFT_OPS
+    return tuple(sorted(op for op in ops if op not in transparent))
+
+
+def copy_insensitive_key(ops: list[str]) -> tuple[str, ...]:
+    """nontransparent_key with clone also dropped — matches partitions whose
+    only difference is where re-tracing placed/elided a layout copy."""
+    transparent = _transparent_op_names() | _COPY_SPELLING_DRIFT_OPS
     return tuple(sorted(op for op in ops if op not in transparent))
 
 
@@ -218,11 +237,17 @@ def compare_pattern_sets(
     """Invariant C: derived pattern-hash set vs expected pattern-hash set.
 
     expected_ops_lookup(hash) -> op list (or None if unknown) is used to
-    classify each mismatch:
-      - spelling: the missing/extra partition has the same non-transparent op
-        multiset as a partition on the other side (re-trace view-op spelling
-        drift, e.g. aten.reshape.default -> aten.view.default). KNOWN class.
-      - hard: no such counterpart — a real round-trip violation.
+    classify each mismatch. The KNOWN "spelling" class covers re-trace
+    spelling drift, in three tiers:
+      1. same non-transparent op multiset on the other side (pure view-op
+         re-spelling, e.g. aten.reshape -> aten.view, dropped _unsafe_view);
+      2. same multiset after also dropping clone (layout-copy placement
+         drift: clone+_unsafe_view chains re-trace as view/clone absorbed
+         into a neighboring partition);
+      3. the partition's copy-insensitive compute is EMPTY (a pure
+         layout/copy partition — its boundary placement is entirely a
+         spelling artifact of the trace).
+    Everything else is a hard mismatch — a real round-trip violation.
 
     Returns {"ok", "missing", "extra", "spelling", "hard"} where ok means
     no hard mismatches.
@@ -233,40 +258,58 @@ def compare_pattern_sets(
     extra = sorted(derived_hashes - expected)
 
     derived_keys = {nontransparent_key(p["ops"]) for p in derived_parts}
+    derived_copy_keys = {copy_insensitive_key(p["ops"]) for p in derived_parts}
     expected_keys: set[tuple[str, ...]] = set()
+    expected_copy_keys: set[tuple[str, ...]] = set()
     for h in expected:
         ops = expected_ops_lookup(h)
         if ops is not None:
             expected_keys.add(nontransparent_key(ops))
+            expected_copy_keys.add(copy_insensitive_key(ops))
 
     spelling: list[str] = []
     hard: list[str] = []
 
-    for h in missing:
-        ops = expected_ops_lookup(h)
-        if ops is not None and nontransparent_key(ops) in derived_keys:
+    def _classify(h: str, ops: list[str] | None, *, side: str,
+                  other_keys: set, other_copy_keys: set) -> None:
+        label = "missing" if side == "expected" else "extra"
+        if ops is None:
+            hard.append(f"{label} {h} (no op info available to classify)")
+            return
+        if nontransparent_key(ops) in other_keys:
             spelling.append(
-                f"missing {h} (expected ops {ops} re-traced under a different "
-                f"view-op spelling)"
+                f"{label} {h} (ops {ops} match a partition on the other side "
+                f"under a different view-op spelling)"
             )
-        elif ops is None:
-            hard.append(f"missing {h} (no op info available to classify)")
-        else:
-            hard.append(f"missing {h} (expected ops {ops}, no derived "
-                        f"partition with matching compute)")
+            return
+        copy_key = copy_insensitive_key(ops)
+        if copy_key and copy_key in other_copy_keys:
+            spelling.append(
+                f"{label} {h} (ops {ops} match a partition on the other side "
+                f"modulo clone/_unsafe_view layout-copy placement)"
+            )
+            return
+        if not copy_key:
+            spelling.append(
+                f"{label} {h} (ops {ops} are a pure layout/copy partition; "
+                f"boundary placement is a re-trace spelling artifact)"
+            )
+            return
+        hard.append(
+            f"{label} {h} (ops {ops}, no partition on the other side with "
+            f"matching compute)"
+        )
+
+    for h in missing:
+        _classify(h, expected_ops_lookup(h), side="expected",
+                  other_keys=derived_keys, other_copy_keys=derived_copy_keys)
 
     extra_ops_by_hash: dict[str, list[str]] = {}
     for p in derived_parts:
         extra_ops_by_hash.setdefault(p["hash"], p["ops"])
     for h in extra:
-        ops = extra_ops_by_hash.get(h, [])
-        if nontransparent_key(ops) in expected_keys:
-            spelling.append(
-                f"extra {h} (derived ops {ops} match an expected partition "
-                f"under a different view-op spelling)"
-            )
-        else:
-            hard.append(f"extra {h} (derived ops {ops} not in expected set)")
+        _classify(h, extra_ops_by_hash.get(h), side="derived",
+                  other_keys=expected_keys, other_copy_keys=expected_copy_keys)
 
     return {
         "ok": not hard,
