@@ -123,7 +123,16 @@ dynamic; static repros simply omit the symbolic keys:
 ```
 
 - `signature` keeps the existing T()/S() string WITHIN the JSON — compact,
-  human-readable, existing parser, copy-paste into `oracle_impl(shapes=)`.
+  human-readable, existing parser.
+- **Oracle dispatch keys on the point hash [SETTLED]**:
+  `oracle_impl(hardware="B200", point="75902420")` (or a list of points,
+  with shared-body kwargs). Dispatch computes the input-derivable shape
+  hash of the runtime inputs and matches by hash equality — no signature
+  parsing or structural comparison. `shapes=` (verbose signature string)
+  remains as fallback for standalone oracles. Unknown hash → loud
+  NO_ORACLE_FOR_SHAPE listing registered points with their readable
+  signatures from shapes.json. This also makes the GC prepare gate's
+  oracle-coverage check mechanical: coverage is per point hash.
 - `models` solves the provenance problem the txt labels smuggled
   (`<model>_<hash>:`), and carries occurrences + generation per model —
   the keys the migration/accounting need and txt could not hold.
