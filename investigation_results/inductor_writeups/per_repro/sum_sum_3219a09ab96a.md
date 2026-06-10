@@ -50,6 +50,59 @@ scatter base is full(0) (or add sum(base) separately); ALL consumers are full
 reductions over scattered dims (slices → dest range tests, where(m,0,x) →
 multiply by !m gathered at dest); sum/add semiring only.
 
-## Status: DIAGNOSED_PENDING_IMPLEMENTATION (awaiting altitude decision +
-free fx_passes agent slot; do not dispatch concurrently with the MT5 scatter
-agent — same file)
+## Status: IMPLEMENTED (2026-06-10, commit 5489b8c2bb9 on pr-184905)
+
+### Result (official harness, B200, fresh cache, CUDAGraph + GPU lock)
+- Before: oracle 204.6us, compile 736.3us, ratio 3.60x
+- After:  oracle 203.8us, compile 91.8us,  ratio 0.45x — compile BEATS the
+  hand-written Triton oracle by 2.2x.
+- Kernels: 3 before (zeros-init poi / atomic-scatter poi / masked-reduce red,
+  201MB traffic w/ 382MB-class scratch) -> 7 after but no scratch buffer and
+  no atomics: 1 fused gather-predicate red kernel producing both [B,C]
+  partial pairs + per-output {mask-count red, [B,C] combine red, [C] final
+  per} (the 7 tiny reduction kernels total ~92us).
+
+### What was implemented (commit 5489b8c2bb9)
+- torch/_inductor/fx_passes/scatter_reduce_fusion.py:
+  - New entry `scatter_add_gather_reduce_pass` (line ~365): default-ON pass
+    running the existing Phase-1a scatter_add chain detection/rewrite under
+    new config flag `scatter_add_reduce_elimination`
+    (TORCHINDUCTOR_SCATTER_ADD_REDUCE_ELIMINATION, default 1). No-ops when
+    the experimental `scatter_reduce_fusion` flag is on (avoids double
+    application). Skip-connection/multiplier (UNet BN-backward) variants are
+    excluded from the default-on path — measured net-negative (see below).
+  - `_rewrite_scatter_add_reduce_chain`: switched final reduction to
+    TWO-STAGE: sum spatial dims -> [B,C] partials, then sum batch -> [C].
+    The old single-stage sum([0,2]) left only C=128 parallel reduction rows
+    on a 148-SM B200 (306us); two stages give B*C=65536 rows (92us).
+  - Safety guards added: plain sum only (keepdim=False/no dtype arg),
+    scatter_dim==1, idx.shape==src.shape, mask shape == sliced view shape,
+    0-dim fill scalar, src rows factor as [B,C_full], CUDA-only, device from
+    graph meta (was hard-coded cuda).
+- torch/_inductor/config.py: new flag `scatter_add_reduce_elimination`.
+- torch/_inductor/fx_passes/post_grad.py: registration after
+  scatter_reduce_fusion.
+
+### Corpus impact (coord-descent us, flag OFF -> ON)
+sum_sum_3219a09ab96a 736->92; sum_18262b26934c 1357->299;
+sum_sum_8bcd6e12dcd4 793->158; sum_7ee057acd9bc 491->117;
+sum_3ee4028cab37 676->159; sum_7df61c52c7f8 709->146;
+sum_34d3dca078b3 1067->481; sum_14fe7b321763 278->89;
+sum_8a66186d1ffe 147->50; sum_bc4a942a8c4f 159->52; sum_f4f71b921e96 37->22.
+All 11 pass eager-vs-compiled at 1e-2. No regressions:
+sum_sum_sum_04ab10ca59ee 0.83x unchanged, pointwise_27183a793fcd at floor.
+
+### Deliberately excluded (measured net-negative, guard in pass)
+UNet BN-backward skip/mult variants (sum_sum_sum_{612b509be4a7,
+cad09d5cca79, 1627b1a3a6f6, 8e6cde42e572}): rewrite needs the f32
+multiplier gathered at destinations + skip/fill terms re-reading the
+output space; at B=8 this lost 1.7-2.2x vs baseline. Still reachable via
+TORCHINDUCTOR_SCATTER_REDUCE_FUSION=1.
+
+### Family-membership correction
+sum_sum_sum_4d7a27f102ca (2.67x) and sum_sum_d73ef74614dc (2.50x) are NOT
+this family: in both, the index_put(accumulate=True) result is a GRAPH
+OUTPUT (Swin rel-pos bias table / Qwen vocab gradient), not consumed by
+reductions — the reduction-over-scatter identity does not apply. They need
+a different optimization (duplicate-index scatter materialization);
+unchanged by this work, separate diagnosis required.
