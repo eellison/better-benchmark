@@ -56,3 +56,29 @@ Env var: `TORCHINDUCTOR_DEDUPE_GRAPH_OUTPUTS=0` to disable.
 - `torch/_inductor/fx_passes/dedupe_graph_outputs.py` - the dedup pass
 - `torch/_inductor/fx_passes/post_grad.py:687-694` - pass registration
 - `torch/_inductor/config.py:1249-1253` - config flag
+
+## Bugfix 2026-06-10: crash on AOT backward graphs (wave-0c finding)
+
+The pass crashed on resnet18's BACKWARD graph under autocast bf16 with
+"Argument 'sum_8' of Node 'mul_5' was used before it has been defined"
+(same class as the timm_repvgg_a2_train sweep failure, "sum_4 used before
+defined").
+
+Root cause (corrected from the wave-0c "AOT hands non-topo graphs" diagnosis):
+the input graph IS topologically sorted at pass entry (post_grad runs
+stable_topological_sort immediately before). The bug was canonical-node
+selection: the pass took the FIRST member of each duplicate group in
+OUTPUT-TUPLE order as canonical. In AOT backward graphs a duplicate output
+(BN bias-grad `sum`) can also have a non-output user (`mul` in the
+input-grad chain) defined earlier in graph order than the output-tuple-first
+node. `replace_all_uses_with` then rewired that early user to a LATER node,
+breaking topo order and failing `graph.lint()` after DCE.
+
+Fix: within each structurally-equal pair, keep whichever node is earlier in
+graph order. Since the graph is topo-sorted, every user of the later
+duplicate appears after the earlier canonical.
+
+- Commit: bb9bac0cd02 on pr-184905
+- Verified: resnet18 timm train (autocast bf16) compiles, 2 steps run, pass
+  fires 3x; timm_repvgg_a2_train full_graph_001 compiles + runs, pass fires
+  39x; this repro's oracle bench unchanged (0.678x, no regression).
