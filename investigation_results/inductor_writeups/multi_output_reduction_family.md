@@ -94,12 +94,31 @@ secondary issue is moot for this repro but may matter elsewhere.
 
 ## Fix (committed to pytorch-work pr-184905)
 
-`config.triton.evict_first_requires_r_contiguous` (new flag, default True):
-in the evict_first branch of `TritonKernel.load`, require stride 1 on a
-*reduction* tiling var; loads only x-contiguous get no eviction hint (normal
-policy). Re-loaded buffers keep the evict_last escalation. Gated to CUDA
-cc >= 10 (validated on B200; same gating precedent as
-split_reductions_for_undersaturated_gpu).
+`config.triton.evict_first_requires_aligned_strides` (new flag, default True),
+`TritonKernel.load` + `TritonKernel.store`. Final shape after two refinement
+rounds driven by counterexamples:
 
-Primary result: sum_011e69da166d 1.42x -> **0.98x** (573.3us -> 395.0us,
+1. v1 (drop evict_first whenever not r-contiguous) — regressed
+   sum_31bf563cdf96 0.946x and sum_2bcc7099936f 0.957x: their x-contiguous
+   loads have 128B-ALIGNED strides (2304*4, 4096*4), where segments never
+   straddle CTA boundaries and evict_first stays profitable.
+2. v2 (require misaligned constant stride too) — fixed those, but
+   sum_sum_666d023699ba (col sum [4096,30000], misaligned 30000*4 stride,
+   NO side store) regressed 0.93x: isolated module A/B confirmed evict_first
+   is GOOD there (292.9 vs 313.7us). Difference vs the primary: pure
+   streaming reduction (no full-size store competing for L2), boundary lines
+   get a chance to survive; and sum_sum_f4d29f9ee6ad showed +1.04x mostly
+   from its side-store kernel.
+3. v3 (final): drop evict_first only when ALL of:
+   - load is x-contiguous but NOT r-contiguous,
+   - some non-unit constant stride is not 128B-aligned,
+   - the kernel ALSO has an rindex-ed (full-size) store inside the reduction
+     loop (`self.has_store_with_rindex`, set in `store()`, resolved via the
+     existing DelayReplaceLine deferral) — i.e. exactly the fused
+     multi-output "reduction + pointwise side output" shape this family is
+     named for.
+   Gated to CUDA cc >= 10 (validated on B200). Symbolic strides keep
+   evict_first conservatively. Re-loaded buffers keep evict_last escalation.
+
+Primary result: sum_011e69da166d 1.42x -> **0.98x** (573.3us -> 394-395us,
 oracle 403.3us) — beats the hand-written oracle.
