@@ -138,8 +138,12 @@ def test_int_offsets_observed_fallback():
 
     model = OffsetsModel()
     x_float = torch.randn(4, 3, 8)
-    # Offsets with max=11, which is larger than max(shape)=8
+    # Offsets with max=11, which is larger than max(shape)=8.
+    # Pin one element to 11 — randint may not hit its max in a sample, and
+    # the contract is bound == observed.max + 1, not "covers the
+    # distribution's theoretical max".
     offsets_int = torch.randint(0, 12, (4, 3), dtype=torch.int64)
+    offsets_int[0, 0] = 11
 
     _, sidecar_inputs, captured, output_dir = _capture_model(model, x_float, offsets_int)
 
