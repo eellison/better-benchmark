@@ -8,15 +8,25 @@ changes touching repros/.
 Usage:
     python scripts/validate_corpus_invariants.py
 
+    # Full-graph round-trip invariants (A: input round-trip, B: partition
+    # determinism, C: partition round-trip vs manifest). Samples 2 models per
+    # suite by default; --all validates every model dir with full_graph_*.py.
+    python scripts/validate_corpus_invariants.py --full-graph-roundtrip
+    python scripts/validate_corpus_invariants.py --full-graph-roundtrip --all
+
 Exit codes:
     0 - all hard invariants pass (soft warnings may be present)
     1 - one or more hard invariants violated
+       (in --full-graph-roundtrip mode: any A/B violation, trace failure, or
+        non-spelling C mismatch)
 """
 
 from __future__ import annotations
 
+import argparse
 import ast
 import json
+import random
 import sys
 from pathlib import Path
 
@@ -24,6 +34,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CANONICAL_DIR = ROOT / "repros" / "canonical"
 MODELS_DIR = ROOT / "repros" / "models"
 BASELINE_PATH = ROOT / ".corpus_baseline.json"
+
+sys.path.insert(0, str(ROOT))
 
 
 # ---------------------------------------------------------------------------
@@ -311,10 +323,290 @@ def warn_pattern_count_per_model(baseline: dict) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# Full-graph round-trip invariants (--full-graph-roundtrip)
+# ---------------------------------------------------------------------------
+
+def _model_dirs_with_full_graphs() -> dict[str, list[Path]]:
+    """suite -> sorted list of model dirs containing full_graph_*.py."""
+    by_suite: dict[str, list[Path]] = {}
+    seen: set[Path] = set()
+    for g in MODELS_DIR.rglob("full_graph_*.py"):
+        d = g.parent
+        if d in seen:
+            continue
+        seen.add(d)
+        suite = d.relative_to(MODELS_DIR).parts[0]
+        by_suite.setdefault(suite, []).append(d)
+    for dirs in by_suite.values():
+        dirs.sort()
+    return by_suite
+
+
+def _manifest_only_dirs() -> int:
+    """Count model dirs that have manifest.json but NO full_graph_*.py.
+
+    These are a separate KNOWN class: the full post-grad graph was never
+    saved (or was captured before graph_dir support), so round-trip
+    validation cannot apply. They need recapture, not validation.
+    """
+    count = 0
+    for m in MODELS_DIR.rglob("manifest.json"):
+        if not list(m.parent.glob("full_graph_*.py")):
+            count += 1
+    return count
+
+
+def validate_model_roundtrip(
+    model_dir: Path,
+    *,
+    max_graphs: int | None = None,
+) -> dict:
+    """Run invariants A/B/C for one model dir. Returns a result dict."""
+    from roundtrip_validation import (
+        canonical_repro_ops,
+        check_input_roundtrip,
+        check_partition_determinism,
+        compare_pattern_sets,
+        derive_partitions,
+        trace_full_graph_fake,
+    )
+    from full_graph_harness import load_full_graph_definition
+
+    result = {
+        "model_dir": str(model_dir.relative_to(ROOT)),
+        "suite": model_dir.relative_to(MODELS_DIR).parts[0],
+        "graphs": [],
+        "a_failures": [],      # invariant A: input round-trip
+        "b_failures": [],      # invariant B: partition determinism
+        "c": None,             # invariant C: vs manifest.json
+        "c_known_class": None, # "no-manifest" when C cannot apply
+        "trace_failures": [],  # graphs that could not be re-traced at all
+    }
+
+    graph_paths = sorted(model_dir.glob("full_graph_*.py"))
+    if max_graphs is not None:
+        graph_paths = graph_paths[:max_graphs]
+
+    derived_parts_all: list[dict] = []
+    for gpath in graph_paths:
+        gname = gpath.name
+        result["graphs"].append(gname)
+
+        # --- Invariant A: input round-trip ---
+        try:
+            definition = load_full_graph_definition(gpath)
+        except Exception as exc:
+            result["a_failures"].append(
+                f"{gname}: load failed: {type(exc).__name__}: {exc}"
+            )
+            continue
+        a_failures = check_input_roundtrip(definition)
+        if a_failures:
+            result["a_failures"].extend(f"{gname}: {f}" for f in a_failures)
+            continue
+
+        # --- Re-trace (required for B and C) ---
+        try:
+            gm = trace_full_graph_fake(definition)
+        except Exception as exc:
+            result["trace_failures"].append(
+                f"{gname}: {type(exc).__name__}: {str(exc)[:300]}"
+            )
+            continue
+
+        # --- Invariant B: partition determinism ---
+        ok, diff = check_partition_determinism(gm)
+        if not ok:
+            result["b_failures"].append(f"{gname}: {diff}")
+
+        derived_parts_all.extend(derive_partitions(gm))
+
+    # --- Invariant C: partition round-trip vs manifest.json ---
+    manifest_path = model_dir / "manifest.json"
+    if not manifest_path.exists():
+        result["c_known_class"] = "no-manifest"
+        return result
+    try:
+        manifest = json.loads(manifest_path.read_text())
+        expected = manifest.get("patterns", [])
+    except Exception as exc:
+        result["c"] = {
+            "ok": False,
+            "missing": [],
+            "extra": [],
+            "spelling": [],
+            "hard": [f"manifest.json unreadable: {exc}"],
+        }
+        return result
+    if result["a_failures"] or result["trace_failures"]:
+        # C would report bogus "missing" hashes if graphs failed upstream.
+        result["c_known_class"] = "skipped-upstream-failure"
+        return result
+
+    result["c"] = compare_pattern_sets(
+        derived_parts_all,
+        expected,
+        expected_ops_lookup=lambda h: canonical_repro_ops(h, CANONICAL_DIR),
+    )
+    return result
+
+
+def run_full_graph_roundtrip(
+    *,
+    sample_per_suite: int = 2,
+    validate_all: bool = False,
+    max_graphs: int | None = 10,
+    seed: int = 0,
+    json_out: Path | None = None,
+) -> int:
+    print("=" * 60)
+    print("Full-Graph Round-Trip Invariant Validation")
+    print("=" * 60)
+
+    by_suite = _model_dirs_with_full_graphs()
+    n_total = sum(len(v) for v in by_suite.values())
+    n_manifest_only = _manifest_only_dirs()
+    print(f"\n{n_total} model dirs have full_graph_*.py artifacts "
+          f"({', '.join(f'{s}={len(d)}' for s, d in sorted(by_suite.items()))})")
+    print(f"[KNOWN CLASS] {n_manifest_only} model dirs are manifest-only "
+          f"(no full_graph_*.py saved; round-trip N/A, need recapture)\n")
+
+    rng = random.Random(seed)
+    selected: list[Path] = []
+    for suite in sorted(by_suite):
+        dirs = by_suite[suite]
+        if validate_all or len(dirs) <= sample_per_suite:
+            selected.extend(dirs)
+        else:
+            selected.extend(sorted(rng.sample(dirs, sample_per_suite)))
+
+    if validate_all:
+        max_graphs = None
+
+    results = []
+    a_violations = b_violations = trace_violations = c_hard = 0
+    for model_dir in selected:
+        res = validate_model_roundtrip(model_dir, max_graphs=max_graphs)
+        results.append(res)
+
+        status_bits = []
+        if res["a_failures"]:
+            a_violations += 1
+            status_bits.append("A:FAIL")
+        else:
+            status_bits.append("A:ok")
+        if res["b_failures"]:
+            b_violations += 1
+            status_bits.append("B:FAIL")
+        elif res["trace_failures"]:
+            status_bits.append("B:skip")
+        else:
+            status_bits.append("B:ok")
+        if res["trace_failures"]:
+            trace_violations += 1
+            status_bits.append("trace:FAIL")
+        c = res["c"]
+        if c is None:
+            status_bits.append(f"C:n/a({res['c_known_class']})")
+        elif c["hard"]:
+            c_hard += 1
+            status_bits.append("C:FAIL")
+        elif c["spelling"]:
+            status_bits.append("C:ok(spelling)")
+        else:
+            status_bits.append("C:ok")
+
+        print(f"  [{' '.join(status_bits)}] {res['model_dir']} "
+              f"({len(res['graphs'])} graph(s))")
+        for f in res["a_failures"][:5]:
+            print(f"      A: {f}")
+        for f in res["b_failures"][:5]:
+            print(f"      B: {f}")
+        for f in res["trace_failures"][:5]:
+            print(f"      trace: {f}")
+        if c:
+            for f in c["hard"][:5]:
+                print(f"      C(hard): {f}")
+            for f in c["spelling"][:5]:
+                print(f"      C(spelling, known class): {f}")
+
+    print("\n" + "=" * 60)
+    print(f"Validated {len(results)} model dir(s) "
+          f"({'all' if validate_all else f'sampled {sample_per_suite}/suite, seed={seed}'})")
+    print(f"  A (input round-trip) violations:      {a_violations}")
+    print(f"  B (partition determinism) violations: {b_violations}")
+    print(f"  re-trace failures:                    {trace_violations}")
+    print(f"  C hard (non-spelling) mismatches:     {c_hard}")
+    n_spelling = sum(
+        1 for r in results
+        if r["c"] and r["c"]["spelling"] and not r["c"]["hard"]
+    )
+    print(f"  C spelling-only mismatches (known):   {n_spelling}")
+    print(f"  manifest-only dirs (known class):     {n_manifest_only}")
+
+    if json_out is not None:
+        payload = {
+            "manifest_only_dirs": n_manifest_only,
+            "sampled": not validate_all,
+            "sample_per_suite": sample_per_suite,
+            "seed": seed,
+            "results": results,
+        }
+        json_out.write_text(json.dumps(payload, indent=2) + "\n")
+        print(f"\nWrote JSON results to {json_out}")
+
+    failed = a_violations or b_violations or trace_violations or c_hard
+    print("\n" + ("FAILED" if failed else "PASSED"))
+    return 1 if failed else 0
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--full-graph-roundtrip", action="store_true",
+        help="Run full-graph round-trip invariants (A/B/C) instead of the "
+             "standard corpus invariants.",
+    )
+    parser.add_argument(
+        "--all", action="store_true",
+        help="(roundtrip mode) validate ALL model dirs with full graphs, "
+             "not a per-suite sample, and all graphs per model.",
+    )
+    parser.add_argument(
+        "--sample", type=int, default=2,
+        help="(roundtrip mode) models sampled per suite (default 2).",
+    )
+    parser.add_argument(
+        "--max-graphs", type=int, default=10,
+        help="(roundtrip mode, sampled) cap on graphs validated per model "
+             "(default 10; --all removes the cap).",
+    )
+    parser.add_argument(
+        "--seed", type=int, default=0,
+        help="(roundtrip mode) sampling seed (default 0, deterministic).",
+    )
+    parser.add_argument(
+        "--json", type=Path, default=None,
+        help="(roundtrip mode) write per-model results JSON to this path.",
+    )
+    args = parser.parse_args()
+
+    if args.full_graph_roundtrip:
+        return run_full_graph_roundtrip(
+            sample_per_suite=args.sample,
+            validate_all=args.all,
+            max_graphs=args.max_graphs,
+            seed=args.seed,
+            json_out=args.json,
+        )
+    return run_standard_invariants()
+
+
+def run_standard_invariants() -> int:
     print("=" * 60)
     print("Corpus Invariant Validation")
     print("=" * 60)
