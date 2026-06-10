@@ -18,3 +18,40 @@ Skipped per task: amax_sum_9940b361e5b4 (Longformer band assembly — separate b
 Stale-jsonl agreement: jsonl ratios match fresh measurements within noise; family genuinely open.
 
 ## Status: WIP — blocker analysis in progress
+
+## Blocker analysis (2026-06-10, fresh)
+
+The triage hypothesis (pattern match not firing for shifted/ignore-index forms) is WRONG.
+Verified via TORCHINDUCTOR_CACHE_DIR dump on amax_sum_sum_6fd07d12d98a:
+`cross_entropy_loss_online` fires (output code kernel comments show
+`%cross_entropy_loss_online_default`), and the online-softmax scalar-accumulator
+kernel is generated. The 218us gap is INSIDE the generated online-softmax loop.
+
+Per-kernel profile (compiled, 738us total):
+- kernel0 (online softmax max+sum over f32[16384, 50257]): 718us  <-- all the gap
+- kernel1 (target gather + per-row loss + partial mean): 16us
+- kernel2 (final mean): 1.5us
+Oracle does the whole thing in 520us; its row kernel is the same online logsumexp.
+
+Microbenchmark decomposition of kernel0 body (B200, interleaved best-of-3, config XBLOCK=2/R0=2048/w4):
+| variant | us | GB/s |
+|---------|----|------|
+| inductor body: `other=0.0` load + 2x `tl.where(r0_mask, v, -inf)` + `triton_helpers.max2` | 641.8 (721.6 @ coordesc-chosen 2/4096/w8) | 5170 |
+| same but `tl.max` instead of `max2` | 537.3 | 6130 |
+| `other=-inf` load, no where, `max2` | 579.4 | 5684 |
+| `other=-inf` load, no where, `tl.max` | **519.7** | 6338 |
+| oracle | 520.3 | 6457 |
+
+Blockers (file:line, pytorch-work pr-184905):
+1. torch/_inductor/codegen/triton.py:5018 (and :5140 CE variant) — scalar online-softmax
+   combine uses `triton_helpers.max2(...)` = `tl.reduce(a, dim, maximum)` with a custom
+   NaN-propagating combine fn. Compiles to a generic reduce ~104us slower than native
+   `tl.max` on B200. NaN propagation through the max output is the only semantic delta;
+   sum_exp output still propagates NaN via exp(NaN), so softmax/log-softmax/CE final
+   outputs are NaN-identical.
+2. torch/_inductor/codegen/triton.py:4158 — masked loads feeding the online-softmax
+   reduction use `other=0.0` then re-mask with `tl.where(cond, value, float('-inf'))`
+   inside the loop (triton.py:5009). Loading `other=-inf` directly removes the where
+   (~17us with tl.max, ~62us with max2).
+
+Fix direction: codegen change behind new config flag (default True), no custom kernels.
