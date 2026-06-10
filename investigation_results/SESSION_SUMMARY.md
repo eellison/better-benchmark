@@ -294,6 +294,21 @@ writes the epilogue output in the same pass. Sub-variants:
 1. **Cooperative split-K / tiled reduction** (~30 repros, 1.2-2.7x)
    - Low-occupancy reductions need more parallelism
    - Scheduler must reason about when to split-K with cooperative epilogue
+   - Design direction (2026-06-10, user): split-K vs cooperative is a FUSION-
+     STRUCTURE decision, not just a saturation knob, and ideally belongs in the
+     scheduler rather than lowering heuristics (choices.py picks split factors
+     from numel hints alone, blind to consumers). Split-K materializes partials
+     + separate combine kernel → a dependent epilogue structurally CANNOT fuse
+     (final value never exists in one kernel). Cooperative keeps the final
+     reduction value live in-kernel after the grid barrier → epilogue CAN
+     continue in the same kernel. So in some cases the right call is to CANCEL
+     split-K and choose cooperative specifically to purchase epilogue fusion
+     (when fused-epilogue bandwidth savings > split-K occupancy gain). Same
+     root principle as realize+fuse-if-tileable (TODO #9): structural decisions
+     made at lowering time without fusion knowledge should move to (or be
+     revisable by) the scheduler. Directly relevant to the
+     reduction-with-epilogue fusion family (top TODO) and the
+     COOPERATIVE_SPLIT_K queue family.
 
 2. **Embedding backward scatter-reduce epilogue** (~15 repros, 1.4-2.1x)
    - "rowwise producer → multi-target atomic scatter" pattern
