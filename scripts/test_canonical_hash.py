@@ -90,8 +90,20 @@ def _capture_spelling_gm(graph_path: Path) -> fx.GraphModule:
     no decomposition, no canonicalization (verified: 44/44 reshapes and
     14/14 clones preserved on convnextv2 train).
     """
-    instance, _inputs, _definition = load_full_graph(graph_path, default_device="cpu")
-    return torch.fx.symbolic_trace(instance)
+    instance, inputs, _definition = load_full_graph(graph_path, default_device="cpu")
+    gm = torch.fx.symbolic_trace(instance)
+    # canonicalize-before-hash needs node.meta["val"] (shape/stride/dtype) to
+    # fabricate retrace inputs; symbolic_trace doesn't populate metas, so
+    # propagate them with fake tensors. This keeps side A in the ORIGINAL
+    # spelling (no decomposition) while making it canonicalizable.
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.passes.fake_tensor_prop import FakeTensorProp
+    with FakeTensorMode(allow_non_fake_inputs=True) as mode:
+        fake_inputs = [
+            mode.from_tensor(t) if torch.is_tensor(t) else t for t in inputs
+        ]
+        FakeTensorProp(gm, mode).propagate(*fake_inputs)
+    return gm
 
 
 def _retraced_gm(graph_path: Path) -> fx.GraphModule:

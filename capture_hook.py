@@ -236,6 +236,14 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     if not output_nodes:
         output_nodes = origin_nodes
 
+    # Output order must never carry information: emit outputs in DEFINITION
+    # order (the node's position in the source graph). origin_nodes arrives
+    # in whatever order the partitioner enumerated; two captures of the same
+    # partition could otherwise serialize different output-tuple orders and
+    # mint different DAG-signature hashes for identical computations.
+    graph_pos = {n: i for i, n in enumerate(gm.graph.nodes)}
+    output_nodes = sorted(output_nodes, key=lambda n: graph_pos.get(n, 0))
+
     new_graph = fx.Graph()
     env: dict[fx.Node, fx.Node] = {}
     placeholder_info: dict[str, dict] = {}
@@ -545,16 +553,178 @@ def shape_hash_for_placeholders(placeholder_info: dict) -> str:
     return hashlib.md5(json.dumps(input_shapes).encode()).hexdigest()[:8]
 
 
-def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
-    """Extract one partition's subgraph and compute its capture-pipeline hashes.
+def canonicalize_subgraph(sub_gm, placeholder_info):
+    """ONE make_fx retrace of an extracted partition: the canonical form.
 
-    Returns dict with pattern_hash, shape_hash, sub_gm, placeholder_info,
-    shape_params — or None if extraction fails.
+    The settled identity invariant (CORPUS_MIGRATION_PLAN §1): one retrace is
+    allowed, BEFORE serialization; thereafter every trace and hash must be
+    identical. make_fx is deterministic given identical inputs, so the
+    retraced graph is a fixed point: retrace(canonical) == canonical. The
+    serialized artifact (repro.py) is generated FROM the canonical form, and
+    the pattern hash is computed FROM it — so live-cut hash, artifact hash,
+    and any later re-derivation cannot diverge (no spelling alias tables
+    needed: reshape->view, dead multi-output getitems, clone placement all
+    normalize in the retrace itself).
+
+    Input fidelity is the one care point: fake inputs are built EXACTLY from
+    placeholder_info (shape, stride, dtype, device) — wrong strides (e.g.
+    assuming contiguous for a channels-last tensor) would change which view
+    ops the retrace emits. SymInt inputs (dynamic, wave 2) are not yet
+    handled here: partitions with symint placeholders return the original
+    sub_gm unchanged (documented limitation; revisit with the dynamic-shapes
+    serialization work).
+
+    Mutation preservation: zero-user mutating ops (copy_) survive make_fx
+    because they are outputs of the extracted sub_gm (the 77a691d80 rule) —
+    make_fx keeps everything reachable from outputs. Verified by
+    scripts/test_partition_outputs.py.
+
+    Returns (canonical sub_gm, remapped placeholder_info), or the originals
+    on any retrace failure
+    (loudly, on stderr — a non-canonical artifact is better than no artifact,
+    and the roundtrip gate will flag it downstream).
+    """
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+
+    _DTYPES = {
+        "torch.float32": torch.float32, "torch.float16": torch.float16,
+        "torch.bfloat16": torch.bfloat16, "torch.float64": torch.float64,
+        "torch.int64": torch.int64, "torch.int32": torch.int32,
+        "torch.int16": torch.int16, "torch.int8": torch.int8,
+        "torch.uint8": torch.uint8, "torch.bool": torch.bool,
+    }
+
+    # The sub_gm's node metas carry FakeTensors created under the ORIGINAL
+    # trace's FakeTensorMode. make_fx requires our fabricated inputs to share
+    # that mode (mixing modes is rejected) — so fish the mode out of any
+    # placeholder's meta val and fabricate under it.
+    _graph_mode = None
+    for _n in sub_gm.graph.nodes:
+        _v = _n.meta.get("val") if hasattr(_n, "meta") else None
+        _m = getattr(_v, "fake_mode", None)
+        if _m is not None:
+            _graph_mode = _m
+            break
+
+    # Placeholder order must match the sub_gm's forward signature, which
+    # includes lifted _shape_param_N ints NOT present in placeholder_info
+    # (it only records tensor/symint inputs). Walk the graph's placeholders
+    # and fabricate per kind: tensors from placeholder_info, shape params as
+    # concrete int lists from shape_params-style metadata in their meta.
+    fake_inputs = []
+    _ph_order = [n for n in sub_gm.graph.nodes if n.op == "placeholder"]
+
+    for name, info in placeholder_info.items():
+        if info.get("dtype") == "symint":
+            print(
+                f"[canonicalize] symint placeholder {name!r}: retrace skipped "
+                f"(dynamic partitions canonicalize in wave 2)",
+                file=sys.stderr,
+            )
+            return sub_gm, placeholder_info
+        dtype = _DTYPES.get(info.get("dtype"), torch.float32)
+        shape = info.get("shape", [])
+        stride = info.get("stride") or None
+        try:
+            if _graph_mode is not None:
+                mode = _graph_mode
+            else:
+                from torch._guards import detect_fake_mode
+                mode = detect_fake_mode() or FakeTensorMode(
+                    allow_non_fake_inputs=True)
+            dev = info.get("device") or "meta"
+            with mode:
+                if stride:
+                    t = torch.empty_strided(shape, stride, dtype=dtype,
+                                            device=dev)
+                else:
+                    t = torch.empty(shape, dtype=dtype, device=dev)
+            fake_inputs.append(t)
+        except Exception as exc:
+            print(f"[canonicalize] could not fabricate input {name!r}: {exc}",
+                  file=sys.stderr)
+            return sub_gm, placeholder_info
+
+    # Interleave shape-param values into the input list at their positions.
+    # Match by KIND (tensor placeholders consume fabricated tensors in
+    # order), not by name — extraction renames placeholders.
+    if len(_ph_order) != len(fake_inputs):
+        _tensor_iter = iter(fake_inputs)
+        _full_inputs = []
+        for _ph in _ph_order:
+            _v = _ph.meta.get("val") if hasattr(_ph, "meta") else None
+            if hasattr(_v, "shape") and hasattr(_v, "dtype"):
+                _full_inputs.append(next(_tensor_iter, None))
+            else:
+                _full_inputs.append(list(_v) if isinstance(_v, (list, tuple))
+                                    else _v)
+        if any(x is None for x in _full_inputs):
+            print("[canonicalize] input interleave failed — skipping retrace",
+                  file=sys.stderr)
+            return sub_gm, placeholder_info
+        fake_inputs = _full_inputs
+
+    try:
+        with torch.no_grad():
+            canonical = make_fx(sub_gm, tracing_mode="fake")(*fake_inputs)
+    except Exception as exc:
+        print(
+            f"[canonicalize] retrace failed ({type(exc).__name__}: "
+            f"{str(exc)[:120]}) — using un-canonicalized subgraph; the "
+            f"roundtrip gate will flag any resulting drift",
+            file=sys.stderr,
+        )
+        return sub_gm, placeholder_info
+
+    # make_fx renames placeholders (arg0_1-style). placeholder_info is keyed
+    # by name and feeds _shapes_config / index inference — remap it to the
+    # canonical graph's names POSITIONALLY (make_fx preserves input order),
+    # or stride/dtype fidelity silently vanishes from the serialized repro.
+    canonical_phs = [
+        n for n in canonical.graph.nodes if n.op == "placeholder"
+    ]
+    original_items = list(placeholder_info.items())
+    if len(canonical_phs) == len(original_items):
+        remapped = {
+            ph.name: info
+            for ph, (_old, info) in zip(canonical_phs, original_items)
+        }
+        return canonical, remapped
+    # Count differs: make_fx materialized lifted shape params as their own
+    # placeholders. Remap the TENSOR subset positionally (tensor placeholders
+    # keep their relative order); shape-param placeholders need no info entry
+    # (serialization emits them as S(...) from their meta vals).
+    tensor_phs = [ph for ph in canonical_phs
+                  if hasattr(ph.meta.get("val"), "shape")]
+    if len(tensor_phs) == len(original_items):
+        remapped = {
+            ph.name: info
+            for ph, (_old, info) in zip(tensor_phs, original_items)
+        }
+        return canonical, remapped
+    print(
+        f"[canonicalize] placeholder structure changed in retrace "
+        f"({len(original_items)} tensor infos vs {len(tensor_phs)} tensor "
+        f"placeholders) — using un-canonicalized subgraph",
+        file=sys.stderr,
+    )
+    return sub_gm, placeholder_info
+
+
+def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
+    """Extract one partition's subgraph, canonicalize it (one make_fx
+    retrace — see canonicalize_subgraph), and compute the capture-pipeline
+    hashes FROM THE CANONICAL FORM.
+
+    Returns dict with pattern_hash, shape_hash, sub_gm (canonical),
+    placeholder_info, shape_params — or None if extraction fails.
     """
     result = extract_partition_subgraph(comp, gm)
     if result is None:
         return None
     sub_gm, placeholder_info, shape_params = result
+    sub_gm, placeholder_info = canonicalize_subgraph(sub_gm, placeholder_info)
     return {
         "pattern_hash": pattern_hash_for_subgraph(sub_gm),
         "shape_hash": shape_hash_for_placeholders(placeholder_info),
@@ -954,10 +1124,18 @@ if __name__ == "__main__":
         for comp in components:
             is_reduction = partition_has_reduction(comp)
 
-            result = self._extract_subgraph(comp, gm)
-            if result is None:
+            # Route through compute_partition_pattern — the SINGLE path that
+            # extracts, CANONICALIZES (one make_fx retrace; see
+            # canonicalize_subgraph), and hashes. The live capture previously
+            # extracted+hashed directly here, bypassing canonicalization,
+            # which is how live-cut hashes diverged from artifact/retrace
+            # hashes (the resnet18 wave-1 drift).
+            pattern = compute_partition_pattern(comp, gm)
+            if pattern is None:
                 continue
-            sub_gm, placeholder_info, shape_params = result
+            sub_gm = pattern["sub_gm"]
+            placeholder_info = pattern["placeholder_info"]
+            shape_params = pattern["shape_params"]
 
             # Attach observed stats to placeholder_info for integer/bool inputs.
             # The subgraph's placeholders inherit names from the full graph's nodes,
@@ -971,10 +1149,11 @@ if __name__ == "__main__":
 
             origin_ops = sorted(str(n.target) for n in comp if n.op == "call_function")
 
-            # DAG-structure hash: encodes op names + wiring (which input feeds which arg)
-            # This ensures two graphs with same ops but different connectivity get different hashes
-            pattern_key = pattern_hash_for_subgraph(sub_gm)
-            shape_key = shape_hash_for_placeholders(placeholder_info)
+            # Hashes come from the CANONICAL sub_gm (computed inside
+            # compute_partition_pattern) — identical to what any later
+            # retrace of the serialized artifact will produce.
+            pattern_key = pattern["pattern_hash"]
+            shape_key = pattern["shape_hash"]
 
             full_key = f"{pattern_key}_{shape_key}"
             if full_key in self.seen_hashes:
