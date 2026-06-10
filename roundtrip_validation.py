@@ -393,3 +393,36 @@ def stamp_roundtrip(graph_path: str | Path, verdict: dict[str, Any]) -> None:
             f"[roundtrip] WARNING: could not stamp sidecar {meta_path}: {exc}",
             file=sys.stderr,
         )
+
+
+def run_write_gate(graph_path: str | Path, original_gm=None) -> dict[str, Any]:
+    """Validate-before-write gate for capture paths that emit full_graph_*.py.
+
+    Call right after the artifact (+ sidecar) is written. Reloads the
+    just-written artifact, runs invariants A + C against the live gm, and
+    stamps the sidecar with "roundtrip": "ok" | "failed: <reason>". On
+    failure prints a loud stderr WARNING but NEVER deletes the artifact.
+
+    Runs outside any ambient FakeTensorMode (capture hooks fire inside
+    Inductor compilation, where a fake mode may be active) and never raises.
+    """
+    graph_path = Path(graph_path)
+    try:
+        try:
+            from torch._subclasses.fake_tensor import unset_fake_temporarily
+        except Exception:
+            unset_fake_temporarily = contextlib.nullcontext  # type: ignore
+
+        with unset_fake_temporarily():
+            verdict = validate_written_full_graph(
+                graph_path, original_gm=original_gm
+            )
+    except Exception as exc:
+        verdict = {
+            "status": "failed",
+            "reason": f"round-trip gate crashed: {type(exc).__name__}: {exc}",
+            "a_failures": [],
+            "c": None,
+        }
+    stamp_roundtrip(graph_path, verdict)
+    return verdict

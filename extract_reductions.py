@@ -1305,6 +1305,20 @@ def run_aten_extraction(model_fn, model_args_fn, output_dir, model_name="model",
                         f"for {full_graph_path}: {exc}",
                         file=sys.stderr,
                     )
+                # Validate-before-write gate: reload the just-written artifact,
+                # run input round-trip (A) + partition round-trip (C) against
+                # the live gm, stamp the sidecar "roundtrip": "ok"|"failed: ..".
+                # Never deletes the artifact; failures WARN loudly on stderr.
+                try:
+                    from roundtrip_validation import run_write_gate
+
+                    run_write_gate(full_graph_path, original_gm=gm)
+                except Exception as exc:
+                    print(
+                        f"[extract_reductions] WARNING: round-trip gate unavailable "
+                        f"for {full_graph_path}: {exc}",
+                        file=sys.stderr,
+                    )
             except Exception as exc:
                 print(
                     f"[extract_reductions] WARNING: could not write full graph "
