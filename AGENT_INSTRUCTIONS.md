@@ -113,7 +113,16 @@ Good: "REDUCTION_EPILOGUE_REREAD" — immediately tells you the mechanism and wh
 
 7. **Never analyze graphs via regex or AST over source text** — repro.py and full_graph_*.py are renderings of FX graphs; parse-by-text is strictly lossy (tuple returns, `= None` deletion idioms, multi-line ops all misread, producing false evidence). Load the artifact and walk the real graph: `gm.graph.nodes`, `node.users`, `node.target`, `node.meta`. If you find yourself writing a regex against graph source, stop and load the graph instead.
 
-8. **Never hand-roll benchmark loops over multiple repros** — `scripts/bench_parallel.py <dir-or-paths> --gpus ... --workers-per-gpu N` exists for exactly this: workers compile in parallel (the expensive part), the GPU flock serializes only timing. Sequentially compiling N repros in a custom loop wastes N×(compile time). Single-repro oracle work still uses `oracle_*.py --bench` directly.
+8. **Verification means consuming your own outputs** — a pipeline is not
+validated until its artifacts are exercised through every path a consumer
+will use: serialized repro.py files LOADED and EXECUTED (not just in-memory
+graphs hashed), shapes.json PARSED and inputs GENERATED, sidecars READ by
+the tools that read them. Run-status "OK" and in-memory invariants are
+producer checks, not product checks. Batch validations must include an
+execute-every-artifact leg. (Earned: a 10/10-green batch had 79/287 repros
+that were SyntaxErrors on load — caught by a human asking to "see" one.)
+
+9. **Never hand-roll benchmark loops over multiple repros** — `scripts/bench_parallel.py <dir-or-paths> --gpus ... --workers-per-gpu N` exists for exactly this: workers compile in parallel (the expensive part), the GPU flock serializes only timing. Sequentially compiling N repros in a custom loop wastes N×(compile time). Single-repro oracle work still uses `oracle_*.py --bench` directly.
 
 ## How To Test
 
