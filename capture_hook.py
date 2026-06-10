@@ -42,6 +42,420 @@ from full_graph_harness import (
 )
 
 
+# ============================================================================
+# Shared partitioning + pattern hashing (single source of truth)
+#
+# These module-level helpers define EXACTLY how the capture pipeline cuts a
+# post-grad graph into fusible partitions and how each partition is
+# content-addressed (pattern_hash / shape_hash). They are used both by the
+# capture path (_CaptureState.process_graph) and by offline accounting tools
+# (scripts/model_graph_accounting.py), guaranteeing that accounting partitions
+# are identical to how canonical repros were originally cut.
+# ============================================================================
+
+import operator as _operator
+
+# Pure view/metadata ops the partitioner treats as transparent: they may be
+# absorbed into a fusible partition but never constitute compute on their own.
+TRANSPARENT_OPS = {
+    _operator.getitem,
+    torch.ops.aten.view.default,
+    torch.ops.aten.reshape.default,
+    torch.ops.aten.permute.default,
+    torch.ops.aten.slice.Tensor,
+    torch.ops.aten.unsqueeze.default,
+    torch.ops.aten.squeeze.default,
+    torch.ops.aten.squeeze.dim,
+    torch.ops.aten.expand.default,
+    torch.ops.aten.t.default,
+    torch.ops.aten.transpose.int,
+    torch.ops.aten.select.int,
+    torch.ops.aten.as_strided.default,
+}
+
+
+def partition_node_is_supported(node: fx.Node) -> bool:
+    """Capture-pipeline fusibility test for a single node.
+
+    A node belongs in a fusible partition if it is a transparent view op or
+    Inductor's is_fusible_node says it has a fusible lowering (no BLAS/cuDNN
+    flop-counter ops, no fallbacks, no collectives).
+    """
+    from torch._inductor.fx_passes.fusion_regions import is_fusible_node
+
+    if node.op == "call_function" and node.target in TRANSPARENT_OPS:
+        return True
+    return is_fusible_node(node)
+
+
+def partition_has_reduction(nodes) -> bool:
+    """True if any node in the partition is a reduction op."""
+    for n in nodes:
+        if n.op == "call_function" and isinstance(n.target, torch._ops.OpOverload):
+            if torch.Tag.reduction in n.target.tags:
+                return True
+    return False
+
+
+def partition_has_real_compute(nodes) -> bool:
+    """Check if a partition has at least one non-transparent compute op."""
+    for n in nodes:
+        if n.op != "call_function":
+            continue
+        if n.target in TRANSPARENT_OPS:
+            continue
+        # It's a real compute op (pointwise, reduction, etc.)
+        return True
+    return False
+
+
+def _split_connected_components(nodes):
+    """Split a list of nodes into connected components by data flow."""
+    from collections import deque
+
+    node_set = set(nodes)
+    # Build adjacency: two nodes in the partition are connected if one
+    # feeds directly into another (producer -> consumer).
+    adjacency = {n: set() for n in nodes}
+    for n in nodes:
+        # Check all args: if any arg is a node in our partition, link them
+        def _link_arg(x):
+            if isinstance(x, fx.Node) and x in node_set and x is not n:
+                adjacency[n].add(x)
+                adjacency[x].add(n)
+        fx.map_arg(n.args, _link_arg)
+        fx.map_arg(n.kwargs, _link_arg)
+
+    # BFS to find connected components
+    visited = set()
+    result_components = []
+    for start in nodes:
+        if start in visited:
+            continue
+        component = []
+        queue = deque([start])
+        visited.add(start)
+        while queue:
+            cur = queue.popleft()
+            component.append(cur)
+            for neighbor in adjacency[cur]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+        result_components.append(component)
+    return result_components
+
+
+def get_fusion_partitions(gm: fx.GraphModule) -> list:
+    """Partition a post-grad GraphModule into fusible regions, EXACTLY as the
+    capture pipeline does.
+
+    Uses CapabilityBasedPartitioner + is_fusible_node (from
+    torch._inductor.fx_passes.fusion_regions) + create_op_support, with
+    transparent view ops allowed inside partitions and horizontal fusion
+    disabled (via skip_horizontal_fusion when available, otherwise a
+    connected-component split). Partitions without real compute are dropped —
+    the returned list corresponds 1:1 to the canonical repros process_graph()
+    would capture.
+
+    Returns: list of partitions, each a list of fx.Node from gm.graph.
+    """
+    import inspect
+
+    from torch.fx.passes.infra.partitioner import CapabilityBasedPartitioner
+    from torch.fx.passes.operator_support import create_op_support
+
+    def _is_supported(_submodules, node):
+        return partition_node_is_supported(node)
+
+    support = create_op_support(_is_supported)
+    _part_kwargs = dict(allows_single_node_partition=True)
+    has_skip_horizontal_fusion = (
+        'skip_horizontal_fusion'
+        in inspect.signature(CapabilityBasedPartitioner.__init__).parameters
+    )
+    if has_skip_horizontal_fusion:
+        _part_kwargs['skip_horizontal_fusion'] = True
+    partitioner = CapabilityBasedPartitioner(
+        gm, support, **_part_kwargs,
+    )
+    partitions = partitioner.propose_partitions()
+    components = [list(p.nodes.keys()) for p in partitions]
+
+    if not has_skip_horizontal_fusion:
+        split_components = []
+        for comp in components:
+            split_components.extend(_split_connected_components(comp))
+        components = split_components
+
+    return [comp for comp in components if partition_has_real_compute(comp)]
+
+
+def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
+    """Extract a standalone sub-GraphModule for one fusible partition.
+
+    Returns (sub_gm, placeholder_info, shape_params) or None.
+    """
+    seen = set()
+    unique_origins = []
+    for n in origin_nodes:
+        if id(n) not in seen:
+            seen.add(id(n))
+            unique_origins.append(n)
+    origin_nodes = unique_origins
+
+    needed_nodes: set[fx.Node] = set(origin_nodes)
+
+    output_nodes = []
+    for n in origin_nodes:
+        has_internal_user = any(
+            user in needed_nodes and user.op != "output"
+            for user in n.users
+        )
+        if not has_internal_user:
+            output_nodes.append(n)
+    if not output_nodes:
+        output_nodes = origin_nodes
+
+    new_graph = fx.Graph()
+    env: dict[fx.Node, fx.Node] = {}
+    placeholder_info: dict[str, dict] = {}
+
+    def _resolve_sym(x):
+        """Resolve SymInt/SymFloat to concrete int/float."""
+        if isinstance(x, (torch.SymInt, torch.SymFloat)):
+            return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
+        return int(x)
+
+    def _record_placeholder(name: str, meta: dict) -> None:
+        val = meta.get("val", None)
+        if val is not None and isinstance(val, torch.Tensor):
+            placeholder_info[name] = {
+                "shape": [_resolve_sym(s) for s in val.shape],
+                "stride": [_resolve_sym(s) for s in val.stride()] if not val.is_contiguous() else [],
+                "dtype": str(val.dtype),
+                "device": str(val.device),
+            }
+        elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
+            hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)
+            placeholder_info[name] = {
+                "shape": [],
+                "stride": [],
+                "dtype": "symint",
+                "device": "cpu",
+                "hint": hint,
+            }
+
+    _ph_names_used: set[str] = set()
+
+    def _unique_ph_name(base: str) -> str:
+        """Ensure placeholder names don't collide with internal node names."""
+        # Internal call_function nodes get names like full_default, clone_default, etc.
+        # Prefix external inputs to avoid collision.
+        name = base
+        if name in _ph_names_used:
+            i = 1
+            while f"{name}_{i}" in _ph_names_used:
+                i += 1
+            name = f"{name}_{i}"
+        _ph_names_used.add(name)
+        return name
+
+    def _ensure_in_env(x: Any) -> Any:
+        if isinstance(x, fx.Node):
+            if x in env:
+                return env[x]
+            name = _unique_ph_name(x.name)
+            ph = new_graph.placeholder(name)
+            ph.meta = copy.copy(x.meta) if x.meta else {}
+            env[x] = ph
+            _record_placeholder(name, x.meta or {})
+            return ph
+        return x
+
+    _VIEW_LIKE_OPS = {
+        torch.ops.aten.reshape.default,
+        torch.ops.aten.view.default,
+        torch.ops.aten.expand.default,
+    }
+
+    shape_params: dict[str, list[int]] = {}
+    _shape_counter = [0]
+
+    def _should_lift_shape(shape_list):
+        """Don't lift trivial shapes that are always the same."""
+        if not shape_list:
+            return False
+        # All dims are 0, 1, or -1 — not shape-dependent
+        if all(d in (0, 1, -1) for d in shape_list):
+            return False
+        return True
+
+    def _lift_shape_arg(node, args):
+        """For reshape/view ops, lift the shape literal to a parameter."""
+        if node.target not in _VIEW_LIKE_OPS:
+            return args
+        if len(args) < 2 or not isinstance(args[1], (list, tuple)):
+            return args
+        shape_list = list(args[1])
+        if not _should_lift_shape(shape_list):
+            return args
+        param_name = f"_shape_param_{_shape_counter[0]}"
+        _shape_counter[0] += 1
+        ph = new_graph.placeholder(param_name)
+        ph.meta = {"val": shape_list}
+        shape_params[param_name] = shape_list
+        return (args[0], ph) + tuple(args[2:]) if len(args) > 2 else (args[0], ph)
+
+    all_graph_nodes = list(gm.graph.nodes)
+    node_order = {n: i for i, n in enumerate(all_graph_nodes)}
+    sorted_needed = sorted(needed_nodes, key=lambda n: node_order.get(n, 0))
+
+    # Create placeholders for ALL external dependencies first,
+    # so they claim clean names before internal nodes are added.
+    for node in sorted_needed:
+        if node.op in ("call_function", "call_method"):
+            def _pre_register(x):
+                if isinstance(x, fx.Node) and x not in needed_nodes and x not in env:
+                    _ensure_in_env(x)
+            fx.map_arg(node.args, _pre_register)
+            fx.map_arg(node.kwargs, _pre_register)
+
+    for node in sorted_needed:
+        if node.op == "placeholder":
+            new_node = new_graph.placeholder(node.name)
+            new_node.meta = copy.copy(node.meta) if node.meta else {}
+            env[node] = new_node
+            _record_placeholder(node.name, node.meta or {})
+        elif node.op == "get_attr":
+            new_node = new_graph.get_attr(node.target)
+            new_node.meta = copy.copy(node.meta) if node.meta else {}
+            env[node] = new_node
+        elif node.op in ("call_function", "call_method"):
+            new_args = fx.map_arg(node.args, _ensure_in_env)
+            new_kwargs = fx.map_arg(node.kwargs, _ensure_in_env)
+            if node.op == "call_function":
+                new_args = _lift_shape_arg(node, new_args)
+                new_node = new_graph.call_function(
+                    node.target, args=new_args, kwargs=new_kwargs
+                )
+            else:
+                new_node = new_graph.call_method(
+                    node.target, args=new_args, kwargs=new_kwargs
+                )
+            new_node.meta = copy.copy(node.meta) if node.meta else {}
+            env[node] = new_node
+
+    mapped_outputs = [env[n] for n in output_nodes if n in env]
+    if not mapped_outputs:
+        return None
+    if len(mapped_outputs) == 1:
+        new_graph.output(mapped_outputs[0])
+    else:
+        new_graph.output(tuple(mapped_outputs))
+
+    new_graph.lint()
+    new_gm = fx.GraphModule(gm, new_graph)
+    return new_gm, placeholder_info, shape_params
+
+
+def compute_dag_signature(gm) -> list:
+    """Compute a DAG-structure signature for the graph.
+
+    Encodes: for each node in topological order, its op name, which
+    predecessor nodes feed each argument (by index), and structural
+    literal args (list/tuple values like reduction dims, permute orders).
+
+    Does NOT encode scalar int/float constants (e.g., mul by 3.0,
+    eps=1e-6) — those don't affect kernel structure.
+    """
+    nodes = list(gm.graph.nodes)
+    node_to_idx = {n: i for i, n in enumerate(nodes)}
+
+    def _encode_arg(arg, arg_idx):
+        """Encode an argument for the signature."""
+        if isinstance(arg, torch.fx.Node) and arg in node_to_idx:
+            return ("node", node_to_idx[arg], arg_idx)
+        elif isinstance(arg, (list, tuple)):
+            # Structural args: reduction dims, permute orders, reshape targets
+            # Encode the structure (length + which are ints) but not concrete values
+            # EXCEPT for small int lists (dims) where the values matter
+            if all(isinstance(x, int) for x in arg):
+                # This is a dim list like [0, 2, 1, 3] or [-1] — encode values
+                return ("dims", list(arg), arg_idx)
+            return ("list", len(arg), arg_idx)
+        elif isinstance(arg, bool):
+            # Booleans like keepdim=True matter for output shape
+            return ("bool", arg, arg_idx)
+        # Scalar int/float constants — don't encode (same kernel regardless)
+        return None
+
+    signature = []
+    for node in nodes:
+        if node.op == "placeholder":
+            signature.append(("input", node_to_idx[node]))
+        elif node.op == "call_function":
+            encoded_args = []
+            for arg_idx, arg in enumerate(node.args):
+                enc = _encode_arg(arg, arg_idx)
+                if enc is not None:
+                    encoded_args.append(enc)
+            # Also encode relevant kwargs (like correction, keepdim)
+            for kw, val in (node.kwargs or {}).items():
+                if isinstance(val, bool):
+                    encoded_args.append(("kw_bool", kw, val))
+                elif isinstance(val, (list, tuple)) and all(isinstance(x, int) for x in val):
+                    encoded_args.append(("kw_dims", kw, list(val)))
+            signature.append((str(node.target), encoded_args))
+        elif node.op == "output":
+            def _collect_output_indices(x):
+                if isinstance(x, torch.fx.Node) and x in node_to_idx:
+                    return node_to_idx[x]
+                elif isinstance(x, (tuple, list)):
+                    return [_collect_output_indices(item) for item in x]
+                return None
+            signature.append(("output", _collect_output_indices(node.args[0])))
+
+    return signature
+
+
+def pattern_hash_for_subgraph(sub_gm) -> str:
+    """Content-addressed pattern hash: ops + wiring, ignoring shapes.
+
+    This is the 12-hex hash in repros/canonical/<family>_<hash> dir names.
+    """
+    dag_signature = compute_dag_signature(sub_gm)
+    return hashlib.md5(json.dumps(dag_signature).encode()).hexdigest()[:12]
+
+
+def shape_hash_for_placeholders(placeholder_info: dict) -> str:
+    """8-hex hash of the partition's input shapes+dtypes (shape config id)."""
+    input_shapes = sorted(
+        f"{info.get('shape', '?')}:{info.get('dtype', '?')}"
+        for info in placeholder_info.values()
+    )
+    return hashlib.md5(json.dumps(input_shapes).encode()).hexdigest()[:8]
+
+
+def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
+    """Extract one partition's subgraph and compute its capture-pipeline hashes.
+
+    Returns dict with pattern_hash, shape_hash, sub_gm, placeholder_info,
+    shape_params — or None if extraction fails.
+    """
+    result = extract_partition_subgraph(comp, gm)
+    if result is None:
+        return None
+    sub_gm, placeholder_info, shape_params = result
+    return {
+        "pattern_hash": pattern_hash_for_subgraph(sub_gm),
+        "shape_hash": shape_hash_for_placeholders(placeholder_info),
+        "sub_gm": sub_gm,
+        "placeholder_info": placeholder_info,
+        "shape_params": shape_params,
+    }
+
+
 class _CaptureState:
     def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
                  validate: bool = True, capture_only: bool = False):
@@ -59,226 +473,10 @@ class _CaptureState:
             os.makedirs(graph_dir, exist_ok=True)
 
     def _extract_subgraph(self, origin_nodes: list[fx.Node], gm: fx.GraphModule):
-        seen = set()
-        unique_origins = []
-        for n in origin_nodes:
-            if id(n) not in seen:
-                seen.add(id(n))
-                unique_origins.append(n)
-        origin_nodes = unique_origins
-
-        needed_nodes: set[fx.Node] = set(origin_nodes)
-
-        output_nodes = []
-        for n in origin_nodes:
-            has_internal_user = any(
-                user in needed_nodes and user.op != "output"
-                for user in n.users
-            )
-            if not has_internal_user:
-                output_nodes.append(n)
-        if not output_nodes:
-            output_nodes = origin_nodes
-
-        new_graph = fx.Graph()
-        env: dict[fx.Node, fx.Node] = {}
-        placeholder_info: dict[str, dict] = {}
-
-        def _resolve_sym(x):
-            """Resolve SymInt/SymFloat to concrete int/float."""
-            if isinstance(x, (torch.SymInt, torch.SymFloat)):
-                return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
-            return int(x)
-
-        def _record_placeholder(name: str, meta: dict) -> None:
-            val = meta.get("val", None)
-            if val is not None and isinstance(val, torch.Tensor):
-                placeholder_info[name] = {
-                    "shape": [_resolve_sym(s) for s in val.shape],
-                    "stride": [_resolve_sym(s) for s in val.stride()] if not val.is_contiguous() else [],
-                    "dtype": str(val.dtype),
-                    "device": str(val.device),
-                }
-            elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
-                hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)
-                placeholder_info[name] = {
-                    "shape": [],
-                    "stride": [],
-                    "dtype": "symint",
-                    "device": "cpu",
-                    "hint": hint,
-                }
-
-        _ph_names_used: set[str] = set()
-
-        def _unique_ph_name(base: str) -> str:
-            """Ensure placeholder names don't collide with internal node names."""
-            # Internal call_function nodes get names like full_default, clone_default, etc.
-            # Prefix external inputs to avoid collision.
-            name = base
-            if name in _ph_names_used:
-                i = 1
-                while f"{name}_{i}" in _ph_names_used:
-                    i += 1
-                name = f"{name}_{i}"
-            _ph_names_used.add(name)
-            return name
-
-        def _ensure_in_env(x: Any) -> Any:
-            if isinstance(x, fx.Node):
-                if x in env:
-                    return env[x]
-                name = _unique_ph_name(x.name)
-                ph = new_graph.placeholder(name)
-                ph.meta = copy.copy(x.meta) if x.meta else {}
-                env[x] = ph
-                _record_placeholder(name, x.meta or {})
-                return ph
-            return x
-
-        _VIEW_LIKE_OPS = {
-            torch.ops.aten.reshape.default,
-            torch.ops.aten.view.default,
-            torch.ops.aten.expand.default,
-        }
-
-        shape_params: dict[str, list[int]] = {}
-        _shape_counter = [0]
-
-        def _should_lift_shape(shape_list):
-            """Don't lift trivial shapes that are always the same."""
-            if not shape_list:
-                return False
-            # All dims are 0, 1, or -1 — not shape-dependent
-            if all(d in (0, 1, -1) for d in shape_list):
-                return False
-            return True
-
-        def _lift_shape_arg(node, args):
-            """For reshape/view ops, lift the shape literal to a parameter."""
-            if node.target not in _VIEW_LIKE_OPS:
-                return args
-            if len(args) < 2 or not isinstance(args[1], (list, tuple)):
-                return args
-            shape_list = list(args[1])
-            if not _should_lift_shape(shape_list):
-                return args
-            param_name = f"_shape_param_{_shape_counter[0]}"
-            _shape_counter[0] += 1
-            ph = new_graph.placeholder(param_name)
-            ph.meta = {"val": shape_list}
-            shape_params[param_name] = shape_list
-            return (args[0], ph) + tuple(args[2:]) if len(args) > 2 else (args[0], ph)
-
-        all_graph_nodes = list(gm.graph.nodes)
-        node_order = {n: i for i, n in enumerate(all_graph_nodes)}
-        sorted_needed = sorted(needed_nodes, key=lambda n: node_order.get(n, 0))
-
-        # Create placeholders for ALL external dependencies first,
-        # so they claim clean names before internal nodes are added.
-        for node in sorted_needed:
-            if node.op in ("call_function", "call_method"):
-                def _pre_register(x):
-                    if isinstance(x, fx.Node) and x not in needed_nodes and x not in env:
-                        _ensure_in_env(x)
-                fx.map_arg(node.args, _pre_register)
-                fx.map_arg(node.kwargs, _pre_register)
-
-        for node in sorted_needed:
-            if node.op == "placeholder":
-                new_node = new_graph.placeholder(node.name)
-                new_node.meta = copy.copy(node.meta) if node.meta else {}
-                env[node] = new_node
-                _record_placeholder(node.name, node.meta or {})
-            elif node.op == "get_attr":
-                new_node = new_graph.get_attr(node.target)
-                new_node.meta = copy.copy(node.meta) if node.meta else {}
-                env[node] = new_node
-            elif node.op in ("call_function", "call_method"):
-                new_args = fx.map_arg(node.args, _ensure_in_env)
-                new_kwargs = fx.map_arg(node.kwargs, _ensure_in_env)
-                if node.op == "call_function":
-                    new_args = _lift_shape_arg(node, new_args)
-                    new_node = new_graph.call_function(
-                        node.target, args=new_args, kwargs=new_kwargs
-                    )
-                else:
-                    new_node = new_graph.call_method(
-                        node.target, args=new_args, kwargs=new_kwargs
-                    )
-                new_node.meta = copy.copy(node.meta) if node.meta else {}
-                env[node] = new_node
-
-        mapped_outputs = [env[n] for n in output_nodes if n in env]
-        if not mapped_outputs:
-            return None
-        if len(mapped_outputs) == 1:
-            new_graph.output(mapped_outputs[0])
-        else:
-            new_graph.output(tuple(mapped_outputs))
-
-        new_graph.lint()
-        new_gm = fx.GraphModule(gm, new_graph)
-        return new_gm, placeholder_info, shape_params
+        return extract_partition_subgraph(origin_nodes, gm)
 
     def _compute_dag_signature(self, gm) -> list:
-        """Compute a DAG-structure signature for the graph.
-
-        Encodes: for each node in topological order, its op name, which
-        predecessor nodes feed each argument (by index), and structural
-        literal args (list/tuple values like reduction dims, permute orders).
-
-        Does NOT encode scalar int/float constants (e.g., mul by 3.0,
-        eps=1e-6) — those don't affect kernel structure.
-        """
-        nodes = list(gm.graph.nodes)
-        node_to_idx = {n: i for i, n in enumerate(nodes)}
-
-        def _encode_arg(arg, arg_idx):
-            """Encode an argument for the signature."""
-            if isinstance(arg, torch.fx.Node) and arg in node_to_idx:
-                return ("node", node_to_idx[arg], arg_idx)
-            elif isinstance(arg, (list, tuple)):
-                # Structural args: reduction dims, permute orders, reshape targets
-                # Encode the structure (length + which are ints) but not concrete values
-                # EXCEPT for small int lists (dims) where the values matter
-                if all(isinstance(x, int) for x in arg):
-                    # This is a dim list like [0, 2, 1, 3] or [-1] — encode values
-                    return ("dims", list(arg), arg_idx)
-                return ("list", len(arg), arg_idx)
-            elif isinstance(arg, bool):
-                # Booleans like keepdim=True matter for output shape
-                return ("bool", arg, arg_idx)
-            # Scalar int/float constants — don't encode (same kernel regardless)
-            return None
-
-        signature = []
-        for node in nodes:
-            if node.op == "placeholder":
-                signature.append(("input", node_to_idx[node]))
-            elif node.op == "call_function":
-                encoded_args = []
-                for arg_idx, arg in enumerate(node.args):
-                    enc = _encode_arg(arg, arg_idx)
-                    if enc is not None:
-                        encoded_args.append(enc)
-                # Also encode relevant kwargs (like correction, keepdim)
-                for kw, val in (node.kwargs or {}).items():
-                    if isinstance(val, bool):
-                        encoded_args.append(("kw_bool", kw, val))
-                    elif isinstance(val, (list, tuple)) and all(isinstance(x, int) for x in val):
-                        encoded_args.append(("kw_dims", kw, list(val)))
-                signature.append((str(node.target), encoded_args))
-            elif node.op == "output":
-                def _collect_output_indices(x):
-                    if isinstance(x, torch.fx.Node) and x in node_to_idx:
-                        return node_to_idx[x]
-                    elif isinstance(x, (tuple, list)):
-                        return [_collect_output_indices(item) for item in x]
-                    return None
-                signature.append(("output", _collect_output_indices(node.args[0])))
-
-        return signature
+        return compute_dag_signature(gm)
 
     @staticmethod
     def _infer_index_bounds(gm, placeholder_info) -> dict[str, int]:
@@ -537,111 +735,13 @@ if __name__ == "__main__":
                     f"{full_graph_path}: {exc}",
                     file=sys.stderr,
                 )
-        from torch._inductor.fx_passes.fusion_regions import is_fusible_node
-        from torch.fx.passes.infra.partitioner import CapabilityBasedPartitioner
-        from torch.fx.passes.operator_support import create_op_support
-
-        import operator
-        _TRANSPARENT_OPS = {
-            operator.getitem,
-            torch.ops.aten.view.default,
-            torch.ops.aten.reshape.default,
-            torch.ops.aten.permute.default,
-            torch.ops.aten.slice.Tensor,
-            torch.ops.aten.unsqueeze.default,
-            torch.ops.aten.squeeze.default,
-            torch.ops.aten.squeeze.dim,
-            torch.ops.aten.expand.default,
-            torch.ops.aten.t.default,
-            torch.ops.aten.transpose.int,
-            torch.ops.aten.select.int,
-            torch.ops.aten.as_strided.default,
-        }
-
-        def _is_supported(_submodules, node):
-            if node.op == "call_function" and node.target in _TRANSPARENT_OPS:
-                return True
-            return is_fusible_node(node)
-
-        def _has_reduction(nodes):
-            for n in nodes:
-                if n.op == "call_function" and isinstance(n.target, torch._ops.OpOverload):
-                    if torch.Tag.reduction in n.target.tags:
-                        return True
-            return False
-
-        support = create_op_support(_is_supported)
-        _part_kwargs = dict(allows_single_node_partition=True)
-        import inspect
-        has_skip_horizontal_fusion = (
-            'skip_horizontal_fusion' in inspect.signature(CapabilityBasedPartitioner.__init__).parameters
-        )
-        if has_skip_horizontal_fusion:
-            _part_kwargs['skip_horizontal_fusion'] = True
-        partitioner = CapabilityBasedPartitioner(
-            gm, support, **_part_kwargs,
-        )
-        partitions = partitioner.propose_partitions()
-        components = [list(p.nodes.keys()) for p in partitions]
-
-        def _split_connected_components(nodes):
-            """Split a list of nodes into connected components by data flow."""
-            node_set = set(nodes)
-            # Build adjacency: two nodes in the partition are connected if one
-            # feeds directly into another (producer -> consumer).
-            from collections import deque
-            adjacency = {n: set() for n in nodes}
-            for n in nodes:
-                # Check all args: if any arg is a node in our partition, link them
-                def _link_arg(x):
-                    if isinstance(x, fx.Node) and x in node_set and x is not n:
-                        adjacency[n].add(x)
-                        adjacency[x].add(n)
-                fx.map_arg(n.args, _link_arg)
-                fx.map_arg(n.kwargs, _link_arg)
-
-            # BFS to find connected components
-            visited = set()
-            result_components = []
-            for start in nodes:
-                if start in visited:
-                    continue
-                component = []
-                queue = deque([start])
-                visited.add(start)
-                while queue:
-                    cur = queue.popleft()
-                    component.append(cur)
-                    for neighbor in adjacency[cur]:
-                        if neighbor not in visited:
-                            visited.add(neighbor)
-                            queue.append(neighbor)
-                result_components.append(component)
-            return result_components
-
-        if not has_skip_horizontal_fusion:
-            split_components = []
-            for comp in components:
-                sub_components = _split_connected_components(comp)
-                split_components.extend(sub_components)
-            components = split_components
-
-        def _has_real_compute(nodes):
-            """Check if a partition has at least one non-transparent compute op."""
-            for n in nodes:
-                if n.op != "call_function":
-                    continue
-                if n.target in _TRANSPARENT_OPS:
-                    continue
-                # It's a real compute op (pointwise, reduction, etc.)
-                return True
-            return False
+        # Shared partitioning + hashing (see module-level helpers above):
+        # this is the single source of truth for how graphs are cut into
+        # canonical repros and how each partition is content-addressed.
+        components = get_fusion_partitions(gm)
 
         for comp in components:
-            if not _has_real_compute(comp):
-                continue
-
-            is_reduction = _has_reduction(comp)
+            is_reduction = partition_has_reduction(comp)
 
             result = self._extract_subgraph(comp, gm)
             if result is None:
@@ -652,18 +752,8 @@ if __name__ == "__main__":
 
             # DAG-structure hash: encodes op names + wiring (which input feeds which arg)
             # This ensures two graphs with same ops but different connectivity get different hashes
-            dag_signature = self._compute_dag_signature(sub_gm)
-            pattern_key = hashlib.md5(
-                json.dumps(dag_signature).encode()
-            ).hexdigest()[:12]
-
-            input_shapes = sorted(
-                f"{info.get('shape', '?')}:{info.get('dtype', '?')}"
-                for info in placeholder_info.values()
-            )
-            shape_key = hashlib.md5(
-                json.dumps(input_shapes).encode()
-            ).hexdigest()[:8]
+            pattern_key = pattern_hash_for_subgraph(sub_gm)
+            shape_key = shape_hash_for_placeholders(placeholder_info)
 
             full_key = f"{pattern_key}_{shape_key}"
             if full_key in self.seen_hashes:
