@@ -47,6 +47,7 @@ regen_repro.py
 region015_logs.txt
 repro_prelude.py
 run_*.py
+!scripts/run_recapture.py
 scan_all_graphs.py
 sol_gap.py
 triage_all_v2.json
