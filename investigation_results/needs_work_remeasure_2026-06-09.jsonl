@@ -1,0 +1,110 @@
+{"repro_id": "pointwise_cf3acd87ba9e", "oracle_us": 27.33, "compile_us": 40.8, "ratio": 1.493, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_6a14a9c9ba88", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_a7c7ab7bfcf5", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_a9f6c9204966", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_ee85624361a0", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_sum_431633879271", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_sum_64f701d26f0a", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_sum_70d71fcb0d68", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_sum_7b24a3457260", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_sum_82a3f0084247", "oracle_us": 5679.07, "compile_us": 636.93, "ratio": 0.112, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_95dac16d4328", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_sum_3ec568a7ba04", "oracle_us": 25.28, "compile_us": 30.66, "ratio": 1.213, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_100fff569d2e", "oracle_us": 114.4, "compile_us": 112.26, "ratio": 0.981, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_b16afac198fb", "oracle_us": 120.48, "compile_us": 223.01, "ratio": 1.851, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_df7b99fa3465", "oracle_us": 219.97, "compile_us": 222.18, "ratio": 1.01, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_5c0f382244aa", "oracle_us": 33.54, "compile_us": 32.45, "ratio": 0.968, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_f0377fc40fe2", "oracle_us": 34.4, "compile_us": 47.84, "ratio": 1.391, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_335abef71e93", "status": "BENCH_FAILED"}
+{"repro_id": "amax_sum_sum_0e37ca9164b3", "oracle_us": 34.05, "compile_us": 44.61, "ratio": 1.31, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_2f2d7ba72160", "oracle_us": 54.05, "compile_us": 50.98, "ratio": 0.943, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_1d10e6314ef6", "oracle_us": 44.48, "compile_us": 39.65, "ratio": 0.891, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_4de1559f24a7", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_sum_56cdc50216ea", "oracle_us": 32.19, "compile_us": 31.49, "ratio": 0.978, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_cad02fe18a69", "oracle_us": 61.18, "compile_us": 61.09, "ratio": 0.998, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_e6f9af9e33b1", "oracle_us": 51.94, "compile_us": 51.04, "ratio": 0.983, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_ed8809aa30cf", "oracle_us": 82.69, "compile_us": 75.52, "ratio": 0.913, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_d112f48ea917", "oracle_us": 75.46, "compile_us": 100.22, "ratio": 1.328, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_63e248035ceb", "oracle_us": 21.31, "compile_us": 35.71, "ratio": 1.676, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_6f518556b3ea", "oracle_us": 24.19, "compile_us": 31.52, "ratio": 1.303, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_a3ce72227d9d", "oracle_us": 53.06, "compile_us": 49.34, "ratio": 0.93, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_43d9d6c4646b", "oracle_us": 32.38, "compile_us": 30.56, "ratio": 0.944, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_7ebfef460635", "oracle_us": 501.76, "compile_us": 712.51, "ratio": 1.42, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_ae9b17407681", "status": "BENCH_FAILED"}
+{"repro_id": "sum_sum_sum_812de8ed33fc", "oracle_us": 76.64, "compile_us": 76.74, "ratio": 1.001, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_94e3624cdd05", "status": "BENCH_FAILED"}
+{"repro_id": "sum_bd2fed913c26", "oracle_us": 29.41, "compile_us": 29.63, "ratio": 1.008, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_66dc4fac757d", "oracle_us": 11.62, "compile_us": 13.06, "ratio": 1.124, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_3d76bb8bc6b6", "oracle_us": 26.59, "compile_us": 42.4, "ratio": 1.594, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_9a2392d9eb48", "oracle_us": 60.29, "compile_us": 54.08, "ratio": 0.897, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_d8e421a07bf7", "oracle_us": 21.89, "compile_us": 28.38, "ratio": 1.297, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_c0e210b86b78", "oracle_us": 34.02, "compile_us": 32.93, "ratio": 0.968, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_82d023e49f62", "oracle_us": 77.34, "compile_us": 99.04, "ratio": 1.281, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_443ecc71f23f", "oracle_us": 45.79, "compile_us": 74.53, "ratio": 1.628, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_57e5518c4d1d", "oracle_us": 81.7, "compile_us": 85.66, "ratio": 1.049, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_17ab35828f89", "oracle_us": 34.14, "compile_us": 31.49, "ratio": 0.922, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_1a6624550d06", "oracle_us": 60.16, "compile_us": 58.14, "ratio": 0.966, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_9f4956227a79", "oracle_us": 34.37, "compile_us": 30.43, "ratio": 0.885, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_sum_e2f518f0a274", "oracle_us": 89.98, "compile_us": 150.18, "ratio": 1.669, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_28b0b21169d4", "oracle_us": 314.14, "compile_us": 429.82, "ratio": 1.368, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_c2895e89552b", "oracle_us": 24.06, "compile_us": 69.25, "ratio": 2.878, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_02744d87feff", "oracle_us": 93.86, "compile_us": 90.11, "ratio": 0.96, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_4af669d6f405", "oracle_us": 113.44, "compile_us": 124.51, "ratio": 1.098, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_4bd81dea302d", "oracle_us": 59.07, "compile_us": 83.84, "ratio": 1.419, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_505c30a7fb41", "oracle_us": 108.16, "compile_us": 104.48, "ratio": 0.966, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_62f7c19427cb", "oracle_us": 101.31, "compile_us": 97.18, "ratio": 0.959, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_be2a8911a995", "oracle_us": 208.67, "compile_us": 227.1, "ratio": 1.088, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_e2388f04f7c2", "oracle_us": 69.38, "compile_us": 115.52, "ratio": 1.665, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_280231331614", "oracle_us": 218.72, "compile_us": 105.22, "ratio": 0.481, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_2c3a34d36aa8", "oracle_us": 109.38, "compile_us": 148.54, "ratio": 1.358, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_3213336f4c0b", "oracle_us": 48.7, "compile_us": 71.33, "ratio": 1.465, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_821bf10276d6", "oracle_us": 81.57, "compile_us": 206.37, "ratio": 2.53, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_bc10a7742387", "oracle_us": 8.77, "compile_us": 11.36, "ratio": 1.296, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_sum_b942094d64da", "oracle_us": 13.76, "compile_us": 16.13, "ratio": 1.172, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "any_amax_sum_56d491110e60", "oracle_us": 11.74, "compile_us": 13.02, "ratio": 1.109, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_any_027aee0fe13f", "oracle_us": 13.92, "compile_us": 18.27, "ratio": 1.313, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_4b162354068b", "oracle_us": 15.14, "compile_us": 19.14, "ratio": 1.264, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_9940b361e5b4", "oracle_us": 151.23, "compile_us": 392.8, "ratio": 2.597, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "pointwise_7f55bac8afd0", "oracle_us": 796.48, "compile_us": 890.59, "ratio": 1.118, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "pointwise_a14dcfc06344", "oracle_us": 177.76, "compile_us": 254.66, "ratio": 1.433, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_9ba8ffa3e0fb", "oracle_us": 909.09, "compile_us": 925.31, "ratio": 1.018, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_145a8857ebf2", "oracle_us": 391.78, "compile_us": 708.22, "ratio": 1.808, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_3219a09ab96a", "oracle_us": 205.47, "compile_us": 736.06, "ratio": 3.582, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_d73ef74614dc", "oracle_us": 182.11, "compile_us": 457.66, "ratio": 2.513, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_4d7a27f102ca", "oracle_us": 270.02, "compile_us": 732.86, "ratio": 2.714, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_6107a2f54029", "oracle_us": 166.784, "compile_us": 216.128, "ratio": 1.296, "status": "GOOD", "combo_compile_us": 219.872, "best_required_compile_us": 216.128, "required_ratio": 1.296, "historical_best_compile_us": 525.2799987792969, "true_floor": true, "classification": "COOPERATIVE_SPLIT_K"}
+{"repro_id": "sum_sum_sum_87fd4ec7f051", "oracle_us": 298.78, "compile_us": 426.02, "ratio": 1.426, "status": "GOOD"}
+{"repro_id": "sum_sum_sum_8fe65349c733", "oracle_us": 404.35, "compile_us": 430.02, "ratio": 1.063, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_dc96c4651516", "oracle_us": 247.65, "compile_us": 216.96, "ratio": 0.876, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "var_mean_var_mean_6d7a29cb97f1", "oracle_us": 159.39, "compile_us": 243.49, "ratio": 1.528, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_f5253e4f250e", "oracle_us": 336.77, "compile_us": 358.05, "ratio": 1.063, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_sum_6fd07d12d98a", "oracle_us": 520.0, "compile_us": 739.14, "ratio": 1.421, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_sum_86d05d6810f4", "oracle_us": 520.03, "compile_us": 738.24, "ratio": 1.42, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_sum_d5ddd6e16182", "oracle_us": 591.58, "compile_us": 614.14, "ratio": 1.038, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "pointwise_f9c1d1b08ddb", "oracle_us": 106.18, "compile_us": 187.01, "ratio": 1.761, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_8d668b8fcd9e", "oracle_us": 78.72, "compile_us": 82.72, "ratio": 1.051, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_sum_2a28fce37306", "oracle_us": 5.82, "compile_us": 5.73, "ratio": 0.984, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_sum_5829d7f5105f", "oracle_us": 5.7, "compile_us": 6.21, "ratio": 1.09, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_8d73a4b5bade", "oracle_us": 5.57, "compile_us": 5.86, "ratio": 1.052, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_8e96ea244bf1", "oracle_us": 5.57, "compile_us": 5.66, "ratio": 1.017, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_8f7c059eb6a4", "oracle_us": 5.7, "compile_us": 6.78, "ratio": 1.191, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_e3016fe2bbb7", "oracle_us": 7.07, "compile_us": 9.09, "ratio": 1.285, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_argmax_sum_5dfabd070411", "oracle_us": 7.49, "compile_us": 10.08, "ratio": 1.346, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "argmax_amax_sum_fd72c2ef2d40", "oracle_us": 8.26, "compile_us": 9.34, "ratio": 1.132, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "pointwise_4e4da02d582f", "oracle_us": 5.54, "compile_us": 5.73, "ratio": 1.035, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_7c50e5b80bfe", "oracle_us": 5.66, "compile_us": 9.02, "ratio": 1.593, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "pointwise_34dd8044bfe1", "oracle_us": 13.12, "compile_us": 12.7, "ratio": 0.968, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "pointwise_f26b1736413f", "oracle_us": 12.58, "compile_us": 16.32, "ratio": 1.298, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "amax_sum_sum_1458251679be", "oracle_us": 7.1, "compile_us": 9.86, "ratio": 1.387, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_27f326f22f76", "oracle_us": 7.52, "compile_us": 9.06, "ratio": 1.204, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_df75f19c9c7a", "oracle_us": 6.88, "compile_us": 9.02, "ratio": 1.312, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "pointwise_7727cefe098e", "oracle_us": 5.7, "compile_us": 5.7, "ratio": 1.0, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_72f8a586759c", "oracle_us": 6.82, "compile_us": 13.34, "ratio": 1.958, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_6b7ff2251678", "oracle_us": 8.35, "compile_us": 8.99, "ratio": 1.077, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_dbc10f22635c", "oracle_us": 10.88, "compile_us": 8.83, "ratio": 0.812, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "var_mean_e48f702d6f81", "oracle_us": 6.08, "compile_us": 7.01, "ratio": 1.153, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "pointwise_f33e2464d32f", "oracle_us": 5.86, "compile_us": 5.79, "ratio": 0.989, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "sum_sum_sum_8faedc560651", "oracle_us": 6.848, "compile_us": 8.192, "combo_compile_us": 8.384, "best_required_compile_us": 8.192, "ratio": 1.196, "status": "GOOD", "true_floor": true, "classification": "SCHEDULER_FUSION"}
+{"repro_id": "var_mean_032354ac8a5f", "oracle_us": 6.94, "compile_us": 6.11, "ratio": 0.88, "status": "BAD_ORACLE", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "var_mean_9ded65850d80", "oracle_us": 6.88, "compile_us": 7.14, "ratio": 1.037, "status": "AT_FLOOR", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
+{"repro_id": "var_mean_a0eecc057fbc", "oracle_us": 6.69, "compile_us": 7.94, "ratio": 1.187, "status": "GOOD", "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
