@@ -684,11 +684,11 @@ def run_orchestrator(args):
     # Load suite models
     all_models = get_suite_models(args.suite)
 
-    # Resolve model list
+    # Resolve model list (accept space-separated nargs AND comma-joined)
     if args.models == ["all"]:
         models = list(all_models.keys())
     else:
-        models = args.models
+        models = [m for arg in args.models for m in arg.split(",") if m]
 
     # Resolve modes
     if args.mode == "both":
