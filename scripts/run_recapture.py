@@ -370,8 +370,8 @@ def capture_single_model(
             n_regions = capture.merge()
             elapsed = time.time() - t0
 
-            # Count roundtrip results from captured artifacts
-            rt_ok, rt_failed = _count_roundtrips(cap_dir)
+            # Count roundtrip results from full_graph meta sidecars
+            rt_ok, rt_failed = _count_roundtrips(model_dir)
 
             entry["status"] = "ok"
             entry["region_count"] = n_regions
@@ -436,12 +436,16 @@ def _reduce_output_to_loss(out):
     raise RuntimeError(f"Cannot reduce output of type {type(out)} to loss")
 
 
-def _count_roundtrips(capture_dir: Path) -> tuple[int, int]:
-    """Count roundtrip:ok vs roundtrip:failed in captured sidecars."""
+def _count_roundtrips(model_dir: Path) -> tuple[int, int]:
+    """Count roundtrip:ok vs roundtrip:failed in full_graph meta sidecars.
+
+    The roundtrip stamp is written by the write-gate into
+    <model_dir>/full_graph_NNN.meta.json files.
+    """
     ok = 0
     failed = 0
-    cap_path = Path(capture_dir)
-    for meta_file in cap_path.glob("**/meta.json"):
+    model_path = Path(model_dir)
+    for meta_file in model_path.glob("full_graph_*.meta.json"):
         try:
             with open(meta_file) as f:
                 meta = json.load(f)
@@ -450,22 +454,12 @@ def _count_roundtrips(capture_dir: Path) -> tuple[int, int]:
                 ok += 1
             elif rt and rt != "ok":
                 failed += 1
+            else:
+                # No roundtrip stamp at all — count as neither (write-gate
+                # may not be available or may have errored)
+                pass
         except Exception:
             failed += 1
-    # Also check index.json entries for roundtrip stamps
-    index_path = cap_path / "index.json"
-    if index_path.exists():
-        try:
-            with open(index_path) as f:
-                entries = json.load(f)
-            for entry in entries:
-                rt = entry.get("roundtrip", "")
-                if rt == "ok":
-                    ok += 1
-                elif rt and rt != "ok":
-                    failed += 1
-        except Exception:
-            pass
     return ok, failed
 
 
