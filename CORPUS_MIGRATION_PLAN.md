@@ -101,6 +101,44 @@ whatever compilation happens.
 groups, collectives — the moco class) is skipped with a recorded reason in
 the run log. Blanket rule in the invocation script.
 
+**Observed-value stats [SETTLED 2026-06-10]:** capture records per
+integer/bool input the OBSERVED stats from the real execution —
+`{"observed": {"min": ..., "max": ..., "n_unique": ...}}` in the input
+spec / shapes.json gen block. Purpose: input to INFERENCE, not just
+validation. Bound hierarchy:
+  1. graph inference (known consumer patterns: embedding→vocab, gather→dim)
+     — wins where available, gives the semantic bound;
+  2. observed-value fallback (`high = observed.max + 1`,
+     `source: "observed"`) — the universal fallback covering the unbounded
+     tail of ops nobody pattern-matched (e.g. int8 maxpool offsets in
+     [0,9) — not a mask, not a vocab index; no pattern matcher knew it);
+  3. default/guess: ELIMINATED for new captures. The high=512-style guess
+     class (device asserts, opacus laundering) becomes structurally
+     impossible — observation is always available at capture time.
+`n_unique` additionally disambiguates generator KIND (permutation:
+n_unique==numel; binary mask in int clothing: n_unique==2; dense vs sparse
+index). Raw stats stored unembellished; generation uses max+1 exactly.
+observed-sourced bounds are conservative-safe (never OOB) but may
+understate the semantic bound — fine for validity, graph inference still
+preferred for realism. Full-value serialization (tier 2) only for: small
+integer/bool tensors, `unverifiable` inference, or the existing
+requires_exact class. Floats never serialized beyond existing tiny-constant
+exact path.
+
+**Constraint round-trip invariants (extend the A/B/C partition set):**
+- **D — derivation**: re-running inference on the reloaded ARTIFACT
+  reproduces the serialized bounds (or the input is stamped
+  `unverifiable` — a guess cannot survive D, killing the laundering
+  failure mode).
+- **E — generation validity**: inputs generated from serialized
+  constraints execute eager + compiled without device asserts.
+- **F — tightness**: edge values (high-1; true permutations) are valid;
+  where independent ground truth exists (model config vocab_size, gather
+  target dims, observed stats), serialized bound is consistent with it.
+D/E run in the write-gate (per-input `constraints: verified |
+unverifiable(reason)` stamps alongside roundtrip:ok) and in
+`--full-graph-roundtrip`; F where ground truth exists.
+
 **Shape serialization [SETTLED]: `shapes.json` is the PRIMARY per-repro
 format from wave 1 onward** (decision 2026-06-10: JSON is easier to reason
 about and augment over time — model linkage, generations, occurrence
