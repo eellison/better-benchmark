@@ -206,14 +206,32 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
 
     needed_nodes: set[fx.Node] = set(origin_nodes)
 
-    output_nodes = []
-    for n in origin_nodes:
-        has_internal_user = any(
-            user in needed_nodes and user.op != "output"
-            for user in n.users
-        )
-        if not has_internal_user:
-            output_nodes.append(n)
+    # A node is a partition output iff it has ANY use outside the partition
+    # (including being a graph output). Internal users are irrelevant: a node
+    # consumed both inside (e.g. by a sum) and outside (e.g. by a
+    # convolution_backward the partitioner cut away) MUST remain an output,
+    # or the repro under-constrains the computation — elimination passes get
+    # freedom the real model never grants and measured gaps don't compose
+    # (see investigation_results/squeezenet_scatter_e2e_validation.md).
+    # The escaping set: any use outside the partition (including the graph
+    # output node, which is never in needed_nodes) makes a node an output.
+    # Nodes with only internal users are internal; nodes with NO users are
+    # dead (upstream DCE makes this near-impossible) and are simply dropped —
+    # EXCEPT mutating ops (copy_, index_put_, ...): their effect is the
+    # in-place mutation of an input buffer, not their return value, so they
+    # can legitimately have zero users and must never be dropped.
+    def _is_mutating(n):
+        target = getattr(n, "target", None)
+        schema = getattr(target, "_schema", None)
+        if schema is not None:
+            return schema.is_mutable
+        name = getattr(target, "__name__", "") or str(target)
+        return name.rstrip(".default").endswith("_")
+
+    output_nodes = [
+        n for n in origin_nodes
+        if any(user not in needed_nodes for user in n.users) or _is_mutating(n)
+    ]
     if not output_nodes:
         output_nodes = origin_nodes
 

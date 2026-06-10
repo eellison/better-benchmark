@@ -140,15 +140,26 @@ class ReductionExtractor:
         # The "needed" set is exactly the origin nodes — no BFS backward.
         needed_nodes: set[fx.Node] = set(origin_nodes)
 
-        # Find leaf nodes: origins not consumed by other origins.
-        output_nodes = []
-        for n in origin_nodes:
-            has_internal_user = any(
-                user in needed_nodes and user.op != "output"
-                for user in n.users
-            )
-            if not has_internal_user:
-                output_nodes.append(n)
+        # A node is a partition output iff it has ANY use outside the
+        # partition (escaping value) — internal users are irrelevant. A node
+        # consumed both inside and outside must remain an output, or the
+        # repro under-constrains the computation (elimination passes get
+        # freedom the model never grants; gaps don't compose). Mirrors
+        # capture_hook.extract_partition_subgraph.
+        # Escaping values are outputs; mutating ops (zero-user side effects
+        # like copy_) are always kept. Mirrors capture_hook.
+        def _is_mutating(n):
+            target = getattr(n, "target", None)
+            schema = getattr(target, "_schema", None)
+            if schema is not None:
+                return schema.is_mutable
+            name = getattr(target, "__name__", "") or str(target)
+            return name.rstrip(".default").endswith("_")
+
+        output_nodes = [
+            n for n in origin_nodes
+            if any(user not in needed_nodes for user in n.users) or _is_mutating(n)
+        ]
         if not output_nodes:
             output_nodes = origin_nodes
 
