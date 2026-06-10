@@ -109,7 +109,7 @@ rounds driven by counterexamples:
    streaming reduction (no full-size store competing for L2), boundary lines
    get a chance to survive; and sum_sum_f4d29f9ee6ad showed +1.04x mostly
    from its side-store kernel.
-3. v3 (final): drop evict_first only when ALL of:
+3. v3: drop evict_first only when ALL of:
    - load is x-contiguous but NOT r-contiguous,
    - some non-unit constant stride is not 128B-aligned,
    - the kernel ALSO has an rindex-ed (full-size) store inside the reduction
@@ -119,6 +119,88 @@ rounds driven by counterexamples:
      named for.
    Gated to CUDA cc >= 10 (validated on B200). Symbolic strides keep
    evict_first conservatively. Re-loaded buffers keep evict_last escalation.
+4. v4 (final): also require the kernel's iteration space (numel*rnumel*
+   itemsize) to exceed the device L2 size. sum_sum_06ebd69de9aa
+   ([128,1000] = 500KB, 6us scale) matched the v3 shape but its whole
+   working set is L2-resident — the eviction policy itself measured neutral
+   (isolated A/B 7.2 vs 7.3us) yet flipping the policy perturbed CD into a
+   worse num_warps pick (0.93x). Below-L2 kernels keep evict_first so their
+   tuning is untouched.
 
 Primary result: sum_011e69da166d 1.42x -> **0.98x** (573.3us -> 394-395us,
 oracle 403.3us) — beats the hand-written oracle.
+
+## Final measurements (B200, 2026-06-10)
+
+Commits in /tmp/pytorch-work (branch pr-184905):
+- f6ae31e6984 [WIP] v1 (r-contiguity requirement)
+- e45f846f8d1 v2 (alignment requirement)
+- 60431eca431 v3 (side-store gate)
+- e9a67c98a8c v4 (L2 working-set gate) — FINAL
+
+Oracle-relative (fresh cache, oracle harness):
+
+| repro | before | after | oracle us | compile us |
+|-------|--------|-------|-----------|------------|
+| sum_011e69da166d | 1.42x | **0.98x AT_FLOOR** | 402.5 | 393.3 |
+| sum_0becf9609ad7 | 1.41x | 1.41x (untouched, r-contiguous) | 66.4 | 93.9 |
+| sum_21c4018e2b7b | 1.26x | 1.26x (untouched, r-contiguous) | 44.0 | 55.2 |
+| sum_031c8d6c51f7 | 1.04x | 1.00x AT_FLOOR | 36.5 | 36.6 |
+
+Flag-on vs flag-off interleaved A/B (19 repros, 3 rounds, same GPU/lock):
+
+| repro | before us | after us | speedup |
+|-------|-----------|----------|---------|
+| sum_011e69da166d | 569.3 | 394.2 | **1.444x** |
+| sum_21c4018e2b7b | 56.3 | 55.3 | 1.017x |
+| sum_31bf563cdf96 | 111.6 | 110.3 | 1.012x |
+| sum_0becf9609ad7 | 93.1 | 93.2 | 0.999x |
+| sum_031c8d6c51f7 | 36.6 | 36.6 | 1.001x |
+| sum_0c674ef4b13c | 319.3 | 319.4 | 1.000x |
+| sum_27f8a4b9ab09 | 33.6 | 33.7 | 0.999x |
+| sum_2bcc7099936f | 69.4 | 69.5 | 0.999x |
+| sum_2e0e9617102b | 55.0 | 55.1 | 0.999x |
+| sum_sum_f4d29f9ee6ad | 999.4 | 1001.4 | 0.998x |
+| sum_sum_666d023699ba | 290.7 | 290.7 | 1.000x |
+| sum_sum_06ebd69de9aa | 6.0 | 6.3 | 0.949x (codegen bit-identical; autotune variance at 6us) |
+| sum_sum_sum_9fe928f49216 | 197.6 | 197.5 | 1.000x |
+| sum_sum_sum_508eb468b8d9 | 155.6 | 155.6 | 1.000x |
+| sum_sum_63e248035ceb (sentinel) | 23.5 | 23.5 | 1.001x |
+| sum_sum_b16afac198fb (sentinel) | 118.7 | 118.7 | 0.999x |
+| sum_sum_3219a09ab96a (sentinel) | 92.1 | 98.0 | 0.939x (codegen bit-identical; autotune variance) |
+| var_mean_598830735cf6 (sentinel) | 114.4 | 114.4 | 1.000x |
+| amax_sum_0561785713ab (softmax sentinel) | 98.0 | 98.0 | 1.000x |
+
+Unit tests: all 6 `pytest test/inductor/test_torchinductor.py -k "evict or
+skip_l1"` pass.
+
+## Projected coverage of the 245-repro family
+
+Static scan of the 306 family rows in inductor_optimization_per_repro_queue.csv
+for the v4 trigger shape (sum keeping the trailing dim, reducing leading dims,
+inner dim not a 32-element multiple, working set > L2 132MB): **3 direct hits**
+(sum_011e69da166d 773MB, sum_sum_f4d29f9ee6ad 1.25GB, sum_sum_666d023699ba
+468MB) — the latter two are gated off by the side-store requirement (their
+side-store kernels are separate). So the fix is narrow-but-deep: it fully
+closes the single largest-absolute-gap member (170us of 61.5ms family total)
+and is precision-targeted to never regress the rest (16/19 within 0.999-1.017x).
+
+The bulk of the remaining family (r-contiguous BN-backward-style reductions:
+sum_0becf9609ad7 1.41x, sum_21c4018e2b7b 1.26x) has a DIFFERENT blocker: the
+oracle uses a 2D-grid split-K (partial + finalize) while Inductor emits a
+single-wave looped reduction (xnumel=1000-1184 rows on 148 SMs at ~7-8 CTAs/SM
+but bandwidth-limited by the single pass-through). That is design TODO #1(b)
+(INTRODUCE a split when nothing downstream fuses and rows undersaturate) — the
+split heuristic at choices.py:570 only lowers the no-split threshold for
+numel_hint < num_sm (1000 >> 148), so these never split. Closing them needs the
+bidirectional split decision, not eviction tweaks. Left for the TODO #1
+scheduler-level chooser.
+
+## Where this fix fits the design TODOs
+
+This is evidence FOR the "structural decisions made blind to consumers" theme:
+the eviction policy was chosen per-load from local index shape only, blind to
+(a) whether segments are cache-line aligned, (b) whether the kernel streams a
+side store, (c) whether the working set even exceeds L2. The fix wires exactly
+those three signals in. Same root principle as TODO #9/TODO #1: local
+heuristics need fusion/working-set context.
