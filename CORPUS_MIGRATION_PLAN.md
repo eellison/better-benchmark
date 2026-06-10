@@ -101,23 +101,38 @@ whatever compilation happens.
 groups, collectives — the moco class) is skipped with a recorded reason in
 the run log. Blanket rule in the invocation script.
 
-**Dynamic shape serialization [SETTLED, wave 2]:** per-repro `shapes.json`
-sidecar:
+**Shape serialization [SETTLED]: `shapes.json` is the PRIMARY per-repro
+format from wave 1 onward** (decision 2026-06-10: JSON is easier to reason
+about and augment over time — model linkage, generations, occurrence
+counts, and the entire dynamic-shape structure are real keys instead of
+facts smuggled into txt label strings). One schema serves static and
+dynamic; static repros simply omit the symbolic keys:
+
 ```json
 {
   "symbols": {"s0": {"hint": 8, "range": [1, 256]}},
   "family":  [{"shape_exprs": ["s0", "s1", 1024], "dtype": "bf16"}],
-  "points":  [{"label": "...", "bindings": {"s0": 1}, "source": "captured"}]
+  "points": [
+    {"shape_hash": "75902420",
+     "signature": "(T([320], bf16), T([128, 320, 7, 7], bf16, stride=(15680, 1, 2240, 320)), ...)",
+     "bindings": {"s0": 1},
+     "models": {"timm/infer/mobilenetv2_100": {"occurrences": 7, "generation": "2026-06-bf16"}},
+     "source": "captured"}
+  ]
 }
 ```
-- Shared symbol table expresses cross-input dim sharing (the thing concrete
-  snapshots can't).
-- Capture records only OBSERVED points; ladder points (BS=8/16/64...) are
-  benchmarking policy added later.
-- shapes.txt is GENERATED from shapes.json — existing consumers
-  (`load_shape_configs`, oracle signatures, dispatch) unchanged; formats
-  are mechanically interconvertible, so this is not blocking in either
-  direction. Static repros get a degenerate shapes.json.
+
+- `signature` keeps the existing T()/S() string WITHIN the JSON — compact,
+  human-readable, existing parser, copy-paste into `oracle_impl(shapes=)`.
+- `models` solves the provenance problem the txt labels smuggled
+  (`<model>_<hash>:`), and carries occurrences + generation per model —
+  the keys the migration/accounting need and txt could not hold.
+- `symbols`/`family`/`bindings` (wave 2): shared symbol table expresses
+  cross-input dim sharing; capture records OBSERVED points; ladder points
+  (BS=8/16/64...) are benchmarking policy, `"source": "ladder"`.
+- shapes.txt becomes DERIVED compat output (generated from shapes.json)
+  until consumers (`load_shape_configs`, runners) read JSON directly; then
+  dropped. Formats are mechanically interconvertible — no migration cliff.
 - Oracles/dispatch stay EXACT-SHAPE (settled oracle_impl design); families
   generate points, never fuzzy-match.
 - Models that compile dynamically should also be *benchmarked* with
