@@ -55,3 +55,21 @@ Blockers (file:line, pytorch-work pr-184905):
    (~17us with tl.max, ~62us with max2).
 
 Fix direction: codegen change behind new config flag (default True), no custom kernels.
+
+## Orchestrator guidance (2026-06-10, from user discussion — for the implementing agent)
+
+Prefer GENERIC loop-body-level transformations over softmax-specific patches:
+
+1. max2 fix, try FIRST: keep NaN semantics and use native speed —
+   `tl.max(a, dim, propagate_nan=tl.PropagateNan.ALL)` (Triton 3.7.0 has
+   PropagateNan; modern PTX has single-instruction NaN-propagating max).
+   If that benches at native-tl.max speed, the fix is a one-line change in
+   triton_helpers.max2 (or its call sites) with BITWISE-identical semantics —
+   no NaN-equivalence argument needed anywhere. Only if propagate_nan ALL is
+   slow fall back to the documented exp(NaN)-propagation argument, scoped to
+   the online-softmax combine sites.
+2. other=-inf fix: implement as generic mask-fill propagation, not a softmax
+   special case — when a masked load's value is consumed ONLY through
+   tl.where(same_mask, value, C), fold C into the load's `other` and elide the
+   where. This is a loop-body dataflow property (value-flow + mask equality),
+   useful beyond softmax (any masked reduction operand).
