@@ -359,6 +359,87 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     return new_gm, placeholder_info, shape_params
 
 
+# ----------------------------------------------------------------------------
+# Hash-time canonicalization (closes the reshape/view canonical-hash fork)
+# ----------------------------------------------------------------------------
+#
+# The same partition used to hash two different ways depending on which
+# pipeline produced the graph being hashed:
+#
+#   * Capture time: Inductor's compile_fx runs view_to_reshape(gm) BEFORE
+#     post_grad_passes (see torch/_inductor/compile_fx.py), so the
+#     post_grad_custom_pre_pass capture hook sees every view spelled as
+#     aten.reshape.default.
+#   * Retrace time: any offline path that re-traces a saved full_graph_*.py
+#     through make_fx (scripts/model_graph_accounting.py,
+#     scripts/repartition_from_graphs.py, recapture runs) sees the reshape
+#     decompose back to aten.view.default.
+#
+# Result: 167 reshape-only vs 887 view-only canonical repro dirs, with
+# confirmed duplicate pairs (e.g. convnextv2 sum_sum_sum_26d1711c064d ==
+# sum_sum_sum_f68c9f1fa09b — origin_ops differ ONLY by 3x reshape vs 3x view).
+#
+# Fix: LIGHT spelling normalization at hash time. NO retracing — retracing is
+# slow, fails on device-literal mismatches for CPU-loaded graphs, and couples
+# the canonical hash to the pytorch version's decomposition behavior.
+_HASH_OP_SPELLING_ALIASES = {
+    # WHY: every aten.reshape.default in a saved post-grad graph was created
+    # by Inductor's view_to_reshape pass FROM a valid aten.view, so it is
+    # always view-able on its input and make_fx provably retraces it back to
+    # aten.view.default. (reshape's clone+_unsafe_view decomposition only
+    # fires for non-view-able inputs, which cannot occur for reshapes that
+    # view_to_reshape produced.) Verified on convnextv2 saved full graphs:
+    # make_fx retrace op-count diff is exactly -44 reshape / +44 view
+    # (train) and -29/+29 (infer), nothing else.
+    "aten.reshape.default": "aten.view.default",
+}
+
+# Ops elided at hash time (op name -> arg index whose value flows through).
+# CURRENTLY EMPTY, deliberately:
+#
+#   WHY no clone/detach elision: empirically, make_fx fake-mode retracing
+#   (the exact path model_graph_accounting.trace_full_graph uses) PRESERVES
+#   aten.clone.default and aten.detach.default. Measured on the convnextv2
+#   train full graph: all 14 clones survive the retrace, and both members of
+#   every confirmed duplicate pair still contain clone_default. Eliding
+#   clones here would therefore CREATE a new fork (capture-hash without
+#   clone vs retrace-hash with clone) instead of closing one. If a provably
+#   elided pattern is found later (the Milestone-2 fixed-point test reports
+#   residual divergences), add it here with the same level of evidence.
+_HASH_ELIDED_OPS: dict[str, int] = {}
+
+
+def canonicalize_for_hash(gm):
+    """LIGHT graph-level normalization for pattern hashing (NO retracing).
+
+    Returns (nodes, resolve, op_name):
+      * nodes: node list to encode, in original order, with hash-elided ops
+        removed (none today; see _HASH_ELIDED_OPS).
+      * resolve(node): maps a node through any elided ops to the node the
+        signature should reference instead.
+      * op_name(node): canonical op spelling for the signature
+        (reshape -> view; see _HASH_OP_SPELLING_ALIASES).
+    """
+    elided: dict = {}
+    for n in gm.graph.nodes:
+        if n.op == "call_function" and str(n.target) in _HASH_ELIDED_OPS:
+            src = n.args[_HASH_ELIDED_OPS[str(n.target)]]
+            if isinstance(src, fx.Node):
+                elided[n] = src
+    nodes = [n for n in gm.graph.nodes if n not in elided]
+
+    def resolve(n):
+        while n in elided:
+            n = elided[n]
+        return n
+
+    def op_name(n):
+        name = str(n.target)
+        return _HASH_OP_SPELLING_ALIASES.get(name, name)
+
+    return nodes, resolve, op_name
+
+
 def compute_dag_signature(gm) -> list:
     """Compute a DAG-structure signature for the graph.
 
@@ -368,12 +449,18 @@ def compute_dag_signature(gm) -> list:
 
     Does NOT encode scalar int/float constants (e.g., mul by 3.0,
     eps=1e-6) — those don't affect kernel structure.
+
+    Op spellings are canonicalized via canonicalize_for_hash so that
+    trace-equivalent graphs (saved post-grad reshape-spelling vs make_fx
+    retrace view-spelling) hash identically.
     """
-    nodes = list(gm.graph.nodes)
+    nodes, _resolve, _op_name = canonicalize_for_hash(gm)
     node_to_idx = {n: i for i, n in enumerate(nodes)}
 
     def _encode_arg(arg, arg_idx):
         """Encode an argument for the signature."""
+        if isinstance(arg, torch.fx.Node):
+            arg = _resolve(arg)
         if isinstance(arg, torch.fx.Node) and arg in node_to_idx:
             return ("node", node_to_idx[arg], arg_idx)
         elif isinstance(arg, (list, tuple)):
@@ -406,9 +493,11 @@ def compute_dag_signature(gm) -> list:
                     encoded_args.append(("kw_bool", kw, val))
                 elif isinstance(val, (list, tuple)) and all(isinstance(x, int) for x in val):
                     encoded_args.append(("kw_dims", kw, list(val)))
-            signature.append((str(node.target), encoded_args))
+            signature.append((_op_name(node), encoded_args))
         elif node.op == "output":
             def _collect_output_indices(x):
+                if isinstance(x, torch.fx.Node):
+                    x = _resolve(x)
                 if isinstance(x, torch.fx.Node) and x in node_to_idx:
                     return node_to_idx[x]
                 elif isinstance(x, (tuple, list)):
