@@ -52,5 +52,16 @@ contiguous segment length of the reduction loads:
   Misaligned splits (74) leave div/mod in phase-1 indexing; aligned splits make
   phase-1 a contiguous streaming row reduction.
 
+### Re-verification (2026-06-10, fresh caches, gpu-locked)
+
+| point | writeup | re-measured |
+|---|---|---|
+| 0bec no-split | 95.4us | 95.3us |
+| 0bec split=512 | 46.1us | 46.1us |
+| 21c4 current (split=74) | 57.1us | 57.0us |
+| 21c4 split=128 | 45.9us | 45.3us |
+
+Anchors hold; proceeding to f0377/3ec568 A/B + implementation.
+
 ## Next: f0377/3ec568 structure dumps + forced-split A/B, then implement
 segment-aligned split introduction in choices.py behind a new flag.
