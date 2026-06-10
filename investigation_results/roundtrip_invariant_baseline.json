@@ -1,0 +1,695 @@
+{
+  "manifest_only_dirs": 404,
+  "sampled": true,
+  "sample_per_suite": 8,
+  "seed": 0,
+  "results": [
+    {
+      "model_dir": "repros/models/genai/CrossEntropyBackward",
+      "suite": "genai",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/genai/CrossEntropyForward",
+      "suite": "genai",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/genai/LayerNormBackward",
+      "suite": "genai",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/genai/LayerNormForward",
+      "suite": "genai",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/genai/RMSNormBackward",
+      "suite": "genai",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/genai/RMSNormForward",
+      "suite": "genai",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/genai/SoftmaxBackward",
+      "suite": "genai",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/genai/SoftmaxForward",
+      "suite": "genai",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/hf/infer/BartForCausalLM",
+      "suite": "hf",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/hf/infer/LayoutLMForMaskedLM",
+      "suite": "hf",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/hf/infer/MT5ForConditionalGeneration",
+      "suite": "hf",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/hf/train/BartForCausalLM",
+      "suite": "hf",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py",
+        "full_graph_002.py",
+        "full_graph_003.py",
+        "full_graph_004.py",
+        "full_graph_005.py",
+        "full_graph_006.py",
+        "full_graph_007.py",
+        "full_graph_008.py",
+        "full_graph_009.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/hf/train/BertForMaskedLM",
+      "suite": "hf",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/hf/train/BlenderbotForCausalLM",
+      "suite": "hf",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py",
+        "full_graph_002.py",
+        "full_graph_003.py",
+        "full_graph_004.py",
+        "full_graph_005.py",
+        "full_graph_006.py",
+        "full_graph_007.py",
+        "full_graph_008.py",
+        "full_graph_009.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/hf/train/ElectraForCausalLM",
+      "suite": "hf",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py",
+        "full_graph_011.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/hf/train/GPT2ForSequenceClassification",
+      "suite": "hf",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py",
+        "full_graph_008.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/timm/infer/timm_deit_tiny_patch16_224.fb_in1k_infer",
+      "suite": "timm",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": {
+        "ok": true,
+        "missing": [
+          "23c4efbb09b5",
+          "4018778d8833",
+          "5bea7483a354",
+          "66a849609a78",
+          "e6323583766d"
+        ],
+        "extra": [
+          "15094386913f",
+          "bccbe164e3a1",
+          "ea520ec22da7"
+        ],
+        "spelling": [
+          "missing 23c4efbb09b5 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.cat.default', 'aten.expand.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 4018778d8833 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.select.int', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 5bea7483a354 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 66a849609a78 (ops ['aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.unbind.int'] match a partition on the other side under a different view-op spelling)",
+          "missing e6323583766d (ops ['aten.add.Tensor', 'aten.erf.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.reshape.default'] match a partition on the other side under a different view-op spelling)",
+          "extra 15094386913f (ops ['aten.add.Tensor', 'aten.erf.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra bccbe164e3a1 (ops ['<built-in function getitem>', '<built-in function getitem>', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra ea520ec22da7 (ops ['<built-in function getitem>', '<built-in function getitem>', '<built-in function getitem>', 'aten.permute.default', 'aten.unbind.int', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
+        ],
+        "hard": []
+      },
+      "c_known_class": null,
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/timm/infer/timm_mobilenetv2_100_infer",
+      "suite": "timm",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": {
+        "ok": true,
+        "missing": [
+          "00c6f66d2b16"
+        ],
+        "extra": [],
+        "spelling": [
+          "missing 00c6f66d2b16 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.as_strided.default', 'aten.clamp_max.default', 'aten.clamp_min.default', 'aten.mean.dim', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reciprocal.default', 'aten.reshape.default', 'aten.sqrt.default', 'aten.sub.Tensor', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default'] match a partition on the other side under a different view-op spelling)"
+        ],
+        "hard": []
+      },
+      "c_known_class": null,
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/timm/infer/timm_mobilenetv3_large_100_infer",
+      "suite": "timm",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": {
+        "ok": true,
+        "missing": [
+          "1cedd96f5faf"
+        ],
+        "extra": [],
+        "spelling": [
+          "missing 1cedd96f5faf (ops ['aten.add.Tensor', 'aten.clamp_max.default', 'aten.clamp_min.default', 'aten.div.Tensor', 'aten.mul.Tensor', 'aten.reshape.default'] match a partition on the other side under a different view-op spelling)"
+        ],
+        "hard": []
+      },
+      "c_known_class": null,
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/timm/infer/timm_swin_base_patch4_window7_224_infer",
+      "suite": "timm",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": {
+        "ok": true,
+        "missing": [
+          "0b554bb6615a",
+          "0f6eed42fa2c",
+          "17ab35828f89",
+          "1a6624550d06",
+          "254b25297850",
+          "2d7c924b96ca",
+          "4c529682a7a5",
+          "59d8965968f1",
+          "7f6c23807d7b",
+          "91fc2812ef17",
+          "99567a16bff5",
+          "aa8ab7fa55a7",
+          "b551e8ee78b4",
+          "c70ae7a95adc",
+          "c7f1676ab603",
+          "deb7c9191e39",
+          "e6323583766d",
+          "e98948176b90"
+        ],
+        "extra": [
+          "15094386913f",
+          "af2e722aed5d"
+        ],
+        "spelling": [
+          "missing 0b554bb6615a (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 0f6eed42fa2c (ops ['aten.clone.default', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default'] match a partition on the other side under a different view-op spelling)",
+          "missing 17ab35828f89 (ops ['aten.add.Tensor', 'aten.amax.default', 'aten.clone.default', 'aten.div.Tensor', 'aten.exp.default', 'aten.expand.default', 'aten.index.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.sub.Tensor', 'aten.sum.dim_IntList', 'aten.unsqueeze.default'] match a partition on the other side under a different view-op spelling)",
+          "missing 1a6624550d06 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.amax.default', 'aten.clone.default', 'aten.div.Tensor', 'aten.exp.default', 'aten.expand.default', 'aten.index.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.sub.Tensor', 'aten.sum.dim_IntList', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default'] match a partition on the other side under a different view-op spelling)",
+          "missing 254b25297850 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.mean.dim', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 2d7c924b96ca (ops ['aten.clone.default', 'aten.clone.default', 'aten.clone.default', 'aten.expand.default', 'aten.expand.default', 'aten.expand.default', 'aten.mul.Tensor', 'aten.permute.default', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.unbind.int'] match a partition on the other side under a different view-op spelling)",
+          "missing 4c529682a7a5 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 59d8965968f1 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 7f6c23807d7b (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.fmod.Scalar', 'aten.fmod.Scalar', 'aten.index.Tensor', 'aten.index.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction', 'prims.iota.default', 'prims.iota.default'] match a partition on the other side under a different view-op spelling)",
+          "missing 91fc2812ef17 (ops ['aten._unsafe_view.default', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.clone.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction', 'aten.view.default', 'aten.view.default', 'aten.view.default', 'aten.view.default', 'aten.view.default'] match a partition on the other side modulo clone/_unsafe_view layout-copy placement)",
+          "missing 99567a16bff5 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.var_mean.correction', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing aa8ab7fa55a7 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing b551e8ee78b4 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing c70ae7a95adc (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing c7f1676ab603 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.fmod.Scalar', 'aten.fmod.Scalar', 'aten.index.Tensor', 'aten.index.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction', 'prims.iota.default', 'prims.iota.default'] match a partition on the other side under a different view-op spelling)",
+          "missing deb7c9191e39 (ops ['aten._unsafe_view.default', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.clone.default', 'aten.fmod.Scalar', 'aten.fmod.Scalar', 'aten.index.Tensor', 'aten.index.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction', 'aten.view.default', 'aten.view.default', 'aten.view.default', 'aten.view.default', 'aten.view.default', 'prims.iota.default', 'prims.iota.default'] match a partition on the other side modulo clone/_unsafe_view layout-copy placement)",
+          "missing e6323583766d (ops ['aten.add.Tensor', 'aten.erf.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.reshape.default'] match a partition on the other side under a different view-op spelling)",
+          "missing e98948176b90 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "extra 15094386913f (ops ['aten.add.Tensor', 'aten.erf.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra af2e722aed5d (ops ['aten.clone.default', 'aten.permute.default', 'aten.view.default', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
+        ],
+        "hard": []
+      },
+      "c_known_class": null,
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/timm/train/timm_deit_tiny_patch16_224.fb_in1k_train",
+      "suite": "timm",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": {
+        "ok": true,
+        "missing": [
+          "40d5a5a49ffd",
+          "426d5bebb63f",
+          "558522245da0",
+          "5c52dd510532",
+          "5f0c557e2169",
+          "66a849609a78",
+          "867f4204961b",
+          "94e6cd22ff22",
+          "97999676281e",
+          "baa1198c62c0",
+          "e262d057f3c9",
+          "e6323583766d"
+        ],
+        "extra": [
+          "15094386913f",
+          "22b5cd24890b",
+          "33b494a50932",
+          "587e52500b08",
+          "7af9076c19a1",
+          "87ad70406872",
+          "bedefd130db8",
+          "c97d1570c0ff",
+          "ea520ec22da7",
+          "f0377fc40fe2"
+        ],
+        "spelling": [
+          "missing 40d5a5a49ffd (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.div.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 426d5bebb63f (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.erf.default', 'aten.exp.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.sum.dim_IntList'] match a partition on the other side under a different view-op spelling)",
+          "missing 558522245da0 (ops ['aten.cat.default', 'aten.clone.default', 'aten.permute.default', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.sum.dim_IntList'] match a partition on the other side under a different view-op spelling)",
+          "missing 5c52dd510532 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.cat.default', 'aten.expand.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 5f0c557e2169 (ops ['aten.full.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.select_scatter.default', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList'] match a partition on the other side under a different view-op spelling)",
+          "missing 66a849609a78 (ops ['aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.unbind.int'] match a partition on the other side under a different view-op spelling)",
+          "missing 867f4204961b (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.div.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.select.int', 'aten.sub.Tensor', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing 94e6cd22ff22 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.div.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.slice.Tensor', 'aten.slice.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList'] match a partition on the other side under a different view-op spelling)",
+          "missing 97999676281e (ops ['aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.reshape.default', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList'] match a partition on the other side under a different view-op spelling)",
+          "missing baa1198c62c0 (ops ['aten._unsafe_view.default', 'aten.clone.default', 'aten.permute.default', 'aten.view.default'] are a pure layout/copy partition; boundary placement is a re-trace spelling artifact)",
+          "missing e262d057f3c9 (ops ['aten.reshape.default', 'aten.sum.dim_IntList'] match a partition on the other side under a different view-op spelling)",
+          "missing e6323583766d (ops ['aten.add.Tensor', 'aten.erf.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.reshape.default'] match a partition on the other side under a different view-op spelling)",
+          "extra 15094386913f (ops ['aten.add.Tensor', 'aten.erf.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra 22b5cd24890b (ops ['aten.sum.dim_IntList', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra 33b494a50932 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.erf.default', 'aten.exp.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.sum.dim_IntList', 'aten.view.default', 'aten.view.default', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra 587e52500b08 (ops ['aten.cat.default', 'aten.clone.default', 'aten.permute.default', 'aten.permute.default', 'aten.sum.dim_IntList', 'aten.view.default', 'aten.view.default', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra 7af9076c19a1 (ops ['<built-in function getitem>', '<built-in function getitem>', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.cat.default', 'aten.expand.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra 87ad70406872 (ops ['<built-in function getitem>', '<built-in function getitem>', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.clone.default', 'aten.div.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.rsqrt.default', 'aten.select.int', 'aten.sub.Tensor', 'aten.var_mean.correction', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra bedefd130db8 (ops ['aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.view.default', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra c97d1570c0ff (ops ['<built-in function getitem>', '<built-in function getitem>', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.div.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.var_mean.correction', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra ea520ec22da7 (ops ['<built-in function getitem>', '<built-in function getitem>', '<built-in function getitem>', 'aten.permute.default', 'aten.unbind.int', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)",
+          "extra f0377fc40fe2 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.div.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.permute.default', 'aten.slice.Tensor', 'aten.slice.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
+        ],
+        "hard": []
+      },
+      "c_known_class": null,
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/timm/train/timm_ghostnet_100_train",
+      "suite": "timm",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": {
+        "ok": true,
+        "missing": [
+          "bd6cd7133361",
+          "e262d057f3c9",
+          "ea0933cb9497"
+        ],
+        "extra": [
+          "22b5cd24890b"
+        ],
+        "spelling": [
+          "missing bd6cd7133361 (ops ['aten.gt.Scalar', 'aten.le.Scalar', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.relu.default', 'aten.reshape.default', 'prims.inductor_lookup_seed.default', 'prims.inductor_random.default', 'prims.inductor_seeds.default'] match a partition on the other side under a different view-op spelling)",
+          "missing e262d057f3c9 (ops ['aten.reshape.default', 'aten.sum.dim_IntList'] match a partition on the other side under a different view-op spelling)",
+          "missing ea0933cb9497 (ops ['aten.full.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.sum.dim_IntList', 'aten.where.self', 'prims.convert_element_type.default'] match a partition on the other side under a different view-op spelling)",
+          "extra 22b5cd24890b (ops ['aten.sum.dim_IntList', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
+        ],
+        "hard": []
+      },
+      "c_known_class": null,
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/timm/train/timm_repvgg_a2_train",
+      "suite": "timm",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": {
+        "ok": true,
+        "missing": [
+          "b49a8ed53342",
+          "e262d057f3c9",
+          "e266124dd032"
+        ],
+        "extra": [
+          "22b5cd24890b"
+        ],
+        "spelling": [
+          "missing b49a8ed53342 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.as_strided.default', 'aten.copy_.default', 'aten.copy_.default', 'aten.copy_.default', 'aten.copy_.default', 'aten.mean.dim', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.relu.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.rsqrt.default', 'aten.squeeze.dims', 'aten.squeeze.dims', 'aten.squeeze.dims', 'aten.squeeze.dims', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.var_mean.correction', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing e262d057f3c9 (ops ['aten.reshape.default', 'aten.sum.dim_IntList'] match a partition on the other side under a different view-op spelling)",
+          "missing e266124dd032 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.as_strided.default', 'aten.as_strided_scatter.default', 'aten.div.Scalar', 'aten.expand.default', 'aten.full.default', 'aten.full.default', 'aten.le.Scalar', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.relu.default', 'aten.reshape.default', 'aten.squeeze.dim', 'aten.squeeze.dim', 'aten.squeeze.dims', 'aten.squeeze.dims', 'aten.squeeze.dims', 'aten.squeeze.dims', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.where.self'] match a partition on the other side under a different view-op spelling)",
+          "extra 22b5cd24890b (ops ['aten.sum.dim_IntList', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
+        ],
+        "hard": []
+      },
+      "c_known_class": null,
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/timm/train/timm_tf_efficientnet_b0_train",
+      "suite": "timm",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": {
+        "ok": true,
+        "missing": [
+          "25b1bb0b8d63",
+          "addc448a9236",
+          "e262d057f3c9"
+        ],
+        "extra": [
+          "22b5cd24890b"
+        ],
+        "spelling": [
+          "missing 25b1bb0b8d63 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.as_strided.default', 'aten.copy_.default', 'aten.copy_.default', 'aten.div.Tensor', 'aten.exp.default', 'aten.mean.dim', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.neg.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.squeeze.dims', 'aten.squeeze.dims', 'aten.sub.Tensor', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+          "missing addc448a9236 (ops ['aten.add.Tensor', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.as_strided.default', 'aten.as_strided_scatter.default', 'aten.div.Scalar', 'aten.exp.default', 'aten.expand.default', 'aten.full.default', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.neg.default', 'aten.reciprocal.default', 'aten.reshape.default', 'aten.squeeze.dim', 'aten.squeeze.dim', 'aten.squeeze.dims', 'aten.squeeze.dims', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sub.Tensor', 'aten.sum.dim_IntList', 'aten.sum.dim_IntList', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default'] match a partition on the other side under a different view-op spelling)",
+          "missing e262d057f3c9 (ops ['aten.reshape.default', 'aten.sum.dim_IntList'] match a partition on the other side under a different view-op spelling)",
+          "extra 22b5cd24890b (ops ['aten.sum.dim_IntList', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
+        ],
+        "hard": []
+      },
+      "c_known_class": null,
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/torchbench/infer/hf_Bert",
+      "suite": "torchbench",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/torchbench/infer/moondream",
+      "suite": "torchbench",
+      "graphs": [
+        "full_graph_000.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/torchbench/train/hf_Bert",
+      "suite": "torchbench",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/torchbench/train/hf_T5_base",
+      "suite": "torchbench",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/torchbench/train/lennard_jones",
+      "suite": "torchbench",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/torchbench/train/resnet18",
+      "suite": "torchbench",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/torchbench/train/tts_angular",
+      "suite": "torchbench",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/torchbench/train/vgg16",
+      "suite": "torchbench",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/vllm/Qwen_Qwen3-0.6B",
+      "suite": "vllm",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/vllm/Qwen_Qwen3-30B-A3B",
+      "suite": "vllm",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/vllm/facebook_opt-125m",
+      "suite": "vllm",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py",
+        "full_graph_002.py",
+        "full_graph_003.py",
+        "full_graph_004.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/vllm/meta-llama_Llama-3.2-1B",
+      "suite": "vllm",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    },
+    {
+      "model_dir": "repros/models/vllm/mistralai_Mistral-7B-Instruct-v0.3",
+      "suite": "vllm",
+      "graphs": [
+        "full_graph_000.py",
+        "full_graph_001.py"
+      ],
+      "a_failures": [],
+      "b_failures": [],
+      "c": null,
+      "c_known_class": "no-manifest",
+      "trace_failures": []
+    }
+  ]
+}
