@@ -309,6 +309,20 @@ writes the epilogue output in the same pass. Sub-variants:
      revisable by) the scheduler. Directly relevant to the
      reduction-with-epilogue fusion family (top TODO) and the
      COOPERATIVE_SPLIT_K queue family.
+   - Completed direction (2026-06-10, user): the decision must be revisable in
+     BOTH directions — "we should be able to cancel split reductions, or do it,
+     to match other fusion":
+     (a) CANCEL a split when wholeness lets a dependent epilogue fuse;
+     (b) INTRODUCE a split when nothing downstream fuses and output rows
+         undersaturate the GPU (e.g. sum_sum_3219a09ab96a post-rewrite: C=128
+         rows on 148 SMs; the scatter-elimination pass currently HAND-FACTORS
+         sum over B×HW into sum-over-HW → [B,C] partials → sum-over-B at the
+         FX level to get 65536 rows — 95.2us, beats oracle 204.6us — precisely
+         because the scheduler can't introduce the split itself. That
+         hand-factoring is logged debt: with (b) in the scheduler the pass
+         would emit the natural single sum);
+     (c) RECONCILE sibling reductions to the same structure so they can fuse
+         with each other (sibling-hint mismatch family, design TODO #3).
 
 2. **Embedding backward scatter-reduce epilogue** (~15 repros, 1.4-2.1x)
    - "rowwise producer → multi-target atomic scatter" pattern
