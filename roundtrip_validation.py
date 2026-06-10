@@ -455,8 +455,20 @@ def run_write_gate(graph_path: str | Path, original_gm=None) -> dict[str, Any]:
             from torch._subclasses.fake_tensor import unset_fake_temporarily
         except Exception:
             unset_fake_temporarily = contextlib.nullcontext  # type: ignore
+        try:
+            from torch._guards import tracing
+        except Exception:
+            def tracing(_ctx):  # type: ignore
+                return contextlib.nullcontext()
 
-        with unset_fake_temporarily():
+        # unset_fake_temporarily clears the dispatch-MODE stack, but when the
+        # gate runs inside Inductor compilation, Dynamo's TracingContext
+        # fake_mode is still set and detect_fake_mode returns it
+        # authoritatively (torch/_guards.py) — the gate's own make_fx
+        # re-trace then dies with "Mixing fake modes NYI" and every sidecar
+        # gets stamped failed (found by wave-0 validation). tracing(None)
+        # clears the TracingContext for the validation scope.
+        with tracing(None), unset_fake_temporarily():
             verdict = validate_written_full_graph(
                 graph_path, original_gm=original_gm
             )
