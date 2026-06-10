@@ -323,6 +323,16 @@ writes the epilogue output in the same pass. Sub-variants:
          would emit the natural single sum);
      (c) RECONCILE sibling reductions to the same structure so they can fuse
          with each other (sibling-hint mismatch family, design TODO #3).
+   - Evidence for the JOINT decision (2026-06-10, sum_sum_63e248035ceb
+     1.68x->1.03x, commit bdc289b3644): the win came from a split threshold
+     change in choices.py:570 (xhint=80 sat just above the num_sm//2 gate), and
+     the split's effect was to UN-FUSE the full-size channels-last epilogue
+     into its own saturated pointwise kernel — the fusion BREAK was the win,
+     the exact inverse of the cancel-split case (a). Also needed a work-size
+     gate (rnumel*xhint <= 9.7M) to avoid regressing a DenseNet sibling.
+     Split decision and epilogue-fusion decision are one joint structure
+     decision; threshold-window patches like this one are debt against the
+     scheduler-level chooser (each new shape needs another gate).
 
 2. **Embedding backward scatter-reduce epilogue** (~15 repros, 1.4-2.1x)
    - "rowwise producer → multi-target atomic scatter" pattern
