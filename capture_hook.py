@@ -607,13 +607,21 @@ def canonicalize_subgraph(sub_gm, placeholder_info):
             _graph_mode = _m
             break
 
-    # Placeholder order must match the sub_gm's forward signature, which
-    # includes lifted _shape_param_N ints NOT present in placeholder_info
-    # (it only records tensor/symint inputs). Walk the graph's placeholders
-    # and fabricate per kind: tensors from placeholder_info, shape params as
-    # concrete int lists from shape_params-style metadata in their meta.
-    fake_inputs = []
+    # Partitions with lifted shape params (_shape_param_N list-valued
+    # placeholders) cannot be round-tripped through make_fx faithfully:
+    # make_fx EXPLODES a list input into one placeholder per element
+    # (S([128,512]) -> arg6_1, arg6_2), so the retraced signature disagrees
+    # with the serialized _shapes_config and the repro fails validation.
+    # Skip canonicalization for these — their reshape spellings already
+    # normalize via the canonical hash, and the validation gate keeps them
+    # honest.
     _ph_order = [n for n in sub_gm.graph.nodes if n.op == "placeholder"]
+    for _ph in _ph_order:
+        _v = _ph.meta.get("val") if hasattr(_ph, "meta") else None
+        if not (hasattr(_v, "shape") and hasattr(_v, "dtype")):
+            return sub_gm, placeholder_info
+
+    fake_inputs = []
 
     for name, info in placeholder_info.items():
         if info.get("dtype") == "symint":
@@ -668,6 +676,13 @@ def canonicalize_subgraph(sub_gm, placeholder_info):
     try:
         with torch.no_grad():
             canonical = make_fx(sub_gm, tracing_mode="fake")(*fake_inputs)
+        # make_fx wraps the module callable with pytree flatten/unflatten
+        # codegen and names the class after the callable ("<lambda>") — both
+        # break standalone serialization (class <lambda> is a SyntaxError;
+        # tree_flatten_spec needs the in/out specs). Reset to plain codegen:
+        # the graph body is identical, the wrapper disappears.
+        canonical.graph.set_codegen(fx.graph.CodeGen())
+        canonical.recompile()
     except Exception as exc:
         print(
             f"[canonicalize] retrace failed ({type(exc).__name__}: "
@@ -773,6 +788,7 @@ class _CaptureState:
         self.counter = 0
         self.graph_counter = 0
         self.captured: list[dict] = []
+        self.dropped: list[dict] = []
         # Stash for real example inputs from compile_fx (keyed by graph counter)
         self._real_inputs_stash: list[torch.Tensor] | None = None
         # Observed stats for the current graph being processed
@@ -835,7 +851,10 @@ class _CaptureState:
     def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
         shape_params = shape_params or {}
         code = gm.print_readable(print_output=False)
-        code = code.replace("class GraphModule(", "class Repro(", 1)
+        import re as _re
+        code = _re.sub(r"^class \S+\(torch\.nn\.Module\):",
+                       "class Repro(torch.nn.Module):", code, count=1,
+                       flags=_re.M)
 
         # Infer index bounds for int64 placeholders (graph inference = tier 1)
         index_bounds = self._infer_index_bounds(gm, placeholder_info)
@@ -1205,7 +1224,21 @@ if __name__ == "__main__":
                     "origin_ops": origin_ops,
                 })
             except Exception as e:
-                print(f"  [capture_hook] Failed to extract region: {e}")
+                # NEVER silently drop a region: record it so the run report
+                # and manifests can show exactly what's missing and why
+                # (silent drops are how the dynamic-regions hole and the
+                # resnet18 mean-head hole happened).
+                self.dropped.append({
+                    "filename": filename,
+                    "pattern_hash": pattern_key,
+                    "shape_hash": shape_key,
+                    "reason": f"{type(e).__name__}: {str(e)[:300]}",
+                })
+                print(
+                    f"  [capture_hook] REGION DROPPED ({pattern_key}_"
+                    f"{shape_key}): {type(e).__name__}: {str(e)[:160]}",
+                    file=sys.stderr,
+                )
 
     def finalize(self):
         """Write index.json for the captured session."""

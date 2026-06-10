@@ -332,7 +332,7 @@ def capture_single_model(
             # Install capture hook
             label = f"{suite}_{model_name}_{mode}"
             install_capture_hook(
-                str(cap_dir), label=label, graph_dir=str(model_dir), validate=False
+                str(cap_dir), label=label, graph_dir=str(model_dir), validate=True
             )
 
             # Compile and run
