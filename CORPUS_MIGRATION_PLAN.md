@@ -278,6 +278,15 @@ special path.
 - SOL column (roofline: max(bytes/BW, flops/peak)) as the second target
   alongside oracle floors — both for repros and gemm/conv. (Backlog.)
 - Wave 2 dynamic families → the BS=1 vs BS=N fusion-impact questions.
+- **Model oracles (future)**: the natural generalization of repros — a
+  hand-optimized END-TO-END implementation as the floor for a whole model
+  (a model is structurally a big repro: graph + input specs + measured
+  time; `oracle_impl(point=<graph shape hash>)` carries over unchanged).
+  Closes the gap kernel floors structurally can't see: cross-kernel
+  scheduling / horizontal fusion for launch-bound models. Accounting gains
+  a third row — compile vs Σ(kernel oracles) vs model oracle — whose
+  spread MEASURES the cross-kernel opportunity. Not until the migrated
+  corpus + kernel floors + accounting are trustworthy.
 
 ---
 
