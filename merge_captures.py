@@ -13,7 +13,9 @@ Usage:
 import argparse
 from contextlib import contextmanager
 from dataclasses import dataclass
+import hashlib
 import json
+import re
 import tempfile
 from pathlib import Path
 from typing import Iterator
@@ -27,6 +29,88 @@ from canonicalize_repros import (
     parse_make_inputs,
     _spec_to_T,
 )
+
+
+# Regex to extract _shapes_config from v2 repro source files.
+# Matches: _shapes_config = "(...)"  (single or double quotes, possibly multi-line)
+_SHAPES_CONFIG_RE = re.compile(
+    r'^_shapes_config\s*=\s*["\'](.+?)["\']\s*$',
+    re.MULTILINE,
+)
+
+
+def _extract_shapes_config(src_path: Path) -> str | None:
+    """Extract the _shapes_config string from a v2 repro source file.
+
+    This is the 0d fix: instead of trying to execute parse_shapes_config
+    (which requires repro_harness importable), we extract the literal string
+    directly from the source via regex.
+    """
+    if not src_path.exists():
+        return None
+    text = src_path.read_text()
+    m = _SHAPES_CONFIG_RE.search(text)
+    if m:
+        return m.group(1)
+    return None
+
+
+def _compute_shape_hash(signature: str) -> str:
+    """Compute the 8-hex-char shape hash from the signature string."""
+    return hashlib.sha256(signature.encode()).hexdigest()[:8]
+
+
+def _write_shapes_json(
+    repro_dir: Path,
+    shape_hash: str,
+    signature: str,
+    model_key: str,
+) -> None:
+    """Write or update shapes.json for a canonical repro directory.
+
+    Idempotent: re-merging the same (model_key, shape_hash) is a no-op.
+    A new model on an existing point adds a key under "models".
+
+    Schema (static/degenerate case — omits symbols/family/bindings):
+    {
+      "points": [
+        {"shape_hash": "<8hex>",
+         "signature": "<the _shapes_config T()/S() string>",
+         "models": {"<suite>/<mode>/<model>": {"occurrences": null}},
+         "source": "captured"}
+      ]
+    }
+    """
+    shapes_path = repro_dir / "shapes.json"
+
+    if shapes_path.exists():
+        data = json.loads(shapes_path.read_text())
+    else:
+        data = {"points": []}
+
+    # Find existing point by shape_hash
+    existing_point = None
+    for point in data["points"]:
+        if point.get("shape_hash") == shape_hash:
+            existing_point = point
+            break
+
+    if existing_point is not None:
+        # Point exists — add model if not already present
+        models = existing_point.setdefault("models", {})
+        if model_key not in models:
+            models[model_key] = {"occurrences": None}
+    else:
+        # New point
+        new_point = {
+            "shape_hash": shape_hash,
+            "signature": signature,
+            "models": {model_key: {"occurrences": None}},
+            "source": "captured",
+        }
+        data["points"].append(new_point)
+
+    shapes_path.write_text(json.dumps(data, indent=2) + "\n")
 
 
 @dataclass
@@ -262,19 +346,28 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             repro_dir = canonical_path / dir_name
         repro_dir.mkdir(parents=True, exist_ok=True)
 
-        # Update shapes.txt (compact T()/S() format)
-        shapes_path = repro_dir / "shapes.txt"
-        config_key = f"{model_name.lower()}_{shape_hash[:8]}"
-
-        # Check if this config already exists
-        existing_lines = shapes_path.read_text().splitlines() if shapes_path.exists() else []
-        if not any(line.startswith(f"{config_key}:") for line in existing_lines):
-            src_file = Path(entry["file"])
+        # Update shapes.json (the 0d fix: extract _shapes_config directly
+        # from v2 source files instead of trying to execute parse_make_inputs,
+        # which fails for v2 repros that call parse_shapes_config)
+        src_file = Path(entry["file"])
+        signature = _extract_shapes_config(src_file)
+        if signature is None:
+            # Fallback for v1 repros: build signature from input_specs
             input_specs = parse_make_inputs(src_file) if src_file.exists() else []
             if input_specs:
-                compact_line = _format_compact_config(config_key, input_specs)
-                with open(shapes_path, "a") as f:
-                    f.write(compact_line + "\n")
+                parts = []
+                for spec in input_specs:
+                    if spec.get("kind") == "shape":
+                        parts.append(f"S({spec['dims']})")
+                    else:
+                        parts.append(_spec_to_T(spec))
+                signature = f"({', '.join(parts)})"
+
+        if signature:
+            # Build model key: suite/mode/model_name
+            model_key = f"{suite}/{mode}/{clean_name}" if mode else f"{suite}/{clean_name}"
+            point_hash = shape_hash[:8] if len(shape_hash) >= 8 else shape_hash
+            _write_shapes_json(repro_dir, point_hash, signature, model_key)
 
         # Update meta.json
         meta_path = repro_dir / "meta.json"
