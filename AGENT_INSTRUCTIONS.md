@@ -109,6 +109,8 @@ Good: "REDUCTION_EPILOGUE_REREAD" — immediately tells you the mechanism and wh
 
 5. **Score by actual memory savings** — fusion is profitable when it eliminates a buffer round-trip. Count bytes saved, not just "shared reads."
 
+6. **Check composability before claiming a closure** — repros are partitions; the capture cut can DROP consumers of a boundary value. Any fix keyed on "sole consumer" / "all users rewritable" (elimination passes especially) may fire on the repro but never on the real model. Before marking a big closure IMPLEMENTED, read the source model's full graph (`repros/models/<suite>/<mode>/<model>/full_graph_*.py`) and check the rewritten value's FULL user set against the pass preconditions — 5 minutes of graph reading, no GPU. Case study: sum_sum_3219a09ab96a closed 3.60x→0.45x in the repro, but in the model every `where` also feeds `convolution_backward`, so the pass (correctly) never fires — end-to-end delta 0.1%. See investigation_results/squeezenet_scatter_e2e_validation.md.
+
 ## How To Test
 
 ```bash
