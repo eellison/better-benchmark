@@ -36,6 +36,7 @@ import torch.fx as fx
 import torch._inductor.config as inductor_config
 
 from full_graph_harness import (
+    _is_fake_or_meta_tensor as _is_fake_or_meta,
     infer_index_bounds_from_gm,
     infer_permutation_indices_from_gm,
     placeholder_info_from_gm,
@@ -563,6 +564,33 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
     }
 
 
+def compute_observed_stats(tensor: torch.Tensor) -> dict | None:
+    """Compute observed-value stats for an integer/bool tensor.
+
+    Returns {"min": int, "max": int, "n_unique": int} or None if the tensor
+    is not integer/bool dtype or is empty. Keeps it cheap: single pass with
+    .min()/.max()/.unique().numel() on the real tensor.
+    """
+    if tensor.numel() == 0:
+        return None
+    dtype_name = str(tensor.dtype)
+    if not ("int" in dtype_name or "bool" in dtype_name):
+        return None
+    try:
+        # Move to CPU for stats if needed (avoids GPU sync issues with .unique())
+        t = tensor.detach()
+        if t.is_cuda:
+            t = t.cpu()
+        t_flat = t.reshape(-1)
+        return {
+            "min": int(t_flat.min().item()),
+            "max": int(t_flat.max().item()),
+            "n_unique": int(t_flat.unique().numel()),
+        }
+    except Exception:
+        return None
+
+
 class _CaptureState:
     def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
                  validate: bool = True, capture_only: bool = False):
@@ -575,9 +603,50 @@ class _CaptureState:
         self.counter = 0
         self.graph_counter = 0
         self.captured: list[dict] = []
+        # Stash for real example inputs from compile_fx (keyed by graph counter)
+        self._real_inputs_stash: list[torch.Tensor] | None = None
+        # Observed stats for the current graph being processed
+        self._current_observed_stats: dict[str, dict] = {}
         os.makedirs(output_dir, exist_ok=True)
         if graph_dir:
             os.makedirs(graph_dir, exist_ok=True)
+
+    def stash_real_inputs(self, example_inputs):
+        """Store real example inputs from compile_fx for observed-stats collection."""
+        real_tensors = []
+        for inp in example_inputs:
+            if isinstance(inp, torch.Tensor) and not _is_fake_or_meta(inp):
+                real_tensors.append(inp)
+            else:
+                real_tensors.append(None)
+        self._real_inputs_stash = real_tensors
+
+    def get_observed_stats_for_placeholders(
+        self, gm: fx.GraphModule, placeholder_info: dict[str, dict]
+    ) -> dict[str, dict]:
+        """Compute observed stats for integer/bool placeholders using stashed real inputs.
+
+        Returns {placeholder_name: {"min": int, "max": int, "n_unique": int}} for
+        each integer/bool placeholder where stats could be computed.
+        """
+        if self._real_inputs_stash is None:
+            return {}
+        stats = {}
+        ph_nodes = [n for n in gm.graph.nodes if n.op == "placeholder"]
+        for idx, node in enumerate(ph_nodes):
+            if idx >= len(self._real_inputs_stash):
+                break
+            real_tensor = self._real_inputs_stash[idx]
+            if real_tensor is None:
+                continue
+            info = placeholder_info.get(node.name, {})
+            dtype = info.get("dtype", "")
+            if not ("int" in dtype or "bool" in dtype):
+                continue
+            observed = compute_observed_stats(real_tensor)
+            if observed is not None:
+                stats[node.name] = observed
+        return stats
 
     def _extract_subgraph(self, origin_nodes: list[fx.Node], gm: fx.GraphModule):
         return extract_partition_subgraph(origin_nodes, gm)
@@ -598,9 +667,22 @@ class _CaptureState:
         code = gm.print_readable(print_output=False)
         code = code.replace("class GraphModule(", "class Repro(", 1)
 
-        # Infer index bounds for int64 placeholders
+        # Infer index bounds for int64 placeholders (graph inference = tier 1)
         index_bounds = self._infer_index_bounds(gm, placeholder_info)
         permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
+
+        # Apply bound hierarchy: observed fallback for integer inputs without
+        # graph-inferred bounds. This eliminates the high=512 guess class.
+        for name, info in placeholder_info.items():
+            dtype = info.get("dtype", "")
+            if "int" not in dtype and "bool" not in dtype:
+                continue
+            if name in index_bounds or name in permutation_indices:
+                continue  # Graph inference won — keep it
+            observed = info.get("observed")
+            if observed is not None:
+                # Observed fallback: bound = observed.max + 1
+                index_bounds[name] = int(observed["max"]) + 1
 
         # Replace symbolic shape refs (s0, s1, ...) in annotations with concrete values
         import re
@@ -802,6 +884,13 @@ if __name__ == "__main__":
 
     def process_graph(self, gm: fx.GraphModule):
         """Called by the hook for each post-grad graph. Partitions and captures."""
+        # Compute observed stats for the full graph's integer/bool placeholders
+        # using the stashed real inputs from compile_fx.
+        full_graph_placeholder_info = placeholder_info_from_gm(gm)
+        self._current_observed_stats = self.get_observed_stats_for_placeholders(
+            gm, full_graph_placeholder_info
+        )
+
         # Save the FULL post-grad graph (before partitioning) for recovery
         if self.graph_dir:
             full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
@@ -829,6 +918,7 @@ if __name__ == "__main__":
                         extra={"source": infer_full_graph_source(full_graph_path)},
                         index_bounds=index_bounds,
                         permutation_indices=permutation_indices,
+                        observed_stats=self._current_observed_stats or {},
                     )
                 except Exception as exc:
                     print(
@@ -868,6 +958,16 @@ if __name__ == "__main__":
             if result is None:
                 continue
             sub_gm, placeholder_info, shape_params = result
+
+            # Attach observed stats to placeholder_info for integer/bool inputs.
+            # The subgraph's placeholders inherit names from the full graph's nodes,
+            # so we can match by name to the full-graph observed stats.
+            if self._current_observed_stats:
+                for ph_name, info in placeholder_info.items():
+                    dtype = info.get("dtype", "")
+                    if "int" in dtype or "bool" in dtype:
+                        if ph_name in self._current_observed_stats:
+                            info["observed"] = self._current_observed_stats[ph_name]
 
             origin_ops = sorted(str(n.target) for n in comp if n.op == "call_function")
 
@@ -991,6 +1091,21 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
     inductor_config.post_grad_custom_pre_pass = _capture_pass
     inductor_config.force_disable_caches = True
 
+    # Install compile_fx wrapper to stash real example inputs for observed-stats.
+    # The real inputs exist at the compile_fx entry point (before AOTAutograd fakes them).
+    import torch._inductor.compile_fx as _compile_fx_module
+    _original_compile_fx = _compile_fx_module.compile_fx
+
+    def _capture_compile_fx(model_, example_inputs_, **kwargs):
+        """Wrapper that stashes real inputs before calling the real compile_fx."""
+        if _active_state is not None:
+            _active_state.stash_real_inputs(example_inputs_)
+        return _original_compile_fx(model_, example_inputs_, **kwargs)
+
+    _compile_fx_module.compile_fx = _capture_compile_fx
+    _active_state._original_compile_fx = _original_compile_fx
+    _active_state._compile_fx_module = _compile_fx_module
+
     import atexit
     atexit.register(_finalize_on_exit)
 
@@ -1009,6 +1124,9 @@ def uninstall_capture_hook():
     """Remove the capture hook and finalize."""
     global _active_state
     if _active_state is not None:
+        # Restore original compile_fx
+        if hasattr(_active_state, '_original_compile_fx') and hasattr(_active_state, '_compile_fx_module'):
+            _active_state._compile_fx_module.compile_fx = _active_state._original_compile_fx
         _active_state.finalize()
         _active_state = None
     inductor_config.post_grad_custom_pre_pass = None

@@ -411,16 +411,24 @@ def graph_constraints_from_gm(
     *,
     index_bounds: dict[str, int] | None = None,
     permutation_indices: dict[str, int] | None = None,
+    observed_stats: dict[str, dict] | None = None,
 ) -> dict[str, Any]:
     """Extract replay constraints from an FX GraphModule.
 
     The exporter writes this next to full_graph_*.py so newly added model
     graphs do not depend solely on parsing print_readable annotations.
+
+    Bound hierarchy (settled 2026-06-10):
+      1. graph_inference: known consumer patterns (embedding, gather, scatter)
+      2. observed: fallback from real execution stats (high = observed.max + 1)
+      3. default_unobserved: ONLY when observation was impossible (should not
+         occur for new captures)
     """
     import torch
 
     index_bounds = index_bounds or {}
     permutation_indices = permutation_indices or {}
+    observed_stats = observed_stats or {}
     inputs = []
     outputs = []
     tensor_attrs = {}
@@ -429,24 +437,60 @@ def graph_constraints_from_gm(
         if node.op == "placeholder":
             if torch.is_tensor(value):
                 gen_override = None
+                constraint_source = None
                 if node.name in permutation_indices:
                     gen_override = {
                         "kind": "permutation",
                         "size": int(permutation_indices[node.name]),
                     }
+                    constraint_source = "graph_inference"
                 elif node.name in index_bounds:
                     gen_override = {
                         "kind": "index",
                         "low": 0,
                         "high": int(index_bounds[node.name]),
                     }
-                inputs.append(
-                    _tensor_spec_from_value(
-                        node.name,
-                        value,
-                        gen_override=gen_override,
-                    )
+                    constraint_source = "graph_inference"
+                elif node.name in observed_stats:
+                    # Observed-value fallback: use observed max + 1 as bound
+                    obs = observed_stats[node.name]
+                    dtype_name = _dtype_name(value.dtype)
+                    if _is_integer_or_bool_dtype_name(dtype_name):
+                        gen_override = {
+                            "kind": "index",
+                            "low": 0,
+                            "high": int(obs["max"]) + 1,
+                        }
+                        constraint_source = "observed"
+                else:
+                    # No inference bound and no observation
+                    dtype_name = _dtype_name(value.dtype)
+                    if _is_integer_or_bool_dtype_name(dtype_name):
+                        constraint_source = "default_unobserved"
+
+                spec = _tensor_spec_from_value(
+                    node.name,
+                    value,
+                    gen_override=gen_override,
                 )
+                # Override constraint_source with the hierarchy decision
+                if constraint_source is not None:
+                    spec["constraint_source"] = constraint_source
+                # Attach observed stats alongside (regardless of which source won)
+                if node.name in observed_stats:
+                    spec["observed"] = observed_stats[node.name]
+                    # Note potential permutation: n_unique == numel on 1-D int tensor
+                    obs = observed_stats[node.name]
+                    shape = spec.get("shape", [])
+                    if (
+                        len(shape) == 1
+                        and shape[0] > 0
+                        and obs.get("n_unique") == shape[0]
+                        and _is_integer_or_bool_dtype_name(spec.get("dtype", ""))
+                        and spec.get("dtype", "") != "bool"
+                    ):
+                        spec["maybe_permutation"] = True
+                inputs.append(spec)
             else:
                 inputs.append(_scalar_spec_from_value(node.name, value))
         elif node.op == "get_attr":
@@ -499,12 +543,14 @@ def write_full_graph_metadata(
     extra: dict[str, Any] | None = None,
     index_bounds: dict[str, int] | None = None,
     permutation_indices: dict[str, int] | None = None,
+    observed_stats: dict[str, dict] | None = None,
 ) -> Path:
     graph_path = Path(graph_path)
     payload = graph_constraints_from_gm(
         gm,
         index_bounds=index_bounds,
         permutation_indices=permutation_indices,
+        observed_stats=observed_stats,
     )
     payload["graph"] = graph_path.name
     if extra:
