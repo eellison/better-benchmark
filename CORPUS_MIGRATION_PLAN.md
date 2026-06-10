@@ -61,9 +61,31 @@ Gated on the dynamic-shapes capture fix. These get expr serialization,
 symbol tables, `captured_dynamic` provenance — enabling the questions that
 motivate them ("how much does this fusion matter at decode BS=1 vs BS=64").
 
-Pilot: a handful of small timm models first to shake out the invocation
-script end-to-end (capture → gate stamps → merge → manifests → spot-bench)
-before the long grind.
+**Wave 0 — single-model pipeline validation (GATES WAVE 1).** Before any
+mass run, prove the ENTIRE value chain on ONE model (small timm CNN), not
+just that capture executes. Acceptance criteria, all must pass:
+
+1. **Capture**: invocation script runs the model (bf16/AMP); full graph +
+   sidecars + manifest + canonical repros written; every artifact stamped
+   `roundtrip: ok` by the write-gate.
+2. **Reference counts**: `gc_corpus.py diff` shows a sane transaction
+   preview (new patterns / content-hash survivors / dropped); the manifest
+   references exactly the repro dirs that exist; `refcount` reports no
+   dangling references.
+3. **Accounting maps**: `model_graph_accounting.py` partitions the new
+   full graph (shared partitioner), maps EVERY partition to a captured
+   repro — zero UNMATCHED — with occurrence counts.
+4. **Times roll up**: benchmark the new repros; verify
+   Σ(partition_time × occurrences) + non-fusible ops ≈ end-to-end
+   full-graph time within tolerance (the A-vs-B cross-check that catches
+   composition bugs — exactly what exposed squeezenet).
+5. **Improvement estimates produce**: with oracles on at least 2-3 of the
+   model's patterns (ported or fresh), the accounting emits the target
+   sentence: "fixing pattern X saves Y us × N occurrences = Z% of this
+   model".
+
+If any link fails on one model it fails on 440 — wave 0 is where it's
+cheap to find out. Only a fully green wave 0 unlocks wave 1.
 
 ---
 
