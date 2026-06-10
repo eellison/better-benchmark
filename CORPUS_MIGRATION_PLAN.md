@@ -35,7 +35,7 @@ itself still embodies the old defects — hence recapture.
 | Gate | What it guarantees | Where |
 |---|---|---|
 | Partition fidelity | Escaping values are partition outputs; mutating ops never dropped | `77a691d80`, tests in `scripts/test_partition_outputs.py` |
-| Canonical hashing | `hash(G) == hash(retrace(G))` for reshape/view + clone spellings; no dup patterns minted | `6ee455f4a`, fixed-point test `scripts/test_canonical_hash.py` |
+| Canonical hashing | **canonicalize-before-serialization**: one make_fx retrace BEFORE the artifact is written, so the serialized form IS canonical and every later trace is the identity (idempotent: retrace(serialized)==serialized). Replaces the alias-table approach (`_HASH_OP_SPELLING_ALIASES` was a code smell — 167 reshape/view + 79 dead-getitem repros prove the drift surface). One re-trace allowed; all subsequent traces and hashes identical. | `6ee455f4a` (alias-table v1) → upgrade in flight per 2026-06-10 decision; fixed-point test becomes the single property retrace∘serialize == serialize |
 | Round-trip invariants | Every written artifact reload-verified at capture time; sidecar stamped `"roundtrip": "ok"/"failed: <reason>"` | `e392d4422` + validate-before-write gate; `validate_corpus_invariants.py --full-graph-roundtrip` |
 | Shared partitioner | Accounting partitions ≡ capture partitions, provably | `260d8f1a0` (`get_fusion_partitions`) |
 | GC transaction | Atomic flip with hard verification gate (§5) | `c374b6553` (`scripts/gc_corpus.py`) |
