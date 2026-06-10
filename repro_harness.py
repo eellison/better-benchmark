@@ -49,29 +49,70 @@ def read_repro_version(repro_path: str | Path) -> int:
 
 
 def load_shape_configs(repro_file: str) -> dict:
-    """Load shapes from shapes.txt (compact T()/S() format).
+    """Load shape configs for a canonical repro.
 
-    Falls back to shapes.json for legacy repos.
+    Preference order:
+      1. shapes.json (new format with points array) — used for new captures
+      2. shapes.txt (compact T()/S() format) — the existing 1482 repros
     """
     repro_dir = Path(repro_file).parent
 
+    # Prefer shapes.json (new format from wave-1 onward)
+    shapes_json = repro_dir / "shapes.json"
+    if shapes_json.exists():
+        return _parse_shapes_json(shapes_json)
+
+    # Fallback: shapes.txt for existing corpus
     shapes_txt = repro_dir / "shapes.txt"
     if shapes_txt.exists():
         return _parse_shapes_txt(shapes_txt)
 
-    # Legacy: verbose JSON format
-    shapes_json = repro_dir / "shapes.json"
-    if shapes_json.exists():
-        with open(shapes_json) as f:
-            data = json.load(f)
-        return data.get("configs", {})
-
     return {}
 
 
-def _parse_shapes_txt(shapes_path: Path) -> dict:
-    """Parse shapes.txt by eval'ing each line with T() and S() as constructors."""
+def _parse_shapes_json(shapes_path: Path) -> dict:
+    """Parse shapes.json (new format with points array).
 
+    Each point has a shape_hash, signature (T()/S() string), and models dict.
+    Returns the same dict format as _parse_shapes_txt: {label: {"inputs": [specs]}}.
+    Label is constructed from shape_hash + first model key for readability.
+    """
+    with open(shapes_path) as f:
+        data = json.load(f)
+
+    # Legacy shapes.json format (pre-points schema)
+    if "configs" in data and "points" not in data:
+        return data.get("configs", {})
+
+    points = data.get("points", [])
+    if not points:
+        return {}
+
+    configs = {}
+    for point in points:
+        signature = point.get("signature", "")
+        shape_hash = point.get("shape_hash", "unknown")
+        models = point.get("models", {})
+
+        # Build label: shape_hash_first_model_key (sanitized)
+        first_model = next(iter(models), "")
+        # Use last component of model path for brevity
+        model_short = first_model.rsplit("/", 1)[-1] if first_model else ""
+        label = f"{model_short}_{shape_hash}" if model_short else shape_hash
+
+        # Parse the signature using the same T()/S() eval as shapes.txt
+        try:
+            inputs = _eval_signature(signature)
+            if inputs:
+                configs[label] = {"inputs": inputs}
+        except Exception:
+            continue
+
+    return configs
+
+
+def _make_shape_eval_ns():
+    """Build the eval namespace for T()/S() signature parsing."""
     _DTYPE_MAP = {
         "f32": "torch.float32", "f16": "torch.float16",
         "bf16": "torch.bfloat16", "f64": "torch.float64",
@@ -111,10 +152,26 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
     def S(dims):
         return {"kind": "shape", "dims": dims}
 
-    _eval_ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm,
-                "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
-                "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
-                "b8": "b8", "u8": "u8"}
+    return {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm,
+            "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
+            "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
+            "b8": "b8", "u8": "u8"}
+
+
+def _eval_signature(expr: str) -> list:
+    """Eval a T()/S() signature string and return a list of input specs."""
+    ns = _make_shape_eval_ns()
+    inputs = eval(expr, ns)  # noqa: S307
+    if isinstance(inputs, tuple):
+        inputs = list(inputs)
+    elif isinstance(inputs, dict):
+        inputs = [inputs]
+    return inputs if inputs else []
+
+
+def _parse_shapes_txt(shapes_path: Path) -> dict:
+    """Parse shapes.txt by eval'ing each line with T() and S() as constructors."""
+    _eval_ns = _make_shape_eval_ns()
 
     configs = {}
     for line in shapes_path.read_text().splitlines():

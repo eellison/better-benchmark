@@ -875,7 +875,7 @@ def _bench_oracle_cpu(oracle_forward, instance, inputs, repro_id, *, warmup, rep
 
 
 def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
-    """Benchmark oracle across all shapes in shapes.txt.
+    """Benchmark oracle across all shapes (shapes.json preferred, shapes.txt fallback).
 
     Args:
         oracle_forward: callable that takes inputs and returns oracle outputs
@@ -889,19 +889,21 @@ def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
     from repro_harness import load_shape_configs, make_inputs_from_config
 
     repro_dir = Path(repro_dir)
-    shapes_file = repro_dir / "shapes.txt"
-    if not shapes_file.exists():
-        # Just run default
+    # load_shape_configs expects a file path whose parent dir it inspects
+    repro_file = repro_dir / "repro.py"
+    configs = load_shape_configs(str(repro_file))
+
+    if not configs:
+        # No shape configs found — just run with default inputs
         inputs = get_inputs(repro_dir)
         instance = get_repro_instance(repro_dir)
         return [bench_oracle(oracle_forward, instance, inputs, repro_id, **kwargs)]
 
     results = []
-    configs = load_shape_configs(shapes_file)
-    for config in configs:
+    for label, config in configs.items():
         inputs = make_inputs_from_config(config)
         instance = get_repro_instance(repro_dir)
-        result = bench_oracle(oracle_forward, instance, inputs, f"{repro_id}_{config.label}", **kwargs)
+        result = bench_oracle(oracle_forward, instance, inputs, f"{repro_id}_{label}", **kwargs)
         results.append(result)
     return results
 
