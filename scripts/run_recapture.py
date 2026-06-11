@@ -366,6 +366,26 @@ def capture_single_model(
 
             uninstall_capture_hook()
 
+            # FAIL-HARD on dropped regions: every drop we have ever seen was
+            # a pipeline bug (resnet18 mean-head serialization, shape-param
+            # explosion), never a legitimately uncapturable region. A model
+            # with drops FAILS before merge — nothing partial enters the
+            # canonical corpus; the drop reasons become the error.
+            index_path = capture.capture_dir / "index.json"
+            if index_path.exists():
+                idx = json.loads(index_path.read_text())
+                dropped = idx.get("dropped", []) if isinstance(idx, dict) else []
+                if dropped:
+                    reasons = "; ".join(
+                        f"{d.get('pattern_hash')}_{d.get('shape_hash')}: "
+                        f"{d.get('reason', '?')[:160]}"
+                        for d in dropped[:5]
+                    )
+                    raise RuntimeError(
+                        f"{len(dropped)} region(s) DROPPED during capture "
+                        f"(pipeline bug — fix before recapture): {reasons}"
+                    )
+
             # Merge into canonical set
             n_regions = capture.merge()
             elapsed = time.time() - t0

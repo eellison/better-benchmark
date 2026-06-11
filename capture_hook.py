@@ -533,9 +533,69 @@ def compute_dag_signature(gm) -> list:
     Op spellings are canonicalized via canonicalize_for_hash so that
     trace-equivalent graphs (saved post-grad reshape-spelling vs make_fx
     retrace view-spelling) hash identically.
+
+    Node ORDER is canonicalized too: nodes are renumbered by a
+    deterministic topological order (Kahn's algorithm, ready set
+    tie-broken by each node's structural encoding), so the textual
+    interleaving of INDEPENDENT ops (relu defined before vs after a
+    sibling sigmoid) never forks the hash. Placeholders keep their
+    original order — input position is semantics, not spelling.
     """
     nodes, _resolve, _op_name = canonicalize_for_hash(gm)
-    node_to_idx = {n: i for i, n in enumerate(nodes)}
+
+    # --- canonical node order: deterministic Kahn topological sort -------
+    node_set = set(nodes)
+
+    def _preds(n):
+        out = []
+
+        def visit(a):
+            if isinstance(a, fx.Node):
+                r = _resolve(a)
+                if r in node_set:
+                    out.append(r)
+        fx.map_arg((n.args, n.kwargs), visit)
+        return out
+
+    def _static_key(n):
+        """Order-independent structural key for tie-breaking: op spelling +
+        literal args (Node refs masked)."""
+        def mask(a):
+            if isinstance(a, fx.Node):
+                return "·"
+            if isinstance(a, (list, tuple)):
+                return [mask(x) for x in a]
+            return repr(a)
+        name = _op_name(n) if n.op == "call_function" else str(n.target)
+        return (n.op, name, repr(mask(list(n.args))), repr(mask(sorted(
+            n.kwargs.items(), key=lambda kv: kv[0]) if n.kwargs else [])))
+
+    node_to_idx: dict = {}
+    order: list = []
+    pending = []
+    for n in nodes:
+        if n.op == "placeholder":
+            # Input position is semantics, not spelling — keep original order.
+            node_to_idx[n] = len(order)
+            order.append(n)
+        else:
+            pending.append(n)
+    remaining = list(pending)
+    while remaining:
+        ready = [n for n in remaining
+                 if all(p in node_to_idx for p in _preds(n))]
+        if not ready:  # cycle cannot happen in fx; defensive fallback
+            ready = remaining[:]
+        ready.sort(key=lambda n: (
+            sorted(node_to_idx.get(p, -1) for p in _preds(n)),
+            _static_key(n),
+        ))
+        chosen = ready[0]
+        node_to_idx[chosen] = len(order)
+        order.append(chosen)
+        remaining.remove(chosen)
+    nodes = order
+    # ---------------------------------------------------------------------
 
     def _int_slots(target):
         """(positional indices, kwarg names) whose schema type is bare
@@ -634,7 +694,18 @@ def compute_dag_signature(gm) -> list:
                 elif isinstance(x, (tuple, list)):
                     return [_collect_output_indices(item) for item in x]
                 return None
-            signature.append(("output", _collect_output_indices(node.args[0])))
+            out_indices = _collect_output_indices(node.args[0])
+            # Output tuple order is consumption spelling, not kernel
+            # structure (extraction orders outputs by the ORIGINAL graph's
+            # def positions, which the canonical renumbering replaces) —
+            # sort top-level indices so output permutations of the same
+            # DAG hash identically.
+            if isinstance(out_indices, list):
+                out_indices = sorted(
+                    out_indices,
+                    key=lambda x: (x is None, x if isinstance(x, int) else repr(x)),
+                )
+            signature.append(("output", out_indices))
 
     return signature
 
@@ -1458,13 +1529,30 @@ if __name__ == "__main__":
                 )
 
     def finalize(self):
-        """Write index.json for the captured session."""
+        """Write index.json for the captured session.
+
+        Drops are FIRST-CLASS in the index: a region that failed
+        validation/serialization must be visible to downstream consumers
+        (run_recapture status, corpus validation), not just stderr.
+        """
         index_path = os.path.join(self.output_dir, "index.json")
-        with open(index_path, "w") as f:
-            json.dump(self.captured, f, indent=2)
+        payload = {
+            "captured": self.captured,
+            "dropped": self.dropped,
+            "n_captured": len(self.captured),
+            "n_dropped": len(self.dropped),
+        }
+        tmp_path = index_path + ".tmp"
+        with open(tmp_path, "w") as f:
+            json.dump(payload, f, indent=2)
+        os.replace(tmp_path, index_path)
         n_red = sum(1 for c in self.captured if c.get("kind") == "reduction")
         n_pw = sum(1 for c in self.captured if c.get("kind") == "pointwise")
-        print(f"[capture_hook] Captured {len(self.captured)} regions ({n_red} reduction, {n_pw} pointwise) -> {self.output_dir}")
+        msg = (f"[capture_hook] Captured {len(self.captured)} regions "
+               f"({n_red} reduction, {n_pw} pointwise) -> {self.output_dir}")
+        if self.dropped:
+            msg += f" | DROPPED {len(self.dropped)} regions (see index.json)"
+        print(msg)
 
 
 _active_state: _CaptureState | None = None

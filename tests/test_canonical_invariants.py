@@ -482,3 +482,59 @@ def test_kwarg_dtype_and_mode_match_positional():
     s0, _ = _pattern_hashes(lambda a: (a + 1).sum(dim=[0]), torch.randn(8, 8))
     s1, _ = _pattern_hashes(lambda a: (a + 1).sum(dim=[1]), torch.randn(8, 8))
     assert s0 != s1, "int[] reduction dims not structural"
+
+
+# ============================================================================
+# 10. Output order canonicalized by definition order
+# ============================================================================
+
+def test_output_consumption_order_irrelevant():
+    """A partition's identity must not depend on the ORDER its outputs are
+    consumed outside: extraction sorts output nodes by definition order
+    (graph_pos), so two models consuming (u, v) vs (v, u) dedup to ONE
+    canonical repro. The mm consumers are non-fusible, forcing both u and
+    v to escape the partition as outputs."""
+    x, w = torch.randn(8, 8), torch.randn(8, 8)
+
+    def f_uv(a, b, w):
+        s = a + b
+        u = s.relu()
+        v = s.sigmoid()
+        return torch.mm(u, w), torch.mm(v, w)
+
+    def f_vu(a, b, w):
+        s = a + b
+        u = s.relu()
+        v = s.sigmoid()
+        return torch.mm(v, w), torch.mm(u, w)  # consumption order swapped
+
+    h1, s1 = _pattern_hashes(f_uv, x, x.clone(), w)
+    h2, s2 = _pattern_hashes(f_vu, x, x.clone(), w)
+    assert (h1, s1) == (h2, s2), \
+        "output consumption order leaked into partition identity"
+
+
+def test_output_definition_order_is_the_canonical_order():
+    """Sorting is BY DEFINITION ORDER, not by consumer: if the defs
+    themselves swap (sigmoid defined before relu), that IS a different
+    def order for the same multiset of ops — but the canonical node
+    renumbering (deterministic Kahn) renumbers topologically-equivalent
+    graphs identically, so the hash must still match."""
+    x, w = torch.randn(8, 8), torch.randn(8, 8)
+
+    def f_relu_first(a, b, w):
+        s = a + b
+        u = s.relu()
+        v = s.sigmoid()
+        return torch.mm(u, w), torch.mm(v, w)
+
+    def f_sigmoid_first(a, b, w):
+        s = a + b
+        v = s.sigmoid()
+        u = s.relu()
+        return torch.mm(u, w), torch.mm(v, w)
+
+    h1, s1 = _pattern_hashes(f_relu_first, x, x.clone(), w)
+    h2, s2 = _pattern_hashes(f_sigmoid_first, x, x.clone(), w)
+    assert (h1, s1) == (h2, s2), \
+        "definition-order permutation of independent ops forked the hash"

@@ -244,7 +244,9 @@ def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
     if mode:
         manifest_data["mode"] = mode
 
-    manifest_file.write_text(json.dumps(manifest_data, indent=2) + "\n")
+    tmp = manifest_file.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(manifest_data, indent=2) + "\n")
+    tmp.replace(manifest_file)
     return out_dir
 
 
@@ -323,7 +325,21 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         return 0
 
     with open(index_path) as f:
-        entries = json.load(f)
+        index = json.load(f)
+    # index.json v2 is {"captured": [...], "dropped": [...]}; v1 was a bare
+    # list. Drops FAIL the merge: every drop ever observed was a pipeline
+    # bug, and a partial model must never enter the canonical corpus.
+    if isinstance(index, dict):
+        entries = index.get("captured", [])
+        dropped = index.get("dropped", [])
+        if dropped:
+            raise RuntimeError(
+                f"refusing to merge {capture_dir}: {len(dropped)} dropped "
+                f"region(s) in index.json — fix the capture bug and re-run. "
+                f"First: {dropped[0].get('reason', '?')[:200]}"
+            )
+    else:
+        entries = index
 
     canonical_path = canonical_dir / "canonical"
     canonical_path.mkdir(parents=True, exist_ok=True)
