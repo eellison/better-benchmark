@@ -57,6 +57,80 @@ memcopy-SOL from bytes at 6.9 TB/s.
 
 (to be filled in per-fix: blocker file:line, hand-A/B, commit, before/after)
 
+### FIX LANDED: ungate scalar-acc configs from CD + raise rnumel ceiling (9dde2c59a51)
+
+Files: `triton_heuristics.py` `_reduction_configs` + new config flag
+`scalar_acc_configs_without_cd` (default True, env
+`TORCHINDUCTOR_SCALAR_ACC_CONFIGS_WITHOUT_CD`). Three parts:
+
+1. `has_scalar_acc` is now the kernel property only (`loads_and_red <= 3 or
+   has_online_softmax`) — CD-gate term dropped.
+2. rnumel ceiling re-measured (not assumed) and raised 131072 -> 1048576.
+   Measurements (B200, default vs forced configs, fresh cache each):
+   - softmax rnumel=524288 (4096 rows): default 3733us, CD 2026us, forced
+     R0=8192/4w 1990us, R0=16384/8w 1936us. After fix default = 1936us.
+   - softmax rnumel=1048576 (2048 rows): default 3899us, CD 2860us, forced
+     R0=16384/8w 2149us. After fix default = 2149us.
+   - plain sum rnumel=524288: default 1478us -> 613us.
+   - split-heuristics collision check: sum x=8 rnumel=8M (split territory)
+     default 31.6us flag-on vs 56.2us flag-off, CD 29.5 vs 31.5 — no
+     regression (post-split inner kernel has small rnumel; the old
+     "collides with split heuristics" rationale no longer applies).
+3. Two extra candidates `(XBLOCK=1, R0_BLOCK=8192, 4 warps)` and
+   `(XBLOCK=1, R0_BLOCK=16384, 8 warps)` for scalar-acc kernels in the
+   window. Needed because ReductionHint.INNER returns a single config: just
+   raising MAX_R0_BLOCK to 4096/16w only got SoftmaxForward to 2798us; the
+   CD-winning configs are R0=16384/8w (softmax 1907us) and R0=8192/4w
+   (CE 720us), confirmed by per-config sweeps.
+
+#### After-table (2026-06-11, B200, same method; flag-off columns re-measured same session)
+
+| graph | default before | default after | CD before | CD after |
+|---|---:|---:|---:|---:|
+| SoftmaxForward/000 | 3540.9 | **1904.5** | 1913.9 | 1909.6 |
+| SoftmaxBackward/000 | 3526.4 | **1434.6** | 1401.7 | 1404.7 |
+| SoftmaxBackward/001 | 2879.5 | 2881.3 | 2458.6 | 2461.6 |
+| CrossEntropyForward/000 | 1969.0 | **708.6** | 746.4 | 708.4 |
+| CrossEntropyBackward/000 | 1977.4 | **716.6** | 747.5 | 716.6 |
+| CrossEntropyBackward/001 | 1725.3 | 1727.5 | 1435.6 | 1435.6 |
+| LayerNormForward/000 | 343.8 | 347.9 | 343.9 | 385.8* |
+| LayerNormBackward/000 | 304.1 | 325.3* | 268.0 | 299.8* |
+| LayerNormBackward/001 | 675.9 | 700.2* | 380.6 | 384.9 |
+| RMSNormForward/000 | 344.0 | 343.8 | 345.8 | 343.7 |
+| RMSNormBackward/000 | 304.0 | 303.2 | 227.0 | 226.1 |
+| RMSNormBackward/001 | 380.8 | 390.7* | 372.5 | 403.2* |
+
+\* Not caused by this fix: same-session flag-off run reproduces these values
+(LNB/000 default 331.5 off vs 325.3 on; LNB/001 702.2 off vs 700.2 on;
+LNF/000 CD 382.7 off vs 385.8 on; RMSB/001 re-run 382.8/372.5 — these are
+rsplit-kernel autotune noise vs the 2026-06-11-morning baseline, identical
+with the flag disabled). All rnumel=262144 graphs whose CD landed near SOL
+now get the same config in DEFAULT autotune: default/SOL 1.85->0.99 (SMfwd),
+2.86->1.03 (CEfwd), 2.87->1.04 (CEbwd000), 2.83->1.15 (SMbwd000).
+LayerNormBackward/001's default gap (676us vs CD 381) is NOT this fix's
+class: its kernels are rsplit/persistent (mix-order reduction), not
+looped-reduction R0_BLOCK — still open.
+
+Sentinels (default/CD, flag-on vs same-session flag-off — all unchanged
+except the headline win):
+- amax_sum_sum_6fd07d12d98a: default 970.6 -> **542.5us**, CD 529-530us
+  both runs = 1.02x of oracle 520.1us (expected ~1.02x — holds).
+- sum_0becf9609ad7: 74.9/44.8 vs 75.0/44.7 flag-off; CD 44.8us = 0.68x of
+  split-k oracle 66.3us (expected ~0.67x — holds).
+- sum_011e69da166d: 438/393 both runs; CD 393us = 0.98x of oracle 401.4us
+  (expected ~0.98x — holds).
+- amax_sum_0561785713ab (plain softmax, BERT, small rnumel=128): 105/101
+  both runs — untouched (below the 8192 window).
+- mean_var_mean_3c4ea6d8f342: 15.1/15.1 both runs — untouched.
+- Default-mode non-suite check: plain sum rnumel=524288 1478->613us (win),
+  rnumel=8M split case 56->32us (win), small-rnumel repros unchanged.
+
+Correctness: softmax/sum/var_mean vs eager at rnumel=262144 pass
+(torch.testing.assert_close, rtol=atol=1e-3).
+test/inductor/test_triton_heuristics.py: 42 passed, 4 skipped;
+test_compile_time_autotune_not_repeated_at_runtime fails identically with
+the flag disabled and on the base commit (pre-existing).
+
 ## Orchestrator guidance for SoftmaxBackward/001 (dgrad, 1.29x after CD)
 
 Graph read (full_graph_001.py): recompute y from saved stats (primals_1 bf16 +

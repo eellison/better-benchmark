@@ -1,0 +1,73 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "83d80e2c5db9bfb35214705bd6a85a4a0adf5524",
+    "timestamp": "2026-06-11T16:47:18Z",
+    "n_repros": 5,
+    "n_results": 5,
+    "workload_kind": "repro"
+  },
+  "repros/canonical/amax_sum_0561785713ab/repro.py": {
+    "default": {
+      "compiled_us": 105.18400371074677,
+      "coord_descent_us": 101.21600329875946,
+      "memcopy_sol_us": 35.711999982595444,
+      "total_bytes": 203424236,
+      "n_kernels": 1,
+      "gap_default": 2.945340607135112,
+      "gap_cd": 2.834229484433467
+    }
+  },
+  "repros/canonical/amax_sum_sum_6fd07d12d98a/repro.py": {
+    "default": {
+      "compiled_us": 542.4960255622864,
+      "coord_descent_us": 530.0160050392151,
+      "memcopy_sol_us": 479.45600748062134,
+      "total_bytes": 3293773828,
+      "n_kernels": 3,
+      "gap_default": 1.1314823823209954,
+      "gap_cd": 1.1054528398220922
+    }
+  },
+  "repros/canonical/mean_var_mean_3c4ea6d8f342/repro.py": {
+    "default": {
+      "compiled_us": 15.135999768972397,
+      "coord_descent_us": 15.135999768972397,
+      "memcopy_sol_us": 11.008000001311302,
+      "total_bytes": 32445440,
+      "n_kernels": 2,
+      "gap_default": 1.3749999788489604,
+      "gap_cd": 1.3749999788489604
+    }
+  },
+  "repros/canonical/sum_0becf9609ad7/repro.py": {
+    "default": {
+      "compiled_us": 74.91199672222137,
+      "coord_descent_us": 44.79999840259552,
+      "memcopy_sol_us": 19.29599978029728,
+      "total_bytes": 88580000,
+      "n_kernels": 2,
+      "gap_default": 3.8822552640528305,
+      "gap_cd": 2.3217246534351546
+    }
+  },
+  "repros/canonical/sum_011e69da166d/repro.py": {
+    "default": {
+      "compiled_us": 438.1119906902313,
+      "coord_descent_us": 393.0560052394867,
+      "memcopy_sol_us": 357.2480082511902,
+      "total_bytes": 2433213692,
+      "n_kernels": 1,
+      "gap_default": 1.226352507421633,
+      "gap_cd": 1.100232880691441
+    }
+  },
+  "__summary__": {
+    "total": 5,
+    "ok": 5,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 17.730106592178345
+  }
+}
