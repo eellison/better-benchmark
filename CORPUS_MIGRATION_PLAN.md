@@ -268,6 +268,14 @@ special path.
 
 ---
 
+**Noted refinement (not pre-launch):** shape-param lifting currently keys
+on the specific view-like op set (reshape/view/expand) with the shape at
+args[1] — matching the original inline lift exactly. A schema-typed
+discriminator (lift any argument occupying a `SymInt[]`-typed parameter
+slot per the op's own schema) is arguably more principled (no op list to
+maintain, can't mis-lift int[] dims/permute args) — swappable inside
+`lift_shape_params` whenever broader shape coverage is wanted.
+
 ## 7. After migration
 
 - Fresh oracle sweep on the new corpus → new gap table (expect honest

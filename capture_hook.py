@@ -553,7 +553,67 @@ def shape_hash_for_placeholders(placeholder_info: dict) -> str:
     return hashlib.md5(json.dumps(input_shapes).encode()).hexdigest()[:8]
 
 
-def canonicalize_subgraph(sub_gm, placeholder_info):
+
+def lift_shape_params(gm):
+    """Lift concrete shape literals on view-like ops into _shape_param_N
+    placeholders. THE single lifting implementation: runs AFTER
+    canonicalization, on the canonical graph, so every partition goes through
+    the identical retrace first and the lift assigns names/positions by one
+    set of rules.
+
+    Returns (gm, shape_params) — gm mutated in place and recompiled.
+    """
+    _VIEW_LIKE_OPS = {
+        torch.ops.aten.reshape.default,
+        torch.ops.aten.view.default,
+        torch.ops.aten.expand.default,
+    }
+
+    def _should_lift(shape_list):
+        if not shape_list:
+            return False
+        if all(d in (0, 1, -1) for d in shape_list):
+            return False
+        return True
+
+    g = gm.graph
+    shape_params: dict[str, list[int]] = {}
+    counter = 0
+    # placeholders append after the last existing placeholder
+    last_ph = None
+    for n in g.nodes:
+        if n.op == "placeholder":
+            last_ph = n
+    for node in list(g.nodes):
+        if node.op != "call_function" or node.target not in _VIEW_LIKE_OPS:
+            continue
+        if len(node.args) < 2 or not isinstance(node.args[1], (list, tuple)):
+            continue
+        shape_list = [x for x in node.args[1]]
+        if any(isinstance(x, torch.fx.Node) for x in shape_list):
+            continue  # already parametric/dynamic
+        if not _should_lift(shape_list):
+            continue
+        name = f"_shape_param_{counter}"
+        counter += 1
+        if last_ph is None:
+            with g.inserting_before(next(iter(g.nodes))):
+                ph = g.placeholder(name)
+        else:
+            with g.inserting_after(last_ph):
+                ph = g.placeholder(name)
+        ph.meta["val"] = list(shape_list)
+        shape_params[name] = list(shape_list)
+        last_ph = ph
+        args = list(node.args)
+        args[1] = ph
+        node.args = tuple(args)
+    if shape_params:
+        gm.recompile()
+    return gm, shape_params
+
+
+def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
     """ONE make_fx retrace of an extracted partition: the canonical form.
 
     The settled identity invariant (CORPUS_MIGRATION_PLAN §1): one retrace is
@@ -607,19 +667,7 @@ def canonicalize_subgraph(sub_gm, placeholder_info):
             _graph_mode = _m
             break
 
-    # Partitions with lifted shape params (_shape_param_N list-valued
-    # placeholders) cannot be round-tripped through make_fx faithfully:
-    # make_fx EXPLODES a list input into one placeholder per element
-    # (S([128,512]) -> arg6_1, arg6_2), so the retraced signature disagrees
-    # with the serialized _shapes_config and the repro fails validation.
-    # Skip canonicalization for these — their reshape spellings already
-    # normalize via the canonical hash, and the validation gate keeps them
-    # honest.
     _ph_order = [n for n in sub_gm.graph.nodes if n.op == "placeholder"]
-    for _ph in _ph_order:
-        _v = _ph.meta.get("val") if hasattr(_ph, "meta") else None
-        if not (hasattr(_v, "shape") and hasattr(_v, "dtype")):
-            return sub_gm, placeholder_info
 
     fake_inputs = []
 
@@ -630,7 +678,7 @@ def canonicalize_subgraph(sub_gm, placeholder_info):
                 f"(dynamic partitions canonicalize in wave 2)",
                 file=sys.stderr,
             )
-            return sub_gm, placeholder_info
+            return sub_gm, placeholder_info, shape_params
         dtype = _DTYPES.get(info.get("dtype"), torch.float32)
         shape = info.get("shape", [])
         stride = info.get("stride") or None
@@ -652,30 +700,45 @@ def canonicalize_subgraph(sub_gm, placeholder_info):
         except Exception as exc:
             print(f"[canonicalize] could not fabricate input {name!r}: {exc}",
                   file=sys.stderr)
-            return sub_gm, placeholder_info
+            return sub_gm, placeholder_info, shape_params
 
-    # Interleave shape-param values into the input list at their positions.
-    # Match by KIND (tensor placeholders consume fabricated tensors in
-    # order), not by name — extraction renames placeholders.
-    if len(_ph_order) != len(fake_inputs):
-        _tensor_iter = iter(fake_inputs)
-        _full_inputs = []
-        for _ph in _ph_order:
-            _v = _ph.meta.get("val") if hasattr(_ph, "meta") else None
-            if hasattr(_v, "shape") and hasattr(_v, "dtype"):
-                _full_inputs.append(next(_tensor_iter, None))
-            else:
-                _full_inputs.append(list(_v) if isinstance(_v, (list, tuple))
-                                    else _v)
-        if any(x is None for x in _full_inputs):
-            print("[canonicalize] input interleave failed — skipping retrace",
-                  file=sys.stderr)
-            return sub_gm, placeholder_info
-        fake_inputs = _full_inputs
+    # Lifted shape params (_shape_param_N, list-valued placeholders) must
+    # NOT be traced as inputs — make_fx explodes a list into one scalar
+    # placeholder per element, breaking the serialized signature. Instead,
+    # PARTIALLY APPLY them: a closure bakes the concrete values in during
+    # the retrace (tensor-only trace), and they are RE-LIFTED into
+    # placeholders afterward so the canonical graph keeps the exact original
+    # signature (and _shapes_config keeps its S(...) entries).
+    _shape_param_pos = {}   # position in _ph_order -> (name, concrete value)
+    for _i, _ph in enumerate(_ph_order):
+        _v = _ph.meta.get("val") if hasattr(_ph, "meta") else None
+        if not (hasattr(_v, "shape") and hasattr(_v, "dtype")):
+            _val = list(_v) if isinstance(_v, (list, tuple)) else _v
+            if _val is None and shape_params and _ph.name in shape_params:
+                _val = shape_params[_ph.name]
+            if _val is None:
+                print(f"[canonicalize] no concrete value for shape param "
+                      f"{_ph.name!r} — skipping retrace", file=sys.stderr)
+                return sub_gm, placeholder_info, shape_params
+            _shape_param_pos[_i] = (_ph.name, _val)
 
     try:
         with torch.no_grad():
-            canonical = make_fx(sub_gm, tracing_mode="fake")(*fake_inputs)
+            if _shape_param_pos:
+                _names_in_order = [n.name for n in _ph_order]
+
+                def _bound(*tensor_args):
+                    full, ti = [], iter(tensor_args)
+                    for _i, _nm in enumerate(_names_in_order):
+                        if _i in _shape_param_pos:
+                            full.append(_shape_param_pos[_i][1])
+                        else:
+                            full.append(next(ti))
+                    return sub_gm(*full)
+
+                canonical = make_fx(_bound, tracing_mode="fake")(*fake_inputs)
+            else:
+                canonical = make_fx(sub_gm, tracing_mode="fake")(*fake_inputs)
         # make_fx wraps the module callable with pytree flatten/unflatten
         # codegen and names the class after the callable ("<lambda>") — both
         # break standalone serialization (class <lambda> is a SyntaxError;
@@ -683,6 +746,11 @@ def canonicalize_subgraph(sub_gm, placeholder_info):
         # the graph body is identical, the wrapper disappears.
         canonical.graph.set_codegen(fx.graph.CodeGen())
         canonical.recompile()
+        # Re-lift shape params with THE single lifting implementation: the
+        # bake+retrace concretized all shape literals; lifting the canonical
+        # graph assigns _shape_param_N names/positions by one set of rules
+        # for every partition (no bespoke re-insertion).
+        canonical, lifted_shape_params = lift_shape_params(canonical)
     except Exception as exc:
         print(
             f"[canonicalize] retrace failed ({type(exc).__name__}: "
@@ -690,14 +758,15 @@ def canonicalize_subgraph(sub_gm, placeholder_info):
             f"roundtrip gate will flag any resulting drift",
             file=sys.stderr,
         )
-        return sub_gm, placeholder_info
+        return sub_gm, placeholder_info, shape_params
 
     # make_fx renames placeholders (arg0_1-style). placeholder_info is keyed
     # by name and feeds _shapes_config / index inference — remap it to the
     # canonical graph's names POSITIONALLY (make_fx preserves input order),
     # or stride/dtype fidelity silently vanishes from the serialized repro.
     canonical_phs = [
-        n for n in canonical.graph.nodes if n.op == "placeholder"
+        n for n in canonical.graph.nodes
+        if n.op == "placeholder" and not n.name.startswith("_shape_param_")
     ]
     original_items = list(placeholder_info.items())
     if len(canonical_phs) == len(original_items):
@@ -705,7 +774,7 @@ def canonicalize_subgraph(sub_gm, placeholder_info):
             ph.name: info
             for ph, (_old, info) in zip(canonical_phs, original_items)
         }
-        return canonical, remapped
+        return canonical, remapped, lifted_shape_params
     # Count differs: make_fx materialized lifted shape params as their own
     # placeholders. Remap the TENSOR subset positionally (tensor placeholders
     # keep their relative order); shape-param placeholders need no info entry
@@ -717,14 +786,14 @@ def canonicalize_subgraph(sub_gm, placeholder_info):
             ph.name: info
             for ph, (_old, info) in zip(tensor_phs, original_items)
         }
-        return canonical, remapped
+        return canonical, remapped, lifted_shape_params
     print(
         f"[canonicalize] placeholder structure changed in retrace "
         f"({len(original_items)} tensor infos vs {len(tensor_phs)} tensor "
         f"placeholders) — using un-canonicalized subgraph",
         file=sys.stderr,
     )
-    return sub_gm, placeholder_info
+    return sub_gm, placeholder_info, shape_params
 
 
 def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
@@ -739,7 +808,8 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
     if result is None:
         return None
     sub_gm, placeholder_info, shape_params = result
-    sub_gm, placeholder_info = canonicalize_subgraph(sub_gm, placeholder_info)
+    sub_gm, placeholder_info, shape_params = canonicalize_subgraph(
+        sub_gm, placeholder_info, shape_params)
     return {
         "pattern_hash": pattern_hash_for_subgraph(sub_gm),
         "shape_hash": shape_hash_for_placeholders(placeholder_info),
