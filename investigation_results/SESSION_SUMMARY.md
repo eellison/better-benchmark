@@ -416,3 +416,12 @@ writes the epilogue output in the same pass. Sub-variants:
 - `pyproject.toml` — pip-installable, no sys.path hacks
 - `scripts/ORACLE_FORMAT.md` — format documentation
 - `INVEST_INSTRUCTIONS.MD` — collaboration guide for oracle writers
+
+## Stack-integrity check (2026-06-11, HEAD = a2c8cbd0217 incl. WIP segment-split)
+
+All 8 spot-checked landed fixes hold on the full stack (fresh cache, CUDAGraph+lock):
+sum_51d2ed69e698 1.00x | sum_sum_sum_04ab10ca59ee 0.84x | sum_sum_b16afac198fb 0.95x |
+sum_sum_63e248035ceb 0.99x | sum_sum_3219a09ab96a 0.48x | amax_sum_sum_6fd07d12d98a 1.02x |
+sum_011e69da166d 0.98x | var_mean_c5067e6e3750 0.93x
+
+Notably the WIP segment-split commit does not disturb any sentinel.
