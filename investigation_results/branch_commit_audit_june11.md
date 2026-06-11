@@ -55,3 +55,23 @@
 ## Top-5 Prioritized Issues
 
 TBD
+
+## Artifact-likelihood overlay (user assessment, 2026-06-11)
+
+User: "some of the stuff, like slice compaction etc, are likely just artifact
+errors." Applying the partitioner-artifact lens to the audited commits:
+
+| Commit(s) | Pattern it serves | Artifact likelihood |
+|---|---|---|
+| bbf37d454c2 + 3bf69043be0 (slice compaction) | graph RETURNS slice/select view of computed intermediate | HIGH — real models rarely return raw slices of intermediates; the "output" is likely a partition cut (same mechanism as squeezenet scatter case). The stride-contract concern compounds: semantics bent for a possibly-synthetic pattern. |
+| 5489b8c2bb9 (scatter gather-reduce) | scatter consumed ONLY by reductions | CONFIRMED artifact for squeezenet; 10 other repro wins unvalidated |
+| 56959375c33 (overlap-add decode) | affine-iota scatter structure | Index-structure detection is real (Longformer's as_strided windows exist in the model); but consumer-set economics may shift with uncut consumers |
+| Heuristic/codegen fixes (splits a85d79a900a/bdc289b3644, evict chain, fast combine a26fc2c8bf4, scalar-acc ungate 9dde2c59a51, rsqrt, dedupe) | kernel-level properties | LOW — fire on load strides/op patterns/config sets regardless of where graphs were cut; genai suite additionally artifact-free by construction |
+
+Implication for upstreaming order: heuristic/codegen commits first (artifact-
+robust + mostly UPSTREAM-READY/light-NEEDS-WORK); graph-shape passes
+(slice compaction, scatter passes) wait for the user's partitioner fixes to
+re-validate their motivating patterns. The planned IR-level view-liveness
+generalization (task #7) inherits the same caveat: its llama flagship case
+(last-token select IS a real model output pattern: logits[:, -1]) is the
+exception worth keeping even if the slice-compaction family proves synthetic.
