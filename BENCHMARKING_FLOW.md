@@ -108,3 +108,24 @@ python scripts/bench_report.py \
 
 Keep hardware labels separate. Do not compare B200 metadata with H100 metadata
 unless the report is explicitly about cross-hardware behavior.
+
+## Clock locking (adopted from sol-execbench methodology, 2026-06-11)
+
+Lock SM clocks to max before timing sweeps to remove boost-clock variance
+(observed idle/boost spread on this box: 1852 vs 1965 MHz ≈ 6%):
+
+```bash
+nvidia-smi -i 0 -lgc 1965        # lock GPU 0 to max SM clock
+nvidia-smi -i 0 -rgc             # release after the sweep
+```
+
+Status on this box: GPU 0 locks fine; GPU 1 returns "current user does not
+have permission" — needs elevated perms (ask infra) or run single-GPU sweeps
+on GPU 0 when strict comparability matters. Note `-lgc` must come with
+`-i <gpu>` as separate args; deprecated applications-clocks API does not work
+on B200.
+
+Otherwise our methodology stands as-is (per review of nvidia/sol-execbench:
+their analytical-SOL scoring and reward-hack screening are interesting, but
+our corpus has far broader coverage — 1482 repros captured from real model
+graphs + full-graph harnesses + oracle floors + per-model attribution).
