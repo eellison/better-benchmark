@@ -127,17 +127,19 @@ def _write_shapes_json(
         if inputs is not None and "inputs" not in existing_point:
             existing_point["inputs"] = inputs
     else:
-        # New point. "inputs" is the data; "signature" is its one-line
-        # human-readable rendering (render_signature(inputs)) kept for
-        # at-a-glance reading and reviewable diffs — never parsed back.
-        # (No "source" field: it had one writer, one value, no readers.)
+        # New point. "inputs" is THE data (compact codec); render the
+        # human-readable string on demand via input_codec.render_signature
+        # — it is not stored (settled: no duplicative signature field).
+        # "signature" is written ONLY as a legacy fallback when the entry
+        # carries no structured inputs (pre-codec capture dirs).
         new_point = {
             "shape_hash": shape_hash,
-            "signature": signature,
             "models": {model_key: {"occurrences": occurrences}},
         }
         if inputs is not None:
             new_point["inputs"] = inputs
+        else:
+            new_point["signature"] = signature
         data["points"].append(new_point)
 
     import copy as _copy

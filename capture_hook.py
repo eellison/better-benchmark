@@ -128,7 +128,13 @@ def graph_node_accounting(gm: fx.GraphModule, components=None) -> dict:
         if node.op != "call_function":
             continue
         total += 1
-        name = str(node.target)
+        # builtins str() as "<built-in function getitem>" — spell them
+        # module.name (operator.getitem) like every other op.
+        if isinstance(node.target, torch._ops.OpOverload):
+            name = str(node.target)
+        else:
+            name = (f"{getattr(node.target, '__module__', '')}."
+                    f"{getattr(node.target, '__name__', node.target)}").lstrip(".")
         if node in partitioned:
             buckets["fusible_in_partition"][name] += 1
         elif partition_node_is_supported(node):
