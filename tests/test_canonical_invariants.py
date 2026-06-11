@@ -865,3 +865,53 @@ def test_merge_backfills_alias_onto_existing_point():
         assert pt["alias_group_nbytes"] == [384]
         assert any("alias" in (e[2] if len(e) > 2 else {})
                    for e in pt["inputs"]), "rich inputs not backfilled"
+
+
+def test_maxpool_offset_tensors_generate_constant_center():
+    """int8 maxpool OFFSET tensors must generate the window-CENTER constant,
+    not random offsets: under padding, edge windows turn most offsets into
+    out-of-range indices (offset 0 at a padded edge -> index -113), and the
+    consuming scatter_add device-side-asserts — poisoning the CUDA context
+    for the whole process (the wave-1 torchbench train failure class)."""
+    import torch
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+    import torch._inductor.inductor_prims  # noqa: F401
+    from full_graph_harness import infer_index_bounds_from_gm, placeholder_info_from_gm
+
+    def f(off):
+        idx = torch.ops.prims._low_memory_max_pool_offsets_to_indices.default(
+            off, [3, 3], [16, 16], [2, 2], [1, 1], [1, 1])
+        return idx + 1
+
+    with FakeTensorMode(allow_non_fake_inputs=True) as m:
+        off = m.from_tensor(torch.zeros(2, 4, 8, 8, dtype=torch.int8))
+        gm = make_fx(f, tracing_mode="fake")(off)
+
+    info = placeholder_info_from_gm(gm)
+    constants: dict = {}
+    bounds = infer_index_bounds_from_gm(gm, info, constants_out=constants)
+    (name,) = info.keys()
+    assert name in constants, "offset tensor not routed to constant gen"
+    assert constants[name] == 4, constants  # 3x3 window center
+    assert name not in bounds, "must not ALSO get a random index bound"
+
+    # And the generation path honors constant kind:
+    from repro_harness import make_inputs_from_config
+    (t,) = make_inputs_from_config({"inputs": [
+        {"kind": "tensor", "shape": [2, 4, 8, 8], "dtype": "int8",
+         "stride": [], "device": "cpu",
+         "gen": {"kind": "constant", "value": 4}}]})
+    assert t.unique().tolist() == [4]
+
+
+def test_constant_gen_codec_roundtrip():
+    """constant generation kind roundtrips the compact encoding."""
+    from input_codec import compact_from_spec, spec_from_compact
+
+    spec = {"kind": "tensor", "shape": [4], "dtype": "int8", "stride": [1],
+            "gen": {"kind": "constant", "value": 4}}
+    e = compact_from_spec(spec)
+    assert e[2]["gen"] == ["const", 4], e
+    rt = spec_from_compact(e)
+    assert rt["gen"] == {"kind": "constant", "value": 4}

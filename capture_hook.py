@@ -1174,8 +1174,13 @@ class _CaptureState:
                        "class Repro(torch.nn.Module):", code, count=1,
                        flags=_re.M)
 
-        # Infer index bounds for int64 placeholders (graph inference = tier 1)
-        index_bounds = self._infer_index_bounds(gm, placeholder_info)
+        # Infer index bounds for int64 placeholders (graph inference = tier 1).
+        # constant_values: placeholders where only a CONSTANT is safe
+        # (maxpool window-center offsets — random offsets OOB at padded
+        # edges -> device-side assert poisons the CUDA context).
+        constant_values: dict[str, int] = {}
+        index_bounds = infer_index_bounds_from_gm(
+            gm, placeholder_info, constants_out=constant_values)
         permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
 
         # Apply bound hierarchy: observed fallback for integer inputs without
@@ -1337,14 +1342,15 @@ class _CaptureState:
                     if sk in _group_of:
                         spec["alias_group"] = _group_of[sk]
                     bound = index_bounds.get(name)
-                    if name in permutation_indices:
+                    if name in constant_values:
+                        spec["gen"] = {"kind": "constant",
+                                       "value": constant_values[name]}
+                    elif name in permutation_indices:
                         spec["gen"] = {"kind": "permutation",
                                        "size": permutation_indices[name]}
                     elif "int" in info["dtype"] and bound:
                         spec["gen"] = {"kind": "index", "low": 0,
                                        "high": bound}
-                    elif "int8" in info["dtype"]:
-                        spec["gen"] = {"kind": "index", "low": 0, "high": 9}
                     compact_inputs.append(compact_from_spec(spec))
                 elif info and info.get("dtype") == "symint":
                     compact_inputs.append(["sym", info.get("hint", 1)])

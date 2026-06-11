@@ -376,6 +376,11 @@ maintain, can't mis-lift int[] dims/permute args) — swappable inside
   demonstrated-best" with trustworthy composition.
 - SOL column (roofline: max(bytes/BW, flops/peak)) as the second target
   alongside oracle floors — both for repros and gemm/conv. (Backlog.)
+  Inspiration target: NVIDIA's sol-execbench
+  (https://github.com/nvidia/sol-execbench) — speed-of-light execution
+  benchmarking methodology; worth mining for roofline modeling, per-kernel
+  SOL accounting conventions, and how they structure SOL-vs-achieved
+  reporting when we build our SOL column.
 - Wave 2 dynamic families → the BS=1 vs BS=N fusion-impact questions.
 - **Model oracles (future)**: the natural generalization of repros — a
   hand-optimized END-TO-END implementation as the floor for a whole model

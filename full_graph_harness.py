@@ -124,8 +124,19 @@ def placeholder_info_from_gm(gm: Any) -> dict[str, dict]:
     return placeholder_info
 
 
-def infer_index_bounds_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> dict[str, int]:
-    """Infer valid index bounds for integer placeholders by inspecting consumers."""
+def infer_index_bounds_from_gm(
+    gm: Any,
+    placeholder_info: dict[str, dict],
+    constants_out: dict[str, int] | None = None,
+) -> dict[str, int]:
+    """Infer valid index bounds for integer placeholders by inspecting consumers.
+
+    `constants_out` (optional dict, filled in place) receives placeholders
+    whose only safe generation is a CONSTANT value rather than a range —
+    e.g. maxpool offset tensors, where the window-center offset is the one
+    value in-bounds for every window under padding (random offsets put edge
+    windows out of range -> device-side assert in the consuming scatter).
+    """
     import torch
 
     index_consumers = {
@@ -156,6 +167,7 @@ def infer_index_bounds_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> di
     }
 
     bounds = {}
+    constants = constants_out if constants_out is not None else {}
     ph_nodes = {n.name: n for n in gm.graph.nodes if n.op == "placeholder"}
 
     def _node_shape(n):
@@ -179,6 +191,16 @@ def infer_index_bounds_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> di
             continue
 
         if "int8" in dtype:
+            # Maxpool OFFSET tensors (offset-within-window). Random offsets
+            # are NOT uniformly valid: offsets_to_indices converts them to
+            # flat indices relative to each window's position, and under
+            # padding the edge windows go negative / past the dim for most
+            # values (offset 0 at a padded edge -> index -113) — the
+            # consuming scatter_add then device-side-asserts and poisons
+            # the CUDA context (the wave-1 torchbench train assert class).
+            # The WINDOW-CENTER offset is in-bounds for every window
+            # (measured: 3x3 pad1 on 112x112 -> [0, 12430] vs dim 12544),
+            # so emit it via constants_out as a constant-value generator.
             for user in node.users:
                 if user.op != "call_function":
                     continue
@@ -187,14 +209,15 @@ def infer_index_bounds_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> di
                     continue
                 if len(user.args) >= 2 and isinstance(user.args[1], (list, tuple)):
                     kernel_size = user.args[1]
-                    bounds[name] = (
-                        int(kernel_size[0] * kernel_size[1])
-                        if len(kernel_size) >= 2
-                        else int(kernel_size[0])
-                    )
+                    if len(kernel_size) >= 2:
+                        kh, kw = int(kernel_size[0]), int(kernel_size[1])
+                        center = (kh // 2) * kw + (kw // 2)
+                    else:
+                        center = int(kernel_size[0]) // 2
+                    constants[name] = center
                     break
-            if name not in bounds:
-                bounds[name] = 9
+            if name not in constants:
+                constants[name] = 4  # assume 3x3: center offset 4
             continue
 
         def _find_bound(start_node, max_hops=3):

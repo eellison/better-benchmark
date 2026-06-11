@@ -388,6 +388,17 @@ def make_inputs_from_config(config: dict) -> list:
         gen = _generation_spec(spec)
 
         if dtype in (torch.int64, torch.int32, torch.int16, torch.int8):
+            if gen and gen.get("kind") == "constant":
+                # Single safe value (maxpool window-center offsets etc).
+                if stride:
+                    numel = _storage_size_for_strided(shape, stride)
+                    storage = torch.full((numel,), int(gen.get("value", 0)),
+                                         dtype=dtype, device=device)
+                    result.append(storage.as_strided(shape, stride))
+                else:
+                    result.append(torch.full(shape, int(gen.get("value", 0)),
+                                             dtype=dtype, device=device))
+                continue
             if gen and gen.get("kind") == "permutation":
                 result.append(
                     _make_permutation_tensor(

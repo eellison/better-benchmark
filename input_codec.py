@@ -64,6 +64,8 @@ def _gen_to_compact(gen: dict) -> list | None:
         return out
     if kind == "offsets":
         return ["offsets", int(gen.get("high", 1))]
+    if kind == "constant":
+        return ["const", gen.get("value", 0)]
     return [kind] + [v for k, v in sorted(gen.items()) if k != "kind"]
 
 
@@ -78,6 +80,8 @@ def _gen_from_compact(c: list) -> dict:
                 "size": c[1] if len(c) > 1 else None}
     if kind == "offsets":
         return {"kind": "offsets", "high": c[1]}
+    if kind == "const":
+        return {"kind": "constant", "value": c[1]}
     return {"kind": kind}
 
 
