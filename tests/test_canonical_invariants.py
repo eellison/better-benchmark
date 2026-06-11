@@ -538,3 +538,120 @@ def test_output_definition_order_is_the_canonical_order():
     h2, s2 = _pattern_hashes(f_sigmoid_first, x, x.clone(), w)
     assert (h1, s1) == (h2, s2), \
         "definition-order permutation of independent ops forked the hash"
+
+
+# ============================================================================
+# 11. Hardened idempotence + tie-break + lift coverage (gap probes 2026-06-11)
+# ============================================================================
+
+def test_idempotence_reduction_partition():
+    """Fixed point must hold on reduction partitions (var_mean/layernorm
+    family), not just pointwise — reductions retrace through different
+    decomposition paths."""
+    def f(a, w):
+        x = a.to(torch.float32)
+        vm = torch.var_mean(x, dim=[1], keepdim=True)
+        y = (x - vm[1]) * torch.rsqrt(vm[0] + 1e-5) * w
+        return y.to(torch.bfloat16)
+
+    gm = _traced(f, torch.randn(64, 384, dtype=torch.bfloat16),
+                 torch.randn(1, 384))
+    p1 = _first_pattern(gm)
+    sub2, info2, _ = canonicalize_subgraph(
+        p1["sub_gm"], p1["placeholder_info"], p1["shape_params"])
+    assert pattern_hash_for_subgraph(sub2) == p1["pattern_hash"]
+    assert shape_hash_for_placeholders(info2) == p1["shape_hash"]
+
+
+def test_idempotence_with_lifted_shape_params():
+    """canonicalize -> lift -> canonicalize again must converge: the bake
+    (closure) -> retrace -> re-lift cycle is a fixed point including the
+    lifted param VALUES."""
+    def f(a):
+        return (a + 1).expand(8, 4, 6).reshape(8, 24) * 2
+
+    gm = _traced(f, torch.randn(1, 4, 6))
+    p1 = _first_pattern(gm)
+    assert p1["shape_params"], "test premise: shape params must be lifted"
+    sub2, _info2, sp2 = canonicalize_subgraph(
+        p1["sub_gm"], p1["placeholder_info"], p1["shape_params"])
+    assert pattern_hash_for_subgraph(sub2) == p1["pattern_hash"]
+    assert sp2 == p1["shape_params"], "lifted param values drifted on re-canon"
+
+
+def test_kahn_same_preds_same_key_deterministic():
+    """TRUE tie-break ambiguity: two relu ops on the SAME input (same pred
+    indices, same structural key) with different consumers — def order
+    must not fork the hash, and the signature must still wire each relu
+    to its own consumer correctly."""
+    def f1(a, w):
+        u = a.relu()
+        v = a.relu()
+        return torch.mm(u, w), torch.mm(v.sigmoid(), w)
+
+    def f2(a, w):
+        v = a.relu()
+        u = a.relu()
+        return torch.mm(u, w), torch.mm(v.sigmoid(), w)
+
+    x, w = torch.randn(8, 8), torch.randn(8, 8)
+    h1, s1 = _pattern_hashes(f1, x, w)
+    h2, s2 = _pattern_hashes(f2, x, w)
+    assert (h1, s1) == (h2, s2)
+
+
+def test_lift_shape_params_idempotent():
+    """Lifting an already-lifted graph is a no-op: no new params, no new
+    placeholders. (A second lift seeing _shape_param Node args must skip.)"""
+    def f(a):
+        return (a + 1).expand(8, 4, 6).reshape(8, 24)
+
+    gm = _traced(f, torch.randn(1, 4, 6))
+    gm, params1 = lift_shape_params(gm)
+    n_ph_1 = sum(1 for n in gm.graph.nodes if n.op == "placeholder")
+    gm, params2 = lift_shape_params(gm)
+    n_ph_2 = sum(1 for n in gm.graph.nodes if n.op == "placeholder")
+    assert params1 and not params2
+    assert n_ph_1 == n_ph_2
+
+
+def test_mutation_into_view_preserved():
+    """copy_ into a VIEW SLICE (buf[0].copy_(y)) — the select/view chain
+    plus the mutation must survive extraction + canonicalization."""
+    def f(a, b, buf):
+        y = (a + b).relu()
+        torch.ops.aten.copy_.default(buf[0], y)
+        return y * 2
+
+    gm = _traced(f, torch.randn(4, 4), torch.randn(4, 4),
+                 torch.randn(2, 4, 4))
+    pat = _first_pattern(gm)
+    ops = [str(n.target) for n in pat["sub_gm"].graph.nodes
+           if n.op == "call_function"]
+    assert any("copy" in o for o in ops), ops
+
+
+def test_node_accounting_components_param_equivalence():
+    """graph_node_accounting(gm) == graph_node_accounting(gm, precomputed)
+    — the shared-components optimization can't change the verdict."""
+    from capture_hook import graph_node_accounting
+
+    def f(x, w):
+        y = torch.ops.aten.convolution.default(
+            x, w, None, [1, 1], [0, 0], [1, 1], False, [0, 0], 1)
+        return (y + 1).relu()
+
+    gm = _traced(f, torch.randn(2, 8, 8, 8), torch.randn(8, 8, 3, 3))
+    assert graph_node_accounting(gm) == graph_node_accounting(
+        gm, get_fusion_partitions(gm))
+
+
+def test_shape_hash_distinguishes_input_multiplicity():
+    """Three identical-spec inputs vs two must hash differently (the
+    sorted-strings multiset keeps duplicates)."""
+    a = {f"p{i}": {"shape": [8, 16], "stride": [], "dtype": "torch.float32"}
+         for i in range(3)}
+    b = {f"p{i}": {"shape": [8, 16], "stride": [], "dtype": "torch.float32"}
+         for i in range(2)}
+    assert (shape_hash_for_placeholders(a)
+            != shape_hash_for_placeholders(b))
