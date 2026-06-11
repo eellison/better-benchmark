@@ -19,12 +19,12 @@
 
 | # | SHA | Title (short) | Verdict | Correctness risk | Notes |
 |---|-----|---------------|---------|------------------|-------|
-| 1 | 6703f38fa2d | rsqrt canonicalization | PENDING | | |
-| 2 | 52d4cadfac0 | Loop-invariant hoisting (default off) | PENDING | | |
-| 3 | 1406552b9d3 | Rotate-half gather (RoPE) | PENDING | | |
-| 4 | edbd4b67279 | Fix stale other_node in scatter_add_into | PENDING | | |
-| 5 | bbf37d454c2 | Compact slice outputs of pointwise epilogues | PENDING | | |
-| 6 | 5489b8c2bb9 | scatter_add -> gather-predicate rewrite | PENDING | | |
+| 1 | 6703f38fa2d | rsqrt canonicalization | UPSTREAM-READY | low | Pure gating of pre-existing patterns behind new flag; identity is safe |
+| 2 | 52d4cadfac0 | Loop-invariant hoisting (default off) | EXPERIMENTAL | medium (flag-on only) | CSE cache-hit can mis-mark in-loop var as hoisted (compile error, not silent); neutral perf, default OFF; also smuggles in rotate_half_gather config flag |
+| 3 | 1406552b9d3 | Rotate-half gather (RoPE) | UPSTREAM-READY | low | Careful static-shape/dtype/sign guards; dynamic shapes safely rejected; dead `_INT64_MAX`; no unit tests |
+| 4 | edbd4b67279 | Fix stale other_node in scatter_add_into | UPSTREAM-READY | low | Sound replacement-map fix with cycle guard; gating a bug fix behind a flag is odd |
+| 5 | bbf37d454c2 | Compact slice outputs of pointwise epilogues | NEEDS-WORK | medium | Deliberately overrides original_output_strides: compiled output strides/contiguity diverge from eager for user-visible outputs |
+| 6 | 5489b8c2bb9 | scatter_add -> gather-predicate rewrite | NEEDS-WORK | medium | Identity verified correct (incl. atomic collisions); but 4-D/[0,2,3]/scatter_dim==1 shape-specialized; hand-built meta has wrong dtype for bool-sum node |
 | 7 | 3b746fce660 | WIP: slice-output compaction extension | PENDING | superseded-or-half check | |
 | 8 | bdc289b3644 | Split partially-saturated multi-output reductions | PENDING | | |
 | 9 | 3bf69043be0 | Extend slice-output compaction (select.int etc.) | PENDING | | |
