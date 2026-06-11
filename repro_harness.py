@@ -100,7 +100,18 @@ def _parse_shapes_json(shapes_path: Path) -> dict:
         model_short = first_model.rsplit("/", 1)[-1] if first_model else ""
         label = f"{model_short}_{shape_hash}" if model_short else shape_hash
 
-        # Parse the signature using the same T()/S() eval as shapes.txt
+        # Prefer the structured compact entries (input_codec) — the data.
+        # Signature-eval is the fallback for points written before the
+        # compact encoding existed; the string is documentation otherwise.
+        compact = point.get("inputs")
+        if compact:
+            try:
+                from input_codec import spec_from_compact
+                specs = [spec_from_compact(e) for e in compact]
+                configs[label] = {"inputs": specs}
+                continue
+            except Exception:
+                pass  # fall through to signature eval
         try:
             inputs = _eval_signature(signature)
             if inputs:

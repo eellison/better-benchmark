@@ -555,9 +555,64 @@ def write_full_graph_metadata(
     payload["graph"] = graph_path.name
     if extra:
         payload.update(extra)
+    # Serialize inputs/outputs/tensor_attrs in the compact shared encoding
+    # (input_codec) — schema_version 2. The verbose dict-per-tensor form
+    # remains the in-memory representation; loaders inflate on read.
+    from input_codec import compact_from_spec
+
+    payload["schema_version"] = 2
+    for key in ("inputs", "outputs"):
+        if payload.get(key):
+            payload[key] = [compact_from_spec(s, include_name=True)
+                            for s in payload[key]]
+    if payload.get("tensor_attrs"):
+        payload["tensor_attrs"] = {
+            name: compact_from_spec(s)
+            for name, s in payload["tensor_attrs"].items()
+        }
     meta_path = graph_path.with_suffix(".meta.json")
-    meta_path.write_text(json.dumps(payload, indent=2) + "\n")
+    meta_path.write_text(_dumps_compact_entries(payload) + "\n")
     return meta_path
+
+
+class _OneLine:
+    """Marker: serialize this value on a single line inside indented JSON."""
+
+    def __init__(self, value):
+        self.value = value
+
+
+def dumps_with_onelines(obj) -> str:
+    """json.dumps(indent=2), but any _OneLine-wrapped value is emitted on a
+    single line (a compact input entry exploded across 12 indented lines
+    would re-create the verbosity the compact encoding exists to remove)."""
+    placeholders: list[str] = []
+
+    class _Enc(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, _OneLine):
+                placeholders.append(
+                    json.dumps(o.value, separators=(",", ":")))
+                return f"@@ONELINE{len(placeholders) - 1}@@"
+            return super().default(o)
+
+    text = json.dumps(obj, indent=2, cls=_Enc)
+    for i, body in enumerate(placeholders):
+        text = text.replace(f'"@@ONELINE{i}@@"', body)
+    return text
+
+
+def _dumps_compact_entries(payload: dict) -> str:
+    """Sidecar serializer: inputs/outputs/tensor_attrs entries one-lined."""
+    marked = dict(payload)
+    for key in ("inputs", "outputs"):
+        if marked.get(key):
+            marked[key] = [_OneLine(e) for e in marked[key]]
+    if marked.get("tensor_attrs"):
+        marked["tensor_attrs"] = {
+            k: _OneLine(v) for k, v in marked["tensor_attrs"].items()
+        }
+    return dumps_with_onelines(marked)
 
 
 def _split_signature_args(sig: str) -> list[str]:
@@ -762,7 +817,22 @@ def load_full_graph_sidecar(graph_path: str | Path) -> dict[str, Any]:
     meta_path = full_graph_meta_path(graph_path)
     if not meta_path.exists():
         return {}
-    return json.loads(meta_path.read_text())
+    sidecar = json.loads(meta_path.read_text())
+    # schema v2: inputs/outputs/tensor_attrs stored in the compact shared
+    # encoding (input_codec); inflate to the verbose in-memory spec dicts
+    # so every downstream consumer is format-agnostic.
+    if sidecar.get("schema_version", 1) >= 2:
+        from input_codec import spec_from_compact
+
+        for key in ("inputs", "outputs"):
+            if sidecar.get(key):
+                sidecar[key] = [spec_from_compact(e) for e in sidecar[key]]
+        if sidecar.get("tensor_attrs"):
+            sidecar["tensor_attrs"] = {
+                name: spec_from_compact(e)
+                for name, e in sidecar["tensor_attrs"].items()
+            }
+    return sidecar
 
 
 def _normalize_dtype_name(dtype_name: Any) -> str:

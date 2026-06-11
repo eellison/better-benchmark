@@ -430,7 +430,10 @@ def stamp_roundtrip(graph_path: str | Path, verdict: dict[str, Any]) -> None:
         sidecar["roundtrip_spelling_notes"] = c["spelling"]
 
     try:
-        meta_path.write_text(json.dumps(sidecar, indent=2) + "\n")
+        # Shared sidecar serializer: keeps compact input entries one-lined
+        # (plain indent=2 would explode them back into the verbose layout).
+        from full_graph_harness import _dumps_compact_entries
+        meta_path.write_text(_dumps_compact_entries(sidecar) + "\n")
     except Exception as exc:
         print(
             f"[roundtrip] WARNING: could not stamp sidecar {meta_path}: {exc}",

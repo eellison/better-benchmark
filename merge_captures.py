@@ -78,6 +78,7 @@ def _write_shapes_json(
     signature: str,
     model_key: str,
     occurrences: int | None = None,
+    inputs: list | None = None,
 ) -> None:
     """Write or update shapes.json for a canonical repro directory.
 
@@ -87,11 +88,17 @@ def _write_shapes_json(
     (pattern, shape) point in the model's graphs (counted by the capture
     hook) — the accounting joins on it without needing a GPU retrace.
 
+    `inputs` is the compact structured encoding (input_codec) — the DATA
+    consumers parse. `signature` is its human-readable T()/S() rendering,
+    kept for documentation and the repro.py default; never text-parsed
+    when `inputs` is present.
+
     Schema (static/degenerate case — omits symbols/family/bindings):
     {
       "points": [
         {"shape_hash": "<8hex>",
-         "signature": "<the _shapes_config T()/S() string>",
+         "inputs": [[[128,512,7,7], "bf16", {"st": [...]}], ["S", [128]]],
+         "signature": "<rendered T()/S() doc string>",
          "models": {"<suite>/<mode>/<model>": {"occurrences": 7}},
          "source": "captured"}
       ]
@@ -117,6 +124,8 @@ def _write_shapes_json(
         models = existing_point.setdefault("models", {})
         if model_key not in models or occurrences is not None:
             models[model_key] = {"occurrences": occurrences}
+        if inputs is not None and "inputs" not in existing_point:
+            existing_point["inputs"] = inputs
     else:
         # New point
         new_point = {
@@ -125,9 +134,18 @@ def _write_shapes_json(
             "models": {model_key: {"occurrences": occurrences}},
             "source": "captured",
         }
+        if inputs is not None:
+            new_point["inputs"] = inputs
         data["points"].append(new_point)
 
-    _atomic_write_text(shapes_path, json.dumps(data, indent=2) + "\n")
+    import copy as _copy
+    from full_graph_harness import _OneLine, dumps_with_onelines
+
+    marked = _copy.deepcopy(data)
+    for point in marked.get("points", []):
+        if isinstance(point.get("inputs"), list):
+            point["inputs"] = [_OneLine(e) for e in point["inputs"]]
+    _atomic_write_text(shapes_path, dumps_with_onelines(marked) + "\n")
 
 
 @dataclass
@@ -402,7 +420,8 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             model_key = f"{suite}/{mode}/{clean_name}" if mode else f"{suite}/{clean_name}"
             point_hash = shape_hash[:8] if len(shape_hash) >= 8 else shape_hash
             _write_shapes_json(repro_dir, point_hash, signature, model_key,
-                               occurrences=entry.get("occurrences"))
+                               occurrences=entry.get("occurrences"),
+                               inputs=entry.get("inputs"))
 
         # Update meta.json
         meta_path = repro_dir / "meta.json"

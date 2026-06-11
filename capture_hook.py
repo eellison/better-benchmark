@@ -1255,30 +1255,37 @@ class _CaptureState:
             "torch.int16": "i16", "torch.int8": "i8",
             "torch.bool": "b8", "torch.uint8": "u8",
         }
-        config_parts = []
+        # Build the inputs as DATA (compact shared encoding); the T()/S()
+        # string is a RENDERING of that data for repro.py documentation —
+        # the same value flows to shapes.json structurally, never re-parsed.
+        from input_codec import compact_from_spec, render_signature
+
+        compact_inputs = []
         for name in ph_names:
             if name in shape_params:
-                config_parts.append(f"S({shape_params[name]})")
+                compact_inputs.append(["S", list(shape_params[name])])
             else:
                 info = placeholder_info.get(name)
                 if info and info["dtype"] != "symint":
-                    dt = _DTYPE_SHORT.get(info["dtype"], info["dtype"])
-                    stride = info.get("stride", [])
+                    spec = {
+                        "kind": "tensor",
+                        "shape": info["shape"],
+                        "dtype": info["dtype"],
+                        "stride": info.get("stride", []),
+                    }
                     bound = index_bounds.get(name)
-                    gen_kwarg = ""
                     if name in permutation_indices:
-                        gen_kwarg = f", gen=Perm({permutation_indices[name]})"
+                        spec["gen"] = {"kind": "permutation",
+                                       "size": permutation_indices[name]}
                     elif "int" in info["dtype"] and bound:
-                        gen_kwarg = f", gen=Index({bound})"
+                        spec["gen"] = {"kind": "index", "low": 0,
+                                       "high": bound}
                     elif "int8" in info["dtype"]:
-                        gen_kwarg = ", gen=Index(9)"
-                    if stride and info["shape"]:
-                        config_parts.append(f"T({info['shape']}, {dt}, stride={tuple(stride)}{gen_kwarg})")
-                    else:
-                        config_parts.append(f"T({info['shape']}, {dt}{gen_kwarg})")
+                        spec["gen"] = {"kind": "index", "low": 0, "high": 9}
+                    compact_inputs.append(compact_from_spec(spec))
                 elif info and info.get("dtype") == "symint":
-                    config_parts.append(f"S([{info.get('hint', 1)}])")
-        shapes_config_line = f"({', '.join(config_parts)})"
+                    compact_inputs.append(["sym", info.get("hint", 1)])
+        shapes_config_line = render_signature(compact_inputs)
 
         script = f'''"""
 Standalone repro captured via capture_hook.
@@ -1360,7 +1367,7 @@ if __name__ == "__main__":
         # shapes.json) must never re-derive it by regexing the generated
         # source — that round-trip through rendered Python is exactly the
         # lossy text-parsing the project bans for graphs.
-        return filepath, shapes_config_line
+        return filepath, shapes_config_line, compact_inputs
 
     def process_graph(self, gm: fx.GraphModule):
         """Called by the hook for each post-grad graph. Partitions and captures."""
@@ -1513,7 +1520,7 @@ if __name__ == "__main__":
             self.counter += 1
 
             try:
-                filepath, signature = self._generate_repro_file(
+                filepath, signature, compact_inputs = self._generate_repro_file(
                     sub_gm, placeholder_info, meta, filename, shape_params)
                 self.captured.append({
                     "file": filepath,
@@ -1522,6 +1529,7 @@ if __name__ == "__main__":
                     "shape_hash": shape_key,
                     "hash": full_key,
                     "signature": signature,
+                    "inputs": compact_inputs,
                     "reduction_types": meta["reduction_types"],
                     "n_ops": len(comp),
                     "origin_ops": origin_ops,
