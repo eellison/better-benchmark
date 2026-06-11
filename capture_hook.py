@@ -1304,15 +1304,21 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_repro_version = 2
-_shapes_config = "{shapes_config_line}"
+_repro_version = 3
+# Input shapes/strides/dtypes live in the sibling shapes.json (structured,
+# one entry per point); forward()'s annotations document the default shapes
+# inline. Default inputs = the first shapes.json point.
 
 {code}
 
 
 def _default_make_inputs():
-    from repro_harness import parse_shapes_config
-    return parse_shapes_config(_shapes_config)
+    configs = load_shape_configs(__file__)
+    if not configs:
+        raise RuntimeError(
+            "no shapes.json next to this repro — pass an explicit config "
+            "via make_inputs(shape_config=...)")
+    return make_inputs_from_config(next(iter(configs.values())))
 
 
 def make_inputs(shape_config=None):
@@ -1352,7 +1358,15 @@ if __name__ == "__main__":
                 mod.nan = float("nan")
                 exec(compiled_code, mod.__dict__)
                 repro_instance = mod.Repro()
-                inputs = mod._default_make_inputs()
+                # Explicit config: shapes.json doesn't exist yet (merge
+                # creates it later in the canonical dir), so the default
+                # path can't be used here — and validating with the same
+                # compact entries that BECOME the shapes.json point means
+                # we validate exactly what consumers will load.
+                from input_codec import spec_from_compact
+                from repro_harness import make_inputs_from_config as _mific
+                inputs = mod.make_inputs(shape_config={
+                    "inputs": [spec_from_compact(e) for e in compact_inputs]})
                 with torch.no_grad():
                     out = repro_instance(*inputs)
                 if out is None:

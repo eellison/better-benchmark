@@ -129,16 +129,53 @@ _SHAPES_CONFIG_LINE = re.compile(
 
 
 def check_shapes_config() -> list[str]:
-    """Hard invariant 3: every repro.py must have _shapes_config (v2 format),
-    and its value must equal one of the dir's shapes.json signatures."""
+    """Hard invariant 3: every repro must have a loadable input config.
+
+    v3 repros (no inline _shapes_config; default = first shapes.json
+    point): the dir MUST have shapes.json with at least one point carrying
+    structured "inputs", and every point's "signature" string must equal
+    render_signature(inputs) (the string is a rendering of the data —
+    drift means a writer bypassed the codec).
+
+    v2 repros (inline _shapes_config string): the legacy check — the
+    string must be a real top-level assignment, and where shapes.json
+    exists it must match one point's signature.
+    """
     errors = []
     missing = []
+    drifted = []
     for repro_py in sorted(CANONICAL_DIR.glob("*/repro.py")):
         source = repro_py.read_text()
+        shapes_path = repro_py.parent / "shapes.json"
+        is_v3 = "_repro_version = 3" in source
+
+        if is_v3:
+            if not shapes_path.exists():
+                missing.append(f"{repro_py.parent.name} (v3, no shapes.json)")
+                continue
+            try:
+                points = json.loads(shapes_path.read_text()).get("points", [])
+            except Exception:
+                continue  # malformed shapes.json caught elsewhere
+            if not points or not any(p.get("inputs") for p in points):
+                missing.append(
+                    f"{repro_py.parent.name} (v3, no structured inputs)")
+                continue
+            try:
+                from input_codec import render_signature
+                for p in points:
+                    if p.get("inputs") and p.get("signature"):
+                        if render_signature(p["inputs"]) != p["signature"]:
+                            drifted.append(
+                                f"{repro_py.parent.name}/{p.get('shape_hash')}")
+            except ImportError:
+                pass
+            continue
+
+        # v2 legacy path
         if "_shapes_config" not in source:
             missing.append(repro_py.parent.name)
             continue
-        # Verify it's a real top-level assignment
         try:
             tree = ast.parse(source)
         except SyntaxError:
@@ -152,42 +189,33 @@ def check_shapes_config() -> list[str]:
                         break
         if not found:
             missing.append(repro_py.parent.name)
-
-    # _shapes_config (repro.py's standalone default) intentionally
-    # DUPLICATES one shapes.json point — drift between them means the
-    # default bench point diverged from the registered points. Enforce:
-    # every _shapes_config string must equal some shapes.json signature.
-    drifted = []
-    for repro_py in sorted(CANONICAL_DIR.glob("*/repro.py")):
-        shapes_path = repro_py.parent / "shapes.json"
-        if not shapes_path.exists():
             continue
-        m = _SHAPES_CONFIG_LINE.search(repro_py.read_text())
-        if not m:
-            continue  # covered by the missing check above
-        cfg = m.group(1)
-        try:
-            sigs = {p.get("signature")
-                    for p in json.loads(shapes_path.read_text()).get("points", [])}
-        except Exception:
-            continue  # malformed shapes.json caught elsewhere
-        if cfg not in sigs:
-            drifted.append(repro_py.parent.name)
+        if shapes_path.exists():
+            m = _SHAPES_CONFIG_LINE.search(source)
+            if m:
+                try:
+                    sigs = {p.get("signature") for p in
+                            json.loads(shapes_path.read_text()).get("points", [])}
+                except Exception:
+                    sigs = None
+                if sigs is not None and m.group(1) not in sigs:
+                    drifted.append(repro_py.parent.name)
+
     if drifted:
         errors.append(
-            f"{len(drifted)} repro.py _shapes_config value(s) match NO "
-            f"shapes.json point (drift):\n"
+            f"{len(drifted)} signature/inputs drift(s) (string is not the "
+            f"rendering of the data):\n"
             + "\n".join(f"    {d}" for d in drifted[:10])
         )
 
     if missing:
         errors.append(
-            f"{len(missing)} repro.py file(s) missing _shapes_config:\n"
+            f"{len(missing)} repro(s) without a loadable input config:\n"
             + "\n".join(f"    {m}" for m in missing[:10])
         )
     else:
         count = len(list(CANONICAL_DIR.glob("*/repro.py")))
-        print(f"  [PASS] all {count} repro.py files have _shapes_config")
+        print(f"  [PASS] all {count} repros have loadable input configs")
     return errors
 
 

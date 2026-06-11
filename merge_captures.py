@@ -127,12 +127,14 @@ def _write_shapes_json(
         if inputs is not None and "inputs" not in existing_point:
             existing_point["inputs"] = inputs
     else:
-        # New point
+        # New point. "inputs" is the data; "signature" is its one-line
+        # human-readable rendering (render_signature(inputs)) kept for
+        # at-a-glance reading and reviewable diffs — never parsed back.
+        # (No "source" field: it had one writer, one value, no readers.)
         new_point = {
             "shape_hash": shape_hash,
             "signature": signature,
             "models": {model_key: {"occurrences": occurrences}},
-            "source": "captured",
         }
         if inputs is not None:
             new_point["inputs"] = inputs
@@ -445,20 +447,30 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             }
             _atomic_write_text(meta_path, json.dumps(meta, indent=2))
 
-        # Write canonical repro.py if it doesn't exist or needs upgrade to v2
+        # Write canonical repro.py if it doesn't exist or is older-format
+        # than the capture's. Version compare, NOT equality-with-v2 — the
+        # old check treated v3 files as "stale v1" and shoved them through
+        # the legacy text-extraction rebuild, corrupting them.
+        _ver_re = re.compile(r"^_repro_version\s*=\s*(\d+)", re.MULTILINE)
+
+        def _version_of(text: str) -> int:
+            m = _ver_re.search(text)
+            return int(m.group(1)) if m else 1
+
         repro_py = repro_dir / "repro.py"
+        src_file = Path(entry["file"])
+        src_text = src_file.read_text() if src_file.exists() else None
+        src_ver = _version_of(src_text) if src_text else 1
         needs_write = not repro_py.exists()
-        if not needs_write and repro_py.exists():
-            existing = repro_py.read_text()
-            if "_repro_version = 2" not in existing:
-                needs_write = True  # upgrade stale repro to v2
+        if not needs_write:
+            needs_write = _version_of(repro_py.read_text()) < src_ver
         if needs_write:
-            src_file = Path(entry["file"])
-            if src_file.exists():
+            if src_text is not None:
                 try:
-                    src_text = src_file.read_text()
-                    # If source is already v2 format (has _shapes_config), use it directly
-                    if "_repro_version = 2" in src_text and "_shapes_config" in src_text:
+                    # Capture-produced files (v2+) are AUTHORITATIVE: copy
+                    # verbatim. The extraction rebuild below is for true
+                    # v1 legacy captures only.
+                    if src_ver >= 2:
                         _atomic_write_text(repro_py, src_text)
                     else:
                         repro_class = extract_repro_class(src_file)

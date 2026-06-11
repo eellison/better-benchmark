@@ -142,8 +142,11 @@ def bench_fusible_points(needed: set[tuple[str, str]],
             key = (phash, pt["shape_hash"])
             if key not in needed or key in times:
                 continue
+            from input_codec import spec_from_compact
+            from repro_harness import make_inputs_from_config
+            specs = [spec_from_compact(e) for e in pt["inputs"]]
             inputs = [t.cuda() if isinstance(t, torch.Tensor) else t
-                      for t in parse_shapes_config(pt["signature"])]
+                      for t in make_inputs_from_config({"inputs": specs})]
             torch._dynamo.reset()
             compiled = torch.compile(mod.Repro())
             times[key] = _bench_replay(lambda: compiled(*inputs))
