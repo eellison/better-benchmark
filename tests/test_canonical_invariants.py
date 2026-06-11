@@ -356,3 +356,65 @@ def test_unreturned_mutation_preserved():
             if n.op == "call_function"]
     assert any("copy" in op for op in ops2), \
         f"mutation lost on re-retrace: {ops2}"
+
+
+# ============================================================================
+# 9. Pattern hash encodes dtype / string-mode / memory-format args
+# ============================================================================
+
+def _pattern_hashes(fn, *inputs):
+    gm = _traced(fn, *inputs)
+    comps = get_fusion_partitions(gm)
+    pat = compute_partition_pattern(max(comps, key=len), gm)
+    return pat["pattern_hash"], pat["shape_hash"]
+
+
+def test_pattern_hash_encodes_dtype_args():
+    """convert_element_type to f32 vs f16 writes different bytes — must be
+    different patterns. Collision found by adversarial review 2026-06-11:
+    _encode_arg dropped torch.dtype args, so 440-model dedup would merge
+    semantically different partitions and attribute timings to the wrong
+    kernel."""
+    x = torch.randn(8, 8, dtype=torch.bfloat16)
+
+    def to_f32(a):
+        return torch.ops.prims.convert_element_type.default(a + 1, torch.float32)
+
+    def to_f16(a):
+        return torch.ops.prims.convert_element_type.default(a + 1, torch.float16)
+
+    h32, _ = _pattern_hashes(to_f32, x)
+    h16, _ = _pattern_hashes(to_f16, x)
+    assert h32 != h16
+
+
+def test_pattern_hash_encodes_str_mode_args():
+    """div rounding_mode floor vs trunc are different computations."""
+    y = torch.randn(8, 8)
+
+    def div_floor(a, b):
+        return torch.ops.aten.div.Tensor_mode(a + 1, b, rounding_mode="floor")
+
+    def div_trunc(a, b):
+        return torch.ops.aten.div.Tensor_mode(a + 1, b, rounding_mode="trunc")
+
+    hf, _ = _pattern_hashes(div_floor, y, y.clone())
+    ht, _ = _pattern_hashes(div_trunc, y, y.clone())
+    assert hf != ht
+
+
+def test_pattern_hash_ignores_scalar_constants():
+    """Scalar float constants (mul by 3.0 vs 5.0, eps) do NOT fork the
+    pattern: same kernel structure, the constant is baked. This is the
+    intended dedup — only encode what changes the kernel."""
+    z = torch.randn(8, 8)
+
+    def mul3(a):
+        return (a + 1) * 3.0
+
+    def mul5(a):
+        return (a + 1) * 5.0
+
+    h3, _ = _pattern_hashes(mul3, z)
+    h5, _ = _pattern_hashes(mul5, z)
+    assert h3 == h5

@@ -554,6 +554,18 @@ def compute_dag_signature(gm) -> list:
         elif isinstance(arg, bool):
             # Booleans like keepdim=True matter for output shape
             return ("bool", arg, arg_idx)
+        elif isinstance(arg, torch.dtype):
+            # convert_element_type/to.dtype targets: different output dtype
+            # = different bytes written = different kernel. Collision found
+            # by adversarial review 2026-06-11 (f32 vs f16 convert hashed
+            # identically); pinned by tests/test_canonical_invariants.py.
+            return ("dtype", str(arg), arg_idx)
+        elif isinstance(arg, str):
+            # String modes (div rounding_mode, gelu approximate): select
+            # genuinely different computations.
+            return ("str", arg, arg_idx)
+        elif isinstance(arg, torch.memory_format):
+            return ("memfmt", str(arg), arg_idx)
         # Scalar int/float constants — don't encode (same kernel regardless)
         return None
 
@@ -573,6 +585,13 @@ def compute_dag_signature(gm) -> list:
                     encoded_args.append(("kw_bool", kw, val))
                 elif isinstance(val, (list, tuple)) and all(isinstance(x, int) for x in val):
                     encoded_args.append(("kw_dims", kw, list(val)))
+                elif isinstance(val, torch.dtype):
+                    encoded_args.append(("kw_dtype", kw, str(val)))
+                elif isinstance(val, str):
+                    # rounding_mode="floor"/"trunc", approximate="tanh", ...
+                    encoded_args.append(("kw_str", kw, val))
+                elif isinstance(val, torch.memory_format):
+                    encoded_args.append(("kw_memfmt", kw, str(val)))
             signature.append((_op_name(node), encoded_args))
         elif node.op == "output":
             def _collect_output_indices(x):
