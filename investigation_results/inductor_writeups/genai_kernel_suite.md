@@ -56,3 +56,23 @@ memcopy-SOL from bytes at 6.9 TB/s.
 ## Fixes (in progress)
 
 (to be filled in per-fix: blocker file:line, hand-A/B, commit, before/after)
+
+## Orchestrator guidance for SoftmaxBackward/001 (dgrad, 1.29x after CD)
+
+Graph read (full_graph_001.py): recompute y from saved stats (primals_1 bf16 +
+amax/sum_1 f32), sum_3 = rowsum(dy*y), dx = fma(-y, sum_3, dy*y). Natural
+2-kernel structure (K1: read x for sum_3; K2: re-read x, write dx) = 12.9GB
+= 1869us floor at 6.9TB/s. Hand kernel 1904us = ~98% BW; CD 2459us = ~76% BW.
+=> The gap is PER-KERNEL STREAMING EFFICIENCY, not structure. Check, in order:
+(1) which of the two kernels is slow (time them separately from output_code);
+(2) in-loop masking on the loads (other=0.0 + where — the a26fc2c8bf4 class)
+and eviction policy on the K2 re-read (x is read in BOTH kernels: K1 should
+NOT evict_first x if K2 follows soon? measure both policies);
+(3) R0_BLOCK/warps config for rnumel=262144 looped rows (CD radius-1 again?
+hand-sweep a few 2-coordinate moves).
+
+CAVEAT: tangents_1 is a SCALAR (0-d expanded) => sum_3 == dy analytically
+(rowsum(softmax)=1) and dx ~= 0 numerically. Do NOT exploit this identity
+(benchmark-specific, numerically inexact). DO validate any change on a
+tensor-tangent variant as well (build one in a standalone script) since this
+graph's outputs are insensitive to bugs.
