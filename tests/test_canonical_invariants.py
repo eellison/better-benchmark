@@ -809,3 +809,59 @@ def test_device_default_accelerator_cpu_recorded():
                            "stride": [1], "device": "cpu"})
     assert e[2]["dev"] == "cpu", e
     assert spec_from_compact(e)["device"] == "cpu"
+
+
+def test_alias_group_nbytes_travels_through_shapes_json_load():
+    """The v3 default path (load_shape_configs -> make_inputs_from_config)
+    must propagate alias_group_nbytes from the shapes.json point into the
+    config — without it, alias-tagged specs crash generation (adversarial
+    review bug #1: the primary `python repro.py` path)."""
+    import json, tempfile
+    from pathlib import Path
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    N, D = 8, 4
+    point = {
+        "shape_hash": "deadbeef",
+        "models": {"timm/train/x": {"occurrences": 1}},
+        "inputs": [
+            [[N, D], "f32", {"st": [3 * D, 1], "off": off, "alias": 0,
+                             "dev": "cpu"}]
+            for off in (0, D, 2 * D)
+        ],
+        "alias_group_nbytes": [N * 3 * D * 4],
+    }
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.json").write_text(json.dumps({"points": [point]}))
+        (d / "repro.py").write_text("# stub")
+        configs = load_shape_configs(str(d / "repro.py"))
+        cfg = next(iter(configs.values()))
+        assert cfg.get("alias_group_nbytes") == [N * 3 * D * 4], cfg.keys()
+        q, k, v = make_inputs_from_config(cfg)
+        assert q.untyped_storage().data_ptr() == v.untyped_storage().data_ptr()
+
+
+def test_merge_backfills_alias_onto_existing_point():
+    """Re-merging a richer (alias-tagged) capture onto a pre-alias point
+    must REPLACE the inputs and add alias_group_nbytes — never silently
+    discard fidelity (adversarial review bug #2)."""
+    import json, tempfile
+    from pathlib import Path
+    from merge_captures import _write_shapes_json
+
+    plain = [[[8, 4], "f32", {"st": [12, 1]}]]
+    rich = [[[8, 4], "f32", {"st": [12, 1], "off": 0, "alias": 0}],
+            [[8, 4], "f32", {"st": [12, 1], "off": 4, "alias": 0}]]
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        _write_shapes_json(d, "aabbccdd", "(sig)", "timm/train/m1",
+                           occurrences=1, inputs=plain)
+        _write_shapes_json(d, "aabbccdd", "(sig)", "timm/train/m2",
+                           occurrences=2, inputs=rich,
+                           alias_group_nbytes=[384])
+        data = json.loads((d / "shapes.json").read_text())
+        pt = data["points"][0]
+        assert pt["alias_group_nbytes"] == [384]
+        assert any("alias" in (e[2] if len(e) > 2 else {})
+                   for e in pt["inputs"]), "rich inputs not backfilled"

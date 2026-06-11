@@ -108,7 +108,13 @@ def _parse_shapes_json(shapes_path: Path) -> dict:
             try:
                 from input_codec import spec_from_compact
                 specs = [spec_from_compact(e) for e in compact]
-                configs[label] = {"inputs": specs}
+                cfg = {"inputs": specs}
+                # alias_group_nbytes must travel with the config — specs
+                # carrying alias_group crash generation without it
+                # (adversarial review bug #1).
+                if point.get("alias_group_nbytes"):
+                    cfg["alias_group_nbytes"] = point["alias_group_nbytes"]
+                configs[label] = cfg
                 continue
             except Exception:
                 pass  # fall through to signature eval

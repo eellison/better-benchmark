@@ -127,6 +127,18 @@ def _write_shapes_json(
             models[model_key] = {"occurrences": occurrences}
         if inputs is not None and "inputs" not in existing_point:
             existing_point["inputs"] = inputs
+        elif inputs is not None and existing_point.get("inputs") != inputs:
+            # Richer recapture (alias tags) REPLACES a pre-alias inputs
+            # list — never silently discard fidelity (review bug #2).
+            def _has_alias(entries):
+                return any(isinstance(e, list) and len(e) > 2
+                           and isinstance(e[2], dict) and "alias" in e[2]
+                           for e in entries)
+            if _has_alias(inputs) and not _has_alias(
+                    existing_point.get("inputs") or []):
+                existing_point["inputs"] = inputs
+        if alias_group_nbytes and not existing_point.get("alias_group_nbytes"):
+            existing_point["alias_group_nbytes"] = alias_group_nbytes
     else:
         # New point. "inputs" is THE data (compact codec); render the
         # human-readable string on demand via input_codec.render_signature
