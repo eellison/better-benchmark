@@ -15,7 +15,7 @@ per-kernel-in-graph slope (~0.9us) appears identically on both sides
 (same kernels, same counts) and cancels — only the intercept is
 corrected.
 
-Validated 2026-06-11 on 10 timm infer models (wave1 batch):
+Validated 2026-06-11 on 10 timm infer models:
 raw parts/e2e 1.14-1.34 -> corrected 1.00-1.09. The two undershoots are
 real perf findings, not accounting error: deit 0.75 (in-model layernorm
 runs up to 4x slower than the identical standalone shape) and nfnet 0.92
@@ -37,7 +37,7 @@ Dedup: nothing is benched twice within a run.
     run-level cache shared across models
 
 Usage:
-    python scripts/model_attribution.py --corpus-root /tmp/wave1_batch5/repros \
+    python scripts/model_attribution.py --corpus-root /tmp/recapture_corpus/repros \
         --suite timm --mode infer --models mobilenetv2_100,resnet18
     python scripts/model_attribution.py --corpus-root ... --models all \
         --output results/attribution_b200.json
@@ -160,14 +160,65 @@ def _meta_sig(val) -> str:
     return repr(val)
 
 
-def _fabricate(val, dev="cuda"):
-    if torch.is_tensor(val):
-        t = torch.empty_strided(list(val.shape), list(val.stride()),
-                                dtype=val.dtype, device=dev)
-        if t.dtype.is_floating_point:
-            t.normal_(0, 0.02)
-        return t
-    return val
+def _generation_kind_for_arg(node, arg_pos) -> dict | None:
+    """Generation spec for an integer tensor arg of an extern op.
+
+    Same op semantics as full_graph_harness.infer_index_bounds_from_gm —
+    here the consumer IS the node being benched, so inference is direct:
+    embedding(weight, indices) bounds indices by weight.shape[0];
+    gather/index_select/scatter by input.shape[dim]; _embedding_bag
+    offsets are a sorted-"offsets" kind. Returns a make_inputs_from_config
+    generation dict, or None (harness default: small non-negative ints).
+    """
+    def _arg_shape(i):
+        if i >= len(node.args) or not isinstance(node.args[i], fx.Node):
+            return None
+        v = node.args[i].meta.get("val")
+        return list(v.shape) if torch.is_tensor(v) else None
+
+    t = node.target
+    a = torch.ops.aten
+    if t in (a.embedding.default, a._embedding_bag.default) and arg_pos == 1:
+        w = _arg_shape(0)
+        return {"kind": "index", "low": 0, "high": w[0]} if w else None
+    if t == a._embedding_bag.default and arg_pos == 2:
+        idx = _arg_shape(1)
+        return {"kind": "offsets", "high": idx[0]} if idx else None
+    if t in (a.gather.default, a.index_select.default,
+             a.scatter.src, a.scatter.value, a.scatter_add.default):
+        if arg_pos == 2:  # (input, dim, index, ...)
+            inp = _arg_shape(0)
+            dim = node.args[1] if len(node.args) > 1 else 0
+            if inp and isinstance(dim, int):
+                return {"kind": "index", "low": 0, "high": inp[dim]}
+    if t == a.index.Tensor and arg_pos == 1:
+        inp = _arg_shape(0)
+        return {"kind": "index", "low": 0, "high": min(inp)} if inp else None
+    return None
+
+
+def _fabricate(val, dev="cuda", node=None, arg_pos=None):
+    """Materialize a bench input from a fake-tensor meta val.
+
+    REUSES repro_harness.make_inputs_from_config — the project's single
+    input-generation implementation (randn floats, bounded randint index
+    ints, permutation/offsets kinds) — by building the same spec dict the
+    shapes.json pipeline produces. No value semantics live here.
+    """
+    if not torch.is_tensor(val):
+        return val
+    from repro_harness import make_inputs_from_config
+    spec = {
+        "shape": list(val.shape),
+        "dtype": str(val.dtype),
+        "stride": list(val.stride()),
+        "device": dev,
+    }
+    if node is not None and arg_pos is not None:
+        gen = _generation_kind_for_arg(node, arg_pos)
+        if gen:
+            spec["gen"] = gen
+    return make_inputs_from_config({"inputs": [spec]})[0]
 
 
 def _arg_sig(a) -> str:
@@ -214,12 +265,20 @@ def collect_extern_points(gm) -> dict[tuple[str, str], dict]:
 
 
 def bench_extern_point(node) -> float:
-    """Bench one non-fusible op standalone at its exact input metas."""
-    def materialize(a):
-        return _fabricate(a.meta.get("val")) if isinstance(a, fx.Node) else a
+    """Bench one non-fusible op standalone at its exact input metas.
 
-    args = fx.node.map_arg(node.args, materialize)
-    kwargs = fx.node.map_arg(node.kwargs, materialize)
+    Top-level positional args carry their position into _fabricate so
+    integer index tensors get inferred valid bounds (embedding indices
+    bounded by the weight's vocab dim, gather indices by input.shape[dim]).
+    """
+    args = tuple(
+        _fabricate(a.meta.get("val"), node=node, arg_pos=i)
+        if isinstance(a, fx.Node)
+        else fx.node.map_arg(a, lambda x: _fabricate(x.meta.get("val")))
+        for i, a in enumerate(node.args)
+    )
+    kwargs = fx.node.map_arg(
+        node.kwargs, lambda x: _fabricate(x.meta.get("val")))
     return _bench_replay(lambda: node.target(*args, **kwargs))
 
 
@@ -280,7 +339,12 @@ def attribute_model(model_dir: Path, canonical_dir: Path,
 
     n_occ = sum(fus_occ.values()) + sum(extern_occ.values())
     parts = fus_sum + ext_sum
-    corrected = parts - launch_floor_us * (n_occ - 1)
+    # Each standalone occurrence embeds one graph-launch intercept G; the
+    # e2e side embeds G per FULL GRAPH (e2e_total sums one bench_e2e per
+    # graph). Correction is therefore G*(n_occ - n_graphs) — using (n_occ-1)
+    # over-subtracts on multi-graph models (opus verifier, 2026-06-11;
+    # coincidentally equal for the 1-graph timm infer validation set).
+    corrected = parts - launch_floor_us * (n_occ - len(graphs))
     return {
         "e2e_us": round(e2e_total, 1),
         "sum_fusible_us": round(fus_sum, 1),

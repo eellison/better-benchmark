@@ -841,7 +841,7 @@ def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
     Input fidelity is the one care point: fake inputs are built EXACTLY from
     placeholder_info (shape, stride, dtype, device) — wrong strides (e.g.
     assuming contiguous for a channels-last tensor) would change which view
-    ops the retrace emits. SymInt inputs (dynamic, wave 2) are not yet
+    ops the retrace emits. SymInt inputs (dynamic shapes) are not yet
     handled here: partitions with symint placeholders return the original
     sub_gm unchanged (documented limitation; revisit with the dynamic-shapes
     serialization work).
@@ -887,7 +887,7 @@ def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
         if info.get("dtype") == "symint":
             print(
                 f"[canonicalize] symint placeholder {name!r}: retrace skipped "
-                f"(dynamic partitions canonicalize in wave 2)",
+                f"(dynamic-shape partitions not yet canonicalized)",
                 file=sys.stderr,
             )
             return sub_gm, placeholder_info, shape_params
@@ -1441,7 +1441,7 @@ if __name__ == "__main__":
             # canonicalize_subgraph), and hashes. The live capture previously
             # extracted+hashed directly here, bypassing canonicalization,
             # which is how live-cut hashes diverged from artifact/retrace
-            # hashes (the resnet18 wave-1 drift).
+            # hashes (the resnet18 live-vs-artifact hash drift, fixed 2026-06).
             pattern = compute_partition_pattern(comp, gm)
             if pattern is None:
                 continue
@@ -1609,7 +1609,21 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
         try:
             _active_state.process_graph(copy.deepcopy(gm))
         except Exception as e:
-            print(f"[capture_hook] Error processing graph: {e}")
+            # A whole-graph processing failure loses EVERY region in the
+            # graph — record it as a drop so the fail-hard gate (run_recapture
+            # raises pre-merge; merge refuses dropped captures) sees it.
+            # Swallowing it here silently merged partial corpora (opus
+            # verifier gap #2, 2026-06-11).
+            _active_state.dropped.append({
+                "filename": None,
+                "pattern_hash": None,
+                "shape_hash": None,
+                "reason": (f"WHOLE-GRAPH process_graph failure "
+                           f"(graph {_active_state.graph_counter}): "
+                           f"{type(e).__name__}: {str(e)[:300]}"),
+            })
+            print(f"[capture_hook] Error processing graph (recorded as drop): {e}",
+                  file=sys.stderr)
 
         if _active_state.capture_only:
             _active_state.finalize()

@@ -343,6 +343,18 @@ def make_inputs_from_config(config: dict) -> list:
                 )
                 continue
 
+            if gen and gen.get("kind") == "offsets":
+                # Segment offsets (e.g. _embedding_bag): non-decreasing,
+                # first element 0, bounded by high (= len(indices)).
+                hi = max(int(gen.get("high", 1)), 1)
+                vals, _ = torch.sort(
+                    torch.randint(0, hi, shape, dtype=dtype, device=device))
+                flat = vals.reshape(-1)
+                if flat.numel():
+                    flat[0] = 0
+                result.append(vals)
+                continue
+
             low = int(gen.get("low", 0)) if gen else 0
             hi = int(gen.get("high", 100)) if gen else 100
             if hi <= low:

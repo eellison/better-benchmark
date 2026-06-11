@@ -25,11 +25,11 @@ Usage:
 
   # Full suite:
   python scripts/run_recapture.py --suite timm --mode infer \\
-      --models all --corpus-root /tmp/wave1_corpus/repros
+      --models all --corpus-root /tmp/recapture_corpus/repros
 
   # Multi-GPU workers:
   python scripts/run_recapture.py --suite timm --mode both \\
-      --models all --corpus-root /tmp/wave1_corpus/repros --gpus 0,1
+      --models all --corpus-root /tmp/recapture_corpus/repros --gpus 0,1
 """
 import argparse
 import gc
@@ -961,7 +961,7 @@ def main():
     project_repros = (PROJECT_ROOT / "repros").resolve()
     if corpus_root == project_repros:
         print("ERROR: --corpus-root must NOT be the existing repros/ directory.")
-        print("       Use a new directory for recapture (e.g. /tmp/wave1_corpus/repros).")
+        print("       Use a new directory for recapture (e.g. /tmp/recapture_corpus/repros).")
         sys.exit(1)
 
     if args._worker:

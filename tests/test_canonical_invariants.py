@@ -2,7 +2,7 @@
 
 These tests are the executable documentation of the corpus identity
 invariants (CORPUS_MIGRATION_PLAN §1). Everything here was landed (and
-burned by at least once) during the wave-1 prep sessions of 2026-06:
+burned by at least once) while hardening the capture pipeline, 2026-06:
 
   1. RETRACE IDEMPOTENCE: canonicalize(canonicalize(g)) == canonicalize(g)
      — one retrace before serialization, then every subsequent trace+hash

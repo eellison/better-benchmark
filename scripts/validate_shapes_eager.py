@@ -284,7 +284,16 @@ def main():
     parser.add_argument("--verbose", action="store_true", help="Print each result as it comes")
     parser.add_argument("--quick", action="store_true",
                         help="Sample 50 random repros for a fast smoke check")
+    parser.add_argument("--canonical-dir", type=Path, default=None,
+                        help="Canonical repro dir to validate (default: the "
+                             "checked-in repros/canonical). Pass this to "
+                             "validate a freshly captured corpus at another "
+                             "root before merging it.")
     args = parser.parse_args()
+
+    if args.canonical_dir is not None:
+        global CANONICAL_DIR
+        CANONICAL_DIR = Path(args.canonical_dir).resolve()
 
     repro_dirs = find_repros(args.limit)
 

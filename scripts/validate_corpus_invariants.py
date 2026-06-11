@@ -8,10 +8,10 @@ changes touching repros/.
 Usage:
     python scripts/validate_corpus_invariants.py
 
-    # Validate a recapture corpus at another root (e.g. wave-1 output tree)
+    # Validate a freshly captured corpus at another root
     # instead of the checked-in repros/. The baseline count check is skipped
     # for non-default roots (a fresh corpus has no baseline yet).
-    python scripts/validate_corpus_invariants.py --corpus-root /tmp/wave1_corpus/repros
+    python scripts/validate_corpus_invariants.py --corpus-root /tmp/recapture_corpus/repros
 
     # Full-graph round-trip invariants (A: input round-trip, B: partition
     # determinism, C: partition round-trip vs manifest). Samples 2 models per
@@ -46,7 +46,7 @@ sys.path.insert(0, str(ROOT))
 
 
 def set_corpus_root(corpus_root: Path) -> bool:
-    """Point all invariants at another corpus tree (wave-1 recapture output).
+    """Point all invariants at another corpus tree (a recapture output root).
 
     Returns True if this is a NON-default root — callers then skip the
     baseline count check (a fresh corpus has no baseline; every other
@@ -238,7 +238,11 @@ def check_shapes_eager_validation() -> list[str]:
 
     try:
         result = subprocess.run(
-            [sys.executable, str(validate_script), "--quick", "--timeout", "30"],
+            [sys.executable, str(validate_script), "--quick", "--timeout", "30",
+             # Pass the ACTIVE canonical dir — without this the child script
+             # hardcodes the checked-in repros/ and silently validates the
+             # wrong tree under --corpus-root (opus verifier gap #6).
+             "--canonical-dir", str(CANONICAL_DIR)],
             capture_output=True, text=True, timeout=300,
             cwd=str(ROOT),
         )
