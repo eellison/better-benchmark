@@ -170,6 +170,23 @@ def _fabricate(val, dev="cuda"):
     return val
 
 
+def _arg_sig(a) -> str:
+    """Exact signature of one arg: tensor metas for Nodes, repr for
+    literals, recursing into containers. (fx.node.map_arg only visits
+    Nodes — literals like conv padding would be silently dropped, merging
+    padding-only-different calls into one point. Caught by
+    test_canonical_invariants.)"""
+    if isinstance(a, fx.Node):
+        return _meta_sig(a.meta.get("val"))
+    if isinstance(a, (list, tuple)):
+        inner = ",".join(_arg_sig(x) for x in a)
+        return f"[{inner}]" if isinstance(a, list) else f"({inner})"
+    if isinstance(a, dict):
+        return "{" + ",".join(f"{k}:{_arg_sig(v)}"
+                              for k, v in sorted(a.items())) + "}"
+    return repr(a)
+
+
 def collect_extern_points(gm) -> dict[tuple[str, str], dict]:
     """(target, exact input signature) -> {count, node} for non-fusible ops.
 
@@ -188,14 +205,7 @@ def collect_extern_points(gm) -> dict[tuple[str, str], dict]:
             continue
         if partition_node_is_supported(node):
             continue
-        sig_parts: list[str] = []
-
-        def visit(a):
-            sig_parts.append(_meta_sig(a.meta.get("val"))
-                             if isinstance(a, fx.Node) else repr(a))
-
-        fx.node.map_arg((node.args, node.kwargs), visit)
-        key = (str(node.target), "|".join(sig_parts))
+        key = (str(node.target), _arg_sig((node.args, node.kwargs)))
         if key in points:
             points[key]["count"] += 1
         else:
