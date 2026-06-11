@@ -202,6 +202,8 @@ print(json.dumps({{"repro": repro_name, "results": results}}))
     env["CUDA_VISIBLE_DEVICES"] = gpu_id
     # Suppress torch warnings
     env["PYTHONWARNINGS"] = "ignore"
+    # Never leave __pycache__ in the corpus tree
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
 
     try:
         result = subprocess.run(

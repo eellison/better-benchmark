@@ -621,6 +621,9 @@ def run_worker(suite: str, model_name: str, mode: str, batch_size: int,
     # models landing on one GPU (OOMs misattributed as model failures).
     if gpu_id is not None:
         env["CUDA_VISIBLE_DEVICES"] = gpu_id
+    # Workers import validation modules from inside the corpus tree —
+    # never leave __pycache__ in the corpus.
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
 
     cmd = [
         sys.executable, str(Path(__file__).resolve()),

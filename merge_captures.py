@@ -446,13 +446,17 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                                inputs=entry.get("inputs"),
                                alias_group_nbytes=entry.get("alias_group_nbytes"))
 
-        # Update meta.json
+        # Update meta.json. Models recorded by QUALIFIED key
+        # (suite/mode/name) — the same key shapes.json uses; bare names
+        # collide across suites/modes (resnet18 exists in timm AND
+        # torchbench).
+        qual_key = f"{suite}/{mode}/{clean_name}" if mode else f"{suite}/{clean_name}"
         meta_path = repro_dir / "meta.json"
         if meta_path.exists():
             with open(meta_path) as f:
                 meta = json.load(f)
-            if model_name not in meta.get("models", []):
-                meta["models"].append(model_name)
+            if qual_key not in meta.get("models", []):
+                meta["models"].append(qual_key)
                 meta["models"].sort()
                 meta["n_models"] = len(meta["models"])
                 _atomic_write_text(meta_path, json.dumps(meta, indent=2))
@@ -464,7 +468,7 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                 "n_ops": entry.get("n_ops"),
                 "origin_ops": entry.get("origin_ops", []),
                 "n_models": 1,
-                "models": [model_name],
+                "models": [qual_key],
             }
             _atomic_write_text(meta_path, json.dumps(meta, indent=2))
 
