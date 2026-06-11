@@ -176,9 +176,24 @@ def write_run_log_entry(corpus_root: Path, entry: dict):
     """Atomically append/update a run log entry.
 
     Reads the full log, updates the entry for the model_key, writes to a
-    temp file, then renames (atomic on same filesystem).
+    temp file, then renames (atomic on same filesystem). An flock around
+    the read-modify-write prevents the multi-GPU lost-update race: two
+    workers finishing simultaneously each read the log, and the second
+    rename silently discarded the first's entry (a lost 'failed' masks a
+    failure from the summary; a lost 'ok' causes a spurious re-run).
     """
     log_path = corpus_root / "run_log.json"
+    lock_path = corpus_root / ".run_log.lock"
+    import fcntl
+    with open(lock_path, "w") as lock_f:
+        fcntl.flock(lock_f, fcntl.LOCK_EX)
+        try:
+            _write_run_log_entry_locked(corpus_root, log_path, entry)
+        finally:
+            fcntl.flock(lock_f, fcntl.LOCK_UN)
+
+
+def _write_run_log_entry_locked(corpus_root: Path, log_path: Path, entry: dict):
     if log_path.exists():
         with open(log_path) as f:
             entries = json.load(f)
@@ -610,10 +625,16 @@ def _load_torchbench(model_name: str, batch_size: int, mode: str):
 # ============================================================================
 
 def run_worker(suite: str, model_name: str, mode: str, batch_size: int,
-               corpus_root: Path, timeout: int = 300):
+               corpus_root: Path, timeout: int = 300,
+               gpu_id: str | None = None):
     """Run capture for a single model in a subprocess. Returns the run_log entry."""
     env = os.environ.copy()
-    # CUDA_VISIBLE_DEVICES is set by the orchestrator per worker
+    # GPU assignment goes on the COPIED env only. Mutating the global
+    # os.environ from dispatcher threads raced: between one thread's set
+    # and its env-copy, another thread could overwrite the value — two
+    # models landing on one GPU (OOMs misattributed as model failures).
+    if gpu_id is not None:
+        env["CUDA_VISIBLE_DEVICES"] = gpu_id
 
     cmd = [
         sys.executable, str(Path(__file__).resolve()),
@@ -774,8 +795,6 @@ def _run_sequential(args, pending, gpu_id: str, corpus_root: Path):
         model_key = f"{args.suite}/{mode}/{model_name}"
         print(f"\n[{i+1}/{total}] {model_key} (batch={bs})")
 
-        # Set GPU for the subprocess
-        os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
         entry = run_worker(
             suite=args.suite,
@@ -784,6 +803,7 @@ def _run_sequential(args, pending, gpu_id: str, corpus_root: Path):
             batch_size=bs,
             corpus_root=corpus_root,
             timeout=args.timeout,
+            gpu_id=gpu_id,
         )
 
         # Write atomically
@@ -821,7 +841,6 @@ def _run_multi_gpu(args, pending, gpu_list: list[str], corpus_root: Path):
     completed = 0
 
     def _worker_wrapper(idx, model_name, mode, bs, gpu_id):
-        os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
         return run_worker(
             suite=args.suite,
             model_name=model_name,
@@ -829,6 +848,7 @@ def _run_multi_gpu(args, pending, gpu_list: list[str], corpus_root: Path):
             batch_size=bs,
             corpus_root=corpus_root,
             timeout=args.timeout,
+            gpu_id=gpu_id,
         )
 
     with ThreadPoolExecutor(max_workers=n_gpus) as executor:
