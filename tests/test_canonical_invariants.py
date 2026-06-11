@@ -46,11 +46,22 @@ from capture_hook import (
 
 
 def _traced(fn, *inputs):
-    """make_fx fake-mode trace with metas, like the capture pipeline sees."""
+    """make_fx fake-mode trace WITH the Inductor decomposition table.
+
+    The capture hook sees POST-GRAD graphs — after Inductor's decomps have
+    run. Tracing test functions without the decomp table manufactures
+    spellings that can't occur in production (e.g. aten._to_copy, which
+    decomposes to prims.convert_element_type before post-grad) and makes
+    tests assert on graphs the pipeline never sees. Audited 2026-06-11:
+    zero _to_copy across all 540 saved post-grad graphs.
+    """
+    from torch._inductor.decomposition import select_decomp_table
+
     with FakeTensorMode(allow_non_fake_inputs=True) as mode:
         fakes = [mode.from_tensor(t) if torch.is_tensor(t) else t
                  for t in inputs]
-        return make_fx(fn, tracing_mode="fake")(*fakes)
+        return make_fx(fn, tracing_mode="fake",
+                       decomposition_table=select_decomp_table())(*fakes)
 
 
 def _first_pattern(gm) -> dict:
