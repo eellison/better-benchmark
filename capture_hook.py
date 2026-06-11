@@ -89,6 +89,59 @@ def partition_node_is_supported(node: fx.Node) -> bool:
     return is_fusible_node(node)
 
 
+def graph_node_accounting(gm: fx.GraphModule, components=None) -> dict:
+    """Exhaustive fusibility classification of every call_function node.
+
+    Serialized into each full_graph_*.meta.json so the capture-time
+    fusible/non-fusible decision is an auditable artifact, not a transient:
+    if Inductor's is_fusible_node changes between pytorch versions, the
+    manifest diff shows exactly which ops moved buckets. Every node lands
+    in exactly ONE bucket and the counts must sum to total_call_functions
+    (enforced by tests/test_canonical_invariants.py).
+
+      fusible_in_partition: in a compute partition -> covered by a
+          canonical repro's pattern hash
+      fusible_unpartitioned: fusible/transparent but placed in no
+          partition (dangling views etc.) -> not a kernel, claimed by
+          neither side of the attribution identity
+      non_fusible: extern/fallback (BLAS, cuDNN, sdpa, ...) -> the
+          extern side of model_attribution
+
+    All three buckets log the aggregate op-target -> count set (graph
+    level, never per-partition — partition contents live in the canonical
+    repros). A misclassification in EITHER direction is then visible in
+    the artifact: an extern op wrongly marked fusible shows up in the
+    fusible set, and vice versa.
+    """
+    if components is None:
+        components = get_fusion_partitions(gm)
+    partitioned = set()
+    for comp in components:
+        partitioned.update(comp)
+    buckets = {
+        "fusible_in_partition": collections.Counter(),
+        "fusible_unpartitioned": collections.Counter(),
+        "non_fusible": collections.Counter(),
+    }
+    total = 0
+    for node in gm.graph.nodes:
+        if node.op != "call_function":
+            continue
+        total += 1
+        name = str(node.target)
+        if node in partitioned:
+            buckets["fusible_in_partition"][name] += 1
+        elif partition_node_is_supported(node):
+            buckets["fusible_unpartitioned"][name] += 1
+        else:
+            buckets["non_fusible"][name] += 1
+    return {
+        "total_call_functions": total,
+        "counts": {k: sum(v.values()) for k, v in buckets.items()},
+        "ops": {k: dict(sorted(v.items())) for k, v in buckets.items()},
+    }
+
+
 def partition_has_reduction(nodes) -> bool:
     """True if any node in the partition is a reduction op."""
     for n in nodes:
@@ -1211,7 +1264,10 @@ if __name__ == "__main__":
                     write_full_graph_metadata(
                         full_graph_path,
                         gm,
-                        extra={"source": infer_full_graph_source(full_graph_path)},
+                        extra={
+                            "source": infer_full_graph_source(full_graph_path),
+                            "node_accounting": graph_node_accounting(gm),
+                        },
                         index_bounds=index_bounds,
                         permutation_indices=permutation_indices,
                         observed_stats=self._current_observed_stats or {},

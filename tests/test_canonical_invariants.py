@@ -286,3 +286,73 @@ def test_no_pointwise_op_has_symint_list_slot():
             if "SymInt[]" in str(op._schema).split("->")[0]:
                 offenders.append(str(op))
     assert not offenders, offenders
+
+
+# ============================================================================
+# 7. Node accounting: exhaustive, auditable fusibility classification
+# ============================================================================
+
+def test_node_accounting_exhaustive():
+    """Every call_function lands in exactly one bucket; counts sum to total.
+    The accounting is the capture-time record of the fusible/non-fusible
+    decision — if Inductor's is_fusible_node changes, the artifact diff
+    shows which ops moved buckets."""
+    from capture_hook import graph_node_accounting
+
+    def f(x, w):
+        y = torch.ops.aten.convolution.default(
+            x, w, None, [1, 1], [0, 0], [1, 1], False, [0, 0], 1)
+        return (y + 1).relu()
+
+    gm = _traced(f, torch.randn(2, 8, 8, 8), torch.randn(8, 8, 3, 3))
+    acct = graph_node_accounting(gm)
+
+    n_cf = sum(1 for n in gm.graph.nodes if n.op == "call_function")
+    assert acct["total_call_functions"] == n_cf
+    assert sum(acct["counts"].values()) == n_cf, acct["counts"]
+    # per-bucket op sets agree with their counts
+    for bucket, ops in acct["ops"].items():
+        assert sum(ops.values()) == acct["counts"][bucket], (bucket, ops)
+    # conv classified non-fusible, pointwise classified fusible
+    assert any("convolution" in op for op in acct["ops"]["non_fusible"])
+    all_fusible_ops = (set(acct["ops"]["fusible_in_partition"])
+                       | set(acct["ops"]["fusible_unpartitioned"]))
+    assert not any("convolution" in op for op in all_fusible_ops)
+
+
+# ============================================================================
+# 8. Unreturned mutation is preserved
+# ============================================================================
+
+def test_unreturned_mutation_preserved():
+    """A copy_ whose result is NOT returned (buffer mutation: the write IS
+    the effect) must survive partition extraction and the canonicalize
+    retrace — make_fx only keeps what's reachable from outputs, so the
+    extraction rule 'mutating ops are outputs' is what protects it."""
+    def f(a, b, buf):
+        y = (a + b).relu()
+        torch.ops.aten.copy_.default(buf, y)  # not returned
+        return y * 2
+
+    gm = _traced(f, torch.randn(4, 4), torch.randn(4, 4), torch.randn(4, 4))
+    assert any("copy_" in str(n.target) for n in gm.graph.nodes
+               if n.op == "call_function"), "copy_ lost in test trace itself"
+
+    comps = get_fusion_partitions(gm)
+    comp = max(comps, key=len)
+    pat = compute_partition_pattern(comp, gm)
+    assert pat is not None
+
+    canon_ops = [str(n.target) for n in pat["sub_gm"].graph.nodes
+                 if n.op == "call_function"]
+    assert any("copy" in op for op in canon_ops), \
+        f"unreturned mutation vanished through canonicalization: {canon_ops}"
+
+    # and it must still be there after a SECOND retrace (idempotence
+    # includes the mutation)
+    sub2, _, _ = canonicalize_subgraph(
+        pat["sub_gm"], pat["placeholder_info"], pat["shape_params"])
+    ops2 = [str(n.target) for n in sub2.graph.nodes
+            if n.op == "call_function"]
+    assert any("copy" in op for op in ops2), \
+        f"mutation lost on re-retrace: {ops2}"
