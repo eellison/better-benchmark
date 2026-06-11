@@ -425,3 +425,28 @@ sum_sum_63e248035ceb 0.99x | sum_sum_3219a09ab96a 0.48x | amax_sum_sum_6fd07d12d
 sum_011e69da166d 0.98x | var_mean_c5067e6e3750 0.93x
 
 Notably the WIP segment-split commit does not disturb any sentinel.
+
+## Artifact-sensitivity audit of landed fixes (2026-06-11)
+
+Context: squeezenet E2E validation showed the scatter-elimination repro pattern
+was a partitioner artifact (real graph has conv_backward consumers; pass
+correctly declines). User is separately fixing partitioner artifacts. Per-fix
+sensitivity to "sole consumer"-type properties:
+
+| Fix | Firing condition | Artifact-sensitive? |
+|---|---|---|
+| rsqrt canonicalization (6703f38fa2d) | op-pattern only | No |
+| RoPE rotate_half gather (1406552b9d3) | op-pattern, same-tensor slices | No |
+| scatter_add_into stale-node fix (edbd4b67279) | bug fix in existing pass | No |
+| slice-output compaction (bbf37d454c2/3bf69043be0) | user-visible OUTPUT views, single-use base | YES — depends on output/consumer structure of captured graph |
+| scatter_add gather-reduce (5489b8c2bb9) | ALL consumers are full reductions | YES — confirmed artifact on squeezenet; other 10 rewritten repros unvalidated E2E |
+| partially-saturated split window (bdc289b3644) | numel/rnumel hints only | No |
+| evict_first gates (e45f846f8d1..e9a67c98a8c) | load stride structure + in-loop side store | No |
+| online-softmax fast combine (a26fc2c8bf4) | codegen of online-softmax loops | No |
+| overlap-add scatter decode (56959375c33) | affine-iota index structure | Index decoding: No. But profitability assumes scatter+consumers dominate — extra consumers would change economics, not correctness |
+| segment-aligned splits (a85d79a900a) | reduction load stride structure | No |
+| dedupe earliest-canonical (60dd3839913) | correctness fix | No |
+
+Headline: the two scatter/slice GRAPH-SHAPE passes are artifact-sensitive; the
+codegen/heuristic fixes (splits, eviction, softmax combine — the bulk of the
+absolute us won) are not.
