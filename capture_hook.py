@@ -1067,6 +1067,11 @@ class _CaptureState:
         self.validate = validate
         self.capture_only = capture_only
         self.seen_hashes: set[str] = set()
+        # Exact occurrence count per (pattern_hash, shape_hash) across ALL
+        # graphs of this capture session — counted BEFORE dedup, so the
+        # accounting join (sum standalone_us x occurrences) is auditable
+        # from artifacts without a GPU retrace.
+        self.occurrence_counts: dict[str, int] = {}
         self.counter = 0
         self.graph_counter = 0
         self.captured: list[dict] = []
@@ -1463,6 +1468,10 @@ if __name__ == "__main__":
             shape_key = pattern["shape_hash"]
 
             full_key = f"{pattern_key}_{shape_key}"
+            # Count EVERY occurrence (pre-dedup): the repro file is written
+            # once per point, but the count is what the accounting joins on.
+            self.occurrence_counts[full_key] = (
+                self.occurrence_counts.get(full_key, 0) + 1)
             if full_key in self.seen_hashes:
                 continue
             self.seen_hashes.add(full_key)
@@ -1536,6 +1545,11 @@ if __name__ == "__main__":
         (run_recapture status, corpus validation), not just stderr.
         """
         index_path = os.path.join(self.output_dir, "index.json")
+        # Stamp each captured entry with its exact occurrence count so the
+        # merge can write it into shapes.json (occurrences were null before
+        # — the accounting join needed a GPU retrace to recover them).
+        for entry in self.captured:
+            entry["occurrences"] = self.occurrence_counts.get(entry["hash"], 1)
         payload = {
             "captured": self.captured,
             "dropped": self.dropped,

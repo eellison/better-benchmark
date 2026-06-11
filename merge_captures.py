@@ -77,18 +77,22 @@ def _write_shapes_json(
     shape_hash: str,
     signature: str,
     model_key: str,
+    occurrences: int | None = None,
 ) -> None:
     """Write or update shapes.json for a canonical repro directory.
 
-    Idempotent: re-merging the same (model_key, shape_hash) is a no-op.
-    A new model on an existing point adds a key under "models".
+    Idempotent: re-merging the same (model_key, shape_hash) updates that
+    model's entry in place. A new model on an existing point adds a key
+    under "models". `occurrences` is the EXACT pre-dedup count of this
+    (pattern, shape) point in the model's graphs (counted by the capture
+    hook) — the accounting joins on it without needing a GPU retrace.
 
     Schema (static/degenerate case — omits symbols/family/bindings):
     {
       "points": [
         {"shape_hash": "<8hex>",
          "signature": "<the _shapes_config T()/S() string>",
-         "models": {"<suite>/<mode>/<model>": {"occurrences": null}},
+         "models": {"<suite>/<mode>/<model>": {"occurrences": 7}},
          "source": "captured"}
       ]
     }
@@ -108,16 +112,17 @@ def _write_shapes_json(
             break
 
     if existing_point is not None:
-        # Point exists — add model if not already present
+        # Point exists — add/update this model's entry (a recapture with a
+        # real count REPLACES a stale null from an older merge).
         models = existing_point.setdefault("models", {})
-        if model_key not in models:
-            models[model_key] = {"occurrences": None}
+        if model_key not in models or occurrences is not None:
+            models[model_key] = {"occurrences": occurrences}
     else:
         # New point
         new_point = {
             "shape_hash": shape_hash,
             "signature": signature,
-            "models": {model_key: {"occurrences": None}},
+            "models": {model_key: {"occurrences": occurrences}},
             "source": "captured",
         }
         data["points"].append(new_point)
@@ -393,7 +398,8 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             # Build model key: suite/mode/model_name
             model_key = f"{suite}/{mode}/{clean_name}" if mode else f"{suite}/{clean_name}"
             point_hash = shape_hash[:8] if len(shape_hash) >= 8 else shape_hash
-            _write_shapes_json(repro_dir, point_hash, signature, model_key)
+            _write_shapes_json(repro_dir, point_hash, signature, model_key,
+                               occurrences=entry.get("occurrences"))
 
         # Update meta.json
         meta_path = repro_dir / "meta.json"
