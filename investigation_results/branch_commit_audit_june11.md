@@ -25,13 +25,13 @@
 | 4 | edbd4b67279 | Fix stale other_node in scatter_add_into | UPSTREAM-READY | low | Sound replacement-map fix with cycle guard; gating a bug fix behind a flag is odd |
 | 5 | bbf37d454c2 | Compact slice outputs of pointwise epilogues | NEEDS-WORK | medium | Deliberately overrides original_output_strides: compiled output strides/contiguity diverge from eager for user-visible outputs |
 | 6 | 5489b8c2bb9 | scatter_add -> gather-predicate rewrite | NEEDS-WORK | medium | Identity verified correct (incl. atomic collisions); but 4-D/[0,2,3]/scatter_dim==1 shape-specialized; hand-built meta has wrong dtype for bool-sum node |
-| 7 | 3b746fce660 | WIP: slice-output compaction extension | PENDING | superseded-or-half check | |
-| 8 | bdc289b3644 | Split partially-saturated multi-output reductions | PENDING | | |
-| 9 | 3bf69043be0 | Extend slice-output compaction (select.int etc.) | PENDING | | |
-| 10 | f6ae31e6984 | WIP: r-contiguity for evict_first | PENDING | superseded-or-half check | |
-| 11 | e45f846f8d1 | Drop evict_first misaligned strides | PENDING | eviction-chain coherence | |
-| 12 | 60431eca431 | Gate evict_first drop on in-loop side stores | PENDING | eviction-chain coherence | |
-| 13 | e9a67c98a8c | Restrict evict_first drop to >L2 iteration space | PENDING | eviction-chain coherence | |
+| 7 | 3b746fce660 | WIP: slice-output compaction extension | LOCAL-ONLY (squash) | low (superseded) | Fully superseded by 3bf69043be0; no half-state left in tree; squash before upstream |
+| 8 | bdc289b3644 | Split partially-saturated multi-output reductions | NEEDS-WORK | low | Heuristic-only; B200-tuned magic window (num_sm//2..num_sm, cc>=10 gate); flag name overloads undersaturated flag semantics |
+| 9 | 3bf69043be0 | Extend slice-output compaction (select.int etc.) | NEEDS-WORK | medium (inherits #5) | Logic sound (multi-view grouping correct); inherits stride-contract concern of bbf37d454c2; _MIN_SAVED_BYTES B200-derived constant |
+| 10 | f6ae31e6984 | WIP: r-contiguity for evict_first | LOCAL-ONLY (squash) | low (superseded) | Flag renamed/replaced by e45f846f8d1; its `return ""` inside old `eviction_policy='<EP>'` template emitted `eviction_policy=''` (Triton tolerates, but sloppy) — cleaned up in follow-up; squash |
+| 11 | e45f846f8d1 | Drop evict_first misaligned strides | NEEDS-WORK | low-medium | Coherent; fixes f6ae31e6984's DelayReplaceLine string bug; torch.cuda.get_device_capability() queries current device not the kernel's device |
+| 12 | 60431eca431 | Gate evict_first drop on in-loop side stores | NEEDS-WORK | low | has_store_with_rindex resolved at DelayReplaceLine time — ordering OK; flag semantics now 3 conditions deep, name stale |
+| 13 | e9a67c98a8c | Restrict evict_first drop to >L2 iteration space | NEEDS-WORK | low | numel*itemsize uses ONE load's dtype as proxy for working set; chain of 3 commits should squash into one well-named flag |
 | 14 | a26fc2c8bf4 | Fast combine for online-softmax loops | PENDING | | |
 | 15 | 60dd3839913 | dedupe_graph_outputs earliest-node canonical | PENDING | | |
 | 16 | 56959375c33 | Overlapping-window index_put -> overlap-add | PENDING | index math | |
