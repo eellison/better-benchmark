@@ -18,6 +18,8 @@ import json
 import re
 import tempfile
 from pathlib import Path
+
+
 from typing import Iterator
 
 from canonicalize_repros import (
@@ -37,6 +39,16 @@ _SHAPES_CONFIG_RE = re.compile(
     r'^_shapes_config\s*=\s*["\'](.+?)["\']\s*$',
     re.MULTILINE,
 )
+
+
+def _atomic_write_text(path: Path, text: str) -> None:
+    """Write via temp + rename so a SIGKILL mid-write (run_recapture kills
+    workers at timeout+60) can never leave a truncated file in the SHARED
+    canonical tree — a poisoned meta.json/shapes.json fails every later
+    model that touches the same pattern dir."""
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text)
+    tmp.replace(path)
 
 
 def _extract_shapes_config(src_path: Path) -> str | None:
@@ -110,7 +122,7 @@ def _write_shapes_json(
         }
         data["points"].append(new_point)
 
-    shapes_path.write_text(json.dumps(data, indent=2) + "\n")
+    _atomic_write_text(shapes_path, json.dumps(data, indent=2) + "\n")
 
 
 @dataclass
@@ -244,9 +256,7 @@ def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
     if mode:
         manifest_data["mode"] = mode
 
-    tmp = manifest_file.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(manifest_data, indent=2) + "\n")
-    tmp.replace(manifest_file)
+    _atomic_write_text(manifest_file, json.dumps(manifest_data, indent=2) + "\n")
     return out_dir
 
 
@@ -394,8 +404,7 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                 meta["models"].append(model_name)
                 meta["models"].sort()
                 meta["n_models"] = len(meta["models"])
-                with open(meta_path, "w") as f:
-                    json.dump(meta, f, indent=2)
+                _atomic_write_text(meta_path, json.dumps(meta, indent=2))
         else:
             meta = {
                 "pattern_hash": pattern_hash,
@@ -406,8 +415,7 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                 "n_models": 1,
                 "models": [model_name],
             }
-            with open(meta_path, "w") as f:
-                json.dump(meta, f, indent=2)
+            _atomic_write_text(meta_path, json.dumps(meta, indent=2))
 
         # Write canonical repro.py if it doesn't exist or needs upgrade to v2
         repro_py = repro_dir / "repro.py"
@@ -423,7 +431,7 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                     src_text = src_file.read_text()
                     # If source is already v2 format (has _shapes_config), use it directly
                     if "_repro_version = 2" in src_text and "_shapes_config" in src_text:
-                        repro_py.write_text(src_text)
+                        _atomic_write_text(repro_py, src_text)
                     else:
                         repro_class = extract_repro_class(src_file)
                         docstring = extract_docstring(src_file)
@@ -445,7 +453,7 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                                 repro_class, docstring, imports, fallback,
                                 shapes_config=shapes_config,
                             )
-                            repro_py.write_text(code)
+                            _atomic_write_text(repro_py, code)
                 except Exception as e:
                     print(f"  Warning: could not generate canonical repro for {dir_name}: {e}")
 
