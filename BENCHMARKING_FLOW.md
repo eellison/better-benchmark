@@ -109,23 +109,25 @@ python scripts/bench_report.py \
 Keep hardware labels separate. Do not compare B200 metadata with H100 metadata
 unless the report is explicitly about cross-hardware behavior.
 
-## Clock locking (adopted from sol-execbench methodology, 2026-06-11)
+## Clock locking (considered 2026-06-11, NOT currently adopted)
 
-Lock SM clocks to max before timing sweeps to remove boost-clock variance
-(observed idle/boost spread on this box: 1852 vs 1965 MHz ≈ 6%):
-
-```bash
-nvidia-smi -i 0 -lgc 1965        # lock GPU 0 to max SM clock
-nvidia-smi -i 0 -rgc             # release after the sweep
-```
-
-Status on this box: GPU 0 locks fine; GPU 1 returns "current user does not
-have permission" — needs elevated perms (ask infra) or run single-GPU sweeps
-on GPU 0 when strict comparability matters. Note `-lgc` must come with
-`-i <gpu>` as separate args; deprecated applications-clocks API does not work
-on B200.
+sol-execbench locks SM clocks for timing stability. We tried it: a one-shot
+`nvidia-smi -i 0 -lgc 1965` succeeded once, but permissions are inconsistent
+(subsequent lock AND release attempts on both GPUs return "does not have
+permission"; both GPUs sit at 1852 MHz idle and under load, so no stale lock
+remains). Decision (user): not pursuing clock locking right now. If
+revisited: get proper perms from infra first, and lock BOTH GPUs or neither —
+a one-sided lock skews cross-GPU comparisons worse than boost variance does.
+Observed boost band on this box: 1852-1965 MHz (~6%) — treat sub-6% deltas
+accordingly; interleaved A/B (which our agents already use for fix
+validation) largely cancels clock drift within a comparison.
 
 Otherwise our methodology stands as-is (per review of nvidia/sol-execbench:
 their analytical-SOL scoring and reward-hack screening are interesting, but
 our corpus has far broader coverage — 1482 repros captured from real model
-graphs + full-graph harnesses + oracle floors + per-model attribution).
+graphs + full-graph harnesses + oracle floors + per-model attribution). Also
+a real advantage on our side (user): OVERLAPPING MULTIPLE COMPILES —
+bench_parallel.py runs many compile jobs concurrently across workers/GPUs
+while INDUCTOR_GPU_BENCH_LOCK serializes only the timed sections, so
+compile-time (which dominates sweep wall-clock) is hidden; sol-execbench
+evaluates one kernel at a time.
