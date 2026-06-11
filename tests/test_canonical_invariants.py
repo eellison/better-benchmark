@@ -942,17 +942,20 @@ def test_index_bound_minimum_across_consumers():
 
     info = placeholder_info_from_gm(gm)
     bounds = infer_index_bounds_from_gm(gm, info)
-    ids_name = [n for n in info if "ids" in n or n.endswith("_1")]
-    # find the placeholder whose users include gather as index arg
-    import torch.fx as fx
-    target = None
+    # Identify roles from the graph: gather(data, dim, index).
+    data_ph = index_ph = None
     for node in gm.graph.nodes:
         if node.op == "placeholder":
             for u in node.users:
-                if u.op == "call_function" and "gather" in str(u.target) \
-                        and len(u.args) > 2 and u.args[2] is node:
-                    target = node.name
-    assert target is not None, "test graph wiring changed"
-    assert bounds.get(target) == 2, (
-        f"expected min bound 2 (through-gather embedding), got "
-        f"{bounds.get(target)}")
+                if u.op == "call_function" and "gather" in str(u.target):
+                    if len(u.args) > 0 and u.args[0] is node:
+                        data_ph = node.name
+                    if len(u.args) > 2 and u.args[2] is node:
+                        index_ph = node.name
+    assert data_ph and index_ph, "test graph wiring changed"
+    # index arg: bounded by the gathered dim (512)
+    assert bounds.get(index_ph) == 512, bounds
+    # DATA arg: its VALUES flow through gather into the 2-row embedding —
+    # the through-gather walk must bound it by the table (2), not leave it
+    # unbounded (the Electra OOB-assert class).
+    assert bounds.get(data_ph) == 2, bounds
