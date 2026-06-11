@@ -76,3 +76,23 @@ CAVEAT: tangents_1 is a SCALAR (0-d expanded) => sum_3 == dy analytically
 (benchmark-specific, numerically inexact). DO validate any change on a
 tensor-tangent variant as well (build one in a standalone script) since this
 graph's outputs are insensitive to bugs.
+
+## Orchestrator finding: root cause of the default-vs-CD spread (user hypothesis confirmed)
+
+triton_heuristics.py:4073 gates the scalar-accumulator knowledge on CD:
+`has_scalar_acc = inductor_meta.get("coordinate_descent_tuning", False) and (...)`
+and :4083 windows it to `8192 <= rnumel <= 131072`. Consequences for genai shapes
+(rnumel=262144): the DEFAULT candidate set caps MAX_R0_BLOCK at 1024 (Blackwell)
+— the good config CD finds is excluded from default autotune BY CONSTRUCTION,
+and even CD's window excludes rnumel=262144 (it gets there only by walking).
+Both the CD-gate and the 131072 ceiling are calibrated against the PRE-fast-
+combine cost model (the old max2 finalization punished large R0); after
+a26fc2c8bf4 the combine is cheap and large-R0 configs won.
+
+FIX DIRECTION (in your territory): derive has_scalar_acc from the kernel
+property only (drop the CD-gate term); re-validate the rnumel ceiling >=262144
+against current codegen (the old "split heuristics collision" rationale predates
+segment-aligned splits a85d79a900a — re-measure, don't assume). Validation =
+this suite's default-column: SoftmaxForward 3541us -> expect ~1914; CEF 1969 ->
+~750. Sentinels: CD numbers must not regress anywhere; sum_0becf9609ad7 ~0.67x;
+amax_sum_sum_6fd07d12d98a ~1.02x. Gate behind a NEW flag per session rules.
