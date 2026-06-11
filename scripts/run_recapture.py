@@ -76,8 +76,12 @@ DISTRIBUTED_ERROR_PATTERNS = [
 # Model list loading
 # ============================================================================
 
-def _parse_model_list_line(line: str) -> tuple[str, int] | None:
-    """Parse a model list line (supports both comma and space separators)."""
+def _parse_model_list_line(line: str) -> tuple[str, int | None] | None:
+    """Parse a model list line (comma/space separated; batch size optional).
+
+    torchbench's all-models list is name-only — batch size None defers to
+    the upstream runner's recorded size (it owns batch sizing anyway).
+    """
     line = line.strip()
     if not line or line.startswith("#"):
         return None
@@ -86,14 +90,15 @@ def _parse_model_list_line(line: str) -> tuple[str, int] | None:
         parts = line.split(",")
     else:
         parts = line.split()
+    name = parts[0].strip()
+    if not name:
+        return None
     if len(parts) >= 2:
-        name = parts[0].strip()
         try:
-            bs = int(parts[1].strip())
-            return name, bs
+            return name, int(parts[1].strip())
         except ValueError:
             return None
-    return None
+    return name, None
 
 
 def load_timm_models() -> dict[str, int]:
@@ -951,7 +956,9 @@ def main():
         model_name = args.models[0]
         mode = args.mode if args.mode != "both" else "infer"
         suite_models = get_suite_models(args.suite)
-        bs = args.batch_size or suite_models.get(model_name, 128)
+        # None = defer to the upstream runner's recorded batch size (the
+        # runner owns batch sizing; torchbench's list is name-only).
+        bs = args.batch_size or suite_models.get(model_name)
 
         entry = capture_single_model(
             suite=args.suite,
