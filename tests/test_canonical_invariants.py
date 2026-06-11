@@ -418,3 +418,67 @@ def test_pattern_hash_ignores_scalar_constants():
     h3, _ = _pattern_hashes(mul3, z)
     h5, _ = _pattern_hashes(mul5, z)
     assert h3 == h5
+
+
+def test_pattern_hash_encodes_int_dim_slots():
+    """Bare 'int'-typed schema slots are dims (cat/gather axis) — structural,
+    must fork the pattern. 'Scalar'-typed ints (add.Scalar) remain baked
+    constants. Schema-typed discrimination, same principle as the SymInt[]
+    lift; found by user question 'what ints are what' 2026-06-11: cat dim=0
+    vs dim=1 on a square input hashed identically."""
+    x = torch.randn(8, 8)  # square: shapes can't disambiguate the dim
+
+    def cat0(a, b):
+        return torch.cat([a + 1, b], 0).relu()
+
+    def cat1(a, b):
+        return torch.cat([a + 1, b], 1).relu()
+
+    h0, _ = _pattern_hashes(cat0, x, x.clone())
+    h1, _ = _pattern_hashes(cat1, x, x.clone())
+    assert h0 != h1
+
+    idx = torch.zeros(8, 8, dtype=torch.int64)
+    g0, _ = _pattern_hashes(lambda a, i: torch.gather(a + 1, 0, i), x, idx)
+    g1, _ = _pattern_hashes(lambda a, i: torch.gather(a + 1, 1, i), x, idx)
+    assert g0 != g1
+
+
+def test_int_dim_positional_vs_kwarg_invocation():
+    """The same structural dim must hash IDENTICALLY whether the model
+    called the op positionally or with a kwarg (same computation — the
+    canonicalize retrace normalizes call spelling), and DIFFERENT dims
+    must hash differently in BOTH invocation forms."""
+    x = torch.randn(8, 8)
+
+    pos0, _ = _pattern_hashes(
+        lambda a: torch.ops.aten.argmax.default(a + 1, 0), x)
+    pos1, _ = _pattern_hashes(
+        lambda a: torch.ops.aten.argmax.default(a + 1, 1), x)
+    kw0, _ = _pattern_hashes(
+        lambda a: torch.ops.aten.argmax.default(a + 1, dim=0), x)
+    kw1, _ = _pattern_hashes(
+        lambda a: torch.ops.aten.argmax.default(a + 1, dim=1), x)
+
+    assert pos0 != pos1, "positional dim not structural"
+    assert kw0 != kw1, "kwarg dim not structural"
+    assert pos0 == kw0 and pos1 == kw1, \
+        "same dim hashed differently across invocation forms"
+
+
+def test_kwarg_dtype_and_mode_match_positional():
+    """dtype / rounding_mode must be structural in both invocation forms
+    and spelling-invariant across them."""
+    y = torch.randn(8, 8)
+
+    posf, _ = _pattern_hashes(
+        lambda a, b: torch.ops.aten.div.Tensor_mode(a + 1, b, rounding_mode="floor"),
+        y, y.clone())
+    post, _ = _pattern_hashes(
+        lambda a, b: torch.ops.aten.div.Tensor_mode(a + 1, b, rounding_mode="trunc"),
+        y, y.clone())
+    assert posf != post
+
+    s0, _ = _pattern_hashes(lambda a: (a + 1).sum(dim=[0]), torch.randn(8, 8))
+    s1, _ = _pattern_hashes(lambda a: (a + 1).sum(dim=[1]), torch.randn(8, 8))
+    assert s0 != s1, "int[] reduction dims not structural"

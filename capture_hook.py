@@ -537,7 +537,30 @@ def compute_dag_signature(gm) -> list:
     nodes, _resolve, _op_name = canonicalize_for_hash(gm)
     node_to_idx = {n: i for i, n in enumerate(nodes)}
 
-    def _encode_arg(arg, arg_idx):
+    def _int_slots(target):
+        """(positional indices, kwarg names) whose schema type is bare
+        'int'/'int?' (dims: cat, gather, cumsum, argmax...). Structural —
+        changes the kernel — so hashed. 'Scalar'-typed slots (add.Scalar
+        other, clamp bounds) are baked constants and stay unhashed. Same
+        schema-typed discrimination as the SymInt[] shape lift: the op's
+        own schema declares which ints are structure, no op list to
+        maintain. Both invocation forms covered (the same arg may arrive
+        positionally or as a kwarg depending on how the model called it)."""
+        schema = getattr(target, "_schema", None)
+        if schema is None:
+            return (), frozenset()
+        positions = []
+        names = []
+        for i, a in enumerate(schema.arguments):
+            # arg.type str-spells optional as Optional[int] (schema text
+            # says int?) — accept both spellings.
+            if str(a.type) in ("int", "Optional[int]"):
+                names.append(a.name)
+                if not a.kwarg_only:
+                    positions.append(i)
+        return tuple(positions), frozenset(names)
+
+    def _encode_arg(arg, arg_idx, int_slots=()):
         """Encode an argument for the signature."""
         if isinstance(arg, torch.fx.Node):
             arg = _resolve(arg)
@@ -566,6 +589,10 @@ def compute_dag_signature(gm) -> list:
             return ("str", arg, arg_idx)
         elif isinstance(arg, torch.memory_format):
             return ("memfmt", str(arg), arg_idx)
+        elif isinstance(arg, int) and arg_idx in int_slots:
+            # Bare 'int'-typed schema slot: a dim (cat/gather/cumsum) —
+            # structural. 'Scalar'-typed int constants fall through below.
+            return ("int", arg, arg_idx)
         # Scalar int/float constants — don't encode (same kernel regardless)
         return None
 
@@ -575,8 +602,9 @@ def compute_dag_signature(gm) -> list:
             signature.append(("input", node_to_idx[node]))
         elif node.op == "call_function":
             encoded_args = []
+            int_slots, int_kwarg_names = _int_slots(node.target)
             for arg_idx, arg in enumerate(node.args):
-                enc = _encode_arg(arg, arg_idx)
+                enc = _encode_arg(arg, arg_idx, int_slots)
                 if enc is not None:
                     encoded_args.append(enc)
             # Also encode relevant kwargs (like correction, keepdim)
@@ -592,6 +620,10 @@ def compute_dag_signature(gm) -> list:
                     encoded_args.append(("kw_str", kw, val))
                 elif isinstance(val, torch.memory_format):
                     encoded_args.append(("kw_memfmt", kw, str(val)))
+                elif isinstance(val, int) and kw in int_kwarg_names:
+                    # dim passed as kwarg (argmax(x, dim=1)) — same
+                    # structural slot as the positional form.
+                    encoded_args.append(("kw_int", kw, val))
             signature.append((_op_name(node), encoded_args))
         elif node.op == "output":
             def _collect_output_indices(x):
