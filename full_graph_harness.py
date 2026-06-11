@@ -35,6 +35,9 @@ _DTYPE_SHORT_NAMES = {
     "i16": "int16",
     "i8": "int8",
     "u8": "uint8",
+    "u16": "uint16",
+    "u32": "uint32",
+    "u64": "uint64",
     "b8": "bool",
     "f64": "float64",
     "c64": "complex64",
@@ -761,7 +764,10 @@ def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
             "dtype": dtype_name,
             "stride": _parse_stride(stride_str),
             "device": _parse_device(device_str),
-            "storage_offset": 0,
+            # print_readable annotations don't carry storage_offset: None =
+            # unknown (validator skips), never a false claim of 0 — packed
+            # qkv views (offset 192/384/...) are real and sidecar-recorded.
+            "storage_offset": None,
             "generator": generator,
         }
         if generator.get("kind") == "index":
