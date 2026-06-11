@@ -995,3 +995,41 @@ def test_index_bound_inverts_arithmetic_chain():
         # and generated products must actually be in range:
         hi = bounds[n]
         assert (hi - 1) * (hi - 1) + 1 < 4098
+
+
+def test_maxpool_offset_kernel_size_from_lifted_param():
+    """In canonical (lifted) graphs the maxpool kernel size arg is a
+    _shape_param placeholder NODE, not a literal — the offset-constant
+    inference must resolve it via meta['val'] (vgg16: literal-only check
+    fell through to a 3x3-center default of 4 on a 2x2 kernel; offset 4
+    is invalid for 2x2 -> scatter assert)."""
+    import torch
+    import torch.fx as fx
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+    import torch._inductor.inductor_prims  # noqa: F401
+    from capture_hook import lift_shape_params
+    from full_graph_harness import (infer_index_bounds_from_gm,
+                                    placeholder_info_from_gm)
+
+    def f(off):
+        idx = torch.ops.prims._low_memory_max_pool_offsets_to_indices.default(
+            off, [2, 2], [16, 16], [2, 2], [0, 0], [1, 1])
+        return idx + 1
+
+    with FakeTensorMode(allow_non_fake_inputs=True) as m:
+        off = m.from_tensor(torch.zeros(2, 4, 8, 8, dtype=torch.int8))
+        gm = make_fx(f, tracing_mode="fake")(off)
+    gm, params = lift_shape_params(gm)
+    # premise: kernel size got lifted to a param node
+    assert any(v == [2, 2] for v in params.values()), params
+
+    info = placeholder_info_from_gm(gm)
+    constants: dict = {}
+    infer_index_bounds_from_gm(gm, info, constants_out=constants)
+    int8_phs = [n for n, i in info.items() if "int8" in i["dtype"]]
+    assert int8_phs
+    name = int8_phs[0]
+    # 2x2 kernel: center = (kh//2)*kw + kw//2 = 1*2+1 = 3 — NOT the 3x3
+    # default 4 (measured: offset 3 on 2x2 pad0 stays in-bounds; 4 is OOB)
+    assert constants.get(name) == 3, constants

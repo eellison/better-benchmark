@@ -207,8 +207,19 @@ def infer_index_bounds_from_gm(
                 target_name = str(user.target)
                 if "max_pool_offsets_to_indices" not in target_name:
                     continue
-                if len(user.args) >= 2 and isinstance(user.args[1], (list, tuple)):
-                    kernel_size = user.args[1]
+                kernel_size = user.args[1] if len(user.args) >= 2 else None
+                # In canonical (lifted) graphs the kernel size is a
+                # _shape_param placeholder NODE whose meta["val"] holds the
+                # list — resolve it (vgg16: literal-only check fell through
+                # to the 3x3 default const 4 on a 2x2 kernel -> offset 4
+                # invalid -> scatter assert).
+                if (kernel_size is not None
+                        and not isinstance(kernel_size, (list, tuple))
+                        and hasattr(kernel_size, "meta")):
+                    mv = kernel_size.meta.get("val")
+                    if isinstance(mv, (list, tuple)):
+                        kernel_size = mv
+                if isinstance(kernel_size, (list, tuple)) and kernel_size:
                     if len(kernel_size) >= 2:
                         kh, kw = int(kernel_size[0]), int(kernel_size[1])
                         center = (kh // 2) * kw + (kw // 2)
@@ -217,7 +228,11 @@ def infer_index_bounds_from_gm(
                     constants[name] = center
                     break
             if name not in constants:
-                constants[name] = 4  # assume 3x3: center offset 4
+                # Offset 0 (first element of the window) is valid for any
+                # kernel WITHOUT padding; under padding only interior
+                # offsets are — but an unknown kernel size gives no better
+                # choice, and 0 is right far more often than a 3x3 center.
+                constants[name] = 0
             continue
 
         def _find_bound(start_node, max_hops=8):
