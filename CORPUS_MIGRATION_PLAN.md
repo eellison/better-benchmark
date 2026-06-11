@@ -10,6 +10,50 @@ session; items marked **[OPEN]** need a call before the relevant phase.
 
 ---
 
+## STATUS 2026-06-11 — Wave 1 READY, awaiting two calls
+
+All infra gates landed, adversarially reviewed (4 agent rounds + opus
+verification + per-fix live captures), and dress-rehearsed end to end
+(10 timm models: capture 173s → all hard invariants → three-leg identity
+exact → occurrence counts match offline retrace → attribution coherent
+0.99–1.08 corrected). Hardening landed since the §1 table was written:
+
+- **Hash identity**: dtype/str/memory_format args, schema-typed structural
+  ints (int/int? dims, both invocation forms), canonical node order
+  (deterministic Kahn) + sorted outputs, stride in shape_hash. 64/74
+  batch hashes changed — free now, a migration later.
+- **Pipeline**: drops FAIL HARD (no partial model enters the corpus);
+  atomic writes everywhere in merge; run_log flock + per-worker GPU env;
+  validator `--corpus-root` (wave trees validatable pre-flip); exact
+  occurrence counts in shapes.json (accounting joins from artifacts, no
+  retrace).
+- **Format**: one compact structured input encoding (`input_codec.py`)
+  shared by model sidecars + shapes.json points (data-only; T()-string
+  rendered on demand); repro v3 (default inputs = first shapes.json
+  point, no inline config); signature flows as data capture→index→merge
+  (regex extraction legacy-only).
+- **Attribution**: e2e ≈ Σ(standalone×occ) − G×(occ − n_graphs) validated
+  on 10 models; extern bench reuses harness input generation (inferred
+  index bounds); deit in-context layernorm finding filed
+  (`investigation_results/deit_incontext_layernorm_slowdown.md`).
+- **Tests**: `tests/test_canonical_invariants.py` — 30 invariants
+  (idempotence incl. lifted-params/reductions/mutations, Kahn tie-break
+  ambiguity, hash semantics, extern signatures, node accounting), ~3s,
+  CPU-only.
+
+**The two calls that unlock launch**: (1) run location — this box
+(dress-rehearsal-proven, ~2.5–3h for ~440 timm on 2 GPUs) vs other
+server; (2) suite order — proposed timm infer+train → torchbench → hf
+(timm = validated path; torchbench = biggest manifest-only hole, 242
+dirs; hf last = newest extern paths + natural experiment for the deit
+finding).
+
+Pre-launch sweep (no decisions needed): qualify model names in canonical
+meta.json (`timm/infer/resnet18`, not `resnet18` — free now, dirs are
+re-minted); suppress __pycache__ in validation imports.
+
+---
+
 ## 0. Why we are migrating
 
 The current corpus was captured before the capture infra had invariants.
