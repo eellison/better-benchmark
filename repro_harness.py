@@ -327,11 +327,51 @@ def _make_permutation_tensor(shape, dtype, device, stride=None, size=None):
 
 
 def make_inputs_from_config(config: dict) -> list:
-    """Create inputs from a shape config. Returns mix of tensors and shape-param lists."""
+    """Create inputs from a shape config. Returns mix of tensors and shape-param lists.
+
+    Alias groups: specs carrying "alias_group" are views of ONE storage
+    (packed-qkv saved views). One buffer is allocated per group — sized by
+    config["alias_group_nbytes"][g], the true capture-time allocation —
+    and each member is as_strided at its own (shape, stride, offset).
+    Footprint and locality then match the model instead of giving every
+    view a private storage.
+    """
+    group_nbytes = config.get("alias_group_nbytes") or []
+    group_storage: dict[int, torch.Tensor] = {}
+
+    def _group_buffer(g: int, device) -> torch.Tensor:
+        if g not in group_storage:
+            nbytes = group_nbytes[g] if g < len(group_nbytes) else 0
+            if nbytes <= 0:
+                raise ValueError(
+                    f"alias_group {g} has no recorded nbytes "
+                    f"(alias_group_nbytes={group_nbytes})")
+            buf = torch.empty(nbytes, dtype=torch.uint8, device=device)
+            buf.random_(0, 255)  # bit-pattern noise; views reinterpret dtype
+            group_storage[g] = buf
+        return group_storage[g]
+
+    def _contiguous_stride_local(shape):
+        st = [1] * len(shape)
+        for i in range(len(shape) - 2, -1, -1):
+            st[i] = st[i + 1] * max(int(shape[i + 1]), 1)
+        return st
+
     result = []
     for spec in config["inputs"]:
         if spec.get("kind") == "shape":
             result.append(spec["dims"])
+            continue
+
+        if spec.get("alias_group") is not None:
+            shape = spec["shape"]
+            dtype = getattr(torch, spec["dtype"].replace("torch.", ""))
+            stride = spec.get("stride") or _contiguous_stride_local(shape)
+            device = spec.get("device", "cuda")
+            offset = int(spec.get("storage_offset", 0))
+            buf = _group_buffer(spec["alias_group"], device)
+            typed = buf.view(dtype) if dtype != torch.uint8 else buf
+            result.append(typed.as_strided(shape, stride, offset))
             continue
 
         shape = spec["shape"]

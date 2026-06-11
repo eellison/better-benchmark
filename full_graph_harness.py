@@ -513,12 +513,41 @@ def graph_constraints_from_gm(
                     elif leaf_value is not None:
                         outputs.append(_scalar_spec_from_value(f"output_{idx}", leaf_value))
 
-    return {
+    payload = {
         "schema_version": 1,
         "inputs": inputs,
         "outputs": outputs,
         "tensor_attrs": tensor_attrs,
     }
+    storage_groups = _placeholder_storage_groups(gm)
+    if storage_groups:
+        # Inputs that are VIEWS OF ONE STORAGE (packed-qkv saved views in
+        # backward graphs etc). Regenerating them as independent storages
+        # changes footprint/locality and is wrong under mutation — replay
+        # must allocate one buffer per group and as_strided each member.
+        # Detectable ONLY at capture (live fake vals share a storage; any
+        # later retrace re-fabricates inputs and the identity is gone).
+        payload["storage_groups"] = storage_groups
+    return payload
+
+
+def _placeholder_storage_groups(gm: Any) -> list[list[str]]:
+    """Group placeholder names whose meta vals share one untyped storage."""
+    import torch
+
+    groups: dict[int, list[str]] = {}
+    for node in gm.graph.nodes:
+        if node.op != "placeholder":
+            continue
+        val = (node.meta or {}).get("val")
+        if not torch.is_tensor(val):
+            continue
+        try:
+            key = id(val.untyped_storage())
+        except Exception:
+            continue
+        groups.setdefault(key, []).append(node.name)
+    return [names for names in groups.values() if len(names) > 1]
 
 
 def _fetch_attr(module: Any, target: Any) -> Any:

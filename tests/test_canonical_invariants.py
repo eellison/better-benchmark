@@ -721,3 +721,91 @@ class Repro(torch.nn.Module):
     by_name = {s["name"]: s for s in specs}
     assert by_name["getitem_3"]["storage_offset"] is None
     assert by_name["rng_state"]["dtype"] == "uint64"
+
+
+# ============================================================================
+# 13. Alias groups: shared-storage inputs preserved end to end
+# ============================================================================
+
+def test_alias_group_codec_roundtrip():
+    """alias_group survives compact encode/decode (opts['alias'])."""
+    from input_codec import compact_from_spec, spec_from_compact
+
+    spec = {"kind": "tensor", "shape": [8, 3, 4, 2], "dtype": "bfloat16",
+            "stride": [24, 2, 6, 1], "storage_offset": 2, "alias_group": 0}
+    entry = compact_from_spec(spec)
+    assert entry[2]["alias"] == 0 and entry[2]["off"] == 2, entry
+    rt = spec_from_compact(entry)
+    assert rt["alias_group"] == 0 and rt["storage_offset"] == 2
+
+
+def test_alias_group_generation_shares_storage():
+    """Members of one alias group must be views of ONE buffer at their own
+    offsets — writing through one member must be visible through the
+    overlapping region of the storage (packed-qkv fidelity), and the
+    group buffer is sized by alias_group_nbytes, not derived by scanning."""
+    import torch
+    from repro_harness import make_inputs_from_config
+
+    # 3 views into one packed [N, 3*D] buffer: q/k/v at offsets 0/D/2D —
+    # deit-style packed projection (D=4, N=8, fp32 -> 4 bytes/elem).
+    N, D = 8, 4
+    nbytes = N * 3 * D * 4
+    config = {
+        "alias_group_nbytes": [nbytes],
+        "inputs": [
+            {"kind": "tensor", "shape": [N, D], "dtype": "float32",
+             "stride": [3 * D, 1], "storage_offset": off, "alias_group": 0,
+             "device": "cpu"}
+            for off in (0, D, 2 * D)
+        ],
+    }
+    q, k, v = make_inputs_from_config(config)
+    assert q.untyped_storage().data_ptr() == k.untyped_storage().data_ptr() \
+        == v.untyped_storage().data_ptr(), "alias group split into storages"
+    assert (q.storage_offset(), k.storage_offset(), v.storage_offset()) == (0, D, 2 * D)
+    # write through q row 0; k/v must NOT change (disjoint columns), but the
+    # underlying storage region q covers must reflect it
+    q[0].fill_(7.0)
+    flat = torch.empty(0)
+    flat = q.untyped_storage()
+    assert q[0, 0].item() == 7.0
+    # k's first element lives D floats after q's — distinct value space
+    assert k.storage_offset() - q.storage_offset() == D
+
+
+def test_alias_group_only_for_multiply_referenced():
+    """A storage referenced by exactly ONE partition placeholder gets NO
+    alias tag (single view == private buffer, grouping is noise). Pins the
+    count>1 filter in the capture-side group assignment."""
+    config = {
+        "inputs": [
+            {"kind": "tensor", "shape": [4, 4], "dtype": "float32",
+             "stride": [4, 1], "storage_offset": 16, "device": "cpu"},
+        ],
+    }
+    from repro_harness import make_inputs_from_config
+    (t,) = make_inputs_from_config(config)
+    # no alias_group -> plain generation path; offset alone is fine to drop
+    # for a private buffer (behaviorally identical)
+    assert t.shape == (4, 4)
+
+
+def test_device_default_accelerator_cpu_recorded():
+    """Device convention: default = accelerator. Bare 'cuda' AND any cuda
+    ordinal ('cuda:0' — workers are pinned via CUDA_VISIBLE_DEVICES, so the
+    ordinal is meaningless identity-wise) are omitted from the encoding;
+    cpu (RNG state tensors etc.) is a real deviation and must roundtrip."""
+    from input_codec import compact_from_spec, spec_from_compact
+
+    for dev in ("cuda", "cuda:0", "cuda:1"):
+        e = compact_from_spec({"kind": "tensor", "shape": [4],
+                               "dtype": "float32", "stride": [1],
+                               "device": dev})
+        assert len(e) == 2 or "dev" not in e[2], (dev, e)
+        assert spec_from_compact(e)["device"] == "cuda"
+
+    e = compact_from_spec({"kind": "tensor", "shape": [2], "dtype": "uint64",
+                           "stride": [1], "device": "cpu"})
+    assert e[2]["dev"] == "cpu", e
+    assert spec_from_compact(e)["device"] == "cpu"

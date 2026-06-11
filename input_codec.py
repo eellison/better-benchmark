@@ -84,7 +84,8 @@ def _gen_from_compact(c: list) -> dict:
 # Keys the codec encodes structurally; anything ELSE on a spec passes
 # through opts["x"] verbatim so no producer field is ever silently lost.
 _KNOWN_KEYS = {"kind", "name", "shape", "dtype", "stride", "device",
-               "storage_offset", "generator", "gen", "exact", "data"}
+               "storage_offset", "generator", "gen", "exact", "data",
+               "alias_group"}
 
 
 def compact_from_spec(spec: dict, include_name: bool = False) -> list:
@@ -104,7 +105,14 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
     stride = spec.get("stride")
     if stride and not _is_contiguous(spec["shape"], stride):
         opts["st"] = list(stride)
-    dev = spec.get("device", "cuda")
+    # Device default = THE accelerator. Capture pins each worker to one
+    # GPU via CUDA_VISIBLE_DEVICES, so any cuda ordinal ("cuda:0") is just
+    # "the accelerator" — normalize to bare "cuda" (recording ordinals
+    # would fork shape identity on which worker captured the model).
+    # Anything non-cuda (cpu RNG state etc.) is a real deviation: recorded.
+    dev = str(spec.get("device", "cuda"))
+    if dev.startswith("cuda"):
+        dev = "cuda"
     if dev != "cuda":
         opts["dev"] = dev
     off = spec.get("storage_offset", 0)
@@ -117,6 +125,11 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
             opts["gen"] = cg
     if spec.get("exact") and spec.get("data") is not None:
         opts["data"] = spec["data"]
+    if spec.get("alias_group") is not None:
+        # Members of one alias group are views of ONE storage (packed-qkv
+        # saved views): generation must allocate a single buffer per group
+        # and as_strided each member at its offset.
+        opts["alias"] = spec["alias_group"]
     extras = {k: v for k, v in spec.items()
               if k not in _KNOWN_KEYS and v is not None}
     if extras:
@@ -153,6 +166,8 @@ def spec_from_compact(entry: list, name: str | None = None) -> dict:
     if "data" in opts:
         spec["exact"] = True
         spec["data"] = opts["data"]
+    if "alias" in opts:
+        spec["alias_group"] = opts["alias"]
     if "n" in opts and name is None:
         spec["name"] = opts["n"]
     spec.update(opts.get("x", {}))

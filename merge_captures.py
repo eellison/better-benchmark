@@ -79,6 +79,7 @@ def _write_shapes_json(
     model_key: str,
     occurrences: int | None = None,
     inputs: list | None = None,
+    alias_group_nbytes: list | None = None,
 ) -> None:
     """Write or update shapes.json for a canonical repro directory.
 
@@ -140,6 +141,11 @@ def _write_shapes_json(
             new_point["inputs"] = inputs
         else:
             new_point["signature"] = signature
+        if alias_group_nbytes:
+            # True allocation size (bytes) per alias group, captured from
+            # the live storage — consumers allocate group buffers directly,
+            # never re-derive size by scanning member offsets/spans.
+            new_point["alias_group_nbytes"] = alias_group_nbytes
         data["points"].append(new_point)
 
     import copy as _copy
@@ -425,7 +431,8 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             point_hash = shape_hash[:8] if len(shape_hash) >= 8 else shape_hash
             _write_shapes_json(repro_dir, point_hash, signature, model_key,
                                occurrences=entry.get("occurrences"),
-                               inputs=entry.get("inputs"))
+                               inputs=entry.get("inputs"),
+                               alias_group_nbytes=entry.get("alias_group_nbytes"))
 
         # Update meta.json
         meta_path = repro_dir / "meta.json"

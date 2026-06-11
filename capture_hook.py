@@ -313,6 +313,12 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
             return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
         return int(x)
 
+    def _storage_key(val):
+        try:
+            return id(val.untyped_storage())
+        except Exception:
+            return None
+
     def _record_placeholder(name: str, meta: dict) -> None:
         val = meta.get("val", None)
         if val is not None and isinstance(val, torch.Tensor):
@@ -322,6 +328,25 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                 "dtype": str(val.dtype),
                 "device": str(val.device),
             }
+            off = _resolve_sym(val.storage_offset()) if val.storage_offset() else 0
+            if off:
+                placeholder_info[name]["storage_offset"] = off
+            # Alias tag: inputs whose fake vals share one untyped storage
+            # (packed-qkv saved views). Live-capture-only signal — any
+            # retrace re-fabricates inputs and the identity is gone. Tag
+            # is the storage key; serialization rewrites it to a small
+            # group index ("alias_group") so replay can allocate ONE
+            # buffer per group and as_strided the members. Storage SIZE
+            # captured here too (the true allocation) so consumers never
+            # re-derive it by scanning members.
+            sk = _storage_key(val)
+            if sk is not None:
+                placeholder_info[name]["_storage_key"] = sk
+                try:
+                    placeholder_info[name]["_storage_nbytes"] = int(
+                        val.untyped_storage().size())
+                except Exception:
+                    pass
         elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
             hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)
             placeholder_info[name] = {
@@ -1266,6 +1291,33 @@ class _CaptureState:
         # the same value flows to shapes.json structurally, never re-parsed.
         from input_codec import compact_from_spec, render_signature
 
+        # Rewrite live storage keys to small group indices: members of one
+        # alias group share an integer "alias" tag so replay allocates ONE
+        # buffer per group and as_strided's each member (footprint and
+        # locality fidelity for packed-qkv style saved views). Group sizes
+        # (true allocation nbytes, from the live storage) are emitted ONCE
+        # as alias_group_nbytes — consumers never scan members to size the
+        # buffer.
+        _group_of: dict[int, int] = {}
+        _group_counts: dict[int, int] = {}
+        _group_nbytes_by_key: dict[int, int] = {}
+        for name in ph_names:
+            info_a = placeholder_info.get(name) or {}
+            sk = info_a.get("_storage_key")
+            if sk is not None:
+                _group_counts[sk] = _group_counts.get(sk, 0) + 1
+                if "_storage_nbytes" in info_a:
+                    _group_nbytes_by_key[sk] = max(
+                        _group_nbytes_by_key.get(sk, 0),
+                        info_a["_storage_nbytes"])
+        for sk, count in _group_counts.items():
+            if count > 1:
+                _group_of[sk] = len(_group_of)
+        alias_group_nbytes = [
+            _group_nbytes_by_key.get(sk, 0)
+            for sk, _idx in sorted(_group_of.items(), key=lambda kv: kv[1])
+        ]
+
         compact_inputs = []
         for name in ph_names:
             if name in shape_params:
@@ -1279,6 +1331,11 @@ class _CaptureState:
                         "dtype": info["dtype"],
                         "stride": info.get("stride", []),
                     }
+                    if info.get("storage_offset"):
+                        spec["storage_offset"] = info["storage_offset"]
+                    sk = info.get("_storage_key")
+                    if sk in _group_of:
+                        spec["alias_group"] = _group_of[sk]
                     bound = index_bounds.get(name)
                     if name in permutation_indices:
                         spec["gen"] = {"kind": "permutation",
@@ -1387,7 +1444,7 @@ if __name__ == "__main__":
         # shapes.json) must never re-derive it by regexing the generated
         # source — that round-trip through rendered Python is exactly the
         # lossy text-parsing the project bans for graphs.
-        return filepath, shapes_config_line, compact_inputs
+        return filepath, shapes_config_line, compact_inputs, alias_group_nbytes
 
     def process_graph(self, gm: fx.GraphModule):
         """Called by the hook for each post-grad graph. Partitions and captures."""
@@ -1540,9 +1597,10 @@ if __name__ == "__main__":
             self.counter += 1
 
             try:
-                filepath, signature, compact_inputs = self._generate_repro_file(
+                (filepath, signature, compact_inputs,
+                 alias_group_nbytes) = self._generate_repro_file(
                     sub_gm, placeholder_info, meta, filename, shape_params)
-                self.captured.append({
+                entry = {
                     "file": filepath,
                     "kind": kind,
                     "pattern_hash": pattern_key,
@@ -1553,7 +1611,10 @@ if __name__ == "__main__":
                     "reduction_types": meta["reduction_types"],
                     "n_ops": len(comp),
                     "origin_ops": origin_ops,
-                })
+                }
+                if alias_group_nbytes:
+                    entry["alias_group_nbytes"] = alias_group_nbytes
+                self.captured.append(entry)
             except Exception as e:
                 # NEVER silently drop a region: record it so the run report
                 # and manifests can show exactly what's missing and why
