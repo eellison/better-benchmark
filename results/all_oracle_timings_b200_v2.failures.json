@@ -1,0 +1,312 @@
+[
+  {
+    "repro_id": "mean_var_mean_c9089e261699",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "mean_var_mean_9f6d83adf6c4",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "mean_var_mean_9d590f58ecc9",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "mean_var_mean_3c4ea6d8f342",
+    "status": "no_output",
+    "error": "ets < hw\n    offsets = x_offsets * hw + hw_offsets\n    summed = (\n        tl.load(x_ptr + offsets, mask=x_mask & hw_mask, other=0.0).to(tl.float32)\n        + tl.load(residual_ptr + offsets, mask=x_mas"
+  },
+  {
+    "repro_id": "pointwise_70c0751eb408",
+    "status": "no_output",
+    "error": "calized.py\", line 309, in oracle_forward\n    return triton_explicit_offsets_oracle(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/repros/canoni"
+  },
+  {
+    "repro_id": "pointwise_2dd5675274fb",
+    "status": "timeout",
+    "error": ""
+  },
+  {
+    "repro_id": "sum_18262b26934c",
+    "status": "no_output",
+    "error": "ine 460, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_forward(inputs)\n  File \"/tmp"
+  },
+  {
+    "repro_id": "sum_34d3dca078b3",
+    "status": "no_output",
+    "error": "tmp/pytorch-work/torch/cuda/graphs.py\", line 477, in __exit__\n    self.cuda_graph.capture_end()\n  File \"/tmp/pytorch-work/torch/cuda/graphs.py\", line 169, in capture_end\n    super().capture_end()\ntorc"
+  },
+  {
+    "repro_id": "sum_3ee4028cab37",
+    "status": "no_output",
+    "error": "tmp/pytorch-work/torch/cuda/graphs.py\", line 477, in __exit__\n    self.cuda_graph.capture_end()\n  File \"/tmp/pytorch-work/torch/cuda/graphs.py\", line 169, in capture_end\n    super().capture_end()\ntorc"
+  },
+  {
+    "repro_id": "sum_7df61c52c7f8",
+    "status": "no_output",
+    "error": "tmp/pytorch-work/torch/cuda/graphs.py\", line 477, in __exit__\n    self.cuda_graph.capture_end()\n  File \"/tmp/pytorch-work/torch/cuda/graphs.py\", line 169, in capture_end\n    super().capture_end()\ntorc"
+  },
+  {
+    "repro_id": "sum_837a32994d31",
+    "status": "no_output",
+    "error": "ard(inputs)\n  File \"/tmp/scratch_space/better_benchmark/repros/canonical/sum_837a32994d31/oracle_slice_scatter_reduce.py\", line 176, in oracle_forward\n    return oracle_triton(*inputs)\n           ^^^^"
+  },
+  {
+    "repro_id": "sum_adeaebad93f7",
+    "status": "no_output",
+    "error": "/sum_adeaebad93f7/oracle_fused_gather_reduce.py\", line 330, in oracle_forward\n    return triton_fused_gather_reduce_oracle(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/s"
+  },
+  {
+    "repro_id": "sum_sum_2778c0896f68",
+    "status": "no_output",
+    "error": "e_forward(inputs)\n  File \"/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_2778c0896f68/oracle_scatter_reduce.py\", line 187, in oracle_forward\n    return oracle_triton(*inputs)\n           "
+  },
+  {
+    "repro_id": "sum_sum_6a14a9c9ba88",
+    "status": "no_output",
+    "error": "ulti_output_reduction.py\", line 423, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_"
+  },
+  {
+    "repro_id": "sum_sum_8bcd6e12dcd4",
+    "status": "no_output",
+    "error": "tmp/pytorch-work/torch/cuda/graphs.py\", line 477, in __exit__\n    self.cuda_graph.capture_end()\n  File \"/tmp/pytorch-work/torch/cuda/graphs.py\", line 169, in capture_end\n    super().capture_end()\ntorc"
+  },
+  {
+    "repro_id": "sum_sum_a42eecd58e57",
+    "status": "no_output",
+    "error": "ulti_output_reduction.py\", line 451, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_"
+  },
+  {
+    "repro_id": "sum_sum_a7c7ab7bfcf5",
+    "status": "no_output",
+    "error": " in triton_oracle\n    return fused_reduction_and_epilogue(where_self, sub_tensor_1, arg244_1_out, arg6_1_out)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+  },
+  {
+    "repro_id": "sum_sum_a9f6c9204966",
+    "status": "no_output",
+    "error": "ulti_output_reduction.py\", line 465, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_"
+  },
+  {
+    "repro_id": "sum_sum_b7f94adef30f",
+    "status": "no_output",
+    "error": "multi_output_reduction.py\", line 261, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle"
+  },
+  {
+    "repro_id": "sum_sum_cdaed89f373c",
+    "status": "no_output",
+    "error": "ion.py\", line 278, in triton_oracle\n    return fused_reduction_and_epilogue(where_self, sub_tensor_1, arg45_1, arg2_1)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+  },
+  {
+    "repro_id": "sum_sum_ee85624361a0",
+    "status": "no_output",
+    "error": "ulti_output_reduction.py\", line 280, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_"
+  },
+  {
+    "repro_id": "sum_sum_mean_1dfbbe76c078",
+    "status": "no_output",
+    "error": "rk/repros/canonical/sum_sum_mean_1dfbbe76c078/oracle_rmsnorm_bwd.py\", line 144, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness"
+  },
+  {
+    "repro_id": "sum_sum_sum_1627b1a3a6f6",
+    "status": "no_output",
+    "error": "ine 291, in triton_oracle\n    return fused_reduction_oracle(where_self, sub_tensor_1, squeeze_dims_1, weight)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File"
+  },
+  {
+    "repro_id": "sum_sum_sum_2c925f59efff",
+    "status": "no_output",
+    "error": "ine 291, in triton_oracle\n    return fused_reduction_oracle(where_self, sub_tensor_1, squeeze_dims_1, weight)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File"
+  },
+  {
+    "repro_id": "sum_sum_sum_335abef71e93",
+    "status": "no_output",
+    "error": "cle_cooperative_split_k.py\", line 316, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracl"
+  },
+  {
+    "repro_id": "sum_sum_sum_3348817ad678",
+    "status": "no_output",
+    "error": "le_moe_router_bwd.py\", line 267, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_forw"
+  },
+  {
+    "repro_id": "sum_sum_sum_431633879271",
+    "status": "no_output",
+    "error": "e \"/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_431633879271/oracle_multi_output_reduction.py\", line 443, in oracle_forward\n    return oracle_fused(*inputs)\n           ^^^^^^^^^^^^"
+  },
+  {
+    "repro_id": "sum_sum_sum_4de1559f24a7",
+    "status": "no_output",
+    "error": "scratch_space/better_benchmark/repros/canonical/sum_sum_sum_4de1559f24a7/oracle_multi_output_reduction.py\", line 241, in oracle_forward\n    return oracle_fused(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^"
+  },
+  {
+    "repro_id": "sum_sum_sum_559e754b2ff4",
+    "status": "no_output",
+    "error": "_cooperative_split_k.py\", line 341, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_f"
+  },
+  {
+    "repro_id": "sum_sum_sum_512dcf4a167b",
+    "status": "no_output",
+    "error": "tter_benchmark/repros/canonical/sum_sum_sum_512dcf4a167b/oracle_multi_output_reduction.py\", line 182, in oracle_forward\n    return oracle_fused(*prepare_oracle_inputs(*inputs))\n           ^^^^^^^^^^^^"
+  },
+  {
+    "repro_id": "sum_sum_sum_580d823755af",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_580d823755af/oracle_cooperative_split_k.py\", line 84, in _build_window_maps\n    fmod_values = [int(val"
+  },
+  {
+    "repro_id": "sum_sum_sum_64f701d26f0a",
+    "status": "no_output",
+    "error": "_output_reduction.py\", line 364, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_forw"
+  },
+  {
+    "repro_id": "sum_sum_sum_59e022113eeb",
+    "status": "no_output",
+    "error": "scratch_space/better_benchmark/repros/canonical/sum_sum_sum_59e022113eeb/oracle_multi_output_reduction.py\", line 231, in oracle_forward\n    return oracle_fused(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^"
+  },
+  {
+    "repro_id": "sum_sum_sum_6770dc6efbe8",
+    "status": "no_output",
+    "error": "_output_reduction.py\", line 390, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_forw"
+  },
+  {
+    "repro_id": "sum_sum_sum_6d6ec1e4f644",
+    "status": "no_output",
+    "error": "scratch_space/better_benchmark/repros/canonical/sum_sum_sum_6d6ec1e4f644/oracle_multi_output_reduction.py\", line 209, in oracle_forward\n    return oracle_fused(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^"
+  },
+  {
+    "repro_id": "sum_sum_sum_70d71fcb0d68",
+    "status": "no_output",
+    "error": "anonical/sum_sum_sum_70d71fcb0d68/oracle_multi_output_reduction.py\", line 255, in oracle_forward\n    return triton_one_pass_oracle(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scra"
+  },
+  {
+    "repro_id": "sum_sum_sum_70d71fcb0d68",
+    "status": "no_output",
+    "error": "m_sum_70d71fcb0d68/oracle_cross_dim_reduction.py\", line 122, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in "
+  },
+  {
+    "repro_id": "sum_sum_sum_7b24a3457260",
+    "status": "no_output",
+    "error": "anonical/sum_sum_sum_7b24a3457260/oracle_multi_output_reduction.py\", line 397, in oracle_forward\n    return triton_one_pass_oracle(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scra"
+  },
+  {
+    "repro_id": "sum_sum_sum_86dbf5a906db",
+    "status": "no_output",
+    "error": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_86dbf5a906db/oracle_multi_output_reduction.py\", line 375, in <module>\n    main()\n  File \"/tm"
+  },
+  {
+    "repro_id": "sum_sum_sum_78c3940fcbe9",
+    "status": "no_output",
+    "error": "sum_sum_sum_78c3940fcbe9/oracle_rmsnorm_rope_bwd_triton.py\", line 486, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", lin"
+  },
+  {
+    "repro_id": "sum_sum_sum_88c9224fa05a",
+    "status": "no_output",
+    "error": "mbedding_scatter.py\", line 341, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_forwa"
+  },
+  {
+    "repro_id": "sum_sum_sum_8e6cde42e572",
+    "status": "no_output",
+    "error": "m_sum_sum_8e6cde42e572/oracle_structured_upsample_reduce.py\", line 309, in oracle_forward\n    return triton_fused_oracle(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/bet"
+  },
+  {
+    "repro_id": "sum_sum_sum_95dac16d4328",
+    "status": "no_output",
+    "error": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_95dac16d4328/oracle_multi_output_reduction.py\", line 490, in <module>\n    main()\n  File \"/tm"
+  },
+  {
+    "repro_id": "sum_sum_sum_94e3624cdd05",
+    "status": "no_output",
+    "error": "tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_forward(inputs)\n  File \"/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_94e3624cdd05/oracle"
+  },
+  {
+    "repro_id": "sum_sum_sum_9814418db3a9",
+    "status": "no_output",
+    "error": "    ^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_9814418db3a9/oracle_cooperative_split_k.py\", line 147, in _build_window_maps\n    fmod_values = [int(val"
+  },
+  {
+    "repro_id": "sum_sum_sum_a29c7a92bc81",
+    "status": "no_output",
+    "error": "_output_reduction.py\", line 402, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_forw"
+  },
+  {
+    "repro_id": "sum_sum_sum_ae9b17407681",
+    "status": "no_output",
+    "error": "cle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_forward(inputs)\n  File \"/tmp/scratch_space/better_benchmark/repros/"
+  },
+  {
+    "repro_id": "sum_sum_sum_afd118ca907d",
+    "status": "no_output",
+    "error": "ax_backward.py\", line 383, in oracle_forward\n    return triton_fused_attention_backward_oracle(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_ben"
+  },
+  {
+    "repro_id": "sum_sum_sum_b35553d96630",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "sum_sum_sum_d0496bdeedba",
+    "status": "no_output",
+    "error": "bedding_scatter.py\", line 355, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_forwar"
+  },
+  {
+    "repro_id": "sum_sum_sum_db1524bc41dd",
+    "status": "no_output",
+    "error": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/repros/canonical/sum_sum_sum_db1524bc41dd/oracle_multi_output_reduction.py\", line 388, in <module>\n    main()\n  File \"/tm"
+  },
+  {
+    "repro_id": "sum_sum_sum_dd4c673f0928",
+    "status": "no_output",
+    "error": "ros/canonical/sum_sum_sum_dd4c673f0928/oracle_rmsnorm_rope_bwd.py\", line 490, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.p"
+  },
+  {
+    "repro_id": "sum_sum_sum_f68c9f1fa09b",
+    "status": "no_output",
+    "error": "i_output_reduction.py\", line 326, in main\n    result = bench_oracle(\n             ^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/oracle_harness.py\", line 460, in bench_oracle\n    oracle_for"
+  },
+  {
+    "repro_id": "sum_sum_sum_f90d684d32cb",
+    "status": "no_output",
+    "error": "cal/sum_sum_sum_f90d684d32cb/oracle_structured_upsample_reduce.py\", line 305, in oracle_forward\n    return triton_fused_oracle(*inputs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_spa"
+  },
+  {
+    "repro_id": "var_mean_26f78838cb62",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "var_mean_2f98fd23fbea",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "var_mean_52d34178da6e",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "var_mean_640c4a11d07e",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "var_mean_bf7164921ad8",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "var_mean_e814c09a1fdb",
+    "status": "no_output",
+    "error": "a/envs/pytorch-work-b200/lib/python3.12/site-packages/triton/runtime/jit.py\", line 731, in run\n    key = compute_cache_key(kernel_key_cache, specialization, options)\n          ^^^^^^^^^^^^^^^^^^^^^^^^"
+  },
+  {
+    "repro_id": "var_mean_mean_60c37a09d40e",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  },
+  {
+    "repro_id": "var_mean_mean_6b0bb4b36636",
+    "status": "no_output",
+    "error": "^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/_inductor/runtime/triton_heuristics.py\", line 2529, in make_launcher\n    self.kernel.load_kernel(device)\n  File \"/tmp/pytorch-work/torch/_inductor/run"
+  }
+]

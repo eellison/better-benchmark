@@ -1,0 +1,873 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "0a8aa5bc49c94b3553e8de6635da2560e16f151b",
+    "timestamp": "2026-06-11T16:02:44Z",
+    "n_repros": 12,
+    "n_results": 12,
+    "workload_kind": "full_graph"
+  },
+  "repros/models/genai/LayerNormBackward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/LayerNormBackward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "LayerNormBackward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "primals_1",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "primals_2",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 331.4239978790283,
+      "coord_descent_us": 298.6240088939667,
+      "memcopy_sol_us": null,
+      "input_bytes": 1179650048,
+      "output_bytes": 1188866050,
+      "naive_io_bytes": 2368516098,
+      "n_kernels": 3,
+      "num_inputs": 2,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/CrossEntropyBackward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/CrossEntropyBackward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "CrossEntropyBackward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "primals_1",
+            "shape": [
+              8192,
+              262144
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "primals_2",
+            "shape": [
+              8192
+            ],
+            "dtype": "int64",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "index",
+              "low": 0,
+              "high": 262144
+            },
+            "gen": {
+              "kind": "index",
+              "low": 0,
+              "high": 262144
+            },
+            "constraint_source": "graph_inference"
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 1375.0079870224,
+      "coord_descent_us": 716.5120244026184,
+      "memcopy_sol_us": null,
+      "input_bytes": 4295032832,
+      "output_bytes": 4295098370,
+      "naive_io_bytes": 8590131202,
+      "n_kernels": 2,
+      "num_inputs": 2,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/CrossEntropyBackward/full_graph_001.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/CrossEntropyBackward/full_graph_001.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "CrossEntropyBackward",
+        "graph": "full_graph_001.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "primals_1",
+            "shape": [
+              8192,
+              262144
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "primals_2",
+            "shape": [
+              8192
+            ],
+            "dtype": "int64",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "index",
+              "low": 0,
+              "high": 8192
+            },
+            "gen": {
+              "kind": "index",
+              "low": 0,
+              "high": 8192
+            },
+            "constraint_source": "comparison_only_safe"
+          },
+          {
+            "kind": "tensor",
+            "name": "amax",
+            "shape": [
+              8192,
+              1
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "log",
+            "shape": [
+              8192,
+              1
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "tangents_1",
+            "shape": [],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 1727.1679639816284,
+      "coord_descent_us": 1435.6160163879395,
+      "memcopy_sol_us": null,
+      "input_bytes": 4295098370,
+      "output_bytes": 4294967296,
+      "naive_io_bytes": 8590065666,
+      "n_kernels": 1,
+      "num_inputs": 5,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/CrossEntropyForward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/CrossEntropyForward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "CrossEntropyForward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "arg0_1",
+            "shape": [
+              8192,
+              262144
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "arg1_1",
+            "shape": [
+              8192
+            ],
+            "dtype": "int64",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "index",
+              "low": 0,
+              "high": 262144
+            },
+            "gen": {
+              "kind": "index",
+              "low": 0,
+              "high": 262144
+            },
+            "constraint_source": "graph_inference"
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 1368.831992149353,
+      "coord_descent_us": 775.0399708747864,
+      "memcopy_sol_us": null,
+      "input_bytes": 4295032832,
+      "output_bytes": 16384,
+      "naive_io_bytes": 4295049216,
+      "n_kernels": 1,
+      "num_inputs": 2,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/LayerNormBackward/full_graph_001.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/LayerNormBackward/full_graph_001.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "LayerNormBackward",
+        "graph": "full_graph_001.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "primals_1",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "primals_2",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "getitem_1",
+            "shape": [
+              1152000,
+              1
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "rsqrt",
+            "shape": [
+              1152000,
+              1
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "tangents_1",
+            "shape": [],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 700.3200054168701,
+      "coord_descent_us": 384.799987077713,
+      "memcopy_sol_us": null,
+      "input_bytes": 1188866050,
+      "output_bytes": 1179650048,
+      "naive_io_bytes": 2368516098,
+      "n_kernels": 2,
+      "num_inputs": 5,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/LayerNormForward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/LayerNormForward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "LayerNormForward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "arg0_1",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "arg1_1",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 366.3040101528168,
+      "coord_descent_us": 382.6560080051422,
+      "memcopy_sol_us": null,
+      "input_bytes": 1179650048,
+      "output_bytes": 1179648000,
+      "naive_io_bytes": 2359298048,
+      "n_kernels": 1,
+      "num_inputs": 2,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/RMSNormBackward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/RMSNormBackward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "RMSNormBackward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "primals_1",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "primals_2",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 325.3119885921478,
+      "coord_descent_us": 243.3920055627823,
+      "memcopy_sol_us": null,
+      "input_bytes": 1179650048,
+      "output_bytes": 1184258050,
+      "naive_io_bytes": 2363908098,
+      "n_kernels": 3,
+      "num_inputs": 2,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/SoftmaxBackward/full_graph_001.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/SoftmaxBackward/full_graph_001.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "SoftmaxBackward",
+        "graph": "full_graph_001.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "primals_1",
+            "shape": [
+              8192,
+              262144
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "amax",
+            "shape": [
+              8192,
+              1
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "sum_1",
+            "shape": [
+              8192,
+              1
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "tangents_1",
+            "shape": [],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 3142.3680782318115,
+      "coord_descent_us": 2809.567928314209,
+      "memcopy_sol_us": null,
+      "input_bytes": 4295032834,
+      "output_bytes": 4294967296,
+      "naive_io_bytes": 8590000130,
+      "n_kernels": 1,
+      "num_inputs": 4,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/RMSNormBackward/full_graph_001.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/RMSNormBackward/full_graph_001.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "RMSNormBackward",
+        "graph": "full_graph_001.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "primals_1",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "primals_2",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "rsqrt",
+            "shape": [
+              1152000,
+              1
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "tangents_1",
+            "shape": [],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 380.73599338531494,
+      "coord_descent_us": 376.76799297332764,
+      "memcopy_sol_us": null,
+      "input_bytes": 1184258050,
+      "output_bytes": 1179650048,
+      "naive_io_bytes": 2363908098,
+      "n_kernels": 1,
+      "num_inputs": 4,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/RMSNormForward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/RMSNormForward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "RMSNormForward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "arg0_1",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          },
+          {
+            "kind": "tensor",
+            "name": "arg1_1",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 343.84000301361084,
+      "coord_descent_us": 345.7280099391937,
+      "memcopy_sol_us": null,
+      "input_bytes": 1179650048,
+      "output_bytes": 1179648000,
+      "naive_io_bytes": 2359298048,
+      "n_kernels": 1,
+      "num_inputs": 2,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/SoftmaxForward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/SoftmaxForward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "SoftmaxForward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "arg0_1",
+            "shape": [
+              8192,
+              262144
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 2797.5358963012695,
+      "coord_descent_us": 1943.3599710464478,
+      "memcopy_sol_us": null,
+      "input_bytes": 4294967296,
+      "output_bytes": 4294967296,
+      "naive_io_bytes": 8589934592,
+      "n_kernels": 1,
+      "num_inputs": 1,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/SoftmaxBackward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/SoftmaxBackward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "SoftmaxBackward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "primals_1",
+            "shape": [
+              8192,
+              262144
+            ],
+            "dtype": "bfloat16",
+            "stride": null,
+            "device": null,
+            "storage_offset": 0,
+            "generator": {
+              "kind": "randn"
+            }
+          }
+        ],
+        "tensor_attrs": {}
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 2472.7680683135986,
+      "coord_descent_us": 1402.6559591293335,
+      "memcopy_sol_us": null,
+      "input_bytes": 4294967296,
+      "output_bytes": 4295032834,
+      "naive_io_bytes": 8590000130,
+      "n_kernels": 2,
+      "num_inputs": 1,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "__summary__": {
+    "total": 12,
+    "ok": 12,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 61.06009387969971
+  }
+}
