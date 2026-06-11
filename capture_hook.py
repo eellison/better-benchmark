@@ -1240,6 +1240,10 @@ if __name__ == "__main__":
             gm, full_graph_placeholder_info
         )
 
+        # Partition ONCE; both the metadata sidecar (node_accounting) and the
+        # capture loop below consume the same components.
+        components = get_fusion_partitions(gm)
+
         # Save the FULL post-grad graph (before partitioning) for recovery
         if self.graph_dir:
             full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
@@ -1266,7 +1270,8 @@ if __name__ == "__main__":
                         gm,
                         extra={
                             "source": infer_full_graph_source(full_graph_path),
-                            "node_accounting": graph_node_accounting(gm),
+                            "node_accounting": graph_node_accounting(
+                                gm, components),
                         },
                         index_bounds=index_bounds,
                         permutation_indices=permutation_indices,
@@ -1301,8 +1306,6 @@ if __name__ == "__main__":
         # Shared partitioning + hashing (see module-level helpers above):
         # this is the single source of truth for how graphs are cut into
         # canonical repros and how each partition is content-addressed.
-        components = get_fusion_partitions(gm)
-
         for comp in components:
             is_reduction = partition_has_reduction(comp)
 
