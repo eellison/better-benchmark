@@ -239,6 +239,39 @@ Sequencing per pattern:
 The old oracles are deleted (well — quarantined) only in §6, after their
 successors are covered. At no point does a pattern lose oracle coverage.
 
+### Oracle file slimming (filed 2026-06-11, apply during the §5 rewrite)
+
+The current oracle files carry heavy boilerplate (example:
+`pointwise_60c504726d51/oracle_whisper_layout.py`, 264 lines for one
+kernel). Since most oracles get rewritten/ported during migration anyway,
+the new-format oracle should drop ALL of this:
+
+- **No input validation** (`_validate_inputs`, `_shape_tuple` rank/dtype/
+  contiguity checks): the oracle is registered against a (pattern_hash,
+  shape_hash) point — input shape/stride/dtype correctness is INHERENT to
+  the registration; the harness feeds it exactly the repro's inputs. ~50
+  lines of defensive checks per oracle that can never fire on the only
+  call path that exists.
+- **No `_torch_full_scope` reference reimplementation**: the repro IS the
+  reference; `check_oracle` already compares against `Repro()(*inputs)`.
+  A second hand-written aten spelling of the same scope is drift waiting
+  to happen.
+- **No CLI entry point** (argparse `main()`, ~80 lines/file): one shared
+  runner (`python -m oracle_harness run <repro_id>`) replaces every
+  per-file CLI. Not factored today — each file re-declares the same
+  parser.
+- **No path manipulation** (`REPRO_DIR = Path(__file__).resolve().parent`
+  etc.): the package is installed; the harness resolves repro dirs by
+  registration key, never by file location.
+- **No `if triton is not None:` guards**: triton is a hard dependency of
+  the whole project; an oracle that can't import triton should fail
+  loudly, not silently fall back to the eager scope (which silently turns
+  a floor measurement into an eager measurement).
+
+Target shape of a migrated oracle file: docstring (gap diagnosis — keep,
+it's valuable), kernel(s), `@oracle_impl`-decorated forward, nothing else.
+Harness owns: inputs, reference comparison, timing, CLI, dispatch.
+
 ---
 
 ## 6. The atomic flip **[SETTLED: GC last, single revertible commit]**
