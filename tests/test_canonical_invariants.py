@@ -959,3 +959,39 @@ def test_index_bound_minimum_across_consumers():
     # the through-gather walk must bound it by the table (2), not leave it
     # unbounded (the Electra OOB-assert class).
     assert bounds.get(data_ph) == 2, bounds
+
+
+def test_index_bound_inverts_arithmetic_chain():
+    """Bounds must be INVERTED through int arithmetic between the
+    placeholder and the consuming index op (Longformer: position ids =
+    (mask_i64 * mask_i32 + 1) index a 4098-row table — the leaf bound is
+    NOT 4098; a tensor*tensor product needs each operand < sqrt(B))."""
+    import math
+    import torch
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from full_graph_harness import (infer_index_bounds_from_gm,
+                                    placeholder_info_from_gm)
+
+    def f(a, b, table):
+        prod = torch.ops.aten.mul.Tensor(a, b)
+        idx = torch.ops.aten.add.Tensor(prod, 1)
+        return torch.ops.aten.embedding.default(table, idx, 1)
+
+    with FakeTensorMode(allow_non_fake_inputs=True) as m:
+        a = m.from_tensor(torch.zeros(8, 64, dtype=torch.int64))
+        b = m.from_tensor(torch.zeros(8, 64, dtype=torch.int64))
+        table = m.from_tensor(torch.zeros(4098, 768))
+        gm = make_fx(f, tracing_mode="fake")(a, b, table)
+
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    int_phs = [n for n, i in info.items() if "int" in i["dtype"]]
+    assert int_phs
+    expected = math.isqrt(4098 - 1 - 1)  # invert add 1, then sqrt for mul
+    for n in int_phs:
+        assert bounds.get(n) is not None, (n, bounds)
+        assert bounds[n] <= expected, (n, bounds[n], expected)
+        # and generated products must actually be in range:
+        hi = bounds[n]
+        assert (hi - 1) * (hi - 1) + 1 < 4098

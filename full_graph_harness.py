@@ -226,23 +226,63 @@ def infer_index_bounds_from_gm(
             # (Electra: ids flow through gather into the 2-row token-type
             # embedding — first-found returned the 512 gather bound and the
             # 2-row table asserted OOB, poisoning the CUDA context).
+            #
+            # The walk follows VALUE flow through int arithmetic too, and
+            # INVERTS each transform when a consumption bound is found
+            # (Longformer: position ids = (ids * mask + 1) indexes a
+            # 4098-row table — the leaf bound is isqrt(4097), not 4098):
+            #   add/sub const c   ->  bound - |c|
+            #   mul const c>0    ->  bound // c
+            #   mul TENSOR       ->  isqrt(bound) (both operands generated
+            #                        by us; each < sqrt(B) keeps product < B)
+            #   add TENSOR       ->  bound // 2  (same reasoning)
+            #   convert/clone/.. ->  unchanged
+            import math as _math
+
             found: list[int] = []
-            frontier = [start_node]
+
+            def _invert(bound: int, chain) -> int:
+                b = bound
+                for kind, arg in reversed(chain):
+                    if kind == "addc":
+                        b = b - abs(int(arg))
+                    elif kind == "mulc":
+                        c = abs(int(arg))
+                        b = b // c if c > 1 else b
+                    elif kind == "mult":
+                        b = int(_math.isqrt(max(b - 1, 1)))
+                    elif kind == "addt":
+                        b = b // 2
+                    b = max(b, 1)
+                return b
+
+            _INT_ARITH = {
+                torch.ops.aten.add.Tensor: "add",
+                torch.ops.aten.sub.Tensor: "add",   # same inversion class
+                torch.ops.aten.mul.Tensor: "mul",
+            }
+            _VALUE_PRESERVING = {
+                torch.ops.prims.convert_element_type.default,
+            }
+
+            frontier = [(start_node, ())]
             for _hop in range(max_hops):
                 next_frontier = []
-                for n in frontier:
+                for n, chain in frontier:
                     for user in n.users:
                         if user.op != "call_function":
                             continue
                         target = user.target
 
                         if target == torch.ops.aten.embedding.default:
-                            weight_arg = user.args[0] if user.args else None
-                            if weight_arg and hasattr(weight_arg, "meta"):
-                                val = weight_arg.meta.get("val")
-                                if isinstance(val, torch.Tensor) and len(val.shape) > 0:
-                                    found.append(int(val.shape[0]))
-                                    continue
+                            # only when n is the INDICES arg (args[1])
+                            if len(user.args) > 1 and user.args[1] is n:
+                                weight_arg = user.args[0] if user.args else None
+                                if weight_arg and hasattr(weight_arg, "meta"):
+                                    val = weight_arg.meta.get("val")
+                                    if isinstance(val, torch.Tensor) and len(val.shape) > 0:
+                                        found.append(_invert(int(val.shape[0]), chain))
+                                        continue
 
                         if target == torch.ops.aten.index.Tensor and len(user.args) >= 2:
                             target_shape = _node_shape(user.args[0])
@@ -250,13 +290,12 @@ def infer_index_bounds_from_gm(
                             if target_shape and isinstance(indices, (list, tuple)):
                                 for dim, index_node in enumerate(indices):
                                     if index_node is n and dim < len(target_shape):
-                                        found.append(int(target_shape[dim]))
+                                        found.append(_invert(int(target_shape[dim]), chain))
 
                         if target == torch.ops.aten.gather.default:
                             if user.args and user.args[0] is n:
-                                # n is gather's DATA source: n's VALUES flow
-                                # into the output — keep walking.
-                                next_frontier.append(user)
+                                # n is gather's DATA source: values flow on.
+                                next_frontier.append((user, chain))
                                 continue
 
                         if target in index_consumers:
@@ -264,16 +303,28 @@ def infer_index_bounds_from_gm(
                             if len(user.args) > target_arg_idx:
                                 target_node = user.args[target_arg_idx]
                                 target_shape = _node_shape(target_node)
-                                if target_shape:
+                                if target_shape and target_node is not n:
                                     if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
                                         dim = user.args[dim_arg_idx]
                                         if isinstance(dim, int) and dim < len(target_shape):
-                                            found.append(int(target_shape[dim]))
+                                            found.append(_invert(int(target_shape[dim]), chain))
                                     else:
-                                        found.append(int(target_shape[0]))
+                                        found.append(_invert(int(target_shape[0]), chain))
 
-                        if target in passthrough_ops:
-                            next_frontier.append(user)
+                        if target in passthrough_ops or target in _VALUE_PRESERVING:
+                            next_frontier.append((user, chain))
+                        elif target in _INT_ARITH:
+                            kind = _INT_ARITH[target]
+                            other = None
+                            for a in user.args[:2]:
+                                if a is not n:
+                                    other = a
+                            if isinstance(other, (int, float)):
+                                next_frontier.append(
+                                    (user, chain + ((kind + "c", other),)))
+                            else:
+                                next_frontier.append(
+                                    (user, chain + ((kind + "t", None),)))
                 frontier = next_frontier
                 if not frontier:
                     break
