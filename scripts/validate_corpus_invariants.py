@@ -8,6 +8,11 @@ changes touching repros/.
 Usage:
     python scripts/validate_corpus_invariants.py
 
+    # Validate a recapture corpus at another root (e.g. wave-1 output tree)
+    # instead of the checked-in repros/. The baseline count check is skipped
+    # for non-default roots (a fresh corpus has no baseline yet).
+    python scripts/validate_corpus_invariants.py --corpus-root /tmp/wave1_corpus/repros
+
     # Full-graph round-trip invariants (A: input round-trip, B: partition
     # determinism, C: partition round-trip vs manifest). Samples 2 models per
     # suite by default; --all validates every model dir with full_graph_*.py.
@@ -31,11 +36,27 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CANONICAL_DIR = ROOT / "repros" / "canonical"
-MODELS_DIR = ROOT / "repros" / "models"
+DEFAULT_CORPUS_ROOT = ROOT / "repros"
+# Reassigned by --corpus-root (set_corpus_root) before any invariant runs.
+CANONICAL_DIR = DEFAULT_CORPUS_ROOT / "canonical"
+MODELS_DIR = DEFAULT_CORPUS_ROOT / "models"
 BASELINE_PATH = ROOT / ".corpus_baseline.json"
 
 sys.path.insert(0, str(ROOT))
+
+
+def set_corpus_root(corpus_root: Path) -> bool:
+    """Point all invariants at another corpus tree (wave-1 recapture output).
+
+    Returns True if this is a NON-default root — callers then skip the
+    baseline count check (a fresh corpus has no baseline; every other
+    invariant is root-relative and applies unchanged).
+    """
+    global CANONICAL_DIR, MODELS_DIR
+    corpus_root = Path(corpus_root).resolve()
+    CANONICAL_DIR = corpus_root / "canonical"
+    MODELS_DIR = corpus_root / "models"
+    return corpus_root != DEFAULT_CORPUS_ROOT.resolve()
 
 
 # ---------------------------------------------------------------------------
@@ -593,7 +614,17 @@ def main() -> int:
         "--json", type=Path, default=None,
         help="(roundtrip mode) write per-model results JSON to this path.",
     )
+    parser.add_argument(
+        "--corpus-root", type=Path, default=None,
+        help="Validate the corpus at this root (containing canonical/ and "
+             "models/) instead of the checked-in repros/. Baseline count "
+             "check is skipped for non-default roots.",
+    )
     args = parser.parse_args()
+
+    skip_baseline = False
+    if args.corpus_root is not None:
+        skip_baseline = set_corpus_root(args.corpus_root)
 
     if args.full_graph_roundtrip:
         return run_full_graph_roundtrip(
@@ -603,24 +634,27 @@ def main() -> int:
             seed=args.seed,
             json_out=args.json,
         )
-    return run_standard_invariants()
+    return run_standard_invariants(skip_baseline=skip_baseline)
 
 
-def run_standard_invariants() -> int:
+def run_standard_invariants(skip_baseline: bool = False) -> int:
     print("=" * 60)
     print("Corpus Invariant Validation")
+    print(f"  canonical: {CANONICAL_DIR}")
+    print(f"  models:    {MODELS_DIR}")
     print("=" * 60)
 
     if not CANONICAL_DIR.exists():
         print(f"ERROR: canonical directory not found: {CANONICAL_DIR}")
         return 1
 
-    baseline = load_baseline()
-
     # --- Hard invariants ---
     print("\n--- Hard Invariants (must pass) ---\n")
     hard_errors: list[str] = []
-    hard_errors.extend(check_repro_count(baseline))
+    if skip_baseline:
+        print("  [SKIP] baseline repro-count check (non-default corpus root)")
+    else:
+        hard_errors.extend(check_repro_count(load_baseline()))
     hard_errors.extend(check_repros_parse())
     hard_errors.extend(check_shapes_config())
     hard_errors.extend(check_manifest_consistency())
@@ -649,14 +683,17 @@ def run_standard_invariants() -> int:
     else:
         print("  [OK] _shapes_config values parseable (or check skipped)")
 
-    w = warn_pattern_count_per_model(baseline)
-    if w:
-        soft_warnings.extend(w)
-        print(f"  [WARN] {len(w)} suite coverage issue(s)")
-        for item in w[:5]:
-            print(f"         {item}")
+    if skip_baseline:
+        print("  [SKIP] suite-coverage check (baseline-relative)")
     else:
-        print("  [OK] all expected suites present")
+        w = warn_pattern_count_per_model(load_baseline())
+        if w:
+            soft_warnings.extend(w)
+            print(f"  [WARN] {len(w)} suite coverage issue(s)")
+            for item in w[:5]:
+                print(f"         {item}")
+        else:
+            print("  [OK] all expected suites present")
 
     # --- Summary ---
     print("\n" + "=" * 60)
