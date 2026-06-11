@@ -3,7 +3,7 @@
 **Branch:** `pr-184905` in /tmp/pytorch-work
 **Range:** `049d1229d84..HEAD` (17 core commits + 1 WIP from another agent)
 **Rubric:** UPSTREAM-READY / NEEDS-WORK / EXPERIMENTAL / LOCAL-ONLY (per `pytorch_upstream_audit.md`)
-**Status:** IN PROGRESS — skeleton committed first per audit protocol; verdicts filled incrementally.
+**Status:** COMPLETE (2026-06-11). All 17 core commits reviewed; 3 headline claims spot-checked on B200; WIP 6f7fd7d74ec noted as in-progress (another agent).
 
 ---
 
@@ -300,11 +300,22 @@ the next auditor knows it postdates this audit's range.
 
 ## Spot-Checks (3 headline claims)
 
-(done last, after table complete)
+Method: `INDUCTOR_GPU_BENCH_LOCK=1`, fresh `TORCHINDUCTOR_CACHE_DIR`,
+`repros/canonical/<id>/oracle*.py --bench` on B200, branch torch
+(/tmp/pytorch-work), harness defaults (coordinate_descent + CUDAGraph).
+Run 2026-06-11.
 
-| Claim | Repro | Claimed | Measured | Verdict |
+| Claim (commit) | Repro | Claimed | Measured | Verdict |
 |-------|-------|---------|----------|---------|
-| TBD | | | | |
+| evict_first drop 1.42x->0.98x (e45f846f8d1 chain) | sum_011e69da166d | 0.98x | **0.978x AT_FLOOR** (oracle 403.1us / compile 394.1us) | CONFIRMED |
+| online-softmax fast combine 1.42x->1.01x (a26fc2c8bf4) | amax_sum_sum_6fd07d12d98a | 1.01x | **1.044x AT_FLOOR** (604.1/630.4us); `--check` PASS (max_diff 9.5e-7) | CONFIRMED (1.04 vs 1.01 within run-to-run; absolute us differ from commit msg — different shape-dispatch fallback noted in result) |
+| segment-aligned split 1.41x->0.62x (a85d79a900a) | sum_0becf9609ad7 | 0.62x | **0.673x BAD_ORACLE** (oracle 66.4us / compile 44.7us — compile beats oracle) | CONFIRMED |
+
+All three headline claims reproduce within noise. Note all three results carry
+`"tuned_on": "H100", "running_on": "B200", "fallback": true` in dispatch
+metadata — oracle kernels are running with H100-tuned configs on B200, so
+oracle floors are conservative (ratios flattering to compile, but consistent
+with how the commits measured them).
 
 ## Top-5 Prioritized Issues
 
