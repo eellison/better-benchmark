@@ -108,18 +108,18 @@ def load_timm_models() -> dict[str, int]:
 
 
 def load_hf_models() -> dict[str, int]:
-    """Load HuggingFace model names and batch sizes."""
+    """Load HuggingFace model names and batch sizes.
+
+    Gated models (Llama/gemma/Mistral/...) are INCLUDED — HF auth is set
+    up on the capture box (settled 2026-06-11). A model that fails to
+    download or OOMs records a clean failure in run_log; nothing partial
+    merges.
+    """
     path = PYTORCH_DYNAMO_DIR / "huggingface_models_list.txt"
-    # Models that need HF auth or special downloads
-    skip = {
-        "meta-llama/Llama-3.2-1B", "google/gemma-2-2b", "google/gemma-3-4b-it",
-        "openai/whisper-tiny", "Qwen/Qwen3-0.6B",
-        "mistralai/Mistral-7B-Instruct-v0.3", "openai/gpt-oss-20b",
-    }
     models = {}
     for line in path.read_text().splitlines():
         parsed = _parse_model_list_line(line)
-        if parsed and parsed[0] not in skip:
+        if parsed:
             models[parsed[0]] = parsed[1]
     return models
 
@@ -502,120 +502,101 @@ def _count_roundtrips(model_dir: Path) -> tuple[int, int]:
 # Model loading helpers (per suite) — reusing patterns from recapture_*.py
 # ============================================================================
 
-def _load_timm(model_name: str, batch_size: int, mode: str):
-    """Load a timm model with bf16 dtype policy."""
-    import timm
+def _bf16_inputs(example_inputs):
+    """Cast floating-point example inputs to bf16 (inference dtype policy)."""
     import torch
 
-    model = timm.create_model(model_name, pretrained=False).cuda()
-    model = model.to(memory_format=torch.channels_last)
+    def cast(v):
+        if isinstance(v, torch.Tensor) and v.is_floating_point():
+            return v.to(dtype=torch.bfloat16)
+        return v
 
-    # DTYPE POLICY: infer = bf16 model + inputs; train = fp32 model (autocast wraps)
-    if mode == "infer":
-        model = model.to(dtype=torch.bfloat16)
-
-    data_config = timm.data.resolve_model_data_config(model)
-    input_size = data_config.get("input_size", (3, 224, 224))
-
-    if mode == "infer":
-        inp = torch.randn(batch_size, *input_size, device="cuda", dtype=torch.bfloat16)
-    else:
-        inp = torch.randn(batch_size, *input_size, device="cuda")
-    inp = inp.to(memory_format=torch.channels_last)
-
-    if mode == "train":
-        model.train()
-    else:
-        model.eval()
-
-    return model, [inp]
+    if isinstance(example_inputs, dict):
+        return {k: cast(v) for k, v in example_inputs.items()}
+    if isinstance(example_inputs, (list, tuple)):
+        return type(example_inputs)(cast(v) for v in example_inputs)
+    return cast(example_inputs)
 
 
-def _load_hf(model_name: str, batch_size: int, mode: str):
-    """Load a HuggingFace model with bf16 dtype policy."""
+def _load_via_upstream_runner(runner_cls, model_name: str, batch_size: int,
+                              mode: str, extra_flags: list[str] | None = None):
+    """Load a model through pytorch's own dynamo BenchmarkRunner.
+
+    THE upstream runners (timm_models/torchbench/huggingface) own model
+    construction, recorded batch sizes (incl. per-model divisors), input
+    generation, and layout flags — we match what they set up rather than
+    hand-rolling approximations (settled 2026-06-11). Our dtype policy is
+    applied AFTER: infer = bf16 model+inputs; train = fp32 (autocast in
+    the capture loop).
+    """
     import torch
 
     sys.path.insert(0, str(PYTORCH_DYNAMO_DIR))
-    import common  # noqa: F401
-    from huggingface import HuggingfaceRunner
+    import common
 
-    # Set up minimal args for the runner
-    sys.argv = [
-        "capture", "--performance",
+    argv = [
+        "--performance",
         "--training" if mode == "train" else "--inference",
         "--inductor", "--devices", "cuda",
-        "--batch-size", str(batch_size), "--only", model_name,
-    ]
-    runner = HuggingfaceRunner()
-    args = common.parse_args(sys.argv[1:])
+        "--only", model_name,
+    ] + (extra_flags or [])
+    if batch_size is not None:
+        argv += ["--batch-size", str(batch_size)]
+    runner = runner_cls()
+    args = common.parse_args(argv)
     runner.args = args
     runner.model_iter_fn = (
-        runner.forward_and_backward_pass if mode == "train" else runner.forward_pass
+        runner.forward_and_backward_pass if mode == "train"
+        else runner.forward_pass
     )
 
-    _, _, model, example_inputs, _ = runner.load_model("cuda", model_name, batch_size)
+    _, _, model, example_inputs, _ = runner.load_model(
+        "cuda", model_name, batch_size)
 
     if mode == "train":
         model.train()
     else:
         model.eval()
-        # DTYPE POLICY: infer = bf16
         model = model.to(dtype=torch.bfloat16)
-        if isinstance(example_inputs, dict):
-            example_inputs = {
-                k: v.to(dtype=torch.bfloat16) if isinstance(v, torch.Tensor) and v.is_floating_point() else v
-                for k, v in example_inputs.items()
-            }
-        elif isinstance(example_inputs, (list, tuple)):
-            example_inputs = type(example_inputs)(
-                v.to(dtype=torch.bfloat16) if isinstance(v, torch.Tensor) and v.is_floating_point() else v
-                for v in example_inputs
-            )
+        example_inputs = _bf16_inputs(example_inputs)
 
     return model, example_inputs
 
 
+def _load_timm(model_name: str, batch_size: int, mode: str):
+    """timm via the upstream TimmRunner, channels-last (vision policy)."""
+    sys.path.insert(0, str(PYTORCH_DYNAMO_DIR))
+    from timm_models import TimmRunner
+
+    return _load_via_upstream_runner(
+        TimmRunner, model_name, batch_size, mode,
+        extra_flags=["--channels-last"])
+
+
+def _load_hf(model_name: str, batch_size: int, mode: str):
+    """HuggingFace via the upstream HuggingfaceRunner (plain policy)."""
+    sys.path.insert(0, str(PYTORCH_DYNAMO_DIR))
+    from huggingface import HuggingfaceRunner
+
+    return _load_via_upstream_runner(
+        HuggingfaceRunner, model_name, batch_size, mode)
+
+
 def _load_torchbench(model_name: str, batch_size: int, mode: str):
-    """Load a TorchBench model with bf16 dtype policy."""
-    import importlib
-    import torch
+    """TorchBench via the upstream TorchBenchmarkRunner.
 
+    No layout override: the upstream runner has no channels-last handling
+    for torchbench, and we match what it sets up (suite-native layouts).
+    """
     sys.path.insert(0, str(TORCHBENCH_DIR))
-
     original_dir = os.getcwd()
     try:
         os.chdir(str(TORCHBENCH_DIR))
-        module = importlib.import_module(f"torchbenchmark.models.{model_name}")
-        benchmark_cls = module.Model
+        sys.path.insert(0, str(PYTORCH_DYNAMO_DIR))
+        from torchbench import TorchBenchmarkRunner
 
-        test_mode = "train" if mode == "train" else "eval"
-        kwargs = {"test": test_mode, "device": "cuda"}
-
-        allow_custom = getattr(benchmark_cls, "ALLOW_CUSTOMIZE_BSIZE", True)
-        if allow_custom and batch_size is not None:
-            kwargs["batch_size"] = batch_size
-
-        benchmark = benchmark_cls(**kwargs)
-        model, example_inputs = benchmark.get_module()
-
-        if mode == "train":
-            model.train()
-        else:
-            model.eval()
-            # DTYPE POLICY: infer = bf16
-            model = model.to(dtype=torch.bfloat16)
-            if isinstance(example_inputs, dict):
-                example_inputs = {
-                    k: v.to(dtype=torch.bfloat16) if isinstance(v, torch.Tensor) and v.is_floating_point() else v
-                    for k, v in example_inputs.items()
-                }
-            elif isinstance(example_inputs, (list, tuple)):
-                example_inputs = type(example_inputs)(
-                    v.to(dtype=torch.bfloat16) if isinstance(v, torch.Tensor) and v.is_floating_point() else v
-                    for v in example_inputs
-                )
-
-        return model, example_inputs
+        return _load_via_upstream_runner(
+            TorchBenchmarkRunner, model_name, batch_size, mode)
     finally:
         os.chdir(original_dir)
 
