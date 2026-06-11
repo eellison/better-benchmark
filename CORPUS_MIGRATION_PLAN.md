@@ -247,11 +247,12 @@ kernel). Since most oracles get rewritten/ported during migration anyway,
 the new-format oracle should drop ALL of this:
 
 - **No input validation** (`_validate_inputs`, `_shape_tuple` rank/dtype/
-  contiguity checks): the oracle is registered against a (pattern_hash,
-  shape_hash) point — input shape/stride/dtype correctness is INHERENT to
-  the registration; the harness feeds it exactly the repro's inputs. ~50
-  lines of defensive checks per oracle that can never fire on the only
-  call path that exists.
+  contiguity checks): IMPLIED BY THE REGISTRATION ITSELF. The
+  `@oracle_impl(shapes="(T([8,6,1500,64], f32), S([12000,384]))")`
+  decorator already declares rank, dtype, shape, and layout — per-oracle
+  checks re-assert the same contract, weaker and driftably. If checking
+  is wanted at all, it is ONE generic harness-side assertion (inputs
+  match the registered signature), written once, never per oracle.
 - **No `_torch_full_scope` reference reimplementation**: the repro IS the
   reference; `check_oracle` already compares against `Repro()(*inputs)`.
   A second hand-written aten spelling of the same scope is drift waiting
