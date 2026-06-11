@@ -377,11 +377,14 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             repro_dir = canonical_path / dir_name
         repro_dir.mkdir(parents=True, exist_ok=True)
 
-        # Update shapes.json (the 0d fix: extract _shapes_config directly
-        # from v2 source files instead of trying to execute parse_make_inputs,
-        # which fails for v2 repros that call parse_shapes_config)
+        # Update shapes.json. The signature travels as DATA in the index
+        # entry (capture_hook stamps it at generation time) — never re-derive
+        # it by regexing generated source (lossy text-parsing, banned).
         src_file = Path(entry["file"])
-        signature = _extract_shapes_config(src_file)
+        signature = entry.get("signature")
+        if signature is None:
+            # Legacy capture dirs (pre-signature index entries) only.
+            signature = _extract_shapes_config(src_file)
         if signature is None:
             # Fallback for v1 repros: build signature from input_specs
             input_specs = parse_make_inputs(src_file) if src_file.exists() else []

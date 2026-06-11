@@ -1356,7 +1356,11 @@ if __name__ == "__main__":
                     f"This indicates a bug in the capture hook (index bounds, shape params, etc.)"
                 ) from e
 
-        return filepath
+        # Signature returned as DATA alongside the file: consumers (merge ->
+        # shapes.json) must never re-derive it by regexing the generated
+        # source — that round-trip through rendered Python is exactly the
+        # lossy text-parsing the project bans for graphs.
+        return filepath, shapes_config_line
 
     def process_graph(self, gm: fx.GraphModule):
         """Called by the hook for each post-grad graph. Partitions and captures."""
@@ -1509,13 +1513,15 @@ if __name__ == "__main__":
             self.counter += 1
 
             try:
-                filepath = self._generate_repro_file(sub_gm, placeholder_info, meta, filename, shape_params)
+                filepath, signature = self._generate_repro_file(
+                    sub_gm, placeholder_info, meta, filename, shape_params)
                 self.captured.append({
                     "file": filepath,
                     "kind": kind,
                     "pattern_hash": pattern_key,
                     "shape_hash": shape_key,
                     "hash": full_key,
+                    "signature": signature,
                     "reduction_types": meta["reduction_types"],
                     "n_ops": len(comp),
                     "origin_ops": origin_ops,
