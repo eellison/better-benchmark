@@ -33,7 +33,9 @@ SHORT_DTYPE = {
     "float32": "f32", "float16": "f16", "bfloat16": "bf16",
     "float64": "f64", "int64": "i64", "int32": "i32",
     "int16": "i16", "int8": "i8", "bool": "b8", "uint8": "u8",
+    "uint16": "u16", "uint32": "u32", "uint64": "u64",
     "complex64": "c64", "complex128": "c128",
+    "float8_e4m3fn": "f8e4m3fn", "float8_e5m2": "f8e5m2",
 }
 LONG_DTYPE = {v: k for k, v in SHORT_DTYPE.items()}
 

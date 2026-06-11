@@ -666,3 +666,58 @@ def test_shape_hash_distinguishes_input_multiplicity():
          for i in range(2)}
     assert (shape_hash_for_placeholders(a)
             != shape_hash_for_placeholders(b))
+
+
+# ============================================================================
+# 12. Storage offset + exotic dtypes preserved through serialization
+# ============================================================================
+
+def test_storage_offset_recorded_and_honored():
+    """Packed-qkv-style saved views (same storage, nonzero storage_offset)
+    must survive the spec roundtrip: recorded in the compact encoding's
+    'off' opt and honored on regeneration. First wave-1 train captures
+    exposed this: annotations carry no offset, so the sidecar is the only
+    carrier — losing it silently regenerates aliased views as offset-0."""
+    from input_codec import compact_from_spec, spec_from_compact
+
+    spec = {
+        "kind": "tensor", "shape": [128, 3, 197, 64],
+        "dtype": "bfloat16", "stride": [113472, 64, 576, 1],
+        "storage_offset": 192,
+    }
+    entry = compact_from_spec(spec)
+    assert entry[2]["off"] == 192, entry
+    rt = spec_from_compact(entry)
+    assert rt["storage_offset"] == 192
+    assert rt["stride"] == [113472, 64, 576, 1]
+
+
+def test_uint_and_fp8_dtypes_roundtrip_codec():
+    """u16/u32/u64 (RNG-state tensors in train graphs) and fp8 must have
+    SHORT_DTYPE entries — an unknown dtype passes through by long name,
+    which works but silently forks identity spelling from every other
+    artifact. mobilevit u64 misparse was the wave-1 catch."""
+    from input_codec import compact_from_spec, spec_from_compact
+
+    for dt in ("uint16", "uint32", "uint64", "float8_e4m3fn", "float8_e5m2"):
+        entry = compact_from_spec(
+            {"kind": "tensor", "shape": [2], "dtype": dt, "stride": [1]})
+        assert entry[1] != dt, f"{dt}: no short spelling in codec"
+        rt = spec_from_compact(entry)
+        assert rt["dtype"] == dt, (dt, rt["dtype"])
+
+
+def test_annotation_parser_offset_unknown_and_u64():
+    """print_readable annotations carry no storage_offset: the parser must
+    record None (unknown), never a false 0 — and must know u64 tokens."""
+    from full_graph_harness import parse_full_graph_inputs
+
+    content = '''
+class Repro(torch.nn.Module):
+    def forward(self, getitem_3: "bf16[128, 3, 197, 64][113472, 64, 576, 1]cuda:0", rng_state: "u64[2][1]cuda:0"):
+        pass
+'''
+    specs = parse_full_graph_inputs(content)
+    by_name = {s["name"]: s for s in specs}
+    assert by_name["getitem_3"]["storage_offset"] is None
+    assert by_name["rng_state"]["dtype"] == "uint64"
