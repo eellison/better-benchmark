@@ -32,6 +32,7 @@ import argparse
 import ast
 import json
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -123,8 +124,13 @@ def check_repros_parse() -> list[str]:
     return errors
 
 
+_SHAPES_CONFIG_LINE = re.compile(
+    r'^_shapes_config\s*=\s*["\'](.+?)["\']\s*$', re.MULTILINE)
+
+
 def check_shapes_config() -> list[str]:
-    """Hard invariant 3: every repro.py must have _shapes_config (v2 format)."""
+    """Hard invariant 3: every repro.py must have _shapes_config (v2 format),
+    and its value must equal one of the dir's shapes.json signatures."""
     errors = []
     missing = []
     for repro_py in sorted(CANONICAL_DIR.glob("*/repro.py")):
@@ -146,6 +152,33 @@ def check_shapes_config() -> list[str]:
                         break
         if not found:
             missing.append(repro_py.parent.name)
+
+    # _shapes_config (repro.py's standalone default) intentionally
+    # DUPLICATES one shapes.json point — drift between them means the
+    # default bench point diverged from the registered points. Enforce:
+    # every _shapes_config string must equal some shapes.json signature.
+    drifted = []
+    for repro_py in sorted(CANONICAL_DIR.glob("*/repro.py")):
+        shapes_path = repro_py.parent / "shapes.json"
+        if not shapes_path.exists():
+            continue
+        m = _SHAPES_CONFIG_LINE.search(repro_py.read_text())
+        if not m:
+            continue  # covered by the missing check above
+        cfg = m.group(1)
+        try:
+            sigs = {p.get("signature")
+                    for p in json.loads(shapes_path.read_text()).get("points", [])}
+        except Exception:
+            continue  # malformed shapes.json caught elsewhere
+        if cfg not in sigs:
+            drifted.append(repro_py.parent.name)
+    if drifted:
+        errors.append(
+            f"{len(drifted)} repro.py _shapes_config value(s) match NO "
+            f"shapes.json point (drift):\n"
+            + "\n".join(f"    {d}" for d in drifted[:10])
+        )
 
     if missing:
         errors.append(
