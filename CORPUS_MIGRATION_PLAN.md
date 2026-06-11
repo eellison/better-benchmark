@@ -273,6 +273,19 @@ Target shape of a migrated oracle file: docstring (gap diagnosis — keep,
 it's valuable), kernel(s), `@oracle_impl`-decorated forward, nothing else.
 Harness owns: inputs, reference comparison, timing, CLI, dispatch.
 
+**Standard, enumerable registration (filed 2026-06-11):** make the
+registry itself the mass-bench surface. Each repro's oracle registers
+under a standard key ((pattern_hash, shape_hash) point — matching the
+oracle-dispatch-by-hash decision) and the registry is ENUMERABLE without
+importing every file by convention (one known filename per canonical dir,
+e.g. `oracle.py`, discovered by walking `repros/canonical/`). Then mass
+benchmarking is one command — `bench_oracles --all` enumerates the
+registry, joins each registration to its repro inputs + shapes.json
+points, and reuses bench_parallel for multi-GPU fan-out. No per-file
+CLIs, no hand-maintained oracle lists, coverage = registry keys vs corpus
+points (the same join that reports which patterns still lack oracles).
+Design during §5 oracle migration, not before.
+
 ---
 
 ## 6. The atomic flip **[SETTLED: GC last, single revertible commit]**
