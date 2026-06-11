@@ -555,19 +555,37 @@ def shape_hash_for_placeholders(placeholder_info: dict) -> str:
 
 
 def lift_shape_params(gm):
-    """Lift concrete shape literals on view-like ops into _shape_param_N
-    placeholders. THE single lifting implementation: runs AFTER
-    canonicalization, on the canonical graph, so every partition goes through
-    the identical retrace first and the lift assigns names/positions by one
-    set of rules.
+    """Lift concrete shape literals into _shape_param_N placeholders.
+
+    THE single lifting implementation, run on the canonical (retraced)
+    graph. Discriminator is SCHEMA-TYPED, not an op allowlist: any argument
+    occupying a SymInt[]-typed parameter slot (per the op's own schema) is a
+    shape; int[]-typed slots (reduction dims, permute orders) are structural
+    and never lifted. The op's schema declares which of its lists are
+    shapes — no list of ops to maintain.
 
     Returns (gm, shape_params) — gm mutated in place and recompiled.
     """
-    _VIEW_LIKE_OPS = {
-        torch.ops.aten.reshape.default,
-        torch.ops.aten.view.default,
-        torch.ops.aten.expand.default,
-    }
+
+    def _symint_list_positions(target):
+        schema = getattr(target, "_schema", None)
+        if schema is None:
+            return ()
+        out = []
+        for i, a in enumerate(schema.arguments):
+            if a.kwarg_only:
+                continue
+            if "SymInt[]" in str(a.type_with_alias()) if hasattr(a, "type_with_alias") else False:
+                out.append(i)
+        if not out:
+            # str(schema) spells SymInt[] even where arg.type collapses to
+            # List[int]; parse positions from the schema string.
+            sig = str(schema)
+            args_str = sig[sig.index("(") + 1: sig.rindex("->")].rsplit(")", 1)[0]
+            for i, part in enumerate(args_str.split(",")):
+                if "SymInt[]" in part:
+                    out.append(i)
+        return tuple(out)
 
     def _should_lift(shape_list):
         if not shape_list:
@@ -579,35 +597,38 @@ def lift_shape_params(gm):
     g = gm.graph
     shape_params: dict[str, list[int]] = {}
     counter = 0
-    # placeholders append after the last existing placeholder
     last_ph = None
     for n in g.nodes:
         if n.op == "placeholder":
             last_ph = n
     for node in list(g.nodes):
-        if node.op != "call_function" or node.target not in _VIEW_LIKE_OPS:
+        if node.op != "call_function":
             continue
-        if len(node.args) < 2 or not isinstance(node.args[1], (list, tuple)):
-            continue
-        shape_list = [x for x in node.args[1]]
-        if any(isinstance(x, torch.fx.Node) for x in shape_list):
-            continue  # already parametric/dynamic
-        if not _should_lift(shape_list):
-            continue
-        name = f"_shape_param_{counter}"
-        counter += 1
-        if last_ph is None:
-            with g.inserting_before(next(iter(g.nodes))):
-                ph = g.placeholder(name)
-        else:
-            with g.inserting_after(last_ph):
-                ph = g.placeholder(name)
-        ph.meta["val"] = list(shape_list)
-        shape_params[name] = list(shape_list)
-        last_ph = ph
-        args = list(node.args)
-        args[1] = ph
-        node.args = tuple(args)
+        for pos in _symint_list_positions(node.target):
+            if pos >= len(node.args):
+                continue
+            arg = node.args[pos]
+            if not isinstance(arg, (list, tuple)):
+                continue
+            if any(isinstance(x, torch.fx.Node) for x in arg):
+                continue  # already parametric/dynamic
+            shape_list = list(arg)
+            if not _should_lift(shape_list):
+                continue
+            name = f"_shape_param_{counter}"
+            counter += 1
+            if last_ph is None:
+                with g.inserting_before(next(iter(g.nodes))):
+                    ph = g.placeholder(name)
+            else:
+                with g.inserting_after(last_ph):
+                    ph = g.placeholder(name)
+            ph.meta["val"] = list(shape_list)
+            shape_params[name] = list(shape_list)
+            last_ph = ph
+            args = list(node.args)
+            args[pos] = ph
+            node.args = tuple(args)
     if shape_params:
         gm.recompile()
     return gm, shape_params
