@@ -398,6 +398,23 @@ maintain, can't mis-lift int[] dims/permute args) — swappable inside
   modules) — repros are generated artifacts and get the corpus linter, not
   the style linter. Explicitly deferred until after the migration lands;
   noted here so it isn't lost.
+- **Corpus/benchmark versioning for cross-change comparability (filed
+  2026-06-11, add after migration)**: schema versions cover artifact
+  FORMAT drift; this is about CONTENT drift — comparing benchmark results
+  across corpus changes. Two distinct mechanisms, don't conflate:
+  (a) *additive drift* (new shapes.json points, new models joining
+  existing points) — cheap: a `generation` stamp per point (the §3 schema
+  already reserves it) lets any results file say which corpus generation
+  produced it. (b) *removals* — the hard case: once a model/pattern is
+  GC'd, "re-run the old comparison set" has nothing to run, so
+  comparability across removals cannot be a property of the corpus
+  itself. It needs the benchmark SET as a first-class versioned artifact:
+  a pinned list of (pattern_hash, shape_hash) points (extending
+  `scripts/select_benchmark_set.py`), checked in, referenced by results
+  files by name+version. Git history of `repros/` gives artifact
+  reproducibility; the pinned set gives result comparability; results
+  JSONs already stamp tool+commit+timestamp in `_metadata`. Design when
+  the first real cross-generation comparison is needed, not before.
 
 ---
 
