@@ -545,9 +545,17 @@ def pattern_hash_for_subgraph(sub_gm) -> str:
 
 
 def shape_hash_for_placeholders(placeholder_info: dict) -> str:
-    """8-hex hash of the partition's input shapes+dtypes (shape config id)."""
+    """8-hex hash of the partition's input shapes+strides+dtypes (shape config id).
+
+    Stride is part of the identity: occurrences of the same pattern at the
+    same shapes but different layouts (contiguous vs channels-last) are
+    distinct benchmark points and must not collapse to one. Contiguous
+    inputs record stride=[] (placeholder_info construction), which is the
+    canonical spelling for "contiguous", so the hash is stable across
+    captures of the same layout.
+    """
     input_shapes = sorted(
-        f"{info.get('shape', '?')}:{info.get('dtype', '?')}"
+        f"{info.get('shape', '?')}:{info.get('stride', [])}:{info.get('dtype', '?')}"
         for info in placeholder_info.values()
     )
     return hashlib.md5(json.dumps(input_shapes).encode()).hexdigest()[:8]
