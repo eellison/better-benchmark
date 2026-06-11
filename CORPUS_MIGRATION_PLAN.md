@@ -391,6 +391,19 @@ maintain, can't mis-lift int[] dims/permute args) — swappable inside
   a third row — compile vs Σ(kernel oracles) vs model oracle — whose
   spread MEASURES the cross-kernel opportunity. Not until the migrated
   corpus + kernel floors + accounting are trustworthy.
+- **Custom generation constructors for op-specific input semantics
+  (established 2026-06-11, extend as needed)**: when an op's inputs have
+  validity constraints beyond a value range, the generation spec language
+  grows a NEW KIND rather than approximating with bounds. Three seams,
+  ~20 lines each, test-pinned: gen dict kind (full_graph_harness
+  inference emits it), compact spelling (input_codec), constructor
+  (repro_harness.make_inputs_from_config). Precedents: `constant`
+  (maxpool window-center offsets — random offsets OOB at padded edges,
+  device-side assert), `offsets` (embedding_bag: sorted non-decreasing),
+  `permutation`, `index`. The inference side decides WHICH kind applies
+  (consumer-op walk); the constructor owns HOW to build it. If an op
+  needs richer semantics than a kind+args can express, the same seams
+  accept a custom constructor keyed on the op.
 - **Semantic tags on shapes/repros (filed 2026-06-11, not for wave 1)**:
   attach reusable semantic labels to specific points/repros — e.g.
   "split-k" (K-dominant gemm reduction shape), "decode" (BS=1 attn),
