@@ -386,6 +386,17 @@ maintain, can't mis-lift int[] dims/permute args) — swappable inside
   a third row — compile vs Σ(kernel oracles) vs model oracle — whose
   spread MEASURES the cross-kernel opportunity. Not until the migrated
   corpus + kernel floors + accounting are trustworthy.
+- **Semantic tags on shapes/repros (filed 2026-06-11, not for wave 1)**:
+  attach reusable semantic labels to specific points/repros — e.g.
+  "split-k" (K-dominant gemm reduction shape), "decode" (BS=1 attn),
+  "prefill", "imbalanced-reduction", "layout-copy" — that benching and
+  analysis can key on ("bench all split-k shapes", "compare oracle wins
+  on decode points vs prefill"). Natural home: an optional `tags: [...]`
+  list per shapes.json point (and/or per canonical meta.json for
+  pattern-level semantics), human/agent-curated, additive, schema already
+  versioned so it lands without migration. Distinct from the structural
+  metadata (shape/stride/gen) — these are MEANINGS, not facts derivable
+  from the artifact alone.
 - **Repro linter (future, post-migration)**: modeled on PyTorch's lintrunner
   setup — a dedicated lint config for `repros/` enforcing the corpus
   invariants statically (repro file structure, shapes.json schema,
