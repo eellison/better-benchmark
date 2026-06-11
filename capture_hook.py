@@ -1434,8 +1434,11 @@ if __name__ == "__main__":
                 # we validate exactly what consumers will load.
                 from input_codec import spec_from_compact
                 from repro_harness import make_inputs_from_config as _mific
-                inputs = mod.make_inputs(shape_config={
-                    "inputs": [spec_from_compact(e) for e in compact_inputs]})
+                _vcfg = {
+                    "inputs": [spec_from_compact(e) for e in compact_inputs]}
+                if alias_group_nbytes:
+                    _vcfg["alias_group_nbytes"] = alias_group_nbytes
+                inputs = mod.make_inputs(shape_config=_vcfg)
                 with torch.no_grad():
                     out = repro_instance(*inputs)
                 if out is None:

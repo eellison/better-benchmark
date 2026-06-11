@@ -915,3 +915,44 @@ def test_constant_gen_codec_roundtrip():
     assert e[2]["gen"] == ["const", 4], e
     rt = spec_from_compact(e)
     assert rt["gen"] == {"kind": "constant", "value": 4}
+
+
+def test_index_bound_minimum_across_consumers():
+    """A value consumed by SEVERAL index ops must get the MINIMUM bound:
+    Electra's ids flow through gather (bound 512) INTO a 2-row token-type
+    embedding — first-found inference returned 512 and the embedding
+    asserted OOB (poisoning the CUDA context for all later validations).
+    The walk must also follow gather's data edge (values flow through)."""
+    import torch
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from full_graph_harness import (infer_index_bounds_from_gm,
+                                    placeholder_info_from_gm)
+
+    def f(ids, pos, table2):
+        g = torch.ops.aten.gather.default(pos, 1, ids)      # bound 512 via pos dim1
+        e = torch.ops.aten.embedding.default(table2, g)      # bound 2 via table rows
+        return e + 1
+
+    with FakeTensorMode(allow_non_fake_inputs=True) as m:
+        ids = m.from_tensor(torch.zeros(1, 512, dtype=torch.int64))
+        pos = m.from_tensor(torch.zeros(1, 512, dtype=torch.int64))
+        table2 = m.from_tensor(torch.zeros(2, 128))
+        gm = make_fx(f, tracing_mode="fake")(ids, pos, table2)
+
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    ids_name = [n for n in info if "ids" in n or n.endswith("_1")]
+    # find the placeholder whose users include gather as index arg
+    import torch.fx as fx
+    target = None
+    for node in gm.graph.nodes:
+        if node.op == "placeholder":
+            for u in node.users:
+                if u.op == "call_function" and "gather" in str(u.target) \
+                        and len(u.args) > 2 and u.args[2] is node:
+                    target = node.name
+    assert target is not None, "test graph wiring changed"
+    assert bounds.get(target) == 2, (
+        f"expected min bound 2 (through-gather embedding), got "
+        f"{bounds.get(target)}")

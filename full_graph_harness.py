@@ -220,7 +220,13 @@ def infer_index_bounds_from_gm(
                 constants[name] = 4  # assume 3x3: center offset 4
             continue
 
-        def _find_bound(start_node, max_hops=3):
+        def _find_bound(start_node, max_hops=8):
+            # Collect EVERY bound the value reaches and return the MIN: a
+            # value consumed by several index ops must satisfy all of them
+            # (Electra: ids flow through gather into the 2-row token-type
+            # embedding — first-found returned the 512 gather bound and the
+            # 2-row table asserted OOB, poisoning the CUDA context).
+            found: list[int] = []
             frontier = [start_node]
             for _hop in range(max_hops):
                 next_frontier = []
@@ -235,7 +241,8 @@ def infer_index_bounds_from_gm(
                             if weight_arg and hasattr(weight_arg, "meta"):
                                 val = weight_arg.meta.get("val")
                                 if isinstance(val, torch.Tensor) and len(val.shape) > 0:
-                                    return int(val.shape[0])
+                                    found.append(int(val.shape[0]))
+                                    continue
 
                         if target == torch.ops.aten.index.Tensor and len(user.args) >= 2:
                             target_shape = _node_shape(user.args[0])
@@ -243,10 +250,12 @@ def infer_index_bounds_from_gm(
                             if target_shape and isinstance(indices, (list, tuple)):
                                 for dim, index_node in enumerate(indices):
                                     if index_node is n and dim < len(target_shape):
-                                        return int(target_shape[dim])
+                                        found.append(int(target_shape[dim]))
 
                         if target == torch.ops.aten.gather.default:
                             if user.args and user.args[0] is n:
+                                # n is gather's DATA source: n's VALUES flow
+                                # into the output — keep walking.
                                 next_frontier.append(user)
                                 continue
 
@@ -259,15 +268,17 @@ def infer_index_bounds_from_gm(
                                     if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
                                         dim = user.args[dim_arg_idx]
                                         if isinstance(dim, int) and dim < len(target_shape):
-                                            return int(target_shape[dim])
+                                            found.append(int(target_shape[dim]))
                                     else:
-                                        return int(target_shape[0])
+                                        found.append(int(target_shape[0]))
 
                         if target in passthrough_ops:
                             next_frontier.append(user)
                 frontier = next_frontier
                 if not frontier:
                     break
+            if found:
+                return min(found)
             return None
 
         bound = _find_bound(node)
