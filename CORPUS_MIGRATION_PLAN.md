@@ -295,6 +295,18 @@ maintain, can't mis-lift int[] dims/permute args) — swappable inside
   a third row — compile vs Σ(kernel oracles) vs model oracle — whose
   spread MEASURES the cross-kernel opportunity. Not until the migrated
   corpus + kernel floors + accounting are trustworthy.
+- **Repro linter (future, post-migration)**: modeled on PyTorch's lintrunner
+  setup — a dedicated lint config for `repros/` enforcing the corpus
+  invariants statically (repro file structure, shapes.json schema,
+  meta.json completeness, no stale `_repro_version`, header/class-name
+  conventions), runnable as a single `lintrunner`-style command and
+  wireable into the same pre-commit/CI hooks as
+  `validate_corpus_invariants.py`. Separately, adopt the standard linter
+  set (the non-repro-specific ones from PyTorch's config: flake8/ruff,
+  format, spelling) for the NON-repro code (`scripts/`, `tests/`, harness
+  modules) — repros are generated artifacts and get the corpus linter, not
+  the style linter. Explicitly deferred until after the migration lands;
+  noted here so it isn't lost.
 
 ---
 
