@@ -612,6 +612,14 @@ def lift_shape_params(gm):
     for node in list(g.nodes):
         if node.op != "call_function":
             continue
+        # SymInt[] slots on NON-fusible ops (conv stride/padding/dilation,
+        # convolution_backward) are op configuration, not output shapes —
+        # lifting them would conflate different convs into one pattern.
+        # Partition subgraphs never contain such ops (the partitioner
+        # excludes them), so this guard is defense-in-depth for any caller
+        # handing us a full graph. Pinned by test_canonical_invariants.
+        if not partition_node_is_supported(node):
+            continue
         for pos in _symint_list_positions(node.target):
             if pos >= len(node.args):
                 continue

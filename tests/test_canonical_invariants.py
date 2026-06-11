@@ -236,3 +236,53 @@ def test_extern_stride_only_difference_distinguishes_points():
     gm = _traced(g, torch.randn(4, 4))
     mm_points = [k for k in collect_extern_points(gm) if "mm" in k[0]]
     assert len(mm_points) == 2, mm_points
+
+
+# ============================================================================
+# 6. Conv never reaches the lift
+# ============================================================================
+
+def test_conv_symint_slots_never_lifted():
+    """aten.convolution spells stride/padding/dilation as SymInt[], where
+    lifting would be semantically wrong (different padding = different conv,
+    not a shape variant). Safe today because conv is non-fusible — it can
+    never appear inside a partition the lift runs on. Pin BOTH halves: the
+    partitioner excludes conv, and a graph containing conv + pointwise ops
+    lifts nothing from the conv node."""
+    def f(x, w):
+        y = torch.ops.aten.convolution.default(
+            x, w, None, [1, 1], [2, 2], [1, 1], False, [0, 0], 1)
+        return (y + 1).relu()
+
+    gm = _traced(f, torch.randn(2, 8, 8, 8), torch.randn(8, 8, 3, 3))
+
+    conv_nodes = [n for n in gm.graph.nodes
+                  if n.op == "call_function" and "convolution" in str(n.target)]
+    assert conv_nodes
+    for comp in get_fusion_partitions(gm):
+        assert not (set(conv_nodes) & set(comp)), \
+            "conv landed inside a fusible partition"
+
+    _gm, params = lift_shape_params(gm)
+    for n in conv_nodes:
+        assert not any(isinstance(a, fx.Node) and
+                       str(a.target).startswith("_shape_param")
+                       for a in n.args), "conv literal args were lifted"
+
+
+def test_no_pointwise_op_has_symint_list_slot():
+    """The structural reason the lift is safe: across ALL of aten, no
+    pointwise-tagged op has a SymInt[] argument slot (swept 2026-06-11:
+    122 SymInt[] overloads, 0 pointwise). SymInt[]-on-fusible-op therefore
+    always means view-family output shape — exactly what the lift wants.
+    If this ever fails, the schema-typed lift needs an explicit op filter."""
+    offenders = []
+    for opname in torch.ops.aten:
+        packet = getattr(torch.ops.aten, opname)
+        for overload in packet.overloads():
+            op = getattr(packet, overload)
+            if torch.Tag.pointwise not in op.tags:
+                continue
+            if "SymInt[]" in str(op._schema).split("->")[0]:
+                offenders.append(str(op))
+    assert not offenders, offenders
