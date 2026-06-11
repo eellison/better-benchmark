@@ -111,7 +111,16 @@ Good: "REDUCTION_EPILOGUE_REREAD" — immediately tells you the mechanism and wh
 
 6. **Check composability before claiming a closure** — repros are partitions; the capture cut can DROP consumers of a boundary value. Any fix keyed on "sole consumer" / "all users rewritable" (elimination passes especially) may fire on the repro but never on the real model. Before marking a big closure IMPLEMENTED, read the source model's full graph (`repros/models/<suite>/<mode>/<model>/full_graph_*.py`) and check the rewritten value's FULL user set against the pass preconditions — 5 minutes of graph reading, no GPU. Case study: sum_sum_3219a09ab96a closed 3.60x→0.45x in the repro, but in the model every `where` also feeds `convolution_backward`, so the pass (correctly) never fires — end-to-end delta 0.1%. See investigation_results/squeezenet_scatter_e2e_validation.md.
 
-7. **Never analyze graphs via regex or AST over source text** — repro.py and full_graph_*.py are renderings of FX graphs; parse-by-text is strictly lossy (tuple returns, `= None` deletion idioms, multi-line ops all misread, producing false evidence). Load the artifact and walk the real graph: `gm.graph.nodes`, `node.users`, `node.target`, `node.meta`. If you find yourself writing a regex against graph source, stop and load the graph instead.
+7. **No regex/AST over our own generated artifacts — ever** — this covers
+graphs AND every other artifact we generate (repro.py headers,
+_shapes_config strings, meta fields). Text-parsing a rendering is strictly
+lossy, and needing it means an upstream producer failed to hand the
+information over as data — fix the producer to return/serialize the value
+(e.g. _generate_repro_file returns its signature; merge reads
+entry["signature"], never regexes the source). For graphs specifically:
+load the artifact and walk the real FX graph (`gm.graph.nodes`,
+`node.users`, `node.target`, `node.meta`). If you find yourself writing a
+regex against generated output, stop and thread the data through instead.
 
 8. **Verification means consuming your own outputs** — a pipeline is not
 validated until its artifacts are exercised through every path a consumer
