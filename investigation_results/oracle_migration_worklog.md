@@ -15,7 +15,6 @@ Refill buffer owned by this session: rows 141-145. Rows 126-140 were claimed rem
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
 - Row 112 `var_mean_45f7dfd4a983`: worker checks passed; fallback bench was `4GOOD_1AT_FLOOR`.
-- Row 113 `pointwise_35ecf6633bb0`: worker checks passed; parent fallback bench was `1GOOD_1AT_FLOOR`.
 - Row 115 `sum_e529e567d636`: worker checks passed; fallback bench was `1GOOD_1AT_FLOOR`.
 - Row 121 `sum_sum_sum_e7781939b0a2`: worker checks passed; fallback bench was `1GOOD_1AT_FLOOR`.
 
@@ -36,6 +35,7 @@ Refill buffer owned by this session: rows 141-145. Rows 126-140 were claimed rem
 - Row 93 `pointwise_e6ddc8e897ec`: marked `needs_work`; 24/24 checks pass but locked bench fails the FP64 numerics gate with NaN errors and emits no timings.
 - Row 95 `pointwise_c509446d4a84`: measured, 3/3 checks, H100 fallback bench `3GOOD`.
 - Row 111 `sum_sum_4c6ae5dbcf21`: measured, 2/2 checks, H100 fallback bench `2GOOD`.
+- Row 113 `pointwise_35ecf6633bb0`: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`.
 - Row 114 `pointwise_733dafce05a6`: measured, 2/2 checks, H100 fallback bench `2GOOD`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
