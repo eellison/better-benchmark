@@ -1168,3 +1168,83 @@ def _do_bench(fn, device: torch.device, warmup: int = 25, rep: int = 200) -> flo
         elapsed = time.perf_counter() - start
         best_us = min(best_us, elapsed * 1_000_000.0)
     return best_us
+
+
+# ---------------------------------------------------------------------------
+# Shared runner CLI: python -m oracle_harness <canonical_dir> [--check|--bench]
+#
+# Replaces the per-file main() of the old template: slim-format oracles are
+# docstring + kernel + @oracle_impl only, and THIS is how they are checked
+# and benched. Loads <dir>/oracle.py, resolves oracle_forward, and runs the
+# same check/bench paths the old CLI exposed.
+# ---------------------------------------------------------------------------
+
+def _load_oracle_module(canonical_dir):
+    import importlib.util
+    from pathlib import Path
+
+    d = Path(canonical_dir)
+    path = d / "oracle.py"
+    if not path.exists():
+        candidates = sorted(d.glob("oracle_*.py"))
+        if not candidates:
+            raise FileNotFoundError(f"no oracle.py / oracle_*.py in {d}")
+        path = candidates[0]
+    spec = importlib.util.spec_from_file_location(
+        f"_oracle_{d.name}", path)
+    mod = importlib.util.module_from_spec(spec)
+    import sys as _sys
+    _sys.modules[spec.name] = mod
+    spec.loader.exec_module(mod)
+    fn = getattr(mod, "oracle_forward", None)
+    if fn is None:
+        raise AttributeError(f"{path} defines no oracle_forward")
+    return mod, fn, d
+
+
+def _runner_main(argv=None):
+    import argparse
+    import json as _json
+
+    ap = argparse.ArgumentParser(
+        prog="python -m oracle_harness",
+        description="Shared check/bench runner for slim-format oracles")
+    ap.add_argument("canonical_dir",
+                    help="repros/canonical/<repro_id> directory")
+    ap.add_argument("--check", action="store_true",
+                    help="numerics check vs Repro() at every shapes.json point")
+    ap.add_argument("--no-skip-stochastic", action="store_true")
+    ap.add_argument("--bench", action="store_true",
+                    help="CUDAGraph bench at every point (bench_oracle)")
+    ap.add_argument("--warmup", type=int, default=25)
+    ap.add_argument("--rep", type=int, default=100)
+    ap.add_argument("--point", default=None,
+                    help="restrict to one shape_hash")
+    args = ap.parse_args(argv)
+
+    mod, fn, d = _load_oracle_module(args.canonical_dir)
+    repro_id = d.name
+    out = {"repro": repro_id, "oracle": getattr(mod, "__file__", "?")}
+
+    if args.check or not args.bench:
+        results = check_oracle(
+            fn, str(d), repro_id,
+            skip_stochastic=not args.no_skip_stochastic,
+            point=args.point,
+        ) if "point" in check_oracle.__code__.co_varnames else check_oracle(
+            fn, str(d), repro_id,
+            skip_stochastic=not args.no_skip_stochastic)
+        out["check"] = results
+    if args.bench:
+        out["bench"] = bench_oracle_all_shapes(
+            fn, str(d), repro_id, warmup=args.warmup, rep=args.rep)
+    print(_json.dumps(out, indent=1, default=str))
+    failed = False
+    chk = out.get("check")
+    if isinstance(chk, dict):
+        failed = any(v in ("fail", False) for v in chk.values())
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(_runner_main())

@@ -226,6 +226,46 @@ Per-point discipline:
   it everywhere and note the slow points — a floor that ties Inductor at
   small shapes is still a floor; do NOT silently narrow coverage.
 
+## Operational rules (carried from the June campaign, updated)
+
+- Branch: investigations-june-2026. Pull latest before every claim batch.
+- The PARENT process (per implementer instance) owns ALL csv edits,
+  commits, rebases, pushes, and final validation. Subagents edit ONLY
+  their assigned repros/canonical/<repro_id>/oracle.py — no CSV edits, no
+  commits, no pushes, and never revert or touch others' edits.
+- Claim before writing: set status/owner, commit AND PUSH the claim, then
+  dispatch subagents.
+- `python -m pip install --no-build-isolation -e .` once per checkout
+  before any oracle work (imports resolve via the package, never
+  sys.path/REPO_ROOT hacks).
+- Preserve eps, correction, rsqrt placement, dtype casts, RNG semantics,
+  alias/view behavior, strides, and the returned-output scope exactly.
+
+### Required gap-diagnosis format (docstring paragraph 1, exactly)
+
+    Gap diagnosis (classification: <CLASS>): this oracle <specific
+    behavior>, whereas Inductor <specific current behavior>; Inductor
+    cannot do this today because <specific scheduler/codegen/pattern
+    limitation>; the fix is <CLASS>: <specific Inductor change>.
+
+Allowed classifications ONLY: SCHEDULER_FUSION, SCATTER_REDUCE,
+COOPERATIVE_SPLIT_K, ALGEBRAIC_ELIMINATION, NEW_PATTERN.
+
+### Verification protocol (run and REPORT all of it)
+
+    python -m py_compile repros/canonical/<id>/oracle.py
+    python -m oracle_harness repros/canonical/<id> --check
+    python -m oracle_harness repros/canonical/<id> --check --no-skip-stochastic
+    INDUCTOR_GPU_BENCH_LOCK=1 python -m oracle_harness repros/canonical/<id> --bench
+
+(The shared runner replaces the old per-file `--check/--bench` CLI; slim
+oracles have no main().) If --bench prints ANY CUDAGraph warning the
+measurement is INVALID — report it as invalid, never accept the number.
+A subagent's final report must list: changed file path, classification,
+PASS/FAIL per check, bench numbers/status per point, CUDAGraph warning
+status, and a short numeric audit (which lowerings were chosen for
+exp/tanh/sigmoid-class ops and why they match the repro).
+
 ## Claim protocol (same flow as the June queue)
 
 The work queue is `investigation_results/oracle_migration_queue.csv`
