@@ -5,18 +5,19 @@ Updated: 2026-06-12
 ## Current Worker Pool
 
 - Row 194 `var_mean_var_mean_5cc92f5d49c1`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 197 `pointwise_544fac7c5583`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 200 `var_mean_787e1d544efe`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 198 `sum_be521af00034`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 199 `sum_sum_sum_33df09c4b328`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 181 `pointwise_2c331ef4f17f`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 201 `pointwise_95ed2ef35da9`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, and 194-203; rows 200-203 remain idle buffer. Rows 126-140, 156-171, and 182-193 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, and 194-203; rows 202-203 remain idle buffer. Rows 126-140, 156-171, and 182-193 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
 - Row 124 `var_mean_88858c55c3b4`: worker checks passed; fallback bench was `18GOOD_1BAD_ORACLE`.
 - Row 172 `sum_abcd9bccce7d`: worker checks passed; fallback bench was `6GOOD_2AT_FLOOR`.
+- Row 181 `pointwise_2c331ef4f17f`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 23 points.
 - Row 180 `pointwise_260db4f7087d`: worker checks passed; fallback bench was `1GOOD`.
 - Row 195 `max_amax_sum_66e6dc6d2131`: worker checks passed; fallback bench was `1GOOD`.
 - Row 196 `pointwise_0cd85fd63f82`: worker checks passed; fallback bench was `1AT_FLOOR`.
@@ -68,6 +69,7 @@ Refill buffer owned by this session: rows 141-155, 172-181, and 194-203; rows 20
 - Row 177 `var_mean_60f28772f7d2`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 178 `amax_sum_69008a1fbe7e`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 - Row 179 `amax_sum_sum_a184947064f0`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
+- Row 197 `pointwise_544fac7c5583`: measured, 3/3 checks, H100 fallback bench `2AT_FLOOR_1BAD_ORACLE`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
