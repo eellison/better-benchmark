@@ -7,10 +7,10 @@ Updated: 2026-06-12
 - Row 208 `var_mean_841c9dfd6146`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 213 `pointwise_d5a413a2c233`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 212 `pointwise_c8d23ac4414d`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 211 `pointwise_47bdc8c7c0cd`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 227 `pointwise_ba870b00a0b3`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 207 `sum_sum_sum_fb3a1658dadb`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, and 226-235; rows 226-235 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, and 226-235; rows 228-235 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
@@ -21,6 +21,7 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, an
 - Row 194 `var_mean_var_mean_5cc92f5d49c1`: worker checks passed; fallback bench was `23GOOD`.
 - Row 203 `pointwise_c911fb4f9b47`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 20 points.
 - Row 210 `pointwise_1611fb0c7845`: worker checks passed; locked bench emitted empty CUDAGraph warnings, so timings are invalid.
+- Row 213 `pointwise_d5a413a2c233`: worker checks passed; locked bench emitted empty CUDAGraph warnings, so timings are invalid.
 
 ## Pushed By This Session
 
@@ -82,6 +83,7 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, an
 - Row 205 `sum_d5a292f49eef`: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`.
 - Row 206 `sum_sum_e2c16e4d1008`: measured, 3/3 checks, H100 fallback bench `1GOOD_2AT_FLOOR`.
 - Row 209 `pointwise_15e408415993`: measured, 3/3 checks, H100 fallback bench `2GOOD_1AT_FLOOR`.
+- Row 211 `pointwise_47bdc8c7c0cd`: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
