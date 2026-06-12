@@ -4,13 +4,13 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 263 `pointwise_62ec9910b2e0`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 268 `pointwise_8352994b2efb`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 266 `pointwise_732ce9dc68ae`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 246 `sum_sum_sum_ddcfccfb8340`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 261 `pointwise_60c4eafecc9d`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 267 `pointwise_7939829e1a9f`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, 236-245, 246-257, and 258-269; rows 268-269 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, 236-245, 246-257, and 258-269; row 269 remains idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
@@ -21,6 +21,8 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 194 `var_mean_var_mean_5cc92f5d49c1`: worker checks passed; fallback bench was `23GOOD`.
 - Row 203 `pointwise_c911fb4f9b47`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 20 points.
 - Row 257 `pointwise_3a0cd5d11499`: worker checks passed; fallback bench was `2GOOD_1AT_FLOOR`.
+- Row 263 `pointwise_62ec9910b2e0`: worker checks passed; fallback bench was `1GOOD`.
+- Row 265 `pointwise_65717f3841e5`: worker checks passed; fallback bench was `1AT_FLOOR`.
 - Row 207 `sum_sum_sum_fb3a1658dadb`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 20 points.
 - Row 232 `var_mean_mean_e790938418f4`: worker checks passed; fallback bench was `9GOOD_1BAD_ORACLE`.
 
@@ -120,10 +122,9 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 256 `pointwise_331deef26ac5`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 259 `pointwise_4d236bfe44e3`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 258 `pointwise_400b9e2117e6`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
-- Row 262 `pointwise_62b6a7509fae`: worker checks passed; fallback bench was `1AT_FLOOR`.
-- Row 265 `pointwise_65717f3841e5`: worker checks passed; fallback bench was `1AT_FLOOR`.
 - Row 260 `pointwise_5e648310bc29`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench is `1BAD_ORACLE`.
 - Row 264 `pointwise_642e9b69a215`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
+- Row 262 `pointwise_62b6a7509fae`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
