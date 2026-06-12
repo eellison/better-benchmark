@@ -10,7 +10,7 @@ Updated: 2026-06-12
 - Row 114 `pointwise_733dafce05a6`: active worker `019ebd6a-9216-7aa3-bd83-b5c4a54759c0`.
 - Row 115 `sum_e529e567d636`: active worker `019ebd6a-e1a1-75d2-a565-f259cd3bfd14`.
 
-Refill buffer owned by this session is currently exhausted. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 121-125. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
 
 ## Pushed By This Session
 
