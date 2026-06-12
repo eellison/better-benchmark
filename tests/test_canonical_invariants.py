@@ -1207,7 +1207,6 @@ def test_oracle_impl_point_registration():
             sys.modules.pop(modname, None)
             reset_oracle_registry(modname)
 
-
 # ============================================================================
 # 14. Dynamic shapes: symbolic entries, bindings, guards (wave 2 format)
 # ============================================================================
@@ -1264,3 +1263,31 @@ def test_symbolic_bindings_validation():
     assert not is_symbolic_entry(static)
     out = instantiate_point({"inputs": [static]}, symbols, bindings={"s0": 4})
     assert out == [static]
+
+
+def test_oracle_compare_treats_matching_nans_as_equal():
+    """Some captured math can produce NaNs for the synthetic input domain.
+    Matching NaN masks are still exact numerics and must not be reported as
+    stochastic output or correctness failure."""
+    import torch
+    from oracle_harness import _compare_oracle_outputs, detect_stochastic_outputs
+
+    class StableNan(torch.nn.Module):
+        def forward(self):
+            return torch.tensor([float("nan"), 1.0, 2.0])
+
+    assert detect_stochastic_outputs(StableNan(), []) == set()
+    assert _compare_oracle_outputs(
+        torch.tensor([float("nan"), 1.0, 2.0]),
+        torch.tensor([float("nan"), 1.0, 2.0]),
+        set(),
+        atol=0.0,
+        rtol=0.0,
+    )
+    assert not _compare_oracle_outputs(
+        torch.tensor([float("nan"), 1.0, 2.0]),
+        torch.tensor([0.0, 1.0, 2.0]),
+        set(),
+        atol=0.0,
+        rtol=0.0,
+    )

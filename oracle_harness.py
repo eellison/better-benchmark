@@ -33,6 +33,9 @@ from pathlib import Path
 
 import torch
 
+if __name__ == "__main__":
+    sys.modules.setdefault("oracle_harness", sys.modules[__name__])
+
 
 # ---------------------------------------------------------------------------
 # Hardware and shape utilities
@@ -668,7 +671,9 @@ def detect_stochastic_outputs(instance, inputs) -> set[int]:
     for i, (o_s, o_u) in enumerate(zip(seeded_list, unseeded_list)):
         if not o_s.is_floating_point():
             continue
-        if not torch.allclose(o_s.float(), o_u.float(), atol=1e-6, rtol=0):
+        if not torch.allclose(
+            o_s.float(), o_u.float(), atol=1e-6, rtol=0, equal_nan=True
+        ):
             stochastic.add(i)
 
     return stochastic
@@ -723,8 +728,12 @@ def _compare_oracle_outputs(
         # Value check
         e_f32 = e.float()
         o_f32 = o.float()
-        max_diff = (e_f32 - o_f32).abs().max().item()
-        ok = torch.allclose(e_f32, o_f32, atol=atol, rtol=rtol)
+        both_nan = torch.isnan(e_f32) & torch.isnan(o_f32)
+        diff = (e_f32 - o_f32).abs()
+        if both_nan.any():
+            diff = torch.where(both_nan, torch.zeros_like(diff), diff)
+        max_diff = diff.max().item() if diff.numel() else 0.0
+        ok = torch.allclose(e_f32, o_f32, atol=atol, rtol=rtol, equal_nan=True)
 
         status = "PASS" if ok else "FAIL"
         print(f"  output {i}: {status} (shape={list(e.shape)} dtype={e.dtype} "
