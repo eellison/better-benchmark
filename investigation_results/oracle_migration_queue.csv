@@ -14,11 +14,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 13,var_mean_f4578c128d74,f4578c128d74,reduction,norm_template_canonicalization,16,22,290,var_mean_d22940b03b5c;var_mean_d8fae237d769,claimed,Codex,claimed_2026-06-12_batch_11-15_repros_v2
 14,pointwise_0a49dc00cbaf,0a49dc00cbaf,pointwise,multi_output_reduction_templates,1,15,259,~max_448f6b3c8f1d;~mean_c9e1a8113328;~pointwise_052e3853c721,claimed,Codex,claimed_2026-06-12_batch_11-15_repros_v2
 15,pointwise_9b533c851bf2,9b533c851bf2,pointwise,unclassified_priority_gap,5,8,235,pointwise_9a3b1c27ce63;pointwise_b46f81501f11,claimed,Codex,claimed_2026-06-12_batch_11-15_repros_v2
-16,sum_139a3020e8bf,139a3020e8bf,reduction,reduction_general,15,32,196,,unclaimed,,
-17,var_mean_b19e82f2a47b,b19e82f2a47b,reduction,norm_template_canonicalization,9,12,186,var_mean_1fad4754680a;var_mean_3711a161734e,unclaimed,,
-18,sum_2f4a2365eba8,2f4a2365eba8,reduction,multi_output_reduction_templates,10,16,168,~sum_214ee1a84aa5,unclaimed,,
-19,pointwise_035e4d7f5117,035e4d7f5117,pointwise,layout_indexing_stencil_fusion,1,25,167,pointwise_052e3853c721;pointwise_41aa929b1bf2;pointwise_5aafedcd8ca4,unclaimed,,
-20,pointwise_3abc926270f6,3abc926270f6,pointwise,layout_indexing_stencil_fusion,51,20,160,pointwise_3abc926270f6,unclaimed,,
+16,sum_139a3020e8bf,139a3020e8bf,reduction,reduction_general,15,32,196,,claimed,codex,claimed_2026-06-12_batch_11-20_keep_5_workers_busy
+17,var_mean_b19e82f2a47b,b19e82f2a47b,reduction,norm_template_canonicalization,9,12,186,var_mean_1fad4754680a;var_mean_3711a161734e,claimed,codex,claimed_2026-06-12_batch_11-20_keep_5_workers_busy
+18,sum_2f4a2365eba8,2f4a2365eba8,reduction,multi_output_reduction_templates,10,16,168,~sum_214ee1a84aa5,claimed,codex,claimed_2026-06-12_batch_11-20_keep_5_workers_busy
+19,pointwise_035e4d7f5117,035e4d7f5117,pointwise,layout_indexing_stencil_fusion,1,25,167,pointwise_052e3853c721;pointwise_41aa929b1bf2;pointwise_5aafedcd8ca4,claimed,codex,claimed_2026-06-12_batch_11-20_keep_5_workers_busy
+20,pointwise_3abc926270f6,3abc926270f6,pointwise,layout_indexing_stencil_fusion,51,20,160,pointwise_3abc926270f6,claimed,codex,claimed_2026-06-12_batch_11-20_keep_5_workers_busy
 21,pointwise_2d969ac9ad59,2d969ac9ad59,pointwise,unclassified_priority_gap,6,14,158,pointwise_8b1aa52513f2,unclaimed,,
 22,pointwise_edd2629dfab3,edd2629dfab3,pointwise,unclassified_priority_gap,3,4,144,pointwise_4498011749b4,unclaimed,,
 23,any_amax_sum_e232f7a3d0d8,e232f7a3d0d8,reduction,reduction_softmax_like,6,12,128,,unclaimed,,
