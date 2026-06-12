@@ -10,7 +10,7 @@ Updated: 2026-06-12
 - Row 125 `pointwise_182f6f9450b9`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 141 `pointwise_435f6504efa7`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-145; rows 144-145 remain idle buffer. Rows 126-140 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155; rows 144-155 remain idle buffer. Rows 126-140 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
