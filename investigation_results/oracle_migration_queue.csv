@@ -301,7 +301,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 300,pointwise_a2a1f4d737dd,a2a1f4d737dd,pointwise,unclassified_priority_gap,1,1,11,pointwise_4ea254f5c392,claimed,Codex,claimed_2026-06-12_batch_298-300_topdown
 301,pointwise_a99945d92cdd,a99945d92cdd,pointwise,layout_indexing_stencil_fusion,6,2,11,~pointwise_604e62335f7c;~pointwise_fc46ae4ec316;~pointwise_1383c536f620,claimed,Codex,claimed_2026-06-12_batch_301-302_topdown
 302,pointwise_b6d762cd3d81,b6d762cd3d81,pointwise,unclassified_priority_gap,3,2,11,~pointwise_298ea8f11903,claimed,Codex,claimed_2026-06-12_batch_301-302_topdown
-303,sum_80d7d20cfbde,80d7d20cfbde,reduction,multi_output_reduction_templates,1,1,11,~sum_ab7572b27d2c;~sum_b8db5e701976,unclaimed,,
+303,sum_80d7d20cfbde,80d7d20cfbde,reduction,multi_output_reduction_templates,1,1,11,~sum_ab7572b27d2c;~sum_b8db5e701976,claimed,Codex,claimed_2026-06-12_batch_303_topdown
 304,sum_sum_21e1fb8d648a,21e1fb8d648a,reduction,reduction_general,1,1,11,~sum_sum_cc11724ac17a,unclaimed,,
 305,sum_sum_6a8cdea856dd,6a8cdea856dd,reduction,reduction_general,4,9,11,,unclaimed,,
 306,sum_sum_sum_0bc6cca52a2d,0bc6cca52a2d,reduction,scatter_gather,1,1,11,,unclaimed,,
