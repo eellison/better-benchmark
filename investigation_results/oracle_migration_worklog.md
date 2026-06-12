@@ -4,13 +4,13 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 151 `pointwise_2db21af13668`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 172 `sum_abcd9bccce7d`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 155 `pointwise_4f45960cc89d`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 124 `var_mean_88858c55c3b4`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 153 `pointwise_3c92a46da990`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 154 `pointwise_452ad66ee287`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155 plus 172-181; rows 172-181 remain idle buffer. Rows 126-140 and 156-171 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155 plus 172-181; rows 173-181 remain idle buffer. Rows 126-140 and 156-171 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
@@ -51,6 +51,7 @@ Refill buffer owned by this session: rows 141-155 plus 172-181; rows 172-181 rem
 - Row 147 `pointwise_000209e1748d`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench is `1BAD_ORACLE`.
 - Row 149 `pointwise_25cec8e73161`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench is `1BAD_ORACLE`.
 - Row 150 `pointwise_2c1752cb59b4`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
+- Row 151 `pointwise_2db21af13668`: measured, 4/4 checks, H100 fallback bench `4GOOD`.
 - Row 152 `pointwise_39610fd5aba3`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
