@@ -1,0 +1,42 @@
+{
+  "points": [
+    {
+      "shape_hash": "3bd04781",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        }
+      },
+      "inputs": [
+        [[128,16384],"bf16"],
+        [[128,16384],"bf16"],
+        ["S",[1,128,16384]],
+        ["S",[1,128,16384]],
+        ["S",[128,16384]],
+        ["S",[16384]]
+      ]
+    },
+    {
+      "shape_hash": "e036773d",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4096,8192],"bf16"],
+        [[4096,8192],"bf16"],
+        ["S",[32,128,8192]],
+        ["S",[32,128,8192]],
+        ["S",[4096,8192]],
+        ["S",[8192]]
+      ]
+    }
+  ]
+}

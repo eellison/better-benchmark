@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "c8d23ac4414d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.constant_pad_nd.default"
+  ],
+  "n_models": 23,
+  "models": [
+    "hf/infer/BartForCausalLM",
+    "hf/infer/DebertaV2ForMaskedLM",
+    "hf/infer/DistilBertForMaskedLM",
+    "hf/infer/DistillGPT2",
+    "hf/train/AllenaiLongformerBase",
+    "hf/train/BartForCausalLM",
+    "hf/train/BertForMaskedLM",
+    "hf/train/DebertaV2ForMaskedLM",
+    "hf/train/DistilBertForMaskedLM",
+    "hf/train/DistillGPT2",
+    "hf/train/ElectraForCausalLM",
+    "hf/train/GPTJForQuestionAnswering",
+    "hf/train/GPTNeoForCausalLM",
+    "hf/train/LayoutLMForMaskedLM",
+    "hf/train/MBartForCausalLM",
+    "hf/train/MobileBertForMaskedLM",
+    "hf/train/PLBartForCausalLM",
+    "hf/train/PegasusForCausalLM",
+    "hf/train/RobertaForCausalLM",
+    "hf/train/TrOCRForCausalLM",
+    "hf/train/YituTechConvBert",
+    "torchbench/infer/BERT_pytorch",
+    "torchbench/train/BERT_pytorch"
+  ]
+}

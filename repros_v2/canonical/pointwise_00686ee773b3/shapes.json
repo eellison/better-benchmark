@@ -1,0 +1,100 @@
+{
+  "points": [
+    {
+      "shape_hash": "ad7b2a2c",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,1024],"bf16"],
+        ["S",[8,1024,1024]]
+      ]
+    },
+    {
+      "shape_hash": "90358d5b",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,2560],"bf16"],
+        ["S",[32,128,2560]]
+      ]
+    },
+    {
+      "shape_hash": "bd432928",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2048,2560],"bf16"],
+        ["S",[16,128,2560]]
+      ]
+    },
+    {
+      "shape_hash": "07bfd41e",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        },
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,768],"bf16"],
+        ["S",[8,1024,768]]
+      ]
+    },
+    {
+      "shape_hash": "d20f46e2",
+      "models": {
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        ["S",[16,1024,768]]
+      ]
+    },
+    {
+      "shape_hash": "b642f4d6",
+      "models": {
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,1024],"bf16"],
+        ["S",[128,128,1024]]
+      ]
+    },
+    {
+      "shape_hash": "4fa33397",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,1024],"bf16"],
+        ["S",[32,128,1024]]
+      ]
+    }
+  ]
+}

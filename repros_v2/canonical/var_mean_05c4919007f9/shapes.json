@@ -1,0 +1,32 @@
+{
+  "points": [
+    {
+      "shape_hash": "f9c4eb2d",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,320,14,14],"bf16",{"st":[62720,1,4480,320]}],
+        [[128,320,14,14],"bf16",{"st":[62720,1,4480,320]}],
+        [[320],"f32"],
+        [[320],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "e5e4b0b5",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,160,28,28],"bf16",{"st":[125440,1,4480,160]}],
+        [[128,160,28,28],"bf16",{"st":[125440,1,4480,160]}],
+        [[160],"f32"],
+        [[160],"f32"]
+      ]
+    }
+  ]
+}

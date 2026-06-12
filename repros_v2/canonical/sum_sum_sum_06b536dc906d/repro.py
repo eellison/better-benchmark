@@ -1,0 +1,237 @@
+"""
+Standalone repro captured via capture_hook.
+Label: timm_adv_inception_v3_train
+Pattern hash: 06b536dc906d
+Shape hash: 0acf4a9d
+"""
+import sys
+from pathlib import Path
+
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_repro_version = 3
+# Input shapes/strides/dtypes live in the sibling shapes.json (structured,
+# one entry per point); forward()'s annotations document the default shapes
+# inline. Default inputs = the first shapes.json point.
+
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "bf16[128, 1280, 8, 8]", arg1_1: "i8[128, 768, 8, 8]", arg2_1: "bf16[128, 768, 17, 17]", arg3_1: "bf16[128, 768, 17, 17]", arg4_1: "bf16[128, 192, 17, 17]", arg5_1: "f32[1, 192, 1, 1]", arg6_1: "f32[1, 192, 1, 1]", arg7_1: "f32[192]", arg8_1: "f32[192]", arg9_1: "bf16[]", arg10_1: "bf16[128, 192, 17, 17]", arg11_1: "f32[1, 192, 1, 1]", arg12_1: "f32[1, 192, 1, 1]", arg13_1: "f32[192]", arg14_1: "f32[192]", arg15_1: "bf16[128, 192, 17, 17]", arg16_1: "f32[1, 192, 1, 1]", arg17_1: "f32[1, 192, 1, 1]", arg18_1: "f32[192]", arg19_1: "f32[192]", arg20_1: "bf16[128, 192, 17, 17]", arg21_1: "f32[1, 192, 1, 1]", arg22_1: "f32[1, 192, 1, 1]", arg23_1: "f32[192]", arg24_1: "f32[192]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6):
+        # No stacktrace found for following nodes
+        slice_1: "bf16[128, 768, 8, 8]" = torch.ops.aten.slice.Tensor(arg0_1, 1, 512, 1280);  arg0_1 = None
+        full: "f32[98304, 289]" = torch.ops.aten.full.default(_shape_param_0, 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False);  _shape_param_0 = None
+        clone: "bf16[128, 768, 8, 8]" = torch.ops.aten.clone.default(slice_1, memory_format = torch.contiguous_format);  slice_1 = None
+        view: "bf16[98304, 64]" = torch.ops.aten.view.default(clone, _shape_param_1);  clone = _shape_param_1 = None
+        _low_memory_max_pool_offsets_to_indices: "i64[128, 768, 8, 8]" = torch.ops.prims._low_memory_max_pool_offsets_to_indices.default(arg1_1, _shape_param_2, _shape_param_3, _shape_param_4, [0, 0], [1, 1]);  arg1_1 = _shape_param_2 = _shape_param_3 = _shape_param_4 = None
+        clone_1: "i64[128, 768, 8, 8]" = torch.ops.aten.clone.default(_low_memory_max_pool_offsets_to_indices, memory_format = torch.contiguous_format);  _low_memory_max_pool_offsets_to_indices = None
+        view_1: "i64[98304, 64]" = torch.ops.aten.view.default(clone_1, _shape_param_5);  clone_1 = _shape_param_5 = None
+        convert_element_type: "f32[98304, 64]" = torch.ops.prims.convert_element_type.default(view, torch.float32);  view = None
+        scatter_add: "f32[98304, 289]" = torch.ops.aten.scatter_add.default(full, 1, view_1, convert_element_type);  full = view_1 = convert_element_type = None
+        view_2: "f32[128, 768, 17, 17]" = torch.ops.aten.view.default(scatter_add, _shape_param_6);  scatter_add = _shape_param_6 = None
+        convert_element_type_1: "bf16[128, 768, 17, 17]" = torch.ops.prims.convert_element_type.default(view_2, torch.bfloat16);  view_2 = None
+        clone_2: "bf16[128, 768, 17, 17]" = torch.ops.aten.clone.default(convert_element_type_1, memory_format = torch.channels_last);  convert_element_type_1 = None
+        add: "bf16[128, 768, 17, 17]" = torch.ops.aten.add.Tensor(clone_2, arg2_1);  clone_2 = arg2_1 = None
+        add_1: "bf16[128, 768, 17, 17]" = torch.ops.aten.add.Tensor(add, arg3_1);  add = arg3_1 = None
+        slice_2: "bf16[128, 192, 17, 17]" = torch.ops.aten.slice.Tensor(add_1, 1, 0, 192)
+        slice_3: "bf16[128, 192, 17, 17]" = torch.ops.aten.slice.Tensor(add_1, 1, 192, 384)
+        slice_4: "bf16[128, 192, 17, 17]" = torch.ops.aten.slice.Tensor(add_1, 1, 384, 576)
+        slice_5: "bf16[128, 192, 17, 17]" = torch.ops.aten.slice.Tensor(add_1, 1, 576, 768);  add_1 = None
+        sub: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(arg4_1, arg5_1)
+        mul: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub, arg6_1);  sub = None
+        unsqueeze: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(arg7_1, -1)
+        unsqueeze_1: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze, -1);  unsqueeze = None
+        mul_1: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(mul, unsqueeze_1);  mul = unsqueeze_1 = None
+        unsqueeze_2: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(arg8_1, -1);  arg8_1 = None
+        unsqueeze_3: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_2, -1);  unsqueeze_2 = None
+        add_2: "f32[128, 192, 17, 17]" = torch.ops.aten.add.Tensor(mul_1, unsqueeze_3);  mul_1 = unsqueeze_3 = None
+        convert_element_type_2: "bf16[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(add_2, torch.bfloat16);  add_2 = None
+        relu: "bf16[128, 192, 17, 17]" = torch.ops.aten.relu.default(convert_element_type_2);  convert_element_type_2 = None
+        le: "b8[128, 192, 17, 17]" = torch.ops.aten.le.Scalar(relu, 0);  relu = None
+        where: "bf16[128, 192, 17, 17]" = torch.ops.aten.where.self(le, arg9_1, slice_5);  le = slice_5 = None
+        convert_element_type_3: "f32[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(where, torch.float32);  where = None
+        squeeze: "f32[192]" = torch.ops.aten.squeeze.dims(arg5_1, [0, 2, 3]);  arg5_1 = None
+        unsqueeze_4: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(squeeze, 0);  squeeze = None
+        unsqueeze_5: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_4, 2);  unsqueeze_4 = None
+        unsqueeze_6: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_5, 3);  unsqueeze_5 = None
+        sum_1: "f32[192]" = torch.ops.aten.sum.dim_IntList(convert_element_type_3, [0, 2, 3])
+        convert_element_type_4: "f32[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(arg4_1, torch.float32);  arg4_1 = None
+        sub_1: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(convert_element_type_4, unsqueeze_6);  convert_element_type_4 = unsqueeze_6 = None
+        mul_2: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(convert_element_type_3, sub_1)
+        sum_2: "f32[192]" = torch.ops.aten.sum.dim_IntList(mul_2, [0, 2, 3]);  mul_2 = None
+        mul_3: "f32[192]" = torch.ops.aten.mul.Tensor(sum_1, 2.703287197231834e-05)
+        unsqueeze_7: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_3, 0);  mul_3 = None
+        unsqueeze_8: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_7, 2);  unsqueeze_7 = None
+        unsqueeze_9: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_8, 3);  unsqueeze_8 = None
+        mul_4: "f32[192]" = torch.ops.aten.mul.Tensor(sum_2, 2.703287197231834e-05)
+        squeeze_1: "f32[192]" = torch.ops.aten.squeeze.dims(arg6_1, [0, 2, 3]);  arg6_1 = None
+        mul_5: "f32[192]" = torch.ops.aten.mul.Tensor(squeeze_1, squeeze_1)
+        mul_6: "f32[192]" = torch.ops.aten.mul.Tensor(mul_4, mul_5);  mul_4 = mul_5 = None
+        unsqueeze_10: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_6, 0);  mul_6 = None
+        unsqueeze_11: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_10, 2);  unsqueeze_10 = None
+        unsqueeze_12: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_11, 3);  unsqueeze_11 = None
+        mul_7: "f32[192]" = torch.ops.aten.mul.Tensor(squeeze_1, arg7_1);  arg7_1 = None
+        unsqueeze_13: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_7, 0);  mul_7 = None
+        unsqueeze_14: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_13, 2);  unsqueeze_13 = None
+        unsqueeze_15: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_14, 3);  unsqueeze_14 = None
+        mul_8: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_1, unsqueeze_12);  sub_1 = unsqueeze_12 = None
+        sub_2: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(convert_element_type_3, mul_8);  convert_element_type_3 = mul_8 = None
+        sub_3: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(sub_2, unsqueeze_9);  sub_2 = unsqueeze_9 = None
+        mul_9: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_3, unsqueeze_15);  sub_3 = unsqueeze_15 = None
+        mul_10: "f32[192]" = torch.ops.aten.mul.Tensor(sum_2, squeeze_1);  sum_2 = squeeze_1 = None
+        convert_element_type_5: "bf16[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(mul_9, torch.bfloat16);  mul_9 = None
+        sub_4: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(arg10_1, arg11_1)
+        mul_11: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_4, arg12_1);  sub_4 = None
+        unsqueeze_16: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(arg13_1, -1)
+        unsqueeze_17: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_16, -1);  unsqueeze_16 = None
+        mul_12: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(mul_11, unsqueeze_17);  mul_11 = unsqueeze_17 = None
+        unsqueeze_18: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(arg14_1, -1);  arg14_1 = None
+        unsqueeze_19: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_18, -1);  unsqueeze_18 = None
+        add_3: "f32[128, 192, 17, 17]" = torch.ops.aten.add.Tensor(mul_12, unsqueeze_19);  mul_12 = unsqueeze_19 = None
+        convert_element_type_6: "bf16[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(add_3, torch.bfloat16);  add_3 = None
+        relu_1: "bf16[128, 192, 17, 17]" = torch.ops.aten.relu.default(convert_element_type_6);  convert_element_type_6 = None
+        le_1: "b8[128, 192, 17, 17]" = torch.ops.aten.le.Scalar(relu_1, 0);  relu_1 = None
+        where_1: "bf16[128, 192, 17, 17]" = torch.ops.aten.where.self(le_1, arg9_1, slice_4);  le_1 = slice_4 = None
+        convert_element_type_7: "f32[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(where_1, torch.float32);  where_1 = None
+        squeeze_2: "f32[192]" = torch.ops.aten.squeeze.dims(arg11_1, [0, 2, 3]);  arg11_1 = None
+        unsqueeze_20: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(squeeze_2, 0);  squeeze_2 = None
+        unsqueeze_21: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_20, 2);  unsqueeze_20 = None
+        unsqueeze_22: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_21, 3);  unsqueeze_21 = None
+        sum_3: "f32[192]" = torch.ops.aten.sum.dim_IntList(convert_element_type_7, [0, 2, 3])
+        convert_element_type_8: "f32[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(arg10_1, torch.float32);  arg10_1 = None
+        sub_5: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(convert_element_type_8, unsqueeze_22);  convert_element_type_8 = unsqueeze_22 = None
+        mul_13: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(convert_element_type_7, sub_5)
+        sum_4: "f32[192]" = torch.ops.aten.sum.dim_IntList(mul_13, [0, 2, 3]);  mul_13 = None
+        mul_14: "f32[192]" = torch.ops.aten.mul.Tensor(sum_3, 2.703287197231834e-05)
+        unsqueeze_23: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_14, 0);  mul_14 = None
+        unsqueeze_24: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_23, 2);  unsqueeze_23 = None
+        unsqueeze_25: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_24, 3);  unsqueeze_24 = None
+        mul_15: "f32[192]" = torch.ops.aten.mul.Tensor(sum_4, 2.703287197231834e-05)
+        squeeze_3: "f32[192]" = torch.ops.aten.squeeze.dims(arg12_1, [0, 2, 3]);  arg12_1 = None
+        mul_16: "f32[192]" = torch.ops.aten.mul.Tensor(squeeze_3, squeeze_3)
+        mul_17: "f32[192]" = torch.ops.aten.mul.Tensor(mul_15, mul_16);  mul_15 = mul_16 = None
+        unsqueeze_26: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_17, 0);  mul_17 = None
+        unsqueeze_27: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_26, 2);  unsqueeze_26 = None
+        unsqueeze_28: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_27, 3);  unsqueeze_27 = None
+        mul_18: "f32[192]" = torch.ops.aten.mul.Tensor(squeeze_3, arg13_1);  arg13_1 = None
+        unsqueeze_29: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_18, 0);  mul_18 = None
+        unsqueeze_30: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_29, 2);  unsqueeze_29 = None
+        unsqueeze_31: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_30, 3);  unsqueeze_30 = None
+        mul_19: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_5, unsqueeze_28);  sub_5 = unsqueeze_28 = None
+        sub_6: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(convert_element_type_7, mul_19);  convert_element_type_7 = mul_19 = None
+        sub_7: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(sub_6, unsqueeze_25);  sub_6 = unsqueeze_25 = None
+        mul_20: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_7, unsqueeze_31);  sub_7 = unsqueeze_31 = None
+        mul_21: "f32[192]" = torch.ops.aten.mul.Tensor(sum_4, squeeze_3);  sum_4 = squeeze_3 = None
+        convert_element_type_9: "bf16[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(mul_20, torch.bfloat16);  mul_20 = None
+        sub_8: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(arg15_1, arg16_1)
+        mul_22: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_8, arg17_1);  sub_8 = None
+        unsqueeze_32: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(arg18_1, -1)
+        unsqueeze_33: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_32, -1);  unsqueeze_32 = None
+        mul_23: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(mul_22, unsqueeze_33);  mul_22 = unsqueeze_33 = None
+        unsqueeze_34: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(arg19_1, -1);  arg19_1 = None
+        unsqueeze_35: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_34, -1);  unsqueeze_34 = None
+        add_4: "f32[128, 192, 17, 17]" = torch.ops.aten.add.Tensor(mul_23, unsqueeze_35);  mul_23 = unsqueeze_35 = None
+        convert_element_type_10: "bf16[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(add_4, torch.bfloat16);  add_4 = None
+        relu_2: "bf16[128, 192, 17, 17]" = torch.ops.aten.relu.default(convert_element_type_10);  convert_element_type_10 = None
+        le_2: "b8[128, 192, 17, 17]" = torch.ops.aten.le.Scalar(relu_2, 0);  relu_2 = None
+        where_2: "bf16[128, 192, 17, 17]" = torch.ops.aten.where.self(le_2, arg9_1, slice_3);  le_2 = slice_3 = None
+        convert_element_type_11: "f32[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(where_2, torch.float32);  where_2 = None
+        squeeze_4: "f32[192]" = torch.ops.aten.squeeze.dims(arg16_1, [0, 2, 3]);  arg16_1 = None
+        unsqueeze_36: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(squeeze_4, 0);  squeeze_4 = None
+        unsqueeze_37: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_36, 2);  unsqueeze_36 = None
+        unsqueeze_38: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_37, 3);  unsqueeze_37 = None
+        sum_5: "f32[192]" = torch.ops.aten.sum.dim_IntList(convert_element_type_11, [0, 2, 3])
+        convert_element_type_12: "f32[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(arg15_1, torch.float32);  arg15_1 = None
+        sub_9: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(convert_element_type_12, unsqueeze_38);  convert_element_type_12 = unsqueeze_38 = None
+        mul_24: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(convert_element_type_11, sub_9)
+        sum_6: "f32[192]" = torch.ops.aten.sum.dim_IntList(mul_24, [0, 2, 3]);  mul_24 = None
+        mul_25: "f32[192]" = torch.ops.aten.mul.Tensor(sum_5, 2.703287197231834e-05)
+        unsqueeze_39: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_25, 0);  mul_25 = None
+        unsqueeze_40: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_39, 2);  unsqueeze_39 = None
+        unsqueeze_41: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_40, 3);  unsqueeze_40 = None
+        mul_26: "f32[192]" = torch.ops.aten.mul.Tensor(sum_6, 2.703287197231834e-05)
+        squeeze_5: "f32[192]" = torch.ops.aten.squeeze.dims(arg17_1, [0, 2, 3]);  arg17_1 = None
+        mul_27: "f32[192]" = torch.ops.aten.mul.Tensor(squeeze_5, squeeze_5)
+        mul_28: "f32[192]" = torch.ops.aten.mul.Tensor(mul_26, mul_27);  mul_26 = mul_27 = None
+        unsqueeze_42: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_28, 0);  mul_28 = None
+        unsqueeze_43: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_42, 2);  unsqueeze_42 = None
+        unsqueeze_44: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_43, 3);  unsqueeze_43 = None
+        mul_29: "f32[192]" = torch.ops.aten.mul.Tensor(squeeze_5, arg18_1);  arg18_1 = None
+        unsqueeze_45: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_29, 0);  mul_29 = None
+        unsqueeze_46: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_45, 2);  unsqueeze_45 = None
+        unsqueeze_47: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_46, 3);  unsqueeze_46 = None
+        mul_30: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_9, unsqueeze_44);  sub_9 = unsqueeze_44 = None
+        sub_10: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(convert_element_type_11, mul_30);  convert_element_type_11 = mul_30 = None
+        sub_11: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(sub_10, unsqueeze_41);  sub_10 = unsqueeze_41 = None
+        mul_31: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_11, unsqueeze_47);  sub_11 = unsqueeze_47 = None
+        mul_32: "f32[192]" = torch.ops.aten.mul.Tensor(sum_6, squeeze_5);  sum_6 = squeeze_5 = None
+        convert_element_type_13: "bf16[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(mul_31, torch.bfloat16);  mul_31 = None
+        sub_12: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(arg20_1, arg21_1)
+        mul_33: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_12, arg22_1);  sub_12 = None
+        unsqueeze_48: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(arg23_1, -1)
+        unsqueeze_49: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_48, -1);  unsqueeze_48 = None
+        mul_34: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(mul_33, unsqueeze_49);  mul_33 = unsqueeze_49 = None
+        unsqueeze_50: "f32[192, 1]" = torch.ops.aten.unsqueeze.default(arg24_1, -1);  arg24_1 = None
+        unsqueeze_51: "f32[192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_50, -1);  unsqueeze_50 = None
+        add_5: "f32[128, 192, 17, 17]" = torch.ops.aten.add.Tensor(mul_34, unsqueeze_51);  mul_34 = unsqueeze_51 = None
+        convert_element_type_14: "bf16[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(add_5, torch.bfloat16);  add_5 = None
+        relu_3: "bf16[128, 192, 17, 17]" = torch.ops.aten.relu.default(convert_element_type_14);  convert_element_type_14 = None
+        le_3: "b8[128, 192, 17, 17]" = torch.ops.aten.le.Scalar(relu_3, 0);  relu_3 = None
+        where_3: "bf16[128, 192, 17, 17]" = torch.ops.aten.where.self(le_3, arg9_1, slice_2);  le_3 = arg9_1 = slice_2 = None
+        convert_element_type_15: "f32[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(where_3, torch.float32);  where_3 = None
+        squeeze_6: "f32[192]" = torch.ops.aten.squeeze.dims(arg21_1, [0, 2, 3]);  arg21_1 = None
+        unsqueeze_52: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(squeeze_6, 0);  squeeze_6 = None
+        unsqueeze_53: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_52, 2);  unsqueeze_52 = None
+        unsqueeze_54: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_53, 3);  unsqueeze_53 = None
+        sum_7: "f32[192]" = torch.ops.aten.sum.dim_IntList(convert_element_type_15, [0, 2, 3])
+        convert_element_type_16: "f32[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(arg20_1, torch.float32);  arg20_1 = None
+        sub_13: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(convert_element_type_16, unsqueeze_54);  convert_element_type_16 = unsqueeze_54 = None
+        mul_35: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(convert_element_type_15, sub_13)
+        sum_8: "f32[192]" = torch.ops.aten.sum.dim_IntList(mul_35, [0, 2, 3]);  mul_35 = None
+        mul_36: "f32[192]" = torch.ops.aten.mul.Tensor(sum_7, 2.703287197231834e-05)
+        unsqueeze_55: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_36, 0);  mul_36 = None
+        unsqueeze_56: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_55, 2);  unsqueeze_55 = None
+        unsqueeze_57: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_56, 3);  unsqueeze_56 = None
+        mul_37: "f32[192]" = torch.ops.aten.mul.Tensor(sum_8, 2.703287197231834e-05)
+        squeeze_7: "f32[192]" = torch.ops.aten.squeeze.dims(arg22_1, [0, 2, 3]);  arg22_1 = None
+        mul_38: "f32[192]" = torch.ops.aten.mul.Tensor(squeeze_7, squeeze_7)
+        mul_39: "f32[192]" = torch.ops.aten.mul.Tensor(mul_37, mul_38);  mul_37 = mul_38 = None
+        unsqueeze_58: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_39, 0);  mul_39 = None
+        unsqueeze_59: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_58, 2);  unsqueeze_58 = None
+        unsqueeze_60: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_59, 3);  unsqueeze_59 = None
+        mul_40: "f32[192]" = torch.ops.aten.mul.Tensor(squeeze_7, arg23_1);  arg23_1 = None
+        unsqueeze_61: "f32[1, 192]" = torch.ops.aten.unsqueeze.default(mul_40, 0);  mul_40 = None
+        unsqueeze_62: "f32[1, 192, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_61, 2);  unsqueeze_61 = None
+        unsqueeze_63: "f32[1, 192, 1, 1]" = torch.ops.aten.unsqueeze.default(unsqueeze_62, 3);  unsqueeze_62 = None
+        mul_41: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_13, unsqueeze_60);  sub_13 = unsqueeze_60 = None
+        sub_14: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(convert_element_type_15, mul_41);  convert_element_type_15 = mul_41 = None
+        sub_15: "f32[128, 192, 17, 17]" = torch.ops.aten.sub.Tensor(sub_14, unsqueeze_57);  sub_14 = unsqueeze_57 = None
+        mul_42: "f32[128, 192, 17, 17]" = torch.ops.aten.mul.Tensor(sub_15, unsqueeze_63);  sub_15 = unsqueeze_63 = None
+        mul_43: "f32[192]" = torch.ops.aten.mul.Tensor(sum_8, squeeze_7);  sum_8 = squeeze_7 = None
+        convert_element_type_17: "bf16[128, 192, 17, 17]" = torch.ops.prims.convert_element_type.default(mul_42, torch.bfloat16);  mul_42 = None
+        return (sum_1, mul_10, convert_element_type_5, sum_3, mul_21, convert_element_type_9, sum_5, mul_32, convert_element_type_13, sum_7, mul_43, convert_element_type_17)
+
+
+
+def _default_make_inputs():
+    configs = load_shape_configs(__file__)
+    if not configs:
+        raise RuntimeError(
+            "no shapes.json next to this repro — pass an explicit config "
+            "via make_inputs(shape_config=...)")
+    return make_inputs_from_config(next(iter(configs.values())))
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
+
+
+if __name__ == "__main__":
+    benchmark_repro(__file__, Repro, make_inputs)

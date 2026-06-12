@@ -1,0 +1,26 @@
+{
+  "points": [
+    {
+      "shape_hash": "f77e434f",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,128,64,64],"bf16",{"st":[524288,1,8192,128]}]
+      ]
+    },
+    {
+      "shape_hash": "1acf97f6",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,128,48,48],"bf16",{"st":[294912,1,6144,128]}]
+      ]
+    }
+  ]
+}

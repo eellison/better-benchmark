@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "mobilenet_v2",
+  "patterns": [
+    "6637e72b3b06",
+    "818c3aa59952",
+    "9595e73ff43b",
+    "bae5a06d2559"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

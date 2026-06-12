@@ -1,0 +1,91 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[1024],"f32",{"n":"primals_11"}],
+    [[1024],"f32",{"n":"primals_17"}],
+    [[8192,1024],"bf16",{"n":"view"}],
+    [[8,16,1024,64],"bf16",{"n":"permute_1","st":[1048576,64,1024,1]}],
+    [[8,16,1024,64],"bf16",{"n":"permute_4","st":[1048576,64,1024,1]}],
+    [[8,16,1024,64],"bf16",{"n":"permute_5","st":[1048576,64,1024,1]}],
+    [[8,1,1024,1024],"bf16",{"n":"where"}],
+    [[8,16,1024,64],"bf16",{"n":"getitem","st":[1048576,64,1024,1]}],
+    [[8,16,1024,1],"f32",{"n":"getitem_1"}],
+    [[],"i64",{"n":"getitem_6","gen":["index",0,100],"x":{"constraint_source":"default_unobserved"}}],
+    [[],"i64",{"n":"getitem_7","gen":["index",0,100],"x":{"constraint_source":"default_unobserved"}}],
+    [[8,1024,1024],"b8",{"n":"gt","gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[8,1024,1024],"f32",{"n":"mul_2"}],
+    [[8192,1024],"bf16",{"n":"view_12"}],
+    [[8192,4096],"bf16",{"n":"addmm_4"}],
+    [[8192,4096],"bf16",{"n":"view_14"}],
+    [[8,1024,1024],"b8",{"n":"gt_1","gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[8,1024,1024],"f32",{"n":"mul_9"}],
+    [[8,1024,1],"f32",{"n":"div"}],
+    [[1024,4096],"bf16",{"n":"permute_10"}],
+    [[4096,1024],"bf16",{"n":"permute_14"}],
+    [[8,1024,1],"f32",{"n":"div_1"}],
+    [[1024,1024],"bf16",{"n":"permute_18"}],
+    [[1024,1024],"bf16",{"n":"permute_25"}],
+    [[1024,1024],"bf16",{"n":"permute_29"}],
+    [[1024,1024],"bf16",{"n":"permute_34"}],
+    [[8,1024,1024],"f32",{"n":"tangents_1"}]
+  ],
+  "outputs": [
+    [[8,1024,1024],"f32",{"n":"output_0"}],
+    [[1024,1024],"f32",{"n":"output_1"}],
+    [[1024],"f32",{"n":"output_2"}],
+    [[1024,1024],"f32",{"n":"output_3"}],
+    [[1024],"f32",{"n":"output_4"}],
+    [[1024,1024],"f32",{"n":"output_5"}],
+    [[1024],"f32",{"n":"output_6"}],
+    [[1024,1024],"f32",{"n":"output_8"}],
+    [[1024],"f32",{"n":"output_9"}],
+    [[1024],"f32",{"n":"output_10"}],
+    [[1024],"f32",{"n":"output_11"}],
+    [[4096,1024],"f32",{"n":"output_12"}],
+    [[4096],"f32",{"n":"output_13"}],
+    [[1024,4096],"f32",{"n":"output_14"}],
+    [[1024],"f32",{"n":"output_15"}],
+    [[1024],"f32",{"n":"output_16"}],
+    [[1024],"f32",{"n":"output_17"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_007.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "BartForCausalLM",
+    "graph": "full_graph_007.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 130,
+    "counts": {
+      "fusible_in_partition": 108,
+      "fusible_unpartitioned": 9,
+      "non_fusible": 13
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 6,
+        "aten.erf.default": 1,
+        "aten.exp.default": 1,
+        "aten.mul.Tensor": 23,
+        "aten.permute.default": 9,
+        "aten.reshape.default": 21,
+        "aten.sub.Tensor": 4,
+        "aten.sum.dim_IntList": 14,
+        "prims.convert_element_type.default": 29
+      },
+      "fusible_unpartitioned": {
+        "_operator.getitem": 3,
+        "aten.permute.default": 2,
+        "aten.reshape.default": 4
+      },
+      "non_fusible": {
+        "aten._scaled_dot_product_cudnn_attention_backward.default": 1,
+        "aten.mm.default": 12
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

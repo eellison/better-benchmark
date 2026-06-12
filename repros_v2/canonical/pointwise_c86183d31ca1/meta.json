@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "c86183d31ca1",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten._unsafe_masked_index_put_accumulate.default",
+    "aten.bitwise_and.Tensor",
+    "aten.bitwise_and.Tensor",
+    "aten.full.default",
+    "aten.ge.Scalar",
+    "aten.lt.Scalar",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 11,
+  "models": [
+    "hf/infer/BartForCausalLM",
+    "hf/infer/BlenderbotForCausalLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/train/BartForCausalLM",
+    "hf/train/BlenderbotForCausalLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/M2M100ForConditionalGeneration",
+    "hf/train/MBartForCausalLM",
+    "hf/train/PLBartForCausalLM",
+    "hf/train/TrOCRForCausalLM",
+    "hf/train/XGLMForCausalLM"
+  ]
+}

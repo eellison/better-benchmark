@@ -1,0 +1,36 @@
+{
+  "pattern_hash": "6150664fe0bf",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "mean"
+  ],
+  "n_ops": 20,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.addcmul.default",
+    "aten.div.Tensor",
+    "aten.erf.default",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.pow.Tensor_Scalar",
+    "aten.pow.Tensor_Scalar",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k",
+    "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k"
+  ]
+}

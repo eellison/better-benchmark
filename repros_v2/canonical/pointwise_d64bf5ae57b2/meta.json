@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "d64bf5ae57b2",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.unsqueeze.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/YituTechConvBert"
+  ]
+}

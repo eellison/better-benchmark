@@ -1,0 +1,72 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "torchbench/infer/pyhpc_isoneutral_mixing": {
+          "occurrences": 1
+        },
+        "torchbench/infer/pyhpc_turbulent_kinetic_energy": {
+          "occurrences": 1
+        },
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/infer/BlenderbotForConditionalGeneration": {
+          "occurrences": 26
+        },
+        "hf/infer/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 6
+        },
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 24
+        },
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 2
+        },
+        "hf/infer/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/M2M100ForConditionalGeneration": {
+          "occurrences": 24
+        },
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/infer/MegatronBertForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 2
+        },
+        "hf/infer/YituTechConvBert": {
+          "occurrences": 1
+        },
+        "hf/infer/MobileBertForMaskedLM": {
+          "occurrences": 24
+        },
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[204,204,26]]
+      ]
+    }
+  ]
+}

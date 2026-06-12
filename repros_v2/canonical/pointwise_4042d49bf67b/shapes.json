@@ -1,0 +1,60 @@
+{
+  "points": [
+    {
+      "shape_hash": "44a2434c",
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 6
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[3072,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "ae9f1068",
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 6
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768,3072],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "f5f85987",
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 6
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "774eab0e",
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 6
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768,2304],"f32"]
+      ]
+    }
+  ]
+}

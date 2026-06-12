@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "dbd126b833fb",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.constant_pad_nd.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/nvidia_deeprecommender",
+    "torchbench/train/nvidia_deeprecommender"
+  ]
+}

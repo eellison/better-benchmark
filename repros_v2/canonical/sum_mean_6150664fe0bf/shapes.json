@@ -1,0 +1,56 @@
+{
+  "points": [
+    {
+      "shape_hash": "428ddc1f",
+      "models": {
+        "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[2560],"bf16"],
+        [[2560],"bf16"],
+        [[128,2560,9,9],"bf16",{"st":[207360,1,23040,2560]}]
+      ]
+    },
+    {
+      "shape_hash": "4a0c78a6",
+      "models": {
+        "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[1280],"bf16"],
+        [[1280],"bf16"],
+        [[128,1280,18,18],"bf16",{"st":[414720,1,23040,1280]}]
+      ]
+    },
+    {
+      "shape_hash": "7b1e363f",
+      "models": {
+        "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[640],"bf16"],
+        [[640],"bf16"],
+        [[128,640,36,36],"bf16",{"st":[829440,1,23040,640]}]
+      ]
+    },
+    {
+      "shape_hash": "78b1c15c",
+      "models": {
+        "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[320],"bf16"],
+        [[320],"bf16"],
+        [[128,320,72,72],"bf16",{"st":[1658880,1,23040,320]}]
+      ]
+    }
+  ]
+}

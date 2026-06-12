@@ -1,0 +1,28 @@
+{
+  "points": [
+    {
+      "shape_hash": "9cb825ed",
+      "models": {
+        "timm/infer/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[128,2304,7,7],"bf16",{"st":[112896,1,16128,2304]}],
+        ["S",[128,3,6,128,49]]
+      ]
+    },
+    {
+      "shape_hash": "97e22389",
+      "models": {
+        "timm/infer/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[128,1152,14,14],"bf16",{"st":[225792,1,16128,1152]}],
+        ["S",[128,3,6,64,196]]
+      ]
+    }
+  ]
+}

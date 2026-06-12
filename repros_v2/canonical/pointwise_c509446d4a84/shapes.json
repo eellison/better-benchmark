@@ -1,0 +1,46 @@
+{
+  "points": [
+    {
+      "shape_hash": "981155f5",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 48
+        }
+      },
+      "inputs": [
+        [[4096,1536],"bf16"],
+        ["S",[8,512,1536]],
+        ["S",[8,512,24,-1]],
+        ["S",[-1,512,64]]
+      ]
+    },
+    {
+      "shape_hash": "b642f4d6",
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,1024],"bf16"],
+        ["S",[64,256,1024]],
+        ["S",[64,-1,16,64]],
+        ["S",[1024,256,64]]
+      ]
+    },
+    {
+      "shape_hash": "4fa33397",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,1024],"bf16"],
+        ["S",[32,128,1024]],
+        ["S",[32,128,-1,64]],
+        ["S",[512,128,64]]
+      ]
+    }
+  ]
+}

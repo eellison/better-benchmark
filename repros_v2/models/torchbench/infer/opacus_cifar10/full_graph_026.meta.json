@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[10,512],"bf16",{"n":"arg0_1"}],
+    [[10],"bf16",{"n":"arg1_1"}],
+    [[64,512],"bf16",{"n":"arg2_1"}]
+  ],
+  "outputs": [
+    [[64,10],"bf16",{"n":"output_0"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_026.py",
+  "source": {
+    "kind": "model",
+    "suite": "torchbench",
+    "mode": "infer",
+    "model": "opacus_cifar10",
+    "graph": "full_graph_026.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 2,
+    "counts": {
+      "fusible_in_partition": 0,
+      "fusible_unpartitioned": 1,
+      "non_fusible": 1
+    },
+    "ops": {
+      "fusible_in_partition": {},
+      "fusible_unpartitioned": {
+        "aten.permute.default": 1
+      },
+      "non_fusible": {
+        "aten.addmm.default": 1
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

@@ -1,0 +1,24 @@
+{
+  "points": [
+    {
+      "shape_hash": "22c184d8",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,147,147],"bf16",{"st":[1382976,1,9408,64]}],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    }
+  ]
+}

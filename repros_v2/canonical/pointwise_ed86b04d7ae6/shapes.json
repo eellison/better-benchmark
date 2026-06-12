@@ -1,0 +1,60 @@
+{
+  "points": [
+    {
+      "shape_hash": "fecae95d",
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[4096,56,32],"bf16"],
+        ["S",[128,32,49,32]],
+        ["S",[128,49,1024]],
+        ["S",[6272,1024]]
+      ]
+    },
+    {
+      "shape_hash": "31e78315",
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[8192,56,32],"bf16"],
+        ["S",[512,16,49,32]],
+        ["S",[512,49,512]],
+        ["S",[25088,512]]
+      ]
+    },
+    {
+      "shape_hash": "c6f70802",
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[16384,56,32],"bf16"],
+        ["S",[2048,8,49,32]],
+        ["S",[2048,49,256]],
+        ["S",[100352,256]]
+      ]
+    },
+    {
+      "shape_hash": "28712c8b",
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32768,56,32],"bf16"],
+        ["S",[8192,4,49,32]],
+        ["S",[8192,49,128]],
+        ["S",[401408,128]]
+      ]
+    }
+  ]
+}

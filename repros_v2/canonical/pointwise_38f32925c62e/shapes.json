@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "c67d6e69",
+      "models": {
+        "torchbench/infer/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,1],"bf16"],
+        [[16,1],"bf16"],
+        [[16],"bf16"]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "points": [
+    {
+      "shape_hash": "cd47785e",
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[4096,16384],"bf16"],
+        ["S",[8,512,16384]],
+        ["S",[4096,16384]]
+      ]
+    },
+    {
+      "shape_hash": "92efc45e",
+      "models": {
+        "hf/infer/DistillGPT2": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[16384,3072],"bf16"],
+        ["S",[32,512,3072]],
+        ["S",[-1,3072]]
+      ]
+    },
+    {
+      "shape_hash": "d05618d1",
+      "models": {
+        "hf/infer/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[8192,3072],"bf16"],
+        ["S",[8,1024,3072]],
+        ["S",[-1,3072]]
+      ]
+    },
+    {
+      "shape_hash": "7b14189f",
+      "models": {
+        "hf/infer/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/infer/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        }
+      },
+      "inputs": [
+        [[128,16384],"bf16"],
+        ["S",[1,128,16384]],
+        ["S",[128,16384]]
+      ]
+    },
+    {
+      "shape_hash": "5cd82a46",
+      "models": {
+        "hf/infer/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/infer/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4096,8192],"bf16"],
+        ["S",[32,128,8192]],
+        ["S",[4096,8192]]
+      ]
+    },
+    {
+      "shape_hash": "8f687505",
+      "models": {
+        "hf/infer/GoogleFnet": {
+          "occurrences": 12
+        },
+        "hf/train/GoogleFnet": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[16384,3072],"f32"],
+        ["S",[32,512,3072]],
+        ["S",[16384,3072]]
+      ]
+    }
+  ]
+}

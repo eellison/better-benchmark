@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "6d651bcd",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[30522,128],"f32"],
+        [[384,30522],"f32"],
+        ["S",[0,6,0,0]]
+      ]
+    }
+  ]
+}

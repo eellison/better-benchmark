@@ -1,0 +1,36 @@
+{
+  "points": [
+    {
+      "shape_hash": "4c7d1afa",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32768,512],"bf16"],
+        [[256,128,512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        ["S",[256,128,512]],
+        ["S",[32768,512]]
+      ]
+    },
+    {
+      "shape_hash": "b5045c46",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[32768,128],"bf16"],
+        [[256,128,128],"f32"],
+        [[128],"f32"],
+        [[128],"f32"],
+        ["S",[256,128,128]],
+        ["S",[32768,128]]
+      ]
+    }
+  ]
+}

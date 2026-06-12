@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "f13eb73e",
+      "models": {
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[25344,768],"bf16"],
+        [[128,198,768],"f32"],
+        [[768],"f32"],
+        [[768],"f32"],
+        ["S",[128,198,768]]
+      ]
+    }
+  ]
+}

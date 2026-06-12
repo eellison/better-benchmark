@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "tf_efficientnet_b0",
+  "patterns": [
+    "019999975a39",
+    "04d85912d998",
+    "100a39b686e3",
+    "149b2db5c64f",
+    "182f6f9450b9",
+    "183b124c731f",
+    "292e665668b6",
+    "4a4493837e6e",
+    "5a22dd21d88e",
+    "795cdbe23b17",
+    "7a2ac1c4841d",
+    "868cea3d5857",
+    "88858c55c3b4",
+    "894f3180f3c4",
+    "8bb40810003c",
+    "a58657212bf4",
+    "ad7165cabf3f",
+    "c2bf513c1ebf",
+    "c91da8ecf163",
+    "ccd411f2a45d",
+    "cd8694c00507",
+    "ceb5c315290a",
+    "de769927fa58",
+    "e790938418f4",
+    "f4b82dbfbec5"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

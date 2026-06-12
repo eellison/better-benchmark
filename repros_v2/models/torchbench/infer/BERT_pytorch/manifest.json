@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "BERT_pytorch",
+  "patterns": [
+    "0aaf589f7fad",
+    "1f95724cbf96",
+    "301cf5a13527",
+    "4506a84dfa49",
+    "644fa7675014",
+    "647d3ac3f711",
+    "68ce17870caf",
+    "75f17d2ac9eb",
+    "81981d13665a",
+    "826ea0b5f6e4",
+    "83ed19c04171",
+    "d5c5da805704",
+    "da6a65f031d5",
+    "e87d6ebc9ded"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "66751dee67d6",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k",
+    "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k"
+  ]
+}

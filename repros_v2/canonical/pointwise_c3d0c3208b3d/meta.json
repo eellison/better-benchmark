@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "c3d0c3208b3d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.expand.default",
+    "aten.ge.Scalar",
+    "aten.lift_fresh_copy.default",
+    "aten.scalar_tensor.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.where.self",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/MT5ForConditionalGeneration"
+  ]
+}

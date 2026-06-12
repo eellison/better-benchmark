@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "200ac53a",
+      "models": {
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,4096],"bf16"],
+        ["S",[64,4096]]
+      ]
+    }
+  ]
+}

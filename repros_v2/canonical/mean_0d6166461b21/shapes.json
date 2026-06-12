@@ -1,0 +1,21 @@
+{
+  "points": [
+    {
+      "shape_hash": "46dbfd5f",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,512],"bf16"],
+        [[84],"i64"],
+        [[32,128,512],"f32"],
+        [[512],"f32"],
+        ["S",[32,128,512]],
+        ["S",[32,128,512]],
+        ["S",[4096,512]]
+      ]
+    }
+  ]
+}

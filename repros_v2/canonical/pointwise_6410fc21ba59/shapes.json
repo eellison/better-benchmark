@@ -1,0 +1,15 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/mistralai/Mistral-7B-Instruct-v0.3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[1,-1,1000,1000]]
+      ]
+    }
+  ]
+}

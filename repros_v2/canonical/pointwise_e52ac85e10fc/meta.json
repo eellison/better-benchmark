@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "e52ac85e10fc",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.full.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf/infer/google/gemma-2-2b",
+    "hf/infer/google/gemma-3-4b-it",
+    "hf/infer/openai/gpt-oss-20b"
+  ]
+}

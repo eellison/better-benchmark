@@ -1,0 +1,91 @@
+{
+  "points": [
+    {
+      "shape_hash": "6098747b",
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,512],"i64",{"gen":["index",0,30000]}],
+        [[4096,30000],"bf16"],
+        ["S",[8,512,30000]],
+        ["S",[-1,30000]]
+      ]
+    },
+    {
+      "shape_hash": "bba6ebb5",
+      "models": {
+        "hf/infer/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128],"i64",{"gen":["index",0,8008]}],
+        [[4096,8008],"bf16"],
+        ["S",[32,128,8008]],
+        ["S",[-1,8008]]
+      ]
+    },
+    {
+      "shape_hash": "4f6a8ed5",
+      "models": {
+        "hf/infer/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,128],"i64",{"gen":["index",0,128112]}],
+        [[8192,128112],"bf16"],
+        ["S",[64,128,128112]],
+        ["S",[-1,128112]]
+      ]
+    },
+    {
+      "shape_hash": "29bccbec",
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128],"i64",{"gen":["index",0,250112]}],
+        [[4096,250112],"bf16"],
+        ["S",[32,128,250112]],
+        ["S",[-1,250112]]
+      ]
+    },
+    {
+      "shape_hash": "f7a45f0f",
+      "models": {
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024],"i64",{"gen":["index",0,32128]}],
+        [[8192,32128],"bf16"],
+        ["S",[8,1024,32128]],
+        ["S",[-1,32128]]
+      ]
+    },
+    {
+      "shape_hash": "8e79bb3c",
+      "models": {
+        "hf/infer/XLNetLMHeadModel": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,512],"i64",{"gen":["index",0,32000]}],
+        [[8192,32000],"bf16"],
+        ["S",[16,512,32000]],
+        ["S",[-1,32000]]
+      ]
+    }
+  ]
+}

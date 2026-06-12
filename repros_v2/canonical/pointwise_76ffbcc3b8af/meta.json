@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "76ffbcc3b8af",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "aten._adaptive_avg_pool2d.default",
+    "aten.relu.default",
+    "aten.reshape.default",
+    "prims._low_memory_max_pool_with_offsets.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/alexnet",
+    "torchbench/train/alexnet"
+  ]
+}

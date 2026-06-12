@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "6bfc0be7",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 23
+        }
+      },
+      "inputs": [
+        [[4096,1536],"bf16"],
+        [[],"bf16"],
+        ["S",[8,512,1536]],
+        ["S",[8,512,24,-1]],
+        ["S",[-1,512,64]]
+      ]
+    }
+  ]
+}

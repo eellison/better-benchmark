@@ -1,0 +1,22 @@
+{
+  "points": [
+    {
+      "shape_hash": "6bcef7c8",
+      "models": {
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,2],"bf16"],
+        [[32,128],"i64"],
+        [[32],"i64",{"gen":["index",0,32]}],
+        [[32],"i64",{"gen":["index",0,2]}],
+        [[],"f32"],
+        ["S",[32,128,2]],
+        ["S",[1,2]],
+        ["S",[32,2]]
+      ]
+    }
+  ]
+}

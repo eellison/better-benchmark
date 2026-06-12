@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "c509446d4a84",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "hf/infer/DebertaV2ForMaskedLM",
+    "hf/train/DebertaV2ForMaskedLM",
+    "hf/train/TrOCRForCausalLM",
+    "hf/train/XGLMForCausalLM"
+  ]
+}

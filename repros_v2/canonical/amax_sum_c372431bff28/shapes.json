@@ -1,0 +1,24 @@
+{
+  "points": [
+    {
+      "shape_hash": "5911cf96",
+      "models": {
+        "hf/infer/GPTNeoForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/GPTNeoForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,1,2048,2048],"b8"],
+        [[512,128,128],"f32"],
+        [[32,128],"i64",{"gen":["index",0,32]}],
+        ["S",[32,16,128,128]],
+        ["S",[32,-1,128,128]],
+        ["S",[32,16,128,128]],
+        ["S",[512,128,128]]
+      ]
+    }
+  ]
+}

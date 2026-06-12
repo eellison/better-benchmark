@@ -1,0 +1,82 @@
+{
+  "points": [
+    {
+      "shape_hash": "27e7b058",
+      "models": {
+        "torchbench/infer/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,192,27,27],"bf16"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "9594e3d9",
+      "models": {
+        "torchbench/infer/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,55,55],"bf16"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "0bd9d057",
+      "models": {
+        "torchbench/infer/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,512,28,28],"bf16"],
+        ["S",[2,2]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "cb475406",
+      "models": {
+        "torchbench/infer/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,256,56,56],"bf16"],
+        ["S",[2,2]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "dbbbb2f7",
+      "models": {
+        "torchbench/infer/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,128,112,112],"bf16"],
+        ["S",[2,2]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "484bbe51",
+      "models": {
+        "torchbench/infer/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,64,224,224],"bf16"],
+        ["S",[2,2]],
+        ["S",[2,2]]
+      ]
+    }
+  ]
+}

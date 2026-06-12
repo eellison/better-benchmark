@@ -1,0 +1,116 @@
+{
+  "points": [
+    {
+      "shape_hash": "732e3257",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,512,7,7],"bf16"],
+        [[64,32,7,7],"bf16"],
+        [[544],"bf16"],
+        [[544],"bf16"],
+        [[544],"bf16"],
+        [[544],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "dca482b1",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,256,14,14],"bf16"],
+        [[64,32,14,14],"bf16"],
+        [[288],"bf16"],
+        [[288],"bf16"],
+        [[288],"bf16"],
+        [[288],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a3bd7f06",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,128,28,28],"bf16"],
+        [[64,32,28,28],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cfae6d5c",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,64,56,56],"bf16"],
+        [[64,32,56,56],"bf16"],
+        [[96],"bf16"],
+        [[96],"bf16"],
+        [[96],"bf16"],
+        [[96],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8aa233bf",
+      "models": {
+        "torchbench/infer/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,16,8,8],"bf16"],
+        [[128,160,8,8],"bf16"],
+        [[176],"bf16"],
+        [[176],"bf16"],
+        [[176],"bf16"],
+        [[176],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1b91efd5",
+      "models": {
+        "torchbench/infer/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,16,16,16],"bf16"],
+        [[128,144,16,16],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "320237ea",
+      "models": {
+        "torchbench/infer/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,16,32,32],"bf16"],
+        [[128,112,32,32],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    }
+  ]
+}

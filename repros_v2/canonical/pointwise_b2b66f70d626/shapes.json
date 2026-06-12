@@ -1,0 +1,20 @@
+{
+  "points": [
+    {
+      "shape_hash": "bc0fb1fb",
+      "models": {
+        "hf/infer/MobileBertForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[32768,128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        ["S",[256,128,128]],
+        ["S",[32768,128]],
+        ["S",[32768,128]]
+      ]
+    }
+  ]
+}

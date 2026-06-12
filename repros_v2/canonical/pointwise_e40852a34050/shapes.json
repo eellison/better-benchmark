@@ -1,0 +1,27 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/infer/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[16,-1,128,128]]
+      ]
+    }
+  ]
+}

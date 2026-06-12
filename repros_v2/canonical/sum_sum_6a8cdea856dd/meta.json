@@ -1,0 +1,52 @@
+{
+  "pattern_hash": "6a8cdea856dd",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 29,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.le.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 9,
+  "models": [
+    "timm/infer/adv_inception_v3",
+    "timm/infer/ghostnet_100",
+    "timm/infer/inception_v3",
+    "timm/train/adv_inception_v3",
+    "timm/train/ghostnet_100",
+    "timm/train/inception_v3",
+    "torchbench/infer/LearningToPaint",
+    "torchbench/train/LearningToPaint",
+    "torchbench/train/phlippe_resnet"
+  ]
+}

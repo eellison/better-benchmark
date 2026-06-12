@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "YituTechConvBert",
+  "patterns": [
+    "035e4d7f5117",
+    "07e2552977f5",
+    "0c4549e63f48",
+    "1af9add64387",
+    "1e8c0ecafa26",
+    "642e9b69a215",
+    "644fa7675014",
+    "647d3ac3f711",
+    "732ce9dc68ae",
+    "8002af197c08",
+    "826ea0b5f6e4",
+    "9375aeadb8d3",
+    "93ab7097e9e5",
+    "96edf0542ecd",
+    "af505388b035",
+    "d64bf5ae57b2",
+    "da5aa7a47091"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

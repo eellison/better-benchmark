@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "e972081e0aab",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "aten.relu.default",
+    "prims._low_memory_max_pool_with_offsets.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/squeezenet1_1",
+    "torchbench/train/squeezenet1_1"
+  ]
+}

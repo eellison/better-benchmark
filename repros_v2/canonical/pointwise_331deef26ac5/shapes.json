@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "61a2330b",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768],"f32"],
+        [[768],"f32"],
+        [[768],"f32"]
+      ]
+    }
+  ]
+}

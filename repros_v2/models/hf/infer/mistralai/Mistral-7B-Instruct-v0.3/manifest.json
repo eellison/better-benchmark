@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "mistralai/Mistral-7B-Instruct-v0.3",
+  "patterns": [
+    "1a665e446ec5",
+    "2ac293b38233",
+    "527df57b755b",
+    "6410fc21ba59",
+    "7c39bacfff54",
+    "b3f01ad9586c",
+    "c033ad4c69ca",
+    "d28c6a07654f",
+    "db9733790220"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

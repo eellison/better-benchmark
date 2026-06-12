@@ -1,0 +1,79 @@
+{
+  "points": [
+    {
+      "shape_hash": "c2db0b92",
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[20005],"f32"],
+        ["S",[3]]
+      ]
+    },
+    {
+      "shape_hash": "2e98d974",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128100],"f32"],
+        ["S",[4]]
+      ]
+    },
+    {
+      "shape_hash": "6925c38d",
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[30522],"f32"],
+        ["S",[6]]
+      ]
+    },
+    {
+      "shape_hash": "85cac153",
+      "models": {
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2],"f32"],
+        ["S",[6]]
+      ]
+    },
+    {
+      "shape_hash": "06af09d8",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50265],"f32"],
+        ["S",[7]]
+      ]
+    }
+  ]
+}

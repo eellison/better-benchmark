@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "2973ba0c",
+      "models": {
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024,768],"bf16"],
+        ["S",[8192,768]],
+        ["S",[8192,768]],
+        ["S",[8192,768]]
+      ]
+    }
+  ]
+}

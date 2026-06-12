@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "50d031e1",
+      "models": {
+        "torchbench/infer/pytorch_CycleGAN_and_pix2pix": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[1,256,64,64],"bf16"],
+        [[1,256,64,64],"bf16"]
+      ]
+    }
+  ]
+}

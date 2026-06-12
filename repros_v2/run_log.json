@@ -1,0 +1,3782 @@
+[
+  {
+    "model_key": "timm/infer/adv_inception_v3",
+    "suite": "timm",
+    "model": "adv_inception_v3",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 23.866334199905396,
+    "region_count": 22,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:09:59"
+  },
+  {
+    "model_key": "timm/infer/beit_base_patch16_224",
+    "suite": "timm",
+    "model": "beit_base_patch16_224",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 47.02119159698486,
+    "region_count": 7,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:10:26"
+  },
+  {
+    "model_key": "timm/train/adv_inception_v3",
+    "suite": "timm",
+    "model": "adv_inception_v3",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 95.07791042327881,
+    "region_count": 134,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:09:59"
+  },
+  {
+    "model_key": "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k",
+    "suite": "timm",
+    "model": "convnextv2_nano.fcmae_ft_in22k_in1k",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 14.722939014434814,
+    "region_count": 16,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:11:38"
+  },
+  {
+    "model_key": "timm/train/beit_base_patch16_224",
+    "suite": "timm",
+    "model": "beit_base_patch16_224",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 41.870733976364136,
+    "region_count": 32,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:13:24"
+  },
+  {
+    "model_key": "timm/infer/deit_base_distilled_patch16_224",
+    "suite": "timm",
+    "model": "deit_base_distilled_patch16_224",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 29.804741382598877,
+    "region_count": 6,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:11:58"
+  },
+  {
+    "model_key": "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k",
+    "suite": "timm",
+    "model": "convnextv2_nano.fcmae_ft_in22k_in1k",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 36.49707794189453,
+    "region_count": 78,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:11:56"
+  },
+  {
+    "model_key": "timm/infer/deit_tiny_patch16_224.fb_in1k",
+    "suite": "timm",
+    "model": "deit_tiny_patch16_224.fb_in1k",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 25.437570095062256,
+    "region_count": 5,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:12:36"
+  },
+  {
+    "model_key": "timm/train/deit_tiny_patch16_224.fb_in1k",
+    "suite": "timm",
+    "model": "deit_tiny_patch16_224.fb_in1k",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 417.1980142593384,
+    "region_count": 28,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:21:37"
+  },
+  {
+    "model_key": "timm/train/deit_base_distilled_patch16_224",
+    "suite": "timm",
+    "model": "deit_base_distilled_patch16_224",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 444.405296087265,
+    "region_count": 29,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:14:09"
+  },
+  {
+    "model_key": "timm/infer/dm_nfnet_f0",
+    "suite": "timm",
+    "model": "dm_nfnet_f0",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 38.00725769996643,
+    "region_count": 45,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:19:58"
+  },
+  {
+    "model_key": "timm/infer/ghostnet_100",
+    "suite": "timm",
+    "model": "ghostnet_100",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 23.83806800842285,
+    "region_count": 61,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:20:39"
+  },
+  {
+    "model_key": "timm/train/dm_nfnet_f0",
+    "suite": "timm",
+    "model": "dm_nfnet_f0",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 66.76359844207764,
+    "region_count": 117,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:20:00"
+  },
+  {
+    "model_key": "timm/infer/inception_v3",
+    "suite": "timm",
+    "model": "inception_v3",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 23.710916757583618,
+    "region_count": 22,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:21:11"
+  },
+  {
+    "model_key": "timm/train/ghostnet_100",
+    "suite": "timm",
+    "model": "ghostnet_100",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 97.54491591453552,
+    "region_count": 258,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:21:06"
+  },
+  {
+    "model_key": "timm/infer/mobilenetv2_100",
+    "suite": "timm",
+    "model": "mobilenetv2_100",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 14.310470342636108,
+    "region_count": 24,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:22:48"
+  },
+  {
+    "model_key": "timm/train/inception_v3",
+    "suite": "timm",
+    "model": "inception_v3",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 94.13290286064148,
+    "region_count": 134,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:21:38"
+  },
+  {
+    "model_key": "timm/infer/mobilenetv3_large_100",
+    "suite": "timm",
+    "model": "mobilenetv3_large_100",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 18.215555906295776,
+    "region_count": 43,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:23:16"
+  },
+  {
+    "model_key": "timm/train/mobilenetv2_100",
+    "suite": "timm",
+    "model": "mobilenetv2_100",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 46.773876667022705,
+    "region_count": 112,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:23:06"
+  },
+  {
+    "model_key": "timm/infer/mobilevit_s",
+    "suite": "timm",
+    "model": "mobilevit_s",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 40.32749128341675,
+    "region_count": 40,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:23:56"
+  },
+  {
+    "model_key": "timm/train/mobilenetv3_large_100",
+    "suite": "timm",
+    "model": "mobilenetv3_large_100",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 61.620076417922974,
+    "region_count": 192,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:23:38"
+  },
+  {
+    "model_key": "timm/infer/nfnet_l0",
+    "suite": "timm",
+    "model": "nfnet_l0",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 26.490294218063354,
+    "region_count": 44,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:24:43"
+  },
+  {
+    "model_key": "timm/train/mobilevit_s",
+    "suite": "timm",
+    "model": "mobilevit_s",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 69.15670132637024,
+    "region_count": 182,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:28:39"
+  },
+  {
+    "model_key": "timm/infer/repvgg_a2",
+    "suite": "timm",
+    "model": "repvgg_a2",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 15.57821249961853,
+    "region_count": 8,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:25:43"
+  },
+  {
+    "model_key": "timm/train/nfnet_l0",
+    "suite": "timm",
+    "model": "nfnet_l0",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 50.94108772277832,
+    "region_count": 117,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:25:13"
+  },
+  {
+    "model_key": "timm/train/repvgg_a2",
+    "suite": "timm",
+    "model": "repvgg_a2",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 40.97671675682068,
+    "region_count": 56,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:26:02"
+  },
+  {
+    "model_key": "timm/infer/swin_base_patch4_window7_224",
+    "suite": "timm",
+    "model": "swin_base_patch4_window7_224",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 60.31332731246948,
+    "region_count": 39,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:26:08"
+  },
+  {
+    "model_key": "timm/infer/tf_efficientnet_b0",
+    "suite": "timm",
+    "model": "tf_efficientnet_b0",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 21.60087561607361,
+    "region_count": 51,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:27:12"
+  },
+  {
+    "model_key": "timm/train/tf_efficientnet_b0",
+    "suite": "timm",
+    "model": "tf_efficientnet_b0",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 72.41684412956238,
+    "region_count": 213,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:27:37"
+  },
+  {
+    "model_key": "timm/infer/visformer_small",
+    "suite": "timm",
+    "model": "visformer_small",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 16.216344356536865,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:28:54"
+  },
+  {
+    "model_key": "timm/train/visformer_small",
+    "suite": "timm",
+    "model": "visformer_small",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 70.74586129188538,
+    "region_count": 77,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:29:13"
+  },
+  {
+    "model_key": "timm/infer/vit_base_patch14_dinov2.lvd142m",
+    "suite": "timm",
+    "model": "vit_base_patch14_dinov2.lvd142m",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 44.184706687927246,
+    "region_count": 5,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:30:28"
+  },
+  {
+    "model_key": "timm/train/vit_base_patch14_dinov2.lvd142m",
+    "suite": "timm",
+    "model": "vit_base_patch14_dinov2.lvd142m",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 54.03366708755493,
+    "region_count": 24,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:29:52"
+  },
+  {
+    "model_key": "timm/infer/vit_base_patch16_siglip_256",
+    "suite": "timm",
+    "model": "vit_base_patch16_siglip_256",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 26.11836814880371,
+    "region_count": 10,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T19:32:10"
+  },
+  {
+    "model_key": "timm/train/vit_base_patch16_siglip_256",
+    "suite": "timm",
+    "model": "vit_base_patch16_siglip_256",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 305.18879222869873,
+    "region_count": 38,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:30:50"
+  },
+  {
+    "model_key": "timm/train/swin_base_patch4_window7_224",
+    "suite": "timm",
+    "model": "swin_base_patch4_window7_224",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 5400,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Subprocess timeout after 5460s",
+    "timestamp": "2026-06-11T22:38:48"
+  },
+  {
+    "model_key": "torchbench/infer/BERT_pytorch",
+    "suite": "torchbench",
+    "model": "BERT_pytorch",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 23.240593910217285,
+    "region_count": 14,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:18:08"
+  },
+  {
+    "model_key": "torchbench/infer/DALLE2_pytorch",
+    "suite": "torchbench",
+    "model": "DALLE2_pytorch",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2802634239196777,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "orchbench.py\", line 241, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/canary_models/DALLE2_pytorch/__init__.py\", line 2, in <module>\n    from dalle2_pytorch import (\nModuleNotFoundError: No module named 'dalle2_pytorch'\n",
+    "timestamp": "2026-06-11T20:18:35"
+  },
+  {
+    "model_key": "torchbench/train/DALLE2_pytorch",
+    "suite": "torchbench",
+    "model": "DALLE2_pytorch",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.3237643241882324,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "orchbench.py\", line 241, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/canary_models/DALLE2_pytorch/__init__.py\", line 2, in <module>\n    from dalle2_pytorch import (\nModuleNotFoundError: No module named 'dalle2_pytorch'\n",
+    "timestamp": "2026-06-11T20:18:38"
+  },
+  {
+    "model_key": "torchbench/infer/LearningToPaint",
+    "suite": "torchbench",
+    "model": "LearningToPaint",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 12.0796959400177,
+    "region_count": 14,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:18:42"
+  },
+  {
+    "model_key": "torchbench/train/LearningToPaint",
+    "suite": "torchbench",
+    "model": "LearningToPaint",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 20.94608783721924,
+    "region_count": 57,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:18:57"
+  },
+  {
+    "model_key": "torchbench/infer/Super_SloMo",
+    "suite": "torchbench",
+    "model": "Super_SloMo",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 59.40045475959778,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "    ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 314, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/Super_SloMo/__init__.py\", line 59, in __init__\n    trainset = SuperSloMo(\n               ^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/Super_SloMo/dataloader.py\", line 189, in __init__\n    raise RuntimeError(msg) from e\nRuntimeError: Failed to download data from manifold: No module named 'torchbenchmark.util.framework.fb'\n",
+    "timestamp": "2026-06-11T20:19:22"
+  },
+  {
+    "model_key": "torchbench/train/Super_SloMo",
+    "suite": "torchbench",
+    "model": "Super_SloMo",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 2.548309087753296,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "    ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 307, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/Super_SloMo/__init__.py\", line 59, in __init__\n    trainset = SuperSloMo(\n               ^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/Super_SloMo/dataloader.py\", line 189, in __init__\n    raise RuntimeError(msg) from e\nRuntimeError: Failed to download data from manifold: No module named 'torchbenchmark.util.framework.fb'\n",
+    "timestamp": "2026-06-11T20:20:24"
+  },
+  {
+    "model_key": "torchbench/train/BERT_pytorch",
+    "suite": "torchbench",
+    "model": "BERT_pytorch",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 173.0845866203308,
+    "region_count": 83,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:18:08"
+  },
+  {
+    "model_key": "torchbench/infer/alexnet",
+    "suite": "torchbench",
+    "model": "alexnet",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 36.086527824401855,
+    "region_count": 6,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:20:29"
+  },
+  {
+    "model_key": "torchbench/infer/attention_is_all_you_need_pytorch",
+    "suite": "torchbench",
+    "model": "attention_is_all_you_need_pytorch",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2345385551452637,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 348, in capture_single_model\n    model_obj, inputs = _load_torchbench(model_name, batch_size, mode)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 603, in _load_torchbench\n    return _load_via_upstream_runner(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 247, in load_model\n    raise ImportError(f\"could not import any of {candidates}\")\nImportError: could not import any of ['torchbenchmark.models.attention_is_all_you_need_pytorch', 'torchbenchmark.canary_models.attention_is_all_you_need_pytorch']\n",
+    "timestamp": "2026-06-11T20:21:08"
+  },
+  {
+    "model_key": "torchbench/train/attention_is_all_you_need_pytorch",
+    "suite": "torchbench",
+    "model": "attention_is_all_you_need_pytorch",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2280573844909668,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 348, in capture_single_model\n    model_obj, inputs = _load_torchbench(model_name, batch_size, mode)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 603, in _load_torchbench\n    return _load_via_upstream_runner(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 247, in load_model\n    raise ImportError(f\"could not import any of {candidates}\")\nImportError: could not import any of ['torchbenchmark.models.attention_is_all_you_need_pytorch', 'torchbenchmark.canary_models.attention_is_all_you_need_pytorch']\n",
+    "timestamp": "2026-06-11T20:21:12"
+  },
+  {
+    "model_key": "torchbench/train/alexnet",
+    "suite": "torchbench",
+    "model": "alexnet",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 13.832583665847778,
+    "region_count": 39,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:21:05"
+  },
+  {
+    "model_key": "torchbench/infer/dcgan",
+    "suite": "torchbench",
+    "model": "dcgan",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 4.7323291301727295,
+    "region_count": 5,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:21:15"
+  },
+  {
+    "model_key": "torchbench/train/dcgan",
+    "suite": "torchbench",
+    "model": "dcgan",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 6.800576210021973,
+    "region_count": 22,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:21:22"
+  },
+  {
+    "model_key": "torchbench/infer/demucs",
+    "suite": "torchbench",
+    "model": "demucs",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 11.782162427902222,
+    "region_count": 25,
+    "roundtrip_summary": {
+      "ok": 3,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:21:23"
+  },
+  {
+    "model_key": "torchbench/train/demucs",
+    "suite": "torchbench",
+    "model": "demucs",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 21.487398147583008,
+    "region_count": 96,
+    "roundtrip_summary": {
+      "ok": 5,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:21:33"
+  },
+  {
+    "model_key": "torchbench/infer/densenet121",
+    "suite": "torchbench",
+    "model": "densenet121",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 38.439298152923584,
+    "region_count": 66,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:21:38"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_fasterrcnn_r_101_c4",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_101_c4",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.267507553100586,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "el)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_101_c4/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:20"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_fasterrcnn_r_101_c4",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_101_c4",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2279105186462402,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "el)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_101_c4/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:24"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_fasterrcnn_r_101_dc5",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_101_dc5",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.3105051517486572,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "l)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_101_dc5/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:27"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_fasterrcnn_r_101_dc5",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_101_dc5",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2534749507904053,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "l)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_101_dc5/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:30"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_fasterrcnn_r_101_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_101_fpn",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.263469934463501,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "l)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_101_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:34"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_fasterrcnn_r_101_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_101_fpn",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2535655498504639,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "l)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_101_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:37"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_fasterrcnn_r_50_c4",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_50_c4",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2638216018676758,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "vel)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_50_c4/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:41"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_fasterrcnn_r_50_c4",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_50_c4",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.245816707611084,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "vel)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_50_c4/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:44"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_fasterrcnn_r_50_dc5",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_50_dc5",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.242290735244751,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "el)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_50_dc5/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:48"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_fasterrcnn_r_50_dc5",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_50_dc5",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.3588271141052246,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "el)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_50_dc5/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:51"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_fasterrcnn_r_50_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_50_fpn",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.265981674194336,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "el)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_50_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:55"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_fasterrcnn_r_50_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_fasterrcnn_r_50_fpn",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2705345153808594,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "el)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fasterrcnn_r_50_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:22:58"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_fcos_r_50_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_fcos_r_50_fpn",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2457640171051025,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "e, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fcos_r_50_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:02"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_fcos_r_50_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_fcos_r_50_fpn",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2413020133972168,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "e, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_fcos_r_50_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:05"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_maskrcnn",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.1849157810211182,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "41, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn/__init__.py\", line 7, in <module>\n    from detectron2.checkpoint import DetectionCheckpointer\nModuleNotFoundError: No module named 'detectron2'\n",
+    "timestamp": "2026-06-11T20:23:09"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_maskrcnn",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.19112229347229,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "41, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn/__init__.py\", line 7, in <module>\n    from detectron2.checkpoint import DetectionCheckpointer\nModuleNotFoundError: No module named 'detectron2'\n",
+    "timestamp": "2026-06-11T20:23:12"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_maskrcnn_r_101_c4",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn_r_101_c4",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2473974227905273,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "evel)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn_r_101_c4/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:15"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_maskrcnn_r_101_c4",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn_r_101_c4",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2446401119232178,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "evel)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn_r_101_c4/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:19"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_maskrcnn_r_101_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn_r_101_fpn",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2371938228607178,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "vel)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn_r_101_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:22"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_maskrcnn_r_101_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn_r_101_fpn",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2367103099822998,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "vel)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn_r_101_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:25"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_maskrcnn_r_50_c4",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn_r_50_c4",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.259580135345459,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn_r_50_c4/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:29"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_maskrcnn_r_50_c4",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn_r_50_c4",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2512710094451904,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn_r_50_c4/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:32"
+  },
+  {
+    "model_key": "torchbench/infer/detectron2_maskrcnn_r_50_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn_r_50_fpn",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2671027183532715,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "evel)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn_r_50_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:36"
+  },
+  {
+    "model_key": "torchbench/train/detectron2_maskrcnn_r_50_fpn",
+    "suite": "torchbench",
+    "model": "detectron2_maskrcnn_r_50_fpn",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.248429298400879,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "evel)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/detectron2_maskrcnn_r_50_fpn/__init__.py\", line 4, in <module>\n    from torchbenchmark.util.framework.detectron2.model_factory import Detectron2Model\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/detectron2/model_factory.py\", line 21, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:23:39"
+  },
+  {
+    "model_key": "torchbench/infer/dlrm",
+    "suite": "torchbench",
+    "model": "dlrm",
+    "mode": "infer",
+    "status": "skipped",
+    "wall_time_s": 6.9141387939453125e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Known distributed model: dlrm",
+    "timestamp": "2026-06-11T20:23:42"
+  },
+  {
+    "model_key": "torchbench/train/dlrm",
+    "suite": "torchbench",
+    "model": "dlrm",
+    "mode": "train",
+    "status": "skipped",
+    "wall_time_s": 6.9141387939453125e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Known distributed model: dlrm",
+    "timestamp": "2026-06-11T20:23:44"
+  },
+  {
+    "model_key": "torchbench/infer/drq",
+    "suite": "torchbench",
+    "model": "drq",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2680511474609375,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/drq/__init__.py\", line 14, in <module>\n    from .replay_buffer import ReplayBuffer\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/drq/replay_buffer.py\", line 1, in <module>\n    import kornia\nModuleNotFoundError: No module named 'kornia'\n",
+    "timestamp": "2026-06-11T20:23:46"
+  },
+  {
+    "model_key": "torchbench/train/drq",
+    "suite": "torchbench",
+    "model": "drq",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2344846725463867,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/drq/__init__.py\", line 14, in <module>\n    from .replay_buffer import ReplayBuffer\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/drq/replay_buffer.py\", line 1, in <module>\n    import kornia\nModuleNotFoundError: No module named 'kornia'\n",
+    "timestamp": "2026-06-11T20:23:50"
+  },
+  {
+    "model_key": "torchbench/infer/fambench_dlrm",
+    "suite": "torchbench",
+    "model": "fambench_dlrm",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2086341381072998,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "py\", line 241, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/canary_models/fambench_dlrm/__init__.py\", line 37, in <module>\n    import optim.rwsadagrad as RowWiseSparseAdagrad\nModuleNotFoundError: No module named 'optim'\n",
+    "timestamp": "2026-06-11T20:23:53"
+  },
+  {
+    "model_key": "torchbench/train/fambench_dlrm",
+    "suite": "torchbench",
+    "model": "fambench_dlrm",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.19063138961792,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "py\", line 241, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/canary_models/fambench_dlrm/__init__.py\", line 37, in <module>\n    import optim.rwsadagrad as RowWiseSparseAdagrad\nModuleNotFoundError: No module named 'optim'\n",
+    "timestamp": "2026-06-11T20:23:56"
+  },
+  {
+    "model_key": "torchbench/infer/fambench_xlmr",
+    "suite": "torchbench",
+    "model": "fambench_xlmr",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.197415828704834,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "k/benchmarks/dynamo/torchbench.py\", line 241, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/canary_models/fambench_xlmr/__init__.py\", line 27, in <module>\n    import fairseq\nModuleNotFoundError: No module named 'fairseq'\n",
+    "timestamp": "2026-06-11T20:24:00"
+  },
+  {
+    "model_key": "torchbench/train/fambench_xlmr",
+    "suite": "torchbench",
+    "model": "fambench_xlmr",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.1828641891479492,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "k/benchmarks/dynamo/torchbench.py\", line 241, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/canary_models/fambench_xlmr/__init__.py\", line 27, in <module>\n    import fairseq\nModuleNotFoundError: No module named 'fairseq'\n",
+    "timestamp": "2026-06-11T20:24:03"
+  },
+  {
+    "model_key": "torchbench/infer/fastNLP_Bert",
+    "suite": "torchbench",
+    "model": "fastNLP_Bert",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2029776573181152,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": ", line 241, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/fastNLP_Bert/__init__.py\", line 14, in <module>\n    from fastNLP import GradientClipCallback, WarmupCallback\nModuleNotFoundError: No module named 'fastNLP'\n",
+    "timestamp": "2026-06-11T20:24:06"
+  },
+  {
+    "model_key": "torchbench/train/fastNLP_Bert",
+    "suite": "torchbench",
+    "model": "fastNLP_Bert",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.1940367221832275,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": ", line 241, in load_model\n    module = importlib.import_module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/fastNLP_Bert/__init__.py\", line 14, in <module>\n    from fastNLP import GradientClipCallback, WarmupCallback\nModuleNotFoundError: No module named 'fastNLP'\n",
+    "timestamp": "2026-06-11T20:24:10"
+  },
+  {
+    "model_key": "torchbench/infer/maml",
+    "suite": "torchbench",
+    "model": "maml",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 6.913335800170898,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": " y_spt[0], x_qry[0], y_qry[0])\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/maml/meta.py\", line 165, in finetunning\n    net = deepcopy(self.net)\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/maml/meta.py\", line 170, in torch_dynamo_resume_in_finetunning_at_165\n    grad = torch.autograd.grad(loss, net.parameters())\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/autograd/__init__.py\", line 594, in grad\n    result = _engine_run_backward(\n             ^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/autograd/graph.py\", line 913, in _engine_run_backward\n    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: element 0 of tensors does not require grad and does not have a grad_fn\n",
+    "timestamp": "2026-06-11T20:24:13"
+  },
+  {
+    "model_key": "torchbench/train/maml",
+    "suite": "torchbench",
+    "model": "maml",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 2.383509635925293,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "ion:\n\nTraceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 348, in capture_single_model\n    model_obj, inputs = _load_torchbench(model_name, batch_size, mode)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 603, in _load_torchbench\n    return _load_via_upstream_runner(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 384, in load_model\n    self.validate_model(benchmark.name, model, example_inputs)\n  File \"/tmp/pytorch-work/benchmarks/dynamo/common.py\", line 2059, in validate_model\n    raise RuntimeError(\"Eager run failed\") from e\nRuntimeError: Eager run failed\n",
+    "timestamp": "2026-06-11T20:24:23"
+  },
+  {
+    "model_key": "torchbench/infer/maml_omniglot",
+    "suite": "torchbench",
+    "model": "maml_omniglot",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.400261402130127,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "y\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/maml_omniglot/__init__.py\", line 104, in __init__\n    self.meta_inputs = torch.load(f\"{root}/batch.pt\", weights_only=True)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 1561, in load\n    with _open_file_like(f, \"rb\") as opened_file:\n         ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 795, in _open_file_like\n    return _open_file(name_or_buffer, mode)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 776, in __init__\n    super().__init__(open(name, mode))  # noqa: SIM115\n                     ^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/maml_omniglot/batch.pt'\n",
+    "timestamp": "2026-06-11T20:24:28"
+  },
+  {
+    "model_key": "torchbench/train/maml_omniglot",
+    "suite": "torchbench",
+    "model": "maml_omniglot",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.4141104221343994,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "y\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/maml_omniglot/__init__.py\", line 104, in __init__\n    self.meta_inputs = torch.load(f\"{root}/batch.pt\", weights_only=True)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 1561, in load\n    with _open_file_like(f, \"rb\") as opened_file:\n         ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 795, in _open_file_like\n    return _open_file(name_or_buffer, mode)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 776, in __init__\n    super().__init__(open(name, mode))  # noqa: SIM115\n                     ^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/maml_omniglot/batch.pt'\n",
+    "timestamp": "2026-06-11T20:24:32"
+  },
+  {
+    "model_key": "torchbench/infer/mnasnet1_0",
+    "suite": "torchbench",
+    "model": "mnasnet1_0",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 17.025102853775024,
+    "region_count": 25,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:24:35"
+  },
+  {
+    "model_key": "torchbench/train/mnasnet1_0",
+    "suite": "torchbench",
+    "model": "mnasnet1_0",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 54.80889368057251,
+    "region_count": 126,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:24:55"
+  },
+  {
+    "model_key": "torchbench/infer/mobilenet_v2",
+    "suite": "torchbench",
+    "model": "mobilenet_v2",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 16.695444345474243,
+    "region_count": 24,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:25:54"
+  },
+  {
+    "model_key": "torchbench/train/densenet121",
+    "suite": "torchbench",
+    "model": "densenet121",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 310.4146378040314,
+    "region_count": 206,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:28:24"
+  },
+  {
+    "model_key": "torchbench/train/mobilenet_v2",
+    "suite": "torchbench",
+    "model": "mobilenet_v2",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 56.16035532951355,
+    "region_count": 112,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:26:14"
+  },
+  {
+    "model_key": "torchbench/infer/mobilenet_v3_large",
+    "suite": "torchbench",
+    "model": "mobilenet_v3_large",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 21.500558137893677,
+    "region_count": 43,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:27:05"
+  },
+  {
+    "model_key": "torchbench/infer/moco",
+    "suite": "torchbench",
+    "model": "moco",
+    "mode": "infer",
+    "status": "skipped",
+    "wall_time_s": 6.67572021484375e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Known distributed model: moco",
+    "timestamp": "2026-06-11T20:27:30"
+  },
+  {
+    "model_key": "torchbench/train/moco",
+    "suite": "torchbench",
+    "model": "moco",
+    "mode": "train",
+    "status": "skipped",
+    "wall_time_s": 6.198883056640625e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Known distributed model: moco",
+    "timestamp": "2026-06-11T20:27:32"
+  },
+  {
+    "model_key": "torchbench/infer/nvidia_deeprecommender",
+    "suite": "torchbench",
+    "model": "nvidia_deeprecommender",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 5.807929277420044,
+    "region_count": 3,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:27:34"
+  },
+  {
+    "model_key": "torchbench/train/nvidia_deeprecommender",
+    "suite": "torchbench",
+    "model": "nvidia_deeprecommender",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 9.46459412574768,
+    "region_count": 23,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:27:42"
+  },
+  {
+    "model_key": "torchbench/infer/opacus_cifar10",
+    "suite": "torchbench",
+    "model": "opacus_cifar10",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 20.518070220947266,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 404, in capture_single_model\n    raise RuntimeError(\nRuntimeError: 4 region(s) DROPPED during capture (pipeline bug \u2014 fix before recapture): b9ce96059d28_7c369620: RuntimeError: Captured repro region_002_var_mean_b9ce96059d28_7c369620.py failed eager validation: 'shape'\nThis indicates a bug in the capture hook (index bound; b9ce96059d28_78971d64: RuntimeError: Captured repro region_005_var_mean_b9ce96059d28_78971d64.py failed eager validation: 'shape'\nThis indicates a bug in the capture hook (index bound; b9ce96059d28_37f9cefc: RuntimeError: Captured repro region_008_var_mean_b9ce96059d28_37f9cefc.py failed eager validation: 'shape'\nThis indicates a bug in the capture hook (index bound; e428e1e389aa_1247f846: RuntimeError: Captured repro region_014_mean_e428e1e389aa_1247f846.py failed eager validation: 'shape'\nThis indicates a bug in the capture hook (index bounds, s\n",
+    "timestamp": "2026-06-11T20:27:55"
+  },
+  {
+    "model_key": "torchbench/train/mobilenet_v3_large",
+    "suite": "torchbench",
+    "model": "mobilenet_v3_large",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 66.2744255065918,
+    "region_count": 192,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:27:13"
+  },
+  {
+    "model_key": "torchbench/train/opacus_cifar10",
+    "suite": "torchbench",
+    "model": "opacus_cifar10",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 2.1191024780273438,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "ion:\n\nTraceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 348, in capture_single_model\n    model_obj, inputs = _load_torchbench(model_name, batch_size, mode)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 603, in _load_torchbench\n    return _load_via_upstream_runner(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 384, in load_model\n    self.validate_model(benchmark.name, model, example_inputs)\n  File \"/tmp/pytorch-work/benchmarks/dynamo/common.py\", line 2059, in validate_model\n    raise RuntimeError(\"Eager run failed\") from e\nRuntimeError: Eager run failed\n",
+    "timestamp": "2026-06-11T20:28:19"
+  },
+  {
+    "model_key": "torchbench/infer/pplbench_beanmachine",
+    "suite": "torchbench",
+    "model": "pplbench_beanmachine",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.190305233001709,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 348, in capture_single_model\n    model_obj, inputs = _load_torchbench(model_name, batch_size, mode)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 603, in _load_torchbench\n    return _load_via_upstream_runner(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 247, in load_model\n    raise ImportError(f\"could not import any of {candidates}\")\nImportError: could not import any of ['torchbenchmark.models.pplbench_beanmachine', 'torchbenchmark.canary_models.pplbench_beanmachine']\n",
+    "timestamp": "2026-06-11T20:28:23"
+  },
+  {
+    "model_key": "torchbench/train/pplbench_beanmachine",
+    "suite": "torchbench",
+    "model": "pplbench_beanmachine",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2865502834320068,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 348, in capture_single_model\n    model_obj, inputs = _load_torchbench(model_name, batch_size, mode)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 603, in _load_torchbench\n    return _load_via_upstream_runner(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 247, in load_model\n    raise ImportError(f\"could not import any of {candidates}\")\nImportError: could not import any of ['torchbenchmark.models.pplbench_beanmachine', 'torchbenchmark.canary_models.pplbench_beanmachine']\n",
+    "timestamp": "2026-06-11T20:28:24"
+  },
+  {
+    "model_key": "torchbench/train/pyhpc_equation_of_state",
+    "suite": "torchbench",
+    "model": "pyhpc_equation_of_state",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.3140122890472412,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "rk/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 307, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pyhpc_equation_of_state/__init__.py\", line 46, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 141, in __init__\n    self._determine_batch_size(batch_size)\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 266, in _determine_batch_size\n    raise NotImplementedError(\nNotImplementedError: Model's DEFAULT_TRAIN_BSIZE is not implemented.\n",
+    "timestamp": "2026-06-11T20:28:27"
+  },
+  {
+    "model_key": "torchbench/infer/pyhpc_equation_of_state",
+    "suite": "torchbench",
+    "model": "pyhpc_equation_of_state",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 7.247551441192627,
+    "region_count": 1,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:28:27"
+  },
+  {
+    "model_key": "torchbench/train/pyhpc_isoneutral_mixing",
+    "suite": "torchbench",
+    "model": "pyhpc_isoneutral_mixing",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.4341602325439453,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "k/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 307, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pyhpc_isoneutral_mixing/__init__.py\", line 137, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 141, in __init__\n    self._determine_batch_size(batch_size)\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 266, in _determine_batch_size\n    raise NotImplementedError(\nNotImplementedError: Model's DEFAULT_TRAIN_BSIZE is not implemented.\n",
+    "timestamp": "2026-06-11T20:28:37"
+  },
+  {
+    "model_key": "torchbench/infer/pyhpc_isoneutral_mixing",
+    "suite": "torchbench",
+    "model": "pyhpc_isoneutral_mixing",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 20.166571140289307,
+    "region_count": 2,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:28:31"
+  },
+  {
+    "model_key": "torchbench/train/pyhpc_turbulent_kinetic_energy",
+    "suite": "torchbench",
+    "model": "pyhpc_turbulent_kinetic_energy",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2163491249084473,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "ts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 307, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pyhpc_turbulent_kinetic_energy/__init__.py\", line 136, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 141, in __init__\n    self._determine_batch_size(batch_size)\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 266, in _determine_batch_size\n    raise NotImplementedError(\nNotImplementedError: Model's DEFAULT_TRAIN_BSIZE is not implemented.\n",
+    "timestamp": "2026-06-11T20:28:54"
+  },
+  {
+    "model_key": "torchbench/infer/pyhpc_turbulent_kinetic_energy",
+    "suite": "torchbench",
+    "model": "pyhpc_turbulent_kinetic_energy",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 22.275817155838013,
+    "region_count": 2,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:28:41"
+  },
+  {
+    "model_key": "torchbench/train/pytorch_CycleGAN_and_pix2pix",
+    "suite": "torchbench",
+    "model": "pytorch_CycleGAN_and_pix2pix",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.5947258472442627,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "46, in prepare_training_loop\n    dataset = create_dataset(\n              ^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_CycleGAN_and_pix2pix/data/__init__.py\", line 62, in create_dataset\n    data_loader = CustomDatasetDataLoader(opt)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_CycleGAN_and_pix2pix/data/__init__.py\", line 78, in __init__\n    self.dataset = dataset_class(opt)\n                   ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_CycleGAN_and_pix2pix/data/unaligned_dataset.py\", line 36, in __init__\n    make_dataset(self.dir_A, opt.max_dataset_size)\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_CycleGAN_and_pix2pix/data/image_folder.py\", line 48, in make_dataset\n    raise RuntimeError(msg) from e\nRuntimeError: Failed to download data from manifold: No module named 'torchbenchmark.util.framework.fb'\n",
+    "timestamp": "2026-06-11T20:29:06"
+  },
+  {
+    "model_key": "torchbench/infer/pytorch_stargan",
+    "suite": "torchbench",
+    "model": "pytorch_stargan",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2929084300994873,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "ch-work/torchbenchmark/torchbenchmark/models/pytorch_stargan/__init__.py\", line 82, in get_data_loader\n    celeba_loader = get_loader(\n                    ^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_stargan/data_loader.py\", line 92, in get_loader\n    dataset = CelebA(image_dir, attr_path, selected_attrs, transform, mode)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_stargan/data_loader.py\", line 25, in __init__\n    self.preprocess()\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_stargan/data_loader.py\", line 34, in preprocess\n    lines = [line.rstrip() for line in open(self.attr_path, \"r\")]\n                                       ^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytorch-work/torchbenchmark/torchbenchmark/data/.data/pytorch_stargan_inputs/data/celeba/list_attr_celeba.txt'\n",
+    "timestamp": "2026-06-11T20:29:10"
+  },
+  {
+    "model_key": "torchbench/infer/pytorch_CycleGAN_and_pix2pix",
+    "suite": "torchbench",
+    "model": "pytorch_CycleGAN_and_pix2pix",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 14.484834432601929,
+    "region_count": 9,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:28:58"
+  },
+  {
+    "model_key": "torchbench/train/pytorch_stargan",
+    "suite": "torchbench",
+    "model": "pytorch_stargan",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.316354513168335,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "ch-work/torchbenchmark/torchbenchmark/models/pytorch_stargan/__init__.py\", line 82, in get_data_loader\n    celeba_loader = get_loader(\n                    ^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_stargan/data_loader.py\", line 92, in get_loader\n    dataset = CelebA(image_dir, attr_path, selected_attrs, transform, mode)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_stargan/data_loader.py\", line 25, in __init__\n    self.preprocess()\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/pytorch_stargan/data_loader.py\", line 34, in preprocess\n    lines = [line.rstrip() for line in open(self.attr_path, \"r\")]\n                                       ^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytorch-work/torchbenchmark/torchbenchmark/data/.data/pytorch_stargan_inputs/data/celeba/list_attr_celeba.txt'\n",
+    "timestamp": "2026-06-11T20:29:14"
+  },
+  {
+    "model_key": "torchbench/infer/pytorch_struct",
+    "suite": "torchbench",
+    "model": "pytorch_struct",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2090003490447998,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 348, in capture_single_model\n    model_obj, inputs = _load_torchbench(model_name, batch_size, mode)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 603, in _load_torchbench\n    return _load_via_upstream_runner(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 247, in load_model\n    raise ImportError(f\"could not import any of {candidates}\")\nImportError: could not import any of ['torchbenchmark.models.pytorch_struct', 'torchbenchmark.canary_models.pytorch_struct']\n",
+    "timestamp": "2026-06-11T20:29:16"
+  },
+  {
+    "model_key": "torchbench/train/pytorch_struct",
+    "suite": "torchbench",
+    "model": "pytorch_struct",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2417259216308594,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Traceback (most recent call last):\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 348, in capture_single_model\n    model_obj, inputs = _load_torchbench(model_name, batch_size, mode)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 603, in _load_torchbench\n    return _load_via_upstream_runner(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 558, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 247, in load_model\n    raise ImportError(f\"could not import any of {candidates}\")\nImportError: could not import any of ['torchbenchmark.models.pytorch_struct', 'torchbenchmark.canary_models.pytorch_struct']\n",
+    "timestamp": "2026-06-11T20:29:18"
+  },
+  {
+    "model_key": "torchbench/infer/pytorch_unet",
+    "suite": "torchbench",
+    "model": "pytorch_unet",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 11.396436214447021,
+    "region_count": 13,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:29:19"
+  },
+  {
+    "model_key": "torchbench/train/pytorch_unet",
+    "suite": "torchbench",
+    "model": "pytorch_unet",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 22.333600282669067,
+    "region_count": 61,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:22:01"
+  },
+  {
+    "model_key": "torchbench/infer/resnet18",
+    "suite": "torchbench",
+    "model": "resnet18",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 13.69624376296997,
+    "region_count": 12,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:29:34"
+  },
+  {
+    "model_key": "torchbench/train/resnet18",
+    "suite": "torchbench",
+    "model": "resnet18",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 20.08141779899597,
+    "region_count": 52,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:34:02"
+  },
+  {
+    "model_key": "torchbench/infer/resnet50",
+    "suite": "torchbench",
+    "model": "resnet50",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 14.389151573181152,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:29:51"
+  },
+  {
+    "model_key": "torchbench/infer/resnext50_32x4d",
+    "suite": "torchbench",
+    "model": "resnext50_32x4d",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 27.243539333343506,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:30:08"
+  },
+  {
+    "model_key": "torchbench/train/resnet50",
+    "suite": "torchbench",
+    "model": "resnet50",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 42.182382345199585,
+    "region_count": 80,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:34:25"
+  },
+  {
+    "model_key": "torchbench/infer/shufflenet_v2_x1_0",
+    "suite": "torchbench",
+    "model": "shufflenet_v2_x1_0",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 19.51660943031311,
+    "region_count": 21,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:30:47"
+  },
+  {
+    "model_key": "torchbench/train/resnext50_32x4d",
+    "suite": "torchbench",
+    "model": "resnext50_32x4d",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 48.69046068191528,
+    "region_count": 76,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:35:11"
+  },
+  {
+    "model_key": "torchbench/infer/soft_actor_critic",
+    "suite": "torchbench",
+    "model": "soft_actor_critic",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.309495449066162,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": " __init__\n    self.agent = SACAgent(\n                 ^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/sac.py\", line 21, in __init__\n    self.actor = actor_net_cls(\n                 ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py\", line 109, in __init__\n    self.apply(weight_init)\n  File \"/tmp/pytorch-work/torch/nn/modules/module.py\", line 1075, in apply\n    module.apply(fn)\n  File \"/tmp/pytorch-work/torch/nn/modules/module.py\", line 1076, in apply\n    fn(self)\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py\", line 13, in weight_init\n    nn.init.orthogonal_(m.weight.data)\n  File \"/tmp/pytorch-work/torch/nn/init.py\", line 708, in orthogonal_\n    q, r = torch.linalg.qr(flattened)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: Calling torch.geqrf on a CPU tensor requires compiling PyTorch with LAPACK. Please use PyTorch built with LAPACK support.\n",
+    "timestamp": "2026-06-11T20:31:24"
+  },
+  {
+    "model_key": "torchbench/train/soft_actor_critic",
+    "suite": "torchbench",
+    "model": "soft_actor_critic",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2252795696258545,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": " __init__\n    self.agent = SACAgent(\n                 ^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/sac.py\", line 21, in __init__\n    self.actor = actor_net_cls(\n                 ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py\", line 109, in __init__\n    self.apply(weight_init)\n  File \"/tmp/pytorch-work/torch/nn/modules/module.py\", line 1075, in apply\n    module.apply(fn)\n  File \"/tmp/pytorch-work/torch/nn/modules/module.py\", line 1076, in apply\n    fn(self)\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/soft_actor_critic/nets.py\", line 13, in weight_init\n    nn.init.orthogonal_(m.weight.data)\n  File \"/tmp/pytorch-work/torch/nn/init.py\", line 708, in orthogonal_\n    q, r = torch.linalg.qr(flattened)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: Calling torch.geqrf on a CPU tensor requires compiling PyTorch with LAPACK. Please use PyTorch built with LAPACK support.\n",
+    "timestamp": "2026-06-11T20:31:27"
+  },
+  {
+    "model_key": "torchbench/infer/speech_transformer",
+    "suite": "torchbench",
+    "model": "speech_transformer",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.2145445346832275,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "on3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/speech_transformer/__init__.py\", line 22, in <module>\n    from .config import SpeechTransformerEvalConfig, SpeechTransformerTrainConfig\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/speech_transformer/config.py\", line 5, in <module>\n    import kaldi_io\nModuleNotFoundError: No module named 'kaldi_io'\n",
+    "timestamp": "2026-06-11T20:31:31"
+  },
+  {
+    "model_key": "torchbench/train/speech_transformer",
+    "suite": "torchbench",
+    "model": "speech_transformer",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2164676189422607,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "on3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/speech_transformer/__init__.py\", line 22, in <module>\n    from .config import SpeechTransformerEvalConfig, SpeechTransformerTrainConfig\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/speech_transformer/config.py\", line 5, in <module>\n    import kaldi_io\nModuleNotFoundError: No module named 'kaldi_io'\n",
+    "timestamp": "2026-06-11T20:31:34"
+  },
+  {
+    "model_key": "torchbench/infer/squeezenet1_1",
+    "suite": "torchbench",
+    "model": "squeezenet1_1",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 8.946012735366821,
+    "region_count": 12,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:31:38"
+  },
+  {
+    "model_key": "torchbench/train/shufflenet_v2_x1_0",
+    "suite": "torchbench",
+    "model": "shufflenet_v2_x1_0",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 55.80957365036011,
+    "region_count": 68,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:36:04"
+  },
+  {
+    "model_key": "torchbench/infer/tacotron2",
+    "suite": "torchbench",
+    "model": "tacotron2",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.1971261501312256,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": " 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/tacotron2/__init__.py\", line 11, in <module>\n    from .text import symbols\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/tacotron2/text/__init__.py\", line 5, in <module>\n    from . import cleaners\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/tacotron2/text/cleaners.py\", line 19, in <module>\n    from .numbers import normalize_numbers\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/tacotron2/text/numbers.py\", line 5, in <module>\n    import inflect\nModuleNotFoundError: No module named 'inflect'\n",
+    "timestamp": "2026-06-11T20:32:01"
+  },
+  {
+    "model_key": "torchbench/train/tacotron2",
+    "suite": "torchbench",
+    "model": "tacotron2",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.2576110363006592,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": " 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/tacotron2/__init__.py\", line 11, in <module>\n    from .text import symbols\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/tacotron2/text/__init__.py\", line 5, in <module>\n    from . import cleaners\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/tacotron2/text/cleaners.py\", line 19, in <module>\n    from .numbers import normalize_numbers\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/tacotron2/text/numbers.py\", line 5, in <module>\n    import inflect\nModuleNotFoundError: No module named 'inflect'\n",
+    "timestamp": "2026-06-11T20:32:04"
+  },
+  {
+    "model_key": "torchbench/train/squeezenet1_1",
+    "suite": "torchbench",
+    "model": "squeezenet1_1",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 18.142332553863525,
+    "region_count": 71,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:31:50"
+  },
+  {
+    "model_key": "torchbench/infer/tts_angular",
+    "suite": "torchbench",
+    "model": "tts_angular",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 3.615252733230591,
+    "region_count": 1,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:32:08"
+  },
+  {
+    "model_key": "torchbench/train/tts_angular",
+    "suite": "torchbench",
+    "model": "tts_angular",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 4.119275331497192,
+    "region_count": 2,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:32:11"
+  },
+  {
+    "model_key": "torchbench/infer/vgg16",
+    "suite": "torchbench",
+    "model": "vgg16",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 9.23602294921875,
+    "region_count": 11,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T20:32:15"
+  },
+  {
+    "model_key": "torchbench/infer/vision_maskrcnn",
+    "suite": "torchbench",
+    "model": "vision_maskrcnn",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.3192498683929443,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/vision_maskrcnn/__init__.py\", line 37, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:32:28"
+  },
+  {
+    "model_key": "torchbench/train/vgg16",
+    "suite": "torchbench",
+    "model": "vgg16",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 15.940463304519653,
+    "region_count": 54,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:21:42"
+  },
+  {
+    "model_key": "torchbench/train/vision_maskrcnn",
+    "suite": "torchbench",
+    "model": "vision_maskrcnn",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.306957483291626,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "module(c)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/vision_maskrcnn/__init__.py\", line 37, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco2017 minimal data dir, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:32:31"
+  },
+  {
+    "model_key": "torchbench/infer/yolov3",
+    "suite": "torchbench",
+    "model": "yolov3",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.708383321762085,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/yolov3/__init__.py\", line 37, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco128 data dir: /tmp/pytorch-work/torchbenchmark/torchbenchmark/data/.data/coco128, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:32:35"
+  },
+  {
+    "model_key": "torchbench/train/yolov3",
+    "suite": "torchbench",
+    "model": "yolov3",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.6882667541503906,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/yolov3/__init__.py\", line 37, in <module>\n    assert os.path.exists(DATA_DIR), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Couldn't find coco128 data dir: /tmp/pytorch-work/torchbenchmark/torchbenchmark/data/.data/coco128, please run install.py again.\n",
+    "timestamp": "2026-06-11T20:32:36"
+  },
+  {
+    "model_key": "hf/infer/AlbertForMaskedLM",
+    "suite": "hf",
+    "model": "AlbertForMaskedLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 18.748045921325684,
+    "region_count": 15,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:51:06"
+  },
+  {
+    "model_key": "hf/train/AlbertForMaskedLM",
+    "suite": "hf",
+    "model": "AlbertForMaskedLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 43.35043478012085,
+    "region_count": 48,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:51:28"
+  },
+  {
+    "model_key": "hf/infer/AllenaiLongformerBase",
+    "suite": "hf",
+    "model": "AllenaiLongformerBase",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 51.56283712387085,
+    "region_count": 21,
+    "roundtrip_summary": {
+      "ok": 4,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:14:04"
+  },
+  {
+    "model_key": "hf/train/AllenaiLongformerBase",
+    "suite": "hf",
+    "model": "AllenaiLongformerBase",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 146.06506061553955,
+    "region_count": 84,
+    "roundtrip_summary": {
+      "ok": 7,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:14:59"
+  },
+  {
+    "model_key": "hf/infer/BartForCausalLM",
+    "suite": "hf",
+    "model": "BartForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 15.760493993759155,
+    "region_count": 8,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:09:00"
+  },
+  {
+    "model_key": "hf/train/BartForCausalLM",
+    "suite": "hf",
+    "model": "BartForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 19.943231344223022,
+    "region_count": 32,
+    "roundtrip_summary": {
+      "ok": 10,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:09:20"
+  },
+  {
+    "model_key": "hf/infer/BertForMaskedLM",
+    "suite": "hf",
+    "model": "BertForMaskedLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 17.715572357177734,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:52:37"
+  },
+  {
+    "model_key": "hf/train/BertForMaskedLM",
+    "suite": "hf",
+    "model": "BertForMaskedLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 46.24803614616394,
+    "region_count": 68,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:52:58"
+  },
+  {
+    "model_key": "hf/infer/BlenderbotForCausalLM",
+    "suite": "hf",
+    "model": "BlenderbotForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 66.97512602806091,
+    "region_count": 7,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:10:36"
+  },
+  {
+    "model_key": "hf/train/BlenderbotForCausalLM",
+    "suite": "hf",
+    "model": "BlenderbotForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 34.961957931518555,
+    "region_count": 30,
+    "roundtrip_summary": {
+      "ok": 10,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:11:47"
+  },
+  {
+    "model_key": "hf/infer/BlenderbotForConditionalGeneration",
+    "suite": "hf",
+    "model": "BlenderbotForConditionalGeneration",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 156.62904906272888,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:12:26"
+  },
+  {
+    "model_key": "hf/train/BlenderbotForConditionalGeneration",
+    "suite": "hf",
+    "model": "BlenderbotForConditionalGeneration",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 45.299067735672,
+    "region_count": 48,
+    "roundtrip_summary": {
+      "ok": 15,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:15:06"
+  },
+  {
+    "model_key": "hf/infer/DebertaV2ForMaskedLM",
+    "suite": "hf",
+    "model": "DebertaV2ForMaskedLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 38.41886520385742,
+    "region_count": 16,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:15:55"
+  },
+  {
+    "model_key": "hf/train/DebertaV2ForMaskedLM",
+    "suite": "hf",
+    "model": "DebertaV2ForMaskedLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 113.07189273834229,
+    "region_count": 105,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:16:37"
+  },
+  {
+    "model_key": "hf/infer/DistilBertForMaskedLM",
+    "suite": "hf",
+    "model": "DistilBertForMaskedLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 13.146773338317871,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:18:34"
+  },
+  {
+    "model_key": "hf/train/DistilBertForMaskedLM",
+    "suite": "hf",
+    "model": "DistilBertForMaskedLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 30.456345558166504,
+    "region_count": 45,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:18:51"
+  },
+  {
+    "model_key": "hf/infer/DistillGPT2",
+    "suite": "hf",
+    "model": "DistillGPT2",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 16.835562705993652,
+    "region_count": 9,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:19:25"
+  },
+  {
+    "model_key": "hf/train/DistillGPT2",
+    "suite": "hf",
+    "model": "DistillGPT2",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 38.49508714675903,
+    "region_count": 37,
+    "roundtrip_summary": {
+      "ok": 4,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:19:45"
+  },
+  {
+    "model_key": "hf/infer/ElectraForCausalLM",
+    "suite": "hf",
+    "model": "ElectraForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 18.03443741798401,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:53:48"
+  },
+  {
+    "model_key": "hf/train/ElectraForCausalLM",
+    "suite": "hf",
+    "model": "ElectraForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 47.2730917930603,
+    "region_count": 75,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:54:09"
+  },
+  {
+    "model_key": "hf/infer/GPT2ForSequenceClassification",
+    "suite": "hf",
+    "model": "GPT2ForSequenceClassification",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 18.873685836791992,
+    "region_count": 8,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:21:18"
+  },
+  {
+    "model_key": "hf/train/GPT2ForSequenceClassification",
+    "suite": "hf",
+    "model": "GPT2ForSequenceClassification",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 121.87316536903381,
+    "region_count": 48,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:21:40"
+  },
+  {
+    "model_key": "hf/infer/GPTJForCausalLM",
+    "suite": "hf",
+    "model": "GPTJForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 102.74890661239624,
+    "region_count": 10,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:23:46"
+  },
+  {
+    "model_key": "hf/train/GPTJForCausalLM",
+    "suite": "hf",
+    "model": "GPTJForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 219.13352417945862,
+    "region_count": 32,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:42:26"
+  },
+  {
+    "model_key": "hf/infer/GPTJForQuestionAnswering",
+    "suite": "hf",
+    "model": "GPTJForQuestionAnswering",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 101.64603781700134,
+    "region_count": 10,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:29:17"
+  },
+  {
+    "model_key": "hf/train/GPTJForQuestionAnswering",
+    "suite": "hf",
+    "model": "GPTJForQuestionAnswering",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 222.53564310073853,
+    "region_count": 33,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:46:10"
+  },
+  {
+    "model_key": "hf/infer/GPTNeoForCausalLM",
+    "suite": "hf",
+    "model": "GPTNeoForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 69.04017400741577,
+    "region_count": 13,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:34:55"
+  },
+  {
+    "model_key": "hf/train/GPTNeoForCausalLM",
+    "suite": "hf",
+    "model": "GPTNeoForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 2177.328894138336,
+    "region_count": 35,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T21:36:08"
+  },
+  {
+    "model_key": "hf/infer/GPTNeoForSequenceClassification",
+    "suite": "hf",
+    "model": "GPTNeoForSequenceClassification",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 67.88398313522339,
+    "region_count": 12,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:12:30"
+  },
+  {
+    "model_key": "hf/train/GPTNeoForSequenceClassification",
+    "suite": "hf",
+    "model": "GPTNeoForSequenceClassification",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 2194.7541513442993,
+    "region_count": 35,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:13:41"
+  },
+  {
+    "model_key": "hf/infer/GoogleFnet",
+    "suite": "hf",
+    "model": "GoogleFnet",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 11.471593379974365,
+    "region_count": 8,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T04:13:39"
+  },
+  {
+    "model_key": "hf/train/GoogleFnet",
+    "suite": "hf",
+    "model": "GoogleFnet",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 22.11843228340149,
+    "region_count": 27,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T13:42:59"
+  },
+  {
+    "model_key": "hf/infer/LayoutLMForMaskedLM",
+    "suite": "hf",
+    "model": "LayoutLMForMaskedLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 15.753372192382812,
+    "region_count": 13,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:50:35"
+  },
+  {
+    "model_key": "hf/train/LayoutLMForMaskedLM",
+    "suite": "hf",
+    "model": "LayoutLMForMaskedLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 49.50239014625549,
+    "region_count": 65,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:50:54"
+  },
+  {
+    "model_key": "hf/infer/M2M100ForConditionalGeneration",
+    "suite": "hf",
+    "model": "M2M100ForConditionalGeneration",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 71.4905652999878,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:51:47"
+  },
+  {
+    "model_key": "hf/train/M2M100ForConditionalGeneration",
+    "suite": "hf",
+    "model": "M2M100ForConditionalGeneration",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 34.44774103164673,
+    "region_count": 46,
+    "roundtrip_summary": {
+      "ok": 12,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:53:03"
+  },
+  {
+    "model_key": "hf/infer/MBartForCausalLM",
+    "suite": "hf",
+    "model": "MBartForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 24.155808448791504,
+    "region_count": 8,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:53:41"
+  },
+  {
+    "model_key": "hf/train/MBartForCausalLM",
+    "suite": "hf",
+    "model": "MBartForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 19.462883949279785,
+    "region_count": 31,
+    "roundtrip_summary": {
+      "ok": 10,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:54:08"
+  },
+  {
+    "model_key": "hf/infer/MT5ForConditionalGeneration",
+    "suite": "hf",
+    "model": "MT5ForConditionalGeneration",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 34.515462160110474,
+    "region_count": 20,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:54:31"
+  },
+  {
+    "model_key": "hf/train/MT5ForConditionalGeneration",
+    "suite": "hf",
+    "model": "MT5ForConditionalGeneration",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 170.9557399749756,
+    "region_count": 107,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:55:10"
+  },
+  {
+    "model_key": "hf/infer/MegatronBertForCausalLM",
+    "suite": "hf",
+    "model": "MegatronBertForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 51.81016302108765,
+    "region_count": 10,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:58:05"
+  },
+  {
+    "model_key": "hf/train/MegatronBertForCausalLM",
+    "suite": "hf",
+    "model": "MegatronBertForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 1341.6860556602478,
+    "region_count": 73,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T22:59:01"
+  },
+  {
+    "model_key": "hf/infer/MobileBertForMaskedLM",
+    "suite": "hf",
+    "model": "MobileBertForMaskedLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 53.147849559783936,
+    "region_count": 20,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T02:42:53"
+  },
+  {
+    "model_key": "hf/train/MobileBertForMaskedLM",
+    "suite": "hf",
+    "model": "MobileBertForMaskedLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 274.9957582950592,
+    "region_count": 70,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T02:43:51"
+  },
+  {
+    "model_key": "hf/infer/OPTForCausalLM",
+    "suite": "hf",
+    "model": "OPTForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 107.24502754211426,
+    "region_count": 9,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T04:11:29"
+  },
+  {
+    "model_key": "hf/train/OPTForCausalLM",
+    "suite": "hf",
+    "model": "OPTForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 16.08137536048889,
+    "region_count": 29,
+    "roundtrip_summary": {
+      "ok": 7,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T04:13:20"
+  },
+  {
+    "model_key": "hf/infer/PLBartForCausalLM",
+    "suite": "hf",
+    "model": "PLBartForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 11.2733314037323,
+    "region_count": 8,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:25:52"
+  },
+  {
+    "model_key": "hf/train/PLBartForCausalLM",
+    "suite": "hf",
+    "model": "PLBartForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 18.118502855300903,
+    "region_count": 32,
+    "roundtrip_summary": {
+      "ok": 10,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:26:07"
+  },
+  {
+    "model_key": "hf/infer/PegasusForCausalLM",
+    "suite": "hf",
+    "model": "PegasusForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 29.037691354751587,
+    "region_count": 8,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:26:29"
+  },
+  {
+    "model_key": "hf/train/PegasusForCausalLM",
+    "suite": "hf",
+    "model": "PegasusForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 20.567289113998413,
+    "region_count": 28,
+    "roundtrip_summary": {
+      "ok": 7,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:27:01"
+  },
+  {
+    "model_key": "hf/infer/RobertaForCausalLM",
+    "suite": "hf",
+    "model": "RobertaForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 18.62985897064209,
+    "region_count": 18,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:27:25"
+  },
+  {
+    "model_key": "hf/train/RobertaForCausalLM",
+    "suite": "hf",
+    "model": "RobertaForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 47.621541261672974,
+    "region_count": 69,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:27:47"
+  },
+  {
+    "model_key": "hf/infer/T5ForConditionalGeneration",
+    "suite": "hf",
+    "model": "T5ForConditionalGeneration",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 22.596964836120605,
+    "region_count": 19,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:28:39"
+  },
+  {
+    "model_key": "hf/train/T5ForConditionalGeneration",
+    "suite": "hf",
+    "model": "T5ForConditionalGeneration",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 84.98356986045837,
+    "region_count": 85,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:29:05"
+  },
+  {
+    "model_key": "hf/infer/T5Small",
+    "suite": "hf",
+    "model": "T5Small",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 22.947367429733276,
+    "region_count": 19,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:30:34"
+  },
+  {
+    "model_key": "hf/train/T5Small",
+    "suite": "hf",
+    "model": "T5Small",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 83.64670705795288,
+    "region_count": 85,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:31:01"
+  },
+  {
+    "model_key": "hf/infer/TrOCRForCausalLM",
+    "suite": "hf",
+    "model": "TrOCRForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 18.148441314697266,
+    "region_count": 13,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:32:28"
+  },
+  {
+    "model_key": "hf/train/TrOCRForCausalLM",
+    "suite": "hf",
+    "model": "TrOCRForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 19.82203769683838,
+    "region_count": 39,
+    "roundtrip_summary": {
+      "ok": 9,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:32:50"
+  },
+  {
+    "model_key": "hf/infer/XGLMForCausalLM",
+    "suite": "hf",
+    "model": "XGLMForCausalLM",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 60.86275339126587,
+    "region_count": 12,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:33:14"
+  },
+  {
+    "model_key": "hf/train/XGLMForCausalLM",
+    "suite": "hf",
+    "model": "XGLMForCausalLM",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 21.861972332000732,
+    "region_count": 36,
+    "roundtrip_summary": {
+      "ok": 8,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-11T23:34:18"
+  },
+  {
+    "model_key": "hf/infer/XLNetLMHeadModel",
+    "suite": "hf",
+    "model": "XLNetLMHeadModel",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 58.15291404724121,
+    "region_count": 11,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T02:48:30"
+  },
+  {
+    "model_key": "hf/train/XLNetLMHeadModel",
+    "suite": "hf",
+    "model": "XLNetLMHeadModel",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 177.29913663864136,
+    "region_count": 128,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T02:49:32"
+  },
+  {
+    "model_key": "hf/infer/YituTechConvBert",
+    "suite": "hf",
+    "model": "YituTechConvBert",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 22.562373638153076,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T04:14:01"
+  },
+  {
+    "model_key": "hf/train/YituTechConvBert",
+    "suite": "hf",
+    "model": "YituTechConvBert",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 66.84652519226074,
+    "region_count": 68,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T13:47:22"
+  },
+  {
+    "model_key": "hf/infer/meta-llama/Llama-3.2-1B",
+    "suite": "hf",
+    "model": "meta-llama/Llama-3.2-1B",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 2.9971470832824707,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": " _get_config_dict\n    resolved_config_file = cached_file(\n                           ^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/utils/hub.py\", line 278, in cached_file\n    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/utils/hub.py\", line 488, in cached_files\n    raise OSError(\nOSError: You are trying to access a gated repo.\nMake sure to have access to it at https://huggingface.co/meta-llama/Llama-3.2-1B.\n403 Client Error. (Request ID: Root=1-6a2b718c-58ba3b1d55f4effb35f0d7c7;f61632af-70b9-4f64-a14c-8bf287d8b853)\n\nCannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.2-1B/resolve/main/config.json.\nYour request to access model meta-llama/Llama-3.2-1B is awaiting a review from the repo authors.\n",
+    "timestamp": "2026-06-12T02:40:09"
+  },
+  {
+    "model_key": "hf/train/meta-llama/Llama-3.2-1B",
+    "suite": "hf",
+    "model": "meta-llama/Llama-3.2-1B",
+    "mode": "train",
+    "status": "skipped",
+    "wall_time_s": 7.62939453125e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Upstream HF_LLM generation benchmark: inference-only by design (no labels; runner loss=pred[0]=logits, backward unsupported)",
+    "timestamp": "2026-06-12T02:40:15"
+  },
+  {
+    "model_key": "hf/infer/google/gemma-2-2b",
+    "suite": "hf",
+    "model": "google/gemma-2-2b",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 81.95260071754456,
+    "region_count": 15,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T00:10:15"
+  },
+  {
+    "model_key": "hf/train/google/gemma-2-2b",
+    "suite": "hf",
+    "model": "google/gemma-2-2b",
+    "mode": "train",
+    "status": "skipped",
+    "wall_time_s": 8.58306884765625e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Upstream HF_LLM generation benchmark: inference-only by design (no labels; runner loss=pred[0]=logits, backward unsupported)",
+    "timestamp": "2026-06-12T14:03:50"
+  },
+  {
+    "model_key": "hf/infer/google/gemma-3-4b-it",
+    "suite": "hf",
+    "model": "google/gemma-3-4b-it",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 174.98165607452393,
+    "region_count": 15,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T00:09:01"
+  },
+  {
+    "model_key": "hf/train/google/gemma-3-4b-it",
+    "suite": "hf",
+    "model": "google/gemma-3-4b-it",
+    "mode": "train",
+    "status": "skipped",
+    "wall_time_s": 7.3909759521484375e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Upstream HF_LLM generation benchmark: inference-only by design (no labels; runner loss=pred[0]=logits, backward unsupported)",
+    "timestamp": "2026-06-12T14:03:52"
+  },
+  {
+    "model_key": "hf/infer/openai/whisper-tiny",
+    "suite": "hf",
+    "model": "openai/whisper-tiny",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 16.887067317962646,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T00:11:51"
+  },
+  {
+    "model_key": "hf/train/openai/whisper-tiny",
+    "suite": "hf",
+    "model": "openai/whisper-tiny",
+    "mode": "train",
+    "status": "skipped",
+    "wall_time_s": 6.67572021484375e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Upstream HF_LLM generation benchmark: inference-only by design (no labels; runner loss=pred[0]=logits, backward unsupported)",
+    "timestamp": "2026-06-12T14:03:54"
+  },
+  {
+    "model_key": "hf/infer/Qwen/Qwen3-0.6B",
+    "suite": "hf",
+    "model": "Qwen/Qwen3-0.6B",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 61.492658853530884,
+    "region_count": 9,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T00:09:01"
+  },
+  {
+    "model_key": "hf/train/Qwen/Qwen3-0.6B",
+    "suite": "hf",
+    "model": "Qwen/Qwen3-0.6B",
+    "mode": "train",
+    "status": "skipped",
+    "wall_time_s": 7.867813110351562e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Upstream HF_LLM generation benchmark: inference-only by design (no labels; runner loss=pred[0]=logits, backward unsupported)",
+    "timestamp": "2026-06-12T14:03:56"
+  },
+  {
+    "model_key": "hf/infer/mistralai/Mistral-7B-Instruct-v0.3",
+    "suite": "hf",
+    "model": "mistralai/Mistral-7B-Instruct-v0.3",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 81.93789744377136,
+    "region_count": 9,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T00:12:12"
+  },
+  {
+    "model_key": "hf/train/mistralai/Mistral-7B-Instruct-v0.3",
+    "suite": "hf",
+    "model": "mistralai/Mistral-7B-Instruct-v0.3",
+    "mode": "train",
+    "status": "skipped",
+    "wall_time_s": 7.62939453125e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Upstream HF_LLM generation benchmark: inference-only by design (no labels; runner loss=pred[0]=logits, backward unsupported)",
+    "timestamp": "2026-06-12T14:03:58"
+  },
+  {
+    "model_key": "hf/infer/openai/gpt-oss-20b",
+    "suite": "hf",
+    "model": "openai/gpt-oss-20b",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 98.61258316040039,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T13:59:03"
+  },
+  {
+    "model_key": "hf/train/openai/gpt-oss-20b",
+    "suite": "hf",
+    "model": "openai/gpt-oss-20b",
+    "mode": "train",
+    "status": "skipped",
+    "wall_time_s": 8.58306884765625e-06,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "Upstream HF_LLM generation benchmark: inference-only by design (no labels; runner loss=pred[0]=logits, backward unsupported)",
+    "timestamp": "2026-06-12T02:36:23"
+  },
+  {
+    "model_key": "genai/static/CrossEntropyBackward",
+    "suite": "genai",
+    "model": "CrossEntropyBackward",
+    "mode": "static",
+    "status": "ok",
+    "wall_time_s": 4.2852983474731445,
+    "region_count": 2,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T03:24:41"
+  },
+  {
+    "model_key": "genai/static/CrossEntropyForward",
+    "suite": "genai",
+    "model": "CrossEntropyForward",
+    "mode": "static",
+    "status": "ok",
+    "wall_time_s": 1.4198322296142578,
+    "region_count": 1,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T03:24:45"
+  },
+  {
+    "model_key": "genai/static/LayerNormBackward",
+    "suite": "genai",
+    "model": "LayerNormBackward",
+    "mode": "static",
+    "status": "ok",
+    "wall_time_s": 1.7521140575408936,
+    "region_count": 2,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T03:24:47"
+  },
+  {
+    "model_key": "genai/static/LayerNormForward",
+    "suite": "genai",
+    "model": "LayerNormForward",
+    "mode": "static",
+    "status": "ok",
+    "wall_time_s": 0.6872208118438721,
+    "region_count": 1,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T03:24:48"
+  },
+  {
+    "model_key": "genai/static/RMSNormBackward",
+    "suite": "genai",
+    "model": "RMSNormBackward",
+    "mode": "static",
+    "status": "ok",
+    "wall_time_s": 1.642345905303955,
+    "region_count": 2,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T03:24:49"
+  },
+  {
+    "model_key": "genai/static/RMSNormForward",
+    "suite": "genai",
+    "model": "RMSNormForward",
+    "mode": "static",
+    "status": "ok",
+    "wall_time_s": 0.6673531532287598,
+    "region_count": 1,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T03:24:51"
+  },
+  {
+    "model_key": "genai/static/SoftmaxBackward",
+    "suite": "genai",
+    "model": "SoftmaxBackward",
+    "mode": "static",
+    "status": "ok",
+    "wall_time_s": 2.1117403507232666,
+    "region_count": 2,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T03:24:51"
+  },
+  {
+    "model_key": "genai/static/SoftmaxForward",
+    "suite": "genai",
+    "model": "SoftmaxForward",
+    "mode": "static",
+    "status": "ok",
+    "wall_time_s": 1.3594470024108887,
+    "region_count": 1,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T03:24:53"
+  },
+  {
+    "model_key": "torchbench/infer/lennard_jones",
+    "suite": "torchbench",
+    "model": "lennard_jones",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 3.9373834133148193,
+    "region_count": 2,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:12:03"
+  },
+  {
+    "model_key": "torchbench/train/lennard_jones",
+    "suite": "torchbench",
+    "model": "lennard_jones",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 5.7178075313568115,
+    "region_count": 13,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:12:10"
+  },
+  {
+    "model_key": "torchbench/infer/phlippe_densenet",
+    "suite": "torchbench",
+    "model": "phlippe_densenet",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 15.331670999526978,
+    "region_count": 31,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:12:03"
+  },
+  {
+    "model_key": "torchbench/infer/basic_gnn_edgecnn",
+    "suite": "torchbench",
+    "model": "basic_gnn_edgecnn",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 3.1452057361602783,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 314, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/basic_gnn_edgecnn/__init__.py\", line 6, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/gnn/model_factory.py\", line 173, in __init__\n    self.model = sys.modules[\"torch_geometric.compile\"].to_jittable(self.model)\n                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'torch_geometric.compile'\n",
+    "timestamp": "2026-06-12T14:12:19"
+  },
+  {
+    "model_key": "torchbench/train/basic_gnn_edgecnn",
+    "suite": "torchbench",
+    "model": "basic_gnn_edgecnn",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 2.534353494644165,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 307, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/basic_gnn_edgecnn/__init__.py\", line 6, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/gnn/model_factory.py\", line 173, in __init__\n    self.model = sys.modules[\"torch_geometric.compile\"].to_jittable(self.model)\n                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'torch_geometric.compile'\n",
+    "timestamp": "2026-06-12T14:12:25"
+  },
+  {
+    "model_key": "torchbench/infer/basic_gnn_gcn",
+    "suite": "torchbench",
+    "model": "basic_gnn_gcn",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 2.544982433319092,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 314, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/basic_gnn_gcn/__init__.py\", line 6, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/gnn/model_factory.py\", line 173, in __init__\n    self.model = sys.modules[\"torch_geometric.compile\"].to_jittable(self.model)\n                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'torch_geometric.compile'\n",
+    "timestamp": "2026-06-12T14:12:30"
+  },
+  {
+    "model_key": "torchbench/train/basic_gnn_gcn",
+    "suite": "torchbench",
+    "model": "basic_gnn_gcn",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 2.656719923019409,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 307, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/basic_gnn_gcn/__init__.py\", line 6, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/gnn/model_factory.py\", line 173, in __init__\n    self.model = sys.modules[\"torch_geometric.compile\"].to_jittable(self.model)\n                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'torch_geometric.compile'\n",
+    "timestamp": "2026-06-12T14:12:35"
+  },
+  {
+    "model_key": "torchbench/infer/basic_gnn_gin",
+    "suite": "torchbench",
+    "model": "basic_gnn_gin",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 2.6147232055664062,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 314, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/basic_gnn_gin/__init__.py\", line 6, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/gnn/model_factory.py\", line 173, in __init__\n    self.model = sys.modules[\"torch_geometric.compile\"].to_jittable(self.model)\n                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'torch_geometric.compile'\n",
+    "timestamp": "2026-06-12T14:12:40"
+  },
+  {
+    "model_key": "torchbench/train/basic_gnn_gin",
+    "suite": "torchbench",
+    "model": "basic_gnn_gin",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 2.5574262142181396,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 307, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/basic_gnn_gin/__init__.py\", line 6, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/gnn/model_factory.py\", line 173, in __init__\n    self.model = sys.modules[\"torch_geometric.compile\"].to_jittable(self.model)\n                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'torch_geometric.compile'\n",
+    "timestamp": "2026-06-12T14:12:45"
+  },
+  {
+    "model_key": "torchbench/infer/basic_gnn_sage",
+    "suite": "torchbench",
+    "model": "basic_gnn_sage",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 2.513183832168579,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 314, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/basic_gnn_sage/__init__.py\", line 6, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/gnn/model_factory.py\", line 173, in __init__\n    self.model = sys.modules[\"torch_geometric.compile\"].to_jittable(self.model)\n                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'torch_geometric.compile'\n",
+    "timestamp": "2026-06-12T14:12:50"
+  },
+  {
+    "model_key": "torchbench/train/basic_gnn_sage",
+    "suite": "torchbench",
+    "model": "basic_gnn_sage",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 2.4922759532928467,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 307, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/basic_gnn_sage/__init__.py\", line 6, in __init__\n    super().__init__(\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/framework/gnn/model_factory.py\", line 173, in __init__\n    self.model = sys.modules[\"torch_geometric.compile\"].to_jittable(self.model)\n                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'torch_geometric.compile'\n",
+    "timestamp": "2026-06-12T14:12:55"
+  },
+  {
+    "model_key": "torchbench/train/phlippe_densenet",
+    "suite": "torchbench",
+    "model": "phlippe_densenet",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 46.54964303970337,
+    "region_count": 110,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:12:21"
+  },
+  {
+    "model_key": "torchbench/infer/functorch_dp_cifar10",
+    "suite": "torchbench",
+    "model": "functorch_dp_cifar10",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 9.530189275741577,
+    "region_count": 12,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:13:00"
+  },
+  {
+    "model_key": "torchbench/infer/phlippe_resnet",
+    "suite": "torchbench",
+    "model": "phlippe_resnet",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 7.750905752182007,
+    "region_count": 7,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:13:11"
+  },
+  {
+    "model_key": "torchbench/train/phlippe_resnet",
+    "suite": "torchbench",
+    "model": "phlippe_resnet",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 17.17966055870056,
+    "region_count": 41,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:13:23"
+  },
+  {
+    "model_key": "torchbench/train/functorch_dp_cifar10",
+    "suite": "torchbench",
+    "model": "functorch_dp_cifar10",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 36.48710227012634,
+    "region_count": 53,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:13:13"
+  },
+  {
+    "model_key": "torchbench/infer/functorch_maml_omniglot",
+    "suite": "torchbench",
+    "model": "functorch_maml_omniglot",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.5964443683624268,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": " File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/functorch_maml_omniglot/__init__.py\", line 98, in __init__\n    self.meta_inputs = torch.load(\n                       ^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 1561, in load\n    with _open_file_like(f, \"rb\") as opened_file:\n         ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 795, in _open_file_like\n    return _open_file(name_or_buffer, mode)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 776, in __init__\n    super().__init__(open(name, mode))  # noqa: SIM115\n                     ^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/maml_omniglot/batch.pt'\n",
+    "timestamp": "2026-06-12T14:13:54"
+  },
+  {
+    "model_key": "torchbench/train/functorch_maml_omniglot",
+    "suite": "torchbench",
+    "model": "functorch_maml_omniglot",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.5706121921539307,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": " File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/functorch_maml_omniglot/__init__.py\", line 98, in __init__\n    self.meta_inputs = torch.load(\n                       ^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 1561, in load\n    with _open_file_like(f, \"rb\") as opened_file:\n         ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 795, in _open_file_like\n    return _open_file(name_or_buffer, mode)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torch/serialization.py\", line 776, in __init__\n    super().__init__(open(name, mode))  # noqa: SIM115\n                     ^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/maml_omniglot/batch.pt'\n",
+    "timestamp": "2026-06-12T14:13:58"
+  },
+  {
+    "model_key": "torchbench/infer/resnet152",
+    "suite": "torchbench",
+    "model": "resnet152",
+    "mode": "infer",
+    "status": "ok",
+    "wall_time_s": 33.19875979423523,
+    "region_count": 17,
+    "roundtrip_summary": {
+      "ok": 1,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:13:43"
+  },
+  {
+    "model_key": "torchbench/train/resnet152",
+    "suite": "torchbench",
+    "model": "resnet152",
+    "mode": "train",
+    "status": "ok",
+    "wall_time_s": 158.96184754371643,
+    "region_count": 80,
+    "roundtrip_summary": {
+      "ok": 2,
+      "failed": 0
+    },
+    "error_tail": null,
+    "timestamp": "2026-06-12T14:14:20"
+  },
+  {
+    "model_key": "torchbench/infer/Background_Matting",
+    "suite": "torchbench",
+    "model": "Background_Matting",
+    "mode": "infer",
+    "status": "failed",
+    "wall_time_s": 1.6639289855957031,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "mp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 643, in _load_torchbench\n    model, inputs, _ = _load_via_upstream_runner(\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 314, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/Background_Matting/__init__.py\", line 73, in __init__\n    raise RuntimeError(msg) from e\nRuntimeError: Failed to download data from manifold: No module named 'torchbenchmark.util.framework.fb'\n",
+    "timestamp": "2026-06-12T14:17:03"
+  },
+  {
+    "model_key": "torchbench/train/Background_Matting",
+    "suite": "torchbench",
+    "model": "Background_Matting",
+    "mode": "train",
+    "status": "failed",
+    "wall_time_s": 1.6358122825622559,
+    "region_count": 0,
+    "roundtrip_summary": {
+      "ok": 0,
+      "failed": 0
+    },
+    "error_tail": "mp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 643, in _load_torchbench\n    model, inputs, _ = _load_via_upstream_runner(\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scratch_space/better_benchmark/scripts/run_recapture.py\", line 581, in _load_via_upstream_runner\n    _, _, model, example_inputs, _ = runner.load_model(\n                                     ^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/benchmarks/dynamo/torchbench.py\", line 307, in load_model\n    benchmark = benchmark_cls(\n                ^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/util/model.py\", line 43, in __call__\n    obj = type.__call__(cls, *args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/pytorch-work/torchbenchmark/torchbenchmark/models/Background_Matting/__init__.py\", line 73, in __init__\n    raise RuntimeError(msg) from e\nRuntimeError: Failed to download data from manifold: No module named 'torchbenchmark.util.framework.fb'\n",
+    "timestamp": "2026-06-12T14:17:07"
+  }
+]

@@ -1,0 +1,75 @@
+{
+  "points": [
+    {
+      "shape_hash": "1bba723b",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,1024],"i64"],
+        [[1,1024,1024],"f32"],
+        ["S",[1026,1024]]
+      ]
+    },
+    {
+      "shape_hash": "154a9c83",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128],"i64"],
+        [[128,2560],"f32"],
+        ["S",[128,2560]]
+      ]
+    },
+    {
+      "shape_hash": "b92ebe46",
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,2048],"i64"],
+        [[4,2048,768],"f32"],
+        ["S",[2050,768]]
+      ]
+    },
+    {
+      "shape_hash": "e0a3bc30",
+      "models": {
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,1024],"i64"],
+        [[1,1024,768],"f32"],
+        ["S",[1026,768]]
+      ]
+    },
+    {
+      "shape_hash": "79ee2993",
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,256],"i64"],
+        [[64,256,1024],"f32"],
+        ["S",[514,1024]]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "points": [
+    {
+      "shape_hash": "11a5c74c",
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32768,768],"bf16"],
+        [[768],"f32"],
+        [[128,256,768],"f32"],
+        [[128,256,1],"f32"],
+        ["S",[128,256,768]],
+        ["S",[32768,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "96a1854b",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,4096],"bf16"],
+        [[4096],"f32"],
+        [[1,128,4096],"f32"],
+        [[1,128,1],"f32"],
+        ["S",[1,128,4096]],
+        ["S",[128,4096]],
+        ["S",[4096]]
+      ]
+    },
+    {
+      "shape_hash": "4676c06c",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,2048],"bf16"],
+        [[2048],"f32"],
+        [[32,128,2048],"f32"],
+        [[32,128,1],"f32"],
+        ["S",[32,128,2048]],
+        ["S",[4096,2048]],
+        ["S",[2048]]
+      ]
+    }
+  ]
+}

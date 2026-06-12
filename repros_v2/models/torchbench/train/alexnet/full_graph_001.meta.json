@@ -1,0 +1,91 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[64,3,11,11],"bf16",{"n":"convert_element_type_1","st":[363,1,33,3]}],
+    [[128,3,224,224],"bf16",{"n":"convert_element_type_2","st":[150528,1,672,3]}],
+    [[128,64,27,27],"bf16",{"n":"getitem","st":[46656,1,1728,64]}],
+    [[128,64,27,27],"i8",{"n":"getitem_1","st":[46656,1,1728,64],"gen":["index",0,9],"x":{"constraint_source":"graph_inference"}}],
+    [[192,64,5,5],"bf16",{"n":"convert_element_type_4","st":[1600,1,320,64]}],
+    [[128,192,13,13],"bf16",{"n":"getitem_2","st":[32448,1,2496,192]}],
+    [[128,192,13,13],"i8",{"n":"getitem_3","st":[32448,1,2496,192],"gen":["index",0,9],"x":{"constraint_source":"graph_inference"}}],
+    [[384,192,3,3],"bf16",{"n":"convert_element_type_6","st":[1728,1,576,192]}],
+    [[128,384,13,13],"bf16",{"n":"relu_2","st":[64896,1,4992,384]}],
+    [[256,384,3,3],"bf16",{"n":"convert_element_type_8","st":[3456,1,1152,384]}],
+    [[128,256,13,13],"bf16",{"n":"relu_3","st":[43264,1,3328,256]}],
+    [[256,256,3,3],"bf16",{"n":"convert_element_type_10","st":[2304,1,768,256]}],
+    [[128,256,6,6],"bf16",{"n":"getitem_4"}],
+    [[128,256,6,6],"i8",{"n":"getitem_5","gen":["index",0,9],"x":{"constraint_source":"graph_inference"}}],
+    [[128,9216],"b8",{"n":"gt","gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[128,9216],"bf16",{"n":"mul_1"}],
+    [[128,4096],"b8",{"n":"gt_1","gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[128,4096],"bf16",{"n":"mul_3"}],
+    [[128,4096],"bf16",{"n":"relu_6"}],
+    [[1000,4096],"bf16",{"n":"permute_3"}],
+    [[4096,4096],"bf16",{"n":"permute_7"}],
+    [[128,4096],"b8",{"n":"le_1","gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[4096,9216],"bf16",{"n":"permute_11"}],
+    [[128,256,13,13],"b8",{"n":"le_2","gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[128,192,27,27],"b8",{"n":"le_5","st":[139968,1,5184,192],"gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[128,64,55,55],"b8",{"n":"le_6","st":[193600,1,3520,64],"gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[128,1000],"bf16",{"n":"tangents_1"}]
+  ],
+  "outputs": [
+    [[64,3,11,11],"f32",{"n":"output_0","st":[363,1,33,3]}],
+    [[64],"f32",{"n":"output_1"}],
+    [[192,64,5,5],"f32",{"n":"output_3","st":[1600,1,320,64]}],
+    [[192],"f32",{"n":"output_4"}],
+    [[384,192,3,3],"f32",{"n":"output_5","st":[1728,1,576,192]}],
+    [[384],"f32",{"n":"output_6"}],
+    [[256,384,3,3],"f32",{"n":"output_7","st":[3456,1,1152,384]}],
+    [[256],"f32",{"n":"output_8"}],
+    [[256,256,3,3],"f32",{"n":"output_9","st":[2304,1,768,256]}],
+    [[256],"f32",{"n":"output_10"}],
+    [[4096,9216],"f32",{"n":"output_11"}],
+    [[4096],"f32",{"n":"output_12"}],
+    [[4096,4096],"f32",{"n":"output_13"}],
+    [[4096],"f32",{"n":"output_14"}],
+    [[1000,4096],"f32",{"n":"output_15"}],
+    [[1000],"f32",{"n":"output_16"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_001.py",
+  "source": {
+    "kind": "model",
+    "suite": "torchbench",
+    "mode": "train",
+    "model": "alexnet",
+    "graph": "full_graph_001.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 96,
+    "counts": {
+      "fusible_in_partition": 74,
+      "fusible_unpartitioned": 10,
+      "non_fusible": 12
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.full.default": 4,
+        "aten.le.Scalar": 3,
+        "aten.mul.Tensor": 4,
+        "aten.permute.default": 2,
+        "aten.reshape.default": 13,
+        "aten.scatter_add.default": 3,
+        "aten.sum.dim_IntList": 8,
+        "aten.where.self": 7,
+        "prims._low_memory_max_pool_offsets_to_indices.default": 3,
+        "prims.convert_element_type.default": 27
+      },
+      "fusible_unpartitioned": {
+        "_operator.getitem": 9,
+        "aten.permute.default": 1
+      },
+      "non_fusible": {
+        "aten._adaptive_avg_pool2d_backward.default": 1,
+        "aten.convolution_backward.default": 5,
+        "aten.mm.default": 6
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

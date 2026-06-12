@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "ec769da9",
+      "models": {
+        "hf/infer/GoogleFnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,768],"f32"],
+        ["S",[32,512,768]]
+      ]
+    }
+  ]
+}

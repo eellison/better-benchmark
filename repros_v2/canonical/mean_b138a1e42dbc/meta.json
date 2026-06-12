@@ -1,0 +1,44 @@
+{
+  "pattern_hash": "b138a1e42dbc",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 23,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reciprocal.default",
+    "aten.relu.default",
+    "aten.reshape.default",
+    "aten.sqrt.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 8,
+  "models": [
+    "torchbench/infer/phlippe_resnet",
+    "torchbench/infer/resnet152",
+    "torchbench/infer/resnet18",
+    "torchbench/infer/resnet50",
+    "torchbench/infer/resnext50_32x4d",
+    "torchbench/train/resnet18",
+    "torchbench/train/resnet50",
+    "torchbench/train/resnext50_32x4d"
+  ]
+}

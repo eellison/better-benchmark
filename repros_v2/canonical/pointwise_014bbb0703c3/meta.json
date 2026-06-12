@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "014bbb0703c3",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.erf.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf/infer/openai/whisper-tiny",
+    "timm/infer/visformer_small",
+    "timm/train/visformer_small"
+  ]
+}

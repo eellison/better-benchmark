@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "59cd03f5c32f",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.clamp_min.default",
+    "aten.div.Tensor",
+    "aten.expand.default",
+    "aten.pow.Tensor_Scalar",
+    "aten.pow.Tensor_Scalar",
+    "aten.select.int",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/tts_angular",
+    "torchbench/train/tts_angular"
+  ]
+}

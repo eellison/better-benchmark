@@ -1,0 +1,289 @@
+{
+  "points": [
+    {
+      "shape_hash": "fb089404",
+      "models": {
+        "torchbench/infer/BERT_pytorch": {
+          "occurrences": 12
+        },
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        },
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 24
+        },
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[192,128,64],"bf16"],
+        ["S",[16,12,128,64]],
+        ["S",[16,-1,768]],
+        ["S",[2048,768]]
+      ]
+    },
+    {
+      "shape_hash": "226fbbfa",
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[512,512,64],"bf16"],
+        ["S",[8,64,512,64]],
+        ["S",[8,512,-1]],
+        ["S",[4096,4096]]
+      ]
+    },
+    {
+      "shape_hash": "c6b0f684",
+      "models": {
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[384,512,64],"bf16"],
+        ["S",[32,12,512,64]],
+        ["S",[32,512,-1]],
+        ["S",[16384,768]]
+      ]
+    },
+    {
+      "shape_hash": "07e248d7",
+      "models": {
+        "hf/infer/BlenderbotForConditionalGeneration": {
+          "occurrences": 26
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512,128,80],"bf16"],
+        ["S",[16,32,128,80]],
+        ["S",[16,128,-1]],
+        ["S",[2048,2560]]
+      ]
+    },
+    {
+      "shape_hash": "576ca76e",
+      "models": {
+        "hf/infer/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        },
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[192,512,64],"bf16"],
+        ["S",[-1,24,512,64]],
+        ["S",[8,512,-1]],
+        ["S",[4096,1536]]
+      ]
+    },
+    {
+      "shape_hash": "471d82af",
+      "models": {
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 6
+        },
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[3072,128,64],"bf16"],
+        ["S",[256,12,128,64]],
+        ["S",[256,128,-1]],
+        ["S",[32768,768]]
+      ]
+    },
+    {
+      "shape_hash": "c6cb1dd8",
+      "models": {
+        "hf/infer/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/infer/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        }
+      },
+      "inputs": [
+        [[16,128,256],"bf16"],
+        ["S",[1,16,128,256]],
+        ["S",[1,128,4096]],
+        ["S",[128,4096]]
+      ]
+    },
+    {
+      "shape_hash": "e6f344ac",
+      "models": {
+        "hf/infer/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/infer/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[512,128,128],"bf16"],
+        ["S",[32,16,128,128]],
+        ["S",[32,128,2048]],
+        ["S",[4096,2048]]
+      ]
+    },
+    {
+      "shape_hash": "2cdbce9d",
+      "models": {
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[256,512,64],"bf16"],
+        ["S",[64,4,512,64]],
+        ["S",[64,512,-1]],
+        ["S",[32768,256]]
+      ]
+    },
+    {
+      "shape_hash": "c23ba4e7",
+      "models": {
+        "hf/infer/M2M100ForConditionalGeneration": {
+          "occurrences": 24
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[1024,128,64],"bf16"],
+        ["S",[64,16,128,64]],
+        ["S",[64,128,-1]],
+        ["S",[8192,1024]]
+      ]
+    },
+    {
+      "shape_hash": "6c3c2efc",
+      "models": {
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 18
+        },
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 18
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 18
+        },
+        "hf/train/T5Small": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[64,1024,64],"bf16"],
+        ["S",[8,8,1024,64]],
+        ["S",[8,1024,-1]],
+        ["S",[8192,512]]
+      ]
+    },
+    {
+      "shape_hash": "a3cab238",
+      "models": {
+        "hf/infer/TrOCRForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1024,256,64],"bf16"],
+        ["S",[64,16,256,64]],
+        ["S",[64,256,1024]],
+        ["S",[16384,1024]]
+      ]
+    },
+    {
+      "shape_hash": "14c0be85",
+      "models": {
+        "hf/infer/XGLMForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,128,64],"bf16"],
+        ["S",[32,16,128,64]],
+        ["S",[32,128,1024]],
+        ["S",[4096,1024]]
+      ]
+    },
+    {
+      "shape_hash": "d528e08b",
+      "models": {
+        "hf/infer/MobileBertForMaskedLM": {
+          "occurrences": 24
+        },
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[1024,128,32],"bf16"],
+        ["S",[256,4,128,32]],
+        ["S",[256,128,-1]],
+        ["S",[32768,128]]
+      ]
+    },
+    {
+      "shape_hash": "1dcf8636",
+      "models": {
+        "hf/infer/openai/gpt-oss-20b": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[64,1000,64],"bf16"],
+        ["S",[1,64,1000,64]],
+        ["S",[1,1000,-1]],
+        ["S",[1000,4096]]
+      ]
+    }
+  ]
+}

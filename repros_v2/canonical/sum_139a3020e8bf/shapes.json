@@ -1,0 +1,268 @@
+{
+  "points": [
+    {
+      "shape_hash": "8572c66c",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[25216,3072],"bf16"],
+        [[25216,3072],"bf16"],
+        ["S",[128,197,3072]],
+        ["S",[128,197,3072]],
+        ["S",[25216,3072]],
+        ["S",[3072]]
+      ]
+    },
+    {
+      "shape_hash": "9448cee8",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[25216,768],"bf16"],
+        [[25216,768],"bf16"],
+        ["S",[128,197,768]],
+        ["S",[128,197,768]],
+        ["S",[25216,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "5c6c31bb",
+      "models": {
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[25344,3072],"bf16"],
+        [[25344,3072],"bf16"],
+        ["S",[128,198,3072]],
+        ["S",[128,198,3072]],
+        ["S",[25344,3072]],
+        ["S",[3072]]
+      ]
+    },
+    {
+      "shape_hash": "3f451298",
+      "models": {
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[175360,3072],"bf16"],
+        [[175360,3072],"bf16"],
+        ["S",[128,1370,3072]],
+        ["S",[128,1370,3072]],
+        ["S",[175360,3072]],
+        ["S",[3072]]
+      ]
+    },
+    {
+      "shape_hash": "c064ba70",
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        },
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[32768,3072],"bf16"],
+        [[32768,3072],"bf16"],
+        ["S",[128,256,3072]],
+        ["S",[128,256,3072]],
+        ["S",[32768,3072]],
+        ["S",[3072]]
+      ]
+    },
+    {
+      "shape_hash": "67c7a377",
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,3072],"bf16"],
+        [[128,3072],"bf16"],
+        ["S",[128,1,3072]],
+        ["S",[128,1,3072]],
+        ["S",[128,3072]],
+        ["S",[3072]]
+      ]
+    },
+    {
+      "shape_hash": "8951d544",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[8192,4096],"bf16"],
+        [[8192,4096],"bf16"],
+        ["S",[8,1024,4096]],
+        ["S",[8,1024,4096]],
+        ["S",[8192,4096]],
+        ["S",[4096]]
+      ]
+    },
+    {
+      "shape_hash": "a448a1c6",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,10240],"bf16"],
+        [[4096,10240],"bf16"],
+        ["S",[32,128,10240]],
+        ["S",[32,128,10240]],
+        ["S",[4096,10240]],
+        ["S",[10240]]
+      ]
+    },
+    {
+      "shape_hash": "5d96adde",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[2048,10240],"bf16"],
+        [[2048,10240],"bf16"],
+        ["S",[16,128,10240]],
+        ["S",[16,128,10240]],
+        ["S",[2048,10240]],
+        ["S",[10240]]
+      ]
+    },
+    {
+      "shape_hash": "63ec809a",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4096,6144],"bf16"],
+        [[4096,6144],"bf16"],
+        ["S",[8,512,6144]],
+        ["S",[8,512,6144]],
+        ["S",[4096,6144]],
+        ["S",[6144]]
+      ]
+    },
+    {
+      "shape_hash": "05a5e903",
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[16384,3072],"bf16"],
+        [[16384,3072],"bf16"],
+        ["S",[32,512,3072]],
+        ["S",[32,512,3072]],
+        ["S",[16384,3072]],
+        ["S",[3072]]
+      ]
+    },
+    {
+      "shape_hash": "7c6aa97f",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[32768,1024],"bf16"],
+        [[32768,1024],"bf16"],
+        ["S",[64,512,1024]],
+        ["S",[64,512,1024]],
+        ["S",[32768,1024]],
+        ["S",[1024]]
+      ]
+    },
+    {
+      "shape_hash": "58ff2bc5",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[8192,3072],"bf16"],
+        [[8192,3072],"bf16"],
+        ["S",[8,1024,3072]],
+        ["S",[8,1024,3072]],
+        ["S",[8192,3072]],
+        ["S",[3072]]
+      ]
+    },
+    {
+      "shape_hash": "6a0c3b2c",
+      "models": {
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,4096],"bf16"],
+        [[16384,4096],"bf16"],
+        ["S",[128,128,4096]],
+        ["S",[128,128,4096]],
+        ["S",[16384,4096]],
+        ["S",[4096]]
+      ]
+    },
+    {
+      "shape_hash": "7c4310e0",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,4096],"bf16"],
+        [[4096,4096],"bf16"],
+        ["S",[32,128,4096]],
+        ["S",[32,128,4096]],
+        ["S",[4096,4096]],
+        ["S",[4096]]
+      ]
+    }
+  ]
+}

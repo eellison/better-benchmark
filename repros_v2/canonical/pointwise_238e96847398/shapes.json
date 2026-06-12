@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "2149da1a",
+      "models": {
+        "torchbench/infer/pyhpc_equation_of_state": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,1,26],"bf16"],
+        [[204,204,26],"bf16"],
+        [[204,204,26],"bf16"]
+      ]
+    }
+  ]
+}

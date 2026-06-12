@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "65717f3841e5",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/openai/gpt-oss-20b"
+  ]
+}

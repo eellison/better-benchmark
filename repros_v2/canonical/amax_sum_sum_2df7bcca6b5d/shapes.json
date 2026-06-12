@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "a7052938",
+      "models": {
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,512],"i64",{"gen":["index",0,30522]}],
+        [[32768,30528],"bf16"],
+        ["S",[64,512,30522]],
+        ["S",[-1,30522]]
+      ]
+    }
+  ]
+}

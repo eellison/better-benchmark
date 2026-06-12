@@ -1,0 +1,44 @@
+{
+  "pattern_hash": "bf54d8c8c94e",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 28,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.exp.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.index_put.default",
+    "aten.log.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.scalar_tensor.default",
+    "aten.scalar_tensor.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.where.self",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/GPTNeoForSequenceClassification"
+  ]
+}

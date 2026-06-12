@@ -1,0 +1,32 @@
+{
+  "points": [
+    {
+      "shape_hash": "f891741b",
+      "models": {
+        "hf/infer/GPTNeoForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128],"i64",{"gen":["index",0,50251]}],
+        [[4096,50264],"bf16"],
+        ["S",[32,128,50257]],
+        ["S",[-1,50257]]
+      ]
+    },
+    {
+      "shape_hash": "68a9ca47",
+      "models": {
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,512],"i64",{"gen":["index",0,50265]}],
+        [[16384,50272],"bf16"],
+        ["S",[32,512,50265]],
+        ["S",[-1,50265]]
+      ]
+    }
+  ]
+}

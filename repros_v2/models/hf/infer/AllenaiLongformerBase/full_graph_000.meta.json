@@ -1,0 +1,53 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[8,1024],"i64",{"n":"arg0_1","gen":["index",0,50265],"x":{"constraint_source":"graph_inference","observed":{"min":3,"max":50260,"n_unique":7605}}}],
+    [[50265,768],"bf16",{"n":"arg1_1"}],
+    [[4098,768],"bf16",{"n":"arg2_1"}],
+    [[1,768],"bf16",{"n":"arg3_1"}],
+    [[768],"bf16",{"n":"arg4_1"}],
+    [[768],"bf16",{"n":"arg5_1"}]
+  ],
+  "outputs": [
+    [[8,1024,768],"bf16",{"n":"output_0"}],
+    [[8,1024],"bf16",{"n":"output_1"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_000.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "infer",
+    "model": "AllenaiLongformerBase",
+    "graph": "full_graph_000.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 32,
+    "counts": {
+      "fusible_in_partition": 31,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 1
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "_operator.getitem": 2,
+        "aten.add.Tensor": 5,
+        "aten.embedding.default": 3,
+        "aten.full.default": 3,
+        "aten.mul.Tensor": 3,
+        "aten.ne.Scalar": 1,
+        "aten.rsqrt.default": 1,
+        "aten.select.int": 2,
+        "aten.sub.Tensor": 2,
+        "aten.unsqueeze.default": 2,
+        "aten.var_mean.correction": 1,
+        "prims.convert_element_type.default": 6
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "aten.cumsum.default": 1
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

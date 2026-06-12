@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "a0e86354",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2048,8008],"bf16"],
+        [[1,8008],"f32"],
+        [[16,128],"i64"],
+        ["S",[16,128,8008]],
+        ["S",[-1,8008]]
+      ]
+    }
+  ]
+}

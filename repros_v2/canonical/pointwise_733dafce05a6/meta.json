@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "733dafce05a6",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/TrOCRForCausalLM",
+    "hf/infer/XGLMForCausalLM"
+  ]
+}

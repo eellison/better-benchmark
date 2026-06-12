@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "70679a552198",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 16,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.scatter_add.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.where.self",
+    "aten.where.self",
+    "prims._low_memory_max_pool_offsets_to_indices.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/squeezenet1_1",
+    "torchbench/train/squeezenet1_1"
+  ]
+}

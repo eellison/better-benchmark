@@ -1,0 +1,67 @@
+{
+  "points": [
+    {
+      "shape_hash": "631b8e39",
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[2048,768],"bf16"],
+        ["S",[16,128,768]],
+        ["S",[16,-1,12,64]],
+        ["S",[16,12,64,128]],
+        ["S",[192,64,128]]
+      ]
+    },
+    {
+      "shape_hash": "d20f46e2",
+      "models": {
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        ["S",[32,512,768]],
+        ["S",[32,512,-1,64]],
+        ["S",[32,12,64,512]],
+        ["S",[384,64,512]]
+      ]
+    },
+    {
+      "shape_hash": "cb7fdfdf",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4096,384],"bf16"],
+        ["S",[32,128,384]],
+        ["S",[32,128,-1,64]],
+        ["S",[32,6,64,128]],
+        ["S",[192,64,128]]
+      ]
+    },
+    {
+      "shape_hash": "b63e0b0f",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 18
+        },
+        "hf/train/T5Small": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[8192,512],"bf16"],
+        ["S",[8,1024,512]],
+        ["S",[8,1024,-1,64]],
+        ["S",[8,8,64,1024]],
+        ["S",[64,64,1024]]
+      ]
+    }
+  ]
+}

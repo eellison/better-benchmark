@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "1918882eece2",
+  "kind": "reduction",
+  "reduction_types": [
+    "any"
+  ],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.any.default",
+    "aten.gt.Scalar",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/AllenaiLongformerBase",
+    "hf/train/AllenaiLongformerBase"
+  ]
+}

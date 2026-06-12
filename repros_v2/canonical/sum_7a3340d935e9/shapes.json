@@ -1,0 +1,52 @@
+{
+  "points": [
+    {
+      "shape_hash": "c57eca43",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024,1024],"f32"],
+        [[8,1024,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b79fa38b",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024,768],"f32"],
+        [[8,1024,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "fc97d3ab",
+      "models": {
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,1024,768],"f32"],
+        [[16,1024,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "f4eac48c",
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,256,1024],"f32"],
+        [[64,256,1024],"f32"]
+      ]
+    }
+  ]
+}

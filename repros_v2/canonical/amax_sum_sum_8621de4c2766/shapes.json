@@ -1,0 +1,37 @@
+{
+  "points": [
+    {
+      "shape_hash": "0b78f8f6",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,250112],"bf16"],
+        [[32,128],"i64",{"gen":["index",0,250112]}],
+        [[],"f32"],
+        ["S",[32,128,250112]],
+        ["S",[-1,250112]]
+      ]
+    },
+    {
+      "shape_hash": "5d25ba41",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/train/T5Small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,32128],"bf16"],
+        [[8,1024],"i64",{"gen":["index",0,32128]}],
+        [[],"f32"],
+        ["S",[8,1024,32128]],
+        ["S",[-1,32128]]
+      ]
+    }
+  ]
+}

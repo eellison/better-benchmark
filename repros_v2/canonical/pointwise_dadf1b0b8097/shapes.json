@@ -1,0 +1,112 @@
+{
+  "points": [
+    {
+      "shape_hash": "bd432928",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[2048,2560],"bf16"],
+        ["S",[16,128,2560]],
+        ["S",[16,128,-1,80]],
+        ["S",[16,32,80,128]],
+        ["S",[512,80,128]]
+      ]
+    },
+    {
+      "shape_hash": "1a8eaeba",
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[32768,768],"bf16"],
+        ["S",[256,128,768]],
+        ["S",[256,128,-1,64]],
+        ["S",[256,12,64,128]],
+        ["S",[3072,64,128]]
+      ]
+    },
+    {
+      "shape_hash": "d87997ca",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[4096,4096],"bf16"],
+        ["S",[8,512,4096]],
+        ["S",[8,512,-1,64]],
+        ["S",[8,64,64,512]],
+        ["S",[512,64,512]]
+      ]
+    },
+    {
+      "shape_hash": "d20f46e2",
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        ["S",[32,512,768]],
+        ["S",[32,512,-1,64]],
+        ["S",[32,12,64,512]],
+        ["S",[384,64,512]]
+      ]
+    },
+    {
+      "shape_hash": "b8160d07",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[32768,256],"bf16"],
+        ["S",[64,512,256]],
+        ["S",[64,512,-1,64]],
+        ["S",[64,4,64,512]],
+        ["S",[256,64,512]]
+      ]
+    },
+    {
+      "shape_hash": "ad7b2a2c",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[8192,1024],"bf16"],
+        ["S",[64,128,1024]],
+        ["S",[64,128,-1,64]],
+        ["S",[64,16,64,128]],
+        ["S",[1024,64,128]]
+      ]
+    },
+    {
+      "shape_hash": "3ab46e72",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[32768,128],"bf16"],
+        ["S",[256,128,128]],
+        ["S",[256,128,-1,32]],
+        ["S",[256,4,32,128]],
+        ["S",[1024,32,128]]
+      ]
+    }
+  ]
+}

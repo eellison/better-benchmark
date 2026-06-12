@@ -1,0 +1,6378 @@
+{
+  "points": [
+    {
+      "shape_hash": "c180bc3c",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,3,3,3],"bf16",{"st":[27,1,9,3]}]
+      ]
+    },
+    {
+      "shape_hash": "795241a6",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,32,3,3],"bf16",{"st":[288,1,96,32]}]
+      ]
+    },
+    {
+      "shape_hash": "f60754ac",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,32,3,3],"bf16",{"st":[288,1,96,32]}]
+      ]
+    },
+    {
+      "shape_hash": "25f8f618",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[80,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e3e42cd3",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,80,3,3],"bf16",{"st":[720,1,240,80]}]
+      ]
+    },
+    {
+      "shape_hash": "12d8ef02",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 2
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 2
+        },
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,192,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ae275ccf",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[48,192,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "11a19ca8",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 3
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[64,48,5,5],"bf16",{"st":[1200,1,240,48]}]
+      ]
+    },
+    {
+      "shape_hash": "7de9bd35",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,64,3,3],"bf16",{"st":[576,1,192,64]}]
+      ]
+    },
+    {
+      "shape_hash": "8ffa104a",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,96,3,3],"bf16",{"st":[864,1,288,96]}]
+      ]
+    },
+    {
+      "shape_hash": "a8a68a04",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32,192,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "41dcb802",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 3
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 3
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        },
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 2
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,256,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "215c452d",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        },
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[48,256,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "daa4b0dd",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[64,288,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5e9822c8",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[48,288,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ac8858e5",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[384,288,3,3],"bf16",{"st":[2592,1,864,288]}]
+      ]
+    },
+    {
+      "shape_hash": "623f8ca6",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 12
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[192,768,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "01c4aa98",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 2
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 2
+        },
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,768,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0730b368",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 2
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,128,1,7],"bf16",{"st":[896,1,896,128]}]
+      ]
+    },
+    {
+      "shape_hash": "97efcb82",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,128,7,1],"bf16",{"st":[896,1,128,128]}]
+      ]
+    },
+    {
+      "shape_hash": "ffbae90c",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 2
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,128,7,1],"bf16",{"st":[896,1,128,128]}]
+      ]
+    },
+    {
+      "shape_hash": "a6a2ae70",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,128,1,7],"bf16",{"st":[896,1,896,128]}]
+      ]
+    },
+    {
+      "shape_hash": "448fc025",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[160,768,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4af17ea6",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[160,160,1,7],"bf16",{"st":[1120,1,1120,160]}]
+      ]
+    },
+    {
+      "shape_hash": "e79325d8",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 2
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[192,160,7,1],"bf16",{"st":[1120,1,160,160]}]
+      ]
+    },
+    {
+      "shape_hash": "f5b2301d",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[160,160,7,1],"bf16",{"st":[1120,1,160,160]}]
+      ]
+    },
+    {
+      "shape_hash": "b6cfd6c1",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 2
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[192,160,1,7],"bf16",{"st":[1120,1,1120,160]}]
+      ]
+    },
+    {
+      "shape_hash": "cd35cac8",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[192,192,1,7],"bf16",{"st":[1344,1,1344,192]}]
+      ]
+    },
+    {
+      "shape_hash": "9bddb1bb",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[192,192,7,1],"bf16",{"st":[1344,1,192,192]}]
+      ]
+    },
+    {
+      "shape_hash": "5303c1fe",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[320,192,3,3],"bf16",{"st":[1728,1,576,192]}]
+      ]
+    },
+    {
+      "shape_hash": "2db5e612",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/repvgg_a2": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[192,192,3,3],"bf16",{"st":[1728,1,576,192]}]
+      ]
+    },
+    {
+      "shape_hash": "051349d0",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 8
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[320,1280,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "49e64e10",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[384,1280,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "efc6a14d",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[384,384,1,3],"bf16",{"st":[1152,1,1152,384]}]
+      ]
+    },
+    {
+      "shape_hash": "eca65597",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[384,384,3,1],"bf16",{"st":[1152,1,384,384]}]
+      ]
+    },
+    {
+      "shape_hash": "ce04aae0",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[448,1280,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "61b56371",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 2
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[384,448,3,3],"bf16",{"st":[4032,1,1344,448]}]
+      ]
+    },
+    {
+      "shape_hash": "fd250a48",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,1280,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "dff54966",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[320,2048,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7d884c45",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[384,2048,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7a20422d",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[448,2048,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "35d516d1",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,2048,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3070c8f9",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,2048],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d0fb09d9",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 1
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 1
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[768,3,16,16],"bf16",{"st":[768,1,48,3]}]
+      ]
+    },
+    {
+      "shape_hash": "2a07733c",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[2304,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2ddc1bad",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 14
+        },
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 48
+        },
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 25
+        },
+        "hf/train/DistillGPT2": {
+          "occurrences": 6
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 49
+        },
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 49
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 49
+        },
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 49
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 13
+        }
+      },
+      "inputs": [
+        [[768,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6393d8ae",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 13
+        },
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        },
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        },
+        "hf/train/DistillGPT2": {
+          "occurrences": 6
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 12
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[3072,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5a62163f",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 13
+        },
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        },
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        },
+        "hf/train/DistillGPT2": {
+          "occurrences": 6
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 12
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768,3072],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "db2f987a",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 1
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 2
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "500e684c",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[80,3,4,4],"bf16",{"st":[48,1,12,3]}]
+      ]
+    },
+    {
+      "shape_hash": "3582f9b3",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[80,1,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3afb3a00",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[320,80,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c139494c",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[80,320,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "851ced79",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[160,80,2,2],"bf16",{"st":[320,1,160,80]}]
+      ]
+    },
+    {
+      "shape_hash": "a3e214ad",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[160,1,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "80b34292",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[640,160,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "99998008",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[160,640,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "af00a629",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[320,160,2,2],"bf16",{"st":[640,1,320,160]}]
+      ]
+    },
+    {
+      "shape_hash": "66cebc81",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[320,1,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6fed7b82",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 8
+        },
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1280,320,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0d3354ef",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[640,320,2,2],"bf16",{"st":[1280,1,640,320]}]
+      ]
+    },
+    {
+      "shape_hash": "cfdf6a3a",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[640,1,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cc895862",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[2560,640,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "be6a4bf6",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[640,2560,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "08fbb5ff",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,640],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "daeb6b89",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,3,16,16],"bf16",{"st":[768,1,48,3]}]
+      ]
+    },
+    {
+      "shape_hash": "5727c431",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[576,192],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a9e40e42",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[192,192],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e0ab88b0",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768,192],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "32da6b44",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[192,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3a15e468",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,192],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d399c005",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "torchbench/train/densenet121": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 2
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,256,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bca6105c",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 3
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,128,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4d209e5f",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 2
+        },
+        "torchbench/train/densenet121": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,512,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "321d80cd",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 2
+        },
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 5
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,256,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8ce957e7",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 9
+        }
+      },
+      "inputs": [
+        [[768,1536,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "16be18b7",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 9
+        }
+      },
+      "inputs": [
+        [[1536,768,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "96111b36",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,3072],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "efa63a42",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,3,3,3],"bf16",{"st":[27,1,9,3]}]
+      ]
+    },
+    {
+      "shape_hash": "6d375dd5",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[8,16,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8b2cf991",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[8,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "48fc43ba",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[24,16,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "40fe5864",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "369826f8",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[48,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f84df4f6",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[12,48,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f58c13ae",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[12,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1238c69e",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b1ba0add",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[36,24,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0b78a53b",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[36,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "57828936",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[12,72,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "df3dbe38",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[72,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "268ac1bb",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[20,72,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9cb48eae",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[72,20,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "81015728",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[20,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "03b16ed5",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a9ac77ba",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[40,24,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bfc1d20b",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[60,40,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "02b03de9",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[60,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6b167218",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        },
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,120,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "658a0097",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[120,32,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ab6685f4",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[20,120,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "83350839",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[120,40,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "dbb934fa",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[120,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0ec57a61",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[240,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "24595219",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[40,240,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1a9f696e",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[40,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4a882661",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[80,40,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "600c8bfa",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[100,80,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "46012c02",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[100,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "450f3148",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[40,200,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8f6bd063",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[92,80,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "71126e7c",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[92,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9b4fa59a",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[40,184,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c3fb5e13",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[240,80,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "32a02f3d",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[120,480,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2ce6048d",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[480,120,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "082b8a84",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[56,480,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "060342ed",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[56,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "62c29c8c",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[80,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bce2a12d",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[112,80,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "49cad605",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[336,112,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7f82c336",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[336,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4b053b17",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[168,672,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e875c188",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[672,168,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "63d7005e",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[56,672,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1e23135c",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[672,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bb34ae40",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[80,672,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "dc6b9547",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[112,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cae60b91",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[160,112,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4033ee34",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[480,160,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a0bc4be4",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 4
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[480,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d4512f46",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[80,960,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3047d934",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[240,960,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fb48e60c",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[960,240,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1de45ad1",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 3
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[960,160,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bb9ce239",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1280,960,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4fd1884d",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,1280],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "eae44ef6",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a96e8dc1",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,32,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b85f5a1d",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,16,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7f465dd6",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6cb8b0a8",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24,96,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6f1872fe",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 2
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[144,24,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "dae65fda",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 2
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[144,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3b31bbb0",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24,144,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "32d9d2bd",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        },
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32,144,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "80927746",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[192,32,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "045932cc",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[192,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "65f6a878",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 4
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[384,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ea643d55",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 4
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[384,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e9c8996b",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 3
+        },
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,384,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7f086117",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,384,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "df387840",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 3
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[576,96,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "be2233b8",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 3
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[576,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "896f8d4a",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[96,576,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3e112035",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[160,576,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "40b2a18e",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[960,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "dcb43c99",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 2
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[160,960,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bbfc1eb9",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[320,960,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cc85f631",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,16,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c39d875c",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        },
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,16,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9357c095",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0539fdea",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "216dece3",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 3
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[72,24,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "24aebc95",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[72,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6e52b66f",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[24,72,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cc408ab6",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[40,72,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c2b68c3e",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[120,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0b93ff3c",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[40,120,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "90187e0c",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[240,40,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "deaf11e8",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[80,240,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5065e963",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[200,80,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f3c583c2",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[200,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6cc3da18",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[80,200,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6f3a310a",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[184,80,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "03b4a772",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[184,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "daba876c",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[80,184,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f7f61ba5",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[480,80,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "db6f45ba",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[112,480,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b783e2ae",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[672,112,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5c274eea",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[672,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "02b08269",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[112,672,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ce11835b",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[160,672,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5ba2cfc0",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[960,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c2c0584f",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "79241e2b",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,32,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b306d35a",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9d6deec3",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,128,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "92eabc3c",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        },
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        },
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 2
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 4
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[256,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5eddb4e1",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[256,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a62c9d83",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,256,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a18c8563",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[144,96,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7d9a8f7c",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[432,144],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4ef768dd",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[144,144],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "611ab15d",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[288,144],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ac4a5514",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[144,288],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4e43fcee",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,144,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "932398c9",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,192,3,3],"bf16",{"st":[1728,1,576,192]}]
+      ]
+    },
+    {
+      "shape_hash": "fa80550a",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[384,96,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e2d29070",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,384,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8b038b8d",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 4
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[128,128,3,3],"bf16",{"st":[1152,1,384,128]}]
+      ]
+    },
+    {
+      "shape_hash": "26dd1868",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,128,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4a583016",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[384,192],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "da0cd8aa",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[192,384],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2f47e61f",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,192,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6831e811",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,256,3,3],"bf16",{"st":[2304,1,768,256]}]
+      ]
+    },
+    {
+      "shape_hash": "31c7a514",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "timm/train/nfnet_l0": {
+          "occurrences": 2
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 4
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[512,128,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "50186d60",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3e95f64a",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[160,512,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "aa66d847",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[160,160,3,3],"bf16",{"st":[1440,1,480,160]}]
+      ]
+    },
+    {
+      "shape_hash": "b7e8cb78",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[240,160,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9c67f914",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[720,240],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0003c196",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[240,240],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "39290894",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[480,240],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "264d9c3b",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[240,480],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4c099e68",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[160,240,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "01aa4545",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[160,320,3,3],"bf16",{"st":[2880,1,960,320]}]
+      ]
+    },
+    {
+      "shape_hash": "e07d5f80",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 2
+        },
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[128,512,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4996369d",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 9
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[384,1536,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d9957df6",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 9
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[1536,384,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9fd1a894",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,2304],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8f1057fd",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,3,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c1bdb117",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        },
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,3,3,3],"bf16",{"st":[27,1,9,3]}]
+      ]
+    },
+    {
+      "shape_hash": "f34cdbd3",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "53f0627f",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,96,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "253c6d5a",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,96,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b3c623f3",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,96,3,3],"bf16",{"st":[864,1,288,96]}]
+      ]
+    },
+    {
+      "shape_hash": "95e765d0",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[192,192,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4166c153",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[384,192,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cb54d99d",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        },
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[384,192,3,3],"bf16",{"st":[1728,1,576,192]}]
+      ]
+    },
+    {
+      "shape_hash": "088dc224",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 13
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[384,384,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d1da25fc",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 13
+        }
+      },
+      "inputs": [
+        [[384,384,3,3],"bf16",{"st":[3456,1,1152,384]}]
+      ]
+    },
+    {
+      "shape_hash": "0ffa35c2",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1408,384,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9f461ac7",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1408,384,3,3],"bf16",{"st":[3456,1,1152,384]}]
+      ]
+    },
+    {
+      "shape_hash": "37b68e48",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,1408],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5773a673",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,32,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f5608adc",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,8,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "357101ae",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,96,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e1626c55",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,4,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d81df4d1",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[6,144,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1b46fb5f",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[144,6,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "88926d23",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[144,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "61720e48",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[40,144,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "42b7dbef",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[240,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a2721139",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[10,240,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fd609835",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[240,10,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3b978354",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[20,480,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "586f4280",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[480,20,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bf294502",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[80,480,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4496422f",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[480,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4a88bef9",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[28,672,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a1fa61f7",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[672,28,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fea91bdf",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,672,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4e4f2956",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 4
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[1152,192,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5f84aaba",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[1152,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4f402cc1",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[48,1152,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "49fbff34",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[1152,48,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3e8ddd11",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[192,1152,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "285a96e6",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1152,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "acbe661c",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[320,1152,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "eeaefea8",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,3,7,7],"bf16",{"st":[147,1,21,3]}]
+      ]
+    },
+    {
+      "shape_hash": "334738f5",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,32,4,4],"bf16",{"st":[512,1,128,32]}]
+      ]
+    },
+    {
+      "shape_hash": "2854b247",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[384,48,3,3],"bf16",{"st":[432,1,144,48]}]
+      ]
+    },
+    {
+      "shape_hash": "17a647ff",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[192,384,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "04503eb1",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[384,192,2,2],"bf16",{"st":[768,1,384,192]}]
+      ]
+    },
+    {
+      "shape_hash": "5186c91b",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[1152,384,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "557c63c6",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[768,384,2,2],"bf16",{"st":[1536,1,768,384]}]
+      ]
+    },
+    {
+      "shape_hash": "076f4090",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[2304,768,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "30dfc3d1",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[768,768,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d5488832",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[3072,768,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f9155247",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[768,3072,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "54170006",
+      "models": {
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[768,3,14,14],"bf16",{"st":[588,1,42,3]}]
+      ]
+    },
+    {
+      "shape_hash": "36b4e1e7",
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1536,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ecec6381",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,9,3,3],"bf16",{"st":[81,1,27,9]}]
+      ]
+    },
+    {
+      "shape_hash": "86e1e916",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 4
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 4
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 3
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 4
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[64,64,3,3],"bf16",{"st":[576,1,192,64]}]
+      ]
+    },
+    {
+      "shape_hash": "1e3eed28",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "77b99a1e",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,3,3],"bf16",{"st":[576,1,192,64]}]
+      ]
+    },
+    {
+      "shape_hash": "86b35d84",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        },
+        "torchbench/train/densenet121": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e3ba5155",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,128,3,3],"bf16",{"st":[1152,1,384,128]}]
+      ]
+    },
+    {
+      "shape_hash": "2fbe85f1",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 3
+        },
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 6
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 2
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 36
+        }
+      },
+      "inputs": [
+        [[256,256,3,3],"bf16",{"st":[2304,1,768,256]}]
+      ]
+    },
+    {
+      "shape_hash": "6dbeafa9",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,256,3,3],"bf16",{"st":[2304,1,768,256]}]
+      ]
+    },
+    {
+      "shape_hash": "8bb60dcb",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 3
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 5
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[512,512,3,3],"bf16",{"st":[4608,1,1536,512]}]
+      ]
+    },
+    {
+      "shape_hash": "d37cbbac",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[65,512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "23700a14",
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 1
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "54b0d05d",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,3,11,11],"bf16",{"st":[363,1,33,3]}]
+      ]
+    },
+    {
+      "shape_hash": "585ee806",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,64,5,5],"bf16",{"st":[1600,1,320,64]}]
+      ]
+    },
+    {
+      "shape_hash": "1f126b5d",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,384,3,3],"bf16",{"st":[3456,1,1152,384]}]
+      ]
+    },
+    {
+      "shape_hash": "b4326adc",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,9216],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d87997ca",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        },
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 112
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 112
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,4096],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d2d047ae",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,4096],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "55a8fc61",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,3,4,4],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5b88fe45",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,4,4],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8ce49709",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,128,4,4],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e8017db1",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,256,4,4],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "73879c72",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,512,4,4],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "631e4b37",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,2048,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "abd6dd08",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[2048,1024,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "718a022f",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2048,1024,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1ae6bfa9",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[1024,512,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "19b4b553",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1024,512,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e6f51b61",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512,256,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "49610b83",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,256,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ff939d3c",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[256,128,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c5ef140e",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,128,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5daae788",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,64,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c1cd4579",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f60569f5",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,8,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3112ab1b",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,2,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0e24c22e",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c1cf52db",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,128,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "acddfa67",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,256,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cf9724c8",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1024,512,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ce6e8d24",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2048,1024,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e9b510db",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,2048,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9fc907e1",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[48,16,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b3e5564e",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24,48,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f375f944",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,480,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "eb33518c",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[576,1,5,5],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8390c579",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[192,576,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "03889ef1",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 2
+        },
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 72
+        },
+        "hf/train/T5Small": {
+          "occurrences": 72
+        },
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ab519e15",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        },
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 32
+        }
+      },
+      "inputs": [
+        [[1024,512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6d360d07",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        },
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 16
+        }
+      },
+      "inputs": [
+        [[512,1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "047f3e89",
+      "models": {
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1280,960],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c435b23e",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f3019e2f",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,16,3,3],"bf16",{"st":[144,1,48,16]}]
+      ]
+    },
+    {
+      "shape_hash": "165c1c1c",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,128,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "815cf3ae",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        },
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32,128,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f3ac0581",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,32,3,3],"bf16",{"st":[288,1,96,32]}]
+      ]
+    },
+    {
+      "shape_hash": "b8220b12",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,256,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8395110a",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[192,48,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "02767734",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[192,48,3,3],"bf16",{"st":[432,1,144,48]}]
+      ]
+    },
+    {
+      "shape_hash": "f9f576d9",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[48,384,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "30e2d2d9",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[256,64,3,3],"bf16",{"st":[576,1,192,64]}]
+      ]
+    },
+    {
+      "shape_hash": "38defa30",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,512,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7ba01f3f",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,512,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a9384bfb",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 97
+        },
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[1024,1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4fa33397",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4096,1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2d6ceca7",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[1024,4096],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4f9b1271",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8008,2560],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "962e8086",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[2560,2560],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cafc67b6",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[10240,2560],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8a886914",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[2560,10240],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "618968fe",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 97
+        }
+      },
+      "inputs": [
+        [[1536,1536],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6043a82f",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[6144,1536],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "97fda35a",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[1536,6144],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0f69674d",
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 6
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768,2304],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1561415a",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,3,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "86aa3fbb",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 58
+        }
+      },
+      "inputs": [
+        [[32,128,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3640346e",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,96,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ecc2720f",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,128,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "50138cd5",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,160,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "30639013",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,224,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fad652a9",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,288,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bcddf491",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,320,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "84177907",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,352,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a3f80304",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,416,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d97e498f",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,448,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e1f57fff",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,480,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ed505313",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,544,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "08008e7b",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,576,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c32fda71",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,608,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4eb41506",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,640,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fba97314",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,672,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "51b453bd",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,704,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5153b1d7",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,736,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "58aa41f0",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,800,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "265b155c",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,832,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c9c3ef3a",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,864,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "47542dd5",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,896,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "72bdd3f7",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,928,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b17dd843",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,960,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "483105fa",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,992,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0409449e",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 5
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,1024,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ed385436",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 1
+        },
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "543c3d82",
+      "models": {
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,3,7,7],"bf16",{"st":[147,1,21,3]}]
+      ]
+    },
+    {
+      "shape_hash": "94ef836f",
+      "models": {
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "263aef1c",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 6
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 36
+        }
+      },
+      "inputs": [
+        [[1024,256,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c8fb3e4d",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 7
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1024,512,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d96e1188",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 5
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 35
+        }
+      },
+      "inputs": [
+        [[256,1024,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1cf60d5c",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 3
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[2048,512,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "029dd4d1",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 4
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2048,1024,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fd7d6607",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 2
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512,2048,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "162feb41",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[128,4,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "13dc61d8",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,256,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0d1b32a0",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[256,8,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9b839694",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,512,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "88377012",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[512,16,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6cb60043",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1024,1024,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3483236d",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[1024,32,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ae6522b8",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[1024,2048,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fb36fdc1",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24,3,3,3],"bf16",{"st":[27,1,9,3]}]
+      ]
+    },
+    {
+      "shape_hash": "f4a82139",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[58,24,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ed3cecdb",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[58,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9b2aff10",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[58,58,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "55bfbbde",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 9
+        }
+      },
+      "inputs": [
+        [[116,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1de4b515",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 17
+        }
+      },
+      "inputs": [
+        [[116,116,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3e3bfb59",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[232,1,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b26b998a",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 9
+        }
+      },
+      "inputs": [
+        [[232,232,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "48ffb95c",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1024,464,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "67d3fea7",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        }
+      },
+      "inputs": [
+        [[16384,4096],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cd47785e",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        }
+      },
+      "inputs": [
+        [[4096,16384],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "edbe5393",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50400,4096],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "10c5c015",
+      "models": {
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2,4096],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7cb7e6e4",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "18290e58",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,4096],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9554fcc1",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9a144edf",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 48
+        }
+      },
+      "inputs": [
+        [[256,256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "99e65a35",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[1024,256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0f3e2fa1",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[256,1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5238af3b",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e994657f",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 96
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 96
+        }
+      },
+      "inputs": [
+        [[2048,2048],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b4a7958d",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[8192,2048],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "613dd548",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[2048,8192],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b2dd43bb",
+      "models": {
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,25088],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b2fe4701",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,3,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7db825a8",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 2
+        },
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[64,64,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c89dde8a",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "31ad171a",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,128,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4a33cf6a",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,128,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b2966ff4",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,256,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e0ea1b62",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,256,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "57c47bed",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[512,512,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5fc50f7b",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,1024,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f46c5bd4",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[256,512,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9d5f4cc4",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,256,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "93f8fbcd",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,128,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3267e53f",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2,64,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bcc6a8f0",
+      "models": {
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2,2048],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a0131897",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128112,1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0fb7f7b5",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 72
+        }
+      },
+      "inputs": [
+        [[384,512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5016da60",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 24
+        },
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,384],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c7a73141",
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50272,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2a26ac60",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/train/T5Small": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[2048,512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1e571200",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/train/T5Small": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[512,2048],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5bfe6d35",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256008,1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3213bad8",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 168
+        }
+      },
+      "inputs": [
+        [[128,512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "298dd5b5",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 72
+        }
+      },
+      "inputs": [
+        [[128,128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e863d800",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 120
+        }
+      },
+      "inputs": [
+        [[512,128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "29b3fcbd",
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 48
+        }
+      },
+      "inputs": [
+        [[384,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "465149ba",
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768,1,9],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "90becd17",
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[384,768,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9fe13ed9",
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[54,384],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "40eb390a",
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "24be48e8",
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[16,16],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a0f5c667",
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,16],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "776eb3d0",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,3,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3ba76078",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,32,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "03144b09",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[16,32,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "44da6ae4",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,48,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "55fb80e4",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[32,80,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7ba51dc8",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[32,96,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ad40b12e",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[32,112,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1816f70c",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[80,160,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e563d9f2",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,160,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "25aedbf5",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[88,176,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fa4513e3",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,88,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "21900eaf",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,104,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c97f17ec",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,136,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c88ad749",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,152,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7eaaa5e5",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,168,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fdfae713",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[10,184],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "de2b7595",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,3,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "af6ceef1",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[16,16,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "85839434",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,16,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ac0fcd75",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[32,32,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "941ec111",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,16,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d1dd0272",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,32,3,3],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0100d342",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,32,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3e9070a3",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[10,64],"bf16"]
+      ]
+    }
+  ]
+}

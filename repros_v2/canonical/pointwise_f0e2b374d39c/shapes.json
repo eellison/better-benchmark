@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "a8ee30c6",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,256,13,13],"bf16"],
+        ["S",[3,3]],
+        ["S",[2,2]],
+        ["S",[128,9216]],
+        ["S",[128,9216]]
+      ]
+    }
+  ]
+}

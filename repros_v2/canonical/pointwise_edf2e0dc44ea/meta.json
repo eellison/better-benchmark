@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "edf2e0dc44ea",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.embedding.default"
+  ],
+  "n_models": 5,
+  "models": [
+    "hf/infer/BlenderbotForCausalLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/train/BlenderbotForCausalLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/PegasusForCausalLM"
+  ]
+}

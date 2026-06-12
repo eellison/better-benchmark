@@ -1,0 +1,35 @@
+{
+  "points": [
+    {
+      "shape_hash": "1e7ad64a",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[192,64,128],"bf16"],
+        ["S",[32,6,64,128]],
+        ["S",[32,128,384]],
+        ["S",[4096,384]]
+      ]
+    },
+    {
+      "shape_hash": "beb18eeb",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 18
+        },
+        "hf/train/T5Small": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[64,64,1024],"bf16"],
+        ["S",[8,8,64,1024]],
+        ["S",[8,1024,512]],
+        ["S",[8192,512]]
+      ]
+    }
+  ]
+}

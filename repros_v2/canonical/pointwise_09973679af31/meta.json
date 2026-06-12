@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "09973679af31",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.glu.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/demucs",
+    "torchbench/train/demucs"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "5d063765",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,1000,13,13],"bf16"],
+        ["S",[32,1000]]
+      ]
+    }
+  ]
+}

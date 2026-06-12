@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[1,1024],"i64",{"n":"add","gen":["index",0,1024],"x":{"constraint_source":"default_unobserved"}}],
+    [[1,1024,1024],"f32",{"n":"tangents_1"}]
+  ],
+  "outputs": [
+    [[1026,1024],"f32",{"n":"output_1"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_008.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "MBartForCausalLM",
+    "graph": "full_graph_008.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 8,
+    "counts": {
+      "fusible_in_partition": 8,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten._unsafe_masked_index_put_accumulate.default": 1,
+        "aten.bitwise_and.Tensor": 2,
+        "aten.full.default": 1,
+        "aten.ge.Scalar": 1,
+        "aten.lt.Scalar": 1,
+        "aten.ne.Scalar": 1,
+        "aten.unsqueeze.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
+}

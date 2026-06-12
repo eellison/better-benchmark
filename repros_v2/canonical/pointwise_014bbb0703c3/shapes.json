@@ -1,0 +1,57 @@
+{
+  "points": [
+    {
+      "shape_hash": "ff8c3966",
+      "models": {
+        "timm/infer/visformer_small": {
+          "occurrences": 4
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[128,3072,7,7],"bf16",{"st":[150528,1,21504,3072]}]
+      ]
+    },
+    {
+      "shape_hash": "d3381898",
+      "models": {
+        "timm/infer/visformer_small": {
+          "occurrences": 4
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[128,1536,14,14],"bf16",{"st":[301056,1,21504,1536]}]
+      ]
+    },
+    {
+      "shape_hash": "e421f3e7",
+      "models": {
+        "timm/infer/visformer_small": {
+          "occurrences": 14
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 14
+        }
+      },
+      "inputs": [
+        [[128,384,28,28],"bf16",{"st":[301056,1,10752,384]}]
+      ]
+    },
+    {
+      "shape_hash": "af87e8bd",
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,384,3000],"bf16"]
+      ]
+    }
+  ]
+}

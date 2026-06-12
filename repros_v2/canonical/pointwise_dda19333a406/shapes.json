@@ -1,0 +1,26 @@
+{
+  "points": [
+    {
+      "shape_hash": "af408fe3",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,197951],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "fddbd2f3",
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,16],"f32"]
+      ]
+    }
+  ]
+}

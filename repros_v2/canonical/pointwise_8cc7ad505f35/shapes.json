@@ -1,0 +1,26 @@
+{
+  "points": [
+    {
+      "shape_hash": "0105f520",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024],"i64"]
+      ]
+    },
+    {
+      "shape_hash": "26cc4258",
+      "models": {
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,512],"i64"]
+      ]
+    }
+  ]
+}

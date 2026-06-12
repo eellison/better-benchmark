@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "genai",
+  "model": "CrossEntropyBackward",
+  "patterns": [
+    "671a76fab586",
+    "b2873b4c9052"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "static"
+}

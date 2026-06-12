@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/MBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[8,-1,1024,1024]]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[50265,1024],"f32",{"n":"primals_1"}],
+    [[8,1024],"i64",{"n":"primals_2","gen":["index",0,50265],"x":{"constraint_source":"graph_inference","observed":{"min":2,"max":50260,"n_unique":7599}}}]
+  ],
+  "outputs": [
+    [[8,1024,1024],"f32",{"n":"output_0"}],
+    [[8,1024],"i64",{"n":"output_1","gen":["index",0,1024],"x":{"constraint_source":"dtype_shape_default"}}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_000.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "MBartForCausalLM",
+    "graph": "full_graph_000.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 2,
+    "counts": {
+      "fusible_in_partition": 2,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.embedding.default": 1,
+        "aten.mul.Tensor": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
+}

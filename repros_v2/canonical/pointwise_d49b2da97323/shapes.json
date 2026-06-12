@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "040ff6c3",
+      "models": {
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,1280],"bf16"],
+        ["S",[32,1280]]
+      ]
+    }
+  ]
+}

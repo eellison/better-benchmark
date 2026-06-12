@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "0e852c6f",
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,768],"bf16"],
+        [[768],"f32"],
+        [[768],"f32"],
+        ["S",[128,1,768]],
+        ["S",[128,768]]
+      ]
+    }
+  ]
+}

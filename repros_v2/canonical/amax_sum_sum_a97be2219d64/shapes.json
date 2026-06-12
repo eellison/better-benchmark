@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "353f43da",
+      "models": {
+        "hf/infer/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,1024],"i64",{"gen":["index",0,50005]}],
+        [[16384,50008],"bf16"],
+        ["S",[16,1024,50005]],
+        ["S",[16384,50005]]
+      ]
+    }
+  ]
+}

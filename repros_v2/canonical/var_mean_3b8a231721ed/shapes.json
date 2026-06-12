@@ -1,0 +1,49 @@
+{
+  "points": [
+    {
+      "shape_hash": "1918a7da",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,512,4,4],"bf16"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "1e748ae3",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,256,8,8],"bf16"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "c42a1f04",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128,16,16],"bf16"],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[128],"f32"]
+      ]
+    }
+  ]
+}

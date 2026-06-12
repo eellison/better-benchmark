@@ -1,0 +1,21 @@
+{
+  "pattern_hash": "3ce87c35ea2d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/GPTNeoForCausalLM",
+    "hf/infer/GPTNeoForSequenceClassification"
+  ]
+}

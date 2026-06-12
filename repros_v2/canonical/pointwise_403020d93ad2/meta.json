@@ -1,0 +1,14 @@
+{
+  "pattern_hash": "403020d93ad2",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.lt.Scalar"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/AllenaiLongformerBase",
+    "hf/train/AllenaiLongformerBase"
+  ]
+}

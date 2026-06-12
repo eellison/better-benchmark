@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "4d6c86f7",
+      "models": {
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,1,1024,1024],"b8"],
+        ["S",[16,12,1024,1024]]
+      ]
+    }
+  ]
+}

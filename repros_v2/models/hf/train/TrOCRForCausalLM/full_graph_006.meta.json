@@ -1,0 +1,92 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[64,1,256,256],"f32",{"n":"primals_8"}],
+    [[1024],"f32",{"n":"primals_11"}],
+    [[1024],"f32",{"n":"primals_17"}],
+    [[16384,1024],"bf16",{"n":"view"}],
+    [[1024,256,256],"bf16",{"n":"bmm"}],
+    [[1024,256,1],"f32",{"n":"amax"}],
+    [[1024,256,1],"f32",{"n":"sum_1"}],
+    [[16384,1024],"bf16",{"n":"view_16"}],
+    [[64,256,1024],"b8",{"n":"gt","gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[64,256,1024],"f32",{"n":"mul_3"}],
+    [[16384,1024],"bf16",{"n":"view_18"}],
+    [[16384,4096],"bf16",{"n":"addmm_4"}],
+    [[16384,4096],"bf16",{"n":"view_20"}],
+    [[64,256,1024],"b8",{"n":"gt_1","gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[64,256,1024],"f32",{"n":"mul_10"}],
+    [[64,256,1],"f32",{"n":"div_1"}],
+    [[1024,4096],"bf16",{"n":"permute_11"}],
+    [[4096,1024],"bf16",{"n":"permute_15"}],
+    [[64,256,1],"f32",{"n":"div_2"}],
+    [[1024,1024],"bf16",{"n":"permute_19"}],
+    [[1024,256,256],"bf16",{"n":"permute_24","st":[65536,1,256]}],
+    [[1024,64,256],"bf16",{"n":"permute_25","st":[16384,1,64]}],
+    [[1024,64,256],"bf16",{"n":"permute_26","st":[16384,1,64]}],
+    [[1024,256,64],"bf16",{"n":"permute_27"}],
+    [[1024,1024],"bf16",{"n":"permute_32"}],
+    [[1024,1024],"bf16",{"n":"permute_36"}],
+    [[1024,1024],"bf16",{"n":"permute_40"}],
+    [[64,256,1024],"f32",{"n":"tangents_1"}]
+  ],
+  "outputs": [
+    [[64,256,1024],"f32",{"n":"output_0"}],
+    [[1024,1024],"f32",{"n":"output_1"}],
+    [[1024],"f32",{"n":"output_2"}],
+    [[1024,1024],"f32",{"n":"output_3"}],
+    [[1024],"f32",{"n":"output_4"}],
+    [[1024,1024],"f32",{"n":"output_5"}],
+    [[1024],"f32",{"n":"output_6"}],
+    [[1024,1024],"f32",{"n":"output_8"}],
+    [[1024],"f32",{"n":"output_9"}],
+    [[1024],"f32",{"n":"output_10"}],
+    [[1024],"f32",{"n":"output_11"}],
+    [[4096,1024],"f32",{"n":"output_12"}],
+    [[4096],"f32",{"n":"output_13"}],
+    [[1024,4096],"f32",{"n":"output_14"}],
+    [[1024],"f32",{"n":"output_15"}],
+    [[1024],"f32",{"n":"output_16"}],
+    [[1024],"f32",{"n":"output_17"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_006.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "TrOCRForCausalLM",
+    "graph": "full_graph_006.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 151,
+    "counts": {
+      "fusible_in_partition": 135,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 16
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 7,
+        "aten.clone.default": 4,
+        "aten.div.Tensor": 1,
+        "aten.erf.default": 1,
+        "aten.exp.default": 2,
+        "aten.mul.Tensor": 25,
+        "aten.neg.default": 1,
+        "aten.permute.default": 11,
+        "aten.reshape.default": 31,
+        "aten.sub.Tensor": 5,
+        "aten.sum.dim_IntList": 15,
+        "prims.convert_element_type.default": 31,
+        "prims.fma.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "aten.bmm.default": 4,
+        "aten.mm.default": 12
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

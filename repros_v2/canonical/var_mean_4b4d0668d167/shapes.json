@@ -1,0 +1,89 @@
+{
+  "points": [
+    {
+      "shape_hash": "5e4f83d3",
+      "models": {
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,64,112,112],"bf16"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "22d6d5c7",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,64,112,112],"bf16"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "4ee39e3f",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,64,112,112],"bf16"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "75543dfe",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,24,112,112],"bf16"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "eaa8fe86",
+      "models": {
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,112,112],"bf16"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    }
+  ]
+}

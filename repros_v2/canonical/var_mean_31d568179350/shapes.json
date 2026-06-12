@@ -1,0 +1,46 @@
+{
+  "points": [
+    {
+      "shape_hash": "243d7832",
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        [[37],"i64"],
+        [[32,512,768],"f32"],
+        [[768],"f32"],
+        [[768],"f32"],
+        ["S",[32,512,768]],
+        ["S",[32,512,768]],
+        ["S",[16384,768]]
+      ]
+    },
+    {
+      "shape_hash": "d9ecc504",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32768,256],"bf16"],
+        [[37],"i64"],
+        [[64,512,256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        ["S",[64,512,256]],
+        ["S",[64,512,256]],
+        ["S",[32768,256]]
+      ]
+    }
+  ]
+}

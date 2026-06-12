@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "c1ee6cd0",
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,512,50257],"bf16",{"st":[25735168,50264,1]}],
+        [[32,512],"i64"],
+        ["S",[-1,50257]]
+      ]
+    }
+  ]
+}

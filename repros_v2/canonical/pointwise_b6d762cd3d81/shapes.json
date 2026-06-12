@@ -1,0 +1,43 @@
+{
+  "points": [
+    {
+      "shape_hash": "58f85f13",
+      "models": {
+        "torchbench/infer/nvidia_deeprecommender": {
+          "occurrences": 1
+        },
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,197951],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f1684e51",
+      "models": {
+        "torchbench/infer/nvidia_deeprecommender": {
+          "occurrences": 4
+        },
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[256,512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0f3e2fa1",
+      "models": {
+        "torchbench/infer/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,1024],"bf16"]
+      ]
+    }
+  ]
+}

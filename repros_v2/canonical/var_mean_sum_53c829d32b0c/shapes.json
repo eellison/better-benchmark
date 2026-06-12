@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "e5ae55b5",
+      "models": {
+        "genai/static/LayerNormBackward": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1152000,512],"bf16"],
+        [[512],"f32"]
+      ]
+    }
+  ]
+}

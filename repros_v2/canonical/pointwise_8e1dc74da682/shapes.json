@@ -1,0 +1,136 @@
+{
+  "points": [
+    {
+      "shape_hash": "092aaddd",
+      "models": {
+        "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,640,9,9],"bf16",{"st":[51840,1,5760,640]}],
+        [[128,640,9,9],"bf16",{"st":[51840,1,5760,640]}]
+      ]
+    },
+    {
+      "shape_hash": "fd885e3f",
+      "models": {
+        "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[128,320,18,18],"bf16",{"st":[103680,1,5760,320]}],
+        [[128,320,18,18],"bf16",{"st":[103680,1,5760,320]}]
+      ]
+    },
+    {
+      "shape_hash": "fe14aec8",
+      "models": {
+        "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,160,36,36],"bf16",{"st":[207360,1,5760,160]}],
+        [[128,160,36,36],"bf16",{"st":[207360,1,5760,160]}]
+      ]
+    },
+    {
+      "shape_hash": "f30f68d5",
+      "models": {
+        "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,80,72,72],"bf16",{"st":[414720,1,5760,80]}],
+        [[128,80,72,72],"bf16",{"st":[414720,1,5760,80]}]
+      ]
+    },
+    {
+      "shape_hash": "b4ab9b24",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,640,7,7],"bf16",{"st":[31360,1,4480,640]}],
+        [[128,640,7,7],"bf16",{"st":[31360,1,4480,640]}]
+      ]
+    },
+    {
+      "shape_hash": "8bac800c",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[128,320,14,14],"bf16",{"st":[62720,1,4480,320]}],
+        [[128,320,14,14],"bf16",{"st":[62720,1,4480,320]}]
+      ]
+    },
+    {
+      "shape_hash": "8b187706",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,160,28,28],"bf16",{"st":[125440,1,4480,160]}],
+        [[128,160,28,28],"bf16",{"st":[125440,1,4480,160]}]
+      ]
+    },
+    {
+      "shape_hash": "7c24d0c8",
+      "models": {
+        "timm/infer/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,384,14,14],"bf16",{"st":[75264,1,5376,384]}],
+        [[128,384,14,14],"bf16",{"st":[75264,1,5376,384]}]
+      ]
+    },
+    {
+      "shape_hash": "d0800b9f",
+      "models": {
+        "timm/infer/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,192,28,28],"bf16",{"st":[150528,1,5376,192]}],
+        [[128,192,28,28],"bf16",{"st":[150528,1,5376,192]}]
+      ]
+    },
+    {
+      "shape_hash": "79c39c98",
+      "models": {
+        "torchbench/infer/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,2048,92],"bf16",{"st":[2048,1,16384]}],
+        [[8,2048,92],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1ffb91db",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,2048,92],"bf16",{"st":[2048,1,8192]}],
+        [[4,2048,92],"bf16"]
+      ]
+    }
+  ]
+}

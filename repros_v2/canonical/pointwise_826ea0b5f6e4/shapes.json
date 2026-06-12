@@ -1,0 +1,386 @@
+{
+  "points": [
+    {
+      "shape_hash": "ddbf4fbd",
+      "models": {
+        "timm/infer/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[25216,3072],"bf16"],
+        ["S",[128,197,3072]],
+        ["S",[25216,3072]]
+      ]
+    },
+    {
+      "shape_hash": "5666a344",
+      "models": {
+        "timm/infer/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[25344,3072],"bf16"],
+        ["S",[128,198,3072]],
+        ["S",[25344,3072]]
+      ]
+    },
+    {
+      "shape_hash": "5ad79285",
+      "models": {
+        "timm/infer/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        },
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[25216,768],"bf16"],
+        ["S",[128,197,768]],
+        ["S",[25216,768]]
+      ]
+    },
+    {
+      "shape_hash": "5cb74639",
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[6272,4096],"bf16"],
+        ["S",[128,49,4096]],
+        ["S",[6272,4096]]
+      ]
+    },
+    {
+      "shape_hash": "2079d386",
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[25088,2048],"bf16"],
+        ["S",[128,196,2048]],
+        ["S",[25088,2048]]
+      ]
+    },
+    {
+      "shape_hash": "a3b11b8d",
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[100352,1024],"bf16"],
+        ["S",[128,784,1024]],
+        ["S",[100352,1024]]
+      ]
+    },
+    {
+      "shape_hash": "de85fb74",
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[401408,512],"bf16"],
+        ["S",[128,3136,512]],
+        ["S",[401408,512]]
+      ]
+    },
+    {
+      "shape_hash": "d62a5c2a",
+      "models": {
+        "timm/infer/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[175360,3072],"bf16"],
+        ["S",[128,1370,3072]],
+        ["S",[175360,3072]]
+      ]
+    },
+    {
+      "shape_hash": "6942db17",
+      "models": {
+        "timm/infer/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,3072],"bf16"],
+        ["S",[128,1,3072]],
+        ["S",[128,3072]]
+      ]
+    },
+    {
+      "shape_hash": "5d3406ab",
+      "models": {
+        "timm/infer/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        },
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 6
+        },
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[32768,3072],"bf16"],
+        ["S",[128,256,3072]],
+        ["S",[32768,3072]]
+      ]
+    },
+    {
+      "shape_hash": "e73010dd",
+      "models": {
+        "torchbench/infer/BERT_pytorch": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[2048,3072],"bf16"],
+        ["S",[16,128,3072]],
+        ["S",[2048,3072]]
+      ]
+    },
+    {
+      "shape_hash": "e44d982c",
+      "models": {
+        "hf/infer/BartForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/MBartForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/MegatronBertForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/infer/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[8192,4096],"bf16"],
+        ["S",[8,1024,4096]],
+        ["S",[8192,4096]]
+      ]
+    },
+    {
+      "shape_hash": "92efc45e",
+      "models": {
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/infer/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/infer/PLBartForCausalLM": {
+          "occurrences": 6
+        },
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/infer/YituTechConvBert": {
+          "occurrences": 12
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[16384,3072],"bf16"],
+        ["S",[32,512,3072]],
+        ["S",[16384,3072]]
+      ]
+    },
+    {
+      "shape_hash": "c2111490",
+      "models": {
+        "hf/infer/BlenderbotForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,10240],"bf16"],
+        ["S",[32,128,10240]],
+        ["S",[4096,10240]]
+      ]
+    },
+    {
+      "shape_hash": "befcb921",
+      "models": {
+        "hf/infer/BlenderbotForConditionalGeneration": {
+          "occurrences": 26
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[2048,10240],"bf16"],
+        ["S",[16,128,10240]],
+        ["S",[2048,10240]]
+      ]
+    },
+    {
+      "shape_hash": "50ec4979",
+      "models": {
+        "hf/infer/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        },
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4096,6144],"bf16"],
+        ["S",[8,512,6144]],
+        ["S",[4096,6144]]
+      ]
+    },
+    {
+      "shape_hash": "e223410f",
+      "models": {
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[32768,1024],"bf16"],
+        ["S",[64,512,1024]],
+        ["S",[32768,1024]]
+      ]
+    },
+    {
+      "shape_hash": "d05618d1",
+      "models": {
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 12
+        },
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[8192,3072],"bf16"],
+        ["S",[8,1024,3072]],
+        ["S",[8192,3072]]
+      ]
+    },
+    {
+      "shape_hash": "67d3fea7",
+      "models": {
+        "hf/infer/PegasusForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/TrOCRForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,4096],"bf16"],
+        ["S",[128,128,4096]],
+        ["S",[16384,4096]]
+      ]
+    },
+    {
+      "shape_hash": "d87997ca",
+      "models": {
+        "hf/infer/XGLMForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,4096],"bf16"],
+        ["S",[32,128,4096]],
+        ["S",[4096,4096]]
+      ]
+    },
+    {
+      "shape_hash": "2909fe19",
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[1,1536],"bf16"],
+        ["S",[1,1,1536]],
+        ["S",[1,1536]]
+      ]
+    },
+    {
+      "shape_hash": "1b310572",
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[1500,1536],"bf16"],
+        ["S",[1,1500,1536]],
+        ["S",[1500,1536]]
+      ]
+    }
+  ]
+}

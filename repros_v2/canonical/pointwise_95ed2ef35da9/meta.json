@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "95ed2ef35da9",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf/infer/OPTForCausalLM",
+    "hf/infer/openai/whisper-tiny",
+    "hf/train/OPTForCausalLM"
+  ]
+}

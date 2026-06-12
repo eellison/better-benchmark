@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[16,1],"bf16",{"n":"arg0_1"}],
+    [[16],"bf16",{"n":"arg1_1"}],
+    [[128,1],"bf16",{"n":"arg2_1"}],
+    [[16,16],"bf16",{"n":"arg3_1"}],
+    [[16],"bf16",{"n":"arg4_1"}],
+    [[16,16],"bf16",{"n":"arg5_1"}],
+    [[16],"bf16",{"n":"arg6_1"}],
+    [[16,16],"bf16",{"n":"arg7_1"}],
+    [[16],"bf16",{"n":"arg8_1"}],
+    [[1,16],"bf16",{"n":"arg9_1"}],
+    [[1],"bf16",{"n":"arg10_1"}]
+  ],
+  "outputs": [
+    [[128,1],"bf16",{"n":"output_0"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_000.py",
+  "source": {
+    "kind": "model",
+    "suite": "torchbench",
+    "mode": "infer",
+    "model": "lennard_jones",
+    "graph": "full_graph_000.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 21,
+    "counts": {
+      "fusible_in_partition": 13,
+      "fusible_unpartitioned": 4,
+      "non_fusible": 4
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.mul.Tensor": 3,
+        "aten.permute.default": 1,
+        "aten.tanh.default": 4,
+        "prims.convert_element_type.default": 4
+      },
+      "fusible_unpartitioned": {
+        "aten.permute.default": 4
+      },
+      "non_fusible": {
+        "aten.addmm.default": 4
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

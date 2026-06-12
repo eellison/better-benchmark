@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "7a3340d935e9",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 5,
+  "models": [
+    "hf/infer/BartForCausalLM",
+    "hf/train/AllenaiLongformerBase",
+    "hf/train/BartForCausalLM",
+    "hf/train/PLBartForCausalLM",
+    "hf/train/TrOCRForCausalLM"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "b899b223",
+      "models": {
+        "genai/static/CrossEntropyForward": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192],"i64",{"gen":["index",0,262144]}],
+        [[8192,262144],"bf16"]
+      ]
+    }
+  ]
+}

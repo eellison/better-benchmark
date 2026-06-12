@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "4a8b763e",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[8192,4096],"bf16"],
+        [[64,128,4096],"b8"],
+        ["S",[64,128,4096]],
+        ["S",[8192,4096]],
+        ["S",[4096]]
+      ]
+    }
+  ]
+}

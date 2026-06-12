@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "1f95724cbf96",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.exp.default",
+    "aten.log.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/BERT_pytorch",
+    "torchbench/train/BERT_pytorch"
+  ]
+}

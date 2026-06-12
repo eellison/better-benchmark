@@ -1,0 +1,100 @@
+{
+  "points": [
+    {
+      "shape_hash": "3d46c2a2",
+      "models": {
+        "timm/infer/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[25216,2304],"bf16"],
+        ["S",[128,197,2304]],
+        ["S",[128,197,3,12,-1]]
+      ]
+    },
+    {
+      "shape_hash": "36a70cbd",
+      "models": {
+        "timm/infer/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[25344,2304],"bf16"],
+        ["S",[128,198,2304]],
+        ["S",[128,198,3,12,64]]
+      ]
+    },
+    {
+      "shape_hash": "79a90d04",
+      "models": {
+        "timm/infer/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        },
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[25216,576],"bf16"],
+        ["S",[128,197,576]],
+        ["S",[128,197,3,3,64]]
+      ]
+    },
+    {
+      "shape_hash": "2e43c9fa",
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 4
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[32768,576],"bf16"],
+        ["S",[512,64,576]],
+        ["S",[512,64,3,4,48]]
+      ]
+    },
+    {
+      "shape_hash": "3b895fcd",
+      "models": {
+        "timm/infer/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[175360,2304],"bf16"],
+        ["S",[128,1370,2304]],
+        ["S",[128,1370,3,12,64]]
+      ]
+    },
+    {
+      "shape_hash": "5bfb1085",
+      "models": {
+        "timm/infer/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[32768,2304],"bf16"],
+        ["S",[128,256,2304]],
+        ["S",[128,256,3,12,64]]
+      ]
+    }
+  ]
+}

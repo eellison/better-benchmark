@@ -1,0 +1,142 @@
+{
+  "points": [
+    {
+      "shape_hash": "93219f63",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[768,128,3,3],"f32",{"st":[1152,1,384,128]}],
+        [[768,1,1,1],"f32"],
+        ["S",[1,768,1152]],
+        ["S",[768,128,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "9050d2f1",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[256,128,3,3],"f32",{"st":[1152,1,384,128]}],
+        [[256,1,1,1],"f32"],
+        ["S",[1,256,1152]],
+        ["S",[256,128,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "666447a7",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,128,3,3],"f32",{"st":[1152,1,384,128]}],
+        [[128,1,1,1],"f32"],
+        ["S",[1,128,1152]],
+        ["S",[128,128,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "58fc5e60",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/train/nfnet_l0": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[128,64,3,3],"f32",{"st":[576,1,192,64]}],
+        [[128,1,1,1],"f32"],
+        ["S",[1,128,576]],
+        ["S",[128,64,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "af508913",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,32,3,3],"f32",{"st":[288,1,96,32]}],
+        [[64,1,1,1],"f32"],
+        ["S",[1,64,288]],
+        ["S",[64,32,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "cfc2822b",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,16,3,3],"f32",{"st":[144,1,48,16]}],
+        [[32,1,1,1],"f32"],
+        ["S",[1,32,144]],
+        ["S",[32,16,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "015e7a17",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,3,3,3],"f32",{"st":[27,1,9,3]}],
+        [[16,1,1,1],"f32"],
+        ["S",[1,16,27]],
+        ["S",[16,3,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "97b48510",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[384,64,3,3],"f32",{"st":[576,1,192,64]}],
+        [[384,1,1,1],"f32"],
+        ["S",[1,384,576]],
+        ["S",[384,64,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "8d69498c",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,64,3,3],"f32",{"st":[576,1,192,64]}],
+        [[64,1,1,1],"f32"],
+        ["S",[1,64,576]],
+        ["S",[64,64,3,3]]
+      ]
+    }
+  ]
+}

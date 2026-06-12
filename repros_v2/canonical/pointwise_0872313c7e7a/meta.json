@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "0872313c7e7a",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/dcgan",
+    "torchbench/train/dcgan"
+  ]
+}

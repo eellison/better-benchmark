@@ -1,0 +1,127 @@
+{
+  "points": [
+    {
+      "shape_hash": "b85aeb78",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 2
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024,1024],"f32"],
+        ["S",[8192,1024]]
+      ]
+    },
+    {
+      "shape_hash": "71639761",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128,2560],"f32"],
+        ["S",[4096,2560]]
+      ]
+    },
+    {
+      "shape_hash": "bcf9edde",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[16,128,2560],"f32"],
+        ["S",[2048,2560]]
+      ]
+    },
+    {
+      "shape_hash": "784a7239",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024,768],"f32"],
+        ["S",[8192,768]]
+      ]
+    },
+    {
+      "shape_hash": "400995f1",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,128,1024],"f32"],
+        ["S",[8192,1024]]
+      ]
+    },
+    {
+      "shape_hash": "139b073e",
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,2048,768],"f32"],
+        ["S",[8192,768]]
+      ]
+    },
+    {
+      "shape_hash": "df1f991c",
+      "models": {
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[16,1024,768],"f32"],
+        ["S",[16384,768]]
+      ]
+    },
+    {
+      "shape_hash": "7997f4ec",
+      "models": {
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,128,1024],"f32"],
+        ["S",[16384,1024]]
+      ]
+    },
+    {
+      "shape_hash": "0a855bca",
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,256,1024],"f32"],
+        ["S",[16384,1024]]
+      ]
+    },
+    {
+      "shape_hash": "727fdfe8",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128,1024],"f32"],
+        ["S",[4096,1024]]
+      ]
+    }
+  ]
+}

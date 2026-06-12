@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[4,2048]],
+        ["S",[4,-1,2048,2048]]
+      ]
+    }
+  ]
+}

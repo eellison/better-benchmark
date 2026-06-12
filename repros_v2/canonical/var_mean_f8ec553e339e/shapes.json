@@ -1,0 +1,102 @@
+{
+  "points": [
+    {
+      "shape_hash": "23d9c217",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128,2560],"f32"],
+        [[2560],"f32"],
+        [[2560],"f32"],
+        ["S",[4096,2560]]
+      ]
+    },
+    {
+      "shape_hash": "3d83c7c9",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[16,128,2560],"f32"],
+        [[2560],"f32"],
+        [[2560],"f32"],
+        ["S",[2048,2560]]
+      ]
+    },
+    {
+      "shape_hash": "08be8792",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,128,1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        ["S",[8192,1024]]
+      ]
+    },
+    {
+      "shape_hash": "aeee3632",
+      "models": {
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024,1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        ["S",[8192,1024]]
+      ]
+    },
+    {
+      "shape_hash": "0f3a195f",
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,2048,768],"f32"],
+        [[768],"f32"],
+        [[768],"f32"],
+        ["S",[8192,768]]
+      ]
+    },
+    {
+      "shape_hash": "f990afad",
+      "models": {
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,128,1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        ["S",[16384,1024]]
+      ]
+    },
+    {
+      "shape_hash": "3220a3ed",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128,1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        ["S",[4096,1024]]
+      ]
+    }
+  ]
+}

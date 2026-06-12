@@ -1,0 +1,100 @@
+{
+  "points": [
+    {
+      "shape_hash": "d4701d13",
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [[4096,4096],"bf16"],
+        [[8,512,4096],"bf16"],
+        [[4096],"bf16"],
+        [[4096],"bf16"],
+        ["S",[8,512,4096]],
+        ["S",[4096,4096]],
+        ["S",[4096,4096]],
+        ["S",[4096,4096]]
+      ]
+    },
+    {
+      "shape_hash": "63bebcf6",
+      "models": {
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 11
+        },
+        "hf/infer/LayoutLMForMaskedLM": {
+          "occurrences": 11
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        [[32,512,768],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"],
+        ["S",[32,512,768]],
+        ["S",[16384,768]],
+        ["S",[16384,768]],
+        ["S",[16384,768]]
+      ]
+    },
+    {
+      "shape_hash": "107053b2",
+      "models": {
+        "hf/infer/DebertaV2ForMaskedLM": {
+          "occurrences": 23
+        }
+      },
+      "inputs": [
+        [[4096,1536],"bf16"],
+        [[8,512,1536],"bf16"],
+        [[1536],"bf16"],
+        [[1536],"bf16"],
+        ["S",[8,512,1536]],
+        ["S",[4096,1536]],
+        ["S",[4096,1536]],
+        ["S",[4096,1536]]
+      ]
+    },
+    {
+      "shape_hash": "82b81ff3",
+      "models": {
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[32768,768],"bf16"],
+        [[256,128,768],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"],
+        ["S",[256,128,768]],
+        ["S",[32768,768]],
+        ["S",[32768,768]],
+        ["S",[32768,768]]
+      ]
+    },
+    {
+      "shape_hash": "94a8a62c",
+      "models": {
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [[32768,256],"bf16"],
+        [[64,512,256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        ["S",[64,512,256]],
+        ["S",[32768,256]],
+        ["S",[32768,256]],
+        ["S",[32768,256]]
+      ]
+    }
+  ]
+}

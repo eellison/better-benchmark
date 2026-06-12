@@ -1,0 +1,52 @@
+{
+  "points": [
+    {
+      "shape_hash": "30725500",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,256,13,13],"bf16"],
+        [[32,256,13,13],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cbcab314",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32,192,13,13],"bf16"],
+        [[32,192,13,13],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e52f606e",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128,27,27],"bf16"],
+        [[32,128,27,27],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cb616840",
+      "models": {
+        "torchbench/train/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,64,55,55],"bf16"],
+        [[32,64,55,55],"bf16"]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[4096,1024],"bf16",{"n":"view"}],
+    [[32,128,256008],"bf16",{"n":"view_1"}],
+    [[32,129],"i64",{"n":"constant_pad_nd","gen":["index",0,255987],"x":{"constraint_source":"observed","observed":{"min":1,"max":255986,"n_unique":4068}}}],
+    [[4096,1],"f32",{"n":"amax"}],
+    [[4096,1],"f32",{"n":"log"}],
+    [[],"f32",{"n":"convert_element_type_5"}],
+    [[256008,1024],"bf16",{"n":"permute_3"}],
+    [[],"f32",{"n":"tangents_1"}],
+    [[32,128,256008],"bf16",{"n":"tangents_2"}]
+  ],
+  "outputs": [
+    [[32,128,1024],"f32",{"n":"output_0"}],
+    [[256008,1024],"f32",{"n":"output_1"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_005.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "XGLMForCausalLM",
+    "graph": "full_graph_005.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 36,
+    "counts": {
+      "fusible_in_partition": 34,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 2
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.clone.default": 1,
+        "aten.div.Tensor": 1,
+        "aten.eq.Tensor": 1,
+        "aten.exp.default": 1,
+        "aten.expand.default": 1,
+        "aten.full.default": 2,
+        "aten.mul.Tensor": 2,
+        "aten.ne.Scalar": 1,
+        "aten.permute.default": 1,
+        "aten.reshape.default": 6,
+        "aten.scalar_tensor.default": 2,
+        "aten.slice.Tensor": 1,
+        "aten.sub.Tensor": 3,
+        "aten.sum.dim_IntList": 1,
+        "aten.unsqueeze.default": 1,
+        "aten.where.self": 3,
+        "prims.convert_element_type.default": 4,
+        "prims.iota.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "aten.mm.default": 2
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

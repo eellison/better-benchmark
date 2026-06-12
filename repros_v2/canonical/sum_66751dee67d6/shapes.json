@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "e47b47c7",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,80,56,56],"bf16",{"st":[250880,1,4480,80]}],
+        [[128,80,56,56],"f32",{"st":[250880,1,80,4480]}]
+      ]
+    }
+  ]
+}

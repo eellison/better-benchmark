@@ -1,0 +1,34 @@
+{
+  "points": [
+    {
+      "shape_hash": "1e7ad64a",
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[192,64,128],"bf16"],
+        ["S",[16,12,64,128]],
+        ["S",[16,128,768]],
+        ["S",[2048,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "17865e49",
+      "models": {
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[384,64,512],"bf16"],
+        ["S",[32,12,64,512]],
+        ["S",[32,512,768]],
+        ["S",[16384,768]],
+        ["S",[768]]
+      ]
+    }
+  ]
+}

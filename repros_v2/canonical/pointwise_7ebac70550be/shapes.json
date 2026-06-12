@@ -1,0 +1,72 @@
+{
+  "points": [
+    {
+      "shape_hash": "3f17dc95",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[1,512,80,119],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        ["S",[2,2]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "535abe76",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[1,256,160,239],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        ["S",[2,2]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "0ce7c2f4",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[1,128,320,479],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        ["S",[2,2]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "4f218228",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[1,64,640,959],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        ["S",[2,2]],
+        ["S",[2,2]]
+      ]
+    }
+  ]
+}

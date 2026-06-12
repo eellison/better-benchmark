@@ -1,0 +1,30 @@
+{
+  "points": [
+    {
+      "shape_hash": "35c60c30",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,4096],"bf16"],
+        [[2],"i64"],
+        ["S",[128,4096]]
+      ]
+    },
+    {
+      "shape_hash": "3044d858",
+      "models": {
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,4096],"bf16"],
+        [[2],"i64"],
+        ["S",[64,4096]]
+      ]
+    }
+  ]
+}

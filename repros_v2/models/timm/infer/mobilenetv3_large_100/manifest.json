@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "mobilenetv3_large_100",
+  "patterns": [
+    "1654cbbe1d50",
+    "364ae2743aa2",
+    "3abc926270f6",
+    "65a318c9ed9c",
+    "6adcb3046e1b",
+    "7899d74e0838",
+    "818c3aa59952",
+    "9fffeb5504ef",
+    "b8f54dc7d592",
+    "e6ddc8e897ec"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

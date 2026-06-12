@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "squeezenet1_1",
+  "patterns": [
+    "3abc926270f6",
+    "3ebefe8b6cfb",
+    "b402ee209d0b",
+    "dfa214dc993f",
+    "e972081e0aab"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

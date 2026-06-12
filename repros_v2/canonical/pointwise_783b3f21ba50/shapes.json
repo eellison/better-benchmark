@@ -1,0 +1,32 @@
+{
+  "points": [
+    {
+      "shape_hash": "b642f4d6",
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,1024],"bf16"],
+        ["S",[64,256,1024]],
+        ["S",[64,256,16,64]],
+        ["S",[1024,256,64]]
+      ]
+    },
+    {
+      "shape_hash": "4fa33397",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,1024],"bf16"],
+        ["S",[32,128,1024]],
+        ["S",[32,128,16,64]],
+        ["S",[512,128,64]]
+      ]
+    }
+  ]
+}

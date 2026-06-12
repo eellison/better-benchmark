@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "3d180cc7",
+      "models": {
+        "timm/infer/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"]
+      ]
+    }
+  ]
+}

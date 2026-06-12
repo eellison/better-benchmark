@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "alexnet",
+  "patterns": [
+    "3abc926270f6",
+    "76ffbcc3b8af",
+    "eff4b8c521ae"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

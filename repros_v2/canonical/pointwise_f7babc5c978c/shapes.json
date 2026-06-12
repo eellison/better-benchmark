@@ -1,0 +1,15 @@
+{
+  "points": [
+    {
+      "shape_hash": "b4e770d9",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,197952],"bf16"]
+      ]
+    }
+  ]
+}

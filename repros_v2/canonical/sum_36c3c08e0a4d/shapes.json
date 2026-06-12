@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "286ee5cf",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,65],"bf16"],
+        [[96,65],"bf16"],
+        ["S",[65]]
+      ]
+    }
+  ]
+}

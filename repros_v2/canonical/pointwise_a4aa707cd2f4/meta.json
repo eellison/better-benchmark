@@ -1,0 +1,20 @@
+{
+  "pattern_hash": "a4aa707cd2f4",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.embedding.default",
+    "aten.mul.Tensor"
+  ],
+  "n_models": 7,
+  "models": [
+    "hf/infer/BartForCausalLM",
+    "hf/train/BartForCausalLM",
+    "hf/train/M2M100ForConditionalGeneration",
+    "hf/train/MBartForCausalLM",
+    "hf/train/PLBartForCausalLM",
+    "hf/train/TrOCRForCausalLM",
+    "hf/train/XGLMForCausalLM"
+  ]
+}
