@@ -1121,3 +1121,42 @@ def test_index_put_indices_map_position_to_dim_including_nones():
     j_name = by_shape[(1, 1)]
     assert bounds.get(i_name) == 520, bounds  # dim 2
     assert bounds.get(j_name) == 4, bounds    # dim 3 — NOT shape[0]=32
+
+
+def test_perm_detection_resolves_lifted_alloc_and_iota():
+    """The inverse-permutation idiom — index_put(empty, [idx], iota) — must
+    detect idx as a PERMUTATION even when the alloc shape / iota length are
+    lifted _shape_param NODES (gpt-oss MoE: random Index left uninit holes
+    in the inverse map; holes fed index() as garbage -> gather assert)."""
+    import torch
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from capture_hook import lift_shape_params
+    from full_graph_harness import (infer_permutation_indices_from_gm,
+                                    placeholder_info_from_gm)
+
+    def f(perm_idx):
+        empty = torch.ops.aten.empty.memory_format(
+            [4000], dtype=torch.int64, device="cpu")
+        iota = torch.ops.prims.iota.default(
+            4000, start=0, step=1, dtype=torch.int64, device="cpu",
+            requires_grad=False)
+        inv = torch.ops.aten.index_put.default(empty, [perm_idx], iota)
+        return inv + 1
+
+    with FakeTensorMode(allow_non_fake_inputs=True) as m:
+        p = m.from_tensor(torch.zeros(4000, dtype=torch.int64))
+        gm = make_fx(f, tracing_mode="fake")(p)
+
+    # unlifted: detection works
+    info = placeholder_info_from_gm(gm)
+    perms = infer_permutation_indices_from_gm(gm, info)
+    assert 4000 in perms.values(), perms
+
+    # LIFTED (canonical form): alloc shape becomes a _shape_param node —
+    # detection must still fire via meta['val'] resolution
+    gm2, params = lift_shape_params(gm)
+    if params:  # premise: something got lifted
+        info2 = placeholder_info_from_gm(gm2)
+        perms2 = infer_permutation_indices_from_gm(gm2, info2)
+        assert 4000 in perms2.values(), (perms2, params)

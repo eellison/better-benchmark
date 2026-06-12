@@ -386,9 +386,20 @@ def infer_permutation_indices_from_gm(
             torch.ops.aten.full.default,
         }:
             return None
-        if not n.args or not isinstance(n.args[0], (list, tuple)):
+        if not n.args:
             return None
-        return list(n.args[0])
+        shape_arg = n.args[0]
+        # Canonical graphs lift alloc shapes to _shape_param placeholder
+        # NODES — resolve via meta['val'] (gpt-oss MoE: empty(_shape_param)
+        # blinded the permutation detection; the scatter ordering indices
+        # then generated as random Index -> duplicate positions -> assert).
+        if not isinstance(shape_arg, (list, tuple)) and hasattr(shape_arg, "meta"):
+            mv = shape_arg.meta.get("val")
+            if isinstance(mv, (list, tuple)):
+                shape_arg = mv
+        if not isinstance(shape_arg, (list, tuple)):
+            return None
+        return list(shape_arg)
 
     iota_passthrough_ops = {
         torch.ops.aten.reshape.default,
@@ -406,8 +417,18 @@ def infer_permutation_indices_from_gm(
             if max_hops > 0 and n.target in iota_passthrough_ops and n.args:
                 return _iota_size(n.args[0], max_hops - 1)
             return None
-        if n.args and isinstance(n.args[0], int):
-            return int(n.args[0])
+        if not n.args:
+            return None
+        length = n.args[0]
+        # lifted/symbolic length: resolve via meta['val'] or SymInt hint
+        if not isinstance(length, int) and hasattr(length, "meta"):
+            mv = length.meta.get("val")
+            if isinstance(mv, int):
+                length = mv
+            elif hasattr(mv, "node") and hasattr(mv.node, "hint"):
+                length = int(mv.node.hint)
+        if isinstance(length, int):
+            return length
         return None
 
     for name, node in ph_nodes.items():
