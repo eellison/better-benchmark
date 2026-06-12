@@ -99,11 +99,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 98,pointwise_045f4feb3853,045f4feb3853,pointwise,layout_indexing_stencil_fusion,1,2,48,~pointwise_7c7235fc35c3;~pointwise_9a3b1c27ce63;~pointwise_b46f81501f11,claimed,Codex,claimed_2026-06-12_batch_96-100_topdown
 99,pointwise_340cdea6ba6a,340cdea6ba6a,pointwise,unclassified_priority_gap,1,2,48,~pointwise_187bbcc9d7ba,claimed,Codex,claimed_2026-06-12_batch_96-100_topdown
 100,pointwise_3ce87c35ea2d,3ce87c35ea2d,pointwise,unclassified_priority_gap,1,2,48,~pointwise_8b4411ef8328;~pointwise_e31a9c1b437e;~pointwise_0decf4e7ecd3,claimed,Codex,claimed_2026-06-12_batch_96-100_topdown
-101,pointwise_af569db1d851,af569db1d851,pointwise,unclassified_priority_gap,1,2,48,~pointwise_8b4411ef8328;~pointwise_e31a9c1b437e;~pointwise_0decf4e7ecd3,unclaimed,,
-102,pointwise_ee109ecb96bb,ee109ecb96bb,pointwise,unclassified_priority_gap,1,2,48,~pointwise_73d2b3dfee0b,unclaimed,,
-103,pointwise_f22251f83eba,f22251f83eba,pointwise,unclassified_priority_gap,2,1,48,~pointwise_187bbcc9d7ba,unclaimed,,
-104,var_mean_749a69fc18a5,749a69fc18a5,reduction,unclassified_priority_gap,1,2,48,~var_mean_40d5a5a49ffd;~var_mean_b3ec7ad4195e;~var_mean_c97d1570c0ff,unclaimed,,
-105,amax_sum_12d2bdc64d4b,12d2bdc64d4b,reduction,online_softmax_cross_entropy,1,2,46,~amax_sum_f5fb3a355fc1,unclaimed,,
+101,pointwise_af569db1d851,af569db1d851,pointwise,unclassified_priority_gap,1,2,48,~pointwise_8b4411ef8328;~pointwise_e31a9c1b437e;~pointwise_0decf4e7ecd3,claimed,Codex,claimed_2026-06-12_batch_101-105_topdown
+102,pointwise_ee109ecb96bb,ee109ecb96bb,pointwise,unclassified_priority_gap,1,2,48,~pointwise_73d2b3dfee0b,claimed,Codex,claimed_2026-06-12_batch_101-105_topdown
+103,pointwise_f22251f83eba,f22251f83eba,pointwise,unclassified_priority_gap,2,1,48,~pointwise_187bbcc9d7ba,claimed,Codex,claimed_2026-06-12_batch_101-105_topdown
+104,var_mean_749a69fc18a5,749a69fc18a5,reduction,unclassified_priority_gap,1,2,48,~var_mean_40d5a5a49ffd;~var_mean_b3ec7ad4195e;~var_mean_c97d1570c0ff,claimed,Codex,claimed_2026-06-12_batch_101-105_topdown
+105,amax_sum_12d2bdc64d4b,12d2bdc64d4b,reduction,online_softmax_cross_entropy,1,2,46,~amax_sum_f5fb3a355fc1,claimed,Codex,claimed_2026-06-12_batch_101-105_topdown
 106,amax_sum_13a9aaa2eadb,13a9aaa2eadb,reduction,online_softmax_cross_entropy,1,2,46,~amax_sum_4b162354068b;~amax_sum_f5fb3a355fc1,unclaimed,,
 107,sum_sum_sum_8a3378108574,8a3378108574,reduction,reduction_general,1,2,46,,unclaimed,,
 108,pointwise_014bbb0703c3,014bbb0703c3,pointwise,layout_indexing_stencil_fusion,4,3,45,pointwise_106406131986,unclaimed,,
