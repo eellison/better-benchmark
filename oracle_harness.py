@@ -678,42 +678,14 @@ def detect_stochastic_outputs(instance, inputs) -> set[int]:
 # Correctness checking
 # ---------------------------------------------------------------------------
 
-def check_oracle(
-    oracle_forward,
-    instance,
-    inputs,
+def _compare_oracle_outputs(
+    eager,
+    oracle_out,
+    stochastic: set[int],
     *,
-    atol: float = 1e-2,
-    rtol: float = 1e-2,
-    skip_stochastic: bool = True,
+    atol: float,
+    rtol: float,
 ) -> bool:
-    """Standard oracle correctness check with auto stochastic detection.
-
-    Args:
-        oracle_forward: callable that takes inputs and returns oracle outputs
-        instance: Repro() instance (eager reference)
-        inputs: list of input tensors/values
-        atol: absolute tolerance for allclose
-        rtol: relative tolerance for allclose
-        skip_stochastic: if True, auto-detect and skip stochastic outputs
-
-    Returns:
-        True if all non-stochastic outputs pass.
-    """
-    # Resolve oracle_impl dispatch so --check verifies the SAME callable that
-    # --bench times (e.g. a B200 kwargs variant, not the undecorated default).
-    try:
-        oracle_forward, _dispatch_info = resolve_oracle(oracle_forward, inputs)
-    except OracleDispatchError as e:
-        print(f"  NO_ORACLE_FOR_SHAPE: {str(e)[:200]}")
-        return False
-
-    stochastic = detect_stochastic_outputs(instance, inputs) if skip_stochastic else set()
-
-    with torch.no_grad():
-        eager = instance(*inputs)
-        oracle_out = oracle_forward(inputs)
-
     eager_list = _normalize_outputs(eager)
     oracle_list = _normalize_outputs(oracle_out)
 
@@ -761,6 +733,133 @@ def check_oracle(
             all_pass = False
 
     return all_pass
+
+
+def check_oracle(
+    oracle_forward,
+    instance,
+    inputs,
+    *,
+    atol: float = 1e-2,
+    rtol: float = 1e-2,
+    skip_stochastic: bool = True,
+) -> bool:
+    """Standard oracle correctness check with auto stochastic detection.
+
+    Args:
+        oracle_forward: callable that takes inputs and returns oracle outputs
+        instance: Repro() instance (eager reference)
+        inputs: list of input tensors/values
+        atol: absolute tolerance for allclose
+        rtol: relative tolerance for allclose
+        skip_stochastic: if True, auto-detect and skip stochastic outputs
+
+    Returns:
+        True if all non-stochastic outputs pass.
+    """
+    # Resolve oracle_impl dispatch so --check verifies the SAME callable that
+    # --bench times (e.g. a B200 kwargs variant, not the undecorated default).
+    try:
+        oracle_forward, _dispatch_info = resolve_oracle(oracle_forward, inputs)
+    except OracleDispatchError as e:
+        print(f"  NO_ORACLE_FOR_SHAPE: {str(e)[:200]}")
+        return False
+
+    stochastic = detect_stochastic_outputs(instance, inputs) if skip_stochastic else set()
+
+    with torch.no_grad():
+        eager = instance(*inputs)
+        oracle_out = oracle_forward(inputs)
+
+    return _compare_oracle_outputs(
+        eager, oracle_out, stochastic, atol=atol, rtol=rtol)
+
+
+def _seed_input_generation(seed: int) -> None:
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+
+def check_oracle_all_shapes(
+    oracle_forward,
+    repro_dir,
+    repro_id: str,
+    *,
+    skip_stochastic: bool = True,
+    point: str | None = None,
+    atol: float = 1e-2,
+    rtol: float = 1e-2,
+) -> dict:
+    """Run check_oracle at every shape config from shapes.json/shapes.txt.
+
+    The runner builds separate deterministic input sets for eager and oracle
+    execution. This avoids mutating the oracle inputs during eager reference
+    evaluation for repros with user-visible in-place writes.
+    """
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    repro_dir = Path(repro_dir)
+    repro_file = repro_dir / "repro.py"
+    configs = load_shape_configs(str(repro_file))
+
+    if point is not None:
+        configs = {
+            label: cfg for label, cfg in configs.items()
+            if label == point or label.endswith(f"_{point}")
+        }
+        if not configs:
+            print(f"  NO_SHAPE_POINT: {point}")
+            return {point: False}
+
+    if not configs:
+        inputs = get_inputs(repro_dir)
+        instance = get_repro_instance(repro_dir)
+        return {
+            "default": check_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                atol=atol,
+                rtol=rtol,
+                skip_stochastic=skip_stochastic,
+            )
+        }
+
+    results = {}
+    for label, config in configs.items():
+        print(f"Checking {repro_id}_{label}...")
+        instance = get_repro_instance(repro_dir)
+
+        _seed_input_generation(0)
+        detect_inputs = make_inputs_from_config(config)
+        stochastic = (
+            detect_stochastic_outputs(instance, detect_inputs)
+            if skip_stochastic
+            else set()
+        )
+
+        _seed_input_generation(1)
+        eager_inputs = make_inputs_from_config(config)
+        _seed_input_generation(1)
+        oracle_inputs = make_inputs_from_config(config)
+
+        try:
+            selected_oracle, _dispatch_info = resolve_oracle(
+                oracle_forward, oracle_inputs)
+        except OracleDispatchError as e:
+            print(f"  NO_ORACLE_FOR_SHAPE: {str(e)[:200]}")
+            results[label] = False
+            continue
+
+        with torch.no_grad():
+            eager = instance(*eager_inputs)
+            oracle_out = selected_oracle(oracle_inputs)
+
+        results[label] = _compare_oracle_outputs(
+            eager, oracle_out, stochastic, atol=atol, rtol=rtol)
+
+    return results
 
 
 # ---------------------------------------------------------------------------
@@ -1227,13 +1326,11 @@ def _runner_main(argv=None):
     out = {"repro": repro_id, "oracle": getattr(mod, "__file__", "?")}
 
     if args.check or not args.bench:
-        results = check_oracle(
-            fn, str(d), repro_id,
+        results = check_oracle_all_shapes(
+            fn, d, repro_id,
             skip_stochastic=not args.no_skip_stochastic,
             point=args.point,
-        ) if "point" in check_oracle.__code__.co_varnames else check_oracle(
-            fn, str(d), repro_id,
-            skip_stochastic=not args.no_skip_stochastic)
+        )
         out["check"] = results
     if args.bench:
         out["bench"] = bench_oracle_all_shapes(
