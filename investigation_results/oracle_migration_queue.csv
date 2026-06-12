@@ -85,7 +85,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 84,pointwise_1c9e8dc48812,1c9e8dc48812,pointwise,scatter_gather,1,4,54,,claimed,codex,claimed_2026-06-12_batch_81-95_refill_queue
 85,pointwise_a77badc5e988,a77badc5e988,pointwise,scatter_gather,1,2,54,,claimed,codex,claimed_2026-06-12_batch_81-95_refill_queue
 86,pointwise_bd0149b22f68,bd0149b22f68,pointwise,scatter_gather,1,2,54,,claimed,codex,claimed_2026-06-12_batch_81-95_refill_queue
-87,pointwise_e52ac85e10fc,e52ac85e10fc,pointwise,layout_indexing_stencil_fusion,1,3,54,pointwise_052e3853c721;pointwise_41aa929b1bf2;pointwise_5aafedcd8ca4,claimed,codex,claimed_2026-06-12_batch_81-95_refill_queue
+87,pointwise_e52ac85e10fc,e52ac85e10fc,pointwise,layout_indexing_stencil_fusion,1,3,54,pointwise_052e3853c721;pointwise_41aa929b1bf2;pointwise_5aafedcd8ca4,oracle_measured,codex,oracle_py_added_checks_pass_1of1_h100_fallback_bench_1AT_FLOOR_no_cudagraph_warnings_needs_B200_measure
 88,var_mean_eac408f45b9d,eac408f45b9d,reduction,unclassified_priority_gap,1,4,54,var_mean_3dd5772aac72,claimed,codex,claimed_2026-06-12_batch_81-95_refill_queue
 89,sum_7cfdb80c54c5,7cfdb80c54c5,reduction,unclassified_priority_gap,23,13,53,~sum_2dab433e3109;~sum_fa194db93388;~sum_035e9c596064,claimed,codex,claimed_2026-06-12_batch_81-95_refill_queue
 90,sum_6d68a671ec4a,6d68a671ec4a,reduction,multi_output_reduction_templates,5,10,52,~sum_51676b1433c8;~sum_558522245da0;~sum_587e52500b08,claimed,codex,claimed_2026-06-12_batch_81-95_refill_queue
