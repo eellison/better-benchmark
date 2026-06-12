@@ -1,9 +1,9 @@
 queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrences,old_oracle_candidates,status,owner,notes
-1,pointwise_04d85912d998,04d85912d998,pointwise,layout_indexing_stencil_fusion,469,105,4289,~pointwise_43877c71f0eb;~pointwise_75795e2c97dd;~pointwise_e5d19e73a52c,unclaimed,,
-2,pointwise_ccd411f2a45d,ccd411f2a45d,pointwise,layout_indexing_stencil_fusion,455,102,3936,~pointwise_43877c71f0eb;~pointwise_75795e2c97dd;~pointwise_e5d19e73a52c,unclaimed,,
-3,pointwise_8bb40810003c,8bb40810003c,pointwise,unclassified_priority_gap,84,96,2660,~pointwise_0a2f01161fd8;~pointwise_a718233d708d;~pointwise_ccfd75b90652,unclaimed,,
-4,pointwise_100a39b686e3,100a39b686e3,pointwise,layout_indexing_stencil_fusion,1,38,1257,pointwise_100a39b686e3,unclaimed,,
-5,pointwise_e87d6ebc9ded,e87d6ebc9ded,pointwise,unclassified_priority_gap,15,40,684,pointwise_035529d03c14;pointwise_0f6eed42fa2c;pointwise_af2e722aed5d,unclaimed,,
+1,pointwise_04d85912d998,04d85912d998,pointwise,layout_indexing_stencil_fusion,469,105,4289,~pointwise_43877c71f0eb;~pointwise_75795e2c97dd;~pointwise_e5d19e73a52c,claimed,Codex,claimed_2026-06-12_batch_1-5
+2,pointwise_ccd411f2a45d,ccd411f2a45d,pointwise,layout_indexing_stencil_fusion,455,102,3936,~pointwise_43877c71f0eb;~pointwise_75795e2c97dd;~pointwise_e5d19e73a52c,claimed,Codex,claimed_2026-06-12_batch_1-5
+3,pointwise_8bb40810003c,8bb40810003c,pointwise,unclassified_priority_gap,84,96,2660,~pointwise_0a2f01161fd8;~pointwise_a718233d708d;~pointwise_ccfd75b90652,claimed,Codex,claimed_2026-06-12_batch_1-5
+4,pointwise_100a39b686e3,100a39b686e3,pointwise,layout_indexing_stencil_fusion,1,38,1257,pointwise_100a39b686e3,claimed,Codex,claimed_2026-06-12_batch_1-5
+5,pointwise_e87d6ebc9ded,e87d6ebc9ded,pointwise,unclassified_priority_gap,15,40,684,pointwise_035529d03c14;pointwise_0f6eed42fa2c;pointwise_af2e722aed5d,claimed,Codex,claimed_2026-06-12_batch_1-5
 6,pointwise_826ea0b5f6e4,826ea0b5f6e4,pointwise,layout_indexing_stencil_fusion,22,49,579,pointwise_e63526b438e7,unclaimed,,
 7,pointwise_7899d74e0838,7899d74e0838,pointwise,layout_indexing_stencil_fusion,121,31,494,pointwise_7a4083b7e3d1,unclaimed,,
 8,var_mean_42fad1ece813,42fad1ece813,reduction,norm_template_canonicalization,121,26,494,~var_mean_65e90900fd65,unclaimed,,
