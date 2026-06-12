@@ -16,7 +16,6 @@ Refill buffer owned by this session: rows 141-155 plus 172-181; rows 172-181 rem
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
 - Row 148 `pointwise_09973679af31`: worker checks passed; fallback bench was `12GOOD_12AT_FLOOR`.
-- Row 152 `pointwise_39610fd5aba3`: worker checks passed; fallback bench was `1GOOD`.
 
 ## Pushed By This Session
 
@@ -52,6 +51,7 @@ Refill buffer owned by this session: rows 141-155 plus 172-181; rows 172-181 rem
 - Row 147 `pointwise_000209e1748d`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench is `1BAD_ORACLE`.
 - Row 149 `pointwise_25cec8e73161`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench is `1BAD_ORACLE`.
 - Row 150 `pointwise_2c1752cb59b4`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
+- Row 152 `pointwise_39610fd5aba3`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
