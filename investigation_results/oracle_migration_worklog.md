@@ -4,13 +4,13 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 89 `sum_7cfdb80c54c5`: active worker `019ebd48-7905-7141-b806-cbcf1243e864`.
-- Row 93 `pointwise_e6ddc8e897ec`: active worker `019ebd51-0563-7001-a264-2a2145aa0c6b`.
 - Row 94 `var_mean_5a22dd21d88e`: active worker `019ebd53-2fc1-7032-a532-fdc9babadeb3`.
 - Row 112 `var_mean_45f7dfd4a983`: active worker `019ebd65-63e1-7040-bb93-705f009078e3`.
 - Row 113 `pointwise_35ecf6633bb0`: active worker `019ebd67-6352-7293-b9a2-499d130e2a7f`.
+- Row 114 `pointwise_733dafce05a6`: active worker `019ebd6a-9216-7aa3-bd83-b5c4a54759c0`.
+- Row 115 `sum_e529e567d636`: active worker `019ebd6a-e1a1-75d2-a565-f259cd3bfd14`.
 
-Refill buffer owned by this session: rows 114-115. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session is currently exhausted. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
 
 ## Pushed By This Session
 
@@ -25,6 +25,7 @@ Refill buffer owned by this session: rows 114-115. Rows 116-120 were claimed rem
 - Row 90 `sum_6d68a671ec4a`: measured, 5/5 checks, H100 fallback bench `4GOOD_1AT_FLOOR`.
 - Row 91 `sum_sum_sum_c5cdd9ab78b4`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 - Row 92 `var_mean_ec0f56a425b2`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
+- Row 93 `pointwise_e6ddc8e897ec`: marked `needs_work`; 24/24 checks pass but locked bench fails the FP64 numerics gate with NaN errors and emits no timings.
 - Row 95 `pointwise_c509446d4a84`: measured, 3/3 checks, H100 fallback bench `3GOOD`.
 - Row 111 `sum_sum_4c6ae5dbcf21`: measured, 2/2 checks, H100 fallback bench `2GOOD`.
 
