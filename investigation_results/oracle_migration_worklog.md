@@ -4,13 +4,13 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 249 `amax_sum_8002af197c08`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 254 `pointwise_0c4549e63f48`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 253 `pointwise_0c33f088df8a`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 246 `sum_sum_sum_ddcfccfb8340`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 250 `mean_var_83ed19c04171`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 252 `pointwise_07e2552977f5`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, 236-245, and 246-257; rows 254-257 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, 236-245, and 246-257; rows 255-257 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
@@ -110,6 +110,7 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 247 `amax_sum_528a3c274a41`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 - Row 248 `amax_sum_7a65d2915044`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 251 `pointwise_07c6ea330ab4`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
+- Row 249 `amax_sum_8002af197c08`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
