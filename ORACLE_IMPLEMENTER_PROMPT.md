@@ -27,10 +27,10 @@ servers; adjust the corpus path to the local mirror if needed).
       scripts/oracle_template.py, do not add CLI/main/check/bench code,
       do not add sys.path hacks. The file is oracle.py, slim format.
     Verification per claimed repro:
-      python -m py_compile repros/canonical/<id>/oracle.py
-      python -m oracle_harness repros/canonical/<id> --check
-      python -m oracle_harness repros/canonical/<id> --check --no-skip-stochastic
-      INDUCTOR_GPU_BENCH_LOCK=1 python -m oracle_harness repros/canonical/<id> --bench
+      python -m py_compile repros_v2/canonical/<id>/oracle.py
+      python -m oracle_harness repros_v2/canonical/<id> --check
+      python -m oracle_harness repros_v2/canonical/<id> --check --no-skip-stochastic
+      INDUCTOR_GPU_BENCH_LOCK=1 python -m oracle_harness repros_v2/canonical/<id> --bench
     Any CUDAGraph warning means the bench number is invalid.
     Completion:
     - Parent implementer reviews worker output; updates ONLY claimed CSV
@@ -71,7 +71,7 @@ HARD CLARIFICATIONS:
   returned outputs, numerics, dtype boundaries, RNG, aliasing, and strides
   before porting anything. Do not port a known-bad subset oracle, eager
   fallback, approximate-math variant, or benchmarking workaround.
-- New-format means exactly `repros/canonical/<id>/oracle.py` with
+- New-format means exactly `repros_v2/canonical/<id>/oracle.py` with
   `@oracle_impl(hardware="B200", point="<shape_hash>")` registration and
   shared-runner verification. Do not create old-style `oracle_*.py`
   files, do not use `scripts/oracle_template.py`, and do not add
@@ -96,13 +96,13 @@ WORKFLOW per batch:
    old_oracle_candidates oracles + same-model prior art via the old
    per-model manifests; port ideas, retune for bf16, never boilerplate),
    EVERY shapes.json point (N points = N validations + N floor numbers),
-   ownership limits (edit only repros/canonical/<id>/oracle.py; no CSV,
+   ownership limits (edit only repros_v2/canonical/<id>/oracle.py; no CSV,
    no commits), exact diagnosis format, strict numerics, and the
    verification protocol:
-       python -m py_compile repros/canonical/<id>/oracle.py
-       python -m oracle_harness repros/canonical/<id> --check
-       python -m oracle_harness repros/canonical/<id> --check --no-skip-stochastic
-       INDUCTOR_GPU_BENCH_LOCK=1 python -m oracle_harness repros/canonical/<id> --bench
+       python -m py_compile repros_v2/canonical/<id>/oracle.py
+       python -m oracle_harness repros_v2/canonical/<id> --check
+       python -m oracle_harness repros_v2/canonical/<id> --check --no-skip-stochastic
+       INDUCTOR_GPU_BENCH_LOCK=1 python -m oracle_harness repros_v2/canonical/<id> --bench
    Any CUDAGraph warning = the number is INVALID, report as such.
    Subagent reports: file path, classification, PASS/FAIL per check,
    per-point bench numbers, CUDAGraph status, numeric audit.

@@ -237,7 +237,7 @@ Per-point discipline:
 - Branch: investigations-june-2026. Pull latest before every claim batch.
 - The PARENT process (per implementer instance) owns ALL csv edits,
   commits, rebases, pushes, and final validation. Subagents edit ONLY
-  their assigned repros/canonical/<repro_id>/oracle.py — no CSV edits, no
+  their assigned repros_v2/canonical/<repro_id>/oracle.py — no CSV edits, no
   commits, no pushes, and never revert or touch others' edits.
 - Claim before writing: set status/owner, commit AND PUSH the claim, then
   dispatch subagents.
@@ -278,10 +278,10 @@ beyond ownership/branch boilerplate:
 
 ### Verification protocol (run and REPORT all of it)
 
-    python -m py_compile repros/canonical/<id>/oracle.py
-    python -m oracle_harness repros/canonical/<id> --check
-    python -m oracle_harness repros/canonical/<id> --check --no-skip-stochastic
-    INDUCTOR_GPU_BENCH_LOCK=1 python -m oracle_harness repros/canonical/<id> --bench
+    python -m py_compile repros_v2/canonical/<id>/oracle.py
+    python -m oracle_harness repros_v2/canonical/<id> --check
+    python -m oracle_harness repros_v2/canonical/<id> --check --no-skip-stochastic
+    INDUCTOR_GPU_BENCH_LOCK=1 python -m oracle_harness repros_v2/canonical/<id> --bench
 
 (The shared runner replaces the old per-file `--check/--bench` CLI; slim
 oracles have no main().) If --bench prints ANY CUDAGraph warning the
