@@ -1033,3 +1033,24 @@ def test_maxpool_offset_kernel_size_from_lifted_param():
     # 2x2 kernel: center = (kh//2)*kw + kw//2 = 1*2+1 = 3 — NOT the 3x3
     # default 4 (measured: offset 3 on 2x2 pad0 stays in-bounds; 4 is OOB)
     assert constants.get(name) == 3, constants
+
+
+def test_zero_input_point_loads_and_runs():
+    """'inputs': [] is a VALID config (constant-producing partitions like
+    scalar_tensor take no args): load_shape_configs must return it (not
+    skip the point as falsy) and generation must return []."""
+    import json, tempfile
+    from pathlib import Path
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.json").write_text(json.dumps({"points": [{
+            "shape_hash": "00000000", "inputs": [],
+            "models": {"hf/infer/x": {"occurrences": 1}}}]}))
+        (d / "repro.py").write_text("# stub")
+        configs = load_shape_configs(str(d / "repro.py"))
+        assert configs, "zero-input point skipped as falsy"
+        cfg = next(iter(configs.values()))
+        assert cfg["inputs"] == []
+        assert make_inputs_from_config(cfg) == []

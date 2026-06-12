@@ -104,7 +104,7 @@ def _parse_shapes_json(shapes_path: Path) -> dict:
         # Signature-eval is the fallback for points written before the
         # compact encoding existed; the string is documentation otherwise.
         compact = point.get("inputs")
-        if compact:
+        if compact is not None:  # [] is a VALID zero-input config
             try:
                 from input_codec import spec_from_compact
                 specs = [spec_from_compact(e) for e in compact]

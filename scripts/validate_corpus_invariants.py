@@ -157,7 +157,10 @@ def check_shapes_config() -> list[str]:
                 points = json.loads(shapes_path.read_text()).get("points", [])
             except Exception:
                 continue  # malformed shapes.json caught elsewhere
-            if not points or not any(p.get("inputs") for p in points):
+            # "inputs": [] is VALID for zero-input partitions (constant-
+            # producing scalar_tensor regions take no args) — only a point
+            # MISSING the key entirely has no loadable config.
+            if not points or not any("inputs" in p for p in points):
                 missing.append(
                     f"{repro_py.parent.name} (v3, no structured inputs)")
                 continue
