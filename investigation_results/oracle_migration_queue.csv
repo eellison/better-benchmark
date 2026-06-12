@@ -36,7 +36,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 35,pointwise_02974718a634,02974718a634,pointwise,unclassified_priority_gap,2,1,95,~pointwise_e0498dcba9fe;~pointwise_28fded12b2f4;~pointwise_b673b7143973,oracle_measured,Codex,B200_verified_2026-06-12: check 2/2 PASS; bench 1GOOD 1AT_FLOOR; oracle_us median=45.9us
 36,var_mean_da5aa7a47091,da5aa7a47091,reduction,norm_template_canonicalization,4,10,90,var_mean_d22940b03b5c;var_mean_d8fae237d769,claimed,Codex,claimed_2026-06-12_batch_36-40_keep_workers_busy
 37,sum_sum_sum_260a107eaf32,260a107eaf32,reduction,reduction_general,6,11,86,,claimed,Codex,claimed_2026-06-12_batch_36-40_keep_workers_busy
-38,pointwise_818c3aa59952,818c3aa59952,pointwise,layout_indexing_stencil_fusion,52,18,85,pointwise_557274333bb2,claimed,Codex,claimed_2026-06-12_batch_36-40_keep_workers_busy
+38,pointwise_818c3aa59952,818c3aa59952,pointwise,layout_indexing_stencil_fusion,52,18,85,pointwise_557274333bb2,needs_work,Codex,needs_work: checks_pass_52of52_h100_fallback_bench_NUMERICS_WORSE_THAN_COMPILED_52of52_nan_ref_no_cudagraph_warnings_class_ALGEBRAIC_ELIMINATION_oracle_not_committed
 39,var_mean_7a2ac1c4841d,7a2ac1c4841d,reduction,norm_template_canonicalization,52,17,85,~var_mean_c0993161a0af,claimed,Codex,claimed_2026-06-12_batch_36-40_keep_workers_busy
 40,pointwise_1e6f46231554,1e6f46231554,pointwise,unclassified_priority_gap,4,6,84,pointwise_73d2b3dfee0b,oracle_measured,Codex,B200_verified_2026-06-12: check 4/4 PASS; bench 3GOOD 1AT_FLOOR; oracle_us median=7.5us
 41,var_mean_393456b916a6,393456b916a6,reduction,norm_template_canonicalization,5,11,83,var_mean_1fad4754680a;var_mean_3711a161734e,claimed,Codex,claimed_2026-06-12_batch_41-45_topdown
