@@ -116,7 +116,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 115,sum_e529e567d636,e529e567d636,reduction,reduction_general,2,3,36,,claimed,codex,claimed_2026-06-12_batch_111-115_refill_queue
 116,sum_281f473c7326,281f473c7326,reduction,reduction_general,6,2,35,,claimed,Codex,claimed_2026-06-12_batch_116-120_topdown
 117,amax_sum_979a0af8f7a7,979a0af8f7a7,reduction,reduction_softmax_like,2,3,34,amax_sum_4fb4f9a0bf43,oracle_measured,Codex,oracle_py_added_checks_pass_2of2_h100_fallback_bench_no_warnings_2GOOD_class_NEW_PATTERN_needs_B200_verify
-118,mean_bf2ed36e56df,bf2ed36e56df,reduction,unclassified_priority_gap,2,3,34,mean_ee17938d7aff,claimed,Codex,claimed_2026-06-12_batch_116-120_topdown
+118,mean_bf2ed36e56df,bf2ed36e56df,reduction,unclassified_priority_gap,2,3,34,mean_ee17938d7aff,oracle_measured,Codex,oracle_py_added_checks_pass_2of2_h100_fallback_bench_no_warnings_1GOOD_1AT_FLOOR_class_SCHEDULER_FUSION_needs_B200_verify
 119,sum_33b36e228e74,33b36e228e74,reduction,reduction_general,2,3,34,,claimed,Codex,claimed_2026-06-12_batch_116-120_topdown
 120,sum_sum_c634506089db,c634506089db,reduction,reduction_general,2,3,34,,claimed,Codex,claimed_2026-06-12_batch_116-120_topdown
 121,sum_sum_sum_e7781939b0a2,e7781939b0a2,reduction,reduction_general,2,4,34,,claimed,codex,claimed_2026-06-12_batch_121-125_refill_queue
