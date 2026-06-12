@@ -14,8 +14,8 @@ servers; adjust the corpus path to the local mirror if needed).
     Claiming:
     - Use investigation_results/oracle_migration_queue.csv.
     - Claim 5-6 rows with status=unclaimed; work top-down from queue_rank.
-    - Rows may already be claimed by others (e.g. Codex holds 1-5) —
-      ALWAYS pull first and never touch rows owned by someone else.
+    - Rows may already be claimed by others — ALWAYS pull first and never
+      touch rows owned by someone else.
     - Set status=claimed, owner=<your-name>, notes=<claim note>.
     - Commit and push the claim BEFORE writing any oracle.
     - Use @oracle_impl(hardware="B200", point="<shape_hash>").
