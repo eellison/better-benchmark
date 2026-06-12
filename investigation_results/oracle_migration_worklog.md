@@ -10,7 +10,7 @@ Updated: 2026-06-12
 - Row 211 `pointwise_47bdc8c7c0cd`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 207 `sum_sum_sum_fb3a1658dadb`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, 194-203, and 204-213; rows 212-213 remain idle buffer. Rows 126-140, 156-171, and 182-193 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, and 226-235; rows 212-213 and 226-235 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
