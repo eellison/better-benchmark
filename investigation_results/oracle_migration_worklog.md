@@ -8,9 +8,9 @@ Updated: 2026-06-12
 - Row 233 `sum_sum_sum_951d09ecbec1`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 232 `var_mean_mean_e790938418f4`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 229 `sum_sum_292e665668b6`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 230 `sum_sum_4df091034d07`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 234 `var_mean_0ada225c0a04`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, and 226-235; rows 234-235 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, and 226-235; row 235 remains idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
@@ -90,6 +90,7 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, an
 - Row 226 `pointwise_ae2a7de08481`: measured, 6/6 checks, H100 fallback bench `4GOOD_2AT_FLOOR`.
 - Row 227 `pointwise_ba870b00a0b3`: measured, 6/6 checks, H100 fallback bench `4GOOD_2AT_FLOOR`.
 - Row 228 `pointwise_fb4ca2518d23`: measured, 6/6 checks, H100 fallback bench `4GOOD_2AT_FLOOR`.
+- Row 230 `sum_sum_4df091034d07`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
