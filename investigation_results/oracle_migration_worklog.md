@@ -5,12 +5,12 @@ Updated: 2026-06-12
 ## Current Worker Pool
 
 - Row 89 `sum_7cfdb80c54c5`: active worker `019ebd48-7905-7141-b806-cbcf1243e864`.
-- Row 70 `sum_785c25a716ed`: active rework worker `019ebd4e-6452-7f12-b383-60f0b1720dfd`; previous parent bench was correct but slower than compiled on H100 fallback.
 - Row 93 `pointwise_e6ddc8e897ec`: active worker `019ebd51-0563-7001-a264-2a2145aa0c6b`.
 - Row 94 `var_mean_5a22dd21d88e`: active worker `019ebd53-2fc1-7032-a532-fdc9babadeb3`.
-- Row 111 `sum_sum_4c6ae5dbcf21`: active worker `019ebd5f-a9c4-7012-a06d-4feecc96b97d`.
+- Row 112 `var_mean_45f7dfd4a983`: active worker `019ebd65-63e1-7040-bb93-705f009078e3`.
+- Row 113 `pointwise_35ecf6633bb0`: active worker `019ebd67-6352-7293-b9a2-499d130e2a7f`.
 
-Refill buffer owned by this session: rows 112-115. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 114-115. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
 
 ## Pushed By This Session
 
