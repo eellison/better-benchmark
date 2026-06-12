@@ -187,7 +187,8 @@ def infer_index_bounds_from_gm(
     for name, node in ph_nodes.items():
         info = placeholder_info.get(name, {})
         dtype = info.get("dtype", "")
-        if "int" not in dtype:
+        is_float = "float" in dtype or "bfloat" in dtype
+        if "int" not in dtype and not is_float:
             continue
 
         if "int8" in dtype:
@@ -349,6 +350,14 @@ def infer_index_bounds_from_gm(
 
         bound = _find_bound(node)
         if bound is not None:
+            if is_float:
+                # FLOAT placeholder whose VALUES flow (via convert chains)
+                # into index consumption — OPT: position ids derive from a
+                # float attention mask, (mask - 1).to(int64) + 2 indexes a
+                # 2050-row table. randn would go negative/OOB; generate
+                # bounded non-negative values instead.
+                info.setdefault("gen", {"kind": "index", "low": 0,
+                                        "high": bound})
             bounds[name] = bound
 
     return bounds

@@ -1054,3 +1054,39 @@ def test_zero_input_point_loads_and_runs():
         cfg = next(iter(configs.values()))
         assert cfg["inputs"] == []
         assert make_inputs_from_config(cfg) == []
+
+
+def test_float_placeholder_feeding_index_chain_gets_bounded_gen():
+    """FLOAT placeholders whose VALUES flow (via convert chains) into index
+    consumption need bounded non-negative generation (OPT: position ids =
+    (float_mask - 1).to(int64) + 2 index a 2050-row table; randn goes
+    negative/OOB -> embedding assert -> poisoned context)."""
+    import torch
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from full_graph_harness import (infer_index_bounds_from_gm,
+                                    placeholder_info_from_gm)
+
+    def f(mask, table):
+        x = torch.ops.aten.sub.Tensor(mask, 1)
+        ids = torch.ops.prims.convert_element_type.default(x, torch.int64)
+        ids2 = torch.ops.aten.add.Tensor(ids, 2)
+        return torch.ops.aten.embedding.default(table, ids2)
+
+    with FakeTensorMode(allow_non_fake_inputs=True) as m:
+        mask = m.from_tensor(torch.zeros(4, 128, dtype=torch.float32))
+        table = m.from_tensor(torch.zeros(2050, 768))
+        gm = make_fx(f, tracing_mode="fake")(mask, table)
+
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    float_phs = [n for n, i in info.items()
+                 if "float" in i["dtype"] and len(i["shape"]) == 2
+                 and i["shape"][0] == 4]
+    assert float_phs
+    name = float_phs[0]
+    assert bounds.get(name) is not None, bounds
+    # inverted through (+2 after convert; sub 1 before): bound well under 2050
+    assert bounds[name] < 2050
+    # and the info dict got a bounded non-negative gen attached
+    assert info[name].get("gen", {}).get("kind") == "index", info[name]

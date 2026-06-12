@@ -1351,6 +1351,11 @@ class _CaptureState:
                     elif "int" in info["dtype"] and bound:
                         spec["gen"] = {"kind": "index", "low": 0,
                                        "high": bound}
+                    elif info.get("gen"):
+                        # Inference attached a gen directly (float->index
+                        # chains: OPT position ids derive from a float
+                        # mask; randn would index negative/OOB).
+                        spec["gen"] = info["gen"]
                     compact_inputs.append(compact_from_spec(spec))
                 elif info and info.get("dtype") == "symint":
                     compact_inputs.append(["sym", info.get("hint", 1)])
