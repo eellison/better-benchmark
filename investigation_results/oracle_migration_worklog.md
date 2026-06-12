@@ -16,7 +16,6 @@ Refill buffer owned by this session: rows 141-155 plus 172-181; rows 175-181 rem
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
 - Row 124 `var_mean_88858c55c3b4`: worker checks passed; fallback bench was `18GOOD_1BAD_ORACLE`.
-- Row 148 `pointwise_09973679af31`: worker checks passed; fallback bench was `12GOOD_12AT_FLOOR`.
 
 ## Pushed By This Session
 
@@ -50,6 +49,7 @@ Refill buffer owned by this session: rows 141-155 plus 172-181; rows 175-181 rem
 - Row 145 `any_amax_amax_af50781fc699`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 - Row 146 `mean_f21cc667fe83`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 147 `pointwise_000209e1748d`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench is `1BAD_ORACLE`.
+- Row 148 `pointwise_09973679af31`: measured, 24/24 checks, H100 fallback bench `11GOOD_11AT_FLOOR_2BAD_ORACLE`.
 - Row 149 `pointwise_25cec8e73161`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench is `1BAD_ORACLE`.
 - Row 150 `pointwise_2c1752cb59b4`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 151 `pointwise_2db21af13668`: measured, 4/4 checks, H100 fallback bench `4GOOD`.
