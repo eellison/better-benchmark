@@ -40,6 +40,16 @@ YOUR JOB (never write oracles yourself):
   evidence; do not skip the oracle.
 - Scope policing: subset oracles are NOT floors; reject with the missing
   scope named in notes.
+- REJECTION FLOW (the standard verdict mechanism): when an oracle fails
+  any check — numerics drift, unreproducible bench, scope subset, format
+  violation, forbidden math substitution — set the row's status back to
+  needs_work, KEEP the owner (it returns to whoever wrote it), and write
+  a SPECIFIC note: what failed, your measured numbers vs claimed, and
+  what would make it pass (e.g. "needs_work: point 6f65d3b5 check fails
+  bf16 atol; kernel uses exp2 where repro has aten.exp — use
+  libdevice.exp; 3 other points pass"). A rejection without an
+  actionable note is itself not done. Never delete their oracle.py —
+  the fix iterates on it.
 - Progress reports into investigation_results/ (rows closed / by family /
   by status).
 
