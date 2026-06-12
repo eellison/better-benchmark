@@ -105,19 +105,20 @@ def _parse_shapes_json(shapes_path: Path) -> dict:
         # compact encoding existed; the string is documentation otherwise.
         compact = point.get("inputs")
         if compact is not None:  # [] is a VALID zero-input config
-            try:
-                from input_codec import spec_from_compact
-                specs = [spec_from_compact(e) for e in compact]
-                cfg = {"inputs": specs}
-                # alias_group_nbytes must travel with the config — specs
-                # carrying alias_group crash generation without it
-                # (adversarial review bug #1).
-                if point.get("alias_group_nbytes"):
-                    cfg["alias_group_nbytes"] = point["alias_group_nbytes"]
-                configs[label] = cfg
-                continue
-            except Exception:
-                pass  # fall through to signature eval
+            # NO silent fallback: data-only points have no signature to
+            # fall back to, so a decode failure here must be LOUD. (The
+            # old except-pass masked input_codec missing from the editable
+            # package — every standalone repro run silently saw 0 configs.)
+            from input_codec import spec_from_compact
+            specs = [spec_from_compact(e) for e in compact]
+            cfg = {"inputs": specs}
+            # alias_group_nbytes must travel with the config — specs
+            # carrying alias_group crash generation without it
+            # (adversarial review bug #1).
+            if point.get("alias_group_nbytes"):
+                cfg["alias_group_nbytes"] = point["alias_group_nbytes"]
+            configs[label] = cfg
+            continue
         try:
             inputs = _eval_signature(signature)
             if inputs:
