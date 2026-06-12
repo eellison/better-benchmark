@@ -134,11 +134,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 133,sum_sum_894f3180f3c4,894f3180f3c4,reduction,reduction_general,20,14,28,,claimed,Codex,claimed_2026-06-12_batch_131-135_topdown
 134,var_mean_522de516d7b7,522de516d7b7,reduction,reduction_var_mean,16,4,28,,claimed,Codex,claimed_2026-06-12_batch_131-135_topdown
 135,mean_mean_37961b6339c1,37961b6339c1,reduction,norm_template_canonicalization,1,1,27,mean_mean_fac851fa5f98,claimed,Codex,claimed_2026-06-12_batch_131-135_topdown
-136,var_mean_c3d3da9339e4,c3d3da9339e4,reduction,norm_template_canonicalization,27,3,27,~var_mean_4581dbce69e5;~var_mean_bb7b5fefc1d5;~var_mean_bff30f530d6e,unclaimed,,
-137,var_mean_c3ea8f7ce5c6,c3ea8f7ce5c6,reduction,norm_template_canonicalization,3,4,27,var_mean_1fad4754680a;var_mean_3711a161734e,unclaimed,,
-138,sum_sum_3eee452cee40,3eee452cee40,reduction,reduction_general,14,4,26,,unclaimed,,
-139,sum_sum_sum_966b39d54c96,966b39d54c96,reduction,reduction_general,3,4,26,,unclaimed,,
-140,pointwise_3af9b4ebfd25,3af9b4ebfd25,pointwise,unclassified_priority_gap,2,1,25,~pointwise_e0498dcba9fe;~pointwise_28fded12b2f4;~pointwise_b673b7143973,unclaimed,,
+136,var_mean_c3d3da9339e4,c3d3da9339e4,reduction,norm_template_canonicalization,27,3,27,~var_mean_4581dbce69e5;~var_mean_bb7b5fefc1d5;~var_mean_bff30f530d6e,claimed,Codex,claimed_2026-06-12_batch_136-140_topdown
+137,var_mean_c3ea8f7ce5c6,c3ea8f7ce5c6,reduction,norm_template_canonicalization,3,4,27,var_mean_1fad4754680a;var_mean_3711a161734e,claimed,Codex,claimed_2026-06-12_batch_136-140_topdown
+138,sum_sum_3eee452cee40,3eee452cee40,reduction,reduction_general,14,4,26,,claimed,Codex,claimed_2026-06-12_batch_136-140_topdown
+139,sum_sum_sum_966b39d54c96,966b39d54c96,reduction,reduction_general,3,4,26,,claimed,Codex,claimed_2026-06-12_batch_136-140_topdown
+140,pointwise_3af9b4ebfd25,3af9b4ebfd25,pointwise,unclassified_priority_gap,2,1,25,~pointwise_e0498dcba9fe;~pointwise_28fded12b2f4;~pointwise_b673b7143973,claimed,Codex,claimed_2026-06-12_batch_136-140_topdown
 141,pointwise_435f6504efa7,435f6504efa7,pointwise,unclassified_priority_gap,2,1,25,pointwise_e0498dcba9fe,unclaimed,,
 142,sum_623a84402e27,623a84402e27,reduction,multi_output_reduction_templates,2,2,25,~sum_ab7572b27d2c;~sum_b8db5e701976,unclaimed,,
 143,sum_sum_sum_00516eacb000,00516eacb000,reduction,reduction_general,2,1,25,,unclaimed,,
