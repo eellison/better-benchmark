@@ -109,11 +109,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 108,pointwise_014bbb0703c3,014bbb0703c3,pointwise,layout_indexing_stencil_fusion,4,3,45,pointwise_106406131986,claimed,Codex,claimed_2026-06-12_batch_106-110_topdown
 109,mean_8818e35b12aa,8818e35b12aa,reduction,unclassified_priority_gap,2,3,44,mean_d5150760404d,claimed,Codex,claimed_2026-06-12_batch_106-110_topdown
 110,sum_6c6fa38d6351,6c6fa38d6351,reduction,unclassified_priority_gap,1,2,44,~sum_ebebe1ce6cce,claimed,Codex,claimed_2026-06-12_batch_106-110_topdown
-111,sum_sum_4c6ae5dbcf21,4c6ae5dbcf21,reduction,multi_output_reduction_templates,2,3,44,~sum_sum_bc46e8b5be67,unclaimed,,
-112,var_mean_45f7dfd4a983,45f7dfd4a983,reduction,norm_template_canonicalization,5,8,43,var_mean_d22940b03b5c;var_mean_d8fae237d769,unclaimed,,
-113,pointwise_35ecf6633bb0,35ecf6633bb0,pointwise,unclassified_priority_gap,2,2,36,pointwise_9a3b1c27ce63;pointwise_b46f81501f11,unclaimed,,
-114,pointwise_733dafce05a6,733dafce05a6,pointwise,unclassified_priority_gap,2,2,36,~pointwise_035529d03c14;~pointwise_0f6eed42fa2c;~pointwise_af2e722aed5d,unclaimed,,
-115,sum_e529e567d636,e529e567d636,reduction,reduction_general,2,3,36,,unclaimed,,
+111,sum_sum_4c6ae5dbcf21,4c6ae5dbcf21,reduction,multi_output_reduction_templates,2,3,44,~sum_sum_bc46e8b5be67,claimed,codex,claimed_2026-06-12_batch_111-115_refill_queue
+112,var_mean_45f7dfd4a983,45f7dfd4a983,reduction,norm_template_canonicalization,5,8,43,var_mean_d22940b03b5c;var_mean_d8fae237d769,claimed,codex,claimed_2026-06-12_batch_111-115_refill_queue
+113,pointwise_35ecf6633bb0,35ecf6633bb0,pointwise,unclassified_priority_gap,2,2,36,pointwise_9a3b1c27ce63;pointwise_b46f81501f11,claimed,codex,claimed_2026-06-12_batch_111-115_refill_queue
+114,pointwise_733dafce05a6,733dafce05a6,pointwise,unclassified_priority_gap,2,2,36,~pointwise_035529d03c14;~pointwise_0f6eed42fa2c;~pointwise_af2e722aed5d,claimed,codex,claimed_2026-06-12_batch_111-115_refill_queue
+115,sum_e529e567d636,e529e567d636,reduction,reduction_general,2,3,36,,claimed,codex,claimed_2026-06-12_batch_111-115_refill_queue
 116,sum_281f473c7326,281f473c7326,reduction,reduction_general,6,2,35,,unclaimed,,
 117,amax_sum_979a0af8f7a7,979a0af8f7a7,reduction,reduction_softmax_like,2,3,34,amax_sum_4fb4f9a0bf43,unclaimed,,
 118,mean_bf2ed36e56df,bf2ed36e56df,reduction,unclassified_priority_gap,2,3,34,mean_ee17938d7aff,unclaimed,,
