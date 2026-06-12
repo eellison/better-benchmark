@@ -25,6 +25,7 @@ Refill buffer owned by this session: rows 112-115. Rows 116-120 were claimed rem
 - Row 91 `sum_sum_sum_c5cdd9ab78b4`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 - Row 92 `var_mean_ec0f56a425b2`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 95 `pointwise_c509446d4a84`: measured, 3/3 checks, H100 fallback bench `3GOOD`.
+- Row 111 `sum_sum_4c6ae5dbcf21`: measured, 2/2 checks, H100 fallback bench `2GOOD`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
