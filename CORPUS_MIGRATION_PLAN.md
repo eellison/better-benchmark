@@ -420,6 +420,20 @@ maintain, can't mis-lift int[] dims/permute args) — swappable inside
   (consumer-op walk); the constructor owns HOW to build it. If an op
   needs richer semantics than a kind+args can express, the same seams
   accept a custom constructor keyed on the op.
+- **Graph invocation counts in full-model accounting (filed 2026-06-12,
+  deferred)**: the attribution identity currently assumes each captured
+  full graph runs ONCE per model step — but a model can invoke the same
+  compiled graph multiple times (loops over identical blocks, repeated
+  calls into one dynamo artifact, generate-style decode steps). Where
+  that happens, e2e ≈ Σ(graph contributions × invocation_count), and
+  per-graph occurrence counts under-account. Detecting it needs a
+  RUNTIME signal, not graph inspection — i.e. augmenting the compile/
+  runtime wrapper to count invocations per compiled artifact during the
+  capture run (a counter in the compiled fn's wrapper, recorded into the
+  graph sidecar as invocations_per_step). Static suites mostly run each
+  graph once per step so wave-1 numbers stand; revisit when accounting
+  shows unexplained e2e > Σ(parts) gaps or when generate-style workloads
+  (wave 2) enter the corpus.
 - **Semantic tags on shapes/repros (filed 2026-06-11, not for wave 1)**:
   attach reusable semantic labels to specific points/repros — e.g.
   "split-k" (K-dominant gemm reduction shape), "decode" (BS=1 attn),
