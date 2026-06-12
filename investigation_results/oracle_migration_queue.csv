@@ -1,6 +1,6 @@
 queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrences,old_oracle_candidates,status,owner,notes
 1,pointwise_04d85912d998,04d85912d998,pointwise,layout_indexing_stencil_fusion,469,105,4289,~pointwise_43877c71f0eb;~pointwise_75795e2c97dd;~pointwise_e5d19e73a52c,claimed,Codex,claimed_2026-06-12_batch_1-5_repros_v2
-2,pointwise_ccd411f2a45d,ccd411f2a45d,pointwise,layout_indexing_stencil_fusion,455,102,3936,~pointwise_43877c71f0eb;~pointwise_75795e2c97dd;~pointwise_e5d19e73a52c,claimed,Codex,claimed_2026-06-12_batch_1-5_repros_v2
+2,pointwise_ccd411f2a45d,ccd411f2a45d,pointwise,layout_indexing_stencil_fusion,455,102,3936,~pointwise_43877c71f0eb;~pointwise_75795e2c97dd;~pointwise_e5d19e73a52c,needs_work,Codex,needs_work: checks_pass_455of455_worker_h100_fallback_bench_BAD_ORACLE_first_bad_oracle_5.44us_compile_5.12us_second_bad_oracle_6.11us_compile_5.50us_no_cudagraph_warnings_class_NEW_PATTERN_needs_retune
 3,pointwise_8bb40810003c,8bb40810003c,pointwise,unclassified_priority_gap,84,96,2660,~pointwise_0a2f01161fd8;~pointwise_a718233d708d;~pointwise_ccfd75b90652,oracle_measured,Codex,B200_verified_2026-06-12: check 84/84 PASS; bench 32GOOD 50AT_FLOOR 2BAD(floor noise); oracle_us median=6.88; gap 1.05-1.27x on GOOD points
 4,pointwise_100a39b686e3,100a39b686e3,pointwise,layout_indexing_stencil_fusion,1,38,1257,pointwise_100a39b686e3,oracle_measured,Codex,B200_verified_2026-06-12: check 1/1 PASS; bench AT_FLOOR oracle=4.99us compile=4.96us; scalar step-counter at launch floor
 5,pointwise_e87d6ebc9ded,e87d6ebc9ded,pointwise,unclassified_priority_gap,15,40,684,pointwise_035529d03c14;pointwise_0f6eed42fa2c;pointwise_af2e722aed5d,oracle_measured,Codex,B200_verified_2026-06-12: check 15/15 PASS; bench 14GOOD 1AT_FLOOR; oracle_us median=9.25; gap up to 17.9x (attention reshape)
@@ -212,8 +212,8 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 211,pointwise_47bdc8c7c0cd,47bdc8c7c0cd,pointwise,unclassified_priority_gap,2,4,18,~pointwise_5adbbefc8021,claimed,codex,claimed_2026-06-12_batch_204-213_refill_queue
 212,pointwise_c8d23ac4414d,c8d23ac4414d,pointwise,unclassified_priority_gap,11,23,18,pointwise_1eb557d9b42d;pointwise_f30674e2e5ee,claimed,codex,claimed_2026-06-12_batch_204-213_refill_queue
 213,pointwise_d5a413a2c233,d5a413a2c233,pointwise,unclassified_priority_gap,2,4,18,pointwise_3c320014165a;pointwise_6b333f661800;pointwise_cffb7fe32779,claimed,codex,claimed_2026-06-12_batch_204-213_refill_queue
-214,sum_03788f40c42f,03788f40c42f,reduction,reduction_general,2,4,18,,claimed,Codex,claimed_2026-06-12_batch_214-225_topdown
-215,sum_e93685de7228,e93685de7228,reduction,reduction_general,2,4,18,~sum_ad4468aef9e0,claimed,Codex,claimed_2026-06-12_batch_214-225_topdown
+214,sum_03788f40c42f,03788f40c42f,reduction,reduction_general,2,4,18,,oracle_measured,Codex,oracle_py_added_checks_pass_2of2_h100_fallback_bench_no_warnings_1GOOD_1AT_FLOOR_class_SCHEDULER_FUSION_needs_B200_verify
+215,sum_e93685de7228,e93685de7228,reduction,reduction_general,2,4,18,~sum_ad4468aef9e0,oracle_measured,Codex,oracle_py_added_checks_pass_2of2_h100_fallback_bench_no_warnings_2GOOD_class_COOPERATIVE_SPLIT_K_needs_B200_verify
 216,pointwise_52fe1925ccda,52fe1925ccda,pointwise,unclassified_priority_gap,10,22,17,~pointwise_0a2f01161fd8;~pointwise_ccfd75b90652;~pointwise_7f7eee8e728d,claimed,Codex,claimed_2026-06-12_batch_214-225_topdown
 217,pointwise_9128d8745e42,9128d8745e42,pointwise,pointwise,3,2,17,,claimed,Codex,claimed_2026-06-12_batch_214-225_topdown
 218,var_mean_1f68e5f6c601,1f68e5f6c601,reduction,unclassified_priority_gap,2,3,17,~var_mean_40d5a5a49ffd;~var_mean_b3ec7ad4195e;~var_mean_c97d1570c0ff,claimed,Codex,claimed_2026-06-12_batch_214-225_topdown
