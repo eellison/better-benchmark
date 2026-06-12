@@ -48,19 +48,25 @@ def read_repro_version(repro_path: str | Path) -> int:
     return parse_repro_version(Path(repro_path).read_text())
 
 
-def load_shape_configs(repro_file: str) -> dict:
+def load_shape_configs(repro_file: str, symbol_bindings: dict | None = None) -> dict:
     """Load shape configs for a canonical repro.
 
     Preference order:
       1. shapes.json (new format with points array) — used for new captures
       2. shapes.txt (compact T()/S() format) — the existing 1482 repros
+
+    symbol_bindings: for DYNAMIC repros (shapes.json with a "symbols"
+    table), instantiate every symbolic point at these bindings instead of
+    each point's recorded ones (e.g. {"s16": 24}). Bindings are validated
+    against symbol ranges + guards; violations raise. Static repros ignore
+    this parameter (no symbols to bind).
     """
     repro_dir = Path(repro_file).parent
 
     # Prefer shapes.json (new format from wave-1 onward)
     shapes_json = repro_dir / "shapes.json"
     if shapes_json.exists():
-        return _parse_shapes_json(shapes_json)
+        return _parse_shapes_json(shapes_json, symbol_bindings=symbol_bindings)
 
     # Fallback: shapes.txt for existing corpus
     shapes_txt = repro_dir / "shapes.txt"
@@ -70,7 +76,8 @@ def load_shape_configs(repro_file: str) -> dict:
     return {}
 
 
-def _parse_shapes_json(shapes_path: Path) -> dict:
+def _parse_shapes_json(shapes_path: Path,
+                       symbol_bindings: dict | None = None) -> dict:
     """Parse shapes.json (new format with points array).
 
     Each point has a shape_hash, signature (T()/S() string), and models dict.
@@ -104,6 +111,15 @@ def _parse_shapes_json(shapes_path: Path) -> dict:
         # Signature-eval is the fallback for points written before the
         # compact encoding existed; the string is documentation otherwise.
         compact = point.get("inputs")
+        symbols = data.get("symbols") or {}
+        if compact is not None and (symbols or symbol_bindings):
+            # Dynamic repro: instantiate symbolic entries (at the point's
+            # recorded bindings, or the caller's). Range/guard violations
+            # raise loudly inside instantiate_point.
+            from input_codec import instantiate_point
+            compact = instantiate_point(
+                point, symbols, bindings=symbol_bindings,
+                guards=data.get("guards"))
         if compact is not None:  # [] is a VALID zero-input config
             # NO silent fallback: data-only points have no signature to
             # fall back to, so a decode failure here must be LOUD. (The
@@ -215,6 +231,72 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
             continue
 
     return configs
+
+
+def parse_bind_args(bind_args: list | None) -> list:
+    """Parse repeated --bind values into a list of binding dicts.
+
+    Each element is one --bind occurrence, e.g. "s16=24,s82=24" ->
+    {"s16": 24, "s82": 24}. Returns [] when bind_args is None/empty.
+    Malformed entries raise ValueError (loud beats benchmarking a typo).
+    """
+    out = []
+    for raw in bind_args or []:
+        bindings = {}
+        for part in str(raw).split(","):
+            part = part.strip()
+            if not part:
+                continue
+            if "=" not in part:
+                raise ValueError(
+                    f"--bind entry {part!r} must be symbol=int (e.g. s16=24)")
+            name, _, val = part.partition("=")
+            try:
+                bindings[name.strip()] = int(val)
+            except ValueError:
+                raise ValueError(
+                    f"--bind value for {name.strip()!r} must be an int, "
+                    f"got {val!r}") from None
+        if not bindings:
+            raise ValueError(f"--bind {raw!r} parsed to no bindings")
+        out.append(bindings)
+    return out
+
+
+def resolve_bound_configs(repro_file: str, bindings_list: list,
+                          shape: str | None = None) -> list:
+    """Resolve (label, binding, config) rows for --bind/--dynamic benching.
+
+    One row per (binding set x shape config): each binding set is threaded
+    through load_shape_configs(symbol_bindings=...), which instantiates
+    every symbolic point at that binding (range/guard violations raise).
+    binding=None rows instantiate at each point's recorded bindings (the
+    captured hint — what a plain run measures). `shape` filters to one
+    named config; unknown names raise.
+    """
+    rows = []
+    for binding in (bindings_list or [None]):
+        configs = load_shape_configs(repro_file, symbol_bindings=binding)
+        if shape is not None:
+            if shape not in configs:
+                raise ValueError(
+                    f"--shape {shape!r} not in configs "
+                    f"(have {sorted(configs)})")
+            configs = {shape: configs[shape]}
+        for label, cfg in configs.items():
+            rows.append((label, binding, cfg))
+    if not rows:
+        raise ValueError(
+            f"--bind/--dynamic found no shape configs for {repro_file} "
+            "(needs a shapes.json next to the repro)")
+    return rows
+
+
+def format_binding(binding: dict | None) -> str:
+    """Human/key form of a binding dict: 's16=24,s82=24' or 'hint'."""
+    if not binding:
+        return "hint"
+    return ",".join(f"{k}={v}" for k, v in sorted(binding.items()))
 
 
 def parse_shapes_config(config_str: str) -> list:

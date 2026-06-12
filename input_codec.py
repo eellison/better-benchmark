@@ -220,3 +220,127 @@ def _contiguous_stride(shape: list) -> list:
 
 def _is_contiguous(shape: list, stride: list) -> bool:
     return list(stride) == _contiguous_stride(shape)
+
+
+# ---------------------------------------------------------------------------
+# Dynamic shapes: symbolic dims/strides + symbol tables (wave 2)
+#
+# A dynamic point's entries may carry EXPR STRINGS in shape/stride slots and
+# ["I", hint, expr] entries for live symint inputs:
+#
+#     {"symbols": {"s16": {"hint": 16, "range": [2, null]}},
+#      "guards": ["Eq(Mod(s0, 128), 0)"],
+#      "points": [{"bindings": {"s16": 16},
+#                  "inputs": [[[64, 64, "s16", "s82"], "f32",
+#                              {"st": ["64*s16*s82", "s16*s82", "s82", 1]}],
+#                             ["I", 256, "s16*s82"]]}]}
+#
+# Static entries are unchanged (ints stay ints); a fully static point has
+# no symbols/bindings and no string dims. Exprs are sympy-printable strings
+# referencing the symbol table; they are data, evaluated by
+# evaluate_symbolic_entry under a binding — never eval()'d as Python.
+# ---------------------------------------------------------------------------
+
+def is_symbolic_entry(entry) -> bool:
+    """True if a compact entry contains symbolic dims/strides or is symint."""
+    if not isinstance(entry, list) or not entry:
+        return False
+    if entry[0] == "I":
+        return True
+    if entry[0] == "S" and len(entry) > 1 and isinstance(entry[1], list):
+        return any(isinstance(d, str) for d in entry[1])
+    if isinstance(entry[0], list):
+        if any(isinstance(d, str) for d in entry[0]):
+            return True
+        opts = entry[2] if len(entry) > 2 else {}
+        if isinstance(opts, dict) and any(
+                isinstance(s, str) for s in opts.get("st", [])):
+            return True
+    return False
+
+
+def _eval_dim(dim, bindings: dict):
+    """Evaluate one dim/stride slot: int passes through; expr string is
+    sympified against the bindings. Raises on unbound symbols."""
+    if isinstance(dim, int):
+        return dim
+    import sympy
+
+    expr = sympy.sympify(dim, rational=False)
+    free = expr.free_symbols
+    missing = [str(s) for s in free if str(s) not in bindings]
+    if missing:
+        raise ValueError(f"unbound symbols {missing} in dim expr {dim!r}")
+    val = expr.subs({sympy.Symbol(k): v for k, v in bindings.items()})
+    if not val.is_Integer:
+        raise ValueError(f"dim expr {dim!r} did not evaluate to an int "
+                         f"under {bindings} (got {val})")
+    return int(val)
+
+
+def validate_bindings(symbols: dict, bindings: dict,
+                      guards: list | None = None) -> None:
+    """Check bindings against symbol ranges and residual guards. LOUD on
+    violation — benchmarking an impossible shape answers no question."""
+    import sympy
+
+    for name, val in bindings.items():
+        sym = symbols.get(name)
+        if sym is None:
+            raise ValueError(f"binding for unknown symbol {name!r} "
+                             f"(table has {sorted(symbols)})")
+        lo, hi = (sym.get("range") or [None, None])
+        if lo is not None and val < lo:
+            raise ValueError(f"{name}={val} below range min {lo}")
+        if hi is not None and val > hi:
+            raise ValueError(f"{name}={val} above range max {hi}")
+    for g in guards or []:
+        expr = sympy.sympify(g, rational=False)
+        sub = expr.subs({sympy.Symbol(k): v for k, v in bindings.items()})
+        if sub == sympy.false:
+            raise ValueError(f"binding {bindings} violates guard {g!r}")
+
+
+def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:
+    """Evaluate a (possibly symbolic) compact entry to a fully static one.
+
+    ["I", hint, expr] -> ["sc", value] semantics are NOT applied here; symint
+    entries evaluate to ["sym", value] (int input to forward). Tensor
+    entries get every shape/stride expr evaluated. Static entries pass
+    through unchanged.
+    """
+    if not is_symbolic_entry(entry):
+        return entry
+    if entry[0] == "I":
+        hint = entry[1]
+        expr = entry[2] if len(entry) > 2 else None
+        return ["sym", _eval_dim(expr, bindings) if expr is not None else hint]
+    if entry[0] == "S":
+        # lifted shape param with symbolic dims: evaluate each slot
+        return ["S", [_eval_dim(d, bindings) for d in entry[1]]]
+    shape = [_eval_dim(d, bindings) for d in entry[0]]
+    out = [shape, entry[1]]
+    opts = dict(entry[2]) if len(entry) > 2 else {}
+    if "st" in opts:
+        opts["st"] = [_eval_dim(s, bindings) for s in opts["st"]]
+    if opts:
+        out.append(opts)
+    return out
+
+
+def instantiate_point(point: dict, symbols: dict,
+                      bindings: dict | None = None,
+                      guards: list | None = None) -> list:
+    """Materialize a (possibly dynamic) point's entries at a binding.
+
+    bindings=None -> the point's own recorded bindings, else the symbol
+    hints (the static snapshot — default behavior matches static corpus).
+    Returns fully static compact entries ready for spec_from_compact.
+    """
+    eff = dict(point.get("bindings") or
+               {k: v.get("hint") for k, v in (symbols or {}).items()})
+    if bindings:
+        eff.update(bindings)
+    if eff:
+        validate_bindings(symbols or {}, eff, guards)
+    return [evaluate_symbolic_entry(e, eff) for e in point.get("inputs", [])]

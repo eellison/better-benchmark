@@ -1206,3 +1206,61 @@ def test_oracle_impl_point_registration():
         finally:
             sys.modules.pop(modname, None)
             reset_oracle_registry(modname)
+
+
+# ============================================================================
+# 14. Dynamic shapes: symbolic entries, bindings, guards (wave 2 format)
+# ============================================================================
+
+def test_symbolic_entry_instantiation():
+    """Symbolic dims/strides evaluate under bindings; coupled dims stay
+    consistent by construction (one binding evaluates every expr)."""
+    from input_codec import instantiate_point, is_symbolic_entry
+
+    symbols = {"s16": {"hint": 16, "range": [2, None]},
+               "s82": {"hint": 16, "range": [2, None]}}
+    point = {"bindings": {"s16": 16, "s82": 16},
+             "inputs": [
+                 [[64, 64, "s16", "s82"], "f32",
+                  {"st": ["64*s16*s82", "s16*s82", "s82", 1]}],
+                 ["I", 256, "s16*s82"],
+             ]}
+    assert is_symbolic_entry(point["inputs"][0])
+    assert is_symbolic_entry(point["inputs"][1])
+
+    at_hint = instantiate_point(point, symbols)
+    assert at_hint[0][0] == [64, 64, 16, 16]
+    assert at_hint[0][2]["st"] == [16384, 256, 16, 1]
+    assert at_hint[1] == ["sym", 256]
+
+    rebound = instantiate_point(point, symbols,
+                                bindings={"s16": 24, "s82": 24})
+    assert rebound[0][0] == [64, 64, 24, 24]
+    assert rebound[0][2]["st"] == [36864, 576, 24, 1]
+    assert rebound[1] == ["sym", 576]  # coupled: s16*s82 re-evaluated
+
+
+def test_symbolic_bindings_validation():
+    """Range and guard violations are LOUD (never bench impossible shapes);
+    static entries pass through instantiation unchanged."""
+    import pytest
+    from input_codec import (instantiate_point, validate_bindings,
+                             is_symbolic_entry)
+
+    symbols = {"s0": {"hint": 8, "range": [2, 64]}}
+    point = {"inputs": [[["s0", 128], "bf16"]]}
+
+    with pytest.raises(ValueError, match="below range"):
+        instantiate_point(point, symbols, bindings={"s0": 1})
+    with pytest.raises(ValueError, match="above range"):
+        instantiate_point(point, symbols, bindings={"s0": 128})
+    with pytest.raises(ValueError, match="unknown symbol"):
+        validate_bindings(symbols, {"s9": 4})
+    with pytest.raises(ValueError, match="violates guard"):
+        validate_bindings(symbols, {"s0": 6}, guards=["Eq(Mod(s0, 4), 0)"])
+    validate_bindings(symbols, {"s0": 8}, guards=["Eq(Mod(s0, 4), 0)"])
+
+    static = [[64, 64], "bf16"]
+    assert not is_symbolic_entry(static)
+    out = instantiate_point({"inputs": [static]}, symbols, bindings={"s0": 4})
+    assert out == [static]
