@@ -7,15 +7,15 @@ Updated: 2026-06-12
 - Row 147 `pointwise_000209e1748d`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 148 `pointwise_09973679af31`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 124 `var_mean_88858c55c3b4`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 125 `pointwise_182f6f9450b9`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 150 `pointwise_2c1752cb59b4`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 149 `pointwise_25cec8e73161`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155; rows 150-155 remain idle buffer. Rows 126-140 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155; rows 151-155 remain idle buffer. Rows 126-140 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
-- Row 123 `sum_sum_cd8694c00507`: worker checks passed; fallback bench was `19GOOD`.
+- Row 125 `pointwise_182f6f9450b9`: worker checks passed; fallback bench was `9GOOD_1AT_FLOOR`.
 
 ## Pushed By This Session
 
@@ -40,6 +40,7 @@ Refill buffer owned by this session: rows 141-155; rows 150-155 remain idle buff
 - Row 115 `sum_e529e567d636`: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`.
 - Row 121 `sum_sum_sum_e7781939b0a2`: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`.
 - Row 122 `pointwise_88bffcefddc4`: marked `needs_work`; 19/19 checks pass but locked bench fails the FP64 numerics gate with NaN errors for every point and emits no timings.
+- Row 123 `sum_sum_cd8694c00507`: measured, 19/19 checks, H100 fallback bench `19GOOD`.
 - Row 141 `pointwise_435f6504efa7`: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`.
 - Row 142 `sum_623a84402e27`: measured, 2/2 checks, H100 fallback bench `2GOOD`.
 - Row 143 `sum_sum_sum_00516eacb000`: measured, 2/2 checks, H100 fallback bench `1GOOD_1BAD_ORACLE`.
