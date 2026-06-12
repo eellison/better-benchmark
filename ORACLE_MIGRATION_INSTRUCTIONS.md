@@ -284,12 +284,33 @@ beyond ownership/branch boilerplate:
     INDUCTOR_GPU_BENCH_LOCK=1 python -m oracle_harness repros_v2/canonical/<id> --bench
 
 (The shared runner replaces the old per-file `--check/--bench` CLI; slim
-oracles have no main().) If --bench prints ANY CUDAGraph warning the
-measurement is INVALID — report it as invalid, never accept the number.
+oracles have no main().)
+
+**Mechanically enforced gates (as of 2026-06-12):** The runner now
+enforces three rules that previously relied on agent self-certification:
+
+1. **Check-before-bench**: `--bench` runs the numerics check first and
+   reports `UNVERIFIED_NUMERICS` (no timing numbers) for any point whose
+   check fails. Use `--bench-unchecked` only as an explicit escape hatch.
+2. **CUDAGraph warning invalidation**: Any warning mentioning
+   CUDAGraph/graph capture/stream during CUDAGraph capture sets
+   `INVALID_CUDAGRAPH_WARNING` — agents no longer need to eyeball
+   warning output.
+3. **FP64-anchored numerics gate**: After compilation but before timing,
+   the runner compares oracle and compiled outputs against an fp64 eager
+   reference. If the oracle is meaningfully less accurate than compiled
+   (i.e. a formulation substitution like fast exp / exp2-softmax), the
+   bench reports `NUMERICS_WORSE_THAN_COMPILED` with per-output error
+   details — no valid floor number is emitted.
+
+The runner exits nonzero if ANY point has a failing check,
+UNVERIFIED_NUMERICS, INVALID_CUDAGRAPH_WARNING, or
+NUMERICS_WORSE_THAN_COMPILED status.
+
 A subagent's final report must list: changed file path, classification,
-PASS/FAIL per check, bench numbers/status per point, CUDAGraph warning
-status, and a short numeric audit (which lowerings were chosen for
-exp/tanh/sigmoid-class ops and why they match the repro).
+PASS/FAIL per check, bench numbers/status per point, and a short numeric
+audit (which lowerings were chosen for exp/tanh/sigmoid-class ops and why
+they match the repro).
 
 ## Claim protocol (same flow as the June queue)
 
