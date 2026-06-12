@@ -54,11 +54,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 53,sum_sum_sum_4a1fb62e29b0,4a1fb62e29b0,reduction,reduction_general,4,8,72,,claimed,codex,claimed_2026-06-12_batch_46-55_refill_queue
 54,sum_sum_sum_5fbbe8587abc,5fbbe8587abc,reduction,reduction_general,1,1,72,,claimed,codex,claimed_2026-06-12_batch_46-55_refill_queue
 55,pointwise_1df91f562302,1df91f562302,pointwise,layout_indexing_stencil_fusion,12,2,70,pointwise_59d71b256016,claimed,codex,claimed_2026-06-12_batch_46-55_refill_queue
-56,sum_76fb9946e296,76fb9946e296,reduction,reduction_general,6,9,70,~sum_bd2fed913c26,unclaimed,,
-57,sum_f3f44f50fa4d,f3f44f50fa4d,reduction,multi_output_reduction_templates,6,9,70,~sum_196d0dc5c868,unclaimed,,
-58,pointwise_9595e73ff43b,9595e73ff43b,pointwise,layout_indexing_stencil_fusion,22,4,68,~pointwise_3bd84c5c45de,unclaimed,,
-59,sum_sum_0bad56ceb78f,0bad56ceb78f,reduction,reduction_general,22,4,68,,unclaimed,,
-60,sum_sum_183b124c731f,183b124c731f,reduction,reduction_general,45,17,68,,unclaimed,,
+56,sum_76fb9946e296,76fb9946e296,reduction,reduction_general,6,9,70,~sum_bd2fed913c26,claimed,Codex,claimed_2026-06-12_batch_56-60_topdown
+57,sum_f3f44f50fa4d,f3f44f50fa4d,reduction,multi_output_reduction_templates,6,9,70,~sum_196d0dc5c868,claimed,Codex,claimed_2026-06-12_batch_56-60_topdown
+58,pointwise_9595e73ff43b,9595e73ff43b,pointwise,layout_indexing_stencil_fusion,22,4,68,~pointwise_3bd84c5c45de,claimed,Codex,claimed_2026-06-12_batch_56-60_topdown
+59,sum_sum_0bad56ceb78f,0bad56ceb78f,reduction,reduction_general,22,4,68,,claimed,Codex,claimed_2026-06-12_batch_56-60_topdown
+60,sum_sum_183b124c731f,183b124c731f,reduction,reduction_general,45,17,68,,claimed,Codex,claimed_2026-06-12_batch_56-60_topdown
 61,var_mean_2e254a2827d8,2e254a2827d8,reduction,reduction_var_mean,22,4,68,,unclaimed,,
 62,var_mean_3a2d56cdea00,3a2d56cdea00,reduction,norm_template_canonicalization,3,6,66,var_mean_d22940b03b5c;var_mean_d8fae237d769,unclaimed,,
 63,pointwise_b89a1eb0b38d,b89a1eb0b38d,pointwise,unclassified_priority_gap,3,4,64,pointwise_17542057506f;pointwise_2babaf917a12;pointwise_b51064ab890f,unclaimed,,
