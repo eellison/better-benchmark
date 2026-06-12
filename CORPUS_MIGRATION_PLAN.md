@@ -391,6 +391,22 @@ maintain, can't mis-lift int[] dims/permute args) — swappable inside
   a third row — compile vs Σ(kernel oracles) vs model oracle — whose
   spread MEASURES the cross-kernel opportunity. Not until the migrated
   corpus + kernel floors + accounting are trustworthy.
+- **LLM training-graph capture (filed 2026-06-12, HIGH VALUE — wave 2 or
+  sooner)**: the 7 modern HF generation benchmarks (Llama-3.2, gemma-2/3,
+  Qwen3, Mistral-7B, whisper-tiny, gpt-oss-20b) are inference-only in the
+  upstream suite BY DECLARATION (ci_expected_accuracy training CSVs mark
+  them `eager_fail_to_run` — their inputs carry no labels; runner
+  loss=pred[0]=logits, backward structurally unsupported). Wave 1 captures
+  their inference graphs and policy-skips train with this reason recorded.
+  BUT these are the most modern models in the suite, and their TRAINING
+  graphs (attention backward, vocab-size cross-entropy backward, RMSNorm
+  backward at real LLM dims) are among the most valuable patterns the
+  corpus could hold. The extension is small: for HF_LLM_MODELS in train
+  mode, construct loss args ourselves (labels=input_ids — HF models
+  compute their own LM loss when labels are present) and capture; mark
+  provenance as our-construction (not upstream-blessed) so benchmark
+  comparisons stay honest. Do when wave-2 planning lands, or earlier if
+  LLM backward patterns become the accounting's coverage gap.
 - **Custom generation constructors for op-specific input semantics
   (established 2026-06-11, extend as needed)**: when an op's inputs have
   validity constraints beyond a value range, the generation spec language
