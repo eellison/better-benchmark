@@ -21,7 +21,6 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 194 `var_mean_var_mean_5cc92f5d49c1`: worker checks passed; fallback bench was `23GOOD`.
 - Row 203 `pointwise_c911fb4f9b47`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 20 points.
 - Row 207 `sum_sum_sum_fb3a1658dadb`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 20 points.
-- Row 234 `var_mean_0ada225c0a04`: worker checks passed; fallback bench was `11GOOD_2AT_FLOOR`.
 
 ## Pushed By This Session
 
@@ -95,6 +94,7 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 230 `sum_sum_4df091034d07`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 231 `sum_sum_c91da8ecf163`: measured, 10/10 checks, H100 fallback bench `9GOOD_1BAD_ORACLE`.
 - Row 233 `sum_sum_sum_951d09ecbec1`: measured, 3/3 checks, H100 fallback bench `2GOOD_1BAD_ORACLE`.
+- Row 234 `var_mean_0ada225c0a04`: measured, 13/13 checks, H100 fallback bench `11GOOD_2AT_FLOOR`.
 - Row 235 `var_mean_547bcc63004b`: measured, 3/3 checks, H100 fallback bench `2GOOD_1BAD_ORACLE`.
 - Row 236 `var_mean_eb058371f885`: measured, 4/4 checks, H100 fallback bench `3GOOD_1AT_FLOOR`.
 - Row 237 `sum_2f173ee403d1`: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`.
