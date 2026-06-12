@@ -74,11 +74,20 @@ registry is enumerated by walking `canonical/*/oracle.py`). If a pattern
 genuinely needs multiple alternative implementations, `oracle_<variant>.py`
 additionally, but `oracle.py` is the registered floor.
 
-Registration: `@oracle_impl(hardware="B200", point="<shape_hash>")` per
-shapes.json point the oracle covers (dispatch is by (pattern_hash,
-shape_hash) — the hash registration decision). Multi-point patterns:
-either one kernel covering all points (preferred when configs allow) or
-per-point registrations.
+Registration (SETTLED 2026-06-12, landed in oracle_harness):
+`@oracle_impl(hardware="B200", point="<shape_hash>")` — the shape_hash is
+THE key. It resolves against the SIBLING shapes.json at import time: an
+unknown/stale hash raises immediately (never a silent dispatch miss).
+Quote the human-readable signature in a comment above the decorator if
+helpful; it is documentation, never parsed. Multi-point patterns: one
+registration per point (one kernel body registered N times with per-point
+configs), or shapes=None/point=None for a genuinely shape-general kernel.
+Example:
+
+    @oracle_impl(hardware="B200", point="6d28ca52",
+                 BLOCK=2048, num_warps=8)
+    # (T([512], bf16), T([128,512,7,7], bf16, stride=(25088,1,3584,512)))
+    def oracle_forward(inputs, *, BLOCK, num_warps): ...
 
 ## Inputs: structured, never parsed
 

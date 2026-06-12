@@ -1160,3 +1160,49 @@ def test_perm_detection_resolves_lifted_alloc_and_iota():
         info2 = placeholder_info_from_gm(gm2)
         perms2 = infer_permutation_indices_from_gm(gm2, info2)
         assert 4000 in perms2.values(), (perms2, params)
+
+
+def test_oracle_impl_point_registration():
+    """Hash-keyed oracle registration (settled: hash as key, zero parsing):
+    point=<shape_hash> resolves input shapes from the SIBLING shapes.json
+    at registration time; an unknown hash fails at import, not silently
+    at dispatch."""
+    import json, sys, tempfile, types
+    from pathlib import Path
+    from oracle_harness import (oracle_impl, OracleDispatchError,
+                                reset_oracle_registry, get_module_registry)
+
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.json").write_text(json.dumps({"points": [{
+            "shape_hash": "aabb1122",
+            "models": {"timm/infer/x": {"occurrences": 1}},
+            "inputs": [[[128, 512], "bf16"], [["S", [128, 512]][0], [128, 512]]],
+        }]}))
+        # build a module whose __file__ sits in the dir (like oracle.py)
+        modname = "_test_oracle_point_mod"
+        mod = types.ModuleType(modname)
+        mod.__file__ = str(d / "oracle.py")
+        sys.modules[modname] = mod
+        try:
+            def fwd(inputs):
+                return inputs
+
+            fwd.__module__ = modname
+
+            reset_oracle_registry(modname)
+            oracle_impl(hardware="B200", point="aabb1122")(fwd)
+            reg = get_module_registry(modname)
+            assert reg is not None and reg._entries
+            assert reg._entries[-1]["point"] == "aabb1122"
+            assert reg._entries[-1]["shape"] == ((128, 512),)
+
+            # unknown hash: loud failure at registration
+            try:
+                oracle_impl(point="deadbeef")(fwd)
+                raise AssertionError("unknown point hash did not raise")
+            except OracleDispatchError as e:
+                assert "deadbeef" in str(e)
+        finally:
+            sys.modules.pop(modname, None)
+            reset_oracle_registry(modname)

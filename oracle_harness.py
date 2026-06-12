@@ -460,13 +460,23 @@ def parse_shapes_signature(shapes, *, with_dtypes=False):
     return shape_tuples
 
 
-def oracle_impl(hardware=None, shapes=None, description=None, **kwargs):
+def oracle_impl(hardware=None, shapes=None, point=None, description=None,
+                **kwargs):
     """Register an oracle implementation: one line declaring what it was
     written for.
 
     Args:
         hardware: GPU kind the impl was tuned on ("H100", "B200", ...).
             None = no hardware constraint.
+        point: shape_hash (8-hex) of the shapes.json point this impl covers
+            — THE registration key for new-corpus oracles (settled
+            2026-06-12: hash as key, zero parsing; the human-readable
+            signature lives in shapes.json and may be quoted in a comment).
+            Resolved against the sibling shapes.json at registration time:
+            an unknown hash raises immediately (stale/typo'd registrations
+            fail at import, not silently at dispatch). Mutually exclusive
+            with shapes=. shapes=None AND point=None still means
+            shape-general.
         shapes: FULL input signature the impl was written for, as the
             T()/S() string from the repro's `_shapes_config` (copy it
             verbatim), or a pre-parsed tuple of shape tuples.
@@ -486,17 +496,50 @@ def oracle_impl(hardware=None, shapes=None, description=None, **kwargs):
 
     Returns the function unchanged, so one body can be registered N times.
     """
+    if point is not None and shapes is not None:
+        raise ValueError("oracle_impl: pass point= (hash) or shapes=, not both")
+
     parsed, dtypes = parse_shapes_signature(shapes, with_dtypes=True)
 
     def decorator(fn):
         reg = _module_registries.setdefault(fn.__module__, OracleRegistry())
         entry_shapes = parsed if parsed is None else tuple(parsed)
+        if point is not None:
+            # Hash-keyed registration: resolve the point's input shapes
+            # from the SIBLING shapes.json (the oracle file lives in the
+            # canonical dir). Loud failure on unknown hash.
+            import inspect
+            import json as _json
+            from pathlib import Path as _Path
+
+            mod_file = inspect.getmodule(fn)
+            fpath = _Path(getattr(mod_file, "__file__", None)
+                          or inspect.getfile(fn))
+            shapes_path = fpath.parent / "shapes.json"
+            if not shapes_path.exists():
+                raise OracleDispatchError(
+                    f"oracle_impl(point={point!r}): no shapes.json next to "
+                    f"{fpath} — hash-keyed registration requires the oracle "
+                    f"to live in its canonical repro dir")
+            data = _json.loads(shapes_path.read_text())
+            match = next((p for p in data.get("points", [])
+                          if p.get("shape_hash") == point), None)
+            if match is None:
+                known = [p.get("shape_hash") for p in data.get("points", [])]
+                raise OracleDispatchError(
+                    f"oracle_impl(point={point!r}): hash not in "
+                    f"{shapes_path} (known: {known[:8]}{'...' if len(known) > 8 else ''})")
+            from input_codec import spec_from_compact
+            specs = [spec_from_compact(e) for e in match.get("inputs", [])]
+            entry_shapes = tuple(
+                tuple(s["shape"]) for s in specs if s.get("kind") == "tensor")
         dec = reg.register(hardware=hardware,
                            shape=entry_shapes,
                            configs=kwargs or None,
                            description=description)
         dec(fn)
         reg._entries[-1]["dtypes"] = dtypes
+        reg._entries[-1]["point"] = point
         return fn
     return decorator
 
