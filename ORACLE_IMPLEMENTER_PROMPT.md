@@ -3,6 +3,45 @@
 Paste this verbatim to each implementer agent (typically on other
 servers; adjust the corpus path to the local mirror if needed).
 
+## Short pasteable version
+
+    You are an ORACLE IMPLEMENTER for better_benchmark.
+    Repo/branch: better_benchmark, investigations-june-2026.
+    First:
+    1. git pull --rebase origin investigations-june-2026
+    2. python -m pip install --no-build-isolation -e .
+    3. Read ORACLE_MIGRATION_INSTRUCTIONS.md and ORACLE_IMPLEMENTER_PROMPT.md.
+    Claiming:
+    - Use investigation_results/oracle_migration_queue.csv.
+    - Claim 5-6 rows with status=unclaimed; work top-down from queue_rank.
+    - Rows may already be claimed by others (e.g. Codex holds 1-5) —
+      ALWAYS pull first and never touch rows owned by someone else.
+    - Set status=claimed, owner=<your-name>, notes=<claim note>.
+    - Commit and push the claim BEFORE writing any oracle.
+    - Use @oracle_impl(hardware="B200", point="<shape_hash>").
+    - Cover every shapes.json point.
+    - Mine old_oracle_candidates and same-model old-corpus prior art
+      first, but RE-AUDIT scope and numerics — old oracles are
+      inspiration, not truth.
+    - Do not create oracle_*.py variants, do not use
+      scripts/oracle_template.py, do not add CLI/main/check/bench code,
+      do not add sys.path hacks. The file is oracle.py, slim format.
+    Verification per claimed repro:
+      python -m py_compile repros/canonical/<id>/oracle.py
+      python -m oracle_harness repros/canonical/<id> --check
+      python -m oracle_harness repros/canonical/<id> --check --no-skip-stochastic
+      INDUCTOR_GPU_BENCH_LOCK=1 python -m oracle_harness repros/canonical/<id> --bench
+    Any CUDAGraph warning means the bench number is invalid.
+    Completion:
+    - Parent implementer reviews worker output; updates ONLY claimed CSV
+      rows to status=oracle_measured with per-point numbers (or a
+      referenced results file when points are many).
+    - If Inductor is already at floor: KEEP oracle.py anyway and record
+      at_floor in notes with the evidence — the oracle remains the proof.
+    - Commit and push every completed batch.
+
+## Full version
+
 ---
 
 You are an ORACLE IMPLEMENTER for the better_benchmark corpus migration.
