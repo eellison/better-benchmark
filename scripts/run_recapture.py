@@ -277,6 +277,17 @@ def _is_distributed_error(error_str: str) -> bool:
     return False
 
 
+# Upstream HF_LLM generation benchmarks: inference-only BY DESIGN (their
+# inputs carry no labels; the runner's compute_loss = pred[0] = logits, so
+# train-mode backward is structurally unsupported upstream). Skip train
+# with a recorded reason instead of failing.
+HF_INFERENCE_ONLY = {
+    "meta-llama/Llama-3.2-1B", "google/gemma-2-2b", "google/gemma-3-4b-it",
+    "openai/whisper-tiny", "Qwen/Qwen3-0.6B",
+    "mistralai/Mistral-7B-Instruct-v0.3", "openai/gpt-oss-20b",
+}
+
+
 def capture_single_model(
     suite: str,
     model_name: str,
@@ -315,6 +326,14 @@ def capture_single_model(
     if model_name in KNOWN_DISTRIBUTED_MODELS:
         entry["status"] = "skipped"
         entry["error_tail"] = f"Known distributed model: {model_name}"
+        entry["wall_time_s"] = time.time() - t0
+        return entry
+
+    if mode == "train" and model_name in HF_INFERENCE_ONLY:
+        entry["status"] = "skipped"
+        entry["error_tail"] = (
+            "Upstream HF_LLM generation benchmark: inference-only by design "
+            "(no labels; runner loss=pred[0]=logits, backward unsupported)")
         entry["wall_time_s"] = time.time() - t0
         return entry
 
@@ -558,14 +577,20 @@ def _load_via_upstream_runner(runner_cls, model_name: str, batch_size: int,
     _, _, model, example_inputs, _ = runner.load_model(
         "cuda", model_name, batch_size)
 
+    # Honor the runner's own fp32-only list (GoogleFnet: FFT mixing has no
+    # bf16 kernel — fft_fftn raises 'Unsupported dtype BFloat16'). Those
+    # models capture in fp32; everything else gets the bf16 policy.
+    fp32_only = model_name in getattr(runner, "fp32_only_models", set())
+
     if mode == "train":
         model.train()
     else:
         model.eval()
-        model = model.to(dtype=torch.bfloat16)
-        example_inputs = _bf16_inputs(example_inputs)
+        if not fp32_only:
+            model = model.to(dtype=torch.bfloat16)
+            example_inputs = _bf16_inputs(example_inputs)
 
-    return model, example_inputs
+    return model, example_inputs, fp32_only
 
 
 def _load_timm(model_name: str, batch_size: int, mode: str):
@@ -573,9 +598,10 @@ def _load_timm(model_name: str, batch_size: int, mode: str):
     sys.path.insert(0, str(PYTORCH_DYNAMO_DIR))
     from timm_models import TimmRunner
 
-    return _load_via_upstream_runner(
+    model, inputs, _ = _load_via_upstream_runner(
         TimmRunner, model_name, batch_size, mode,
         extra_flags=["--channels-last"])
+    return model, inputs
 
 
 def _load_hf(model_name: str, batch_size: int, mode: str):
@@ -583,8 +609,11 @@ def _load_hf(model_name: str, batch_size: int, mode: str):
     sys.path.insert(0, str(PYTORCH_DYNAMO_DIR))
     from huggingface import HuggingfaceRunner
 
-    return _load_via_upstream_runner(
+    model, inputs, fp32_only = _load_via_upstream_runner(
         HuggingfaceRunner, model_name, batch_size, mode)
+    if fp32_only:
+        print(f"  [dtype] {model_name}: fp32-only per upstream runner list")
+    return model, inputs
 
 
 def _load_torchbench(model_name: str, batch_size: int, mode: str):
@@ -600,8 +629,9 @@ def _load_torchbench(model_name: str, batch_size: int, mode: str):
         sys.path.insert(0, str(PYTORCH_DYNAMO_DIR))
         from torchbench import TorchBenchmarkRunner
 
-        return _load_via_upstream_runner(
+        model, inputs, _ = _load_via_upstream_runner(
             TorchBenchmarkRunner, model_name, batch_size, mode)
+        return model, inputs
     finally:
         os.chdir(original_dir)
 
