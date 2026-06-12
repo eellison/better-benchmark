@@ -166,8 +166,8 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 165,pointwise_d13382187963,d13382187963,pointwise,unclassified_priority_gap,1,2,24,pointwise_f5a70a963d42,claimed,codex,claimed 2026-06-12 by codex
 166,pointwise_d17fec3a0be5,d17fec3a0be5,pointwise,unclassified_priority_gap,1,1,24,~pointwise_a020dfe84962;~pointwise_fed52737c4f6,claimed,codex,claimed 2026-06-12 by codex
 167,pointwise_ed86b04d7ae6,ed86b04d7ae6,pointwise,unclassified_priority_gap,4,1,24,~pointwise_035529d03c14;~pointwise_0f6eed42fa2c;~pointwise_af2e722aed5d,claimed,Codex,claimed_2026-06-12_batch_167-171_topdown
-168,pointwise_fb9acc3ed8b0,fb9acc3ed8b0,pointwise,unclassified_priority_gap,1,1,24,~pointwise_187bbcc9d7ba,claimed,Codex,claimed_2026-06-12_batch_167-171_topdown
-169,sum_24541cd0c55b,24541cd0c55b,reduction,reduction_general,1,1,24,,claimed,Codex,claimed_2026-06-12_batch_167-171_topdown
+168,pointwise_fb9acc3ed8b0,fb9acc3ed8b0,pointwise,unclassified_priority_gap,1,1,24,~pointwise_187bbcc9d7ba,needs_work,Codex,needs_work: checks_pass_1of1_h100_fallback_bench_BAD_ORACLE_oracle_17.12us_compile_15.01us_no_cudagraph_warnings_class_NEW_PATTERN_needs_retune
+169,sum_24541cd0c55b,24541cd0c55b,reduction,reduction_general,1,1,24,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_h100_fallback_bench_no_warnings_1AT_FLOOR_class_SCHEDULER_FUSION_needs_B200_verify
 170,sum_35b8acdece58,35b8acdece58,reduction,multi_output_reduction_templates,2,3,24,~sum_1fb7f13c05d1,claimed,Codex,claimed_2026-06-12_batch_167-171_topdown
 171,sum_a72724ce25f0,a72724ce25f0,reduction,multi_output_reduction_templates,8,4,24,~sum_5688d5156d97,claimed,Codex,claimed_2026-06-12_batch_167-171_topdown
 172,sum_abcd9bccce7d,abcd9bccce7d,reduction,multi_output_reduction_templates,8,13,24,~sum_2b63837952dc;~sum_34445852895e;~sum_acbec27412d2,claimed,codex,claimed_2026-06-12_batch_172-181_refill_queue
