@@ -71,6 +71,13 @@ def load_shape_configs(repro_file: str, symbol_bindings: dict | None = None) -> 
     # Fallback: shapes.txt for existing corpus
     shapes_txt = repro_dir / "shapes.txt"
     if shapes_txt.exists():
+        if symbol_bindings:
+            # shapes.txt has no symbols table — silently ignoring the
+            # caller's bindings would bench the WRONG point.
+            raise ValueError(
+                f"symbol_bindings={symbol_bindings} given but {repro_dir} "
+                "has only shapes.txt (no symbols table); bindings require "
+                "a shapes.json with symbolic entries")
         return _parse_shapes_txt(shapes_txt)
 
     return {}
@@ -544,6 +551,27 @@ def make_inputs_from_config(config: dict) -> list:
     return result
 
 
+def _merge_default_shape_params(inputs: list, default_inputs: list) -> list:
+    """Fill shape params (plain lists/ints) from default inputs when a shape
+    config carries only tensors but forward() also expects lifted params."""
+    if len(inputs) >= len(default_inputs):
+        return inputs
+    merged = []
+    config_idx = 0
+    for di in default_inputs:
+        if isinstance(di, (list, int)) and not isinstance(di, torch.Tensor):
+            # Shape param or scalar — take from default
+            merged.append(di)
+        else:
+            # Tensor — take from config if available
+            if config_idx < len(inputs):
+                merged.append(inputs[config_idx])
+                config_idx += 1
+            else:
+                merged.append(di)
+    return merged
+
+
 def _randn_with_bool(old_randn):
     """Wrapper around torch.randn that handles bool dtype (legacy repro compat)."""
     def randn(*args, **kwargs):
@@ -584,14 +612,19 @@ def count_bytes_adjusted(mod, inputs) -> int:
     return count_bytes_effective(mod, inputs)
 
 
-def count_kernels(mod, inputs) -> tuple[int, list[str]]:
-    """Compile and count how many Triton kernels Inductor generates."""
+def count_kernels(mod, inputs, dynamic: bool = False) -> tuple[int, list[str]]:
+    """Compile and count how many Triton kernels Inductor generates.
+
+    dynamic=True counts kernels of the dynamic-shapes compilation (the
+    artifact --dynamic benchmarks) instead of the static one. NOTE: this
+    resets dynamo — never call it while a compile-once artifact is live.
+    """
     from torch._inductor.utils import fresh_inductor_cache
     from torch._inductor.codecache import cache_dir
 
     torch._dynamo.reset()
     with fresh_inductor_cache():
-        compiled = torch.compile(mod)
+        compiled = torch.compile(mod, dynamic=True) if dynamic else torch.compile(mod)
         with torch.no_grad():
             compiled(*inputs)
             torch.cuda.synchronize()
@@ -653,6 +686,133 @@ def _detect_hardware() -> str:
         return "unknown"
 
 
+def _bench_cudagraph_min_us(call_fn, inputs, n_warmup: int, n_rep: int) -> float:
+    """Warm up, capture one CUDAGraph of call_fn(*inputs), and time replay.
+
+    This is THE timing methodology for repros (3 warmup calls, CUDAGraph
+    capture, do_bench return_mode='min') — both the static path and the
+    --dynamic path go through here so their numbers are comparable.
+    """
+    from triton.testing import do_bench
+
+    with torch.no_grad():
+        for _ in range(3):
+            call_fn(*inputs)
+        torch.cuda.synchronize()
+        g = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(g):
+            call_fn(*inputs)
+        torch.cuda.synchronize()
+    ms = do_bench(lambda: g.replay(), warmup=n_warmup, rep=n_rep,
+                  return_mode="min")
+    return ms * 1000
+
+
+def _unique_graph_count() -> int:
+    """Cumulative count of graphs dynamo has compiled (survives reset —
+    deltas of this counter detect recompiles between measurements)."""
+    from torch._dynamo.utils import counters
+
+    return int(counters["stats"]["unique_graphs"])
+
+
+def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
+    """--bind / --dynamic benchmarking path.
+
+    Rows are (config label x binding x mode). Static mode compiles per
+    binding (each point is its own specialized artifact). Dynamic mode
+    compiles ONCE with torch.compile(dynamic=True) and measures the same
+    artifact at every binding — the point: the dynamic kernel's perf
+    across family points. Recompiles between dynamic points are detected
+    via dynamo's unique_graphs counter and recorded per row.
+    """
+    bindings_list = parse_bind_args(parsed.bind)
+    mode = "dynamic" if parsed.dynamic else "static"
+    rows = resolve_bound_configs(repro_file, bindings_list,
+                                 shape=parsed.shape)
+
+    def _inputs_for(binding, cfg):
+        inputs = make_inputs_from_config(cfg)
+        if binding is None:
+            # hint point: legacy shape-param merge applies (configs that
+            # predate S-entries lack lifted params; defaults ARE the hint)
+            inputs = _merge_default_shape_params(
+                inputs, make_inputs_safely(make_inputs_fn))
+        return inputs
+
+    all_results = {}
+    compiled = None  # dynamic mode: ONE artifact across all rows
+    if mode == "dynamic":
+        # Kernel counting recompiles (and resets dynamo), so do it BEFORE
+        # the compile-once artifact exists. The dynamic compilation's
+        # kernel set is binding-independent — count at the first row.
+        _first_label, first_binding, first_cfg = rows[0]
+        n_kernels, kernel_names = count_kernels(
+            repro_cls(), _inputs_for(first_binding, first_cfg), dynamic=True)
+        torch._dynamo.reset()
+        compiled = torch.compile(repro_cls(), dynamic=True)
+
+    for label, binding, cfg in rows:
+        binding_str = format_binding(binding)
+        row_key = f"{label}::{binding_str}::{mode}"
+        inputs = _inputs_for(binding, cfg)
+
+        mod = repro_cls()
+        with torch.no_grad():
+            mod(*inputs)  # eager validation: bad configs fail LOUD here
+
+        graphs_before = _unique_graph_count()
+        if mode == "static":
+            n_kernels, kernel_names = count_kernels(mod, inputs)
+            torch._dynamo.reset()
+            compiled_static = torch.compile(mod)
+            compiled_us = _bench_cudagraph_min_us(
+                compiled_static, inputs, parsed.n_warmup, parsed.n_rep)
+            recompiled = None  # fresh compile per row by design
+        else:
+            compiled_us = _bench_cudagraph_min_us(
+                compiled, inputs, parsed.n_warmup, parsed.n_rep)
+            graphs_after = _unique_graph_count()
+            is_first_row = not any(
+                r.get("mode") == "dynamic" for r in all_results.values())
+            # First dynamic row pays the one compile; later rows must
+            # reuse the artifact — any new graph is a recompile.
+            recompiled = (graphs_after > graphs_before) and not is_first_row
+            if recompiled:
+                print(f"[{row_key}] WARNING: dynamic artifact recompiled "
+                      f"at this binding (unique_graphs "
+                      f"{graphs_before} -> {graphs_after})")
+
+        print(f"[{row_key}] binding={binding_str} mode={mode} "
+              f"time={compiled_us:8.1f} us kernels={n_kernels}"
+              + (" RECOMPILED" if recompiled else ""))
+
+        all_results[row_key] = {
+            "label": label,
+            "binding": binding,
+            "mode": mode,
+            "compiled_us": compiled_us,
+            "n_kernels": n_kernels,
+            "kernel_names": kernel_names,
+            "recompiled": recompiled,
+        }
+
+    if parsed.output:
+        with open(parsed.output, "w") as f:
+            json.dump(all_results, f, indent=2)
+
+    if parsed.update_perf:
+        hardware = parsed.hardware or _detect_hardware()
+        for row_key, result in all_results.items():
+            perf_entry = {k: v for k, v in result.items()
+                          if k != "kernel_names"}
+            perf_entry["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+            _save_perf(repro_file, hardware, row_key, perf_entry)
+        print(f"\n[perf] Saved to perf.json under hardware={hardware}")
+
+    return all_results
+
+
 def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
     """Full benchmark entry point for canonical repros.
 
@@ -674,6 +834,20 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                         help="Write JSON results to file")
     parser.add_argument("--no-cd", action="store_true",
                         help="Skip coordinate descent tuning")
+    parser.add_argument("--bind", action="append", default=None,
+                        metavar="s16=24,s82=24",
+                        help="Symbol bindings for dynamic repros (shapes.json "
+                             "with a symbols table). Repeatable: each "
+                             "occurrence is one family point. Works with "
+                             "static compile (one compile per binding) or "
+                             "--dynamic (one compile, measured per binding).")
+    parser.add_argument("--dynamic", action="store_true",
+                        help="Compile with torch.compile(dynamic=True) and "
+                             "measure the SAME compiled artifact at every "
+                             "--bind point (CUDAGraph+do_bench min, same "
+                             "methodology as static). Rows record binding, "
+                             "mode, time; recompiles between points are "
+                             "detected and flagged.")
     parser.add_argument("--count-kernels-only", action="store_true",
                         help="Only count generated kernels, skip timing")
     parser.add_argument("--n-warmup", type=int, default=25)
@@ -687,6 +861,14 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
     parsed = parser.parse_args(args)
 
     def _run_benchmark():
+        if parsed.bind or parsed.dynamic:
+            # Family-point benchmarking: --bind instantiates symbolic
+            # points at explicit bindings; --dynamic measures one
+            # dynamic=True artifact across them. Separate path so the
+            # legacy flow below stays byte-identical when flags absent.
+            return _run_bound_benchmark(
+                repro_file, repro_cls, make_inputs_fn, parsed)
+
         configs = load_shape_configs(repro_file)
 
         if parsed.all_shapes and configs:

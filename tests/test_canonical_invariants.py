@@ -1291,3 +1291,84 @@ def test_oracle_compare_treats_matching_nans_as_equal():
         atol=0.0,
         rtol=0.0,
     )
+
+
+def test_bind_parsing_and_symbol_binding_threading():
+    """--bind parsing (repeatable, symbol=int) threads through
+    load_shape_configs as symbol_bindings and produces correctly-bound
+    configs — including the coupled S() shape param. CPU-only: configs are
+    specs, no tensor is materialized. (GPU half of this feature:
+    scripts/test_dynamic_bench.py, the §1.4 static-vs-dynamic experiment.)"""
+    import json, tempfile
+    import pytest
+    from pathlib import Path
+    from repro_harness import (format_binding, load_shape_configs,
+                               parse_bind_args, resolve_bound_configs)
+
+    # parsing: repeatable flags, whitespace, malformed entries are LOUD
+    assert parse_bind_args(None) == []
+    assert parse_bind_args(["s16=24,s82=24", " s16 = 16 "]) == [
+        {"s16": 24, "s82": 24}, {"s16": 16}]
+    with pytest.raises(ValueError, match="must be symbol=int"):
+        parse_bind_args(["s16"])
+    with pytest.raises(ValueError, match="must be an int"):
+        parse_bind_args(["s16=abc"])
+    with pytest.raises(ValueError, match="no bindings"):
+        parse_bind_args([","])
+    assert format_binding(None) == "hint"
+    assert format_binding({"s82": 24, "s16": 16}) == "s16=16,s82=24"
+
+    shapes = {
+        "symbols": {"s16": {"hint": 16, "range": [2, None]},
+                    "s82": {"hint": 16, "range": [2, None]}},
+        "points": [{
+            "shape_hash": "dynexp01",
+            "bindings": {"s16": 16, "s82": 16},
+            "models": {"torchbench/infer/opacus_like": {"occurrences": 1}},
+            "inputs": [
+                [[64, 64, "s16", "s82"], "f32"],
+                [[64], "f32"],
+                ["S", [64, 32, 2, "s16*s82"]],
+            ],
+        }],
+    }
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.json").write_text(json.dumps(shapes))
+        repro = str(d / "repro.py")
+        (d / "repro.py").write_text("# stub")
+
+        # binding threads through load_shape_configs -> instantiate_point
+        cfg = next(iter(load_shape_configs(
+            repro, symbol_bindings={"s16": 24, "s82": 24}).values()))
+        specs = cfg["inputs"]
+        assert specs[0]["shape"] == [64, 64, 24, 24]
+        assert specs[2]["dims"] == [64, 32, 2, 576]  # coupled s16*s82
+
+        # rows: one per (binding x config); binding=None = hint point
+        rows = resolve_bound_configs(repro, parse_bind_args(
+            ["s16=16,s82=16", "s16=24,s82=24"]))
+        assert [b for _, b, _ in rows] == [
+            {"s16": 16, "s82": 16}, {"s16": 24, "s82": 24}]
+        assert rows[0][2]["inputs"][0]["shape"] == [64, 64, 16, 16]
+        assert rows[1][2]["inputs"][0]["shape"] == [64, 64, 24, 24]
+        hint_rows = resolve_bound_configs(repro, [])
+        assert hint_rows[0][1] is None
+        assert hint_rows[0][2]["inputs"][0]["shape"] == [64, 64, 16, 16]
+
+        # range violations surface (not silently benched)
+        with pytest.raises(ValueError, match="below range"):
+            resolve_bound_configs(repro, [{"s16": 1, "s82": 16}])
+        # unknown --shape is loud
+        with pytest.raises(ValueError, match="not in configs"):
+            resolve_bound_configs(repro, [], shape="nope")
+
+    # shapes.txt-only repros cannot honor bindings: loud, not ignored
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.txt").write_text(
+            "lbl: (T([64, 64, 16, 16], f32),)\n")
+        (d / "repro.py").write_text("# stub")
+        with pytest.raises(ValueError, match="shapes.txt"):
+            load_shape_configs(str(d / "repro.py"),
+                               symbol_bindings={"s16": 24})
