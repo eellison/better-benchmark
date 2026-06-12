@@ -251,6 +251,25 @@ Per-point discipline:
 Allowed classifications ONLY: SCHEDULER_FUSION, SCATTER_REDUCE,
 COOPERATIVE_SPLIT_K, ALGEBRAIC_ELIMINATION, NEW_PATTERN.
 
+### Worker prompt requirements (what each subagent dispatch must say)
+
+When the parent dispatches a per-repro subagent, the prompt MUST include,
+beyond ownership/branch boilerplate:
+
+1. **This is a MIGRATION, not greenfield**: before designing a kernel,
+   look at the old corpus. Concretely: (a) the queue row's
+   old_oracle_candidates dirs (exact/near op-multiset matches — read
+   their oracle files and gap diagnoses first); (b) the SAME-MODEL prior
+   art: this pattern's shapes.json models keys -> the old corpus's
+   repros/models/<suite>/<mode>/<model>/manifest.json -> that model's old
+   pattern dirs -> their oracles. An old oracle for a similar partition
+   of the same model is usually the right starting kernel — port the
+   idea, retune for bf16, never copy boilerplate.
+2. **EVERY shape point**: the oracle must check_oracle-pass AND be
+   benched at every point in shapes.json — a pattern with 8 points means
+   8 validations and 8 floor numbers in the report. Correct-but-slow
+   points are registered and noted, never dropped.
+
 ### Verification protocol (run and REPORT all of it)
 
     python -m py_compile repros/canonical/<id>/oracle.py
