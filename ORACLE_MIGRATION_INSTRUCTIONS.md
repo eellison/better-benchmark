@@ -50,6 +50,39 @@ the governing invariants; read `AGENT_INSTRUCTIONS.md` for repo-wide rules
 (especially: never regex/AST over generated artifacts; verification means
 consuming your own outputs; composability check before claiming closures).
 
+## Reference documents (read the ones for your role)
+
+BOTH roles:
+- `AGENT_INSTRUCTIONS.md` — repo-wide rules (graphs not regex, verify by
+  consuming outputs, bench_parallel for batches, composability check).
+- `BENCHMARKING_FLOW.md` — the standard measurement pipeline.
+
+IMPLEMENTERS additionally:
+- `INVEST_INSTRUCTIONS.MD` §"What NOT to do" + §"Benchmarking" — the
+  SAME-NUMERICS rule (verbatim binding here): oracles must use the same
+  math formulation and dtype rounding boundaries as Inductor for the
+  captured repro — no fast/approx exp, no exp2-based softmax, no fast
+  GELU/tanh/sigmoid substitutions, no moved casts, unless Inductor
+  generated that exact formulation; `aten.exp` means natural exp
+  (libdevice.exp), and any nonstandard lowering choice is documented in
+  the gap diagnosis. ALSO the no-inline-timing rule: bench only via
+  oracle_harness.bench_oracle() — inline do_bench/perf_counter timing
+  fabricates 2.3x fake gaps (verified) from dispatch overhead.
+- `scripts/ORACLE_FORMAT.md` — the standardized format rationale (this
+  document's slim format supersedes its template for NEW oracles, but its
+  scope rules — full Repro() scope, no subset microbenchmarks — stand).
+
+MANAGER additionally:
+- `ORACLE_GAP_CLOSING_PLAYBOOK.md` — WHAT TO PROBE when verifying a
+  measured gap: characterize the compile path (kernel census under fresh
+  cache + CD), then iterate configs (combo kernels, multi-kernel,
+  persistent vs looped, max-autotune) to either CLOSE the gap (it was
+  tuning, not a missing optimization — downgrade the row) or CONFIRM it
+  (no config matches the oracle — the gap is real; record which configs
+  were tried). A gap nobody tried to close is not a confirmed gap.
+- `INVEST_INSTRUCTIONS.MD` §status/scope rules — what oracle_measured may
+  and may not claim; subset-scope rejection criteria.
+
 ## The one invariant that governs everything
 
 **Never a state with repros and no oracles.** The old corpus + old oracles
