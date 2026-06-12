@@ -35,7 +35,9 @@ YOUR JOB (never write oracles yourself):
   verified oracles, record per-point oracle_us vs compiled_us; for every
   REAL gap run the close-or-confirm config sweep — a gap nobody tried to
   close is not a confirmed gap. Oracle-slower-than-compile at a point is
-  a bug there or a per-point no_oracle_needed — say which.
+  a bug to send back to needs_work. If Inductor is already at floor, keep
+  the oracle row measured and record `at_floor` with the per-point
+  evidence; do not skip the oracle.
 - Scope policing: subset oracles are NOT floors; reject with the missing
   scope named in notes.
 - Progress reports into investigation_results/ (rows closed / by family /

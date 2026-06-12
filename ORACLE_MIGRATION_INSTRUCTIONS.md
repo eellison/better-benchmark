@@ -25,7 +25,8 @@ oracles. Responsibilities:
    CUDAGraph methodology) — this is the gap table the whole exercise
    exists to produce. Mark slowdowns (oracle worse than compile) loudly:
    either the oracle is bad (back to needs_work) or Inductor is already
-   at floor there (no_oracle_needed verdict, recorded per point).
+   at floor there (recorded as an at_floor note on the measured oracle
+   row, never as a skip).
 4. **Stale sweeps** (the June "Stale-sweep 110 entries" role): when
    methodology or pytorch-under-test changes, re-measure affected rows
    with the standard harness rather than trusting old numbers.
@@ -210,13 +211,14 @@ shifted under bf16); port boilerplate never.
 
 ## Coverage target: EVERY canonical repro, EVERY shape point
 
-The goal is exhaustive: all 1727 canonical patterns get an oracle (or an
-explicit, justified no_oracle_needed verdict), and the oracle must cover
-EVERY point in the pattern's shapes.json — validated and measured at each
-one. No prioritization gate: rankings exist in the queue only so agents
-working top-down tend to hit high-value patterns first; nothing is
-out-of-scope and the migration is done when every row is closed, not when
-the "important" ones are.
+The goal is exhaustive: all 1727 canonical patterns get an oracle, and
+the oracle must cover EVERY point in the pattern's shapes.json —
+validated and measured at each one. No prioritization gate: rankings
+exist in the queue only so agents working top-down tend to hit high-value
+patterns first; nothing is out-of-scope and the migration is done when
+every row has a measured oracle, not when the "important" ones are. There
+is no skip verdict for patterns that look hard, tiny, or already
+optimized; "at floor" is a measurement note after an oracle exists.
 
 Per-point discipline:
 - `check_oracle` must pass at every point (one kernel, many shapes — or
@@ -304,18 +306,17 @@ n_points, status, old_oracle_candidates, owner, notes).
    loops; use bench_parallel --all-shapes for batches. Record per-point
    measured_oracle_us in the queue row (or a results file referenced by
    the row when points are many).
-5. MARK: status=oracle_measured, one commit per batch. Include any
-   pattern you investigated and decided needs NO oracle (already at
-   launch floor / SOL at every point) as status=no_oracle_needed with one
-   line of why — the verdict must hold at EVERY point, not just the
-   default one.
+5. MARK: status=oracle_measured, one commit per batch. Every claimed
+   pattern must land an oracle.py. If Inductor is already at launch floor
+   / SOL at every point, record `at_floor` and the per-point evidence in
+   notes/results, but still keep the row as a measured oracle.
 
 ## Verification gates (you are not done until)
 
 - `check_oracle` passes at EVERY shapes.json point (bf16 tolerances).
 - Measured floor <= Inductor's compiled time at each point (an
-  "oracle" slower than the compiler at a point is a bug there, or the
-  pattern is no_oracle_needed at that point — say which).
+  "oracle" slower than the compiler at a point is a bug to fix or mark
+  needs_work; an at-floor pattern should tie, not be skipped).
 - The queue row carries per-point measured numbers, not estimates.
 - For big closures: the composability check (AGENT_INSTRUCTIONS rule 6) —
   read the source model's full graph before claiming model-level impact.
