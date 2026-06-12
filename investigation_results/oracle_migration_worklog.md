@@ -21,7 +21,6 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 194 `var_mean_var_mean_5cc92f5d49c1`: worker checks passed; fallback bench was `23GOOD`.
 - Row 203 `pointwise_c911fb4f9b47`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 20 points.
 - Row 246 `sum_sum_sum_ddcfccfb8340`: worker checks passed; fallback bench was `2GOOD_2BAD_ORACLE`.
-- Row 257 `pointwise_3a0cd5d11499`: worker checks passed; fallback bench was `2GOOD_1AT_FLOOR`.
 - Row 261 `pointwise_60c4eafecc9d`: worker checks passed; fallback bench was `1AT_FLOOR`.
 - Row 207 `sum_sum_sum_fb3a1658dadb`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 20 points.
 - Row 232 `var_mean_mean_e790938418f4`: worker checks passed; fallback bench was `9GOOD_1BAD_ORACLE`.
@@ -127,6 +126,7 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 262 `pointwise_62b6a7509fae`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 265 `pointwise_65717f3841e5`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 - Row 263 `pointwise_62ec9910b2e0`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
+- Row 257 `pointwise_3a0cd5d11499`: measured, 3/3 checks, H100 fallback bench `2GOOD_1AT_FLOOR`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
