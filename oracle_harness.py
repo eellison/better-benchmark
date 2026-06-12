@@ -1091,19 +1091,37 @@ def _run_anchored_numerics_gate(oracle_forward, instance, compiled, inputs):
 
     Returns the gate result dict, or None if the gate could not be run.
     """
+    # Every run gets its OWN copy of the inputs: repros with in-place
+    # writes mutate their inputs, and the gate is only meaningful if the
+    # reference, oracle, and compiled runs all start from the same state.
+    # empty_strided+copy_ rather than clone(): clone() contiguizes
+    # non-dense views, and stride is part of pattern identity here.
+    def _copy_one(t):
+        if any(s == 0 for s in t.stride()):
+            return t.clone()  # expanded: copy_ into 0-stride is undefined
+        out = torch.empty_strided(t.size(), t.stride(),
+                                  dtype=t.dtype, device=t.device)
+        out.copy_(t)
+        return out
+
+    def _clone_inputs(src):
+        return [_copy_one(i) if isinstance(i, torch.Tensor) else i
+                for i in src]
+
     # Detect stochastic outputs for gating
-    stochastic = detect_stochastic_outputs(instance, inputs)
+    stochastic = detect_stochastic_outputs(instance, _clone_inputs(inputs))
 
     # Build fp64 reference: deepcopy instance, cast module + float inputs
     ref_precision = "f64"
     try:
         fp64_instance = copy.deepcopy(instance).double()
         fp64_inputs = []
-        for inp in inputs:
+        for inp in _clone_inputs(inputs):
             if isinstance(inp, torch.Tensor) and inp.is_floating_point():
                 fp64_inputs.append(inp.double())
             else:
                 fp64_inputs.append(inp)
+        _seed_input_generation(1)
         with torch.no_grad():
             ref_outs = _normalize_outputs(fp64_instance(*fp64_inputs))
     except Exception:
@@ -1113,19 +1131,19 @@ def _run_anchored_numerics_gate(oracle_forward, instance, compiled, inputs):
             # Use the instance itself as the f32 reference
             _seed_input_generation(1)
             with torch.no_grad():
-                ref_outs = _normalize_outputs(instance(*inputs))
+                ref_outs = _normalize_outputs(instance(*_clone_inputs(inputs)))
         except Exception:
             return None
 
     # Get oracle outputs with seeded inputs
     _seed_input_generation(1)
     with torch.no_grad():
-        oracle_outs = _normalize_outputs(oracle_forward(inputs))
+        oracle_outs = _normalize_outputs(oracle_forward(_clone_inputs(inputs)))
 
     # Get compiled outputs with seeded inputs
     _seed_input_generation(1)
     with torch.no_grad():
-        compiled_outs = _normalize_outputs(compiled(*inputs))
+        compiled_outs = _normalize_outputs(compiled(*_clone_inputs(inputs)))
 
     # Cast ref_outs to match the comparison dtype for the gate
     # (the gate casts everything to f64 internally for comparison)
