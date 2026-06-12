@@ -4,11 +4,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 3,pointwise_8bb40810003c,8bb40810003c,pointwise,unclassified_priority_gap,84,96,2660,~pointwise_0a2f01161fd8;~pointwise_a718233d708d;~pointwise_ccfd75b90652,claimed,Codex,claimed_2026-06-12_batch_1-5_repros_v2
 4,pointwise_100a39b686e3,100a39b686e3,pointwise,layout_indexing_stencil_fusion,1,38,1257,pointwise_100a39b686e3,claimed,Codex,claimed_2026-06-12_batch_1-5_repros_v2
 5,pointwise_e87d6ebc9ded,e87d6ebc9ded,pointwise,unclassified_priority_gap,15,40,684,pointwise_035529d03c14;pointwise_0f6eed42fa2c;pointwise_af2e722aed5d,claimed,Codex,claimed_2026-06-12_batch_1-5_repros_v2
-6,pointwise_826ea0b5f6e4,826ea0b5f6e4,pointwise,layout_indexing_stencil_fusion,22,49,579,pointwise_e63526b438e7,unclaimed,,
-7,pointwise_7899d74e0838,7899d74e0838,pointwise,layout_indexing_stencil_fusion,121,31,494,pointwise_7a4083b7e3d1,unclaimed,,
-8,var_mean_42fad1ece813,42fad1ece813,reduction,norm_template_canonicalization,121,26,494,~var_mean_65e90900fd65,unclaimed,,
-9,sum_sum_643db2887a01,643db2887a01,reduction,reduction_general,74,21,425,,unclaimed,,
-10,pointwise_c0d19d490a2f,c0d19d490a2f,pointwise,unclassified_priority_gap,14,24,324,pointwise_035529d03c14;pointwise_0f6eed42fa2c;pointwise_af2e722aed5d,unclaimed,,
+6,pointwise_826ea0b5f6e4,826ea0b5f6e4,pointwise,layout_indexing_stencil_fusion,22,49,579,pointwise_e63526b438e7,claimed,codex,claimed_2026-06-12_batch_6-10_repros_v2_all_points
+7,pointwise_7899d74e0838,7899d74e0838,pointwise,layout_indexing_stencil_fusion,121,31,494,pointwise_7a4083b7e3d1,claimed,codex,claimed_2026-06-12_batch_6-10_repros_v2_all_points
+8,var_mean_42fad1ece813,42fad1ece813,reduction,norm_template_canonicalization,121,26,494,~var_mean_65e90900fd65,claimed,codex,claimed_2026-06-12_batch_6-10_repros_v2_all_points
+9,sum_sum_643db2887a01,643db2887a01,reduction,reduction_general,74,21,425,,claimed,codex,claimed_2026-06-12_batch_6-10_repros_v2_all_points
+10,pointwise_c0d19d490a2f,c0d19d490a2f,pointwise,unclassified_priority_gap,14,24,324,pointwise_035529d03c14;pointwise_0f6eed42fa2c;pointwise_af2e722aed5d,claimed,codex,claimed_2026-06-12_batch_6-10_repros_v2_all_points
 11,pointwise_301cf5a13527,301cf5a13527,pointwise,unclassified_priority_gap,11,19,320,pointwise_902799b6712e,unclaimed,,
 12,pointwise_52aa132fd273,52aa132fd273,pointwise,unclassified_priority_gap,11,18,298,pointwise_8b4411ef8328;pointwise_e31a9c1b437e,unclaimed,,
 13,var_mean_f4578c128d74,f4578c128d74,reduction,norm_template_canonicalization,16,22,290,var_mean_d22940b03b5c;var_mean_d8fae237d769,unclaimed,,
