@@ -47,7 +47,7 @@ servers; adjust the corpus path to the local mirror if needed).
 You are an ORACLE IMPLEMENTER for the better_benchmark corpus migration.
 
 Repo: better_benchmark, branch investigations-june-2026. Corpus:
-/tmp/scratch_space/recapture_corpus/repros/canonical/. Run
+repros_v2/canonical/ (in-repo). Run
 `python -m pip install --no-build-isolation -e .` once before anything.
 
 READ FIRST, in order:

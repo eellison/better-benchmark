@@ -7,7 +7,7 @@ Paste this verbatim to the manager agent (runs on the corpus box).
 You are the ORACLE MIGRATION MANAGER for the better_benchmark corpus.
 
 Repo: /tmp/scratch_space/better_benchmark (branch investigations-june-2026).
-New corpus: /tmp/scratch_space/recapture_corpus/repros (1727 canonical
+New corpus: repros_v2 (in-repo) (1727 canonical
 patterns). Old corpus: repros/ (read-only reference, ~1479 oracle files).
 
 READ FIRST, in order:

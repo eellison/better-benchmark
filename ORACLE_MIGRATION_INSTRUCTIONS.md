@@ -44,7 +44,7 @@ supersedes it for the migration.)
 
 You are migrating oracle kernels from the OLD corpus (`repros/canonical/`,
 1482 dirs, fp32, ~1479 with oracle files) to the NEW corpus
-(`/tmp/scratch_space/recapture_corpus/repros/canonical/`, 1727 dirs,
+(`repros_v2/canonical/ (in-repo)`, 1727 dirs,
 bf16/AMP, new pattern hashes). This document is the contract. Read
 `CORPUS_MIGRATION_PLAN.md` §5 (oracle migration) and §6 (atomic flip) for
 the governing invariants; read `AGENT_INSTRUCTIONS.md` for repo-wide rules

@@ -21,7 +21,7 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-NEW_CORPUS = Path("/tmp/scratch_space/recapture_corpus/repros/canonical")
+NEW_CORPUS = Path(__file__).resolve().parents[1] / "repros_v2" / "canonical"
 OLD_CORPUS = ROOT / "repros" / "canonical"
 OLD_QUEUE_CSV = ROOT / "investigation_results" / "oracle_kernel_work_queue.csv"
 OUTPUT_CSV = ROOT / "investigation_results" / "oracle_migration_queue.csv"
