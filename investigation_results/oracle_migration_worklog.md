@@ -5,7 +5,7 @@ Updated: 2026-06-12
 ## Current Worker Pool
 
 - Row 147 `pointwise_000209e1748d`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 145 `any_amax_amax_af50781fc699`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 148 `pointwise_09973679af31`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 124 `var_mean_88858c55c3b4`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 125 `pointwise_182f6f9450b9`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 146 `mean_f21cc667fe83`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
@@ -16,7 +16,6 @@ Refill buffer owned by this session: rows 141-155; rows 149-155 remain idle buff
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
 - Row 123 `sum_sum_cd8694c00507`: worker checks passed; fallback bench was `19GOOD`.
-- Row 145 `any_amax_amax_af50781fc699`: worker checks passed; fallback bench was `1GOOD`.
 
 ## Pushed By This Session
 
@@ -45,6 +44,7 @@ Refill buffer owned by this session: rows 141-155; rows 149-155 remain idle buff
 - Row 142 `sum_623a84402e27`: measured, 2/2 checks, H100 fallback bench `2GOOD`.
 - Row 143 `sum_sum_sum_00516eacb000`: measured, 2/2 checks, H100 fallback bench `1GOOD_1BAD_ORACLE`.
 - Row 144 `amax_sum_7f67e161bd21`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
+- Row 145 `any_amax_amax_af50781fc699`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
