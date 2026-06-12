@@ -4,17 +4,19 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 147 `pointwise_000209e1748d`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 151 `pointwise_2db21af13668`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 148 `pointwise_09973679af31`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 124 `var_mean_88858c55c3b4`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 150 `pointwise_2c1752cb59b4`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 149 `pointwise_25cec8e73161`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 153 `pointwise_3c92a46da990`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 152 `pointwise_39610fd5aba3`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155; rows 151-155 remain idle buffer. Rows 126-140 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155; rows 154-155 remain idle buffer. Rows 126-140 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
+- Row 149 `pointwise_25cec8e73161`: worker checks passed; fallback bench was `1GOOD`.
+- Row 150 `pointwise_2c1752cb59b4`: worker checks passed; fallback bench was `1GOOD`.
 
 ## Pushed By This Session
 
@@ -47,6 +49,7 @@ Refill buffer owned by this session: rows 141-155; rows 151-155 remain idle buff
 - Row 144 `amax_sum_7f67e161bd21`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 145 `any_amax_amax_af50781fc699`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 - Row 146 `mean_f21cc667fe83`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
+- Row 147 `pointwise_000209e1748d`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench is `1BAD_ORACLE`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
