@@ -29,11 +29,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 28,pointwise_49492eb7035e,49492eb7035e,pointwise,unclassified_priority_gap,3,5,116,~pointwise_8b1aa52513f2,claimed,codex,claimed_2026-06-12_batch_21-30_refill_queue
 29,var_mean_e2ecdbc22ad9,e2ecdbc22ad9,reduction,unclassified_priority_gap,4,8,115,~var_mean_40d5a5a49ffd;~var_mean_b3ec7ad4195e;~var_mean_c97d1570c0ff,claimed,codex,claimed_2026-06-12_batch_21-30_refill_queue
 30,pointwise_795cdbe23b17,795cdbe23b17,pointwise,layout_indexing_stencil_fusion,25,4,110,pointwise_69b13df5a532,claimed,codex,claimed_2026-06-12_batch_21-30_refill_queue
-31,sum_851ae8199532,851ae8199532,reduction,reduction_general,2,4,104,,unclaimed,,
-32,pointwise_4a3cb5b99475,4a3cb5b99475,pointwise,unclassified_priority_gap,2,2,98,pointwise_63fa86014ca5,unclaimed,,
-33,pointwise_8beb9f5d4ff7,8beb9f5d4ff7,pointwise,pointwise,1,1,96,,unclaimed,,
-34,sum_8a2f10cdd825,8a2f10cdd825,reduction,reduction_general,1,1,96,~sum_fa555e0728c5,unclaimed,,
-35,pointwise_02974718a634,02974718a634,pointwise,unclassified_priority_gap,2,1,95,~pointwise_e0498dcba9fe;~pointwise_28fded12b2f4;~pointwise_b673b7143973,unclaimed,,
+31,sum_851ae8199532,851ae8199532,reduction,reduction_general,2,4,104,,claimed,Codex,claimed_2026-06-12_batch_31-35_keep_workers_busy
+32,pointwise_4a3cb5b99475,4a3cb5b99475,pointwise,unclassified_priority_gap,2,2,98,pointwise_63fa86014ca5,claimed,Codex,claimed_2026-06-12_batch_31-35_keep_workers_busy
+33,pointwise_8beb9f5d4ff7,8beb9f5d4ff7,pointwise,pointwise,1,1,96,,claimed,Codex,claimed_2026-06-12_batch_31-35_keep_workers_busy
+34,sum_8a2f10cdd825,8a2f10cdd825,reduction,reduction_general,1,1,96,~sum_fa555e0728c5,claimed,Codex,claimed_2026-06-12_batch_31-35_keep_workers_busy
+35,pointwise_02974718a634,02974718a634,pointwise,unclassified_priority_gap,2,1,95,~pointwise_e0498dcba9fe;~pointwise_28fded12b2f4;~pointwise_b673b7143973,claimed,Codex,claimed_2026-06-12_batch_31-35_keep_workers_busy
 36,var_mean_da5aa7a47091,da5aa7a47091,reduction,norm_template_canonicalization,4,10,90,var_mean_d22940b03b5c;var_mean_d8fae237d769,unclaimed,,
 37,sum_sum_sum_260a107eaf32,260a107eaf32,reduction,reduction_general,6,11,86,,unclaimed,,
 38,pointwise_818c3aa59952,818c3aa59952,pointwise,layout_indexing_stencil_fusion,52,18,85,pointwise_557274333bb2,unclaimed,,
