@@ -159,12 +159,12 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 158,pointwise_6ee05b1c8806,6ee05b1c8806,pointwise,pointwise,1,1,24,,claimed,Codex,claimed_2026-06-12_batch_156-160_topdown
 159,pointwise_75d57ea4f44c,75d57ea4f44c,pointwise,pointwise,1,1,24,,claimed,Codex,claimed_2026-06-12_batch_156-160_topdown
 160,pointwise_ac6b918dc26f,ac6b918dc26f,pointwise,pointwise,1,1,24,,claimed,Codex,claimed_2026-06-12_batch_156-160_topdown
-161,pointwise_b2b66f70d626,b2b66f70d626,pointwise,unclassified_priority_gap,1,1,24,pointwise_75af75329d35,unclaimed,,
-162,pointwise_b65830214642,b65830214642,pointwise,unclassified_priority_gap,1,2,24,pointwise_7dbbfd1acea3,unclaimed,,
-163,pointwise_b9618a7f8d96,b9618a7f8d96,pointwise,layout_indexing_stencil_fusion,1,2,24,~pointwise_a942dec89d15,unclaimed,,
-164,pointwise_bbf412ad3164,bbf412ad3164,pointwise,unclassified_priority_gap,1,1,24,~pointwise_187bbcc9d7ba,unclaimed,,
-165,pointwise_d13382187963,d13382187963,pointwise,unclassified_priority_gap,1,2,24,pointwise_f5a70a963d42,unclaimed,,
-166,pointwise_d17fec3a0be5,d17fec3a0be5,pointwise,unclassified_priority_gap,1,1,24,~pointwise_a020dfe84962;~pointwise_fed52737c4f6,unclaimed,,
+161,pointwise_b2b66f70d626,b2b66f70d626,pointwise,unclassified_priority_gap,1,1,24,pointwise_75af75329d35,claimed,codex,claimed 2026-06-12 by codex
+162,pointwise_b65830214642,b65830214642,pointwise,unclassified_priority_gap,1,2,24,pointwise_7dbbfd1acea3,claimed,codex,claimed 2026-06-12 by codex
+163,pointwise_b9618a7f8d96,b9618a7f8d96,pointwise,layout_indexing_stencil_fusion,1,2,24,~pointwise_a942dec89d15,claimed,codex,claimed 2026-06-12 by codex
+164,pointwise_bbf412ad3164,bbf412ad3164,pointwise,unclassified_priority_gap,1,1,24,~pointwise_187bbcc9d7ba,claimed,codex,claimed 2026-06-12 by codex
+165,pointwise_d13382187963,d13382187963,pointwise,unclassified_priority_gap,1,2,24,pointwise_f5a70a963d42,claimed,codex,claimed 2026-06-12 by codex
+166,pointwise_d17fec3a0be5,d17fec3a0be5,pointwise,unclassified_priority_gap,1,1,24,~pointwise_a020dfe84962;~pointwise_fed52737c4f6,claimed,codex,claimed 2026-06-12 by codex
 167,pointwise_ed86b04d7ae6,ed86b04d7ae6,pointwise,unclassified_priority_gap,4,1,24,~pointwise_035529d03c14;~pointwise_0f6eed42fa2c;~pointwise_af2e722aed5d,unclaimed,,
 168,pointwise_fb9acc3ed8b0,fb9acc3ed8b0,pointwise,unclassified_priority_gap,1,1,24,~pointwise_187bbcc9d7ba,unclaimed,,
 169,sum_24541cd0c55b,24541cd0c55b,reduction,reduction_general,1,1,24,,unclaimed,,
