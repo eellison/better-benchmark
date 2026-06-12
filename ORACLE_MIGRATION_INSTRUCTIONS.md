@@ -74,12 +74,21 @@ IMPLEMENTERS additionally:
 
 MANAGER additionally:
 - `ORACLE_GAP_CLOSING_PLAYBOOK.md` — WHAT TO PROBE when verifying a
-  measured gap: characterize the compile path (kernel census under fresh
-  cache + CD), then iterate configs (combo kernels, multi-kernel,
-  persistent vs looped, max-autotune) to either CLOSE the gap (it was
-  tuning, not a missing optimization — downgrade the row) or CONFIRM it
-  (no config matches the oracle — the gap is real; record which configs
-  were tried). A gap nobody tried to close is not a confirmed gap.
+  measured gap: the 6-step process (characterize compile path: kernel
+  census under fresh cache + CD; config sweep: coordinate_descent,
+  max_autotune, combo_kernels, persistent-vs-looped, multi_kernel;
+  algebraic-elimination check; oracle tuning check; classify
+  closed/needs_work/confirmed; CSV update with configs-tried recorded).
+  Includes the common-gap-patterns table with expected ranges per family.
+  A gap nobody tried to close is not a confirmed gap.
+- `ADVERSARIAL_REVIEW.md` — the pre-clean checklist (worker-queue
+  recovery semantics, corpus validity, capture/partitioning rules,
+  benchmark validity: exclusive-timing discipline, multi-worker variance).
+  Restored 2026-06-12 from git history (deleted 05-21) — it is the
+  reviewer's deep-probe list.
+- `investigation_results/SESSION_SUMMARY.md` — the June campaign's
+  execution framework: 3-5 parallel subagents sustained; any ratio >1.05x
+  gets dedicated investigation with root-cause deliverables.
 - `INVEST_INSTRUCTIONS.MD` §status/scope rules — what oracle_measured may
   and may not claim; subset-scope rejection criteria.
 
