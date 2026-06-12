@@ -4,13 +4,13 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 239 `sum_mean_6150664fe0bf`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 243 `amax_sum_821fb95bd167`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 242 `var_mean_e98d6d833b6e`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 232 `var_mean_mean_e790938418f4`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 240 `sum_sum_sum_865e7fa30b8a`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 241 `sum_sum_sum_db03a2e026aa`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 238 `sum_mean_1db528935b36`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 244 `pointwise_c707ca49a4aa`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, and 236-245; rows 243-245 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, and 236-245; row 245 remains idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
@@ -21,6 +21,8 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 194 `var_mean_var_mean_5cc92f5d49c1`: worker checks passed; fallback bench was `23GOOD`.
 - Row 203 `pointwise_c911fb4f9b47`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 20 points.
 - Row 207 `sum_sum_sum_fb3a1658dadb`: worker checks passed; fallback bench failed before timing with `NUMERICS_WORSE_THAN_COMPILED` on all 20 points.
+- Row 232 `var_mean_mean_e790938418f4`: worker checks passed; fallback bench was `9GOOD_1BAD_ORACLE`.
+- Row 239 `sum_mean_6150664fe0bf`: worker checks passed; fallback bench was `3GOOD_1BAD_ORACLE`.
 
 ## Pushed By This Session
 
@@ -98,6 +100,7 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 235 `var_mean_547bcc63004b`: measured, 3/3 checks, H100 fallback bench `2GOOD_1BAD_ORACLE`.
 - Row 236 `var_mean_eb058371f885`: measured, 4/4 checks, H100 fallback bench `3GOOD_1AT_FLOOR`.
 - Row 237 `sum_2f173ee403d1`: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`.
+- Row 238 `sum_mean_1db528935b36`: measured, 4/4 checks, H100 fallback bench `2GOOD_2AT_FLOOR`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
