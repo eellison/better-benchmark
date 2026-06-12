@@ -4,13 +4,18 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 94 `var_mean_5a22dd21d88e`: active worker `019ebd53-2fc1-7032-a532-fdc9babadeb3`.
 - Row 112 `var_mean_45f7dfd4a983`: active worker `019ebd65-63e1-7040-bb93-705f009078e3`.
 - Row 113 `pointwise_35ecf6633bb0`: active worker `019ebd67-6352-7293-b9a2-499d130e2a7f`.
-- Row 114 `pointwise_733dafce05a6`: active worker `019ebd6a-9216-7aa3-bd83-b5c4a54759c0`.
 - Row 115 `sum_e529e567d636`: active worker `019ebd6a-e1a1-75d2-a565-f259cd3bfd14`.
+- Row 121 `sum_sum_sum_e7781939b0a2`: active worker `019ebd6e-57ed-7c03-b25d-0eec24374d45`.
+- Row 122 `pointwise_88bffcefddc4`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 
-Refill buffer owned by this session: rows 121-125. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 123-125. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
+
+## Pending Parent Review
+
+- Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
+- Row 114 `pointwise_733dafce05a6`: worker checks passed; fallback bench was `1GOOD_1AT_FLOOR`.
 
 ## Pushed By This Session
 
@@ -22,6 +27,7 @@ Refill buffer owned by this session: rows 121-125. Rows 116-120 were claimed rem
 - Row 86 `pointwise_bd0149b22f68`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 - Row 87 `pointwise_e52ac85e10fc`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
 - Row 88 `var_mean_eac408f45b9d`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
+- Row 89 `sum_7cfdb80c54c5`: measured, 23/23 checks, H100 fallback bench `21GOOD_2AT_FLOOR`.
 - Row 90 `sum_6d68a671ec4a`: measured, 5/5 checks, H100 fallback bench `4GOOD_1AT_FLOOR`.
 - Row 91 `sum_sum_sum_c5cdd9ab78b4`: measured, 1/1 checks, H100 fallback bench `1GOOD`.
 - Row 92 `var_mean_ec0f56a425b2`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`.
