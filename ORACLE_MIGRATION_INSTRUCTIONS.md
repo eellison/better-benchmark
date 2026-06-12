@@ -116,34 +116,56 @@ rarely the algorithmic idea). Before writing a kernel from scratch:
 Port ideas freely; port configs skeptically (fp32-tuned, B200-roofline
 shifted under bf16); port boilerplate never.
 
+## Coverage target: EVERY canonical repro, EVERY shape point
+
+The goal is exhaustive: all 1727 canonical patterns get an oracle (or an
+explicit, justified no_oracle_needed verdict), and the oracle must cover
+EVERY point in the pattern's shapes.json — validated and measured at each
+one. No prioritization gate: rankings exist in the queue only so agents
+working top-down tend to hit high-value patterns first; nothing is
+out-of-scope and the migration is done when every row is closed, not when
+the "important" ones are.
+
+Per-point discipline:
+- `check_oracle` must pass at every point (one kernel, many shapes — or
+  per-point registrations where configs genuinely differ).
+- Measure at every point; a pattern with 8 points gets 8 floor numbers.
+- If a kernel is correct everywhere but only FAST at some points, register
+  it everywhere and note the slow points — a floor that ties Inductor at
+  small shapes is still a floor; do NOT silently narrow coverage.
+
 ## Claim protocol (same flow as the June queue)
 
 The work queue is `investigation_results/oracle_migration_queue.csv`
-(generated from the new corpus after the bench sweep; columns:
-queue_rank, new_pattern_hash, repro_dir, family, gap_vs_sol, status,
-old_oracle_candidates, owner, notes).
+(generated from the new corpus; one row per canonical pattern, ALL 1727
+present; columns: queue_rank, new_pattern_hash, repro_dir, family,
+n_points, status, old_oracle_candidates, owner, notes).
 
-1. CLAIM: pick the highest-ranked unclaimed rows (batch of 5-6), set
-   status=claimed + owner=<your-name> in ONE commit ("Claim oracle batch
-   NNNN-NNNN"). Any repro without an oracle and without an owner is
-   eligible — no other gatekeeping.
+1. CLAIM: pick unclaimed rows (batch of 5-6), set status=claimed +
+   owner=<your-name> in ONE commit ("Claim oracle batch NNNN-NNNN"). Any
+   repro without an oracle and without an owner is eligible — no other
+   gatekeeping.
 2. IMPLEMENT: write `oracle.py` per the format above.
 3. VALIDATE: `check_oracle` numerics at bf16 tolerances against the repro
-   at EVERY registered point. A failing point = not done.
+   at EVERY shapes.json point. A failing point = not done.
 4. MEASURE: bench through the standard harness (CUDAGraph + CD, min mode,
-   `INDUCTOR_GPU_BENCH_LOCK=1`) — never hand-rolled timing loops; use
-   bench_parallel for batches. Record measured_oracle_us in the queue row.
+   `INDUCTOR_GPU_BENCH_LOCK=1`) at EVERY point — never hand-rolled timing
+   loops; use bench_parallel --all-shapes for batches. Record per-point
+   measured_oracle_us in the queue row (or a results file referenced by
+   the row when points are many).
 5. MARK: status=oracle_measured, one commit per batch. Include any
-   pattern you investigated and decided needs NO oracle (gap is launch
-   floor / SOL-bound already) as status=no_oracle_needed with one line of
-   why.
+   pattern you investigated and decided needs NO oracle (already at
+   launch floor / SOL at every point) as status=no_oracle_needed with one
+   line of why — the verdict must hold at EVERY point, not just the
+   default one.
 
 ## Verification gates (you are not done until)
 
-- `check_oracle` passes at every registered point (bf16 tolerances).
-- Measured floor <= Inductor's compiled time at the same point (an
-  "oracle" slower than the compiler is a bug or a no_oracle_needed).
-- The queue row carries measured numbers, not estimates.
+- `check_oracle` passes at EVERY shapes.json point (bf16 tolerances).
+- Measured floor <= Inductor's compiled time at each point (an
+  "oracle" slower than the compiler at a point is a bug there, or the
+  pattern is no_oracle_needed at that point — say which).
+- The queue row carries per-point measured numbers, not estimates.
 - For big closures: the composability check (AGENT_INSTRUCTIONS rule 6) —
   read the source model's full graph before claiming model-level impact.
 
