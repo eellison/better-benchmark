@@ -4,19 +4,20 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 113 `pointwise_35ecf6633bb0`: active worker `019ebd67-6352-7293-b9a2-499d130e2a7f`.
-- Row 121 `sum_sum_sum_e7781939b0a2`: active worker `019ebd6e-57ed-7c03-b25d-0eec24374d45`.
 - Row 122 `pointwise_88bffcefddc4`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 123 `sum_sum_cd8694c00507`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 124 `var_mean_88858c55c3b4`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 125 `pointwise_182f6f9450b9`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 
-Refill buffer owned by this session: row 125. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-145. Rows 126-140 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
 - Row 112 `var_mean_45f7dfd4a983`: worker checks passed; fallback bench was `4GOOD_1AT_FLOOR`.
+- Row 113 `pointwise_35ecf6633bb0`: worker checks passed; parent fallback bench was `1GOOD_1AT_FLOOR`.
 - Row 115 `sum_e529e567d636`: worker checks passed; fallback bench was `1GOOD_1AT_FLOOR`.
+- Row 121 `sum_sum_sum_e7781939b0a2`: worker checks passed; fallback bench was `1GOOD_1AT_FLOOR`.
 
 ## Pushed By This Session
 
