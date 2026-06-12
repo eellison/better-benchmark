@@ -196,7 +196,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 195,max_amax_sum_66e6dc6d2131,66e6dc6d2131,reduction,reduction_softmax_like,1,1,22,,claimed,codex,claimed_2026-06-12_batch_194-203_refill_queue
 196,pointwise_0cd85fd63f82,0cd85fd63f82,pointwise,unclassified_priority_gap,1,2,22,~pointwise_d604053b7cd8,claimed,codex,claimed_2026-06-12_batch_194-203_refill_queue
 197,pointwise_544fac7c5583,544fac7c5583,pointwise,pointwise,3,2,22,,oracle_measured,codex,oracle_py_added_checks_pass_3of3_h100_fallback_bench_2AT_FLOOR_1BAD_ORACLE_no_cudagraph_warnings_needs_B200_measure
-198,sum_be521af00034,be521af00034,reduction,reduction_general,1,2,22,,claimed,codex,claimed_2026-06-12_batch_194-203_refill_queue
+198,sum_be521af00034,be521af00034,reduction,reduction_general,1,2,22,,oracle_measured,codex,oracle_py_added_checks_pass_1of1_h100_fallback_bench_1AT_FLOOR_no_cudagraph_warnings_needs_B200_measure
 199,sum_sum_sum_33df09c4b328,33df09c4b328,reduction,reduction_general,1,2,22,,claimed,codex,claimed_2026-06-12_batch_194-203_refill_queue
 200,var_mean_787e1d544efe,787e1d544efe,reduction,unclassified_priority_gap,1,2,22,~var_mean_0361de9eae81;~var_mean_4ca91616285c;~var_mean_6a701483fed1,claimed,codex,claimed_2026-06-12_batch_194-203_refill_queue
 201,pointwise_95ed2ef35da9,95ed2ef35da9,pointwise,layout_indexing_stencil_fusion,2,3,21,pointwise_9edaf9e5b4c4,claimed,codex,claimed_2026-06-12_batch_194-203_refill_queue
