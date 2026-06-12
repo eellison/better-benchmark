@@ -379,8 +379,12 @@ def capture_single_model(
                 compiled = torch.compile(model_obj)
 
                 if mode == "train":
-                    # DTYPE POLICY: autocast bf16 + backward
-                    with torch.amp.autocast("cuda", dtype=torch.bfloat16):
+                    # DTYPE POLICY: autocast bf16 + backward — except
+                    # fp32-only models (fft under autocast fails the same
+                    # way as a bf16 cast).
+                    _amp_enabled = model_name not in _FP32_ONLY_LOADED
+                    with torch.amp.autocast("cuda", dtype=torch.bfloat16,
+                                            enabled=_amp_enabled):
                         if isinstance(inputs, dict):
                             out = compiled(**inputs)
                         elif isinstance(inputs, (list, tuple)):
@@ -604,6 +608,12 @@ def _load_timm(model_name: str, batch_size: int, mode: str):
     return model, inputs
 
 
+# Models the upstream runner marks fp32-only (GoogleFnet: fft has no bf16
+# kernel). Populated at load; the train capture loop checks it to skip
+# autocast (autocast bf16 re-breaks fft even with an fp32 model).
+_FP32_ONLY_LOADED: set[str] = set()
+
+
 def _load_hf(model_name: str, batch_size: int, mode: str):
     """HuggingFace via the upstream HuggingfaceRunner (plain policy)."""
     sys.path.insert(0, str(PYTORCH_DYNAMO_DIR))
@@ -613,6 +623,7 @@ def _load_hf(model_name: str, batch_size: int, mode: str):
         HuggingfaceRunner, model_name, batch_size, mode)
     if fp32_only:
         print(f"  [dtype] {model_name}: fp32-only per upstream runner list")
+        _FP32_ONLY_LOADED.add(model_name)
     return model, inputs
 
 
