@@ -1,5 +1,46 @@
 # Oracle Migration — Agent Instructions
 
+## Two roles (split as in the June flow)
+
+**IMPLEMENTERS** (typically on other servers): claim queue rows, write
+oracle.py files, validate numerics, measure floors, mark rows. The bulk of
+this document is your contract — start at "Coverage target".
+
+**THE MANAGER/OVERSEER** (one agent, on the corpus box): does NOT write
+oracles. Responsibilities:
+
+1. **Queue integrity**: regenerate `oracle_migration_queue.csv` from the
+   corpus when it changes (`scripts/generate_oracle_queue.py`); resolve
+   claim collisions (duplicate owners on a row: earliest commit wins);
+   periodically sweep rows stuck in status=claimed with no commits from
+   that owner (>1 day -> reset to unclaimed with a note).
+2. **Batch verification** (the June "Batch-verify 84/100" role): for each
+   batch marked oracle_measured, INDEPENDENTLY re-run check_oracle + the
+   bench at a sample of points (all points for small batches) on this box.
+   Numbers that don't reproduce (>10% drift) -> status back to
+   needs_work with measured-vs-claimed numbers in notes. Trust nothing
+   unmeasured locally.
+3. **Compile-gap investigation**: for verified oracles, compute and record
+   speedup-vs-compile per point (oracle_us vs Inductor compiled_us, same
+   CUDAGraph methodology) — this is the gap table the whole exercise
+   exists to produce. Mark slowdowns (oracle worse than compile) loudly:
+   either the oracle is bad (back to needs_work) or Inductor is already
+   at floor there (no_oracle_needed verdict, recorded per point).
+4. **Stale sweeps** (the June "Stale-sweep 110 entries" role): when
+   methodology or pytorch-under-test changes, re-measure affected rows
+   with the standard harness rather than trusting old numbers.
+5. **Scope policing**: enforce the full-scope rule — an oracle measuring a
+   SUBSET of the repro's computation (just the reduction, not the
+   surrounding fused ops) is NOT a floor; reject with the missing scope
+   named in notes.
+6. **Progress reporting**: rows closed / by family / by status, weekly
+   into investigation_results/.
+
+The manager has GPU access on this box; implementers' numbers are
+provisional until manager-verified. (History: INVEST_INSTRUCTIONS.MD is
+the June-era predecessor of this document — same claim flow, this doc
+supersedes it for the migration.)
+
 You are migrating oracle kernels from the OLD corpus (`repros/canonical/`,
 1482 dirs, fp32, ~1479 with oracle files) to the NEW corpus
 (`/tmp/scratch_space/recapture_corpus/repros/canonical/`, 1727 dirs,
