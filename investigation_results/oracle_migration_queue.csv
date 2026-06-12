@@ -154,11 +154,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 153,pointwise_3c92a46da990,3c92a46da990,pointwise,pointwise,1,1,24,,claimed,codex,claimed_2026-06-12_batch_146-155_refill_queue
 154,pointwise_452ad66ee287,452ad66ee287,pointwise,unclassified_priority_gap,1,1,24,~pointwise_b673b7143973;~pointwise_43aac667469a;~pointwise_75af75329d35,claimed,codex,claimed_2026-06-12_batch_146-155_refill_queue
 155,pointwise_4f45960cc89d,4f45960cc89d,pointwise,pointwise,1,1,24,,claimed,codex,claimed_2026-06-12_batch_146-155_refill_queue
-156,pointwise_59acdb823e92,59acdb823e92,pointwise,pointwise,1,1,24,,unclaimed,,
-157,pointwise_5c3762c611b3,5c3762c611b3,pointwise,unclassified_priority_gap,1,1,24,pointwise_a020dfe84962;pointwise_fed52737c4f6,unclaimed,,
-158,pointwise_6ee05b1c8806,6ee05b1c8806,pointwise,pointwise,1,1,24,,unclaimed,,
-159,pointwise_75d57ea4f44c,75d57ea4f44c,pointwise,pointwise,1,1,24,,unclaimed,,
-160,pointwise_ac6b918dc26f,ac6b918dc26f,pointwise,pointwise,1,1,24,,unclaimed,,
+156,pointwise_59acdb823e92,59acdb823e92,pointwise,pointwise,1,1,24,,claimed,Codex,claimed_2026-06-12_batch_156-160_topdown
+157,pointwise_5c3762c611b3,5c3762c611b3,pointwise,unclassified_priority_gap,1,1,24,pointwise_a020dfe84962;pointwise_fed52737c4f6,claimed,Codex,claimed_2026-06-12_batch_156-160_topdown
+158,pointwise_6ee05b1c8806,6ee05b1c8806,pointwise,pointwise,1,1,24,,claimed,Codex,claimed_2026-06-12_batch_156-160_topdown
+159,pointwise_75d57ea4f44c,75d57ea4f44c,pointwise,pointwise,1,1,24,,claimed,Codex,claimed_2026-06-12_batch_156-160_topdown
+160,pointwise_ac6b918dc26f,ac6b918dc26f,pointwise,pointwise,1,1,24,,claimed,Codex,claimed_2026-06-12_batch_156-160_topdown
 161,pointwise_b2b66f70d626,b2b66f70d626,pointwise,unclassified_priority_gap,1,1,24,pointwise_75af75329d35,unclaimed,,
 162,pointwise_b65830214642,b65830214642,pointwise,unclassified_priority_gap,1,2,24,pointwise_7dbbfd1acea3,unclaimed,,
 163,pointwise_b9618a7f8d96,b9618a7f8d96,pointwise,layout_indexing_stencil_fusion,1,2,24,~pointwise_a942dec89d15,unclaimed,,
