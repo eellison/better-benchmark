@@ -382,6 +382,18 @@ maintain, can't mis-lift int[] dims/permute args) — swappable inside
   SOL accounting conventions, and how they structure SOL-vs-achieved
   reporting when we build our SOL column.
 - Wave 2 dynamic families → the BS=1 vs BS=N fusion-impact questions.
+- **Special-value numerics validation (filed 2026-06-12)**: the oracle
+  check + fp64-anchored gate run on well-behaved synthetic inputs, so they
+  can't catch oracles that mishandle special values — NaN propagation
+  (max/min tricks that drop NaNs, fast-math that flushes them), ±inf
+  (softmax/logsumexp shift tricks), -0.0, denormals. Add an opt-in
+  adversarial pass to check_oracle_all_shapes: salt float inputs with
+  NaN/±inf/-0.0 at a few positions (respecting gen kinds — never salt
+  index/offsets/permutation inputs) and require bitwise-class agreement
+  with eager (NaN positions match; inf signs match). Eager is the
+  semantics reference, same as today. Needs care for repros where eager
+  itself is special-value-undefined (e.g. uninitialized-read patterns);
+  those get a recorded skip, not silence.
 - **Model oracles (future)**: the natural generalization of repros — a
   hand-optimized END-TO-END implementation as the floor for a whole model
   (a model is structurally a big repro: graph + input specs + measured
