@@ -44,7 +44,11 @@ supersedes it for the migration.)
 
 You are migrating oracle kernels from the OLD corpus (`repros/canonical/`,
 1482 dirs, fp32, ~1479 with oracle files) to the NEW corpus
-(`repros_v2/canonical/ (in-repo)`, 1727 dirs,
+(`repros_v2/canonical/`, in-repo, 1727 dirs — repro.py + shapes.json +
+meta.json per pattern is ALL implementers need; the new corpus's
+full-model trees live only on the capture box and are a manager-side
+concern. Same-model prior-art lookups use the OLD corpus's in-repo
+per-model manifests under `repros/models/`. Corpus is
 bf16/AMP, new pattern hashes). This document is the contract. Read
 `CORPUS_MIGRATION_PLAN.md` §5 (oracle migration) and §6 (atomic flip) for
 the governing invariants; read `AGENT_INSTRUCTIONS.md` for repo-wide rules
