@@ -4,18 +4,19 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 112 `var_mean_45f7dfd4a983`: active worker `019ebd65-63e1-7040-bb93-705f009078e3`.
 - Row 113 `pointwise_35ecf6633bb0`: active worker `019ebd67-6352-7293-b9a2-499d130e2a7f`.
-- Row 115 `sum_e529e567d636`: active worker `019ebd6a-e1a1-75d2-a565-f259cd3bfd14`.
 - Row 121 `sum_sum_sum_e7781939b0a2`: active worker `019ebd6e-57ed-7c03-b25d-0eec24374d45`.
 - Row 122 `pointwise_88bffcefddc4`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 123 `sum_sum_cd8694c00507`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 124 `var_mean_88858c55c3b4`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 
-Refill buffer owned by this session: rows 123-125. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: row 125. Rows 116-120 were claimed remotely by another `Codex` batch and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
-- Row 114 `pointwise_733dafce05a6`: worker checks passed; fallback bench was `1GOOD_1AT_FLOOR`.
+- Row 112 `var_mean_45f7dfd4a983`: worker checks passed; fallback bench was `4GOOD_1AT_FLOOR`.
+- Row 115 `sum_e529e567d636`: worker checks passed; fallback bench was `1GOOD_1AT_FLOOR`.
 
 ## Pushed By This Session
 
@@ -34,6 +35,7 @@ Refill buffer owned by this session: rows 123-125. Rows 116-120 were claimed rem
 - Row 93 `pointwise_e6ddc8e897ec`: marked `needs_work`; 24/24 checks pass but locked bench fails the FP64 numerics gate with NaN errors and emits no timings.
 - Row 95 `pointwise_c509446d4a84`: measured, 3/3 checks, H100 fallback bench `3GOOD`.
 - Row 111 `sum_sum_4c6ae5dbcf21`: measured, 2/2 checks, H100 fallback bench `2GOOD`.
+- Row 114 `pointwise_733dafce05a6`: measured, 2/2 checks, H100 fallback bench `2GOOD`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
