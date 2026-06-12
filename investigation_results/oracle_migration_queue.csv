@@ -69,11 +69,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 68,pointwise_7c39bacfff54,7c39bacfff54,pointwise,unclassified_priority_gap,2,2,60,pointwise_391b0009ff83,claimed,codex,claimed_2026-06-12_batch_61-70_refill_queue
 69,pointwise_aa77af8fcd54,aa77af8fcd54,pointwise,pointwise,2,2,60,,claimed,codex,claimed_2026-06-12_batch_61-70_refill_queue
 70,sum_785c25a716ed,785c25a716ed,reduction,multi_output_reduction_templates,3,2,60,~sum_ab7572b27d2c;~sum_b8db5e701976,claimed,codex,claimed_2026-06-12_batch_61-70_refill_queue
-71,mean_c033ad4c69ca,c033ad4c69ca,reduction,unclassified_priority_gap,2,2,58,mean_ee17938d7aff,unclaimed,,
-72,mean_mean_8c30aa48d748,8c30aa48d748,reduction,reduction_general,2,2,58,,unclaimed,,
-73,sum_sum_78f580611c3f,78f580611c3f,reduction,multi_output_reduction_templates,20,4,58,~sum_sum_12bf0466c00c;~sum_sum_7c6679a3489a,unclaimed,,
-74,var_mean_7aed0e0a804f,7aed0e0a804f,reduction,unclassified_priority_gap,20,4,58,~var_mean_035991ff3d2b;~var_mean_a1464365da4f;~var_mean_23f0e798b604,unclaimed,,
-75,var_mean_ffc11133a616,ffc11133a616,reduction,norm_template_canonicalization,20,4,58,var_mean_7fd0d03bbf2d,unclaimed,,
+71,mean_c033ad4c69ca,c033ad4c69ca,reduction,unclassified_priority_gap,2,2,58,mean_ee17938d7aff,claimed,Codex,claimed_2026-06-12_batch_71-75_topdown
+72,mean_mean_8c30aa48d748,8c30aa48d748,reduction,reduction_general,2,2,58,,claimed,Codex,claimed_2026-06-12_batch_71-75_topdown
+73,sum_sum_78f580611c3f,78f580611c3f,reduction,multi_output_reduction_templates,20,4,58,~sum_sum_12bf0466c00c;~sum_sum_7c6679a3489a,claimed,Codex,claimed_2026-06-12_batch_71-75_topdown
+74,var_mean_7aed0e0a804f,7aed0e0a804f,reduction,unclassified_priority_gap,20,4,58,~var_mean_035991ff3d2b;~var_mean_a1464365da4f;~var_mean_23f0e798b604,claimed,Codex,claimed_2026-06-12_batch_71-75_topdown
+75,var_mean_ffc11133a616,ffc11133a616,reduction,norm_template_canonicalization,20,4,58,var_mean_7fd0d03bbf2d,claimed,Codex,claimed_2026-06-12_batch_71-75_topdown
 76,pointwise_9f7dce7fb407,9f7dce7fb407,pointwise,layout_indexing_stencil_fusion,2,6,57,~pointwise_a942dec89d15;~pointwise_e5d19e73a52c;~max_448f6b3c8f1d,unclaimed,,
 77,sum_1fa91878a7ad,1fa91878a7ad,reduction,reduction_general,1,2,56,,unclaimed,,
 78,sum_sum_c17d298e608e,c17d298e608e,reduction,multi_output_reduction_templates,9,4,56,~sum_sum_8d73a4b5bade;~sum_sum_8e96ea244bf1,unclaimed,,
