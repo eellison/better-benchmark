@@ -512,7 +512,7 @@ maintain, can't mis-lift int[] dims/permute args) — swappable inside
 | 3 | Old-corpus work during migration | Wave 1 start | Keep using for kernel-level work; it stays valid until flip |
 | 4 | Flip granularity: per-suite vs corpus-wide | First flip | Per-suite — smaller blast radius, earlier feedback |
 | 5 | Oracle translation ownership: which floors port mechanically vs re-written | Phase §5 | Oracle server decides per pattern; dispatch registration makes either a 2-line landing |
-| 6 | Ladder policy for wave-2 families (which BS/seq points) | Wave 2 bench | Per-family policy doc; decode ladder for vllm (1,2,4,...,64), seq ladder for LMs |
+| 6 | Ladder policy for wave-2 families (which BS/seq points) | Wave 2 bench | SETTLED 2026-06-12: investigation_results/wave2_ladder_policy.md — role-based ladders (decode 1..64, seq 128..8192, spatial ±2x, feature=hint-only), ≤12 points/pattern, ladder points are bench-policy inputs (never written into capture's shapes.json), both compile modes per point |
 
 ---
 
