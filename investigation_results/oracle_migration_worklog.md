@@ -7,10 +7,10 @@ Updated: 2026-06-12
 - Row 239 `sum_mean_6150664fe0bf`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 236 `var_mean_eb058371f885`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 232 `var_mean_mean_e790938418f4`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 237 `sum_2f173ee403d1`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 241 `sum_sum_sum_db03a2e026aa`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 238 `sum_mean_1db528935b36`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, and 236-245; rows 240-245 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, and 236-245; rows 242-245 remain idle buffer. Rows 126-140, 156-171, 182-193, and 214-225 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
@@ -96,6 +96,7 @@ Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 22
 - Row 231 `sum_sum_c91da8ecf163`: measured, 10/10 checks, H100 fallback bench `9GOOD_1BAD_ORACLE`.
 - Row 233 `sum_sum_sum_951d09ecbec1`: measured, 3/3 checks, H100 fallback bench `2GOOD_1BAD_ORACLE`.
 - Row 235 `var_mean_547bcc63004b`: measured, 3/3 checks, H100 fallback bench `2GOOD_1BAD_ORACLE`.
+- Row 237 `sum_2f173ee403d1`: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
