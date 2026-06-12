@@ -10,13 +10,14 @@ Updated: 2026-06-12
 - Row 177 `var_mean_60f28772f7d2`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 178 `amax_sum_69008a1fbe7e`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155 plus 172-181; row 181 remains idle buffer. Rows 126-140 and 156-171 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, and 194-203; rows 194-203 remain idle buffer. Rows 126-140, 156-171, and 182-193 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
 - Row 124 `var_mean_88858c55c3b4`: worker checks passed; fallback bench was `18GOOD_1BAD_ORACLE`.
 - Row 172 `sum_abcd9bccce7d`: worker checks passed; fallback bench was `6GOOD_2AT_FLOOR`.
+- Row 178 `amax_sum_69008a1fbe7e`: worker checks passed; fallback bench was `1GOOD`.
 - Row 175 `sum_sum_sum_51593d0552e5`: worker checks passed; fallback bench was `1AT_FLOOR`.
 
 ## Pushed By This Session
