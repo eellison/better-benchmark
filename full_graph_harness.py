@@ -144,8 +144,7 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.scatter.value: (0, 1),
         torch.ops.aten.scatter_add.default: (0, 1),
         torch.ops.aten.gather.default: (0, 1),
-        torch.ops.aten.index_put.default: (0, None),
-        torch.ops.aten.index.Tensor: (0, None),
+
         torch.ops.aten.index_select.default: (0, 1),
         torch.ops.aten.embedding.default: (0, None),
     }
@@ -300,7 +299,13 @@ def infer_index_bounds_from_gm(
                                         found.append(_invert(int(val.shape[0]), chain))
                                         continue
 
-                        if target == torch.ops.aten.index.Tensor and len(user.args) >= 2:
+                        if (target in (torch.ops.aten.index.Tensor,
+                                       torch.ops.aten.index_put.default)
+                                and len(user.args) >= 2):
+                            # indices list position maps to DIM, INCLUDING
+                            # None slots (index_put([None, None, i, j]):
+                            # i indexes dim 2, j dim 3 — Yitu: bounding j
+                            # by shape[0]=32 against dim3 size 1 asserted).
                             target_shape = _node_shape(user.args[0])
                             indices = user.args[1]
                             if target_shape and isinstance(indices, (list, tuple)):

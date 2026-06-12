@@ -1090,3 +1090,34 @@ def test_float_placeholder_feeding_index_chain_gets_bounded_gen():
     assert bounds[name] < 2050
     # and the info dict got a bounded non-negative gen attached
     assert info[name].get("gen", {}).get("kind") == "index", info[name]
+
+
+def test_index_put_indices_map_position_to_dim_including_nones():
+    """index_put's indices LIST position maps to the indexed DIM, counting
+    None slots: index_put(t, [None, None, i, j], v) — i indexes dim 2,
+    j indexes dim 3. YituTechConvBert: j bounded by shape[0]=32 against a
+    dim-3 of size 1 generated OOB indices -> assert."""
+    import torch
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from full_graph_harness import (infer_index_bounds_from_gm,
+                                    placeholder_info_from_gm)
+
+    def f(t, i, j, v):
+        return torch.ops.aten.index_put.default(t, [None, None, i, j], v, True)
+
+    with FakeTensorMode(allow_non_fake_inputs=True) as m:
+        t = m.from_tensor(torch.zeros(32, 384, 520, 4))
+        i = m.from_tensor(torch.zeros(9, 512, 1, 1, dtype=torch.int64))
+        j = m.from_tensor(torch.zeros(1, 1, dtype=torch.int64))
+        v = m.from_tensor(torch.zeros(32, 384, 9, 512, 1, 1))
+        gm = make_fx(f, tracing_mode="fake")(t, i, j, v)
+
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    # identify i and j placeholders by their shapes
+    by_shape = {tuple(v_["shape"]): k for k, v_ in info.items()}
+    i_name = by_shape[(9, 512, 1, 1)]
+    j_name = by_shape[(1, 1)]
+    assert bounds.get(i_name) == 520, bounds  # dim 2
+    assert bounds.get(j_name) == 4, bounds    # dim 3 — NOT shape[0]=32
