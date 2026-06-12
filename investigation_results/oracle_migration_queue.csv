@@ -54,7 +54,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 53,sum_sum_sum_4a1fb62e29b0,4a1fb62e29b0,reduction,reduction_general,4,8,72,,needs_work,codex,needs_work: B200 check 3/4 FAIL (BertForMaskedLM_c1e38d67 outputs 3+4 max_diff=16.0) + CUDA crash on ElectraForCausalLM; oracle broken for 2/4 points
 54,sum_sum_sum_5fbbe8587abc,5fbbe8587abc,reduction,reduction_general,1,1,72,,oracle_measured,codex,B200_verified_2026-06-12: check 1/1 PASS; bench 1BAD(0.92x at floor); oracle_us=34.46us
 55,pointwise_1df91f562302,1df91f562302,pointwise,layout_indexing_stencil_fusion,12,2,70,pointwise_59d71b256016,oracle_measured,codex,B200_verified_2026-06-12: check 12/12 PASS; bench 0GOOD 10AT_FLOOR 2BAD(0.93x/0.90x floor); oracle_us median=34us
-56,sum_76fb9946e296,76fb9946e296,reduction,reduction_general,6,9,70,~sum_bd2fed913c26,claimed,Codex,claimed_2026-06-12_batch_56-60_topdown
+56,sum_76fb9946e296,76fb9946e296,reduction,reduction_general,6,9,70,~sum_bd2fed913c26,oracle_measured,Codex,oracle_py_added_checks_pass_6of6_h100_fallback_bench_no_warnings_5GOOD_1AT_FLOOR_class_SCHEDULER_FUSION_needs_B200_verify
 57,sum_f3f44f50fa4d,f3f44f50fa4d,reduction,multi_output_reduction_templates,6,9,70,~sum_196d0dc5c868,claimed,Codex,claimed_2026-06-12_batch_56-60_topdown
 58,pointwise_9595e73ff43b,9595e73ff43b,pointwise,layout_indexing_stencil_fusion,22,4,68,~pointwise_3bd84c5c45de,claimed,Codex,claimed_2026-06-12_batch_56-60_topdown
 59,sum_sum_0bad56ceb78f,0bad56ceb78f,reduction,reduction_general,22,4,68,,oracle_measured,Codex,B200_verified_2026-06-12: check 22/22 PASS; bench 20GOOD 2AT_FLOOR; oracle_us median=64us; strong 4.7-8.4x gaps
