@@ -325,7 +325,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 324,pointwise_b71f0d447f2e,b71f0d447f2e,pointwise,pointwise,3,4,10,,claimed,Codex,claimed_2026-06-12_batch_324_topdown
 325,sum_2a94132dcf5e,2a94132dcf5e,reduction,reduction_general,1,2,10,,claimed,Codex,claimed_2026-06-12_batch_325_topdown
 326,sum_444779f98932,444779f98932,reduction,scatter_gather,1,1,10,,claimed,Codex,claimed_2026-06-12_batch_326_topdown
-327,sum_sum_245fc9d79aad,245fc9d79aad,reduction,reduction_general,8,4,10,,unclaimed,,
+327,sum_sum_245fc9d79aad,245fc9d79aad,reduction,reduction_general,8,4,10,,claimed,Codex,claimed_2026-06-12_batch_327_topdown
 328,sum_sum_2e7998fcb884,2e7998fcb884,reduction,reduction_general,1,1,10,,unclaimed,,
 329,var_mean_ff900ef0c453,ff900ef0c453,reduction,norm_template_canonicalization,5,2,10,~var_mean_b7d516740b38;~var_mean_bbc2387d0095,unclaimed,,
 330,var_mean_var_mean_var_mean_77aa028cea27,77aa028cea27,reduction,reduction_var_mean,3,4,10,,unclaimed,,
