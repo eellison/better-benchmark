@@ -1493,11 +1493,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1492,var_mean_3d651d7390ce,3d651d7390ce,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1490_1494_midqueue
 1493,var_mean_3dd1f797edda,3dd1f797edda,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1490_1494_midqueue
 1494,var_mean_3e50d103dcec,3e50d103dcec,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1490_1494_midqueue
-1495,var_mean_3ebfdb9a8750,3ebfdb9a8750,reduction,reduction_var_mean,1,1,1,,unclaimed,,
-1496,var_mean_4073a74b3f1a,4073a74b3f1a,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-1497,var_mean_4348a08765d9,4348a08765d9,reduction,norm_template_canonicalization,1,1,1,~var_mean_f3432607acca;~var_mean_f58b743b2264,unclaimed,,
-1498,var_mean_43610b02573d,43610b02573d,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-1499,var_mean_43612b52e7fc,43612b52e7fc,reduction,reduction_var_mean,1,1,1,,unclaimed,,
+1495,var_mean_3ebfdb9a8750,3ebfdb9a8750,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1495_1499_midqueue
+1496,var_mean_4073a74b3f1a,4073a74b3f1a,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1495_1499_midqueue
+1497,var_mean_4348a08765d9,4348a08765d9,reduction,norm_template_canonicalization,1,1,1,~var_mean_f3432607acca;~var_mean_f58b743b2264,claimed,Codex,claimed_2026-06-13_batch_1495_1499_midqueue
+1498,var_mean_43610b02573d,43610b02573d,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1495_1499_midqueue
+1499,var_mean_43612b52e7fc,43612b52e7fc,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1495_1499_midqueue
 1500,var_mean_4425f695fc68,4425f695fc68,reduction,reduction_var_mean,1,1,1,,unclaimed,,
 1501,var_mean_445ed11aad0a,445ed11aad0a,reduction,norm_template_canonicalization,1,1,1,var_mean_327c3b97bf10;var_mean_d61716dfd9dd,unclaimed,,
 1502,var_mean_476d7b53369e,476d7b53369e,reduction,reduction_var_mean,1,1,1,,unclaimed,,
