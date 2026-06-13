@@ -1,16 +1,16 @@
 # Oracle Migration Worklog
 
-Updated: 2026-06-12
+Updated: 2026-06-13
 
 ## Current Worker Pool
 
-- Row 577 `var_mean_var_mean_e56fc242c590`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 578 `amax_sum_119baf9550ec`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 579 `amax_sum_1d0b8274d1b3`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 580 `amax_sum_2ee0501b648a`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 581 `amax_sum_57fd7ff76261`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 1727 `var_mean_var_mean_mean_0efb69a14422`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1726 `var_mean_var_mean_e642e2ea37a3`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1725 `var_mean_var_mean_92c45aff3580`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1724 `var_mean_var_mean_74b57fcc4507`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1723 `var_mean_var_mean_414c9e6634ca`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, 236-245, 246-257, 258-269, 275-286, and 577-588; rows 582-588 remain idle buffer. Rows 126-140, 156-171, 182-193, 214-225, 271-274, and 289-576 were claimed or completed remotely and should not be reused by this session unless ownership changes.
+Tail lane owned by this session: rows 1716-1727; rows 1716-1722 remain idle buffer. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
