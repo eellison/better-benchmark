@@ -548,11 +548,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 547,sum_sum_sum_0703a79bc871,0703a79bc871,reduction,reduction_general,3,2,3,,claimed,Codex,claimed_2026-06-12_batch_545-549_topdown
 548,sum_sum_sum_2b1b93ca6e56,2b1b93ca6e56,reduction,reduction_general,3,1,3,,claimed,Codex,claimed_2026-06-12_batch_545-549_topdown
 549,sum_sum_sum_2d74760b80f4,2d74760b80f4,reduction,reduction_general,3,2,3,,claimed,Codex,claimed_2026-06-12_batch_545-549_topdown
-550,sum_sum_sum_3634d1a62257,3634d1a62257,reduction,reduction_general,3,2,3,,unclaimed,,
-551,sum_sum_sum_874ba88ee22e,874ba88ee22e,reduction,reduction_general,3,1,3,,unclaimed,,
-552,sum_sum_sum_9a5b3965d355,9a5b3965d355,reduction,reduction_general,3,2,3,,unclaimed,,
-553,sum_sum_sum_b37e1065b3a0,b37e1065b3a0,reduction,reduction_general,3,2,3,,unclaimed,,
-554,sum_sum_sum_b6027582bc37,b6027582bc37,reduction,scatter_gather,2,3,3,,unclaimed,,
+550,sum_sum_sum_3634d1a62257,3634d1a62257,reduction,reduction_general,3,2,3,,claimed,Codex,claimed_2026-06-12_batch_550-554_topdown
+551,sum_sum_sum_874ba88ee22e,874ba88ee22e,reduction,reduction_general,3,1,3,,claimed,Codex,claimed_2026-06-12_batch_550-554_topdown
+552,sum_sum_sum_9a5b3965d355,9a5b3965d355,reduction,reduction_general,3,2,3,,claimed,Codex,claimed_2026-06-12_batch_550-554_topdown
+553,sum_sum_sum_b37e1065b3a0,b37e1065b3a0,reduction,reduction_general,3,2,3,,claimed,Codex,claimed_2026-06-12_batch_550-554_topdown
+554,sum_sum_sum_b6027582bc37,b6027582bc37,reduction,scatter_gather,2,3,3,,claimed,Codex,claimed_2026-06-12_batch_550-554_topdown
 555,sum_sum_sum_f2eb6784cabb,f2eb6784cabb,reduction,reduction_general,3,2,3,,unclaimed,,
 556,var_mean_0469ab74bf66,0469ab74bf66,reduction,norm_template_canonicalization,3,2,3,~var_mean_617b759d99fa,unclaimed,,
 557,var_mean_0b4143d6fc46,0b4143d6fc46,reduction,norm_template_canonicalization,1,1,3,~var_mean_1fad4754680a;~var_mean_3711a161734e;~var_mean_034578d167c5,unclaimed,,
