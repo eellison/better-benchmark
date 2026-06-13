@@ -4,13 +4,13 @@ Updated: 2026-06-13
 
 ## Current Worker Pool
 
-- Row 1691 `var_mean_f1094971e1b4`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1690 `var_mean_f0fb76589ff6`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1689 `var_mean_f0e10186a3cf`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 1688 `var_mean_ef83fb4a9dbc`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1687 `var_mean_ee167627f636`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 1686 `var_mean_ed2e4094de1e`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1685 `var_mean_ed219c5108e6`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1684 `var_mean_ece687e898ac`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1683 `var_mean_ece07e97e2fe`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 
-Tail lane owned by this session: rows 1653-1691; rows 1653-1686 remain idle buffer. Rows 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1692-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1653-1687; rows 1653-1682 remain idle buffer. Rows 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1688-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
@@ -28,6 +28,7 @@ Tail lane owned by this session: rows 1653-1691; rows 1653-1686 remain idle buff
 ## Pushed By This Session
 
 - Rows 1695-1697: measured, 3/3 checks, H100 fallback bench `3AT_FLOOR`, no CUDAGraph warnings.
+- Rows 1688-1691: measured, 4/4 checks, H100 fallback bench `1GOOD_3AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1692-1694: measured, 3/3 checks, H100 fallback bench `2GOOD_1AT_FLOOR`, no CUDAGraph warnings.
 - Row 1700 `var_mean_fbc9e58f2e01`: marked needs_work after parent rerun reproduced `NUMERICS_WORSE_THAN_COMPILED`; oracle.py deleted locally.
 - Row 1701 `var_mean_fbfc0104897d`: marked needs_work after parent rerun reproduced `1BAD_ORACLE`; oracle.py deleted locally.
