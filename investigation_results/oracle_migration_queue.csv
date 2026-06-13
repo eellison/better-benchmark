@@ -523,11 +523,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 522,mean_d8316a4248ca,d8316a4248ca,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_520-524_topdown
 523,mean_dd0ae0c99a52,dd0ae0c99a52,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_520-524_topdown
 524,mean_e8b283443d04,e8b283443d04,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_520-524_topdown
-525,mean_ec8e6cb1cc72,ec8e6cb1cc72,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
-526,mean_ece69d14f132,ece69d14f132,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
-527,mean_fb0fac280d31,fb0fac280d31,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
-528,pointwise_12465c189749,12465c189749,pointwise,layout_indexing_stencil_fusion,3,2,3,pointwise_1383c536f620;pointwise_556aac88a856;pointwise_7e9403871aac,unclaimed,,
-529,pointwise_39eaa1204ef2,39eaa1204ef2,pointwise,layout_indexing_stencil_fusion,3,2,3,~pointwise_57287c224f10;~pointwise_6a5649feb1f2,unclaimed,,
+525,mean_ec8e6cb1cc72,ec8e6cb1cc72,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_525-529_topdown
+526,mean_ece69d14f132,ece69d14f132,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_525-529_topdown
+527,mean_fb0fac280d31,fb0fac280d31,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_525-529_topdown
+528,pointwise_12465c189749,12465c189749,pointwise,layout_indexing_stencil_fusion,3,2,3,pointwise_1383c536f620;pointwise_556aac88a856;pointwise_7e9403871aac,claimed,Codex,claimed_2026-06-12_batch_525-529_topdown
+529,pointwise_39eaa1204ef2,39eaa1204ef2,pointwise,layout_indexing_stencil_fusion,3,2,3,~pointwise_57287c224f10;~pointwise_6a5649feb1f2,claimed,Codex,claimed_2026-06-12_batch_525-529_topdown
 530,pointwise_3dc061aeb21e,3dc061aeb21e,pointwise,pointwise,1,4,3,,unclaimed,,
 531,pointwise_41944c71d2d8,41944c71d2d8,pointwise,layout_indexing_stencil_fusion,3,2,3,pointwise_e4cfa8694326,unclaimed,,
 532,pointwise_68309e9afcc5,68309e9afcc5,pointwise,layout_indexing_stencil_fusion,3,2,3,~pointwise_72ba9dfd2891,unclaimed,,
