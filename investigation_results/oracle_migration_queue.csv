@@ -431,7 +431,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 430,var_mean_var_mean_09d2be3a4e2b,09d2be3a4e2b,reduction,reduction_var_mean,5,2,5,,claimed,Codex,claimed_2026-06-12_batch_430_topdown
 431,amax_amax_any_395c2caa2db4,395c2caa2db4,reduction,reduction_softmax_like,1,2,4,,claimed,Codex,claimed_2026-06-12_batch_431_topdown
 432,amax_amax_any_f8e425e72787,f8e425e72787,reduction,reduction_softmax_like,1,2,4,,claimed,Codex,claimed_2026-06-12_batch_432_topdown
-433,amax_sum_any_161752724969,161752724969,reduction,reduction_softmax_like,3,4,4,,unclaimed,,
+433,amax_sum_any_161752724969,161752724969,reduction,reduction_softmax_like,3,4,4,,claimed,Codex,claimed_2026-06-12_batch_433_topdown
 434,amax_sum_any_30cded63a2f9,30cded63a2f9,reduction,reduction_softmax_like,3,4,4,,unclaimed,,
 435,amax_sum_any_3342ba469382,3342ba469382,reduction,reduction_softmax_like,3,5,4,,unclaimed,,
 436,amax_sum_any_577af7e1e84b,577af7e1e84b,reduction,reduction_softmax_like,3,4,4,,unclaimed,,
