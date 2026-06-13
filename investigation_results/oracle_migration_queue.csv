@@ -390,7 +390,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 389,amax_sum_any_34ccb88507ce,34ccb88507ce,reduction,reduction_softmax_like,4,6,5,,claimed,Codex,claimed_2026-06-12_batch_389_topdown
 390,amax_sum_sum_3f000d9caa57,3f000d9caa57,reduction,scatter_gather,3,6,5,,claimed,Codex,claimed_2026-06-12_batch_390-392_topdown
 391,amax_sum_sum_822c7c06b882,822c7c06b882,reduction,online_softmax_cross_entropy,3,6,5,~amax_sum_sum_d85e67b00643,claimed,Codex,claimed_2026-06-12_batch_390-392_topdown
-392,mean_1e85edda8f16,1e85edda8f16,reduction,norm_template_canonicalization,4,2,5,~mean_7874ce26c7f3;~mean_cf12f53df7dd;~pointwise_f564ff7f54c2,claimed,Codex,claimed_2026-06-12_batch_390-392_topdown
+392,mean_1e85edda8f16,1e85edda8f16,reduction,norm_template_canonicalization,4,2,5,~mean_7874ce26c7f3;~mean_cf12f53df7dd;~pointwise_f564ff7f54c2,needs_work,Codex,needs_work: checks_pass_4of4_worker_h100_fallback_bench_NUMERICS_WORSE_THAN_COMPILED_all4_nan_fp64_gate_no_cudagraph_warnings_class_SCHEDULER_FUSION
 393,mean_65a318c9ed9c,65a318c9ed9c,reduction,norm_template_canonicalization,4,2,5,~mean_7874ce26c7f3;~mean_cf12f53df7dd;~pointwise_f564ff7f54c2,claimed,Codex,claimed_2026-06-12_batch_393_topdown
 394,mean_b138a1e42dbc,b138a1e42dbc,reduction,norm_template_canonicalization,5,8,5,mean_90c4736187a1,unclaimed,,
 395,mean_ea7081208754,ea7081208754,reduction,norm_template_canonicalization,4,2,5,~mean_148ad2fc17ca;~mean_7b48b0105aea;~mean_f5b5cccf92a8,unclaimed,,
