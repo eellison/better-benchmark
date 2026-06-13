@@ -10,7 +10,7 @@ Updated: 2026-06-13
 - Row 1702 `var_mean_fda6b7a40722`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1703 `var_mean_fdbe15b24063`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Tail lane owned by this session: rows 1692-1707; rows 1692-1700 remain idle buffer. Rows 1711, 1716, and 1718 are marked needs_work after parent-confirmed BAD_ORACLE. Rows 1704-1705, 1708-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1680-1707; rows 1680-1700 remain idle buffer. Rows 1711, 1716, and 1718 are marked needs_work after parent-confirmed BAD_ORACLE. Rows 1704-1705, 1708-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
