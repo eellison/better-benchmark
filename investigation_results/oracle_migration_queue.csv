@@ -530,7 +530,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 529,pointwise_39eaa1204ef2,39eaa1204ef2,pointwise,layout_indexing_stencil_fusion,3,2,3,~pointwise_57287c224f10;~pointwise_6a5649feb1f2,needs_work,Codex,worker_check_pass_bench_numerics_worse_than_compiled_all_points_no_cudagraph_warnings_2026-06-12
 530,pointwise_3dc061aeb21e,3dc061aeb21e,pointwise,pointwise,1,4,3,,claimed,Codex,claimed_2026-06-12_batch_530-534_topdown
 531,pointwise_41944c71d2d8,41944c71d2d8,pointwise,layout_indexing_stencil_fusion,3,2,3,pointwise_e4cfa8694326,needs_work,Codex,worker_check_pass_bench_numerics_worse_than_compiled_all_points_no_cudagraph_warnings_2026-06-12
-532,pointwise_68309e9afcc5,68309e9afcc5,pointwise,layout_indexing_stencil_fusion,3,2,3,~pointwise_72ba9dfd2891,claimed,Codex,claimed_2026-06-12_batch_530-534_topdown
+532,pointwise_68309e9afcc5,68309e9afcc5,pointwise,layout_indexing_stencil_fusion,3,2,3,~pointwise_72ba9dfd2891,needs_work,Codex,worker_check_pass_bench_numerics_worse_than_compiled_all_points_no_cudagraph_warnings_2026-06-12
 533,pointwise_dc1e4ac6d11f,dc1e4ac6d11f,pointwise,unclassified_priority_gap,2,4,3,pointwise_1c5b4956323d,claimed,Codex,claimed_2026-06-12_batch_530-534_topdown
 534,pointwise_dce071a17123,dce071a17123,pointwise,layout_indexing_stencil_fusion,3,4,3,pointwise_c2dc9d900d36,claimed,Codex,claimed_2026-06-12_batch_530-534_topdown
 535,pointwise_edf2e0dc44ea,edf2e0dc44ea,pointwise,layout_indexing_stencil_fusion,2,5,3,pointwise_edf2e0dc44ea,claimed,Codex,claimed_2026-06-12_batch_535-539_topdown
@@ -538,11 +538,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 537,pointwise_fc79e17a0171,fc79e17a0171,pointwise,pointwise,3,2,3,,claimed,Codex,claimed_2026-06-12_batch_535-539_topdown
 538,sum_53ecd5ca9ebe,53ecd5ca9ebe,reduction,reduction_general,1,2,3,,claimed,Codex,claimed_2026-06-12_batch_535-539_topdown
 539,sum_sum_00d72974c5fe,00d72974c5fe,reduction,reduction_general,3,1,3,,claimed,Codex,claimed_2026-06-12_batch_535-539_topdown
-540,sum_sum_12fc8ebf8180,12fc8ebf8180,reduction,reduction_general,3,2,3,,unclaimed,,
-541,sum_sum_3690c31a5a51,3690c31a5a51,reduction,reduction_general,3,1,3,,unclaimed,,
-542,sum_sum_7b53f7309dbe,7b53f7309dbe,reduction,reduction_general,3,1,3,,unclaimed,,
-543,sum_sum_840ed90a9954,840ed90a9954,reduction,reduction_general,1,2,3,,unclaimed,,
-544,sum_sum_d405766683ac,d405766683ac,reduction,reduction_general,2,2,3,,unclaimed,,
+540,sum_sum_12fc8ebf8180,12fc8ebf8180,reduction,reduction_general,3,2,3,,claimed,Codex,claimed_2026-06-12_batch_540-544_topdown
+541,sum_sum_3690c31a5a51,3690c31a5a51,reduction,reduction_general,3,1,3,,claimed,Codex,claimed_2026-06-12_batch_540-544_topdown
+542,sum_sum_7b53f7309dbe,7b53f7309dbe,reduction,reduction_general,3,1,3,,claimed,Codex,claimed_2026-06-12_batch_540-544_topdown
+543,sum_sum_840ed90a9954,840ed90a9954,reduction,reduction_general,1,2,3,,claimed,Codex,claimed_2026-06-12_batch_540-544_topdown
+544,sum_sum_d405766683ac,d405766683ac,reduction,reduction_general,2,2,3,,claimed,Codex,claimed_2026-06-12_batch_540-544_topdown
 545,sum_sum_e681bc3d9d59,e681bc3d9d59,reduction,reduction_general,2,2,3,,unclaimed,,
 546,sum_sum_sum_065a82cdc059,065a82cdc059,reduction,reduction_general,3,2,3,,unclaimed,,
 547,sum_sum_sum_0703a79bc871,0703a79bc871,reduction,reduction_general,3,2,3,,unclaimed,,
