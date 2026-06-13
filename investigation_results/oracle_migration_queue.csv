@@ -474,7 +474,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 473,sum_sum_85ee747617a6,85ee747617a6,reduction,reduction_general,2,5,4,,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
 474,sum_sum_f1db211e227c,f1db211e227c,reduction,reduction_general,4,2,4,,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
 475,sum_sum_sum_00a35e7a9bcb,00a35e7a9bcb,reduction,reduction_general,4,5,4,,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
-476,var_mean_0a75c9632b84,0a75c9632b84,reduction,norm_template_canonicalization,4,2,4,~var_mean_4581dbce69e5;~var_mean_bb7b5fefc1d5;~var_mean_bff30f530d6e,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
+476,var_mean_0a75c9632b84,0a75c9632b84,reduction,norm_template_canonicalization,4,2,4,~var_mean_4581dbce69e5;~var_mean_bb7b5fefc1d5;~var_mean_bff30f530d6e,oracle_measured,Codex,oracle_py_added_checks_pass_4of4_no_skip_pass_4of4_h100_fallback_bench_no_cudagraph_warnings_1AT_FLOOR_3GOOD_class_SCHEDULER_FUSION_needs_B200_verify
 477,var_mean_31d568179350,31d568179350,reduction,norm_template_canonicalization,2,4,4,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
 478,var_mean_481c5828fa83,481c5828fa83,reduction,norm_template_canonicalization,4,2,4,~var_mean_4581dbce69e5;~var_mean_bb7b5fefc1d5;~var_mean_bff30f530d6e,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
 479,var_mean_7ede8d1b11ff,7ede8d1b11ff,reduction,norm_template_canonicalization,4,2,4,~var_mean_4581dbce69e5;~var_mean_bb7b5fefc1d5;~var_mean_bff30f530d6e,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
