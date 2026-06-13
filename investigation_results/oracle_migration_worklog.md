@@ -5,14 +5,14 @@ Updated: 2026-06-13
 ## Current Worker Pool
 
 - Row 1343 `sum_sum_deb15e5bd8f2`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1342 `sum_sum_de4088ac89ce`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1345 `sum_sum_e62c5b3ab99a`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 1353 `sum_sum_fa3f320d4dca`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1340 `sum_sum_d3526ae548ba`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1339 `sum_sum_d283dea24dab`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1341 `sum_sum_db3fe220dc1b`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1344 `sum_sum_e5ed56d5d094`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
 Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
-Lower-gap refill buffer claimed by this session: rows 1342-1345 and 1353 are active. Rows 1357, 1365, 1369-1370, 1373, 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1346-1352, 1354-1364, 1366-1368, 1371-1372, 1374-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
+Lower-gap refill buffer claimed by this session: rows 1339-1341 and 1343-1344 are active. Rows 1357, 1365, 1369-1370, 1373, 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1342, 1345-1356, 1358-1364, 1366-1368, 1371-1372, 1374-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
 
 Additional lower-gap refill buffer claimed by this session: rows 1360-1369.
 
@@ -41,6 +41,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 
 ## Pushed By This Session
 
+- Rows 1342, 1345, and 1353: measured, 3/3 checks, H100 fallback bench `1GOOD_2AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1346-1347 and 1349: measured, 3/3 checks, H100 fallback bench `3GOOD`, no CUDAGraph warnings.
 - Row 1348: measured, 1/1 checks, H100 fallback bench `1GOOD`, no CUDAGraph warnings.
 - Rows 1351-1352: measured, 2/2 checks, H100 fallback bench `2GOOD`, no CUDAGraph warnings.
