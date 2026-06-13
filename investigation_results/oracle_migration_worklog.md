@@ -8,9 +8,9 @@ Updated: 2026-06-13
 - Row 1716 `var_mean_mean_94d5b5ab5e6e`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 1715 `var_mean_mean_7e505883fbf8`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 1714 `var_mean_mean_52ddb6a14d4e`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 1718 `var_mean_mean_c2c0ad00da48`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 1713 `var_mean_mean_3a94a106616a`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Tail lane owned by this session: rows 1704-1718; rows 1704-1713 remain idle buffer. Rows 1719-1727 are parent-verified and measured on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1704-1717; rows 1704-1712 remain idle buffer. Row 1718 is marked needs_work after parent-confirmed BAD_ORACLE. Rows 1719-1727 are parent-verified and measured on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
@@ -27,6 +27,7 @@ Tail lane owned by this session: rows 1704-1718; rows 1704-1713 remain idle buff
 
 ## Pushed By This Session
 
+- Row 1718 `var_mean_mean_c2c0ad00da48`: marked needs_work after parent rerun reproduced `1BAD_ORACLE`; oracle.py deleted locally.
 - Rows 1719-1722: measured, 4/4 checks, H100 fallback bench `1GOOD_3AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1723-1727: measured, 5/5 checks, H100 fallback bench `3GOOD_2AT_FLOOR`, no CUDAGraph warnings.
 - Row 61 `var_mean_2e254a2827d8`: measured, 22/22 checks, H100 fallback bench `20GOOD_1AT_FLOOR_1BAD_ORACLE`.
