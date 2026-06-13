@@ -453,11 +453,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 452,pointwise_66a321be1626,66a321be1626,pointwise,layout_indexing_stencil_fusion,1,2,4,~pointwise_086ccf98d441;~pointwise_78060a0d4a6b,claimed,Codex,claimed_2026-06-12_batch_450-454_topdown
 453,pointwise_7ebac70550be,7ebac70550be,pointwise,layout_indexing_stencil_fusion,4,2,4,~pointwise_c0e132c66e3b;~pointwise_f2df04089ff4;~pointwise_7a4083b7e3d1,claimed,Codex,claimed_2026-06-12_batch_450-454_topdown
 454,pointwise_9375aeadb8d3,9375aeadb8d3,pointwise,layout_indexing_stencil_fusion,1,4,4,pointwise_d54fca93c7e1,claimed,Codex,claimed_2026-06-12_batch_450-454_topdown
-455,pointwise_a22d76c884fc,a22d76c884fc,pointwise,layout_indexing_stencil_fusion,4,2,4,pointwise_1383c536f620;pointwise_556aac88a856;pointwise_7e9403871aac,unclaimed,,
-456,pointwise_ae776f663178,ae776f663178,pointwise,layout_indexing_stencil_fusion,4,2,4,~pointwise_d4f672d645c1,unclaimed,,
-457,pointwise_bf1f8ed80b12,bf1f8ed80b12,pointwise,pointwise,1,2,4,,unclaimed,,
-458,pointwise_c6c7ad63023f,c6c7ad63023f,pointwise,layout_indexing_stencil_fusion,4,2,4,pointwise_1383c536f620;pointwise_556aac88a856;pointwise_7e9403871aac,unclaimed,,
-459,pointwise_c7d4871a86a8,c7d4871a86a8,pointwise,layout_indexing_stencil_fusion,4,2,4,pointwise_d89eb45ec337,unclaimed,,
+455,pointwise_a22d76c884fc,a22d76c884fc,pointwise,layout_indexing_stencil_fusion,4,2,4,pointwise_1383c536f620;pointwise_556aac88a856;pointwise_7e9403871aac,claimed,Codex,claimed_2026-06-12_batch_455-459_topdown
+456,pointwise_ae776f663178,ae776f663178,pointwise,layout_indexing_stencil_fusion,4,2,4,~pointwise_d4f672d645c1,claimed,Codex,claimed_2026-06-12_batch_455-459_topdown
+457,pointwise_bf1f8ed80b12,bf1f8ed80b12,pointwise,pointwise,1,2,4,,claimed,Codex,claimed_2026-06-12_batch_455-459_topdown
+458,pointwise_c6c7ad63023f,c6c7ad63023f,pointwise,layout_indexing_stencil_fusion,4,2,4,pointwise_1383c536f620;pointwise_556aac88a856;pointwise_7e9403871aac,claimed,Codex,claimed_2026-06-12_batch_455-459_topdown
+459,pointwise_c7d4871a86a8,c7d4871a86a8,pointwise,layout_indexing_stencil_fusion,4,2,4,pointwise_d89eb45ec337,claimed,Codex,claimed_2026-06-12_batch_455-459_topdown
 460,pointwise_c827b10bd5dd,c827b10bd5dd,pointwise,unclassified_priority_gap,1,2,4,~pointwise_17542057506f;~pointwise_2babaf917a12;~pointwise_b51064ab890f,unclaimed,,
 461,pointwise_d6d9504b25c0,d6d9504b25c0,pointwise,unclassified_priority_gap,1,2,4,~pointwise_17542057506f;~pointwise_2babaf917a12;~pointwise_b51064ab890f,unclaimed,,
 462,pointwise_e4b7b0947416,e4b7b0947416,pointwise,pointwise,2,4,4,,unclaimed,,
