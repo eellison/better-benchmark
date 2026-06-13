@@ -1393,10 +1393,10 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1392,sum_sum_sum_74f116312f8b,74f116312f8b,reduction,scatter_gather,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1390-1399
 1393,sum_sum_sum_789f08ef70ab,789f08ef70ab,reduction,reduction_general,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_1390-1399
 1394,sum_sum_sum_79c321089383,79c321089383,reduction,scatter_gather,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1390-1399
-1395,sum_sum_sum_7ab5c91b014a,7ab5c91b014a,reduction,reduction_general,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1390-1399
+1395,sum_sum_sum_7ab5c91b014a,7ab5c91b014a,reduction,reduction_general,1,2,1,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_1GOOD_class_COOPERATIVE_SPLIT_K_needs_B200_verify
 1396,sum_sum_sum_7c4a1a0a4d8d,7c4a1a0a4d8d,reduction,scatter_gather,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1390-1399
-1397,sum_sum_sum_81f672a568a0,81f672a568a0,reduction,scatter_gather,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_1390-1399
-1398,sum_sum_sum_86e661f4be59,86e661f4be59,reduction,reduction_general,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1390-1399
+1397,sum_sum_sum_81f672a568a0,81f672a568a0,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_1GOOD_class_SCATTER_REDUCE_needs_B200_verify
+1398,sum_sum_sum_86e661f4be59,86e661f4be59,reduction,reduction_general,1,2,1,,needs_work,Codex,parent_check_pass_no_skip_pass_h100_fallback_bench_NUMERICS_WORSE_THAN_COMPILED_no_cudagraph_warnings_oracle_deleted_2026-06-13
 1399,sum_sum_sum_8adea0bd8df9,8adea0bd8df9,reduction,reduction_general,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_1390-1399
 1400,sum_sum_sum_8f68a97a2af7,8f68a97a2af7,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1401,sum_sum_sum_9ab0961d1fd9,9ab0961d1fd9,reduction,scatter_gather,1,1,1,,needs_work,Codex,worker_check_pass_bench_NUMERICS_WORSE_THAN_COMPILED_no_cudagraph_warnings_2026-06-13

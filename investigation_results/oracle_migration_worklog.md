@@ -5,14 +5,14 @@ Updated: 2026-06-13
 ## Current Worker Pool
 
 - Row 1399 `sum_sum_sum_8adea0bd8df9`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1398 `sum_sum_sum_86e661f4be59`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
-- Row 1397 `sum_sum_sum_81f672a568a0`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1396 `sum_sum_sum_7c4a1a0a4d8d`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1395 `sum_sum_sum_7ab5c91b014a`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1394 `sum_sum_sum_79c321089383`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1393 `sum_sum_sum_789f08ef70ab`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1392 `sum_sum_sum_74f116312f8b`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
 Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
-Lower-gap refill buffer claimed by this session: rows 1390-1394 remain idle buffer; rows 1395-1399 are active.
+Lower-gap refill buffer claimed by this session: rows 1390-1391 remain idle buffer; rows 1392-1394, 1396, and 1399 are active. Row 1398 is marked needs_work after parent-confirmed numerics-gate failure; rows 1395 and 1397 are parent-verified on H100 fallback, pending B200 verification.
 
 ## Pending Parent Review
 
@@ -30,6 +30,8 @@ Lower-gap refill buffer claimed by this session: rows 1390-1394 remain idle buff
 ## Pushed By This Session
 
 - Rows 1695-1697: measured, 3/3 checks, H100 fallback bench `3AT_FLOOR`, no CUDAGraph warnings.
+- Rows 1395 and 1397: measured, 2/2 checks, H100 fallback bench `2GOOD`, no CUDAGraph warnings.
+- Row 1398 `sum_sum_sum_86e661f4be59`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench fails `NUMERICS_WORSE_THAN_COMPILED`.
 - Row 1556 `var_mean_7947f1107256`: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`, no CUDAGraph warnings.
 - Row 1549 `var_mean_6cd69c8f3b06`: marked `needs_work`; 1/1 checks pass but parent rerun locked bench is `1BAD_ORACLE`.
 - Rows 1550-1552 and 1559: measured, 4/4 checks, H100 fallback bench `1GOOD_3AT_FLOOR`, no CUDAGraph warnings.
