@@ -4,13 +4,13 @@ Updated: 2026-06-13
 
 ## Current Worker Pool
 
-- Row 1727 `var_mean_var_mean_mean_0efb69a14422`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1726 `var_mean_var_mean_e642e2ea37a3`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1725 `var_mean_var_mean_92c45aff3580`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 1724 `var_mean_var_mean_74b57fcc4507`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 1723 `var_mean_var_mean_414c9e6634ca`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 1722 `var_mean_var_mean_0ec03ae7565f`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1721 `var_mean_var_mean_0dd15b92dc70`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1720 `var_mean_sum_53c829d32b0c`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1719 `var_mean_mean_f766086bbce9`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1718 `var_mean_mean_c2c0ad00da48`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Tail lane owned by this session: rows 1716-1727; rows 1716-1722 remain idle buffer. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1716-1722; rows 1716-1717 remain idle buffer. Rows 1723-1727 are parent-verified and measured on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
@@ -27,6 +27,7 @@ Tail lane owned by this session: rows 1716-1727; rows 1716-1722 remain idle buff
 
 ## Pushed By This Session
 
+- Rows 1723-1727: measured, 5/5 checks, H100 fallback bench `3GOOD_2AT_FLOOR`, no CUDAGraph warnings.
 - Row 61 `var_mean_2e254a2827d8`: measured, 22/22 checks, H100 fallback bench `20GOOD_1AT_FLOOR_1BAD_ORACLE`.
 - Row 70 `sum_785c25a716ed`: measured after rework, 3/3 checks, H100 fallback bench `3GOOD`; duplicate shape registration warning is expected for same-shape/different-stride ConvBERT points.
 - Row 81 `sum_4a4493837e6e`: measured, 16/16 checks, H100 fallback bench `15GOOD_1AT_FLOOR`.
