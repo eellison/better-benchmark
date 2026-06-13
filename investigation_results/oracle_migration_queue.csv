@@ -372,7 +372,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 371,pointwise_eff4b8c521ae,eff4b8c521ae,pointwise,layout_indexing_stencil_fusion,6,4,6,~pointwise_485ad74a8b0e;~pointwise_5af8bce2a228;~pointwise_e33f44c6dd73,claimed,Codex,claimed_2026-06-12_batch_370-371_topdown
 372,pointwise_fbfd10a2d290,fbfd10a2d290,pointwise,layout_indexing_stencil_fusion,6,3,6,pointwise_1f7516b9892a;pointwise_7f55bac8afd0;pointwise_d38e6d98a617,claimed,Codex,claimed_2026-06-12_batch_372_topdown
 373,sum_sum_3ab1da5a9e6c,3ab1da5a9e6c,reduction,reduction_general,4,4,6,,claimed,Codex,claimed_2026-06-12_batch_373-374_topdown
-374,sum_sum_f9e4c9d243d2,f9e4c9d243d2,reduction,reduction_general,1,1,6,,claimed,Codex,claimed_2026-06-12_batch_373-374_topdown
+374,sum_sum_f9e4c9d243d2,f9e4c9d243d2,reduction,reduction_general,1,1,6,,needs_work,Codex,needs_work: checks_pass_1of1_worker_h100_fallback_bench_BAD_ORACLE_oracle55.62us_compile43.94us_no_cudagraph_warnings_class_SCHEDULER_FUSION
 375,sum_sum_sum_127fc8edd5da,127fc8edd5da,reduction,reduction_general,1,2,6,,claimed,Codex,claimed_2026-06-12_batch_375_topdown
 376,sum_sum_sum_92943d6eae4c,92943d6eae4c,reduction,reduction_general,1,4,6,,claimed,Codex,claimed_2026-06-12_batch_376-377_topdown
 377,var_mean_11df982f906b,11df982f906b,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_376-377_topdown
