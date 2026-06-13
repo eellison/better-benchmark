@@ -17,6 +17,8 @@ Lower-gap refill buffer claimed by this session: rows 1381-1382 and 1384-1386 ar
 
 Additional lower-gap refill buffer claimed by this session: rows 1380-1389.
 
+Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
+
 ## Pending Parent Review
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
