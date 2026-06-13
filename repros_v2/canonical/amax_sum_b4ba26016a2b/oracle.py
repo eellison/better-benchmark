@@ -45,13 +45,14 @@ def _softmax_dropout_random_kernel(
     BLOCK_M: tl.constexpr,
     BLOCK_N: tl.constexpr,
 ):
-    rows = tl.program_id(0) * BLOCK_M + tl.arange(0, BLOCK_M)
+    schedule_rows = tl.program_id(0) * BLOCK_M + tl.arange(0, BLOCK_M)
     cols = tl.arange(0, BLOCK_N)
 
-    bh = rows // q_len
-    q = rows - bh * q_len
-    h = bh % n_heads
-    b = bh // n_heads
+    b = schedule_rows // (q_len * n_heads)
+    bq_rem = schedule_rows - b * q_len * n_heads
+    q = bq_rem // n_heads
+    h = bq_rem - q * n_heads
+    rows = (b * n_heads + h) * q_len + q
     dense_offsets = rows[:, None] * k_len + cols[None, :]
     strided_offsets = (
         b[:, None] * arg1_s0
@@ -60,8 +61,12 @@ def _softmax_dropout_random_kernel(
         + cols[None, :] * arg1_s3
     )
 
-    view_val = tl.load(arg0_ptr + dense_offsets).to(tl.float32)
-    bias = tl.load(arg1_ptr + strided_offsets).to(tl.float32)
+    view_val = tl.load(arg0_ptr + dense_offsets, eviction_policy="evict_first").to(
+        tl.float32
+    )
+    bias = tl.load(arg1_ptr + strided_offsets, eviction_policy="evict_last").to(
+        tl.float32
+    )
     rounded = (view_val + bias).to(tl.bfloat16)
     tl.store(rounded_ptr + dense_offsets, rounded)
 
@@ -109,13 +114,14 @@ def _softmax_dropout_seeded_kernel(
     BLOCK_M: tl.constexpr,
     BLOCK_N: tl.constexpr,
 ):
-    rows = tl.program_id(0) * BLOCK_M + tl.arange(0, BLOCK_M)
+    schedule_rows = tl.program_id(0) * BLOCK_M + tl.arange(0, BLOCK_M)
     cols = tl.arange(0, BLOCK_N)
 
-    bh = rows // q_len
-    q = rows - bh * q_len
-    h = bh % n_heads
-    b = bh // n_heads
+    b = schedule_rows // (q_len * n_heads)
+    bq_rem = schedule_rows - b * q_len * n_heads
+    q = bq_rem // n_heads
+    h = bq_rem - q * n_heads
+    rows = (b * n_heads + h) * q_len + q
     dense_offsets = rows[:, None] * k_len + cols[None, :]
     strided_offsets = (
         b[:, None] * arg1_s0
@@ -124,8 +130,12 @@ def _softmax_dropout_seeded_kernel(
         + cols[None, :] * arg1_s3
     )
 
-    view_val = tl.load(arg0_ptr + dense_offsets).to(tl.float32)
-    bias = tl.load(arg1_ptr + strided_offsets).to(tl.float32)
+    view_val = tl.load(arg0_ptr + dense_offsets, eviction_policy="evict_first").to(
+        tl.float32
+    )
+    bias = tl.load(arg1_ptr + strided_offsets, eviction_policy="evict_last").to(
+        tl.float32
+    )
     rounded = (view_val + bias).to(tl.bfloat16)
     tl.store(rounded_ptr + dense_offsets, rounded)
 
@@ -306,7 +316,7 @@ def _launch(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int, num_stages: i
 
 
 # aeb1682d: (T([64,1024,1024], bf16), T([8,8,1024,1024], f32, stride=(8388608,1,8192,8)), T([64], i64), ...)
-@oracle_impl(hardware="B200", point="aeb1682d", BLOCK_M=1, BLOCK_N=1024, num_warps=8, num_stages=3)
+@oracle_impl(hardware="B200", point="aeb1682d", BLOCK_M=2, BLOCK_N=1024, num_warps=4, num_stages=3)
 def oracle_forward(
     inputs,
     *,

@@ -82,6 +82,7 @@ def _encoder_branch_kernel(
     q_len: tl.constexpr,
     k_len: tl.constexpr,
     USE_RANDOM_PTR: tl.constexpr,
+    STORE_SIDE_OUTPUTS: tl.constexpr,
     BLOCK_M: tl.constexpr,
     BLOCK_N: tl.constexpr,
 ):
@@ -125,14 +126,15 @@ def _encoder_branch_kernel(
     scaled = _f32_mul(dropped.to(tl.float32), 1.1111111111111112).to(tl.bfloat16)
     tl.store(dropped_ptr + linear, scaled, mask=mask)
 
-    first_batch = batch[:, None] == 0
-    first_head = head[:, None] == 0
-    qk_offsets = query[:, None] * k_len + cols[None, :]
-    tl.store(bucket_ptr + qk_offsets, bucket.to(tl.int64), mask=mask & first_batch & first_head)
-    embedding_offsets = (query[:, None] * k_len + cols[None, :]) * heads + head[:, None]
-    tl.store(embedding_ptr + embedding_offsets, rel, mask=mask & first_batch)
-    bias_offsets = batch[:, None] * (heads * q_len * k_len) + head[:, None] + query[:, None] * (k_len * heads) + cols[None, :] * heads
-    tl.store(bias_ptr + bias_offsets, rel, mask=mask)
+    if STORE_SIDE_OUTPUTS:
+        first_batch = batch[:, None] == 0
+        first_head = head[:, None] == 0
+        qk_offsets = query[:, None] * k_len + cols[None, :]
+        tl.store(bucket_ptr + qk_offsets, bucket.to(tl.int64), mask=mask & first_batch & first_head)
+        embedding_offsets = (query[:, None] * k_len + cols[None, :]) * heads + head[:, None]
+        tl.store(embedding_ptr + embedding_offsets, rel, mask=mask & first_batch)
+        bias_offsets = batch[:, None] * (heads * q_len * k_len) + head[:, None] + query[:, None] * (k_len * heads) + cols[None, :] * heads
+        tl.store(bias_ptr + bias_offsets, rel, mask=mask)
 
 
 @triton.jit
@@ -155,6 +157,7 @@ def _decoder_branch_kernel(
     q_len: tl.constexpr,
     k_len: tl.constexpr,
     USE_RANDOM_PTR: tl.constexpr,
+    STORE_SIDE_OUTPUTS: tl.constexpr,
     BLOCK_M: tl.constexpr,
     BLOCK_N: tl.constexpr,
 ):
@@ -201,15 +204,81 @@ def _decoder_branch_kernel(
     scaled = _f32_mul(dropped.to(tl.float32), 1.1111111111111112).to(tl.bfloat16)
     tl.store(dropped_ptr + linear, scaled, mask=mask)
 
-    first_batch = batch[:, None] == 0
-    first_head = head[:, None] == 0
-    qk_offsets = query[:, None] * k_len + cols[None, :]
-    tl.store(bucket_ptr + qk_offsets, bucket.to(tl.int64), mask=mask & first_batch & first_head)
-    embedding_offsets = (query[:, None] * k_len + cols[None, :]) * heads + head[:, None]
-    tl.store(embedding_ptr + embedding_offsets, rel, mask=mask & first_batch)
-    bias_offsets = batch[:, None] * (heads * q_len * k_len) + head[:, None] + query[:, None] * (k_len * heads) + cols[None, :] * heads
-    tl.store(bias_ptr + bias_offsets, bias_val, mask=mask)
-    tl.store(iota_ptr + query, query.to(tl.int64), mask=row_mask & (batch == 0) & (head == 0))
+    if STORE_SIDE_OUTPUTS:
+        first_batch = batch[:, None] == 0
+        first_head = head[:, None] == 0
+        qk_offsets = query[:, None] * k_len + cols[None, :]
+        tl.store(bucket_ptr + qk_offsets, bucket.to(tl.int64), mask=mask & first_batch & first_head)
+        embedding_offsets = (query[:, None] * k_len + cols[None, :]) * heads + head[:, None]
+        tl.store(embedding_ptr + embedding_offsets, rel, mask=mask & first_batch)
+        bias_offsets = batch[:, None] * (heads * q_len * k_len) + head[:, None] + query[:, None] * (k_len * heads) + cols[None, :] * heads
+        tl.store(bias_ptr + bias_offsets, bias_val, mask=mask)
+        tl.store(iota_ptr + query, query.to(tl.int64), mask=row_mask & (batch == 0) & (head == 0))
+        tl.store(zero_ptr, 0.0, mask=tl.program_id(0) == 0)
+
+
+@triton.jit
+def _encoder_side_outputs_kernel(
+    rel_ptr,
+    bucket_ptr,
+    embedding_ptr,
+    bias_ptr,
+    total: tl.constexpr,
+    heads: tl.constexpr,
+    q_len: tl.constexpr,
+    k_len: tl.constexpr,
+    BLOCK: tl.constexpr,
+):
+    offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+    mask = offsets < total
+
+    head = offsets % heads
+    tmp = offsets // heads
+    key = tmp % k_len
+    tmp = tmp // k_len
+    query = tmp % q_len
+    batch = tmp // q_len
+
+    bucket = _t5_bidirectional_bucket(query, key)
+    rel = tl.load(rel_ptr + bucket * heads + head, mask=mask, other=0.0).to(tl.float32)
+    tl.store(bias_ptr + offsets, rel, mask=mask)
+    tl.store(embedding_ptr + query * k_len * heads + key * heads + head, rel, mask=mask & (batch == 0))
+    tl.store(bucket_ptr + query * k_len + key, bucket.to(tl.int64), mask=mask & (batch == 0) & (head == 0))
+
+
+@triton.jit
+def _decoder_side_outputs_kernel(
+    rel_ptr,
+    iota_ptr,
+    zero_ptr,
+    bucket_ptr,
+    embedding_ptr,
+    bias_ptr,
+    total: tl.constexpr,
+    heads: tl.constexpr,
+    q_len: tl.constexpr,
+    k_len: tl.constexpr,
+    BLOCK: tl.constexpr,
+):
+    offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+    mask = offsets < total
+
+    head = offsets % heads
+    tmp = offsets // heads
+    key = tmp % k_len
+    tmp = tmp // k_len
+    query = tmp % q_len
+    batch = tmp // q_len
+
+    bucket = _t5_causal_bucket(query, key)
+    rel = tl.load(rel_ptr + bucket * heads + head, mask=mask, other=0.0).to(tl.float32)
+    min_f32 = tl.full((BLOCK,), -3.4028234663852886e38, tl.float32)
+    bias_val = tl.where(key <= query, rel, min_f32)
+
+    tl.store(bias_ptr + offsets, bias_val, mask=mask)
+    tl.store(embedding_ptr + query * k_len * heads + key * heads + head, rel, mask=mask & (batch == 0))
+    tl.store(bucket_ptr + query * k_len + key, bucket.to(tl.int64), mask=mask & (batch == 0) & (head == 0))
+    tl.store(iota_ptr + offsets, offsets.to(tl.int64), mask=offsets < q_len)
     tl.store(zero_ptr, 0.0, mask=tl.program_id(0) == 0)
 
 
@@ -271,8 +340,8 @@ def _row_stride(shape):
     return (shape[1] * shape[2], shape[2], 1, 1)
 
 
-@oracle_impl(hardware="B200", point="5d077752", BLOCK_M=1, BLOCK_N=1024, num_warps=4, num_stages=3)
-def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int, num_stages: int):
+@oracle_impl(hardware="B200", point="5d077752", BLOCK_M=1, BLOCK_N=1024, SIDE_BLOCK=2048, num_warps=4, num_stages=3)
+def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, SIDE_BLOCK: int, num_warps: int, num_stages: int):
     (
         arg0_1,
         arg1_1,
@@ -325,6 +394,35 @@ def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int, num_st
     view_3 = torch.empty_strided(flat_shape_2, (q_len * k_len, k_len, 1), device=arg0_1.device, dtype=torch.bfloat16)
 
     grid = (triton.cdiv(n_rows, BLOCK_M),)
+    side_grid = (triton.cdiv(add_4.numel(), SIDE_BLOCK),)
+    _encoder_side_outputs_kernel[side_grid](
+        arg1_1,
+        add_3,
+        embedding,
+        add_4,
+        total=add_4.numel(),
+        heads=heads,
+        q_len=q_len,
+        k_len=k_len,
+        BLOCK=SIDE_BLOCK,
+        num_warps=4,
+        num_stages=3,
+    )
+    _decoder_side_outputs_kernel[side_grid](
+        arg4_1,
+        unsqueeze_4,
+        full_2,
+        add_8,
+        embedding_1,
+        add_9,
+        total=add_9.numel(),
+        heads=heads,
+        q_len=q_len,
+        k_len=k_len,
+        BLOCK=SIDE_BLOCK,
+        num_warps=4,
+        num_stages=3,
+    )
     if torch.cuda.is_current_stream_capturing():
         _encoder_branch_kernel[grid](
             arg0_1,
@@ -343,6 +441,7 @@ def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int, num_st
             q_len=q_len,
             k_len=k_len,
             USE_RANDOM_PTR=False,
+            STORE_SIDE_OUTPUTS=False,
             BLOCK_M=BLOCK_M,
             BLOCK_N=BLOCK_N,
             num_warps=num_warps,
@@ -367,6 +466,7 @@ def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int, num_st
             q_len=q_len,
             k_len=k_len,
             USE_RANDOM_PTR=False,
+            STORE_SIDE_OUTPUTS=False,
             BLOCK_M=BLOCK_M,
             BLOCK_N=BLOCK_N,
             num_warps=num_warps,
@@ -393,6 +493,7 @@ def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int, num_st
             q_len=q_len,
             k_len=k_len,
             USE_RANDOM_PTR=True,
+            STORE_SIDE_OUTPUTS=False,
             BLOCK_M=BLOCK_M,
             BLOCK_N=BLOCK_N,
             num_warps=num_warps,
@@ -417,6 +518,7 @@ def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int, num_st
             q_len=q_len,
             k_len=k_len,
             USE_RANDOM_PTR=True,
+            STORE_SIDE_OUTPUTS=False,
             BLOCK_M=BLOCK_M,
             BLOCK_N=BLOCK_N,
             num_warps=num_warps,

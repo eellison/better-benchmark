@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 T5 attention softmax/dropout scope in one Triton row kernel, including the shape-param view, strided f32 bias add, explicit bf16 post-add rounding, fp32 stable last-dimension amax/libdevice.exp/sum/div, returned bf16 rounded score tensor, returned fp32 amax and sum side outputs, Inductor seed-index-39 dropout with the required f32-random-to-bf16 cast before gt(0.1), bf16 dropout scaling by 1.1111111111111112, the returned contiguous 3D view, and returned permute alias, whereas Inductor lowers the strided add, reduction, stochastic producer, dropout epilogue, and sibling side outputs through generic scheduler fragments; Inductor cannot do this today because its row-softmax fusion path does not keep the bf16 score materialization, reduction side outputs, seeded dropout mask, scaled output view, and layout-only alias resident across the reduction epilogue while preserving the bf16 rounding boundaries; the fix is SCHEDULER_FUSION: extend the attention-softmax scheduler to fuse strided score biasing, observable reduction side outputs, Inductor-seeded dropout, and alias-producing layout epilogues in one full-scope plan."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 T5 attention softmax/dropout scope with Triton kernels, including the shape-param view, strided f32 bias add, explicit bf16 post-add rounding, fp32 stable last-dimension amax/libdevice.exp/sum/div, returned bf16 rounded score tensor, returned fp32 amax and sum side outputs, Inductor seed-index-39 dropout with the required f32-random-to-bf16 cast before gt(0.1), bf16 dropout scaling by 1.1111111111111112, the returned contiguous 3D view, and returned permute alias, whereas Inductor lowers the strided add, reduction, stochastic producer, dropout epilogue, and sibling side outputs through generic scheduler fragments; Inductor cannot do this today because its row-softmax fusion path does not keep the bf16 score materialization, reduction side outputs, seeded dropout mask, scaled output view, and layout-only alias resident across the reduction epilogue while preserving the bf16 rounding boundaries; the fix is SCHEDULER_FUSION: extend the attention-softmax scheduler to fuse strided score biasing, observable reduction side outputs, Inductor-seeded dropout, and alias-producing layout epilogues in one full-scope plan."""
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
@@ -57,7 +57,7 @@ def _softmax_dropout_random_kernel(
     row_max = tl.max(scores, axis=1)
     numer = libdevice.exp(scores - row_max[:, None])
     denom = tl.sum(numer, axis=1)
-    probs = (numer / denom[:, None]).to(tl.bfloat16)
+    probs = (libdevice.exp(scores - row_max[:, None]) / denom[:, None]).to(tl.bfloat16)
 
     tl.store(amax_ptr + rows, row_max)
     tl.store(sum_ptr + rows, denom)
@@ -121,7 +121,7 @@ def _softmax_dropout_seeded_kernel(
     row_max = tl.max(scores, axis=1)
     numer = libdevice.exp(scores - row_max[:, None])
     denom = tl.sum(numer, axis=1)
-    probs = (numer / denom[:, None]).to(tl.bfloat16)
+    probs = (libdevice.exp(scores - row_max[:, None]) / denom[:, None]).to(tl.bfloat16)
 
     tl.store(amax_ptr + rows, row_max)
     tl.store(sum_ptr + rows, denom)
@@ -294,7 +294,7 @@ def _launch(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int, num_stages: i
 
 
 # aeb1682d: (T([64,1024,1024], bf16), T([8,8,1024,1024], f32, stride=(8388608,1,8192,8)), T([64], i64), ...)
-@oracle_impl(hardware="B200", point="aeb1682d", BLOCK_M=1, BLOCK_N=1024, num_warps=8, num_stages=3)
+@oracle_impl(hardware="B200", point="aeb1682d", BLOCK_M=1, BLOCK_N=1024, num_warps=8, num_stages=1)
 def oracle_forward(
     inputs,
     *,
