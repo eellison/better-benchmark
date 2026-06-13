@@ -458,11 +458,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 457,pointwise_bf1f8ed80b12,bf1f8ed80b12,pointwise,pointwise,1,2,4,,claimed,Codex,claimed_2026-06-12_batch_455-459_topdown
 458,pointwise_c6c7ad63023f,c6c7ad63023f,pointwise,layout_indexing_stencil_fusion,4,2,4,pointwise_1383c536f620;pointwise_556aac88a856;pointwise_7e9403871aac,claimed,Codex,claimed_2026-06-12_batch_455-459_topdown
 459,pointwise_c7d4871a86a8,c7d4871a86a8,pointwise,layout_indexing_stencil_fusion,4,2,4,pointwise_d89eb45ec337,claimed,Codex,claimed_2026-06-12_batch_455-459_topdown
-460,pointwise_c827b10bd5dd,c827b10bd5dd,pointwise,unclassified_priority_gap,1,2,4,~pointwise_17542057506f;~pointwise_2babaf917a12;~pointwise_b51064ab890f,unclaimed,,
-461,pointwise_d6d9504b25c0,d6d9504b25c0,pointwise,unclassified_priority_gap,1,2,4,~pointwise_17542057506f;~pointwise_2babaf917a12;~pointwise_b51064ab890f,unclaimed,,
-462,pointwise_e4b7b0947416,e4b7b0947416,pointwise,pointwise,2,4,4,,unclaimed,,
-463,sum_30fd5c612a69,30fd5c612a69,reduction,reduction_general,4,2,4,,unclaimed,,
-464,sum_5cb3d877d464,5cb3d877d464,reduction,reduction_general,1,2,4,,unclaimed,,
+460,pointwise_c827b10bd5dd,c827b10bd5dd,pointwise,unclassified_priority_gap,1,2,4,~pointwise_17542057506f;~pointwise_2babaf917a12;~pointwise_b51064ab890f,claimed,Codex,claimed_2026-06-12_batch_460-464_topdown
+461,pointwise_d6d9504b25c0,d6d9504b25c0,pointwise,unclassified_priority_gap,1,2,4,~pointwise_17542057506f;~pointwise_2babaf917a12;~pointwise_b51064ab890f,claimed,Codex,claimed_2026-06-12_batch_460-464_topdown
+462,pointwise_e4b7b0947416,e4b7b0947416,pointwise,pointwise,2,4,4,,claimed,Codex,claimed_2026-06-12_batch_460-464_topdown
+463,sum_30fd5c612a69,30fd5c612a69,reduction,reduction_general,4,2,4,,claimed,Codex,claimed_2026-06-12_batch_460-464_topdown
+464,sum_5cb3d877d464,5cb3d877d464,reduction,reduction_general,1,2,4,,claimed,Codex,claimed_2026-06-12_batch_460-464_topdown
 465,sum_7a3340d935e9,7a3340d935e9,reduction,multi_output_reduction_templates,4,5,4,sum_7a3340d935e9;sum_962f7dc019a9,unclaimed,,
 466,sum_81b4fd73f8d1,81b4fd73f8d1,reduction,reduction_general,3,5,4,,unclaimed,,
 467,sum_898c72fb606a,898c72fb606a,reduction,reduction_general,1,2,4,,unclaimed,,
