@@ -468,7 +468,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 467,sum_898c72fb606a,898c72fb606a,reduction,reduction_general,1,2,4,,claimed,Codex,claimed_2026-06-12_batch_465-469_topdown
 468,sum_d6239b8319dc,d6239b8319dc,reduction,unclassified_priority_gap,4,8,4,~sum_035e9c596064;~sum_ca52eb919072;~sum_2dab433e3109,claimed,Codex,claimed_2026-06-12_batch_465-469_topdown
 469,sum_eb86a17deab9,eb86a17deab9,reduction,sum,4,5,4,sum_39cf4835a913;sum_c7a56ee42903;sum_eb86a17deab9,claimed,Codex,claimed_2026-06-12_batch_465-469_topdown
-470,sum_sum_1e07e3ba8c68,1e07e3ba8c68,reduction,reduction_general,1,2,4,,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
+470,sum_sum_1e07e3ba8c68,1e07e3ba8c68,reduction,reduction_general,1,2,4,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_1AT_FLOOR_class_COOPERATIVE_SPLIT_K_needs_B200_verify
 471,sum_sum_3a61ea52bbe0,3a61ea52bbe0,reduction,scatter_gather,4,4,4,,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
 472,sum_sum_3e2827a51f95,3e2827a51f95,reduction,reduction_general,1,2,4,,needs_work,Codex,needs_work: checks_pass_1of1_no_skip_pass_1of1_bench_failed_NUMERICS_WORSE_THAN_COMPILED_no_cudagraph_warnings_class_COOPERATIVE_SPLIT_K
 473,sum_sum_85ee747617a6,85ee747617a6,reduction,reduction_general,2,5,4,,claimed,Codex,claimed_2026-06-12_batch_470-479_topdown
