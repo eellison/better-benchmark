@@ -1529,10 +1529,10 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1528,var_mean_5c94515647e9,5c94515647e9,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1528_1530_midqueue
 1529,var_mean_5d4968220975,5d4968220975,reduction,norm_template_canonicalization,1,2,1,~var_mean_b0e2cade591e;~var_mean_e44de9a60b6b;~var_mean_6f5e73770101,claimed,Codex,claimed_2026-06-13_batch_1528_1530_midqueue
 1530,var_mean_5e0db2d8059c,5e0db2d8059c,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1528_1530_midqueue
-1531,var_mean_5eb9caa7d36d,5eb9caa7d36d,reduction,reduction_var_mean,1,1,1,,unclaimed,,
-1532,var_mean_5ec2187b5869,5ec2187b5869,reduction,reduction_var_mean,1,2,1,,unclaimed,,
-1533,var_mean_5fb45b3e5469,5fb45b3e5469,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-1534,var_mean_5fe194ed50d0,5fe194ed50d0,reduction,reduction_var_mean,1,1,1,,unclaimed,,
+1531,var_mean_5eb9caa7d36d,5eb9caa7d36d,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1531_1534_midqueue
+1532,var_mean_5ec2187b5869,5ec2187b5869,reduction,reduction_var_mean,1,2,1,,claimed,Codex,claimed_2026-06-13_batch_1531_1534_midqueue
+1533,var_mean_5fb45b3e5469,5fb45b3e5469,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1531_1534_midqueue
+1534,var_mean_5fe194ed50d0,5fe194ed50d0,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1531_1534_midqueue
 1535,var_mean_606094b5efa2,606094b5efa2,reduction,unclassified_priority_gap,1,2,1,~var_mean_1711c4ddc910;~var_mean_427eaae2cf58;~var_mean_8238dd59b2ec,unclaimed,,
 1536,var_mean_6062715a375f,6062715a375f,reduction,reduction_var_mean,1,1,1,,unclaimed,,
 1537,var_mean_60be3c717aec,60be3c717aec,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
