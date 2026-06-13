@@ -374,15 +374,15 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 373,sum_sum_3ab1da5a9e6c,3ab1da5a9e6c,reduction,reduction_general,4,4,6,,needs_work,Codex,needs_work: checks_pass_4of4_worker_h100_fallback_bench_BAD_ORACLE_2of4_no_cudagraph_warnings_class_SCHEDULER_FUSION
 374,sum_sum_f9e4c9d243d2,f9e4c9d243d2,reduction,reduction_general,1,1,6,,needs_work,Codex,needs_work: checks_pass_1of1_worker_h100_fallback_bench_BAD_ORACLE_oracle55.62us_compile43.94us_no_cudagraph_warnings_class_SCHEDULER_FUSION
 375,sum_sum_sum_127fc8edd5da,127fc8edd5da,reduction,reduction_general,1,2,6,,claimed,Codex,claimed_2026-06-12_batch_375_topdown
-376,sum_sum_sum_92943d6eae4c,92943d6eae4c,reduction,reduction_general,1,4,6,,claimed,Codex,claimed_2026-06-12_batch_376-377_topdown
+376,sum_sum_sum_92943d6eae4c,92943d6eae4c,reduction,reduction_general,1,4,6,,needs_work,Codex,needs_work: checks_pass_1of1_worker_h100_fallback_bench_BAD_ORACLE_oracle1428.10us_compile396.32us_no_cudagraph_warnings_class_SCHEDULER_FUSION
 377,var_mean_11df982f906b,11df982f906b,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_376-377_topdown
 378,var_mean_23294968b555,23294968b555,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_378_topdown
 379,var_mean_3260131881b0,3260131881b0,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_379_topdown
-380,var_mean_38f166201359,38f166201359,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-381,var_mean_47eaf3cbeb9b,47eaf3cbeb9b,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-382,var_mean_8799151bd693,8799151bd693,reduction,norm_template_canonicalization,4,8,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-383,var_mean_a678817dc522,a678817dc522,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-384,var_mean_b52cf3fd9807,b52cf3fd9807,reduction,norm_template_canonicalization,4,8,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
+380,var_mean_38f166201359,38f166201359,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_380-384_topdown
+381,var_mean_47eaf3cbeb9b,47eaf3cbeb9b,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_380-384_topdown
+382,var_mean_8799151bd693,8799151bd693,reduction,norm_template_canonicalization,4,8,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_380-384_topdown
+383,var_mean_a678817dc522,a678817dc522,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_380-384_topdown
+384,var_mean_b52cf3fd9807,b52cf3fd9807,reduction,norm_template_canonicalization,4,8,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_380-384_topdown
 385,var_mean_ba4e73ab2deb,ba4e73ab2deb,reduction,norm_template_canonicalization,6,3,6,~var_mean_cf1ffb1a79d8,unclaimed,,
 386,var_mean_bdf875eb35d3,bdf875eb35d3,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
 387,var_mean_d8be325d48fc,d8be325d48fc,reduction,norm_template_canonicalization,4,7,6,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
