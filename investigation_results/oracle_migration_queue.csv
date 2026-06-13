@@ -1408,11 +1408,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1407,sum_sum_sum_b703e5a31562,b703e5a31562,reduction,reduction_general,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1405-1409_midqueue
 1408,sum_sum_sum_b925d072e497,b925d072e497,reduction,reduction_general,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1405-1409_midqueue
 1409,sum_sum_sum_be519a2435f2,be519a2435f2,reduction,multi_output_reduction_templates,1,1,1,sum_sum_sum_fe2bec6738d1,claimed,Codex,claimed_2026-06-13_batch_1405-1409_midqueue
-1410,sum_sum_sum_be6b9442c621,be6b9442c621,reduction,scatter_gather,1,1,1,,unclaimed,,
-1411,sum_sum_sum_c0d30ef6f9c5,c0d30ef6f9c5,reduction,scatter_gather,1,2,1,,unclaimed,,
-1412,sum_sum_sum_c304a1364550,c304a1364550,reduction,reduction_general,1,1,1,,unclaimed,,
-1413,sum_sum_sum_c3cfd4211c4e,c3cfd4211c4e,reduction,reduction_general,1,1,1,,unclaimed,,
-1414,sum_sum_sum_cb474de4ede0,cb474de4ede0,reduction,scatter_gather,1,1,1,,unclaimed,,
+1410,sum_sum_sum_be6b9442c621,be6b9442c621,reduction,scatter_gather,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1410-1414_midqueue
+1411,sum_sum_sum_c0d30ef6f9c5,c0d30ef6f9c5,reduction,scatter_gather,1,2,1,,claimed,Codex,claimed_2026-06-13_batch_1410-1414_midqueue
+1412,sum_sum_sum_c304a1364550,c304a1364550,reduction,reduction_general,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1410-1414_midqueue
+1413,sum_sum_sum_c3cfd4211c4e,c3cfd4211c4e,reduction,reduction_general,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1410-1414_midqueue
+1414,sum_sum_sum_cb474de4ede0,cb474de4ede0,reduction,scatter_gather,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1410-1414_midqueue
 1415,sum_sum_sum_d0b0dff4e37d,d0b0dff4e37d,reduction,reduction_general,1,2,1,,unclaimed,,
 1416,sum_sum_sum_d8929373f4db,d8929373f4db,reduction,scatter_gather,1,2,1,,unclaimed,,
 1417,sum_sum_sum_d90a5c698770,d90a5c698770,reduction,scatter_gather,1,2,1,,unclaimed,,
