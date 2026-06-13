@@ -10,7 +10,7 @@ Updated: 2026-06-13
 - Row 1578 `var_mean_92d134082176`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1577 `var_mean_92c5ebca24ad`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 
-Tail lane owned by this session: rows 1570-1654; rows 1570-1576 remain idle buffer. Rows 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1582-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1564-1654; rows 1564-1576 are the current reserved tail buffer. Rows 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1582-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
