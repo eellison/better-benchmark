@@ -1463,11 +1463,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1462,var_mean_1d57e5873892,1d57e5873892,reduction,norm_template_canonicalization,1,2,1,~var_mean_a5d43c43648a;~var_mean_26f78838cb62;~var_mean_792162dbb8a3,claimed,Codex,claimed_2026-06-13_batch_1460_1464_midqueue
 1463,var_mean_1e8c0ecafa26,1e8c0ecafa26,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1460_1464_midqueue
 1464,var_mean_1fc57d20f910,1fc57d20f910,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1460_1464_midqueue
-1465,var_mean_221aed5431d8,221aed5431d8,reduction,reduction_var_mean,1,1,1,,unclaimed,,
-1466,var_mean_232f8ebe7430,232f8ebe7430,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-1467,var_mean_2336bccf950b,2336bccf950b,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-1468,var_mean_25e302386921,25e302386921,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-1469,var_mean_265507cb5c7e,265507cb5c7e,reduction,norm_template_canonicalization,1,1,1,~var_mean_32352a093910;~var_mean_7f6c23807d7b;~var_mean_c7f1676ab603,unclaimed,,
+1465,var_mean_221aed5431d8,221aed5431d8,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1465_1469_midqueue
+1466,var_mean_232f8ebe7430,232f8ebe7430,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1465_1469_midqueue
+1467,var_mean_2336bccf950b,2336bccf950b,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1465_1469_midqueue
+1468,var_mean_25e302386921,25e302386921,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1465_1469_midqueue
+1469,var_mean_265507cb5c7e,265507cb5c7e,reduction,norm_template_canonicalization,1,1,1,~var_mean_32352a093910;~var_mean_7f6c23807d7b;~var_mean_c7f1676ab603,claimed,Codex,claimed_2026-06-13_batch_1465_1469_midqueue
 1470,var_mean_2b382ed802af,2b382ed802af,reduction,reduction_var_mean,1,1,1,,unclaimed,,
 1471,var_mean_2bd313f3c17f,2bd313f3c17f,reduction,norm_template_canonicalization,1,2,1,~var_mean_cdecf7775405,unclaimed,,
 1472,var_mean_2edacc9b086b,2edacc9b086b,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
