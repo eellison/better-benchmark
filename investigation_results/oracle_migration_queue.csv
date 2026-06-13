@@ -558,11 +558,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 557,var_mean_0b4143d6fc46,0b4143d6fc46,reduction,norm_template_canonicalization,1,1,3,~var_mean_1fad4754680a;~var_mean_3711a161734e;~var_mean_034578d167c5,claimed,Codex,claimed_2026-06-12_batch_555-559_topdown
 558,var_mean_129ad79a9b02,129ad79a9b02,reduction,unclassified_priority_gap,2,1,3,~var_mean_819a2cfa3958;~var_mean_e7e57aea37e1,claimed,Codex,claimed_2026-06-12_batch_555-559_topdown
 559,var_mean_1f6788bc3116,1f6788bc3116,reduction,norm_template_canonicalization,3,2,3,~var_mean_4581dbce69e5;~var_mean_bb7b5fefc1d5;~var_mean_bff30f530d6e,claimed,Codex,claimed_2026-06-12_batch_555-559_topdown
-560,var_mean_3028dfd6ddfb,3028dfd6ddfb,reduction,norm_template_canonicalization,3,2,3,~var_mean_2e61b19a52bc;~var_mean_41a46a395e3a,unclaimed,,
-561,var_mean_33d24326eae6,33d24326eae6,reduction,norm_template_canonicalization,3,1,3,~var_mean_4a0c3a2ad6fb,unclaimed,,
-562,var_mean_39861a8a39f5,39861a8a39f5,reduction,reduction_var_mean,3,1,3,,unclaimed,,
-563,var_mean_3b8a231721ed,3b8a231721ed,reduction,reduction_var_mean,3,2,3,,unclaimed,,
-564,var_mean_4c1b6e6ef03f,4c1b6e6ef03f,reduction,norm_template_canonicalization,3,5,3,~var_mean_e74dde6c3e2b;~var_mean_ef88cc4744f1,unclaimed,,
+560,var_mean_3028dfd6ddfb,3028dfd6ddfb,reduction,norm_template_canonicalization,3,2,3,~var_mean_2e61b19a52bc;~var_mean_41a46a395e3a,claimed,Codex,claimed_2026-06-12_batch_560-564_topdown
+561,var_mean_33d24326eae6,33d24326eae6,reduction,norm_template_canonicalization,3,1,3,~var_mean_4a0c3a2ad6fb,claimed,Codex,claimed_2026-06-12_batch_560-564_topdown
+562,var_mean_39861a8a39f5,39861a8a39f5,reduction,reduction_var_mean,3,1,3,,claimed,Codex,claimed_2026-06-12_batch_560-564_topdown
+563,var_mean_3b8a231721ed,3b8a231721ed,reduction,reduction_var_mean,3,2,3,,claimed,Codex,claimed_2026-06-12_batch_560-564_topdown
+564,var_mean_4c1b6e6ef03f,4c1b6e6ef03f,reduction,norm_template_canonicalization,3,5,3,~var_mean_e74dde6c3e2b;~var_mean_ef88cc4744f1,claimed,Codex,claimed_2026-06-12_batch_560-564_topdown
 565,var_mean_51bba8502cc5,51bba8502cc5,reduction,norm_template_canonicalization,3,2,3,~var_mean_2e61b19a52bc;~var_mean_41a46a395e3a,unclaimed,,
 566,var_mean_528c70306f73,528c70306f73,reduction,unclassified_priority_gap,2,4,3,~var_mean_40d5a5a49ffd;~var_mean_b3ec7ad4195e;~var_mean_c97d1570c0ff,unclaimed,,
 567,var_mean_6de4787c0d2d,6de4787c0d2d,reduction,norm_template_canonicalization,3,1,3,~var_mean_aa8ab7fa55a7;~var_mean_b7b154e2f8c6;~var_mean_f2580942698a,unclaimed,,
