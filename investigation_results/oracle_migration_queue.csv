@@ -333,7 +333,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 332,sum_3a6aa9bca77f,3a6aa9bca77f,reduction,reduction_general,3,2,9,,claimed,Codex,claimed_2026-06-12_batch_332_topdown
 333,sum_sum_sum_199240d27571,199240d27571,reduction,reduction_general,6,11,9,,claimed,Codex,claimed_2026-06-12_batch_333_topdown
 334,sum_sum_sum_836354f50614,836354f50614,reduction,reduction_general,7,9,9,,claimed,Codex,claimed_2026-06-12_batch_334_topdown
-335,sum_sum_sum_ca662cf33758,ca662cf33758,reduction,reduction_general,5,1,9,,unclaimed,,
+335,sum_sum_sum_ca662cf33758,ca662cf33758,reduction,reduction_general,5,1,9,,claimed,Codex,claimed_2026-06-12_batch_335_topdown
 336,var_mean_21faaccf749d,21faaccf749d,reduction,norm_template_canonicalization,6,11,9,~var_mean_9f9f7f8de566,unclaimed,,
 337,var_mean_247c7d9796c4,247c7d9796c4,reduction,reduction_var_mean,1,1,9,,unclaimed,,
 338,var_mean_25c71e7fbc96,25c71e7fbc96,reduction,norm_template_canonicalization,1,1,9,~var_mean_32352a093910;~var_mean_7f6c23807d7b;~var_mean_c7f1676ab603,unclaimed,,
