@@ -4,13 +4,13 @@ Updated: 2026-06-13
 
 ## Current Worker Pool
 
-- Row 1682 `var_mean_ec9057741b2d`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1681 `var_mean_ec73bf00e3e1`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 1679 `var_mean_ea17bbef3a14`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 - Row 1678 `var_mean_e8d19aecbc03`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1677 `var_mean_e835ce476902`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1676 `var_mean_e7bcffc0e186`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1675 `var_mean_e6f457facad2`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1674 `var_mean_e5a8f396e9fa`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1673 `var_mean_e59fb82095be`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Tail lane owned by this session: rows 1653-1682; rows 1653-1676 remain idle buffer. Rows 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1680, 1683-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1653-1678; rows 1653-1672 remain idle buffer. Rows 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1677, 1679-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
@@ -28,6 +28,7 @@ Tail lane owned by this session: rows 1653-1682; rows 1653-1676 remain idle buff
 ## Pushed By This Session
 
 - Rows 1695-1697: measured, 3/3 checks, H100 fallback bench `3AT_FLOOR`, no CUDAGraph warnings.
+- Rows 1677, 1679, 1681, and 1682: measured, 4/4 checks, H100 fallback bench `1GOOD_3AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1680, 1683, and 1687: measured, 3/3 checks, H100 fallback bench `2GOOD_1AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1684-1686: measured, 3/3 checks, H100 fallback bench `3AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1688-1691: measured, 4/4 checks, H100 fallback bench `1GOOD_3AT_FLOOR`, no CUDAGraph warnings.
