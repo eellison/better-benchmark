@@ -403,7 +403,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 402,sum_6d8612892024,6d8612892024,reduction,reduction_general,4,6,5,,claimed,Codex,claimed_2026-06-12_batch_400-402_topdown
 403,sum_9fe21001f3f9,9fe21001f3f9,reduction,unclassified_priority_gap,5,2,5,~sum_2dab433e3109;~sum_fa194db93388;~sum_035e9c596064,claimed,Codex,claimed_2026-06-12_batch_403-404_topdown
 404,sum_e7c5599e5aa2,e7c5599e5aa2,reduction,reduction_general,2,2,5,,claimed,Codex,claimed_2026-06-12_batch_403-404_topdown
-405,sum_sum_1a7b8d26a98e,1a7b8d26a98e,reduction,reduction_general,2,2,5,,unclaimed,,
+405,sum_sum_1a7b8d26a98e,1a7b8d26a98e,reduction,reduction_general,2,2,5,,claimed,Codex,claimed_2026-06-12_batch_405_topdown
 406,sum_sum_38b494b9c61a,38b494b9c61a,reduction,reduction_general,4,2,5,,unclaimed,,
 407,sum_sum_7f5745d75e84,7f5745d75e84,reduction,reduction_general,1,2,5,,unclaimed,,
 408,sum_sum_abf3db8fc03f,abf3db8fc03f,reduction,reduction_general,5,5,5,,unclaimed,,
