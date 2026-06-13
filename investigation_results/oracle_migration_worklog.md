@@ -14,6 +14,8 @@ Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a
 
 Lower-gap refill buffer claimed by this session: rows 1370-1373 and 1375 are active. Rows 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1374, 1376-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
 
+Additional lower-gap refill buffer claimed by this session: rows 1360-1369.
+
 Additional lower-gap refill buffer claimed by this session: rows 1380-1389.
 
 Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
