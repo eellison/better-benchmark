@@ -1498,11 +1498,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1497,var_mean_4348a08765d9,4348a08765d9,reduction,norm_template_canonicalization,1,1,1,~var_mean_f3432607acca;~var_mean_f58b743b2264,claimed,Codex,claimed_2026-06-13_batch_1495_1499_midqueue
 1498,var_mean_43610b02573d,43610b02573d,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1495_1499_midqueue
 1499,var_mean_43612b52e7fc,43612b52e7fc,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1495_1499_midqueue
-1500,var_mean_4425f695fc68,4425f695fc68,reduction,reduction_var_mean,1,1,1,,unclaimed,,
-1501,var_mean_445ed11aad0a,445ed11aad0a,reduction,norm_template_canonicalization,1,1,1,var_mean_327c3b97bf10;var_mean_d61716dfd9dd,unclaimed,,
-1502,var_mean_476d7b53369e,476d7b53369e,reduction,reduction_var_mean,1,1,1,,unclaimed,,
-1503,var_mean_48fe94d26f82,48fe94d26f82,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
-1504,var_mean_4903d1ba689a,4903d1ba689a,reduction,reduction_var_mean,1,1,1,,unclaimed,,
+1500,var_mean_4425f695fc68,4425f695fc68,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1500_1504_midqueue
+1501,var_mean_445ed11aad0a,445ed11aad0a,reduction,norm_template_canonicalization,1,1,1,var_mean_327c3b97bf10;var_mean_d61716dfd9dd,claimed,Codex,claimed_2026-06-13_batch_1500_1504_midqueue
+1502,var_mean_476d7b53369e,476d7b53369e,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1500_1504_midqueue
+1503,var_mean_48fe94d26f82,48fe94d26f82,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1500_1504_midqueue
+1504,var_mean_4903d1ba689a,4903d1ba689a,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1500_1504_midqueue
 1505,var_mean_49c7455398cd,49c7455398cd,reduction,norm_template_canonicalization,1,1,1,var_mean_8287d162bd36,unclaimed,,
 1506,var_mean_4a268d7c766e,4a268d7c766e,reduction,norm_template_canonicalization,1,2,1,~var_mean_6d9f14e83fbb;~var_mean_a88cd01397d1;~var_mean_2f7685c1567b,unclaimed,,
 1507,var_mean_4bfe478bb42f,4bfe478bb42f,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
