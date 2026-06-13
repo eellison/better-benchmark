@@ -1319,7 +1319,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1318,sum_sum_a6951a29b3dc,a6951a29b3dc,reduction,reduction_general,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1310-1319
 1319,sum_sum_aa601b4d2732,aa601b4d2732,reduction,reduction_general,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_1310-1319
 1320,sum_sum_aad9b35ce285,aad9b35ce285,reduction,reduction_general,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_1320-1329
-1321,sum_sum_ab9fc4091e40,ab9fc4091e40,reduction,reduction_general,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1320-1329
+1321,sum_sum_ab9fc4091e40,ab9fc4091e40,reduction,reduction_general,1,2,1,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_1GOOD_class_COOPERATIVE_SPLIT_K_needs_B200_verify
 1322,sum_sum_b00464d36daa,b00464d36daa,reduction,reduction_general,1,2,1,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_1GOOD_class_COOPERATIVE_SPLIT_K_needs_B200_verify
 1323,sum_sum_b089f1ca0d13,b089f1ca0d13,reduction,scatter_gather,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1320-1329
 1324,sum_sum_b38468e7a324,b38468e7a324,reduction,reduction_general,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1320-1329
