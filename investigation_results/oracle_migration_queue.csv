@@ -1400,7 +1400,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1399,sum_sum_sum_8adea0bd8df9,8adea0bd8df9,reduction,reduction_general,1,1,1,,unclaimed,,
 1400,sum_sum_sum_8f68a97a2af7,8f68a97a2af7,reduction,reduction_general,1,2,1,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_1GOOD_class_COOPERATIVE_SPLIT_K_needs_B200_verify
 1401,sum_sum_sum_9ab0961d1fd9,9ab0961d1fd9,reduction,scatter_gather,1,1,1,,needs_work,Codex,worker_check_pass_bench_NUMERICS_WORSE_THAN_COMPILED_no_cudagraph_warnings_2026-06-13
-1402,sum_sum_sum_9ae530fb77de,9ae530fb77de,reduction,reduction_general,1,2,1,,claimed,Codex,claimed_2026-06-13_batch_1400-1404_midqueue
+1402,sum_sum_sum_9ae530fb77de,9ae530fb77de,reduction,reduction_general,1,2,1,,needs_work,Codex,parent_check_pass_bench_BAD_ORACLE_oracle_47p07us_compile_39p26us_no_cudagraph_warnings_2026-06-13
 1403,sum_sum_sum_9b7df2917dda,9b7df2917dda,reduction,scatter_gather,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1400-1404_midqueue
 1404,sum_sum_sum_9cc696981073,9cc696981073,reduction,reduction_general,1,2,1,,claimed,Codex,claimed_2026-06-13_batch_1400-1404_midqueue
 1405,sum_sum_sum_9e1e02d0dd86,9e1e02d0dd86,reduction,scatter_gather,1,2,1,,claimed,Codex,claimed_2026-06-13_batch_1405-1409_midqueue
