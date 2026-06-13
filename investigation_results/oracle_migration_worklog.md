@@ -4,13 +4,13 @@ Updated: 2026-06-12
 
 ## Current Worker Pool
 
-- Row 280 `sum_6ad4e4f2ca8d`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 282 `sum_983bc7365627`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 278 `sum_42c689cc9c14`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 279 `sum_59fc6f384249`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 281 `sum_9683f50f2dcf`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 577 `var_mean_var_mean_e56fc242c590`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 578 `amax_sum_119baf9550ec`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 579 `amax_sum_1d0b8274d1b3`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 580 `amax_sum_2ee0501b648a`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 581 `amax_sum_57fd7ff76261`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, 236-245, 246-257, 258-269, and 275-286; rows 283-286 remain idle buffer. Rows 126-140, 156-171, 182-193, 214-225, and 271-274 were claimed remotely by other `Codex` batches and should not be reused by this session unless ownership changes.
+Refill buffer owned by this session: rows 141-155, 172-181, 194-203, 204-213, 226-235, 236-245, 246-257, 258-269, 275-286, and 577-588; rows 582-588 remain idle buffer. Rows 126-140, 156-171, 182-193, 214-225, 271-274, and 289-576 were claimed or completed remotely and should not be reused by this session unless ownership changes.
 
 ## Pending Parent Review
 
