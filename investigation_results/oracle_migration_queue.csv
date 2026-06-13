@@ -498,7 +498,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 497,amax_sum_sum_8621de4c2766,8621de4c2766,reduction,scatter_gather,2,3,3,,claimed,Codex,claimed_2026-06-12_batch_490-499_topdown
 498,amax_sum_sum_c94a0970300f,c94a0970300f,reduction,online_softmax_cross_entropy,3,3,3,amax_sum_sum_9e768dff4978,claimed,Codex,claimed_2026-06-12_batch_490-499_topdown
 499,amax_sum_sum_f58f591dd576,f58f591dd576,reduction,online_softmax_cross_entropy,3,3,3,~amax_sum_sum_6939e2db29e3;~amax_sum_sum_9e768dff4978;~amax_sum_sum_e2f518f0a274,claimed,Codex,claimed_2026-06-12_batch_490-499_topdown
-500,mean_2f7419dff92d,2f7419dff92d,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_500-504_topdown
+500,mean_2f7419dff92d,2f7419dff92d,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,oracle_measured,Codex,oracle_py_added_checks_pass_2of2_no_skip_pass_2of2_h100_fallback_bench_no_cudagraph_warnings_2AT_FLOOR_class_NEW_PATTERN_needs_B200_verify
 501,mean_36a7a1f42a5b,36a7a1f42a5b,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_500-504_topdown
 502,mean_4a6776b9b660,4a6776b9b660,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_500-504_topdown
 503,mean_55602d03e235,55602d03e235,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_500-504_topdown
