@@ -498,11 +498,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 497,amax_sum_sum_8621de4c2766,8621de4c2766,reduction,scatter_gather,2,3,3,,claimed,Codex,claimed_2026-06-12_batch_490-499_topdown
 498,amax_sum_sum_c94a0970300f,c94a0970300f,reduction,online_softmax_cross_entropy,3,3,3,amax_sum_sum_9e768dff4978,claimed,Codex,claimed_2026-06-12_batch_490-499_topdown
 499,amax_sum_sum_f58f591dd576,f58f591dd576,reduction,online_softmax_cross_entropy,3,3,3,~amax_sum_sum_6939e2db29e3;~amax_sum_sum_9e768dff4978;~amax_sum_sum_e2f518f0a274,claimed,Codex,claimed_2026-06-12_batch_490-499_topdown
-500,mean_2f7419dff92d,2f7419dff92d,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
-501,mean_36a7a1f42a5b,36a7a1f42a5b,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
-502,mean_4a6776b9b660,4a6776b9b660,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
-503,mean_55602d03e235,55602d03e235,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
-504,mean_5926e8454de3,5926e8454de3,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
+500,mean_2f7419dff92d,2f7419dff92d,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_500-504_topdown
+501,mean_36a7a1f42a5b,36a7a1f42a5b,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_500-504_topdown
+502,mean_4a6776b9b660,4a6776b9b660,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_500-504_topdown
+503,mean_55602d03e235,55602d03e235,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_500-504_topdown
+504,mean_5926e8454de3,5926e8454de3,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,claimed,Codex,claimed_2026-06-12_batch_500-504_topdown
 505,mean_5b2f38aad09a,5b2f38aad09a,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
 506,mean_63bc58206705,63bc58206705,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
 507,mean_64a0cf92faf4,64a0cf92faf4,reduction,norm_template_canonicalization,2,3,3,~mean_1b78c675fe8a;~mean_9ca8b4d0ba26;~mean_b440f707e405,unclaimed,,
