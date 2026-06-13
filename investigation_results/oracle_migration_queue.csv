@@ -411,7 +411,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 410,sum_sum_sum_28aca384bafa,28aca384bafa,reduction,reduction_general,2,2,5,,claimed,Codex,claimed_2026-06-12_batch_406-410_topdown
 411,sum_sum_sum_899373d9c485,899373d9c485,reduction,reduction_general,3,6,5,,claimed,Codex,claimed_2026-06-12_batch_411-412_topdown
 412,var_mean_106cb6ed6885,106cb6ed6885,reduction,norm_template_canonicalization,3,7,5,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_411-412_topdown
-413,var_mean_1c8a151acad6,1c8a151acad6,reduction,norm_template_canonicalization,3,6,5,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
+413,var_mean_1c8a151acad6,1c8a151acad6,reduction,norm_template_canonicalization,3,6,5,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-12_batch_413_topdown
 414,var_mean_292acd4e7428,292acd4e7428,reduction,norm_template_canonicalization,3,6,5,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
 415,var_mean_2da2cb2a9aeb,2da2cb2a9aeb,reduction,norm_template_canonicalization,3,6,5,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
 416,var_mean_331f3c87e4d8,331f3c87e4d8,reduction,norm_template_canonicalization,3,6,5,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
