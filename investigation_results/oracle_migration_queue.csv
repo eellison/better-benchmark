@@ -427,7 +427,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 426,var_mean_mean_3f4aa90365fa,3f4aa90365fa,reduction,reduction_var_mean,4,2,5,,claimed,Codex,claimed_2026-06-12_batch_425-426_topdown
 427,var_mean_mean_5f6d60b04d02,5f6d60b04d02,reduction,norm_template_canonicalization,5,5,5,~var_mean_mean_188f42114f68,claimed,Codex,claimed_2026-06-12_batch_427-428_topdown
 428,var_mean_mean_6a2d0c92a5ed,6a2d0c92a5ed,reduction,reduction_var_mean,4,2,5,,claimed,Codex,claimed_2026-06-12_batch_427-428_topdown
-429,var_mean_mean_d205976abf2e,d205976abf2e,reduction,norm_template_canonicalization,4,2,5,~var_mean_mean_1e867cdb78f5,unclaimed,,
+429,var_mean_mean_d205976abf2e,d205976abf2e,reduction,norm_template_canonicalization,4,2,5,~var_mean_mean_1e867cdb78f5,claimed,Codex,claimed_2026-06-12_batch_429_topdown
 430,var_mean_var_mean_09d2be3a4e2b,09d2be3a4e2b,reduction,reduction_var_mean,5,2,5,,unclaimed,,
 431,amax_amax_any_395c2caa2db4,395c2caa2db4,reduction,reduction_softmax_like,1,2,4,,unclaimed,,
 432,amax_amax_any_f8e425e72787,f8e425e72787,reduction,reduction_softmax_like,1,2,4,,unclaimed,,
