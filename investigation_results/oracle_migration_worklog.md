@@ -12,6 +12,8 @@ Updated: 2026-06-13
 
 Tail lane owned by this session: rows 1549-1654; row 1549 remains idle buffer. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1553, 1555, 1557-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
+Lower-gap refill buffer claimed by this session: rows 1390-1399.
+
 ## Pending Parent Review
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
