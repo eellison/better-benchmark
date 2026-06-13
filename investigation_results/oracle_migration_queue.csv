@@ -332,7 +332,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 331,pointwise_647d3ac3f711,647d3ac3f711,pointwise,layout_indexing_stencil_fusion,4,13,9,pointwise_05d4844325ca;pointwise_724b26e60185;pointwise_b43349159514,oracle_measured,Codex,oracle_py_added_checks_pass_4of4_h100_fallback_bench_no_warnings_4AT_FLOOR_class_SCHEDULER_FUSION_needs_B200_verify
 332,sum_3a6aa9bca77f,3a6aa9bca77f,reduction,reduction_general,3,2,9,,claimed,Codex,claimed_2026-06-12_batch_332_topdown
 333,sum_sum_sum_199240d27571,199240d27571,reduction,reduction_general,6,11,9,,claimed,Codex,claimed_2026-06-12_batch_333_topdown
-334,sum_sum_sum_836354f50614,836354f50614,reduction,reduction_general,7,9,9,,unclaimed,,
+334,sum_sum_sum_836354f50614,836354f50614,reduction,reduction_general,7,9,9,,claimed,Codex,claimed_2026-06-12_batch_334_topdown
 335,sum_sum_sum_ca662cf33758,ca662cf33758,reduction,reduction_general,5,1,9,,unclaimed,,
 336,var_mean_21faaccf749d,21faaccf749d,reduction,norm_template_canonicalization,6,11,9,~var_mean_9f9f7f8de566,unclaimed,,
 337,var_mean_247c7d9796c4,247c7d9796c4,reduction,reduction_var_mean,1,1,9,,unclaimed,,
