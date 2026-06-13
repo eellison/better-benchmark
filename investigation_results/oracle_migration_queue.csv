@@ -1520,8 +1520,8 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1519,var_mean_54fd2dc43b14,54fd2dc43b14,reduction,norm_template_canonicalization,1,1,1,~var_mean_12542e903d57;~var_mean_48d3414b7305,claimed,Codex,claimed_2026-06-13_batch_1518_1521_midqueue
 1520,var_mean_5545b90ce598,5545b90ce598,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1518_1521_midqueue
 1521,var_mean_56f70f193173,56f70f193173,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,claimed,Codex,claimed_2026-06-13_batch_1518_1521_midqueue
-1522,var_mean_57d9fe10252a,57d9fe10252a,reduction,reduction_var_mean,1,1,1,,unclaimed,,
-1523,var_mean_592f69819372,592f69819372,reduction,norm_template_canonicalization,1,1,1,~var_mean_0dc1c0150d30;~var_mean_0bb837cbf30a;~var_mean_6084e124876c,unclaimed,,
+1522,var_mean_57d9fe10252a,57d9fe10252a,reduction,reduction_var_mean,1,1,1,,claimed,Codex,claimed_2026-06-13_batch_1522_1523_midqueue
+1523,var_mean_592f69819372,592f69819372,reduction,norm_template_canonicalization,1,1,1,~var_mean_0dc1c0150d30;~var_mean_0bb837cbf30a;~var_mean_6084e124876c,claimed,Codex,claimed_2026-06-13_batch_1522_1523_midqueue
 1524,var_mean_5b08f93b3624,5b08f93b3624,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
 1525,var_mean_5b870e78f4a2,5b870e78f4a2,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
 1526,var_mean_5bc38bbfb644,5bc38bbfb644,reduction,norm_template_canonicalization,1,1,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,unclaimed,,
