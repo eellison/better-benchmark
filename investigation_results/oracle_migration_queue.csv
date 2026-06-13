@@ -309,8 +309,8 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 308,sum_sum_sum_23ebf74d21f6,23ebf74d21f6,reduction,reduction_general,1,2,11,,claimed,Codex,claimed_2026-06-12_batch_308-309_topdown
 309,sum_sum_sum_4cd246989343,4cd246989343,reduction,reduction_general,1,1,11,sum_sum_sum_e2388f04f7c2,claimed,Codex,claimed_2026-06-12_batch_308-309_topdown
 310,sum_sum_sum_56a68a521d26,56a68a521d26,reduction,reduction_general,1,1,11,,claimed,Codex,claimed_2026-06-12_batch_310_topdown
-311,sum_sum_sum_907cbb3d9f19,907cbb3d9f19,reduction,structured_pool_upsample_backward_reduce,1,1,11,sum_sum_sum_b30da3bff8d4,unclaimed,,
-312,sum_sum_sum_cc4b6a77cc6b,cc4b6a77cc6b,reduction,reduction_general,1,1,11,,unclaimed,,
+311,sum_sum_sum_907cbb3d9f19,907cbb3d9f19,reduction,structured_pool_upsample_backward_reduce,1,1,11,sum_sum_sum_b30da3bff8d4,claimed,Codex,claimed_2026-06-12_batch_311-312_topdown
+312,sum_sum_sum_cc4b6a77cc6b,cc4b6a77cc6b,reduction,reduction_general,1,1,11,,claimed,Codex,claimed_2026-06-12_batch_311-312_topdown
 313,var_mean_1af9add64387,1af9add64387,reduction,norm_template_canonicalization,1,1,11,~var_mean_b7b154e2f8c6;~var_mean_1fad4754680a;~var_mean_3711a161734e,unclaimed,,
 314,var_mean_2056ae6e1995,2056ae6e1995,reduction,norm_template_canonicalization,8,2,11,~var_mean_0854c7adb682;~var_mean_52ba5f6bf2a0,unclaimed,,
 315,var_mean_3ad14c3d031f,3ad14c3d031f,reduction,norm_template_canonicalization,1,1,11,var_mean_1fad4754680a;var_mean_3711a161734e,unclaimed,,
