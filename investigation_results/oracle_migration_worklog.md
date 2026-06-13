@@ -4,13 +4,13 @@ Updated: 2026-06-13
 
 ## Current Worker Pool
 
-- Row 1576 `var_mean_922c346a8f22`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1575 `var_mean_9051d879a6b2`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
-- Row 1574 `var_mean_8ef72e7459c3`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1573 `var_mean_8e06cc841b36`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 1572 `var_mean_8c76be9c9a48`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1571 `var_mean_8b98e0815e8e`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1570 `var_mean_8ae98a8e9539`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 1569 `var_mean_88c8b20940d5`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1568 `var_mean_88a3ff825dcf`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1567 `var_mean_87444703be27`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 
-Tail lane owned by this session: rows 1558-1654; rows 1558-1571 are the current reserved tail buffer. Rows 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1577-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1558-1654; rows 1558-1566 remain idle buffer. Rows 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1572-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
@@ -28,6 +28,7 @@ Tail lane owned by this session: rows 1558-1654; rows 1558-1571 are the current 
 ## Pushed By This Session
 
 - Rows 1695-1697: measured, 3/3 checks, H100 fallback bench `3AT_FLOOR`, no CUDAGraph warnings.
+- Rows 1572-1576: measured, 5/5 checks, H100 fallback bench `5AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1577-1581: measured, 5/5 checks, H100 fallback bench `1GOOD_4AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1582-1586: measured, 5/5 checks, H100 fallback bench `2GOOD_3AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1587-1591: measured, 5/5 checks, H100 fallback bench `2GOOD_3AT_FLOOR`, no CUDAGraph warnings.
