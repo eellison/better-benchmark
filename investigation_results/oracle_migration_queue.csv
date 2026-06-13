@@ -398,9 +398,9 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 397,pointwise_a80af1a259ac,a80af1a259ac,pointwise,layout_indexing_stencil_fusion,3,4,5,pointwise_75795e2c97dd,claimed,Codex,claimed_2026-06-12_batch_396-397_topdown
 398,pointwise_bef60966ace3,bef60966ace3,pointwise,layout_indexing_stencil_fusion,4,7,5,pointwise_f9f5fb61c369,needs_work,Codex,needs_work: checks_pass_4of4_worker_h100_fallback_bench_NUMERICS_WORSE_THAN_COMPILED_all4_inf_sentinel_fp64_gate_no_cudagraph_warnings_class_NEW_PATTERN
 399,pointwise_dc963d04f8e4,dc963d04f8e4,pointwise,unclassified_priority_gap,4,2,5,pointwise_70e5a4aca4b5,claimed,Codex,claimed_2026-06-12_batch_398-399_topdown
-400,pointwise_ef561a2def29,ef561a2def29,pointwise,layout_indexing_stencil_fusion,4,9,5,~pointwise_c0e132c66e3b;~pointwise_f2df04089ff4;~pointwise_7a4083b7e3d1,unclaimed,,
-401,pointwise_fa1cc97c6cfd,fa1cc97c6cfd,pointwise,layout_indexing_stencil_fusion,2,6,5,~pointwise_43877c71f0eb;~pointwise_75795e2c97dd;~pointwise_e5d19e73a52c,unclaimed,,
-402,sum_6d8612892024,6d8612892024,reduction,reduction_general,4,6,5,,unclaimed,,
+400,pointwise_ef561a2def29,ef561a2def29,pointwise,layout_indexing_stencil_fusion,4,9,5,~pointwise_c0e132c66e3b;~pointwise_f2df04089ff4;~pointwise_7a4083b7e3d1,claimed,Codex,claimed_2026-06-12_batch_400-402_topdown
+401,pointwise_fa1cc97c6cfd,fa1cc97c6cfd,pointwise,layout_indexing_stencil_fusion,2,6,5,~pointwise_43877c71f0eb;~pointwise_75795e2c97dd;~pointwise_e5d19e73a52c,claimed,Codex,claimed_2026-06-12_batch_400-402_topdown
+402,sum_6d8612892024,6d8612892024,reduction,reduction_general,4,6,5,,claimed,Codex,claimed_2026-06-12_batch_400-402_topdown
 403,sum_9fe21001f3f9,9fe21001f3f9,reduction,unclassified_priority_gap,5,2,5,~sum_2dab433e3109;~sum_fa194db93388;~sum_035e9c596064,unclaimed,,
 404,sum_e7c5599e5aa2,e7c5599e5aa2,reduction,reduction_general,2,2,5,,unclaimed,,
 405,sum_sum_1a7b8d26a98e,1a7b8d26a98e,reduction,reduction_general,2,2,5,,unclaimed,,
