@@ -14,6 +14,8 @@ Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a
 
 Lower-gap refill buffer claimed by this session: rows 1390-1391, 1393, 1396, and 1399 are active. Row 1398 is marked needs_work after parent-confirmed numerics-gate failure; rows 1392, 1394-1395, and 1397 are parent-verified on H100 fallback, pending B200 verification.
 
+Additional lower-gap refill buffer claimed by this session: rows 1380-1389.
+
 ## Pending Parent Review
 
 - Row 94 `var_mean_5a22dd21d88e`: worker checks passed; fallback bench was `23GOOD_1BAD_ORACLE`.
