@@ -10,7 +10,7 @@ Updated: 2026-06-13
 - Row 1719 `var_mean_mean_f766086bbce9`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1718 `var_mean_mean_c2c0ad00da48`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
-Tail lane owned by this session: rows 1716-1722; rows 1716-1717 remain idle buffer. Rows 1723-1727 are parent-verified and measured on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1704-1722; rows 1704-1717 remain idle buffer. Rows 1723-1727 are parent-verified and measured on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
