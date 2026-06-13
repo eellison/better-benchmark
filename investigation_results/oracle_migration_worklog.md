@@ -4,13 +4,13 @@ Updated: 2026-06-13
 
 ## Current Worker Pool
 
-- Row 1659 `var_mean_db63028c4eb9`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 1658 `var_mean_daa978c10e99`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
-- Row 1657 `var_mean_d99603638029`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 1656 `var_mean_d8af25d872f0`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1655 `var_mean_d8a04dcc69ee`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1654 `var_mean_d7e9d309a0c1`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1653 `var_mean_d6d0815bb6fa`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 1652 `var_mean_d552da4c6138`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1651 `var_mean_d49a6f9122fd`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1649 `var_mean_d301b5fe0f3c`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 
-Tail lane owned by this session: rows 1625-1659; rows 1625-1654 remain idle buffer. Rows 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1625-1654; rows 1625-1648 remain idle buffer. Rows 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1650, 1655-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 ## Pending Parent Review
 
@@ -28,6 +28,8 @@ Tail lane owned by this session: rows 1625-1659; rows 1625-1654 remain idle buff
 ## Pushed By This Session
 
 - Rows 1695-1697: measured, 3/3 checks, H100 fallback bench `3AT_FLOOR`, no CUDAGraph warnings.
+- Rows 1650 and 1655-1658: measured, 5/5 checks, H100 fallback bench `1GOOD_4AT_FLOOR`, no CUDAGraph warnings.
+- Row 1659 `var_mean_db63028c4eb9`: marked needs_work after parent rerun reproduced `1BAD_ORACLE`; oracle.py deleted locally.
 - Rows 1660-1669 and 1671: measured, 11/11 checks, H100 fallback bench `11AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1670, 1672, 1674-1676, and 1678: measured, 6/6 checks, H100 fallback bench `6AT_FLOOR`, no CUDAGraph warnings.
 - Row 1673 `var_mean_e59fb82095be`: marked needs_work after parent rerun reproduced `1BAD_ORACLE`; oracle.py deleted locally.
