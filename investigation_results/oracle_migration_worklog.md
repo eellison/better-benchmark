@@ -5,14 +5,14 @@ Updated: 2026-06-13
 ## Current Worker Pool
 
 - Row 1298 `sum_sum_6b1f51177c85`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1299 `sum_sum_70679a552198`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1296 `sum_sum_64e7323dd3c2`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 - Row 1297 `sum_sum_6542e246541d`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 1301 `sum_sum_77f6be69be60`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 1300 `sum_sum_7155d62f36cd`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 1295 `sum_sum_6435ae06bfdf`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
 Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
-Lower-gap refill buffer claimed by this session: rows 1297-1301 are active. Rows 1312, 1323, 1336, 1344, 1357, 1365, 1369-1370, 1373, 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1302-1311, 1313-1322, 1324-1335, 1337-1343, 1345-1356, 1358-1364, 1366-1368, 1371-1372, 1374-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
+Lower-gap refill buffer claimed by this session: rows 1295-1298 and 1301 are active. Rows 1312, 1323, 1336, 1344, 1357, 1365, 1369-1370, 1373, 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1299-1311, 1313-1322, 1324-1335, 1337-1343, 1345-1356, 1358-1364, 1366-1368, 1371-1372, 1374-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
 
 Additional lower-gap refill buffer claimed by this session: rows 1360-1369.
 
@@ -49,6 +49,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 
 ## Pushed By This Session
 
+- Rows 1299-1300: measured, 2/2 checks, H100 fallback bench `2GOOD`, no CUDAGraph warnings.
 - Rows 1302-1303: measured, 2/2 checks, H100 fallback bench `2GOOD`, no CUDAGraph warnings.
 - Rows 1304-1305: measured, 2/2 checks, H100 fallback bench `2GOOD`, no CUDAGraph warnings.
 - Row 1312 `sum_sum_936e8304ff14`: marked `needs_work`; checks pass but parent rerun locked bench is `1BAD_ORACLE`, oracle.py deleted locally.
