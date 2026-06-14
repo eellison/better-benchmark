@@ -4,10 +4,10 @@ Updated: 2026-06-13
 
 ## Current Worker Pool
 
-- Row 1063 `pointwise_57dd467b4a45`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1061 `pointwise_5101893d451c`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 1071 `pointwise_656833e29d89`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1064 `pointwise_584a8c609627`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 1065 `pointwise_5ae4111f8443`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1060 `pointwise_4d58f1411abf`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1059 `pointwise_4c8935159f18`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1062 `pointwise_52818a8e5cdd`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
 Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
@@ -21,6 +21,8 @@ Additional lower-gap refill buffer claimed by this session: rows 1080-1089.
 Additional lower-gap refill buffer claimed by this session: rows 1070-1079.
 
 Additional lower-gap refill buffer claimed by this session: rows 1060-1069.
+
+Additional lower-gap refill buffer claimed by this session: rows 1050-1059.
 
 Additional lower-gap refill buffer claimed by this session: rows 1100-1109.
 
