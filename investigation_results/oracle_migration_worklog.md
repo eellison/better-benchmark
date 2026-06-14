@@ -5,14 +5,14 @@ Updated: 2026-06-13
 ## Current Worker Pool
 
 - Row 1230 `sum_b011c33c656b`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1228 `sum_ab9ad96560cd`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1227 `sum_aa70ea7e1d52`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1222 `sum_977aa8760e55`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1224 `sum_a05c10ed018a`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 1225 `sum_a09fa3089339`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 1226 `sum_a200e61c94a5`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 1223 `sum_9b2fcee49b0a`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
 Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
-Lower-gap refill buffer claimed by this session: rows 1225-1228 and 1230 are active. Rows 1233, 1238, 1247, 1251, 1253, 1255, 1271, 1274, 1281, 1288, 1301, 1312, 1323, 1336, 1344, 1357, 1365, 1369-1370, 1373, 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1229, 1231-1232, 1234-1237, 1239-1246, 1248-1250, 1252, 1254, 1256-1270, 1272-1273, 1275-1280, 1282-1287, 1289-1292, 1294-1300, 1302-1311, 1313-1322, 1324-1335, 1337-1343, 1345-1356, 1358-1364, 1366-1368, 1371-1372, 1374-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
+Lower-gap refill buffer claimed by this session: rows 1222-1225 and 1230 are active. Rows 1233, 1238, 1247, 1251, 1253, 1255, 1271, 1274, 1281, 1288, 1301, 1312, 1323, 1336, 1344, 1357, 1365, 1369-1370, 1373, 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1226-1229, 1231-1232, 1234-1237, 1239-1246, 1248-1250, 1252, 1254, 1256-1270, 1272-1273, 1275-1280, 1282-1287, 1289-1292, 1294-1300, 1302-1311, 1313-1322, 1324-1335, 1337-1343, 1345-1356, 1358-1364, 1366-1368, 1371-1372, 1374-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
 
 Additional lower-gap refill buffer claimed by this session: rows 1360-1369.
 
@@ -63,6 +63,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 
 ## Pushed By This Session
 
+- Rows 1226-1228: measured, 3/3 checks, H100 fallback bench `2GOOD_1AT_FLOOR`, no CUDAGraph warnings.
 - Rows 1229, 1231, and 1235: measured, 3/3 checks, H100 fallback bench `2GOOD_1AT_FLOOR`, no CUDAGraph warnings.
 - Row 1233 `sum_b2873b4c9052`: marked `needs_work`; checks pass but parent rerun locked bench OOMs in the fp64 numerics gate before timing, oracle.py deleted locally.
 - Rows 1232 and 1234: measured, 2/2 checks, H100 fallback bench `1GOOD_1AT_FLOOR`, no CUDAGraph warnings.
