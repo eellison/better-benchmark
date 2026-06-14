@@ -22,6 +22,8 @@ Additional lower-gap refill buffer claimed by this session: rows 1150-1159.
 
 Additional lower-gap refill buffer claimed by this session: rows 1140-1149.
 
+Additional lower-gap refill buffer claimed by this session: rows 1130-1139.
+
 Additional lower-gap refill buffer claimed by this session: rows 1360-1369.
 
 Additional lower-gap refill buffer claimed by this session: rows 1350-1359.
