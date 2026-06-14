@@ -873,7 +873,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 872,amax_sum_amax_d857d0afb1ee,d857d0afb1ee,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_870-879
 873,amax_sum_any_1b9e85b4c3f6,1b9e85b4c3f6,reduction,unclassified_priority_gap,1,2,1,~amax_sum_any_511c5ade6e96;~any_amax_sum_0481a7940388;~any_amax_sum_148048393068,claimed,codex,claimed_2026-06-13_lower_gap_870-879
 874,amax_sum_any_2bd234cc2ede,2bd234cc2ede,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_870-879
-875,amax_sum_any_2f67740df045,2f67740df045,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_870-879
+875,amax_sum_any_2f67740df045,2f67740df045,reduction,reduction_softmax_like,1,1,1,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_MobileBertForMaskedLM_d59f4ab1_oracle_76.51us_compile_80.54us_ratio_1.053_GOOD_class_SCHEDULER_FUSION_needs_B200_verify
 876,amax_sum_any_32ad3e5c5477,32ad3e5c5477,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_870-879
 877,amax_sum_any_4d975a47966c,4d975a47966c,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_870-879
 878,amax_sum_any_56c7a5304dc4,56c7a5304dc4,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_870-879
