@@ -888,7 +888,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 887,amax_sum_any_cdb7e77aafa5,cdb7e77aafa5,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_880-889
 888,amax_sum_any_cec33bc33361,cec33bc33361,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_880-889
 889,amax_sum_any_ee88252e6536,ee88252e6536,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_880-889
-890,amax_sum_any_f4223a2e8741,f4223a2e8741,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_890-899
+890,amax_sum_any_f4223a2e8741,f4223a2e8741,reduction,reduction_softmax_like,1,1,1,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_MobileBertForMaskedLM_d59f4ab1_oracle_76.26us_compile_80.10us_ratio_1.050_GOOD_class_SCHEDULER_FUSION_needs_B200_verify
 891,amax_sum_b0e9ed98229b,b0e9ed98229b,reduction,reduction_softmax_like,1,2,1,~amax_sum_0561785713ab,claimed,codex,claimed_2026-06-13_lower_gap_890-899
 892,amax_sum_b4a1db9f7f57,b4a1db9f7f57,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_890-899
 893,amax_sum_bc3fbecd2ce0,bc3fbecd2ce0,reduction,reduction_softmax_like,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_890-899
