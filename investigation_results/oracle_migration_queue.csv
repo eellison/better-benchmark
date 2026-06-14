@@ -1277,7 +1277,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1276,sum_sum_38fa7c1b328d,38fa7c1b328d,reduction,reduction_general,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_1270-1279
 1277,sum_sum_393ad7af35f7,393ad7af35f7,reduction,reduction_general,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_1270-1279
 1278,sum_sum_3e454120af0f,3e454120af0f,reduction,reduction_general,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1270-1279
-1279,sum_sum_4100b99aa8b9,4100b99aa8b9,reduction,reduction_general,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1270-1279
+1279,sum_sum_4100b99aa8b9,4100b99aa8b9,reduction,reduction_general,1,2,1,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_1GOOD_class_COOPERATIVE_SPLIT_K_needs_B200_verify
 1280,sum_sum_41826392af68,41826392af68,reduction,reduction_general,1,1,1,,claimed,codex,claimed_2026-06-13_lower_gap_1280-1289
 1281,sum_sum_4289edc98a8d,4289edc98a8d,reduction,reduction_general,1,2,1,,claimed,codex,claimed_2026-06-13_lower_gap_1280-1289
 1282,sum_sum_44fbd6471588,44fbd6471588,reduction,reduction_general,1,1,1,,oracle_measured,Codex,oracle_py_added_checks_pass_1of1_no_skip_pass_1of1_h100_fallback_bench_no_cudagraph_warnings_allocator_oom_warning_1AT_FLOOR_class_BANDWIDTH_BOUND_needs_B200_verify
