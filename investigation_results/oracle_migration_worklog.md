@@ -20,6 +20,8 @@ Additional lower-gap refill buffer claimed by this session: rows 1010-1019.
 
 Additional lower-gap refill buffer claimed by this session: rows 1000-1009.
 
+Additional lower-gap refill buffer claimed by this session: rows 990-999.
+
 Additional lower-gap refill buffer claimed by this session: rows 1030-1039.
 
 Additional lower-gap refill buffer claimed by this session: rows 1090-1099.
