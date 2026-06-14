@@ -4,10 +4,10 @@ Updated: 2026-06-13
 
 ## Current Worker Pool
 
-- Row 1096 `pointwise_87cb1a76ed86`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1089 `pointwise_7ba7efb075cd`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 1092 `pointwise_802def73cfd7`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1091 `pointwise_7be50f130b06`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 1097 `pointwise_89c74f3242b5`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1088 `pointwise_794fb0f0bd4d`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1087 `pointwise_783d1118b332`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1090 `pointwise_7bd204513fbb`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
 Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
@@ -15,6 +15,8 @@ Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a
 Lower-gap refill buffer claimed by this session: rows 1090-1092 and 1096-1097 are active. Rows 1104, 1109, 1111, 1117, 1120, 1124, 1132, 1138-1140, 1142, 1144-1145, 1147, 1153-1154, 1156, 1162, 1173, 1197, 1204, 1207, 1212, 1230, 1233, 1238, 1247, 1251, 1253, 1255, 1271, 1274, 1281, 1288, 1301, 1312, 1323, 1336, 1344, 1357, 1365, 1369-1370, 1373, 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1093-1095, 1098-1103, 1105-1108, 1110, 1112-1116, 1118-1119, 1121-1123, 1125-1131, 1133-1137, 1141, 1143, 1146, 1148-1152, 1155, 1157-1161, 1163-1172, 1174-1196, 1198-1203, 1205-1206, 1208-1211, 1213-1218, 1219-1229, 1231-1232, 1234-1237, 1239-1246, 1248-1250, 1252, 1254, 1256-1270, 1272-1273, 1275-1280, 1282-1287, 1289-1292, 1294-1300, 1302-1311, 1313-1322, 1324-1335, 1337-1343, 1345-1356, 1358-1364, 1366-1368, 1371-1372, 1374-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
 
 Additional lower-gap refill buffer claimed by this session: rows 1090-1099.
+
+Additional lower-gap refill buffer claimed by this session: rows 1080-1089.
 
 Additional lower-gap refill buffer claimed by this session: rows 1100-1109.
 
