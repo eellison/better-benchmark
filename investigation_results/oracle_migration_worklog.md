@@ -4,15 +4,15 @@ Updated: 2026-06-13
 
 ## Current Worker Pool
 
-- Row 1017 `pointwise_0b055fee3826`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1019 `pointwise_15a27d15fe72`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
 - Row 1018 `pointwise_10be75ce3204`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 1010 `mean_var_mean_dfa4dc2f8f9a`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 1015 `pointwise_08576d101b39`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1000 `mean_var_cebddda52e7b`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1001 `mean_var_d0e54075d3fd`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1011 `mean_var_mean_f541715270de`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
 Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
-Lower-gap refill buffer claimed by this session: rows 1010-1011, 1015, and 1017-1018 are active. Rows 1014, 1032, 1047, 1053, 1054, 1056, 1058, 1062, 1068, 1071, 1075, 1080, 1083, 1087, 1092, 1096-1097, 1104, 1109, 1111, 1117, 1120, 1124, 1132, 1138-1140, 1142, 1144-1145, 1147, 1153-1154, 1156, 1162, 1173, 1197, 1204, 1207, 1212, 1230, 1233, 1238, 1247, 1251, 1253, 1255, 1271, 1274, 1281, 1288, 1301, 1312, 1323, 1336, 1344, 1357, 1365, 1369-1370, 1373, 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1012-1013, 1016, 1020-1031, 1033-1046, 1048-1052, 1055, 1057, 1059-1061, 1063-1067, 1069-1070, 1072-1074, 1076-1079, 1081-1082, 1084-1086, 1088-1091, 1093-1095, 1098-1103, 1105-1108, 1110, 1112-1116, 1118-1119, 1121-1123, 1125-1131, 1133-1137, 1141, 1143, 1146, 1148-1152, 1155, 1157-1161, 1163-1172, 1174-1196, 1198-1203, 1205-1206, 1208-1211, 1213-1218, 1219-1229, 1231-1232, 1234-1237, 1239-1246, 1248-1250, 1252, 1254, 1256-1270, 1272-1273, 1275-1280, 1282-1287, 1289-1292, 1294-1300, 1302-1311, 1313-1322, 1324-1335, 1337-1343, 1345-1356, 1358-1364, 1366-1368, 1371-1372, 1374-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
+Lower-gap refill buffer claimed by this session: rows 1000-1001, 1011, and 1018-1019 are active. Rows 1014, 1032, 1047, 1053, 1054, 1056, 1058, 1062, 1068, 1071, 1075, 1080, 1083, 1087, 1092, 1096-1097, 1104, 1109, 1111, 1117, 1120, 1124, 1132, 1138-1140, 1142, 1144-1145, 1147, 1153-1154, 1156, 1162, 1173, 1197, 1204, 1207, 1212, 1230, 1233, 1238, 1247, 1251, 1253, 1255, 1271, 1274, 1281, 1288, 1301, 1312, 1323, 1336, 1344, 1357, 1365, 1369-1370, 1373, 1382, 1385, and 1398 are marked needs_work after parent-confirmed bench failures; rows 1010, 1012-1013, 1015-1017, 1020-1031, 1033-1046, 1048-1052, 1055, 1057, 1059-1061, 1063-1067, 1069-1070, 1072-1074, 1076-1079, 1081-1082, 1084-1086, 1088-1091, 1093-1095, 1098-1103, 1105-1108, 1110, 1112-1116, 1118-1119, 1121-1123, 1125-1131, 1133-1137, 1141, 1143, 1146, 1148-1152, 1155, 1157-1161, 1163-1172, 1174-1196, 1198-1203, 1205-1206, 1208-1211, 1213-1218, 1219-1229, 1231-1232, 1234-1237, 1239-1246, 1248-1250, 1252, 1254, 1256-1270, 1272-1273, 1275-1280, 1282-1287, 1289-1292, 1294-1300, 1302-1311, 1313-1322, 1324-1335, 1337-1343, 1345-1356, 1358-1364, 1366-1368, 1371-1372, 1374-1381, 1383-1384, 1386-1397, and 1399 are parent-verified on H100 fallback, pending B200 verification.
 
 Additional lower-gap refill buffer claimed by this session: rows 1020-1029.
 
@@ -107,6 +107,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 
 ## Pushed By This Session
 
+- Rows 1010, 1015, and 1017: measured, 3/3 checks, H100 fallback bench `1GOOD/2AT_FLOOR`, no CUDAGraph warnings. Row 1015 has stochastic outputs; no-skip checks passed, normal bench skips stochastic comparison.
 - Row 1016: measured, 1/1 checks, H100 fallback bench `1AT_FLOOR`, no CUDAGraph warnings.
 - Row 1014 `pointwise_05ee034feb4c`: marked `needs_work`; checks pass but parent rerun locked bench fails `NUMERICS_WORSE_THAN_COMPILED`, oracle.py deleted locally.
 - Rows 1012 and 1013: measured, 2/2 checks, H100 fallback bench `2AT_FLOOR`, no CUDAGraph warnings. Both rows have stochastic outputs; no-skip checks passed, normal bench skips stochastic comparison.
