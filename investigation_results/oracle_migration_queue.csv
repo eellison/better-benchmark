@@ -179,7 +179,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 178,amax_sum_69008a1fbe7e,69008a1fbe7e,reduction,reduction_softmax_like,1,1,23,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 179,amax_sum_sum_a184947064f0,a184947064f0,reduction,scatter_gather,1,1,23,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 180,pointwise_260db4f7087d,260db4f7087d,pointwise,unclassified_priority_gap,1,1,23,~pointwise_869474330b72,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
-181,pointwise_2c331ef4f17f,2c331ef4f17f,pointwise,layout_indexing_stencil_fusion,23,11,23,pointwise_57287c224f10,claimed,codex,retry_claim_2026-06-15_needs_work_prev_NUMERICS_WORSE_THAN_COMPILED_nan_gate_23pts_reaudit
+181,pointwise_2c331ef4f17f,2c331ef4f17f,pointwise,layout_indexing_stencil_fusion,23,11,23,pointwise_57287c224f10,oracle_measured,codex,retry_resolved_checks_pass_23of23_no_skip_pass_23of23_locked_bench_invalid_OMP_BrokenProcessPool_no_cudagraph_warnings_h100_serial_fallback_23_NUMERICS_FLAG_nan_gate_needs_B200_verify
 182,pointwise_598163daa1a2,598163daa1a2,pointwise,unclassified_priority_gap,1,2,23,pointwise_69399b54497b,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 183,pointwise_8e1dc74da682,8e1dc74da682,pointwise,unclassified_priority_gap,11,6,23,pointwise_8e1dc74da682,claimed,codex,retry_claim_2026-06-15_needs_work_prev_9AT_FLOOR_2BAD_ORACLE_11pts_retune
 184,pointwise_b79cf7b4f823,b79cf7b4f823,pointwise,unclassified_priority_gap,1,1,23,pointwise_b954be2ccd22,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
