@@ -1535,6 +1535,15 @@ def test_harvest_shape_env_symbols_ranges():
         assert lo is None or isinstance(lo, int)
         assert hi is None or isinstance(hi, int)  # int_oo -> None
 
+    # _jsonable_range_bound: a FINITE upper bound survives (only oo/int_oo ->
+    # None). A symbol with a real ceiling (e.g. torch._check(s <= 4096)) must
+    # keep it, never get widened to unbounded.
+    from full_graph_harness import _jsonable_range_bound
+    import sympy
+    assert _jsonable_range_bound(sympy.Integer(4096)) == 4096
+    assert _jsonable_range_bound(sympy.oo) is None
+    assert _jsonable_range_bound(-sympy.oo) is None
+
 
 def test_harvest_none_shape_env():
     """None env (static capture) -> None block, never raises."""
@@ -1679,3 +1688,165 @@ def test_symint_input_expr_parsed_without_regex_or_default():
     assert t["shape"] == [64, "s53"]
     assert t["symbolic"]["shape_exprs"] == [None, "s53"]
     assert t["symbolic"]["stride_exprs"] == ["s53", None]
+
+
+# ============================================================================
+# End-to-end dynamic capture (GPU-gated)
+#
+# The unit tests above cover each piece (harvest, codec, merge schema) in
+# isolation; this exercises the REAL pipeline so a capture_hook refactor that
+# silently breaks dynamic capture is caught — the static-only-blind-spot class
+# of bug this whole effort exists to kill. Skipped without CUDA.
+# ============================================================================
+
+class _GroupNormDyn(torch.nn.Module):
+    """GroupNorm-affine family: two coupled dynamic spatial dims (s0, s53),
+    a lifted shape param (64,32,2,s0*s53) and live symint inputs — the
+    var_mean opacus pattern the design doc uses."""
+    def __init__(self):
+        super().__init__()
+        self.w = torch.nn.Parameter(torch.randn(64))
+        self.b = torch.nn.Parameter(torch.randn(64))
+
+    def forward(self, x):
+        view = x.view(64, 32, 2, x.shape[2] * x.shape[3])
+        var, mean = torch.var_mean(view, [2, 3], correction=0, keepdim=True)
+        normed = (view - mean) * torch.rsqrt(var + 1e-5)
+        return normed.view(x.shape) * self.w[None, :, None, None] + self.b[None, :, None, None]
+
+
+def _capture_dynamic_region(tmpdir):
+    """Capture _GroupNormDyn under dynamic=True; return the single index entry."""
+    import json
+    from capture_hook import install_capture_hook, uninstall_capture_hook
+    out = str(tmpdir / "cap")
+    install_capture_hook(out, label="e2e")
+    try:
+        m = _GroupNormDyn().cuda()
+        x = torch.randn(64, 64, 16, 16, device="cuda")
+        torch._dynamo.mark_dynamic(x, 2)
+        torch._dynamo.mark_dynamic(x, 3)
+        with torch.no_grad():
+            torch.compile(m, dynamic=True)(x)
+    finally:
+        uninstall_capture_hook()
+    idx = json.loads((tmpdir / "cap" / "index.json").read_text())
+    assert idx["n_dropped"] == 0, f"dynamic region dropped: {idx.get('dropped')}"
+    assert idx["n_captured"] == 1, idx
+    return idx["captured"][0]
+
+
+def test_dynamic_capture_merge_load_roundtrip_gpu():
+    """Full pipeline: capture a dynamic region -> merge into shapes.json ->
+    load_shape_configs at the hint and a guard-RESPECTING rebind run eager;
+    a guard-VIOLATING rebind is loudly rejected. No hand-built shapes.json."""
+    import json
+    import tempfile
+    import importlib.util
+    import pytest
+    from pathlib import Path
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for real dynamic capture")
+    torch._dynamo.reset()
+
+    from merge_captures import _write_shapes_json
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        entry = _capture_dynamic_region(tmp)
+
+        # the captured inputs ARE the symbolic format (exprs, not hints)
+        assert entry.get("captured_dynamic") is True
+        assert entry["symbols"], "no symbols harvested"
+        tensor0 = entry["inputs"][0]
+        assert any(isinstance(d, str) for d in tensor0[0]), "shape not symbolic"
+        assert any(e[0] == "I" for e in entry["inputs"]
+                   if isinstance(e, list) and e), "no ['I',..] symint input"
+
+        repro_dir = tmp / "canonical" / "var_mean_e2e"
+        repro_dir.mkdir(parents=True)
+        (repro_dir / "repro.py").write_text(Path(entry["file"]).read_text())
+        _write_shapes_json(
+            repro_dir, entry["shape_hash"], entry.get("signature", ""),
+            "probe/infer/groupnorm", occurrences=1, inputs=entry["inputs"],
+            alias_group_nbytes=entry.get("alias_group_nbytes"),
+            symbols=entry.get("symbols"), guards=entry.get("guards"))
+
+        sj = json.loads((repro_dir / "shapes.json").read_text())
+        assert sj["symbols"] == entry["symbols"]          # graph-level
+        assert sj["points"][0]["captured_dynamic"] is True
+        assert sj["points"][0]["bindings"]                # hint binding
+
+        repro_py = str(repro_dir / "repro.py")
+        syms = sorted(entry["symbols"])  # e.g. ['s0', 's53']
+
+        def _run(binding):
+            cfg = next(iter(load_shape_configs(
+                repro_py, symbol_bindings=binding).values()))
+            inputs = make_inputs_from_config(cfg)
+            spec = importlib.util.spec_from_file_location("_e2e_repro", repro_py)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            with torch.no_grad():
+                out = mod.Repro()(*inputs)
+            return tuple(inputs[0].shape), tuple(out.shape)
+
+        # hint point runs (recorded bindings)
+        in_shape, out_shape = _run(None)
+        assert in_shape == (64, 64, 16, 16)
+        assert out_shape == (64, 64, 16, 16)
+
+        # guard-RESPECTING rebind: product s0*s53 stays 256 (8*32), runs
+        in_shape2, out_shape2 = _run({syms[0]: 8, syms[1]: 32})
+        assert in_shape2[2] * in_shape2[3] == 16 * 16  # spatial product preserved
+        assert out_shape2 == in_shape2                 # affine: out == in shape
+
+        # guard-VIOLATING rebind: product 576 != 256 -> loudly rejected
+        with pytest.raises(ValueError, match="guard|range"):
+            _run({syms[0]: 24, syms[1]: 24})
+
+
+def test_static_capture_has_no_symbolic_artifacts_gpu():
+    """A STATIC compile (no mark_dynamic) must capture with zero symbolic
+    content — no expr-string dims, no symbolic block, no symbols/guards in
+    shapes.json. Pins that the dynamic path is fully additive."""
+    import json
+    import tempfile
+    import pytest
+    from pathlib import Path
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for real capture")
+    torch._dynamo.reset()
+
+    from capture_hook import install_capture_hook, uninstall_capture_hook
+
+    class _StaticM(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.w = torch.nn.Parameter(torch.randn(64, 64))
+
+        def forward(self, x):
+            y = x @ self.w
+            return (y - y.mean(0, keepdim=True)).relu().sum(1)
+
+    with tempfile.TemporaryDirectory() as td:
+        out = str(Path(td) / "cap")
+        install_capture_hook(out, label="static")
+        try:
+            m = _StaticM().cuda()
+            with torch.no_grad():
+                torch.compile(m)(torch.randn(128, 64, device="cuda"))
+        finally:
+            uninstall_capture_hook()
+        idx = json.loads((Path(td) / "cap" / "index.json").read_text())
+        assert idx["n_dropped"] == 0 and idx["n_captured"] >= 1
+        for entry in idx["captured"]:
+            assert not entry.get("captured_dynamic")
+            assert "symbols" not in entry and "guards" not in entry
+            for e in entry["inputs"]:
+                if isinstance(e, list) and e and isinstance(e[0], list):
+                    assert all(isinstance(d, int) for d in e[0]), \
+                        f"static capture has symbolic dim: {e}"
