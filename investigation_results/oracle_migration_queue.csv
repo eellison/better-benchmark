@@ -1716,7 +1716,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1715,var_mean_mean_7e505883fbf8,7e505883fbf8,reduction,norm_template_canonicalization,1,2,1,~var_mean_mean_6b0bb4b36636;~var_mean_mean_935376ba22dc,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1716,var_mean_mean_94d5b5ab5e6e,94d5b5ab5e6e,reduction,reduction_var_mean,1,2,1,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 1717,var_mean_mean_bf8fb2be89c6,bf8fb2be89c6,reduction,norm_template_canonicalization,1,1,1,~var_mean_mean_2d18883a5e64,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-1718,var_mean_mean_c2c0ad00da48,c2c0ad00da48,reduction,norm_template_canonicalization,1,2,1,~var_mean_mean_0805988a80e9,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_BAD_ORACLE_ratio_0.845
+1718,var_mean_mean_c2c0ad00da48,c2c0ad00da48,reduction,norm_template_canonicalization,1,2,1,~var_mean_mean_0805988a80e9,needs_work,codex,needs_work_worker_checks_pass_no_skip_pass_bench_BAD_ORACLE_441beb73_oracle_us=25.70_compile_us=20.83_ratio=0.811_numerics_pass_no_cudagraph_warnings_oracle_not_committed_2026-06-15
 1719,var_mean_mean_f766086bbce9,f766086bbce9,reduction,norm_template_canonicalization,1,1,1,~var_mean_mean_34a86d931d28,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1720,var_mean_sum_53c829d32b0c,53c829d32b0c,reduction,norm_template_canonicalization,1,1,1,var_mean_sum_87c8c4a61b33,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1721,var_mean_var_mean_0dd15b92dc70,0dd15b92dc70,reduction,reduction_var_mean,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
