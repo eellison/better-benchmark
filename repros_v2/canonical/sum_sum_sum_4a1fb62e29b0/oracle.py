@@ -49,6 +49,18 @@ def _mul_rn(a, b):
 
 
 @triton.jit
+def _round_bf16_to_f32(x):
+    return tl.inline_asm_elementwise(
+        "{ .reg .b16 t; cvt.rn.bf16.f32 t, $1; cvt.f32.bf16 $0, t; }",
+        constraints="=f,f",
+        args=[x],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
 def _store_partials_kernel(
     arg0_ptr,
     arg1_ptr,
@@ -105,15 +117,12 @@ def _store_partials_kernel(
         grad = _mul_rn(scale[:, None], centered)
         grad = tl.where(mask, grad, 0.0)
 
-        grad_bf16 = grad.to(tl.bfloat16, fp_downcast_rounding="rtne")
-        keep_scale = _mul_rn(
+        grad_bf16 = _round_bf16_to_f32(grad)
+        keep_scale = _round_bf16_to_f32(_mul_rn(
             keep,
             tl.full((BLOCK_R, BLOCK_C), DROP_SCALE_, tl.float32),
-        ).to(tl.bfloat16, fp_downcast_rounding="rtne")
-        side_bf16 = _mul_rn(
-            grad_bf16.to(tl.float32),
-            keep_scale.to(tl.float32),
-        ).to(tl.bfloat16, fp_downcast_rounding="rtne")
+        ))
+        side_bf16 = _round_bf16_to_f32(_mul_rn(grad_bf16, keep_scale))
 
         tl.store(grad_out_ptr + offsets, grad, mask=mask)
         tl.store(bf16_out_ptr + offsets, side_bf16, mask=mask)
@@ -146,19 +155,20 @@ def _c768_tree_row_store_kernel(
     ROWS: tl.constexpr,
     ROW_FACTOR_: tl.constexpr,
     DROP_SCALE_: tl.constexpr,
+    STORE_BLOCK_R: tl.constexpr,
     BLOCK_C: tl.constexpr,
 ):
-    row = tl.program_id(0) + tl.arange(0, 1)
+    row = tl.program_id(0) * STORE_BLOCK_R + tl.arange(0, STORE_BLOCK_R)
     row_mask = row < ROWS
     lanes = tl.arange(0, 32)
-    sum0 = tl.zeros((1, 32), dtype=tl.float32)
-    sum1 = tl.zeros((1, 32), dtype=tl.float32)
-    sum2 = tl.zeros((1, 32), dtype=tl.float32)
-    sum3 = tl.zeros((1, 32), dtype=tl.float32)
-    dot0 = tl.zeros((1, 32), dtype=tl.float32)
-    dot1 = tl.zeros((1, 32), dtype=tl.float32)
-    dot2 = tl.zeros((1, 32), dtype=tl.float32)
-    dot3 = tl.zeros((1, 32), dtype=tl.float32)
+    sum0 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
+    sum1 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
+    sum2 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
+    sum3 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
+    dot0 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
+    dot1 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
+    dot2 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
+    dot3 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
 
     for step in tl.static_range(0, 6):
         for vec in tl.static_range(0, 4):
@@ -199,14 +209,14 @@ def _c768_tree_row_store_kernel(
 
     lane_sum = _add_rn(_add_rn(_add_rn(sum0, sum1), sum2), sum3)
     lane_dot = _add_rn(_add_rn(_add_rn(dot0, dot1), dot2), dot3)
-    sum16 = tl.reshape(tl.sum(tl.reshape(lane_sum, (16, 2)), axis=1), (1, 16))
-    dot16 = tl.reshape(tl.sum(tl.reshape(lane_dot, (16, 2)), axis=1), (1, 16))
-    sum8 = tl.reshape(tl.sum(tl.reshape(sum16, (8, 2)), axis=1), (1, 8))
-    dot8 = tl.reshape(tl.sum(tl.reshape(dot16, (8, 2)), axis=1), (1, 8))
-    sum4 = tl.reshape(tl.sum(tl.reshape(sum8, (4, 2)), axis=1), (1, 4))
-    dot4 = tl.reshape(tl.sum(tl.reshape(dot8, (4, 2)), axis=1), (1, 4))
-    sum2_final = tl.reshape(tl.sum(tl.reshape(sum4, (2, 2)), axis=1), (1, 2))
-    dot2_final = tl.reshape(tl.sum(tl.reshape(dot4, (2, 2)), axis=1), (1, 2))
+    sum16 = tl.reshape(tl.sum(tl.reshape(lane_sum, (STORE_BLOCK_R * 16, 2)), axis=1), (STORE_BLOCK_R, 16))
+    dot16 = tl.reshape(tl.sum(tl.reshape(lane_dot, (STORE_BLOCK_R * 16, 2)), axis=1), (STORE_BLOCK_R, 16))
+    sum8 = tl.reshape(tl.sum(tl.reshape(sum16, (STORE_BLOCK_R * 8, 2)), axis=1), (STORE_BLOCK_R, 8))
+    dot8 = tl.reshape(tl.sum(tl.reshape(dot16, (STORE_BLOCK_R * 8, 2)), axis=1), (STORE_BLOCK_R, 8))
+    sum4 = tl.reshape(tl.sum(tl.reshape(sum8, (STORE_BLOCK_R * 4, 2)), axis=1), (STORE_BLOCK_R, 4))
+    dot4 = tl.reshape(tl.sum(tl.reshape(dot8, (STORE_BLOCK_R * 4, 2)), axis=1), (STORE_BLOCK_R, 4))
+    sum2_final = tl.reshape(tl.sum(tl.reshape(sum4, (STORE_BLOCK_R * 2, 2)), axis=1), (STORE_BLOCK_R, 2))
+    dot2_final = tl.reshape(tl.sum(tl.reshape(dot4, (STORE_BLOCK_R * 2, 2)), axis=1), (STORE_BLOCK_R, 2))
     row_sum = tl.sum(sum2_final, axis=1)
     row_dot = tl.sum(dot2_final, axis=1)
 
@@ -226,22 +236,19 @@ def _c768_tree_row_store_kernel(
     weighted = _mul_rn(x, weight[None, :])
     scaled_weighted = _mul_rn(
         weighted,
-        tl.full((1, BLOCK_C), ROW_FACTOR_, tl.float32),
+        tl.full((STORE_BLOCK_R, BLOCK_C), ROW_FACTOR_, tl.float32),
     )
     centered = _sub_rn(scaled_weighted, row_sum[:, None])
     centered = _sub_rn(centered, _mul_rn(rhs, row_dot[:, None]))
     grad = _mul_rn(scale[:, None], centered)
     grad = tl.where(mask, grad, 0.0)
 
-    grad_bf16 = grad.to(tl.bfloat16, fp_downcast_rounding="rtne")
-    keep_scale = _mul_rn(
+    grad_bf16 = _round_bf16_to_f32(grad)
+    keep_scale = _round_bf16_to_f32(_mul_rn(
         keep,
-        tl.full((1, BLOCK_C), DROP_SCALE_, tl.float32),
-    ).to(tl.bfloat16, fp_downcast_rounding="rtne")
-    side_bf16 = _mul_rn(
-        grad_bf16.to(tl.float32),
-        keep_scale.to(tl.float32),
-    ).to(tl.bfloat16, fp_downcast_rounding="rtne")
+        tl.full((STORE_BLOCK_R, BLOCK_C), DROP_SCALE_, tl.float32),
+    ))
+    side_bf16 = _round_bf16_to_f32(_mul_rn(grad_bf16, keep_scale))
     tl.store(grad_out_ptr + offsets, grad, mask=mask)
     tl.store(bf16_out_ptr + offsets, side_bf16, mask=mask)
 
@@ -317,12 +324,13 @@ def _finalize_partials_kernel(
     tl.store(out_bf16_sum_ptr + cols, side_sum, mask=col_mask)
 
 
-@oracle_impl(hardware="B200", point="c21f4298", ROWS_PER_GROUP=128, BLOCK_R=4, BLOCK_C=1024, FINAL_BLOCK_C=2, num_warps=2)
+@oracle_impl(hardware="B200", point="c21f4298", ROWS_PER_GROUP=128, BLOCK_R=4, STORE_BLOCK_R=1, BLOCK_C=1024, FINAL_BLOCK_C=2, num_warps=2)
 def _oracle_forward_c21(
     inputs,
     *,
     ROWS_PER_GROUP: int,
     BLOCK_R: int,
+    STORE_BLOCK_R: int,
     BLOCK_C: int,
     FINAL_BLOCK_C: int,
     num_warps: int,
@@ -371,7 +379,7 @@ def _oracle_forward_c21(
         device=device,
         dtype=torch.float32,
     )
-    _c768_tree_row_store_kernel[(rows,)](
+    _c768_tree_row_store_kernel[(triton.cdiv(rows, STORE_BLOCK_R),)](
         arg0,
         arg1,
         arg2,
@@ -385,6 +393,7 @@ def _oracle_forward_c21(
         ROWS=rows,
         ROW_FACTOR_=ROW_FACTOR,
         DROP_SCALE_=DROP_SCALE,
+        STORE_BLOCK_R=STORE_BLOCK_R,
         BLOCK_C=BLOCK_C,
         num_warps=num_warps,
     )
@@ -504,7 +513,6 @@ def oracle_forward(
         BLOCK_C=BLOCK_C,
         num_warps=num_warps,
     )
-
     group_block = 1 << (num_groups - 1).bit_length()
     _finalize_partials_kernel[(triton.cdiv(channels, FINAL_BLOCK_C),)](
         partials,
