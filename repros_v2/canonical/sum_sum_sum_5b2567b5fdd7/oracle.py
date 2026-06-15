@@ -123,6 +123,9 @@ def _ln_bwd_store_partials_c768_kernel(
     CHUNK_C: tl.constexpr,
 ):
     group = tl.program_id(0)
+    cols = tl.arange(0, BLOCK_C)
+    col_mask = cols < 768
+    weight_full = tl.load(weight_ptr + cols, mask=col_mask, other=0.0).to(tl.float32)
     chunk_cols = tl.arange(0, CHUNK_C)
     w0 = tl.load(weight_ptr + chunk_cols).to(tl.float32)
     w1 = tl.load(weight_ptr + chunk_cols + CHUNK_C).to(tl.float32)
@@ -142,10 +145,14 @@ def _ln_bwd_store_partials_c768_kernel(
         row_mask = rows < ROWS
         scale = tl.load(scale_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
 
+        full_mask = row_mask[:, None] & col_mask[None, :]
+        full_offsets = rows[:, None] * 768 + cols[None, :]
         chunk_mask = row_mask[:, None]
         offsets0 = rows[:, None] * 768 + chunk_cols[None, :]
         offsets1 = offsets0 + CHUNK_C
         offsets2 = offsets1 + CHUNK_C
+        x_full = tl.load(x_ptr + full_offsets, mask=full_mask, other=0.0).to(tl.float32)
+        r_full = tl.load(rhs_ptr + full_offsets, mask=full_mask, other=0.0).to(tl.float32)
         x0 = tl.load(x_ptr + offsets0, mask=chunk_mask, other=0.0).to(tl.float32)
         x1 = tl.load(x_ptr + offsets1, mask=chunk_mask, other=0.0).to(tl.float32)
         x2 = tl.load(x_ptr + offsets2, mask=chunk_mask, other=0.0).to(tl.float32)
@@ -160,13 +167,9 @@ def _ln_bwd_store_partials_c768_kernel(
             _add_rn(tl.sum(wx0, axis=1), tl.sum(wx1, axis=1)),
             tl.sum(wx2, axis=1),
         )
-        wr0 = _mul_rn(wx0, r0)
-        wr1 = _mul_rn(wx1, r1)
-        wr2 = _mul_rn(wx2, r2)
-        row_dot = _add_rn(
-            _add_rn(tl.sum(wr0, axis=1), tl.sum(wr1, axis=1)),
-            tl.sum(wr2, axis=1),
-        )
+        weighted_full = _mul_rn(x_full, weight_full[None, :])
+        weighted_rhs_full = _mul_rn(weighted_full, r_full)
+        row_dot = tl.sum(tl.where(full_mask, weighted_rhs_full, 0.0), axis=1)
         acc_x_rhs0 += tl.sum(_mul_rn(x0, r0), axis=0)
         acc_x_rhs1 += tl.sum(_mul_rn(x1, r1), axis=0)
         acc_x_rhs2 += tl.sum(_mul_rn(x2, r2), axis=0)
