@@ -167,7 +167,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 166,pointwise_d17fec3a0be5,d17fec3a0be5,pointwise,unclassified_priority_gap,1,1,24,~pointwise_a020dfe84962;~pointwise_fed52737c4f6,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 167,pointwise_ed86b04d7ae6,ed86b04d7ae6,pointwise,unclassified_priority_gap,4,1,24,~pointwise_035529d03c14;~pointwise_0f6eed42fa2c;~pointwise_af2e722aed5d,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 168,pointwise_fb9acc3ed8b0,fb9acc3ed8b0,pointwise,unclassified_priority_gap,1,1,24,~pointwise_187bbcc9d7ba,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
-169,sum_24541cd0c55b,24541cd0c55b,reduction,reduction_general,1,1,24,,oracle_measured,codex,retry_resolved_second_fix_checks_pass_1of1_no_skip_pass_1of1_locked_bench_invalid_OMP_BrokenProcessPool_no_cudagraph_warnings_h100_serial_fallback_66f209c9_oracle_us=216.74_compile_us=211.81_ratio=0.977_AT_FLOOR_numerics_pass_tl_math_exp_cast_sinking_match_needs_B200_verify
+169,sum_24541cd0c55b,24541cd0c55b,reduction,reduction_general,1,1,24,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 170,sum_35b8acdece58,35b8acdece58,reduction,multi_output_reduction_templates,2,3,24,~sum_1fb7f13c05d1,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 171,sum_a72724ce25f0,a72724ce25f0,reduction,multi_output_reduction_templates,8,4,24,~sum_5688d5156d97,oracle_measured,Codex,"B200_verified_2026-06-15: stale needs_work re-checked, check+bench PASS (fleet)"
 172,sum_abcd9bccce7d,abcd9bccce7d,reduction,multi_output_reduction_templates,8,13,24,~sum_2b63837952dc;~sum_34445852895e;~sum_acbec27412d2,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
@@ -197,7 +197,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 196,pointwise_0cd85fd63f82,0cd85fd63f82,pointwise,unclassified_priority_gap,1,2,22,~pointwise_d604053b7cd8,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 197,pointwise_544fac7c5583,544fac7c5583,pointwise,pointwise,3,2,22,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 198,sum_be521af00034,be521af00034,reduction,reduction_general,1,2,22,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
-199,sum_sum_sum_33df09c4b328,33df09c4b328,reduction,reduction_general,1,2,22,,oracle_measured,codex,retry_resolved_checks_pass_1of1_no_skip_pass_1of1_locked_bench_invalid_OMP_BrokenProcessPool_no_cudagraph_warnings_h100_serial_fallback_7635d0ad_oracle_us=274.40_compile_us=276.32_ratio=1.007_AT_FLOOR_numerics_pass_needs_B200_verify
+199,sum_sum_sum_33df09c4b328,33df09c4b328,reduction,reduction_general,1,2,22,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 200,var_mean_787e1d544efe,787e1d544efe,reduction,unclassified_priority_gap,1,2,22,~var_mean_0361de9eae81;~var_mean_4ca91616285c;~var_mean_6a701483fed1,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 201,pointwise_95ed2ef35da9,95ed2ef35da9,pointwise,layout_indexing_stencil_fusion,2,3,21,pointwise_9edaf9e5b4c4,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 202,amax_sum_fa4cc85fe5ad,fa4cc85fe5ad,reduction,reduction_softmax_like,2,3,20,~amax_sum_4fb4f9a0bf43,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
@@ -231,14 +231,14 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 230,sum_sum_4df091034d07,4df091034d07,reduction,multi_output_reduction_templates,1,1,16,~sum_sum_aac6620b978d,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 231,sum_sum_c91da8ecf163,c91da8ecf163,reduction,reduction_general,10,2,16,,oracle_measured,codex,"B200_verified_2026-06-15: stale needs_work re-checked, check+bench PASS (fleet)"
 232,var_mean_mean_e790938418f4,e790938418f4,reduction,reduction_var_mean,10,2,16,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_2BAD_ORACLE_8GOOD_10pts_oracle_deleted_retune
-233,sum_sum_sum_951d09ecbec1,951d09ecbec1,reduction,reduction_general,3,2,15,,oracle_measured,codex,retry_resolved_checks_pass_3of3_no_skip_pass_3of3_locked_bench_invalid_OMP_BrokenProcessPool_no_cudagraph_warnings_h100_serial_fallback_3GOOD_results_investigation_results/row233_sum_sum_sum_951d09ecbec1_results.csv_needs_B200_verify
+233,sum_sum_sum_951d09ecbec1,951d09ecbec1,reduction,reduction_general,3,2,15,,needs_work,codex,needs_work: B200 3float fail max_diff=0.25 (large/unknown - verify not broken math)
 234,var_mean_0ada225c0a04,0ada225c0a04,reduction,norm_template_canonicalization,13,20,15,var_mean_d22940b03b5c;var_mean_d8fae237d769,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 235,var_mean_547bcc63004b,547bcc63004b,reduction,norm_template_canonicalization,3,2,15,var_mean_d22940b03b5c;var_mean_d8fae237d769,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 236,var_mean_eb058371f885,eb058371f885,reduction,norm_template_canonicalization,4,2,15,~var_mean_2f98fd23fbea;~var_mean_e4d2655a5279,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 237,sum_2f173ee403d1,2f173ee403d1,reduction,reduction_general,2,3,14,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 238,sum_mean_1db528935b36,1db528935b36,reduction,reduction_general,4,2,14,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 239,sum_mean_6150664fe0bf,6150664fe0bf,reduction,reduction_general,4,2,14,,oracle_measured,codex,B200_verified_2026-06-15: numerics_flag non-blocking per policy (0bool 2float fail max_diff=0.0312 (precision; non-blocking))
-240,sum_sum_sum_865e7fa30b8a,865e7fa30b8a,reduction,reduction_general,4,2,14,,oracle_measured,codex,retry_resolved_checks_pass_4of4_no_skip_pass_4of4_locked_bench_invalid_OMP_BrokenProcessPool_no_cudagraph_warnings_h100_serial_fallback_2GOOD_2AT_FLOOR_results_investigation_results/row240_sum_sum_sum_865e7fa30b8a_results.csv_needs_B200_verify
+240,sum_sum_sum_865e7fa30b8a,865e7fa30b8a,reduction,reduction_general,4,2,14,,needs_work,codex,needs_work: B200 1float fail max_diff=2.0 (large/unknown - verify not broken math)
 241,sum_sum_sum_db03a2e026aa,db03a2e026aa,reduction,reduction_general,2,2,14,,oracle_measured,codex,B200_verified_2026-06-15: numerics_flag non-blocking per policy (0bool 1float fail max_diff=0.0625 (precision; non-blocking))
 242,var_mean_e98d6d833b6e,e98d6d833b6e,reduction,norm_template_canonicalization,4,2,14,~var_mean_2f98fd23fbea;~var_mean_e4d2655a5279,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 243,amax_sum_821fb95bd167,821fb95bd167,reduction,reduction_softmax_like,4,1,13,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
@@ -1377,14 +1377,14 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1376,sum_sum_sum_3d8e3038c144,3d8e3038c144,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1377,sum_sum_sum_456d637a9bc7,456d637a9bc7,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1378,sum_sum_sum_46c77e1ef34a,46c77e1ef34a,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1379,sum_sum_sum_4aae5698dd79,4aae5698dd79,reduction,scatter_gather,1,1,1,,oracle_measured,codex,parent_verified_checks_pass_1of1_no_skip_pass_1of1_locked_bench_no_cudagraph_warnings_1_GOOD_2f93d7aa_oracle_132.16us_compile_286.24us_ratio_2.166_needs_B200_verify
+1379,sum_sum_sum_4aae5698dd79,4aae5698dd79,reduction,scatter_gather,1,1,1,,needs_work,codex,needs_work: B200 1float fail max_diff=805000000.0 (large/unknown - verify not broken math)
 1380,sum_sum_sum_4ce9013c6e0d,4ce9013c6e0d,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1381,sum_sum_sum_5008e7d7f793,5008e7d7f793,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1382,sum_sum_sum_51b3bd5aa388,51b3bd5aa388,reduction,reduction_general,1,2,1,,oracle_measured,codex,parent_verified_checks_pass_1of1_no_skip_pass_1of1_locked_bench_no_cudagraph_warnings_1_AT_FLOOR_c8d56283_oracle_71.30us_compile_71.49us_ratio_1.003_needs_B200_verify
+1382,sum_sum_sum_51b3bd5aa388,51b3bd5aa388,reduction,reduction_general,1,2,1,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 1383,sum_sum_sum_57057d0973c9,57057d0973c9,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1384,sum_sum_sum_59c5b1609d60,59c5b1609d60,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1385,sum_sum_sum_603e69b709ae,603e69b709ae,reduction,reduction_general,1,2,1,,oracle_measured,codex,parent_verified_checks_pass_1of1_no_skip_pass_1of1_locked_bench_no_cudagraph_warnings_1_GOOD_9c141705_oracle_532.51us_compile_602.62us_ratio_1.132_needs_B200_verify
-1386,sum_sum_sum_60a418792eff,60a418792eff,reduction,scatter_gather,1,1,1,,oracle_measured,codex,parent_verified_checks_pass_1of1_no_skip_pass_1of1_locked_bench_no_cudagraph_warnings_1_AT_FLOOR_6c540e4e_oracle_106.53us_compile_105.60us_ratio_0.991_needs_B200_verify
+1385,sum_sum_sum_603e69b709ae,603e69b709ae,reduction,reduction_general,1,2,1,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
+1386,sum_sum_sum_60a418792eff,60a418792eff,reduction,scatter_gather,1,1,1,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 1387,sum_sum_sum_6178014c1a1b,6178014c1a1b,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1388,sum_sum_sum_66b9baf8b40f,66b9baf8b40f,reduction,scatter_gather,1,1,1,sum_sum_sum_995d991d6527,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1389,sum_sum_sum_6b160090a678,6b160090a678,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
@@ -1399,8 +1399,8 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1398,sum_sum_sum_86e661f4be59,86e661f4be59,reduction,reduction_general,1,2,1,,needs_work,codex,needs_work_retry_check_pass_no_skip_pass_bench_NUMERICS_WORSE_THAN_COMPILED_visible_reduction_outputs_1_2_compiled_closer_than_eager_no_cudagraph_warnings_oracle_not_committed_2026-06-15
 1399,sum_sum_sum_8adea0bd8df9,8adea0bd8df9,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1400,sum_sum_sum_8f68a97a2af7,8f68a97a2af7,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-1401,sum_sum_sum_9ab0961d1fd9,9ab0961d1fd9,reduction,scatter_gather,1,1,1,,oracle_measured,codex,parent_verified_checks_pass_1of1_no_skip_pass_1of1_locked_bench_no_cudagraph_warnings_1_GOOD_a380a4be_oracle_32.96us_compile_40.16us_ratio_1.218_needs_B200_verify
-1402,sum_sum_sum_9ae530fb77de,9ae530fb77de,reduction,reduction_general,1,2,1,,oracle_measured,codex,parent_verified_checks_pass_1of1_no_skip_pass_1of1_locked_bench_no_cudagraph_warnings_1_GOOD_fd33c7c3_oracle_30.69us_compile_44.58us_ratio_1.453_needs_B200_verify
+1401,sum_sum_sum_9ab0961d1fd9,9ab0961d1fd9,reduction,scatter_gather,1,1,1,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
+1402,sum_sum_sum_9ae530fb77de,9ae530fb77de,reduction,reduction_general,1,2,1,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 1403,sum_sum_sum_9b7df2917dda,9b7df2917dda,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1404,sum_sum_sum_9cc696981073,9cc696981073,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1405,sum_sum_sum_9e1e02d0dd86,9e1e02d0dd86,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
