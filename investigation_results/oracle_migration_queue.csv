@@ -1709,7 +1709,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1708,var_mean_mean_1ae53b59df19,1ae53b59df19,reduction,norm_template_canonicalization,1,1,1,~var_mean_mean_626fb0807512,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1709,var_mean_mean_1dc49728bc38,1dc49728bc38,reduction,norm_template_canonicalization,1,2,1,~var_mean_mean_08131211a12e,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1710,var_mean_mean_1f7174490c38,1f7174490c38,reduction,reduction_var_mean,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-1711,var_mean_mean_1fc0030c74ea,1fc0030c74ea,reduction,reduction_var_mean,1,2,1,,needs_work,codex,needs_work: parent_verified_checks_pass_1of1_no_skip_pass_1of1_locked_bench_no_cudagraph_warnings_1_BAD_ORACLE_99d23f7b_oracle_37.70us_compile_34.98us_ratio_0.928_oracle_py_deleted
+1711,var_mean_mean_1fc0030c74ea,1fc0030c74ea,reduction,reduction_var_mean,1,2,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_BAD_ORACLE_ratio_0.928
 1712,var_mean_mean_3574762a85f1,3574762a85f1,reduction,norm_template_canonicalization,1,2,1,~var_mean_mean_1310120283dc,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1713,var_mean_mean_3a94a106616a,3a94a106616a,reduction,reduction_var_mean,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1714,var_mean_mean_52ddb6a14d4e,52ddb6a14d4e,reduction,norm_template_canonicalization,1,1,1,~var_mean_d22940b03b5c;~var_mean_d8fae237d769;~var_mean_034578d167c5,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
