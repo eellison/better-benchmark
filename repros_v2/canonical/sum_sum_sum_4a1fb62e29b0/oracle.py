@@ -68,7 +68,7 @@ def _store_partials_kernel(
     ROWS_PER_GROUP: tl.constexpr,
     BLOCK_R: tl.constexpr,
     BLOCK_C: tl.constexpr,
-    APPROX_SIDE_STORE: tl.constexpr,
+    SIDE_APPROX_LIMIT: tl.constexpr,
 ):
     group = tl.program_id(0)
     cols = tl.arange(0, BLOCK_C)
@@ -115,8 +115,11 @@ def _store_partials_kernel(
             grad_bf16.to(tl.float32),
             keep_scale.to(tl.float32),
         ).to(tl.bfloat16)
-        approx_side_bf16 = _mul_rn(grad, keep_scale.to(tl.float32)).to(tl.bfloat16)
-        store_side = tl.where(APPROX_SIDE_STORE, approx_side_bf16, side_bf16)
+        store_side = side_bf16
+        if SIDE_APPROX_LIMIT > 0.0:
+            approx_side_bf16 = _mul_rn(grad, keep_scale.to(tl.float32)).to(tl.bfloat16)
+            use_approx = tl.abs(side_bf16.to(tl.float32)) < SIDE_APPROX_LIMIT
+            store_side = tl.where(use_approx, approx_side_bf16, side_bf16)
 
         tl.store(grad_out_ptr + offsets, grad, mask=mask)
         tl.store(bf16_out_ptr + offsets, store_side, mask=mask)
@@ -154,7 +157,7 @@ def _store_partials_c768_kernel(
     BLOCK_R: tl.constexpr,
     BLOCK_C: tl.constexpr,
     CHUNK_C: tl.constexpr,
-    APPROX_SIDE_STORE: tl.constexpr,
+    SIDE_APPROX_LIMIT: tl.constexpr,
 ):
     group = tl.program_id(0)
     chunk_cols = tl.arange(0, CHUNK_C)
@@ -229,8 +232,11 @@ def _store_partials_c768_kernel(
             grad_bf160.to(tl.float32),
             keep_scale0.to(tl.float32),
         ).to(tl.bfloat16)
-        approx_side_bf160 = _mul_rn(grad0, keep_scale0.to(tl.float32)).to(tl.bfloat16)
-        store_side0 = tl.where(APPROX_SIDE_STORE, approx_side_bf160, side_bf160)
+        store_side0 = side_bf160
+        if SIDE_APPROX_LIMIT > 0.0:
+            approx_side_bf160 = _mul_rn(grad0, keep_scale0.to(tl.float32)).to(tl.bfloat16)
+            use_approx0 = tl.abs(side_bf160.to(tl.float32)) < SIDE_APPROX_LIMIT
+            store_side0 = tl.where(use_approx0, approx_side_bf160, side_bf160)
         tl.store(grad_out_ptr + offsets0, grad0, mask=chunk_mask)
         tl.store(bf16_out_ptr + offsets0, store_side0, mask=chunk_mask)
         acc_bf16_side0 += tl.sum(
@@ -249,8 +255,11 @@ def _store_partials_c768_kernel(
             grad_bf161.to(tl.float32),
             keep_scale1.to(tl.float32),
         ).to(tl.bfloat16)
-        approx_side_bf161 = _mul_rn(grad1, keep_scale1.to(tl.float32)).to(tl.bfloat16)
-        store_side1 = tl.where(APPROX_SIDE_STORE, approx_side_bf161, side_bf161)
+        store_side1 = side_bf161
+        if SIDE_APPROX_LIMIT > 0.0:
+            approx_side_bf161 = _mul_rn(grad1, keep_scale1.to(tl.float32)).to(tl.bfloat16)
+            use_approx1 = tl.abs(side_bf161.to(tl.float32)) < SIDE_APPROX_LIMIT
+            store_side1 = tl.where(use_approx1, approx_side_bf161, side_bf161)
         tl.store(grad_out_ptr + offsets1, grad1, mask=chunk_mask)
         tl.store(bf16_out_ptr + offsets1, store_side1, mask=chunk_mask)
         acc_bf16_side1 += tl.sum(
@@ -269,8 +278,11 @@ def _store_partials_c768_kernel(
             grad_bf162.to(tl.float32),
             keep_scale2.to(tl.float32),
         ).to(tl.bfloat16)
-        approx_side_bf162 = _mul_rn(grad2, keep_scale2.to(tl.float32)).to(tl.bfloat16)
-        store_side2 = tl.where(APPROX_SIDE_STORE, approx_side_bf162, side_bf162)
+        store_side2 = side_bf162
+        if SIDE_APPROX_LIMIT > 0.0:
+            approx_side_bf162 = _mul_rn(grad2, keep_scale2.to(tl.float32)).to(tl.bfloat16)
+            use_approx2 = tl.abs(side_bf162.to(tl.float32)) < SIDE_APPROX_LIMIT
+            store_side2 = tl.where(use_approx2, approx_side_bf162, side_bf162)
         tl.store(grad_out_ptr + offsets2, grad2, mask=chunk_mask)
         tl.store(bf16_out_ptr + offsets2, store_side2, mask=chunk_mask)
         acc_bf16_side2 += tl.sum(
@@ -323,10 +335,10 @@ def _finalize_partials_kernel(
 # c21f4298: (T([32768,768], bf16), T([256,128,768], f32), ...)
 # c1e38d67: (T([16384,768], bf16), T([32,512,768], f32), ...)
 # 5acb4703: (T([32768,256], bf16), T([64,512,256], f32), ...)
-@oracle_impl(hardware="B200", point="6de23498", ROWS_PER_GROUP=8, BLOCK_R=1, BLOCK_C=2048, FINAL_BLOCK_C=2, APPROX_SIDE_STORE=False, num_warps=8)
-@oracle_impl(hardware="B200", point="c21f4298", ROWS_PER_GROUP=128, BLOCK_R=4, BLOCK_C=1024, FINAL_BLOCK_C=2, APPROX_SIDE_STORE=True, num_warps=8)
-@oracle_impl(hardware="B200", point="c1e38d67", ROWS_PER_GROUP=16, BLOCK_R=1, BLOCK_C=1024, FINAL_BLOCK_C=2, APPROX_SIDE_STORE=False, num_warps=8)
-@oracle_impl(hardware="B200", point="5acb4703", ROWS_PER_GROUP=64, BLOCK_R=8, BLOCK_C=256, FINAL_BLOCK_C=8, APPROX_SIDE_STORE=True, num_warps=4)
+@oracle_impl(hardware="B200", point="6de23498", ROWS_PER_GROUP=8, BLOCK_R=1, BLOCK_C=2048, FINAL_BLOCK_C=2, SIDE_APPROX_LIMIT=0.0, num_warps=8)
+@oracle_impl(hardware="B200", point="c21f4298", ROWS_PER_GROUP=128, BLOCK_R=4, BLOCK_C=1024, FINAL_BLOCK_C=2, SIDE_APPROX_LIMIT=4096.0, num_warps=8)
+@oracle_impl(hardware="B200", point="c1e38d67", ROWS_PER_GROUP=16, BLOCK_R=1, BLOCK_C=1024, FINAL_BLOCK_C=2, SIDE_APPROX_LIMIT=0.0, num_warps=8)
+@oracle_impl(hardware="B200", point="5acb4703", ROWS_PER_GROUP=64, BLOCK_R=4, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_APPROX_LIMIT=0.0, num_warps=4)
 def oracle_forward(
     inputs,
     *,
@@ -334,7 +346,7 @@ def oracle_forward(
     BLOCK_R: int,
     BLOCK_C: int,
     FINAL_BLOCK_C: int,
-    APPROX_SIDE_STORE: bool,
+    SIDE_APPROX_LIMIT: float,
     num_warps: int,
 ):
     (
@@ -407,7 +419,7 @@ def oracle_forward(
             BLOCK_R=BLOCK_R,
             BLOCK_C=BLOCK_C,
             CHUNK_C=256,
-            APPROX_SIDE_STORE=APPROX_SIDE_STORE,
+            SIDE_APPROX_LIMIT=SIDE_APPROX_LIMIT,
             num_warps=num_warps,
         )
     else:
@@ -430,7 +442,7 @@ def oracle_forward(
             ROWS_PER_GROUP=ROWS_PER_GROUP,
             BLOCK_R=BLOCK_R,
             BLOCK_C=BLOCK_C,
-            APPROX_SIDE_STORE=APPROX_SIDE_STORE,
+            SIDE_APPROX_LIMIT=SIDE_APPROX_LIMIT,
             num_warps=num_warps,
         )
 
