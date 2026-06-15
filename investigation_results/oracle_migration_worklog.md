@@ -4,15 +4,15 @@ Updated: 2026-06-15
 
 ## Current Worker Pool
 
-- Row 769 `var_mean_b5aeecfb82a3`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 770 `var_mean_c4177f8f8203`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 771 `var_mean_ceb5c315290a`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
-- Row 777 `var_mean_fd789e584775`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
-- Row 780 `var_mean_mean_de769927fa58`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 764 `var_mean_96b55483e3cf`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 765 `var_mean_97fd1a9318ef`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 766 `var_mean_9b4501cc7b35`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 767 `var_mean_ad7165cabf3f`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 768 `var_mean_b12103db1177`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 
 Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
-Lower-gap refill buffer claimed by this session: rows 769-771, 777, and 780 are active; rows 760-768 are spare claimed buffer. Rows 775, 850, 852-854, 858-859, 862, 869, 873, 886, 895-896, 908, 916, 951-952, 957-958, and 966-968 were marked needs_work after parent-confirmed bench failures. Rows 772-774, 776, 778-779, 781-849, 851, 855-857, 860-861, 863-868, 870-872, 874-878, 879-885, 887-894, 897-907, 909-915, 917-950, 953-956, 959, and 969 are parent-verified on H100 fallback, pending B200 verification. Historical lower-gap status is authoritative in `investigation_results/oracle_migration_queue.csv`.
+Lower-gap refill buffer claimed by this session: rows 764-768 are active; rows 760-763 are spare claimed buffer. Rows 775, 780, 850, 852-854, 858-859, 862, 869, 873, 886, 895-896, 908, 916, 951-952, 957-958, and 966-968 were marked needs_work after parent-confirmed bench failures. Rows 769-774, 776-779, 781-849, 851, 855-857, 860-861, 863-868, 870-872, 874-878, 879-885, 887-894, 897-907, 909-915, 917-950, 953-956, 959, and 969 are parent-verified on H100 fallback, pending B200 verification. Historical lower-gap status is authoritative in `investigation_results/oracle_migration_queue.csv`.
 
 Additional lower-gap refill buffer claimed by this session: rows 760-769.
 
