@@ -342,6 +342,52 @@ Yes — repros should record it. Concretely:
   the opacus sidecars' all-32 values are guesses (1.2) and currently pass
   as real.
 
+### 2.5b UPDATE (2026-06-15): mark_dynamic is insufficient; use ShapesSpec — and lifted shape-params block it
+
+Implementing 2.5 surfaced two things. (1) `mark_dynamic` only re-derives an
+*approximation* of the ShapeEnv: it sets dynamic dims + ranges but the
+guards are freshly re-traced and the symbols are re-allocated, so coupled
+constraints (e.g. `s0*s53==256`) are NOT restored — dynamo re-discovers
+whatever the re-trace yields, which can diverge. (2) Blanket `dynamic=True`
+over-dynamizes and, worse, the lifted symints arrive as plain Python int
+ARGUMENTS that dynamo specializes on → a recompile per binding.
+
+The faithful mechanism is `torch.compile(mod, shapes_spec=ShapesSpec(...))`
+(landed in the local pytorch as the ShapesSpec stack;
+`torch/fx/experimental/dynamic_spec.py`). It re-creates the ShapeEnv rather
+than re-deriving it — our capture maps 1:1:
+
+| capture (shapes.json) | ShapesSpec |
+|---|---|
+| `symbols` + ranges | `ShapeVar(name, min=, max=)` — ONE object per symbol |
+| per-dim/stride exprs (`s0*s53`) | `TensorSpec([64,64,s53,s0])`; derived dims `s0*s53` over the shared objects |
+| coupling / symbol sharing | reuse the SAME ShapeVar object across slots |
+| live symint inputs (`["I",..]`) | `IntVar(...)` params |
+| guards (`s0*s53==256`) | `assumptions=[s0*s53 == 256]` (wired into the env, runtime-asserted) |
+| hint | `optimization_hint=` |
+
+VERIFIED (spike, EagerAndRecordGraphs): a model that derives shapes INSIDE
+forward compiles to **1 graph** across a coupled rebind (16×16 → 32×8) — the
+ShapeEnv is faithfully restored, no recompile. 
+
+THE BLOCKER: our captured repros LIFT reshape/view shapes into
+`_shape_param_N` **list** arguments (`[64,64,h,w]`). `ParamsSpec` has spec
+types for tensors and scalar ints, but NOT for "a list whose elements are
+dynamic" — so the changing list values re-specialize and force a recompile
+(spike: same model with lifted params = 2 graphs; without = 1). Shape-param
+lifting is a STATIC-capture hygiene mechanism; under dynamic shapes it
+converts a symbolic dim into a frozen list literal and defeats ShapesSpec.
+
+DECISION NEEDED (not yet implemented): for dynamic captures, do NOT lift
+shape params — let the repro derive them inside `forward` from the dynamic
+input (the spike's working form). We already capture the shape-param exprs
+(`["S",[64,32,2,"s0*s53"]]`), so the generator has what it needs to emit
+`x.shape[..]`-derived computation instead of a lifted list. This is a
+capture-generation change (how dynamic repro.py is written), gated behind
+`captured_dynamic`, leaving static capture's lifting untouched. Until then,
+`--dynamic` marks the recorded tensor dims (a strict improvement over
+blanket, but still recompiles per binding for the lifted-symint repro form).
+
 ### 2.6 Retroactive recovery vs. recapture
 
 Recoverable retroactively (no model rerun):
