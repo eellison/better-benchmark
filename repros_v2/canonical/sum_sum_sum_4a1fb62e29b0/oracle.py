@@ -325,6 +325,7 @@ def _finalize_partials_kernel(
 
 
 @oracle_impl(hardware="B200", point="c21f4298", ROWS_PER_GROUP=128, BLOCK_R=4, STORE_BLOCK_R=1, BLOCK_C=1024, FINAL_BLOCK_C=2, num_warps=2)
+@oracle_impl(hardware="B200", point="c1e38d67", ROWS_PER_GROUP=64, BLOCK_R=4, STORE_BLOCK_R=1, BLOCK_C=1024, FINAL_BLOCK_C=2, num_warps=4)
 def _oracle_forward_c21(
     inputs,
     *,
@@ -428,10 +429,8 @@ def _oracle_forward_c21(
 
 # 6de23498: (T([4096,1536], bf16), T([8,512,1536], f32), ...)
 # c21f4298: (T([32768,768], bf16), T([256,128,768], f32), ...)
-# c1e38d67: (T([16384,768], bf16), T([32,512,768], f32), ...)
 # 5acb4703: (T([32768,256], bf16), T([64,512,256], f32), ...)
 @oracle_impl(hardware="B200", point="6de23498", ROWS_PER_GROUP=8, BLOCK_R=1, BLOCK_C=2048, FINAL_BLOCK_C=2, num_warps=8)
-@oracle_impl(hardware="B200", point="c1e38d67", ROWS_PER_GROUP=16, BLOCK_R=1, BLOCK_C=1024, FINAL_BLOCK_C=2, num_warps=8)
 @oracle_impl(hardware="B200", point="5acb4703", ROWS_PER_GROUP=64, BLOCK_R=8, BLOCK_C=256, FINAL_BLOCK_C=8, num_warps=4)
 def oracle_forward(
     inputs,
