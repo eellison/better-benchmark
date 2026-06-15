@@ -1405,7 +1405,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1404,sum_sum_sum_9cc696981073,9cc696981073,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1405,sum_sum_sum_9e1e02d0dd86,9e1e02d0dd86,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1406,sum_sum_sum_9ed7c07e6072,9ed7c07e6072,reduction,reduction_general,1,2,1,,needs_work,Codex,parent_check_pass_bench_BAD_ORACLE_oracle_289p63us_compile_273p15us_no_cudagraph_warnings_2026-06-13
-1407,sum_sum_sum_b703e5a31562,b703e5a31562,reduction,reduction_general,1,1,1,,needs_work,Codex,worker_check_pass_bench_BAD_ORACLE_oracle_254p50us_compile_240p35us_no_cudagraph_warnings_2026-06-13
+1407,sum_sum_sum_b703e5a31562,b703e5a31562,reduction,reduction_general,1,1,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_BAD_ORACLE
 1408,sum_sum_sum_b925d072e497,b925d072e497,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1409,sum_sum_sum_be519a2435f2,be519a2435f2,reduction,multi_output_reduction_templates,1,1,1,sum_sum_sum_fe2bec6738d1,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1410,sum_sum_sum_be6b9442c621,be6b9442c621,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
@@ -1423,7 +1423,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1422,sum_sum_sum_ecce309d13e3,ecce309d13e3,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1423,sum_sum_sum_ed482d857957,ed482d857957,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1424,sum_sum_sum_ed793bcaf7cf,ed793bcaf7cf,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-1425,sum_sum_sum_ee5e53038768,ee5e53038768,reduction,reduction_general,1,2,1,,needs_work,Codex,worker_check_failed_output3_UNVERIFIED_NUMERICS_no_cudagraph_warnings_2026-06-13
+1425,sum_sum_sum_ee5e53038768,ee5e53038768,reduction,reduction_general,1,2,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_UNVERIFIED_NUMERICS_output3
 1426,sum_sum_sum_ef836df37d2d,ef836df37d2d,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1427,sum_sum_sum_ef8c091a67f7,ef8c091a67f7,reduction,reduction_general,1,1,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_B200_large_diff_wrong_math_reaudit
 1428,sum_sum_sum_f0df0905cd69,f0df0905cd69,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
