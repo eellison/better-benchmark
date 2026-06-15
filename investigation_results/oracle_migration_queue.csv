@@ -197,7 +197,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 196,pointwise_0cd85fd63f82,0cd85fd63f82,pointwise,unclassified_priority_gap,1,2,22,~pointwise_d604053b7cd8,claimed,codex,retry_claim_2026-06-15_needs_work_prev_BAD_ORACLE_1pt_retune
 197,pointwise_544fac7c5583,544fac7c5583,pointwise,pointwise,3,2,22,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 198,sum_be521af00034,be521af00034,reduction,reduction_general,1,2,22,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
-199,sum_sum_sum_33df09c4b328,33df09c4b328,reduction,reduction_general,1,2,22,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_B200_large_diff_wrong_math_1pt_reaudit
+199,sum_sum_sum_33df09c4b328,33df09c4b328,reduction,reduction_general,1,2,22,,oracle_measured,codex,parent_verified_2026-06-15_checks_pass_1of1_no_skip_pass_1of1_locked_bench_GOOD_7635d0ad_oracle_us=212.19_compile_us=276.32_ratio=1.302_numerics_pass_h100_fallback_class_COOPERATIVE_SPLIT_K
 200,var_mean_787e1d544efe,787e1d544efe,reduction,unclassified_priority_gap,1,2,22,~var_mean_0361de9eae81;~var_mean_4ca91616285c;~var_mean_6a701483fed1,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 201,pointwise_95ed2ef35da9,95ed2ef35da9,pointwise,layout_indexing_stencil_fusion,2,3,21,pointwise_9edaf9e5b4c4,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 202,amax_sum_fa4cc85fe5ad,fa4cc85fe5ad,reduction,reduction_softmax_like,2,3,20,~amax_sum_4fb4f9a0bf43,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
