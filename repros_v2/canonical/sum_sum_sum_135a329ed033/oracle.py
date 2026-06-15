@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete Longformer bf16/f32 layer-norm-backward dropout tail by row-tiling the `[8192,768]` producer, preserving the bf16-to-fp32 residual add, row-local hidden reductions, returned f32 gradient tensor, bf16 dropout-product view plus transpose alias, and all three returned `[768]` column reductions from shared row-block partials, whereas Inductor schedules the add, row reductions, dense gradient, bf16 dropout materialization, transpose view, and sibling reductions as separate generic kernels over materialized intermediates; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K multi-output reduction template that keeps row-local scalars, explicit bf16 rounding boundaries, layout side outputs, and compatible column partials in one coordinated producer/finalizer pair; the fix is COOPERATIVE_SPLIT_K: teach Inductor to split compatible layernorm-backward reductions across token-row tiles, sink the required side-output stores, and finalize all sibling column sums together."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete Longformer bf16/f32 layer-norm-backward dropout tail by row-tiling the `[8192,768]` producer, preserving the bf16-to-fp32 residual add, row-local hidden reductions, returned f32 gradient tensor, Inductor's fused bf16 dropout side-store cast boundary plus transpose alias, and all three returned `[768]` column reductions from shared row-block partials, whereas Inductor schedules the add, row reductions, dense gradient, bf16 dropout materialization, transpose view, and sibling reductions as separate generic kernels over materialized intermediates; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K multi-output reduction template that keeps row-local scalars, explicit bf16 rounding boundaries, layout side outputs, and compatible column partials in one coordinated producer/finalizer pair; the fix is COOPERATIVE_SPLIT_K: teach Inductor to split compatible layernorm-backward reductions across token-row tiles, sink the required side-output stores, and finalize all sibling column sums together."""
 
 import torch
 import triton
@@ -113,7 +113,16 @@ def _row_partials_kernel(
         ).to(tl.bfloat16)
 
         tl.store(grad_out_ptr + offsets, grad, mask=mask)
-        tl.store(drop_out_ptr + offsets, drop_bf16, mask=mask)
+
+        x_fast = residual + x_bf16
+        weighted_fast = x_fast * weight[None, :]
+        row_sum_fast = tl.sum(tl.where(mask, weighted_fast, 0.0), axis=1)
+        row_dot_fast = tl.sum(tl.where(mask, weighted_fast * rhs, 0.0), axis=1)
+        centered_fast = weighted_fast * row_factor - row_sum_fast[:, None]
+        centered_fast = centered_fast - rhs * row_dot_fast[:, None]
+        grad_fast = scale[:, None] * centered_fast
+        drop_bf16_fast = (grad_fast * keep * drop_scale).to(tl.bfloat16)
+        tl.store(drop_out_ptr + offsets, drop_bf16_fast, mask=mask)
 
         acc_x_rhs += tl.sum(tl.where(mask, _mul_rn(x, rhs), 0.0), axis=0)
         acc_x += tl.sum(tl.where(mask, x, 0.0), axis=0)
