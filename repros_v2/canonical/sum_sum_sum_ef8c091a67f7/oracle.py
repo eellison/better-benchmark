@@ -62,7 +62,6 @@ def _row_partials_kernel(
     col_mask = cols < HIDDEN_
     weight = tl.load(weight_ptr + cols, mask=col_mask, other=0.0).to(tl.float32)
     drop_scale = tl.full((BLOCK_R, BLOCK_C), DROP_SCALE_, tl.float32)
-    drop_scale_bf16 = drop_scale.to(tl.bfloat16)
 
     acc_clone_rhs = tl.zeros((BLOCK_C,), dtype=tl.float32)
     acc_clone = tl.zeros((BLOCK_C,), dtype=tl.float32)
@@ -92,17 +91,22 @@ def _row_partials_kernel(
         centered = _sub_rn(centered, _mul_rn(rhs, row_dot[:, None]))
         grad = _mul_rn(scale[:, None], centered)
 
-        keep1 = tl.load(keep1_ptr + offsets, mask=mask, other=0).to(tl.bfloat16)
-        keep_scaled = (keep1 * drop_scale_bf16).to(tl.bfloat16)
+        keep1 = tl.load(keep1_ptr + offsets, mask=mask, other=0).to(tl.float32)
+        keep_scaled = _mul_rn(keep1, drop_scale)
+        keep_scaled_bf16 = keep_scaled.to(tl.bfloat16)
         grad_bf16 = grad.to(tl.bfloat16)
-        dropped = (grad_bf16.to(tl.float32) * keep_scaled.to(tl.float32)).to(tl.bfloat16)
+        dropped = _mul_rn(grad, keep_scaled).to(tl.bfloat16)
+        dropped_for_sum = _mul_rn(
+            grad_bf16.to(tl.float32),
+            keep_scaled_bf16.to(tl.float32),
+        ).to(tl.bfloat16)
 
         tl.store(grad_out_ptr + offsets, grad, mask=mask)
         tl.store(bf16_out_ptr + offsets, dropped, mask=mask)
 
         acc_clone_rhs += tl.sum(tl.where(mask, _mul_rn(clone, rhs), 0.0), axis=0)
         acc_clone += tl.sum(tl.where(mask, clone, 0.0), axis=0)
-        acc_bf16 += tl.sum(tl.where(mask, dropped.to(tl.float32), 0.0), axis=0)
+        acc_bf16 += tl.sum(tl.where(mask, dropped_for_sum.to(tl.float32), 0.0), axis=0)
 
     partial_base = group * 3 * HIDDEN_ + cols
     tl.store(partials_ptr + partial_base, acc_clone_rhs, mask=col_mask)
