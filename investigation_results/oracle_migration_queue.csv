@@ -1321,11 +1321,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1320,sum_sum_aad9b35ce285,aad9b35ce285,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1321,sum_sum_ab9fc4091e40,ab9fc4091e40,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1322,sum_sum_b00464d36daa,b00464d36daa,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1323,sum_sum_b089f1ca0d13,b089f1ca0d13,reduction,scatter_gather,1,2,1,,needs_work,Codex,parent_check_pass_no_skip_pass_h100_fallback_bench_1BAD_ORACLE_no_cudagraph_warnings_oracle_deleted_2026-06-13
+1323,sum_sum_b089f1ca0d13,b089f1ca0d13,reduction,scatter_gather,1,2,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_BAD_ORACLE
 1324,sum_sum_b38468e7a324,b38468e7a324,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1325,sum_sum_b49b9f45e522,b49b9f45e522,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1326,sum_sum_b58d306002be,b58d306002be,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1327,sum_sum_b67c187f8e8e,b67c187f8e8e,reduction,reduction_general,1,2,1,,needs_work,Codex,needs_work: B200 large diff likely wrong-math (1float fail max_diff=5.08 (large/unknown - verify not broken math))
+1327,sum_sum_b67c187f8e8e,b67c187f8e8e,reduction,reduction_general,1,2,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_B200_large_diff_wrong_math_reaudit
 1328,sum_sum_b6dba5d75a7b,b6dba5d75a7b,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1329,sum_sum_bbf2f7bed268,bbf2f7bed268,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1330,sum_sum_bf3fda8e124c,bf3fda8e124c,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
