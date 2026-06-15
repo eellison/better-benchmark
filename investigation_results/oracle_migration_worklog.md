@@ -14,6 +14,8 @@ Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a
 
 Lower-gap refill buffer claimed by this session: rows 1, 2, 94, and 96 are active. Rows 1514-1548 remain reserved for the separate midqueue worker. Rows 43, 58, 62, 84, 94, 96, 124, 181, 183, 203, 207, 221, 232, 246, 294, 563, 740-741, 748, 757-758, 775, 780, 850, 852-854, 858-859, 862, 869, 873, 886, 895-896, 908, 916, 951-952, 957-958, 966-968, and 1500 were marked needs_work after parent-confirmed bench failures. Rows 53, 75, 172, 194, 223-224, 286, 440-442, 466, 469, 473, 497-499, 559-562, 564, 715-716, 742-747, 749-756, 759-774, 776-779, 781-849, 851, 855-857, 860-861, 863-868, 870-872, 874-878, 879-885, 887-894, 897-907, 909-915, 917-950, 953-956, 959, 969, and 1470-1513 are parent-verified on H100 fallback, pending B200 verification. Historical lower-gap status is authoritative in `investigation_results/oracle_migration_queue.csv`.
 
+Rows 85 and 93 were parent-rechecked after the pulled implementation: checks pass, but locked bench fails `NUMERICS_WORSE_THAN_COMPILED` on all points due the NaN fp64 gate, so their oracle files are deleted and queue status is back to needs_work.
+
 Additional lower-gap refill buffer claimed by this session: rows 740-749.
 
 Additional lower-gap refill buffer claimed by this session: rows 750-759.
