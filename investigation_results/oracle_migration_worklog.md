@@ -20,6 +20,8 @@ Row 84 was also parent-rechecked after the pulled implementation: checks pass, b
 
 Row 99 was parent-rechecked after the pulled implementation: checks pass, but locked bench is `BAD_ORACLE` (`19.30us` oracle vs `18.14us` compile), so its oracle file is deleted and queue status is back to needs_work.
 
+Rows 94 and 103 were parent-rechecked after the pulled implementation: row 94 passes required locked bench (`23GOOD_1AT_FLOOR`) and is kept; row 103 fails required locked bench (`1BAD_ORACLE_1AT_FLOOR`), so its oracle file is deleted and queue status is back to needs_work.
+
 Additional lower-gap refill buffer claimed by this session: rows 740-749.
 
 Additional lower-gap refill buffer claimed by this session: rows 750-759.
