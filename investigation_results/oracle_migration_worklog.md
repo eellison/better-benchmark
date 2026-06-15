@@ -547,6 +547,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1445 `var_mean_087d5b4f064d`: returned to `needs_work`; retry still failed exact `complex64` output 3 and bench stopped at `UNVERIFIED_NUMERICS`, with no CUDAGraph warnings.
 - Row 1432 `sum_sum_sum_f7a87f05bdd2`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` for visible reduction outputs 1 and 2, with no CUDAGraph warnings.
 - Row 1398 `sum_sum_sum_86e661f4be59`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` for visible reduction outputs 1 and 2, with no CUDAGraph warnings.
+- Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; retry fixed numerics but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=1397.73us`, `compile=162.78us`, ratio `0.116`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
