@@ -459,6 +459,19 @@ def make_inputs_from_config(config: dict) -> list:
             result.append(spec["dims"])
             continue
 
+        if spec.get("kind") == "symint":
+            # A live symint input (dynamic-shape graph): forward() takes a
+            # plain Python int, exactly as a lifted shape param takes a
+            # plain list. Without this branch the spec falls through to
+            # spec["shape"] and KeyErrors — the silent-drop that excluded
+            # every dynamic-compilation region from the corpus.
+            result.append(int(spec["value"]))
+            continue
+
+        if spec.get("kind") == "scalar":
+            result.append(spec["value"])
+            continue
+
         if spec.get("alias_group") is not None:
             shape = spec["shape"]
             dtype = getattr(torch, spec["dtype"].replace("torch.", ""))

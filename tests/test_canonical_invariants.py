@@ -791,6 +791,31 @@ def test_alias_group_only_for_multiply_referenced():
     assert t.shape == (4, 4)
 
 
+def test_symint_and_scalar_inputs_materialize():
+    """A live symint input (dynamic-shape graph) and a python scalar must
+    materialize to a plain int / value through make_inputs_from_config.
+
+    Regression pin for the silent-drop bug: make_inputs_from_config had no
+    kind=='symint' branch, so a ['sym', h] input fell through to
+    spec['shape'] and KeyError'd — which made eager validation fail and
+    every dynamic-compilation region get dropped from the corpus. A live
+    ['I', hint, expr] symint also evaluates (under a binding) to ['sym',
+    val] and must materialize identically."""
+    from input_codec import spec_from_compact, evaluate_symbolic_entry
+    from repro_harness import make_inputs_from_config
+
+    assert make_inputs_from_config(
+        {"inputs": [spec_from_compact(["sym", 16])]}) == [16]
+    assert make_inputs_from_config(
+        {"inputs": [spec_from_compact(["sc", 0.5])]}) == [0.5]
+
+    # ['I', hint, expr] -> evaluate at a binding -> ['sym', val] -> int
+    ev = evaluate_symbolic_entry(["I", 256, "s16*s82"], {"s16": 24, "s82": 24})
+    assert ev == ["sym", 576]
+    assert make_inputs_from_config(
+        {"inputs": [spec_from_compact(ev)]}) == [576]
+
+
 def test_device_default_accelerator_cpu_recorded():
     """Device convention: default = accelerator. Bare 'cuda' AND any cuda
     ordinal ('cuda:0' — workers are pinned via CUDA_VISIBLE_DEVICES, so the
