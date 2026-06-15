@@ -465,8 +465,27 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
             return int(v), None
         return None, None
 
+    def _entry_is_symbolic_node(entry):
+        """True if a (already env-mapped) shape-list entry is an fx.Node
+        wrapping a live SymInt — i.e. a symbolic dim that flows from a symint
+        input node, not a plain int."""
+        if not isinstance(entry, fx.Node):
+            return False
+        return isinstance((entry.meta or {}).get("val"),
+                          (torch.SymInt, torch.SymFloat))
+
     def _lift_shape_arg(node, args):
-        """For reshape/view ops, lift the shape literal to a parameter."""
+        """For reshape/view ops, lift the shape literal to a parameter.
+
+        EXCEPT when the shape list contains symbolic dims (fx.Node SymInts):
+        those entries already reference live symint INPUT nodes that are in
+        scope as forward args (the lifted ['I',hint,expr] symints), so the
+        faithful form is the INLINE list `[64, 32, 2, mul]` — exactly what
+        the model's graph had before our lift. Lifting it to a standalone
+        _shape_param LIST placeholder freezes the dims into a constant list
+        literal that re-specializes per binding and defeats dynamic reuse
+        (design 2.5b: ParamsSpec can't spec list elements; verified 1-vs-2
+        graphs). A fully-static shape list still lifts as before."""
         if node.target not in _VIEW_LIKE_OPS:
             return args
         if len(args) < 2 or not isinstance(args[1], (list, tuple)):
@@ -474,10 +493,16 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         shape_list = list(args[1])
         if not _should_lift_shape(shape_list):
             return args
-        # Resolve every entry to its hint int (and parallel expr). A symbolic
-        # dim (fx.Node wrapping a SymInt) becomes its hint, so the lifted
-        # _shape_param is a valid List[int] — this is what fixes the
-        # 'name mul is not defined' / 'Expected List[int]' drop.
+        # Symbolic shape list: keep it inline (don't lift). Note the env for
+        # harvest; the symint nodes are already external placeholders.
+        if any(_entry_is_symbolic_node(e) for e in shape_list):
+            for e in shape_list:
+                if isinstance(e, fx.Node):
+                    v = (e.meta or {}).get("val")
+                    if isinstance(v, (torch.SymInt, torch.SymFloat)):
+                        _note_env(v)
+            return args
+        # Static shape list: lift to a _shape_param placeholder as before.
         hints, exprs = [], []
         for entry in shape_list:
             h, e = _shape_entry_hint_expr(entry)

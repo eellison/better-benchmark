@@ -1765,9 +1765,20 @@ def test_dynamic_capture_merge_load_roundtrip_gpu():
         assert any(e[0] == "I" for e in entry["inputs"]
                    if isinstance(e, list) and e), "no ['I',..] symint input"
 
+        # GENERATION (design 2.5b): a symbolic reshape target is kept INLINE
+        # referencing the lifted symint args ([64, 32, 2, mul]), NOT lifted to
+        # a standalone _shape_param LIST placeholder (which would freeze the
+        # dims into a constant literal and break dynamic reuse). So the
+        # captured dynamic repro must carry no _shape_param arg and must
+        # reference a symint arg inside a reshape shape list.
+        repro_src = Path(entry["file"]).read_text()
+        assert "_shape_param" not in repro_src, (
+            "dynamic capture lifted a symbolic shape to a constant-list param")
+        assert "reshape" in repro_src
+
         repro_dir = tmp / "canonical" / "var_mean_e2e"
         repro_dir.mkdir(parents=True)
-        (repro_dir / "repro.py").write_text(Path(entry["file"]).read_text())
+        (repro_dir / "repro.py").write_text(repro_src)
         _write_shapes_json(
             repro_dir, entry["shape_hash"], entry.get("signature", ""),
             "probe/infer/groupnorm", occurrences=1, inputs=entry["inputs"],
