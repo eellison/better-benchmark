@@ -92,6 +92,31 @@ def _finalize_partials_kernel(
     partials_ptr,
     out_x_rhs_ptr,
     out_x_ptr,
+    NUM_GROUPS: tl.constexpr,
+    CHANNELS: tl.constexpr,
+    GROUP_BLOCK: tl.constexpr,
+    BLOCK_C: tl.constexpr,
+):
+    cols = tl.program_id(0) * BLOCK_C + tl.arange(0, BLOCK_C)
+    groups = tl.arange(0, GROUP_BLOCK)
+    col_mask = cols < CHANNELS
+    mask = (groups[:, None] < NUM_GROUPS) & col_mask[None, :]
+    offsets = groups[:, None] * 3 * CHANNELS + cols[None, :]
+
+    x_rhs = tl.load(partials_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    x = tl.load(partials_ptr + offsets + CHANNELS, mask=mask, other=0.0).to(
+        tl.float32
+    )
+
+    tl.store(out_x_rhs_ptr + cols, tl.sum(x_rhs, axis=0), mask=col_mask)
+    tl.store(out_x_ptr + cols, tl.sum(x, axis=0), mask=col_mask)
+
+
+@triton.jit
+def _finalize_all_partials_kernel(
+    partials_ptr,
+    out_x_rhs_ptr,
+    out_x_ptr,
     out_add_sum_ptr,
     NUM_GROUPS: tl.constexpr,
     CHANNELS: tl.constexpr,
@@ -114,11 +139,47 @@ def _finalize_partials_kernel(
 
     tl.store(out_x_rhs_ptr + cols, tl.sum(x_rhs, axis=0), mask=col_mask)
     tl.store(out_x_ptr + cols, tl.sum(x, axis=0), mask=col_mask)
-    tl.store(
-        out_add_sum_ptr + cols,
-        _round_bf16_to_f32(tl.sum(add_sum, axis=0)),
-        mask=col_mask,
-    )
+    tl.store(out_add_sum_ptr + cols, _round_bf16_to_f32(tl.sum(add_sum, axis=0)), mask=col_mask)
+
+
+@triton.jit
+def _side_sum_tile_kernel(
+    partials_ptr,
+    side_partials_ptr,
+    CHANNELS: tl.constexpr,
+    CHUNKS_PER_BATCH: tl.constexpr,
+    CHUNK_BLOCK: tl.constexpr,
+    BLOCK_C: tl.constexpr,
+):
+    b = tl.program_id(0)
+    cols = tl.program_id(1) * BLOCK_C + tl.arange(0, BLOCK_C)
+    chunks = tl.arange(0, CHUNK_BLOCK)
+    col_mask = cols < CHANNELS
+    mask = (chunks[:, None] < CHUNKS_PER_BATCH) & col_mask[None, :]
+    tile = b * CHUNKS_PER_BATCH + chunks
+    offsets = tile[:, None] * 3 * CHANNELS + 2 * CHANNELS + cols[None, :]
+    vals = tl.load(partials_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    sums = tl.sum(tl.where(mask, vals, 0.0), axis=0)
+    tl.store(side_partials_ptr + b * CHANNELS + cols, sums, mask=col_mask)
+
+
+@triton.jit
+def _side_sum_b_finalize_kernel(
+    side_partials_ptr,
+    out_add_sum_ptr,
+    BATCH: tl.constexpr,
+    CHANNELS: tl.constexpr,
+    BLOCK_B: tl.constexpr,
+    BLOCK_C: tl.constexpr,
+):
+    cols = tl.program_id(0) * BLOCK_C + tl.arange(0, BLOCK_C)
+    b = tl.arange(0, BLOCK_B)
+    col_mask = cols < CHANNELS
+    mask = (b[:, None] < BATCH) & col_mask[None, :]
+    offsets = b[:, None] * CHANNELS + cols[None, :]
+    vals = tl.load(side_partials_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    sums = tl.sum(tl.where(mask, vals, 0.0), axis=0)
+    tl.store(out_add_sum_ptr + cols, _round_bf16_to_f32(sums), mask=col_mask)
 
 
 def _shape_tuple(shape):
@@ -126,17 +187,20 @@ def _shape_tuple(shape):
 
 
 # 30b03cad: (T([131072,144], bf16), T([144], f32), ..., S([512,256,144]))
-@oracle_impl(hardware="B200", point="30b03cad", BLOCK_M=16, BLOCK_C=256, FINAL_BLOCK_C=8, num_warps=2)
+@oracle_impl(hardware="B200", point="30b03cad", BLOCK_M=16, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_BLOCK_C=32, GROUPED_SIDE=False, SIDE_WARPS=1, num_warps=2)
 # 1c6da2dd: (T([32768,192], bf16), T([192], f32), ..., S([512,64,192]))
-@oracle_impl(hardware="B200", point="1c6da2dd", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, num_warps=8)
+@oracle_impl(hardware="B200", point="1c6da2dd", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_BLOCK_C=32, GROUPED_SIDE=True, SIDE_WARPS=1, num_warps=8)
 # 0c9dc299: (T([8192,240], bf16), T([240], f32), ..., S([512,16,240]))
-@oracle_impl(hardware="B200", point="0c9dc299", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, num_warps=8)
+@oracle_impl(hardware="B200", point="0c9dc299", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_BLOCK_C=32, GROUPED_SIDE=False, SIDE_WARPS=1, num_warps=8)
 def oracle_forward(
     inputs,
     *,
     BLOCK_M: int,
     BLOCK_C: int,
     FINAL_BLOCK_C: int,
+    SIDE_BLOCK_C: int,
+    GROUPED_SIDE: bool,
+    SIDE_WARPS: int,
     num_warps: int,
 ):
     (
@@ -155,6 +219,8 @@ def oracle_forward(
     sum_shape = _shape_tuple(sum_shape_param)
     rows = int(flat_shape[0])
     channels = int(flat_shape[1])
+    batch = int(full_shape[0])
+    m_dim = int(full_shape[1])
 
     add_out = torch.empty_strided(
         full_shape,
@@ -196,17 +262,54 @@ def oracle_forward(
         sum_shape, (1,), device=x_bf16.device, dtype=torch.float32
     )
     group_block = 1 << (num_groups - 1).bit_length()
-    _finalize_partials_kernel[(triton.cdiv(channels, FINAL_BLOCK_C),)](
-        partials,
-        out_x_rhs,
-        out_x,
-        out_add_sum,
-        NUM_GROUPS=num_groups,
-        CHANNELS=channels,
-        GROUP_BLOCK=group_block,
-        BLOCK_C=FINAL_BLOCK_C,
-        num_warps=8,
-    )
+    if GROUPED_SIDE:
+        _finalize_partials_kernel[(triton.cdiv(channels, FINAL_BLOCK_C),)](
+            partials,
+            out_x_rhs,
+            out_x,
+            NUM_GROUPS=num_groups,
+            CHANNELS=channels,
+            GROUP_BLOCK=group_block,
+            BLOCK_C=FINAL_BLOCK_C,
+            num_warps=8,
+        )
+        side_partials = torch.empty_strided(
+            (batch, channels),
+            (channels, 1),
+            device=x_bf16.device,
+            dtype=torch.float32,
+        )
+        chunks_per_batch = triton.cdiv(m_dim, BLOCK_M)
+        _side_sum_tile_kernel[(batch, triton.cdiv(channels, SIDE_BLOCK_C))](
+            partials,
+            side_partials,
+            CHANNELS=channels,
+            CHUNKS_PER_BATCH=chunks_per_batch,
+            CHUNK_BLOCK=1 << (chunks_per_batch - 1).bit_length(),
+            BLOCK_C=SIDE_BLOCK_C,
+            num_warps=SIDE_WARPS,
+        )
+        _side_sum_b_finalize_kernel[(triton.cdiv(channels, SIDE_BLOCK_C),)](
+            side_partials,
+            out_add_sum,
+            BATCH=batch,
+            CHANNELS=channels,
+            BLOCK_B=1 << (batch - 1).bit_length(),
+            BLOCK_C=SIDE_BLOCK_C,
+            num_warps=SIDE_WARPS,
+        )
+    else:
+        _finalize_all_partials_kernel[(triton.cdiv(channels, FINAL_BLOCK_C),)](
+            partials,
+            out_x_rhs,
+            out_x,
+            out_add_sum,
+            NUM_GROUPS=num_groups,
+            CHANNELS=channels,
+            GROUP_BLOCK=group_block,
+            BLOCK_C=FINAL_BLOCK_C,
+            num_warps=8,
+        )
 
     flat = add_out.view(flat_shape)
     return out_x_rhs, out_x, add_out, flat, flat.permute(1, 0), out_add_sum
