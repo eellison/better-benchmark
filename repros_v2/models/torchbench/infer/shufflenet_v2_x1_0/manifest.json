@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "shufflenet_v2_x1_0",
+  "patterns": [
+    "00475df23925",
+    "36110ffe9e6c",
+    "3c17f0120a71",
+    "41944c71d2d8",
+    "666951cd0da5",
+    "7308e0024674",
+    "7899d74e0838",
+    "818c3aa59952",
+    "99e028e77568",
+    "ba25986618ef",
+    "ef561a2def29"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

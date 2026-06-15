@@ -1,0 +1,63 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[8,1024],"i64",{"n":"primals_3","gen":["index",0,1024],"x":{"constraint_source":"default_unobserved"}}],
+    [[8192,1024],"bf16",{"n":"view"}],
+    [[8,1024,50265],"bf16",{"n":"view_1","st":[51478528,50272,1]}],
+    [[8192,1],"f32",{"n":"amax"}],
+    [[8192,1],"f32",{"n":"log"}],
+    [[],"f32",{"n":"convert_element_type_7"}],
+    [[50265,1024],"bf16",{"n":"permute_3"}],
+    [[],"f32",{"n":"tangents_1"}],
+    [[8,1024,50265],"bf16",{"n":"tangents_2"}]
+  ],
+  "outputs": [
+    [[8,1024,1024],"f32",{"n":"output_0"}],
+    [[50265,1024],"f32",{"n":"output_1"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_006.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "BartForCausalLM",
+    "graph": "full_graph_006.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 42,
+    "counts": {
+      "fusible_in_partition": 40,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 2
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.constant_pad_nd.default": 3,
+        "aten.div.Tensor": 1,
+        "aten.eq.Tensor": 1,
+        "aten.exp.default": 1,
+        "aten.expand.default": 1,
+        "aten.full.default": 2,
+        "aten.mul.Tensor": 2,
+        "aten.ne.Scalar": 1,
+        "aten.permute.default": 1,
+        "aten.reshape.default": 6,
+        "aten.scalar_tensor.default": 2,
+        "aten.slice.Tensor": 1,
+        "aten.sub.Tensor": 3,
+        "aten.sum.dim_IntList": 1,
+        "aten.unsqueeze.default": 1,
+        "aten.where.self": 3,
+        "prims.convert_element_type.default": 8,
+        "prims.iota.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "aten.mm.default": 2
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

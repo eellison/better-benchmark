@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "phlippe_resnet",
+  "patterns": [
+    "04d85912d998",
+    "0c1c9fc832f4",
+    "100a39b686e3",
+    "2a737da66d69",
+    "42fad1ece813",
+    "5f6d60b04d02",
+    "643db2887a01",
+    "6a8cdea856dd",
+    "8bb40810003c",
+    "abf3db8fc03f",
+    "c2bf513c1ebf",
+    "c6909ce24699",
+    "ccd411f2a45d"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

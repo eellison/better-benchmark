@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "deit_tiny_patch16_224.fb_in1k",
+  "patterns": [
+    "499e4b26c010",
+    "813b85fdc01b",
+    "826ea0b5f6e4",
+    "a42e20fae37b",
+    "f4578c128d74"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

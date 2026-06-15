@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "beit_base_patch16_224",
+  "patterns": [
+    "04d85912d998",
+    "0c3a6fa20cd5",
+    "139a3020e8bf",
+    "23b40b0be2a8",
+    "331deef26ac5",
+    "33df09c4b328",
+    "57057d0973c9",
+    "59fc6f384249",
+    "606094b5efa2",
+    "62b6a7509fae",
+    "787e1d544efe",
+    "826ea0b5f6e4",
+    "88c8b20940d5",
+    "8bb40810003c",
+    "a42e20fae37b",
+    "bd3c73984e9d",
+    "c2bf513c1ebf",
+    "ccd411f2a45d",
+    "d0b0dff4e37d"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

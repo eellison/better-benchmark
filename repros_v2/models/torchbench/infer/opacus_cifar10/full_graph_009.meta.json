@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    ["sym",128],
+    ["sym",4],
+    ["sym",4],
+    [[64,128,4,4],"bf16",{"n":"arg3_1"}]
+  ],
+  "outputs": [
+    [[64,128,4,4],"bf16",{"n":"output_0"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_009.py",
+  "source": {
+    "kind": "model",
+    "suite": "torchbench",
+    "mode": "infer",
+    "model": "opacus_cifar10",
+    "graph": "full_graph_009.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 2,
+    "counts": {
+      "fusible_in_partition": 2,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.copy_.default": 1,
+        "aten.relu.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "failed: A: load_full_graph_definition: ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 2048 != 39"
+}

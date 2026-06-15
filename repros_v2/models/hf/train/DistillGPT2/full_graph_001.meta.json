@@ -1,0 +1,58 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[32,512,50257],"bf16",{"n":"primals_1","st":[25735168,50264,1]}],
+    [[32,512],"i64",{"n":"primals_2","gen":["index",0,50257],"x":{"constraint_source":"observed","observed":{"min":1,"max":50256,"n_unique":13992}}}]
+  ],
+  "outputs": [
+    [[],"f32",{"n":"output_0"}],
+    [[32,512,50257],"bf16",{"n":"output_1","st":[25735168,50264,1]}],
+    [[32,513],"i64",{"n":"output_2","gen":["index",0,513],"x":{"constraint_source":"dtype_shape_default"}}],
+    [[16384,1],"f32",{"n":"output_3"}],
+    [[16384,1],"f32",{"n":"output_4"}],
+    [[],"f32",{"n":"output_5"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_001.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "DistillGPT2",
+    "graph": "full_graph_001.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 25,
+    "counts": {
+      "fusible_in_partition": 25,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.amax.default": 1,
+        "aten.clone.default": 1,
+        "aten.constant_pad_nd.default": 1,
+        "aten.div.Tensor": 1,
+        "aten.exp.default": 1,
+        "aten.full.default": 2,
+        "aten.gather.default": 1,
+        "aten.log.default": 1,
+        "aten.ne.Scalar": 1,
+        "aten.neg.default": 1,
+        "aten.reshape.default": 2,
+        "aten.slice.Tensor": 1,
+        "aten.squeeze.dim": 1,
+        "aten.sub.Tensor": 2,
+        "aten.sum.default": 2,
+        "aten.sum.dim_IntList": 1,
+        "aten.unsqueeze.default": 1,
+        "aten.where.self": 2,
+        "prims.convert_element_type.default": 2
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
+}

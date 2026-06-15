@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPTNeoForSequenceClassification",
+  "patterns": [
+    "03afed5ec8e9",
+    "0ada225c0a04",
+    "13a9aaa2eadb",
+    "2d969ac9ad59",
+    "301cf5a13527",
+    "37bf4eff6ec9",
+    "3a2d56cdea00",
+    "3ce87c35ea2d",
+    "b19e82f2a47b",
+    "c372431bff28",
+    "e87d6ebc9ded",
+    "ee1163128221"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

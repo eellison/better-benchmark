@@ -1,0 +1,62 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[32,128,2560],"f32",{"n":"primals_1"}],
+    [[8008,2560],"f32",{"n":"primals_2"}],
+    [[32,128],"i64",{"n":"primals_3","gen":["index",0,8007],"x":{"constraint_source":"observed","observed":{"min":0,"max":8006,"n_unique":3217}}}]
+  ],
+  "outputs": [
+    [[],"f32",{"n":"output_0"}],
+    [[32,128,8008],"bf16",{"n":"output_1"}],
+    [[32,128],"i64",{"n":"output_2","gen":["index",0,128],"x":{"constraint_source":"dtype_shape_default"}}],
+    [[4096,2560],"bf16",{"n":"output_3"}],
+    [[32,128,8008],"bf16",{"n":"output_4"}],
+    [[4096,1],"f32",{"n":"output_5"}],
+    [[4096,1],"f32",{"n":"output_6"}],
+    [[],"f32",{"n":"output_7"}],
+    [[8008,2560],"bf16",{"n":"output_8"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_005.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "BlenderbotForCausalLM",
+    "graph": "full_graph_005.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 31,
+    "counts": {
+      "fusible_in_partition": 30,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 1
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.amax.default": 1,
+        "aten.div.Tensor": 1,
+        "aten.exp.default": 1,
+        "aten.full.default": 2,
+        "aten.gather.default": 1,
+        "aten.log.default": 1,
+        "aten.ne.Scalar": 1,
+        "aten.neg.default": 1,
+        "aten.permute.default": 2,
+        "aten.reshape.default": 4,
+        "aten.squeeze.dim": 1,
+        "aten.sub.Tensor": 2,
+        "aten.sum.default": 2,
+        "aten.sum.dim_IntList": 1,
+        "aten.unsqueeze.default": 1,
+        "aten.where.self": 2,
+        "prims.convert_element_type.default": 6
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "aten.mm.default": 1
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

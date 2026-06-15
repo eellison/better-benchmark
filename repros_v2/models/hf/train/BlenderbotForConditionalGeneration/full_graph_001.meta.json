@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[128,2560],"f32",{"n":"primals_1"}]
+  ],
+  "outputs": [
+    [[128,2560],"f32",{"n":"output_0"}],
+    [[128],"i64",{"n":"output_1","gen":["index",0,128],"x":{"constraint_source":"dtype_shape_default"}}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_001.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "BlenderbotForConditionalGeneration",
+    "graph": "full_graph_001.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 2,
+    "counts": {
+      "fusible_in_partition": 2,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.embedding.default": 1,
+        "prims.iota.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
+}

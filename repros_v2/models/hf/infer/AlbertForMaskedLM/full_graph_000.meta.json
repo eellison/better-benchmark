@@ -1,0 +1,105 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[8,512],"i64",{"n":"arg0_1","gen":["index",0,30000],"x":{"constraint_source":"graph_inference","observed":{"min":3,"max":29999,"n_unique":3811}}}],
+    [[1,512],"i64",{"n":"arg1_1","gen":["index",0,512],"x":{"constraint_source":"graph_inference","observed":{"min":0,"max":511,"n_unique":512}}}],
+    [[1,512],"i64",{"n":"arg2_1","gen":["index",0,2],"x":{"constraint_source":"graph_inference","observed":{"min":0,"max":0,"n_unique":1}}}],
+    [[30000,128],"bf16",{"n":"arg3_1"}],
+    [[2,128],"bf16",{"n":"arg4_1"}],
+    [[512,128],"bf16",{"n":"arg5_1"}],
+    [[128],"bf16",{"n":"arg6_1"}],
+    [[128],"bf16",{"n":"arg7_1"}],
+    [[4096,128],"bf16",{"n":"arg8_1"}],
+    [[4096],"bf16",{"n":"arg9_1"}],
+    [[4096,4096],"bf16",{"n":"arg10_1"}],
+    [[4096],"bf16",{"n":"arg11_1"}],
+    [[4096,4096],"bf16",{"n":"arg12_1"}],
+    [[4096],"bf16",{"n":"arg13_1"}],
+    [[4096,4096],"bf16",{"n":"arg14_1"}],
+    [[4096],"bf16",{"n":"arg15_1"}],
+    [[4096,4096],"bf16",{"n":"arg16_1"}],
+    [[4096],"bf16",{"n":"arg17_1"}],
+    [[4096],"bf16",{"n":"arg18_1"}],
+    [[4096],"bf16",{"n":"arg19_1"}],
+    [[16384,4096],"bf16",{"n":"arg20_1"}],
+    [[16384],"bf16",{"n":"arg21_1"}],
+    [[4096,16384],"bf16",{"n":"arg22_1"}],
+    [[4096],"bf16",{"n":"arg23_1"}],
+    [[4096],"bf16",{"n":"arg24_1"}],
+    [[4096],"bf16",{"n":"arg25_1"}],
+    [[128,4096],"bf16",{"n":"arg26_1"}],
+    [[128],"bf16",{"n":"arg27_1"}],
+    [[128],"bf16",{"n":"arg28_1"}],
+    [[128],"bf16",{"n":"arg29_1"}],
+    [[30000],"bf16",{"n":"arg30_1"}],
+    [[8,512],"i64",{"n":"arg31_1","gen":["index",0,30000],"x":{"constraint_source":"graph_inference","observed":{"min":31,"max":29997,"n_unique":3823}}}]
+  ],
+  "outputs": [
+    [[],"bf16",{"n":"output_0"}],
+    [[8,512,30000],"bf16",{"n":"output_1"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_000.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "infer",
+    "model": "AlbertForMaskedLM",
+    "graph": "full_graph_000.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 1270,
+    "counts": {
+      "fusible_in_partition": 1092,
+      "fusible_unpartitioned": 79,
+      "non_fusible": 99
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "_operator.getitem": 52,
+        "aten.add.Tensor": 105,
+        "aten.amax.default": 13,
+        "aten.any.dim": 12,
+        "aten.clone.default": 48,
+        "aten.div.Tensor": 13,
+        "aten.embedding.default": 3,
+        "aten.eq.Scalar": 12,
+        "aten.exp.default": 13,
+        "aten.expand.default": 51,
+        "aten.full.default": 26,
+        "aten.gather.default": 2,
+        "aten.ge.Scalar": 1,
+        "aten.log.default": 1,
+        "aten.logical_not.default": 24,
+        "aten.mul.Scalar": 24,
+        "aten.mul.Tensor": 104,
+        "aten.ne.Scalar": 3,
+        "aten.neg.default": 1,
+        "aten.permute.default": 60,
+        "aten.pow.Tensor_Scalar": 13,
+        "aten.reshape.default": 268,
+        "aten.rsqrt.default": 26,
+        "aten.scalar_tensor.default": 24,
+        "aten.squeeze.dim": 1,
+        "aten.sub.Tensor": 40,
+        "aten.sum.default": 2,
+        "aten.sum.dim_IntList": 13,
+        "aten.tanh.default": 13,
+        "aten.unsqueeze.default": 4,
+        "aten.var_mean.correction": 26,
+        "aten.where.self": 14,
+        "prims.convert_element_type.default": 79,
+        "prims.iota.default": 1
+      },
+      "fusible_unpartitioned": {
+        "aten.permute.default": 75,
+        "aten.reshape.default": 4
+      },
+      "non_fusible": {
+        "aten.addmm.default": 75,
+        "aten.bmm.default": 24
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

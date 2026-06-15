@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "mobilenet_v3_large",
+  "patterns": [
+    "04d85912d998",
+    "100a39b686e3",
+    "12bce2738ed4",
+    "183b124c731f",
+    "245fc9d79aad",
+    "26237066094b",
+    "29c472896711",
+    "38b494b9c61a",
+    "3a94a106616a",
+    "3ab1da5a9e6c",
+    "3abc926270f6",
+    "3eee452cee40",
+    "3f4aa90365fa",
+    "42fad1ece813",
+    "522de516d7b7",
+    "5a22dd21d88e",
+    "643db2887a01",
+    "7a2ac1c4841d",
+    "7cfdb80c54c5",
+    "894f3180f3c4",
+    "8bb40810003c",
+    "a58657212bf4",
+    "ba870b00a0b3",
+    "c2bf513c1ebf",
+    "c98413eb2743",
+    "ccd411f2a45d",
+    "d49b2da97323",
+    "d6239b8319dc",
+    "e681bc3d9d59"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

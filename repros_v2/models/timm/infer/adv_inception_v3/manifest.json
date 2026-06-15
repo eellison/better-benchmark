@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "adv_inception_v3",
+  "patterns": [
+    "06377502b8f5",
+    "2fd75199c31d",
+    "7899d74e0838",
+    "8b6bcc3d5ac7",
+    "b0a24575ebc9",
+    "b71f0d447f2e",
+    "d8eeabccee6e",
+    "e4b7b0947416"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}
