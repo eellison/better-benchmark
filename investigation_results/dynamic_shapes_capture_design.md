@@ -378,15 +378,33 @@ dynamic" — so the changing list values re-specialize and force a recompile
 lifting is a STATIC-capture hygiene mechanism; under dynamic shapes it
 converts a symbolic dim into a frozen list literal and defeats ShapesSpec.
 
-DECISION NEEDED (not yet implemented): for dynamic captures, do NOT lift
-shape params — let the repro derive them inside `forward` from the dynamic
-input (the spike's working form). We already capture the shape-param exprs
-(`["S",[64,32,2,"s0*s53"]]`), so the generator has what it needs to emit
-`x.shape[..]`-derived computation instead of a lifted list. This is a
-capture-generation change (how dynamic repro.py is written), gated behind
-`captured_dynamic`, leaving static capture's lifting untouched. Until then,
-`--dynamic` marks the recorded tensor dims (a strict improvement over
-blanket, but still recompiles per binding for the lifted-symint repro form).
+REFINED (2026-06-15, spikes C/D): the fix is NOT "stop lifting" — lifting
+is good for reuse and we keep it. The culprit is specifically a shape param
+lifted as a standalone *constant list* placeholder (`_shape_param_0 =
+[64,32,2,256]`); the changing list literal re-specializes regardless of
+symbol binding (spike C: symbols bound via scalar slots + plain-int list
+params still = 2 graphs). The resolution, VERIFIED at 1 graph across the
+coupled 16×16→32×8 rebind (spike D):
+
+- KEEP lifting the symints as scalar args (`mul`, `arg0_1`, `arg1_1`) —
+  these are the bare `IntVar` slots that bind the symbols. Already captured.
+- For a lifted shape-param LIST, build the reshape target IN the forward
+  body from those symint args — `reshape(x, [64, 32, 2, mul])` — instead of
+  emitting a separate constant-list `_shape_param` placeholder. The list
+  elements are then live SymInts and one artifact covers the family.
+
+This is strictly a dynamic-capture GENERATION change (how repro.py spells
+the reshape target), gated on `captured_dynamic`; static lifting is
+untouched. We already capture both the symint args (`["I",hint,expr]`) and
+the shape-param exprs (`["S",[64,32,2,"s0*s53"]]`), so the generator has
+everything: emit the list as `[64, 32, 2, <symint-arg-or-expr>]` over the
+in-scope lifted symints. ParamsSpec has no list-element spec, so this is
+also the ONLY way to make a lifted reshape target dynamic under ShapesSpec.
+
+Status: ShapesSpec builder from shapes.json + this generation change are
+the remaining implementation. Until then, `--dynamic` marks the recorded
+tensor dims (strict improvement over blanket; still recompiles per binding
+for the constant-list-param form).
 
 ### 2.6 Retroactive recovery vs. recapture
 
