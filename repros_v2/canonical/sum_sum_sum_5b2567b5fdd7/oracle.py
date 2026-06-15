@@ -123,37 +123,29 @@ def _ln_bwd_store_partials_c768_kernel(
     CHUNK_C: tl.constexpr,
 ):
     group = tl.program_id(0)
-    cols = tl.arange(0, BLOCK_C)
-    col_mask = cols < 768
-    weight = tl.load(weight_ptr + cols, mask=col_mask, other=0.0).to(tl.float32)
-
-    acc_bf16_side = tl.zeros((BLOCK_C,), dtype=tl.float32)
     chunk_cols = tl.arange(0, CHUNK_C)
+    w0 = tl.load(weight_ptr + chunk_cols).to(tl.float32)
+    w1 = tl.load(weight_ptr + chunk_cols + CHUNK_C).to(tl.float32)
+    w2 = tl.load(weight_ptr + chunk_cols + 2 * CHUNK_C).to(tl.float32)
     acc_x_rhs0 = tl.zeros((CHUNK_C,), dtype=tl.float32)
     acc_x_rhs1 = tl.zeros((CHUNK_C,), dtype=tl.float32)
     acc_x_rhs2 = tl.zeros((CHUNK_C,), dtype=tl.float32)
     acc_x0 = tl.zeros((CHUNK_C,), dtype=tl.float32)
     acc_x1 = tl.zeros((CHUNK_C,), dtype=tl.float32)
     acc_x2 = tl.zeros((CHUNK_C,), dtype=tl.float32)
+    acc_bf16_side0 = tl.zeros((CHUNK_C,), dtype=tl.float32)
+    acc_bf16_side1 = tl.zeros((CHUNK_C,), dtype=tl.float32)
+    acc_bf16_side2 = tl.zeros((CHUNK_C,), dtype=tl.float32)
 
     for local_start in tl.range(0, ROWS_PER_GROUP, BLOCK_R):
         rows = group * ROWS_PER_GROUP + local_start + tl.arange(0, BLOCK_R)
         row_mask = rows < ROWS
-        mask = row_mask[:, None] & col_mask[None, :]
-        offsets = rows[:, None] * 768 + cols[None, :]
-
-        x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-        rhs = tl.load(rhs_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-        residual = tl.load(residual_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
         scale = tl.load(scale_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
 
         chunk_mask = row_mask[:, None]
         offsets0 = rows[:, None] * 768 + chunk_cols[None, :]
         offsets1 = offsets0 + CHUNK_C
         offsets2 = offsets1 + CHUNK_C
-        w0 = tl.load(weight_ptr + chunk_cols, mask=chunk_cols < CHUNK_C, other=0.0).to(tl.float32)
-        w1 = tl.load(weight_ptr + chunk_cols + CHUNK_C, mask=chunk_cols < CHUNK_C, other=0.0).to(tl.float32)
-        w2 = tl.load(weight_ptr + chunk_cols + 2 * CHUNK_C, mask=chunk_cols < CHUNK_C, other=0.0).to(tl.float32)
         x0 = tl.load(x_ptr + offsets0, mask=chunk_mask, other=0.0).to(tl.float32)
         x1 = tl.load(x_ptr + offsets1, mask=chunk_mask, other=0.0).to(tl.float32)
         x2 = tl.load(x_ptr + offsets2, mask=chunk_mask, other=0.0).to(tl.float32)
@@ -168,6 +160,13 @@ def _ln_bwd_store_partials_c768_kernel(
             _add_rn(tl.sum(wx0, axis=1), tl.sum(wx1, axis=1)),
             tl.sum(wx2, axis=1),
         )
+        wr0 = _mul_rn(wx0, r0)
+        wr1 = _mul_rn(wx1, r1)
+        wr2 = _mul_rn(wx2, r2)
+        row_dot = _add_rn(
+            _add_rn(tl.sum(wr0, axis=1), tl.sum(wr1, axis=1)),
+            tl.sum(wr2, axis=1),
+        )
         acc_x_rhs0 += tl.sum(_mul_rn(x0, r0), axis=0)
         acc_x_rhs1 += tl.sum(_mul_rn(x1, r1), axis=0)
         acc_x_rhs2 += tl.sum(_mul_rn(x2, r2), axis=0)
@@ -175,24 +174,41 @@ def _ln_bwd_store_partials_c768_kernel(
         acc_x1 += tl.sum(x1, axis=0)
         acc_x2 += tl.sum(x2, axis=0)
 
-        weighted = _mul_rn(x, weight[None, :])
-        weighted_rhs = _mul_rn(weighted, rhs)
-        row_dot = tl.sum(tl.where(mask, weighted_rhs, 0.0), axis=1)
-        row_factor = tl.full((BLOCK_R, BLOCK_C), ROW_FACTOR, tl.float32)
-        scaled_weighted = _mul_rn(weighted, row_factor)
-        centered = _sub_rn(scaled_weighted, row_sum[:, None])
-        centered = _sub_rn(centered, _mul_rn(rhs, row_dot[:, None]))
-        grad = _mul_rn(scale[:, None], centered)
-        side = _add_rn(residual, grad)
-        round_bias = _mul_rn(side, tl.full((BLOCK_R, BLOCK_C), 1.1920928955078125e-7, tl.float32))
-        side_bf16 = _add_rn(side, round_bias).to(tl.bfloat16)
+        row_factor = tl.full((BLOCK_R, CHUNK_C), ROW_FACTOR, tl.float32)
 
-        tl.store(add_out_ptr + offsets, side, mask=mask)
-        tl.store(bf16_out_ptr + offsets, side_bf16, mask=mask)
+        residual0 = tl.load(residual_ptr + offsets0, mask=chunk_mask, other=0.0).to(tl.float32)
+        scaled_weighted0 = _mul_rn(wx0, row_factor)
+        centered0 = _sub_rn(scaled_weighted0, row_sum[:, None])
+        centered0 = _sub_rn(centered0, _mul_rn(r0, row_dot[:, None]))
+        grad0 = _mul_rn(scale[:, None], centered0)
+        side0 = _add_rn(residual0, grad0)
+        side_bf160 = side0.to(tl.bfloat16)
+        tl.store(add_out_ptr + offsets0, side0, mask=chunk_mask)
+        tl.store(bf16_out_ptr + offsets0, side_bf160, mask=chunk_mask)
+        acc_bf16_side0 += tl.sum(tl.where(chunk_mask, side_bf160.to(tl.float32), 0.0), axis=0)
 
-        acc_bf16_side += tl.sum(tl.where(mask, side_bf16.to(tl.float32), 0.0), axis=0)
+        residual1 = tl.load(residual_ptr + offsets1, mask=chunk_mask, other=0.0).to(tl.float32)
+        scaled_weighted1 = _mul_rn(wx1, row_factor)
+        centered1 = _sub_rn(scaled_weighted1, row_sum[:, None])
+        centered1 = _sub_rn(centered1, _mul_rn(r1, row_dot[:, None]))
+        grad1 = _mul_rn(scale[:, None], centered1)
+        side1 = _add_rn(residual1, grad1)
+        side_bf161 = side1.to(tl.bfloat16)
+        tl.store(add_out_ptr + offsets1, side1, mask=chunk_mask)
+        tl.store(bf16_out_ptr + offsets1, side_bf161, mask=chunk_mask)
+        acc_bf16_side1 += tl.sum(tl.where(chunk_mask, side_bf161.to(tl.float32), 0.0), axis=0)
 
-    partial_base = group * 3 * 768 + cols
+        residual2 = tl.load(residual_ptr + offsets2, mask=chunk_mask, other=0.0).to(tl.float32)
+        scaled_weighted2 = _mul_rn(wx2, row_factor)
+        centered2 = _sub_rn(scaled_weighted2, row_sum[:, None])
+        centered2 = _sub_rn(centered2, _mul_rn(r2, row_dot[:, None]))
+        grad2 = _mul_rn(scale[:, None], centered2)
+        side2 = _add_rn(residual2, grad2)
+        side_bf162 = side2.to(tl.bfloat16)
+        tl.store(add_out_ptr + offsets2, side2, mask=chunk_mask)
+        tl.store(bf16_out_ptr + offsets2, side_bf162, mask=chunk_mask)
+        acc_bf16_side2 += tl.sum(tl.where(chunk_mask, side_bf162.to(tl.float32), 0.0), axis=0)
+
     chunk_base = group * 3 * 768 + chunk_cols
     tl.store(partials_ptr + chunk_base, acc_x_rhs0)
     tl.store(partials_ptr + chunk_base + CHUNK_C, acc_x_rhs1)
@@ -200,7 +216,9 @@ def _ln_bwd_store_partials_c768_kernel(
     tl.store(partials_ptr + chunk_base + 768, acc_x0)
     tl.store(partials_ptr + chunk_base + 768 + CHUNK_C, acc_x1)
     tl.store(partials_ptr + chunk_base + 768 + 2 * CHUNK_C, acc_x2)
-    tl.store(partials_ptr + partial_base + 2 * 768, acc_bf16_side, mask=col_mask)
+    tl.store(partials_ptr + chunk_base + 2 * 768, acc_bf16_side0)
+    tl.store(partials_ptr + chunk_base + 2 * 768 + CHUNK_C, acc_bf16_side1)
+    tl.store(partials_ptr + chunk_base + 2 * 768 + 2 * CHUNK_C, acc_bf16_side2)
 
 
 @triton.jit
@@ -237,8 +255,8 @@ def _finalize_partials_kernel(
 # 670b1ed7: (T([32768, 768], bf16), T([768], f32), ..., S([128,256,768]))
 # 18835b6c: (T([4096, 2048], bf16), T([2048], f32), ..., S([32,128,2048]))
 @oracle_impl(hardware="B200", point="0243aeaa", ROWS_PER_GROUP=16, BLOCK_R=1, BLOCK_C=256, FINAL_BLOCK_C=8, num_warps=4)
-@oracle_impl(hardware="B200", point="8348e069", ROWS_PER_GROUP=16, BLOCK_R=2, BLOCK_C=1024, FINAL_BLOCK_C=2, num_warps=8)
-@oracle_impl(hardware="B200", point="670b1ed7", ROWS_PER_GROUP=16, BLOCK_R=2, BLOCK_C=1024, FINAL_BLOCK_C=2, num_warps=8)
+@oracle_impl(hardware="B200", point="8348e069", ROWS_PER_GROUP=16, BLOCK_R=2, BLOCK_C=1024, FINAL_BLOCK_C=8, num_warps=4)
+@oracle_impl(hardware="B200", point="670b1ed7", ROWS_PER_GROUP=32, BLOCK_R=2, BLOCK_C=1024, FINAL_BLOCK_C=8, num_warps=4)
 @oracle_impl(hardware="B200", point="18835b6c", ROWS_PER_GROUP=8, BLOCK_R=1, BLOCK_C=2048, FINAL_BLOCK_C=2, num_warps=8)
 def oracle_forward(
     inputs,
