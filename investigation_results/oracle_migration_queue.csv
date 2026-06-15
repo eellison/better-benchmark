@@ -51,7 +51,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 50,pointwise_4042d49bf67b,4042d49bf67b,pointwise,unclassified_priority_gap,4,4,72,~pointwise_a718233d708d;~pointwise_43877c71f0eb;~pointwise_75795e2c97dd,oracle_measured,codex,B200_verified_2026-06-12: check 4/4 PASS; bench 1GOOD 2AT_FLOOR 1BAD(0.92x); oracle_us median=7.84us
 51,pointwise_5f698ae9321b,5f698ae9321b,pointwise,unclassified_priority_gap,1,1,72,pointwise_e0498dcba9fe,oracle_measured,codex,B200_verified_2026-06-12: check 1/1 PASS; bench 1BAD(0.92x at floor); oracle_us=10.69us
 52,pointwise_ae7e5786852b,ae7e5786852b,pointwise,pointwise,1,1,72,,oracle_measured,codex,B200_verified_2026-06-12: check 1/1 PASS; bench AT_FLOOR oracle=7.26us
-53,sum_sum_sum_4a1fb62e29b0,4a1fb62e29b0,reduction,reduction_general,4,8,72,,needs_work,codex,needs_work: B200 2float fail max_diff=32.0 (large/unknown - verify not broken math)
+53,sum_sum_sum_4a1fb62e29b0,4a1fb62e29b0,reduction,reduction_general,4,8,72,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_B200_2float_fail_max_diff_32_reaudit
 54,sum_sum_sum_5fbbe8587abc,5fbbe8587abc,reduction,reduction_general,1,1,72,,oracle_measured,codex,B200_verified_2026-06-12: check 1/1 PASS; bench 1BAD(0.92x at floor); oracle_us=34.46us
 55,pointwise_1df91f562302,1df91f562302,pointwise,layout_indexing_stencil_fusion,12,2,70,pointwise_59d71b256016,oracle_measured,codex,B200_verified_2026-06-12: check 12/12 PASS; bench 0GOOD 10AT_FLOOR 2BAD(0.93x/0.90x floor); oracle_us median=34us
 56,sum_76fb9946e296,76fb9946e296,reduction,reduction_general,6,9,70,~sum_bd2fed913c26,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
@@ -167,7 +167,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 166,pointwise_d17fec3a0be5,d17fec3a0be5,pointwise,unclassified_priority_gap,1,1,24,~pointwise_a020dfe84962;~pointwise_fed52737c4f6,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 167,pointwise_ed86b04d7ae6,ed86b04d7ae6,pointwise,unclassified_priority_gap,4,1,24,~pointwise_035529d03c14;~pointwise_0f6eed42fa2c;~pointwise_af2e722aed5d,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 168,pointwise_fb9acc3ed8b0,fb9acc3ed8b0,pointwise,unclassified_priority_gap,1,1,24,~pointwise_187bbcc9d7ba,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
-169,sum_24541cd0c55b,24541cd0c55b,reduction,reduction_general,1,1,24,,needs_work,codex,needs_work: B200 2float fail max_diff=33600000.0 (large/unknown - verify not broken math)
+169,sum_24541cd0c55b,24541cd0c55b,reduction,reduction_general,1,1,24,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_B200_2float_fail_max_diff_33600000_reaudit
 170,sum_35b8acdece58,35b8acdece58,reduction,multi_output_reduction_templates,2,3,24,~sum_1fb7f13c05d1,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 171,sum_a72724ce25f0,a72724ce25f0,reduction,multi_output_reduction_templates,8,4,24,~sum_5688d5156d97,oracle_measured,Codex,"B200_verified_2026-06-15: stale needs_work re-checked, check+bench PASS (fleet)"
 172,sum_abcd9bccce7d,abcd9bccce7d,reduction,multi_output_reduction_templates,8,13,24,~sum_2b63837952dc;~sum_34445852895e;~sum_acbec27412d2,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
