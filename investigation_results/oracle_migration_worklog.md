@@ -544,6 +544,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1549 `var_mean_6cd69c8f3b06`: returned to `needs_work`; parent checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=15.71us`, `compile=14.72us`, ratio `0.937`).
 - Row 1561 `var_mean_8187f7c4e01e`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=72.96us`, `compile=72.90us`, ratio `0.999`).
 - Row 1608 `var_mean_a7b32508693f`: returned to `needs_work`; retry still failed exact `complex64` output 3 and bench stopped at `UNVERIFIED_NUMERICS`, with no CUDAGraph warnings.
+- Row 1445 `var_mean_087d5b4f064d`: returned to `needs_work`; retry still failed exact `complex64` output 3 and bench stopped at `UNVERIFIED_NUMERICS`, with no CUDAGraph warnings.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
