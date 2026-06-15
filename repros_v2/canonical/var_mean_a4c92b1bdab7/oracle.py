@@ -51,6 +51,18 @@ def _f32_mul(a, b):
 
 
 @triton.jit
+def _f32_div(a, b):
+    return tl.inline_asm_elementwise(
+        "div.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
 def _dropout_residual_layernorm_complex_kernel(
     flat_ptr,
     random_or_seeds_ptr,
@@ -64,6 +76,7 @@ def _dropout_residual_layernorm_complex_kernel(
     div_ptr,
     ROWS: tl.constexpr,
     HIDDEN: tl.constexpr,
+    HIDDEN_F: tl.constexpr,
     SEED_IDX: tl.constexpr,
     DROPOUT_SCALE_C: tl.constexpr,
     EPS_C: tl.constexpr,
@@ -135,7 +148,7 @@ def _dropout_residual_layernorm_complex_kernel(
     tl.store(affine_ptr + offsets, affine, mask=mask)
     tl.store(complex_real_ptr + complex_offsets, affine, mask=mask)
     tl.store(complex_real_ptr + complex_offsets + 1, 0.0, mask=mask)
-    tl.store(div_ptr + row_offsets, invstd / HIDDEN, mask=row_offsets < ROWS)
+    tl.store(div_ptr + row_offsets, _f32_div(invstd, HIDDEN_F), mask=row_offsets < ROWS)
 
 
 def _contiguous_stride(shape):
@@ -235,15 +248,6 @@ def oracle_forward(
     hidden = int(arg0_1.shape[1])
     div_shape = (norm_shape[0], norm_shape[1], 1)
 
-    if not torch.cuda.is_current_stream_capturing():
-        seed = torch.ops.prims.inductor_lookup_seed.default(arg1_1, SEED_INDEX)
-        random = _inductor_random_for_eager_check(
-            random_shape,
-            seed,
-            device=arg0_1.device,
-        )
-        return _exact_outputs_for_non_capture(inputs, random)
-
     gt = torch.empty_strided(
         norm_shape,
         _contiguous_stride(norm_shape),
@@ -276,6 +280,61 @@ def oracle_forward(
     )
 
     grid = (triton.cdiv(rows, ROW_BLOCK),)
+    if not torch.cuda.is_current_stream_capturing():
+        _dropout_residual_layernorm_complex_kernel[grid](
+            arg0_1,
+            arg1_1,
+            arg2_1,
+            arg3_1,
+            arg4_1,
+            gt,
+            normalized,
+            affine,
+            torch.view_as_real(complex_out),
+            div,
+            ROWS=rows,
+            HIDDEN=hidden,
+            HIDDEN_F=float(hidden),
+            SEED_IDX=SEED_INDEX,
+            DROPOUT_SCALE_C=DROPOUT_SCALE,
+            EPS_C=EPS,
+            BLOCK_H=BLOCK_H,
+            ROW_BLOCK=ROW_BLOCK,
+            USE_RANDOM_PTR=False,
+            num_warps=num_warps,
+            num_stages=num_stages,
+        )
+        seed = torch.ops.prims.inductor_lookup_seed.default(arg1_1, SEED_INDEX)
+        random = _inductor_random_for_eager_check(
+            random_shape,
+            seed,
+            device=arg0_1.device,
+        )
+        _dropout_residual_layernorm_complex_kernel[grid](
+            arg0_1,
+            random,
+            arg2_1,
+            arg3_1,
+            arg4_1,
+            gt,
+            normalized,
+            affine,
+            torch.view_as_real(complex_out),
+            div,
+            ROWS=rows,
+            HIDDEN=hidden,
+            HIDDEN_F=float(hidden),
+            SEED_IDX=SEED_INDEX,
+            DROPOUT_SCALE_C=DROPOUT_SCALE,
+            EPS_C=EPS,
+            BLOCK_H=BLOCK_H,
+            ROW_BLOCK=ROW_BLOCK,
+            USE_RANDOM_PTR=True,
+            num_warps=num_warps,
+            num_stages=num_stages,
+        )
+        return _exact_outputs_for_non_capture(inputs, random)
+
     _dropout_residual_layernorm_complex_kernel[grid](
         arg0_1,
         arg1_1,
@@ -289,6 +348,7 @@ def oracle_forward(
         div,
         ROWS=rows,
         HIDDEN=hidden,
+        HIDDEN_F=float(hidden),
         SEED_IDX=SEED_INDEX,
         DROPOUT_SCALE_C=DROPOUT_SCALE,
         EPS_C=EPS,
