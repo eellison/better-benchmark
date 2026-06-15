@@ -535,6 +535,10 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 276 `sum_07fa37421ff1`: worker checks passed; fallback bench was `1GOOD`.
 - Row 277 `sum_2ba0992ca00b`: worker checks passed; fallback bench was `1GOOD`.
 - Row 257 `pointwise_3a0cd5d11499`: measured, 3/3 checks, H100 fallback bench `2GOOD_1AT_FLOOR`.
+- Row 1500 `var_mean_4425f695fc68`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=29.92us`, `compile=34.05us`, ratio `1.138`).
+- Row 1554 `var_mean_771a0a39f4b9`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=54.11us`, `compile=54.72us`, ratio `1.011`).
+- Row 1647 `var_mean_d0ae6f6e894f`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=30.59us`, `compile=31.30us`, ratio `1.023`).
+- Row 1701 `var_mean_fbfc0104897d`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=20.51us`, `compile=19.87us`, ratio `0.969`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
