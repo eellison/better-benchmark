@@ -51,7 +51,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 50,pointwise_4042d49bf67b,4042d49bf67b,pointwise,unclassified_priority_gap,4,4,72,~pointwise_a718233d708d;~pointwise_43877c71f0eb;~pointwise_75795e2c97dd,oracle_measured,codex,B200_verified_2026-06-12: check 4/4 PASS; bench 1GOOD 2AT_FLOOR 1BAD(0.92x); oracle_us median=7.84us
 51,pointwise_5f698ae9321b,5f698ae9321b,pointwise,unclassified_priority_gap,1,1,72,pointwise_e0498dcba9fe,oracle_measured,codex,B200_verified_2026-06-12: check 1/1 PASS; bench 1BAD(0.92x at floor); oracle_us=10.69us
 52,pointwise_ae7e5786852b,ae7e5786852b,pointwise,pointwise,1,1,72,,oracle_measured,codex,B200_verified_2026-06-12: check 1/1 PASS; bench AT_FLOOR oracle=7.26us
-53,sum_sum_sum_4a1fb62e29b0,4a1fb62e29b0,reduction,reduction_general,4,8,72,,needs_work,codex,needs_work: B200 4float fail max_diff=32.0 (large/unknown - verify not broken math)
+53,sum_sum_sum_4a1fb62e29b0,4a1fb62e29b0,reduction,reduction_general,4,8,72,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_B200_4float_fail_max_diff_32_second_reaudit
 54,sum_sum_sum_5fbbe8587abc,5fbbe8587abc,reduction,reduction_general,1,1,72,,oracle_measured,codex,B200_verified_2026-06-12: check 1/1 PASS; bench 1BAD(0.92x at floor); oracle_us=34.46us
 55,pointwise_1df91f562302,1df91f562302,pointwise,layout_indexing_stencil_fusion,12,2,70,pointwise_59d71b256016,oracle_measured,codex,B200_verified_2026-06-12: check 12/12 PASS; bench 0GOOD 10AT_FLOOR 2BAD(0.93x/0.90x floor); oracle_us median=34us
 56,sum_76fb9946e296,76fb9946e296,reduction,reduction_general,6,9,70,~sum_bd2fed913c26,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
