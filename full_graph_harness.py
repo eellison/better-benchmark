@@ -180,14 +180,45 @@ def harvest_shape_env(shape_env: Any) -> dict | None:
         or getattr(shape_env, "var_to_val", {}) or {}
     var_to_range = getattr(shape_env, "var_to_range", {}) or {}
 
-    symbols = {}
-    for sym, val in var_to_val.items():
+    def _record(sym, hint, unbacked):
         rng = var_to_range.get(sym)
         lo = _jsonable_range_bound(getattr(rng, "lower", None)) if rng is not None else None
         hi = _jsonable_range_bound(getattr(rng, "upper", None)) if rng is not None else None
-        if lo is not None and hi is not None and lo == hi:
-            continue  # specialized to a constant — not a free family dim
-        symbols[str(sym)] = {"hint": int(val), "range": [lo, hi]}
+        if not unbacked and lo is not None and hi is not None and lo == hi:
+            return  # backed symbol specialized to a constant — not free
+        entry = {"hint": int(hint), "range": [lo, hi]}
+        if unbacked:
+            # The "hint" is a data-dependent FALLBACK (size_hint / range), not
+            # a real observed size — a consumer benching it must know the true
+            # value is runtime-determined. The expr still references it, so it
+            # must be in the table or instantiation raises 'unbound symbol'.
+            entry["unbacked"] = True
+        symbols[str(sym)] = entry
+
+    symbols = {}
+    for sym, val in var_to_val.items():
+        _record(sym, val, unbacked=False)
+
+    # Unbacked symbols (u0, u1 — from data-dependent ops: nonzero/item/unique/
+    # masked-index) carry no real value; their hint is the ShapeEnv's
+    # size_hint fallback. Rare in fusion regions (data-dependent ops are
+    # extern/fallback), but if one lands in a captured expr it MUST be in the
+    # table — else _eval_dim raises 'unbound symbol' at load.
+    is_unbacked = getattr(shape_env, "is_unbacked_symint", None)
+    size_hint = getattr(shape_env, "size_hint", None)
+    if is_unbacked is not None:
+        for sym in list(var_to_range):
+            if sym in var_to_val or not is_unbacked(sym):
+                continue
+            hint = None
+            if size_hint is not None:
+                hint = size_hint(sym, allow_none=True)
+            if hint is None:
+                rng = var_to_range.get(sym)
+                hint = _jsonable_range_bound(getattr(rng, "lower", None))
+            if hint is None:
+                continue  # no usable fallback; cannot bind — skip (loud later)
+            _record(sym, hint, unbacked=True)
 
     if not symbols:
         return None
@@ -673,7 +704,14 @@ def _scalar_spec_from_value(name: str, value: Any) -> dict[str, Any]:
     import torch
 
     if isinstance(value, (torch.SymInt, torch.SymFloat)):
-        return {"kind": "symint", "name": name, "value": _concrete_int(value)}
+        spec = {"kind": "symint", "name": name, "value": _concrete_int(value)}
+        # Keep the exact expr for a live symint input ('s53', 's0*s53') so the
+        # sidecar can rebind, same as the region path's ['I', hint, expr].
+        # None for a constant-valued symint (the hint already captures it).
+        expr = sym_expr_str(value)
+        if expr is not None:
+            spec["expr"] = expr
+        return spec
     if isinstance(value, (int, float, bool)):
         return {"kind": "scalar", "name": name, "value": value}
     return {"kind": "scalar", "name": name, "value": 1}

@@ -1593,6 +1593,59 @@ def test_dims_equal_compares_exprs_by_sympy_not_int():
     assert not _dims_equal("64*s0*s53", 64)
 
 
+def test_symint_input_expr_codec_roundtrips_as_I():
+    """A live symint INPUT spec with an expr round-trips as ['I', hint, expr]
+    (rebindable), a constant symint as ['sym', hint]. Both sides — the region
+    capture and the full-graph sidecar — produce the symint spec, so the
+    codec must carry the expr or the sidecar symint can't rebind."""
+    from input_codec import (compact_from_spec, spec_from_compact,
+                             evaluate_symbolic_entry)
+
+    live = {"kind": "symint", "name": "arg0_1", "value": 16, "expr": "s53"}
+    entry = compact_from_spec(live)
+    assert entry == ["I", 16, "s53"], entry
+    rt = spec_from_compact(entry)
+    assert rt["expr"] == "s53" and rt["value"] == 16
+    # evaluates at a binding to a concrete symint
+    assert evaluate_symbolic_entry(entry, {"s53": 24}) == ["sym", 24]
+
+    const = {"kind": "symint", "name": "n", "value": 256}
+    assert compact_from_spec(const) == ["sym", 256]
+
+
+def test_harvest_unbacked_symbol_recorded_with_flag():
+    """An unbacked symbol (u0, data-dependent) that lands in the table is
+    marked unbacked=True so a consumer knows its hint is a fallback, not an
+    observed size. Synthetic ShapeEnv stub — no data-dependent graph needed
+    (those are extern ops, rare in fusion regions)."""
+    from full_graph_harness import harvest_shape_env
+    import sympy
+
+    class _VR:
+        def __init__(self, lo, hi):
+            self.lower, self.upper = lo, hi
+
+    u0 = sympy.Symbol("u0")
+    s0 = sympy.Symbol("s0")
+
+    class _FakeEnv:
+        backed_var_to_val = {s0: sympy.Integer(16)}
+        var_to_range = {s0: _VR(2, sympy.oo), u0: _VR(0, sympy.oo)}
+        guards = []
+
+        def is_unbacked_symint(self, sym):
+            return str(sym).startswith("u")
+
+        def size_hint(self, sym, *, allow_none=False):
+            return sympy.Integer(8192) if str(sym) == "u0" else None
+
+    block = harvest_shape_env(_FakeEnv())
+    assert block["symbols"]["s0"] == {"hint": 16, "range": [2, None]}
+    assert block["symbols"]["s0"].get("unbacked") is None
+    u = block["symbols"]["u0"]
+    assert u["hint"] == 8192 and u["unbacked"] is True
+
+
 def test_symint_input_expr_parsed_without_regex_or_default():
     """A Sym(expr) input annotation keeps its exact expr (no _parse_intish
     default of 32, no regex). Sym(<int>) stays a constant value."""

@@ -114,7 +114,12 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
     if kind == "shape":
         return ["S", list(spec["dims"])]
     if kind == "symint":
-        return ["sym", spec.get("value", spec.get("hint", 1))]
+        hint = spec.get("value", spec.get("hint", 1))
+        # A live symint input with an expr -> ['I', hint, expr] (rebindable);
+        # a constant symint -> ['sym', hint].
+        if spec.get("expr") is not None:
+            return ["I", hint, spec["expr"]]
+        return ["sym", hint]
     if kind == "scalar":
         return ["sc", spec.get("value")]
 
@@ -180,6 +185,12 @@ def spec_from_compact(entry: list, name: str | None = None) -> dict:
         return {"kind": "shape", "name": name, "dims": list(entry[1])}
     if entry and entry[0] == "sym":
         return {"kind": "symint", "name": name, "value": entry[1]}
+    if entry and entry[0] == "I":
+        # Live symint input: ['I', hint, expr] -> rebindable symint spec.
+        spec = {"kind": "symint", "name": name, "value": entry[1]}
+        if len(entry) > 2 and entry[2] is not None:
+            spec["expr"] = entry[2]
+        return spec
     if entry and entry[0] == "sc":
         return {"kind": "scalar", "name": name, "value": entry[1]}
 
