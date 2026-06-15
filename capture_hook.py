@@ -251,10 +251,117 @@ def get_fusion_partitions(gm: fx.GraphModule) -> list:
     return [comp for comp in components if partition_has_real_compute(comp)]
 
 
+# ---------------------------------------------------------------------------
+# Dynamic-shape capture: SymInt expr + ShapeEnv harvesting (design §2.1)
+#
+# At post-grad time the SymNodes are live, so the expr, hint, value-ranges
+# and guards are all one shape_env read away. We record exprs ALONGSIDE the
+# hint ints (never instead — the hint fields stay exactly as a static capture
+# produces them, so shape_hash identity and every existing consumer are
+# unchanged). A fully static capture touches none of this.
+# ---------------------------------------------------------------------------
+
+def _sym_expr_str(x):
+    """sympy-printed expr for a SymInt/SymFloat, or None if it's a plain int
+    or a constant-valued symbol. A bare symbol prints as its name ('s0'); a
+    derived node prints compound ('s0*s53'). Returns None when there's no
+    symbolic content to preserve (the value is already a concrete int)."""
+    if not isinstance(x, (torch.SymInt, torch.SymFloat)):
+        return None
+    node = getattr(x, "node", None)
+    expr = getattr(node, "expr", None)
+    if expr is None:
+        return None
+    # A constant SymInt (expr is a number) carries no symbol — the hint int
+    # already captures it; don't emit a redundant "256" expr string.
+    if getattr(expr, "is_number", False):
+        return None
+    return str(expr)
+
+
+def _shape_env_of(x):
+    """ShapeEnv backing a SymInt/SymFloat, or None."""
+    node = getattr(x, "node", None)
+    return getattr(node, "shape_env", None)
+
+
+def _harvest_shape_env(shape_env) -> dict | None:
+    """Extract the {symbols, guards, captured_dynamic} graph-level block from
+    a live ShapeEnv (design §2.1). symbols: name -> {hint, range}; range
+    bounds clamp sympy oo/int_oo to None (JSON-safe 'unbounded'). Guards are
+    sympy-printed strings, filtered to those expressible over the recorded
+    backed symbols (tensor-id / dtype guards dropped). Returns None if the
+    env exposes no backed FREE symbols (nothing dynamic to record)."""
+    if shape_env is None:
+        return None
+    try:
+        import sympy
+    except Exception:
+        sympy = None
+
+    def _bound(v):
+        # ValueRanges bounds may be sympy oo / int_oo / -oo — JSON 'null'.
+        try:
+            if v is None:
+                return None
+            sv = str(v)
+            if "oo" in sv:  # int_oo, oo, -oo
+                return None
+            return int(v)
+        except Exception:
+            return None
+
+    # backed_var_to_val preferred (var_to_val is deprecated); fall back.
+    var_to_val = getattr(shape_env, "backed_var_to_val", None)
+    if not var_to_val:
+        var_to_val = getattr(shape_env, "var_to_val", {}) or {}
+    var_to_range = getattr(shape_env, "var_to_range", {}) or {}
+
+    symbols = {}
+    for sym, val in var_to_val.items():
+        name = str(sym)
+        rng = var_to_range.get(sym)
+        lo = _bound(getattr(rng, "lower", None)) if rng is not None else None
+        hi = _bound(getattr(rng, "upper", None)) if rng is not None else None
+        try:
+            hint = int(val)
+        except Exception:
+            continue
+        # A symbol specialized to a single value (range [k, k]) is not a
+        # free family dimension — it's a constant the graph baked in. Skip
+        # it so it never appears as a bindable symbol (e.g. s77 == 64).
+        if lo is not None and hi is not None and lo == hi:
+            continue
+        symbols[name] = {"hint": hint, "range": [lo, hi]}
+
+    if not symbols:
+        return None
+
+    known = set(symbols)
+    guards = []
+    for g in (getattr(shape_env, "guards", []) or []):
+        expr = getattr(g, "expr", g)
+        # Drop trivially-true guards and any guard referencing a symbol we
+        # didn't keep (specialized/unbacked) — a residual guard the consumer
+        # can't evaluate over the symbol table is noise at best.
+        try:
+            if sympy is not None and (expr == sympy.true or expr is True):
+                continue
+            free = {str(s) for s in expr.free_symbols}
+        except Exception:
+            continue
+        if free and free.issubset(known):
+            guards.append(str(expr))
+
+    return {"symbols": symbols, "guards": guards, "captured_dynamic": True}
+
+
 def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     """Extract a standalone sub-GraphModule for one fusible partition.
 
-    Returns (sub_gm, placeholder_info, shape_params) or None.
+    Returns (sub_gm, placeholder_info, shape_params, shape_env_block) — the
+    last is None for a static capture, else the {symbols, guards,
+    captured_dynamic} block harvested from the live ShapeEnv.
     """
     seen = set()
     unique_origins = []
@@ -306,12 +413,28 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     new_graph = fx.Graph()
     env: dict[fx.Node, fx.Node] = {}
     placeholder_info: dict[str, dict] = {}
+    # Live ShapeEnv seen during this extraction (any SymInt dim/stride/input).
+    # Harvested once into the graph-level symbolic block at the end.
+    _seen_shape_env = [None]
+
+    def _note_env(x):
+        se = _shape_env_of(x)
+        if se is not None and _seen_shape_env[0] is None:
+            _seen_shape_env[0] = se
 
     def _resolve_sym(x):
-        """Resolve SymInt/SymFloat to concrete int/float."""
+        """Resolve SymInt/SymFloat to concrete int/float (the hint)."""
         if isinstance(x, (torch.SymInt, torch.SymFloat)):
+            _note_env(x)
             return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
         return int(x)
+
+    def _expr_list(syms):
+        """Per-slot expr strings (None where the slot is a plain int / a
+        constant-valued symint). Returns None if NO slot is symbolic, so a
+        static placeholder records no 'symbolic' block at all."""
+        exprs = [_sym_expr_str(s) for s in syms]
+        return exprs if any(e is not None for e in exprs) else None
 
     def _storage_key(val):
         try:
@@ -322,15 +445,29 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     def _record_placeholder(name: str, meta: dict) -> None:
         val = meta.get("val", None)
         if val is not None and isinstance(val, torch.Tensor):
+            shape = list(val.shape)
+            stride = list(val.stride())
             placeholder_info[name] = {
-                "shape": [_resolve_sym(s) for s in val.shape],
-                "stride": [_resolve_sym(s) for s in val.stride()] if not val.is_contiguous() else [],
+                "shape": [_resolve_sym(s) for s in shape],
+                "stride": [_resolve_sym(s) for s in stride] if not val.is_contiguous() else [],
                 "dtype": str(val.dtype),
                 "device": str(val.device),
             }
             off = _resolve_sym(val.storage_offset()) if val.storage_offset() else 0
             if off:
                 placeholder_info[name]["storage_offset"] = off
+            # Symbolic block (design §2.1): per-slot exprs alongside the hint
+            # ints above. Additive — absent for static tensors, so identity
+            # and existing consumers are untouched.
+            shape_exprs = _expr_list(shape)
+            stride_exprs = _expr_list(stride) if not val.is_contiguous() else None
+            if shape_exprs is not None or stride_exprs is not None:
+                sym = {}
+                if shape_exprs is not None:
+                    sym["shape_exprs"] = shape_exprs
+                if stride_exprs is not None:
+                    sym["stride_exprs"] = stride_exprs
+                placeholder_info[name]["symbolic"] = sym
             # Alias tag: inputs whose fake vals share one untyped storage
             # (packed-qkv saved views). Live-capture-only signal — any
             # retrace re-fabricates inputs and the identity is gone. Tag
@@ -348,6 +485,7 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                 except Exception:
                     pass
         elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
+            _note_env(val)
             hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)
             placeholder_info[name] = {
                 "shape": [],
@@ -356,6 +494,12 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                 "device": "cpu",
                 "hint": hint,
             }
+            # Live symint input: record its expr ('s0' root, or 's0*s53'
+            # derived) so it serializes as ['I', hint, expr], not the old
+            # S([hint]) conflation. None for a constant-valued symint.
+            expr = _sym_expr_str(val)
+            if expr is not None:
+                placeholder_info[name]["expr"] = expr
 
     _ph_names_used: set[str] = set()
 
@@ -391,6 +535,9 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     }
 
     shape_params: dict[str, list[int]] = {}
+    # Parallel to shape_params: per-slot expr strings (None where a slot is a
+    # plain int) for shape params carrying symbolic dims. Absent for static.
+    shape_param_exprs: dict[str, list] = {}
     _shape_counter = [0]
 
     def _should_lift_shape(shape_list):
@@ -402,6 +549,25 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
             return False
         return True
 
+    def _shape_entry_hint_expr(entry):
+        """One shape-list entry -> (hint_int_or_None, expr_or_None). Entries
+        arrive already mapped through _ensure_in_env, so a symbolic dim is an
+        fx.Node whose .meta['val'] is the live SymInt; a static dim is a
+        plain int. Resolving to the hint keeps the lifted literal a valid
+        List[int] (region captures at the hint, exactly like a static
+        capture); the expr rides in shape_param_exprs. hint=None means the
+        entry can't be resolved to an int -> caller leaves the op unlifted."""
+        v = entry
+        if isinstance(entry, fx.Node):
+            v = (entry.meta or {}).get("val")
+        if isinstance(v, (torch.SymInt, torch.SymFloat)):
+            _note_env(v)
+            hint = v.node.hint if hasattr(v, "node") and hasattr(v.node, "hint") else int(v)
+            return int(hint), _sym_expr_str(v)
+        if isinstance(v, int):
+            return int(v), None
+        return None, None
+
     def _lift_shape_arg(node, args):
         """For reshape/view ops, lift the shape literal to a parameter."""
         if node.target not in _VIEW_LIKE_OPS:
@@ -411,11 +577,24 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         shape_list = list(args[1])
         if not _should_lift_shape(shape_list):
             return args
+        # Resolve every entry to its hint int (and parallel expr). A symbolic
+        # dim (fx.Node wrapping a SymInt) becomes its hint, so the lifted
+        # _shape_param is a valid List[int] — this is what fixes the
+        # 'name mul is not defined' / 'Expected List[int]' drop.
+        hints, exprs = [], []
+        for entry in shape_list:
+            h, e = _shape_entry_hint_expr(entry)
+            if h is None:
+                return args  # unresolvable entry: don't lift this op
+            hints.append(h)
+            exprs.append(e)
         param_name = f"_shape_param_{_shape_counter[0]}"
         _shape_counter[0] += 1
         ph = new_graph.placeholder(param_name)
-        ph.meta = {"val": shape_list}
-        shape_params[param_name] = shape_list
+        ph.meta = {"val": hints}
+        shape_params[param_name] = hints
+        if any(e is not None for e in exprs):
+            shape_param_exprs[param_name] = exprs
         return (args[0], ph) + tuple(args[2:]) if len(args) > 2 else (args[0], ph)
 
     all_graph_nodes = list(gm.graph.nodes)
@@ -467,7 +646,17 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
 
     new_graph.lint()
     new_gm = fx.GraphModule(gm, new_graph)
-    return new_gm, placeholder_info, shape_params
+
+    # Harvest the graph-level symbolic block from whatever live ShapeEnv we
+    # saw (None for a fully static partition). Fold in any lifted-shape-param
+    # exprs so the whole symbolic story for this region is one object.
+    shape_env_block = _harvest_shape_env(_seen_shape_env[0])
+    if shape_param_exprs:
+        if shape_env_block is None:
+            shape_env_block = {"symbols": {}, "guards": [],
+                               "captured_dynamic": True}
+        shape_env_block["shape_param_exprs"] = shape_param_exprs
+    return new_gm, placeholder_info, shape_params, shape_env_block
 
 
 # ----------------------------------------------------------------------------
@@ -1050,7 +1239,7 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
     result = extract_partition_subgraph(comp, gm)
     if result is None:
         return None
-    sub_gm, placeholder_info, shape_params = result
+    sub_gm, placeholder_info, shape_params, shape_env_block = result
     sub_gm, placeholder_info, shape_params = canonicalize_subgraph(
         sub_gm, placeholder_info, shape_params)
     return {
@@ -1059,6 +1248,12 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
         "sub_gm": sub_gm,
         "placeholder_info": placeholder_info,
         "shape_params": shape_params,
+        # None for static partitions; {symbols, guards, captured_dynamic,
+        # [shape_param_exprs]} for dynamic ones. shape_hash above is computed
+        # from the HINT ints in placeholder_info, so a dynamic capture
+        # dedupes against the static capture of the same hint shapes — the
+        # symbolic block is point metadata, never identity (design §E).
+        "shape_env_block": shape_env_block,
     }
 
 
@@ -1166,8 +1361,19 @@ class _CaptureState:
     def _infer_permutation_indices(gm, placeholder_info) -> dict[str, int]:
         return infer_permutation_indices_from_gm(gm, placeholder_info)
 
-    def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
+    def _generate_repro_file(self, gm, placeholder_info, meta, filename,
+                             shape_params=None, shape_env_block=None):
         shape_params = shape_params or {}
+        # Dynamic-shape metadata (None for static captures). Per-shape-param
+        # exprs overlay symbolic dims onto the lifted shape-param ['S', ...]
+        # entries; hint_bindings is the binding under which every expr
+        # evaluates back to the captured concrete shape (eager validation +
+        # signature rendering both need concrete ints).
+        shape_param_exprs = (shape_env_block or {}).get("shape_param_exprs", {})
+        hint_bindings = {
+            n: s["hint"]
+            for n, s in (shape_env_block or {}).get("symbols", {}).items()
+        }
         code = gm.print_readable(print_output=False)
         import re as _re
         code = _re.sub(r"^class \S+\(torch\.nn\.Module\):",
@@ -1323,10 +1529,21 @@ class _CaptureState:
             for sk, _idx in sorted(_group_of.items(), key=lambda kv: kv[1])
         ]
 
+        # Overlay per-slot exprs onto already-built compact slots: a slot
+        # with a recorded expr becomes the expr STRING, static slots keep
+        # their hint int. None-free entries pass through unchanged, so static
+        # captures are byte-identical.
+        def _apply_exprs(slots, exprs):
+            return [e if e is not None else s for s, e in zip(slots, exprs)]
+
         compact_inputs = []
         for name in ph_names:
             if name in shape_params:
-                compact_inputs.append(["S", list(shape_params[name])])
+                dims = list(shape_params[name])
+                pexprs = (shape_param_exprs or {}).get(name)
+                if pexprs:
+                    dims = _apply_exprs(dims, pexprs)
+                compact_inputs.append(["S", dims])
             else:
                 info = placeholder_info.get(name)
                 if info and info["dtype"] != "symint":
@@ -1356,10 +1573,39 @@ class _CaptureState:
                         # chains: OPT position ids derive from a float
                         # mask; randn would index negative/OOB).
                         spec["gen"] = info["gen"]
-                    compact_inputs.append(compact_from_spec(spec))
+                    entry = compact_from_spec(spec)
+                    # Overlay symbolic dims/strides (design §2.1): hint ints
+                    # stay in entry; exprs replace symbolic slots so the
+                    # serialized entry is the instantiate_point format.
+                    symb = info.get("symbolic")
+                    if symb:
+                        if symb.get("shape_exprs"):
+                            entry[0] = _apply_exprs(entry[0], symb["shape_exprs"])
+                        if symb.get("stride_exprs") and len(entry) > 2 \
+                                and isinstance(entry[2], dict) and "st" in entry[2]:
+                            entry[2]["st"] = _apply_exprs(
+                                entry[2]["st"], symb["stride_exprs"])
+                    compact_inputs.append(entry)
                 elif info and info.get("dtype") == "symint":
-                    compact_inputs.append(["sym", info.get("hint", 1)])
-        shapes_config_line = render_signature(compact_inputs)
+                    expr = info.get("expr")
+                    if expr is not None:
+                        # Live symint input: ['I', hint, expr] (NOT the old
+                        # S([hint]) conflation that returned a list where the
+                        # graph needs an int).
+                        compact_inputs.append(["I", info.get("hint", 1), expr])
+                    else:
+                        compact_inputs.append(["sym", info.get("hint", 1)])
+
+        # Render the human signature from a CONCRETE (hint-evaluated) copy —
+        # render_T can't print expr strings, and the signature is
+        # documentation; the data is compact_inputs.
+        from input_codec import evaluate_symbolic_entry, is_symbolic_entry
+
+        def _concrete(e):
+            return evaluate_symbolic_entry(e, hint_bindings) if (
+                hint_bindings and is_symbolic_entry(e)) else e
+        shapes_config_line = render_signature(
+            [_concrete(e) for e in compact_inputs])
 
         script = f'''"""
 Standalone repro captured via capture_hook.
@@ -1437,10 +1683,23 @@ if __name__ == "__main__":
                 # path can't be used here — and validating with the same
                 # compact entries that BECOME the shapes.json point means
                 # we validate exactly what consumers will load.
-                from input_codec import spec_from_compact
+                from input_codec import (spec_from_compact,
+                                          evaluate_symbolic_entry,
+                                          is_symbolic_entry)
                 from repro_harness import make_inputs_from_config as _mific
+                # Dynamic entries carry expr strings; evaluate at the hint
+                # binding so validation runs the concrete snapshot shape
+                # (exactly the static point this dynamic capture dedupes to).
+                _hb = {n: s["hint"]
+                       for n, s in (shape_env_block or {}).get(
+                           "symbols", {}).items()}
+
+                def _concrete_entry(e):
+                    return (evaluate_symbolic_entry(e, _hb)
+                            if (_hb and is_symbolic_entry(e)) else e)
                 _vcfg = {
-                    "inputs": [spec_from_compact(e) for e in compact_inputs]}
+                    "inputs": [spec_from_compact(_concrete_entry(e))
+                               for e in compact_inputs]}
                 if alias_group_nbytes:
                     _vcfg["alias_group_nbytes"] = alias_group_nbytes
                 inputs = mod.make_inputs(shape_config=_vcfg)
@@ -1550,6 +1809,7 @@ if __name__ == "__main__":
             sub_gm = pattern["sub_gm"]
             placeholder_info = pattern["placeholder_info"]
             shape_params = pattern["shape_params"]
+            shape_env_block = pattern.get("shape_env_block")
 
             # Attach observed stats to placeholder_info for integer/bool inputs.
             # The subgraph's placeholders inherit names from the full graph's nodes,
@@ -1613,7 +1873,8 @@ if __name__ == "__main__":
             try:
                 (filepath, signature, compact_inputs,
                  alias_group_nbytes) = self._generate_repro_file(
-                    sub_gm, placeholder_info, meta, filename, shape_params)
+                    sub_gm, placeholder_info, meta, filename, shape_params,
+                    shape_env_block=shape_env_block)
                 entry = {
                     "file": filepath,
                     "kind": kind,
@@ -1628,6 +1889,13 @@ if __name__ == "__main__":
                 }
                 if alias_group_nbytes:
                     entry["alias_group_nbytes"] = alias_group_nbytes
+                # Dynamic-shape metadata travels with the captured entry so
+                # the merge can write symbols/guards/bindings into shapes.json
+                # (design §2.1). Absent for static captures.
+                if shape_env_block:
+                    entry["symbols"] = shape_env_block.get("symbols", {})
+                    entry["guards"] = shape_env_block.get("guards", [])
+                    entry["captured_dynamic"] = True
                 self.captured.append(entry)
             except Exception as e:
                 # NEVER silently drop a region: record it so the run report
