@@ -180,7 +180,7 @@ def harvest_shape_env(shape_env: Any) -> dict | None:
         or getattr(shape_env, "var_to_val", {}) or {}
     var_to_range = getattr(shape_env, "var_to_range", {}) or {}
 
-    def _record(sym, hint, unbacked):
+    def _record(sym, hint, *, unbacked, hint_source):
         rng = var_to_range.get(sym)
         lo = _jsonable_range_bound(getattr(rng, "lower", None)) if rng is not None else None
         hi = _jsonable_range_bound(getattr(rng, "upper", None)) if rng is not None else None
@@ -188,37 +188,50 @@ def harvest_shape_env(shape_env: Any) -> dict | None:
             return  # backed symbol specialized to a constant — not free
         entry = {"hint": int(hint), "range": [lo, hi]}
         if unbacked:
-            # The "hint" is a data-dependent FALLBACK (size_hint / range), not
-            # a real observed size — a consumer benching it must know the true
-            # value is runtime-determined. The expr still references it, so it
-            # must be in the table or instantiation raises 'unbound symbol'.
+            # Unbacked (data-dependent) symbol: the bench still needs a
+            # concrete value, but it is NOT an observed shape. unbacked=True
+            # + hint_source tell the consumer how much to trust the hint:
+            #   observed       — real runtime value (propagate_real_tensors);
+            #                    a legitimate single-point bench.
+            #   size_hint      — derived from backed subs / static eval.
+            #   range_fallback — arbitrary placeholder (range floor); a single
+            #                    measurement is noise — sweep or exclude from
+            #                    the static-vs-dynamic gap table.
             entry["unbacked"] = True
+            entry["hint_source"] = hint_source
         symbols[str(sym)] = entry
 
     symbols = {}
     for sym, val in var_to_val.items():
-        _record(sym, val, unbacked=False)
+        _record(sym, val, unbacked=False, hint_source="observed")
 
     # Unbacked symbols (u0, u1 — from data-dependent ops: nonzero/item/unique/
-    # masked-index) carry no real value; their hint is the ShapeEnv's
-    # size_hint fallback. Rare in fusion regions (data-dependent ops are
-    # extern/fallback), but if one lands in a captured expr it MUST be in the
-    # table — else _eval_dim raises 'unbound symbol' at load.
+    # masked-index) carry no real value. Take the most faithful tier
+    # available: a real propagated runtime value, else size_hint, else the
+    # range floor. Rare in fusion regions (data-dependent ops are extern), but
+    # if one lands in a captured expr it MUST be in the table — else _eval_dim
+    # raises 'unbound symbol' at load.
     is_unbacked = getattr(shape_env, "is_unbacked_symint", None)
     size_hint = getattr(shape_env, "size_hint", None)
+    real_vals = getattr(shape_env, "real_tensor_prop_unbacked_vals", {}) or {}
     if is_unbacked is not None:
         for sym in list(var_to_range):
             if sym in var_to_val or not is_unbacked(sym):
                 continue
-            hint = None
-            if size_hint is not None:
-                hint = size_hint(sym, allow_none=True)
-            if hint is None:
+            hint, src = None, None
+            if sym in real_vals:                       # tier 1: observed
+                hint, src = real_vals[sym], "observed"
+            elif size_hint is not None:                # tier 2: derived
+                h = size_hint(sym, allow_none=True)
+                if h is not None:
+                    hint, src = h, "size_hint"
+            if hint is None:                           # tier 3: range floor
                 rng = var_to_range.get(sym)
                 hint = _jsonable_range_bound(getattr(rng, "lower", None))
+                src = "range_fallback"
             if hint is None:
-                continue  # no usable fallback; cannot bind — skip (loud later)
-            _record(sym, hint, unbacked=True)
+                continue  # no usable value at all — skip (loud at load)
+            _record(sym, hint, unbacked=True, hint_source=src)
 
     if not symbols:
         return None

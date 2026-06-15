@@ -1613,11 +1613,12 @@ def test_symint_input_expr_codec_roundtrips_as_I():
     assert compact_from_spec(const) == ["sym", 256]
 
 
-def test_harvest_unbacked_symbol_recorded_with_flag():
-    """An unbacked symbol (u0, data-dependent) that lands in the table is
-    marked unbacked=True so a consumer knows its hint is a fallback, not an
-    observed size. Synthetic ShapeEnv stub — no data-dependent graph needed
-    (those are extern ops, rare in fusion regions)."""
+def test_harvest_unbacked_symbol_records_hint_source_tiers():
+    """An unbacked symbol (data-dependent) is recorded with unbacked=True and
+    a hint_source naming WHICH tier the value came from — observed (real
+    runtime) > size_hint (derived) > range_fallback (arbitrary placeholder).
+    Backed symbols are implicitly observed (no flags). Synthetic ShapeEnv
+    stub — data-dependent ops are extern, rare in fusion regions."""
     from full_graph_harness import harvest_shape_env
     import sympy
 
@@ -1625,25 +1626,37 @@ def test_harvest_unbacked_symbol_recorded_with_flag():
         def __init__(self, lo, hi):
             self.lower, self.upper = lo, hi
 
-    u0 = sympy.Symbol("u0")
     s0 = sympy.Symbol("s0")
+    u_obs, u_sh, u_fb = (sympy.Symbol(n) for n in ("u0", "u1", "u2"))
 
     class _FakeEnv:
         backed_var_to_val = {s0: sympy.Integer(16)}
-        var_to_range = {s0: _VR(2, sympy.oo), u0: _VR(0, sympy.oo)}
+        var_to_range = {s0: _VR(2, sympy.oo), u_obs: _VR(0, sympy.oo),
+                        u_sh: _VR(0, sympy.oo), u_fb: _VR(4, sympy.oo)}
         guards = []
+        # tier 1: a real propagated runtime value for u0
+        real_tensor_prop_unbacked_vals = {u_obs: sympy.Integer(1372)}
 
         def is_unbacked_symint(self, sym):
             return str(sym).startswith("u")
 
         def size_hint(self, sym, *, allow_none=False):
-            return sympy.Integer(8192) if str(sym) == "u0" else None
+            # tier 2 only for u1; u2 falls through to the range floor
+            return sympy.Integer(8192) if str(sym) == "u1" else None
 
     block = harvest_shape_env(_FakeEnv())
+    # backed: observed, no flags
     assert block["symbols"]["s0"] == {"hint": 16, "range": [2, None]}
-    assert block["symbols"]["s0"].get("unbacked") is None
-    u = block["symbols"]["u0"]
-    assert u["hint"] == 8192 and u["unbacked"] is True
+    # tier 1 — real runtime value
+    assert block["symbols"]["u0"] == {
+        "hint": 1372, "range": [0, None], "unbacked": True,
+        "hint_source": "observed"}
+    # tier 2 — derived size_hint
+    assert block["symbols"]["u1"]["hint_source"] == "size_hint"
+    assert block["symbols"]["u1"]["hint"] == 8192
+    # tier 3 — arbitrary range floor
+    assert block["symbols"]["u2"]["hint_source"] == "range_fallback"
+    assert block["symbols"]["u2"]["hint"] == 4
 
 
 def test_symint_input_expr_parsed_without_regex_or_default():
