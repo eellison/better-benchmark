@@ -7,10 +7,10 @@ Updated: 2026-06-15
 - Row 1 `pointwise_04d85912d998`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 - Row 2 `pointwise_ccd411f2a45d`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
 - Row 1701 `var_mean_fbfc0104897d`: claimed for worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1700 `var_mean_fbc9e58f2e01`: claimed for worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1648 `var_mean_d1f8c258a72a`: claimed for worker `019ebd75-6886-78e3-bf4e-af115c359931`.
 - Row 1659 `var_mean_db63028c4eb9`: claimed for worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 
-Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, and 1648 are marked needs_work after parent-confirmed bench failures; rows 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are claimed for high-end refill or pending parent review. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, and 1647 are marked needs_work after parent-confirmed bench failures; rows 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are claimed for high-end refill or pending parent review. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 Rows 1711, 1716, and 1718 were parent-reviewed: row 1716 is kept as `1_AT_FLOOR`; rows 1711 and 1718 are back to needs_work after `1_BAD_ORACLE` locked benches.
 
