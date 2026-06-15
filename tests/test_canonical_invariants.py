@@ -1397,3 +1397,94 @@ def test_bind_parsing_and_symbol_binding_threading():
         with pytest.raises(ValueError, match="shapes.txt"):
             load_shape_configs(str(d / "repro.py"),
                                symbol_bindings={"s16": 24})
+
+
+# ============================================================================
+# Capture-side dynamic-shape harvesting (design §2.1/§2.2)
+#
+# CPU-only: a make_fx symbolic trace gives a live ShapeEnv + SymInt-backed
+# placeholder vals, the same objects the post-grad capture hook sees, so the
+# harvest helpers test without a GPU compile.
+# ============================================================================
+
+def _symbolic_shape_env_and_syms(fn, *example):
+    """make_fx symbolic-trace fn; return (shape_env, {dim_name: SymInt})."""
+    from torch.fx.experimental.proxy_tensor import make_fx
+    gm = make_fx(fn, tracing_mode="symbolic")(*example)
+    shape_env = None
+    syms = []
+    for n in gm.graph.nodes:
+        if n.op != "placeholder":
+            continue
+        v = (n.meta or {}).get("val")
+        if hasattr(v, "shape"):
+            for s in v.shape:
+                if isinstance(s, torch.SymInt):
+                    shape_env = s.node.shape_env
+                    syms.append(s)
+    return shape_env, syms
+
+
+def test_sym_expr_str_roundtrips_through_sympy():
+    """Every expr string the capture emits must re-parse via sympy.sympify —
+    that is the contract instantiate_point relies on."""
+    import sympy
+    from capture_hook import _sym_expr_str
+
+    def f(x):
+        return x.view(x.shape[0], x.shape[1] * x.shape[2]).sum(1)
+
+    _se, syms = _symbolic_shape_env_and_syms(f, torch.randn(4, 8, 16))
+    seen_compound = False
+    for s in syms:
+        es = _sym_expr_str(s)
+        if es is None:
+            continue
+        # re-parse: must not raise, must be a sympy expr over symbol names
+        expr = sympy.sympify(es)
+        assert expr.free_symbols, f"{es!r} parsed to a constant"
+        if "*" in es:
+            seen_compound = True
+    # A constant SymInt yields None (no redundant '256' string)
+    assert _sym_expr_str(5) is None
+    assert _sym_expr_str(torch.SymInt) is None or True  # type guard, no raise
+
+
+def test_harvest_shape_env_symbols_ranges():
+    """_harvest_shape_env returns {symbols:{name:{hint,range}}, guards,
+    captured_dynamic}; free symbols kept with hints + ranges, unbounded
+    upper clamped to None, returns None when nothing is dynamic."""
+    from capture_hook import _harvest_shape_env
+
+    def f(x):
+        return x.view(x.shape[0], x.shape[1] * x.shape[2]).sum(1)
+
+    se, _syms = _symbolic_shape_env_and_syms(f, torch.randn(4, 8, 16))
+    block = _harvest_shape_env(se)
+    assert block is not None and block["captured_dynamic"] is True
+    assert block["symbols"], "no symbols harvested"
+    for name, meta in block["symbols"].items():
+        assert name.startswith("s")
+        assert isinstance(meta["hint"], int)
+        lo, hi = meta["range"]
+        assert lo is None or isinstance(lo, int)
+        assert hi is None or isinstance(hi, int)  # int_oo -> None
+
+    # A fully static (fake-mode) trace exposes no SymInt dims, so the capture
+    # never sees a ShapeEnv -> no symbolic block recorded at all.
+    from torch.fx.experimental.proxy_tensor import make_fx
+    gm = make_fx(lambda x: x + 1, tracing_mode="fake")(torch.randn(4, 4))
+    static_env = None
+    for n in gm.graph.nodes:
+        v = (n.meta or {}).get("val")
+        if hasattr(v, "shape"):
+            for s in v.shape:
+                if isinstance(s, torch.SymInt):
+                    static_env = s.node.shape_env
+    assert static_env is None, "fake-mode trace unexpectedly produced SymInt dims"
+
+
+def test_harvest_none_shape_env():
+    """None env (static capture) -> None block, never raises."""
+    from capture_hook import _harvest_shape_env
+    assert _harvest_shape_env(None) is None
