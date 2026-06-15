@@ -1396,10 +1396,10 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1395,sum_sum_sum_7ab5c91b014a,7ab5c91b014a,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1396,sum_sum_sum_7c4a1a0a4d8d,7c4a1a0a4d8d,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1397,sum_sum_sum_81f672a568a0,81f672a568a0,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1398,sum_sum_sum_86e661f4be59,86e661f4be59,reduction,reduction_general,1,2,1,,needs_work,Codex,parent_check_pass_no_skip_pass_h100_fallback_bench_NUMERICS_WORSE_THAN_COMPILED_no_cudagraph_warnings_oracle_deleted_2026-06-13
+1398,sum_sum_sum_86e661f4be59,86e661f4be59,reduction,reduction_general,1,2,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_NUMERICS_WORSE_THAN_COMPILED
 1399,sum_sum_sum_8adea0bd8df9,8adea0bd8df9,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1400,sum_sum_sum_8f68a97a2af7,8f68a97a2af7,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-1401,sum_sum_sum_9ab0961d1fd9,9ab0961d1fd9,reduction,scatter_gather,1,1,1,,needs_work,Codex,worker_check_pass_bench_NUMERICS_WORSE_THAN_COMPILED_no_cudagraph_warnings_2026-06-13
+1401,sum_sum_sum_9ab0961d1fd9,9ab0961d1fd9,reduction,scatter_gather,1,1,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_NUMERICS_WORSE_THAN_COMPILED
 1402,sum_sum_sum_9ae530fb77de,9ae530fb77de,reduction,reduction_general,1,2,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_BAD_ORACLE
 1403,sum_sum_sum_9b7df2917dda,9b7df2917dda,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1404,sum_sum_sum_9cc696981073,9cc696981073,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
@@ -1716,7 +1716,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1715,var_mean_mean_7e505883fbf8,7e505883fbf8,reduction,norm_template_canonicalization,1,2,1,~var_mean_mean_6b0bb4b36636;~var_mean_mean_935376ba22dc,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1716,var_mean_mean_94d5b5ab5e6e,94d5b5ab5e6e,reduction,reduction_var_mean,1,2,1,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 1717,var_mean_mean_bf8fb2be89c6,bf8fb2be89c6,reduction,norm_template_canonicalization,1,1,1,~var_mean_mean_2d18883a5e64,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-1718,var_mean_mean_c2c0ad00da48,c2c0ad00da48,reduction,norm_template_canonicalization,1,2,1,~var_mean_mean_0805988a80e9,needs_work,codex,needs_work: parent_verified_checks_pass_1of1_no_skip_pass_1of1_locked_bench_no_cudagraph_warnings_1_BAD_ORACLE_441beb73_oracle_23.55us_compile_19.90us_ratio_0.845_oracle_py_deleted
+1718,var_mean_mean_c2c0ad00da48,c2c0ad00da48,reduction,norm_template_canonicalization,1,2,1,~var_mean_mean_0805988a80e9,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_BAD_ORACLE_ratio_0.845
 1719,var_mean_mean_f766086bbce9,f766086bbce9,reduction,norm_template_canonicalization,1,1,1,~var_mean_mean_34a86d931d28,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1720,var_mean_sum_53c829d32b0c,53c829d32b0c,reduction,norm_template_canonicalization,1,1,1,var_mean_sum_87c8c4a61b33,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1721,var_mean_var_mean_0dd15b92dc70,0dd15b92dc70,reduction,reduction_var_mean,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
