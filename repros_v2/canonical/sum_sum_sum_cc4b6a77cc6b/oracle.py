@@ -110,24 +110,104 @@ def _row_tile_store_and_reduce_kernel(
         weighted = _mul_rn(x, weight[None, :])
         weighted = tl.where(elem_mask, weighted, 0.0)
         rhs_masked = tl.where(elem_mask, rhs, 0.0)
-        chunk0 = d < 256
-        chunk1 = (d >= 256) & (d < 512)
-        chunk2 = (d >= 512) & (d < 768)
-        weighted_rhs = _mul_rn(weighted, rhs_masked)
-        row_sum = _add_rn(
-            _add_rn(
-                tl.sum(tl.where(chunk0[None, :], weighted, 0.0), axis=1),
-                tl.sum(tl.where(chunk1[None, :], weighted, 0.0), axis=1),
-            ),
-            tl.sum(tl.where(chunk2[None, :], weighted, 0.0), axis=1),
+        lanes = tl.arange(0, 32)
+        sum0 = tl.zeros((XBLOCK, 32), dtype=tl.float32)
+        sum1 = tl.zeros((XBLOCK, 32), dtype=tl.float32)
+        sum2 = tl.zeros((XBLOCK, 32), dtype=tl.float32)
+        sum3 = tl.zeros((XBLOCK, 32), dtype=tl.float32)
+        dot0 = tl.zeros((XBLOCK, 32), dtype=tl.float32)
+        dot1 = tl.zeros((XBLOCK, 32), dtype=tl.float32)
+        dot2 = tl.zeros((XBLOCK, 32), dtype=tl.float32)
+        dot3 = tl.zeros((XBLOCK, 32), dtype=tl.float32)
+
+        for step in tl.static_range(0, 6):
+            for vec in tl.static_range(0, 4):
+                col = lanes * 4 + step * 128 + vec
+                tree_mm_offsets = mm_row[:, None] * HIDDEN_ + col[None, :]
+                tree_row_offsets = row[:, None] * HIDDEN_ + col[None, :]
+                tree_mask = row_mask[:, None]
+
+                tree_mm0 = tl.load(
+                    mm0_ptr + tree_mm_offsets,
+                    mask=tree_mask,
+                    other=0.0,
+                ).to(tl.float32)
+                tree_mm1 = tl.load(
+                    mm1_ptr + tree_mm_offsets,
+                    mask=tree_mask,
+                    other=0.0,
+                ).to(tl.float32)
+                tree_mm2 = tl.load(
+                    mm2_ptr + tree_mm_offsets,
+                    mask=tree_mask,
+                    other=0.0,
+                ).to(tl.float32)
+                tree_residual = tl.load(
+                    residual_ptr + tree_row_offsets,
+                    mask=tree_mask,
+                    other=0.0,
+                ).to(tl.float32)
+                tree_rhs = tl.load(
+                    rhs_ptr + tree_row_offsets,
+                    mask=tree_mask,
+                    other=0.0,
+                ).to(tl.float32)
+                tree_weight = tl.load(weight_ptr + col).to(tl.float32)
+                tree_x = _add_rn(
+                    tree_residual,
+                    _add_rn(_add_rn(tree_mm0, tree_mm1), tree_mm2),
+                )
+                tree_weighted = _mul_rn(tree_x, tree_weight[None, :])
+                tree_weighted_rhs = _mul_rn(tree_weighted, tree_rhs)
+                if vec == 0:
+                    sum0 = _add_rn(sum0, tree_weighted)
+                    dot0 = _add_rn(dot0, tree_weighted_rhs)
+                elif vec == 1:
+                    sum1 = _add_rn(sum1, tree_weighted)
+                    dot1 = _add_rn(dot1, tree_weighted_rhs)
+                elif vec == 2:
+                    sum2 = _add_rn(sum2, tree_weighted)
+                    dot2 = _add_rn(dot2, tree_weighted_rhs)
+                else:
+                    sum3 = _add_rn(sum3, tree_weighted)
+                    dot3 = _add_rn(dot3, tree_weighted_rhs)
+
+        lane_sum = _add_rn(_add_rn(_add_rn(sum0, sum1), sum2), sum3)
+        lane_dot = _add_rn(_add_rn(_add_rn(dot0, dot1), dot2), dot3)
+        sum16 = tl.reshape(
+            tl.sum(tl.reshape(lane_sum, (XBLOCK * 16, 2)), axis=1),
+            (XBLOCK, 16),
         )
-        row_dot = _add_rn(
-            _add_rn(
-                tl.sum(tl.where(chunk0[None, :], weighted_rhs, 0.0), axis=1),
-                tl.sum(tl.where(chunk1[None, :], weighted_rhs, 0.0), axis=1),
-            ),
-            tl.sum(tl.where(chunk2[None, :], weighted_rhs, 0.0), axis=1),
+        dot16 = tl.reshape(
+            tl.sum(tl.reshape(lane_dot, (XBLOCK * 16, 2)), axis=1),
+            (XBLOCK, 16),
         )
+        sum8 = tl.reshape(
+            tl.sum(tl.reshape(sum16, (XBLOCK * 8, 2)), axis=1),
+            (XBLOCK, 8),
+        )
+        dot8 = tl.reshape(
+            tl.sum(tl.reshape(dot16, (XBLOCK * 8, 2)), axis=1),
+            (XBLOCK, 8),
+        )
+        sum4 = tl.reshape(
+            tl.sum(tl.reshape(sum8, (XBLOCK * 4, 2)), axis=1),
+            (XBLOCK, 4),
+        )
+        dot4 = tl.reshape(
+            tl.sum(tl.reshape(dot8, (XBLOCK * 4, 2)), axis=1),
+            (XBLOCK, 4),
+        )
+        sum2_final = tl.reshape(
+            tl.sum(tl.reshape(sum4, (XBLOCK * 2, 2)), axis=1),
+            (XBLOCK, 2),
+        )
+        dot2_final = tl.reshape(
+            tl.sum(tl.reshape(dot4, (XBLOCK * 2, 2)), axis=1),
+            (XBLOCK, 2),
+        )
+        row_sum = tl.sum(sum2_final, axis=1)
+        row_dot = tl.sum(dot2_final, axis=1)
         hidden = tl.full((XBLOCK, BLOCK_D), HIDDEN_, tl.float32)
         weighted_times_hidden = _mul_rn(weighted, hidden)
         rhs_times_dot = _mul_rn(rhs, row_dot[:, None])
@@ -135,22 +215,12 @@ def _row_tile_store_and_reduce_kernel(
         centered = _sub_rn(centered, rhs_times_dot)
         grad = _mul_rn(scale[:, None], centered)
 
-        round_toward_zero = _sub_rn(
-            grad,
-            _mul_rn(grad, tl.full((XBLOCK, BLOCK_D), 5.0e-8, tl.float32)),
-        )
-        positive_tie_bias = tl.where(
-            grad > 0.0,
-            tl.full((XBLOCK, BLOCK_D), 8.0e-6, tl.float32),
-            tl.zeros((XBLOCK, BLOCK_D), tl.float32),
-        )
-        grad_for_bf16 = _add_rn(round_toward_zero, positive_tie_bias)
-        grad_bf16_f32 = grad_for_bf16.to(tl.bfloat16).to(tl.float32)
-        mask_scale = _mul_rn(
-            keep,
+        grad_bf16_f32 = grad.to(tl.bfloat16).to(tl.float32)
+        keep_bf16_f32 = keep.to(tl.bfloat16).to(tl.float32)
+        mask_scale_bf16_f32 = _mul_rn(
+            keep_bf16_f32,
             tl.full((XBLOCK, BLOCK_D), 1.1111111111111112, tl.float32),
-        )
-        mask_scale_bf16_f32 = mask_scale.to(tl.bfloat16).to(tl.float32)
+        ).to(tl.bfloat16).to(tl.float32)
         masked_bf16 = _mul_rn(grad_bf16_f32, mask_scale_bf16_f32).to(tl.bfloat16)
         masked_f32 = masked_bf16.to(tl.float32)
 
@@ -203,9 +273,9 @@ def _finalize_column_sums_kernel(
     ROW_SPLIT=16,
     XBLOCK=1,
     BLOCK_D=1024,
-    FINAL_BLOCK_D=16,
+    FINAL_BLOCK_D=32,
     FINAL_BLOCK_ROW_BLOCKS=512,
-    num_warps=8,
+    num_warps=4,
     final_num_warps=8,
 )
 def oracle_forward(
