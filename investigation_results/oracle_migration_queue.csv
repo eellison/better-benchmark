@@ -303,7 +303,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 302,pointwise_b6d762cd3d81,b6d762cd3d81,pointwise,unclassified_priority_gap,3,2,11,~pointwise_298ea8f11903,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 303,sum_80d7d20cfbde,80d7d20cfbde,reduction,multi_output_reduction_templates,1,1,11,~sum_ab7572b27d2c;~sum_b8db5e701976,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 304,sum_sum_21e1fb8d648a,21e1fb8d648a,reduction,reduction_general,1,1,11,~sum_sum_cc11724ac17a,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-305,sum_sum_6a8cdea856dd,6a8cdea856dd,reduction,reduction_general,4,9,11,,needs_work,Codex,needs_work: B200 large diff likely wrong-math (2float fail max_diff=27.0 (large/unknown - verify not broken math))
+305,sum_sum_6a8cdea856dd,6a8cdea856dd,reduction,reduction_general,4,9,11,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_B200_2float_fail_max_diff_27_reaudit
 306,sum_sum_sum_0bc6cca52a2d,0bc6cca52a2d,reduction,scatter_gather,1,1,11,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 307,sum_sum_sum_19792008bf4a,19792008bf4a,reduction,reduction_general,1,2,11,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 308,sum_sum_sum_23ebf74d21f6,23ebf74d21f6,reduction,reduction_general,1,2,11,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
