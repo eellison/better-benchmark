@@ -122,7 +122,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 121,sum_sum_sum_e7781939b0a2,e7781939b0a2,reduction,reduction_general,2,4,34,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 122,pointwise_88bffcefddc4,88bffcefddc4,pointwise,layout_indexing_stencil_fusion,19,4,33,~pointwise_72ba9dfd2891;~mean_c324cfc06a94,needs_work,codex,checks_pass_19of19_required_bench_fails_NUMERICS_WORSE_THAN_COMPILED_nan_fp64_gate_no_cudagraph_warnings
 123,sum_sum_cd8694c00507,cd8694c00507,reduction,reduction_general,19,4,33,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
-124,var_mean_88858c55c3b4,88858c55c3b4,reduction,reduction_var_mean,19,4,33,,claimed,codex,claimed_2026-06-12_batch_121-125_refill_queue
+124,var_mean_88858c55c3b4,88858c55c3b4,reduction,reduction_var_mean,19,4,33,,needs_work,Codex,needs_work: parent_confirmed_h100_fallback_checks_pass_19of19_no_skip_pass_19of19_bench_no_cudagraph_warnings_1_BAD_ORACLE_18_GOOD_mobilevit_s_000da78a_oracle_14.24us_compile_12.83us_ratio_0.901_class_COOPERATIVE_SPLIT_K_oracle_py_deleted
 125,pointwise_182f6f9450b9,182f6f9450b9,pointwise,unclassified_priority_gap,10,2,32,pointwise_182f6f9450b9,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 126,pointwise_527df57b755b,527df57b755b,pointwise,layout_indexing_stencil_fusion,1,1,31,pointwise_352e97c8de09,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch verified)
 127,sum_sum_a58657212bf4,a58657212bf4,reduction,reduction_general,27,14,31,,needs_work,Codex,needs_work: checks_pass_27of27_h100_fallback_bench_invalid_27NUMERICS_WORSE_THAN_COMPILED_no_cudagraph_warnings_class_COOPERATIVE_SPLIT_K
