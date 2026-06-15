@@ -9,6 +9,18 @@ from oracle_harness import oracle_impl
 
 
 @triton.jit
+def _f32_fma(a, b, c):
+    return tl.inline_asm_elementwise(
+        "fma.rn.f32 $0, $1, $2, $3;",
+        constraints="=f,f,f,f",
+        args=[a, b, c],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
 def _softmax_backward_bf16_kernel(
     grad_ptr,
     keep_ptr,
@@ -38,7 +50,7 @@ def _softmax_backward_bf16_kernel(
     probs = libdevice.exp(logits - row_max[:, None]) / denom[:, None]
     product = dropped_grad * probs
     row_dot = tl.sum(product, axis=1)[:, None]
-    out = tl.fma(-probs, row_dot, product).to(tl.bfloat16)
+    out = _f32_fma(-probs, row_dot, product).to(tl.bfloat16)
 
     tl.store(out_ptr + offsets, out)
 
