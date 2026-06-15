@@ -1,9 +1,9 @@
-"""Gap diagnosis (classification: BANDWIDTH_BOUND): this oracle computes the complete XLNet bf16 attention-backward row epilogue in one Triton kernel, including the shape-param view, dropout-mask scaling, probability reconstruction, the eager-visible bf16 probability-scale and fma cast boundaries, libdevice natural-exp denominator divide, fp32 product sum, libdevice.fma row update, final bf16 store, and returned aliasing `[256,512,512]` view. Inductor already schedules this fixed-width row reduction at the same memory/math floor, but the generic lowering is still the baseline full-scope implementation; the oracle keeps the row formula in one specialized Triton program while preserving the captured casts and output alias."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete XLNet bf16 attention-backward row epilogue as a specialized Triton row reduction, including the shape-param view, dropout-mask scaling, probability reconstruction, Inductor's power-of-two scale sinking, `tl_math.exp` formulation, fp32 row sum, `libdevice.fma` update, final bf16 store, and returned aliasing `[256,512,512]` view. Inductor already emits a near-floor persistent reduction for this fixed-width row, but this oracle keeps the full captured scope in one tuned tile while matching the generated exp/cast lowering that matters for B200 numerics."""
 
 import torch
 import triton
 import triton.language as tl
-from torch._inductor.runtime.triton_helpers import libdevice
+from torch._inductor.runtime.triton_helpers import libdevice, math as tl_math
 
 from oracle_harness import oracle_impl
 
@@ -25,32 +25,26 @@ def _xlnet_attention_backward_kernel(
 ):
     rows = tl.program_id(0) * BLOCK_M + tl.arange(0, BLOCK_M)
     cols = tl.arange(0, BLOCK_N)
-    row_mask = rows < N_ROWS
-    col_mask = cols < N_COLS
-    mask = row_mask[:, None] & col_mask[None, :]
+    mask = (rows[:, None] < N_ROWS) & (cols[None, :] < N_COLS)
     offsets = rows[:, None] * N_COLS + cols[None, :]
 
-    grad = tl.load(grad_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    keep = tl.load(dropout_mask_ptr + offsets, mask=mask, other=0).to(tl.float32)
-    prob_bf16 = tl.load(prob_ptr + offsets, mask=mask, other=0.0)
-    prob = prob_bf16.to(tl.float32)
+    pred = tl.load(row_pred_ptr + rows, mask=rows < N_ROWS, other=0, eviction_policy="evict_last").to(tl.int1)
+    prob = tl.load(prob_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    base_a = tl.load(row_base_a_ptr + rows, mask=rows < N_ROWS, other=0.0, eviction_policy="evict_last")
+    base_b = tl.load(row_base_b_ptr + rows, mask=rows < N_ROWS, other=0.0, eviction_policy="evict_last")
+    denom = tl.load(row_denom_ptr + rows, mask=rows < N_ROWS, other=1.0, eviction_policy="evict_last")
 
-    base_a = tl.load(row_base_a_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
-    base_b = tl.load(row_base_b_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
-    pred = tl.load(row_pred_ptr + rows, mask=row_mask, other=0).to(tl.int1)
-    denom = tl.load(row_denom_ptr + rows, mask=row_mask, other=1.0).to(tl.float32)
-
-    scaled_prob = (prob * 0.125).to(tl.bfloat16).to(tl.float32)
     true_path = (prob * 1.0 - base_a[:, None]) * 0.125
-    false_path = scaled_prob - base_b[:, None]
+    false_path = prob * 0.125 - base_b[:, None]
     exponent = tl.where(pred[:, None], true_path, false_path)
-    div = libdevice.exp(exponent) / denom[:, None]
+    div = tl_math.exp(exponent) / denom[:, None]
 
+    grad = tl.load(grad_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    keep = tl.load(dropout_mask_ptr + offsets, mask=mask, other=0).to(tl.int1).to(tl.float32)
     scaled_grad = grad * (keep * 1.1111111111111112)
     product = scaled_grad * div
     row_sum = tl.sum(tl.where(mask, product, 0.0), axis=1)[:, None]
-    fma_bf16 = libdevice.fma(-div, row_sum, product).to(tl.bfloat16).to(tl.float32)
-    out = (fma_bf16 * 0.125).to(tl.bfloat16)
+    out = libdevice.fma(-div, row_sum, product) * 0.125
 
     tl.store(out_ptr + offsets, out, mask=mask)
 
