@@ -177,6 +177,21 @@ Example:
     # (T([512], bf16), T([128,512,7,7], bf16, stride=(25088,1,3584,512)))
     def oracle_forward(inputs, *, BLOCK, num_warps): ...
 
+### Sweep configs even for a single shape point
+
+A floor is the BEST achievable kernel time, not "the time of the one config
+you picked." Registering a single hardcoded `BLOCK`/`num_warps` per shape is
+one guess — it under-measures the floor when another config is faster. Even
+for a single shape point, sweep a small grid of launch configs and let the
+fastest win; the per-point floor is the min over that grid.
+
+Concretely: register the SAME kernel body for a point under several config
+tuples (different BLOCK / num_warps / num_stages, persistent-vs-looped where
+applicable), or autotune over a candidate list inside the impl. One config
+per point is acceptable ONLY when you've shown the kernel is bandwidth/launch
+bound and neighboring configs tie — note that in the gap diagnosis. Don't
+leave a faster config on the table by registering just one.
+
 ## Inputs: structured, never parsed
 
 New-corpus shapes.json points carry structured `inputs` (compact codec:
