@@ -16,6 +16,8 @@ Lower-gap refill buffer claimed by this session: rows 1, 2, and 96 are active. R
 
 Rows 85 and 93 were parent-rechecked after the pulled implementation: checks pass, but locked bench fails `NUMERICS_WORSE_THAN_COMPILED` on all points due the NaN fp64 gate, so their oracle files are deleted and queue status is back to needs_work.
 
+Row 84 was also parent-rechecked after the pulled implementation: checks pass, but locked bench fails `NUMERICS_WORSE_THAN_COMPILED` because the oracle differs from the fp64 ref while compiled has zero error, so its oracle file is deleted and queue status is back to needs_work.
+
 Additional lower-gap refill buffer claimed by this session: rows 740-749.
 
 Additional lower-gap refill buffer claimed by this session: rows 750-759.
