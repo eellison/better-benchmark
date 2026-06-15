@@ -715,11 +715,11 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 714,sum_sum_ad2e5844c8b7,ad2e5844c8b7,reduction,reduction_general,2,2,2,,oracle_measured,codex,oracle_py_added_checks_pass_2of2_h100_fallback_serial_compile_bench_2GOOD_b28a5714_oracle_us=9.50_compile_us=12.90_ratio=1.357_702b6b63_oracle_us=5.98_compile_us=9.50_ratio=1.588_required_bench_omp_invalid_no_cudagraph_warnings_needs_B200_measure
 715,sum_sum_b1354c2a333b,b1354c2a333b,reduction,reduction_general,1,1,2,,claimed,Codex,claimed_2026-06-15_restart_batch_715_716
 716,sum_sum_b1d8468e9c69,b1d8468e9c69,reduction,reduction_general,2,2,2,,claimed,Codex,claimed_2026-06-15_restart_batch_715_716
-717,sum_sum_b265bd27fbd8,b265bd27fbd8,reduction,reduction_general,1,2,2,,unclaimed,,
-718,sum_sum_b2f43ab7b175,b2f43ab7b175,reduction,reduction_general,2,2,2,,unclaimed,,
-719,sum_sum_b50ad423ed16,b50ad423ed16,reduction,reduction_general,1,2,2,,unclaimed,,
-720,sum_sum_b699431fa635,b699431fa635,reduction,reduction_general,2,2,2,,unclaimed,,
-721,sum_sum_d227dc0811d2,d227dc0811d2,reduction,reduction_general,2,2,2,,unclaimed,,
+717,sum_sum_b265bd27fbd8,b265bd27fbd8,reduction,reduction_general,1,2,2,,claimed,codex,
+718,sum_sum_b2f43ab7b175,b2f43ab7b175,reduction,reduction_general,2,2,2,,claimed,codex,
+719,sum_sum_b50ad423ed16,b50ad423ed16,reduction,reduction_general,1,2,2,,claimed,codex,
+720,sum_sum_b699431fa635,b699431fa635,reduction,reduction_general,2,2,2,,claimed,codex,
+721,sum_sum_d227dc0811d2,d227dc0811d2,reduction,reduction_general,2,2,2,,claimed,codex,
 722,sum_sum_dcfe30b8d79b,dcfe30b8d79b,reduction,reduction_general,2,2,2,,unclaimed,,
 723,sum_sum_e3043e605301,e3043e605301,reduction,reduction_general,1,2,2,,unclaimed,,
 724,sum_sum_ed4730568670,ed4730568670,reduction,reduction_general,1,1,2,,unclaimed,,
