@@ -726,12 +726,12 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 725,sum_sum_f1250e5f7b6e,f1250e5f7b6e,reduction,reduction_general,1,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 726,sum_sum_f2a80116b65b,f2a80116b65b,reduction,reduction_general,2,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 727,sum_sum_f4b82dbfbec5,f4b82dbfbec5,reduction,reduction_general,2,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
-728,sum_sum_f6a916ea301b,f6a916ea301b,reduction,reduction_general,1,2,2,,claimed,codex,
-729,sum_sum_f967f297304c,f967f297304c,reduction,reduction_general,2,2,2,,claimed,codex,
-730,sum_sum_sum_06b536dc906d,06b536dc906d,reduction,scatter_gather,1,4,2,,claimed,codex,
-731,sum_sum_sum_0b5187c8ce05,0b5187c8ce05,reduction,scatter_gather,1,2,2,,claimed,codex,
-732,sum_sum_sum_5152cff96318,5152cff96318,reduction,reduction_general,2,2,2,,claimed,codex,
-733,sum_sum_sum_72ccaeb6654a,72ccaeb6654a,reduction,reduction_general,1,4,2,,claimed,codex,
+728,sum_sum_f6a916ea301b,f6a916ea301b,reduction,reduction_general,1,2,2,,oracle_measured,codex,oracle_py_added_checks_pass_1of1_h100_fallback_serial_compile_bench_1AT_FLOOR_537609ac_oracle_us=84.83_compile_us=83.46_ratio=0.984_required_bench_omp_invalid_no_cudagraph_warnings_needs_B200_measure
+729,sum_sum_f967f297304c,f967f297304c,reduction,reduction_general,2,2,2,,oracle_measured,codex,oracle_py_added_checks_pass_2of2_h100_fallback_serial_compile_bench_2GOOD_1bdfd7ec_oracle_us=9.86_compile_us=12.16_ratio=1.234_747f775b_oracle_us=6.11_compile_us=9.31_ratio=1.524_required_bench_omp_invalid_no_cudagraph_warnings_needs_B200_measure
+730,sum_sum_sum_06b536dc906d,06b536dc906d,reduction,scatter_gather,1,4,2,,oracle_measured,codex,oracle_py_added_checks_pass_1of1_h100_fallback_serial_compile_bench_1GOOD_0acf4a9d_oracle_us=354.53_compile_us=534.27_ratio=1.507_required_bench_omp_invalid_no_cudagraph_warnings_needs_B200_measure
+731,sum_sum_sum_0b5187c8ce05,0b5187c8ce05,reduction,scatter_gather,1,2,2,,oracle_measured,codex,oracle_py_added_checks_pass_1of1_h100_fallback_serial_compile_bench_1AT_FLOOR_cce081e2_oracle_us=354.02_compile_us=355.36_ratio=1.004_required_bench_omp_invalid_no_cudagraph_warnings_needs_B200_measure
+732,sum_sum_sum_5152cff96318,5152cff96318,reduction,reduction_general,2,2,2,,oracle_measured,codex,oracle_py_added_checks_pass_2of2_h100_fallback_serial_compile_bench_2GOOD_678a07bc_oracle_us=194.46_compile_us=309.70_ratio=1.593_b0299cd5_oracle_us=104.77_compile_us=161.41_ratio=1.541_required_bench_omp_invalid_no_cudagraph_warnings_needs_B200_measure
+733,sum_sum_sum_72ccaeb6654a,72ccaeb6654a,reduction,reduction_general,1,4,2,,oracle_measured,codex,oracle_py_added_checks_pass_1of1_h100_fallback_serial_compile_bench_1GOOD_a91d4c93_oracle_us=523.23_compile_us=607.46_ratio=1.161_required_bench_omp_invalid_no_cudagraph_warnings_needs_B200_measure
 734,sum_sum_sum_74daaa264688,74daaa264688,reduction,reduction_general,1,2,2,,unclaimed,,
 735,sum_sum_sum_77f93c745c34,77f93c745c34,reduction,scatter_gather,1,4,2,,unclaimed,,
 736,sum_sum_sum_7bfe496f3aa5,7bfe496f3aa5,reduction,reduction_general,1,4,2,,unclaimed,,
