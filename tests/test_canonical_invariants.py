@@ -892,6 +892,63 @@ def test_merge_backfills_alias_onto_existing_point():
                    for e in pt["inputs"]), "rich inputs not backfilled"
 
 
+def test_merge_writes_dynamic_symbols_guards_bindings():
+    """A dynamic capture index entry (symbols/guards on the entry, exprs in
+    inputs) merges into shapes.json with symbols/guards GRAPH-LEVEL and
+    bindings/captured_dynamic per point — exactly the schema
+    _parse_shapes_json reads. CPU-only: pure dict plumbing."""
+    import json, tempfile
+    from pathlib import Path
+    from merge_captures import _write_shapes_json
+
+    symbols = {"s0": {"hint": 16, "range": [2, None]},
+               "s53": {"hint": 16, "range": [2, None]}}
+    guards = ["Eq(s0*s53, 256)"]
+    inputs = [[[64, 64, "s53", "s0"], "f32",
+               {"st": ["64*s0*s53", "s0*s53", "s0", 1]}],
+              ["I", 256, "s0*s53"]]
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        _write_shapes_json(d, "deadbeef", "(sig)", "probe/infer/m",
+                           occurrences=1, inputs=inputs,
+                           symbols=symbols, guards=guards)
+        data = json.loads((d / "shapes.json").read_text())
+        # graph-level
+        assert data["symbols"] == symbols
+        assert data["guards"] == guards
+        pt = data["points"][0]
+        assert pt["captured_dynamic"] is True
+        assert pt["bindings"] == {"s0": 16, "s53": 16}  # hints
+        # exprs preserved verbatim in the point inputs
+        assert pt["inputs"][0][0] == [64, 64, "s53", "s0"]
+        assert pt["inputs"][1] == ["I", 256, "s0*s53"]
+
+        # idempotent re-merge of the same symbols doesn't duplicate guards
+        _write_shapes_json(d, "deadbeef", "(sig)", "probe/infer/m2",
+                           occurrences=1, inputs=inputs,
+                           symbols=symbols, guards=guards)
+        data2 = json.loads((d / "shapes.json").read_text())
+        assert data2["guards"] == guards, "guard duplicated on re-merge"
+        assert len(data2["points"]) == 1
+
+
+def test_merge_static_point_has_no_dynamic_fields():
+    """A static capture (no symbols) must NOT gain symbols/guards/bindings/
+    captured_dynamic — the static path stays byte-clean."""
+    import json, tempfile
+    from pathlib import Path
+    from merge_captures import _write_shapes_json
+
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        _write_shapes_json(d, "cafef00d", "(sig)", "timm/train/m",
+                           occurrences=1, inputs=[[[8, 4], "f32"]])
+        data = json.loads((d / "shapes.json").read_text())
+        assert "symbols" not in data and "guards" not in data
+        pt = data["points"][0]
+        assert "bindings" not in pt and "captured_dynamic" not in pt
+
+
 def test_maxpool_offset_tensors_generate_constant_center():
     """int8 maxpool OFFSET tensors must generate the window-CENTER constant,
     not random offsets: under padding, edge windows turn most offsets into

@@ -80,6 +80,8 @@ def _write_shapes_json(
     occurrences: int | None = None,
     inputs: list | None = None,
     alias_group_nbytes: list | None = None,
+    symbols: dict | None = None,
+    guards: list | None = None,
 ) -> None:
     """Write or update shapes.json for a canonical repro directory.
 
@@ -94,7 +96,7 @@ def _write_shapes_json(
     kept for documentation and the repro.py default; never text-parsed
     when `inputs` is present.
 
-    Schema (static/degenerate case — omits symbols/family/bindings):
+    Schema (static/degenerate case — omits symbols/guards/bindings):
     {
       "points": [
         {"shape_hash": "<8hex>",
@@ -104,6 +106,21 @@ def _write_shapes_json(
          "source": "captured"}
       ]
     }
+
+    Dynamic case (a region captured from a dynamic compilation): `symbols`
+    and `guards` are GRAPH-LEVEL (top-level, shared across points — that is
+    how _parse_shapes_json reads them), and each dynamic point carries its
+    hint `bindings` + `captured_dynamic`. `inputs` then hold expr strings in
+    symbolic slots (['I', hint, expr], '64*s0*s53' strides, ['S',[...,expr]]).
+    {
+      "symbols": {"s0": {"hint": 16, "range": [2, null]}, ...},
+      "guards":  ["Eq(s0*s53*4096, 4096*s0*s53)", ...],
+      "points": [
+        {"shape_hash": "<8hex>", "inputs": [...], "captured_dynamic": true,
+         "bindings": {"s0": 16, "s53": 16},
+         "models": {...}}
+      ]
+    }
     """
     shapes_path = repro_dir / "shapes.json"
 
@@ -111,6 +128,22 @@ def _write_shapes_json(
         data = json.loads(shapes_path.read_text())
     else:
         data = {"points": []}
+
+    # Dynamic capture: symbols/guards are GRAPH-LEVEL (shared across points).
+    # Merge them at the top of shapes.json — the consumer reads them there.
+    # Per-symbol entries are keyed by name, so a re-merge that sees the same
+    # symbols is idempotent; a genuinely new symbol is added.
+    if symbols:
+        data.setdefault("symbols", {}).update(symbols)
+    if guards:
+        existing_guards = data.setdefault("guards", [])
+        for g in guards:
+            if g not in existing_guards:
+                existing_guards.append(g)
+    # The hint binding for this point (one value per symbol) — what every
+    # expr evaluates under to reproduce the captured snapshot shape.
+    bindings = ({name: s["hint"] for name, s in symbols.items()}
+                if symbols else None)
 
     # Find existing point by shape_hash
     existing_point = None
@@ -139,6 +172,9 @@ def _write_shapes_json(
                 existing_point["inputs"] = inputs
         if alias_group_nbytes and not existing_point.get("alias_group_nbytes"):
             existing_point["alias_group_nbytes"] = alias_group_nbytes
+        if bindings is not None:
+            existing_point["bindings"] = bindings
+            existing_point["captured_dynamic"] = True
     else:
         # New point. "inputs" is THE data (compact codec); render the
         # human-readable string on demand via input_codec.render_signature
@@ -158,6 +194,9 @@ def _write_shapes_json(
             # the live storage — consumers allocate group buffers directly,
             # never re-derive size by scanning member offsets/spans.
             new_point["alias_group_nbytes"] = alias_group_nbytes
+        if bindings is not None:
+            new_point["bindings"] = bindings
+            new_point["captured_dynamic"] = True
         data["points"].append(new_point)
 
     import copy as _copy
@@ -444,7 +483,9 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             _write_shapes_json(repro_dir, point_hash, signature, model_key,
                                occurrences=entry.get("occurrences"),
                                inputs=entry.get("inputs"),
-                               alias_group_nbytes=entry.get("alias_group_nbytes"))
+                               alias_group_nbytes=entry.get("alias_group_nbytes"),
+                               symbols=entry.get("symbols"),
+                               guards=entry.get("guards"))
 
         # Update meta.json. Models recorded by QUALIFIED key
         # (suite/mode/name) — the same key shapes.json uses; bare names
