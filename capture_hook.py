@@ -40,6 +40,10 @@ from full_graph_harness import (
     infer_index_bounds_from_gm,
     infer_permutation_indices_from_gm,
     placeholder_info_from_gm,
+    sym_expr_str as _sym_expr_str,
+    shape_env_of as _shape_env_of,
+    symbolic_block_from_value as _symbolic_block_from_value,
+    harvest_shape_env as _harvest_shape_env,
 )
 
 
@@ -261,101 +265,6 @@ def get_fusion_partitions(gm: fx.GraphModule) -> list:
 # unchanged). A fully static capture touches none of this.
 # ---------------------------------------------------------------------------
 
-def _sym_expr_str(x):
-    """sympy-printed expr for a SymInt/SymFloat, or None if it's a plain int
-    or a constant-valued symbol. A bare symbol prints as its name ('s0'); a
-    derived node prints compound ('s0*s53'). Returns None when there's no
-    symbolic content to preserve (the value is already a concrete int)."""
-    if not isinstance(x, (torch.SymInt, torch.SymFloat)):
-        return None
-    node = getattr(x, "node", None)
-    expr = getattr(node, "expr", None)
-    if expr is None:
-        return None
-    # A constant SymInt (expr is a number) carries no symbol — the hint int
-    # already captures it; don't emit a redundant "256" expr string.
-    if getattr(expr, "is_number", False):
-        return None
-    return str(expr)
-
-
-def _shape_env_of(x):
-    """ShapeEnv backing a SymInt/SymFloat, or None."""
-    node = getattr(x, "node", None)
-    return getattr(node, "shape_env", None)
-
-
-def _harvest_shape_env(shape_env) -> dict | None:
-    """Extract the {symbols, guards, captured_dynamic} graph-level block from
-    a live ShapeEnv (design §2.1). symbols: name -> {hint, range}; range
-    bounds clamp sympy oo/int_oo to None (JSON-safe 'unbounded'). Guards are
-    sympy-printed strings, filtered to those expressible over the recorded
-    backed symbols (tensor-id / dtype guards dropped). Returns None if the
-    env exposes no backed FREE symbols (nothing dynamic to record)."""
-    if shape_env is None:
-        return None
-    try:
-        import sympy
-    except Exception:
-        sympy = None
-
-    def _bound(v):
-        # ValueRanges bounds may be sympy oo / int_oo / -oo — JSON 'null'.
-        try:
-            if v is None:
-                return None
-            sv = str(v)
-            if "oo" in sv:  # int_oo, oo, -oo
-                return None
-            return int(v)
-        except Exception:
-            return None
-
-    # backed_var_to_val preferred (var_to_val is deprecated); fall back.
-    var_to_val = getattr(shape_env, "backed_var_to_val", None)
-    if not var_to_val:
-        var_to_val = getattr(shape_env, "var_to_val", {}) or {}
-    var_to_range = getattr(shape_env, "var_to_range", {}) or {}
-
-    symbols = {}
-    for sym, val in var_to_val.items():
-        name = str(sym)
-        rng = var_to_range.get(sym)
-        lo = _bound(getattr(rng, "lower", None)) if rng is not None else None
-        hi = _bound(getattr(rng, "upper", None)) if rng is not None else None
-        try:
-            hint = int(val)
-        except Exception:
-            continue
-        # A symbol specialized to a single value (range [k, k]) is not a
-        # free family dimension — it's a constant the graph baked in. Skip
-        # it so it never appears as a bindable symbol (e.g. s77 == 64).
-        if lo is not None and hi is not None and lo == hi:
-            continue
-        symbols[name] = {"hint": hint, "range": [lo, hi]}
-
-    if not symbols:
-        return None
-
-    known = set(symbols)
-    guards = []
-    for g in (getattr(shape_env, "guards", []) or []):
-        expr = getattr(g, "expr", g)
-        # Drop trivially-true guards and any guard referencing a symbol we
-        # didn't keep (specialized/unbacked) — a residual guard the consumer
-        # can't evaluate over the symbol table is noise at best.
-        try:
-            if sympy is not None and (expr == sympy.true or expr is True):
-                continue
-            free = {str(s) for s in expr.free_symbols}
-        except Exception:
-            continue
-        if free and free.issubset(known):
-            guards.append(str(expr))
-
-    return {"symbols": symbols, "guards": guards, "captured_dynamic": True}
-
-
 def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     """Extract a standalone sub-GraphModule for one fusible partition.
 
@@ -429,13 +338,6 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
             return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
         return int(x)
 
-    def _expr_list(syms):
-        """Per-slot expr strings (None where the slot is a plain int / a
-        constant-valued symint). Returns None if NO slot is symbolic, so a
-        static placeholder records no 'symbolic' block at all."""
-        exprs = [_sym_expr_str(s) for s in syms]
-        return exprs if any(e is not None for e in exprs) else None
-
     def _storage_key(val):
         try:
             return id(val.untyped_storage())
@@ -445,11 +347,11 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     def _record_placeholder(name: str, meta: dict) -> None:
         val = meta.get("val", None)
         if val is not None and isinstance(val, torch.Tensor):
-            shape = list(val.shape)
-            stride = list(val.stride())
+            for s in (*val.shape, *val.stride(), val.storage_offset()):
+                _note_env(s)
             placeholder_info[name] = {
-                "shape": [_resolve_sym(s) for s in shape],
-                "stride": [_resolve_sym(s) for s in stride] if not val.is_contiguous() else [],
+                "shape": [_resolve_sym(s) for s in val.shape],
+                "stride": [_resolve_sym(s) for s in val.stride()] if not val.is_contiguous() else [],
                 "dtype": str(val.dtype),
                 "device": str(val.device),
             }
@@ -457,17 +359,12 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
             if off:
                 placeholder_info[name]["storage_offset"] = off
             # Symbolic block (design §2.1): per-slot exprs alongside the hint
-            # ints above. Additive — absent for static tensors, so identity
-            # and existing consumers are untouched.
-            shape_exprs = _expr_list(shape)
-            stride_exprs = _expr_list(stride) if not val.is_contiguous() else None
-            if shape_exprs is not None or stride_exprs is not None:
-                sym = {}
-                if shape_exprs is not None:
-                    sym["shape_exprs"] = shape_exprs
-                if stride_exprs is not None:
-                    sym["stride_exprs"] = stride_exprs
-                placeholder_info[name]["symbolic"] = sym
+            # ints above, via the SHARED extractor (full_graph_harness). Even
+            # a stride contiguous AT THE HINT records exprs (a rebind may
+            # break contiguity). Additive — absent for static tensors.
+            symbolic = _symbolic_block_from_value(val)
+            if symbolic:
+                placeholder_info[name]["symbolic"] = symbolic
             # Alias tag: inputs whose fake vals share one untyped storage
             # (packed-qkv saved views). Live-capture-only signal — any
             # retrace re-fabricates inputs and the identity is gone. Tag
@@ -1529,10 +1426,9 @@ class _CaptureState:
             for sk, _idx in sorted(_group_of.items(), key=lambda kv: kv[1])
         ]
 
-        # Overlay per-slot exprs onto already-built compact slots: a slot
-        # with a recorded expr becomes the expr STRING, static slots keep
-        # their hint int. None-free entries pass through unchanged, so static
-        # captures are byte-identical.
+        # Overlay per-slot exprs onto a lifted shape-param's hint dims (shape
+        # params are not tensor specs, so they don't go through
+        # compact_from_spec's symbolic overlay).
         def _apply_exprs(slots, exprs):
             return [e if e is not None else s for s, e in zip(slots, exprs)]
 
@@ -1573,19 +1469,12 @@ class _CaptureState:
                         # chains: OPT position ids derive from a float
                         # mask; randn would index negative/OOB).
                         spec["gen"] = info["gen"]
-                    entry = compact_from_spec(spec)
-                    # Overlay symbolic dims/strides (design §2.1): hint ints
-                    # stay in entry; exprs replace symbolic slots so the
-                    # serialized entry is the instantiate_point format.
-                    symb = info.get("symbolic")
-                    if symb:
-                        if symb.get("shape_exprs"):
-                            entry[0] = _apply_exprs(entry[0], symb["shape_exprs"])
-                        if symb.get("stride_exprs") and len(entry) > 2 \
-                                and isinstance(entry[2], dict) and "st" in entry[2]:
-                            entry[2]["st"] = _apply_exprs(
-                                entry[2]["st"], symb["stride_exprs"])
-                    compact_inputs.append(entry)
+                    # Symbolic dims/strides ride on the spec; compact_from_spec
+                    # overlays the exprs into the entry's shape/stride slots
+                    # (ONE overlay path, shared with the sidecar).
+                    if info.get("symbolic"):
+                        spec["symbolic"] = info["symbolic"]
+                    compact_inputs.append(compact_from_spec(spec))
                 elif info and info.get("dtype") == "symint":
                     expr = info.get("expr")
                     if expr is not None:

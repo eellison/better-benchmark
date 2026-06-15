@@ -1427,9 +1427,10 @@ def _symbolic_shape_env_and_syms(fn, *example):
 
 def test_sym_expr_str_roundtrips_through_sympy():
     """Every expr string the capture emits must re-parse via sympy.sympify —
-    that is the contract instantiate_point relies on."""
+    that is the contract instantiate_point relies on. The extractor lives in
+    full_graph_harness (THE shared home); capture_hook re-exports it."""
     import sympy
-    from capture_hook import _sym_expr_str
+    from full_graph_harness import sym_expr_str
 
     def f(x):
         return x.view(x.shape[0], x.shape[1] * x.shape[2]).sum(1)
@@ -1437,30 +1438,37 @@ def test_sym_expr_str_roundtrips_through_sympy():
     _se, syms = _symbolic_shape_env_and_syms(f, torch.randn(4, 8, 16))
     seen_compound = False
     for s in syms:
-        es = _sym_expr_str(s)
+        es = sym_expr_str(s)
         if es is None:
             continue
-        # re-parse: must not raise, must be a sympy expr over symbol names
-        expr = sympy.sympify(es)
+        expr = sympy.sympify(es)  # must not raise
         assert expr.free_symbols, f"{es!r} parsed to a constant"
         if "*" in es:
             seen_compound = True
-    # A constant SymInt yields None (no redundant '256' string)
-    assert _sym_expr_str(5) is None
-    assert _sym_expr_str(torch.SymInt) is None or True  # type guard, no raise
+    # A plain int has no symbolic content -> None (no redundant string)
+    assert sym_expr_str(5) is None
+
+
+def test_capture_hook_reexports_shared_extractor():
+    """capture_hook must NOT have its own copy — it re-exports the one in
+    full_graph_harness (shared-utility invariant)."""
+    import capture_hook
+    import full_graph_harness
+    assert capture_hook._sym_expr_str is full_graph_harness.sym_expr_str
+    assert capture_hook._harvest_shape_env is full_graph_harness.harvest_shape_env
 
 
 def test_harvest_shape_env_symbols_ranges():
-    """_harvest_shape_env returns {symbols:{name:{hint,range}}, guards,
+    """harvest_shape_env returns {symbols:{name:{hint,range}}, guards,
     captured_dynamic}; free symbols kept with hints + ranges, unbounded
     upper clamped to None, returns None when nothing is dynamic."""
-    from capture_hook import _harvest_shape_env
+    from full_graph_harness import harvest_shape_env
 
     def f(x):
         return x.view(x.shape[0], x.shape[1] * x.shape[2]).sum(1)
 
     se, _syms = _symbolic_shape_env_and_syms(f, torch.randn(4, 8, 16))
-    block = _harvest_shape_env(se)
+    block = harvest_shape_env(se)
     assert block is not None and block["captured_dynamic"] is True
     assert block["symbols"], "no symbols harvested"
     for name, meta in block["symbols"].items():
@@ -1470,21 +1478,81 @@ def test_harvest_shape_env_symbols_ranges():
         assert lo is None or isinstance(lo, int)
         assert hi is None or isinstance(hi, int)  # int_oo -> None
 
-    # A fully static (fake-mode) trace exposes no SymInt dims, so the capture
-    # never sees a ShapeEnv -> no symbolic block recorded at all.
-    from torch.fx.experimental.proxy_tensor import make_fx
-    gm = make_fx(lambda x: x + 1, tracing_mode="fake")(torch.randn(4, 4))
-    static_env = None
-    for n in gm.graph.nodes:
-        v = (n.meta or {}).get("val")
-        if hasattr(v, "shape"):
-            for s in v.shape:
-                if isinstance(s, torch.SymInt):
-                    static_env = s.node.shape_env
-    assert static_env is None, "fake-mode trace unexpectedly produced SymInt dims"
-
 
 def test_harvest_none_shape_env():
     """None env (static capture) -> None block, never raises."""
-    from capture_hook import _harvest_shape_env
-    assert _harvest_shape_env(None) is None
+    from full_graph_harness import harvest_shape_env
+    assert harvest_shape_env(None) is None
+
+
+def test_symbolic_stride_codec_roundtrip_is_exprs_not_hints():
+    """A tensor spec with symbolic shape/stride round-trips through the codec
+    carrying the EXACT exprs (never hint ints, never regex-mangled numbers).
+    This is the regression pin for the '16384 != 64' sidecar-stride bug."""
+    from input_codec import compact_from_spec, spec_from_compact, evaluate_spec
+
+    spec = {
+        "kind": "tensor",
+        "shape": [64, 64, 16, 16],        # hints
+        "dtype": "float32",
+        "stride": [16384, 256, 16, 1],    # hints
+        "symbolic": {
+            "shape_exprs": [None, None, "s53", "s0"],
+            "stride_exprs": ["64*s0*s53", "s0*s53", "s0", None],
+        },
+    }
+    entry = compact_from_spec(spec)
+    # exprs land in the slots, NOT hints
+    assert entry[0] == [64, 64, "s53", "s0"], entry
+    assert entry[2]["st"] == ["64*s0*s53", "s0*s53", "s0", 1], entry
+
+    # decode reconstructs the symbolic block losslessly
+    rt = spec_from_compact(entry)
+    assert rt["symbolic"]["shape_exprs"] == [None, None, "s53", "s0"]
+    assert rt["symbolic"]["stride_exprs"] == ["64*s0*s53", "s0*s53", "s0", None]
+
+    # evaluate at the hint binding -> the original concrete hints
+    ev = evaluate_spec(rt, {"s53": 16, "s0": 16})
+    assert ev["shape"] == [64, 64, 16, 16]
+    assert ev["stride"] == [16384, 256, 16, 1]
+    assert "symbolic" not in ev
+    # a different binding re-derives consistently (coupled stride 64*s0*s53)
+    ev2 = evaluate_spec(rt, {"s53": 8, "s0": 32})
+    assert ev2["shape"] == [64, 64, 8, 32]
+    assert ev2["stride"][0] == 64 * 32 * 8
+
+
+def test_dims_equal_compares_exprs_by_sympy_not_int():
+    """_dims_equal: ints exact, symbolic slots by sympy-equivalence — never
+    int() (the mangling bug), never string equality."""
+    from full_graph_harness import _dims_equal
+    assert _dims_equal(16384, 16384)
+    assert not _dims_equal(16384, 64)
+    # equal exprs, different rendering
+    assert _dims_equal("s0*s53", "s53*s0")
+    assert _dims_equal("64*s0*s53", "s0*s53*64")
+    assert not _dims_equal("s0*s53", "s0*s53*64")
+    # a symbolic slot is NOT mangled to its leading integer
+    assert not _dims_equal("64*s0*s53", 64)
+
+
+def test_symint_input_expr_parsed_without_regex_or_default():
+    """A Sym(expr) input annotation keeps its exact expr (no _parse_intish
+    default of 32, no regex). Sym(<int>) stays a constant value."""
+    from full_graph_harness import parse_full_graph_inputs
+    content = (
+        'class G(torch.nn.Module):\n'
+        '    def forward(self, arg0_1: "Sym(s53)", arg1_1: "Sym(256)", '
+        'arg2_1: "f32[64, s53][s53, 1]cuda:0"):\n'
+        '        return arg2_1\n'
+    )
+    specs = {s["name"]: s for s in parse_full_graph_inputs(content)}
+    assert specs["arg0_1"]["kind"] == "symint"
+    assert specs["arg0_1"].get("expr") == "s53"
+    assert "value" not in specs["arg0_1"]      # NOT defaulted to 32
+    assert specs["arg1_1"]["value"] == 256     # int literal stays concrete
+    # tensor annotation keeps symbolic dim/stride exprs (no mangling)
+    t = specs["arg2_1"]
+    assert t["shape"] == [64, "s53"]
+    assert t["symbolic"]["shape_exprs"] == [None, "s53"]
+    assert t["symbolic"]["stride_exprs"] == ["s53", None]

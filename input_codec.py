@@ -89,7 +89,23 @@ def _gen_from_compact(c: list) -> dict:
 # through opts["x"] verbatim so no producer field is ever silently lost.
 _KNOWN_KEYS = {"kind", "name", "shape", "dtype", "stride", "device",
                "storage_offset", "generator", "gen", "exact", "data",
-               "alias_group"}
+               "alias_group", "symbolic"}
+
+
+def _overlay_exprs(slots: list, exprs: list | None) -> list:
+    """Overlay per-slot expr strings onto hint ints: where exprs[i] is a
+    non-None string, the slot becomes that expr; otherwise the hint int
+    stays. None/empty exprs -> slots unchanged (static)."""
+    if not exprs:
+        return slots
+    return [e if e is not None else s for s, e in zip(slots, exprs)]
+
+
+def _exprs_from_slots(slots: list) -> list | None:
+    """Inverse of _overlay: per-slot expr strings (None where the slot is a
+    plain int). Returns None if NO slot is a string (fully static)."""
+    out = [s if isinstance(s, str) else None for s in slots]
+    return out if any(e is not None for e in out) else None
 
 
 def compact_from_spec(spec: dict, include_name: bool = False) -> list:
@@ -102,13 +118,28 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
     if kind == "scalar":
         return ["sc", spec.get("value")]
 
-    entry: list = [list(spec["shape"]), _short_dtype(spec["dtype"])]
+    # Symbolic block (dynamic capture): per-slot exprs overlaid onto the hint
+    # shape/stride so the serialized entry IS the instantiate_point format
+    # (a symbolic slot holds the expr string, static slots the hint int).
+    # ONE overlay path for both region and full-graph capture.
+    symbolic = spec.get("symbolic") or {}
+    shape = _overlay_exprs(list(spec["shape"]), symbolic.get("shape_exprs"))
+
+    entry: list = [shape, _short_dtype(spec["dtype"])]
     opts: dict = {}
     if include_name and spec.get("name"):
         opts["n"] = spec["name"]
     stride = spec.get("stride")
+    stride_exprs = symbolic.get("stride_exprs")
     if stride and not _is_contiguous(spec["shape"], stride):
-        opts["st"] = list(stride)
+        opts["st"] = _overlay_exprs(list(stride), stride_exprs)
+    elif stride_exprs is not None and any(e is not None for e in stride_exprs):
+        # Symbolic stride that happens to be contiguous AT THE HINT must
+        # still be recorded as exprs — a different binding may break
+        # contiguity, and the expr is the exact data.
+        opts["st"] = _overlay_exprs(
+            list(stride or _contiguous_stride(list(spec["shape"]))),
+            stride_exprs)
     # Device default = THE accelerator. Capture pins each worker to one
     # GPU via CUDA_VISIBLE_DEVICES, so any cuda ordinal ("cuda:0") is just
     # "the accelerator" — normalize to bare "cuda" (recording ordinals
@@ -154,15 +185,31 @@ def spec_from_compact(entry: list, name: str | None = None) -> dict:
 
     shape, dtype = list(entry[0]), _long_dtype(entry[1])
     opts = entry[2] if len(entry) > 2 else {}
+    raw_stride = list(opts["st"]) if "st" in opts else None
+    # Reconstruct the symbolic block from any expr strings in the slots, so
+    # the round-trip is lossless and downstream can re-evaluate at any
+    # binding. shape/stride themselves keep the expr strings — evaluation
+    # (evaluate_symbolic_entry/instantiate_point) is the consumer's job, NOT
+    # something we lossily collapse here.
+    symbolic: dict = {}
+    sh_exprs = _exprs_from_slots(shape)
+    if sh_exprs is not None:
+        symbolic["shape_exprs"] = sh_exprs
+    if raw_stride is not None:
+        st_exprs = _exprs_from_slots(raw_stride)
+        if st_exprs is not None:
+            symbolic["stride_exprs"] = st_exprs
     spec: dict = {
         "kind": "tensor",
         "name": name,
         "shape": shape,
         "dtype": dtype,
-        "stride": list(opts.get("st", _contiguous_stride(shape))),
+        "stride": raw_stride if raw_stride is not None else _contiguous_stride(shape),
         "device": opts.get("dev", "cuda"),
         "storage_offset": opts.get("off", 0),
     }
+    if symbolic:
+        spec["symbolic"] = symbolic
     if "gen" in opts:
         gen = _gen_from_compact(opts["gen"])
         spec["gen"] = gen
@@ -325,6 +372,33 @@ def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:
         opts["st"] = [_eval_dim(s, bindings) for s in opts["st"]]
     if opts:
         out.append(opts)
+    return out
+
+
+def evaluate_spec(spec: dict, bindings: dict) -> dict:
+    """Evaluate a VERBOSE spec dict's symbolic shape/stride at a binding,
+    returning a concrete spec (symbolic dims/strides -> ints, 'symbolic'
+    block dropped). Static specs pass through. A symint spec with an 'expr'
+    resolves to {'kind':'symint','value':...}. Reuses _eval_dim — one
+    evaluator for compact entries AND verbose specs."""
+    if spec.get("kind") == "symint" and spec.get("expr") is not None:
+        out = dict(spec)
+        out["value"] = _eval_dim(spec["expr"], bindings)
+        out.pop("expr", None)
+        return out
+    symbolic = spec.get("symbolic")
+    if not symbolic:
+        return spec
+    out = dict(spec)
+    out.pop("symbolic", None)
+    if symbolic.get("shape_exprs"):
+        out["shape"] = [_eval_dim(d, bindings)
+                        for d in _overlay_exprs(list(spec["shape"]),
+                                                symbolic["shape_exprs"])]
+    if symbolic.get("stride_exprs"):
+        base = list(spec.get("stride") or [])
+        out["stride"] = [_eval_dim(d, bindings)
+                         for d in _overlay_exprs(base, symbolic["stride_exprs"])]
     return out
 
 
