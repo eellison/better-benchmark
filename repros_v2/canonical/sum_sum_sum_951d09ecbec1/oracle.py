@@ -204,7 +204,7 @@ def _shape_tuple(shape):
 
 
 # 30b03cad: (T([131072,144], bf16), T([144], f32), ..., S([512,256,144]))
-@oracle_impl(hardware="B200", point="30b03cad", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, num_warps=4, SPLIT_REDUCE=True, REDUCE_BLOCK_R=256, REDUCE_BLOCK_C=16)
+@oracle_impl(hardware="B200", point="30b03cad", BLOCK_M=16, BLOCK_C=256, FINAL_BLOCK_C=8, num_warps=2, SPLIT_REDUCE=False, REDUCE_BLOCK_R=256, REDUCE_BLOCK_C=16)
 # 1c6da2dd: (T([32768,192], bf16), T([192], f32), ..., S([512,64,192]))
 @oracle_impl(hardware="B200", point="1c6da2dd", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, num_warps=8, SPLIT_REDUCE=False, REDUCE_BLOCK_R=256, REDUCE_BLOCK_C=16)
 # 0c9dc299: (T([8192,240], bf16), T([240], f32), ..., S([512,16,240]))
