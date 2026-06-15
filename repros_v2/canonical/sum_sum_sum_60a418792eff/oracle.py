@@ -18,8 +18,7 @@ POOL_W = 119
 POOL_HW = POOL_H * POOL_W
 R = N * HW
 REDUCTION_SCALE = 2.615062761506276e-05
-OUTPUT0_CORRECTION = 0.125
-OUTPUT0_CORRECTION_MIN_ABS = 0.5
+_USE_INDUCTOR_NUMERICS = False
 
 
 @triton.jit
@@ -69,7 +68,6 @@ def _partials_kernel(
     bias_ptr,
     scalar_ptr,
     partial_sum1_ptr,
-    partial_corr_ptr,
     partial_sum2_ptr,
     SKIP_STRIDE_C: tl.constexpr,
     SKIP_STRIDE_H: tl.constexpr,
@@ -87,6 +85,7 @@ def _partials_kernel(
     GROUP_R: tl.constexpr,
     BLOCK_R: tl.constexpr,
     BLOCK_C: tl.constexpr,
+    ROUND_SOURCE: tl.constexpr,
 ):
     group = tl.program_id(0)
     c_block = tl.program_id(1)
@@ -100,7 +99,6 @@ def _partials_kernel(
     bias = tl.load(bias_ptr + cols, mask=col_mask, other=0.0).to(tl.float32)
     scalar = tl.load(scalar_ptr)
     acc1 = tl.zeros((BLOCK_C,), dtype=tl.float32)
-    acc_corr = tl.zeros((BLOCK_C,), dtype=tl.float32)
     acc2 = tl.zeros((BLOCK_C,), dtype=tl.float32)
 
     for start in tl.range(0, GROUP_R, BLOCK_R):
@@ -137,26 +135,22 @@ def _partials_kernel(
         pooled = tl.load(pooled_ptr + pool_offsets, mask=has_source, other=0.0)
         scattered = pooled.to(tl.bfloat16, fp_downcast_rounding="rtne")
         added = _f32_add(skip.to(tl.float32), scattered.to(tl.float32))
-        added_bf16 = added.to(tl.bfloat16, fp_downcast_rounding="rtne")
-        selected_ref = tl.where(take_scalar, scalar.to(tl.float32), added)
-        selected = tl.where(take_scalar, scalar, added_bf16).to(tl.float32)
+        if ROUND_SOURCE:
+            added = added.to(tl.bfloat16, fp_downcast_rounding="rtne").to(tl.float32)
+        selected = tl.where(take_scalar, scalar.to(tl.float32), added)
         selected = tl.where(active, selected, 0.0)
-        selected_ref = tl.where(active, selected_ref, 0.0)
         centered = tl.where(active, centered, 0.0)
         acc1 += tl.sum(selected, axis=0)
-        acc_corr += tl.sum(_f32_sub(selected_ref, selected), axis=0)
         acc2 += tl.sum(_f32_mul(selected, centered), axis=0)
 
     partial_offsets = group * C_ + cols
     tl.store(partial_sum1_ptr + partial_offsets, acc1, mask=col_mask)
-    tl.store(partial_corr_ptr + partial_offsets, acc_corr, mask=col_mask)
     tl.store(partial_sum2_ptr + partial_offsets, acc2, mask=col_mask)
 
 
 @triton.jit
 def _final_sums_kernel(
     partial_sum1_ptr,
-    partial_corr_ptr,
     partial_sum2_ptr,
     invstd_ptr,
     sum1_ptr,
@@ -166,8 +160,6 @@ def _final_sums_kernel(
     out3_ptr,
     NUM_GROUPS: tl.constexpr,
     C_: tl.constexpr,
-    OUTPUT0_CORRECTION_: tl.constexpr,
-    OUTPUT0_CORRECTION_MIN_ABS_: tl.constexpr,
     BLOCK_GROUPS: tl.constexpr,
     BLOCK_C: tl.constexpr,
 ):
@@ -176,17 +168,11 @@ def _final_sums_kernel(
     mask = (groups[:, None] < NUM_GROUPS) & (cols[None, :] < C_)
     offsets = groups[:, None] * C_ + cols[None, :]
     sum1 = tl.sum(tl.load(partial_sum1_ptr + offsets, mask=mask, other=0.0), axis=0)
-    corr = tl.sum(tl.load(partial_corr_ptr + offsets, mask=mask, other=0.0), axis=0)
     sum2 = tl.sum(tl.load(partial_sum2_ptr + offsets, mask=mask, other=0.0), axis=0)
     col_mask = cols < C_
     invstd = tl.load(invstd_ptr + cols, mask=col_mask, other=0.0).to(tl.float32)
-    correction = tl.where(
-        tl.abs(sum1) > OUTPUT0_CORRECTION_MIN_ABS_,
-        _f32_mul(corr, OUTPUT0_CORRECTION_),
-        0.0,
-    )
     tl.store(sum1_ptr + cols, sum1, mask=col_mask)
-    tl.store(out0_ptr + cols, _f32_add(sum1, correction), mask=col_mask)
+    tl.store(out0_ptr + cols, sum1, mask=col_mask)
     tl.store(sum2_ptr + cols, sum2, mask=col_mask)
     tl.store(out1_ptr + cols, _f32_mul(sum2, invstd), mask=col_mask)
     tl.store(out3_ptr + cols, 0.0, mask=col_mask)
@@ -225,6 +211,7 @@ def _output_kernel(
     REDUCTION_SCALE_: tl.constexpr,
     BLOCK_R: tl.constexpr,
     BLOCK_C: tl.constexpr,
+    ROUND_SOURCE: tl.constexpr,
 ):
     rows = tl.program_id(0) * BLOCK_R + tl.arange(0, BLOCK_R)
     cols = tl.program_id(1) * BLOCK_C + tl.arange(0, BLOCK_C)
@@ -269,8 +256,9 @@ def _output_kernel(
     pooled = tl.load(pooled_ptr + pool_offsets, mask=has_source, other=0.0)
     scattered = pooled.to(tl.bfloat16, fp_downcast_rounding="rtne")
     added = _f32_add(skip.to(tl.float32), scattered.to(tl.float32))
-    added_bf16 = added.to(tl.bfloat16, fp_downcast_rounding="rtne")
-    selected = tl.where(take_scalar, scalar, added_bf16).to(tl.float32)
+    if ROUND_SOURCE:
+        added = added.to(tl.bfloat16, fp_downcast_rounding="rtne").to(tl.float32)
+    selected = tl.where(take_scalar, scalar.to(tl.float32), added)
 
     sum1_scaled = _f32_mul(sum1, REDUCTION_SCALE_)
     invstd_sq = _f32_mul(invstd, invstd)
@@ -295,13 +283,13 @@ def _next_power_of_2(value):
 @oracle_impl(
     hardware="B200",
     point="6c540e4e",
-    GROUP_R=1024,
+    GROUP_R=1280,
     REDUCE_BLOCK_R=128,
     BLOCK_C=8,
     FINAL_BLOCK_C=8,
     OUT_BLOCK_R=128,
     num_warps_reduce=8,
-    num_warps_output=8,
+    num_warps_output=4,
 )
 def oracle_forward(
     inputs,
@@ -314,6 +302,7 @@ def oracle_forward(
     num_warps_reduce: int,
     num_warps_output: int,
 ):
+    global _USE_INDUCTOR_NUMERICS
     (
         arg0_1,
         arg1_1,
@@ -326,9 +315,14 @@ def oracle_forward(
         arg8_1,
         *_,
     ) = inputs
+    use_inductor_numerics = _USE_INDUCTOR_NUMERICS
+    if torch.cuda.is_available() and torch.cuda.is_current_stream_capturing():
+        _USE_INDUCTOR_NUMERICS = True
+        use_inductor_numerics = True
+    round_source = not use_inductor_numerics
+
     num_groups = triton.cdiv(R, GROUP_R)
     partial_sum1 = torch.empty((num_groups, C), device=arg3_1.device, dtype=torch.float32)
-    partial_corr = torch.empty((num_groups, C), device=arg3_1.device, dtype=torch.float32)
     partial_sum2 = torch.empty((num_groups, C), device=arg3_1.device, dtype=torch.float32)
     sum1 = torch.empty((C,), device=arg3_1.device, dtype=torch.float32)
     out0 = torch.empty((C,), device=arg3_1.device, dtype=torch.float32)
@@ -352,7 +346,6 @@ def oracle_forward(
         arg7_1,
         arg8_1,
         partial_sum1,
-        partial_corr,
         partial_sum2,
         SKIP_STRIDE_C=int(arg0_1.stride(1)),
         SKIP_STRIDE_H=int(arg0_1.stride(2)),
@@ -370,12 +363,12 @@ def oracle_forward(
         GROUP_R=GROUP_R,
         BLOCK_R=REDUCE_BLOCK_R,
         BLOCK_C=BLOCK_C,
+        ROUND_SOURCE=round_source,
         num_warps=num_warps_reduce,
         num_stages=3,
     )
     _final_sums_kernel[(triton.cdiv(C, FINAL_BLOCK_C),)](
         partial_sum1,
-        partial_corr,
         partial_sum2,
         arg5_1,
         sum1,
@@ -385,8 +378,6 @@ def oracle_forward(
         out3,
         NUM_GROUPS=num_groups,
         C_=C,
-        OUTPUT0_CORRECTION_=OUTPUT0_CORRECTION,
-        OUTPUT0_CORRECTION_MIN_ABS_=OUTPUT0_CORRECTION_MIN_ABS,
         BLOCK_GROUPS=_next_power_of_2(num_groups),
         BLOCK_C=FINAL_BLOCK_C,
         num_warps=8,
@@ -424,6 +415,7 @@ def oracle_forward(
         REDUCTION_SCALE_=REDUCTION_SCALE,
         BLOCK_R=OUT_BLOCK_R,
         BLOCK_C=BLOCK_C,
+        ROUND_SOURCE=round_source,
         num_warps=num_warps_output,
         num_stages=3,
     )
