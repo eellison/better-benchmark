@@ -18,6 +18,8 @@ Rows 85 and 93 were parent-rechecked after the pulled implementation: checks pas
 
 Row 84 was also parent-rechecked after the pulled implementation: checks pass, but locked bench fails `NUMERICS_WORSE_THAN_COMPILED` because the oracle differs from the fp64 ref while compiled has zero error, so its oracle file is deleted and queue status is back to needs_work.
 
+Row 99 was parent-rechecked after the pulled implementation: checks pass, but locked bench is `BAD_ORACLE` (`19.30us` oracle vs `18.14us` compile), so its oracle file is deleted and queue status is back to needs_work.
+
 Additional lower-gap refill buffer claimed by this session: rows 740-749.
 
 Additional lower-gap refill buffer claimed by this session: rows 750-759.
