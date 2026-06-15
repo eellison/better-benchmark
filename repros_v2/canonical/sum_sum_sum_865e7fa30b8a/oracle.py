@@ -239,9 +239,9 @@ def _launch(inputs, *, BLOCK_R, BLOCK_C, FINAL_BLOCK_C, num_warps):
 # ConvNeXtV2 nano GRN backward, C=80, H=W=56.
 @oracle_impl(hardware="B200", point="5cee1fdd", BLOCK_R=128, BLOCK_C=128, FINAL_BLOCK_C=8, num_warps=8)
 # ConvNeXtV2 nano GRN backward, C=160, H=W=28.
-@oracle_impl(hardware="B200", point="9deba5e9", BLOCK_R=32, BLOCK_C=256, FINAL_BLOCK_C=8, num_warps=4)
+@oracle_impl(hardware="B200", point="9deba5e9", BLOCK_R=32, BLOCK_C=256, FINAL_BLOCK_C=2, num_warps=4)
 # ConvNeXtV2 nano GRN backward, C=320, H=W=14.
-@oracle_impl(hardware="B200", point="2cbe1bb4", BLOCK_R=32, BLOCK_C=512, FINAL_BLOCK_C=16, num_warps=8)
+@oracle_impl(hardware="B200", point="2cbe1bb4", BLOCK_R=16, BLOCK_C=512, FINAL_BLOCK_C=16, num_warps=4)
 # ConvNeXtV2 nano GRN backward, C=640, H=W=7.
 @oracle_impl(hardware="B200", point="d5a3644b", BLOCK_R=16, BLOCK_C=1024, FINAL_BLOCK_C=16, num_warps=8)
 def oracle_forward(
