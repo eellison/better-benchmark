@@ -244,7 +244,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 243,amax_sum_821fb95bd167,821fb95bd167,reduction,reduction_softmax_like,4,1,13,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 244,pointwise_c707ca49a4aa,c707ca49a4aa,pointwise,layout_indexing_stencil_fusion,1,1,13,pointwise_352e97c8de09,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 245,pointwise_eb3a50b8feaa,eb3a50b8feaa,pointwise,unclassified_priority_gap,1,1,13,~pointwise_49473bb3f273;~pointwise_902799b6712e,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
-246,sum_sum_sum_ddcfccfb8340,ddcfccfb8340,reduction,reduction_general,4,2,13,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_2BAD_ORACLE_1GOOD_1AT_FLOOR_4pts_oracle_deleted_retune
+246,sum_sum_sum_ddcfccfb8340,ddcfccfb8340,reduction,reduction_general,4,2,13,,needs_work,codex,needs_work_worker_checks_pass_4of4_no_skip_pass_4of4_bench_4BAD_ORACLE_h100_fallback_ratios_0.035_0.073_0.076_0.091_no_cudagraph_warnings_oracle_not_committed_2026-06-15
 247,amax_sum_528a3c274a41,528a3c274a41,reduction,scatter_gather,1,1,12,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 248,amax_sum_7a65d2915044,7a65d2915044,reduction,reduction_softmax_like,1,1,12,~amax_sum_4fb4f9a0bf43,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 249,amax_sum_8002af197c08,8002af197c08,reduction,reduction_softmax_like,1,1,12,amax_sum_4fb4f9a0bf43,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
