@@ -713,8 +713,8 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 712,sum_sum_9b7fd1c0bb67,9b7fd1c0bb67,reduction,reduction_general,2,1,2,,claimed,codex,
 713,sum_sum_a1d490241791,a1d490241791,reduction,reduction_general,1,2,2,,claimed,codex,
 714,sum_sum_ad2e5844c8b7,ad2e5844c8b7,reduction,reduction_general,2,2,2,,claimed,codex,
-715,sum_sum_b1354c2a333b,b1354c2a333b,reduction,reduction_general,1,1,2,,unclaimed,,
-716,sum_sum_b1d8468e9c69,b1d8468e9c69,reduction,reduction_general,2,2,2,,unclaimed,,
+715,sum_sum_b1354c2a333b,b1354c2a333b,reduction,reduction_general,1,1,2,,claimed,Codex,claimed_2026-06-15_restart_batch_715_716
+716,sum_sum_b1d8468e9c69,b1d8468e9c69,reduction,reduction_general,2,2,2,,claimed,Codex,claimed_2026-06-15_restart_batch_715_716
 717,sum_sum_b265bd27fbd8,b265bd27fbd8,reduction,reduction_general,1,2,2,,unclaimed,,
 718,sum_sum_b2f43ab7b175,b2f43ab7b175,reduction,reduction_general,2,2,2,,unclaimed,,
 719,sum_sum_b50ad423ed16,b50ad423ed16,reduction,reduction_general,1,2,2,,unclaimed,,
