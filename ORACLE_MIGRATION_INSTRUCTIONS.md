@@ -177,20 +177,20 @@ Example:
     # (T([512], bf16), T([128,512,7,7], bf16, stride=(25088,1,3584,512)))
     def oracle_forward(inputs, *, BLOCK, num_warps): ...
 
-### Sweep configs even for a single shape point
+### Autotuning is encouraged — a single non-autotuning oracle is a non-goal
 
-A floor is the BEST achievable kernel time, not "the time of the one config
-you picked." Registering a single hardcoded `BLOCK`/`num_warps` per shape is
-one guess — it under-measures the floor when another config is faster. Even
-for a single shape point, sweep a small grid of launch configs and let the
-fastest win; the per-point floor is the min over that grid.
+The per-point dispatch mechanism does NOT preclude autotuning. Two equally
+good patterns:
 
-Concretely: register the SAME kernel body for a point under several config
-tuples (different BLOCK / num_warps / num_stages, persistent-vs-looped where
-applicable), or autotune over a candidate list inside the impl. One config
-per point is acceptable ONLY when you've shown the kernel is bandwidth/launch
-bound and neighboring configs tie — note that in the gap diagnosis. Don't
-leave a faster config on the table by registering just one.
+- Multi-dispatch to the SAME kernel that still autotunes over a config grid —
+  this is more robust, even though vastly different shapes may reasonably
+  settle on different config sets.
+- Register DIFFERENT implementations for different shapes, allowing different
+  kernel code, autotuning configs, etc.
+
+Either way, having a single oracle that does NOT autotune is a non-goal. It is
+fine — expected — to carry multiple configs; don't collapse to one fixed
+`BLOCK`/`num_warps` just because the registration lets you.
 
 ## Inputs: structured, never parsed
 
