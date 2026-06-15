@@ -162,6 +162,7 @@ def _shape_tuple(shape):
     return tuple(int(dim) for dim in shape)
 
 
+# (T([8192, 1024], bf16), T([64, 128, 1024], f32), T([1024], f32), T([1024], f32), S([64, 128, 1024]), S([64, 128, 1024]), S([8192, 1024]))
 @oracle_impl(hardware="B200", point="c414de20", BLOCK_H=1024, ROW_BLOCK=1, num_warps=8, num_stages=3)
 def oracle_forward(
     inputs,

@@ -9,6 +9,18 @@ from oracle_harness import oracle_impl
 
 
 @triton.jit
+def _fma_rn_f32(a, b, c):
+    return tl.inline_asm_elementwise(
+        "fma.rn.f32 $0, $1, $2, $3;",
+        constraints="=f,f,f,f",
+        args=[a, b, c],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
 def _xlnet_attention_backward_kernel(
     grad_ptr,
     dropout_mask_ptr,
@@ -49,7 +61,7 @@ def _xlnet_attention_backward_kernel(
     scaled_grad = grad * (keep * 1.1111111111111112)
     product = scaled_grad * div
     row_sum = tl.sum(tl.where(mask, product, 0.0), axis=1)[:, None]
-    fma = tl.fma(-div, row_sum, product)
+    fma = _fma_rn_f32(-div, row_sum, product)
     rounded = fma.to(tl.bfloat16).to(tl.float32)
     out = (rounded * 0.125).to(tl.bfloat16)
 
