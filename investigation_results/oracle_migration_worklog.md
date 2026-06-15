@@ -6,11 +6,11 @@ Updated: 2026-06-15
 
 - Row 1 `pointwise_04d85912d998`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
 - Row 2 `pointwise_ccd411f2a45d`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 1716 `var_mean_mean_94d5b5ab5e6e`: claimed for worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 1711 `var_mean_mean_1fc0030c74ea`: claimed for worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 1718 `var_mean_mean_c2c0ad00da48`: claimed for worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1701 `var_mean_fbfc0104897d`: claimed for worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1700 `var_mean_fbc9e58f2e01`: claimed for worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1673 `var_mean_e59fb82095be`: claimed for worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 
-Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, and 1701 are marked needs_work after parent-confirmed bench failures; rows 1711, 1716, and 1718 are claimed for high-end refill. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, and 1659 are marked needs_work after parent-confirmed bench failures; rows 1673, 1700, 1701, 1711, 1716, and 1718 are claimed for high-end refill or pending parent review. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
 Lower-gap refill buffer claimed by this session: rows 1 and 2 are active. Rows 94 and 96 are back to needs_work after reproducing `1_BAD_ORACLE_23_GOOD` and `8_BAD_ORACLE_4_GOOD_4_AT_FLOOR`, respectively. Rows 1514-1548 remain reserved for the separate midqueue worker. Rows 43, 58, 62, 84, 94, 96, 124, 181, 183, 203, 207, 221, 232, 246, 294, 563, 740-741, 748, 757-758, 775, 780, 850, 852-854, 858-859, 862, 869, 873, 886, 895-896, 908, 916, 951-952, 957-958, 966-968, and 1500 were marked needs_work after parent-confirmed bench failures. Rows 53, 75, 172, 194, 223-224, 286, 440-442, 466, 469, 473, 497-499, 559-562, 564, 715-716, 742-747, 749-756, 759-774, 776-779, 781-849, 851, 855-857, 860-861, 863-868, 870-872, 874-878, 879-885, 887-894, 897-907, 909-915, 917-950, 953-956, 959, 969, and 1470-1513 are parent-verified on H100 fallback, pending B200 verification. Historical lower-gap status is authoritative in `investigation_results/oracle_migration_queue.csv`.
 
