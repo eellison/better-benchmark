@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete ConvNeXtV2 GRN backward-style bf16 scope, including the NCHW-to-NHWC logical layout, the literal-80 GRN scale/divide captured in the graph, the per-pixel weighted channel reductions, the two sibling channel reductions, the bf16-rounded returned tensor with its captured nonstandard stride, and the final bf16 sum from that returned tensor in one fused partial-reduction producer plus a co-finalizer, whereas Inductor lowers the permutes, row reductions, pointwise GRN-gradient algebra, layout permute, and channel reductions as generic scheduled regions; Inductor cannot do this today because its scheduler does not form one multi-output reduction plan across reductions with different axes that share strided channels-last producers and dependent row summaries; the fix is SCHEDULER_FUSION: teach reduction scheduling to compute the channel row summaries once, reuse them for all channel partials, and sink required bf16 materialization into the same producer."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete ConvNeXtV2 GRN backward-style bf16 scope, including the NCHW-to-NHWC logical layout, the literal-80 GRN scale/divide captured in the graph, the per-pixel weighted channel reductions, the two sibling channel reductions, the bf16-rounded returned tensor with its captured nonstandard stride, and the final channel sum of that bf16 tensor with Inductor's fp32 finalization boundary in one fused partial-reduction producer plus a co-finalizer, whereas Inductor lowers the permutes, row reductions, pointwise GRN-gradient algebra, layout permute, and channel reductions as generic scheduled regions; Inductor cannot do this today because its scheduler does not form one multi-output reduction plan across reductions with different axes that share strided channels-last producers and dependent row summaries; the fix is SCHEDULER_FUSION: teach reduction scheduling to compute the channel row summaries once, reuse them for all channel partials, and sink required bf16 materialization into the same producer."""
 
 import torch
 import triton
@@ -162,7 +162,7 @@ def _finalize_partials_kernel(
     c_vec = tl.program_id(0) * BLOCK_C + tl.arange(0, BLOCK_C)
     tl.store(out_sum_xgrad_ptr + c_vec, sum_xgrad, mask=c_vec < C)
     tl.store(out_sum_x_ptr + c_vec, sum_x, mask=c_vec < C)
-    tl.store(out_sum_y_ptr + c_vec, sum_y.to(tl.bfloat16).to(tl.float32), mask=c_vec < C)
+    tl.store(out_sum_y_ptr + c_vec, sum_y, mask=c_vec < C)
 
 
 def _launch(inputs, *, BLOCK_R, BLOCK_C, FINAL_BLOCK_C, num_warps):
