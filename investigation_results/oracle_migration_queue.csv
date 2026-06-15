@@ -348,7 +348,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 347,sum_c9b37dbc088b,c9b37dbc088b,reduction,multi_output_reduction_templates,4,2,8,~sum_399b79c70c7b;~sum_2dab433e3109;~sum_fa194db93388,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 348,sum_ed6f0f7c8016,ed6f0f7c8016,reduction,reduction_general,6,8,8,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 349,sum_sum_sum_83f07a242da7,83f07a242da7,reduction,reduction_general,4,1,8,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-350,sum_sum_sum_d0cb44a92f6d,d0cb44a92f6d,reduction,reduction_general,5,10,8,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_B200_3float_fail_max_diff_2050_reaudit
+350,sum_sum_sum_d0cb44a92f6d,d0cb44a92f6d,reduction,reduction_general,5,10,8,,oracle_measured,codex,retry_resolved_checks_pass_5of5_no_skip_pass_5of5_locked_bench_invalid_OMP_BrokenProcessPool_no_cudagraph_warnings_h100_serial_fallback_5GOOD_removed_midpoint_adjustment_results_investigation_results/row350_sum_sum_sum_d0cb44a92f6d_results.csv_needs_B200_verify
 351,sum_sum_sum_f3a5ea805a22,f3a5ea805a22,reduction,reduction_general,6,8,8,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 352,var_mean_50d468f5399f,50d468f5399f,reduction,unclassified_priority_gap,1,1,8,~var_mean_0b554bb6615a;~var_mean_1139e33ee710;~var_mean_ccc838fc023d,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 353,var_mean_73c58826bf26,73c58826bf26,reduction,norm_template_canonicalization,4,1,8,~var_mean_35394af84f60,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)

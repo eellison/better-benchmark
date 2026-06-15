@@ -86,26 +86,26 @@ def _row_group_store_and_reduce_kernel(
         grad = _f32_mul(row_scale[:, None], sub_1)
         tl.store(grad_ptr + offsets, grad, mask=mask)
 
-        keep = tl.load(keep_ptr + offsets, mask=mask, other=0)
-        keep_bf16 = keep.to(tl.bfloat16)
-        drop = (keep_bf16 * DROP_SCALE).to(tl.bfloat16)
-        current_bf16 = (grad.to(tl.bfloat16) * drop).to(tl.bfloat16)
-        keep_scale = _f32_mul(keep.to(tl.float32), DROP_SCALE + 0.0)
-        midpoint_bf16 = _f32_mul(grad, keep_scale).to(tl.bfloat16)
-        grad_bits = grad.to(tl.uint32, bitcast=True)
-        grad_low_bits = grad_bits & 0xFFFF
-        near_bf16_midpoint = (grad_low_bits >= 0x7FFF) & (grad_low_bits <= 0x8001)
-        masked_bf16 = tl.where(
-            near_bf16_midpoint,
-            midpoint_bf16.to(tl.float32),
-            current_bf16.to(tl.float32),
+        keep = tl.load(keep_ptr + offsets, mask=mask, other=0).to(tl.float32)
+        keep_scale_bf16 = _f32_mul(keep, DROP_SCALE + 0.0).to(tl.bfloat16)
+        grad_bf16 = grad.to(tl.bfloat16)
+        reduced_masked_bf16 = _f32_mul(
+            grad_bf16.to(tl.float32),
+            keep_scale_bf16.to(tl.float32),
         ).to(tl.bfloat16)
-        tl.store(masked_ptr + offsets, masked_bf16, mask=mask)
+        stored_masked_bf16 = _f32_mul(
+            grad,
+            keep_scale_bf16.to(tl.float32),
+        ).to(tl.bfloat16)
+        tl.store(masked_ptr + offsets, stored_masked_bf16, mask=mask)
 
         x_rhs = _f32_mul(x, rhs)
         acc_x_rhs += tl.sum(tl.where(mask, x_rhs, 0.0), axis=0)
         acc_x += tl.sum(tl.where(mask, x, 0.0), axis=0)
-        acc_masked += tl.sum(tl.where(mask, masked_bf16.to(tl.float32), 0.0), axis=0)
+        acc_masked += tl.sum(
+            tl.where(mask, reduced_masked_bf16.to(tl.float32), 0.0),
+            axis=0,
+        )
 
     partial_offsets = row_group * C + c
     tl.store(partial_x_rhs_ptr + partial_offsets, acc_x_rhs, mask=c_mask)
