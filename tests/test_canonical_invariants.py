@@ -1850,3 +1850,56 @@ def test_static_capture_has_no_symbolic_artifacts_gpu():
                 if isinstance(e, list) and e and isinstance(e[0], list):
                     assert all(isinstance(d, int) for d in e[0]), \
                         f"static capture has symbolic dim: {e}"
+
+
+def test_dynamic_dims_for_repro_maps_tensor_positions():
+    """dynamic_dims_for_repro returns {tensor-input-index: [symbolic dims]}
+    over make_inputs positions — only TENSOR entries advance the index
+    (symints/shape-params don't). This is the mark_dynamic map; it must
+    name exactly the dims that were symbolic, not every dim (blanket
+    dynamic=True over-dynamizes static dims -> a different kernel)."""
+    import json, tempfile
+    from pathlib import Path
+    from repro_harness import dynamic_dims_for_repro
+
+    shapes = {
+        "symbols": {"s0": {"hint": 16, "range": [2, None]},
+                    "s53": {"hint": 16, "range": [2, None]}},
+        "guards": [],
+        "points": [{
+            "shape_hash": "deadbeef",
+            "captured_dynamic": True,
+            "bindings": {"s0": 16, "s53": 16},
+            "models": {"probe/infer/m": {"occurrences": 1}},
+            "inputs": [
+                [[64, 64, "s53", "s0"], "f32"],   # tensor 0: dims 2,3 dynamic
+                ["I", 256, "s0*s53"],             # symint — NOT a tensor slot
+                [[64], "f32"],                    # tensor 1: fully static
+                ["S", [64, 32, 2, "s0*s53"]],     # shape param — not a tensor
+            ],
+        }],
+    }
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.json").write_text(json.dumps(shapes))
+        (d / "repro.py").write_text("# stub")
+        dmap = dynamic_dims_for_repro(str(d / "repro.py"))
+        # tensor index 0 has dims 2,3 dynamic; the static tensor (index 1)
+        # and the non-tensor entries contribute nothing.
+        assert dmap == {0: [2, 3]}, dmap
+
+
+def test_dynamic_dims_none_for_static_repro():
+    """A static repro (no captured_dynamic point) yields None -> the bench
+    falls back to blanket dynamic=True."""
+    import json, tempfile
+    from pathlib import Path
+    from repro_harness import dynamic_dims_for_repro
+
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.json").write_text(json.dumps({"points": [{
+            "shape_hash": "aa", "inputs": [[[8, 4], "f32"]],
+            "models": {"m": {"occurrences": 1}}}]}))
+        (d / "repro.py").write_text("# stub")
+        assert dynamic_dims_for_repro(str(d / "repro.py")) is None

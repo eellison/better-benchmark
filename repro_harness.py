@@ -306,6 +306,49 @@ def format_binding(binding: dict | None) -> str:
     return ",".join(f"{k}={v}" for k, v in sorted(binding.items()))
 
 
+def dynamic_dims_for_repro(repro_file: str) -> dict[int, list[int]] | None:
+    """Map {tensor-input-index: [dims that were symbolic]} from shapes.json.
+
+    This is what torch._dynamo.mark_dynamic needs to recompile a dynamic
+    repro with the SAME dynamic structure the model had — exactly the dims
+    that were symbolic at capture, not every dim (blanket dynamic=True
+    over-dynamizes genuinely-static dims, which measures a different kernel:
+    design §2.5, the 40.4 vs 35.5us gap). The index is over make_inputs
+    output positions; only tensor inputs (compact [shape, dtype, ...]) count
+    a position toward mark_dynamic (symints/scalars/shape-params are not
+    tensors). Returns None if no point carries a symbolic block.
+    """
+    from input_codec import is_symbolic_entry
+
+    repro_dir = Path(repro_file).parent
+    shapes_json = repro_dir / "shapes.json"
+    if not shapes_json.exists():
+        return None
+    data = json.loads(shapes_json.read_text())
+    for point in data.get("points", []):
+        if not point.get("captured_dynamic"):
+            continue
+        dynamic_dims: dict[int, list[int]] = {}
+        tensor_idx = 0
+        for entry in point.get("inputs", []):
+            # Only tensor entries occupy a mark_dynamic-able position. A
+            # tensor entry is [shape_list, dtype, opts?]; shape_list[0] is a
+            # list. 'I'/'sym'/'sc'/'S' tagged entries are non-tensors.
+            is_tensor = (isinstance(entry, list) and entry
+                         and isinstance(entry[0], list))
+            if not is_tensor:
+                continue
+            if is_symbolic_entry(entry):
+                dims = [i for i, d in enumerate(entry[0])
+                        if isinstance(d, str)]
+                if dims:
+                    dynamic_dims[tensor_idx] = dims
+            tensor_idx += 1
+        if dynamic_dims:
+            return dynamic_dims
+    return None
+
+
 def parse_shapes_config(config_str: str) -> list:
     """Parse a _shapes_config string and generate inputs. Used by repro._default_make_inputs()."""
     _DTYPE_MAP = {
@@ -753,6 +796,29 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
                 inputs, make_inputs_safely(make_inputs_fn))
         return inputs
 
+    # Mark EXACTLY the dims that were symbolic at capture, so the dynamic
+    # artifact has the model's real dynamic structure. Blanket dynamic=True
+    # also dynamizes genuinely-static dims -> a different kernel than the
+    # model ran (design §2.5: 40.4us blanket vs 35.5us marked). Falls back to
+    # blanket dynamic=True only when the repro has no recorded symbolic dims
+    # (e.g. a hand-written dynamic shapes.json predating the symbolic block).
+    dyn_dims = dynamic_dims_for_repro(repro_file) if mode == "dynamic" else None
+
+    def _mark_dynamic(inputs):
+        """mark_dynamic the recorded (input, dim) pairs on tensor inputs.
+        Returns True if any dim was marked (-> compile WITHOUT blanket
+        dynamic=True), False to fall back to blanket dynamic=True."""
+        if not dyn_dims:
+            return False
+        marked = False
+        for idx, dims in dyn_dims.items():
+            if idx < len(inputs) and isinstance(inputs[idx], torch.Tensor):
+                for d in dims:
+                    if d < inputs[idx].dim():
+                        torch._dynamo.mark_dynamic(inputs[idx], d)
+                        marked = True
+        return marked
+
     all_results = {}
     compiled = None  # dynamic mode: ONE artifact across all rows
     if mode == "dynamic":
@@ -760,15 +826,26 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         # the compile-once artifact exists. The dynamic compilation's
         # kernel set is binding-independent — count at the first row.
         _first_label, first_binding, first_cfg = rows[0]
+        first_inputs = _inputs_for(first_binding, first_cfg)
+        # The compile-once artifact is built from inputs marked at exactly
+        # the captured symbolic dims; mark_dynamic is sticky on the tensor,
+        # so the same marked inputs drive both kernel-count and compile.
+        _marked = _mark_dynamic(first_inputs)
         n_kernels, kernel_names = count_kernels(
-            repro_cls(), _inputs_for(first_binding, first_cfg), dynamic=True)
+            repro_cls(), first_inputs, dynamic=not _marked)
         torch._dynamo.reset()
-        compiled = torch.compile(repro_cls(), dynamic=True)
+        compiled = torch.compile(repro_cls(), dynamic=None if _marked else True)
 
     for label, binding, cfg in rows:
         binding_str = format_binding(binding)
         row_key = f"{label}::{binding_str}::{mode}"
         inputs = _inputs_for(binding, cfg)
+        if mode == "dynamic":
+            # Mark this row's fresh inputs at the same captured dims, so the
+            # compile-once artifact treats them as the dynamic family (an
+            # unmarked input could trigger a fresh specialization == a
+            # spurious recompile reported below).
+            _mark_dynamic(inputs)
 
         mod = repro_cls()
         with torch.no_grad():
