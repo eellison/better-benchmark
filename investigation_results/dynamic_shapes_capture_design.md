@@ -406,6 +406,25 @@ the remaining implementation. Until then, `--dynamic` marks the recorded
 tensor dims (strict improvement over blanket; still recompiles per binding
 for the constant-list-param form).
 
+UPSTREAM BUG (filed here 2026-06-15): using `torch.compile(shapes_spec=...)`
+emits a non-fatal traceback every compile —
+`TypeError: Object of type SymInt is not JSON serializable`, from
+`torch/_dynamo/utils.py::_get_dynamo_config_for_logging` →
+`json.dumps(config_dict)`. The dynamo config now contains `_shapes_spec`,
+whose value holds `IntVar`/`SymInt` objects; that function scrubs a
+blocklist of known-unserializable keys but does NOT exclude `_shapes_spec`,
+so the dump raises. It is caught (not by us — by pytorch's telemetry guard
+`torch/_dynamo/metrics_context.py:103` `except Exception:
+log.exception(...)`, which deliberately prevents a metrics-logging failure
+from crashing a real compile), so compilation SUCCEEDS and the result is
+correct (verified: 1 graph, right shapes). Impact = stderr log spam only.
+NOT a case of us swallowing exceptions: the swallow and the bug are both
+upstream; our code adds neither. Fix options: (a) upstream — add
+`_shapes_spec` to the `_get_dynamo_config_for_logging` blocklist (or make
+it serialize via `.to_jsonable()`); (b) our side — filter the known log
+line from bench output (we do NOT add an exception handler). File upstream
+when the ShapesSpec bench path lands.
+
 ### 2.6 Retroactive recovery vs. recapture
 
 Recoverable retroactively (no model rerun):
