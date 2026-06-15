@@ -1384,7 +1384,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1383,sum_sum_sum_57057d0973c9,57057d0973c9,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1384,sum_sum_sum_59c5b1609d60,59c5b1609d60,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1385,sum_sum_sum_603e69b709ae,603e69b709ae,reduction,reduction_general,1,2,1,,needs_work,Codex,parent_check_pass_no_skip_pass_h100_fallback_bench_1BAD_ORACLE_no_cudagraph_warnings_oracle_deleted_2026-06-13
-1386,sum_sum_sum_60a418792eff,60a418792eff,reduction,scatter_gather,1,1,1,,needs_work,Codex,needs_work: B200 large diff likely wrong-math (1float fail max_diff=1760.0 (large/unknown - verify not broken math))
+1386,sum_sum_sum_60a418792eff,60a418792eff,reduction,scatter_gather,1,1,1,,claimed,codex,retry_claim_2026-06-15_high_end_refill_prev_B200_large_diff_wrong_math_reaudit
 1387,sum_sum_sum_6178014c1a1b,6178014c1a1b,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1388,sum_sum_sum_66b9baf8b40f,66b9baf8b40f,reduction,scatter_gather,1,1,1,sum_sum_sum_995d991d6527,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1389,sum_sum_sum_6b160090a678,6b160090a678,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
