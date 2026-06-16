@@ -1,38 +1,45 @@
-# Notes for oracle implementers — 2026-06-16
+# Notes for oracle implementers — updated 2026-06-16 (late)
 
-Status: 1570/1727 oracle_measured (90.9%). 131 needs_work (65 real-bug w/
-oracle + 66 missing-oracle to author), 26 claimed in flight.
+Status: **1714/1727 oracle_measured (99.2%)**. Only **13 needs_work** remain —
+all sum-family reductions. The migration is essentially complete.
 
-## Policy changes — READ (now in ORACLE_MIGRATION_INSTRUCTIONS.md)
+## The 13 remaining — ALL deterministic wrong-math in sum/sum_sum_sum reductions
 
-1. **Numerics are flag-not-block.** Precision-level drift (accumulation order,
-   rounding, ULP, fp64-anchor) is FLAGGED for investigation, NOT rejected.
-   Do NOT hand-tune an oracle to slip under the numerics gate, and do NOT
-   prescribe a per-oracle tolerance. The reference may itself be stricter than
-   real Inductor output; gate strictness is resolved centrally. This means you
-   should stop over-working the var_mean / reduction numerics.
+These have an oracle.py but FAIL the bench numerics gate with LARGE
+deterministic diffs (re-verified stable across unseeded runs — not stochastic,
+not precision drift). The reduction math is wrong. Per-row max_diff is in the
+queue (oracle_migration_queue.csv) notes column.
 
-2. **The `tl.where` self-blend BLOCKS (still).** Computing the answer two ways
-   and selecting per-element whichever lands inside tolerance
-   (`tl.where(abs(a-b)<=tol, a, b)`, clamp-to-reference, etc.) is bench-hacking,
-   not a numerics issue — it fabricates a pass. Commit to ONE faithful path.
+| dir | max_diff (failing output) |
+|---|---|
+| sum_sum_sum_4aae5698dd79 | 2.15e9 (out0 bf16) |
+| sum_75456ad2c2c7 | 3.36e7 |
+| sum_4fd6e4019857 | 1.68e7 (out0 bf16 [8192,262144]) |
+| sum_7ba9dcb96142 | 8.39e6 |
+| sum_9b2fcee49b0a | 2.10e6 |
+| sum_sum_sum_d2c97d17f3dc | 1.05e6 |
+| sum_898c72fb606a | 4096 |
+| sum_444779f98932 | 2048 |
+| sum_sum_sum_4a1fb62e29b0 | 16 (deterministic at 2/4 points) |
+| sum_sum_1e07e3ba8c68 | 3.84 |
+| sum_sum_sum_cc4b6a77cc6b | 2.0 |
+| sum_sum_sum_ddcfccfb8340 | (impl re-audit: checks pass H100, fails B200 locked) |
+| sum_sum_sum_ee5e53038768 | exact dense bf16 output3 mismatch |
 
-3. **Autotuning is encouraged; a single non-autotuning oracle is a non-goal.**
-   Carry multiple configs (multi-dispatch to one kernel that autotunes, or
-   per-shape implementations). Don't collapse to one fixed BLOCK/num_warps.
+Likely shared cause: these are multi-reduction (relu_grad/where + dual/triple
+channel sums) BN/layernorm-backward-style patterns; a wrong reduction axis,
+scale constant, or accumulation-dtype on one output. Fix the failing output's
+math; the queue note names which output and the diff.
 
-## Where to focus the remaining work
+## Policy reminders (unchanged, in ORACLE_MIGRATION_INSTRUCTIONS.md)
+- Numerics drift (ULP/accumulation/fp64-gate/stochastic-mask) is FLAG-NOT-BLOCK,
+  not a rejection. The 13 above are NOT that — they are large deterministic diffs.
+- `tl.where` self-blend / clamp-to-tolerance is bench-hacking and BLOCKS.
+- Autotuning encouraged; a single non-autotuning oracle is a non-goal.
 
-- **66 missing oracles** (needs_work, no oracle.py) — pure authoring, the
-  biggest lever. Highest priority for free hands.
-- **Real-bug cluster** (oracle exists, large-diff wrong math): pointwise (27),
-  sum_sum_sum (10), sum_sum (7), mean (6), var_mean (5), amax_sum (5), sum (4).
-  Each row's queue note carries the failing output + max_diff (some off by 1e6+,
-  e.g. sum_6d8612892024 @ 8.4e6, sum_sum_sum_d2c97d17f3dc @ 5.4e9). These are
-  genuine math bugs, not precision.
-
-## Manager-side status (no action needed from you)
-- Model-tool validation is DONE on v2: per-pattern oracle floors compose to
-  model floors, reconciled against real HF-infer e2e (see
-  v2_model_rollup_validation.md). Modeled fusible speedup ~2.3-2.65x.
-- Verification keeps pace with deliveries; nothing is blocked on the manager.
+## Not implementer work (manager/infra side, for reference)
+- ~144 dirs flagged no_valid_point in the sweep PASS a fresh --check (fp64
+  bench-gate over-strictness) — harness issue, NOT oracle bugs. See
+  nvp_triage_2026-06-16.md.
+- detect_stochastic_outputs int64/bool gap: FIXED (commit 408922770).
+- Model-level floor roll-up validated to ~5-9% of real e2e.
