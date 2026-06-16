@@ -56,3 +56,32 @@ bench_parallel --full-graphs for true e2e.
 - Modeled speedup (deliverable): oracle/compile ~0.44 transformer pointwise/norm (~2.3x over compile fusion), ~1.0 LayerNorm.
 - 0 unmatched partitions on all 8 models. beit-style floor>compile only on hf/train/AlbertForMaskedLM (1.107x, within ~10%, training backward).
 - Caveat: HF-infer full graphs need --allow-unsafe-full-graphs (int token inputs) for clean true-e2e; LayerNorm (float) is the clean load-bearing check.
+
+## Rigorous HF-infer e2e (2026-06-16) — caveat closed
+
+Ran 4 HF-infer full graphs e2e with VALID integer inputs (no
+--allow-unsafe-full-graphs; v2 meta sidecars already carry correct
+gen:['index',low,high] ranges for token/position/type ids). CUDAGraph + CD +
+bench-lock + fresh cache, min-of-5, numerics-checked vs eager (no NaN).
+
+| model | real_e2e_us | fus_compile_Σ | fus_oracle_Σ | modeled fusible speedup | nonfusible GEMM_us (%e2e) |
+|---|---|---|---|---|---|
+| DistilBertForMaskedLM | 5076 | 1999 | 874 | 2.29x | 3452 (68%) |
+| BertForMaskedLM | 6016 | 3485 | 1316 | 2.65x | 3998 (66%) |
+| ElectraForCausalLM | 3889 | 3669 | 1593 | 2.30x | 2490 (64%) |
+| AlbertForMaskedLM | 15802 | 3244 | 1282 | 2.53x | 13691 (87%) |
+
+- Non-fusible GEMMs (addmm/bmm/mm, measured directly with exact arg shapes x occ)
+  explain 64-87% of e2e — a true lower bound.
+- nonfusible + fusible_compile = 107-158% of e2e (never under-counts).
+- The fusible ROLL-UP over-counts the in-graph fusible remainder by 1.2-2.6x:
+  it sums 72-138 independent partition launches but the full graph fuses into
+  56-104 kernels. Excess = partition-boundary launch-floor (5.4us/kernel B200)
+  + re-materialized partition I/O elided when fused. Largest for small/numerous
+  partitions (Electra hidden=256, 158%), smallest for GEMM-dominated (DistilBert/
+  Albert, 107%). This is the documented Σparts-vs-e2e launch-floor correction,
+  not a roll-up error.
+- VERDICT: accounting reconciles with real HF-infer e2e once non-fusible ops +
+  launch-floor correction are applied. Per-pattern oracle floors sound; naive
+  Σ over-counts by a known/correctable launch factor. Modeled fusible speedup
+  2.3-2.65x (~1100-2200us/model). LayerNorm-only caveat closed.
