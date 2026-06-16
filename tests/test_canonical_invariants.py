@@ -1809,14 +1809,26 @@ def test_dynamic_capture_merge_load_roundtrip_gpu():
         assert in_shape == (64, 64, 16, 16)
         assert out_shape == (64, 64, 16, 16)
 
-        # guard-RESPECTING rebind: product s0*s53 stays 256 (8*32), runs
+        # Rebind to a DIFFERENT spatial product (8x32, product 256) runs.
         in_shape2, out_shape2 = _run({syms[0]: 8, syms[1]: 32})
-        assert in_shape2[2] * in_shape2[3] == 16 * 16  # spatial product preserved
         assert out_shape2 == in_shape2                 # affine: out == in shape
 
-        # guard-VIOLATING rebind: product 576 != 256 -> loudly rejected
+        # Rebind to yet another product (24x24, product 576) ALSO runs: the
+        # GroupNorm view (64,32,2,h*w) is consistent for ANY h,w, so this
+        # graph has no genuine coupling constraint. (Before review R2-1, the
+        # capture's int(storage_size) forced a spurious Eq(...,256) guard that
+        # WRONGLY rejected this valid rebind — that guard is now gone.)
+        in_shape3, out_shape3 = _run({syms[0]: 24, syms[1]: 24})
+        assert in_shape3 == (64, 64, 24, 24)
+        assert out_shape3 == in_shape3
+        # and capture recorded NO spurious storage guard
+        assert not sj.get("guards"), \
+            f"unexpected guard from int(storage_size): {sj.get('guards')}"
+
+        # A genuinely range-violating bind IS still loudly rejected (s0 below
+        # its captured range floor of 2).
         with pytest.raises(ValueError, match="guard|range"):
-            _run({syms[0]: 24, syms[1]: 24})
+            _run({syms[0]: 1, syms[1]: 16})
 
 
 def test_static_capture_has_no_symbolic_artifacts_gpu():
@@ -2118,3 +2130,88 @@ def test_dims_equal_never_raises_on_torch_function_probes():
     assert _dims_equal("Max(s0, s1)", "s0") is False
     assert _dims_equal("Max(s0, s1)", "s0 + s1") is False  # differ for positive dims
     assert _dims_equal("s0*s53", "s0*s99") is False
+
+
+def test_capture_does_not_force_storage_size_guard_gpu():
+    """Review R2-1 (SEVERE): int(val.untyped_storage().size()) on a symbolic
+    tensor forced an Eq(...) byte-size guard into the live ShapeEnv, which
+    harvest_shape_env baked into shapes.json and which then REJECTED every
+    rebind that changed the product (and DROPPED whole families whose dims
+    all specialized). Capture must read the storage-size HINT, never int()
+    the SymInt, and read metadata under suppress_guards."""
+    import json
+    import tempfile
+    import pytest
+    from pathlib import Path
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for real dynamic capture")
+    torch._dynamo.reset()
+    from capture_hook import install_capture_hook, uninstall_capture_hook
+
+    # multi-symbol reduction over a dynamic dim — the failure-mode-A case
+    class _Red(torch.nn.Module):
+        def forward(self, x):
+            return (x * 2.0).sum(1, keepdim=True) + x.mean(1, keepdim=True)
+
+    with tempfile.TemporaryDirectory() as td:
+        out = str(Path(td) / "cap")
+        install_capture_hook(out, label="r21")
+        try:
+            x = torch.randn(64, 100, device="cuda")
+            torch._dynamo.mark_dynamic(x, 0)
+            torch._dynamo.mark_dynamic(x, 1)
+            with torch.no_grad():
+                torch.compile(_Red().cuda(), dynamic=True)(x)
+        finally:
+            uninstall_capture_hook()
+        idx = json.loads((Path(td) / "cap" / "index.json").read_text())
+        assert idx["n_dropped"] == 0 and idx["n_captured"] == 1
+        c = idx["captured"][0]
+        # both spatial symbols harvested, ranges UNBOUNDED (no Eq pin), and
+        # NO spurious storage-size guard.
+        assert len(c["symbols"]) == 2
+        for meta in c["symbols"].values():
+            assert meta["range"][1] is None        # upper unbounded, not pinned
+        assert not c.get("guards"), \
+            f"spurious storage-size guard leaked: {c.get('guards')}"
+
+
+def test_capture_symbolic_broadcast_not_dropped_gpu():
+    """Review R2-2: a broadcast region (dynamic dim vs static bias) used to be
+    DROPPED (n_captured=0) because int(storage_size) specialized all dims ->
+    harvest returned no symbols -> the symbolic shape hit the validation
+    input-builder with no binding -> 'str > int' TypeError -> drop. With R2-1
+    fixed it captures cleanly."""
+    import json
+    import tempfile
+    import pytest
+    from pathlib import Path
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for real dynamic capture")
+    torch._dynamo.reset()
+    from capture_hook import install_capture_hook, uninstall_capture_hook
+
+    class _BC(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.bias = torch.nn.Parameter(torch.randn(1, 64))
+
+        def forward(self, x):
+            return (x * 2.0 + self.bias).tanh()
+
+    with tempfile.TemporaryDirectory() as td:
+        out = str(Path(td) / "cap")
+        install_capture_hook(out, label="bc")
+        try:
+            x = torch.randn(40, 64, device="cuda")
+            torch._dynamo.mark_dynamic(x, 0)
+            with torch.no_grad():
+                torch.compile(_BC().cuda(), dynamic=True)(x)
+        finally:
+            uninstall_capture_hook()
+        idx = json.loads((Path(td) / "cap" / "index.json").read_text())
+        assert idx["n_dropped"] == 0 and idx["n_captured"] == 1, \
+            f"broadcast family dropped: {idx.get('dropped')}"
+        c = idx["captured"][0]
+        # the dynamic batch dim is symbolic in the captured input
+        assert any(isinstance(d, str) for d in c["inputs"][0][0])

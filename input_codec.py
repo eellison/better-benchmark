@@ -344,18 +344,33 @@ def _sympy_locals():
     return _TORCH_SYMPY_LOCALS
 
 
-def _sympify_expr(text):
+def _sympify_expr(text, symbols: dict | None = None):
     """Parse a captured expr string to a sympy expr. Two things make this
     faithful vs a bare sympy.sympify: (1) the torch-functions locals map
-    (above), so torch's shape functions fold; (2) every free symbol is
-    declared integer & positive — a SymInt shape dim is a positive integer,
-    and without this Max(1, s//k), floor(s)==s, etc. don't simplify and
-    sympy.equals can even raise 'nan not comparable'."""
+    (above), so torch's shape functions fold; (2) free symbols are declared
+    integer with a sign assumption DRIVEN BY THE RANGE FLOOR — positive when
+    the symbol's range lower bound >= 1, else nonnegative (a size is >= 0).
+    Without an integer assumption Max(1, s//k)/floor(s)==s don't simplify and
+    sympy.equals can raise 'nan not comparable'; but a blanket `positive`
+    is WRONG for a zero-capable symbol (unbacked u0, range [0, ...]) — it
+    folds Ne(u0,0)->True / Eq(u0,0)->False, dropping a guard / rejecting a
+    valid 0 binding. `symbols` is the {name: {"range":[lo,hi]}} table; when
+    absent we assume nonnegative (the safe floor for any shape dim)."""
     import sympy
     expr = sympy.sympify(text, rational=False, locals=_sympy_locals())
-    if getattr(expr, "free_symbols", None):
-        expr = expr.subs({s: sympy.Symbol(s.name, integer=True, positive=True)
-                          for s in expr.free_symbols})
+    free = getattr(expr, "free_symbols", None)
+    if free:
+        subs = {}
+        for s in free:
+            lo = None
+            if symbols and s.name in symbols:
+                rng = symbols[s.name].get("range") or [None, None]
+                lo = rng[0]
+            if lo is not None and lo >= 1:
+                subs[s] = sympy.Symbol(s.name, integer=True, positive=True)
+            else:
+                subs[s] = sympy.Symbol(s.name, integer=True, nonnegative=True)
+        expr = expr.subs(subs)
     return expr
 
 
@@ -417,7 +432,10 @@ def validate_bindings(symbols: dict, bindings: dict,
         if hi is not None and val > hi:
             raise ValueError(f"{name}={val} above range max {hi}")
     for g in guards or []:
-        expr = _sympify_expr(g)
+        # Pass the symbol table so sign assumptions come from each symbol's
+        # range floor (a zero-capable unbacked symbol must NOT be assumed
+        # positive — that drops Ne(u0,0) / rejects a valid u0=0).
+        expr = _sympify_expr(g, symbols)
         # A guard that references symbols NOT in this binding is about a
         # DIFFERENT point (guards are a shared graph-level list); it is not
         # applicable here — skip it (the benign cross-point case). Only a

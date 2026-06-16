@@ -23,6 +23,7 @@ After capture, merge them into the canonical set with:
     python merge_captures.py /tmp/captures/my_model --canonical-dir repros/
 """
 import collections
+import contextlib
 import copy
 import hashlib
 import json
@@ -344,43 +345,83 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         except Exception:
             return None
 
+    @contextlib.contextmanager
+    def _no_guards(val):
+        """Suppress ShapeEnv guard recording while we READ a symbolic
+        tensor's metadata. Reading shape/stride/storage of a SymInt-backed
+        fake tensor (is_contiguous, storage size, comparisons) can FORCE
+        guards into the live ShapeEnv that harvest_shape_env then bakes into
+        shapes.json — guards the model never actually had, which reject
+        rebinds (review R2-1). Capture must never mutate the env it harvests.
+        No-op when the tensor has no ShapeEnv (static)."""
+        se = None
+        for s in (*getattr(val, "shape", ()), *(
+                val.stride() if torch.is_tensor(val) else ())):
+            se = _shape_env_of(s)
+            if se is not None:
+                break
+        if se is not None and hasattr(se, "suppress_guards"):
+            with se.suppress_guards():
+                yield
+        else:
+            yield
+
     def _record_placeholder(name: str, meta: dict) -> None:
         val = meta.get("val", None)
         if val is not None and isinstance(val, torch.Tensor):
-            for s in (*val.shape, *val.stride(), val.storage_offset()):
-                _note_env(s)
-            placeholder_info[name] = {
-                "shape": [_resolve_sym(s) for s in val.shape],
-                "stride": [_resolve_sym(s) for s in val.stride()] if not val.is_contiguous() else [],
-                "dtype": str(val.dtype),
-                "device": str(val.device),
-            }
-            off = _resolve_sym(val.storage_offset()) if val.storage_offset() else 0
-            if off:
-                placeholder_info[name]["storage_offset"] = off
-            # Symbolic block (design §2.1): per-slot exprs alongside the hint
-            # ints above, via the SHARED extractor (full_graph_harness). Even
-            # a stride contiguous AT THE HINT records exprs (a rebind may
-            # break contiguity). Additive — absent for static tensors.
-            symbolic = _symbolic_block_from_value(val)
-            if symbolic:
-                placeholder_info[name]["symbolic"] = symbolic
-            # Alias tag: inputs whose fake vals share one untyped storage
-            # (packed-qkv saved views). Live-capture-only signal — any
-            # retrace re-fabricates inputs and the identity is gone. Tag
-            # is the storage key; serialization rewrites it to a small
-            # group index ("alias_group") so replay can allocate ONE
-            # buffer per group and as_strided the members. Storage SIZE
-            # captured here too (the true allocation) so consumers never
-            # re-derive it by scanning members.
-            sk = _storage_key(val)
-            if sk is not None:
-                placeholder_info[name]["_storage_key"] = sk
-                try:
-                    placeholder_info[name]["_storage_nbytes"] = int(
-                        val.untyped_storage().size())
-                except Exception:
-                    pass
+            # ALL reads of a symbolic tensor's metadata happen under
+            # suppress_guards: is_contiguous(), bool(storage_offset()), and
+            # the storage size are each guard-forcing on a SymInt-backed fake
+            # tensor (review R2-1). Capture must never mutate the ShapeEnv it
+            # then harvests, or spurious guards land in shapes.json and reject
+            # every rebind.
+            with _no_guards(val):
+                for s in (*val.shape, *val.stride(), val.storage_offset()):
+                    _note_env(s)
+                is_contig = val.is_contiguous()
+                placeholder_info[name] = {
+                    "shape": [_resolve_sym(s) for s in val.shape],
+                    "stride": ([_resolve_sym(s) for s in val.stride()]
+                               if not is_contig else []),
+                    "dtype": str(val.dtype),
+                    "device": str(val.device),
+                }
+                off_raw = val.storage_offset()
+                off = _resolve_sym(off_raw) if off_raw else 0
+                if off:
+                    placeholder_info[name]["storage_offset"] = off
+                # Symbolic block (design §2.1): per-slot exprs alongside the
+                # hint ints above, via the SHARED extractor. Even a stride
+                # contiguous AT THE HINT records exprs (a rebind may break
+                # contiguity). Additive — absent for static tensors.
+                symbolic = _symbolic_block_from_value(val)
+                if symbolic:
+                    placeholder_info[name]["symbolic"] = symbolic
+                # Alias tag: inputs whose fake vals share one untyped storage
+                # (packed-qkv saved views). Live-capture-only signal — any
+                # retrace re-fabricates inputs and the identity is gone. Tag
+                # is the storage key; serialization rewrites it to a small
+                # group index ("alias_group") so replay can allocate ONE
+                # buffer per group and as_strided the members. Storage SIZE
+                # captured too (the true allocation) so consumers never
+                # re-derive it by scanning members.
+                sk = _storage_key(val)
+                if sk is not None:
+                    placeholder_info[name]["_storage_key"] = sk
+                    try:
+                        # NEVER int() the storage size: under dynamic shapes
+                        # it is a SymInt (e.g. 4*s27*s77), and int() forces an
+                        # equality guard pinning the byte-size — harvested into
+                        # shapes.json, rejecting every rebind (R2-1). Read the
+                        # hint instead.
+                        ssz = val.untyped_storage().size()
+                        if isinstance(ssz, (torch.SymInt, torch.SymFloat)):
+                            _note_env(ssz)
+                            ssz = ssz.node.hint if hasattr(ssz, "node") else None
+                        if ssz is not None:
+                            placeholder_info[name]["_storage_nbytes"] = int(ssz)
+                    except Exception:
+                        pass
         elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
             _note_env(val)
             hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)

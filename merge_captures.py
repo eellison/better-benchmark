@@ -51,6 +51,58 @@ def _atomic_write_text(path: Path, text: str) -> None:
     tmp.replace(path)
 
 
+def _rename_symbols_in_expr(text, rename: dict) -> str:
+    """Rename symbols in a sympy-printable expr string via sympy substitution
+    (NOT string replace — 's0' must not corrupt 's0_other' or '64*s0'). A bare
+    int passes through. Used to namespace a colliding capture's guards."""
+    if not isinstance(text, str) or not rename:
+        return text
+    from input_codec import _sympify_expr
+    import sympy
+    expr = _sympify_expr(text)
+    # Match free symbols BY NAME — _sympify_expr stamps assumptions
+    # (integer/nonnegative) onto them, so a plain Symbol(old) won't compare
+    # equal in a subs dict. Map the actual free symbols whose name is renamed.
+    sub = {s: sympy.Symbol(rename[s.name]) for s in expr.free_symbols
+           if s.name in rename}
+    return str(expr.subs(sub)) if sub else text
+
+
+def _rename_symbols_in_inputs(inputs, rename: dict):
+    """Rename symbols inside compact input entries (shape/stride expr strings,
+    ['S',[...]] shape-param dims, ['I',hint,expr] symint exprs). Ints/static
+    entries untouched. sympy-based per-slot so no substring corruption."""
+    if not inputs or not rename:
+        return inputs
+
+    def _slot(d):
+        return _rename_symbols_in_expr(d, rename) if isinstance(d, str) else d
+
+    out = []
+    for e in inputs:
+        if not isinstance(e, list) or not e:
+            out.append(e)
+            continue
+        if e[0] == "I":                      # ['I', hint, expr]
+            out.append([e[0], e[1],
+                        _slot(e[2]) if len(e) > 2 else e[2]] if len(e) > 2
+                       else e)
+        elif e[0] == "S":                    # ['S', [dims...]]
+            out.append([e[0], [_slot(d) for d in e[1]]])
+        elif isinstance(e[0], list):         # [shape, dtype, opts?]
+            shape = [_slot(d) for d in e[0]]
+            ne = [shape, e[1]]
+            if len(e) > 2 and isinstance(e[2], dict):
+                opts = dict(e[2])
+                if "st" in opts:
+                    opts["st"] = [_slot(s) for s in opts["st"]]
+                ne.append(opts)
+            out.append(ne)
+        else:
+            out.append(e)
+    return out
+
+
 def _extract_shapes_config(src_path: Path) -> str | None:
     """Extract the _shapes_config string from a v2 repro source file.
 
@@ -129,11 +181,6 @@ def _write_shapes_json(
     else:
         data = {"points": []}
 
-    # The hint binding for this point (one value per symbol) — what every
-    # expr evaluates under to reproduce the captured snapshot shape.
-    bindings = ({name: s["hint"] for name, s in symbols.items()}
-                if symbols else None)
-
     # Find existing point by shape_hash
     existing_point = None
     for point in data["points"]:
@@ -142,21 +189,50 @@ def _write_shapes_json(
             break
 
     # A dynamic point's symbols/guards/bindings/inputs are a COUPLED set: the
-    # inputs' expr strings reference exactly these symbol names. A second
-    # capture of the same shape_hash with DIFFERENT symbol names (dynamo
-    # reallocates names per trace context) must NOT overwrite the existing
-    # point's bindings (that strands its inputs on names with no binding ->
-    # load 'unbound symbol'). When the symbol sets differ, keep this capture
-    # as a SEPARATE point; its (distinctly-named) symbols join the shared
-    # top-level table by union, and each point binds only its own subset
-    # (instantiate_point binds only the names a point references).
+    # inputs' expr strings reference exactly these symbol names. Dynamo
+    # REALLOCATES symbol names per trace context, so a second capture of the
+    # same shape_hash can reuse `s0` for a DIFFERENT dim with a different
+    # range/guard. A naive name-keyed union would clobber the existing s0's
+    # range (rejecting/widening the first point) and cross-contaminate guards.
+    # So: if any incoming symbol name collides with an existing top-level
+    # symbol whose DEFINITION DIFFERS, namespace this capture's colliding
+    # symbols (rename in symbols+bindings+guards+inputs) to fresh names before
+    # merge. Same-definition reuse is genuine -> no rename (idempotent).
+    if symbols:
+        existing_syms_table = data.get("symbols") or {}
+        rename = {}
+        for name, defn in symbols.items():
+            other = existing_syms_table.get(name)
+            if other is not None and other != defn:
+                # collision with a different definition -> fresh name
+                cand = f"{name}__{shape_hash[:4]}"
+                i = 1
+                while cand in existing_syms_table or cand in symbols:
+                    cand = f"{name}__{shape_hash[:4]}_{i}"
+                    i += 1
+                rename[name] = cand
+        if rename:
+            symbols = {rename.get(n, n): d for n, d in symbols.items()}
+            guards = [_rename_symbols_in_expr(g, rename) for g in (guards or [])]
+            inputs = _rename_symbols_in_inputs(inputs, rename)
+
+    # The hint binding for this point — computed from the (possibly renamed)
+    # symbols, so a namespaced symbol binds its NEW name.
+    bindings = ({name: s["hint"] for name, s in symbols.items()}
+                if symbols else None)
+
+    # A second capture with a DIFFERENT symbol SET (after any renaming) is a
+    # distinct symbolization of the same shape_hash -> keep it as a SEPARATE
+    # point rather than overwriting the existing one's bindings (which would
+    # strand its inputs on names with no binding).
     existing_syms = set((existing_point or {}).get("bindings") or {})
     if symbols and existing_syms and existing_syms != set(symbols):
-        existing_point = None   # foreign symbolization -> distinct point
+        existing_point = None
 
-    # Graph-level symbols/guards (shared across points). Symbol names are
-    # globally distinct per capture, so update() is a safe union; guards
-    # de-duped. Each point's bindings select its own symbols.
+    # Graph-level symbols/guards (shared across points). After collision
+    # renaming above, names are now genuinely distinct OR identically-defined,
+    # so update() is a safe union; guards de-duped. Each point's bindings
+    # select its own symbols.
     if symbols:
         data.setdefault("symbols", {}).update(symbols)
         if guards:
