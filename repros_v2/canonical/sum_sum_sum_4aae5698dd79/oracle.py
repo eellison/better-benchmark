@@ -3,7 +3,6 @@
 import torch
 import triton
 import triton.language as tl
-from torch._inductor.runtime.triton_helpers import libdevice
 
 from oracle_harness import oracle_impl
 
@@ -137,7 +136,7 @@ def _branch_kernel(
     logits = tl.load(logits_ptr + offsets, mask=active, other=0.0).to(tl.float32)
     score = _f32_add(logits, bias_with_mask[None, :]).to(tl.bfloat16).to(tl.float32)
     shifted = _f32_sub(score, tl.load(row_shift_ptr + ((bs * HEADS_ + h) * QUERY_ + q), mask=bs < BATCH_, other=0.0).to(tl.float32)[:, None])
-    numer = libdevice.exp(shifted)
+    numer = tl.exp(shifted)
     denom = tl.load(
         denom_ptr + ((bs * HEADS_ + h) * QUERY_ + q),
         mask=bs < BATCH_,
