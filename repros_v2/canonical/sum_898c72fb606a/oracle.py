@@ -13,26 +13,7 @@ SCALE = 0.08838834764831845
 
 @triton.jit
 def _round_to_bf16_f32(x):
-    return tl.inline_asm_elementwise(
-        "{ .reg .b16 t; cvt.rn.bf16.f32 t, $1; cvt.f32.bf16 $0, t; }",
-        constraints="=f,f",
-        args=[x],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
-
-
-@triton.jit
-def _fma_rn_f32(a, b, c):
-    return tl.inline_asm_elementwise(
-        "fma.rn.f32 $0, $1, $2, $3;",
-        constraints="=f,f,f,f",
-        args=[a, b, c],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
+    return x.to(tl.bfloat16).to(tl.float32)
 
 
 @triton.jit
@@ -74,10 +55,10 @@ def _visformer_softmax_backward_49_kernel(
 
     product = grad * probs
     row_sum = tl.sum(tl.where(mask, product, 0.0), axis=1)[:, None].to(tl.float32)
-    fma = _fma_rn_f32(-probs, row_sum, product)
+    fma = tl.fma(-probs, row_sum, product)
     rounded = _round_to_bf16_f32(fma)
-    out = _round_to_bf16_f32(rounded * SCALE_)
-    tl.store(out_ptr + compact_offsets, out.to(tl.bfloat16), mask=mask)
+    out = (rounded * SCALE_).to(tl.bfloat16)
+    tl.store(out_ptr + compact_offsets, out, mask=mask)
 
 
 # cdec8791: Visformer small train, bf16 softmax-backward recompute on 49-wide rows.
