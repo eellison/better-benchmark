@@ -1221,7 +1221,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1220,sum_9552a61d796d,9552a61d796d,reduction,layout_indexing_stencil_fusion,1,1,1,~pointwise_fe13a47e3f19;~sum_22b5cd24890b;~sum_d7cc0afd5743,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1221,sum_9680481803dd,9680481803dd,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1222,sum_977aa8760e55,977aa8760e55,reduction,layout_indexing_stencil_fusion,1,2,1,~pointwise_fe13a47e3f19;~sum_22b5cd24890b;~sum_d7cc0afd5743,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1223,sum_9b2fcee49b0a,9b2fcee49b0a,reduction,reduction_general,1,2,1,,needs_work,codex,needs_work: B200 1float fail max_diff=2100000.0 (large/unknown - verify not broken math)
+1223,sum_9b2fcee49b0a,9b2fcee49b0a,reduction,reduction_general,1,2,1,,claimed,codex,retry_claim_2026-06-16_b200_sum_large_diff_single_point
 1224,sum_a05c10ed018a,a05c10ed018a,reduction,structured_pool_upsample_backward_reduce,1,2,1,~sum_28b0b21169d4;~sum_7d7c71d09ef5;~sum_837a32994d31,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1225,sum_a09fa3089339,a09fa3089339,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1226,sum_a200e61c94a5,a200e61c94a5,reduction,layout_indexing_stencil_fusion,1,2,1,~pointwise_fe13a47e3f19;~sum_22b5cd24890b;~sum_d7cc0afd5743,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
@@ -1377,7 +1377,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1376,sum_sum_sum_3d8e3038c144,3d8e3038c144,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1377,sum_sum_sum_456d637a9bc7,456d637a9bc7,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1378,sum_sum_sum_46c77e1ef34a,46c77e1ef34a,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1379,sum_sum_sum_4aae5698dd79,4aae5698dd79,reduction,scatter_gather,1,1,1,,needs_work,codex,needs_work: B200 2float fail max_diff=2160000000.0 (large/unknown - verify not broken math)
+1379,sum_sum_sum_4aae5698dd79,4aae5698dd79,reduction,scatter_gather,1,1,1,,claimed,codex,retry_claim_2026-06-16_b200_scatter_sum_sum_sum_large_diff
 1380,sum_sum_sum_4ce9013c6e0d,4ce9013c6e0d,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1381,sum_sum_sum_5008e7d7f793,5008e7d7f793,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1382,sum_sum_sum_51b3bd5aa388,51b3bd5aa388,reduction,reduction_general,1,2,1,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
