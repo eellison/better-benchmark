@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete GhostNet bf16 masked BN-backward-style branch, including the channels-last slice/add fused arithmetic, scalar `where`, both fp32 `[0, 2, 3]` channel reductions, returned scale-gradient vector, and final channels-last bf16 tensor epilogue, whereas Inductor schedules the masked producer, sibling reductions, coefficient math, and dense epilogue through generic reduction/pointwise regions; Inductor cannot do this today because scheduler/codegen has no cooperative split-K multi-output reduction template that preserves the captured cast boundaries while sharing the finalized channel summaries with the dependent full-tensor epilogue; the fix is COOPERATIVE_SPLIT_K: add a guarded BN-backward reduction template that splits the `N,H,W` dimension, finalizes compatible channel partials once, and sinks the dependent channels-last bf16 epilogue into the same planned lowering."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete GhostNet bf16 masked BN-backward-style branch, using Inductor's resident f32 sliced-add source for the two channel reductions and the rounded bf16 visible tensor path for the returned dense epilogue, whereas Inductor schedules the masked producer, sibling reductions, coefficient math, and dense epilogue through generic reduction/pointwise regions; Inductor cannot do this today because scheduler/codegen has no cooperative split-K multi-output reduction lowering that preserves the captured output contract while sharing finalized channel summaries with the dependent full-tensor epilogue; the fix is COOPERATIVE_SPLIT_K: add a guarded BN-backward reduction lowering that splits the `N,H,W` dimension, finalizes compatible channel partials once, and sinks the dependent channels-last bf16 epilogue into the same planned lowering."""
 
 import torch
 import triton
@@ -83,7 +83,7 @@ def _masked_source(
 
 
 @triton.jit
-def _masked_source_bf16_add(
+def _masked_source_rounded(
     arg0_ptr,
     arg1_ptr,
     arg2_ptr,
@@ -219,10 +219,7 @@ def _epilogue_kernel(
     n = k // HW_
     hw = k - n * HW_
 
-    source_eager = _masked_source_bf16_add(
-        arg0_ptr, arg1_ptr, arg2_ptr, fill_ptr, n, hw, c, active, C_IN_, C_, HW_
-    )
-    source_fused = _masked_source(
+    source = _masked_source_rounded(
         arg0_ptr, arg1_ptr, arg2_ptr, fill_ptr, n, hw, c, active, C_IN_, C_, HW_
     )
     x = tl.load(arg4_ptr + linear, mask=active, other=0.0).to(tl.float32)
@@ -231,19 +228,10 @@ def _epilogue_kernel(
     coeff = tl.load(coeff_ptr + c, mask=active, other=0.0).to(tl.float32)
     mean_term = tl.load(mean_term_ptr + c, mask=active, other=0.0).to(tl.float32)
     output_scale = tl.load(output_scale_ptr + c, mask=active, other=0.0).to(tl.float32)
-    correction = _f32_add(_f32_mul(centered, coeff), mean_term)
-    corrected_eager = _f32_sub(source_eager, correction)
-    corrected_fused = _f32_sub(source_fused, correction)
-    out_eager = _f32_mul(corrected_eager, output_scale).to(
-        tl.bfloat16, fp_downcast_rounding="rtne"
-    ).to(tl.float32)
-    out_fused = _f32_mul(corrected_fused, output_scale).to(
-        tl.bfloat16, fp_downcast_rounding="rtne"
-    ).to(tl.float32)
-    out_abs = tl.abs(out_eager)
-    tolerance = _f32_add(0.01, _f32_mul(0.01, out_abs))
-    use_fused = (out_abs >= 16.0) & (tl.abs(_f32_sub(out_fused, out_eager)) <= tolerance)
-    out = tl.where(use_fused, out_fused, out_eager)
+    correction = _f32_mul(centered, coeff)
+    corrected = _f32_sub(source, correction)
+    corrected = _f32_sub(corrected, mean_term)
+    out = _f32_mul(corrected, output_scale)
     tl.store(out_ptr + linear, out, mask=active)
 
 

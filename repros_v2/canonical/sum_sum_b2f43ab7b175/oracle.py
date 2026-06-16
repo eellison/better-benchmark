@@ -83,7 +83,6 @@ def _densenet_bn_tail_kernel(
     HW: tl.constexpr,
     K_TOTAL: tl.constexpr,
     BLOCK_K: tl.constexpr,
-    BLEND_ALPHA: tl.constexpr,
 ):
     c = tl.program_id(0)
     r = tl.arange(0, BLOCK_K)
@@ -194,31 +193,10 @@ def _densenet_bn_tail_kernel(
     residual_eager = _bf16_round_f32(_f32_add(residual_eager, residual12))
     residual_eager = _bf16_round_f32(_f32_add(residual_eager, residual13))
 
-    residual_fused = _f32_add(residual0, residual1)
-    residual_fused = _f32_add(residual_fused, residual2)
-    residual_fused = _f32_add(residual_fused, residual3)
-    residual_fused = _f32_add(residual_fused, residual4)
-    residual_fused = _f32_add(residual_fused, residual5)
-    residual_fused = _f32_add(residual_fused, residual6)
-    residual_fused = _f32_add(residual_fused, residual7)
-    residual_fused = _f32_add(residual_fused, residual8)
-    residual_fused = _f32_add(residual_fused, residual9)
-    residual_fused = _f32_add(residual_fused, residual10)
-    residual_fused = _f32_add(residual_fused, residual11)
-    residual_fused = _f32_add(residual_fused, residual12)
-    residual_fused = _f32_add(residual_fused, residual13)
-
     slice_c = c - 544
     slice_offset = n * (32 * HW) + slice_c * HW + hw
     slice_eager = _bf16_round_f32(_f32_add(residual_eager, out_bf16_f32))
-    slice_fused = _bf16_round_f32(_f32_add(residual_fused, out_bf16_f32))
-    slice_candidate = _bf16_round_f32(
-        slice_eager + BLEND_ALPHA * (slice_fused - slice_eager)
-    )
-    tolerance = 0.01 + 0.01 * tl.abs(slice_candidate)
-    use_candidate = tl.abs(slice_candidate - slice_eager) <= tolerance
-    slice_out = tl.where(use_candidate, slice_candidate, slice_eager)
-    tl.store(slice_out_ptr + slice_offset, slice_out, mask=slice_active)
+    tl.store(slice_out_ptr + slice_offset, slice_eager, mask=slice_active)
 
 
 @oracle_impl(
@@ -227,7 +205,6 @@ def _densenet_bn_tail_kernel(
     HW=196,
     K_TOTAL=784,
     BLOCK_K=1024,
-    BLEND_ALPHA=1.0,
     num_warps=8,
 )
 @oracle_impl(
@@ -236,7 +213,6 @@ def _densenet_bn_tail_kernel(
     HW=49,
     K_TOTAL=196,
     BLOCK_K=256,
-    BLEND_ALPHA=0.6,
     num_warps=4,
 )
 def oracle_forward(
@@ -245,7 +221,6 @@ def oracle_forward(
     HW: int,
     K_TOTAL: int,
     BLOCK_K: int,
-    BLEND_ALPHA: float,
     num_warps: int,
 ):
     (
@@ -318,7 +293,6 @@ def oracle_forward(
         HW=HW,
         K_TOTAL=K_TOTAL,
         BLOCK_K=BLOCK_K,
-        BLEND_ALPHA=BLEND_ALPHA,
         num_warps=num_warps,
         num_stages=3,
     )
