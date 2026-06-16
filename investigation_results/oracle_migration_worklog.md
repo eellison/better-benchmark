@@ -645,6 +645,8 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 246 `sum_sum_sum_ddcfccfb8340`: returned to `needs_work`; final retry checks and numerics gate pass all 4 points with no CUDAGraph warnings, but the large `8185fd2d` point remains `BAD_ORACLE` (`1969.02us` vs `1180.45us`), while the other points are `1AT_FLOOR_2GOOD`; oracle candidate was not committed.
 - Row 402 `sum_6d8612892024`: parent-verified after restoring the local passing oracle candidate; 4/4 checks plus no-skip pass, numerics gate passes, locked H100 fallback bench `1AT_FLOOR_3GOOD` with no CUDAGraph warnings (`165.31/162.37us`, `385.41/559.23us`, `261.44/488.80us`, `60.26/169.50us`).
 - Row 1051 `pointwise_4254ac4c0d96`: parent-verified existing oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=183.78us`, `compile=217.76us`, ratio `1.185`).
+- Row 571 `var_mean_dc4abd356145`: parent-verified existing oracle, 3/3 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR_2GOOD` with no CUDAGraph warnings (`79.65/77.28us`, `106.82/151.94us`, `139.33/147.81us`).
+- Row 1064 `pointwise_584a8c609627`: parent-verified existing oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`112.77us` vs `135.04us`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
