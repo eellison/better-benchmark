@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 seeded-dropout residual LayerNorm training scope in one Triton row kernel, including internally generated `inductor_seeds`, seed-index-0 RNG, the returned bool mask, bf16 dropout multiply and scale before the fp32 residual add, population `var_mean(correction=0, keepdim=True)`, eps=1e-5 `rsqrt`, returned residual-add tensor, returned mean and rsqrt tensors, and final bf16 flattened affine view, whereas Inductor lowers the stochastic producer, residual add, row-normalization reduction, affine epilogue, bf16 cast/view, and sibling outputs through generic scheduler boundaries; Inductor cannot fuse this full returned-output envelope today because its norm lowering does not keep an internally seeded RNG producer and all observable side outputs resident across the fixed-hidden row reduction and affine epilogue; the fix is SCHEDULER_FUSION: teach the LayerNorm scheduler to inline `prims.inductor_seeds`/seeded dropout and emit the mask, residual-add tensor, mean, rsqrt, and bf16 affine view from one guarded row plan."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 seeded-dropout residual LayerNorm training scope in one Triton row kernel, including internally generated `inductor_seeds`, seed-index-0 RNG, the returned bool mask, bf16 dropout multiply and scale before the fp32 residual add, population `var_mean(correction=0, keepdim=True)`, eps=1e-5 `rsqrt`, returned residual-add tensor, returned mean and rsqrt tensors, and final bf16 flattened affine view, whereas Inductor lowers the stochastic producer, residual add, row-normalization reduction, affine epilogue, bf16 cast/view, and sibling outputs through generic scheduler boundaries; Inductor cannot fuse this full returned-output envelope today because its norm lowering scheduler does not keep an internally seeded RNG producer and all observable side outputs resident across the fixed-hidden row reduction and affine epilogue; the fix is SCHEDULER_FUSION: teach the LayerNorm scheduler to inline `prims.inductor_seeds`/seeded dropout and emit the mask, residual-add tensor, mean, rsqrt, and bf16 affine view from one guarded row plan."""
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
@@ -142,6 +142,92 @@ def _dropout_residual_layernorm_kernel(
     tl.store(out_ptr + offsets, affine.to(tl.bfloat16), mask=mask)
 
 
+@triton.jit
+def _dropout_residual_layernorm_2560_kernel(
+    src_ptr,
+    rng_ptr,
+    residual_ptr,
+    weight_ptr,
+    bias_ptr,
+    mask_ptr,
+    add_ptr,
+    mean_ptr,
+    rsqrt_ptr,
+    out_ptr,
+    ROWS: tl.constexpr,
+    SEED_IDX: tl.constexpr,
+    DROPOUT_P_C: tl.constexpr,
+    DROPOUT_SCALE_C: tl.constexpr,
+    EPS_C: tl.constexpr,
+    USE_SEEDED_RNG: tl.constexpr,
+):
+    row = tl.program_id(0)
+    cols0 = tl.arange(0, 2048)
+    cols1 = tl.arange(0, 512) + 2048
+    offsets0 = row * 2560 + cols0
+    offsets1 = row * 2560 + cols1
+    row_mask = row < ROWS
+
+    src0 = tl.load(src_ptr + offsets0, mask=row_mask, other=0.0, eviction_policy="evict_first")
+    src1 = tl.load(src_ptr + offsets1, mask=row_mask, other=0.0, eviction_policy="evict_first")
+    residual0 = tl.load(
+        residual_ptr + offsets0,
+        mask=row_mask,
+        other=0.0,
+        eviction_policy="evict_first",
+    ).to(tl.float32)
+    residual1 = tl.load(
+        residual_ptr + offsets1,
+        mask=row_mask,
+        other=0.0,
+        eviction_policy="evict_first",
+    ).to(tl.float32)
+
+    if USE_SEEDED_RNG:
+        seed = tl.load(rng_ptr + SEED_IDX)
+        random0 = tl.rand(seed, offsets0.to(tl.uint32))
+        random1 = tl.rand(seed, offsets1.to(tl.uint32))
+    else:
+        random0 = tl.load(rng_ptr + offsets0, mask=row_mask, other=0.0, eviction_policy="evict_first")
+        random1 = tl.load(rng_ptr + offsets1, mask=row_mask, other=0.0, eviction_policy="evict_first")
+
+    threshold = tl.full((2048,), DROPOUT_P_C, tl.float32).to(tl.bfloat16)
+    keep0 = random0.to(tl.bfloat16) > threshold
+    keep1 = random1.to(tl.bfloat16) > tl.full((512,), DROPOUT_P_C, tl.float32).to(tl.bfloat16)
+    tl.store(mask_ptr + offsets0, keep0, mask=row_mask)
+    tl.store(mask_ptr + offsets1, keep1, mask=row_mask)
+
+    dropped0 = tl.where(keep0, src0, 0.0).to(tl.bfloat16)
+    dropped1 = tl.where(keep1, src1, 0.0).to(tl.bfloat16)
+    scaled0 = _f32_mul(dropped0.to(tl.float32), DROPOUT_SCALE_C).to(tl.bfloat16)
+    scaled1 = _f32_mul(dropped1.to(tl.float32), DROPOUT_SCALE_C).to(tl.bfloat16)
+    x0 = _f32_add(residual0, scaled0.to(tl.float32))
+    x1 = _f32_add(residual1, scaled1.to(tl.float32))
+    tl.store(add_ptr + offsets0, x0, mask=row_mask)
+    tl.store(add_ptr + offsets1, x1, mask=row_mask)
+
+    mean = (tl.sum(x0, axis=0) + tl.sum(x1, axis=0)) / 2560.0
+    centered0 = _f32_sub(x0, mean)
+    centered1 = _f32_sub(x1, mean)
+    var = (
+        tl.sum(_f32_mul(centered0, centered0), axis=0)
+        + tl.sum(_f32_mul(centered1, centered1), axis=0)
+    ) / 2560.0
+    invstd = libdevice.rsqrt(_f32_add(var, EPS_C))
+
+    weight0 = tl.load(weight_ptr + cols0, eviction_policy="evict_last").to(tl.float32)
+    weight1 = tl.load(weight_ptr + cols1, eviction_policy="evict_last").to(tl.float32)
+    bias0 = tl.load(bias_ptr + cols0, eviction_policy="evict_last").to(tl.float32)
+    bias1 = tl.load(bias_ptr + cols1, eviction_policy="evict_last").to(tl.float32)
+    affine0 = _f32_add(_f32_mul(_f32_mul(centered0, invstd), weight0), bias0)
+    affine1 = _f32_add(_f32_mul(_f32_mul(centered1, invstd), weight1), bias1)
+
+    tl.store(mean_ptr + row, mean, mask=row_mask)
+    tl.store(rsqrt_ptr + row, invstd, mask=row_mask)
+    tl.store(out_ptr + offsets0, affine0.to(tl.bfloat16), mask=row_mask)
+    tl.store(out_ptr + offsets1, affine1.to(tl.bfloat16), mask=row_mask)
+
+
 def _contiguous_stride(shape):
     stride = []
     running = 1
@@ -242,6 +328,75 @@ def _launch(
         device=arg0_1.device,
         dtype=torch.bfloat16,
     )
+
+    if hidden == 2560:
+        grid_2560 = (rows,)
+        if torch.cuda.is_current_stream_capturing():
+            seeds = torch.ops.prims.inductor_seeds.default(SEED_COUNT, arg0_1.device)
+            _dropout_residual_layernorm_2560_kernel[grid_2560](
+                arg0_1,
+                seeds,
+                arg1_1,
+                arg2_1,
+                arg3_1,
+                gt,
+                add,
+                mean,
+                rsqrt,
+                out,
+                ROWS=rows,
+                SEED_IDX=SEED_INDEX,
+                DROPOUT_P_C=DROPOUT_P,
+                DROPOUT_SCALE_C=DROPOUT_SCALE,
+                EPS_C=EPS,
+                USE_SEEDED_RNG=True,
+                num_warps=num_warps,
+                num_stages=num_stages,
+            )
+            return seeds, gt, add, mean, rsqrt, out
+
+        seeds, random = _seeds_and_random_for_eager_check(random_shape, device=arg0_1.device)
+        _dropout_residual_layernorm_2560_kernel[grid_2560](
+            arg0_1,
+            seeds,
+            arg1_1,
+            arg2_1,
+            arg3_1,
+            gt,
+            add,
+            mean,
+            rsqrt,
+            out,
+            ROWS=rows,
+            SEED_IDX=SEED_INDEX,
+            DROPOUT_P_C=DROPOUT_P,
+            DROPOUT_SCALE_C=DROPOUT_SCALE,
+            EPS_C=EPS,
+            USE_SEEDED_RNG=True,
+            num_warps=num_warps,
+            num_stages=num_stages,
+        )
+        _dropout_residual_layernorm_2560_kernel[grid_2560](
+            arg0_1,
+            random,
+            arg1_1,
+            arg2_1,
+            arg3_1,
+            gt,
+            add,
+            mean,
+            rsqrt,
+            out,
+            ROWS=rows,
+            SEED_IDX=SEED_INDEX,
+            DROPOUT_P_C=DROPOUT_P,
+            DROPOUT_SCALE_C=DROPOUT_SCALE,
+            EPS_C=EPS,
+            USE_SEEDED_RNG=False,
+            num_warps=num_warps,
+            num_stages=num_stages,
+        )
+        return seeds, gt, add, mean, rsqrt, out
 
     grid = (triton.cdiv(rows, ROW_BLOCK),)
     if torch.cuda.is_current_stream_capturing():
