@@ -635,6 +635,9 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1053 `pointwise_43588d3e9780`: claimed for final scatter/stencil Triton or capture-support retry.
 - Row 1379 `sum_sum_sum_4aae5698dd79`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=132.22us`, `compile=286.14us`, ratio `2.164`); large sentinel-scale diffs pass the numerics gate.
 - Row 1120 `pointwise_ac8d8e1c9b73`: worker checks pass including stochastic exactness, but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=14.21us`, `compile=12.35us`, ratio `0.869`); remote re-claimed for a third-worker retry, so the candidate was not committed.
+- Row 1053 `pointwise_43588d3e9780`: returned to `needs_work`; final retry was still a reference wrapper rather than a slim Triton oracle and skipped-gate H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=2744.29us`, `compile=286.72us`, ratio `0.104`).
+- Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; different-worker retry still fails output 3 (`max_diff=8.00`) and skipped-gate H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=358.02us`, `compile=163.65us`, ratio `0.457`).
+- Row 1120 `pointwise_ac8d8e1c9b73`: returned to `needs_work`; third-worker retry checks pass including stochastic exactness, but locked H100 fallback bench remains `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=14.21us`, `compile=12.35us`, ratio `0.869`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
