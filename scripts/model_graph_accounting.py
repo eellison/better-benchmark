@@ -410,6 +410,103 @@ def load_timings(timings_path: Path) -> dict[str, dict]:
 # Reporting
 # ============================================================================
 
+def _rollup_occurrence_timings(
+    timing: dict | None,
+    occs: list["PartitionOccurrence"],
+) -> dict:
+    """Sum oracle/compile time over occurrences, matching each to ITS shape.
+
+    The old roll-up booked every occurrence at one per-dir number (the min
+    across all of a dir's shape points), undercounting by up to ~144x when a
+    dir's points span a wide shape range. The correct roll-up looks up the
+    timing for each occurrence's own ``shape_hash`` and sums.
+
+    Uses ``timing['points_by_shape']`` (shape_hash -> {oracle_us, compile_us}).
+    Occurrences whose shape_hash has no timed point fall back to the dir's
+    representative ``oracle_us``/``compile_us`` (a MEDIAN, never the min). If
+    ``points_by_shape`` is absent (older timings file) we warn and fall back to
+    the legacy per-dir-number behaviour.
+
+    Returns: {oracle_us_total, compile_us_total, matched_occ, total_occ, mode}
+    where ``matched_occ`` is how many occurrences hit a per-shape point.
+    """
+    total_occ = len(occs)
+    if not timing:
+        return {
+            "oracle_us_total": None,
+            "compile_us_total": None,
+            "matched_occ": 0,
+            "total_occ": total_occ,
+            "mode": "untimed",
+        }
+
+    rep_oracle = timing.get("oracle_us")
+    rep_compile = timing.get("compile_us")
+    by_shape = timing.get("points_by_shape")
+
+    if not isinstance(by_shape, dict):
+        # Backward compat: legacy timings file without per-shape data.
+        if not _rollup_occurrence_timings._warned_legacy:
+            print(
+                "  [warn] timings lack 'points_by_shape'; falling back to "
+                "legacy per-dir roll-up (oracle_us * occurrences) which can "
+                "undercount wide-shape dirs. Re-run bench_parallel --oracles "
+                "to regenerate.",
+                file=sys.stderr,
+            )
+            _rollup_occurrence_timings._warned_legacy = True
+        return {
+            "oracle_us_total": (
+                round(rep_oracle * total_occ, 2)
+                if isinstance(rep_oracle, (int, float)) else None
+            ),
+            "compile_us_total": (
+                round(rep_compile * total_occ, 2)
+                if isinstance(rep_compile, (int, float)) else None
+            ),
+            "matched_occ": 0,
+            "total_occ": total_occ,
+            "mode": "legacy",
+        }
+
+    oracle_sum = 0.0
+    compile_sum = 0.0
+    have_oracle = False
+    have_compile = False
+    matched = 0
+    for occ in occs:
+        point = by_shape.get(occ.shape_hash)
+        o_us = point.get("oracle_us") if isinstance(point, dict) else None
+        c_us = point.get("compile_us") if isinstance(point, dict) else None
+        if isinstance(o_us, (int, float)):
+            matched += 1
+        else:
+            # No per-shape timing for this occurrence: use the dir median.
+            o_us = rep_oracle if isinstance(rep_oracle, (int, float)) else None
+        if not isinstance(c_us, (int, float)):
+            c_us = rep_compile if isinstance(rep_compile, (int, float)) else None
+        if isinstance(o_us, (int, float)):
+            oracle_sum += o_us
+            have_oracle = True
+        if isinstance(c_us, (int, float)):
+            compile_sum += c_us
+            have_compile = True
+
+    mode = "per_shape" if matched == total_occ else (
+        "partial" if matched else "fallback_only"
+    )
+    return {
+        "oracle_us_total": round(oracle_sum, 2) if have_oracle else None,
+        "compile_us_total": round(compile_sum, 2) if have_compile else None,
+        "matched_occ": matched,
+        "total_occ": total_occ,
+        "mode": mode,
+    }
+
+
+_rollup_occurrence_timings._warned_legacy = False
+
+
 def _pattern_rows(acc: ModelAccounting, hash_to_repro: dict[str, str],
                   timings: dict[str, dict],
                   opset_to_repros: dict[tuple, list[str]]) -> list[dict]:
@@ -438,6 +535,7 @@ def _pattern_rows(acc: ModelAccounting, hash_to_repro: dict[str, str],
         if timing:
             oracle_us = timing.get("oracle_us")
             compile_us = timing.get("compile_us")
+        roll = _rollup_occurrence_timings(timing, occs)
         rows.append({
             "pattern_hash": phash,
             "repro_dir": repro_dir,
@@ -453,12 +551,11 @@ def _pattern_rows(acc: ModelAccounting, hash_to_repro: dict[str, str],
             "max_output_shape": rep.max_output_shape,
             "oracle_us": oracle_us,
             "compile_us": compile_us,
-            "oracle_us_total": (
-                round(oracle_us * len(occs), 2) if oracle_us is not None else None
-            ),
-            "compile_us_total": (
-                round(compile_us * len(occs), 2) if compile_us is not None else None
-            ),
+            "oracle_us_total": roll["oracle_us_total"],
+            "compile_us_total": roll["compile_us_total"],
+            "matched_occ": roll["matched_occ"],
+            "total_occ": roll["total_occ"],
+            "rollup_mode": roll["mode"],
         })
     rows.sort(key=lambda r: -r["occurrences"])
     return rows
@@ -500,6 +597,10 @@ def build_model_report(acc: ModelAccounting, hash_to_repro: dict[str, str],
     total_compile_us = round(sum(
         r["compile_us_total"] for r in timed if r["compile_us_total"] is not None
     ), 2)
+    # Per-shape coverage: how many occurrences (in timed patterns) were priced
+    # at their OWN shape vs fell back to the dir median.
+    matched_occ_total = sum(r.get("matched_occ", 0) for r in timed)
+    timed_occ_total = sum(r.get("total_occ", r["occurrences"]) for r in timed)
 
     # For manifest patterns we did NOT re-find, check whether a re-found
     # partition is trace-equivalent (same ops modulo reshape->view / clone
@@ -546,6 +647,8 @@ def build_model_report(acc: ModelAccounting, hash_to_repro: dict[str, str],
         "fusible_oracle_us_total": total_oracle_us,
         "fusible_compile_us_total": total_compile_us,
         "timed_patterns": len(timed),
+        "shape_matched_occurrences": matched_occ_total,
+        "timed_occurrences": timed_occ_total,
         "manifest": {
             "patterns": sorted(manifest_set),
             "in_manifest_not_found": sorted(manifest_set - found_hashes),
@@ -575,10 +678,15 @@ def format_text_report(report: dict) -> str:
     )
     if report["timed_patterns"]:
         lines.append(
-            f"Fusible time projection (SUM of us x occurrences over "
+            f"Fusible time projection (SUM of per-shape us over "
             f"{report['timed_patterns']} timed patterns): "
             f"oracle={report['fusible_oracle_us_total']}us "
             f"compile={report['fusible_compile_us_total']}us"
+        )
+        lines.append(
+            f"  Per-shape coverage: {report['shape_matched_occurrences']}/"
+            f"{report['timed_occurrences']} occurrences priced at own shape "
+            f"(rest fell back to dir median)"
         )
     if report["errors"]:
         lines.append(f"ERRORS: {report['errors']}")

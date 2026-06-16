@@ -429,49 +429,141 @@ def _oracle_dir_name(task_key: str) -> str:
     return path.parent.name if path.name == "repro.py" else path.name
 
 
+def _median(values: list[float]) -> float:
+    """Median of a non-empty numeric list."""
+    s = sorted(values)
+    n = len(s)
+    mid = n // 2
+    if n % 2:
+        return s[mid]
+    return (s[mid - 1] + s[mid]) / 2.0
+
+
 def _aggregate_oracle_timings(all_results: dict) -> dict:
     """Flatten per-dir oracle bench results into the model-tool timings schema.
 
-    model_graph_accounting.py --timings consumes {dir_name -> {oracle_us:...}}.
-    Per dir we take the representative oracle_us as the MIN across valid shape
-    points (status not in _INVALID_STATUSES and oracle_us present). Dirs with no
-    valid point are omitted (so the model tool just shows them untimed rather
-    than picking up a bogus number).
+    model_graph_accounting.py --timings consumes {dir_name -> {...}}. Each
+    point is keyed by SHAPE HASH (the trailing underscore token of the result
+    label, which is ``<model>_<shape_hash[:8]>``) so the model tool can match
+    each occurrence to the oracle timing for ITS shape. A dir's shape points
+    can span ~144x (e.g. 7us..1069us), so booking every occurrence at a single
+    per-dir number badly mis-prices the roll-up.
+
+    Emits per dir:
+      - ``points_by_shape``: {shape_hash -> {oracle_us, compile_us, status,
+        ratio, fallback}} — the authoritative per-shape data the roll-up uses.
+      - ``points``: the original {label -> {...}} dict (back-compat).
+      - ``oracle_us`` / ``compile_us``: representative MEDIAN across valid
+        points (fallback only, used when an occurrence's shape_hash has no
+        timed point; NOT the floor for matched occurrences).
+
+    Floor validity excludes ``_INVALID_STATUSES`` AND ``BAD_ORACLE`` (an oracle
+    slower than compile is not a valid floor). Dirs with no valid point are
+    NOT silently dropped: they are recorded under the top-level ``__failures__``
+    key with a reason, so the file accounts for every processed dir.
     """
     from oracle_harness import _INVALID_STATUSES
 
+    # Local exclusion set; do not mutate the shared frozenset.
+    floor_excluded = _INVALID_STATUSES | {"BAD_ORACLE"}
+
     flat: dict[str, dict] = {}
+    failures: dict[str, dict] = {}
     for task_key, results in all_results.items():
         dir_name = _oracle_dir_name(str(task_key))
         points: dict[str, dict] = {}
-        valid_us = []
-        valid_compile = []
-        for label, point in results.items():
-            if label in _RESERVED_RESULT_LABELS or not isinstance(point, dict):
-                continue
+        points_by_shape: dict[str, dict] = {}
+        valid_us: list[float] = []
+        valid_compile: list[float] = []
+        n_total_points = 0
+        n_bad_oracle = 0
+        for label, point in _metric_result_items(results):
+            n_total_points += 1
             status = point.get("status")
             us = point.get("oracle_us")
+            compile_us = point.get("compile_us")
+            ratio = point.get("ratio")
+            # dispatch.fallback marks a cross-hardware fallback (no matching
+            # tuned impl for the running GPU); preserve it for visibility.
+            fallback = None
+            dispatch = point.get("dispatch")
+            if isinstance(dispatch, dict):
+                fallback = dispatch.get("fallback")
             points[label] = {
                 "oracle_us": us,
-                "compile_us": point.get("compile_us"),
-                "ratio": point.get("ratio"),
+                "compile_us": compile_us,
+                "ratio": ratio,
                 "status": status,
             }
-            if status not in _INVALID_STATUSES and isinstance(us, (int, float)):
+            # Key per-shape data by the trailing shape-hash token of the label.
+            shape_hash = label.rsplit("_", 1)[-1]
+            shape_entry = {
+                "oracle_us": us,
+                "compile_us": compile_us,
+                "ratio": ratio,
+                "status": status,
+                "fallback": fallback,
+            }
+            existing = points_by_shape.get(shape_hash)
+            # If two labels collapse to the same shape_hash, keep the valid /
+            # faster oracle point (prefer a usable floor over a bad one).
+            if existing is None or _prefer_shape_point(shape_entry, existing,
+                                                        floor_excluded):
+                points_by_shape[shape_hash] = shape_entry
+            if status == "BAD_ORACLE":
+                n_bad_oracle += 1
+            if status not in floor_excluded and isinstance(us, (int, float)):
                 valid_us.append(us)
-                if isinstance(point.get("compile_us"), (int, float)):
-                    valid_compile.append(point["compile_us"])
+                if isinstance(compile_us, (int, float)):
+                    valid_compile.append(compile_us)
         if not valid_us:
+            # Account for the dir instead of dropping it.
+            if n_total_points == 0:
+                reason = "no_points"
+            elif n_bad_oracle == n_total_points:
+                reason = "all_bad_oracle"
+            else:
+                reason = "no_valid_point"
+            failures[dir_name] = {
+                "reason": reason,
+                "n_points": n_total_points,
+                "n_bad_oracle": n_bad_oracle,
+                "points": points,
+            }
             continue
         entry = {
-            "oracle_us": round(min(valid_us), 2),
+            # Representative fallback value: MEDIAN (not min) of valid points.
+            "oracle_us": round(_median(valid_us), 2),
             "n_points": len(valid_us),
             "points": points,
+            "points_by_shape": points_by_shape,
         }
         if valid_compile:
-            entry["compile_us"] = round(min(valid_compile), 2)
+            entry["compile_us"] = round(_median(valid_compile), 2)
         flat[dir_name] = entry
+    if failures:
+        flat["__failures__"] = failures
     return flat
+
+
+def _prefer_shape_point(candidate: dict, existing: dict, floor_excluded) -> bool:
+    """True if ``candidate`` is a better per-shape point than ``existing``.
+
+    Prefer a floor-valid point over an invalid one; among two valid points
+    prefer the faster oracle (the achievable floor for that shape).
+    """
+    cand_us = candidate.get("oracle_us")
+    exist_us = existing.get("oracle_us")
+    cand_valid = (candidate.get("status") not in floor_excluded
+                  and isinstance(cand_us, (int, float)))
+    exist_valid = (existing.get("status") not in floor_excluded
+                   and isinstance(exist_us, (int, float)))
+    if cand_valid != exist_valid:
+        return cand_valid
+    if cand_valid and exist_valid:
+        return cand_us < exist_us
+    # Both invalid: keep whichever has a numeric oracle_us, else keep existing.
+    return isinstance(cand_us, (int, float)) and not isinstance(exist_us, (int, float))
 
 
 def _write_oracle_timings_output(output_path: Path, all_results: dict) -> None:
@@ -1250,8 +1342,11 @@ def main():
     if args.output and args.oracles:
         _write_oracle_timings_output(args.output, all_results)
         timed = _aggregate_oracle_timings(all_results)
+        n_priced = sum(1 for k in timed if not k.startswith("_"))
+        n_failed = len(timed.get("__failures__", {}))
         print(f"[output] Wrote {args.output} "
-              f"({len(timed)} oracle dirs with valid oracle_us)")
+              f"({n_priced} oracle dirs with valid oracle_us, "
+              f"{n_failed} unpriced)")
     elif args.output:
         _write_results_output(
             args.output,
