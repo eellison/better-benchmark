@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete GhostNet bf16 BN-inference affine, explicit bf16 cast, NaN-preserving ReLU, 7x7 spatial mean, and returned keepdim as_strided output in one Triton reduction, whereas Inductor lowers the broadcast normalization producer and spatial mean through generic normalization reduction code; Inductor cannot do this today because the scheduler does not sink the fixed BN-affine/ReLU producer into the small spatial mean while preserving the bf16 cast boundary and output stride; the fix is SCHEDULER_FUSION: add a guarded BN-affine activation spatial-mean lowering that emits the final keepdim as_strided output directly."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete GhostNet bf16 BN-inference affine, explicit bf16 cast, NaN-preserving ReLU, 7x7 spatial mean, and returned keepdim as_strided output in one Triton reduction, whereas Inductor lowers the broadcast normalization producer and spatial mean through generic norm reduction code; Inductor cannot do this today because the scheduler does not sink the fixed BN-affine/ReLU producer into the small spatial mean while preserving the bf16 cast boundary and output stride; the fix is SCHEDULER_FUSION: add a guarded BN-affine activation spatial-mean lowering that emits the final keepdim as_strided output directly."""
 
 import torch
 import triton
@@ -18,39 +18,17 @@ ROWS = BATCH * CHANNELS
 
 @triton.jit
 def _f32_add(a, b):
-    return tl.inline_asm_elementwise(
-        "add.rn.f32 $0, $1, $2;",
-        constraints="=f,f,f",
-        args=[a, b],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
+    return a + b
 
 
 @triton.jit
 def _f32_sub(a, b):
-    return tl.inline_asm_elementwise(
-        "sub.rn.f32 $0, $1, $2;",
-        constraints="=f,f,f",
-        args=[a, b],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
+    return a - b
 
 
 @triton.jit
 def _f32_mul(a, b):
-    return tl.inline_asm_elementwise(
-        "mul.rn.f32 $0, $1, $2;",
-        constraints="=f,f,f",
-        args=[a, b],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
-
+    return a * b
 
 @triton.jit
 def _bn_relu_mean_kernel(
@@ -103,7 +81,7 @@ def _bn_relu_mean_kernel(
     tl.store(out_ptr + rows, pooled.to(tl.bfloat16), mask=row_mask)
 
 
-@oracle_impl(hardware="B200", point="3e244c1d", BLOCK_ROWS=16, BLOCK_HW=64, num_warps=4)
+@oracle_impl(hardware="B200", point="3e244c1d", BLOCK_ROWS=64, BLOCK_HW=64, num_warps=2)
 def oracle_forward(inputs, *, BLOCK_ROWS, BLOCK_HW, num_warps):
     running_mean, x, running_var, weight, bias, _shape, _stride = inputs
     out = torch.empty_strided(
