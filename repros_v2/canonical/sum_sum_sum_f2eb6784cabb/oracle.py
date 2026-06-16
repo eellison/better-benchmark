@@ -110,48 +110,87 @@ def _first_spatial_summary_kernel(
     W: tl.constexpr,
     HW: tl.constexpr,
     RESIDUAL_CHANNELS_LAST: tl.constexpr,
+    BLOCK_C: tl.constexpr,
     BLOCK_HW: tl.constexpr,
+    BLOCK_HC: tl.constexpr,
 ):
-    c = tl.program_id(0)
-    hw = tl.program_id(1) * BLOCK_HW + tl.arange(0, BLOCK_HW)
-    n = tl.arange(0, 128)
+    c_base = tl.program_id(0) * BLOCK_C
+    hw_base = tl.program_id(1) * BLOCK_HW
+    n = tl.arange(0, 128)[:, None]
+    lane = tl.arange(0, BLOCK_HC)
+    hw_rel = lane // BLOCK_C
+    c = c_base + lane - hw_rel * BLOCK_C
+    hw = hw_base + hw_rel
     h = hw // W
     w = hw - h * W
-    hw_mask = hw < HW
+    mask = (c < C) & (hw < HW)
 
-    cl_offsets = n[:, None] * C * HW + h[None, :] * W * C + w[None, :] * C + c
+    cl_offsets = n * C * HW + h * W * C + w * C + c
     if RESIDUAL_CHANNELS_LAST:
         residual_offsets = cl_offsets
     else:
-        residual_offsets = n[:, None] * C * HW + c * HW + hw[None, :]
+        residual_offsets = n * C * HW + c * HW + hw
 
-    x = tl.load(x_ptr + cl_offsets, mask=hw_mask[None, :], other=0.0).to(tl.float32)
-    y = tl.load(y_ptr + cl_offsets, mask=hw_mask[None, :], other=0.0).to(tl.float32)
-    residual = tl.load(residual_ptr + residual_offsets, mask=hw_mask[None, :], other=0.0).to(tl.float32)
+    load_mask = mask[None, :]
+    x = tl.load(x_ptr + cl_offsets, mask=load_mask, other=0.0).to(tl.float32)
+    y = tl.load(y_ptr + cl_offsets, mask=load_mask, other=0.0).to(tl.float32)
+    residual = tl.load(residual_ptr + residual_offsets, mask=load_mask, other=0.0).to(tl.float32)
+    spatial_bias = tl.load(spatial_bias_ptr + h * W * C + w * C + c, mask=mask, other=0.0).to(tl.float32)
 
-    mean1 = tl.load(mean1_ptr + c).to(tl.float32)
-    inv1 = tl.load(inv1_ptr + c).to(tl.float32)
-    weight1 = tl.load(weight1_ptr + c).to(tl.float32)
-    bias1 = tl.load(bias1_ptr + c).to(tl.float32)
-    mean2 = tl.load(mean2_ptr + c).to(tl.float32)
-    spatial_bias = tl.load(
-        spatial_bias_ptr + h * W * C + w * C + c,
-        mask=hw_mask,
-        other=0.0,
-    ).to(tl.float32)
+    mean1 = tl.load(mean1_ptr + c, mask=mask, other=0.0).to(tl.float32)
+    inv1 = tl.load(inv1_ptr + c, mask=mask, other=0.0).to(tl.float32)
+    weight1 = tl.load(weight1_ptr + c, mask=mask, other=0.0).to(tl.float32)
+    bias1 = tl.load(bias1_ptr + c, mask=mask, other=0.0).to(tl.float32)
+    mean2 = tl.load(mean2_ptr + c, mask=mask, other=0.0).to(tl.float32)
 
     affine = ((y - mean1) * inv1) * weight1 + bias1
-    norm = affine.to(tl.bfloat16).to(tl.float32) + spatial_bias[None, :] - mean2
-
-    sum_x_hw = tl.sum(x, axis=0)
-    sum_norm_hw = tl.sum(norm, axis=0)
-    sum_residual_hw = tl.sum(residual, axis=0)
-
-    base = c * HW + hw
+    norm = affine.to(tl.bfloat16).to(tl.float32) + spatial_bias - mean2
+    out_offsets = hw * C + c
     plane = C * HW
-    tl.store(summaries_ptr + base, sum_x_hw, mask=hw_mask)
-    tl.store(summaries_ptr + plane + base, sum_norm_hw, mask=hw_mask)
-    tl.store(summaries_ptr + 2 * plane + base, sum_residual_hw, mask=hw_mask)
+
+    tl.store(summaries_ptr + out_offsets, tl.sum(x, axis=0), mask=mask)
+    tl.store(summaries_ptr + plane + out_offsets, tl.sum(x * norm, axis=0), mask=mask)
+    tl.store(summaries_ptr + 2 * plane + out_offsets, tl.sum(norm, axis=0), mask=mask)
+    tl.store(summaries_ptr + 3 * plane + out_offsets, tl.sum(residual, axis=0), mask=mask)
+
+
+@triton.jit
+def _stats1_from_spatial_kernel(
+    summaries_ptr,
+    gamma2_ptr,
+    beta2_ptr,
+    out0_ptr,
+    out1_ptr,
+    stats1_ptr,
+    C: tl.constexpr,
+    HW: tl.constexpr,
+    INV_REDUCE_VALUE: tl.constexpr,
+    BLOCK_C: tl.constexpr,
+    BLOCK_HW_ALL: tl.constexpr,
+):
+    c_vec = tl.program_id(0) * BLOCK_C + tl.arange(0, BLOCK_C)
+    hw = tl.arange(0, BLOCK_HW_ALL)[:, None]
+    mask = (c_vec < C) & (hw < HW)
+    offsets = hw * C + c_vec
+    plane = C * HW
+
+    sum_x_hw = tl.load(summaries_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    sum_x_norm_hw = tl.load(summaries_ptr + plane + offsets, mask=mask, other=0.0).to(tl.float32)
+    sum_x = tl.sum(sum_x_hw, axis=0)
+    sum_x_norm = tl.sum(sum_x_norm_hw, axis=0)
+
+    gamma2 = tl.load(gamma2_ptr + c_vec, mask=c_vec < C, other=0.0).to(tl.float32)
+    beta2 = tl.load(beta2_ptr + c_vec, mask=c_vec < C, other=0.0).to(tl.float32)
+    mean_x = sum_x * INV_REDUCE_VALUE
+    norm_scale = (sum_x_norm * INV_REDUCE_VALUE) * (gamma2 * gamma2)
+    grad_scale = gamma2 * beta2
+
+    cmask = c_vec < C
+    tl.store(out0_ptr + c_vec, sum_x, mask=cmask)
+    tl.store(out1_ptr + c_vec, sum_x_norm * gamma2, mask=cmask)
+    tl.store(stats1_ptr + c_vec, mean_x, mask=cmask)
+    tl.store(stats1_ptr + C + c_vec, norm_scale, mask=cmask)
+    tl.store(stats1_ptr + 2 * C + c_vec, grad_scale, mask=cmask)
 
 
 @triton.jit
@@ -163,24 +202,28 @@ def _first_finalize_kernel(
     H: tl.constexpr,
     W: tl.constexpr,
     HW: tl.constexpr,
+    BLOCK_C: tl.constexpr,
     BLOCK_HW: tl.constexpr,
+    BLOCK_HC: tl.constexpr,
 ):
-    c = tl.program_id(0)
-    hw = tl.arange(0, BLOCK_HW)
-    mask = hw < HW
-    base = c * HW + hw
+    c_base = tl.program_id(0) * BLOCK_C
+    hw_base = tl.program_id(1) * BLOCK_HW
+    lane = tl.arange(0, BLOCK_HC)
+    hw_rel = lane // BLOCK_C
+    c = c_base + lane - hw_rel * BLOCK_C
+    hw = hw_base + hw_rel
+    mask = (c < C) & (hw < HW)
+    offsets = hw * C + c
     plane = C * HW
 
-    sum_x_hw = tl.load(summaries_ptr + base, mask=mask, other=0.0).to(tl.float32)
-    sum_norm_hw = tl.load(summaries_ptr + plane + base, mask=mask, other=0.0).to(tl.float32)
-    sum_residual_hw = tl.load(summaries_ptr + 2 * plane + base, mask=mask, other=0.0).to(tl.float32)
+    sum_x_hw = tl.load(summaries_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    sum_norm_hw = tl.load(summaries_ptr + 2 * plane + offsets, mask=mask, other=0.0).to(tl.float32)
+    sum_residual_hw = tl.load(summaries_ptr + 3 * plane + offsets, mask=mask, other=0.0).to(tl.float32)
 
-    mean_x = tl.load(stats1_ptr + c).to(tl.float32)
-    norm_scale = tl.load(stats1_ptr + C + c).to(tl.float32)
-    grad_scale = tl.load(stats1_ptr + 2 * C + c).to(tl.float32)
-
+    mean_x = tl.load(stats1_ptr + c, mask=mask, other=0.0).to(tl.float32)
+    norm_scale = tl.load(stats1_ptr + C + c, mask=mask, other=0.0).to(tl.float32)
+    grad_scale = tl.load(stats1_ptr + 2 * C + c, mask=mask, other=0.0).to(tl.float32)
     out2 = sum_residual_hw + grad_scale * sum_x_hw - grad_scale * norm_scale * sum_norm_hw - grad_scale * mean_x * 128.0
-
     tl.store(out2_ptr + c * HW + hw, out2, mask=mask)
 
 
@@ -220,11 +263,7 @@ def _rounded_add2_partial_kernel(
     x = tl.load(x_ptr + cl_offsets, mask=hw_mask, other=0.0).to(tl.float32)
     y = tl.load(y_ptr + cl_offsets, mask=hw_mask, other=0.0).to(tl.float32)
     residual = tl.load(residual_ptr + out_offsets, mask=hw_mask, other=0.0).to(tl.float32)
-    spatial_bias = tl.load(
-        spatial_bias_ptr + h * W * C + w * C + c,
-        mask=hw_mask,
-        other=0.0,
-    ).to(tl.float32)
+    spatial_bias = tl.load(spatial_bias_ptr + h * W * C + w * C + c, mask=hw_mask, other=0.0).to(tl.float32)
 
     mean1 = tl.load(mean1_ptr + c).to(tl.float32)
     inv1 = tl.load(inv1_ptr + c).to(tl.float32)
@@ -237,11 +276,7 @@ def _rounded_add2_partial_kernel(
 
     affine = ((y - mean1) * inv1) * weight1 + bias1
     norm = affine.to(tl.bfloat16).to(tl.float32) + spatial_bias - mean2
-    mul8 = norm * norm_scale
-    sub2 = x - mul8
-    sub3 = sub2 - mean_x
-    mul9 = sub3 * grad_scale
-    add2 = residual + mul9
+    add2 = residual + (x - norm * norm_scale - mean_x) * grad_scale
     add2_bf16 = add2.to(tl.bfloat16)
     add2_f32 = add2_bf16.to(tl.float32)
     sub4 = y - mean1
@@ -263,6 +298,7 @@ def _second_finalize_kernel(
     stats2_ptr,
     C: tl.constexpr,
     INV_REDUCE_VALUE: tl.constexpr,
+    BLOCK_C: tl.constexpr,
     BLOCK_N: tl.constexpr,
 ):
     c = tl.program_id(0)
@@ -270,7 +306,6 @@ def _second_finalize_kernel(
     mask = n < 128
     base = c * 128 + n
     plane = C * 128
-
     sum4_parts = tl.load(second_summaries_ptr + base, mask=mask, other=0.0).to(tl.float32)
     sum5_parts = tl.load(second_summaries_ptr + plane + base, mask=mask, other=0.0).to(tl.float32)
     sum4 = tl.sum(sum4_parts, axis=0)
@@ -304,16 +339,17 @@ def _epilogue_partial_kernel(
     TOTAL_REDUCE: tl.constexpr,
     NUM_TILES: tl.constexpr,
     OUTPUT_CHANNELS_LAST: tl.constexpr,
+    BLOCK_C: tl.constexpr,
     BLOCK_R: tl.constexpr,
 ):
     c = tl.program_id(0)
     tile = tl.program_id(1)
     r = tile * BLOCK_R + tl.arange(0, BLOCK_R)
-    mask = r < TOTAL_REDUCE
     n = r // HW
     hw = r - n * HW
     h = hw // W
     w = hw - h * W
+    mask = r < TOTAL_REDUCE
     cl_offsets = n * C * HW + h * W * C + w * C + c
     if OUTPUT_CHANNELS_LAST:
         out_offsets = cl_offsets
@@ -327,15 +363,11 @@ def _epilogue_partial_kernel(
     correction = tl.load(stats2_ptr + C + c).to(tl.float32)
     out_scale = tl.load(stats2_ptr + 2 * C + c).to(tl.float32)
 
-    sub4 = y - mean1
-    mul17 = sub4 * correction
-    sub5 = add2 - mul17
-    sub6 = sub5 - mean_out
-    out = sub6 * out_scale
+    out = (add2 - (y - mean1) * correction - mean_out) * out_scale
     out_bf16 = out.to(tl.bfloat16)
     tl.store(out5_ptr + out_offsets, out_bf16, mask=mask)
-    summed = tl.sum(tl.where(mask, out_bf16.to(tl.float32), 0.0), axis=0)
-    tl.store(partial6_ptr + c * NUM_TILES + tile, summed)
+    partial = tl.sum(tl.where(mask, out_bf16.to(tl.float32), 0.0), axis=0)
+    tl.store(partial6_ptr + c * NUM_TILES + tile, partial)
 
 
 @triton.jit
@@ -344,6 +376,7 @@ def _final_sum6_kernel(
     out6_ptr,
     C: tl.constexpr,
     NUM_TILES: tl.constexpr,
+    BLOCK_C: tl.constexpr,
     BLOCK_TILES: tl.constexpr,
 ):
     c = tl.program_id(0)
@@ -357,6 +390,7 @@ def _final_sum6_kernel(
 def _launch(
     inputs,
     *,
+    BLOCK_C: int,
     BLOCK_HW: int,
     CHUNK_HW: int,
     BLOCK_R: int,
@@ -371,9 +405,11 @@ def _launch(
     first_hw_tiles = triton.cdiv(hw, CHUNK_HW)
     first_tiles = N * first_hw_tiles
     residual_channels_last = residual.stride(1) == 1
+    block_hc = BLOCK_HW * BLOCK_C
+    block_hw_all = triton.next_power_of_2(hw)
 
     batch_summaries = torch.empty((2, channels, first_tiles), device=x.device, dtype=torch.float32)
-    summaries = torch.empty((3, channels, hw), device=x.device, dtype=torch.float32)
+    summaries = torch.empty((4, hw, channels), device=x.device, dtype=torch.float32)
     second_summaries = torch.empty((2, channels, N), device=x.device, dtype=torch.float32)
     stats1 = torch.empty((3, channels), device=x.device, dtype=torch.float32)
     stats2 = torch.empty((3, channels), device=x.device, dtype=torch.float32)
@@ -422,7 +458,7 @@ def _launch(
         num_warps=num_warps_summary,
         num_stages=1,
     )
-    _first_spatial_summary_kernel[(channels, triton.cdiv(hw, BLOCK_HW))](
+    _first_spatial_summary_kernel[(triton.cdiv(channels, BLOCK_C), triton.cdiv(hw, BLOCK_HW))](
         x,
         y,
         mean1,
@@ -438,11 +474,13 @@ def _launch(
         W=width,
         HW=hw,
         RESIDUAL_CHANNELS_LAST=residual_channels_last,
+        BLOCK_C=BLOCK_C,
         BLOCK_HW=BLOCK_HW,
+        BLOCK_HC=block_hc,
         num_warps=num_warps_summary,
         num_stages=4,
     )
-    _first_finalize_kernel[(channels,)](
+    _first_finalize_kernel[(triton.cdiv(channels, BLOCK_C), triton.cdiv(hw, BLOCK_HW))](
         summaries,
         out2,
         stats1,
@@ -450,7 +488,9 @@ def _launch(
         H=height,
         W=width,
         HW=hw,
-        BLOCK_HW=triton.next_power_of_2(hw),
+        BLOCK_C=BLOCK_C,
+        BLOCK_HW=BLOCK_HW,
+        BLOCK_HC=block_hc,
         num_warps=num_warps_summary,
         num_stages=4,
     )
@@ -472,7 +512,7 @@ def _launch(
         W=width,
         HW=hw,
         RESIDUAL_CHANNELS_LAST=residual_channels_last,
-        BLOCK_HW=triton.next_power_of_2(hw),
+        BLOCK_HW=block_hw_all,
         num_warps=num_warps_summary,
         num_stages=4,
     )
@@ -485,6 +525,7 @@ def _launch(
         stats2,
         C=channels,
         INV_REDUCE_VALUE=INV_REDUCE,
+        BLOCK_C=BLOCK_C,
         BLOCK_N=128,
         num_warps=num_warps_summary,
         num_stages=4,
@@ -503,6 +544,7 @@ def _launch(
         TOTAL_REDUCE=total_reduce,
         NUM_TILES=num_tiles,
         OUTPUT_CHANNELS_LAST=residual_channels_last,
+        BLOCK_C=BLOCK_C,
         BLOCK_R=BLOCK_R,
         num_warps=num_warps_reduce,
         num_stages=4,
@@ -512,6 +554,7 @@ def _launch(
         out6,
         C=channels,
         NUM_TILES=num_tiles,
+        BLOCK_C=BLOCK_C,
         BLOCK_TILES=triton.next_power_of_2(num_tiles),
         num_warps=1,
         num_stages=1,
@@ -519,12 +562,13 @@ def _launch(
     return out0, out1, out2, out3, out4, out5, out6
 
 
-@oracle_impl(hardware="B200", point="ff30dd34", BLOCK_HW=64, CHUNK_HW=196, BLOCK_R=1024, num_warps_summary=2, num_warps_reduce=4)
-@oracle_impl(hardware="B200", point="7a6295cd", BLOCK_HW=64, CHUNK_HW=196, BLOCK_R=2048, num_warps_summary=4, num_warps_reduce=8)
-@oracle_impl(hardware="B200", point="fd9590cc", BLOCK_HW=64, CHUNK_HW=64, BLOCK_R=1024, num_warps_summary=4, num_warps_reduce=4)
-def oracle_forward(inputs, *, BLOCK_HW: int, CHUNK_HW: int, BLOCK_R: int, num_warps_summary: int, num_warps_reduce: int):
+@oracle_impl(hardware="B200", point="ff30dd34", BLOCK_C=16, BLOCK_HW=4, CHUNK_HW=196, BLOCK_R=256, num_warps_summary=2, num_warps_reduce=4)
+@oracle_impl(hardware="B200", point="7a6295cd", BLOCK_C=16, BLOCK_HW=4, CHUNK_HW=196, BLOCK_R=256, num_warps_summary=4, num_warps_reduce=4)
+@oracle_impl(hardware="B200", point="fd9590cc", BLOCK_C=16, BLOCK_HW=4, CHUNK_HW=64, BLOCK_R=256, num_warps_summary=4, num_warps_reduce=4)
+def oracle_forward(inputs, *, BLOCK_C: int, BLOCK_HW: int, CHUNK_HW: int, BLOCK_R: int, num_warps_summary: int, num_warps_reduce: int):
     return _launch(
         inputs,
+        BLOCK_C=BLOCK_C,
         BLOCK_HW=BLOCK_HW,
         CHUNK_HW=CHUNK_HW,
         BLOCK_R=BLOCK_R,
