@@ -639,6 +639,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; different-worker retry still fails output 3 (`max_diff=8.00`) and skipped-gate H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=358.02us`, `compile=163.65us`, ratio `0.457`).
 - Row 1120 `pointwise_ac8d8e1c9b73`: returned to `needs_work`; third-worker retry checks pass including stochastic exactness, but locked H100 fallback bench remains `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=14.21us`, `compile=12.35us`, ratio `0.869`).
 - Rows 1053 `pointwise_43588d3e9780`, 1120 `pointwise_ac8d8e1c9b73`, and 1425 `sum_sum_sum_ee5e53038768`: re-claimed for a last pass that must avoid the known-bad wrapper/slow/wrong-output approaches.
+- Row 1053 `pointwise_43588d3e9780`: returned to `needs_work`; no slim Triton candidate found. The only local wrapper checks correctly but is `1BAD_ORACLE` (`~2744us` vs `~287us`), and a real fix requires reimplementing the full PyHPC scatter/stencil recurrence and boundary semantics.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
