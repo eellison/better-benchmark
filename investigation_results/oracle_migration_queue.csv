@@ -740,7 +740,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 739,sum_sum_sum_bb06617cadbd,bb06617cadbd,reduction,reduction_general,1,4,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 740,sum_sum_sum_c2ae956520f9,c2ae956520f9,reduction,reduction_general,2,2,2,,oracle_measured,codex,B200_verified_2026-06-16: check+bench PASS (fleet)
 741,sum_sum_sum_c6909ce24699,c6909ce24699,reduction,reduction_general,2,1,2,,oracle_measured,codex,B200_verified_2026-06-16: check+bench PASS (fleet)
-742,sum_sum_sum_d2c97d17f3dc,d2c97d17f3dc,reduction,scatter_gather,1,2,2,,claimed,codex,claimed_reopened_B200_fail_maxdiff3490000000_hardware_specific_reduction_divergence
+742,sum_sum_sum_d2c97d17f3dc,d2c97d17f3dc,reduction,scatter_gather,1,2,2,,claimed,codex,candidate_pushed_deterministic_bucket_partials_2026-06-16: replaced atomic_add bucket path with fixed per-row partials/final reduction; parent H100 fallback check+no-skip PASS; bench GOOD 3178.66/21548.22us r6.779 no CUDAGraph warnings; previous B200 fail max_diff=3490000000.0 needs native B200 reverify
 743,sum_sum_sum_f34efcbb8bb7,f34efcbb8bb7,reduction,reduction_general,1,4,2,,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 744,var_mean_05643331629f,05643331629f,reduction,norm_template_canonicalization,2,4,2,~var_mean_052df521537f;~var_mean_3f319cc01bd1;~var_mean_42b3beb8ea30,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 745,var_mean_0584ac272c37,0584ac272c37,reduction,unclassified_priority_gap,1,1,2,~var_mean_3dd5772aac72;~var_mean_54ad7896eb18;~var_mean_59d8965968f1,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
