@@ -594,6 +594,8 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 394 `mean_b138a1e42dbc`: parent-verified with numerics flag, 5/5 checks plus no-skip pass, skipped-gate locked H100 fallback bench `1AT_FLOOR_4GOOD` with no CUDAGraph warnings (ratio range `0.984` to `1.585`).
 - Row 850 `amax_sum_7079889cfc04`: parent-verified with numerics flag, checks plus no-skip pass, official bench OOMs in fp64 gate, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=5778.37us`, `compile=5767.52us`, ratio `0.998`).
 - Row 958 `mean_470cecc170ec`: returned to `needs_work`; worker checks passed but skipped-gate H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=36.29us`, `compile=31.04us`, ratio `0.855`).
+- Row 1064 `pointwise_584a8c609627`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=113.06us`, `compile=135.10us`, ratio `1.195`).
+- Row 1068 `pointwise_6410fc21ba59`: claimed for inf/nan numerics-gate reaudit/refill.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
