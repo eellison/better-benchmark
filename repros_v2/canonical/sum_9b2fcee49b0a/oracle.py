@@ -75,7 +75,7 @@ def _deberta_masked_softmax_backward_bf16_kernel(
 
 
 # (T([192,512,512], bf16), T([8,24,512,512], b8), T([192,512,512], bf16), T([8,1,512,512], b8), T([8,24,512,1], f32), T([8,24,512,1], f32), T([], bf16), ...)
-@oracle_impl(hardware="B200", point="8dadb13a", BLOCK_M=8, BLOCK_N=512, num_warps=8)
+@oracle_impl(hardware="B200", point="8dadb13a", BLOCK_M=2, BLOCK_N=512, num_warps=8)
 def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int):
     (
         arg0_1,

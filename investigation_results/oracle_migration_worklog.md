@@ -562,6 +562,12 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1357 `sum_sum_sum_0a8714a3041e`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` on outputs 1, 2, and 3, with no CUDAGraph warnings.
 - Row 1288 `sum_sum_563676e3726c`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=47.78us`, `compile=47.84us`, ratio `1.001`).
 - Row 1 `pointwise_04d85912d998`: parent-verified, 469/469 checks plus no-skip pass, locked H100 fallback bench `425AT_FLOOR_44GOOD` with no CUDAGraph warnings (ratio range `0.960` to `1.182`).
+- Row 1274 `sum_sum_370ed60792c7`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=8.93us`, `compile=9.18us`, ratio `1.029`).
+- Row 1271 `sum_sum_3104a9ce2ada`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=96.61us`, `compile=96.83us`, ratio `1.002`).
+- Row 1255 `sum_sum_139d37b65771`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=363.07us`, `compile=353.34us`, ratio `0.973`).
+- Row 1212 `sum_84a4b14c240d`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=29.89us`, `compile=31.04us`, ratio `1.039`).
+- Row 1238 `sum_c5765737e761`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=15.84us`, `compile=15.81us`, ratio `0.998`).
+- Row 1223 `sum_9b2fcee49b0a`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=164.45us`, `compile=163.23us`, ratio `0.993`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
