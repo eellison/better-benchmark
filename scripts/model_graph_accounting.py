@@ -39,8 +39,8 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
-MODELS_DIR = ROOT / "repros_v2" / "models"
-CANONICAL_DIR = ROOT / "repros_v2" / "canonical"
+MODELS_DIR = ROOT / "repros" / "models"
+CANONICAL_DIR = ROOT / "repros" / "canonical"
 DEFAULT_TIMINGS = ROOT / "results" / "all_oracle_timings_b200_v2.json"
 
 sys.path.insert(0, str(ROOT))

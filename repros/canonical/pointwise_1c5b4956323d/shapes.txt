@@ -1,6 +1,0 @@
-hf_mbartforcausallm_train_1009e89b: (T([1024], i64), T([1026, 1024], f32))
-hf_bartforcausallm_train_1009e89b: (T([1024], i64), T([1026, 1024], f32))
-hf_plbartforcausallm_train_401de7c7: (T([1024], i64), T([1026, 768], f32))
-hf_bartforcausallm_train_003_1009e89b: (T([1024], i64), T([1026, 1024], f32))
-hf_mbartforcausallm_train_003_1009e89b: (T([1024], i64), T([1026, 1024], f32))
-torchbench_hf_bart_train_007_152372c6: (T([512], i64), T([1026, 768], f32))

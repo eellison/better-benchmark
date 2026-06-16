@@ -66,11 +66,11 @@ for d in batch:
     if d in BENCH_HACK:
         fout.write(f'{d},STILL_NEEDS_WORK,bench_hack_tl_where_self_blend (blocks regardless of check)\n')
         fout.flush(); print(f'  {d}: BENCH_HACK (held)', flush=True); continue
-    op = f'repros_v2/canonical/{d}/oracle.py'
+    op = f'repros/canonical/{d}/oracle.py'
     if not os.path.exists(op):
         fout.write(f'{d},STILL_NEEDS_WORK,no_oracle\n'); fout.flush(); continue
     try:
-        rc = subprocess.run([sys.executable,'-m','oracle_harness',f'repros_v2/canonical/{d}','--check'],
+        rc = subprocess.run([sys.executable,'-m','oracle_harness',f'repros/canonical/{d}','--check'],
                             capture_output=True, text=True, timeout=300)
     except subprocess.TimeoutExpired:
         fout.write(f'{d},STILL_NEEDS_WORK,check_timeout\n'); fout.flush(); continue

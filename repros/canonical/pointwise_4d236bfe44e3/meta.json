@@ -6,13 +6,9 @@
   "origin_ops": [
     "aten.cat.default"
   ],
-  "n_models": 6,
+  "n_models": 2,
   "models": [
-    "timm_beit_base_patch16_224_infer",
-    "timm_beit_base_patch16_224_infer_000",
-    "timm_beit_base_patch16_224_train",
-    "timm_beit_base_patch16_224_train_000",
-    "timm_timm_beit_base_patch16_224_infer_infer_000",
-    "timm_timm_beit_base_patch16_224_train_train_000"
+    "timm/infer/beit_base_patch16_224",
+    "timm/train/beit_base_patch16_224"
   ]
 }

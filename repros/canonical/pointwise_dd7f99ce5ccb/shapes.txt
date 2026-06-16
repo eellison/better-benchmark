@@ -1,1 +1,0 @@
-torchbench_hf_reformer_infer_003_3bf9da8b: (T([1, 64, 64, 64], f16), T([1, 64, 64, 192], f16), T([1, 4096], i64, gen=Index(4096)), S([1, -1, 256]))

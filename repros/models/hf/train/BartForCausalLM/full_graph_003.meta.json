@@ -1,43 +1,12 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "primals_1",
-      "shape": [
-        1024
-      ],
-      "dtype": "int64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "index",
-        "low": 0,
-        "high": 1026
-      },
-      "gen": {
-        "kind": "index",
-        "low": 0,
-        "high": 1026
-      },
-      "constraint_source": "graph_inference"
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_2",
-      "shape": [
-        1026,
-        1024
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[1024],"i64",{"n":"primals_1","gen":["index",0,1024],"x":{"constraint_source":"observed","observed":{"min":0,"max":1023,"n_unique":1024},"maybe_permutation":true}}],
+    [[1026,1024],"f32",{"n":"primals_2"}]
+  ],
+  "outputs": [
+    [[1,1024,1024],"f32",{"n":"output_0"}],
+    [[1,1024],"i64",{"n":"output_1","gen":["index",0,1024],"x":{"constraint_source":"dtype_shape_default"}}]
   ],
   "tensor_attrs": {},
   "graph": "full_graph_003.py",
@@ -47,5 +16,23 @@
     "mode": "train",
     "model": "BartForCausalLM",
     "graph": "full_graph_003.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 3,
+    "counts": {
+      "fusible_in_partition": 3,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.embedding.default": 1,
+        "aten.unsqueeze.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

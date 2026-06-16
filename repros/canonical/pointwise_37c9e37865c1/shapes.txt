@@ -1,3 +1,0 @@
-hf_plbartforcausallm_train_532f3622: (T([1, 1024], i64), T([1, 1024, 768], f32))
-torchbench_hf_bart_train_012_c08053bf: (T([1, 512], i64, gen=Index(1026)), T([1, 512, 768], f32))
-torchbench_hf_bart_train_015_79a6b47b: (T([4, 512], i64, gen=Index(1026)), T([4, 512, 768], f32))

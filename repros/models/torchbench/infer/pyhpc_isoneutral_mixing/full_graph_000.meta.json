@@ -1,729 +1,58 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "arg0_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg1_1",
-      "shape": [
-        204,
-        204,
-        26,
-        3
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg2_1",
-      "shape": [
-        204,
-        204,
-        26,
-        3
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg3_1",
-      "shape": [
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg4_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg5_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg6_1",
-      "shape": [
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg7_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg8_1",
-      "shape": [
-        204
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg9_1",
-      "shape": [
-        204
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg10_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg11_1",
-      "shape": [
-        204
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg12_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg13_1",
-      "shape": [
-        204,
-        204,
-        26,
-        2,
-        2
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg14_1",
-      "shape": [
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg15_1",
-      "shape": [
-        204,
-        204,
-        26,
-        2,
-        2
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg16_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg17_1",
-      "shape": [
-        204,
-        204,
-        26,
-        2,
-        2
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg18_1",
-      "shape": [
-        204
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg19_1",
-      "shape": [
-        204,
-        204,
-        26,
-        2,
-        2
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg20_1",
-      "shape": [
-        204
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg21_1",
-      "shape": [
-        204
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg22_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[204,204,26],"bf16",{"n":"arg0_1"}],
+    [[204,204,26,3],"bf16",{"n":"arg1_1"}],
+    [[204,204,26,3],"bf16",{"n":"arg2_1"}],
+    [[26],"bf16",{"n":"arg3_1"}],
+    [[204,204,26],"bf16",{"n":"arg4_1"}],
+    [[204,204,26],"bf16",{"n":"arg5_1"}],
+    [[26],"bf16",{"n":"arg6_1"}],
+    [[204,204,26],"bf16",{"n":"arg7_1"}],
+    [[204],"bf16",{"n":"arg8_1"}],
+    [[204],"bf16",{"n":"arg9_1"}],
+    [[204,204,26],"bf16",{"n":"arg10_1"}],
+    [[204],"bf16",{"n":"arg11_1"}],
+    [[204,204,26],"bf16",{"n":"arg12_1"}],
+    [[204,204,26,2,2],"bf16",{"n":"arg13_1"}],
+    [[26],"bf16",{"n":"arg14_1"}],
+    [[204,204,26,2,2],"bf16",{"n":"arg15_1"}],
+    [[204,204,26],"bf16",{"n":"arg16_1"}],
+    [[204,204,26,2,2],"bf16",{"n":"arg17_1"}],
+    [[204],"bf16",{"n":"arg18_1"}],
+    [[204,204,26,2,2],"bf16",{"n":"arg19_1"}],
+    [[204],"bf16",{"n":"arg20_1"}],
+    [[204],"bf16",{"n":"arg21_1"}],
+    [[204,204,26],"bf16",{"n":"arg22_1"}]
   ],
   "outputs": [],
   "tensor_attrs": {
-    "_tensor_constant0": {
-      "kind": "tensor",
-      "name": "_tensor_constant0",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant1": {
-      "kind": "tensor",
-      "name": "_tensor_constant1",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant2": {
-      "kind": "tensor",
-      "name": "_tensor_constant2",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant3": {
-      "kind": "tensor",
-      "name": "_tensor_constant3",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant4": {
-      "kind": "tensor",
-      "name": "_tensor_constant4",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant5": {
-      "kind": "tensor",
-      "name": "_tensor_constant5",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant6": {
-      "kind": "tensor",
-      "name": "_tensor_constant6",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant7": {
-      "kind": "tensor",
-      "name": "_tensor_constant7",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant8": {
-      "kind": "tensor",
-      "name": "_tensor_constant8",
-      "shape": [],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant9": {
-      "kind": "tensor",
-      "name": "_tensor_constant9",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant10": {
-      "kind": "tensor",
-      "name": "_tensor_constant10",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant11": {
-      "kind": "tensor",
-      "name": "_tensor_constant11",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant12": {
-      "kind": "tensor",
-      "name": "_tensor_constant12",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant13": {
-      "kind": "tensor",
-      "name": "_tensor_constant13",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant14": {
-      "kind": "tensor",
-      "name": "_tensor_constant14",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant15": {
-      "kind": "tensor",
-      "name": "_tensor_constant15",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant16": {
-      "kind": "tensor",
-      "name": "_tensor_constant16",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant17": {
-      "kind": "tensor",
-      "name": "_tensor_constant17",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant18": {
-      "kind": "tensor",
-      "name": "_tensor_constant18",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant19": {
-      "kind": "tensor",
-      "name": "_tensor_constant19",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant20": {
-      "kind": "tensor",
-      "name": "_tensor_constant20",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant21": {
-      "kind": "tensor",
-      "name": "_tensor_constant21",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant22": {
-      "kind": "tensor",
-      "name": "_tensor_constant22",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant23": {
-      "kind": "tensor",
-      "name": "_tensor_constant23",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant24": {
-      "kind": "tensor",
-      "name": "_tensor_constant24",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    "_tensor_constant25": {
-      "kind": "tensor",
-      "name": "_tensor_constant25",
-      "shape": [],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    "_tensor_constant0": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant1": [[1],"f32",{"data":[50.0]}],
+    "_tensor_constant2": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant3": [[1],"f32",{"data":[50.0]}],
+    "_tensor_constant4": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant5": [[1],"f32",{"data":[50.0]}],
+    "_tensor_constant6": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant7": [[1],"f32",{"data":[50.0]}],
+    "_tensor_constant8": [[],"bf16",{"dev":"cpu","data":[0.0]}],
+    "_tensor_constant9": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant10": [[1],"f32",{"data":[50.0]}],
+    "_tensor_constant11": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant12": [[1],"f32",{"data":[50.0]}],
+    "_tensor_constant13": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant14": [[1],"f32",{"data":[50.0]}],
+    "_tensor_constant15": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant16": [[1],"f32",{"data":[50.0]}],
+    "_tensor_constant17": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant18": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant19": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant20": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant21": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant22": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant23": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant24": [[1],"f32",{"data":[0.0]}],
+    "_tensor_constant25": [[],"bf16",{"dev":"cpu","data":[0.0]}]
   },
   "graph": "full_graph_000.py",
   "source": {
@@ -732,5 +61,39 @@
     "mode": "infer",
     "model": "pyhpc_isoneutral_mixing",
     "graph": "full_graph_000.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 1567,
+    "counts": {
+      "fusible_in_partition": 1567,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.abs.default": 17,
+        "aten.add.Tensor": 84,
+        "aten.copy.default": 29,
+        "aten.copy_.default": 7,
+        "aten.div.Tensor": 42,
+        "aten.full.default": 39,
+        "aten.maximum.default": 8,
+        "aten.minimum.default": 16,
+        "aten.mul.Tensor": 184,
+        "aten.neg.default": 34,
+        "aten.pow.Tensor_Scalar": 8,
+        "aten.select.int": 68,
+        "aten.select_scatter.default": 35,
+        "aten.slice.Tensor": 748,
+        "aten.slice_scatter.default": 133,
+        "aten.sub.Tensor": 25,
+        "aten.tanh.default": 16,
+        "aten.unsqueeze.default": 58,
+        "prims.convert_element_type.default": 16
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

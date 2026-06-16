@@ -1054,7 +1054,7 @@ def main():
     else:
         workload_kind = "repro"
     if args.oracles:
-        oracle_paths = args.paths or [Path("repros_v2/canonical")]
+        oracle_paths = args.paths or [Path("repros/canonical")]
         repros = find_oracle_dirs(oracle_paths)
         # Oracle bench is per shape point internally; --all-shapes is implied.
         args.all_shapes = True

@@ -21,7 +21,11 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-NEW_CORPUS = Path(__file__).resolve().parents[1] / "repros_v2" / "canonical"
+# Migration artifact: this generated the queue by matching the (then-new) bf16
+# corpus against the old fp32 corpus for oracle candidates. The flip retired the
+# fp32 corpus into git history (tag corpus-preflip-both); the bf16 corpus is now
+# the live repros/. OLD_CORPUS candidate-matching is historical post-flip.
+NEW_CORPUS = ROOT / "repros" / "canonical"
 OLD_CORPUS = ROOT / "repros" / "canonical"
 OLD_QUEUE_CSV = ROOT / "investigation_results" / "oracle_kernel_work_queue.csv"
 OUTPUT_CSV = ROOT / "investigation_results" / "oracle_migration_queue.csv"

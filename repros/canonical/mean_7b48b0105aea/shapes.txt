@@ -1,4 +1,0 @@
-torchbench_timm_regnet_infer_000_31261b91: (T([448], f16), T([32, 448, 28, 28], f16), T([448], f16), T([448], f16), T([448], f16))
-torchbench_timm_regnet_infer_000_5eea3f9b: (T([224], f16), T([32, 224, 56, 56], f16), T([224], f16), T([224], f16), T([224], f16))
-torchbench_timm_regnet_infer_000_aefb6786: (T([2240], f16), T([32, 2240, 7, 7], f16), T([2240], f16), T([2240], f16), T([2240], f16))
-torchbench_timm_regnet_infer_000_d3588e6c: (T([896], f16), T([32, 896, 14, 14], f16), T([896], f16), T([896], f16), T([896], f16))

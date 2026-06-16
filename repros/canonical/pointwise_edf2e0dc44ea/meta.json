@@ -6,10 +6,12 @@
   "origin_ops": [
     "aten.embedding.default"
   ],
-  "n_models": 3,
+  "n_models": 5,
   "models": [
-    "hf_BlenderbotForCausalLM_train_003",
-    "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_train_006",
-    "torchbench_hf_Reformer_infer_001"
+    "hf/infer/BlenderbotForCausalLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/train/BlenderbotForCausalLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/PegasusForCausalLM"
   ]
 }
