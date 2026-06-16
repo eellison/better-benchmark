@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle cooperatively splits the shared channels-last `N,H,W` domain, reconstructs the bf16 sliced-add/where producer, co-reduces `sum(producer)` and `sum(producer * (arg4 - mean))`, then uses the finalized channel summaries to emit the returned fp32 vectors and dense bf16 BatchNorm-backward tensor, whereas Inductor schedules the slice/add/where producer, sibling channel reductions, and dependent dense epilogue as generic reduction and pointwise regions; Inductor cannot do this today because its scheduler/codegen lacks a cooperative split-K multi-output channel-reduction template that keeps a sliced bf16 producer, compatible reductions, vector epilogues, and the final bf16 tensor epilogue in one coordinated plan while preserving cast boundaries; the fix is COOPERATIVE_SPLIT_K: add a guarded channels-last BN-backward split-K lowering that shares the channel reductions and sinks their finalized scalars into all dependent outputs."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle splits the GhostNet channels-last BN-backward `N,H,W` domain, uses Inductor's fused fp32 sliced-add producer for the channel sums, keeps the bf16 materialized producer for the dense return, and emits the fp32 vector plus bf16 tensor outputs; whereas Inductor schedules this sliced where producer, sibling reductions, and dependent dense epilogue as generic regions; Inductor cannot do this today because its scheduler lacks a guarded multi-output split-K lowering that preserves the mixed cast boundaries across reductions and epilogues; the fix is COOPERATIVE_SPLIT_K: add a channels-last BN-backward lowering that shares the split-K reductions and sinks finalized scalars into the vector and dense epilogues."""
 
 import torch
 import triton
@@ -221,7 +221,7 @@ def _epilogue_kernel(
 
 
 # 8399096d: GhostNet train, bf16 channels-last N=512, C=480, H=W=7.
-@oracle_impl(hardware="B200", point="8399096d", BLOCK_K=1024, BLOCK_C=16, num_warps=8)
+@oracle_impl(hardware="B200", point="8399096d", BLOCK_K=1024, BLOCK_C=8, num_warps=4)
 def oracle_forward(inputs, *, BLOCK_K: int, BLOCK_C: int, num_warps: int):
     arg0_1, arg1_1, arg2_1, arg3_1, arg4_1, arg5_1, arg6_1, arg7_1 = inputs
     n, c, h, w = arg1_1.shape
