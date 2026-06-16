@@ -1,22 +1,11 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full DenseNet virtual channel concat, fp32 BN-inference affine from bf16 parameters, explicit bf16 cast, and ReLU output for all four captured shapes in one Triton pass; whereas Inductor materializes the fixed channel cat before the downstream affine/ReLU pointwise work; Inductor cannot do this today because its scheduler does not keep multi-input channel concat as a virtual producer across the channel-dependent BN affine consumer and bf16 epilogue; the fix is SCHEDULER_FUSION: inline fixed channel concat producers into pointwise consumers with guarded source selection and preserved cast boundaries."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full DenseNet virtual channel concat, Inductor-style fp32 BN-inference affine/ReLU from bf16 parameters, and final bf16 output store for all four captured shapes in one Triton pass, whereas Inductor materializes the fixed channel cat before the downstream affine/ReLU pointwise work; Inductor cannot do this today because its scheduler does not keep multi-input channel concat as a virtual producer across the channel-dependent BN affine consumer and bf16 epilogue; the fix is SCHEDULER_FUSION: inline fixed channel concat producers into pointwise consumers with guarded source selection and preserved sqrt/reciprocal/final-cast semantics."""
 
 import torch
 import triton
 import triton.language as tl
+from torch._inductor.runtime.triton_helpers import libdevice
 
 from oracle_harness import oracle_impl
-
-
-@triton.jit
-def _round_bf16_to_f32(x):
-    return tl.inline_asm_elementwise(
-        "{ .reg .b16 t; cvt.rn.bf16.f32 t, $1; cvt.f32.bf16 $0, t; }",
-        constraints="=f,f",
-        args=[x],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
 
 
 @triton.jit
@@ -62,11 +51,10 @@ def _cat_bn_relu_kernel(
     weight = tl.load(weight_ptr + c, mask=valid_c, other=0.0).to(tl.float32)
     bias = tl.load(bias_ptr + c, mask=valid_c, other=0.0).to(tl.float32)
 
-    invstd = 1.0 / tl.sqrt(var + 1.0e-5)
+    invstd = 1.0 / libdevice.sqrt(var + 1.0e-5)
     y = (x - mean[:, None]) * invstd[:, None]
     y = y * weight[:, None] + bias[:, None]
-    y_bf16 = _round_bf16_to_f32(y)
-    relu = tl.where(y_bf16 < 0.0, 0.0, y_bf16)
+    relu = tl.where(y < 0.0, 0.0, y)
 
     out_offsets = (n * C_OUT + c[:, None]) * HW + hw[None, :]
     tl.store(out_ptr + out_offsets, relu, mask=mask)
