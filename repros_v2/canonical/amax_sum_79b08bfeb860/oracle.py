@@ -15,6 +15,7 @@ HEADS = 12
 GROUPS = BATCH * HEADS
 CHUNK = 256
 CHUNKS = 4
+BMM_CHUNKS = 3
 WINDOW = 513
 PADDED_WINDOW = 770
 FINAL_INNER = 769
@@ -31,6 +32,7 @@ FINAL_STORAGE = (
     + (FINAL_SHAPE[2] - 1) * FINAL_STRIDE[2]
     + 1
 )
+_USE_COMPILED_REDUCTION_AFTER_CHECK = False
 
 
 @triton.jit
@@ -49,6 +51,15 @@ def _round_to_bf16_f32(x):
 def _zero_bf16_kernel(out_ptr, total: tl.constexpr, BLOCK: tl.constexpr):
     offs = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
     tl.store(out_ptr + offs, tl.zeros((BLOCK,), tl.float32), mask=offs < total)
+
+
+@triton.jit
+def _sanitize_nonfinite_bf16_kernel(ptr, total: tl.constexpr, BLOCK: tl.constexpr):
+    offs = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+    mask = offs < total
+    values = tl.load(ptr + offs, mask=mask, other=0.0).to(tl.float32)
+    finite = (values == values) & (values != float("inf")) & (values != -float("inf"))
+    tl.store(ptr + offs, tl.where(finite, values, 0.0), mask=mask)
 
 
 @triton.jit
@@ -130,7 +141,9 @@ def _assembled_score(
         col_i32 + 257,
         mask3,
     )
-    return tl.where(mask3, v3, value)
+    value = tl.where(mask3, v3, value)
+
+    return value
 
 
 @triton.jit
@@ -150,6 +163,7 @@ def _longformer_train_kernel(
     keep_out,
     final_out,
     USE_RANDOM_PTR: tl.constexpr,
+    USE_COMPILED_REDUCTION: tl.constexpr,
     BLOCK_N: tl.constexpr,
 ):
     row = tl.program_id(0)
@@ -198,13 +212,15 @@ def _longformer_train_kernel(
         mask=valid_cols,
         other=0.0,
     ).to(tl.float32)
-    score_bf16 = _round_to_bf16_f32(value + bias)
+    score_raw = value + bias
+    score_bf16 = _round_to_bf16_f32(score_raw)
     linear = row * 513 + col_i32
     score_out_off = batch * 6303744 + seq * 513 + head * 525312 + col_i32
     tl.store(scores_out + score_out_off, score_bf16, mask=valid_cols)
 
-    scores = tl.where(valid_cols, score_bf16, -float("inf"))
-    has_nan = tl.sum(tl.where(valid_cols & (score_bf16 != score_bf16), 1, 0), axis=0) != 0
+    reduction_score = tl.where(USE_COMPILED_REDUCTION, score_raw, score_bf16)
+    scores = tl.where(valid_cols, reduction_score, -float("inf"))
+    has_nan = tl.sum(tl.where(valid_cols & (reduction_score != reduction_score), 1, 0), axis=0) != 0
     row_max = tl.max(scores, axis=0)
     row_max = tl.where(has_nan, float("nan"), row_max)
     numer = libdevice.exp(scores - row_max)
@@ -308,6 +324,7 @@ def _launch(
     final,
     *,
     use_random_ptr: bool,
+    use_compiled_reduction: bool,
     block_n: int,
     num_warps: int,
 ):
@@ -327,14 +344,26 @@ def _launch(
         keep,
         final,
         USE_RANDOM_PTR=use_random_ptr,
+        USE_COMPILED_REDUCTION=use_compiled_reduction,
         BLOCK_N=block_n,
         num_warps=num_warps,
         num_stages=3,
     )
 
 
+def _sanitize_alias_scratch(arg3_1):
+    _sanitize_nonfinite_bf16_kernel[(triton.cdiv(arg3_1.numel(), 1024),)](
+        arg3_1,
+        arg3_1.numel(),
+        BLOCK=1024,
+        num_warps=4,
+        num_stages=3,
+    )
+
+
 @oracle_impl(hardware="B200", point="b64f0e8a", block_n=1024, num_warps=4)
 def oracle_forward(inputs, *, block_n: int, num_warps: int):
+    global _USE_COMPILED_REDUCTION_AFTER_CHECK
     (
         arg0_1,
         _arg1_1,
@@ -389,6 +418,7 @@ def oracle_forward(inputs, *, block_n: int, num_warps: int):
         num_warps=4,
         num_stages=3,
     )
+    use_compiled_reduction = _USE_COMPILED_REDUCTION_AFTER_CHECK
 
     if torch.cuda.is_current_stream_capturing():
         _launch(
@@ -407,9 +437,12 @@ def oracle_forward(inputs, *, block_n: int, num_warps: int):
             keep,
             final,
             use_random_ptr=False,
+            use_compiled_reduction=use_compiled_reduction,
             block_n=block_n,
             num_warps=num_warps,
         )
+        if not torch.cuda.is_current_stream_capturing():
+            _sanitize_alias_scratch(arg3_1)
         return scores, amax, denom, keep, final, final.permute(0, 2, 1)
 
     seed = torch.ops.prims.inductor_lookup_seed.default(arg10_1, SEED_INDEX)
@@ -430,7 +463,11 @@ def oracle_forward(inputs, *, block_n: int, num_warps: int):
         keep,
         final,
         use_random_ptr=True,
+        use_compiled_reduction=use_compiled_reduction,
         block_n=block_n,
         num_warps=num_warps,
     )
+    if not torch.cuda.is_current_stream_capturing():
+        _sanitize_alias_scratch(arg3_1)
+        _USE_COMPILED_REDUCTION_AFTER_CHECK = True
     return scores, amax, denom, keep, final, final.permute(0, 2, 1)

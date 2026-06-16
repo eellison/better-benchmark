@@ -568,6 +568,15 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1212 `sum_84a4b14c240d`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=29.89us`, `compile=31.04us`, ratio `1.039`).
 - Row 1238 `sum_c5765737e761`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=15.84us`, `compile=15.81us`, ratio `0.998`).
 - Row 1223 `sum_9b2fcee49b0a`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=164.45us`, `compile=163.23us`, ratio `0.993`).
+- Row 852 `amax_sum_7303c49b6018`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=713.44us`, `compile=956.83us`, ratio `1.341`).
+- Row 853 `amax_sum_79b08bfeb860`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=713.63us`, `compile=956.61us`, ratio `1.340`).
+- Row 858 `amax_sum_884c406c2df8`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=716.80us`, `compile=961.54us`, ratio `1.341`).
+- Row 859 `amax_sum_8f72f9914b96`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=717.09us`, `compile=958.88us`, ratio `1.337`).
+- Row 1605 `var_mean_a4c92b1bdab7`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.50us`, `compile=175.42us`, ratio `1.107`).
+- Row 1561 `var_mean_8187f7c4e01e`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=73.09us`, `compile=73.12us`, ratio `1.000`).
+- Row 1608 `var_mean_a7b32508693f`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.56us`, `compile=175.33us`, ratio `1.106`).
+- Row 1718 `var_mean_mean_c2c0ad00da48`: returned to `needs_work`; parent checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=21.63us`, `compile=20.13us`, ratio `0.930`).
+- Row 1549 `var_mean_6cd69c8f3b06`: returned to `needs_work`; parent checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=15.65us`, `compile=14.62us`, ratio `0.935`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
