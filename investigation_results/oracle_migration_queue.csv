@@ -1355,7 +1355,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1354,sum_sum_fdba1485ca74,fdba1485ca74,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1355,sum_sum_sum_04b57f7e083d,04b57f7e083d,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1356,sum_sum_sum_0931873d4f42,0931873d4f42,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1357,sum_sum_sum_0a8714a3041e,0a8714a3041e,reduction,reduction_general,1,2,1,,claimed,codex,retry_claim_2026-06-15_reduction_sum_sum_sum_numerics_reaudit
+1357,sum_sum_sum_0a8714a3041e,0a8714a3041e,reduction,reduction_general,1,2,1,,oracle_measured,codex,NUMERICS_FLAG_parent_verified_faithful_oracle_committed_checks_pass_1of1_no_skip_pass_1of1_7outputs_official_bench_NUMERICS_WORSE_outputs1_2_3_skipped_gate_locked_h100_fallback_GOOD_f96ef00e_oracle_57.82us_compile_61.57us_ratio_1.065_no_cudagraph_warnings_no_self_blend_class_COOPERATIVE_SPLIT_K
 1358,sum_sum_sum_0c3a6fa20cd5,0c3a6fa20cd5,reduction,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1359,sum_sum_sum_0db891d3a1f0,0db891d3a1f0,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1360,sum_sum_sum_0e08b9d50286,0e08b9d50286,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
