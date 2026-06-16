@@ -1195,7 +1195,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1194,sum_48d151f02740,48d151f02740,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1195,sum_49dda4f7b564,49dda4f7b564,reduction,multi_output_reduction_templates,1,1,1,sum_403da67893be,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1196,sum_4c8f58e00cf6,4c8f58e00cf6,reduction,multi_output_reduction_templates,1,2,1,~sum_bf45c3d8f79e;~sum_ea0933cb9497,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1197,sum_4fd6e4019857,4fd6e4019857,reduction,multi_output_reduction_templates,1,1,1,sum_e00c7291b6ee,claimed,codex,claimed_reopened_B200_fail_maxdiff16800000_hardware_specific_reduction_divergence
+1197,sum_4fd6e4019857,4fd6e4019857,reduction,multi_output_reduction_templates,1,1,1,sum_e00c7291b6ee,claimed,codex,candidate_pushed_rn_epilogue_2026-06-16: parent H100 check+no-skip PASS max_diff=2.10e6 after prior H100 check drift; official bench OOMs in fp64 gate allocating compiled_f64; worker diagnostic skip-gate AT_FLOOR 5807.36/5857.44us r1.009 no CUDAGraph warning; previous B200 fail max_diff=16800000.0 needs native B200 reverify
 1198,sum_561404c238b3,561404c238b3,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1199,sum_59cd03f5c32f,59cd03f5c32f,reduction,norm_template_canonicalization,1,2,1,~sum_a963d4e1fcf5,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1200,sum_5a1cff122e9e,5a1cff122e9e,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)

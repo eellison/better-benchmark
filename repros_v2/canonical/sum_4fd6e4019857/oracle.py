@@ -13,12 +13,57 @@ COLS = 262144
 
 
 @triton.jit
-def _rounded_prob(x_ptr, row_max_ptr, row_denom_ptr, offsets, row, mask):
+def _rounded_prob_precise(x_ptr, row_max_ptr, row_denom_ptr, offsets, row, mask):
+    x = tl.load(x_ptr + offsets, mask=mask, other=-float("inf")).to(tl.float32)
+    row_max = tl.load(row_max_ptr + row).to(tl.float32)
+    row_denom = tl.load(row_denom_ptr + row).to(tl.float32)
+    prob = _f32_div(libdevice.exp(_f32_sub(x, row_max)), row_denom)
+    return prob.to(tl.bfloat16, fp_downcast_rounding="rtne").to(tl.float32)
+
+
+@triton.jit
+def _rounded_prob_fast(x_ptr, row_max_ptr, row_denom_ptr, offsets, row, mask):
     x = tl.load(x_ptr + offsets, mask=mask, other=-float("inf")).to(tl.float32)
     row_max = tl.load(row_max_ptr + row).to(tl.float32)
     row_denom = tl.load(row_denom_ptr + row).to(tl.float32)
     prob = libdevice.exp(x - row_max) / row_denom
     return prob.to(tl.bfloat16, fp_downcast_rounding="rtne").to(tl.float32)
+
+
+@triton.jit
+def _f32_sub(a, b):
+    return tl.inline_asm_elementwise(
+        "sub.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
+def _f32_mul(a, b):
+    return tl.inline_asm_elementwise(
+        "mul.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
+def _f32_div(a, b):
+    return tl.inline_asm_elementwise(
+        "div.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
 
 
 @triton.jit
@@ -38,9 +83,9 @@ def _partial_sum_kernel(
     mask = cols < COLS_N
     offsets = row * COLS_N + cols
 
-    prob = _rounded_prob(x_ptr, row_max_ptr, row_denom_ptr, offsets, row, mask)
+    prob = _rounded_prob_fast(x_ptr, row_max_ptr, row_denom_ptr, offsets, row, mask)
     grad = tl.load(grad_scalar_ptr).to(tl.float32)
-    product = grad * prob
+    product = _f32_mul(grad, prob)
     partial = tl.sum(tl.where(mask, product, 0.0), axis=0)
     tl.store(partial_ptr + row * NUM_TILES + tile, partial)
 
@@ -74,9 +119,9 @@ def _softmax_backward_epilogue_kernel(
     mask = cols < COLS_N
     offsets = row * COLS_N + cols
 
-    prob = _rounded_prob(x_ptr, row_max_ptr, row_denom_ptr, offsets, row, mask)
+    prob = _rounded_prob_precise(x_ptr, row_max_ptr, row_denom_ptr, offsets, row, mask)
     grad = tl.load(grad_scalar_ptr).to(tl.float32)
-    product = grad * prob
+    product = _f32_mul(grad, prob)
     out = tl.inline_asm_elementwise(
         "fma.rn.f32 $0, $1, $2, $3;",
         "=f,f,f,f",
@@ -93,6 +138,14 @@ def _softmax_backward_epilogue_kernel(
 
 
 # 74d25999: genai SoftmaxBackward static, bf16[8192,262144].
+@oracle_impl(
+    hardware="H100",
+    point="74d25999",
+    PARTIAL_BLOCK_N=16384,
+    OUTPUT_BLOCK_N=1024,
+    partial_warps=8,
+    output_warps=4,
+)
 @oracle_impl(
     hardware="B200",
     point="74d25999",
