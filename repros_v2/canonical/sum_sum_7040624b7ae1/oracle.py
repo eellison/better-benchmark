@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete GhostNet bf16 masked BN-backward-style branch, using Inductor's resident f32 sliced-add source for the two channel reductions and the rounded bf16 visible tensor path for the returned dense epilogue, whereas Inductor schedules the masked producer, sibling reductions, coefficient math, and dense epilogue through generic reduction/pointwise regions; Inductor cannot do this today because scheduler/codegen has no cooperative split-K multi-output reduction lowering that preserves the captured output contract while sharing finalized channel summaries with the dependent full-tensor epilogue; the fix is COOPERATIVE_SPLIT_K: add a guarded BN-backward reduction lowering that splits the `N,H,W` dimension, finalizes compatible channel partials once, and sinks the dependent channels-last bf16 epilogue into the same planned lowering."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete GhostNet bf16 masked BN-backward-style branch, using the bf16-rounded sliced-add/where producer for both channel reductions and the returned dense epilogue, whereas Inductor schedules the masked producer, sibling reductions, coefficient math, and dense epilogue through generic reduction/pointwise regions; Inductor cannot do this today because scheduler/codegen has no cooperative split-K multi-output lowering that preserves the captured output contract while sharing finalized channel summaries with the dependent full-tensor epilogue; the fix is COOPERATIVE_SPLIT_K: add a guarded BN-backward reduction lowering that splits the `N,H,W` dimension, finalizes compatible channel partials once, and sinks the dependent channels-last bf16 epilogue into the same planned lowering."""
 
 import torch
 import triton
@@ -59,30 +59,6 @@ def _f32_mul(a, b):
 
 
 @triton.jit
-def _masked_source(
-    arg0_ptr,
-    arg1_ptr,
-    arg2_ptr,
-    fill_ptr,
-    n,
-    hw,
-    c,
-    active,
-    C_IN_: tl.constexpr,
-    C_: tl.constexpr,
-    HW_: tl.constexpr,
-):
-    offset0 = n * (C_IN_ * HW_) + hw * C_IN_ + c
-    offset = n * (C_ * HW_) + hw * C_ + c
-    lhs = tl.load(arg0_ptr + offset0, mask=active, other=0.0)
-    rhs = tl.load(arg1_ptr + offset, mask=active, other=0.0)
-    mask_value = tl.load(arg2_ptr + offset, mask=active, other=1.0).to(tl.float32)
-    fill = tl.load(fill_ptr).to(tl.float32)
-    added = _f32_add(lhs.to(tl.float32), rhs.to(tl.float32))
-    return tl.where(mask_value <= 0.0, fill, added).to(tl.float32)
-
-
-@triton.jit
 def _masked_source_rounded(
     arg0_ptr,
     arg1_ptr,
@@ -138,7 +114,7 @@ def _partial_reduce_kernel(
     hw = k - n * HW_
     offset = n * (C_ * HW_) + hw * C_ + c
 
-    source = _masked_source(
+    source = _masked_source_rounded(
         arg0_ptr, arg1_ptr, arg2_ptr, fill_ptr, n, hw, c, active, C_IN_, C_, HW_
     )
     arg4_value = tl.load(arg4_ptr + offset, mask=active, other=0.0).to(tl.float32)
