@@ -10,14 +10,7 @@ from oracle_harness import oracle_impl
 
 @triton.jit
 def _bf16(x):
-    return tl.inline_asm_elementwise(
-        "{ .reg .b16 t; cvt.rn.bf16.f32 t, $1; cvt.f32.bf16 $0, t; }",
-        constraints="=f,f",
-        args=[x],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
+    return x.to(tl.bfloat16).to(tl.float32)
 
 
 @triton.jit
@@ -231,7 +224,7 @@ def _run(inputs, C, H, W, BLOCK_C, BLOCK_HW, FINAL_BLOCK_C, num_warps):
     return out_sigmoid, out_add3, out_scalar, out_mul16, out_gate, out_sum3, out_sum4
 
 
-@oracle_impl(hardware="B200", point="adbc9760", C=512, H=24, W=24, BLOCK_C=8, BLOCK_HW=512, FINAL_BLOCK_C=16, num_warps=8)
+@oracle_impl(hardware="B200", point="adbc9760", C=512, H=24, W=24, BLOCK_C=32, BLOCK_HW=256, FINAL_BLOCK_C=16, num_warps=8)
 @oracle_impl(hardware="B200", point="bfd27ee1", C=1536, H=12, W=12, BLOCK_C=8, BLOCK_HW=128, FINAL_BLOCK_C=16, num_warps=4)
 @oracle_impl(hardware="B200", point="9d70a1e6", C=1536, H=6, W=6, BLOCK_C=16, BLOCK_HW=64, FINAL_BLOCK_C=16, num_warps=4)
 def oracle_forward(
