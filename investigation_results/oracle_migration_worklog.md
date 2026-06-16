@@ -633,6 +633,8 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1370 `sum_sum_sum_275ca61fceb8`: claimed from the tail for reduction numerics reaudit/refill.
 - Row 1379 `sum_sum_sum_4aae5698dd79`: claimed from the tail for large-diff reduction reaudit/refill.
 - Row 1053 `pointwise_43588d3e9780`: claimed for final scatter/stencil Triton or capture-support retry.
+- Row 1379 `sum_sum_sum_4aae5698dd79`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=132.22us`, `compile=286.14us`, ratio `2.164`); large sentinel-scale diffs pass the numerics gate.
+- Row 1120 `pointwise_ac8d8e1c9b73`: worker checks pass including stochastic exactness, but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=14.21us`, `compile=12.35us`, ratio `0.869`); remote re-claimed for a third-worker retry, so the candidate was not committed.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
