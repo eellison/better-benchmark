@@ -18,54 +18,6 @@ NEG_INF_F32 = -3.4028234663852886e38
 
 
 @triton.jit
-def _f32_add(a, b):
-    return tl.inline_asm_elementwise(
-        "add.rn.f32 $0, $1, $2;",
-        constraints="=f,f,f",
-        args=[a, b],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
-
-
-@triton.jit
-def _f32_sub(a, b):
-    return tl.inline_asm_elementwise(
-        "sub.rn.f32 $0, $1, $2;",
-        constraints="=f,f,f",
-        args=[a, b],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
-
-
-@triton.jit
-def _f32_mul(a, b):
-    return tl.inline_asm_elementwise(
-        "mul.rn.f32 $0, $1, $2;",
-        constraints="=f,f,f",
-        args=[a, b],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
-
-
-@triton.jit
-def _f32_div(a, b):
-    return tl.inline_asm_elementwise(
-        "div.rn.f32 $0, $1, $2;",
-        constraints="=f,f,f",
-        args=[a, b],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
-
-
-@triton.jit
 def _f32_fma(a, b, c):
     return tl.inline_asm_elementwise(
         "fma.rn.f32 $0, $1, $2, $3;",
@@ -75,6 +27,18 @@ def _f32_fma(a, b, c):
         is_pure=True,
         pack=1,
     )
+
+
+@triton.jit
+def _aten_inner_sum_1024(values):
+    by_vec = tl.reshape(values, (8, 32, 4))
+    lane_acc = tl.sum(by_vec, axis=0)
+    lane_sum = tl.sum(lane_acc, axis=1)
+    sum16 = tl.reshape(tl.sum(tl.reshape(lane_sum, (16, 2)), axis=1), (16,))
+    sum8 = tl.reshape(tl.sum(tl.reshape(sum16, (8, 2)), axis=1), (8,))
+    sum4 = tl.reshape(tl.sum(tl.reshape(sum8, (4, 2)), axis=1), (4,))
+    sum2 = tl.reshape(tl.sum(tl.reshape(sum4, (2, 2)), axis=1), (2,))
+    return tl.sum(sum2, axis=0)
 
 
 @triton.jit
@@ -116,9 +80,9 @@ def _branch_kernel(
     offsets = ((bs[:, None] * HEADS_ + h) * QUERY_ + q) * KEY_ + ks[None, :]
 
     keep = tl.load(keep_ptr + offsets, mask=active, other=0).to(tl.float32)
-    dropout_scale = _f32_mul(keep, SCALE_).to(tl.bfloat16).to(tl.float32)
+    dropout_scale = (keep * SCALE_).to(tl.bfloat16).to(tl.float32)
     bmm = tl.load(bmm_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    dprob = _f32_mul(bmm, dropout_scale).to(tl.bfloat16).to(tl.float32)
+    dprob = (bmm * dropout_scale).to(tl.bfloat16).to(tl.float32)
 
     bias = tl.load(
         bias_ptr + (q * KEY_ + ks) * HEADS_ + h,
@@ -131,35 +95,40 @@ def _branch_kernel(
         mask_bias = tl.where(k_order <= q_order, tl.load(fill_ptr).to(tl.float32), NEG_INF_)
     else:
         mask_bias = tl.zeros((BLOCK_K,), dtype=tl.float32)
-    bias_with_mask = _f32_add(bias, mask_bias)
+    bias_with_mask = bias + mask_bias
 
     logits = tl.load(logits_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    score = _f32_add(logits, bias_with_mask[None, :]).to(tl.bfloat16).to(tl.float32)
-    shifted = _f32_sub(
-        score,
-        tl.load(row_shift_ptr + ((bs * HEADS_ + h) * QUERY_ + q), mask=bs < BATCH_, other=0.0).to(tl.float32)[:, None],
-    )
+    score = (logits + bias_with_mask[None, :]).to(tl.bfloat16).to(tl.float32)
+    shifted = score - tl.load(
+        row_shift_ptr + ((bs * HEADS_ + h) * QUERY_ + q),
+        mask=bs < BATCH_,
+        other=0.0,
+    ).to(tl.float32)[:, None]
     numer = libdevice.exp(shifted)
     denom = tl.load(
         denom_ptr + ((bs * HEADS_ + h) * QUERY_ + q),
         mask=bs < BATCH_,
         other=1.0,
     ).to(tl.float32)
-    probs = _f32_div(numer, denom[:, None])
+    probs = numer / denom[:, None]
 
-    product = _f32_mul(dprob, probs)
-    row_sum = tl.sum(tl.where(active, product, 0.0), axis=1)
-    dscore = _f32_fma(-probs, row_sum[:, None], product)
+    product = dprob * probs
+    if BLOCK_B == 1 and BLOCK_K == 1024:
+        row_sum = _aten_inner_sum_1024(tl.reshape(product, (1024,)))
+        dscore = _f32_fma(-probs, row_sum, product)
+    else:
+        row_sum = tl.sum(tl.where(active, product, 0.0), axis=1)
+        dscore = _f32_fma(-probs, row_sum[:, None], product)
     dscore_bf16 = dscore.to(tl.bfloat16, fp_downcast_rounding="rtne")
     if STORE_OUT:
         tl.store(out_ptr + offsets, dscore_bf16, mask=active)
 
     residual = tl.load(res0_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    residual = _f32_add(residual, tl.load(res1_ptr + offsets, mask=active, other=0.0).to(tl.float32))
-    residual = _f32_add(residual, tl.load(res2_ptr + offsets, mask=active, other=0.0).to(tl.float32))
-    residual = _f32_add(residual, tl.load(res3_ptr + offsets, mask=active, other=0.0).to(tl.float32))
-    residual = _f32_add(residual, tl.load(res4_ptr + offsets, mask=active, other=0.0).to(tl.float32))
-    values = _f32_add(residual, dscore_bf16.to(tl.float32))
+    residual = residual + tl.load(res1_ptr + offsets, mask=active, other=0.0).to(tl.float32)
+    residual = residual + tl.load(res2_ptr + offsets, mask=active, other=0.0).to(tl.float32)
+    residual = residual + tl.load(res3_ptr + offsets, mask=active, other=0.0).to(tl.float32)
+    residual = residual + tl.load(res4_ptr + offsets, mask=active, other=0.0).to(tl.float32)
+    values = residual + dscore_bf16.to(tl.float32)
     reduced_k = tl.sum(tl.where(active, values, 0.0), axis=0)
 
     bucket = tl.load(index_ptr + q * KEY_ + ks, mask=ks < KEY_, other=-1).to(tl.int64)
@@ -277,26 +246,6 @@ def _launch_branch(
     return out, bucket
 
 
-def _torch_branch_dense(
-    bmm,
-    keep,
-    logits,
-    bias,
-    row_shift,
-    denom,
-):
-    view_bmm = bmm.view(BATCH, HEADS, QUERY, KEY)
-    view_logits = logits.view(BATCH, HEADS, QUERY, KEY)
-    dropout_scale = keep.to(torch.bfloat16) * SCALE
-    dprob = (view_bmm * dropout_scale).to(torch.bfloat16).to(torch.float32)
-    rounded_score = (view_logits + bias.permute(2, 0, 1).unsqueeze(0)).to(torch.bfloat16).to(torch.float32)
-    probs = torch.exp(rounded_score - row_shift) / denom
-    product = dprob * probs
-    row_sum = product.sum(dim=-1, keepdim=True)
-    dscore = torch.ops.prims.fma.default(-probs, row_sum, product).to(torch.bfloat16)
-    return dscore.view(BATCH * HEADS, QUERY, KEY)
-
-
 # 3932aff4: T5 dual attention backward, bf16 dscore side outputs and f32 relative-position buckets.
 @oracle_impl(
     hardware="B200",
@@ -364,7 +313,7 @@ def oracle_forward(
         num_warps_finalize=num_warps_finalize,
         store_out=True,
     )
-    _out2, bucket1 = _launch_branch(
+    out2, bucket1 = _launch_branch(
         (arg14_1, arg15_1, arg16_1, arg17_1, arg18_1),
         arg19_1,
         arg20_1,
@@ -380,14 +329,6 @@ def oracle_forward(
         BLOCK_K=BLOCK_K,
         num_warps_branch=num_warps_branch1,
         num_warps_finalize=num_warps_finalize,
-        store_out=False,
-    )
-    out2 = _torch_branch_dense(
-        arg19_1,
-        arg20_1,
-        arg21_1,
-        arg22_1,
-        arg23_1,
-        arg24_1,
+        store_out=True,
     )
     return out0, bucket0, out2, bucket1
