@@ -285,7 +285,7 @@ def _add_final_kernel(
     tmp69 = tmp65 + tmp68
     tl.store(out_ptr + xout, tmp69)
 
-@oracle_impl(hardware="B200", point="47e7063f", X=512, RX=1, C=512, num_warps=4)
+@oracle_impl(hardware="B200", point="47e7063f", X=1024, RX=1, C=512, num_warps=8)
 def oracle_forward(inputs, *, X: int, RX: int, C: int, num_warps: int):
     (
         arg0,
