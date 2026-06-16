@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle splits the GhostNet channels-last BN-backward `N,H,W` domain, uses Inductor's fused fp32 sliced-add producer for the channel sums, keeps the bf16 materialized producer for the dense return, and emits the fp32 vector plus bf16 tensor outputs; whereas Inductor schedules this sliced where producer, sibling reductions, and dependent dense epilogue as generic regions; Inductor cannot do this today because its scheduler lacks a guarded multi-output split-K lowering that preserves the mixed cast boundaries across reductions and epilogues; the fix is COOPERATIVE_SPLIT_K: add a channels-last BN-backward lowering that shares the split-K reductions and sinks finalized scalars into the vector and dense epilogues."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle splits the GhostNet channels-last BN-backward `N,H,W` domain, uses Inductor's fused f32 sliced-add/where producer for the channel sums, keeps the bf16 materialized producer for the dense return, and emits the fp32 vector plus bf16 tensor outputs; whereas Inductor schedules this sliced where producer, sibling reductions, and dependent dense epilogue as generic regions. Inductor cannot do this today because its scheduler lacks a guarded multi-output split-K lowering that preserves the mixed cast boundaries across reductions and epilogues; the fix is COOPERATIVE_SPLIT_K: add a channels-last BN-backward lowering that shares the split-K reductions and sinks finalized scalars into the vector and dense epilogues."""
 
 import torch
 import triton
@@ -9,6 +9,7 @@ from oracle_harness import oracle_impl
 
 SCALE = 3.985969387755102e-05
 EPILOGUE_BLOCK = 512
+FINAL_BLOCK_K = 128
 
 
 @triton.jit
@@ -96,28 +97,15 @@ def _producer_value_rounded(
 
 
 @triton.jit
-def _zero_kernel(
-    sum_out_ptr,
-    dot_out_ptr,
-    C: tl.constexpr,
-    BLOCK: tl.constexpr,
-):
-    offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
-    mask = offsets < C
-    tl.store(sum_out_ptr + offsets, tl.zeros((BLOCK,), dtype=tl.float32), mask=mask)
-    tl.store(dot_out_ptr + offsets, tl.zeros((BLOCK,), dtype=tl.float32), mask=mask)
-
-
-@triton.jit
-def _atomic_reduce_kernel(
+def _partial_reduce_kernel(
     arg0_ptr,
     arg1_ptr,
     arg2_ptr,
     fill_ptr,
     arg4_ptr,
     mean_ptr,
-    sum_out_ptr,
-    dot_out_ptr,
+    partial_sum_ptr,
+    partial_dot_ptr,
     C: tl.constexpr,
     C_IN: tl.constexpr,
     K_TOTAL: tl.constexpr,
@@ -145,19 +133,38 @@ def _atomic_reduce_kernel(
     active = tl.where(mask, producer, 0.0)
     active_dot = tl.where(mask, _f32_mul(producer, centered), 0.0)
 
+    partial_offsets = tl.program_id(1) * C + c_offsets
     channel_mask = c_offsets < C
-    tl.atomic_add(
-        sum_out_ptr + c_offsets,
-        tl.sum(active, axis=0),
-        sem="relaxed",
-        mask=channel_mask,
-    )
-    tl.atomic_add(
-        dot_out_ptr + c_offsets,
-        tl.sum(active_dot, axis=0),
-        sem="relaxed",
-        mask=channel_mask,
-    )
+    tl.store(partial_sum_ptr + partial_offsets, tl.sum(active, axis=0), mask=channel_mask)
+    tl.store(partial_dot_ptr + partial_offsets, tl.sum(active_dot, axis=0), mask=channel_mask)
+
+
+@triton.jit
+def _finalize_reduce_kernel(
+    partial_sum_ptr,
+    partial_dot_ptr,
+    invstd_ptr,
+    sum_out_ptr,
+    dot_out_ptr,
+    vector_out_ptr,
+    C: tl.constexpr,
+    NUM_TILES: tl.constexpr,
+    BLOCK_C: tl.constexpr,
+    BLOCK_TILES: tl.constexpr,
+):
+    c_offsets = tl.program_id(0) * BLOCK_C + tl.arange(0, BLOCK_C)
+    tile_offsets = tl.arange(0, BLOCK_TILES)
+    mask = (c_offsets[None, :] < C) & (tile_offsets[:, None] < NUM_TILES)
+    offsets = tile_offsets[:, None] * C + c_offsets[None, :]
+    sum_values = tl.load(partial_sum_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    dot_values = tl.load(partial_dot_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    sum_value = tl.sum(sum_values, axis=0)
+    dot_value = tl.sum(dot_values, axis=0)
+    channel_mask = c_offsets < C
+    invstd = tl.load(invstd_ptr + c_offsets, mask=channel_mask, other=0.0).to(tl.float32)
+    tl.store(sum_out_ptr + c_offsets, sum_value, mask=channel_mask)
+    tl.store(dot_out_ptr + c_offsets, dot_value, mask=channel_mask)
+    tl.store(vector_out_ptr + c_offsets, _f32_mul(dot_value, invstd), mask=channel_mask)
 
 
 @triton.jit
@@ -172,7 +179,6 @@ def _epilogue_kernel(
     weight_ptr,
     sum_ptr,
     dot_ptr,
-    vector_out_ptr,
     out_ptr,
     TOTAL: tl.constexpr,
     C: tl.constexpr,
@@ -212,16 +218,11 @@ def _epilogue_kernel(
     residual = _f32_sub(residual, mean_term)
     out_scale = _f32_mul(invstd, weight)
     result = _f32_mul(residual, out_scale)
-    tl.store(
-        vector_out_ptr + c,
-        _f32_mul(dot_value, invstd),
-        mask=active & (offsets < C),
-    )
     tl.store(out_ptr + offsets, result.to(tl.bfloat16), mask=active)
 
 
 # 8399096d: GhostNet train, bf16 channels-last N=512, C=480, H=W=7.
-@oracle_impl(hardware="B200", point="8399096d", BLOCK_K=1024, BLOCK_C=8, num_warps=4)
+@oracle_impl(hardware="B200", point="8399096d", BLOCK_K=256, BLOCK_C=8, num_warps=4)
 def oracle_forward(inputs, *, BLOCK_K: int, BLOCK_C: int, num_warps: int):
     arg0_1, arg1_1, arg2_1, arg3_1, arg4_1, arg5_1, arg6_1, arg7_1 = inputs
     n, c, h, w = arg1_1.shape
@@ -230,6 +231,12 @@ def oracle_forward(inputs, *, BLOCK_K: int, BLOCK_C: int, num_warps: int):
     num_k_tiles = triton.cdiv(k_total, BLOCK_K)
     c_in = int(arg0_1.shape[1])
 
+    partial_sum = torch.empty_strided(
+        (num_k_tiles, c), (c, 1), device=arg1_1.device, dtype=torch.float32
+    )
+    partial_dot = torch.empty_strided(
+        (num_k_tiles, c), (c, 1), device=arg1_1.device, dtype=torch.float32
+    )
     sum_out = torch.empty_strided((c,), (1,), device=arg1_1.device, dtype=torch.float32)
     dot_out = torch.empty_strided((c,), (1,), device=arg1_1.device, dtype=torch.float32)
     vector_out = torch.empty_strided((c,), (1,), device=arg1_1.device, dtype=torch.float32)
@@ -240,29 +247,35 @@ def oracle_forward(inputs, *, BLOCK_K: int, BLOCK_C: int, num_warps: int):
         dtype=torch.bfloat16,
     )
 
-    _zero_kernel[(triton.cdiv(c, 1024),)](
-        sum_out,
-        dot_out,
-        C=c,
-        BLOCK=1024,
-        num_warps=4,
-        num_stages=3,
-    )
-    _atomic_reduce_kernel[(triton.cdiv(c, BLOCK_C), num_k_tiles)](
+    _partial_reduce_kernel[(triton.cdiv(c, BLOCK_C), num_k_tiles)](
         arg0_1,
         arg1_1,
         arg2_1,
         arg3_1,
         arg4_1,
         arg5_1,
-        sum_out,
-        dot_out,
+        partial_sum,
+        partial_dot,
         C=c,
         C_IN=c_in,
         K_TOTAL=k_total,
         BLOCK_K=BLOCK_K,
         BLOCK_C=BLOCK_C,
         num_warps=num_warps,
+        num_stages=3,
+    )
+    _finalize_reduce_kernel[(triton.cdiv(c, BLOCK_C),)](
+        partial_sum,
+        partial_dot,
+        arg6_1,
+        sum_out,
+        dot_out,
+        vector_out,
+        C=c,
+        NUM_TILES=num_k_tiles,
+        BLOCK_C=BLOCK_C,
+        BLOCK_TILES=FINAL_BLOCK_K,
+        num_warps=4,
         num_stages=3,
     )
     _epilogue_kernel[(triton.cdiv(total, EPILOGUE_BLOCK),)](
@@ -276,7 +289,6 @@ def oracle_forward(inputs, *, BLOCK_K: int, BLOCK_C: int, num_warps: int):
         arg7_1,
         sum_out,
         dot_out,
-        vector_out,
         out,
         TOTAL=total,
         C=c,
