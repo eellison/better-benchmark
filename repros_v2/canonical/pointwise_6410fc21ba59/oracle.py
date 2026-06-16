@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete Mistral 32-output bf16 causal-mask construction in one Triton pointwise kernel, sharing the generated row/column predicate for all returned `[1,1,1000,1000]` outputs and materializing each distinct output tensor with exact bf16 `0.0` and `-inf` values; Inductor lowers the iota/unsqueeze/le/expand producer and thirty-two identical `where` graph-output siblings through generic pointwise scheduling, so the shared structured predicate is rebuilt across many output stores; the fix is SCHEDULER_FUSION: teach pointwise scheduling to fuse same-domain graph-output siblings with shared index-derived producers into one multi-output store kernel."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete Mistral bf16 causal-mask fanout scope by materializing all thirty-two fresh `[1,1,1000,1000]` graph outputs in one Triton multi-output kernel that shares the generated iota/le predicate and bf16 `where` constants, whereas Inductor lowers the identical graph-output siblings as repeated pointwise materializations from the same structured predicate. Inductor cannot do this today because the pointwise scheduler does not group same-domain output siblings with shared shape-derived producers into one store schedule; the fix is SCHEDULER_FUSION: add graph-output sibling fusion for identical structured pointwise roots so one schedule can emit all required fresh output stores while reusing the causal predicate."""
 
 import torch
 import triton
@@ -7,10 +7,6 @@ import triton.language as tl
 from oracle_harness import oracle_impl
 
 
-SEQ = 1000
-OUT_SHAPE = (1, 1, SEQ, SEQ)
-OUT_STRIDE = (SEQ * SEQ, SEQ * SEQ, SEQ, 1)
-OUT_NUMEL = SEQ * SEQ
 OUTPUT_COUNT = 32
 
 
@@ -48,15 +44,14 @@ def _causal_mask_32_kernel(
     out29,
     out30,
     out31,
-    n_elements: tl.constexpr,
-    seq: tl.constexpr,
+    S: tl.constexpr,
     BLOCK: tl.constexpr,
 ):
-    offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
-    mask = offsets < n_elements
-    rows = offsets // seq
-    cols = offsets - rows * seq
-    values = tl.where(cols <= rows, 0.0, -float("inf"))
+    row = tl.program_id(0)
+    cols = tl.arange(0, BLOCK)
+    mask = cols < S
+    offsets = row * S + cols
+    values = tl.where(cols <= row, 0.0, -float("inf"))
 
     tl.store(out0 + offsets, values, mask=mask)
     tl.store(out1 + offsets, values, mask=mask)
@@ -92,23 +87,22 @@ def _causal_mask_32_kernel(
     tl.store(out31 + offsets, values, mask=mask)
 
 
-@oracle_impl(hardware="B200", point="d7517139", BLOCK=256, num_warps=4)
+@oracle_impl(hardware="B200", point="d7517139", BLOCK=1024, num_warps=4)
 def oracle_forward(inputs, *, BLOCK: int, num_warps: int):
-    del inputs
+    expand_shape = tuple(1 if int(dim) == -1 else int(dim) for dim in inputs[0])
+    batch, heads, seq, _ = expand_shape
+    stride = (heads * seq * seq, seq * seq, seq, 1)
+    device = torch.device("cuda", 0)
     outputs = tuple(
-        torch.empty_strided(
-            OUT_SHAPE,
-            OUT_STRIDE,
-            device="cuda",
-            dtype=torch.bfloat16,
-        )
+        torch.empty_strided(expand_shape, stride, device=device, dtype=torch.bfloat16)
         for _ in range(OUTPUT_COUNT)
     )
-    _causal_mask_32_kernel[(triton.cdiv(OUT_NUMEL, BLOCK),)](
+
+    _causal_mask_32_kernel[(batch * heads * seq,)](
         *outputs,
-        n_elements=OUT_NUMEL,
-        seq=SEQ,
+        S=seq,
         BLOCK=BLOCK,
         num_warps=num_warps,
+        num_stages=3,
     )
     return outputs
