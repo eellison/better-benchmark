@@ -216,66 +216,55 @@ def _longformer_backward_scatter_kernel(
     product = grad_term * probs
     row_sum = tl.sum(tl.where(col_mask, product, 0.0), axis=0)
     fma = _fma_rn_f32(-probs, row_sum, product)
-    result = fma.to(tl.bfloat16, fp_downcast_rounding="rtne")
 
-    upper_q = cols - 256
-    upper_linear = pos * 513 + upper_q
-    upper_r = upper_linear // FINAL_K_
-    upper_c = upper_linear - upper_r * FINAL_K_
-    left_edge = tl.load(left_edge_mask_ptr + pos * 257 + 256).to(tl.float32) != 0.0
-    upper_mask = (
-        col_mask
-        & (chunk < (CHUNKS_ - 1))
-        & (cols >= 256)
-        & ~((chunk == 0) & (cols == 256) & left_edge)
-    )
-    upper_offset = ((group * 3 + chunk) * FINAL_N_ + upper_r) * FINAL_K_ + upper_c
-    tl.store(final_ptr + upper_offset, result, mask=upper_mask)
-
-    left_mask_value = tl.load(
+    start_mask = tl.load(
         left_edge_mask_ptr + pos * 257 + cols,
-        mask=col_mask & (cols < 257),
-        other=1.0,
+        mask=col_mask & (cols <= 256),
+        other=0.0,
     ).to(tl.float32) != 0.0
-    left_linear = (pos - 1) * 513 + (cols + 257)
-    left_r = left_linear // FINAL_K_
-    left_c = left_linear - left_r * FINAL_K_
-    left_mask = (
-        col_mask
-        & (chunk == 0)
-        & (pos >= 1)
-        & (cols >= 1)
-        & (cols <= 255)
-        & ~left_mask_value
-    )
-    left_offset = (group * 3 * FINAL_N_ + left_r) * FINAL_K_ + left_c
-    tl.store(final_ptr + left_offset, result, mask=left_mask)
-
-    lower_q = cols + 257
-    lower_linear = (pos + 255) * 513 + lower_q
-    lower_r = lower_linear // FINAL_K_
-    lower_c = lower_linear - lower_r * FINAL_K_
-    lower_mask = col_mask & (chunk > 0) & (cols <= 255)
-    lower_offset = ((group * 3 + chunk - 1) * FINAL_N_ + lower_r) * FINAL_K_ + lower_c
-    tl.store(final_ptr + lower_offset, result, mask=lower_mask)
-
-    right_mask_value = tl.load(
+    end_mask = tl.load(
         right_edge_mask_ptr + pos * 257 + (cols - 256),
         mask=col_mask & (cols >= 256),
-        other=1.0,
+        other=0.0,
     ).to(tl.float32) != 0.0
-    right_linear = (pos + 256) * 513 + (cols - 256)
-    right_r = right_linear // FINAL_K_
-    right_c = right_linear - right_r * FINAL_K_
-    right_mask = (
-        col_mask
-        & (chunk == (CHUNKS_ - 1))
-        & (cols >= 256)
-        & (right_r < FINAL_N_)
-        & ~right_mask_value
+    fma = tl.where((chunk == 0) & (cols <= 256) & start_mask, 0.0, fma)
+    fma = tl.where((chunk == (CHUNKS_ - 1)) & (cols >= 256) & end_mask, 0.0, fma)
+    result = fma.to(tl.bfloat16, fp_downcast_rounding="rtne")
+
+    cols_i64 = cols.to(tl.int64)
+    out_plane = FINAL_N_ * FINAL_K_
+
+    upper_linear = pos * 513 + (cols_i64 - 256)
+    upper_offset = (group * 3 + chunk) * out_plane + upper_linear
+    tl.store(
+        final_ptr + upper_offset,
+        result,
+        mask=(chunk <= (CHUNKS_ - 2)) & (cols >= 256) & col_mask,
     )
-    right_offset = ((group * 3 + CHUNKS_ - 2) * FINAL_N_ + right_r) * FINAL_K_ + right_c
-    tl.store(final_ptr + right_offset, result, mask=right_mask)
+
+    left_linear = (pos - 1) * 513 + (cols_i64 + 257)
+    left_offset = group * 3 * out_plane + left_linear
+    tl.store(
+        final_ptr + left_offset,
+        result,
+        mask=(chunk == 0) & (pos >= 1) & (cols >= 1) & (cols <= 255),
+    )
+
+    lower_linear = (255 + pos) * 513 + (cols_i64 + 257)
+    lower_offset = (group * 3 + chunk - 1) * out_plane + lower_linear
+    tl.store(
+        final_ptr + lower_offset,
+        result,
+        mask=(chunk >= 1) & (cols <= 255),
+    )
+
+    right_linear = (256 + pos) * 513 + (cols_i64 - 256)
+    right_offset = (group * 3 + CHUNKS_ - 2) * out_plane + right_linear
+    tl.store(
+        final_ptr + right_offset,
+        result,
+        mask=(chunk == (CHUNKS_ - 1)) & (cols >= 256) & col_mask & (right_linear < out_plane),
+    )
 
 
 def _empty_bf16(shape, device):

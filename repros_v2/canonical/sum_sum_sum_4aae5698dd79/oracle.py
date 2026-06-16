@@ -3,6 +3,7 @@
 import torch
 import triton
 import triton.language as tl
+from torch._inductor.runtime.triton_helpers import libdevice
 
 from oracle_harness import oracle_impl
 
@@ -136,7 +137,7 @@ def _branch_kernel(
     logits = tl.load(logits_ptr + offsets, mask=active, other=0.0).to(tl.float32)
     score = _f32_add(logits, bias_with_mask[None, :]).to(tl.bfloat16).to(tl.float32)
     shifted = _f32_sub(score, tl.load(row_shift_ptr + ((bs * HEADS_ + h) * QUERY_ + q), mask=bs < BATCH_, other=0.0).to(tl.float32)[:, None])
-    numer = tl.exp(shifted)
+    numer = libdevice.exp(shifted)
     denom = tl.load(
         denom_ptr + ((bs * HEADS_ + h) * QUERY_ + q),
         mask=bs < BATCH_,
@@ -145,7 +146,11 @@ def _branch_kernel(
     probs = _f32_div(numer, denom[:, None])
 
     product = _f32_mul(dprob, probs)
-    row_sum = tl.sum(tl.where(active, product, 0.0), axis=1)
+    lane0 = tl.sum(tl.where(active & ((ks[None, :] % 4) == 0), product, 0.0), axis=1)
+    lane1 = tl.sum(tl.where(active & ((ks[None, :] % 4) == 1), product, 0.0), axis=1)
+    lane2 = tl.sum(tl.where(active & ((ks[None, :] % 4) == 2), product, 0.0), axis=1)
+    lane3 = tl.sum(tl.where(active & ((ks[None, :] % 4) == 3), product, 0.0), axis=1)
+    row_sum = (((lane0 + lane1) + lane2) + lane3).to(tl.float32)
     dscore = _f32_fma(-probs, row_sum[:, None], product)
     dscore_bf16 = dscore.to(tl.bfloat16, fp_downcast_rounding="rtne")
     tl.store(out_ptr + offsets, dscore_bf16, mask=active)
@@ -161,15 +166,12 @@ def _branch_kernel(
     reduced_k = tl.sum(tl.where(active, values, 0.0), axis=0)
 
     bucket = tl.load(index_ptr + q * KEY_ + ks, mask=ks < KEY_, other=-1).to(tl.int64)
+    bucket = tl.minimum(tl.maximum(bucket, -BUCKETS_), BUCKETS_ - 1)
+    bucket = tl.where(bucket < 0, bucket + BUCKETS_, bucket)
     partial_base = ((b_block * HEADS_ + h) * QUERY_ + q) * BUCKETS_
     for bucket_id in tl.static_range(0, 32):
-        bucket_match = bucket == bucket_id
-        if bucket_id == 0:
-            bucket_match = bucket <= bucket_id
-        if bucket_id == 31:
-            bucket_match = bucket >= bucket_id
         bucket_sum = tl.sum(
-            tl.where((ks < KEY_) & bucket_match, reduced_k, 0.0),
+            tl.where((ks < KEY_) & (bucket == bucket_id), reduced_k, 0.0),
             axis=0,
         )
         tl.store(partial_ptr + partial_base + bucket_id, bucket_sum)
@@ -275,7 +277,7 @@ def _launch_branch(
 @oracle_impl(
     hardware="B200",
     point="2f93d7aa",
-    BLOCK_B=16,
+    BLOCK_B=32,
     BLOCK_K=128,
     num_warps_branch=8,
     num_warps_finalize=4,

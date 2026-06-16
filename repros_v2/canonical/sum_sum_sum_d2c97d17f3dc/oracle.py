@@ -18,6 +18,54 @@ NEG_INF_F32 = -3.4028234663852886e38
 
 
 @triton.jit
+def _f32_add(a, b):
+    return tl.inline_asm_elementwise(
+        "add.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
+def _f32_sub(a, b):
+    return tl.inline_asm_elementwise(
+        "sub.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
+def _f32_mul(a, b):
+    return tl.inline_asm_elementwise(
+        "mul.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
+def _f32_div(a, b):
+    return tl.inline_asm_elementwise(
+        "div.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
 def _f32_fma(a, b, c):
     return tl.inline_asm_elementwise(
         "fma.rn.f32 $0, $1, $2, $3;",
@@ -30,15 +78,15 @@ def _f32_fma(a, b, c):
 
 
 @triton.jit
-def _aten_inner_sum_1024(values):
-    by_vec = tl.reshape(values, (8, 32, 4))
-    lane_acc = tl.sum(by_vec, axis=0)
-    lane_sum = tl.sum(lane_acc, axis=1)
-    sum16 = tl.reshape(tl.sum(tl.reshape(lane_sum, (16, 2)), axis=1), (16,))
-    sum8 = tl.reshape(tl.sum(tl.reshape(sum16, (8, 2)), axis=1), (8,))
-    sum4 = tl.reshape(tl.sum(tl.reshape(sum8, (4, 2)), axis=1), (4,))
-    sum2 = tl.reshape(tl.sum(tl.reshape(sum4, (2, 2)), axis=1), (2,))
-    return tl.sum(sum2, axis=0)
+def _aten_inner_sum_1024_masked(values):
+    return tl.sum(tl.sum(tl.reshape(values, (32, 32)), axis=0), axis=0)
+
+
+@triton.jit
+def _aten_inner_sum_1024_unmasked(values):
+    partial = tl.sum(tl.reshape(values, (4, 4, 64)), axis=1)
+    partial = tl.sum(partial, axis=1)
+    return tl.sum(partial, axis=0)
 
 
 @triton.jit
@@ -72,9 +120,9 @@ def _branch_kernel(
     offsets = ((bs[:, None] * HEADS_ + h) * QUERY_ + q) * KEY_ + ks[None, :]
 
     keep = tl.load(keep_ptr + offsets, mask=active, other=0).to(tl.float32)
-    dropout_scale = (keep * SCALE_).to(tl.bfloat16).to(tl.float32)
+    dropout_scale = _f32_mul(keep, SCALE_).to(tl.bfloat16).to(tl.float32)
     bmm = tl.load(bmm_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    dprob = (bmm * dropout_scale).to(tl.bfloat16).to(tl.float32)
+    dprob = _f32_mul(bmm, dropout_scale).to(tl.bfloat16).to(tl.float32)
 
     bias = tl.load(
         bias_ptr + (q * KEY_ + ks) * HEADS_ + h,
@@ -87,26 +135,29 @@ def _branch_kernel(
         mask_bias = tl.where(k_order <= q_order, tl.load(fill_ptr).to(tl.float32), NEG_INF_)
     else:
         mask_bias = tl.zeros((BLOCK_K,), dtype=tl.float32)
-    bias_with_mask = bias + mask_bias
+    bias_with_mask = _f32_add(bias, mask_bias)
 
     logits = tl.load(logits_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    score = (logits + bias_with_mask[None, :]).to(tl.bfloat16).to(tl.float32)
-    shifted = score - tl.load(
+    score = _f32_add(logits, bias_with_mask[None, :]).to(tl.bfloat16).to(tl.float32)
+    shifted = _f32_sub(score, tl.load(
         row_shift_ptr + ((bs * HEADS_ + h) * QUERY_ + q),
         mask=bs < BATCH_,
         other=0.0,
-    ).to(tl.float32)[:, None]
+    ).to(tl.float32)[:, None])
     numer = libdevice.exp(shifted)
     denom = tl.load(
         denom_ptr + ((bs * HEADS_ + h) * QUERY_ + q),
         mask=bs < BATCH_,
         other=1.0,
     ).to(tl.float32)
-    probs = numer / denom[:, None]
+    probs = _f32_div(numer, denom[:, None])
 
-    product = dprob * probs
+    product = _f32_mul(dprob, probs)
     if BLOCK_B == 1 and BLOCK_K == 1024:
-        row_sum = _aten_inner_sum_1024(tl.reshape(product, (1024,)))
+        if USE_ORDER_MASK:
+            row_sum = _aten_inner_sum_1024_masked(tl.reshape(product, (1024,)))
+        else:
+            row_sum = _aten_inner_sum_1024_unmasked(tl.reshape(product, (1024,)))
         dscore = _f32_fma(-probs, row_sum, product)
     else:
         row_sum = tl.sum(tl.where(active, product, 0.0), axis=1)

@@ -68,7 +68,7 @@ def _deberta_masked_softmax_backward_bf16_kernel(
     product = scaled_grad * probs
     row_sum = tl.sum(tl.where(mask, product, 0.0), axis=1)[:, None].to(tl.float32)
     fma = _fma_rn_f32(-probs, row_sum, product)
-    rounded = fma.to(tl.bfloat16)
+    rounded = fma.to(tl.bfloat16, fp_downcast_rounding="rtne")
     out = tl.where(final_mask, fill, rounded)
 
     tl.store(out_ptr + offsets, out, mask=mask)
