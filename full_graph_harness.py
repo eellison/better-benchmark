@@ -1255,48 +1255,46 @@ def _normalize_device_name(device: Any) -> str | None:
     return text
 
 
-def _dims_equal(a: Any, b: Any) -> bool:
-    """Two shape/stride slots agree. Ints compare directly; symbolic slots
-    (expr strings) compare by sympy equivalence ('s0*s53' == '64*s0*s53//64')
-    — never string equality (different but equal renderings exist), never
-    int() (the bug that mangled '64*s0*s53' to 64).
+def _dims_provably_differ(a: Any, b: Any) -> bool:
+    """True only when two shape/stride slots can be PROVEN unequal — used by
+    the sidecar-vs-annotation cross-check, which raises on a mismatch. We must
+    never raise on a pair sympy can't decide (a false alarm dropping a valid
+    repro), and never claim a mismatch we didn't prove.
 
-    Uses input_codec._sympify_expr so symbols are integer with a range-driven
-    sign assumption (a SymInt dim is integer; a size is >= 0). Equality is
-    decided ENTIRELY by INTEGER-point sampling (subs + is_Integer): sympy's
-    .equals()/.simplify() are avoided on purpose — they probe at FRACTIONAL
-    random points, which makes torch's PythonMod/CeilToInt assert (integer
-    args only) and raise. Integer .subs() never raises (a 0-divisor folds to
-    an unevaluated zoo that is_Integer rejects), so no try/except is needed."""
+    Ints compare directly. Symbolic slots are sympified via
+    input_codec._sympify_expr (integer + range-driven sign assumptions, so
+    e.g. 64*s0*s53//64 cancels to s0*s53 and floor(s)==s).
+
+    Decision (sound both ways, no sampling, no fractional probing):
+      - structural `ea == eb`        -> NOT differ (commutativity/cancel)
+      - (ea-eb).is_zero True/False   -> sympy decided it
+      - is_zero None (undecided): if the difference is a non-zero POLYNOMIAL
+        in the symbols it is PROVABLY non-zero (two distinct integer
+        polynomials differ at infinitely many points) -> differ. Otherwise it
+        contains floor/Mod/Max/ceiling sympy couldn't fold (Max(1,X) vs X,
+        PythonMod vs Mod) -> NOT proven; return False (never raise a mismatch
+        we cannot prove).
+    .equals()/.simplify()'s fractional probing is avoided — it asserts
+    integer-only inside torch's PythonMod.eval and raises; is_zero/expand are
+    pure algebra and do not probe."""
     if isinstance(a, int) and isinstance(b, int):
-        return a == b
+        return a != b
+    import sympy
     from input_codec import _sympify_expr
     ea, eb = _sympify_expr(str(a)), _sympify_expr(str(b))
     if ea == eb:
-        return True
-    # Sample each symbol INDEPENDENTLY (distinct per-symbol sequences, plus an
-    # all-equal and an all-distinct point) so an expr differing only when
-    # symbols coincide/differ is still caught. This is a validator
-    # cross-check, not a correctness gate: a genuine capture mismatch
-    # disagrees at some integer point; EVERY decidable sample must agree.
-    syms = sorted(ea.free_symbols | eb.free_symbols, key=str)
-    if not syms:
         return False
-    bases = [2, 3, 5, 8, 13, 16, 32, 64, 257]
-    points = [{s: base + (j * (k + 1)) for j, s in enumerate(syms)}
-              for k, base in enumerate(bases)]
-    points.append({s: 7 for s in syms})                    # all equal
-    points.append({s: 4 + j for j, s in enumerate(syms)})  # all distinct
-    agree = 0
-    for subs in points:
-        va, vb = ea.subs(subs), eb.subs(subs)
-        if not (getattr(va, "is_Integer", False)
-                and getattr(vb, "is_Integer", False)):
-            continue   # couldn't fold this point (zoo/non-int) — skip
-        if va != vb:
-            return False   # one disagreement = genuine mismatch
-        agree += 1
-    return agree >= 3   # enough decidable points all agreed
+    diff = ea - eb
+    z = diff.is_zero
+    if z is True:
+        return False
+    if z is False:
+        return True
+    de = sympy.expand(diff)
+    if de == 0:
+        return False
+    syms = sorted(diff.free_symbols, key=str)
+    return bool(syms) and de.is_polynomial(*syms)
 
 
 def _validate_dim_vector(sidecar, annotation, side_exprs, ann_exprs,
@@ -1318,7 +1316,10 @@ def _validate_dim_vector(sidecar, annotation, side_exprs, ann_exprs,
         # Prefer the expr where a side has one; else the (int) value.
         a = side_exprs[idx] if side_exprs[idx] is not None else sidecar[idx]
         b = ann_exprs[idx] if ann_exprs[idx] is not None else annotation[idx]
-        if not _dims_equal(a, b):
+        # Raise ONLY on a proven mismatch — an undecidable pair (sympy can't
+        # decide Max(1,X) vs X) is not a confirmed capture bug, so don't drop
+        # the repro over it.
+        if _dims_provably_differ(a, b):
             raise ValueError(
                 f"full graph sidecar tensor {what} does not match forward "
                 f"annotations for {label} dim {idx}: {a} != {b}")

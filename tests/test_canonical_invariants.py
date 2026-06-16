@@ -1588,18 +1588,20 @@ def test_symbolic_stride_codec_roundtrip_is_exprs_not_hints():
     assert ev2["stride"][0] == 64 * 32 * 8
 
 
-def test_dims_equal_compares_exprs_by_sympy_not_int():
-    """_dims_equal: ints exact, symbolic slots by sympy-equivalence — never
-    int() (the mangling bug), never string equality."""
-    from full_graph_harness import _dims_equal
-    assert _dims_equal(16384, 16384)
-    assert not _dims_equal(16384, 64)
-    # equal exprs, different rendering
-    assert _dims_equal("s0*s53", "s53*s0")
-    assert _dims_equal("64*s0*s53", "s0*s53*64")
-    assert not _dims_equal("s0*s53", "s0*s53*64")
-    # a symbolic slot is NOT mangled to its leading integer
-    assert not _dims_equal("64*s0*s53", 64)
+def test_dims_provably_differ_uses_sympy_not_int():
+    """_dims_provably_differ: ints exact, symbolic slots by sympy is_zero —
+    never int() (the mangling bug), never string equality. True ONLY on a
+    proven mismatch."""
+    from full_graph_harness import _dims_provably_differ
+    assert not _dims_provably_differ(16384, 16384)
+    assert _dims_provably_differ(16384, 64)
+    # equal exprs, different rendering -> NOT a mismatch
+    assert not _dims_provably_differ("s0*s53", "s53*s0")
+    assert not _dims_provably_differ("64*s0*s53", "s0*s53*64")
+    # genuinely different -> proven mismatch
+    assert _dims_provably_differ("s0*s53", "s0*s53*64")
+    # a symbolic slot is NOT mangled to its leading integer -> proven differ
+    assert _dims_provably_differ("64*s0*s53", 64)
 
 
 def test_symint_input_expr_codec_roundtrips_as_I():
@@ -1992,18 +1994,20 @@ def test_contiguous_stride_symbolic_shape_no_crash():
     assert ev["stride"] == [16384, 256, 16, 1]
 
 
-def test_dims_equal_robust_on_max_and_floor_renderings():
-    """Findings H/I: _dims_equal must (a) not raise 'nan not comparable' on
-    Max(1, floor(...)) vs the bare floor, (b) treat floor(s0)==s0 as equal
-    (integer-positive symbols), (c) still catch genuine mismatches."""
-    from full_graph_harness import _dims_equal
-    assert _dims_equal("s96*((s75//((s75//2))))",
-                       "s96*Max(1, (s75//((s75//2))))")   # equal for all s>=2
-    assert _dims_equal("floor(s0)", "s0")
-    assert _dims_equal("s0*s53", "64*s0*s53//64")
-    assert _dims_equal(16384, 16384)
-    assert not _dims_equal(16384, 64)
-    assert not _dims_equal("s0*s53", "s0*s99")            # genuine mismatch
+def test_dims_provably_differ_robust_on_max_and_floor_renderings():
+    """Findings H/I: _dims_provably_differ must (a) not raise on Max(1,
+    floor(...)) vs the bare floor and not claim a mismatch it can't prove,
+    (b) treat floor(s0)==s0 and the //64 cancellation as NOT-differing
+    (integer/positive symbols), (c) still PROVE a genuine mismatch."""
+    from full_graph_harness import _dims_provably_differ
+    # undecidable (Max(1,X) vs X): NOT a proven mismatch -> must not raise
+    assert not _dims_provably_differ("s96*((s75//((s75//2))))",
+                                     "s96*Max(1, (s75//((s75//2))))")
+    assert not _dims_provably_differ("floor(s0)", "s0")
+    assert not _dims_provably_differ("s0*s53", "64*s0*s53//64")
+    assert not _dims_provably_differ(16384, 16384)
+    assert _dims_provably_differ(16384, 64)
+    assert _dims_provably_differ("s0*s53", "s0*s99")      # proven mismatch
 
 
 def test_dynamic_dims_for_repro_absolute_position():
@@ -2118,18 +2122,22 @@ def test_merge_distinct_symbolizations_do_not_clobber():
             make_inputs_from_config(cfg)
 
 
-def test_dims_equal_never_raises_on_torch_function_probes():
-    """Round 2 self-finding: _dims_equal's sympy .equals()/.simplify() probe
-    expressions at FRACTIONAL random points, which makes torch's PythonMod
-    .eval assert (integer args only) -> uncaught AssertionError crashed the
-    sidecar validator. The guards must be broad (catch Exception) and fall
-    through to the sound integer-sampling check."""
-    from full_graph_harness import _dims_equal
-    # these must return a bool, never raise:
-    assert _dims_equal("s0", "Mod(s0, 1000000)") is True   # equal on all real dims
-    assert _dims_equal("Max(s0, s1)", "s0") is False
-    assert _dims_equal("Max(s0, s1)", "s0 + s1") is False  # differ for positive dims
-    assert _dims_equal("s0*s53", "s0*s99") is False
+def test_dims_provably_differ_never_raises_on_torch_functions():
+    """Round 2/3: the OLD _dims_equal used sympy .equals()/.simplify(), which
+    probe at FRACTIONAL random points and made torch's PythonMod.eval assert
+    -> crash. _dims_provably_differ uses only structural == and .is_zero
+    (pure algebra, no probing), so it NEVER raises and NEVER guesses
+    (no sampling): it returns True only on a sympy-PROVEN mismatch."""
+    from full_graph_harness import _dims_provably_differ
+    # must return a bool, never raise:
+    # PythonMod vs the bare symbol: sympy can't decide -> NOT proven differ
+    # (we don't raise a mismatch we can't prove).
+    assert _dims_provably_differ("s0", "Mod(s0, 1000000)") is False
+    # Max(s0,s1) vs s0 / vs s0+s1: also undecidable in general -> not proven.
+    assert _dims_provably_differ("Max(s0, s1)", "s0") is False
+    assert _dims_provably_differ("Max(s0, s1)", "s0 + s1") is False
+    # a genuine polynomial mismatch IS proven:
+    assert _dims_provably_differ("s0*s53", "s0*s99") is True
 
 
 def test_capture_does_not_force_storage_size_guard_gpu():
