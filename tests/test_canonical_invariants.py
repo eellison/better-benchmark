@@ -2104,3 +2104,17 @@ def test_merge_distinct_symbolizations_do_not_clobber():
         assert len(cfgs) == 2
         for cfg in cfgs.values():
             make_inputs_from_config(cfg)
+
+
+def test_dims_equal_never_raises_on_torch_function_probes():
+    """Round 2 self-finding: _dims_equal's sympy .equals()/.simplify() probe
+    expressions at FRACTIONAL random points, which makes torch's PythonMod
+    .eval assert (integer args only) -> uncaught AssertionError crashed the
+    sidecar validator. The guards must be broad (catch Exception) and fall
+    through to the sound integer-sampling check."""
+    from full_graph_harness import _dims_equal
+    # these must return a bool, never raise:
+    assert _dims_equal("s0", "Mod(s0, 1000000)") is True   # equal on all real dims
+    assert _dims_equal("Max(s0, s1)", "s0") is False
+    assert _dims_equal("Max(s0, s1)", "s0 + s1") is False  # differ for positive dims
+    assert _dims_equal("s0*s53", "s0*s99") is False

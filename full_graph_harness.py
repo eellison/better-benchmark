@@ -1273,39 +1273,52 @@ def _dims_equal(a: Any, b: Any) -> bool:
     ea, eb = _sympify_expr(str(a)), _sympify_expr(str(b))
     if ea == eb:
         return True
+    # simplify / .equals are best-effort: BOTH can raise from torch's sympy
+    # functions (e.g. PythonMod.eval asserts integer args, but sympy's
+    # .equals/.is_constant probe at FRACTIONAL random points) — catch broadly
+    # (AssertionError included), fall through to the sound sampling check.
     try:
         if sympy.simplify(ea - eb) == 0:
             return True
-    except (TypeError, ValueError, AttributeError):
+    except Exception:
         pass
     try:
         if ea.equals(eb) is True:    # may return None -> not decided
             return True
-    except (TypeError, ValueError):
+    except Exception:
         pass
     # Undecided symbolically (e.g. Max(1, floor(s//(s//2))) vs the bare
     # floor — equal for every integer s>=2 but sympy can't prove it). This
-    # is a validator cross-check, not a correctness gate: agreement at many
-    # positive-integer sample points means the two derivations match (a
-    # genuine capture mismatch disagrees almost everywhere). Sample the
-    # shared free symbols; if EVERY sample agrees, treat as equal.
+    # is a validator cross-check, not a correctness gate: a genuine capture
+    # mismatch disagrees at some integer point. Sample each symbol
+    # INDEPENDENTLY (distinct per-symbol sequences, AND a point where they
+    # coincide) so an expr that differs only when symbols are equal/unequal
+    # is still caught. EVERY decidable sample must agree.
     syms = sorted(ea.free_symbols | eb.free_symbols, key=str)
     if not syms:
         return False
-    samples = [2, 3, 4, 7, 8, 16, 17, 31, 64, 128, 257]
+    import itertools
+    bases = [2, 3, 5, 8, 13, 16, 32, 64, 257]
+    # per-symbol points: coprime-ish strides so symbols rarely coincide,
+    # plus an all-equal point and an all-distinct point.
+    points = []
+    for k, base in enumerate(bases):
+        points.append({s: base + (j * (k + 1)) for j, s in enumerate(syms)})
+    points.append({s: 7 for s in syms})                 # all equal
+    points.append({s: 4 + j for j, s in enumerate(syms)})  # all distinct
     agree = 0
-    for i, base in enumerate(samples):
-        subs = {s: base + j for j, s in enumerate(syms)}
+    for subs in points:
         try:
             va, vb = ea.subs(subs), eb.subs(subs)
-            if not (va.is_Integer and vb.is_Integer):
-                continue  # couldn't fold this point (e.g. div-by-zero) — skip
+            if not (getattr(va, "is_Integer", False)
+                    and getattr(vb, "is_Integer", False)):
+                continue  # couldn't fold this point — skip
             if va != vb:
                 return False   # one disagreement = genuine mismatch
             agree += 1
-        except (TypeError, ValueError, ZeroDivisionError):
+        except Exception:
             continue
-    return agree >= 3   # enough decidable points agreed
+    return agree >= 3   # enough decidable points all agreed
 
 
 def _validate_dim_vector(sidecar, annotation, side_exprs, ann_exprs,
