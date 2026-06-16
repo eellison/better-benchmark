@@ -202,6 +202,19 @@ exact boundary:
    regions (data-dependent ops are extern); flagged, not yet special-cased
    in accounting.
 
+5. **Dynamic-vs-static IDENTITY** (adversarial review round 1, Finding E —
+   see `finding_e_identity_analysis.md`). MEASURED: a dynamic capture does
+   NOT currently dedup to the static capture of the same hint shapes — both
+   shape_hash (symint input placeholders inflate it; excluding them makes it
+   match, verified, and changes ZERO existing corpus hashes) and pattern_hash
+   (inline-reshape vs lifted `_shape_param`; dynamic subgraphs skip
+   canonicalization) fork. Plus symbol allocation is trace-context-sensitive,
+   so re-captures scatter. DECISION: Option 1 (make them dedup — exclude
+   symints from shape_hash + canonicalize dynamic subgraphs) vs Option 2
+   (distinct entries, join static-vs-dynamic at the accounting layer via
+   origin_ops+models, retract the §E dedup claim). Recommend Option 2 + the
+   safe shape_hash change. Not yet implemented — needs the call.
+
 ---
 
 ## 6. Remaining implementation (once #5.1 is decided)
