@@ -117,10 +117,8 @@ def _spatial_stats_kernel(
 
     for base in range(0, HW, BLOCK_HW):
         linear_hw = base + hw_offsets
-        h = linear_hw // W
-        w = linear_hw - h * W
         mask = (c_hw < C) & (linear_hw < HW)
-        offsets = n * S0 + c_hw + h * S2 + w * S3
+        offsets = n * S0 + c_hw + linear_hw * S3
         x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
         gelu_x = tl.load(gelu_x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
         erf_arg = _f32_mul(gelu_x, 0.7071067811865476)
@@ -214,9 +212,7 @@ def _output_kernel(
     mask = (rb < ROWS) & (c < C)
     hw = rb % HW
     n = rb // HW
-    h = hw // W
-    w = hw - h * W
-    offsets = n * S0 + c + h * S2 + w * S3
+    offsets = n * S0 + c + hw * S3
     nc_offsets = n * C + c
 
     x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
@@ -278,9 +274,7 @@ def _sum_out_partial_kernel(
     mask = (c < C) & (r < ROWS)
     hw = r % HW
     n = r // HW
-    h = hw // W
-    w = hw - h * W
-    offsets = n * S0 + c + h * S2 + w * S3
+    offsets = n * S0 + c + hw * S3
     vals = tl.load(out_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
     sums = tl.sum(tl.where(mask, vals, 0.0), axis=1)
     c_vec = tl.program_id(1) * BLOCK_C + tl.arange(0, BLOCK_C)
@@ -322,6 +316,8 @@ def _forward(
     SUM_GROUP_SIZE,
     SUM_BLOCK_C,
     USE_FAST_STATS,
+    OUT_NUM_WARPS=8,
+    STATS_NUM_WARPS=8,
 ):
     arg0_1, arg1_1, arg2_1, arg3_1, arg4_1, arg5_1, _shape0, _shape1, _shape2 = inputs
     del _shape0, _shape1, _shape2
@@ -363,7 +359,7 @@ def _forward(
         BLOCK_C=STATS_BLOCK_C,
         BLOCK_HW=STATS_BLOCK_HW,
         STORE_WEIGHTED_TERMS=not USE_FAST_STATS,
-        num_warps=8,
+        num_warps=STATS_NUM_WARPS,
         num_stages=1,
     )
     if USE_FAST_STATS:
@@ -408,7 +404,7 @@ def _forward(
         INV_C=1.0 / 320.0,
         BLOCK_R=OUT_BLOCK_R,
         BLOCK_C=OUT_BLOCK_C,
-        num_warps=8,
+        num_warps=OUT_NUM_WARPS,
         num_stages=1,
     )
 
@@ -425,8 +421,8 @@ def _forward(
     return out0, out1, out2, out3
 
 
-@oracle_impl(hardware="B200", point="8185fd2d", C=320, H=56, STATS_BLOCK_C=32, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=64, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
-@oracle_impl(hardware="B200", point="1b9e6372", C=640, H=28, STATS_BLOCK_C=32, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=64, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
+@oracle_impl(hardware="B200", point="8185fd2d", C=320, H=56, STATS_BLOCK_C=16, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False, OUT_NUM_WARPS=4, STATS_NUM_WARPS=4)
+@oracle_impl(hardware="B200", point="1b9e6372", C=640, H=28, STATS_BLOCK_C=32, STATS_BLOCK_HW=512, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
 @oracle_impl(hardware="B200", point="76e2a948", C=1280, H=14, STATS_BLOCK_C=32, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
 @oracle_impl(hardware="B200", point="d8a24a49", C=2560, H=7, STATS_BLOCK_C=8, STATS_BLOCK_HW=64, FINAL_BLOCK_C=32, OUT_BLOCK_R=64, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
 def oracle_forward(inputs, **kwargs):
