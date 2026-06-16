@@ -132,15 +132,12 @@ def _branch_kernel(
     reduced_k = tl.sum(tl.where(active, values, 0.0), axis=0)
 
     bucket = tl.load(index_ptr + q * KEY_ + ks, mask=ks < KEY_, other=-1).to(tl.int64)
+    bucket = tl.minimum(tl.maximum(bucket, -BUCKETS_), BUCKETS_ - 1)
+    bucket = tl.where(bucket < 0, bucket + BUCKETS_, bucket)
     partial_base = ((b_block * HEADS_ + h) * QUERY_ + q) * BUCKETS_
     for bucket_id in tl.static_range(0, 32):
-        bucket_match = bucket == bucket_id
-        if bucket_id == 0:
-            bucket_match = bucket <= bucket_id
-        if bucket_id == 31:
-            bucket_match = bucket >= bucket_id
         bucket_sum = tl.sum(
-            tl.where((ks < KEY_) & bucket_match, reduced_k, 0.0),
+            tl.where((ks < KEY_) & (bucket == bucket_id), reduced_k, 0.0),
             axis=0,
         )
         tl.store(partial_ptr + partial_base + bucket_id, bucket_sum)
