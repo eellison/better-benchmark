@@ -468,7 +468,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 467,sum_898c72fb606a,898c72fb606a,reduction,reduction_general,1,2,4,,needs_work,codex,needs_work: passes H100 but FAILS B200 (max_diff=4100.0) - hardware-specific reduction/accumulation divergence; verify on B200 not just H100
 468,sum_d6239b8319dc,d6239b8319dc,reduction,unclassified_priority_gap,4,8,4,~sum_035e9c596064;~sum_ca52eb919072;~sum_2dab433e3109,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 469,sum_eb86a17deab9,eb86a17deab9,reduction,sum,4,5,4,sum_39cf4835a913;sum_c7a56ee42903;sum_eb86a17deab9,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
-470,sum_sum_1e07e3ba8c68,1e07e3ba8c68,reduction,reduction_general,1,2,4,,needs_work,codex,needs_work: passes H100 but FAILS B200 (max_diff=3.84) - hardware-specific reduction/accumulation divergence; verify on B200 not just H100
+470,sum_sum_1e07e3ba8c68,1e07e3ba8c68,reduction,reduction_general,1,2,4,,claimed,codex,candidate_pushed_fused_f32_producer_2026-06-16: parent H100 fallback check+no-skip PASS; bench AT_FLOOR 117.73/117.95us r1.002 numerics_gate PASS no CUDAGraph warnings; previous B200 fail max_diff=3.84 needs native B200 reverify
 471,sum_sum_3a61ea52bbe0,3a61ea52bbe0,reduction,scatter_gather,4,4,4,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 472,sum_sum_3e2827a51f95,3e2827a51f95,reduction,reduction_general,1,2,4,,oracle_measured,codex,B200_verified_2026-06-16: check+bench PASS (fleet)
 473,sum_sum_85ee747617a6,85ee747617a6,reduction,reduction_general,2,5,4,,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
