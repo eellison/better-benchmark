@@ -88,6 +88,116 @@ def _mobilevit_bwd_partials_kernel(
 
 
 @triton.jit
+def _mobilevit_row_stats_kernel(
+    x_ptr,
+    weight_ptr,
+    rhs_bf16_ptr,
+    mean_ptr,
+    inv_ptr,
+    row_sum_ptr,
+    row_dot_ptr,
+    ROWS: tl.constexpr,
+    CHANNELS: tl.constexpr,
+    BLOCK_M: tl.constexpr,
+    CHUNK_C: tl.constexpr,
+):
+    tile = tl.program_id(0)
+    rows = tile * BLOCK_M + tl.arange(0, BLOCK_M)
+    cols = tl.arange(0, CHUNK_C)
+    row_mask = rows < ROWS
+    mean = tl.load(mean_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
+    inv = tl.load(inv_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
+
+    row_sum = tl.zeros((BLOCK_M,), dtype=tl.float32)
+    row_dot = tl.zeros((BLOCK_M,), dtype=tl.float32)
+    for start in tl.range(0, CHANNELS, CHUNK_C):
+        block_cols = start + cols
+        col_mask = block_cols < CHANNELS
+        offsets = rows[:, None] * CHANNELS + block_cols[None, :]
+        mask = row_mask[:, None] & col_mask[None, :]
+        x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        weight = tl.load(weight_ptr + block_cols, mask=col_mask, other=0.0).to(
+            tl.float32
+        )
+        rhs_src = tl.load(rhs_bf16_ptr + offsets, mask=mask, other=0.0).to(
+            tl.float32
+        )
+        weighted = x * weight[None, :]
+        rhs = (rhs_src - mean[:, None]) * inv[:, None]
+        row_sum += tl.sum(tl.where(mask, weighted, 0.0), axis=1)
+        row_dot += tl.sum(tl.where(mask, weighted * rhs, 0.0), axis=1)
+
+    tl.store(row_sum_ptr + rows, row_sum, mask=row_mask)
+    tl.store(row_dot_ptr + rows, row_dot, mask=row_mask)
+
+
+@triton.jit
+def _mobilevit_bwd_partials_from_stats_kernel(
+    x_ptr,
+    weight_ptr,
+    rhs_bf16_ptr,
+    mean_ptr,
+    inv_ptr,
+    residual_bf16_ptr,
+    row_sum_ptr,
+    row_dot_ptr,
+    add_out_ptr,
+    partials_ptr,
+    ROWS: tl.constexpr,
+    CHANNELS: tl.constexpr,
+    BLOCK_M: tl.constexpr,
+    BLOCK_C: tl.constexpr,
+    ROW_FACTOR_: tl.constexpr,
+):
+    tile = tl.program_id(0)
+    rows = tile * BLOCK_M + tl.arange(0, BLOCK_M)
+    cols = tl.arange(0, BLOCK_C)
+    row_mask = rows < ROWS
+    col_mask = cols < CHANNELS
+    offsets = rows[:, None] * CHANNELS + cols[None, :]
+    mask = row_mask[:, None] & col_mask[None, :]
+    weight = tl.load(weight_ptr + cols, mask=col_mask, other=0.0).to(tl.float32)
+    row_factor_vec = tl.full((BLOCK_M,), ROW_FACTOR_, tl.float32)
+    row_factor = tl.full((BLOCK_M, BLOCK_C), ROW_FACTOR_, tl.float32)
+
+    x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    rhs_src = tl.load(rhs_bf16_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    mean = tl.load(mean_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
+    inv = tl.load(inv_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
+    residual = tl.load(residual_bf16_ptr + offsets, mask=mask, other=0.0).to(
+        tl.float32
+    )
+    row_sum = tl.load(row_sum_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
+    row_dot = tl.load(row_dot_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
+
+    weighted = x * weight[None, :]
+    rhs = (rhs_src - mean[:, None]) * inv[:, None]
+    centered = weighted * row_factor - row_sum[:, None]
+    centered = centered - rhs * row_dot[:, None]
+    delta = (inv / row_factor_vec)[:, None] * centered
+    delta_bf16 = _round_bf16_to_f32(delta)
+    add_bf16 = _round_bf16_to_f32(residual + delta_bf16)
+    tl.store(add_out_ptr + offsets, add_bf16, mask=mask)
+
+    partial_base = tile * 3 * CHANNELS + cols
+    tl.store(
+        partials_ptr + partial_base,
+        tl.sum(tl.where(mask, x * rhs, 0.0), axis=0),
+        mask=col_mask,
+    )
+    tl.store(
+        partials_ptr + partial_base + CHANNELS,
+        tl.sum(tl.where(mask, x, 0.0), axis=0),
+        mask=col_mask,
+    )
+    tl.store(
+        partials_ptr + partial_base + 2 * CHANNELS,
+        tl.sum(tl.where(mask, add_bf16.to(tl.float32), 0.0), axis=0),
+        mask=col_mask,
+    )
+
+
+@triton.jit
 def _finalize_partials_kernel(
     partials_ptr,
     out_x_rhs_ptr,
@@ -187,11 +297,11 @@ def _shape_tuple(shape):
 
 
 # 30b03cad: (T([131072,144], bf16), T([144], f32), ..., S([512,256,144]))
-@oracle_impl(hardware="B200", point="30b03cad", BLOCK_M=16, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_BLOCK_C=32, GROUPED_SIDE=False, SIDE_WARPS=1, num_warps=2)
+@oracle_impl(hardware="B200", point="30b03cad", BLOCK_M=16, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_BLOCK_C=32, GROUPED_SIDE=False, USE_ROW_STATS=True, STAT_CHUNK_C=16, SIDE_WARPS=1, num_warps=2)
 # 1c6da2dd: (T([32768,192], bf16), T([192], f32), ..., S([512,64,192]))
-@oracle_impl(hardware="B200", point="1c6da2dd", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_BLOCK_C=32, GROUPED_SIDE=True, SIDE_WARPS=1, num_warps=8)
+@oracle_impl(hardware="B200", point="1c6da2dd", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_BLOCK_C=32, GROUPED_SIDE=True, USE_ROW_STATS=True, STAT_CHUNK_C=16, SIDE_WARPS=1, num_warps=8)
 # 0c9dc299: (T([8192,240], bf16), T([240], f32), ..., S([512,16,240]))
-@oracle_impl(hardware="B200", point="0c9dc299", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_BLOCK_C=32, GROUPED_SIDE=False, SIDE_WARPS=1, num_warps=8)
+@oracle_impl(hardware="B200", point="0c9dc299", BLOCK_M=64, BLOCK_C=256, FINAL_BLOCK_C=8, SIDE_BLOCK_C=32, GROUPED_SIDE=False, USE_ROW_STATS=True, STAT_CHUNK_C=8, SIDE_WARPS=1, num_warps=8)
 def oracle_forward(
     inputs,
     *,
@@ -200,6 +310,8 @@ def oracle_forward(
     FINAL_BLOCK_C: int,
     SIDE_BLOCK_C: int,
     GROUPED_SIDE: bool,
+    USE_ROW_STATS: bool,
+    STAT_CHUNK_C: int,
     SIDE_WARPS: int,
     num_warps: int,
 ):
@@ -235,22 +347,62 @@ def oracle_forward(
         device=x_bf16.device,
         dtype=torch.float32,
     )
-    _mobilevit_bwd_partials_kernel[(num_groups,)](
-        x_bf16,
-        weight,
-        rhs_bf16,
-        mean,
-        inv,
-        residual_bf16,
-        add_out,
-        partials,
-        ROWS=rows,
-        CHANNELS=channels,
-        BLOCK_M=BLOCK_M,
-        BLOCK_C=BLOCK_C,
-        ROW_FACTOR_=ROW_FACTOR,
-        num_warps=num_warps,
-    )
+    if USE_ROW_STATS:
+        row_sum = torch.empty_strided(
+            (rows,), (1,), device=x_bf16.device, dtype=torch.float32
+        )
+        row_dot = torch.empty_strided(
+            (rows,), (1,), device=x_bf16.device, dtype=torch.float32
+        )
+        _mobilevit_row_stats_kernel[(num_groups,)](
+            x_bf16,
+            weight,
+            rhs_bf16,
+            mean,
+            inv,
+            row_sum,
+            row_dot,
+            ROWS=rows,
+            CHANNELS=channels,
+            BLOCK_M=BLOCK_M,
+            CHUNK_C=STAT_CHUNK_C,
+            num_warps=num_warps,
+        )
+        _mobilevit_bwd_partials_from_stats_kernel[(num_groups,)](
+            x_bf16,
+            weight,
+            rhs_bf16,
+            mean,
+            inv,
+            residual_bf16,
+            row_sum,
+            row_dot,
+            add_out,
+            partials,
+            ROWS=rows,
+            CHANNELS=channels,
+            BLOCK_M=BLOCK_M,
+            BLOCK_C=BLOCK_C,
+            ROW_FACTOR_=ROW_FACTOR,
+            num_warps=num_warps,
+        )
+    else:
+        _mobilevit_bwd_partials_kernel[(num_groups,)](
+            x_bf16,
+            weight,
+            rhs_bf16,
+            mean,
+            inv,
+            residual_bf16,
+            add_out,
+            partials,
+            ROWS=rows,
+            CHANNELS=channels,
+            BLOCK_M=BLOCK_M,
+            BLOCK_C=BLOCK_C,
+            ROW_FACTOR_=ROW_FACTOR,
+            num_warps=num_warps,
+        )
 
     out_x_rhs = torch.empty_strided(
         sum_shape, (1,), device=x_bf16.device, dtype=torch.float32

@@ -307,65 +307,28 @@ def _row_stats_1536_exact_kernel(
 ):
     row = tl.program_id(0) * STORE_BLOCK_R + tl.arange(0, STORE_BLOCK_R)
     row_mask = row < ROWS
-    lanes = tl.arange(0, 32)
-    sum0 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    sum1 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    sum2 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    sum3 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    dot0 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    dot1 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    dot2 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    dot3 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
+    lanes = tl.arange(0, 128)
+    tree_mask = row_mask[:, None]
+    lane_sum = tl.zeros((STORE_BLOCK_R, 128), dtype=tl.float32)
+    lane_dot = tl.zeros((STORE_BLOCK_R, 128), dtype=tl.float32)
 
     for step in tl.static_range(0, 12):
-        for vec in tl.static_range(0, 4):
-            col = lanes * 4 + step * 128 + vec
-            offs = row[:, None] * 1536 + col[None, :]
-            tree_mask = row_mask[:, None]
-            x_tree = tl.load(arg1_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32)
-            x_tree = _add_rn(
-                x_tree,
-                tl.load(arg0_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32),
-            )
-            x_tree = _add_rn(
-                x_tree,
-                tl.load(arg2_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32),
-            )
-            x_tree = _add_rn(
-                x_tree,
-                tl.load(arg3_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32),
-            )
-            rhs_tree = tl.load(rhs_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32)
-            weighted_tree = _mul_rn(
-                x_tree,
-                tl.load(weight_ptr + col).to(tl.float32)[None, :],
-            )
-            weighted_rhs_tree = _mul_rn(weighted_tree, rhs_tree)
-            if vec == 0:
-                sum0 = _add_rn(sum0, weighted_tree)
-                dot0 = _add_rn(dot0, weighted_rhs_tree)
-            elif vec == 1:
-                sum1 = _add_rn(sum1, weighted_tree)
-                dot1 = _add_rn(dot1, weighted_rhs_tree)
-            elif vec == 2:
-                sum2 = _add_rn(sum2, weighted_tree)
-                dot2 = _add_rn(dot2, weighted_rhs_tree)
-            else:
-                sum3 = _add_rn(sum3, weighted_tree)
-                dot3 = _add_rn(dot3, weighted_rhs_tree)
+        col = lanes + step * 128
+        offs = row[:, None] * 1536 + col[None, :]
+        x_tree = tl.load(arg1_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32)
+        x_tree = _add_rn(x_tree, tl.load(arg0_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32))
+        x_tree = _add_rn(x_tree, tl.load(arg2_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32))
+        x_tree = _add_rn(x_tree, tl.load(arg3_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32))
+        rhs_tree = tl.load(rhs_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32)
+        weighted_tree = _mul_rn(
+            x_tree,
+            tl.load(weight_ptr + col).to(tl.float32)[None, :],
+        )
+        lane_sum = _add_rn(lane_sum, weighted_tree)
+        lane_dot = _add_rn(lane_dot, _mul_rn(weighted_tree, rhs_tree))
 
-    lane_sum = _add_rn(_add_rn(_add_rn(sum0, sum1), sum2), sum3)
-    lane_dot = _add_rn(_add_rn(_add_rn(dot0, dot1), dot2), dot3)
-    sum16 = tl.reshape(tl.sum(tl.reshape(lane_sum, (STORE_BLOCK_R * 16, 2)), axis=1), (STORE_BLOCK_R, 16))
-    dot16 = tl.reshape(tl.sum(tl.reshape(lane_dot, (STORE_BLOCK_R * 16, 2)), axis=1), (STORE_BLOCK_R, 16))
-    sum8 = tl.reshape(tl.sum(tl.reshape(sum16, (STORE_BLOCK_R * 8, 2)), axis=1), (STORE_BLOCK_R, 8))
-    dot8 = tl.reshape(tl.sum(tl.reshape(dot16, (STORE_BLOCK_R * 8, 2)), axis=1), (STORE_BLOCK_R, 8))
-    sum4 = tl.reshape(tl.sum(tl.reshape(sum8, (STORE_BLOCK_R * 4, 2)), axis=1), (STORE_BLOCK_R, 4))
-    dot4 = tl.reshape(tl.sum(tl.reshape(dot8, (STORE_BLOCK_R * 4, 2)), axis=1), (STORE_BLOCK_R, 4))
-    sum2 = tl.reshape(tl.sum(tl.reshape(sum4, (STORE_BLOCK_R * 2, 2)), axis=1), (STORE_BLOCK_R, 2))
-    dot2 = tl.reshape(tl.sum(tl.reshape(dot4, (STORE_BLOCK_R * 2, 2)), axis=1), (STORE_BLOCK_R, 2))
-    row_sum = tl.sum(sum2, axis=1)
-    row_dot = tl.sum(dot2, axis=1)
+    row_sum = tl.sum(lane_sum, axis=1)
+    row_dot = tl.sum(lane_dot, axis=1)
     tl.store(row_sum_ptr + row, row_sum, mask=row_mask)
     tl.store(row_dot_ptr + row, row_dot, mask=row_mask)
 

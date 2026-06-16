@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 attention softmax-backward/dropout scope in one Triton row kernel, including the shape-param views, bf16 dropout-mask scaling by 1.1111111111111112, natural libdevice.exp and round-to-nearest f32 division with the captured fp32 row normalizers, explicit bf16 probability rounding and all-masked-row zeroing, the fp32 last-dimension reduction, fused multiply-add epilogue, final bf16 cast, and returned contiguous 3D view, whereas Inductor lowers the dropout producer, exp/div probability reconstruction, mask selection, reduction, FMA epilogue, and layout-only view through generic scheduler fragments; Inductor cannot do this today because its scheduler does not recognize this softmax-backward row reduction with preserved bf16 rounding boundaries and dropout-mask producer as one full-scope fused template; the fix is SCHEDULER_FUSION: teach Inductor's attention backward scheduler to fuse the dropout scaling, probability reconstruction, row reduction, FMA epilogue, and view-equivalent output store in one generated row kernel."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 attention softmax-backward/dropout scope in one Triton row kernel, including the shape-param views, bf16 dropout-mask scaling by 1.1111111111111112, natural libdevice.exp and round-to-nearest f32 division with the captured fp32 row normalizers, explicit bf16 probability rounding and all-masked-row zeroing, the fp32 last-dimension reduction, fused multiply-add epilogue, final bf16 cast, and returned contiguous 3D view, whereas Inductor lowers the dropout producer, exp/div probability reconstruction, mask selection, reduction, FMA epilogue, and layout-only view through generic scheduler fragments; Inductor cannot do this today because its scheduler does not recognize this softmax-backward row reduction with preserved bf16 rounding boundaries and dropout-mask producer as one full-scope fused lowering; the fix is SCHEDULER_FUSION: teach Inductor's attention backward scheduler to fuse the dropout scaling, probability reconstruction, row reduction, FMA epilogue, and view-equivalent output store in one generated row kernel."""
 
 import torch
 import triton
@@ -136,10 +136,10 @@ def _launch(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int, num_stages: i
 # 79d7858b: (T([384,512,512], bf16), T([32,12,512,512], b8), ...)
 # 4e534079: (T([256,512,512], bf16), T([64,4,512,512], b8), ...)
 # 5d18732f: (T([1024,128,128], bf16), T([256,4,128,128], b8), ...)
-@oracle_impl(hardware="B200", point="931c2d63", BLOCK_M=4, BLOCK_N=128, num_warps=4, num_stages=3)
-@oracle_impl(hardware="B200", point="79d7858b", BLOCK_M=1, BLOCK_N=512, num_warps=8, num_stages=3)
-@oracle_impl(hardware="B200", point="4e534079", BLOCK_M=1, BLOCK_N=512, num_warps=8, num_stages=3)
-@oracle_impl(hardware="B200", point="5d18732f", BLOCK_M=4, BLOCK_N=128, num_warps=4, num_stages=3)
+@oracle_impl(hardware="B200", point="931c2d63", BLOCK_M=8, BLOCK_N=128, num_warps=4, num_stages=3)
+@oracle_impl(hardware="B200", point="79d7858b", BLOCK_M=1, BLOCK_N=512, num_warps=1, num_stages=3)
+@oracle_impl(hardware="B200", point="4e534079", BLOCK_M=1, BLOCK_N=512, num_warps=4, num_stages=3)
+@oracle_impl(hardware="B200", point="5d18732f", BLOCK_M=8, BLOCK_N=128, num_warps=4, num_stages=3)
 def oracle_forward(
     inputs,
     *,

@@ -203,7 +203,7 @@ def _finalize_dense_sum_kernel(
 
 
 # 39b5812f: (T([1,64,640,959], bf16), T([], bf16), ...)
-@oracle_impl(hardware="B200", point="39b5812f", BLOCK_K=8192, num_warps=8)
+@oracle_impl(hardware="B200", point="39b5812f", BLOCK_K=1024, num_warps=8)
 # 9309c5e2: (T([1,128,320,479], bf16), T([], bf16), ...)
 @oracle_impl(hardware="B200", point="9309c5e2", BLOCK_K=4096, num_warps=8)
 # 0439afe2: (T([1,256,160,239], bf16), T([], bf16), ...)

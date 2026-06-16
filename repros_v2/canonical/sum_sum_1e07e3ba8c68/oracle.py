@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle splits the GhostNet channels-last BN-backward `N,H,W` domain, uses Inductor's fused f32 sliced-add/where producer for the channel sums, keeps the bf16 materialized producer for the dense return, and emits the fp32 vector plus bf16 tensor outputs; whereas Inductor schedules this sliced where producer, sibling reductions, and dependent dense epilogue as generic regions. Inductor cannot do this today because its scheduler lacks a guarded multi-output split-K lowering that preserves the mixed cast boundaries across reductions and epilogues; the fix is COOPERATIVE_SPLIT_K: add a channels-last BN-backward lowering that shares the split-K reductions and sinks finalized scalars into the vector and dense epilogues."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle splits the GhostNet channels-last BN-backward `N,H,W` domain, reconstructs the bf16-rounded sliced-add/where producer before both channel sums and the dense return, and emits the fp32 vector plus bf16 tensor outputs; whereas Inductor schedules this sliced where producer, sibling reductions, and dependent dense epilogue as generic regions. Inductor cannot do this today because its scheduler lacks a guarded multi-output split-K lowering that preserves the mixed cast boundaries across reductions and epilogues; the fix is COOPERATIVE_SPLIT_K: add a channels-last BN-backward lowering that shares the split-K reductions and sinks finalized scalars into the vector and dense epilogues."""
 
 import torch
 import triton
@@ -62,24 +62,6 @@ def _round_bf16_to_f32(x):
 
 
 @triton.jit
-def _producer_value(
-    arg0_ptr,
-    arg1_ptr,
-    arg2_ptr,
-    fill_ptr,
-    offset_wide,
-    offset_narrow,
-    mask,
-):
-    lhs = tl.load(arg0_ptr + offset_wide, mask=mask, other=0.0).to(tl.float32)
-    rhs = tl.load(arg1_ptr + offset_narrow, mask=mask, other=0.0).to(tl.float32)
-    added = _f32_add(lhs, rhs)
-    pred = tl.load(arg2_ptr + offset_narrow, mask=mask, other=1.0)
-    fill = tl.load(fill_ptr).to(tl.float32)
-    return tl.where(pred <= 0.0, fill, added)
-
-
-@triton.jit
 def _producer_value_rounded(
     arg0_ptr,
     arg1_ptr,
@@ -121,7 +103,7 @@ def _partial_reduce_kernel(
     wide_offsets = k_offsets[:, None] * C_IN + c_offsets[None, :]
     mask = (k_offsets[:, None] < K_TOTAL) & (c_offsets[None, :] < C)
 
-    producer = _producer_value(
+    producer = _producer_value_rounded(
         arg0_ptr,
         arg1_ptr,
         arg2_ptr,

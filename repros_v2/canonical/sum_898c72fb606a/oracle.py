@@ -13,14 +13,7 @@ SCALE = 0.08838834764831845
 
 @triton.jit
 def _round_to_bf16_f32(x):
-    return tl.inline_asm_elementwise(
-        "{ .reg .b16 t; cvt.rn.bf16.f32 t, $1; cvt.f32.bf16 $0, t; }",
-        constraints="=f,f",
-        args=[x],
-        dtype=tl.float32,
-        is_pure=True,
-        pack=1,
-    )
+    return x.to(tl.bfloat16, fp_downcast_rounding="rtne").to(tl.float32)
 
 
 @triton.jit
@@ -78,9 +71,10 @@ def _visformer_softmax_backward_49_kernel(
     row_shift_false = tl.load(row_shift_false_ptr + rows, mask=row_mask, other=0.0).to(tl.float32)
     branch = tl.load(branch_ptr + rows, mask=row_mask, other=0) != 0
     row_denom = tl.load(row_denom_ptr + rows, mask=row_mask, other=1.0).to(tl.float32)
+    scale = tl.full((1, 1), SCALE_, tl.float32)
 
-    logits_scaled_bf16 = _round_to_bf16_f32(logits * SCALE_)
-    branch_scaled_sub = (logits - row_shift_true[:, None]) * SCALE_
+    logits_scaled_bf16 = _round_to_bf16_f32(logits * scale)
+    branch_scaled_sub = (logits - row_shift_true[:, None]) * scale
     branch_sub_scaled = logits_scaled_bf16 - row_shift_false[:, None]
     exp_arg = tl.where(branch[:, None], branch_scaled_sub, branch_sub_scaled)
     probs = libdevice.exp(exp_arg) / row_denom[:, None]
@@ -89,7 +83,7 @@ def _visformer_softmax_backward_49_kernel(
     row_sum = tl.sum(tl.where(mask, product, 0.0), axis=1)[:, None].to(tl.float32)
     fma = _fma_rn_f32(-probs, row_sum, product)
     rounded = _round_to_bf16_f32(fma)
-    out = _round_to_bf16_f32(rounded * SCALE_)
+    out = _round_to_bf16_f32(rounded * scale)
     tl.store(out_ptr + compact_offsets, out.to(tl.bfloat16), mask=mask)
 
 
