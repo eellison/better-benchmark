@@ -79,27 +79,30 @@ def _relu_dropout_kernel(
     block: tl.constexpr,
 ):
     offsets = tl.program_id(0) * block + tl.arange(0, block)
-    mask = offsets < total
-    x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    le = x <= 0.0
-    relu = tl.where(le, 0.0, x).to(tl.bfloat16)
+    x = tl.load(x_ptr + offsets).to(tl.float32)
 
     if use_random_ptr:
-        random_bf16 = tl.load(rng_ptr + offsets, mask=mask, other=0.0).to(tl.bfloat16)
+        le = x <= 0.0
+        relu = tl.where(le, 0.0, x).to(tl.bfloat16)
+        random_bf16 = tl.load(rng_ptr + offsets).to(tl.bfloat16)
+        keep = random_bf16 > tl.full((block,), 0.5, tl.float32).to(tl.bfloat16)
+        dropped = keep.to(tl.bfloat16) * relu
+        scaled = (dropped * tl.full((block,), 2.0, tl.float32).to(tl.bfloat16)).to(tl.bfloat16)
     else:
         seed = tl.load(rng_ptr + seed_index)
-        random_bf16 = tl.rand(seed, offsets.to(tl.uint32)).to(tl.bfloat16)
-    keep = random_bf16 > tl.full((block,), 0.5, tl.float32).to(tl.bfloat16)
+        random = tl.rand(seed, offsets.to(tl.uint32)).to(tl.float32)
+        keep = random > 0.5
+        relu_f32 = tl.maximum(x, 0.0)
+        le = relu_f32 <= 0.0
+        scaled = keep.to(tl.float32) * relu_f32 * 2.0
 
-    dropped = keep.to(tl.bfloat16) * relu
-    scaled = (dropped * tl.full((block,), 2.0, tl.float32).to(tl.bfloat16)).to(tl.bfloat16)
-    tl.store(gt_ptr + offsets, keep, mask=mask)
-    tl.store(out_ptr + offsets, scaled, mask=mask)
-    tl.store(le_ptr + offsets, le, mask=mask)
+    tl.store(gt_ptr + offsets, keep)
+    tl.store(out_ptr + offsets, scaled)
+    tl.store(le_ptr + offsets, le)
 
 
-@oracle_impl(hardware="B200", point="200ac53a", block=256, num_warps=8)
-def oracle_forward(inputs, *, block: int, num_warps: int):
+@oracle_impl(hardware="B200", point="200ac53a", block=512, num_warps=4, num_stages=2)
+def oracle_forward(inputs, *, block: int, num_warps: int, num_stages: int):
     x, shape = inputs
     out_shape = tuple(int(dim) for dim in shape)
     gt = torch.empty_strided(out_shape, (COLS, 1), device=x.device, dtype=torch.bool)
@@ -107,7 +110,13 @@ def oracle_forward(inputs, *, block: int, num_warps: int):
     le = torch.empty_strided(out_shape, (COLS, 1), device=x.device, dtype=torch.bool)
 
     if torch.cuda.is_current_stream_capturing():
-        seeds = torch.ops.prims.inductor_seeds.default(SEED_COUNT, x.device)
+        seeds = torch.empty((SEED_COUNT,), device=x.device, dtype=torch.int64)
+        torch.ops.aten.randint.low_out(
+            -9223372036854775808,
+            9223372036854775807,
+            [SEED_COUNT],
+            out=seeds,
+        )
         rng_source = seeds
         use_random_ptr = False
     else:
@@ -126,5 +135,6 @@ def oracle_forward(inputs, *, block: int, num_warps: int):
         seed_index=SEED_INDEX,
         block=block,
         num_warps=num_warps,
+        num_stages=num_stages,
     )
     return seeds, gt, dropped, le
