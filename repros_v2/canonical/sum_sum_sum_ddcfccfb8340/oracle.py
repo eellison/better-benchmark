@@ -128,11 +128,7 @@ def _spatial_stats_kernel(
         gelu = _f32_mul(_f32_mul(gelu_x, 0.5), erf_plus_one)
         gelu_bf16 = _round_to_bf16_f32(gelu)
         gelu_bf16 = _torch_gelu_bf16_tail(gelu_x, gelu_bf16)
-        term_erf_plus_one = _f32_add(tl.erf(erf_arg), 1.0)
-        term_gelu = _f32_mul(_f32_mul(gelu_x, 0.5), term_erf_plus_one)
-        term_gelu_bf16 = _round_to_bf16_f32(term_gelu)
-        term_gelu_bf16 = _torch_gelu_bf16_tail(gelu_x, term_gelu_bf16)
-        weighted_term = _f32_mul(_f32_mul(x, weight[:, None]), term_gelu_bf16)
+        weighted_term = _f32_mul(_f32_mul(x, weight[:, None]), gelu_bf16)
         val0 = tl.where(mask, _f32_mul(x, _f32_mul(gelu_bf16, div0[:, None])), 0.0)
         val1 = tl.where(mask, x, 0.0)
         if STORE_WEIGHTED_TERMS:
@@ -429,9 +425,9 @@ def _forward(
     return out0, out1, out2, out3
 
 
-@oracle_impl(hardware="B200", point="8185fd2d", C=320, H=56, STATS_BLOCK_C=8, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
-@oracle_impl(hardware="B200", point="1b9e6372", C=640, H=28, STATS_BLOCK_C=8, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
-@oracle_impl(hardware="B200", point="76e2a948", C=1280, H=14, STATS_BLOCK_C=8, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
-@oracle_impl(hardware="B200", point="d8a24a49", C=2560, H=7, STATS_BLOCK_C=8, STATS_BLOCK_HW=4, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=True)
+@oracle_impl(hardware="B200", point="8185fd2d", C=320, H=56, STATS_BLOCK_C=32, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=64, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
+@oracle_impl(hardware="B200", point="1b9e6372", C=640, H=28, STATS_BLOCK_C=32, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=64, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
+@oracle_impl(hardware="B200", point="76e2a948", C=1280, H=14, STATS_BLOCK_C=32, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
+@oracle_impl(hardware="B200", point="d8a24a49", C=2560, H=7, STATS_BLOCK_C=8, STATS_BLOCK_HW=64, FINAL_BLOCK_C=32, OUT_BLOCK_R=64, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
 def oracle_forward(inputs, **kwargs):
     return _forward(inputs, **kwargs)

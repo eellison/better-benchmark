@@ -244,7 +244,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 243,amax_sum_821fb95bd167,821fb95bd167,reduction,reduction_softmax_like,4,1,13,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 244,pointwise_c707ca49a4aa,c707ca49a4aa,pointwise,layout_indexing_stencil_fusion,1,1,13,pointwise_352e97c8de09,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 245,pointwise_eb3a50b8feaa,eb3a50b8feaa,pointwise,unclassified_priority_gap,1,1,13,~pointwise_49473bb3f273;~pointwise_902799b6712e,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
-246,sum_sum_sum_ddcfccfb8340,ddcfccfb8340,reduction,reduction_general,4,2,13,,claimed,codex,retry_claim_2026-06-15_reduction_sum_sum_sum_bad_oracle_reaudit
+246,sum_sum_sum_ddcfccfb8340,ddcfccfb8340,reduction,reduction_general,4,2,13,,needs_work,codex,needs_work_improved_oracle_committed_checks_pass_4of4_no_skip_pass_4of4_locked_bench_invalid_OMP_BrokenProcessPool_no_cudagraph_serial_fallback_4BAD_ORACLE_8185fd2d_2119.10us_vs_1087.10us_ratio0.513_1b9e6372_1210.50us_vs_924.29us_ratio0.764_76e2a948_512.29us_vs_481.28us_ratio0.939_d8a24a49_344.74us_vs_271.52us_ratio0.788_numerics_pass_no_self_blend_class_SCHEDULER_FUSION
 247,amax_sum_528a3c274a41,528a3c274a41,reduction,scatter_gather,1,1,12,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 248,amax_sum_7a65d2915044,7a65d2915044,reduction,reduction_softmax_like,1,1,12,~amax_sum_4fb4f9a0bf43,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 249,amax_sum_8002af197c08,8002af197c08,reduction,reduction_softmax_like,1,1,12,amax_sum_4fb4f9a0bf43,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
@@ -1085,7 +1085,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1084,pointwise_7344e3d613b2,7344e3d613b2,pointwise,unclassified_priority_gap,1,2,1,pointwise_0c71173959e2,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1085,pointwise_7551a58e5d34,7551a58e5d34,pointwise,layout_indexing_stencil_fusion,1,2,1,pointwise_f466fd2ff03f,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1086,pointwise_76ffbcc3b8af,76ffbcc3b8af,pointwise,layout_indexing_stencil_fusion,1,2,1,~pointwise_438e6bf82c6e;~pointwise_4ac748523d2a,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1087,pointwise_783d1118b332,783d1118b332,pointwise,pointwise,1,2,1,,claimed,codex,retry_claim_2026-06-15_pointwise_deleted_oracle_nan_reaudit
+1087,pointwise_783d1118b332,783d1118b332,pointwise,pointwise,1,2,1,,oracle_measured,codex,NUMERICS_FLAG_faithful_oracle_committed_checks_pass_1of1_no_skip_pass_1of1_exact_locked_bench_invalid_NUMERICS_WORSE_then_OMP_no_cudagraph_serial_fallback_NUMERICS_WORSE_fp64_nan_gate_no_valid_time_no_self_blend_class_SCHEDULER_FUSION
 1088,pointwise_794fb0f0bd4d,794fb0f0bd4d,pointwise,layout_indexing_stencil_fusion,1,1,1,~pointwise_355c2d00df8b,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1089,pointwise_7ba7efb075cd,7ba7efb075cd,pointwise,pointwise,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1090,pointwise_7bd204513fbb,7bd204513fbb,pointwise,layout_indexing_stencil_fusion,1,1,1,pointwise_c2dc9d900d36,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
@@ -1102,12 +1102,12 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1101,pointwise_901e2d8f5a46,901e2d8f5a46,pointwise,pointwise,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1102,pointwise_93756b266db9,93756b266db9,pointwise,layout_indexing_stencil_fusion,1,2,1,pointwise_5b4d8d4d06aa;pointwise_d88c39614b6c,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1103,pointwise_97e884699b38,97e884699b38,pointwise,layout_indexing_stencil_fusion,1,1,1,~pointwise_355c2d00df8b,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1104,pointwise_99e028e77568,99e028e77568,pointwise,pointwise,1,2,1,pointwise_cf3acd87ba9e,needs_work,Codex,parent_rerun_h100_fallback_bench_NUMERICS_WORSE_THAN_COMPILED_oracle_deleted_nan_thresholds_needs_B200_or_harness_fix
+1104,pointwise_99e028e77568,99e028e77568,pointwise,pointwise,1,2,1,pointwise_cf3acd87ba9e,claimed,codex,retry_claim_2026-06-15_pointwise_deleted_oracle_nan_reaudit
 1105,pointwise_9a59fb6b2026,9a59fb6b2026,pointwise,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1106,pointwise_9a63444680ea,9a63444680ea,pointwise,pointwise,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1107,pointwise_9b95b7531c94,9b95b7531c94,pointwise,layout_indexing_stencil_fusion,1,1,1,pointwise_4ac748523d2a,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1108,pointwise_9c4f8abf00ac,9c4f8abf00ac,pointwise,pointwise,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1109,pointwise_a3cc865697d1,a3cc865697d1,pointwise,layout_indexing_stencil_fusion,1,2,1,pointwise_77c5ae8ad1b9;pointwise_ba25116c7e2e,needs_work,Codex,parent_rerun_h100_fallback_bench_NUMERICS_WORSE_THAN_COMPILED_oracle_deleted_inf_nan_thresholds_needs_B200_or_harness_fix
+1109,pointwise_a3cc865697d1,a3cc865697d1,pointwise,layout_indexing_stencil_fusion,1,2,1,pointwise_77c5ae8ad1b9;pointwise_ba25116c7e2e,claimed,codex,retry_claim_2026-06-15_pointwise_deleted_oracle_inf_nan_reaudit
 1110,pointwise_a68a45ab034a,a68a45ab034a,pointwise,unclassified_priority_gap,1,2,1,pointwise_a5634203b03b,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1111,pointwise_a7159158fa8e,a7159158fa8e,pointwise,layout_indexing_stencil_fusion,1,1,1,~pointwise_c6795cc8ece2;~pointwise_2596a9303ec6;~pointwise_7fe0a1e563a5,needs_work,Codex,parent_rerun_h100_fallback_bench_1BAD_ORACLE_oracle_deleted_needs_B200_or_redesign
 1112,pointwise_a71731ed83c7,a71731ed83c7,pointwise,layout_indexing_stencil_fusion,1,1,1,pointwise_5d7c3bd1f499,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
