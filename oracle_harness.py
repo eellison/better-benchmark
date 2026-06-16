@@ -650,10 +650,16 @@ def detect_stochastic_outputs(instance, inputs) -> set[int]:
 
     Returns a set of output indices that are nondeterministic.
 
-    Strategy: run with explicit seed, then run WITHOUT seeding. Outputs that
-    differ are stochastic (dropout, etc.). We also do a seeded-vs-seeded run
-    to distinguish truly stochastic ops (those that ignore the seed) from
-    seed-respecting randomness.
+    Strategy: run once with an explicit seed, then run again WITHOUT reseeding.
+    Any output that differs between the two runs is nondeterministic (dropout,
+    bernoulli, RNG-derived indices/masks, etc.) and is reported as stochastic so
+    the correctness check skips it.
+
+    Nondeterminism is dtype-agnostic: an RNG-derived int64 index, bool dropout
+    mask, or complex tensor is just as stochastic as a float one. We therefore
+    compare every output regardless of dtype, mirroring _compare_oracle_outputs:
+    a tolerance (allclose) check for floats, and an exact (torch.equal) check for
+    int/bool/complex. An output that differs => stochastic.
     """
     # Seeded run
     torch.manual_seed(42)
@@ -671,11 +677,23 @@ def detect_stochastic_outputs(instance, inputs) -> set[int]:
     unseeded_list = _normalize_outputs(out_unseeded)
 
     for i, (o_s, o_u) in enumerate(zip(seeded_list, unseeded_list)):
-        if not o_s.is_floating_point():
-            continue
-        if not torch.allclose(
-            o_s.float(), o_u.float(), atol=1e-6, rtol=0, equal_nan=True
-        ):
+        try:
+            if o_s.is_floating_point():
+                # Float: tolerant comparison (matches the value-check path).
+                differs = not torch.allclose(
+                    o_s.float(), o_u.float(), atol=1e-6, rtol=0, equal_nan=True
+                )
+            else:
+                # int / bool / complex: exact comparison (matches the
+                # torch.equal path in _compare_oracle_outputs). torch.equal
+                # also returns False on a shape mismatch, so differing shapes
+                # between runs are treated as nondeterministic too.
+                differs = not torch.equal(o_s, o_u)
+        except RuntimeError:
+            # Comparison failed (e.g. shapes differ between runs) -> the output
+            # is not stable across runs, so treat it as stochastic.
+            differs = True
+        if differs:
             stochastic.add(i)
 
     return stochastic
