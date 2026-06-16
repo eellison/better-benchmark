@@ -562,9 +562,9 @@ def _launch(
     return out0, out1, out2, out3, out4, out5, out6
 
 
-@oracle_impl(hardware="B200", point="ff30dd34", BLOCK_C=16, BLOCK_HW=4, CHUNK_HW=196, BLOCK_R=256, num_warps_summary=2, num_warps_reduce=4)
-@oracle_impl(hardware="B200", point="7a6295cd", BLOCK_C=16, BLOCK_HW=4, CHUNK_HW=196, BLOCK_R=256, num_warps_summary=4, num_warps_reduce=4)
-@oracle_impl(hardware="B200", point="fd9590cc", BLOCK_C=16, BLOCK_HW=4, CHUNK_HW=64, BLOCK_R=256, num_warps_summary=4, num_warps_reduce=4)
+@oracle_impl(hardware="B200", point="ff30dd34", BLOCK_C=16, BLOCK_HW=4, CHUNK_HW=196, BLOCK_R=1024, num_warps_summary=2, num_warps_reduce=4)
+@oracle_impl(hardware="B200", point="7a6295cd", BLOCK_C=16, BLOCK_HW=4, CHUNK_HW=196, BLOCK_R=1024, num_warps_summary=4, num_warps_reduce=4)
+@oracle_impl(hardware="B200", point="fd9590cc", BLOCK_C=16, BLOCK_HW=4, CHUNK_HW=64, BLOCK_R=1024, num_warps_summary=4, num_warps_reduce=4)
 def oracle_forward(inputs, *, BLOCK_C: int, BLOCK_HW: int, CHUNK_HW: int, BLOCK_R: int, num_warps_summary: int, num_warps_reduce: int):
     return _launch(
         inputs,

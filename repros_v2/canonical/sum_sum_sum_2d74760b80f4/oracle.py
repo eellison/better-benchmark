@@ -3,7 +3,7 @@
 import torch
 import triton
 import triton.language as tl
-from torch._inductor.runtime.triton_helpers import libdevice, math as tl_math
+from torch._inductor.runtime.triton_helpers import libdevice
 
 from oracle_harness import oracle_impl
 
@@ -11,6 +11,11 @@ from oracle_harness import oracle_impl
 @triton.jit
 def _bf16(x):
     return x.to(tl.bfloat16).to(tl.float32)
+
+
+@triton.jit
+def _sigmoid(x):
+    return 1.0 / (1.0 + libdevice.exp(-x))
 
 
 @triton.jit
@@ -40,8 +45,8 @@ def _spatial_kernel(
     c_mask = cs < C
 
     gate_arg = tl.load(arg1 + n * C + cs, mask=c_mask, other=0.0).to(tl.float32)
-    sigmoid_bf = tl.sigmoid(gate_arg).to(tl.bfloat16)
-    sigmoid_f = sigmoid_bf.to(tl.float32)
+    sigmoid_bf = _bf16(_sigmoid(gate_arg))
+    sigmoid_f = sigmoid_bf
     scalar = tl.load(arg3).to(tl.float32)
     scalar_bf = _bf16(scalar)
 
@@ -78,7 +83,7 @@ def _spatial_kernel(
         mul_7 = add_1 * 0.5
         mul_8 = add * add
         mul_9 = mul_8 * -0.5
-        exp = tl_math.exp(mul_9)
+        exp = libdevice.exp(mul_9)
         mul_10 = exp * 0.3989422804014327
         mul_11 = add * mul_10
         add_2 = mul_7 + mul_11
