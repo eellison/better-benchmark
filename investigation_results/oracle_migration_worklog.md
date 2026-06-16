@@ -561,6 +561,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1365 `sum_sum_sum_1a561863a1c6`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` on outputs 1 and 2, with no CUDAGraph warnings.
 - Row 1357 `sum_sum_sum_0a8714a3041e`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` on outputs 1, 2, and 3, with no CUDAGraph warnings.
 - Row 1288 `sum_sum_563676e3726c`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=47.78us`, `compile=47.84us`, ratio `1.001`).
+- Row 1 `pointwise_04d85912d998`: parent-verified, 469/469 checks plus no-skip pass, locked H100 fallback bench `425AT_FLOOR_44GOOD` with no CUDAGraph warnings (ratio range `0.960` to `1.182`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
