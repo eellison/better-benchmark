@@ -36,3 +36,23 @@ occurrences), arithmetically verified (alexnet 318.0 == 318.03 reported).
   compile-side work, or an oracle slower-than-compile on some shapes.
 - ~189 oracles have no floor (check-gate-blocked bench-hacks/stochastic);
   expected, excluded from roll-up.
+
+## E2E reconciliation on v2 (2026-06-16)
+
+Re-confirmed the roll-up reconciles with REAL full-graph runs on v2 (prior
+~5% result was old-corpus). Method: model_graph_accounting --timings
+(fusible_oracle_us_total vs fusible_compile_us_total, same partitions) +
+bench_parallel --full-graphs for true e2e.
+
+| model | oracle Σus | compile Σus | oracle/compile | e2e us | compile/e2e |
+|---|---|---|---|---|---|
+| LayerNormForward (control, float in) | 351.5 | 343.8 | 1.022 | 342.9 | 1.003 |
+| DistilBertForMaskedLM | 873.6 | 1999.2 | 0.437 | 5525.6 | 0.362 |
+| GPTNeoForCausalLM | 2116.3 | 4877.3 | 0.434 | 13986.8 | 0.349 |
+| BlenderbotForCausalLM | 352.6 | 429.1 | 0.822 | 33230.9 | 0.013 |
+
+- LayerNorm control: real e2e == compile-Σ to 0.24%, oracle roll-up +2.5% — inside 5% target. Arithmetic + timings JSON wired correctly.
+- compile-Σ < e2e for transformers BY DESIGN: oracle roll-up is fusible-only; the rest is non-fusible conv/mm/sdpa (out of scope). Fusible fraction ~35% (Bert-family), 1.3% (Blenderbot, attention-dominated).
+- Modeled speedup (deliverable): oracle/compile ~0.44 transformer pointwise/norm (~2.3x over compile fusion), ~1.0 LayerNorm.
+- 0 unmatched partitions on all 8 models. beit-style floor>compile only on hf/train/AlbertForMaskedLM (1.107x, within ~10%, training backward).
+- Caveat: HF-infer full graphs need --allow-unsafe-full-graphs (int token inputs) for clean true-e2e; LayerNorm (float) is the clean load-bearing check.
