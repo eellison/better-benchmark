@@ -9,7 +9,8 @@ from oracle_harness import oracle_impl
 
 SCALE = 3.985969387755102e-05
 EPILOGUE_BLOCK = 512
-FINAL_BLOCK_K = 128
+FINAL_BLOCK_K = 256
+PARTIAL_SPLIT_K = 128
 
 
 @triton.jit
@@ -110,10 +111,12 @@ def _partial_reduce_kernel(
     C_IN: tl.constexpr,
     K_TOTAL: tl.constexpr,
     BLOCK_K: tl.constexpr,
+    PARTIAL_K: tl.constexpr,
     BLOCK_C: tl.constexpr,
 ):
     c_offsets = tl.program_id(0) * BLOCK_C + tl.arange(0, BLOCK_C)
     k_offsets = tl.program_id(1) * BLOCK_K + tl.arange(0, BLOCK_K)
+    k_lanes = tl.arange(0, BLOCK_K)[:, None]
     narrow_offsets = k_offsets[:, None] * C + c_offsets[None, :]
     wide_offsets = k_offsets[:, None] * C_IN + c_offsets[None, :]
     mask = (k_offsets[:, None] < K_TOTAL) & (c_offsets[None, :] < C)
@@ -132,11 +135,31 @@ def _partial_reduce_kernel(
     centered = _f32_sub(activation, mean[None, :])
     active = tl.where(mask, producer, 0.0)
     active_dot = tl.where(mask, _f32_mul(producer, centered), 0.0)
+    first_half = k_lanes < PARTIAL_K
 
-    partial_offsets = tl.program_id(1) * C + c_offsets
+    partial_offsets0 = (tl.program_id(1) * 2) * C + c_offsets
+    partial_offsets1 = (tl.program_id(1) * 2 + 1) * C + c_offsets
     channel_mask = c_offsets < C
-    tl.store(partial_sum_ptr + partial_offsets, tl.sum(active, axis=0), mask=channel_mask)
-    tl.store(partial_dot_ptr + partial_offsets, tl.sum(active_dot, axis=0), mask=channel_mask)
+    tl.store(
+        partial_sum_ptr + partial_offsets0,
+        tl.sum(tl.where(first_half, active, 0.0), axis=0),
+        mask=channel_mask,
+    )
+    tl.store(
+        partial_dot_ptr + partial_offsets0,
+        tl.sum(tl.where(first_half, active_dot, 0.0), axis=0),
+        mask=channel_mask,
+    )
+    tl.store(
+        partial_sum_ptr + partial_offsets1,
+        tl.sum(tl.where(first_half, 0.0, active), axis=0),
+        mask=channel_mask,
+    )
+    tl.store(
+        partial_dot_ptr + partial_offsets1,
+        tl.sum(tl.where(first_half, 0.0, active_dot), axis=0),
+        mask=channel_mask,
+    )
 
 
 @triton.jit
@@ -222,20 +245,21 @@ def _epilogue_kernel(
 
 
 # 8399096d: GhostNet train, bf16 channels-last N=512, C=480, H=W=7.
-@oracle_impl(hardware="B200", point="8399096d", BLOCK_K=256, BLOCK_C=8, num_warps=4)
+@oracle_impl(hardware="B200", point="8399096d", BLOCK_K=256, BLOCK_C=16, num_warps=4)
 def oracle_forward(inputs, *, BLOCK_K: int, BLOCK_C: int, num_warps: int):
     arg0_1, arg1_1, arg2_1, arg3_1, arg4_1, arg5_1, arg6_1, arg7_1 = inputs
     n, c, h, w = arg1_1.shape
     k_total = n * h * w
     total = arg1_1.numel()
     num_k_tiles = triton.cdiv(k_total, BLOCK_K)
+    num_reduce_tiles = num_k_tiles * 2
     c_in = int(arg0_1.shape[1])
 
     partial_sum = torch.empty_strided(
-        (num_k_tiles, c), (c, 1), device=arg1_1.device, dtype=torch.float32
+        (num_reduce_tiles, c), (c, 1), device=arg1_1.device, dtype=torch.float32
     )
     partial_dot = torch.empty_strided(
-        (num_k_tiles, c), (c, 1), device=arg1_1.device, dtype=torch.float32
+        (num_reduce_tiles, c), (c, 1), device=arg1_1.device, dtype=torch.float32
     )
     sum_out = torch.empty_strided((c,), (1,), device=arg1_1.device, dtype=torch.float32)
     dot_out = torch.empty_strided((c,), (1,), device=arg1_1.device, dtype=torch.float32)
@@ -260,6 +284,7 @@ def oracle_forward(inputs, *, BLOCK_K: int, BLOCK_C: int, num_warps: int):
         C_IN=c_in,
         K_TOTAL=k_total,
         BLOCK_K=BLOCK_K,
+        PARTIAL_K=PARTIAL_SPLIT_K,
         BLOCK_C=BLOCK_C,
         num_warps=num_warps,
         num_stages=3,
@@ -272,7 +297,7 @@ def oracle_forward(inputs, *, BLOCK_K: int, BLOCK_C: int, num_warps: int):
         dot_out,
         vector_out,
         C=c,
-        NUM_TILES=num_k_tiles,
+        NUM_TILES=num_reduce_tiles,
         BLOCK_C=BLOCK_C,
         BLOCK_TILES=FINAL_BLOCK_K,
         num_warps=4,

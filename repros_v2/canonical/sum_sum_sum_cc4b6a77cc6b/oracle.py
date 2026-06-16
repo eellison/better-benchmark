@@ -174,40 +174,22 @@ def _row_tile_store_and_reduce_kernel(
 
         lane_sum = _add_rn(_add_rn(_add_rn(sum0, sum1), sum2), sum3)
         lane_dot = _add_rn(_add_rn(_add_rn(dot0, dot1), dot2), dot3)
-        sum16 = tl.reshape(
-            tl.sum(tl.reshape(lane_sum, (XBLOCK * 16, 2)), axis=1),
-            (XBLOCK, 16),
+        sum16 = tl.sum(tl.reshape(lane_sum, (2, 16)), axis=0)
+        dot16 = tl.sum(tl.reshape(lane_dot, (2, 16)), axis=0)
+        sum8 = tl.sum(tl.reshape(sum16, (2, 8)), axis=0)
+        dot8 = tl.sum(tl.reshape(dot16, (2, 8)), axis=0)
+        sum4 = tl.sum(tl.reshape(sum8, (2, 4)), axis=0)
+        dot4 = tl.sum(tl.reshape(dot8, (2, 4)), axis=0)
+        sum2_final = tl.sum(tl.reshape(sum4, (2, 2)), axis=0)
+        dot2_final = tl.sum(tl.reshape(dot4, (2, 2)), axis=0)
+        row_sum = tl.reshape(
+            tl.sum(tl.reshape(sum2_final, (2, 1)), axis=0),
+            (1,),
         )
-        dot16 = tl.reshape(
-            tl.sum(tl.reshape(lane_dot, (XBLOCK * 16, 2)), axis=1),
-            (XBLOCK, 16),
+        row_dot = tl.reshape(
+            tl.sum(tl.reshape(dot2_final, (2, 1)), axis=0),
+            (1,),
         )
-        sum8 = tl.reshape(
-            tl.sum(tl.reshape(sum16, (XBLOCK * 8, 2)), axis=1),
-            (XBLOCK, 8),
-        )
-        dot8 = tl.reshape(
-            tl.sum(tl.reshape(dot16, (XBLOCK * 8, 2)), axis=1),
-            (XBLOCK, 8),
-        )
-        sum4 = tl.reshape(
-            tl.sum(tl.reshape(sum8, (XBLOCK * 4, 2)), axis=1),
-            (XBLOCK, 4),
-        )
-        dot4 = tl.reshape(
-            tl.sum(tl.reshape(dot8, (XBLOCK * 4, 2)), axis=1),
-            (XBLOCK, 4),
-        )
-        sum2_final = tl.reshape(
-            tl.sum(tl.reshape(sum4, (XBLOCK * 2, 2)), axis=1),
-            (XBLOCK, 2),
-        )
-        dot2_final = tl.reshape(
-            tl.sum(tl.reshape(dot4, (XBLOCK * 2, 2)), axis=1),
-            (XBLOCK, 2),
-        )
-        row_sum = tl.sum(sum2_final, axis=1)
-        row_dot = tl.sum(dot2_final, axis=1)
         hidden = tl.full((XBLOCK, BLOCK_D), HIDDEN_, tl.float32)
         weighted_times_hidden = _mul_rn(weighted, hidden)
         rhs_times_dot = _mul_rn(rhs, row_dot[:, None])

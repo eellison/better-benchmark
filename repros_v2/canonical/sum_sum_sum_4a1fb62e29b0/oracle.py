@@ -213,65 +213,51 @@ def _tree_row_store_kernel(
 ):
     row = tl.program_id(0) * STORE_BLOCK_R + tl.arange(0, STORE_BLOCK_R)
     row_mask = row < ROWS
-    lanes = tl.arange(0, 32)
-    sum0 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    sum1 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    sum2 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    sum3 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    dot0 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    dot1 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    dot2 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
-    dot3 = tl.zeros((STORE_BLOCK_R, 32), dtype=tl.float32)
+    lanes = tl.arange(0, 128)
+    tree_mask = row_mask[:, None]
+    lane_sum = tl.zeros((STORE_BLOCK_R, 128), dtype=tl.float32)
+    lane_dot = tl.zeros((STORE_BLOCK_R, 128), dtype=tl.float32)
+    sum_comp = tl.zeros((STORE_BLOCK_R, 128), dtype=tl.float32)
+    dot_comp = tl.zeros((STORE_BLOCK_R, 128), dtype=tl.float32)
 
     for step in tl.static_range(0, STEPS):
-        for vec in tl.static_range(0, 4):
-            col = lanes * 4 + step * 128 + vec
-            offs = row[:, None] * CHANNELS + col[None, :]
-            tree_mask = row_mask[:, None]
-            x_tree = tl.load(arg1_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32)
-            x_tree = _add_rn(
-                x_tree,
-                tl.load(arg0_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32),
-            )
-            x_tree = _add_rn(
-                x_tree,
-                tl.load(arg2_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32),
-            )
-            x_tree = _add_rn(
-                x_tree,
-                tl.load(arg3_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32),
-            )
-            rhs_tree = tl.load(rhs_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32)
-            weighted_tree = _mul_rn(
-                x_tree,
-                tl.load(weight_ptr + col).to(tl.float32)[None, :],
-            )
-            weighted_rhs_tree = _mul_rn(weighted_tree, rhs_tree)
-            if vec == 0:
-                sum0 = _add_rn(sum0, weighted_tree)
-                dot0 = _add_rn(dot0, weighted_rhs_tree)
-            elif vec == 1:
-                sum1 = _add_rn(sum1, weighted_tree)
-                dot1 = _add_rn(dot1, weighted_rhs_tree)
-            elif vec == 2:
-                sum2 = _add_rn(sum2, weighted_tree)
-                dot2 = _add_rn(dot2, weighted_rhs_tree)
-            else:
-                sum3 = _add_rn(sum3, weighted_tree)
-                dot3 = _add_rn(dot3, weighted_rhs_tree)
+        col = lanes + step * 128
+        offs = row[:, None] * CHANNELS + col[None, :]
+        x_tree = tl.load(arg1_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32)
+        x_tree = _add_rn(x_tree, tl.load(arg0_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32))
+        x_tree = _add_rn(x_tree, tl.load(arg2_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32))
+        x_tree = _add_rn(x_tree, tl.load(arg3_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32))
+        rhs_tree = tl.load(rhs_ptr + offs, mask=tree_mask, other=0.0).to(tl.float32)
+        weighted_tree = _mul_rn(
+            x_tree,
+            tl.load(weight_ptr + col).to(tl.float32)[None, :],
+        )
+        weighted_rhs_tree = _mul_rn(weighted_tree, rhs_tree)
 
-    lane_sum = _add_rn(_add_rn(_add_rn(sum0, sum1), sum2), sum3)
-    lane_dot = _add_rn(_add_rn(_add_rn(dot0, dot1), dot2), dot3)
-    sum16 = tl.reshape(tl.sum(tl.reshape(lane_sum, (STORE_BLOCK_R * 16, 2)), axis=1), (STORE_BLOCK_R, 16))
-    dot16 = tl.reshape(tl.sum(tl.reshape(lane_dot, (STORE_BLOCK_R * 16, 2)), axis=1), (STORE_BLOCK_R, 16))
+        y_sum = _sub_rn(weighted_tree, sum_comp)
+        next_sum = _add_rn(lane_sum, y_sum)
+        sum_comp = _sub_rn(_sub_rn(next_sum, lane_sum), y_sum)
+        lane_sum = next_sum
+
+        y_dot = _sub_rn(weighted_rhs_tree, dot_comp)
+        next_dot = _add_rn(lane_dot, y_dot)
+        dot_comp = _sub_rn(_sub_rn(next_dot, lane_dot), y_dot)
+        lane_dot = next_dot
+
+    sum64 = tl.reshape(tl.sum(tl.reshape(lane_sum, (STORE_BLOCK_R * 64, 2)), axis=1), (STORE_BLOCK_R, 64))
+    dot64 = tl.reshape(tl.sum(tl.reshape(lane_dot, (STORE_BLOCK_R * 64, 2)), axis=1), (STORE_BLOCK_R, 64))
+    sum32 = tl.reshape(tl.sum(tl.reshape(sum64, (STORE_BLOCK_R * 32, 2)), axis=1), (STORE_BLOCK_R, 32))
+    dot32 = tl.reshape(tl.sum(tl.reshape(dot64, (STORE_BLOCK_R * 32, 2)), axis=1), (STORE_BLOCK_R, 32))
+    sum16 = tl.reshape(tl.sum(tl.reshape(sum32, (STORE_BLOCK_R * 16, 2)), axis=1), (STORE_BLOCK_R, 16))
+    dot16 = tl.reshape(tl.sum(tl.reshape(dot32, (STORE_BLOCK_R * 16, 2)), axis=1), (STORE_BLOCK_R, 16))
     sum8 = tl.reshape(tl.sum(tl.reshape(sum16, (STORE_BLOCK_R * 8, 2)), axis=1), (STORE_BLOCK_R, 8))
     dot8 = tl.reshape(tl.sum(tl.reshape(dot16, (STORE_BLOCK_R * 8, 2)), axis=1), (STORE_BLOCK_R, 8))
     sum4 = tl.reshape(tl.sum(tl.reshape(sum8, (STORE_BLOCK_R * 4, 2)), axis=1), (STORE_BLOCK_R, 4))
     dot4 = tl.reshape(tl.sum(tl.reshape(dot8, (STORE_BLOCK_R * 4, 2)), axis=1), (STORE_BLOCK_R, 4))
-    sum2_final = tl.reshape(tl.sum(tl.reshape(sum4, (STORE_BLOCK_R * 2, 2)), axis=1), (STORE_BLOCK_R, 2))
-    dot2_final = tl.reshape(tl.sum(tl.reshape(dot4, (STORE_BLOCK_R * 2, 2)), axis=1), (STORE_BLOCK_R, 2))
-    row_sum = tl.sum(sum2_final, axis=1)
-    row_dot = tl.sum(dot2_final, axis=1)
+    sum2 = tl.reshape(tl.sum(tl.reshape(sum4, (STORE_BLOCK_R * 2, 2)), axis=1), (STORE_BLOCK_R, 2))
+    dot2 = tl.reshape(tl.sum(tl.reshape(dot4, (STORE_BLOCK_R * 2, 2)), axis=1), (STORE_BLOCK_R, 2))
+    row_sum = tl.sum(sum2, axis=1)
+    row_dot = tl.sum(dot2, axis=1)
 
     cols = tl.arange(0, BLOCK_C)
     col_mask = cols < CHANNELS
@@ -584,7 +570,6 @@ def _finalize_partials_kernel(
 
 
 @oracle_impl(hardware="B200", point="c21f4298", ROWS_PER_GROUP=128, BLOCK_R=4, STORE_BLOCK_R=1, BLOCK_C=1024, FINAL_BLOCK_C=2, num_warps=2)
-@oracle_impl(hardware="B200", point="c1e38d67", ROWS_PER_GROUP=64, BLOCK_R=4, STORE_BLOCK_R=1, BLOCK_C=1024, FINAL_BLOCK_C=2, num_warps=4)
 def _oracle_forward_c21(
     inputs,
     *,
@@ -807,7 +792,9 @@ def _oracle_forward_6de(
 
 # 6de23498: (T([4096,1536], bf16), T([8,512,1536], f32), ...)
 # c21f4298: (T([32768,768], bf16), T([256,128,768], f32), ...)
+# c1e38d67: (T([16384,768], bf16), T([32,512,768], f32), ...)
 # 5acb4703: (T([32768,256], bf16), T([64,512,256], f32), ...)
+@oracle_impl(hardware="B200", point="c1e38d67", ROWS_PER_GROUP=64, BLOCK_R=4, BLOCK_C=1024, SIDE_BLOCK_R=32, SIDE_BLOCK_C=32, FINAL_BLOCK_C=8, STEPS=6, num_warps=4)
 @oracle_impl(hardware="B200", point="5acb4703", ROWS_PER_GROUP=64, BLOCK_R=8, BLOCK_C=256, SIDE_BLOCK_R=32, SIDE_BLOCK_C=32, FINAL_BLOCK_C=8, STEPS=2, num_warps=4)
 def oracle_forward(
     inputs,
