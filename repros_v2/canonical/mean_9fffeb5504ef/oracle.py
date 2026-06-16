@@ -1,8 +1,10 @@
-"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the full MobileNetV3 bf16 BN-inference affine, explicit bf16 cast, NaN-preserving ReLU materialization, and keepdim spatial mean in one channels-last row-reduction; whereas Inductor lowers the decomposed broadcast normalization, returned activation, and reduction through generic fused regions; Inductor cannot do this today because its scheduler lacks a full-scope multi-output BN-affine ReLU spatial-mean lowering that reuses the channel algebra while preserving the bf16 cast boundary and output strides; the fix is ALGEBRAIC_ELIMINATION: canonicalize inference BN affine before lowering and emit the returned activation plus spatial mean from one fused channels-last kernel."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full MobileNetV3 bf16 BN-inference affine, Inductor-style fp32 ReLU, final bf16 activation store, and keepdim spatial mean of that stored activation in one channels-last row-reduction; whereas Inductor lowers the decomposed broadcast normalization, returned activation, and reduction through generic fused regions; Inductor cannot do this today because its scheduler lacks a full-scope multi-output BN-affine ReLU spatial-mean lowering that reuses the channel algebra while preserving the fp32 ReLU, final bf16 cast boundary, and output strides; the fix is SCHEDULER_FUSION: fuse the returned activation producer with the spatial mean consumer while preserving libdevice sqrt, eps, casts, and channels-last layout."""
 
 import torch
 import triton
 import triton.language as tl
+from torch._inductor.runtime import triton_helpers
+from torch._inductor.runtime.triton_helpers import libdevice
 
 from oracle_harness import oracle_impl
 
@@ -53,21 +55,16 @@ def _bn_relu_mean_kernel(
     var = tl.load(var_ptr + c, mask=row_mask, other=1.0).to(tl.float32)
     weight = tl.load(weight_ptr + c, mask=row_mask, other=0.0).to(tl.float32)
     bias = tl.load(bias_ptr + c, mask=row_mask, other=0.0).to(tl.float32)
-    invstd = 1.0 / tl.sqrt(var + eps)
+    invstd = 1.0 / libdevice.sqrt(var + eps)
 
-    x = tl.load(
-        x_ptr + offsets,
-        mask=valid & ((invstd == invstd)[:, None]),
-        other=0.0,
-    ).to(tl.float32)
+    x = tl.load(x_ptr + offsets, mask=valid, other=0.0).to(tl.float32)
     y = ((x - mean[:, None]) * invstd[:, None]) * weight[:, None] + bias[:, None]
-    y_bf16 = y.to(tl.bfloat16)
-    zero = tl.full((BLOCK_ROWS, BLOCK_HW), 0.0, tl.bfloat16)
-    relu = tl.where(y_bf16 < zero, zero, y_bf16)
-    relu_f32 = relu.to(tl.float32)
+    relu = triton_helpers.maximum(tl.full([1], 0, tl.int32), y)
+    relu_bf16 = relu.to(tl.bfloat16)
+    relu_f32 = relu_bf16.to(tl.float32)
     reduced = tl.sum(tl.where(spatial_mask[None, :], relu_f32, 0.0), axis=1) / hw
 
-    tl.store(relu_out_ptr + offsets, relu, mask=valid)
+    tl.store(relu_out_ptr + offsets, relu_bf16, mask=valid)
     tl.store(mean_out_ptr + rows, reduced.to(tl.bfloat16), mask=row_mask)
 
 
