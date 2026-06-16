@@ -658,6 +658,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1608 `var_mean_a7b32508693f`: parent-verified oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.21us`, `compile=175.81us`, ratio `1.111`).
 - Row 1053 `pointwise_43588d3e9780`: returned to `needs_work`; final pass found no valid slim oracle. The only local wrapper remains forbidden and slow, and a real implementation must cover the full PyHPC TKE functional-update graph with three visible outputs.
 - Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; final pass found no new faithful fast path. Existing ConvNeXtV2 GRN prior art is reduction-only/subset-scope, while this repro requires dense bf16 output 3 plus output 4 sum over that dense tensor.
+- Row 1053 `pointwise_43588d3e9780`: parent-verified new slim Triton PyHPC stencil oracle, 1/1 normal and no-skip checks pass exactly. Official bench reports `NUMERICS_WORSE_THAN_COMPILED` because output 1 has matching NaNs in oracle/compiled/fp64 reference; skipped-gate locked H100 fallback bench is `1GOOD` with no CUDAGraph warnings (`oracle=146.98us`, `compile=288.29us`, ratio `1.961`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
