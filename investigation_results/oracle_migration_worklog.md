@@ -590,6 +590,9 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1207 `sum_75456ad2c2c7`: parent-verified with numerics flag; check reports tolerance drift, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=190.59us`, `compile=196.26us`, ratio `1.030`).
 - Row 1173 `pointwise_faf725b387f9`: returned to `needs_work`; worker checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=58.56us`, `compile=47.23us`, ratio `0.807`).
 - Row 1197 `sum_4fd6e4019857`: parent-verified with numerics flag; check fails on bf16 large-value drift (`max_diff=3.44e10`), skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=5789.92us`, `compile=5848.67us`, ratio `1.010`).
+- Row 393 `mean_65a318c9ed9c`: returned to `needs_work`; parent recheck found skipped-gate bench `1BAD_ORACLE_1GOOD_2AT_FLOOR`, with the bad point `3e244c1d` at `oracle=84.54us`, `compile=50.05us`, ratio `0.592`, no CUDAGraph warnings.
+- Row 394 `mean_b138a1e42dbc`: parent-verified with numerics flag, 5/5 checks plus no-skip pass, skipped-gate locked H100 fallback bench `1AT_FLOOR_4GOOD` with no CUDAGraph warnings (ratio range `0.984` to `1.585`).
+- Row 850 `amax_sum_7079889cfc04`: parent-verified with numerics flag, checks plus no-skip pass, official bench OOMs in fp64 gate, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=5778.37us`, `compile=5767.52us`, ratio `0.998`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
