@@ -285,6 +285,92 @@ def _sum6_kernel(
     summed = tl.sum(values, axis=1).to(tl.bfloat16).to(tl.float32)
     tl.store(out6_ptr + c, summed, mask=c < C)
 
+
+@triton.jit
+def _fd_single_channel_kernel(
+    x_ptr,
+    y_ptr,
+    mean1_ptr,
+    inv1_ptr,
+    weight1_ptr,
+    bias1_ptr,
+    spatial_bias_ptr,
+    mean2_ptr,
+    gamma2_ptr,
+    beta2_ptr,
+    residual_ptr,
+    out0_ptr,
+    out1_ptr,
+    out2_ptr,
+    out3_ptr,
+    out4_ptr,
+    out5_ptr,
+    out6_ptr,
+    C: tl.constexpr,
+    H: tl.constexpr,
+    W: tl.constexpr,
+    HW: tl.constexpr,
+    INV_REDUCE_VALUE: tl.constexpr,
+    BLOCK_N: tl.constexpr,
+    BLOCK_HW: tl.constexpr,
+):
+    c = tl.program_id(0)
+    n = tl.arange(0, BLOCK_N)[:, None]
+    hw = tl.arange(0, BLOCK_HW)[None, :]
+    h = hw // W
+    w = hw - h * W
+    mask = hw < HW
+    cl_offsets = n * C * HW + h * W * C + w * C + c
+    nchw_offsets = n * C * HW + c * HW + hw
+
+    mean1 = tl.load(mean1_ptr + c).to(tl.float32)
+    inv1 = tl.load(inv1_ptr + c).to(tl.float32)
+    weight1 = tl.load(weight1_ptr + c).to(tl.float32)
+    bias1 = tl.load(bias1_ptr + c).to(tl.float32)
+    mean2 = tl.load(mean2_ptr + c).to(tl.float32)
+    gamma2 = tl.load(gamma2_ptr + c).to(tl.float32)
+    beta2 = tl.load(beta2_ptr + c).to(tl.float32)
+    spatial = tl.load(spatial_bias_ptr + h * W * C + w * C + c, mask=mask, other=0.0).to(tl.float32)
+
+    x = tl.load(x_ptr + cl_offsets, mask=mask, other=0.0).to(tl.float32)
+    y = tl.load(y_ptr + cl_offsets, mask=mask, other=0.0).to(tl.float32)
+    residual = tl.load(residual_ptr + nchw_offsets, mask=mask, other=0.0).to(tl.float32)
+
+    affine = ((y - mean1) * inv1) * weight1 + bias1
+    norm = affine.to(tl.bfloat16).to(tl.float32) + spatial - mean2
+    x_masked = tl.where(mask, x, 0.0)
+    sum_x_hw = tl.sum(x_masked, axis=0)
+    sum_x_norm_hw = tl.sum(tl.where(mask, x * norm, 0.0), axis=0)
+    sum_x = tl.sum(sum_x_hw, axis=0)
+    sum_x_norm = tl.sum(sum_x_norm_hw, axis=0)
+
+    mean_x = sum_x * INV_REDUCE_VALUE
+    norm_scale = (sum_x_norm * INV_REDUCE_VALUE) * (gamma2 * gamma2)
+    grad_scale = gamma2 * beta2
+    add2 = residual + (x - norm * norm_scale - mean_x) * grad_scale
+    add2_bf16 = add2.to(tl.bfloat16)
+    add2_f32 = add2_bf16.to(tl.float32)
+    sub4 = y - mean1
+    sum3_hw = tl.sum(tl.where(mask, add2, 0.0), axis=0)
+    sum4 = tl.sum(tl.sum(tl.where(mask, add2_f32, 0.0), axis=0), axis=0)
+    sum5 = tl.sum(tl.sum(tl.where(mask, add2_f32 * sub4, 0.0), axis=0), axis=0)
+
+    mean_out = sum4 * INV_REDUCE_VALUE
+    correction = (sum5 * INV_REDUCE_VALUE) * (inv1 * inv1)
+    out_scale = inv1 * weight1
+    out = (add2_f32 - sub4 * correction - mean_out) * out_scale
+    out_bf16 = out.to(tl.bfloat16)
+    sum6 = tl.sum(tl.sum(tl.where(mask, out_bf16.to(tl.float32), 0.0), axis=0), axis=0).to(tl.bfloat16).to(tl.float32)
+
+    hw_vec = tl.arange(0, BLOCK_HW)
+    tl.store(out0_ptr + c, sum_x)
+    tl.store(out1_ptr + c, sum_x_norm * gamma2)
+    tl.store(out2_ptr + c * HW + hw_vec, sum3_hw, mask=hw_vec < HW)
+    tl.store(out3_ptr + c, sum4)
+    tl.store(out4_ptr + c, sum5 * inv1)
+    tl.store(out5_ptr + nchw_offsets, out_bf16, mask=mask)
+    tl.store(out6_ptr + c, sum6)
+
 def _launch(
     inputs,
     *,
@@ -426,9 +512,51 @@ def _launch(
     return out0, out1, out2, out3, out4, out5, out6
 
 
+def _launch_fd_single(inputs):
+    x, y, mean1, inv1, weight1, bias1, spatial_bias, mean2, gamma2, beta2, residual = inputs
+    _, channels, height, width = x.shape
+    hw = height * width
+    out0 = torch.empty((channels,), device=x.device, dtype=torch.float32)
+    out1 = torch.empty((channels,), device=x.device, dtype=torch.float32)
+    out2 = torch.empty_strided((1, channels, height, width), (channels * hw, hw, width, 1), device=x.device, dtype=torch.float32)
+    out3 = torch.empty((channels,), device=x.device, dtype=torch.float32)
+    out4 = torch.empty((channels,), device=x.device, dtype=torch.float32)
+    out5 = torch.empty_strided(tuple(residual.shape), tuple(residual.stride()), device=x.device, dtype=torch.bfloat16)
+    out6 = torch.empty((channels,), device=x.device, dtype=torch.float32)
+    _fd_single_channel_kernel[(channels,)](
+        x,
+        y,
+        mean1,
+        inv1,
+        weight1,
+        bias1,
+        spatial_bias,
+        mean2,
+        gamma2,
+        beta2,
+        residual,
+        out0,
+        out1,
+        out2,
+        out3,
+        out4,
+        out5,
+        out6,
+        C=channels,
+        H=height,
+        W=width,
+        HW=hw,
+        INV_REDUCE_VALUE=INV_REDUCE,
+        BLOCK_N=128,
+        BLOCK_HW=triton.next_power_of_2(hw),
+        num_warps=8,
+        num_stages=4,
+    )
+    return out0, out1, out2, out3, out4, out5, out6
+
+
 @oracle_impl(hardware="B200", point="ff30dd34", BLOCK_C=4, BLOCK_R=1024, BLOCK_HW=8, num_warps_first=8, num_warps_main=4, num_warps_final=1)
 @oracle_impl(hardware="B200", point="7a6295cd", BLOCK_C=4, BLOCK_R=1024, BLOCK_HW=7, num_warps_first=8, num_warps_main=4, num_warps_final=1)
-@oracle_impl(hardware="B200", point="fd9590cc", BLOCK_C=4, BLOCK_R=1024, BLOCK_HW=7, num_warps_first=8, num_warps_main=4, num_warps_final=1)
 def oracle_forward(inputs, *, BLOCK_C: int, BLOCK_R: int, BLOCK_HW: int, num_warps_first: int, num_warps_main: int, num_warps_final: int):
     return _launch(
         inputs,
@@ -439,3 +567,8 @@ def oracle_forward(inputs, *, BLOCK_C: int, BLOCK_R: int, BLOCK_HW: int, num_war
         num_warps_main=num_warps_main,
         num_warps_final=num_warps_final,
     )
+
+
+@oracle_impl(hardware="B200", point="fd9590cc")
+def oracle_forward_fd(inputs):
+    return _launch_fd_single(inputs)
