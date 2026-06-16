@@ -1443,7 +1443,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1442,var_mean_06e60cb12bee,06e60cb12bee,reduction,reduction_var_mean,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1443,var_mean_06f909d22a3a,06f909d22a3a,reduction,reduction_var_mean,1,1,1,,oracle_measured,Codex,"B200_verified_2026-06-15: oracle valid; only dropout-mask (bool RNG) differs - stochastic, non-blocking per policy. float outputs skip-stochastic/pass."
 1444,var_mean_07361cbc8321,07361cbc8321,reduction,unclassified_priority_gap,1,1,1,~var_mean_3dd5772aac72;~var_mean_54ad7896eb18;~var_mean_59d8965968f1,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
-1445,var_mean_087d5b4f064d,087d5b4f064d,reduction,norm_template_canonicalization,1,1,1,var_mean_8287d162bd36,needs_work,codex,needs_work: B200 1float fail max_diff=unknown (large/unknown - verify not broken math)
+1445,var_mean_087d5b4f064d,087d5b4f064d,reduction,norm_template_canonicalization,1,1,1,var_mean_8287d162bd36,claimed,codex,retry_claim_2026-06-15_b200_var_mean_single_point_unknown_diff
 1446,var_mean_08f6231329f7,08f6231329f7,reduction,norm_template_canonicalization,1,2,1,var_mean_2ceed1dd2572,oracle_measured,codex,B200_verified_2026-06-16: check+bench PASS (fleet)
 1447,var_mean_0a4e6a5f43c5,0a4e6a5f43c5,reduction,reduction_var_mean,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1448,var_mean_0af75aeb1fe2,0af75aeb1fe2,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
