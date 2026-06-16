@@ -45,3 +45,18 @@ failed at every shape point so no floor recorded). Triaged all 252 by WHY:
   timings file. Worth a harness fix (gate seeding/stability). NOT oracle bugs.
 - STOCHASTIC_MASK dirs: the bench gate exact-compares a stochastic dropout
   mask; should skip/flag per the stochastic policy.
+
+## Cross-check + sub-reason note (independent run)
+
+A second independent triage (different script, 240-dir snapshot) reproduced the
+verdict: ~93% harness false-negatives, ~7% genuine bugs — consistent with the
+authoritative 4-shard run (232 FN / 20 real of 252).
+
+It also sub-split the false-negatives more finely, which refines the INFRA fix list:
+the bench-time gate over-blocks on TWO distinct causes, not one:
+  - FP64_GATE: `--check` passes but the fp64-anchored bench gate fails (the bulk).
+  - CUDAGRAPH_FN: `--check` passes but the sweep failed on a CUDAGraph capture
+    WARNING (not wrong math) — ~8 dirs. Distinct harness fix from the fp64 gate.
+Both are bench-gate strictness, not oracle defects. The REAL_BUG set is unchanged
+(20): large-diff sum_*/sum_sum_sum_* reductions + 2 pointwise exact-compare
+(int64/complex64) coverage bugs (584a8c609627, 4254ac4c0d96).
