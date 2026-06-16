@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full MobileNetV3 gate/average-pool/ReLU-mask producer, both fp32 channel reductions, the fp32 side vector, and the returned channels-last bf16 BN-backward epilogue in one shared reduction plan while preserving Inductor's compiled f32 reduction producer and bf16 dense-output cast boundaries, whereas Inductor schedules the sibling reductions plus dependent epilogue as separate generic kernels; Inductor cannot do this today because its scheduler does not form a full-scope multi-output channel-reduction lowering that shares this live producer across compatible sums and sinks the finalized channel scalars into the dense epilogue; the fix is SCHEDULER_FUSION: teach reduction scheduling to fuse sibling channel reductions with their structured producer and dependent full-tensor epilogue while preserving the compiled cast boundaries."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full MobileNetV3 gate/average-pool/ReLU-mask producer, both fp32 channel reductions, the fp32 side vector, and the returned channels-last bf16 BN-backward epilogue in one shared reduction plan while preserving the captured bf16 producer boundary before the f32 reductions and the dense-output cast boundary, whereas Inductor schedules the sibling reductions plus dependent epilogue as separate generic kernels; Inductor cannot do this today because its scheduler does not form a full-scope multi-output channel-reduction lowering that shares this live producer across compatible sums and sinks the finalized channel scalars into the dense epilogue; the fix is SCHEDULER_FUSION: teach reduction scheduling to fuse sibling channel reductions with their structured producer and dependent full-tensor epilogue while preserving the compiled cast boundaries."""
 
 import torch
 import triton
@@ -154,7 +154,7 @@ def _partial_reduce_kernel(
     n = k // HW
     offsets = k[:, None] * C + c[None, :]
 
-    producer = _producer_f32(
+    producer = _producer_bf16(
         gate_ptr,
         gated_x_ptr,
         pooled_ptr,
