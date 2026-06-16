@@ -124,7 +124,7 @@ def _spatial_stats_kernel(
         x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
         gelu_x = tl.load(gelu_x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
         erf_arg = _f32_mul(gelu_x, 0.7071067811865476)
-        erf_plus_one = tl.where(gelu_x < 0.0, libdevice.erfc(-erf_arg), _f32_add(tl.erf(erf_arg), 1.0))
+        erf_plus_one = _f32_add(tl.erf(erf_arg), 1.0)
         gelu = _f32_mul(_f32_mul(gelu_x, 0.5), erf_plus_one)
         gelu_bf16 = _round_to_bf16_f32(gelu)
         gelu_bf16 = _torch_gelu_bf16_tail(gelu_x, gelu_bf16)
@@ -200,6 +200,7 @@ def _output_kernel(
     sum_weighted_x_gelu_ptr,
     common_ptr,
     out_ptr,
+    sum_partial_ptr,
     C: tl.constexpr,
     H: tl.constexpr,
     W: tl.constexpr,
@@ -232,7 +233,7 @@ def _output_kernel(
     scalar = tl.load(scalar_ptr).to(tl.float32)
 
     erf_arg = _f32_mul(gelu_x, 0.7071067811865476)
-    erf_plus_one = tl.where(gelu_x < 0.0, libdevice.erfc(-erf_arg), _f32_add(tl.erf(erf_arg), 1.0))
+    erf_plus_one = _f32_add(tl.erf(erf_arg), 1.0)
     gelu = _f32_mul(_f32_mul(gelu_x, 0.5), erf_plus_one)
     gelu_bf16 = _round_to_bf16_f32(gelu)
     gelu_bf16 = _torch_gelu_bf16_tail(gelu_x, gelu_bf16)
@@ -252,6 +253,12 @@ def _output_kernel(
     )
     out = _round_to_bf16_f32(_f32_mul(add3, gelu_grad))
     tl.store(out_ptr + offsets, out, mask=mask)
+    c_vec = tl.program_id(1) * BLOCK_C + tl.arange(0, BLOCK_C)
+    tl.store(
+        sum_partial_ptr + tl.program_id(0) * C + c_vec,
+        tl.sum(tl.where(mask, out, 0.0), axis=1),
+        mask=c_vec < C,
+    )
 
 
 @triton.jit
@@ -299,7 +306,7 @@ def _sum_out_finalize_kernel(
     vals = tl.load(partial_ptr + g * C + c, mask=mask, other=0.0).to(tl.float32)
     sums = tl.sum(tl.where(mask, vals, 0.0), axis=1)
     c_vec = tl.program_id(0) * BLOCK_C + tl.arange(0, BLOCK_C)
-    tl.store(out_ptr + c_vec, sums, mask=c_vec < C)
+    tl.store(out_ptr + c_vec, _round_to_bf16_f32(sums), mask=c_vec < C)
 
 
 def _ceil_pow2(value):
@@ -381,7 +388,9 @@ def _forward(
     )
     div = arg2_1 / arg3_1
     common = (-(stats_weighted.view(n, C, 1, 1)) * (div / arg3_1)).sum(dim=1, dtype=torch.float32).view(n)
-    _output_kernel[(triton.cdiv(rows, OUT_BLOCK_R), triton.cdiv(C, OUT_BLOCK_C))](
+    out_sum_groups = triton.cdiv(rows, OUT_BLOCK_R)
+    partial = torch.empty_strided((out_sum_groups, C), (C, 1), device=arg0_1.device, dtype=torch.float32)
+    _output_kernel[(out_sum_groups, triton.cdiv(C, OUT_BLOCK_C))](
         arg0_1,
         arg1_1,
         arg2_1,
@@ -391,6 +400,7 @@ def _forward(
         stats_weighted,
         common,
         out2,
+        partial,
         C=C,
         H=H,
         W=w,
@@ -406,39 +416,22 @@ def _forward(
         num_stages=1,
     )
 
-    num_groups = triton.cdiv(rows, SUM_GROUP_SIZE)
-    partial = torch.empty_strided((num_groups, C), (C, 1), device=arg0_1.device, dtype=torch.float32)
     out3 = torch.empty_strided((C,), (1,), device=arg0_1.device, dtype=torch.float32)
-    _sum_out_partial_kernel[(num_groups, triton.cdiv(C, SUM_BLOCK_C))](
-        out2,
-        partial,
-        C=C,
-        H=H,
-        W=w,
-        HW=hw,
-        ROWS=rows,
-        S0=s0,
-        S2=s2,
-        S3=s3,
-        GROUP_SIZE=SUM_GROUP_SIZE,
-        BLOCK_C=SUM_BLOCK_C,
-        num_warps=8,
-    )
     _sum_out_finalize_kernel[(triton.cdiv(C, SUM_BLOCK_C),)](
         partial,
         out3,
         C=C,
-        NUM_GROUPS=num_groups,
-        BLOCK_GROUPS=_ceil_pow2(num_groups),
+        NUM_GROUPS=out_sum_groups,
+        BLOCK_GROUPS=_ceil_pow2(out_sum_groups),
         BLOCK_C=SUM_BLOCK_C,
         num_warps=8,
     )
     return out0, out1, out2, out3
 
 
-@oracle_impl(hardware="B200", point="8185fd2d", C=320, H=56, STATS_BLOCK_C=8, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=16, OUT_BLOCK_C=64, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
-@oracle_impl(hardware="B200", point="1b9e6372", C=640, H=28, STATS_BLOCK_C=8, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=16, OUT_BLOCK_C=64, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
-@oracle_impl(hardware="B200", point="76e2a948", C=1280, H=14, STATS_BLOCK_C=8, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=16, OUT_BLOCK_C=64, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
-@oracle_impl(hardware="B200", point="d8a24a49", C=2560, H=7, STATS_BLOCK_C=8, STATS_BLOCK_HW=4, FINAL_BLOCK_C=32, OUT_BLOCK_R=16, OUT_BLOCK_C=64, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=True)
+@oracle_impl(hardware="B200", point="8185fd2d", C=320, H=56, STATS_BLOCK_C=8, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
+@oracle_impl(hardware="B200", point="1b9e6372", C=640, H=28, STATS_BLOCK_C=8, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
+@oracle_impl(hardware="B200", point="76e2a948", C=1280, H=14, STATS_BLOCK_C=8, STATS_BLOCK_HW=256, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=False)
+@oracle_impl(hardware="B200", point="d8a24a49", C=2560, H=7, STATS_BLOCK_C=8, STATS_BLOCK_HW=4, FINAL_BLOCK_C=32, OUT_BLOCK_R=32, OUT_BLOCK_C=32, SUM_GROUP_SIZE=1024, SUM_BLOCK_C=4, USE_FAST_STATS=True)
 def oracle_forward(inputs, **kwargs):
     return _forward(inputs, **kwargs)
