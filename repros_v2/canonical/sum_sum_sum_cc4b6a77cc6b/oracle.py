@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete Longformer bf16/f32 layer-norm-backward scope by row-tiling the permuted three-bf16-matmul producer, preserving bf16 promotion and dropout-mask bf16 rounding, writing the required f32 raw-gradient and bf16 view/transpose side outputs, and cooperatively accumulating the two pre-mask [768] column reductions plus the bf16-rounded masked-gradient sum from the same row tiles, whereas Inductor schedules the bf16 promotions, permuted add, row-local reductions, mask/cast side outputs, transpose view producer, and sibling column reductions as separate generic regions over materialized intermediates; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K multi-output reduction template that combines non-contiguous row-tile producers, row-local scalar reductions, required mixed-dtype side-output stores, and multiple column accumulators in one producer/finalizer pair; the fix is COOPERATIVE_SPLIT_K: teach Inductor to tile compatible layer-norm-backward producers across token rows, emit shared column partials while writing side outputs with exact cast boundaries, and finalize the sibling reductions together."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete Longformer bf16/f32 layer-norm-backward scope by row-tiling the permuted three-bf16-matmul producer, preserving bf16 promotion and dropout-mask bf16 rounding, writing the required f32 raw-gradient and bf16 view/transpose side outputs, and cooperatively accumulating the two pre-mask [768] column reductions plus the bf16-rounded masked-gradient sum from the same row tiles, whereas Inductor schedules the bf16 promotions, permuted add, row-local reductions, mask/cast side outputs, transpose view producer, and sibling column reductions as separate generic regions over materialized intermediates; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K multi-output reduction lowering that combines non-contiguous row-tile producers, row-local scalar reductions, required mixed-dtype side-output stores, and multiple column accumulators in one producer/finalizer pair; the fix is COOPERATIVE_SPLIT_K: teach Inductor to tile compatible layer-norm-backward producers across token rows, emit shared column partials while writing side outputs with exact cast boundaries, and finalize the sibling reductions together."""
 
 import torch
 import triton
@@ -227,9 +227,15 @@ def _row_tile_store_and_reduce_kernel(
         tl.store(raw_grad_ptr + row_offsets, grad, mask=elem_mask)
         tl.store(masked_bf16_ptr + row_offsets, masked_bf16, mask=elem_mask)
 
-        acc_x_rhs += tl.sum(tl.where(elem_mask, _mul_rn(x, rhs), 0.0), axis=0)
-        acc_x += tl.sum(tl.where(elem_mask, x, 0.0), axis=0)
-        acc_masked += tl.sum(tl.where(elem_mask, masked_f32, 0.0), axis=0)
+        acc_x_rhs = _add_rn(
+            acc_x_rhs,
+            tl.sum(tl.where(elem_mask, _mul_rn(x, rhs), 0.0), axis=0),
+        )
+        acc_x = _add_rn(acc_x, tl.sum(tl.where(elem_mask, x, 0.0), axis=0))
+        acc_masked = _add_rn(
+            acc_masked,
+            tl.sum(tl.where(elem_mask, masked_f32, 0.0), axis=0),
+        )
 
     partial_offsets = row_block * HIDDEN_ + d
     tl.store(partial_x_rhs_ptr + partial_offsets, acc_x_rhs, mask=d_mask)
@@ -251,18 +257,31 @@ def _finalize_column_sums_kernel(
     BLOCK_D: tl.constexpr,
 ):
     d = tl.program_id(0) * BLOCK_D + tl.arange(0, BLOCK_D)
-    row_blocks = tl.arange(0, BLOCK_ROW_BLOCKS)
     d_mask = d < HIDDEN_
-    offsets = row_blocks[:, None] * HIDDEN_ + d[None, :]
-    mask = (row_blocks[:, None] < NUM_ROW_BLOCKS) & d_mask[None, :]
+    row_blocks = tl.arange(0, BLOCK_ROW_BLOCKS)
+    acc_x_rhs = tl.zeros((BLOCK_D,), dtype=tl.float32)
+    acc_x = tl.zeros((BLOCK_D,), dtype=tl.float32)
+    acc_masked = tl.zeros((BLOCK_D,), dtype=tl.float32)
 
-    x_rhs = tl.load(partial_x_rhs_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    x = tl.load(partial_x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    masked = tl.load(partial_masked_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+    for group_start in range(0, NUM_ROW_BLOCKS, BLOCK_ROW_BLOCKS):
+        group_ids = group_start + row_blocks
+        offsets = group_ids[:, None] * HIDDEN_ + d[None, :]
+        mask = (group_ids[:, None] < NUM_ROW_BLOCKS) & d_mask[None, :]
 
-    sum_masked = tl.sum(masked, axis=0).to(tl.bfloat16).to(tl.float32)
-    tl.store(out_x_rhs_ptr + d, tl.sum(x_rhs, axis=0), mask=d_mask)
-    tl.store(out_x_ptr + d, tl.sum(x, axis=0), mask=d_mask)
+        x_rhs = tl.load(partial_x_rhs_ptr + offsets, mask=mask, other=0.0).to(
+            tl.float32
+        )
+        x = tl.load(partial_x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        masked = tl.load(partial_masked_ptr + offsets, mask=mask, other=0.0).to(
+            tl.float32
+        )
+        acc_x_rhs = _add_rn(acc_x_rhs, tl.sum(x_rhs, axis=0))
+        acc_x = _add_rn(acc_x, tl.sum(x, axis=0))
+        acc_masked = _add_rn(acc_masked, tl.sum(masked, axis=0))
+
+    sum_masked = acc_masked.to(tl.bfloat16).to(tl.float32)
+    tl.store(out_x_rhs_ptr + d, acc_x_rhs, mask=d_mask)
+    tl.store(out_x_ptr + d, acc_x, mask=d_mask)
     tl.store(out_masked_sum_ptr + d, sum_masked, mask=d_mask)
 
 
@@ -274,7 +293,7 @@ def _finalize_column_sums_kernel(
     XBLOCK=1,
     BLOCK_D=1024,
     FINAL_BLOCK_D=32,
-    FINAL_BLOCK_ROW_BLOCKS=512,
+    FINAL_BLOCK_ROW_BLOCKS=128,
     num_warps=4,
     final_num_warps=8,
 )
