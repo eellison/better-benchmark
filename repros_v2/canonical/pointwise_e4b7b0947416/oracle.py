@@ -1,57 +1,102 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full four-branch bf16 Inception BatchNorm-inference affine, explicit bf16 cast, NaN-preserving ReLU, and channel concatenation by writing each branch directly into the final channels-last bf16 output, whereas Inductor lowers the sibling broadcast pointwise producers and fixed aten.cat layout as generic scheduler fragments; Inductor cannot do this today because its scheduler does not model aten.cat as an output-layout epilogue for sibling pointwise producers with static channel intervals and preserved bf16 cast boundaries; the fix is SCHEDULER_FUSION: teach the scheduler to sink fixed channel-cat writes into the branch pointwise codegen while preserving the sqrt/reciprocal, eps, bf16 cast, ReLU, and output stride semantics."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the full four-branch bf16 Inception BatchNorm-inference affine, Inductor-style fp32 ReLU, final bf16 output store, and fixed channel concatenation in one output-channel-tiled Triton kernel, whereas Inductor lowers the sibling broadcast pointwise producers and fixed aten.cat layout as a generic flattened scheduler fragment; Inductor cannot do this today because its scheduler does not expose a reusable cat-epilogue lowering for sibling pointwise producers with static channel intervals and per-branch BN parameters; the fix is SCHEDULER_FUSION: teach the scheduler to sink fixed channel-cat writes into branch pointwise codegen while preserving libdevice sqrt/reciprocal, eps, final-cast, ReLU, and channels-last output stride semantics."""
 
 import torch
 import triton
 import triton.language as tl
+from torch._inductor.runtime import triton_helpers
+from torch._inductor.runtime.triton_helpers import libdevice
 
 from oracle_harness import oracle_impl
 
 
 @triton.jit
-def _relu_bf16_preserve_nan(x):
-    zero = tl.full(x.shape, 0.0, tl.float32).to(tl.bfloat16)
-    return tl.where((x > zero) | (x != x), x, zero)
-
-
-@triton.jit
-def _branch_bn_relu_cat_kernel(
-    mean_ptr,
-    x_ptr,
-    var_ptr,
-    weight_ptr,
-    bias_ptr,
+def _multi_bn_relu_cat_kernel(
+    mean0_ptr,
+    x0_ptr,
+    var0_ptr,
+    weight0_ptr,
+    bias0_ptr,
+    mean1_ptr,
+    x1_ptr,
+    var1_ptr,
+    weight1_ptr,
+    bias1_ptr,
+    mean2_ptr,
+    x2_ptr,
+    var2_ptr,
+    weight2_ptr,
+    bias2_ptr,
+    mean3_ptr,
+    x3_ptr,
+    var3_ptr,
+    weight3_ptr,
+    bias3_ptr,
     out_ptr,
-    channels: tl.constexpr,
-    hw: tl.constexpr,
-    out_channels: tl.constexpr,
-    out_c_offset: tl.constexpr,
+    C0: tl.constexpr,
+    C1: tl.constexpr,
+    C2: tl.constexpr,
+    C3: tl.constexpr,
+    HW: tl.constexpr,
+    OUT_C: tl.constexpr,
     BLOCK_C: tl.constexpr,
     BLOCK_HW: tl.constexpr,
 ):
     batch = tl.program_id(0)
-    c_offsets = tl.program_id(1) * BLOCK_C + tl.arange(0, BLOCK_C)
+    c = tl.program_id(1) * BLOCK_C + tl.arange(0, BLOCK_C)
     hw_offsets = tl.program_id(2) * BLOCK_HW + tl.arange(0, BLOCK_HW)
-    mask = (c_offsets[:, None] < channels) & (hw_offsets[None, :] < hw)
+    valid_c = c < OUT_C
+    valid_hw = hw_offsets < HW
+    mask = valid_c[:, None] & valid_hw[None, :]
 
-    x_offsets = batch * channels * hw + hw_offsets[None, :] * channels + c_offsets[:, None]
-    out_offsets = (
-        batch * out_channels * hw
-        + hw_offsets[None, :] * out_channels
-        + out_c_offset
-        + c_offsets[:, None]
-    )
+    c01: tl.constexpr = C0 + C1
+    c012: tl.constexpr = C0 + C1 + C2
+    in0 = c < C0
+    in1 = (c >= C0) & (c < c01)
+    in2 = (c >= c01) & (c < c012)
+    in3 = c >= c012
 
-    x = tl.load(x_ptr + x_offsets, mask=mask, other=0.0).to(tl.float32)
-    mean = tl.load(mean_ptr + c_offsets, mask=c_offsets < channels, other=0.0).to(tl.float32)
-    var = tl.load(var_ptr + c_offsets, mask=c_offsets < channels, other=0.0).to(tl.float32)
-    weight = tl.load(weight_ptr + c_offsets, mask=c_offsets < channels, other=0.0).to(tl.float32)
-    bias = tl.load(bias_ptr + c_offsets, mask=c_offsets < channels, other=0.0).to(tl.float32)
+    c0 = c
+    c1 = c - C0
+    c2 = c - c01
+    c3 = c - c012
 
-    invstd = 1.0 / tl.sqrt(var[:, None] + 0.001)
-    y = (x - mean[:, None]) * invstd
+    x0_offsets = batch * C0 * HW + hw_offsets[None, :] * C0 + c0[:, None]
+    x1_offsets = batch * C1 * HW + hw_offsets[None, :] * C1 + c1[:, None]
+    x2_offsets = batch * C2 * HW + hw_offsets[None, :] * C2 + c2[:, None]
+    x3_offsets = batch * C3 * HW + hw_offsets[None, :] * C3 + c3[:, None]
+
+    x = tl.load(x0_ptr + x0_offsets, mask=mask & in0[:, None], other=0.0).to(tl.float32)
+    x += tl.load(x1_ptr + x1_offsets, mask=mask & in1[:, None], other=0.0).to(tl.float32)
+    x += tl.load(x2_ptr + x2_offsets, mask=mask & in2[:, None], other=0.0).to(tl.float32)
+    x += tl.load(x3_ptr + x3_offsets, mask=mask & in3[:, None], other=0.0).to(tl.float32)
+
+    mean = tl.load(mean0_ptr + c0, mask=valid_c & in0, other=0.0).to(tl.float32)
+    mean += tl.load(mean1_ptr + c1, mask=valid_c & in1, other=0.0).to(tl.float32)
+    mean += tl.load(mean2_ptr + c2, mask=valid_c & in2, other=0.0).to(tl.float32)
+    mean += tl.load(mean3_ptr + c3, mask=valid_c & in3, other=0.0).to(tl.float32)
+
+    var = tl.load(var0_ptr + c0, mask=valid_c & in0, other=0.0).to(tl.float32)
+    var += tl.load(var1_ptr + c1, mask=valid_c & in1, other=0.0).to(tl.float32)
+    var += tl.load(var2_ptr + c2, mask=valid_c & in2, other=0.0).to(tl.float32)
+    var += tl.load(var3_ptr + c3, mask=valid_c & in3, other=0.0).to(tl.float32)
+
+    weight = tl.load(weight0_ptr + c0, mask=valid_c & in0, other=0.0).to(tl.float32)
+    weight += tl.load(weight1_ptr + c1, mask=valid_c & in1, other=0.0).to(tl.float32)
+    weight += tl.load(weight2_ptr + c2, mask=valid_c & in2, other=0.0).to(tl.float32)
+    weight += tl.load(weight3_ptr + c3, mask=valid_c & in3, other=0.0).to(tl.float32)
+
+    bias = tl.load(bias0_ptr + c0, mask=valid_c & in0, other=0.0).to(tl.float32)
+    bias += tl.load(bias1_ptr + c1, mask=valid_c & in1, other=0.0).to(tl.float32)
+    bias += tl.load(bias2_ptr + c2, mask=valid_c & in2, other=0.0).to(tl.float32)
+    bias += tl.load(bias3_ptr + c3, mask=valid_c & in3, other=0.0).to(tl.float32)
+
+    invstd = 1.0 / libdevice.sqrt(var + 0.001)
+    y = (x - mean[:, None]) * invstd[:, None]
     y = y * weight[:, None] + bias[:, None]
-    y_bf16 = y.to(tl.bfloat16, fp_downcast_rounding="rtne")
-    tl.store(out_ptr + out_offsets, _relu_bf16_preserve_nan(y_bf16), mask=mask)
+    relu = triton_helpers.maximum(tl.full([1], 0, tl.int32), y)
+
+    out_offsets = batch * OUT_C * HW + hw_offsets[None, :] * OUT_C + c[:, None]
+    tl.store(out_ptr + out_offsets, relu, mask=mask)
 
 
 def _launch(inputs, *, BLOCK_C: int, BLOCK_HW: int):
@@ -95,40 +140,43 @@ def _launch(inputs, *, BLOCK_C: int, BLOCK_HW: int):
         dtype=torch.bfloat16,
     )
 
-    def run_branch(mean, x, var, weight, bias, channels, out_c_offset):
-        grid = (
-            batch,
-            triton.cdiv(channels, BLOCK_C),
-            triton.cdiv(hw, BLOCK_HW),
-        )
-        _branch_bn_relu_cat_kernel[grid](
-            mean,
-            x,
-            var,
-            weight,
-            bias,
-            out,
-            channels=channels,
-            hw=hw,
-            out_channels=out_channels,
-            out_c_offset=out_c_offset,
-            BLOCK_C=BLOCK_C,
-            BLOCK_HW=BLOCK_HW,
-            num_warps=4,
-            num_stages=3,
-        )
-
-    run_branch(mean0, x0, var0, weight0, bias0, channels0, 0)
-    run_branch(mean1, x1, var1, weight1, bias1, channels1, channels0)
-    run_branch(mean2, x2, var2, weight2, bias2, channels2, channels0 + channels1)
-    run_branch(
+    grid = (
+        batch,
+        triton.cdiv(out_channels, BLOCK_C),
+        triton.cdiv(hw, BLOCK_HW),
+    )
+    _multi_bn_relu_cat_kernel[grid](
+        mean0,
+        x0,
+        var0,
+        weight0,
+        bias0,
+        mean1,
+        x1,
+        var1,
+        weight1,
+        bias1,
+        mean2,
+        x2,
+        var2,
+        weight2,
+        bias2,
         mean3,
         x3,
         var3,
         weight3,
         bias3,
-        channels3,
-        channels0 + channels1 + channels2,
+        out,
+        C0=channels0,
+        C1=channels1,
+        C2=channels2,
+        C3=channels3,
+        HW=hw,
+        OUT_C=out_channels,
+        BLOCK_C=BLOCK_C,
+        BLOCK_HW=BLOCK_HW,
+        num_warps=4,
+        num_stages=3,
     )
     return out
 
