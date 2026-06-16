@@ -17,6 +17,31 @@ def _round_to_bf16_f32(x):
 
 
 @triton.jit
+def _fma_rn_f32(a, b, c):
+    return tl.inline_asm_elementwise(
+        "fma.rn.f32 $0, $1, $2, $3;",
+        constraints="=f,f,f,f",
+        args=[a, b, c],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.autotune(
+    configs=[
+        triton.Config({"BLOCK_M": 4, "BLOCK_N": 64}, num_warps=1, num_stages=3),
+        triton.Config({"BLOCK_M": 8, "BLOCK_N": 64}, num_warps=1, num_stages=3),
+        triton.Config({"BLOCK_M": 8, "BLOCK_N": 64}, num_warps=2, num_stages=3),
+        triton.Config({"BLOCK_M": 16, "BLOCK_N": 64}, num_warps=1, num_stages=3),
+        triton.Config({"BLOCK_M": 16, "BLOCK_N": 64}, num_warps=2, num_stages=3),
+        triton.Config({"BLOCK_M": 16, "BLOCK_N": 64}, num_warps=4, num_stages=3),
+        triton.Config({"BLOCK_M": 32, "BLOCK_N": 64}, num_warps=1, num_stages=3),
+        triton.Config({"BLOCK_M": 32, "BLOCK_N": 64}, num_warps=2, num_stages=3),
+    ],
+    key=[],
+)
+@triton.jit
 def _visformer_softmax_backward_49_kernel(
     grad_ptr,
     logits_ptr,
@@ -55,15 +80,15 @@ def _visformer_softmax_backward_49_kernel(
 
     product = grad * probs
     row_sum = tl.sum(tl.where(mask, product, 0.0), axis=1)[:, None].to(tl.float32)
-    fma = tl.fma(-probs, row_sum, product)
+    fma = _fma_rn_f32(-probs, row_sum, product)
     rounded = _round_to_bf16_f32(fma)
     out = (rounded * SCALE_).to(tl.bfloat16)
     tl.store(out_ptr + compact_offsets, out, mask=mask)
 
 
 # cdec8791: Visformer small train, bf16 softmax-backward recompute on 49-wide rows.
-@oracle_impl(hardware="B200", point="cdec8791", BLOCK_M=16, BLOCK_N=64, num_warps=4)
-def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int):
+@oracle_impl(hardware="B200", point="cdec8791")
+def oracle_forward(inputs):
     (
         arg0_1,
         arg1_1,
@@ -85,7 +110,8 @@ def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int):
         dtype=torch.bfloat16,
     )
 
-    _visformer_softmax_backward_49_kernel[(triton.cdiv(37632, BLOCK_M),)](
+    grid = lambda meta: (triton.cdiv(37632, meta["BLOCK_M"]),)
+    _visformer_softmax_backward_49_kernel[grid](
         arg0_1,
         arg1_1,
         arg2_1,
@@ -94,9 +120,5 @@ def oracle_forward(inputs, *, BLOCK_M: int, BLOCK_N: int, num_warps: int):
         arg5_1,
         out,
         SCALE_=SCALE,
-        BLOCK_M=BLOCK_M,
-        BLOCK_N=BLOCK_N,
-        num_warps=num_warps,
-        num_stages=3,
     )
     return out
