@@ -106,7 +106,7 @@ def _bn_hardswish_mean_kernel(
     relu6 = _f32_add(affine, 3.0)
     relu6 = tl.where(relu6 < 0.0, 0.0, relu6)
     relu6 = tl.where(relu6 > 6.0, 6.0, relu6)
-    hardswish = _f32_mul(_f32_mul(affine, relu6), 0.16666666666666666)
+    hardswish = _f32_div(_f32_mul(affine, relu6), 6.0)
     out_bf16 = hardswish.to(tl.bfloat16)
 
     tl.store(out_ptr + offsets, out_bf16, mask=row_mask[:, None] & hw_mask[None, :])
