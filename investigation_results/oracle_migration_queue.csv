@@ -716,7 +716,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 715,sum_sum_b1354c2a333b,b1354c2a333b,reduction,reduction_general,1,1,2,,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 716,sum_sum_b1d8468e9c69,b1d8468e9c69,reduction,reduction_general,2,2,2,,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 717,sum_sum_b265bd27fbd8,b265bd27fbd8,reduction,reduction_general,1,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
-718,sum_sum_b2f43ab7b175,b2f43ab7b175,reduction,reduction_general,2,2,2,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_mixed_good_and_NUMERICS_WORSE_reaudit
+718,sum_sum_b2f43ab7b175,b2f43ab7b175,reduction,reduction_general,2,2,2,,needs_work,codex,needs_work_existing_oracle_retained_checks_pass_2of2_no_skip_pass_2of2_locked_bench_invalid_OMP_BrokenProcessPool_no_cudagraph_serial_fallback_5f5b775d_GOOD_10.14us_vs_12.29us_ratio1.211_d4009f05_NUMERICS_WORSE_output3_err0.147583_compiled0.03125_threshold0.09375_class_SCHEDULER_FUSION
 719,sum_sum_b50ad423ed16,b50ad423ed16,reduction,reduction_general,1,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 720,sum_sum_b699431fa635,b699431fa635,reduction,reduction_general,2,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 721,sum_sum_d227dc0811d2,d227dc0811d2,reduction,reduction_general,2,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
@@ -848,7 +848,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 847,amax_sum_6a53066a9204,6a53066a9204,reduction,online_softmax_cross_entropy,1,2,1,~amax_sum_0f87f6568d0f,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 848,amax_sum_6a531546a9ab,6a531546a9ab,reduction,reduction_softmax_like,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 849,amax_sum_6afeef4d689d,6afeef4d689d,reduction,online_softmax_cross_entropy,1,2,1,~amax_sum_0f87f6568d0f,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-850,amax_sum_7079889cfc04,7079889cfc04,reduction,online_softmax_cross_entropy,1,1,1,amax_sum_3ed297ef02cd,needs_work,Codex,parent_h100_fallback_bench_OOM_in_fp64_numerics_gate_after_checks_pass_no_cudagraph_warnings
+850,amax_sum_7079889cfc04,7079889cfc04,reduction,online_softmax_cross_entropy,1,1,1,amax_sum_3ed297ef02cd,claimed,codex,retry_claim_2026-06-15_needs_work_prev_OOM_fp64_gate_reaudit
 851,amax_sum_715e3538e1e7,715e3538e1e7,reduction,reduction_softmax_like,1,2,1,~amax_sum_0561785713ab,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 852,amax_sum_7303c49b6018,7303c49b6018,reduction,scatter_gather,1,1,1,,needs_work,Codex,parent_h100_fallback_bench_NUMERICS_WORSE_THAN_COMPILED_nan_gate_outputs_0_1_2_checks_pass_no_cudagraph_warnings
 853,amax_sum_79b08bfeb860,79b08bfeb860,reduction,scatter_gather,1,1,1,,needs_work,Codex,parent_h100_fallback_bench_NUMERICS_WORSE_THAN_COMPILED_nan_gate_outputs_0_1_2_checks_pass_no_cudagraph_warnings
