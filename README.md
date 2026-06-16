@@ -14,31 +14,34 @@ Extracts fused kernel regions from real model compilations as lightweight, self-
 
 4. **Parallel benchmark runner** — persistent workers per GPU, overlapped repro compilation, exclusive lock for timing isolation, CUDAGraph replay, worker recovery on CUDA errors.
 
-5. **Incremental updates** — `--merge-into` patches an existing baseline with re-benchmarked results without re-running everything.
+5. **Reference kernels** — every unique kernel pattern (at each captured shape) ships with a reference implementation serving as the optimization target for `torch.compile` output. Today written by Codex 5.5 (xhigh) in Triton; more providers planned.
+
+6. **Model-level perf estimation** — per-model kernel aggregation gives an approximate accounting of how much improving an individual kernel translates to end-to-end speedup.
 
 ## Corpus
 
-**1482 unique kernel patterns** deduplicated across 227 model captures (torchbench, HuggingFace, timm, vLLM, genai). **553 full model graphs** saved for repartitioning. Full sweep takes ~30 min on 2x B200.
+**1727 unique kernel patterns** deduplicated across 155 full models (torchbench, HuggingFace, timm) plus 8 genai microbenchmarks. **364 full model graphs** retained.
+
+Sweep time scales with point count (one per pattern vs every captured shape) and target (compile path vs oracle references). One point per pattern sweeps in ~30 min on 4x B200; the exhaustive all-shapes sweep (~2.9x the points) takes ~80 min. <!-- TODO(elias): fill in measured unique-only / compile-path numbers; only the ~80min all-shapes oracle sweep is measured (the ~30min is derived from the 2.9x ratio). -->
 
 <details>
 <summary>Coverage breakdown</summary>
 
-| Suite | Models | Mode |
+| Suite | Captures | Mode |
 |-------|-------:|------|
-| torchbench | 121 | infer + train |
-| hf | 75 | infer + train |
-| timm | 18 | infer + train |
-| vllm | 5 | infer |
-| genai | 8 | fwd + bwd |
+| torchbench | 50 | infer + train |
+| hf | 70 | infer + train |
+| timm | 35 | infer + train |
+| genai | 8 | microbenchmarks (fwd + bwd) |
 
 Each canonical repro is a flat directory:
 
 ```
-repros/canonical/mean_376234b0e316/
+repros/canonical/mean_014afd4984e6/
   repro.py       # standalone nn.Module + make_inputs()
   meta.json      # pattern hash, ops, reduction types, model list
-  shapes.txt     # per-model shape configs
-  oracle_*.py    # hand-optimized performance floor (see Oracles below)
+  shapes.json    # per-model shape configs
+  oracle.py      # reference implementation / optimization target (see Oracles below)
 ```
 
 Per-model directories hold full post-grad graphs for recapture and a manifest listing which canonical patterns that model produces.
@@ -49,89 +52,68 @@ Per-model directories hold full post-grad graphs for recapture and a manifest li
 
 ```bash
 # Benchmark one repro
-python repros/canonical/mean_376234b0e316/repro.py
+python repros/canonical/mean_014afd4984e6/repro.py
 
 # Parallel sweep of entire corpus
 python scripts/bench_parallel.py repros/canonical --gpus 0,1 --max-workers 2 \
   --output results.json
 
-# Experimental/WIP: parallel sweep of saved model full graphs
-# (latency + input constraints; legacy annotation-only graphs are skipped;
-# no graph SOL yet)
+# Parallel sweep of the oracle references (per shape point)
+python scripts/bench_parallel.py repros/canonical --oracles --gpus 0,1 \
+  --max-workers 2 --all-shapes --output results/all_oracle_timings.json
+
+# Parallel sweep of saved model full graphs
+# (latency + input constraints; legacy annotation-only graphs are skipped)
 python scripts/bench_parallel.py --full-graphs --gpus 0,1 \
   --workers-per-gpu 2 --combo-kernels --output full_graph_results.json
 
 # Re-benchmark a subset and merge into existing baseline
-python scripts/bench_parallel.py repros/canonical/pointwise_904767c8c432 \
+python scripts/bench_parallel.py repros/canonical/pointwise_000209e1748d \
   --gpus 0 --merge-into results.json
 
 # Validate all repros run correctly in eager mode
 python scripts/validate_eager.py --gpus 0,1 --max-workers 4
 ```
 
-Full-graph benchmarking is intentionally conservative and still WIP. Newly
-captured graphs get `full_graph_NNN.meta.json` sidecars with explicit input
-constraints; older checked-in graphs without enough constraint metadata are
-reported as `skipped` instead of being run with guessed integer/symbolic inputs.
-Graph-level SOL/oracle accounting is not implemented yet.
-
 ## Oracles
 
-Each canonical repro carries an **oracle** — a hand-optimized reference
-implementation serving as the performance floor for `torch.compile` output.
-Currently written as Triton kernels, but any implementation qualifies (CUDA,
-CUTLASS, another compiler's output).
+Each canonical repro carries an **oracle** — a reference implementation
+serving as the optimization target for `torch.compile` output. Today written
+as Triton kernels, but any implementation qualifies (CUDA, CUTLASS, another
+compiler's output).
 
 Oracles must match the repro's full scope and numerics (no fast-math
 substitutions), and are timed exclusively through
-`oracle_harness.bench_oracle()` (CUDAGraph replay, per-GPU lock, interleaved
-min-of-N — inline timing produces fake gaps from dispatch overhead).
+`oracle_harness.bench_oracle()`.
 
 ```bash
-INDUCTOR_GPU_BENCH_LOCK=1 python repros/canonical/mean_376234b0e316/oracle_*.py --bench
+# GPU bench lock is on by default (pass --disable-gpu-lock to skip it)
+python repros/canonical/mean_014afd4984e6/oracle.py --bench
 ```
 
-<details>
-<summary>Declaring what an oracle was written for</summary>
-
-Every oracle declares its operating point — the hardware it was tuned on and
-the full input signature it was written for — in one line:
-
-```python
-from oracle_harness import oracle_impl
-
-@oracle_impl(hardware="H100", shapes="(T([8192, 262144], bf16))")  # _shapes_config verbatim
-def oracle_forward(inputs): ...
-```
-
-Benchmark output then reports dispatch honestly:
-
-```json
-{"repro_id": "...", "oracle_us": 1927.0, "compile_us": 2042.7, "ratio": 1.06, "status": "GOOD",
- "dispatch": {"matched": "shape", "tuned_on": "H100", "running_on": "B200", "fallback": true}}
-```
-
-`matched: "hardware+shape"` means a trustworthy floor; `"shape"` means the
-kernel ran at its tuned shape but on different hardware (the floor may be
-soft). Matching is exact-only — if no registration fits the runtime inputs,
-the bench reports `NO_ORACLE_FOR_SHAPE` rather than silently running a
-shape-specific kernel at the wrong shape.
-
-Hardware/shape variants are additive — register the same kernel body again
-with different launch parameters (any kwarg beyond `hardware`/`shapes`/
-`description` is passed through to the implementation, including strategy
-flags):
-
-```python
-SIG = "(T([32768, 1024], bf16),)"
-oracle_impl(hardware="H100", shapes=SIG, persistent=True,  RBLOCK=512)(_reduction_impl)
-oracle_impl(hardware="B200", shapes=SIG, persistent=False, RBLOCK=128)(_reduction_impl)
-```
-
-To write a new oracle, start from `scripts/oracle_template.py`. Design notes:
-`scripts/oracle_dispatch_design.md`.
+Each oracle declares its operating point (hardware + input signature) so the
+bench dispatches the right variant per shape and reports the match honestly.
+To write a new oracle, start from `scripts/oracle_template.py`; for the
+registration/dispatch model see `scripts/oracle_dispatch_design.md`.
 
 </details>
+
+## Full model artifacts
+
+The original full FX graphs are retained per model, so they can be re-partitioned
+under different fusion rules or run and benchmarked directly end-to-end.
+
+## Model accounting
+
+Per-kernel timings aggregate to the **model level**: partition a model's full post-grad graph, map each fusible partition back to its canonical pattern, and sum the per-kernel times weighted by occurrence — giving an approximate accounting of how much improving an individual kernel would speed up the whole model. Works with oracle times, SOL, or the compile path.
+
+```bash
+# Aggregate per-kernel times to a model-level estimate
+python scripts/model_graph_accounting.py --model BertForMaskedLM --timings results/all_oracle_timings.json
+
+# Reconcile the aggregate against measured end-to-end time
+python scripts/model_attribution.py --corpus-root repros --suite hf --mode infer
+```
 
 ## Extraction
 
@@ -139,8 +121,8 @@ To write a new oracle, start from `scripts/oracle_template.py`. Design notes:
 from capture_hook import install_capture_hook, uninstall_capture_hook
 from merge_captures import temporary_capture_for_merge
 
-with temporary_capture_for_merge(Path("repros"), "my_model", suite="vllm") as capture:
-    graph_dir = Path("repros/models/vllm/my_model")
+with temporary_capture_for_merge(Path("repros"), "my_model", suite="hf") as capture:
+    graph_dir = Path("repros/models/hf/infer/my_model")
     install_capture_hook(
         str(capture.capture_dir),
         label="my_model",
@@ -175,6 +157,14 @@ bench_parallel.py
 └── Output: JSON with per-repro/per-graph metrics + __failures__ + __summary__
 ```
 
+The same runner (workers, GPU lock, recovery) drives three workloads:
+
+| Mode | What it times |
+|------|---------------|
+| default | the `torch.compile` path per repro |
+| `--oracles` | the oracle reference implementations (per shape point; numerics check-gated) |
+| `--full-graphs` | whole captured model graphs (latency + input constraints) |
+
 Timing uses exclusive `flock` on a per-GPU lock file — multiple processes can compile in parallel, but only one times on a given GPU at once.
 
 </details>
@@ -190,6 +180,34 @@ Timing uses exclusive `flock` on a per-GPU lock file — multiple processes can 
 | `coord_descent_us` | With `coordinate_descent_tuning=True` |
 | `memcopy_sol_us` | `torch.add(a, 1, out=b)` at same read+write bytes |
 | `gap_default` | `compiled_us / memcopy_sol_us` — 1.0x = at bandwidth ceiling |
+
+</details>
+
+<details>
+<summary>Per-repro: compile vs oracle reference (`--oracles`)</summary>
+
+| Metric | Meaning |
+|--------|---------|
+| `oracle_us` | The reference implementation's time (CUDAGraph replay, GPU lock) |
+| `compile_us` | The `torch.compile` time at the same shape point |
+| `ratio` | `compile_us / oracle_us` — how far compile sits above the reference |
+| `status` | Per-point verdict (e.g. `GOOD`); numerics-checked against the repro |
+| `fallback` | True if a cross-hardware kernel was dispatched (reference may be soft) |
+
+Per-shape data lives under `points_by_shape`; top-level `oracle_us`/`compile_us` are the median across valid points.
+
+</details>
+
+<details>
+<summary>Per-model: aggregate vs measured e2e</summary>
+
+| Metric | Meaning |
+|--------|---------|
+| `sum_fusible_us` | Σ oracle times over fusible kernel occurrences |
+| `sum_extern_us` | Σ standalone times of non-fusible ops (conv/GEMM/SDPA — not oracle targets) |
+| `corrected_parts_us` | `parts − G·(n_occ − n_graphs)`, the CUDAGraph launch-floor correction |
+| `e2e_us` | Measured full-graph end-to-end time |
+| `ratio_corrected` | `corrected_parts_us / e2e_us` — how well the aggregate accounts for e2e |
 
 </details>
 
@@ -209,20 +227,25 @@ extract_reductions.py    # batch extraction from dynamo suite
 extract_vllm.py          # vLLM/HF model capture driver
 
 scripts/
-  bench_parallel.py      # parallel GPU benchmark runner
+  bench_parallel.py      # parallel GPU benchmark runner (compile, --oracles, --full-graphs)
   bench_oracles_parallel.py  # parallel oracle sweep (resumable)
   oracle_template.py     # starting point for new oracles
   validate_oracles.py    # oracle correctness/scope validation
   validate_eager.py      # subprocess-isolated eager validation
+  validate_corpus_invariants.py  # hard/soft corpus invariants (CI / pre-commit)
+  model_graph_accounting.py  # aggregate per-kernel times to a model-level estimate
+  model_attribution.py   # reconcile the aggregate against measured e2e (launch-corrected)
+  gc_corpus.py           # corpus reference-counting / migration transaction tool
   bench_report.py        # before/after comparison reports
   test_adversarial.py    # infrastructure regression tests
   test_merge_into.py     # --merge-into adversarial tests
   test_bench_recovery.py # worker failure recovery tests
 
 repros/
-  canonical/             # 1482 flat, content-addressed repro dirs (each with oracle)
-  models/                # per-model: manifest.json + full_graph_*.py
+  canonical/             # 1727 flat, content-addressed repro dirs (each with oracle.py)
+  models/                # <suite>/<mode>/<model>/: manifest.json + full_graph_*.py (+ .meta.json)
 
+optimal_kernels/         # standalone hand-optimized reference kernels w/ root-cause writeups
 benchmarks/              # frozen benchmark set definitions
 ```
 
