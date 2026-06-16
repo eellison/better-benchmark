@@ -1115,7 +1115,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1114,pointwise_a8c22a6e9809,a8c22a6e9809,pointwise,pointwise,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1115,pointwise_a8f7c1df5d48,a8f7c1df5d48,pointwise,pointwise,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1116,pointwise_a903fdfa1994,a903fdfa1994,pointwise,scatter_gather,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1117,pointwise_aa30343135f0,aa30343135f0,pointwise,pointwise,1,2,1,,oracle_measured,codex,NUMERICS_FLAG_faithful_oracle_committed_checks_pass_1of1_no_skip_pass_1of1_exact_6outputs_locked_bench_invalid_NUMERICS_WORSE_then_OMP_no_cudagraph_serial_fallback_NUMERICS_WORSE_fp64_nan_inf_gate_no_valid_time_no_self_blend_class_NEW_PATTERN
+1117,pointwise_aa30343135f0,aa30343135f0,pointwise,pointwise,1,2,1,,oracle_measured,codex,NUMERICS_FLAG_parent_verified_checks_pass_1of1_no_skip_pass_1of1_6outputs_locked_bench_invalid_NUMERICS_WORSE_inf_nan_gate_no_cudagraph_skip_gate_h100_fallback_AT_FLOOR_DistillGPT2_26cc4258_oracle_46.62us_compile_45.89us_ratio_0.984_class_NEW_PATTERN
 1118,pointwise_ab0d63bc2d68,ab0d63bc2d68,pointwise,layout_indexing_stencil_fusion,1,1,1,~pointwise_355c2d00df8b,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1119,pointwise_abb86bbd005a,abb86bbd005a,pointwise,pointwise,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1120,pointwise_ac8d8e1c9b73,ac8d8e1c9b73,pointwise,pointwise,1,2,1,,claimed,codex,retry_claim_2026-06-15_pointwise_bad_oracle_reaudit
