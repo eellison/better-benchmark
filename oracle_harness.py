@@ -905,6 +905,7 @@ def bench_oracle(
     rep: int = 200,
     rounds: int = 5,
     _skip_numerics_gate: bool = False,
+    disable_gpu_lock: bool = False,
 ) -> dict:
     """Standard oracle benchmark: oracle vs torch.compile.
 
@@ -928,6 +929,10 @@ def bench_oracle(
         rep: repetitions per round
         rounds: number of interleaved rounds (min-of-N)
         _skip_numerics_gate: internal flag to bypass fp64 gate (testing only)
+        disable_gpu_lock: skip the exclusive GPU lock (no-op context manager).
+            The lock is ON by default; an INDUCTOR_GPU_BENCH_LOCK=1 /
+            TORCHINDUCTOR_GPU_BENCH_LOCK=1 env var force-enables it even when
+            this is True.
 
     Returns:
         Dict with repro_id, oracle_us, compile_us, ratio, status — plus a
@@ -1029,7 +1034,7 @@ def bench_oracle(
     best_oracle_us = math.inf
     best_compile_us = math.inf
 
-    with _gpu_exclusive_lock(repro_id):
+    with _gpu_exclusive_lock(repro_id, disabled=disable_gpu_lock):
         # Warm under lock
         for _ in range(warmup):
             g_oracle.replay()
@@ -1397,30 +1402,29 @@ def _release_fd(fd):
 
 
 @contextlib.contextmanager
-def _gpu_exclusive_lock(label="oracle_bench"):
-    """Acquire exclusive GPU lock. NEVER silently skips.
+def _gpu_exclusive_lock(label="oracle_bench", *, disabled=False):
+    """Acquire exclusive GPU lock. ON BY DEFAULT.
 
-    Respects the same env-var protocol as bench_compare:
-      - INDUCTOR_GPU_BENCH_LOCK=1 or TORCHINDUCTOR_GPU_BENCH_LOCK=1: acquire lock
-      - Neither set: raise RuntimeError (caller must explicitly configure)
+    The lock prevents silent measurement corruption from GPU contention, so it
+    is acquired by default. Gating:
+      - Default (no env var, disabled=False): acquire the lock.
+      - INDUCTOR_GPU_BENCH_LOCK=1 or TORCHINDUCTOR_GPU_BENCH_LOCK=1: force the
+        lock on, even if disabled=True (force-enable beats --disable-gpu-lock).
+      - disabled=True (e.g. --disable-gpu-lock) and no env force: no-op
+        context manager (no flock taken).
 
-    This ensures benchmarks never run without explicit lock configuration,
-    preventing silent measurement corruption from GPU contention.
+    The same env-var protocol as bench_compare is respected for back-compat.
     """
-    lock_enabled = (
+    force_enabled = (
         _env_flag_enabled("INDUCTOR_GPU_BENCH_LOCK")
         or _env_flag_enabled("TORCHINDUCTOR_GPU_BENCH_LOCK")
     )
 
-    if not lock_enabled:
-        raise RuntimeError(
-            "GPU bench lock is not enabled. Set INDUCTOR_GPU_BENCH_LOCK=1 (or "
-            "TORCHINDUCTOR_GPU_BENCH_LOCK=1) before running oracle benchmarks. "
-            "The lock is required to prevent measurement corruption from GPU "
-            "contention. If you are certain no other GPU work is running, set "
-            "the env var to enable the lock anyway (it will be a no-op if "
-            "uncontended)."
-        )
+    # Env force-enable beats an explicit disable; otherwise honor `disabled`.
+    if disabled and not force_enabled:
+        # No-op context manager: do not take the flock.
+        yield
+        return
 
     lock_dir = (
         os.environ.get("INDUCTOR_GPU_BENCH_LOCK_DIR")
@@ -1597,6 +1601,10 @@ def _runner_main(argv=None):
     ap.add_argument("--rep", type=int, default=100)
     ap.add_argument("--point", default=None,
                     help="restrict to one shape_hash")
+    ap.add_argument("--disable-gpu-lock", action="store_true",
+                    help="Skip the exclusive GPU bench lock (ON by default). "
+                    "An INDUCTOR_GPU_BENCH_LOCK=1 env var force-enables the "
+                    "lock even with this flag set.")
     args = ap.parse_args(argv)
 
     mod, fn, d = _load_oracle_module(args.canonical_dir)
@@ -1639,7 +1647,8 @@ def _runner_main(argv=None):
                 instance = get_repro_instance(d)
                 bench_results.append(
                     bench_oracle(fn, instance, inputs, repro_id,
-                                 warmup=args.warmup, rep=args.rep))
+                                 warmup=args.warmup, rep=args.rep,
+                                 disable_gpu_lock=args.disable_gpu_lock))
             else:
                 bench_results.append({
                     "repro_id": repro_id,
@@ -1661,7 +1670,8 @@ def _runner_main(argv=None):
                     instance = get_repro_instance(d)
                     bench_results.append(
                         bench_oracle(fn, instance, inputs, point_id,
-                                     warmup=args.warmup, rep=args.rep))
+                                     warmup=args.warmup, rep=args.rep,
+                                     disable_gpu_lock=args.disable_gpu_lock))
                 else:
                     bench_results.append({
                         "repro_id": point_id,
