@@ -578,6 +578,11 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1718 `var_mean_mean_c2c0ad00da48`: returned to `needs_work`; parent checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=21.63us`, `compile=20.13us`, ratio `0.930`).
 - Row 1549 `var_mean_6cd69c8f3b06`: returned to `needs_work`; parent checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=15.65us`, `compile=14.62us`, ratio `0.935`).
 - Row 1209 `sum_7ba9dcb96142`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=610.85us`, `compile=1449.76us`, ratio `2.373`).
+- Row 1247 `sum_sum_0189bf613c7e`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=1493.66us`, `compile=1539.10us`, ratio `1.030`).
+- Row 1445 `var_mean_087d5b4f064d`: parent-verified with numerics flag; exact `complex64` output drifts while faithful float outputs pass tolerance, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.91us`, `compile=175.68us`, ratio `1.106`).
+- Row 1446 `var_mean_08f6231329f7`: parent-verified with numerics flag, checks plus no-skip pass, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=6.59us`, `compile=6.43us`, ratio `0.976`).
+- Row 1489 `var_mean_3bc311a8676a`: parent-verified with numerics flag; exact `complex64` output drifts while faithful float outputs pass tolerance, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=152.19us`, `compile=175.49us`, ratio `1.153`).
+- Row 1700 `var_mean_fbc9e58f2e01`: parent-verified with numerics flag, checks plus no-skip pass, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=23.07us`, `compile=22.24us`, ratio `0.964`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 

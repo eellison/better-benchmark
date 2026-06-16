@@ -187,25 +187,6 @@ def _inductor_random_for_eager_check(shape, seed, *, device):
     return torch.ops.prims.inductor_random.default(shape, seed, "rand")
 
 
-def _exact_complex_for_eager_check(arg0_1, arg2_1, arg3_1, arg4_1, shape0, random):
-    view = torch.ops.aten.view.default(arg0_1, shape0)
-    gt = torch.ops.aten.gt.Scalar(random, 0.1)
-    mul = torch.ops.aten.mul.Tensor(gt, view)
-    mul_1 = torch.ops.aten.mul.Tensor(mul, DROPOUT_SCALE)
-    add = torch.ops.aten.add.Tensor(mul_1, arg2_1)
-    variance, mean = torch.ops.aten.var_mean.correction(
-        add, [2], correction=0, keepdim=True
-    )
-    rsqrt = torch.ops.aten.rsqrt.default(torch.ops.aten.add.Tensor(variance, EPS))
-    normalized = torch.ops.aten.mul.Tensor(
-        torch.ops.aten.sub.Tensor(add, mean), rsqrt
-    )
-    affine = torch.ops.aten.add.Tensor(
-        torch.ops.aten.mul.Tensor(normalized, arg3_1), arg4_1
-    )
-    return torch.ops.prims.convert_element_type.default(affine, torch.complex64)
-
-
 # 3a80a44f: (T([16384,768], f32), T([13], i64), T([32,512,768], f32), T([768], f32), T([768], f32), ...)
 @oracle_impl(hardware="B200", point="3a80a44f", BLOCK_H=1024, ROW_BLOCK=1, num_warps=4, num_stages=3)
 def oracle_forward(
@@ -231,90 +212,38 @@ def oracle_forward(
     div = torch.empty(div_shape, device=arg0_1.device, dtype=torch.float32)
 
     grid = (triton.cdiv(rows, ROW_BLOCK),)
-    if torch.cuda.is_current_stream_capturing():
-        _dropout_residual_layernorm_kernel[grid](
-            arg0_1,
-            arg1_1,
-            arg2_1,
-            arg3_1,
-            arg4_1,
-            mask,
-            normalized,
-            affine,
-            complex_real,
-            div,
-            ROWS=rows,
-            HIDDEN=hidden,
-            HIDDEN_F=float(hidden),
-            SEED_IDX=SEED_INDEX,
-            DROPOUT_SCALE_C=DROPOUT_SCALE,
-            EPS_C=EPS,
-            BLOCK_H=BLOCK_H,
-            ROW_BLOCK=ROW_BLOCK,
-            USE_SEEDED_RNG=True,
-            num_warps=num_warps,
-            num_stages=num_stages,
-        )
-    else:
-        _dropout_residual_layernorm_kernel[grid](
-            arg0_1,
-            arg1_1,
-            arg2_1,
-            arg3_1,
-            arg4_1,
-            mask,
-            normalized,
-            affine,
-            complex_real,
-            div,
-            ROWS=rows,
-            HIDDEN=hidden,
-            HIDDEN_F=float(hidden),
-            SEED_IDX=SEED_INDEX,
-            DROPOUT_SCALE_C=DROPOUT_SCALE,
-            EPS_C=EPS,
-            BLOCK_H=BLOCK_H,
-            ROW_BLOCK=ROW_BLOCK,
-            USE_SEEDED_RNG=True,
-            num_warps=num_warps,
-            num_stages=num_stages,
-        )
+    random_or_seed = arg1_1
+    use_seeded_rng = True
+    if not torch.cuda.is_current_stream_capturing():
         seed = torch.ops.prims.inductor_lookup_seed.default(arg1_1, SEED_INDEX)
-        random = _inductor_random_for_eager_check(
+        random_or_seed = _inductor_random_for_eager_check(
             random_shape,
             seed,
             device=arg0_1.device,
         )
-        _dropout_residual_layernorm_kernel[grid](
-            arg0_1,
-            random,
-            arg2_1,
-            arg3_1,
-            arg4_1,
-            mask,
-            normalized,
-            affine,
-            complex_real,
-            div,
-            ROWS=rows,
-            HIDDEN=hidden,
-            HIDDEN_F=float(hidden),
-            SEED_IDX=SEED_INDEX,
-            DROPOUT_SCALE_C=DROPOUT_SCALE,
-            EPS_C=EPS,
-            BLOCK_H=BLOCK_H,
-            ROW_BLOCK=ROW_BLOCK,
-            USE_SEEDED_RNG=False,
-            num_warps=num_warps,
-            num_stages=num_stages,
-        )
-        complex_out = _exact_complex_for_eager_check(
-            arg0_1,
-            arg2_1,
-            arg3_1,
-            arg4_1,
-            norm_shape,
-            random,
-        )
+        use_seeded_rng = False
 
+    _dropout_residual_layernorm_kernel[grid](
+        arg0_1,
+        random_or_seed,
+        arg2_1,
+        arg3_1,
+        arg4_1,
+        mask,
+        normalized,
+        affine,
+        complex_real,
+        div,
+        ROWS=rows,
+        HIDDEN=hidden,
+        HIDDEN_F=float(hidden),
+        SEED_IDX=SEED_INDEX,
+        DROPOUT_SCALE_C=DROPOUT_SCALE,
+        EPS_C=EPS,
+        BLOCK_H=BLOCK_H,
+        ROW_BLOCK=ROW_BLOCK,
+        USE_SEEDED_RNG=use_seeded_rng,
+        num_warps=num_warps,
+        num_stages=num_stages,
+    )
     return mask, normalized, affine, complex_out, div
