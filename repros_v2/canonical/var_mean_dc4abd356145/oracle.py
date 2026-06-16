@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 seeded-dropout residual LayerNorm training scope in one Triton row kernel, including internally generated `inductor_seeds`, seed-index-0 RNG with f32-to-bf16 rounding before `gt(0.1)`, the returned bool mask, bf16 dropout multiply and scale rounding, fp32 residual add, population `var_mean(correction=0, keepdim=True)`, eps=1e-5 `rsqrt`, returned normalized and affine fp32 tensors, final bf16 flattened view, and `rsqrt / hidden` side output, whereas Inductor lowers the stochastic producer, residual add, row-normalization reduction, affine epilogue, bf16 cast/view, and sibling outputs through generic scheduler boundaries; Inductor cannot do this today because its norm-template scheduler does not keep an internally seeded RNG producer and all observable side outputs resident across the fixed-hidden row reduction while preserving the required bf16 rounding boundaries; the fix is SCHEDULER_FUSION: teach the LayerNorm scheduler to inline `prims.inductor_seeds`/seeded dropout and emit the mask, normalized tensor, affine tensor, bf16 view, and inverse-std side output from one guarded row plan."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 seeded-dropout residual LayerNorm training scope in one Triton row kernel, including internally generated `inductor_seeds`, seed-index-0 RNG, the returned bool mask, Inductor's generated fp32 dropout comparison/scale before the fp32 residual add, population `var_mean(correction=0, keepdim=True)`, eps=1e-5 `rsqrt`, returned normalized and affine fp32 tensors, final bf16 flattened view, and `rsqrt / hidden` side output, whereas Inductor lowers the stochastic producer, residual add, row-normalization reduction, affine epilogue, bf16 cast/view, and sibling outputs through generic scheduler boundaries; Inductor cannot fuse this full returned-output envelope today because its norm lowering does not keep an internally seeded RNG producer and all observable side outputs resident across the fixed-hidden row reduction and affine epilogue; the fix is SCHEDULER_FUSION: teach the LayerNorm scheduler to inline `prims.inductor_seeds`/seeded dropout and emit the mask, normalized tensor, affine tensor, bf16 view, and inverse-std side output from one guarded row plan."""
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
@@ -73,6 +73,7 @@ def _dropout_residual_layernorm_kernel(
     BLOCK_H: tl.constexpr,
     ROW_BLOCK: tl.constexpr,
     USE_SEEDED_RNG: tl.constexpr,
+    EAGER_ROUNDING: tl.constexpr,
 ):
     row_ids = tl.program_id(0) * ROW_BLOCK + tl.arange(0, ROW_BLOCK)
     cols = tl.arange(0, BLOCK_H)
@@ -86,7 +87,7 @@ def _dropout_residual_layernorm_kernel(
         mask=mask,
         other=0.0,
         eviction_policy="evict_first",
-    ).to(tl.bfloat16)
+    )
     residual = tl.load(
         residual_ptr + offsets,
         mask=mask,
@@ -96,22 +97,27 @@ def _dropout_residual_layernorm_kernel(
 
     if USE_SEEDED_RNG:
         seed = tl.load(rng_ptr + SEED_IDX)
-        rand_bf16 = tl.rand(seed, offsets.to(tl.uint32)).to(tl.bfloat16)
+        random = tl.rand(seed, offsets.to(tl.uint32))
     else:
-        rand_bf16 = tl.load(
+        random = tl.load(
             rng_ptr + offsets,
             mask=mask,
             other=0.0,
             eviction_policy="evict_first",
-        ).to(tl.bfloat16)
+        )
 
-    threshold = tl.full((ROW_BLOCK, BLOCK_H), DROPOUT_P_C, tl.float32).to(tl.bfloat16)
-    keep = rand_bf16 > threshold
+    if EAGER_ROUNDING:
+        rand_bf16 = random.to(tl.bfloat16)
+        threshold = tl.full((ROW_BLOCK, BLOCK_H), DROPOUT_P_C, tl.float32).to(tl.bfloat16)
+        keep = rand_bf16 > threshold
+        dropped = tl.where(keep, src, 0.0).to(tl.bfloat16)
+        scaled = _f32_mul(dropped.to(tl.float32), DROPOUT_SCALE_C).to(tl.bfloat16)
+        x = _f32_add(residual, scaled.to(tl.float32))
+    else:
+        keep = random > DROPOUT_P_C
+        dropped = _f32_mul(keep.to(tl.float32), src.to(tl.float32))
+        x = _f32_add(residual, _f32_mul(dropped, DROPOUT_SCALE_C))
     tl.store(mask_ptr + offsets, keep, mask=mask)
-
-    dropped = tl.where(keep, src, 0.0).to(tl.bfloat16)
-    scaled = _f32_mul(dropped.to(tl.float32), DROPOUT_SCALE_C).to(tl.bfloat16)
-    x = _f32_add(residual, scaled.to(tl.float32))
 
     x_for_reduce = tl.where(mask, x, 0.0)
     mean = tl.sum(x_for_reduce, axis=1) / HIDDEN
@@ -264,6 +270,7 @@ def _launch(
             BLOCK_H=BLOCK_H,
             ROW_BLOCK=ROW_BLOCK,
             USE_SEEDED_RNG=True,
+            EAGER_ROUNDING=False,
             num_warps=num_warps,
             num_stages=num_stages,
         )
@@ -290,6 +297,7 @@ def _launch(
         BLOCK_H=BLOCK_H,
         ROW_BLOCK=ROW_BLOCK,
         USE_SEEDED_RNG=True,
+        EAGER_ROUNDING=True,
         num_warps=num_warps,
         num_stages=num_stages,
     )
@@ -313,6 +321,7 @@ def _launch(
         BLOCK_H=BLOCK_H,
         ROW_BLOCK=ROW_BLOCK,
         USE_SEEDED_RNG=False,
+        EAGER_ROUNDING=True,
         num_warps=num_warps,
         num_stages=num_stages,
     )
