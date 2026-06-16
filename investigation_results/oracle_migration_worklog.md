@@ -611,6 +611,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1140 `pointwise_c9af56d69f6c`: claimed for inf/nan numerics-gate reaudit/refill.
 - Row 1111 `pointwise_a7159158fa8e`: returned to `needs_work`; parent checks pass but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=14.27us`, `compile=12.38us`, ratio `0.868`).
 - Row 1142 `pointwise_cbb8d3f0ed92`: claimed for bad-oracle reaudit/refill.
+- Row 1138 `pointwise_c9434eade687`: returned to `needs_work`; parent checks pass exactly, but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=20.38us`, `compile=18.50us`, ratio `0.907`), so the worker oracle was not committed.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
