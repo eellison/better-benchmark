@@ -1487,7 +1487,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1486,var_mean_38c197b63b8b,38c197b63b8b,reduction,reduction_var_mean,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-15: stochastic_flag non-blocking per policy (1bool_mask fail only (RNG mask; stochastic non-blocking))
 1487,var_mean_38fe02d3252c,38fe02d3252c,reduction,norm_template_canonicalization,1,2,1,~var_mean_867f4204961b;~var_mean_87ad70406872;~var_mean_1c7b809d512d,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 1488,var_mean_3a0c8f02d6d5,3a0c8f02d6d5,reduction,reduction_var_mean,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
-1489,var_mean_3bc311a8676a,3bc311a8676a,reduction,norm_template_canonicalization,1,1,2,,needs_work,codex,needs_work: B200 1float fail max_diff=unknown (large/unknown - verify not broken math)
+1489,var_mean_3bc311a8676a,3bc311a8676a,reduction,norm_template_canonicalization,1,1,2,,claimed,codex,retry_claim_2026-06-15_b200_var_mean_single_point_unknown_diff
 1490,var_mean_3c54c00b2120,3c54c00b2120,reduction,reduction_var_mean,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 1491,var_mean_3c7707c0bb8a,3c7707c0bb8a,reduction,norm_template_canonicalization,1,1,1,var_mean_2ceed1dd2572,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 1492,var_mean_3d651d7390ce,3d651d7390ce,reduction,norm_template_canonicalization,1,2,1,~var_mean_2ad1aa26eb79;~var_mean_549fdfa09721;~var_mean_5fa359332f2e,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
