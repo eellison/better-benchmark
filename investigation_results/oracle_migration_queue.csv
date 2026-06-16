@@ -1334,7 +1334,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1333,sum_sum_c62059e3dc7b,c62059e3dc7b,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1334,sum_sum_c91e0b70e149,c91e0b70e149,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1335,sum_sum_c94d2f06e30b,c94d2f06e30b,reduction,reduction_general,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
-1336,sum_sum_cc37fdc0b4ba,cc37fdc0b4ba,reduction,reduction_general,1,2,1,,claimed,codex,retry_claim_2026-06-15_reduction_sum_sum_bad_oracle_reaudit
+1336,sum_sum_cc37fdc0b4ba,cc37fdc0b4ba,reduction,reduction_general,1,2,1,,needs_work,,needs_work_parent_verified_checks_pass_1of1_no_skip_pass_1of1_locked_h100_fallback_bench_BAD_ORACLE_ghostnet_e93c5538_oracle_63.84us_compile_59.42us_ratio_0.931_numerics_pass_no_cudagraph_candidate_dropped_2026-06-15
 1337,sum_sum_cc8aafa6ae2d,cc8aafa6ae2d,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1338,sum_sum_d27740999897,d27740999897,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
 1339,sum_sum_d283dea24dab,d283dea24dab,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (8-worker fleet)
