@@ -460,7 +460,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 459,pointwise_c7d4871a86a8,c7d4871a86a8,pointwise,layout_indexing_stencil_fusion,4,2,4,pointwise_d89eb45ec337,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 460,pointwise_c827b10bd5dd,c827b10bd5dd,pointwise,unclassified_priority_gap,1,2,4,~pointwise_17542057506f;~pointwise_2babaf917a12;~pointwise_b51064ab890f,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 461,pointwise_d6d9504b25c0,d6d9504b25c0,pointwise,unclassified_priority_gap,1,2,4,~pointwise_17542057506f;~pointwise_2babaf917a12;~pointwise_b51064ab890f,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-462,pointwise_e4b7b0947416,e4b7b0947416,pointwise,pointwise,2,4,4,,needs_work,Codex,needs_work: checks_pass_2of2_no_skip_pass_2of2_bench_failed_NUMERICS_WORSE_THAN_COMPILED_nan_metrics_no_cudagraph_warnings_class_SCHEDULER_FUSION
+462,pointwise_e4b7b0947416,e4b7b0947416,pointwise,pointwise,2,4,4,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_NUMERICS_WORSE_THAN_COMPILED_nan_metrics_reaudit
 463,sum_30fd5c612a69,30fd5c612a69,reduction,reduction_general,4,2,4,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 464,sum_5cb3d877d464,5cb3d877d464,reduction,reduction_general,1,2,4,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 465,sum_7a3340d935e9,7a3340d935e9,reduction,multi_output_reduction_templates,4,5,4,sum_7a3340d935e9;sum_962f7dc019a9,needs_work,Codex,needs_work: checks_pass_4of4_no_skip_pass_4of4_bench_failed_BAD_ORACLE_3of4_no_cudagraph_warnings_class_COOPERATIVE_SPLIT_K
