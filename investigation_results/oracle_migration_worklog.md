@@ -632,6 +632,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1071 `pointwise_656833e29d89`: claimed for explicit-offset Triton floor retry.
 - Row 1370 `sum_sum_sum_275ca61fceb8`: claimed from the tail for reduction numerics reaudit/refill.
 - Row 1379 `sum_sum_sum_4aae5698dd79`: claimed from the tail for large-diff reduction reaudit/refill.
+- Row 1053 `pointwise_43588d3e9780`: claimed for final scatter/stencil Triton or capture-support retry.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
