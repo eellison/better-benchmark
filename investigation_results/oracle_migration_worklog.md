@@ -652,6 +652,8 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1379 `sum_sum_sum_4aae5698dd79`: parent-verified existing oracle, 1/1 check plus no-skip pass, numerics gate passes, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=133.25us`, `compile=286.43us`, ratio `2.150`).
 - Row 1209 `sum_7ba9dcb96142`: parent-verified Longformer scatter fix, 1/1 check plus no-skip pass, numerics gate passes, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=625.60us`, `compile=1453.09us`, ratio `2.323`); fix adds missing chunk boundary stores.
 - Row 1445 `var_mean_087d5b4f064d`: parent-verified existing oracle version, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.46us`, `compile=174.94us`, ratio `1.104`).
+- Row 1207 `sum_75456ad2c2c7`: parent-verified as `NUMERICS_FLAG`; py_compile passes, normal/no-skip checks fail by precision drift (`max_diff=3.36e7`), official bench reports `UNVERIFIED_NUMERICS`, and `--bench-unchecked` shows H100 fallback `AT_FLOOR` with fp64 gate pass and no CUDAGraph warnings (`oracle=194.94us`, `compile=196.35us`, ratio `1.007`). This is not an official clean floor measurement.
+- Row 1489 `var_mean_3bc311a8676a`: parent-verified oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=151.97us`, `compile=175.20us`, ratio `1.153`).
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
