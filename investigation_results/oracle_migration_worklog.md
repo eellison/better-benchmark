@@ -629,6 +629,9 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1053 `pointwise_43588d3e9780`: returned to `needs_work`; worker candidate was a full-reference wrapper rather than a slim Triton oracle and skipped-gate H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=2754.91us`, `compile=288.06us`, ratio `0.105`), so it was not committed.
 - Row 246 `sum_sum_sum_ddcfccfb8340`: returned to `needs_work`; worker candidate fails output 2 on all four points and skipped-gate H100 fallback bench has `1BAD_ORACLE_3AT_FLOOR`, so it was not committed.
 - Row 1373 `sum_sum_sum_31ea6dc807dd`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by precision drift on outputs 0/2, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=69.31us`, `compile=110.85us`, ratio `1.599`).
+- Row 1071 `pointwise_656833e29d89`: claimed for explicit-offset Triton floor retry.
+- Row 1370 `sum_sum_sum_275ca61fceb8`: claimed from the tail for reduction numerics reaudit/refill.
+- Row 1379 `sum_sum_sum_4aae5698dd79`: claimed from the tail for large-diff reduction reaudit/refill.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
