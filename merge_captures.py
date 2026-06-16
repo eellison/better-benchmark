@@ -129,17 +129,6 @@ def _write_shapes_json(
     else:
         data = {"points": []}
 
-    # Dynamic capture: symbols/guards are GRAPH-LEVEL (shared across points).
-    # Merge them at the top of shapes.json — the consumer reads them there.
-    # Per-symbol entries are keyed by name, so a re-merge that sees the same
-    # symbols is idempotent; a genuinely new symbol is added.
-    if symbols:
-        data.setdefault("symbols", {}).update(symbols)
-    if guards:
-        existing_guards = data.setdefault("guards", [])
-        for g in guards:
-            if g not in existing_guards:
-                existing_guards.append(g)
     # The hint binding for this point (one value per symbol) — what every
     # expr evaluates under to reproduce the captured snapshot shape.
     bindings = ({name: s["hint"] for name, s in symbols.items()}
@@ -151,6 +140,30 @@ def _write_shapes_json(
         if point.get("shape_hash") == shape_hash:
             existing_point = point
             break
+
+    # A dynamic point's symbols/guards/bindings/inputs are a COUPLED set: the
+    # inputs' expr strings reference exactly these symbol names. A second
+    # capture of the same shape_hash with DIFFERENT symbol names (dynamo
+    # reallocates names per trace context) must NOT overwrite the existing
+    # point's bindings (that strands its inputs on names with no binding ->
+    # load 'unbound symbol'). When the symbol sets differ, keep this capture
+    # as a SEPARATE point; its (distinctly-named) symbols join the shared
+    # top-level table by union, and each point binds only its own subset
+    # (instantiate_point binds only the names a point references).
+    existing_syms = set((existing_point or {}).get("bindings") or {})
+    if symbols and existing_syms and existing_syms != set(symbols):
+        existing_point = None   # foreign symbolization -> distinct point
+
+    # Graph-level symbols/guards (shared across points). Symbol names are
+    # globally distinct per capture, so update() is a safe union; guards
+    # de-duped. Each point's bindings select its own symbols.
+    if symbols:
+        data.setdefault("symbols", {}).update(symbols)
+        if guards:
+            existing_guards = data.setdefault("guards", [])
+            for g in guards:
+                if g not in existing_guards:
+                    existing_guards.append(g)
 
     if existing_point is not None:
         # Point exists — add/update this model's entry (a recapture with a
@@ -172,7 +185,9 @@ def _write_shapes_json(
                 existing_point["inputs"] = inputs
         if alias_group_nbytes and not existing_point.get("alias_group_nbytes"):
             existing_point["alias_group_nbytes"] = alias_group_nbytes
-        if bindings is not None:
+        if bindings is not None and not existing_point.get("bindings"):
+            # First dynamic write establishes the symbol<->input binding;
+            # never overwrite it from a later (consistent) capture.
             existing_point["bindings"] = bindings
             existing_point["captured_dynamic"] = True
     else:

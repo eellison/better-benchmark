@@ -1914,3 +1914,193 @@ def test_dynamic_dims_none_for_static_repro():
             "models": {"m": {"occurrences": 1}}}]}))
         (d / "repro.py").write_text("# stub")
         assert dynamic_dims_for_repro(str(d / "repro.py")) is None
+
+
+# ============================================================================
+# Adversarial review round 1 — regression pins (2026-06-16)
+# Each test pins a demonstrated finding from the parallel adversarial review.
+# ============================================================================
+
+def test_opaque_torch_functions_fold_in_eval_and_guards():
+    """Finding B: str(SymInt) of PythonMod/CeilToInt/ModularIndexing/TruncToInt
+    re-parses as opaque undefined funcs under bare sympy.sympify -> _eval_dim
+    raised / validate_bindings silently accepted. The _sympify_expr locals map
+    must fold them to the right int/bool."""
+    import pytest
+    from input_codec import _eval_dim, validate_bindings
+    try:
+        import torch.utils._sympy.functions  # noqa: F401
+    except Exception:
+        pytest.skip("torch sympy functions unavailable")
+
+    # dims fold to torch's value (was ValueError)
+    assert _eval_dim("PythonMod(s0, 128)", {"s0": 300}) == 44
+    assert _eval_dim("CeilToInt(s0/3)", {"s0": 256}) == 86
+    assert _eval_dim("ModularIndexing(s0, 1, 64)", {"s0": 300}) == 44
+    assert _eval_dim("TruncToInt(0.5*ToFloat(s53))", {"s53": 64}) == 32
+
+    # a guard with an opaque fn must REJECT an invalid binding (was silent
+    # accept): interpolate-class requires trunc(0.5*s53) >= 2 and != 1.
+    syms = {"s53": {"hint": 64, "range": [2, None]}}
+    g = ["Ne(TruncToInt(0.5*ToFloat(s53)), 1)",
+         "TruncToInt(0.5*ToFloat(s53)) >= 2"]
+    validate_bindings(syms, {"s53": 64}, g)            # valid -> ok
+    for bad in (2, 3):
+        with pytest.raises(ValueError):
+            validate_bindings(syms, {"s53": bad}, g)   # invalid -> LOUD
+
+
+def test_validate_bindings_loud_when_guard_cannot_decide():
+    """Finding B1: a fully-bound guard that does NOT fold to a concrete bool
+    must raise (never silently pass). A guard over OTHER points' symbols
+    (not in this binding) is skipped, not raised."""
+    import pytest
+    from input_codec import validate_bindings
+    syms = {"s0": {"hint": 8, "range": [2, None]}}
+    # cross-point guard (s9 unbound here) -> skipped, no raise
+    validate_bindings(syms, {"s0": 8}, ["Eq(s9, 4)"])
+    # bound guard that holds
+    validate_bindings(syms, {"s0": 8}, ["Eq(s0, 8)"])
+    # bound guard that's violated
+    with pytest.raises(ValueError):
+        validate_bindings(syms, {"s0": 8}, ["Eq(s0, 9)"])
+
+
+def test_contiguous_stride_symbolic_shape_no_crash():
+    """Finding G: spec_from_compact on a symbolic shape with no recorded
+    stride used to int('s0')-crash in _contiguous_stride. Now the contiguous
+    stride is built symbolically."""
+    from input_codec import _contiguous_stride, spec_from_compact, evaluate_spec
+    assert _contiguous_stride([64, 64, "s53", "s0"]) == \
+        ["64*s0*s53", "s0*s53", "s0", 1]
+    spec = spec_from_compact([[64, 64, "s53", "s0"], "f32"])  # no 'st'
+    assert spec["stride"] == ["64*s0*s53", "s0*s53", "s0", 1]
+    ev = evaluate_spec(spec, {"s53": 16, "s0": 16})
+    assert ev["shape"] == [64, 64, 16, 16]
+    assert ev["stride"] == [16384, 256, 16, 1]
+
+
+def test_dims_equal_robust_on_max_and_floor_renderings():
+    """Findings H/I: _dims_equal must (a) not raise 'nan not comparable' on
+    Max(1, floor(...)) vs the bare floor, (b) treat floor(s0)==s0 as equal
+    (integer-positive symbols), (c) still catch genuine mismatches."""
+    from full_graph_harness import _dims_equal
+    assert _dims_equal("s96*((s75//((s75//2))))",
+                       "s96*Max(1, (s75//((s75//2))))")   # equal for all s>=2
+    assert _dims_equal("floor(s0)", "s0")
+    assert _dims_equal("s0*s53", "64*s0*s53//64")
+    assert _dims_equal(16384, 16384)
+    assert not _dims_equal(16384, 64)
+    assert not _dims_equal("s0*s53", "s0*s99")            # genuine mismatch
+
+
+def test_dynamic_dims_for_repro_absolute_position():
+    """Finding C: dynamic_dims_for_repro must key by ABSOLUTE make_inputs
+    position, not a tensor-only counter — else a symint before a tensor marks
+    the wrong input (or a static one)."""
+    import json, tempfile
+    from pathlib import Path
+    from repro_harness import (dynamic_dims_for_repro, load_shape_configs,
+                               make_inputs_from_config)
+    shapes = {"symbols": {"s0": {"hint": 16, "range": [2, None]}}, "guards": [],
+              "points": [{"shape_hash": "aa", "captured_dynamic": True,
+                          "bindings": {"s0": 16}, "models": {"m": {"occurrences": 1}},
+                          "inputs": [["I", 16, "s0"], [[64, "s0"], "f32"]]}]}
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.json").write_text(json.dumps(shapes))
+        (d / "repro.py").write_text("# stub")
+        dmap = dynamic_dims_for_repro(str(d / "repro.py"))
+        assert dmap == {1: [1]}, dmap   # tensor is at ABSOLUTE position 1
+        cfg = next(iter(load_shape_configs(
+            str(d / "repro.py"), symbol_bindings={"s0": 16}).values()))
+        inp = make_inputs_from_config(cfg)
+        pos = next(iter(dmap))
+        assert hasattr(inp[pos], "shape")   # the marked position IS a tensor
+
+
+def test_harvest_preserves_guard_over_specialized_symbol():
+    """Finding A: a guard referencing a symbol specialized to a constant
+    (Eq(s0*s53, s77), s77==64) must be PRESERVED as Eq(s0*s53, 64), not
+    dropped when s77 leaves the symbol table."""
+    import sympy
+    from full_graph_harness import harvest_shape_env
+
+    class _VR:
+        def __init__(self, lo, hi):
+            self.lower, self.upper = lo, hi
+
+    class _G:
+        def __init__(self, e):
+            self.expr = e
+
+    s0, s53, s77 = sympy.Symbol("s0"), sympy.Symbol("s53"), sympy.Symbol("s77")
+
+    class _Env:
+        backed_var_to_val = {s0: sympy.Integer(8), s53: sympy.Integer(8),
+                             s77: sympy.Integer(64)}
+        var_to_range = {s0: _VR(2, sympy.oo), s53: _VR(2, sympy.oo),
+                        s77: _VR(64, 64)}
+        guards = [_G(sympy.Eq(s0 * s53, s77))]
+
+        def is_unbacked_symint(self, x):
+            return False
+
+    block = harvest_shape_env(_Env())
+    assert set(block["symbols"]) == {"s0", "s53"}      # s77 dropped
+    assert block["guards"] == ["Eq(s0*s53, 64)"]       # constraint preserved
+
+
+def test_harvest_survives_size_hint_raise():
+    """Finding J: an unbacked symbol whose size_hint() RAISES must not lose
+    the whole harvest — fall through to the range tier."""
+    import sympy
+    from full_graph_harness import harvest_shape_env
+
+    class _VR:
+        def __init__(self, lo, hi):
+            self.lower, self.upper = lo, hi
+
+    s0, u0 = sympy.Symbol("s0"), sympy.Symbol("u0")
+
+    class _Env:
+        backed_var_to_val = {s0: sympy.Integer(8)}
+        var_to_range = {s0: _VR(2, sympy.oo), u0: _VR(4, sympy.oo)}
+        guards = []
+
+        def is_unbacked_symint(self, x):
+            return str(x).startswith("u")
+
+        def size_hint(self, x, allow_none=False):
+            raise RuntimeError("data-dependent")
+
+    block = harvest_shape_env(_Env())
+    assert "s0" in block["symbols"]                    # harvest survived
+    assert block["symbols"]["u0"]["hint_source"] == "range_fallback"
+    assert block["symbols"]["u0"]["hint"] == 4
+
+
+def test_merge_distinct_symbolizations_do_not_clobber():
+    """Finding D: two captures of the same shape_hash with DIFFERENT symbol
+    names must not overwrite each other's bindings; each point stays loadable."""
+    import json, tempfile
+    from pathlib import Path
+    from merge_captures import _write_shapes_json
+    from repro_harness import load_shape_configs, make_inputs_from_config
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "repro.py").write_text("# stub")
+        _write_shapes_json(d, "hh", "(s)", "m1", occurrences=1,
+                           inputs=[[[64, "s53"], "f32"], ["I", 16, "s53"]],
+                           symbols={"s53": {"hint": 16, "range": [2, None]}})
+        _write_shapes_json(d, "hh", "(s)", "m2", occurrences=1,
+                           inputs=[[[64, "s9"], "f32"], ["I", 32, "s9"]],
+                           symbols={"s9": {"hint": 32, "range": [2, None]}})
+        data = json.loads((d / "shapes.json").read_text())
+        assert len(data["points"]) == 2
+        assert set(data["symbols"]) == {"s53", "s9"}
+        # both load without 'unbound symbol'
+        cfgs = load_shape_configs(str(d / "repro.py"))
+        assert len(cfgs) == 2
+        for cfg in cfgs.values():
+            make_inputs_from_config(cfg)

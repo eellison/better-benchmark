@@ -180,13 +180,27 @@ def harvest_shape_env(shape_env: Any) -> dict | None:
         or getattr(shape_env, "var_to_val", {}) or {}
     var_to_range = getattr(shape_env, "var_to_range", {}) or {}
 
+    # Symbols specialized to one value (range [k,k]) -> {sympy.Symbol: int}.
+    # They are dropped from the free table, but a guard may REFERENCE one
+    # (e.g. Eq(s0*s53, s77) with s77==64 IS the constraint s0*s53==64).
+    # Substituting them back into guards before the drop-filter preserves
+    # that constraint instead of silently losing it.
+    specialized: dict = {}
+
     def _record(sym, hint, *, unbacked, hint_source):
         rng = var_to_range.get(sym)
         lo = _jsonable_range_bound(getattr(rng, "lower", None)) if rng is not None else None
         hi = _jsonable_range_bound(getattr(rng, "upper", None)) if rng is not None else None
         if not unbacked and lo is not None and hi is not None and lo == hi:
+            specialized[sym] = lo   # remember the baked-in constant
             return  # backed symbol specialized to a constant — not free
-        entry = {"hint": int(hint), "range": [lo, hi]}
+        # A non-integer hint (e.g. a Float size_hint) is a bug upstream of
+        # us; record it truthfully rounded but flag it, never silently
+        # truncate to a wrong shape.
+        ihint = int(hint)
+        entry = {"hint": ihint, "range": [lo, hi]}
+        if unbacked and ihint != hint:
+            entry["hint_noninteger"] = str(hint)
         if unbacked:
             # Unbacked (data-dependent) symbol: the bench still needs a
             # concrete value, but it is NOT an observed shape. unbacked=True
@@ -222,7 +236,14 @@ def harvest_shape_env(shape_env: Any) -> dict | None:
             if sym in real_vals:                       # tier 1: observed
                 hint, src = real_vals[sym], "observed"
             elif size_hint is not None:                # tier 2: derived
-                h = size_hint(sym, allow_none=True)
+                # size_hint can RAISE on data-dependent paths even with
+                # allow_none (it reaches _make_data_dependent_error /
+                # safe_expand). A throw here must NOT lose the whole harvest
+                # — fall through to the range tier.
+                try:
+                    h = size_hint(sym, allow_none=True)
+                except Exception:
+                    h = None
                 if h is not None:
                     hint, src = h, "size_hint"
             if hint is None:                           # tier 3: range floor
@@ -240,8 +261,16 @@ def harvest_shape_env(shape_env: Any) -> dict | None:
     guards = []
     for g in (getattr(shape_env, "guards", []) or []):
         expr = getattr(g, "expr", g)
+        # Substitute specialized symbols with their constant value FIRST, so a
+        # guard like Eq(s0*s53, s77) (s77==64) becomes Eq(s0*s53, 64) — the
+        # real constraint — instead of being dropped for referencing s77.
+        if specialized:
+            try:
+                expr = expr.subs(specialized)
+            except Exception:
+                pass
         if expr == sympy.true:
-            continue
+            continue   # trivially satisfied after substitution
         free = {str(s) for s in expr.free_symbols}
         if free and free.issubset(known):
             guards.append(str(expr))
@@ -1228,14 +1257,55 @@ def _normalize_device_name(device: Any) -> str | None:
 
 def _dims_equal(a: Any, b: Any) -> bool:
     """Two shape/stride slots agree. Ints compare directly; symbolic slots
-    (expr strings, always our own sympy-valid output) compare by sympy
-    equivalence ('s0*s53' == '64*s0*s53//64') — never string equality
-    (different but equal renderings exist), never int() (the bug that
-    mangled '64*s0*s53' to 64)."""
+    (expr strings) compare by sympy equivalence ('s0*s53' == '64*s0*s53//64')
+    — never string equality (different but equal renderings exist), never
+    int() (the bug that mangled '64*s0*s53' to 64).
+
+    Uses input_codec._sympify_expr so symbols are integer & positive (a
+    SymInt dim is): without that, Max(1, s//k) doesn't fold and
+    sympy.equals can raise 'nan not comparable', AND floor(s)==s reads
+    unequal. Difference is decided by (a-b).simplify()==0, which is robust
+    where .equals() returns None/raises."""
     if isinstance(a, int) and isinstance(b, int):
         return a == b
     import sympy
-    return bool(sympy.sympify(str(a)).equals(sympy.sympify(str(b))))
+    from input_codec import _sympify_expr
+    ea, eb = _sympify_expr(str(a)), _sympify_expr(str(b))
+    if ea == eb:
+        return True
+    try:
+        if sympy.simplify(ea - eb) == 0:
+            return True
+    except (TypeError, ValueError, AttributeError):
+        pass
+    try:
+        if ea.equals(eb) is True:    # may return None -> not decided
+            return True
+    except (TypeError, ValueError):
+        pass
+    # Undecided symbolically (e.g. Max(1, floor(s//(s//2))) vs the bare
+    # floor — equal for every integer s>=2 but sympy can't prove it). This
+    # is a validator cross-check, not a correctness gate: agreement at many
+    # positive-integer sample points means the two derivations match (a
+    # genuine capture mismatch disagrees almost everywhere). Sample the
+    # shared free symbols; if EVERY sample agrees, treat as equal.
+    syms = sorted(ea.free_symbols | eb.free_symbols, key=str)
+    if not syms:
+        return False
+    samples = [2, 3, 4, 7, 8, 16, 17, 31, 64, 128, 257]
+    agree = 0
+    for i, base in enumerate(samples):
+        subs = {s: base + j for j, s in enumerate(syms)}
+        try:
+            va, vb = ea.subs(subs), eb.subs(subs)
+            if not (va.is_Integer and vb.is_Integer):
+                continue  # couldn't fold this point (e.g. div-by-zero) — skip
+            if va != vb:
+                return False   # one disagreement = genuine mismatch
+            agree += 1
+        except (TypeError, ValueError, ZeroDivisionError):
+            continue
+    return agree >= 3   # enough decidable points agreed
 
 
 def _validate_dim_vector(sidecar, annotation, side_exprs, ann_exprs,

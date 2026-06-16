@@ -307,16 +307,21 @@ def format_binding(binding: dict | None) -> str:
 
 
 def dynamic_dims_for_repro(repro_file: str) -> dict[int, list[int]] | None:
-    """Map {tensor-input-index: [dims that were symbolic]} from shapes.json.
+    """Map {make_inputs-position: [dims that were symbolic]} from shapes.json.
 
     This is what torch._dynamo.mark_dynamic needs to recompile a dynamic
     repro with the SAME dynamic structure the model had — exactly the dims
     that were symbolic at capture, not every dim (blanket dynamic=True
     over-dynamizes genuinely-static dims, which measures a different kernel:
-    design §2.5, the 40.4 vs 35.5us gap). The index is over make_inputs
-    output positions; only tensor inputs (compact [shape, dtype, ...]) count
-    a position toward mark_dynamic (symints/scalars/shape-params are not
-    tensors). Returns None if no point carries a symbolic block.
+    design §2.5, the 40.4 vs 35.5us gap).
+
+    The index is the ABSOLUTE position in make_inputs_from_config output,
+    which appends EVERY entry (tensors, symints, scalars, shape-params) in
+    order — so the key must be the entry's index among ALL inputs, NOT a
+    tensor-only counter (that off-by-N marked the wrong input / a static
+    tensor / nothing when a symint preceded a tensor). _mark_dynamic still
+    skips non-tensor positions at call time, so a symint position recorded
+    here is simply a no-op there. Returns None if no point is dynamic.
     """
     from input_codec import is_symbolic_entry
 
@@ -329,21 +334,15 @@ def dynamic_dims_for_repro(repro_file: str) -> dict[int, list[int]] | None:
         if not point.get("captured_dynamic"):
             continue
         dynamic_dims: dict[int, list[int]] = {}
-        tensor_idx = 0
-        for entry in point.get("inputs", []):
-            # Only tensor entries occupy a mark_dynamic-able position. A
-            # tensor entry is [shape_list, dtype, opts?]; shape_list[0] is a
-            # list. 'I'/'sym'/'sc'/'S' tagged entries are non-tensors.
+        for pos, entry in enumerate(point.get("inputs", [])):
+            # Tensor entry: [shape_list, dtype, opts?] with shape_list a list.
             is_tensor = (isinstance(entry, list) and entry
                          and isinstance(entry[0], list))
-            if not is_tensor:
+            if not is_tensor or not is_symbolic_entry(entry):
                 continue
-            if is_symbolic_entry(entry):
-                dims = [i for i, d in enumerate(entry[0])
-                        if isinstance(d, str)]
-                if dims:
-                    dynamic_dims[tensor_idx] = dims
-            tensor_idx += 1
+            dims = [i for i, d in enumerate(entry[0]) if isinstance(d, str)]
+            if dims:
+                dynamic_dims[pos] = dims   # ABSOLUTE make_inputs position
         if dynamic_dims:
             return dynamic_dims
     return None
