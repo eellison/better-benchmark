@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the full twelve-output OPT causal-mask materialization by folding the all-true indexed batch mask and writing the exact bf16 0.0/-inf lower-triangular outputs directly, whereas Inductor lowers the decomposed iota/unsqueeze/index/bitwise/expand/where sibling graph as generic pointwise work; Inductor cannot do this today because its algebraic simplifier does not prove the shape-created full/index predicate is tautological or common the repeated where outputs before scheduling; the fix is ALGEBRAIC_ELIMINATION: add shape-aware predicate folding and sibling mask materialization commoning for generated attention masks."""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the complete OPT inference causal-mask bias scope in one Triton materialization kernel, including the generated 2048x2048 `key <= query` predicate, the indexed all-true `[4,2048]` source mask, twelve independent bf16 `where(mask, 0.0, -inf)` outputs, and the exact contiguous `[4,1,2048,2048]` return strides with no aliasing between outputs, whereas Inductor lowers the decomposed iota/unsqueeze/le/index/bitwise_and/expand graph and then repeats the identical scalar-fill `where` twelve times through generic pointwise scheduling; Inductor cannot do this today because its simplifier does not fold the all-true indexed source mask and common-subexpression the repeated attention-bias materializations into one full-scope multi-output store; the fix is ALGEBRAIC_ELIMINATION: recognize generated all-true mask sources and emit one multi-output causal-bias materialization that preserves exact bf16 `0.0`/`-inf` constants and output storage independence."""
 
 import torch
 import triton
@@ -8,7 +8,7 @@ from oracle_harness import oracle_impl
 
 
 @triton.jit
-def _causal_mask12_kernel(
+def _twelve_causal_bias_kernel(
     out0,
     out1,
     out2,
@@ -21,53 +21,61 @@ def _causal_mask12_kernel(
     out9,
     out10,
     out11,
-    n_elements: tl.constexpr,
-    seq: tl.constexpr,
-    block: tl.constexpr,
+    N_ELEMENTS: tl.constexpr,
+    SEQ: tl.constexpr,
+    BLOCK: tl.constexpr,
 ):
-    offsets = tl.program_id(0) * block + tl.arange(0, block)
-    mask = offsets < n_elements
-    col = offsets % seq
-    row = (offsets // seq) % seq
-    value = tl.where(col <= row, 0.0, -float("inf"))
+    offsets = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+    mask = offsets < N_ELEMENTS
+    q = (offsets // SEQ) % SEQ
+    k = offsets % SEQ
+    values = tl.where(k <= q, 0.0, -float("inf"))
+    tl.store(out0 + offsets, values, mask=mask)
+    tl.store(out1 + offsets, values, mask=mask)
+    tl.store(out2 + offsets, values, mask=mask)
+    tl.store(out3 + offsets, values, mask=mask)
+    tl.store(out4 + offsets, values, mask=mask)
+    tl.store(out5 + offsets, values, mask=mask)
+    tl.store(out6 + offsets, values, mask=mask)
+    tl.store(out7 + offsets, values, mask=mask)
+    tl.store(out8 + offsets, values, mask=mask)
+    tl.store(out9 + offsets, values, mask=mask)
+    tl.store(out10 + offsets, values, mask=mask)
+    tl.store(out11 + offsets, values, mask=mask)
 
-    tl.store(out0 + offsets, value, mask=mask)
-    tl.store(out1 + offsets, value, mask=mask)
-    tl.store(out2 + offsets, value, mask=mask)
-    tl.store(out3 + offsets, value, mask=mask)
-    tl.store(out4 + offsets, value, mask=mask)
-    tl.store(out5 + offsets, value, mask=mask)
-    tl.store(out6 + offsets, value, mask=mask)
-    tl.store(out7 + offsets, value, mask=mask)
-    tl.store(out8 + offsets, value, mask=mask)
-    tl.store(out9 + offsets, value, mask=mask)
-    tl.store(out10 + offsets, value, mask=mask)
-    tl.store(out11 + offsets, value, mask=mask)
+
+def _materialized_shape(expand_shape):
+    return tuple(1 if int(dim) == -1 else int(dim) for dim in expand_shape)
 
 
-@oracle_impl(hardware="B200", point="d7517139", block=1024, num_warps=4)
-def oracle_forward(inputs, *, block: int, num_warps: int):
-    del inputs
-    shape = (4, 1, 2048, 2048)
-    outputs = tuple(torch.empty(shape, device="cuda", dtype=torch.bfloat16) for _ in range(12))
-    n_elements = 4 * 2048 * 2048
-    grid = (triton.cdiv(n_elements, block),)
-    _causal_mask12_kernel[grid](
-        outputs[0],
-        outputs[1],
-        outputs[2],
-        outputs[3],
-        outputs[4],
-        outputs[5],
-        outputs[6],
-        outputs[7],
-        outputs[8],
-        outputs[9],
-        outputs[10],
-        outputs[11],
-        n_elements=n_elements,
-        seq=2048,
-        block=block,
-        num_warps=num_warps,
+@oracle_impl(
+    hardware="B200",
+    point="d7517139",
+    BLOCK=1024,
+    num_warps=4,
+    num_stages=3,
+)
+def oracle_forward(
+    inputs,
+    *,
+    BLOCK: int,
+    num_warps: int,
+    num_stages: int,
+):
+    _source_shape, expand_shape_arg = inputs
+    shape = _materialized_shape(expand_shape_arg)
+    stride = (shape[2] * shape[3], shape[2] * shape[3], shape[3], 1)
+    outs = tuple(
+        torch.empty_strided(shape, stride, device="cuda", dtype=torch.bfloat16)
+        for _ in range(12)
     )
-    return outputs
+    n_elements = shape[0] * shape[1] * shape[2] * shape[3]
+    _twelve_causal_bias_kernel[(triton.cdiv(n_elements, BLOCK),)](
+        *outs,
+        N_ELEMENTS=n_elements,
+        SEQ=shape[3],
+        BLOCK=BLOCK,
+        num_warps=num_warps,
+        num_stages=num_stages,
+    )
+    return outs
