@@ -667,21 +667,35 @@ def count_bytes_adjusted(mod, inputs) -> int:
     return count_bytes_effective(mod, inputs)
 
 
-def count_kernels(mod, inputs, dynamic: bool = False) -> tuple[int, list[str]]:
+def count_kernels(mod, inputs, dynamic: bool | None = False,
+                  second_inputs=None) -> tuple[int, list[str]]:
     """Compile and count how many Triton kernels Inductor generates.
 
-    dynamic=True counts kernels of the dynamic-shapes compilation (the
-    artifact --dynamic benchmarks) instead of the static one. NOTE: this
-    resets dynamo — never call it while a compile-once artifact is live.
+    dynamic: True -> blanket dynamic compile; False -> static; None -> honor
+    whatever the inputs are marked (torch._dynamo.mark_dynamic). NOTE: resets
+    dynamo — never call while a compile-once artifact is live.
+
+    second_inputs: when the inputs carry mark_dynamic dims, dynamo's 0/1/many
+    rule specializes on the FIRST shape; invoking a second (differently-bound,
+    same-marked) input forces generalization so the count reflects the
+    DYNAMIC artifact the bench measures, not the static-specialized one
+    (review R3-2). The kernel set is read from the LAST compile.
     """
     from torch._inductor.utils import fresh_inductor_cache
     from torch._inductor.codecache import cache_dir
 
     torch._dynamo.reset()
     with fresh_inductor_cache():
-        compiled = torch.compile(mod, dynamic=True) if dynamic else torch.compile(mod)
+        if dynamic is None:
+            compiled = torch.compile(mod)        # honor mark_dynamic on inputs
+        elif dynamic:
+            compiled = torch.compile(mod, dynamic=True)
+        else:
+            compiled = torch.compile(mod)
         with torch.no_grad():
             compiled(*inputs)
+            if second_inputs is not None:
+                compiled(*second_inputs)         # force past 0/1/many
             torch.cuda.synchronize()
         cd = cache_dir()
         py_files = sorted(glob.glob(os.path.join(cd, "**", "*.py"), recursive=True), key=os.path.getmtime)
@@ -830,8 +844,22 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         # the captured symbolic dims; mark_dynamic is sticky on the tensor,
         # so the same marked inputs drive both kernel-count and compile.
         _marked = _mark_dynamic(first_inputs)
-        n_kernels, kernel_names = count_kernels(
-            repro_cls(), first_inputs, dynamic=not _marked)
+        # Count kernels of the SAME artifact the bench measures: when dims are
+        # marked, count under marks (dynamic=None honors them) invoked across
+        # TWO shapes to force dynamo past 0/1/many specialization into the
+        # generalized (dynamic) kernel set — counting on one shape returns the
+        # STATIC count, which is the wrong column (review R3-2). With no marks,
+        # blanket dynamic=True is the artifact.
+        if _marked:
+            second_inputs = _inputs_for(rows[1][1], rows[1][2]) if len(rows) > 1 else None
+            if second_inputs is not None:
+                _mark_dynamic(second_inputs)
+            n_kernels, kernel_names = count_kernels(
+                repro_cls(), first_inputs, dynamic=None,
+                second_inputs=second_inputs)
+        else:
+            n_kernels, kernel_names = count_kernels(
+                repro_cls(), first_inputs, dynamic=True)
         torch._dynamo.reset()
         compiled = torch.compile(repro_cls(), dynamic=None if _marked else True)
 

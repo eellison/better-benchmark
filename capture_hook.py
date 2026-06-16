@@ -354,9 +354,19 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         shapes.json — guards the model never actually had, which reject
         rebinds (review R2-1). Capture must never mutate the env it harvests.
         No-op when the tensor has no ShapeEnv (static)."""
+        # Discover the env from EVERY symbolic surface we will read: shape,
+        # stride, AND storage_offset. A view with a static shape+stride but a
+        # SYMBOLIC offset (e.g. offset s77-2) would otherwise leave se=None,
+        # and the `if off_raw:` bool(SymInt) read below would force a guard
+        # unsuppressed — the same R2-1 leak class (review R3-1). The storage
+        # SIZE is read only after the env is found, inside the suppressed
+        # block, so it need not seed discovery.
+        candidates = list(getattr(val, "shape", ()))
+        if torch.is_tensor(val):
+            candidates += list(val.stride())
+            candidates.append(val.storage_offset())
         se = None
-        for s in (*getattr(val, "shape", ()), *(
-                val.stride() if torch.is_tensor(val) else ())):
+        for s in candidates:
             se = _shape_env_of(s)
             if se is not None:
                 break
@@ -408,20 +418,17 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                 sk = _storage_key(val)
                 if sk is not None:
                     placeholder_info[name]["_storage_key"] = sk
-                    try:
-                        # NEVER int() the storage size: under dynamic shapes
-                        # it is a SymInt (e.g. 4*s27*s77), and int() forces an
-                        # equality guard pinning the byte-size — harvested into
-                        # shapes.json, rejecting every rebind (R2-1). Read the
-                        # hint instead.
-                        ssz = val.untyped_storage().size()
-                        if isinstance(ssz, (torch.SymInt, torch.SymFloat)):
-                            _note_env(ssz)
-                            ssz = ssz.node.hint if hasattr(ssz, "node") else None
-                        if ssz is not None:
-                            placeholder_info[name]["_storage_nbytes"] = int(ssz)
-                    except Exception:
-                        pass
+                    # NEVER int() the storage size: under dynamic shapes it is
+                    # a SymInt (e.g. 4*s27*s77), and int() forces an equality
+                    # guard pinning the byte-size — harvested into shapes.json,
+                    # rejecting every rebind (R2-1). Read the hint instead.
+                    # (We're inside _no_guards, so even reads here can't leak.)
+                    ssz = val.untyped_storage().size()
+                    if isinstance(ssz, (torch.SymInt, torch.SymFloat)):
+                        _note_env(ssz)
+                        ssz = ssz.node.hint        # int by construction
+                    if ssz is not None:
+                        placeholder_info[name]["_storage_nbytes"] = int(ssz)
         elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
             _note_env(val)
             hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)

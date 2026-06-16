@@ -1261,63 +1261,41 @@ def _dims_equal(a: Any, b: Any) -> bool:
     — never string equality (different but equal renderings exist), never
     int() (the bug that mangled '64*s0*s53' to 64).
 
-    Uses input_codec._sympify_expr so symbols are integer & positive (a
-    SymInt dim is): without that, Max(1, s//k) doesn't fold and
-    sympy.equals can raise 'nan not comparable', AND floor(s)==s reads
-    unequal. Difference is decided by (a-b).simplify()==0, which is robust
-    where .equals() returns None/raises."""
+    Uses input_codec._sympify_expr so symbols are integer with a range-driven
+    sign assumption (a SymInt dim is integer; a size is >= 0). Equality is
+    decided ENTIRELY by INTEGER-point sampling (subs + is_Integer): sympy's
+    .equals()/.simplify() are avoided on purpose — they probe at FRACTIONAL
+    random points, which makes torch's PythonMod/CeilToInt assert (integer
+    args only) and raise. Integer .subs() never raises (a 0-divisor folds to
+    an unevaluated zoo that is_Integer rejects), so no try/except is needed."""
     if isinstance(a, int) and isinstance(b, int):
         return a == b
-    import sympy
     from input_codec import _sympify_expr
     ea, eb = _sympify_expr(str(a)), _sympify_expr(str(b))
     if ea == eb:
         return True
-    # simplify / .equals are best-effort: BOTH can raise from torch's sympy
-    # functions (e.g. PythonMod.eval asserts integer args, but sympy's
-    # .equals/.is_constant probe at FRACTIONAL random points) — catch broadly
-    # (AssertionError included), fall through to the sound sampling check.
-    try:
-        if sympy.simplify(ea - eb) == 0:
-            return True
-    except Exception:
-        pass
-    try:
-        if ea.equals(eb) is True:    # may return None -> not decided
-            return True
-    except Exception:
-        pass
-    # Undecided symbolically (e.g. Max(1, floor(s//(s//2))) vs the bare
-    # floor — equal for every integer s>=2 but sympy can't prove it). This
-    # is a validator cross-check, not a correctness gate: a genuine capture
-    # mismatch disagrees at some integer point. Sample each symbol
-    # INDEPENDENTLY (distinct per-symbol sequences, AND a point where they
-    # coincide) so an expr that differs only when symbols are equal/unequal
-    # is still caught. EVERY decidable sample must agree.
+    # Sample each symbol INDEPENDENTLY (distinct per-symbol sequences, plus an
+    # all-equal and an all-distinct point) so an expr differing only when
+    # symbols coincide/differ is still caught. This is a validator
+    # cross-check, not a correctness gate: a genuine capture mismatch
+    # disagrees at some integer point; EVERY decidable sample must agree.
     syms = sorted(ea.free_symbols | eb.free_symbols, key=str)
     if not syms:
         return False
-    import itertools
     bases = [2, 3, 5, 8, 13, 16, 32, 64, 257]
-    # per-symbol points: coprime-ish strides so symbols rarely coincide,
-    # plus an all-equal point and an all-distinct point.
-    points = []
-    for k, base in enumerate(bases):
-        points.append({s: base + (j * (k + 1)) for j, s in enumerate(syms)})
-    points.append({s: 7 for s in syms})                 # all equal
+    points = [{s: base + (j * (k + 1)) for j, s in enumerate(syms)}
+              for k, base in enumerate(bases)]
+    points.append({s: 7 for s in syms})                    # all equal
     points.append({s: 4 + j for j, s in enumerate(syms)})  # all distinct
     agree = 0
     for subs in points:
-        try:
-            va, vb = ea.subs(subs), eb.subs(subs)
-            if not (getattr(va, "is_Integer", False)
-                    and getattr(vb, "is_Integer", False)):
-                continue  # couldn't fold this point — skip
-            if va != vb:
-                return False   # one disagreement = genuine mismatch
-            agree += 1
-        except Exception:
-            continue
+        va, vb = ea.subs(subs), eb.subs(subs)
+        if not (getattr(va, "is_Integer", False)
+                and getattr(vb, "is_Integer", False)):
+            continue   # couldn't fold this point (zoo/non-int) — skip
+        if va != vb:
+            return False   # one disagreement = genuine mismatch
+        agree += 1
     return agree >= 3   # enough decidable points all agreed
 
 

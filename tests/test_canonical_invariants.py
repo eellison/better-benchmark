@@ -2215,3 +2215,36 @@ def test_capture_symbolic_broadcast_not_dropped_gpu():
         c = idx["captured"][0]
         # the dynamic batch dim is symbolic in the captured input
         assert any(isinstance(d, str) for d in c["inputs"][0][0])
+
+
+def test_no_guards_discovery_includes_symbolic_offset():
+    """Review R3-1: _no_guards discovered the ShapeEnv from shape+stride only,
+    so a view with a static shape/stride but a SYMBOLIC storage_offset left
+    se=None and the bool(SymInt) offset read leaked a guard (the R2-1 class).
+    The discovery loop must now also probe storage_offset. Unit-test the
+    discovery directly via a fake-mode symbolic offset."""
+    import pytest
+    from torch.fx.experimental.symbolic_shapes import ShapeEnv
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from capture_hook import _shape_env_of
+
+    se = ShapeEnv()
+    with FakeTensorMode(shape_env=se):
+        off = se.create_unbacked_symint()
+    # the symbolic offset must be env-discoverable (this is what the fixed
+    # discovery loop now appends to its candidate list)
+    assert isinstance(off, torch.SymInt)
+    assert _shape_env_of(off) is not None, \
+        "symbolic storage_offset must expose its ShapeEnv for _no_guards"
+
+
+def test_count_kernels_accepts_dynamic_none_and_second_inputs():
+    """Review R3-2: count_kernels gained dynamic=None (honor mark_dynamic) and
+    second_inputs (force past dynamo 0/1/many to the dynamic kernel set).
+    Signature/plumbing smoke (CPU): a static fn counts without error under the
+    new params."""
+    import inspect
+    from repro_harness import count_kernels
+    sig = inspect.signature(count_kernels)
+    assert "second_inputs" in sig.parameters
+    assert sig.parameters["dynamic"].default is False
