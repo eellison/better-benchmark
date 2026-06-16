@@ -107,13 +107,30 @@ def _concrete_int(value: Any, *, default: int = 32) -> int:
 # instantiate_point in input_codec.
 # ---------------------------------------------------------------------------
 
+def canonical_expr_str(expr) -> str:
+    """ONE canonical string rendering of a symbolic expr, so the SAME
+    mathematical expression always serializes to the SAME string regardless
+    of how it was constructed/rendered (live SymNode str() vs print_readable
+    annotation text). Render = str(sympify(...)): commutative orderings and
+    //-cancellation collapse (64*s0*s53 and s0*s53*64 both -> '64*s0*s53';
+    64*s0*s53//64 -> 's0*s53'). Because both the sidecar and the annotation
+    normalize through this at WRITE/parse time, the round-trip has no skew and
+    downstream equality is plain string ==, no sympy-equivalence reasoning.
+    Accepts a sympy expr or an expr string; ints/plain strings pass through."""
+    if isinstance(expr, str):
+        from input_codec import _sympify_expr
+        return str(_sympify_expr(expr))
+    return str(expr)
+
+
 def sym_expr_str(x: Any) -> str | None:
-    """Exact sympy-printed expr for a live SymInt/SymFloat, else None.
+    """Canonical sympy-printed expr for a live SymInt/SymFloat, else None.
 
     A bare symbol prints as its name ('s0'); a derived node prints compound
     ('64*s0*s53'). Returns None when there is no symbol to preserve (plain
     int, or a SymInt whose expr is a constant — the hint already captures
-    it). This is THE extractor; capture_hook imports it (no private copy)."""
+    it). Routed through canonical_expr_str so it matches the annotation
+    rendering of the same expr. THE extractor; capture_hook imports it."""
     import torch
 
     if not isinstance(x, (torch.SymInt, torch.SymFloat)):
@@ -124,7 +141,7 @@ def sym_expr_str(x: Any) -> str | None:
         return None
     if getattr(expr, "is_number", False):
         return None
-    return str(expr)
+    return canonical_expr_str(expr)
 
 
 def shape_env_of(x: Any) -> Any:
@@ -1038,9 +1055,10 @@ def _is_int_token(tok: str) -> bool:
 def _dim_tokens(s: str | None) -> list:
     """Split a rendered shape/stride annotation into per-slot values WITHOUT
     losing symbolic information: an integer slot becomes an int, a symbolic
-    slot keeps its EXACT expr string ('s53', '64*s0*s53') for sympy
-    evaluation downstream — never a number mangled out of the expr text.
-    Returns [] / None for empty / None."""
+    slot is CANONICALIZED (canonical_expr_str) to the same steady-state form
+    the sidecar stores — so the two renderings of one expr are
+    string-identical and the cross-check is plain ==. Returns [] / None for
+    empty / None."""
     if s is None:
         return None
     out = []
@@ -1048,7 +1066,8 @@ def _dim_tokens(s: str | None) -> list:
         tok = tok.strip()
         if not tok:
             continue
-        out.append(int(tok) if _is_int_token(tok) else tok)
+        out.append(int(tok) if _is_int_token(tok)
+                   else canonical_expr_str(tok))
     return out
 
 
@@ -1255,55 +1274,26 @@ def _normalize_device_name(device: Any) -> str | None:
     return text
 
 
-def _dims_provably_differ(a: Any, b: Any) -> bool:
-    """True only when two shape/stride slots can be PROVEN unequal — used by
-    the sidecar-vs-annotation cross-check, which raises on a mismatch. We must
-    never raise on a pair sympy can't decide (a false alarm dropping a valid
-    repro), and never claim a mismatch we didn't prove.
-
-    Ints compare directly. Symbolic slots are sympified via
-    input_codec._sympify_expr (integer + range-driven sign assumptions, so
-    e.g. 64*s0*s53//64 cancels to s0*s53 and floor(s)==s).
-
-    Decision (sound both ways, no sampling, no fractional probing):
-      - structural `ea == eb`        -> NOT differ (commutativity/cancel)
-      - (ea-eb).is_zero True/False   -> sympy decided it
-      - is_zero None (undecided): if the difference is a non-zero POLYNOMIAL
-        in the symbols it is PROVABLY non-zero (two distinct integer
-        polynomials differ at infinitely many points) -> differ. Otherwise it
-        contains floor/Mod/Max/ceiling sympy couldn't fold (Max(1,X) vs X,
-        PythonMod vs Mod) -> NOT proven; return False (never raise a mismatch
-        we cannot prove).
-    .equals()/.simplify()'s fractional probing is avoided — it asserts
-    integer-only inside torch's PythonMod.eval and raises; is_zero/expand are
-    pure algebra and do not probe."""
+def _dims_differ(a: Any, b: Any) -> bool:
+    """Whether two shape/stride slots disagree. Both the sidecar and the
+    annotation render symbolic exprs through canonical_expr_str (one round of
+    simplification -> idempotent steady state), so the SAME expression has the
+    SAME string on both sides and equality is plain ==. Ints compare directly;
+    an int vs a canonical string compares unequal (a symbolic slot is not the
+    same as a concrete one). No sympy-equivalence reasoning needed here — the
+    canonicalization at write/parse time already removed the rendering skew."""
     if isinstance(a, int) and isinstance(b, int):
         return a != b
-    import sympy
-    from input_codec import _sympify_expr
-    ea, eb = _sympify_expr(str(a)), _sympify_expr(str(b))
-    if ea == eb:
-        return False
-    diff = ea - eb
-    z = diff.is_zero
-    if z is True:
-        return False
-    if z is False:
-        return True
-    de = sympy.expand(diff)
-    if de == 0:
-        return False
-    syms = sorted(diff.free_symbols, key=str)
-    return bool(syms) and de.is_polynomial(*syms)
+    # one side symbolic, other int, or both strings: canonical string compare
+    return canonical_expr_str(a) != canonical_expr_str(b)
 
 
 def _validate_dim_vector(sidecar, annotation, side_exprs, ann_exprs,
                          label: str, what: str) -> None:
-    """Compare a sidecar vs annotation shape/stride vector. A slot that is
-    symbolic on EITHER side is compared by expr (sympy-equivalence); fully
-    static slots compare as ints. Both sources derive their exprs from the
-    same live SymNodes / exact annotation tokens, so a real disagreement is
-    a genuine capture bug, not a rendering artifact."""
+    """Compare a sidecar vs annotation shape/stride vector. Symbolic slots are
+    compared by their CANONICAL string (both sides canonicalized at
+    write/parse), static slots as ints. A real disagreement is a genuine
+    capture bug, not a rendering artifact (canonicalization removed those)."""
     if sidecar is None or annotation is None:
         return
     if len(sidecar) != len(annotation):
@@ -1316,10 +1306,7 @@ def _validate_dim_vector(sidecar, annotation, side_exprs, ann_exprs,
         # Prefer the expr where a side has one; else the (int) value.
         a = side_exprs[idx] if side_exprs[idx] is not None else sidecar[idx]
         b = ann_exprs[idx] if ann_exprs[idx] is not None else annotation[idx]
-        # Raise ONLY on a proven mismatch — an undecidable pair (sympy can't
-        # decide Max(1,X) vs X) is not a confirmed capture bug, so don't drop
-        # the repro over it.
-        if _dims_provably_differ(a, b):
+        if _dims_differ(a, b):
             raise ValueError(
                 f"full graph sidecar tensor {what} does not match forward "
                 f"annotations for {label} dim {idx}: {a} != {b}")

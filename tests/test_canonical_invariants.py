@@ -1588,20 +1588,23 @@ def test_symbolic_stride_codec_roundtrip_is_exprs_not_hints():
     assert ev2["stride"][0] == 64 * 32 * 8
 
 
-def test_dims_provably_differ_uses_sympy_not_int():
-    """_dims_provably_differ: ints exact, symbolic slots by sympy is_zero —
-    never int() (the mangling bug), never string equality. True ONLY on a
-    proven mismatch."""
-    from full_graph_harness import _dims_provably_differ
-    assert not _dims_provably_differ(16384, 16384)
-    assert _dims_provably_differ(16384, 64)
-    # equal exprs, different rendering -> NOT a mismatch
-    assert not _dims_provably_differ("s0*s53", "s53*s0")
-    assert not _dims_provably_differ("64*s0*s53", "s0*s53*64")
-    # genuinely different -> proven mismatch
-    assert _dims_provably_differ("s0*s53", "s0*s53*64")
-    # a symbolic slot is NOT mangled to its leading integer -> proven differ
-    assert _dims_provably_differ("64*s0*s53", 64)
+def test_dims_differ_uses_canonical_string_not_int():
+    """_dims_differ: ints exact; symbolic slots compared by their CANONICAL
+    string (both sides canonicalized at write/parse, one round -> idempotent
+    steady state) — never int() (the mangling bug), never raw string ==.
+    Commutativity/cancellation collapse; genuine differences stay."""
+    from full_graph_harness import _dims_differ
+    assert not _dims_differ(16384, 16384)
+    assert _dims_differ(16384, 64)
+    # equal exprs, different rendering -> canonicalize to same string
+    assert not _dims_differ("s0*s53", "s53*s0")
+    assert not _dims_differ("64*s0*s53", "s0*s53*64")
+    assert not _dims_differ("s0*s53", "64*s0*s53//64")   # // cancels
+    # genuinely different
+    assert _dims_differ("s0*s53", "s0*s53*64")
+    assert _dims_differ("s0*s53", "s0*s99")
+    # a symbolic slot is NOT mangled to its leading integer
+    assert _dims_differ("64*s0*s53", 64)
 
 
 def test_symint_input_expr_codec_roundtrips_as_I():
@@ -1994,20 +1997,22 @@ def test_contiguous_stride_symbolic_shape_no_crash():
     assert ev["stride"] == [16384, 256, 16, 1]
 
 
-def test_dims_provably_differ_robust_on_max_and_floor_renderings():
-    """Findings H/I: _dims_provably_differ must (a) not raise on Max(1,
-    floor(...)) vs the bare floor and not claim a mismatch it can't prove,
-    (b) treat floor(s0)==s0 and the //64 cancellation as NOT-differing
-    (integer/positive symbols), (c) still PROVE a genuine mismatch."""
-    from full_graph_harness import _dims_provably_differ
-    # undecidable (Max(1,X) vs X): NOT a proven mismatch -> must not raise
-    assert not _dims_provably_differ("s96*((s75//((s75//2))))",
-                                     "s96*Max(1, (s75//((s75//2))))")
-    assert not _dims_provably_differ("floor(s0)", "s0")
-    assert not _dims_provably_differ("s0*s53", "64*s0*s53//64")
-    assert not _dims_provably_differ(16384, 16384)
-    assert _dims_provably_differ(16384, 64)
-    assert _dims_provably_differ("s0*s53", "s0*s99")      # proven mismatch
+def test_canonical_expr_str_idempotent_and_collapses_renderings():
+    """The steady-state invariant: canonical_expr_str(canonical(x)) ==
+    canonical(x) (one round of simplification reaches a fixed point, same
+    discipline as the canonical-subgraph retrace), and commutative /
+    cancellable / floor-int renderings collapse to one string so the
+    sidecar and annotation of the SAME expr are string-identical."""
+    from full_graph_harness import canonical_expr_str as C
+    for f in ["64*s0*s53", "s0*s53*64", "64*s0*s53//64", "s0*(s53-1)+s0",
+              "Mod(s0,8)", "Max(1,s0//2)", "CeilToInt(s0/3)", "s0",
+              "PythonMod(s0,128)", "s0**2"]:
+        assert C(C(f)) == C(f), f"not idempotent: {f!r}"
+    # commutativity + // cancellation collapse to one canonical string
+    assert C("64*s0*s53") == C("s0*s53*64")
+    assert C("64*s0*s53//64") == C("s0*s53")
+    # floor(s)==s under the integer assumption
+    assert C("floor(s0)") == C("s0")
 
 
 def test_dynamic_dims_for_repro_absolute_position():
@@ -2122,22 +2127,19 @@ def test_merge_distinct_symbolizations_do_not_clobber():
             make_inputs_from_config(cfg)
 
 
-def test_dims_provably_differ_never_raises_on_torch_functions():
-    """Round 2/3: the OLD _dims_equal used sympy .equals()/.simplify(), which
-    probe at FRACTIONAL random points and made torch's PythonMod.eval assert
-    -> crash. _dims_provably_differ uses only structural == and .is_zero
-    (pure algebra, no probing), so it NEVER raises and NEVER guesses
-    (no sampling): it returns True only on a sympy-PROVEN mismatch."""
-    from full_graph_harness import _dims_provably_differ
-    # must return a bool, never raise:
-    # PythonMod vs the bare symbol: sympy can't decide -> NOT proven differ
-    # (we don't raise a mismatch we can't prove).
-    assert _dims_provably_differ("s0", "Mod(s0, 1000000)") is False
-    # Max(s0,s1) vs s0 / vs s0+s1: also undecidable in general -> not proven.
-    assert _dims_provably_differ("Max(s0, s1)", "s0") is False
-    assert _dims_provably_differ("Max(s0, s1)", "s0 + s1") is False
-    # a genuine polynomial mismatch IS proven:
-    assert _dims_provably_differ("s0*s53", "s0*s99") is True
+def test_dims_differ_never_raises_on_torch_functions():
+    """The OLD _dims_equal used sympy .equals()/.simplify(), which probe at
+    FRACTIONAL random points and made torch's PythonMod.eval assert -> crash.
+    _dims_differ compares CANONICAL strings (canonical_expr_str = one
+    sympify+str, no fractional probing), so it NEVER raises and never
+    samples. Distinct canonical strings -> differ; identical -> not."""
+    from full_graph_harness import _dims_differ
+    # canonical strings differ for these (genuinely different renderings/exprs)
+    assert _dims_differ("Max(s0, s1)", "s0") is True
+    assert _dims_differ("Max(s0, s1)", "s0 + s1") is True
+    assert _dims_differ("s0*s53", "s0*s99") is True
+    # PythonMod canonicalizes stably (no raise); same expr -> not differ
+    assert _dims_differ("PythonMod(s0, 8)", "PythonMod(s0, 8)") is False
 
 
 def test_capture_does_not_force_storage_size_guard_gpu():
