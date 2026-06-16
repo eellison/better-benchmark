@@ -270,7 +270,7 @@ def _launch(
             BLOCK_H=BLOCK_H,
             ROW_BLOCK=ROW_BLOCK,
             USE_SEEDED_RNG=True,
-            EAGER_ROUNDING=False,
+            EAGER_ROUNDING=True,
             num_warps=num_warps,
             num_stages=num_stages,
         )
