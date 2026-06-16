@@ -548,7 +548,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 547,sum_sum_sum_0703a79bc871,0703a79bc871,reduction,reduction_general,3,2,3,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 548,sum_sum_sum_2b1b93ca6e56,2b1b93ca6e56,reduction,reduction_general,3,1,3,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 549,sum_sum_sum_2d74760b80f4,2d74760b80f4,reduction,reduction_general,3,2,3,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_1BAD_1NUMERICS_WORSE_1GOOD_reaudit
-550,sum_sum_sum_3634d1a62257,3634d1a62257,reduction,reduction_general,3,2,3,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_NUMERICS_WORSE_THAN_COMPILED_3of3_reaudit
+550,sum_sum_sum_3634d1a62257,3634d1a62257,reduction,reduction_general,3,2,3,,needs_work,codex,needs_work_faithful_oracle_committed_checks_pass_3of3_no_skip_pass_3of3_bench_NUMERICS_WORSE_THAN_COMPILED_3of3_err_oracle_0.03125_0.015625_0.015625_compiled_0_no_valid_times_no_cudagraph
 551,sum_sum_sum_874ba88ee22e,874ba88ee22e,reduction,reduction_general,3,1,3,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 552,sum_sum_sum_9a5b3965d355,9a5b3965d355,reduction,reduction_general,3,2,3,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 553,sum_sum_sum_b37e1065b3a0,b37e1065b3a0,reduction,reduction_general,3,2,3,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
@@ -716,7 +716,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 715,sum_sum_b1354c2a333b,b1354c2a333b,reduction,reduction_general,1,1,2,,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 716,sum_sum_b1d8468e9c69,b1d8468e9c69,reduction,reduction_general,2,2,2,,oracle_measured,Codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 717,sum_sum_b265bd27fbd8,b265bd27fbd8,reduction,reduction_general,1,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
-718,sum_sum_b2f43ab7b175,b2f43ab7b175,reduction,reduction_general,2,2,2,,needs_work,codex,needs_work: B200 large diff likely wrong-math (1float fail max_diff=0.25 (large/unknown - verify not broken math))
+718,sum_sum_b2f43ab7b175,b2f43ab7b175,reduction,reduction_general,2,2,2,,claimed,codex,retry_claim_2026-06-15_needs_work_prev_B200_large_diff_wrong_math_reaudit
 719,sum_sum_b50ad423ed16,b50ad423ed16,reduction,reduction_general,1,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 720,sum_sum_b699431fa635,b699431fa635,reduction,reduction_general,2,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 721,sum_sum_d227dc0811d2,d227dc0811d2,reduction,reduction_general,2,2,2,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
