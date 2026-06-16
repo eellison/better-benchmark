@@ -244,7 +244,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 243,amax_sum_821fb95bd167,821fb95bd167,reduction,reduction_softmax_like,4,1,13,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 244,pointwise_c707ca49a4aa,c707ca49a4aa,pointwise,layout_indexing_stencil_fusion,1,1,13,pointwise_352e97c8de09,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 245,pointwise_eb3a50b8feaa,eb3a50b8feaa,pointwise,unclassified_priority_gap,1,1,13,~pointwise_49473bb3f273;~pointwise_902799b6712e,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
-246,sum_sum_sum_ddcfccfb8340,ddcfccfb8340,reduction,reduction_general,4,2,13,,needs_work,codex,needs_work_final_reaudit_checks_pass_4of4_no_skip_pass_4of4_locked_h100_fallback_1BAD_1AT_FLOOR_2GOOD_no_cudagraph_warnings_BAD_8185fd2d_oracle_us=1910.75_compile_us=1107.68_ratio0.580_AT_FLOOR_1b9e6372_oracle_us=1149.47_compile_us=1138.56_ratio0.991_GOOD_76e2a948_oracle_us=510.05_compile_us=593.38_ratio1.163_GOOD_d8a24a49_oracle_us=340.13_compile_us=370.53_ratio1.089_fast_stats_exactness_attempts_fail_dense_output2_maxdiff4.10e3_or_slower_materialized_weighted_stat_path_still_required_class_SCHEDULER_FUSION
+246,sum_sum_sum_ddcfccfb8340,ddcfccfb8340,reduction,reduction_general,4,2,13,,claimed,codex,retry_claim_2026-06-16_hard_convnextv2_ddcf_perf_current_checks_pass_but_8185fd2d_BAD_ORACLE_materialized_weighted_stat_path_needed
 247,amax_sum_528a3c274a41,528a3c274a41,reduction,scatter_gather,1,1,12,,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 248,amax_sum_7a65d2915044,7a65d2915044,reduction,reduction_softmax_like,1,1,12,~amax_sum_4fb4f9a0bf43,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
 249,amax_sum_8002af197c08,8002af197c08,reduction,reduction_softmax_like,1,1,12,amax_sum_4fb4f9a0bf43,oracle_measured,codex,B200_verified_2026-06-13: check+bench PASS (batch)
@@ -1423,7 +1423,7 @@ queue_rank,repro_dir,pattern_hash,kind,family,n_points,n_models,total_occurrence
 1422,sum_sum_sum_ecce309d13e3,ecce309d13e3,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1423,sum_sum_sum_ed482d857957,ed482d857957,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1424,sum_sum_sum_ed793bcaf7cf,ed793bcaf7cf,reduction,reduction_general,1,2,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
-1425,sum_sum_sum_ee5e53038768,ee5e53038768,reduction,reduction_general,1,2,1,,needs_work,codex,needs_work_final_reaudit_no_valid_oracle_retained_exact_dense_bf16_output3_and_output4_sum_over_rounded_dense_required_best_faithful_prior_193.70us_vs_158.18us_BAD_ORACLE_fast_variants_fail_output3_maxdiff8_64_128_reduction_only_convnextv2_prior_art_subset_scope_class_SCHEDULER_FUSION
+1425,sum_sum_sum_ee5e53038768,ee5e53038768,reduction,reduction_general,1,2,1,,claimed,codex,retry_claim_2026-06-16_hard_convnextv2_ee5e_missing_oracle_dense_bf16_output3_plus_output4_sum_required
 1426,sum_sum_sum_ef836df37d2d,ef836df37d2d,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
 1427,sum_sum_sum_ef8c091a67f7,ef8c091a67f7,reduction,reduction_general,1,1,1,,oracle_measured,codex,B200_verified_2026-06-15: check+bench PASS (fleet)
 1428,sum_sum_sum_f0df0905cd69,f0df0905cd69,reduction,scatter_gather,1,1,1,,oracle_measured,Codex,B200_verified_2026-06-13: check+bench PASS (batch)
