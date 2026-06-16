@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "d247edd4e4a6",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 26,
+  "origin_ops": [
+    "aten._unsafe_masked_index_put_accumulate.default",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.bitwise_and.Tensor",
+    "aten.bitwise_and.Tensor",
+    "aten.constant_pad_nd.default",
+    "aten.constant_pad_nd.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.ge.Scalar",
+    "aten.lt.Scalar",
+    "aten.ne.Scalar",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice_scatter.default",
+    "aten.slice_scatter.default",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/MobileBertForMaskedLM"
+  ]
+}

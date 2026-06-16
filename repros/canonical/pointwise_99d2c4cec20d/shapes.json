@@ -1,0 +1,26 @@
+{
+  "points": [
+    {
+      "shape_hash": "441d2026",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,192,28,28],"bf16",{"st":[150528,1,5376,192]}]
+      ]
+    },
+    {
+      "shape_hash": "5ffc94d9",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,384,14,14],"bf16",{"st":[75264,1,5376,384]}]
+      ]
+    }
+  ]
+}

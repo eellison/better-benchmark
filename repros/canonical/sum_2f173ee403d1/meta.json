@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "2f173ee403d1",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 9,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.fma.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/train/AlbertForMaskedLM",
+    "hf/train/BlenderbotForConditionalGeneration"
+  ]
+}

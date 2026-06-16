@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GoogleFnet",
+  "patterns": [
+    "087d5b4f064d",
+    "1ba47c0de2b0",
+    "2ba0992ca00b",
+    "2d969ac9ad59",
+    "3bc311a8676a",
+    "445ed11aad0a",
+    "49c7455398cd",
+    "4cd246989343",
+    "5361f6c9de6c",
+    "584a8c609627",
+    "66b9baf8b40f",
+    "69ffe374d494",
+    "907cbb3d9f19",
+    "978d6d771932",
+    "a4c92b1bdab7",
+    "a7b32508693f",
+    "be519a2435f2",
+    "c977e7f52b49",
+    "d9612b876341",
+    "ed482d857957",
+    "ef83fb4a9dbc",
+    "f0fb76589ff6",
+    "f13145f53165",
+    "f1989c7d123c",
+    "f77445bf16f4",
+    "f9d8faf2bd9a",
+    "fd39a3b3f5fd"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

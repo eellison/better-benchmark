@@ -1,0 +1,69 @@
+{
+  "points": [
+    {
+      "shape_hash": "7865ae61",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,64,95696],"bf16"],
+        [[],"bf16"],
+        [[4,64,95696],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c6e644f9",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,128,23923],"bf16"],
+        [[],"bf16"],
+        [[4,128,23923],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9d21ed2c",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,256,5979],"bf16"],
+        [[],"bf16"],
+        [[4,256,5979],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "03da249b",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,512,1493],"bf16"],
+        [[],"bf16"],
+        [[4,512,1493],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "11e513cb",
+      "models": {
+        "torchbench/train/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,1024,372],"bf16"],
+        [[],"bf16"],
+        [[4,1024,372],"bf16"]
+      ]
+    }
+  ]
+}

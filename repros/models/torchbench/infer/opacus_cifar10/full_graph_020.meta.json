@@ -1,37 +1,15 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "symint",
-      "name": "arg0_1",
-      "value": 32
-    },
-    {
-      "kind": "tensor",
-      "name": "arg1_1",
-      "shape": [
-        64,
-        32,
-        1,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      },
-      "symbolic_dims": [
-        {
-          "dim": 1,
-          "symbol": "s67",
-          "default": 32
-        }
-      ]
-    }
+    ["sym",256],
+    ["sym",2],
+    ["sym",2],
+    [[64,256,2,2],"bf16",{"n":"arg3_1"}],
+    [[64,256,2,2],"bf16",{"n":"arg4_1"}]
   ],
-  "outputs": [],
+  "outputs": [
+    [[64,256,2,2],"bf16",{"n":"output_0"}]
+  ],
   "tensor_attrs": {},
   "graph": "full_graph_020.py",
   "source": {
@@ -40,5 +18,23 @@
     "mode": "infer",
     "model": "opacus_cifar10",
     "graph": "full_graph_020.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 3,
+    "counts": {
+      "fusible_in_partition": 3,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.copy_.default": 1,
+        "aten.relu.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "failed: A: load_full_graph_definition: ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 1024 != 15"
 }

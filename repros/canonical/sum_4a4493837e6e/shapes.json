@@ -1,0 +1,196 @@
+{
+  "points": [
+    {
+      "shape_hash": "c5cf0dd3",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,16,112,112],"bf16",{"st":[200704,1,1792,16]}],
+        [[128,16,112,112],"bf16",{"st":[200704,1,1792,16]}]
+      ]
+    },
+    {
+      "shape_hash": "f40368ca",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,32,112,112],"bf16",{"st":[401408,1,3584,32]}],
+        [[128,32,112,112],"bf16",{"st":[401408,1,3584,32]}]
+      ]
+    },
+    {
+      "shape_hash": "934b0f73",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,112,112],"bf16",{"st":[802816,1,7168,64]}],
+        [[128,64,112,112],"bf16",{"st":[802816,1,7168,64]}]
+      ]
+    },
+    {
+      "shape_hash": "96449bbf",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[128,64,56,56],"bf16",{"st":[200704,1,3584,64]}],
+        [[128,64,56,56],"bf16",{"st":[200704,1,3584,64]}]
+      ]
+    },
+    {
+      "shape_hash": "d34f6e69",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,128,56,56],"bf16",{"st":[401408,1,7168,128]}],
+        [[128,128,56,56],"bf16",{"st":[401408,1,7168,128]}]
+      ]
+    },
+    {
+      "shape_hash": "13a2d815",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[128,128,28,28],"bf16",{"st":[100352,1,3584,128]}],
+        [[128,128,28,28],"bf16",{"st":[100352,1,3584,128]}]
+      ]
+    },
+    {
+      "shape_hash": "f961de61",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,384,28,28],"bf16",{"st":[301056,1,10752,384]}],
+        [[128,384,28,28],"bf16",{"st":[301056,1,10752,384]}]
+      ]
+    },
+    {
+      "shape_hash": "7c24d0c8",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[128,384,14,14],"bf16",{"st":[75264,1,5376,384]}],
+        [[128,384,14,14],"bf16",{"st":[75264,1,5376,384]}]
+      ]
+    },
+    {
+      "shape_hash": "5c7adf25",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[128,384,7,7],"bf16",{"st":[18816,1,2688,384]}],
+        [[128,384,7,7],"bf16",{"st":[18816,1,2688,384]}]
+      ]
+    },
+    {
+      "shape_hash": "03f3f1e3",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,8,1,1],"bf16"],
+        [[128,8,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9926e6d2",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,4,1,1],"bf16"],
+        [[128,4,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5045fc42",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,6,1,1],"bf16"],
+        [[128,6,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6ced833e",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,10,1,1],"bf16"],
+        [[128,10,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cadd9933",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[128,20,1,1],"bf16"],
+        [[128,20,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "00335e2b",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[128,28,1,1],"bf16"],
+        [[128,28,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "78ac4aa7",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[128,48,1,1],"bf16"],
+        [[128,48,1,1],"bf16"]
+      ]
+    }
+  ]
+}

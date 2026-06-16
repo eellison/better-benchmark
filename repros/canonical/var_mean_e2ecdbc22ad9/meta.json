@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "e2ecdbc22ad9",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 14,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 8,
+  "models": [
+    "hf/train/GPTNeoForCausalLM",
+    "hf/train/GPTNeoForSequenceClassification",
+    "timm/infer/deit_base_distilled_patch16_224",
+    "timm/infer/deit_tiny_patch16_224.fb_in1k",
+    "timm/infer/vit_base_patch16_siglip_256",
+    "timm/train/deit_base_distilled_patch16_224",
+    "timm/train/deit_tiny_patch16_224.fb_in1k",
+    "timm/train/vit_base_patch16_siglip_256"
+  ]
+}

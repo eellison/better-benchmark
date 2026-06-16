@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/infer/PegasusForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[64,-1,128,128]]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "points": [
+    {
+      "shape_hash": "10254c9c",
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,1],"bf16"]
+      ]
+    }
+  ]
+}

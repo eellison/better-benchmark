@@ -1,0 +1,36 @@
+{
+  "pattern_hash": "a143a82c2f77",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 21,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/DistilBertForMaskedLM",
+    "hf/train/DistilBertForMaskedLM"
+  ]
+}

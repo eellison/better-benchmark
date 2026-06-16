@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "da5fdead",
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[1500,384],"bf16"],
+        ["S",[1,1500,384]],
+        ["S",[1,1500,-1,64]]
+      ]
+    }
+  ]
+}

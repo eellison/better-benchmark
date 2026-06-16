@@ -48,30 +48,112 @@ def read_repro_version(repro_path: str | Path) -> int:
     return parse_repro_version(Path(repro_path).read_text())
 
 
-def load_shape_configs(repro_file: str) -> dict:
-    """Load shapes from shapes.txt (compact T()/S() format).
+def load_shape_configs(repro_file: str, symbol_bindings: dict | None = None) -> dict:
+    """Load shape configs for a canonical repro.
 
-    Falls back to shapes.json for legacy repos.
+    Preference order:
+      1. shapes.json (new format with points array) — used for new captures
+      2. shapes.txt (compact T()/S() format) — the existing 1482 repros
+
+    symbol_bindings: for DYNAMIC repros (shapes.json with a "symbols"
+    table), instantiate every symbolic point at these bindings instead of
+    each point's recorded ones (e.g. {"s16": 24}). Bindings are validated
+    against symbol ranges + guards; violations raise. Static repros ignore
+    this parameter (no symbols to bind).
     """
     repro_dir = Path(repro_file).parent
 
-    shapes_txt = repro_dir / "shapes.txt"
-    if shapes_txt.exists():
-        return _parse_shapes_txt(shapes_txt)
-
-    # Legacy: verbose JSON format
+    # Prefer shapes.json (new format from wave-1 onward)
     shapes_json = repro_dir / "shapes.json"
     if shapes_json.exists():
-        with open(shapes_json) as f:
-            data = json.load(f)
-        return data.get("configs", {})
+        return _parse_shapes_json(shapes_json, symbol_bindings=symbol_bindings)
+
+    # Fallback: shapes.txt for existing corpus
+    shapes_txt = repro_dir / "shapes.txt"
+    if shapes_txt.exists():
+        if symbol_bindings:
+            # shapes.txt has no symbols table — silently ignoring the
+            # caller's bindings would bench the WRONG point.
+            raise ValueError(
+                f"symbol_bindings={symbol_bindings} given but {repro_dir} "
+                "has only shapes.txt (no symbols table); bindings require "
+                "a shapes.json with symbolic entries")
+        return _parse_shapes_txt(shapes_txt)
 
     return {}
 
 
-def _parse_shapes_txt(shapes_path: Path) -> dict:
-    """Parse shapes.txt by eval'ing each line with T() and S() as constructors."""
+def _parse_shapes_json(shapes_path: Path,
+                       symbol_bindings: dict | None = None) -> dict:
+    """Parse shapes.json (new format with points array).
 
+    Each point has a shape_hash, signature (T()/S() string), and models dict.
+    Returns the same dict format as _parse_shapes_txt: {label: {"inputs": [specs]}}.
+    Label is constructed from shape_hash + first model key for readability.
+    """
+    with open(shapes_path) as f:
+        data = json.load(f)
+
+    # Legacy shapes.json format (pre-points schema)
+    if "configs" in data and "points" not in data:
+        return data.get("configs", {})
+
+    points = data.get("points", [])
+    if not points:
+        return {}
+
+    configs = {}
+    for point in points:
+        signature = point.get("signature", "")
+        shape_hash = point.get("shape_hash", "unknown")
+        models = point.get("models", {})
+
+        # Build label: shape_hash_first_model_key (sanitized)
+        first_model = next(iter(models), "")
+        # Use last component of model path for brevity
+        model_short = first_model.rsplit("/", 1)[-1] if first_model else ""
+        label = f"{model_short}_{shape_hash}" if model_short else shape_hash
+
+        # Prefer the structured compact entries (input_codec) — the data.
+        # Signature-eval is the fallback for points written before the
+        # compact encoding existed; the string is documentation otherwise.
+        compact = point.get("inputs")
+        symbols = data.get("symbols") or {}
+        if compact is not None and (symbols or symbol_bindings):
+            # Dynamic repro: instantiate symbolic entries (at the point's
+            # recorded bindings, or the caller's). Range/guard violations
+            # raise loudly inside instantiate_point.
+            from input_codec import instantiate_point
+            compact = instantiate_point(
+                point, symbols, bindings=symbol_bindings,
+                guards=data.get("guards"))
+        if compact is not None:  # [] is a VALID zero-input config
+            # NO silent fallback: data-only points have no signature to
+            # fall back to, so a decode failure here must be LOUD. (The
+            # old except-pass masked input_codec missing from the editable
+            # package — every standalone repro run silently saw 0 configs.)
+            from input_codec import spec_from_compact
+            specs = [spec_from_compact(e) for e in compact]
+            cfg = {"inputs": specs}
+            # alias_group_nbytes must travel with the config — specs
+            # carrying alias_group crash generation without it
+            # (adversarial review bug #1).
+            if point.get("alias_group_nbytes"):
+                cfg["alias_group_nbytes"] = point["alias_group_nbytes"]
+            configs[label] = cfg
+            continue
+        try:
+            inputs = _eval_signature(signature)
+            if inputs:
+                configs[label] = {"inputs": inputs}
+        except Exception:
+            continue
+
+    return configs
+
+
+def _make_shape_eval_ns():
+    """Build the eval namespace for T()/S() signature parsing."""
     _DTYPE_MAP = {
         "f32": "torch.float32", "f16": "torch.float16",
         "bf16": "torch.bfloat16", "f64": "torch.float64",
@@ -111,10 +193,26 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
     def S(dims):
         return {"kind": "shape", "dims": dims}
 
-    _eval_ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm,
-                "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
-                "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
-                "b8": "b8", "u8": "u8"}
+    return {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm,
+            "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
+            "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
+            "b8": "b8", "u8": "u8"}
+
+
+def _eval_signature(expr: str) -> list:
+    """Eval a T()/S() signature string and return a list of input specs."""
+    ns = _make_shape_eval_ns()
+    inputs = eval(expr, ns)  # noqa: S307
+    if isinstance(inputs, tuple):
+        inputs = list(inputs)
+    elif isinstance(inputs, dict):
+        inputs = [inputs]
+    return inputs if inputs else []
+
+
+def _parse_shapes_txt(shapes_path: Path) -> dict:
+    """Parse shapes.txt by eval'ing each line with T() and S() as constructors."""
+    _eval_ns = _make_shape_eval_ns()
 
     configs = {}
     for line in shapes_path.read_text().splitlines():
@@ -140,6 +238,72 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
             continue
 
     return configs
+
+
+def parse_bind_args(bind_args: list | None) -> list:
+    """Parse repeated --bind values into a list of binding dicts.
+
+    Each element is one --bind occurrence, e.g. "s16=24,s82=24" ->
+    {"s16": 24, "s82": 24}. Returns [] when bind_args is None/empty.
+    Malformed entries raise ValueError (loud beats benchmarking a typo).
+    """
+    out = []
+    for raw in bind_args or []:
+        bindings = {}
+        for part in str(raw).split(","):
+            part = part.strip()
+            if not part:
+                continue
+            if "=" not in part:
+                raise ValueError(
+                    f"--bind entry {part!r} must be symbol=int (e.g. s16=24)")
+            name, _, val = part.partition("=")
+            try:
+                bindings[name.strip()] = int(val)
+            except ValueError:
+                raise ValueError(
+                    f"--bind value for {name.strip()!r} must be an int, "
+                    f"got {val!r}") from None
+        if not bindings:
+            raise ValueError(f"--bind {raw!r} parsed to no bindings")
+        out.append(bindings)
+    return out
+
+
+def resolve_bound_configs(repro_file: str, bindings_list: list,
+                          shape: str | None = None) -> list:
+    """Resolve (label, binding, config) rows for --bind/--dynamic benching.
+
+    One row per (binding set x shape config): each binding set is threaded
+    through load_shape_configs(symbol_bindings=...), which instantiates
+    every symbolic point at that binding (range/guard violations raise).
+    binding=None rows instantiate at each point's recorded bindings (the
+    captured hint — what a plain run measures). `shape` filters to one
+    named config; unknown names raise.
+    """
+    rows = []
+    for binding in (bindings_list or [None]):
+        configs = load_shape_configs(repro_file, symbol_bindings=binding)
+        if shape is not None:
+            if shape not in configs:
+                raise ValueError(
+                    f"--shape {shape!r} not in configs "
+                    f"(have {sorted(configs)})")
+            configs = {shape: configs[shape]}
+        for label, cfg in configs.items():
+            rows.append((label, binding, cfg))
+    if not rows:
+        raise ValueError(
+            f"--bind/--dynamic found no shape configs for {repro_file} "
+            "(needs a shapes.json next to the repro)")
+    return rows
+
+
+def format_binding(binding: dict | None) -> str:
+    """Human/key form of a binding dict: 's16=24,s82=24' or 'hint'."""
+    if not binding:
+        return "hint"
+    return ",".join(f"{k}={v}" for k, v in sorted(binding.items()))
 
 
 def parse_shapes_config(config_str: str) -> list:
@@ -259,11 +423,64 @@ def _make_permutation_tensor(shape, dtype, device, stride=None, size=None):
 
 
 def make_inputs_from_config(config: dict) -> list:
-    """Create inputs from a shape config. Returns mix of tensors and shape-param lists."""
+    """Create inputs from a shape config. Returns mix of tensors and shape-param lists.
+
+    Alias groups: specs carrying "alias_group" are views of ONE storage
+    (packed-qkv saved views). One buffer is allocated per group — sized by
+    config["alias_group_nbytes"][g], the true capture-time allocation —
+    and each member is as_strided at its own (shape, stride, offset).
+    Footprint and locality then match the model instead of giving every
+    view a private storage.
+    """
+    group_nbytes = config.get("alias_group_nbytes") or []
+    group_storage: dict[int, torch.Tensor] = {}
+
+    def _group_buffer(g: int, device) -> torch.Tensor:
+        if g not in group_storage:
+            nbytes = group_nbytes[g] if g < len(group_nbytes) else 0
+            if nbytes <= 0:
+                raise ValueError(
+                    f"alias_group {g} has no recorded nbytes "
+                    f"(alias_group_nbytes={group_nbytes})")
+            buf = torch.empty(nbytes, dtype=torch.uint8, device=device)
+            buf.random_(0, 255)  # bit-pattern noise; views reinterpret dtype
+            group_storage[g] = buf
+        return group_storage[g]
+
+    def _contiguous_stride_local(shape):
+        st = [1] * len(shape)
+        for i in range(len(shape) - 2, -1, -1):
+            st[i] = st[i + 1] * max(int(shape[i + 1]), 1)
+        return st
+
     result = []
     for spec in config["inputs"]:
         if spec.get("kind") == "shape":
             result.append(spec["dims"])
+            continue
+
+        if spec.get("kind") == "symint":
+            # A live symint input (dynamic-shape graph): forward() takes a
+            # plain Python int, exactly as a lifted shape param takes a
+            # plain list. Without this branch the spec falls through to
+            # spec["shape"] and KeyErrors — the silent-drop that excluded
+            # every dynamic-compilation region from the corpus.
+            result.append(int(spec["value"]))
+            continue
+
+        if spec.get("kind") == "scalar":
+            result.append(spec["value"])
+            continue
+
+        if spec.get("alias_group") is not None:
+            shape = spec["shape"]
+            dtype = getattr(torch, spec["dtype"].replace("torch.", ""))
+            stride = spec.get("stride") or _contiguous_stride_local(shape)
+            device = spec.get("device", "cuda")
+            offset = int(spec.get("storage_offset", 0))
+            buf = _group_buffer(spec["alias_group"], device)
+            typed = buf.view(dtype) if dtype != torch.uint8 else buf
+            result.append(typed.as_strided(shape, stride, offset))
             continue
 
         shape = spec["shape"]
@@ -274,6 +491,17 @@ def make_inputs_from_config(config: dict) -> list:
         gen = _generation_spec(spec)
 
         if dtype in (torch.int64, torch.int32, torch.int16, torch.int8):
+            if gen and gen.get("kind") == "constant":
+                # Single safe value (maxpool window-center offsets etc).
+                if stride:
+                    numel = _storage_size_for_strided(shape, stride)
+                    storage = torch.full((numel,), int(gen.get("value", 0)),
+                                         dtype=dtype, device=device)
+                    result.append(storage.as_strided(shape, stride))
+                else:
+                    result.append(torch.full(shape, int(gen.get("value", 0)),
+                                             dtype=dtype, device=device))
+                continue
             if gen and gen.get("kind") == "permutation":
                 result.append(
                     _make_permutation_tensor(
@@ -284,6 +512,18 @@ def make_inputs_from_config(config: dict) -> list:
                         size=gen.get("size"),
                     )
                 )
+                continue
+
+            if gen and gen.get("kind") == "offsets":
+                # Segment offsets (e.g. _embedding_bag): non-decreasing,
+                # first element 0, bounded by high (= len(indices)).
+                hi = max(int(gen.get("high", 1)), 1)
+                vals, _ = torch.sort(
+                    torch.randint(0, hi, shape, dtype=dtype, device=device))
+                flat = vals.reshape(-1)
+                if flat.numel():
+                    flat[0] = 0
+                result.append(vals)
                 continue
 
             low = int(gen.get("low", 0)) if gen else 0
@@ -322,6 +562,27 @@ def make_inputs_from_config(config: dict) -> list:
             else:
                 result.append(torch.randn(shape, dtype=dtype, device=device))
     return result
+
+
+def _merge_default_shape_params(inputs: list, default_inputs: list) -> list:
+    """Fill shape params (plain lists/ints) from default inputs when a shape
+    config carries only tensors but forward() also expects lifted params."""
+    if len(inputs) >= len(default_inputs):
+        return inputs
+    merged = []
+    config_idx = 0
+    for di in default_inputs:
+        if isinstance(di, (list, int)) and not isinstance(di, torch.Tensor):
+            # Shape param or scalar — take from default
+            merged.append(di)
+        else:
+            # Tensor — take from config if available
+            if config_idx < len(inputs):
+                merged.append(inputs[config_idx])
+                config_idx += 1
+            else:
+                merged.append(di)
+    return merged
 
 
 def _randn_with_bool(old_randn):
@@ -364,14 +625,19 @@ def count_bytes_adjusted(mod, inputs) -> int:
     return count_bytes_effective(mod, inputs)
 
 
-def count_kernels(mod, inputs) -> tuple[int, list[str]]:
-    """Compile and count how many Triton kernels Inductor generates."""
+def count_kernels(mod, inputs, dynamic: bool = False) -> tuple[int, list[str]]:
+    """Compile and count how many Triton kernels Inductor generates.
+
+    dynamic=True counts kernels of the dynamic-shapes compilation (the
+    artifact --dynamic benchmarks) instead of the static one. NOTE: this
+    resets dynamo — never call it while a compile-once artifact is live.
+    """
     from torch._inductor.utils import fresh_inductor_cache
     from torch._inductor.codecache import cache_dir
 
     torch._dynamo.reset()
     with fresh_inductor_cache():
-        compiled = torch.compile(mod)
+        compiled = torch.compile(mod, dynamic=True) if dynamic else torch.compile(mod)
         with torch.no_grad():
             compiled(*inputs)
             torch.cuda.synchronize()
@@ -433,6 +699,133 @@ def _detect_hardware() -> str:
         return "unknown"
 
 
+def _bench_cudagraph_min_us(call_fn, inputs, n_warmup: int, n_rep: int) -> float:
+    """Warm up, capture one CUDAGraph of call_fn(*inputs), and time replay.
+
+    This is THE timing methodology for repros (3 warmup calls, CUDAGraph
+    capture, do_bench return_mode='min') — both the static path and the
+    --dynamic path go through here so their numbers are comparable.
+    """
+    from triton.testing import do_bench
+
+    with torch.no_grad():
+        for _ in range(3):
+            call_fn(*inputs)
+        torch.cuda.synchronize()
+        g = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(g):
+            call_fn(*inputs)
+        torch.cuda.synchronize()
+    ms = do_bench(lambda: g.replay(), warmup=n_warmup, rep=n_rep,
+                  return_mode="min")
+    return ms * 1000
+
+
+def _unique_graph_count() -> int:
+    """Cumulative count of graphs dynamo has compiled (survives reset —
+    deltas of this counter detect recompiles between measurements)."""
+    from torch._dynamo.utils import counters
+
+    return int(counters["stats"]["unique_graphs"])
+
+
+def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
+    """--bind / --dynamic benchmarking path.
+
+    Rows are (config label x binding x mode). Static mode compiles per
+    binding (each point is its own specialized artifact). Dynamic mode
+    compiles ONCE with torch.compile(dynamic=True) and measures the same
+    artifact at every binding — the point: the dynamic kernel's perf
+    across family points. Recompiles between dynamic points are detected
+    via dynamo's unique_graphs counter and recorded per row.
+    """
+    bindings_list = parse_bind_args(parsed.bind)
+    mode = "dynamic" if parsed.dynamic else "static"
+    rows = resolve_bound_configs(repro_file, bindings_list,
+                                 shape=parsed.shape)
+
+    def _inputs_for(binding, cfg):
+        inputs = make_inputs_from_config(cfg)
+        if binding is None:
+            # hint point: legacy shape-param merge applies (configs that
+            # predate S-entries lack lifted params; defaults ARE the hint)
+            inputs = _merge_default_shape_params(
+                inputs, make_inputs_safely(make_inputs_fn))
+        return inputs
+
+    all_results = {}
+    compiled = None  # dynamic mode: ONE artifact across all rows
+    if mode == "dynamic":
+        # Kernel counting recompiles (and resets dynamo), so do it BEFORE
+        # the compile-once artifact exists. The dynamic compilation's
+        # kernel set is binding-independent — count at the first row.
+        _first_label, first_binding, first_cfg = rows[0]
+        n_kernels, kernel_names = count_kernels(
+            repro_cls(), _inputs_for(first_binding, first_cfg), dynamic=True)
+        torch._dynamo.reset()
+        compiled = torch.compile(repro_cls(), dynamic=True)
+
+    for label, binding, cfg in rows:
+        binding_str = format_binding(binding)
+        row_key = f"{label}::{binding_str}::{mode}"
+        inputs = _inputs_for(binding, cfg)
+
+        mod = repro_cls()
+        with torch.no_grad():
+            mod(*inputs)  # eager validation: bad configs fail LOUD here
+
+        graphs_before = _unique_graph_count()
+        if mode == "static":
+            n_kernels, kernel_names = count_kernels(mod, inputs)
+            torch._dynamo.reset()
+            compiled_static = torch.compile(mod)
+            compiled_us = _bench_cudagraph_min_us(
+                compiled_static, inputs, parsed.n_warmup, parsed.n_rep)
+            recompiled = None  # fresh compile per row by design
+        else:
+            compiled_us = _bench_cudagraph_min_us(
+                compiled, inputs, parsed.n_warmup, parsed.n_rep)
+            graphs_after = _unique_graph_count()
+            is_first_row = not any(
+                r.get("mode") == "dynamic" for r in all_results.values())
+            # First dynamic row pays the one compile; later rows must
+            # reuse the artifact — any new graph is a recompile.
+            recompiled = (graphs_after > graphs_before) and not is_first_row
+            if recompiled:
+                print(f"[{row_key}] WARNING: dynamic artifact recompiled "
+                      f"at this binding (unique_graphs "
+                      f"{graphs_before} -> {graphs_after})")
+
+        print(f"[{row_key}] binding={binding_str} mode={mode} "
+              f"time={compiled_us:8.1f} us kernels={n_kernels}"
+              + (" RECOMPILED" if recompiled else ""))
+
+        all_results[row_key] = {
+            "label": label,
+            "binding": binding,
+            "mode": mode,
+            "compiled_us": compiled_us,
+            "n_kernels": n_kernels,
+            "kernel_names": kernel_names,
+            "recompiled": recompiled,
+        }
+
+    if parsed.output:
+        with open(parsed.output, "w") as f:
+            json.dump(all_results, f, indent=2)
+
+    if parsed.update_perf:
+        hardware = parsed.hardware or _detect_hardware()
+        for row_key, result in all_results.items():
+            perf_entry = {k: v for k, v in result.items()
+                          if k != "kernel_names"}
+            perf_entry["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+            _save_perf(repro_file, hardware, row_key, perf_entry)
+        print(f"\n[perf] Saved to perf.json under hardware={hardware}")
+
+    return all_results
+
+
 def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
     """Full benchmark entry point for canonical repros.
 
@@ -454,6 +847,20 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                         help="Write JSON results to file")
     parser.add_argument("--no-cd", action="store_true",
                         help="Skip coordinate descent tuning")
+    parser.add_argument("--bind", action="append", default=None,
+                        metavar="s16=24,s82=24",
+                        help="Symbol bindings for dynamic repros (shapes.json "
+                             "with a symbols table). Repeatable: each "
+                             "occurrence is one family point. Works with "
+                             "static compile (one compile per binding) or "
+                             "--dynamic (one compile, measured per binding).")
+    parser.add_argument("--dynamic", action="store_true",
+                        help="Compile with torch.compile(dynamic=True) and "
+                             "measure the SAME compiled artifact at every "
+                             "--bind point (CUDAGraph+do_bench min, same "
+                             "methodology as static). Rows record binding, "
+                             "mode, time; recompiles between points are "
+                             "detected and flagged.")
     parser.add_argument("--count-kernels-only", action="store_true",
                         help="Only count generated kernels, skip timing")
     parser.add_argument("--n-warmup", type=int, default=25)
@@ -467,6 +874,14 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
     parsed = parser.parse_args(args)
 
     def _run_benchmark():
+        if parsed.bind or parsed.dynamic:
+            # Family-point benchmarking: --bind instantiates symbolic
+            # points at explicit bindings; --dynamic measures one
+            # dynamic=True artifact across them. Separate path so the
+            # legacy flow below stays byte-identical when flags absent.
+            return _run_bound_benchmark(
+                repro_file, repro_cls, make_inputs_fn, parsed)
+
         configs = load_shape_configs(repro_file)
 
         if parsed.all_shapes and configs:

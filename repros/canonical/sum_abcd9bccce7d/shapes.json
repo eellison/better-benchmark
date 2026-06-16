@@ -1,0 +1,119 @@
+{
+  "points": [
+    {
+      "shape_hash": "fd01dd4f",
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,12,1,64],"bf16"],
+        ["S",[128,1,768]],
+        ["S",[128,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "9ca5cb3f",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 3
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[8,16,1024,64],"bf16",{"st":[1048576,64,1024,1]}],
+        ["S",[8,1024,1024]],
+        ["S",[8192,1024]],
+        ["S",[1024]]
+      ]
+    },
+    {
+      "shape_hash": "c14b0cba",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[32,32,128,80],"bf16",{"st":[327680,80,2560,1]}],
+        ["S",[32,128,2560]],
+        ["S",[4096,2560]],
+        ["S",[2560]]
+      ]
+    },
+    {
+      "shape_hash": "4252d9ce",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[16,32,128,80],"bf16",{"st":[327680,80,2560,1]}],
+        ["S",[16,128,2560]],
+        ["S",[2048,2560]],
+        ["S",[2560]]
+      ]
+    },
+    {
+      "shape_hash": "cc365d90",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[64,16,128,64],"bf16",{"st":[131072,64,1024,1]}],
+        ["S",[64,128,1024]],
+        ["S",[8192,1024]],
+        ["S",[1024]]
+      ]
+    },
+    {
+      "shape_hash": "f696cede",
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[4,12,2048,64],"bf16",{"st":[1572864,64,768,1]}],
+        ["S",[4,2048,768]],
+        ["S",[8192,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "73dfcea9",
+      "models": {
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[16,12,1024,64],"bf16",{"st":[786432,64,768,1]}],
+        ["S",[16,1024,768]],
+        ["S",[16384,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "2ed1d266",
+      "models": {
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[128,16,128,64],"bf16",{"st":[131072,64,1024,1]}],
+        ["S",[128,128,1024]],
+        ["S",[16384,1024]],
+        ["S",[1024]]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "1edbc54f25f6",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/alexnet",
+    "torchbench/train/alexnet"
+  ]
+}

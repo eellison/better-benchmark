@@ -1,0 +1,53 @@
+{
+  "pattern_hash": "af50781fc699",
+  "kind": "reduction",
+  "reduction_types": [
+    "any",
+    "amax",
+    "amax",
+    "sum"
+  ],
+  "n_ops": 36,
+  "origin_ops": [
+    "aten.abs.default",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.amax.default",
+    "aten.any.dims",
+    "aten.div.Tensor",
+    "aten.eq.Tensor",
+    "aten.exp.default",
+    "aten.index.Tensor",
+    "aten.logical_not.default",
+    "aten.logical_not.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/XLNetLMHeadModel"
+  ]
+}

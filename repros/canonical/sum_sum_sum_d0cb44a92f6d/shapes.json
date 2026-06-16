@@ -1,0 +1,103 @@
+{
+  "points": [
+    {
+      "shape_hash": "09b68f1c",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,1536],"bf16"],
+        [[1536],"f32"],
+        [[8,512,1536],"f32"],
+        [[8,512,1],"f32"],
+        [[8,512,1536],"b8"],
+        ["S",[8,512,1536]],
+        ["S",[4096,1536]],
+        ["S",[1536]]
+      ]
+    },
+    {
+      "shape_hash": "3fb352aa",
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32768,768],"bf16"],
+        [[768],"f32"],
+        [[256,128,768],"f32"],
+        [[256,128,1],"f32"],
+        [[256,128,768],"b8"],
+        ["S",[256,128,768]],
+        ["S",[32768,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "dca7eb09",
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        [[768],"f32"],
+        [[32,512,768],"f32"],
+        [[32,512,1],"f32"],
+        [[32,512,768],"b8"],
+        ["S",[32,512,768]],
+        ["S",[16384,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "8fb12abb",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32768,256],"bf16"],
+        [[256],"f32"],
+        [[64,512,256],"f32"],
+        [[64,512,1],"f32"],
+        [[64,512,256],"b8"],
+        ["S",[64,512,256]],
+        ["S",[32768,256]],
+        ["S",[256]]
+      ]
+    },
+    {
+      "shape_hash": "a1f869c6",
+      "models": {
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,1024],"bf16"],
+        [[1024],"f32"],
+        [[16,512,1024],"f32"],
+        [[16,512,1],"f32"],
+        [[16,512,1024],"b8"],
+        ["S",[16,512,1024]],
+        ["S",[8192,1024]],
+        ["S",[1024]]
+      ]
+    }
+  ]
+}

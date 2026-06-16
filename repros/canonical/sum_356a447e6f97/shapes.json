@@ -1,0 +1,15 @@
+{
+  "points": [
+    {
+      "shape_hash": "7a9f1993",
+      "models": {
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,2,640,959],"bf16"]
+      ]
+    }
+  ]
+}

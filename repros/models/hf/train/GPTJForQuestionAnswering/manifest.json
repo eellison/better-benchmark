@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPTJForQuestionAnswering",
+  "patterns": [
+    "04d85912d998",
+    "0b5187c8ce05",
+    "1fa91878a7ad",
+    "28b0ef07dcb9",
+    "2ee0501b648a",
+    "3e7683cb24f2",
+    "49492eb7035e",
+    "52fe1925ccda",
+    "59d866109a4c",
+    "5c9e535343f4",
+    "73d95925b4b4",
+    "74daaa264688",
+    "7cb726f1f92d",
+    "851ae8199532",
+    "899373d9c485",
+    "8bb40810003c",
+    "9675d6f1ba21",
+    "9b533c851bf2",
+    "a77badc5e988",
+    "b2e54a0ac412",
+    "bd0149b22f68",
+    "c5cdd9ab78b4",
+    "c8d23ac4414d",
+    "ccd411f2a45d",
+    "df15b46bd601",
+    "e87d6ebc9ded",
+    "ec0f56a425b2"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

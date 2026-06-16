@@ -1,0 +1,53 @@
+{
+  "pattern_hash": "260a107eaf32",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 11,
+  "models": [
+    "hf/infer/BartForCausalLM",
+    "hf/infer/DebertaV2ForMaskedLM",
+    "hf/train/BartForCausalLM",
+    "hf/train/BertForMaskedLM",
+    "hf/train/DebertaV2ForMaskedLM",
+    "hf/train/ElectraForCausalLM",
+    "hf/train/LayoutLMForMaskedLM",
+    "hf/train/PLBartForCausalLM",
+    "hf/train/RobertaForCausalLM",
+    "hf/train/TrOCRForCausalLM",
+    "hf/train/YituTechConvBert"
+  ]
+}

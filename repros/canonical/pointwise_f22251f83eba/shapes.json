@@ -1,0 +1,32 @@
+{
+  "points": [
+    {
+      "shape_hash": "144bae60",
+      "models": {
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[256,64,512],"bf16"],
+        ["S",[16,16,64,512,1]],
+        ["S",[512,16,16,64,1]],
+        ["S",[1,8192,1024]]
+      ]
+    },
+    {
+      "shape_hash": "e95c7520",
+      "models": {
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[256,64,1024],"bf16"],
+        ["S",[16,16,64,1024,1]],
+        ["S",[1024,16,16,64,1]],
+        ["S",[1,16384,1024]]
+      ]
+    }
+  ]
+}

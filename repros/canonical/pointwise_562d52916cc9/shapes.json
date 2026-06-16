@@ -1,0 +1,24 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[8,-1,512,512]]
+      ]
+    }
+  ]
+}

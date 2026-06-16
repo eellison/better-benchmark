@@ -1,0 +1,40 @@
+{
+  "points": [
+    {
+      "shape_hash": "f961de61",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 14
+        }
+      },
+      "inputs": [
+        [[128,384,28,28],"bf16",{"st":[301056,1,10752,384]}],
+        [[128,384,28,28],"bf16",{"st":[301056,1,10752,384]}]
+      ]
+    },
+    {
+      "shape_hash": "21c46fcd",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[128,1536,14,14],"bf16",{"st":[301056,1,21504,1536]}],
+        [[128,1536,14,14],"bf16",{"st":[301056,1,21504,1536]}]
+      ]
+    },
+    {
+      "shape_hash": "cfcbfec7",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[128,3072,7,7],"bf16",{"st":[150528,1,21504,3072]}],
+        [[128,3072,7,7],"bf16",{"st":[150528,1,21504,3072]}]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "points": [
+    {
+      "shape_hash": "0ff22f63",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 23
+        }
+      },
+      "inputs": [
+        [[25216,192],"bf16"],
+        [[128,197,192],"f32"],
+        [[192],"f32"],
+        [[192],"f32"],
+        ["S",[128,197,192]],
+        ["S",[25216,192]]
+      ]
+    },
+    {
+      "shape_hash": "f13eb73e",
+      "models": {
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 23
+        }
+      },
+      "inputs": [
+        [[25344,768],"bf16"],
+        [[128,198,768],"f32"],
+        [[768],"f32"],
+        [[768],"f32"],
+        ["S",[128,198,768]],
+        ["S",[25344,768]]
+      ]
+    },
+    {
+      "shape_hash": "7b097b88",
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 23
+        }
+      },
+      "inputs": [
+        [[32768,768],"bf16"],
+        [[128,256,768],"f32"],
+        [[768],"f32"],
+        [[768],"f32"],
+        ["S",[128,256,768]],
+        ["S",[32768,768]]
+      ]
+    },
+    {
+      "shape_hash": "5d43e450",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 23
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 23
+        }
+      },
+      "inputs": [
+        [[4096,2048],"bf16"],
+        [[32,128,2048],"f32"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        ["S",[32,128,2048]],
+        ["S",[4096,2048]]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "562d52916cc9",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.expand.default",
+    "aten.ge.Scalar",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims.iota.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf/infer/AlbertForMaskedLM",
+    "hf/infer/BertForMaskedLM",
+    "hf/infer/ElectraForCausalLM",
+    "hf/infer/RobertaForCausalLM",
+    "hf/train/AlbertForMaskedLM",
+    "hf/train/BertForMaskedLM"
+  ]
+}

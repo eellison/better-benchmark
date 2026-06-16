@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "fe37f3bb",
+      "models": {
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,8],"bf16"],
+        [[1],"i64"],
+        [[1],"i64"],
+        [[],"f32"],
+        ["S",[1,128,2]]
+      ]
+    }
+  ]
+}

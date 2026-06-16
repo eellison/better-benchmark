@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "genai",
+  "model": "RMSNormBackward",
+  "patterns": [
+    "2cd99e5eb23e",
+    "60b7c9e320b2"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "static"
+}

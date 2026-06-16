@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "51fe7e77",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,240],"bf16"],
+        ["S",[512,16,240]],
+        ["S",[512,16,4,60]],
+        ["S",[512,4,16,64]]
+      ]
+    }
+  ]
+}

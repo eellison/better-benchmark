@@ -1,0 +1,32 @@
+{
+  "points": [
+    {
+      "shape_hash": "86725088",
+      "models": {
+        "torchbench/infer/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,128,27,27],"bf16"],
+        [[16,128,27,27],"bf16"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    },
+    {
+      "shape_hash": "5a0347c9",
+      "models": {
+        "torchbench/infer/squeezenet1_1": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,64,55,55],"bf16"],
+        [[16,64,55,55],"bf16"],
+        ["S",[3,3]],
+        ["S",[2,2]]
+      ]
+    }
+  ]
+}

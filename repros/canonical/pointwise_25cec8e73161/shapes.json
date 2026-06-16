@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "55c3c977",
+      "models": {
+        "hf/infer/openai/gpt-oss-20b": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4000],"i64",{"gen":["index",0,199449]}],
+        [[32,5760],"bf16"],
+        [[4000,5760],"bf16"]
+      ]
+    }
+  ]
+}

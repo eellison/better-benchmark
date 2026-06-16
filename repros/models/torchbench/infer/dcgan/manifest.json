@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "dcgan",
+  "patterns": [
+    "0872313c7e7a",
+    "246850b7c198",
+    "fc79e17a0171"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[96,4,768,64]],
+        ["S",[98304,16384,64,1]],
+        ["S",[18874368]]
+      ]
+    }
+  ]
+}

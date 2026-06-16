@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "5fad102b",
+      "models": {
+        "hf/infer/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[16384,54],"bf16"],
+        [[54],"bf16"],
+        ["S",[32,512,54]],
+        ["S",[-1,9,1]],
+        ["S",[98304,9,1]]
+      ]
+    }
+  ]
+}

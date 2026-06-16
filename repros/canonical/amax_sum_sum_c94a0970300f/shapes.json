@@ -1,0 +1,46 @@
+{
+  "points": [
+    {
+      "shape_hash": "4137e900",
+      "models": {
+        "hf/infer/MegatronBertForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,512],"i64",{"gen":["index",0,29052]}],
+        [[8192,29056],"bf16"],
+        ["S",[16,512,29056]],
+        ["S",[-1,29056]]
+      ]
+    },
+    {
+      "shape_hash": "92fc17b6",
+      "models": {
+        "hf/infer/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128],"i64",{"gen":["index",0,255989]}],
+        [[4096,256008],"bf16"],
+        ["S",[32,128,256008]],
+        ["S",[-1,256008]]
+      ]
+    },
+    {
+      "shape_hash": "ab0881e7",
+      "models": {
+        "hf/infer/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,2048],"i64",{"gen":["index",0,50271]}],
+        [[8192,50272],"bf16"],
+        ["S",[4,2048,50272]],
+        ["S",[-1,50272]]
+      ]
+    }
+  ]
+}

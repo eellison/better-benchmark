@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "1eeba9a28a57",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 19,
+  "origin_ops": [
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.eq.Scalar",
+    "aten.exp.default",
+    "aten.full.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.fma.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/BERT_pytorch",
+    "torchbench/train/BERT_pytorch"
+  ]
+}

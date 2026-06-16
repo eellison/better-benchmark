@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "38c88cc47464",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/AllenaiLongformerBase"
+  ]
+}

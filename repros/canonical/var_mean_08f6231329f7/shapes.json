@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "699e8097",
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        ["S",[8,512,128]],
+        ["S",[4096,128]]
+      ]
+    }
+  ]
+}

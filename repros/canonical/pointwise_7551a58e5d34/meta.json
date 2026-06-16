@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "7551a58e5d34",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.constant_pad_nd.default",
+    "aten.constant_pad_nd.default",
+    "aten.permute.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/DistillGPT2",
+    "hf/train/DistillGPT2"
+  ]
+}

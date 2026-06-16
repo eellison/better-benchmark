@@ -1,0 +1,39 @@
+{
+  "pattern_hash": "96edf0542ecd",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 14,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 12,
+  "models": [
+    "hf/infer/AlbertForMaskedLM",
+    "hf/infer/BertForMaskedLM",
+    "hf/infer/DebertaV2ForMaskedLM",
+    "hf/infer/DistilBertForMaskedLM",
+    "hf/infer/ElectraForCausalLM",
+    "hf/infer/LayoutLMForMaskedLM",
+    "hf/infer/RobertaForCausalLM",
+    "hf/infer/YituTechConvBert",
+    "hf/train/AlbertForMaskedLM",
+    "hf/train/BertForMaskedLM",
+    "hf/train/DebertaV2ForMaskedLM",
+    "hf/train/DistilBertForMaskedLM"
+  ]
+}

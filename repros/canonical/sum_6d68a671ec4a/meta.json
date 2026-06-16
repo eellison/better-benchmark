@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "6d68a671ec4a",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 10,
+  "models": [
+    "timm/infer/deit_base_distilled_patch16_224",
+    "timm/infer/deit_tiny_patch16_224.fb_in1k",
+    "timm/infer/mobilevit_s",
+    "timm/infer/vit_base_patch14_dinov2.lvd142m",
+    "timm/infer/vit_base_patch16_siglip_256",
+    "timm/train/deit_base_distilled_patch16_224",
+    "timm/train/deit_tiny_patch16_224.fb_in1k",
+    "timm/train/mobilevit_s",
+    "timm/train/vit_base_patch14_dinov2.lvd142m",
+    "timm/train/vit_base_patch16_siglip_256"
+  ]
+}

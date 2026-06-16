@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "a18f3869022f",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.mul.Scalar",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 12,
+  "models": [
+    "hf/infer/AlbertForMaskedLM",
+    "hf/infer/BertForMaskedLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/infer/DistilBertForMaskedLM",
+    "hf/infer/ElectraForCausalLM",
+    "hf/infer/M2M100ForConditionalGeneration",
+    "hf/infer/MobileBertForMaskedLM",
+    "hf/infer/RobertaForCausalLM",
+    "hf/train/AlbertForMaskedLM",
+    "hf/train/BertForMaskedLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/DistilBertForMaskedLM"
+  ]
+}

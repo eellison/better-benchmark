@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "dda19333a406",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.permute.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "torchbench/infer/nvidia_deeprecommender",
+    "torchbench/train/lennard_jones",
+    "torchbench/train/nvidia_deeprecommender"
+  ]
+}

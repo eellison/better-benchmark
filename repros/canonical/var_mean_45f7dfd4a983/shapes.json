@@ -1,0 +1,84 @@
+{
+  "points": [
+    {
+      "shape_hash": "d4701d13",
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[4096,4096],"bf16"],
+        [[8,512,4096],"bf16"],
+        [[4096],"bf16"],
+        [[4096],"bf16"],
+        ["S",[8,512,4096]],
+        ["S",[4096,4096]]
+      ]
+    },
+    {
+      "shape_hash": "0b3dc49f",
+      "models": {
+        "hf/infer/BartForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[8192,1024],"bf16"],
+        [[8,1024,1024],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        ["S",[8,1024,1024]],
+        ["S",[8192,1024]]
+      ]
+    },
+    {
+      "shape_hash": "63bebcf6",
+      "models": {
+        "hf/infer/DistillGPT2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        [[32,512,768],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"],
+        ["S",[32,512,768]],
+        ["S",[16384,768]]
+      ]
+    },
+    {
+      "shape_hash": "d1f40ce2",
+      "models": {
+        "hf/infer/PLBartForCausalLM": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        [[16,1024,768],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"],
+        ["S",[16,1024,768]],
+        ["S",[16384,768]]
+      ]
+    },
+    {
+      "shape_hash": "d4cc3e3e",
+      "models": {
+        "hf/infer/TrOCRForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[16384,1024],"bf16"],
+        [[64,256,1024],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        ["S",[64,256,1024]],
+        ["S",[16384,1024]]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "839c4ad7",
+      "models": {
+        "torchbench/infer/demucs": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,256,5804],"bf16"],
+        [[8,256,5979],"bf16"]
+      ]
+    }
+  ]
+}

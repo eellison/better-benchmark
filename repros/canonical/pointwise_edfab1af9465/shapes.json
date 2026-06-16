@@ -1,0 +1,29 @@
+{
+  "points": [
+    {
+      "shape_hash": "3fee83c6",
+      "models": {
+        "torchbench/infer/pytorch_CycleGAN_and_pix2pix": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,3,256,256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5a025cf0",
+      "models": {
+        "torchbench/infer/lennard_jones": {
+          "occurrences": 3
+        },
+        "torchbench/train/lennard_jones": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[128,16],"bf16"]
+      ]
+    }
+  ]
+}

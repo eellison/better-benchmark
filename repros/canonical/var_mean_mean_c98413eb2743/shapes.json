@@ -1,0 +1,34 @@
+{
+  "points": [
+    {
+      "shape_hash": "00cca0ad",
+      "models": {
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32,120,28,28],"bf16"],
+        [[120],"f32"],
+        [[120],"f32"],
+        [[120],"f32"],
+        [[120],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b7fea7d6",
+      "models": {
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,72,28,28],"bf16"],
+        [[72],"f32"],
+        [[72],"f32"],
+        [[72],"f32"],
+        [[72],"f32"]
+      ]
+    }
+  ]
+}

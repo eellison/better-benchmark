@@ -1,0 +1,94 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7edb67c",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32,960,1,1],"bf16"],
+        [[32,960,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f9969da7",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,672,1,1],"bf16"],
+        [[32,672,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f76fad38",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,672,1,1],"bf16"],
+        [[32,672,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0c85aae0",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,480,1,1],"bf16"],
+        [[32,480,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "be7a1f98",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 2
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32,120,1,1],"bf16"],
+        [[32,120,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "38d11fef",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,72,1,1],"bf16"],
+        [[32,72,28,28],"bf16"]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[8192],"i64",{"n":"arg0_1","gen":["index",0,262144],"x":{"constraint_source":"graph_inference","observed":{"min":33,"max":262073,"n_unique":8063}}}],
+    [[8192,262144],"bf16",{"n":"arg1_1"}]
+  ],
+  "outputs": [
+    [[8192],"bf16",{"n":"output_0"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_000.py",
+  "source": {
+    "kind": "microbenchmark",
+    "suite": "genai",
+    "mode": null,
+    "model": "static/CrossEntropyForward",
+    "graph": "full_graph_000.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 18,
+    "counts": {
+      "fusible_in_partition": 18,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.amax.default": 1,
+        "aten.exp.default": 1,
+        "aten.full.default": 2,
+        "aten.gather.default": 1,
+        "aten.log.default": 1,
+        "aten.ne.Scalar": 2,
+        "aten.neg.default": 1,
+        "aten.squeeze.dim": 1,
+        "aten.sub.Tensor": 2,
+        "aten.sum.dim_IntList": 1,
+        "aten.unsqueeze.default": 1,
+        "aten.where.self": 2,
+        "prims.convert_element_type.default": 2
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
+}

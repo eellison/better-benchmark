@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "resnext50_32x4d",
+  "patterns": [
+    "2c331ef4f17f",
+    "7899d74e0838",
+    "81485f33f5b9",
+    "b138a1e42dbc",
+    "ef561a2def29"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

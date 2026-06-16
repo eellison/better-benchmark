@@ -1,7 +1,0 @@
-timm_mobilevit_s_infer_000_c2abb250: (T([8192, 480], f32), S([512, 16, 480]), S([8192, 480]))
-timm_timm_mobilevit_s_infer_infer_000_7d66bb6c: (T([32768, 384], f32), S([512, 64, 384]), S([32768, 384]))
-timm_timm_mobilevit_s_infer_infer_000_c2abb250: (T([8192, 480], f32), S([512, 16, 480]), S([8192, 480]))
-timm_timm_mobilevit_s_infer_infer_000_fa789845: (T([131072, 288], f32), S([512, 256, 288]), S([131072, 288]))
-timm_timm_mobilevit_s_train_train_000_7d66bb6c: (T([32768, 384], f32), S([512, 64, 384]), S([32768, 384]))
-timm_timm_mobilevit_s_train_train_000_c2abb250: (T([8192, 480], f32), S([512, 16, 480]), S([8192, 480]))
-timm_timm_mobilevit_s_train_train_000_fa789845: (T([131072, 288], f32), S([512, 256, 288]), S([131072, 288]))

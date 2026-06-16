@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "736b279f",
+      "models": {
+        "hf/infer/google/gemma-2-2b": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,256000],"bf16"],
+        ["S",[1,1000,256000]]
+      ]
+    }
+  ]
+}

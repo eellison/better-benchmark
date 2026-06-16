@@ -1,0 +1,133 @@
+{
+  "points": [
+    {
+      "shape_hash": "ba1b8f0f",
+      "models": {
+        "torchbench/infer/BERT_pytorch": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[20005,768],"bf16"],
+        ["S",[0,3,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "6883fad3",
+      "models": {
+        "hf/infer/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/MBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/PegasusForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50265,1024],"bf16"],
+        ["S",[0,7,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "cd997de8",
+      "models": {
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[30522,768],"bf16"],
+        ["S",[0,6,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "1779a8cb",
+      "models": {
+        "hf/infer/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128100,1536],"bf16"],
+        ["S",[0,4,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "cb779bb6",
+      "models": {
+        "hf/infer/DistillGPT2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50257,768],"bf16"],
+        ["S",[0,7,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "360d77c3",
+      "models": {
+        "hf/infer/GPTNeoForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50257,2048],"bf16"],
+        ["S",[0,7,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "d67c38a5",
+      "models": {
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[30522,128],"bf16"],
+        ["S",[0,6,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "d59edba9",
+      "models": {
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 1
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50265,768],"bf16"],
+        ["S",[0,7,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "ea31889c",
+      "models": {
+        "hf/infer/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50005,768],"bf16"],
+        ["S",[0,3,0,0]]
+      ]
+    }
+  ]
+}

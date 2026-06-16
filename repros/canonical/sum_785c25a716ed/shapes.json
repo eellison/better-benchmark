@@ -1,0 +1,46 @@
+{
+  "points": [
+    {
+      "shape_hash": "903ae292",
+      "models": {
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 48
+        }
+      },
+      "inputs": [
+        [[16,16,512,64],"bf16",{"st":[524288,64,1024,1]}],
+        ["S",[16,512,1024]],
+        ["S",[8192,1024]],
+        ["S",[1024]]
+      ]
+    },
+    {
+      "shape_hash": "f85fe078",
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [[32,6,512,64],"bf16",{"st":[196608,1,384,6]}],
+        ["S",[32,512,384]],
+        ["S",[16384,384]],
+        ["S",[384]]
+      ]
+    },
+    {
+      "shape_hash": "9876fbcf",
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,6,512,64],"bf16",{"st":[196608,64,384,1]}],
+        ["S",[32,512,384]],
+        ["S",[16384,384]],
+        ["S",[384]]
+      ]
+    }
+  ]
+}

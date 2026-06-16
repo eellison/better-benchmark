@@ -1,0 +1,83 @@
+{
+  "points": [
+    {
+      "shape_hash": "c6cb1dd8",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        }
+      },
+      "inputs": [
+        [[16,128,256],"bf16"],
+        ["S",[1,16,128,256]],
+        ["S",[1,128,4096]],
+        ["S",[128,4096]]
+      ]
+    },
+    {
+      "shape_hash": "226fbbfa",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [[512,512,64],"bf16"],
+        ["S",[8,64,512,64]],
+        ["S",[8,512,4096]],
+        ["S",[4096,4096]]
+      ]
+    },
+    {
+      "shape_hash": "e6f344ac",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[512,128,128],"bf16"],
+        ["S",[32,16,128,128]],
+        ["S",[32,128,2048]],
+        ["S",[4096,2048]]
+      ]
+    },
+    {
+      "shape_hash": "fb089404",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 48
+        }
+      },
+      "inputs": [
+        [[192,128,64],"bf16"],
+        ["S",[32,6,128,64]],
+        ["S",[32,128,384]],
+        ["S",[4096,384]]
+      ]
+    },
+    {
+      "shape_hash": "6c3c2efc",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 36
+        },
+        "hf/train/T5Small": {
+          "occurrences": 36
+        }
+      },
+      "inputs": [
+        [[64,1024,64],"bf16"],
+        ["S",[8,8,1024,64]],
+        ["S",[8,1024,512]],
+        ["S",[8192,512]]
+      ]
+    }
+  ]
+}

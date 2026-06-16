@@ -1,0 +1,19 @@
+{
+  "pattern_hash": "514cc391d8e4",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/M2M100ForConditionalGeneration"
+  ]
+}

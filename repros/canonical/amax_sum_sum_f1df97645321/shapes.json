@@ -1,0 +1,60 @@
+{
+  "points": [
+    {
+      "shape_hash": "bba6ebb5",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,8008],"bf16"],
+        [[32,128],"i64"],
+        ["S",[32,128,8008]],
+        ["S",[-1,8008]]
+      ]
+    },
+    {
+      "shape_hash": "6098747b",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,30000],"bf16"],
+        [[8,512],"i64",{"gen":["index",0,30000]}],
+        ["S",[8,512,30000]],
+        ["S",[-1,30000]]
+      ]
+    },
+    {
+      "shape_hash": "4f6a8ed5",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,128112],"bf16"],
+        [[64,128],"i64",{"gen":["index",0,128112]}],
+        ["S",[64,128,128112]],
+        ["S",[-1,128112]]
+      ]
+    },
+    {
+      "shape_hash": "8e79bb3c",
+      "models": {
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,32000],"bf16"],
+        [[16,512],"i64",{"gen":["index",0,32000]}],
+        ["S",[16,512,32000]],
+        ["S",[-1,32000]]
+      ]
+    }
+  ]
+}

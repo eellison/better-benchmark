@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "59aa3e3a",
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[514,1024],"f32"],
+        ["S",[64,-1]]
+      ]
+    }
+  ]
+}

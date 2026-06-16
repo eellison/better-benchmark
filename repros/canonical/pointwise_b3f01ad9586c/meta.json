@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "b3f01ad9586c",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.unsqueeze.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "hf/infer/Qwen/Qwen3-0.6B",
+    "hf/infer/google/gemma-2-2b",
+    "hf/infer/google/gemma-3-4b-it",
+    "hf/infer/mistralai/Mistral-7B-Instruct-v0.3"
+  ]
+}

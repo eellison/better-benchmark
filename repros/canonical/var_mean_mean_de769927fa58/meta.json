@@ -1,0 +1,53 @@
+{
+  "pattern_hash": "de769927fa58",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean",
+    "mean"
+  ],
+  "n_ops": 35,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.as_strided.default",
+    "aten.copy_.default",
+    "aten.copy_.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.squeeze.dims",
+    "aten.squeeze.dims",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 4,
+  "models": [
+    "timm/infer/mobilevit_s",
+    "timm/infer/tf_efficientnet_b0",
+    "timm/train/mobilevit_s",
+    "timm/train/tf_efficientnet_b0"
+  ]
+}

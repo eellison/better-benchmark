@@ -1,0 +1,38 @@
+{
+  "points": [
+    {
+      "shape_hash": "c9d2e15a",
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32768,30528],"bf16"],
+        [[256,128],"i64"],
+        ["S",[256,128,30522]],
+        ["S",[32768,30522]]
+      ]
+    },
+    {
+      "shape_hash": "4b47cbc0",
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,30528],"bf16"],
+        [[32,512],"i64",{"gen":["index",0,30522]}],
+        ["S",[32,512,30522]],
+        ["S",[16384,30522]]
+      ]
+    }
+  ]
+}

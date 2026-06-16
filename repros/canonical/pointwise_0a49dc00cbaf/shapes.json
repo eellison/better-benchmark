@@ -1,0 +1,43 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 24
+        },
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 24
+        },
+        "hf/infer/BlenderbotForConditionalGeneration": {
+          "occurrences": 52
+        },
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/infer/M2M100ForConditionalGeneration": {
+          "occurrences": 48
+        },
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 1
+        },
+        "hf/infer/MobileBertForMaskedLM": {
+          "occurrences": 48
+        }
+      },
+      "inputs": []
+    }
+  ]
+}

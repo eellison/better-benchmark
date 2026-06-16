@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "f3f44f50fa4d",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.mul.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 9,
+  "models": [
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/infer/DistilBertForMaskedLM",
+    "hf/train/BertForMaskedLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/DistilBertForMaskedLM",
+    "hf/train/ElectraForCausalLM",
+    "hf/train/M2M100ForConditionalGeneration",
+    "hf/train/MobileBertForMaskedLM",
+    "hf/train/RobertaForCausalLM"
+  ]
+}

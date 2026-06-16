@@ -1,42 +1,12 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "arg0_1",
-      "shape": [
-        64,
-        3,
-        7,
-        7
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg1_1",
-      "shape": [
-        64,
-        3,
-        32,
-        32
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[64,3,7,7],"bf16",{"n":"arg0_1"}],
+    [[64,3,32,32],"bf16",{"n":"arg1_1"}]
   ],
-  "outputs": [],
+  "outputs": [
+    [[64,64,16,16],"bf16",{"n":"output_0"}]
+  ],
   "tensor_attrs": {},
   "graph": "full_graph_000.py",
   "source": {
@@ -45,5 +15,21 @@
     "mode": "infer",
     "model": "opacus_cifar10",
     "graph": "full_graph_000.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 1,
+    "counts": {
+      "fusible_in_partition": 0,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 1
+    },
+    "ops": {
+      "fusible_in_partition": {},
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "aten.convolution.default": 1
+      }
+    }
+  },
+  "roundtrip": "ok"
 }

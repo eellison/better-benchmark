@@ -1,0 +1,15 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/Qwen/Qwen3-0.6B": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[1,-1,1000,1000]]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "56e670a4",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1,128],"i64",{"gen":["index",0,2048]}],
+        [[2050,1024],"f32"],
+        ["S",[1,128,1024]]
+      ]
+    }
+  ]
+}

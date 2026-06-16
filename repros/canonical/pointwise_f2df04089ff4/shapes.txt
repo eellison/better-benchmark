@@ -1,6 +1,0 @@
-torchbench_resnet152_infer_000_aa7f52e4: (T([64], f16), T([32, 64, 112, 112], f16), T([64], f16), T([64], f16), T([64], f16))
-torchbench_resnet18_infer_000_e98f4d41: (T([64], f16), T([512, 64, 112, 112], f16), T([64], f16), T([64], f16), T([64], f16))
-torchbench_resnet50_infer_000_24d7ac40: (T([64], f16), T([128, 64, 112, 112], f16), T([64], f16), T([64], f16), T([64], f16))
-torchbench_resnext50_32x4d_infer_000_24d7ac40: (T([64], f16), T([128, 64, 112, 112], f16), T([64], f16), T([64], f16), T([64], f16))
-torchbench_shufflenet_v2_x1_0_infer_000_4ac66061: (T([24], f16), T([512, 24, 112, 112], f16), T([24], f16), T([24], f16), T([24], f16))
-torchbench_timm_resnest_infer_000_aa7f52e4: (T([64], f16), T([32, 64, 112, 112], f16), T([64], f16), T([64], f16), T([64], f16))

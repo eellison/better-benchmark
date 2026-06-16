@@ -1,10 +1,6 @@
-import torch
-from torch import device
-from math import inf, nan
-
 class GraphModule(torch.nn.Module):
-    def forward(self, primals_1: "f32[8008, 2560]", primals_2: "i64[16, 128]"):
+    def forward(self, primals_1: "f32[8008, 2560][2560, 1]cuda:0", primals_2: "i64[16, 128][128, 1]cuda:0"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:96 in forward, code: return super().forward(input_ids) * self.embed_scale
-        embedding: "f32[16, 128, 2560]" = torch.ops.aten.embedding.default(primals_1, primals_2, 0);  primals_1 = None
-        mul: "f32[16, 128, 2560]" = torch.ops.aten.mul.Tensor(embedding, 1.0);  embedding = None
+        embedding: "f32[16, 128, 2560][327680, 2560, 1]cuda:0" = torch.ops.aten.embedding.default(primals_1, primals_2, 0);  primals_1 = None
+        mul: "f32[16, 128, 2560][327680, 2560, 1]cuda:0" = torch.ops.aten.mul.Tensor(embedding, 1.0);  embedding = None
         return (mul, primals_2)

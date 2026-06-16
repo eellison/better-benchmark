@@ -1,0 +1,26 @@
+{
+  "points": [
+    {
+      "shape_hash": "33f5cb91",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,3,256,256],"bf16",{"st":[196608,1,768,3]}]
+      ]
+    },
+    {
+      "shape_hash": "e96942cb",
+      "models": {
+        "timm/infer/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,3,224,224],"bf16",{"st":[150528,1,672,3]}]
+      ]
+    }
+  ]
+}

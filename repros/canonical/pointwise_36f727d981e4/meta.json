@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "36f727d981e4",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "aten.reshape.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 14,
+  "models": [
+    "hf/infer/BartForCausalLM",
+    "hf/infer/BlenderbotForCausalLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/train/AllenaiLongformerBase",
+    "hf/train/BartForCausalLM",
+    "hf/train/BlenderbotForCausalLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/M2M100ForConditionalGeneration",
+    "hf/train/MBartForCausalLM",
+    "hf/train/OPTForCausalLM",
+    "hf/train/PLBartForCausalLM",
+    "hf/train/PegasusForCausalLM",
+    "hf/train/TrOCRForCausalLM",
+    "hf/train/XGLMForCausalLM"
+  ]
+}

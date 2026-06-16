@@ -1,0 +1,24 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 1
+        },
+        "hf/infer/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/MegatronBertForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[8,1024]]
+      ]
+    }
+  ]
+}

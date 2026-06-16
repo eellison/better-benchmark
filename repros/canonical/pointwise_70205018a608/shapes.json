@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "228a3c6c",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,128],"f32"],
+        ["S",[32,-1,128,128]]
+      ]
+    }
+  ]
+}

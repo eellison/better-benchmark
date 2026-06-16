@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "f7d2043cd67e",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.tanh.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/google/gemma-2-2b"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/infer/google/gemma-2-2b": {
+          "occurrences": 13
+        },
+        "hf/infer/google/gemma-3-4b-it": {
+          "occurrences": 29
+        },
+        "hf/infer/openai/gpt-oss-20b": {
+          "occurrences": 12
+        }
+      },
+      "inputs": []
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "points": [
+    {
+      "shape_hash": "741cfc27",
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[20005,768],"f32"],
+        ["S",[0,3,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "03ae85fd",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50265,1024],"f32"],
+        ["S",[0,7,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "ba21ab5c",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128100,1536],"f32"],
+        ["S",[0,4,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "2e6d9a9a",
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[30522,768],"f32"],
+        ["S",[0,6,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "b1ba703d",
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50257,768],"f32"],
+        ["S",[0,7,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "9aad8b4c",
+      "models": {
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2,4096],"f32"],
+        ["S",[0,6,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "04cf6984",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[30522,128],"f32"],
+        ["S",[0,6,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "11a7c671",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50257,2048],"f32"],
+        ["S",[0,7,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "6ce50a53",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50265,768],"f32"],
+        ["S",[0,7,0,0]]
+      ]
+    },
+    {
+      "shape_hash": "3bdcd15b",
+      "models": {
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50005,768],"f32"],
+        ["S",[0,3,0,0]]
+      ]
+    }
+  ]
+}

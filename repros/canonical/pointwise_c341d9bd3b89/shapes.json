@@ -1,0 +1,28 @@
+{
+  "points": [
+    {
+      "shape_hash": "c4650a85",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8008,2560],"f32"],
+        [[32,128],"i64",{"gen":["index",0,8008]}]
+      ]
+    },
+    {
+      "shape_hash": "0dc67f27",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8008,2560],"f32"],
+        [[16,128],"i64",{"gen":["index",0,8008]}]
+      ]
+    }
+  ]
+}

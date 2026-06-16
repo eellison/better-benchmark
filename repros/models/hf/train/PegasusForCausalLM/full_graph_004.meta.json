@@ -1,0 +1,64 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[128,128,1024],"f32",{"n":"primals_1"}],
+    [[50265,1024],"f32",{"n":"primals_2"}],
+    [[128,128],"i64",{"n":"primals_3","gen":["index",0,50265],"x":{"constraint_source":"graph_inference","observed":{"min":1,"max":50264,"n_unique":14013}}}]
+  ],
+  "outputs": [
+    [[],"f32",{"n":"output_0"}],
+    [[128,128,50265],"bf16",{"n":"output_1","st":[6434816,50272,1]}],
+    [[128,128],"i64",{"n":"output_2","gen":["index",0,128],"x":{"constraint_source":"dtype_shape_default"}}],
+    [[16384,1024],"bf16",{"n":"output_3"}],
+    [[128,128,50265],"bf16",{"n":"output_4","st":[6434816,50272,1]}],
+    [[16384,1],"f32",{"n":"output_5"}],
+    [[16384,1],"f32",{"n":"output_6"}],
+    [[],"f32",{"n":"output_7"}],
+    [[50265,1024],"bf16",{"n":"output_8"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_004.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "PegasusForCausalLM",
+    "graph": "full_graph_004.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 33,
+    "counts": {
+      "fusible_in_partition": 32,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 1
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.amax.default": 1,
+        "aten.constant_pad_nd.default": 1,
+        "aten.div.Tensor": 1,
+        "aten.exp.default": 1,
+        "aten.full.default": 2,
+        "aten.gather.default": 1,
+        "aten.log.default": 1,
+        "aten.ne.Scalar": 1,
+        "aten.neg.default": 1,
+        "aten.permute.default": 2,
+        "aten.reshape.default": 4,
+        "aten.slice.Tensor": 1,
+        "aten.squeeze.dim": 1,
+        "aten.sub.Tensor": 2,
+        "aten.sum.default": 2,
+        "aten.sum.dim_IntList": 1,
+        "aten.unsqueeze.default": 1,
+        "aten.where.self": 2,
+        "prims.convert_element_type.default": 6
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "aten.mm.default": 1
+      }
+    }
+  },
+  "roundtrip": "ok"
+}

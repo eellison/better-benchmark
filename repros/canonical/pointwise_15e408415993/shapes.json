@@ -1,0 +1,52 @@
+{
+  "points": [
+    {
+      "shape_hash": "fd0f60cd",
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 3
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[8192,480],"bf16"],
+        ["S",[512,16,480]],
+        ["S",[8192,480]]
+      ]
+    },
+    {
+      "shape_hash": "4bf70c65",
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 4
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[32768,384],"bf16"],
+        ["S",[512,64,384]],
+        ["S",[32768,384]]
+      ]
+    },
+    {
+      "shape_hash": "7f1f1e95",
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 2
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[131072,288],"bf16"],
+        ["S",[512,256,288]],
+        ["S",[131072,288]]
+      ]
+    }
+  ]
+}

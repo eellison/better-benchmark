@@ -1,0 +1,400 @@
+{
+  "points": [
+    {
+      "shape_hash": "1b9786b5",
+      "models": {
+        "timm/infer/mobilenetv2_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[160],"bf16"],
+        [[128,160,7,7],"bf16",{"st":[7840,1,1120,160]}],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[128,160,7,7],"bf16",{"st":[7840,1,1120,160]}]
+      ]
+    },
+    {
+      "shape_hash": "cbfa3b6c",
+      "models": {
+        "timm/infer/mobilenetv2_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[96],"bf16"],
+        [[128,96,14,14],"bf16",{"st":[18816,1,1344,96]}],
+        [[96],"bf16"],
+        [[96],"bf16"],
+        [[96],"bf16"],
+        [[128,96,14,14],"bf16",{"st":[18816,1,1344,96]}]
+      ]
+    },
+    {
+      "shape_hash": "dee7c6c7",
+      "models": {
+        "timm/infer/mobilenetv2_100": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[128,64,14,14],"bf16",{"st":[12544,1,896,64]}],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[128,64,14,14],"bf16",{"st":[12544,1,896,64]}]
+      ]
+    },
+    {
+      "shape_hash": "2cdd53e8",
+      "models": {
+        "timm/infer/mobilenetv2_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[128,32,28,28],"bf16",{"st":[25088,1,896,32]}],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[128,32,28,28],"bf16",{"st":[25088,1,896,32]}]
+      ]
+    },
+    {
+      "shape_hash": "02ba49e6",
+      "models": {
+        "timm/infer/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/infer/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24],"bf16"],
+        [[128,24,56,56],"bf16",{"st":[75264,1,1344,24]}],
+        [[24],"bf16"],
+        [[24],"bf16"],
+        [[24],"bf16"],
+        [[128,24,56,56],"bf16",{"st":[75264,1,1344,24]}]
+      ]
+    },
+    {
+      "shape_hash": "059bf3db",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[160],"bf16"],
+        [[512,160,7,7],"bf16",{"st":[7840,1,1120,160]}],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[512,160,7,7],"bf16",{"st":[7840,1,1120,160]}]
+      ]
+    },
+    {
+      "shape_hash": "342a6237",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[112],"bf16"],
+        [[512,112,14,14],"bf16",{"st":[21952,1,1568,112]}],
+        [[112],"bf16"],
+        [[112],"bf16"],
+        [[112],"bf16"],
+        [[512,112,14,14],"bf16",{"st":[21952,1,1568,112]}]
+      ]
+    },
+    {
+      "shape_hash": "c8441aee",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[80],"bf16"],
+        [[512,80,14,14],"bf16",{"st":[15680,1,1120,80]}],
+        [[80],"bf16"],
+        [[80],"bf16"],
+        [[80],"bf16"],
+        [[512,80,14,14],"bf16",{"st":[15680,1,1120,80]}]
+      ]
+    },
+    {
+      "shape_hash": "fc6552ee",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[40],"bf16"],
+        [[512,40,28,28],"bf16",{"st":[31360,1,1120,40]}],
+        [[40],"bf16"],
+        [[40],"bf16"],
+        [[40],"bf16"],
+        [[512,40,28,28],"bf16",{"st":[31360,1,1120,40]}]
+      ]
+    },
+    {
+      "shape_hash": "50e4898b",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24],"bf16"],
+        [[512,24,56,56],"bf16",{"st":[75264,1,1344,24]}],
+        [[24],"bf16"],
+        [[24],"bf16"],
+        [[24],"bf16"],
+        [[512,24,56,56],"bf16",{"st":[75264,1,1344,24]}]
+      ]
+    },
+    {
+      "shape_hash": "3bc177c9",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16],"bf16"],
+        [[512,16,112,112],"bf16",{"st":[200704,1,1792,16]}],
+        [[16],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"],
+        [[512,16,112,112],"bf16",{"st":[200704,1,1792,16]}]
+      ]
+    },
+    {
+      "shape_hash": "a2ab0ad0",
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[128,64,64,64],"bf16",{"st":[262144,1,4096,64]}],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[128,64,64,64],"bf16",{"st":[262144,1,4096,64]}]
+      ]
+    },
+    {
+      "shape_hash": "8858d870",
+      "models": {
+        "timm/infer/tf_efficientnet_b0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[192],"bf16"],
+        [[128,192,7,7],"bf16",{"st":[9408,1,1344,192]}],
+        [[192],"bf16"],
+        [[192],"bf16"],
+        [[192],"bf16"],
+        [[128,192,7,7],"bf16",{"st":[9408,1,1344,192]}]
+      ]
+    },
+    {
+      "shape_hash": "cbb247bc",
+      "models": {
+        "timm/infer/tf_efficientnet_b0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[112],"bf16"],
+        [[128,112,14,14],"bf16",{"st":[21952,1,1568,112]}],
+        [[112],"bf16"],
+        [[112],"bf16"],
+        [[112],"bf16"],
+        [[128,112,14,14],"bf16",{"st":[21952,1,1568,112]}]
+      ]
+    },
+    {
+      "shape_hash": "6f6fdd1f",
+      "models": {
+        "timm/infer/tf_efficientnet_b0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[80],"bf16"],
+        [[128,80,14,14],"bf16",{"st":[15680,1,1120,80]}],
+        [[80],"bf16"],
+        [[80],"bf16"],
+        [[80],"bf16"],
+        [[128,80,14,14],"bf16",{"st":[15680,1,1120,80]}]
+      ]
+    },
+    {
+      "shape_hash": "661bb0c6",
+      "models": {
+        "timm/infer/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[40],"bf16"],
+        [[128,40,28,28],"bf16",{"st":[31360,1,1120,40]}],
+        [[40],"bf16"],
+        [[40],"bf16"],
+        [[40],"bf16"],
+        [[128,40,28,28],"bf16",{"st":[31360,1,1120,40]}]
+      ]
+    },
+    {
+      "shape_hash": "9147e0bf",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[192],"bf16"],
+        [[32,192,7,7],"bf16"],
+        [[192],"bf16"],
+        [[192],"bf16"],
+        [[192],"bf16"],
+        [[32,192,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6834e84b",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96],"bf16"],
+        [[32,96,14,14],"bf16"],
+        [[96],"bf16"],
+        [[96],"bf16"],
+        [[96],"bf16"],
+        [[32,96,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4273c1f9",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 2
+        },
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[80],"bf16"],
+        [[32,80,14,14],"bf16"],
+        [[80],"bf16"],
+        [[80],"bf16"],
+        [[80],"bf16"],
+        [[32,80,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "127b8ac2",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 2
+        },
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[40],"bf16"],
+        [[32,40,28,28],"bf16"],
+        [[40],"bf16"],
+        [[40],"bf16"],
+        [[40],"bf16"],
+        [[32,40,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0f6a0e52",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 2
+        },
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24],"bf16"],
+        [[32,24,56,56],"bf16"],
+        [[24],"bf16"],
+        [[24],"bf16"],
+        [[24],"bf16"],
+        [[32,24,56,56],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cce36204",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[160],"bf16"],
+        [[32,160,7,7],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[32,160,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e62d3519",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[112],"bf16"],
+        [[32,112,14,14],"bf16"],
+        [[112],"bf16"],
+        [[112],"bf16"],
+        [[112],"bf16"],
+        [[32,112,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7638df56",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16],"bf16"],
+        [[32,16,112,112],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"],
+        [[32,16,112,112],"bf16"]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "points": [
+    {
+      "shape_hash": "6ffb5b71",
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[3072,128,128],"bf16"],
+        [[256,12,128,128],"b8"],
+        [[256,12,128,128],"bf16"],
+        ["S",[256,12,128,128]],
+        ["S",[3072,128,128]]
+      ]
+    },
+    {
+      "shape_hash": "d02283d5",
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 11
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [[384,512,512],"bf16"],
+        [[32,12,512,512],"b8"],
+        [[32,12,512,512],"bf16"],
+        ["S",[32,12,512,512]],
+        ["S",[384,512,512]]
+      ]
+    },
+    {
+      "shape_hash": "c99a78fd",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [[256,512,512],"bf16"],
+        [[64,4,512,512],"b8"],
+        [[64,4,512,512],"bf16"],
+        ["S",[64,4,512,512]],
+        ["S",[256,512,512]]
+      ]
+    },
+    {
+      "shape_hash": "2e48b06a",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[1024,128,128],"bf16"],
+        [[64,16,128,128],"b8"],
+        [[64,16,128,128],"bf16"],
+        ["S",[64,16,128,128]],
+        ["S",[1024,128,128]]
+      ]
+    },
+    {
+      "shape_hash": "87ed7153",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 23
+        }
+      },
+      "inputs": [
+        [[1024,128,128],"bf16"],
+        [[256,4,128,128],"b8"],
+        [[256,4,128,128],"bf16"],
+        ["S",[256,4,128,128]],
+        ["S",[1024,128,128]]
+      ]
+    }
+  ]
+}

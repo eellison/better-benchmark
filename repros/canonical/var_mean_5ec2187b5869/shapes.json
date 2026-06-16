@@ -1,0 +1,22 @@
+{
+  "points": [
+    {
+      "shape_hash": "3b387564",
+      "models": {
+        "hf/infer/GPT2ForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50257,768],"bf16"],
+        [[8,1024],"i64",{"gen":["index",0,50257]}],
+        [[1024,768],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"],
+        ["S",[8,-1]],
+        ["S",[-1,768]],
+        ["S",[8,1]]
+      ]
+    }
+  ]
+}

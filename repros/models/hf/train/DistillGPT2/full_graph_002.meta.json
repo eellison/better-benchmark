@@ -1,99 +1,15 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "primals_1",
-      "shape": [
-        32,
-        512,
-        50257
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "constant_pad_nd",
-      "shape": [
-        32,
-        513
-      ],
-      "dtype": "int64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "index",
-        "low": 0,
-        "high": 513
-      },
-      "gen": {
-        "kind": "index",
-        "low": 0,
-        "high": 513
-      },
-      "constraint_source": "comparison_only_safe"
-    },
-    {
-      "kind": "tensor",
-      "name": "amax",
-      "shape": [
-        16384,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "log",
-      "shape": [
-        16384,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "convert_element_type",
-      "shape": [],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "tangents_1",
-      "shape": [],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[32,512,50257],"bf16",{"n":"primals_1","st":[25735168,50264,1]}],
+    [[32,513],"i64",{"n":"constant_pad_nd","gen":["index",0,50257],"x":{"constraint_source":"observed","observed":{"min":1,"max":50256,"n_unique":13992}}}],
+    [[16384,1],"f32",{"n":"amax"}],
+    [[16384,1],"f32",{"n":"log"}],
+    [[],"f32",{"n":"convert_element_type_1"}],
+    [[],"f32",{"n":"tangents_1"}]
+  ],
+  "outputs": [
+    [[32,512,50257],"bf16",{"n":"output_0"}]
   ],
   "tensor_attrs": {},
   "graph": "full_graph_002.py",
@@ -103,5 +19,37 @@
     "mode": "train",
     "model": "DistillGPT2",
     "graph": "full_graph_002.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 28,
+    "counts": {
+      "fusible_in_partition": 28,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.clone.default": 1,
+        "aten.div.Tensor": 1,
+        "aten.eq.Tensor": 1,
+        "aten.exp.default": 1,
+        "aten.expand.default": 1,
+        "aten.full.default": 2,
+        "aten.mul.Tensor": 2,
+        "aten.ne.Scalar": 1,
+        "aten.reshape.default": 4,
+        "aten.scalar_tensor.default": 2,
+        "aten.slice.Tensor": 1,
+        "aten.sub.Tensor": 3,
+        "aten.sum.dim_IntList": 1,
+        "aten.unsqueeze.default": 1,
+        "aten.where.self": 3,
+        "prims.convert_element_type.default": 2,
+        "prims.iota.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

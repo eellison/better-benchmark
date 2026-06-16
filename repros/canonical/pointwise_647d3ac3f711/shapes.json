@@ -1,0 +1,67 @@
+{
+  "points": [
+    {
+      "shape_hash": "ff177488",
+      "models": {
+        "torchbench/infer/BERT_pytorch": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[20005],"bf16"],
+        ["S",[3]]
+      ]
+    },
+    {
+      "shape_hash": "bcb2f702",
+      "models": {
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/infer/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[30522],"bf16"],
+        ["S",[6]]
+      ]
+    },
+    {
+      "shape_hash": "81752f72",
+      "models": {
+        "hf/infer/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128100],"bf16"],
+        ["S",[4]]
+      ]
+    },
+    {
+      "shape_hash": "0bd4da28",
+      "models": {
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 1
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50265],"bf16"],
+        ["S",[7]]
+      ]
+    }
+  ]
+}

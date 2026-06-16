@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "mobilenet_v2",
+  "patterns": [
+    "04d85912d998",
+    "0bad56ceb78f",
+    "100a39b686e3",
+    "183b124c731f",
+    "1fc0030c74ea",
+    "2e254a2827d8",
+    "7a2ac1c4841d",
+    "894f3180f3c4",
+    "8bb40810003c",
+    "a58657212bf4",
+    "b38468e7a324",
+    "c2bf513c1ebf",
+    "ccd411f2a45d",
+    "ff900ef0c453"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

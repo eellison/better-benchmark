@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "6cbb208b",
+      "models": {
+        "torchbench/train/tts_angular": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,50,256],"bf16"],
+        ["S",[64,256]]
+      ]
+    }
+  ]
+}

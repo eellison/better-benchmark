@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "a7f39cdb",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,512],"bf16"],
+        [[256,512],"bf16"],
+        ["S",[512]]
+      ]
+    }
+  ]
+}

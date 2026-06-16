@@ -1,1 +1,0 @@
-torchbench_hf_reformer_train_014_bc1e210c: (T([8, 4096, 256], b8), T([8, 4096, 256], f32), T([8, 4096], i64, gen=Index(320)))

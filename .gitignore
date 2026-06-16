@@ -47,6 +47,7 @@ regen_repro.py
 region015_logs.txt
 repro_prelude.py
 run_*.py
+!scripts/run_recapture.py
 scan_all_graphs.py
 sol_gap.py
 triage_all_v2.json
@@ -55,3 +56,25 @@ tritonbench_reference_impls/
 tune_kernel.py
 validation_results.json
 *.best_config
+
+# Perf sweep outputs — kept locally, not published until results are ready
+results/
+
+# Session investigation notebook + perf-bearing session logs — kept locally,
+# preserved on the investigations-june-2026 branch + tags, not published to main.
+investigation_results/
+investigation_multi_kernel.md
+investigation_combo_regressions.md
+investigation_combo_mechanism.md
+investigation_combo_all_slowdowns.md
+PROGRESS.md
+
+# Session/process docs — kept locally, main-inclusion deferred (decide later).
+ORACLE_MANAGER_PROMPT.md
+ORACLE_IMPLEMENTER_PROMPT.md
+ADVERSARIAL_REVIEW.md
+INVEST_INSTRUCTIONS.MD
+CORPUS_MIGRATION_PLAN.md
+BENCHMARKING_FLOW.md
+EXPAND_BENCHMARKS.md
+ORACLE_MIGRATION_INSTRUCTIONS.md

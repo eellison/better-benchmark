@@ -1,0 +1,21 @@
+{
+  "points": [
+    {
+      "shape_hash": "adc76233",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,512,4,4],"bf16"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[96,512,4,4],"bf16"],
+        ["S",[96,-1]]
+      ]
+    }
+  ]
+}

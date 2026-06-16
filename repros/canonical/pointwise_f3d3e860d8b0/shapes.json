@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "60ceae96",
+      "models": {
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,128],"f32"],
+        ["S",[128,-1,128,128]]
+      ]
+    }
+  ]
+}

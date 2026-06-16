@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "8ebdd403",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,1,1,1],"bf16"],
+        [[32,1,1,1],"bf16"]
+      ]
+    }
+  ]
+}

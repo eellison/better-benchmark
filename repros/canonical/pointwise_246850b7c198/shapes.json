@@ -1,0 +1,40 @@
+{
+  "points": [
+    {
+      "shape_hash": "c06edc2f",
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 1
+        },
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,65],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c60f6058",
+      "models": {
+        "torchbench/infer/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,1,1,1],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "dda9fef3",
+      "models": {
+        "torchbench/train/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,1,1,1],"bf16"]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "2017ac6d22a7",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice_scatter.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm/infer/mobilevit_s",
+    "timm/train/mobilevit_s"
+  ]
+}

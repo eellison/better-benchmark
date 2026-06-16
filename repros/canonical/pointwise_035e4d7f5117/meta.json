@@ -1,0 +1,37 @@
+{
+  "pattern_hash": "035e4d7f5117",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.full.default"
+  ],
+  "n_models": 25,
+  "models": [
+    "hf/infer/AlbertForMaskedLM",
+    "hf/infer/AllenaiLongformerBase",
+    "hf/infer/BertForMaskedLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/infer/DebertaV2ForMaskedLM",
+    "hf/infer/DistilBertForMaskedLM",
+    "hf/infer/ElectraForCausalLM",
+    "hf/infer/LayoutLMForMaskedLM",
+    "hf/infer/M2M100ForConditionalGeneration",
+    "hf/infer/MT5ForConditionalGeneration",
+    "hf/infer/MegatronBertForCausalLM",
+    "hf/infer/MobileBertForMaskedLM",
+    "hf/infer/RobertaForCausalLM",
+    "hf/infer/T5ForConditionalGeneration",
+    "hf/infer/T5Small",
+    "hf/infer/YituTechConvBert",
+    "hf/train/AlbertForMaskedLM",
+    "hf/train/AllenaiLongformerBase",
+    "hf/train/BertForMaskedLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/DebertaV2ForMaskedLM",
+    "hf/train/DistilBertForMaskedLM",
+    "hf/train/XLNetLMHeadModel",
+    "torchbench/infer/pyhpc_isoneutral_mixing",
+    "torchbench/infer/pyhpc_turbulent_kinetic_energy"
+  ]
+}

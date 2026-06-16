@@ -1,0 +1,22 @@
+{
+  "pattern_hash": "f667cd8901af",
+  "kind": "reduction",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mean.dim",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.pow.Tensor_Scalar",
+    "aten.rsqrt.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "genai/static/RMSNormForward"
+  ]
+}

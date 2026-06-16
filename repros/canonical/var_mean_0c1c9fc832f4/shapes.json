@@ -1,0 +1,340 @@
+{
+  "points": [
+    {
+      "shape_hash": "2a5a9625",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,256,8,8],"bf16"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[96,256,8,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c772ba0f",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,128,16,16],"bf16"],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[96,128,16,16],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8d0ce3d5",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,64,32,32],"bf16"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[96,64,32,32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b2063b0a",
+      "models": {
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,256,14,14],"bf16"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[16,256,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f584d38d",
+      "models": {
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,128,28,28],"bf16"],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[16,128,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "912cb7ce",
+      "models": {
+        "torchbench/train/resnet18": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[16,64,56,56],"bf16"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[16,64,56,56],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8881253b",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,2048,7,7],"bf16"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        [[32,2048,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4ace980f",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[32,1024,14,14],"bf16"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        [[32,1024,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0815ad0d",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[32,512,28,28],"bf16"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[32,512,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "faf0eb9e",
+      "models": {
+        "torchbench/train/resnet50": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32,256,56,56],"bf16"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[32,256,56,56],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c99f0cec",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,2048,7,7],"bf16"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        [[8,2048,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b1e0eed3",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[8,1024,14,14],"bf16"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        [[8,1024,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "56f0f473",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[8,512,28,28],"bf16"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[8,512,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "39fb619f",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[8,256,56,56],"bf16"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[8,256,56,56],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "77734290",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,64,8,8],"bf16"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[128,64,8,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a4d97c4c",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[128,32,16,16],"bf16"],
+        [[32],"f32"],
+        [[32],"f32"],
+        [[32],"f32"],
+        [[32],"f32"],
+        [[128,32,16,16],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "79b5368f",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[128,16,32,32],"bf16"],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[128,16,32,32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f7eda15e",
+      "models": {
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,2048,7,7],"bf16"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        [[128,2048,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e7ff3dbe",
+      "models": {
+        "torchbench/train/resnet152": {
+          "occurrences": 35
+        }
+      },
+      "inputs": [
+        [[128,1024,14,14],"bf16"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        [[128,1024,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "60428e86",
+      "models": {
+        "torchbench/train/resnet152": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[128,512,28,28],"bf16"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        [[128,512,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cd42bd92",
+      "models": {
+        "torchbench/train/resnet152": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,256,56,56],"bf16"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[256],"f32"],
+        [[128,256,56,56],"bf16"]
+      ]
+    }
+  ]
+}

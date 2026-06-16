@@ -1,0 +1,25 @@
+{
+  "points": [
+    {
+      "shape_hash": "3fdaed2a",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 26
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 26
+        }
+      },
+      "inputs": [
+        [[128,4096],"bf16"],
+        [[128,4096],"bf16"],
+        [[1,128,4096],"f32"],
+        [[4096],"f32"],
+        [[4096],"f32"],
+        ["S",[1,128,4096]],
+        ["S",[1,128,4096]],
+        ["S",[128,4096]]
+      ]
+    }
+  ]
+}

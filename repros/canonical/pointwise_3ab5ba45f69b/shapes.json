@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "ba170fb6",
+      "models": {
+        "torchbench/infer/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,512,14,14],"bf16"],
+        ["S",[2,2]],
+        ["S",[2,2]],
+        ["S",[4,25088]]
+      ]
+    }
+  ]
+}

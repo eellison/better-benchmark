@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "3a0cd5d11499",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm/infer/visformer_small",
+    "timm/train/visformer_small"
+  ]
+}

@@ -13,9 +13,13 @@ Usage:
 import argparse
 from contextlib import contextmanager
 from dataclasses import dataclass
+import hashlib
 import json
+import re
 import tempfile
 from pathlib import Path
+
+
 from typing import Iterator
 
 from canonicalize_repros import (
@@ -27,6 +31,143 @@ from canonicalize_repros import (
     parse_make_inputs,
     _spec_to_T,
 )
+
+
+# Regex to extract _shapes_config from v2 repro source files.
+# Matches: _shapes_config = "(...)"  (single or double quotes, possibly multi-line)
+_SHAPES_CONFIG_RE = re.compile(
+    r'^_shapes_config\s*=\s*["\'](.+?)["\']\s*$',
+    re.MULTILINE,
+)
+
+
+def _atomic_write_text(path: Path, text: str) -> None:
+    """Write via temp + rename so a SIGKILL mid-write (run_recapture kills
+    workers at timeout+60) can never leave a truncated file in the SHARED
+    canonical tree — a poisoned meta.json/shapes.json fails every later
+    model that touches the same pattern dir."""
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text)
+    tmp.replace(path)
+
+
+def _extract_shapes_config(src_path: Path) -> str | None:
+    """Extract the _shapes_config string from a v2 repro source file.
+
+    This is the 0d fix: instead of trying to execute parse_shapes_config
+    (which requires repro_harness importable), we extract the literal string
+    directly from the source via regex.
+    """
+    if not src_path.exists():
+        return None
+    text = src_path.read_text()
+    m = _SHAPES_CONFIG_RE.search(text)
+    if m:
+        return m.group(1)
+    return None
+
+
+def _compute_shape_hash(signature: str) -> str:
+    """Compute the 8-hex-char shape hash from the signature string."""
+    return hashlib.sha256(signature.encode()).hexdigest()[:8]
+
+
+def _write_shapes_json(
+    repro_dir: Path,
+    shape_hash: str,
+    signature: str,
+    model_key: str,
+    occurrences: int | None = None,
+    inputs: list | None = None,
+    alias_group_nbytes: list | None = None,
+) -> None:
+    """Write or update shapes.json for a canonical repro directory.
+
+    Idempotent: re-merging the same (model_key, shape_hash) updates that
+    model's entry in place. A new model on an existing point adds a key
+    under "models". `occurrences` is the EXACT pre-dedup count of this
+    (pattern, shape) point in the model's graphs (counted by the capture
+    hook) — the accounting joins on it without needing a GPU retrace.
+
+    `inputs` is the compact structured encoding (input_codec) — the DATA
+    consumers parse. `signature` is its human-readable T()/S() rendering,
+    kept for documentation and the repro.py default; never text-parsed
+    when `inputs` is present.
+
+    Schema (static/degenerate case — omits symbols/family/bindings):
+    {
+      "points": [
+        {"shape_hash": "<8hex>",
+         "inputs": [[[128,512,7,7], "bf16", {"st": [...]}], ["S", [128]]],
+         "signature": "<rendered T()/S() doc string>",
+         "models": {"<suite>/<mode>/<model>": {"occurrences": 7}},
+         "source": "captured"}
+      ]
+    }
+    """
+    shapes_path = repro_dir / "shapes.json"
+
+    if shapes_path.exists():
+        data = json.loads(shapes_path.read_text())
+    else:
+        data = {"points": []}
+
+    # Find existing point by shape_hash
+    existing_point = None
+    for point in data["points"]:
+        if point.get("shape_hash") == shape_hash:
+            existing_point = point
+            break
+
+    if existing_point is not None:
+        # Point exists — add/update this model's entry (a recapture with a
+        # real count REPLACES a stale null from an older merge).
+        models = existing_point.setdefault("models", {})
+        if model_key not in models or occurrences is not None:
+            models[model_key] = {"occurrences": occurrences}
+        if inputs is not None and "inputs" not in existing_point:
+            existing_point["inputs"] = inputs
+        elif inputs is not None and existing_point.get("inputs") != inputs:
+            # Richer recapture (alias tags) REPLACES a pre-alias inputs
+            # list — never silently discard fidelity (review bug #2).
+            def _has_alias(entries):
+                return any(isinstance(e, list) and len(e) > 2
+                           and isinstance(e[2], dict) and "alias" in e[2]
+                           for e in entries)
+            if _has_alias(inputs) and not _has_alias(
+                    existing_point.get("inputs") or []):
+                existing_point["inputs"] = inputs
+        if alias_group_nbytes and not existing_point.get("alias_group_nbytes"):
+            existing_point["alias_group_nbytes"] = alias_group_nbytes
+    else:
+        # New point. "inputs" is THE data (compact codec); render the
+        # human-readable string on demand via input_codec.render_signature
+        # — it is not stored (settled: no duplicative signature field).
+        # "signature" is written ONLY as a legacy fallback when the entry
+        # carries no structured inputs (pre-codec capture dirs).
+        new_point = {
+            "shape_hash": shape_hash,
+            "models": {model_key: {"occurrences": occurrences}},
+        }
+        if inputs is not None:
+            new_point["inputs"] = inputs
+        else:
+            new_point["signature"] = signature
+        if alias_group_nbytes:
+            # True allocation size (bytes) per alias group, captured from
+            # the live storage — consumers allocate group buffers directly,
+            # never re-derive size by scanning member offsets/spans.
+            new_point["alias_group_nbytes"] = alias_group_nbytes
+        data["points"].append(new_point)
+
+    import copy as _copy
+    from full_graph_harness import _OneLine, dumps_with_onelines
+
+    marked = _copy.deepcopy(data)
+    for point in marked.get("points", []):
+        if isinstance(point.get("inputs"), list):
+            point["inputs"] = [_OneLine(e) for e in point["inputs"]]
+    _atomic_write_text(shapes_path, dumps_with_onelines(marked) + "\n")
 
 
 @dataclass
@@ -160,7 +301,7 @@ def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
     if mode:
         manifest_data["mode"] = mode
 
-    manifest_file.write_text(json.dumps(manifest_data, indent=2) + "\n")
+    _atomic_write_text(manifest_file, json.dumps(manifest_data, indent=2) + "\n")
     return out_dir
 
 
@@ -239,7 +380,21 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         return 0
 
     with open(index_path) as f:
-        entries = json.load(f)
+        index = json.load(f)
+    # index.json v2 is {"captured": [...], "dropped": [...]}; v1 was a bare
+    # list. Drops FAIL the merge: every drop ever observed was a pipeline
+    # bug, and a partial model must never enter the canonical corpus.
+    if isinstance(index, dict):
+        entries = index.get("captured", [])
+        dropped = index.get("dropped", [])
+        if dropped:
+            raise RuntimeError(
+                f"refusing to merge {capture_dir}: {len(dropped)} dropped "
+                f"region(s) in index.json — fix the capture bug and re-run. "
+                f"First: {dropped[0].get('reason', '?')[:200]}"
+            )
+    else:
+        entries = index
 
     canonical_path = canonical_dir / "canonical"
     canonical_path.mkdir(parents=True, exist_ok=True)
@@ -262,31 +417,49 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             repro_dir = canonical_path / dir_name
         repro_dir.mkdir(parents=True, exist_ok=True)
 
-        # Update shapes.txt (compact T()/S() format)
-        shapes_path = repro_dir / "shapes.txt"
-        config_key = f"{model_name.lower()}_{shape_hash[:8]}"
-
-        # Check if this config already exists
-        existing_lines = shapes_path.read_text().splitlines() if shapes_path.exists() else []
-        if not any(line.startswith(f"{config_key}:") for line in existing_lines):
-            src_file = Path(entry["file"])
+        # Update shapes.json. The signature travels as DATA in the index
+        # entry (capture_hook stamps it at generation time) — never re-derive
+        # it by regexing generated source (lossy text-parsing, banned).
+        src_file = Path(entry["file"])
+        signature = entry.get("signature")
+        if signature is None:
+            # Legacy capture dirs (pre-signature index entries) only.
+            signature = _extract_shapes_config(src_file)
+        if signature is None:
+            # Fallback for v1 repros: build signature from input_specs
             input_specs = parse_make_inputs(src_file) if src_file.exists() else []
             if input_specs:
-                compact_line = _format_compact_config(config_key, input_specs)
-                with open(shapes_path, "a") as f:
-                    f.write(compact_line + "\n")
+                parts = []
+                for spec in input_specs:
+                    if spec.get("kind") == "shape":
+                        parts.append(f"S({spec['dims']})")
+                    else:
+                        parts.append(_spec_to_T(spec))
+                signature = f"({', '.join(parts)})"
 
-        # Update meta.json
+        if signature:
+            # Build model key: suite/mode/model_name
+            model_key = f"{suite}/{mode}/{clean_name}" if mode else f"{suite}/{clean_name}"
+            point_hash = shape_hash[:8] if len(shape_hash) >= 8 else shape_hash
+            _write_shapes_json(repro_dir, point_hash, signature, model_key,
+                               occurrences=entry.get("occurrences"),
+                               inputs=entry.get("inputs"),
+                               alias_group_nbytes=entry.get("alias_group_nbytes"))
+
+        # Update meta.json. Models recorded by QUALIFIED key
+        # (suite/mode/name) — the same key shapes.json uses; bare names
+        # collide across suites/modes (resnet18 exists in timm AND
+        # torchbench).
+        qual_key = f"{suite}/{mode}/{clean_name}" if mode else f"{suite}/{clean_name}"
         meta_path = repro_dir / "meta.json"
         if meta_path.exists():
             with open(meta_path) as f:
                 meta = json.load(f)
-            if model_name not in meta.get("models", []):
-                meta["models"].append(model_name)
+            if qual_key not in meta.get("models", []):
+                meta["models"].append(qual_key)
                 meta["models"].sort()
                 meta["n_models"] = len(meta["models"])
-                with open(meta_path, "w") as f:
-                    json.dump(meta, f, indent=2)
+                _atomic_write_text(meta_path, json.dumps(meta, indent=2))
         else:
             meta = {
                 "pattern_hash": pattern_hash,
@@ -295,26 +468,35 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                 "n_ops": entry.get("n_ops"),
                 "origin_ops": entry.get("origin_ops", []),
                 "n_models": 1,
-                "models": [model_name],
+                "models": [qual_key],
             }
-            with open(meta_path, "w") as f:
-                json.dump(meta, f, indent=2)
+            _atomic_write_text(meta_path, json.dumps(meta, indent=2))
 
-        # Write canonical repro.py if it doesn't exist or needs upgrade to v2
+        # Write canonical repro.py if it doesn't exist or is older-format
+        # than the capture's. Version compare, NOT equality-with-v2 — the
+        # old check treated v3 files as "stale v1" and shoved them through
+        # the legacy text-extraction rebuild, corrupting them.
+        _ver_re = re.compile(r"^_repro_version\s*=\s*(\d+)", re.MULTILINE)
+
+        def _version_of(text: str) -> int:
+            m = _ver_re.search(text)
+            return int(m.group(1)) if m else 1
+
         repro_py = repro_dir / "repro.py"
+        src_file = Path(entry["file"])
+        src_text = src_file.read_text() if src_file.exists() else None
+        src_ver = _version_of(src_text) if src_text else 1
         needs_write = not repro_py.exists()
-        if not needs_write and repro_py.exists():
-            existing = repro_py.read_text()
-            if "_repro_version = 2" not in existing:
-                needs_write = True  # upgrade stale repro to v2
+        if not needs_write:
+            needs_write = _version_of(repro_py.read_text()) < src_ver
         if needs_write:
-            src_file = Path(entry["file"])
-            if src_file.exists():
+            if src_text is not None:
                 try:
-                    src_text = src_file.read_text()
-                    # If source is already v2 format (has _shapes_config), use it directly
-                    if "_repro_version = 2" in src_text and "_shapes_config" in src_text:
-                        repro_py.write_text(src_text)
+                    # Capture-produced files (v2+) are AUTHORITATIVE: copy
+                    # verbatim. The extraction rebuild below is for true
+                    # v1 legacy captures only.
+                    if src_ver >= 2:
+                        _atomic_write_text(repro_py, src_text)
                     else:
                         repro_class = extract_repro_class(src_file)
                         docstring = extract_docstring(src_file)
@@ -336,7 +518,7 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                                 repro_class, docstring, imports, fallback,
                                 shapes_config=shapes_config,
                             )
-                            repro_py.write_text(code)
+                            _atomic_write_text(repro_py, code)
                 except Exception as e:
                     print(f"  Warning: could not generate canonical repro for {dir_name}: {e}")
 

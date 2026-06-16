@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "89c74f3242b5",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.where.self"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/PLBartForCausalLM"
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "points": [
+    {
+      "shape_hash": "9135f859",
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[512,512,512],"bf16"],
+        ["S",[8,64,512,512]],
+        ["S",[8,64,512,512]],
+        ["S",[8,64,512,512]],
+        ["S",[512,512,512]]
+      ]
+    },
+    {
+      "shape_hash": "59a0e132",
+      "models": {
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[384,512,512],"bf16"],
+        ["S",[32,12,512,512]],
+        ["S",[32,12,512,512]],
+        ["S",[32,12,512,512]],
+        ["S",[384,512,512]]
+      ]
+    },
+    {
+      "shape_hash": "e6f344ac",
+      "models": {
+        "hf/infer/BlenderbotForConditionalGeneration": {
+          "occurrences": 26
+        }
+      },
+      "inputs": [
+        [[512,128,128],"bf16"],
+        ["S",[16,32,128,128]],
+        ["S",[16,32,128,128]],
+        ["S",[16,32,128,128]],
+        ["S",[512,128,128]]
+      ]
+    },
+    {
+      "shape_hash": "2fe3efd1",
+      "models": {
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[3072,128,128],"bf16"],
+        ["S",[256,12,128,128]],
+        ["S",[256,12,128,128]],
+        ["S",[256,12,128,128]],
+        ["S",[3072,128,128]]
+      ]
+    },
+    {
+      "shape_hash": "730342a3",
+      "models": {
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[256,512,512],"bf16"],
+        ["S",[64,4,512,512]],
+        ["S",[64,4,512,512]],
+        ["S",[64,4,512,512]],
+        ["S",[256,512,512]]
+      ]
+    },
+    {
+      "shape_hash": "bcf6fe02",
+      "models": {
+        "hf/infer/M2M100ForConditionalGeneration": {
+          "occurrences": 24
+        },
+        "hf/infer/MobileBertForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[1024,128,128],"bf16"],
+        ["S",[64,16,128,128]],
+        ["S",[64,16,128,128]],
+        ["S",[64,16,128,128]],
+        ["S",[1024,128,128]]
+      ]
+    }
+  ]
+}

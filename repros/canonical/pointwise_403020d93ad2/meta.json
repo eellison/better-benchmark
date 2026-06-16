@@ -6,11 +6,9 @@
   "origin_ops": [
     "aten.lt.Scalar"
   ],
-  "n_models": 4,
+  "n_models": 2,
   "models": [
-    "hf_AllenaiLongformerBase_infer_001",
-    "hf_AllenaiLongformerBase_train_001",
-    "torchbench_hf_Longformer_infer_001",
-    "torchbench_hf_Longformer_train_001"
+    "hf/infer/AllenaiLongformerBase",
+    "hf/train/AllenaiLongformerBase"
   ]
 }

@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "a0e6bc91",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,128],"bf16"],
+        [[128],"f32"],
+        [[128],"f32"],
+        ["S",[8,512,128]],
+        ["S",[4096,128]]
+      ]
+    }
+  ]
+}

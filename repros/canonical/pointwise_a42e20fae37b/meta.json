@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "a42e20fae37b",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.unbind.int"
+  ],
+  "n_models": 12,
+  "models": [
+    "timm/infer/beit_base_patch16_224",
+    "timm/infer/deit_base_distilled_patch16_224",
+    "timm/infer/deit_tiny_patch16_224.fb_in1k",
+    "timm/infer/mobilevit_s",
+    "timm/infer/vit_base_patch14_dinov2.lvd142m",
+    "timm/infer/vit_base_patch16_siglip_256",
+    "timm/train/beit_base_patch16_224",
+    "timm/train/deit_base_distilled_patch16_224",
+    "timm/train/deit_tiny_patch16_224.fb_in1k",
+    "timm/train/mobilevit_s",
+    "timm/train/vit_base_patch14_dinov2.lvd142m",
+    "timm/train/vit_base_patch16_siglip_256"
+  ]
+}

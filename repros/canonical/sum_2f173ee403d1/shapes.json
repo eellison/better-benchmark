@@ -1,0 +1,32 @@
+{
+  "points": [
+    {
+      "shape_hash": "0c938b20",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512,128,128],"bf16"],
+        [[16,32,128,128],"bf16"],
+        ["S",[16,32,128,128]],
+        ["S",[512,128,128]]
+      ]
+    },
+    {
+      "shape_hash": "b31e9601",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[512,512,512],"bf16"],
+        [[8,64,512,512],"bf16"],
+        ["S",[8,64,512,512]],
+        ["S",[512,512,512]]
+      ]
+    }
+  ]
+}

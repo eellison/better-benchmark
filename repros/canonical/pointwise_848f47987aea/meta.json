@@ -1,0 +1,24 @@
+{
+  "pattern_hash": "848f47987aea",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.expand.default",
+    "aten.ge.Scalar",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "prims.iota.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf/infer/BlenderbotForCausalLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/train/BlenderbotForCausalLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/M2M100ForConditionalGeneration",
+    "hf/train/PegasusForCausalLM"
+  ]
+}

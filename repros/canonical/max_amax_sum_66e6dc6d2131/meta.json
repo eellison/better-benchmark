@@ -1,0 +1,36 @@
+{
+  "pattern_hash": "66e6dc6d2131",
+  "kind": "reduction",
+  "reduction_types": [
+    "max",
+    "amax",
+    "sum"
+  ],
+  "n_ops": 20,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.max.dim",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/openai/gpt-oss-20b"
+  ]
+}

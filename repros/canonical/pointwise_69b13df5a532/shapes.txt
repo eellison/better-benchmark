@@ -1,7 +1,0 @@
-torchbench_timm_efficientnet_infer_000_1ea3f542: (T([64, 4, 1, 1], f16))
-torchbench_timm_efficientnet_infer_000_3b21fedc: (T([64, 10, 1, 1], f16))
-torchbench_timm_efficientnet_infer_000_584aabd9: (T([64, 48, 1, 1], f16))
-torchbench_timm_efficientnet_infer_000_722fe825: (T([64, 28, 1, 1], f16))
-torchbench_timm_efficientnet_infer_000_9ea59d68: (T([64, 20, 1, 1], f16))
-torchbench_timm_efficientnet_infer_000_a9d02438: (T([64, 6, 1, 1], f16))
-torchbench_timm_efficientnet_infer_000_d5ebd17f: (T([64, 8, 1, 1], f16))

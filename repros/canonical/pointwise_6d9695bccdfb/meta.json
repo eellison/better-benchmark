@@ -1,0 +1,17 @@
+{
+  "pattern_hash": "6d9695bccdfb",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.le.Scalar",
+    "aten.relu.default",
+    "aten.slice.Tensor"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/demucs",
+    "torchbench/train/demucs"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "points": [
+    {
+      "shape_hash": "0105f520",
+      "models": {
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024],"i64",{"gen":["index",0,50261]}]
+      ]
+    },
+    {
+      "shape_hash": "3d748156",
+      "models": {
+        "hf/infer/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,128],"i64",{"gen":["index",0,128042]}]
+      ]
+    },
+    {
+      "shape_hash": "26cc4258",
+      "models": {
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,512],"i64",{"gen":["index",0,50265]}]
+      ]
+    }
+  ]
+}

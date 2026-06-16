@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "alexnet",
+  "patterns": [
+    "00305945ce46",
+    "04d85912d998",
+    "18c197d90a41",
+    "1edbc54f25f6",
+    "3abc926270f6",
+    "7cfdb80c54c5",
+    "8bb40810003c",
+    "c2bf513c1ebf",
+    "cbfed5cd52de",
+    "ccd411f2a45d",
+    "ccfc54d6b3cf",
+    "cf864ca94168",
+    "f0e2b374d39c",
+    "fbfd10a2d290"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

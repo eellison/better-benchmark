@@ -1,0 +1,16 @@
+{
+  "points": [
+    {
+      "shape_hash": "2a837a19",
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[],"bf16"],
+        ["S",[32,-1,128,128]]
+      ]
+    }
+  ]
+}

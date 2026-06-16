@@ -1,0 +1,49 @@
+{
+  "pattern_hash": "93ab7097e9e5",
+  "kind": "reduction",
+  "reduction_types": [
+    "amax",
+    "sum",
+    "sum",
+    "sum"
+  ],
+  "n_ops": 27,
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.gather.default",
+    "aten.log.default",
+    "aten.ne.Scalar",
+    "aten.ne.Scalar",
+    "aten.ne.Scalar",
+    "aten.neg.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.slice.Tensor",
+    "aten.squeeze.dim",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sum.default",
+    "aten.sum.default",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.where.self",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf/infer/BertForMaskedLM",
+    "hf/infer/DistilBertForMaskedLM",
+    "hf/infer/LayoutLMForMaskedLM",
+    "hf/infer/YituTechConvBert",
+    "hf/train/BertForMaskedLM",
+    "hf/train/DistilBertForMaskedLM"
+  ]
+}

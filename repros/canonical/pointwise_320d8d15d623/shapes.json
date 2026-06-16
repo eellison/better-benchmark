@@ -1,0 +1,43 @@
+{
+  "points": [
+    {
+      "shape_hash": "d20f46e2",
+      "models": {
+        "hf/infer/LayoutLMForMaskedLM": {
+          "occurrences": 36
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        ["S",[32,512,768]],
+        ["S",[32,512,-1,64]]
+      ]
+    },
+    {
+      "shape_hash": "ad7b2a2c",
+      "models": {
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[8192,1024],"bf16"],
+        ["S",[16,512,1024]],
+        ["S",[16,512,16,64]]
+      ]
+    },
+    {
+      "shape_hash": "da5fdead",
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 16
+        }
+      },
+      "inputs": [
+        [[1500,384],"bf16"],
+        ["S",[1,1500,384]],
+        ["S",[1,-1,6,64]]
+      ]
+    }
+  ]
+}

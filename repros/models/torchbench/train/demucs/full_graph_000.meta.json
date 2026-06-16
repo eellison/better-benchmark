@@ -1,25 +1,12 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "arg0_1",
-      "shape": [
-        64,
-        5,
-        2,
-        426888
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[4,5,2,426888],"f32",{"n":"arg0_1"}]
   ],
-  "outputs": [],
+  "outputs": [
+    [[4,4,2,382788],"f32",{"n":"output_0"}],
+    [[4,2,382788],"f32",{"n":"output_1"}]
+  ],
   "tensor_attrs": {},
   "graph": "full_graph_000.py",
   "source": {
@@ -28,5 +15,37 @@
     "mode": "train",
     "model": "demucs",
     "graph": "full_graph_000.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 30,
+    "counts": {
+      "fusible_in_partition": 30,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "_operator.getitem": 1,
+        "aten.add.Tensor": 1,
+        "aten.cat.default": 1,
+        "aten.expand.default": 3,
+        "aten.gather.default": 4,
+        "aten.mul.Tensor": 2,
+        "aten.reshape.default": 2,
+        "aten.slice.Tensor": 1,
+        "aten.sort.default": 1,
+        "aten.sub.Tensor": 2,
+        "aten.sum.dim_IntList": 1,
+        "prims.convert_element_type.default": 1,
+        "prims.inductor_lookup_seed.default": 4,
+        "prims.inductor_randint.default": 3,
+        "prims.inductor_random.default": 1,
+        "prims.inductor_seeds.default": 1,
+        "prims.iota.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

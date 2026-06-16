@@ -1,0 +1,1870 @@
+{
+  "points": [
+    {
+      "shape_hash": "aeef24a2",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[384],"bf16"],
+        [[128,384,8,8],"bf16",{"st":[24576,1,3072,384]}],
+        [[384],"bf16"],
+        [[384],"bf16"],
+        [[384],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d0015d69",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 2
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[448],"bf16"],
+        [[128,448,8,8],"bf16",{"st":[28672,1,3584,448]}],
+        [[448],"bf16"],
+        [[448],"bf16"],
+        [[448],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "79f50b00",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 10
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 10
+        }
+      },
+      "inputs": [
+        [[192],"bf16"],
+        [[128,192,17,17],"bf16",{"st":[55488,1,3264,192]}],
+        [[192],"bf16"],
+        [[192],"bf16"],
+        [[192],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "45fcf39e",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 12
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[160],"bf16"],
+        [[128,160,17,17],"bf16",{"st":[46240,1,2720,160]}],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6b130750",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 6
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[128,128,17,17],"bf16",{"st":[36992,1,2176,128]}],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "466338df",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[96],"bf16"],
+        [[128,96,35,35],"bf16",{"st":[117600,1,3360,96]}],
+        [[96],"bf16"],
+        [[96],"bf16"],
+        [[96],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2eaf76ca",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 4
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[128,64,35,35],"bf16",{"st":[78400,1,2240,64]}],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5ecba4cf",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 3
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[48],"bf16"],
+        [[128,48,35,35],"bf16",{"st":[58800,1,1680,48]}],
+        [[48],"bf16"],
+        [[48],"bf16"],
+        [[48],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2869e39e",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[80],"bf16"],
+        [[128,80,73,73],"bf16",{"st":[426320,1,5840,80]}],
+        [[80],"bf16"],
+        [[80],"bf16"],
+        [[80],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8a535339",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[128,32,147,147],"bf16",{"st":[691488,1,4704,32]}],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f868ccff",
+      "models": {
+        "timm/infer/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/infer/inception_v3": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[128,32,149,149],"bf16",{"st":[710432,1,4768,32]}],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2b758769",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[480],"bf16"],
+        [[512,480,7,7],"bf16",{"st":[23520,1,3360,480]}],
+        [[480],"bf16"],
+        [[480],"bf16"],
+        [[480],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a034af1b",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[336],"bf16"],
+        [[512,336,14,14],"bf16",{"st":[65856,1,4704,336]}],
+        [[336],"bf16"],
+        [[336],"bf16"],
+        [[336],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4c825568",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[240],"bf16"],
+        [[512,240,14,14],"bf16",{"st":[47040,1,3360,240]}],
+        [[240],"bf16"],
+        [[240],"bf16"],
+        [[240],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3d7c0f11",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[92],"bf16"],
+        [[512,92,14,14],"bf16",{"st":[18032,1,1288,92]}],
+        [[92],"bf16"],
+        [[92],"bf16"],
+        [[92],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "76836be5",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[100],"bf16"],
+        [[512,100,14,14],"bf16",{"st":[19600,1,1400,100]}],
+        [[100],"bf16"],
+        [[100],"bf16"],
+        [[100],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "37cf4567",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[120],"bf16"],
+        [[512,120,28,28],"bf16",{"st":[94080,1,3360,120]}],
+        [[120],"bf16"],
+        [[120],"bf16"],
+        [[120],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "09d7b0e3",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[60],"bf16"],
+        [[512,60,28,28],"bf16",{"st":[47040,1,1680,60]}],
+        [[60],"bf16"],
+        [[60],"bf16"],
+        [[60],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ff6665c7",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[36],"bf16"],
+        [[512,36,56,56],"bf16",{"st":[112896,1,2016,36]}],
+        [[36],"bf16"],
+        [[36],"bf16"],
+        [[36],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2d204c68",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24],"bf16"],
+        [[512,24,112,112],"bf16",{"st":[301056,1,2688,24]}],
+        [[24],"bf16"],
+        [[24],"bf16"],
+        [[24],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0a96753f",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8],"bf16"],
+        [[512,8,112,112],"bf16",{"st":[100352,1,896,8]}],
+        [[8],"bf16"],
+        [[8],"bf16"],
+        [[8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c7c6ed1f",
+      "models": {
+        "timm/infer/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16],"bf16"],
+        [[512,16,112,112],"bf16",{"st":[200704,1,1792,16]}],
+        [[16],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e7ac2695",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[72],"bf16"],
+        [[512,72,56,56],"bf16",{"st":[225792,1,4032,72]}],
+        [[72],"bf16"],
+        [[72],"bf16"],
+        [[72],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5ddd3fd5",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[512,64,56,56],"bf16",{"st":[200704,1,3584,64]}],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b88e53cc",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[512,64,112,112],"bf16",{"st":[802816,1,7168,64]}],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9c97edfa",
+      "models": {
+        "timm/infer/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[128,32,112,112],"bf16",{"st":[401408,1,3584,32]}],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "55c49b50",
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[96,512,4,4],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9ffe1d7a",
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[96,256,8,8],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d0456ef8",
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[96,128,16,16],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "dc068d28",
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[96,64,32,32],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "23b42229",
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[96,64,64,64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8273eec8",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 16
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[64,128,7,7],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fe78a763",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[992],"bf16"],
+        [[64,992,7,7],"bf16"],
+        [[992],"bf16"],
+        [[992],"bf16"],
+        [[992],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fb1609c3",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[960],"bf16"],
+        [[64,960,7,7],"bf16"],
+        [[960],"bf16"],
+        [[960],"bf16"],
+        [[960],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3a805d91",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[928],"bf16"],
+        [[64,928,7,7],"bf16"],
+        [[928],"bf16"],
+        [[928],"bf16"],
+        [[928],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f9b980a0",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[896],"bf16"],
+        [[64,896,7,7],"bf16"],
+        [[896],"bf16"],
+        [[896],"bf16"],
+        [[896],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9a46a7c3",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[864],"bf16"],
+        [[64,864,7,7],"bf16"],
+        [[864],"bf16"],
+        [[864],"bf16"],
+        [[864],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "29619cda",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[832],"bf16"],
+        [[64,832,7,7],"bf16"],
+        [[832],"bf16"],
+        [[832],"bf16"],
+        [[832],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "49317bb2",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[800],"bf16"],
+        [[64,800,7,7],"bf16"],
+        [[800],"bf16"],
+        [[800],"bf16"],
+        [[800],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "15c8ba03",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[768],"bf16"],
+        [[64,768,7,7],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "5536024c",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1024],"bf16"],
+        [[64,1024,14,14],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "706b5a8b",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[64,128,14,14],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0c615bbc",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[992],"bf16"],
+        [[64,992,14,14],"bf16"],
+        [[992],"bf16"],
+        [[992],"bf16"],
+        [[992],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "86d8b817",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[960],"bf16"],
+        [[64,960,14,14],"bf16"],
+        [[960],"bf16"],
+        [[960],"bf16"],
+        [[960],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a01c3bbe",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[928],"bf16"],
+        [[64,928,14,14],"bf16"],
+        [[928],"bf16"],
+        [[928],"bf16"],
+        [[928],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ba61c626",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[896],"bf16"],
+        [[64,896,14,14],"bf16"],
+        [[896],"bf16"],
+        [[896],"bf16"],
+        [[896],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "bc2770a8",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[864],"bf16"],
+        [[64,864,14,14],"bf16"],
+        [[864],"bf16"],
+        [[864],"bf16"],
+        [[864],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9e8f8bc2",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[832],"bf16"],
+        [[64,832,14,14],"bf16"],
+        [[832],"bf16"],
+        [[832],"bf16"],
+        [[832],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8004dcee",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[800],"bf16"],
+        [[64,800,14,14],"bf16"],
+        [[800],"bf16"],
+        [[800],"bf16"],
+        [[800],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6039b181",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[768],"bf16"],
+        [[64,768,14,14],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"],
+        [[768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d438d876",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[736],"bf16"],
+        [[64,736,14,14],"bf16"],
+        [[736],"bf16"],
+        [[736],"bf16"],
+        [[736],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b6537524",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[704],"bf16"],
+        [[64,704,14,14],"bf16"],
+        [[704],"bf16"],
+        [[704],"bf16"],
+        [[704],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cc855e4e",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[672],"bf16"],
+        [[64,672,14,14],"bf16"],
+        [[672],"bf16"],
+        [[672],"bf16"],
+        [[672],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "27be3f93",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[640],"bf16"],
+        [[64,640,14,14],"bf16"],
+        [[640],"bf16"],
+        [[640],"bf16"],
+        [[640],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a3bf2c8d",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[608],"bf16"],
+        [[64,608,14,14],"bf16"],
+        [[608],"bf16"],
+        [[608],"bf16"],
+        [[608],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0fe88f70",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[576],"bf16"],
+        [[64,576,14,14],"bf16"],
+        [[576],"bf16"],
+        [[576],"bf16"],
+        [[576],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6558df98",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[544],"bf16"],
+        [[64,544,14,14],"bf16"],
+        [[544],"bf16"],
+        [[544],"bf16"],
+        [[544],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "793856d7",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[64,512,14,14],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c2f1485a",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[64,512,28,28],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "78e9098c",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[64,128,28,28],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4fbb328e",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[480],"bf16"],
+        [[64,480,28,28],"bf16"],
+        [[480],"bf16"],
+        [[480],"bf16"],
+        [[480],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c1f1985a",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[448],"bf16"],
+        [[64,448,28,28],"bf16"],
+        [[448],"bf16"],
+        [[448],"bf16"],
+        [[448],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b83c3106",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[416],"bf16"],
+        [[64,416,28,28],"bf16"],
+        [[416],"bf16"],
+        [[416],"bf16"],
+        [[416],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "82781865",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[384],"bf16"],
+        [[64,384,28,28],"bf16"],
+        [[384],"bf16"],
+        [[384],"bf16"],
+        [[384],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3a0fa905",
+      "models": {
+        "torchbench/infer/densenet121": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[64,128,56,56],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e3b17b69",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[1152],"bf16"],
+        [[32,1152,7,7],"bf16"],
+        [[1152],"bf16"],
+        [[1152],"bf16"],
+        [[1152],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d6d70882",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[576],"bf16"],
+        [[32,576,7,7],"bf16"],
+        [[576],"bf16"],
+        [[576],"bf16"],
+        [[576],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c9277843",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[576],"bf16"],
+        [[32,576,14,14],"bf16"],
+        [[576],"bf16"],
+        [[576],"bf16"],
+        [[576],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6cc76740",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[480],"bf16"],
+        [[32,480,14,14],"bf16"],
+        [[480],"bf16"],
+        [[480],"bf16"],
+        [[480],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "08df9f87",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[240],"bf16"],
+        [[32,240,14,14],"bf16"],
+        [[240],"bf16"],
+        [[240],"bf16"],
+        [[240],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a952c87d",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[240],"bf16"],
+        [[32,240,28,28],"bf16"],
+        [[240],"bf16"],
+        [[240],"bf16"],
+        [[240],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "51b8f364",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 4
+        },
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[120],"bf16"],
+        [[32,120,28,28],"bf16"],
+        [[120],"bf16"],
+        [[120],"bf16"],
+        [[120],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e78adaa5",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[72],"bf16"],
+        [[32,72,28,28],"bf16"],
+        [[72],"bf16"],
+        [[72],"bf16"],
+        [[72],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "09db272d",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 5
+        },
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[72],"bf16"],
+        [[32,72,56,56],"bf16"],
+        [[72],"bf16"],
+        [[72],"bf16"],
+        [[72],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "1f81c187",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[48],"bf16"],
+        [[32,48,56,56],"bf16"],
+        [[48],"bf16"],
+        [[48],"bf16"],
+        [[48],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b5cedc58",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[48],"bf16"],
+        [[32,48,112,112],"bf16"],
+        [[48],"bf16"],
+        [[48],"bf16"],
+        [[48],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c78ca241",
+      "models": {
+        "torchbench/infer/mnasnet1_0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[32,32,112,112],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "11ab0e65",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        },
+        "torchbench/infer/resnet50": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[32,64,56,56],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4194c732",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[32,64,112,112],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "05028dd8",
+      "models": {
+        "torchbench/infer/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16],"bf16"],
+        [[32,16,112,112],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4f218228",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[1,64,640,959],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0ce7c2f4",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[1,128,320,479],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "535abe76",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[1,256,160,239],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3f17dc95",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[1,512,80,119],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "d957323e",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[1,512,40,59],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7fd9f949",
+      "models": {
+        "torchbench/infer/resnet18": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[8,512,7,7],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2b7370d5",
+      "models": {
+        "torchbench/infer/resnet18": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[8,256,14,14],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6ff82f3b",
+      "models": {
+        "torchbench/infer/resnet18": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[8,128,28,28],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f50736b8",
+      "models": {
+        "torchbench/infer/resnet18": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[8,64,56,56],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "ad2ff10f",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[32,512,7,7],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7ebdbaf5",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[32,512,14,14],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "8380c440",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[32,256,14,14],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e3fcf83d",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[32,256,28,28],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "20f76211",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[32,128,28,28],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2ff0039c",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[32,128,56,56],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "93683cfe",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[1024],"bf16"],
+        [[8,1024,7,7],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6b05bfa0",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1024],"bf16"],
+        [[8,1024,14,14],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6a1621d9",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[8,512,14,14],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f7d56653",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[8,512,28,28],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c7ca5fcc",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[8,256,28,28],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "eff1e63e",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[8,256,56,56],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "18ebcf69",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[8,128,56,56],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "13e72620",
+      "models": {
+        "torchbench/infer/shufflenet_v2_x1_0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[232],"bf16"],
+        [[64,232,7,7],"bf16"],
+        [[232],"bf16"],
+        [[232],"bf16"],
+        [[232],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "b30eafb6",
+      "models": {
+        "torchbench/infer/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[232],"bf16"],
+        [[64,232,14,14],"bf16"],
+        [[232],"bf16"],
+        [[232],"bf16"],
+        [[232],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "f3036c42",
+      "models": {
+        "torchbench/infer/shufflenet_v2_x1_0": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[116],"bf16"],
+        [[64,116,14,14],"bf16"],
+        [[116],"bf16"],
+        [[116],"bf16"],
+        [[116],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "eb73312d",
+      "models": {
+        "torchbench/infer/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[116],"bf16"],
+        [[64,116,28,28],"bf16"],
+        [[116],"bf16"],
+        [[116],"bf16"],
+        [[116],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "9a05b224",
+      "models": {
+        "torchbench/infer/shufflenet_v2_x1_0": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[58],"bf16"],
+        [[64,58,28,28],"bf16"],
+        [[58],"bf16"],
+        [[58],"bf16"],
+        [[58],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c356b4b1",
+      "models": {
+        "torchbench/infer/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[58],"bf16"],
+        [[64,58,56,56],"bf16"],
+        [[58],"bf16"],
+        [[58],"bf16"],
+        [[58],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a8109c98",
+      "models": {
+        "torchbench/infer/phlippe_densenet": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[128,32,4,4],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a9c4f100",
+      "models": {
+        "torchbench/infer/phlippe_densenet": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[128,32,8,8],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7e261bd0",
+      "models": {
+        "torchbench/infer/phlippe_densenet": {
+          "occurrences": 6
+        },
+        "torchbench/infer/phlippe_resnet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[128,32,16,16],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fe80f1ea",
+      "models": {
+        "torchbench/infer/phlippe_densenet": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[128,32,32,32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "217063c8",
+      "models": {
+        "torchbench/infer/phlippe_resnet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[128,64,8,8],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "13bff0d2",
+      "models": {
+        "torchbench/infer/phlippe_resnet": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[16],"bf16"],
+        [[128,16,32,32],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "23eaa07b",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[128,512,7,7],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "dd92c2d0",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[128,512,14,14],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "357d64ea",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 71
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[128,256,14,14],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e84dbb88",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[128,256,28,28],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "839e83c4",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 15
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[128,128,28,28],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "608e0114",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[128,128,56,56],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "a2b8c17d",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[128,64,56,56],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"]
+      ]
+    }
+  ]
+}

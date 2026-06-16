@@ -1,0 +1,97 @@
+{
+  "points": [
+    {
+      "shape_hash": "115f9a0f",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512,80,128],"bf16"],
+        ["S",[16,32,80,128]],
+        ["S",[16,128,2560]],
+        ["S",[2048,2560]],
+        ["S",[2560]]
+      ]
+    },
+    {
+      "shape_hash": "471fe712",
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[3072,64,128],"bf16"],
+        ["S",[256,12,64,128]],
+        ["S",[256,128,768]],
+        ["S",[32768,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "17865e49",
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[384,64,512],"bf16"],
+        ["S",[32,12,64,512]],
+        ["S",[32,512,768]],
+        ["S",[16384,768]],
+        ["S",[768]]
+      ]
+    },
+    {
+      "shape_hash": "144bae60",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[256,64,512],"bf16"],
+        ["S",[64,4,64,512]],
+        ["S",[64,512,256]],
+        ["S",[32768,256]],
+        ["S",[256]]
+      ]
+    },
+    {
+      "shape_hash": "34b9f4a9",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[1024,64,128],"bf16"],
+        ["S",[64,16,64,128]],
+        ["S",[64,128,1024]],
+        ["S",[8192,1024]],
+        ["S",[1024]]
+      ]
+    },
+    {
+      "shape_hash": "5f1be6f8",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[1024,32,128],"bf16"],
+        ["S",[256,4,32,128]],
+        ["S",[256,128,128]],
+        ["S",[32768,128]],
+        ["S",[128]]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "points": [
+    {
+      "shape_hash": "f49a1957",
+      "models": {
+        "torchbench/infer/mobilenet_v2": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[160],"bf16"],
+        [[16,160,7,7],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[160],"bf16"],
+        [[16,160,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "c7ba4cb4",
+      "models": {
+        "torchbench/infer/mobilenet_v2": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[96],"bf16"],
+        [[16,96,14,14],"bf16"],
+        [[96],"bf16"],
+        [[96],"bf16"],
+        [[96],"bf16"],
+        [[16,96,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "896739fb",
+      "models": {
+        "torchbench/infer/mobilenet_v2": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[16,64,14,14],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[16,64,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6e9d37a0",
+      "models": {
+        "torchbench/infer/mobilenet_v2": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[16,32,28,28],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[16,32,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0d54f7c1",
+      "models": {
+        "torchbench/infer/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[24],"bf16"],
+        [[16,24,56,56],"bf16"],
+        [[24],"bf16"],
+        [[24],"bf16"],
+        [[24],"bf16"],
+        [[16,24,56,56],"bf16"]
+      ]
+    }
+  ]
+}

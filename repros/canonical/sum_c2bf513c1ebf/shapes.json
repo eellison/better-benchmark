@@ -1,0 +1,169 @@
+{
+  "points": [
+    {
+      "shape_hash": "e781aba9",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 1
+        },
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        },
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 1
+        },
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        },
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        },
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        },
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        },
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,1000],"bf16"],
+        ["S",[1000]]
+      ]
+    },
+    {
+      "shape_hash": "8dee6029",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,1000],"bf16"],
+        ["S",[1000]]
+      ]
+    },
+    {
+      "shape_hash": "4b6198d7",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,1000],"bf16"],
+        ["S",[1000]]
+      ]
+    },
+    {
+      "shape_hash": "49b9e9b9",
+      "models": {
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,1000],"bf16"],
+        ["S",[1000]]
+      ]
+    },
+    {
+      "shape_hash": "ba2d273a",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4,1000],"bf16"],
+        ["S",[1000]]
+      ]
+    },
+    {
+      "shape_hash": "9ff0a848",
+      "models": {
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,1000],"bf16"],
+        ["S",[1000]]
+      ]
+    },
+    {
+      "shape_hash": "53ab91d1",
+      "models": {
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1000],"bf16"],
+        ["S",[1000]]
+      ]
+    },
+    {
+      "shape_hash": "c0006de7",
+      "models": {
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,1000],"bf16"],
+        ["S",[1000]]
+      ]
+    },
+    {
+      "shape_hash": "b5a632e7",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        },
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,10],"bf16"],
+        ["S",[10]]
+      ]
+    }
+  ]
+}

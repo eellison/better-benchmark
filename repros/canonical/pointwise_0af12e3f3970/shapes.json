@@ -1,0 +1,26 @@
+{
+  "points": [
+    {
+      "shape_hash": "9ba4aad1",
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[20008,768],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "19d57796",
+      "models": {
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50008,768],"bf16"]
+      ]
+    }
+  ]
+}

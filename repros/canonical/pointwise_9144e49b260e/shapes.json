@@ -1,0 +1,28 @@
+{
+  "points": [
+    {
+      "shape_hash": "ac403ece",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,384,14,14],"f32",{"st":[75264,1,5376,384]}],
+        [[128,384,14,14],"bf16",{"st":[75264,1,5376,384]}]
+      ]
+    },
+    {
+      "shape_hash": "509debd6",
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,192,28,28],"f32",{"st":[150528,1,5376,192]}],
+        [[128,192,28,28],"bf16",{"st":[150528,1,5376,192]}]
+      ]
+    }
+  ]
+}

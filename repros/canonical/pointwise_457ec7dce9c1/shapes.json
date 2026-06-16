@@ -1,0 +1,21 @@
+{
+  "points": [
+    {
+      "shape_hash": "e3cdab72",
+      "models": {
+        "torchbench/infer/pytorch_unet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[1,64,320,479],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[1,64,640,959],"bf16"],
+        ["S",[640,1]]
+      ]
+    }
+  ]
+}

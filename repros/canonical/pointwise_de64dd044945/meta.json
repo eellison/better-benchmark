@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "de64dd044945",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.gt.Scalar",
+    "aten.le.Scalar",
+    "aten.le.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.relu.default",
+    "prims.convert_element_type.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/squeezenet1_1",
+    "torchbench/train/squeezenet1_1"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "points": [
+    {
+      "shape_hash": "ea4c0a34",
+      "models": {
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,1024,1024],"bf16"],
+        [[32,8],"bf16"],
+        ["S",[8,8,1024,1024]],
+        ["S",[1024,1024]],
+        ["S",[1024,1024]],
+        ["S",[8,-1,1024,1024]],
+        ["S",[8,8,1024,1024]],
+        ["S",[64,1024,1024]]
+      ]
+    }
+  ]
+}

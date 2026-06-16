@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "9f7dce7fb407",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 1,
+  "origin_ops": [
+    "aten.lift_fresh_copy.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf/infer/MT5ForConditionalGeneration",
+    "hf/infer/T5ForConditionalGeneration",
+    "hf/infer/T5Small",
+    "hf/infer/google/gemma-2-2b",
+    "hf/infer/google/gemma-3-4b-it",
+    "hf/infer/openai/gpt-oss-20b"
+  ]
+}

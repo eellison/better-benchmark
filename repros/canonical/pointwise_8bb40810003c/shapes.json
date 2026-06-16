@@ -1,0 +1,1234 @@
+{
+  "points": [
+    {
+      "shape_hash": "0cf39344",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 1
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 1
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,2048],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "ce1e0a23",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 1
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 2
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "ae9f1068",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 13
+        },
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        },
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 12
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768,3072],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "44a2434c",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 13
+        },
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        },
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 12
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[3072,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "f5f85987",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 14
+        },
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 48
+        },
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 25
+        },
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 49
+        },
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 49
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 49
+        },
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 49
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 13
+        }
+      },
+      "inputs": [
+        [[768,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "e24f40e4",
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[2304,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "9e822d8f",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,640],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "2e98be1c",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,192],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "5cffd879",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[192,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "e1aec24f",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[768,192],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "aafa641b",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[192,192],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "2613646b",
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[576,192],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "d29f2cfb",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,3072],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "5617a165",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,1280],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "ac612a70",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[240,480],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "f0eaed89",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[480,240],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "0a486f34",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[240,240],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "ebcabf6d",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[720,240],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "debf1fc5",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[192,384],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b30c1d04",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[384,192],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "6c896102",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[144,288],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "18173249",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[288,144],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "62980a68",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[144,144],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "af8b80d5",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[432,144],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "9f2d4100",
+      "models": {
+        "timm/train/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,2304],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "1b40fbb6",
+      "models": {
+        "timm/train/repvgg_a2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,1408],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "557311da",
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1536,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "5c0408c4",
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[65,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b1ca53d6",
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 1
+        },
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "a1cb3860",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,4096],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "52d3c6a7",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        },
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 112
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 112
+        },
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 4
+        },
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,4096],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "01baa4eb",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,9216],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "43065864",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[197951,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "16e5c8c0",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 2
+        },
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 72
+        },
+        "hf/train/T5Small": {
+          "occurrences": 72
+        },
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "fdcbaff1",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        },
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 16
+        }
+      },
+      "inputs": [
+        [[512,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "25dff7ef",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        },
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 32
+        }
+      },
+      "inputs": [
+        [[1024,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "7cfcfe39",
+      "models": {
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1280,960],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "19d8a989",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[1024,4096],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "17dcd71b",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4096,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "c4cfc269",
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 97
+        },
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[1024,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "fb817d2a",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[2560,10240],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "2d6d0114",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[10240,2560],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "32e09daf",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 4
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[2560,2560],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "e340bbdf",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8008,2560],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "1185642c",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 97
+        }
+      },
+      "inputs": [
+        [[1536,1536],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "d84d33a1",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[1536,6144],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "af634b6e",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[6144,1536],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "46c132a4",
+      "models": {
+        "torchbench/train/densenet121": {
+          "occurrences": 1
+        },
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "8cf9b83f",
+      "models": {
+        "torchbench/train/resnet18": {
+          "occurrences": 1
+        },
+        "torchbench/train/functorch_dp_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1000,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "16d2cbc0",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50400,4096],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "62c6abfb",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        },
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,16384],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "595a24d8",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        },
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,4096],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "ec623101",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[30000,128],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "dc3e8b06",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,4096],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "040e49cd",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,128],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "3798a6aa",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,256],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "8aa63c17",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[256,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "3851a1ae",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[1024,256],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "945f2c72",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 48
+        }
+      },
+      "inputs": [
+        [[256,256],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "6747b18a",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,128],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "e692d575",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[2048,8192],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "688f3d95",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[8192,2048],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "559a6c52",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 96
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 96
+        }
+      },
+      "inputs": [
+        [[2048,2048],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "68efa070",
+      "models": {
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,25088],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "1c987e3e",
+      "models": {
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2,2048],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "e583d54f",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128112,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "2d7cdfa7",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[250112,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "e56e2d8f",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 24
+        },
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,384],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b016ff56",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 72
+        }
+      },
+      "inputs": [
+        [[384,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "2bb61127",
+      "models": {
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[29056,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "7a086584",
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[50272,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "fdf8e815",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/train/T5Small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32128,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "76ad9430",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/train/T5Small": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[512,2048],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b3e78a1b",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/train/T5Small": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[2048,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "4f207a72",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256008,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "58e39a16",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 120
+        }
+      },
+      "inputs": [
+        [[512,128],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "f4e93827",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 168
+        }
+      },
+      "inputs": [
+        [[128,512],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "60ceae96",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 72
+        }
+      },
+      "inputs": [
+        [[128,128],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "8d573313",
+      "models": {
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32000,1024],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "aa459734",
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 48
+        }
+      },
+      "inputs": [
+        [[384,768],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "a7aca999",
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[54,384],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "a876c3bb",
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[16,16],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "afe477f0",
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[10,184],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "7b445016",
+      "models": {
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[10,64],"f32"]
+      ]
+    }
+  ]
+}

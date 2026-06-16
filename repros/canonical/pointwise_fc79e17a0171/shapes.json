@@ -1,0 +1,49 @@
+{
+  "points": [
+    {
+      "shape_hash": "ade1975e",
+      "models": {
+        "torchbench/infer/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[256,512,4,4],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "359745db",
+      "models": {
+        "torchbench/infer/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[256,256,8,8],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "177337c2",
+      "models": {
+        "torchbench/infer/dcgan": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[256,128,16,16],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"]
+      ]
+    }
+  ]
+}

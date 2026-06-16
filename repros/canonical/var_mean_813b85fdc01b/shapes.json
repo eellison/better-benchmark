@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "ad6d6241",
+      "models": {
+        "timm/infer/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[25216,192],"bf16"],
+        [[128,197,192],"bf16"],
+        [[192],"bf16"],
+        [[192],"bf16"],
+        ["S",[128,197,192]]
+      ]
+    }
+  ]
+}

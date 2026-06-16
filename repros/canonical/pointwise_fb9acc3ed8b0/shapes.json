@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "2cdbce9d",
+      "models": {
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[256,512,64],"bf16"],
+        ["S",[16,16,512,64,1]],
+        ["S",[512,16,16,64,1]],
+        ["S",[1,8192,1024]]
+      ]
+    }
+  ]
+}

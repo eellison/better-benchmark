@@ -1,0 +1,34 @@
+{
+  "points": [
+    {
+      "shape_hash": "74f1c5d9",
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 6
+        }
+      },
+      "inputs": [
+        [[16384,2304],"bf16"],
+        ["S",[32,512,2304]],
+        ["S",[32,512,12,64]],
+        ["S",[32,512,12,64]],
+        ["S",[32,512,12,64]]
+      ]
+    },
+    {
+      "shape_hash": "d8de82d9",
+      "models": {
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[8192,2304],"bf16"],
+        ["S",[8,1024,2304]],
+        ["S",[8,1024,12,64]],
+        ["S",[8,1024,12,64]],
+        ["S",[8,1024,12,64]]
+      ]
+    }
+  ]
+}

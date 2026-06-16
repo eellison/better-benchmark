@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[1,128],"i64",{"n":"arg0_1","gen":["index",0,2048],"x":{"constraint_source":"graph_inference","observed":{"min":0,"max":127,"n_unique":128}}}],
+    [[2050,1024],"f32",{"n":"arg1_1"}]
+  ],
+  "outputs": [
+    [[1,128,1024],"f32",{"n":"output_0"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_002.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "XGLMForCausalLM",
+    "graph": "full_graph_002.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 4,
+    "counts": {
+      "fusible_in_partition": 4,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.index.Tensor": 1,
+        "aten.reshape.default": 2
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
+}

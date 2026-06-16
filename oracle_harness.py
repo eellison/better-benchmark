@@ -19,6 +19,7 @@ Provides:
 from __future__ import annotations
 
 import contextlib
+import copy
 import fcntl
 import importlib.util
 import json
@@ -29,9 +30,13 @@ import sys
 import tempfile
 import threading
 import time
+import warnings
 from pathlib import Path
 
 import torch
+
+if __name__ == "__main__":
+    sys.modules.setdefault("oracle_harness", sys.modules[__name__])
 
 
 # ---------------------------------------------------------------------------
@@ -460,13 +465,23 @@ def parse_shapes_signature(shapes, *, with_dtypes=False):
     return shape_tuples
 
 
-def oracle_impl(hardware=None, shapes=None, description=None, **kwargs):
+def oracle_impl(hardware=None, shapes=None, point=None, description=None,
+                **kwargs):
     """Register an oracle implementation: one line declaring what it was
     written for.
 
     Args:
         hardware: GPU kind the impl was tuned on ("H100", "B200", ...).
             None = no hardware constraint.
+        point: shape_hash (8-hex) of the shapes.json point this impl covers
+            — THE registration key for new-corpus oracles (settled
+            2026-06-12: hash as key, zero parsing; the human-readable
+            signature lives in shapes.json and may be quoted in a comment).
+            Resolved against the sibling shapes.json at registration time:
+            an unknown hash raises immediately (stale/typo'd registrations
+            fail at import, not silently at dispatch). Mutually exclusive
+            with shapes=. shapes=None AND point=None still means
+            shape-general.
         shapes: FULL input signature the impl was written for, as the
             T()/S() string from the repro's `_shapes_config` (copy it
             verbatim), or a pre-parsed tuple of shape tuples.
@@ -486,17 +501,50 @@ def oracle_impl(hardware=None, shapes=None, description=None, **kwargs):
 
     Returns the function unchanged, so one body can be registered N times.
     """
+    if point is not None and shapes is not None:
+        raise ValueError("oracle_impl: pass point= (hash) or shapes=, not both")
+
     parsed, dtypes = parse_shapes_signature(shapes, with_dtypes=True)
 
     def decorator(fn):
         reg = _module_registries.setdefault(fn.__module__, OracleRegistry())
         entry_shapes = parsed if parsed is None else tuple(parsed)
+        if point is not None:
+            # Hash-keyed registration: resolve the point's input shapes
+            # from the SIBLING shapes.json (the oracle file lives in the
+            # canonical dir). Loud failure on unknown hash.
+            import inspect
+            import json as _json
+            from pathlib import Path as _Path
+
+            mod_file = inspect.getmodule(fn)
+            fpath = _Path(getattr(mod_file, "__file__", None)
+                          or inspect.getfile(fn))
+            shapes_path = fpath.parent / "shapes.json"
+            if not shapes_path.exists():
+                raise OracleDispatchError(
+                    f"oracle_impl(point={point!r}): no shapes.json next to "
+                    f"{fpath} — hash-keyed registration requires the oracle "
+                    f"to live in its canonical repro dir")
+            data = _json.loads(shapes_path.read_text())
+            match = next((p for p in data.get("points", [])
+                          if p.get("shape_hash") == point), None)
+            if match is None:
+                known = [p.get("shape_hash") for p in data.get("points", [])]
+                raise OracleDispatchError(
+                    f"oracle_impl(point={point!r}): hash not in "
+                    f"{shapes_path} (known: {known[:8]}{'...' if len(known) > 8 else ''})")
+            from input_codec import spec_from_compact
+            specs = [spec_from_compact(e) for e in match.get("inputs", [])]
+            entry_shapes = tuple(
+                tuple(s["shape"]) for s in specs if s.get("kind") == "tensor")
         dec = reg.register(hardware=hardware,
                            shape=entry_shapes,
                            configs=kwargs or None,
                            description=description)
         dec(fn)
         reg._entries[-1]["dtypes"] = dtypes
+        reg._entries[-1]["point"] = point
         return fn
     return decorator
 
@@ -602,10 +650,16 @@ def detect_stochastic_outputs(instance, inputs) -> set[int]:
 
     Returns a set of output indices that are nondeterministic.
 
-    Strategy: run with explicit seed, then run WITHOUT seeding. Outputs that
-    differ are stochastic (dropout, etc.). We also do a seeded-vs-seeded run
-    to distinguish truly stochastic ops (those that ignore the seed) from
-    seed-respecting randomness.
+    Strategy: run once with an explicit seed, then run again WITHOUT reseeding.
+    Any output that differs between the two runs is nondeterministic (dropout,
+    bernoulli, RNG-derived indices/masks, etc.) and is reported as stochastic so
+    the correctness check skips it.
+
+    Nondeterminism is dtype-agnostic: an RNG-derived int64 index, bool dropout
+    mask, or complex tensor is just as stochastic as a float one. We therefore
+    compare every output regardless of dtype, mirroring _compare_oracle_outputs:
+    a tolerance (allclose) check for floats, and an exact (torch.equal) check for
+    int/bool/complex. An output that differs => stochastic.
     """
     # Seeded run
     torch.manual_seed(42)
@@ -623,9 +677,23 @@ def detect_stochastic_outputs(instance, inputs) -> set[int]:
     unseeded_list = _normalize_outputs(out_unseeded)
 
     for i, (o_s, o_u) in enumerate(zip(seeded_list, unseeded_list)):
-        if not o_s.is_floating_point():
-            continue
-        if not torch.allclose(o_s.float(), o_u.float(), atol=1e-6, rtol=0):
+        try:
+            if o_s.is_floating_point():
+                # Float: tolerant comparison (matches the value-check path).
+                differs = not torch.allclose(
+                    o_s.float(), o_u.float(), atol=1e-6, rtol=0, equal_nan=True
+                )
+            else:
+                # int / bool / complex: exact comparison (matches the
+                # torch.equal path in _compare_oracle_outputs). torch.equal
+                # also returns False on a shape mismatch, so differing shapes
+                # between runs are treated as nondeterministic too.
+                differs = not torch.equal(o_s, o_u)
+        except RuntimeError:
+            # Comparison failed (e.g. shapes differ between runs) -> the output
+            # is not stable across runs, so treat it as stochastic.
+            differs = True
+        if differs:
             stochastic.add(i)
 
     return stochastic
@@ -635,42 +703,14 @@ def detect_stochastic_outputs(instance, inputs) -> set[int]:
 # Correctness checking
 # ---------------------------------------------------------------------------
 
-def check_oracle(
-    oracle_forward,
-    instance,
-    inputs,
+def _compare_oracle_outputs(
+    eager,
+    oracle_out,
+    stochastic: set[int],
     *,
-    atol: float = 1e-2,
-    rtol: float = 1e-2,
-    skip_stochastic: bool = True,
+    atol: float,
+    rtol: float,
 ) -> bool:
-    """Standard oracle correctness check with auto stochastic detection.
-
-    Args:
-        oracle_forward: callable that takes inputs and returns oracle outputs
-        instance: Repro() instance (eager reference)
-        inputs: list of input tensors/values
-        atol: absolute tolerance for allclose
-        rtol: relative tolerance for allclose
-        skip_stochastic: if True, auto-detect and skip stochastic outputs
-
-    Returns:
-        True if all non-stochastic outputs pass.
-    """
-    # Resolve oracle_impl dispatch so --check verifies the SAME callable that
-    # --bench times (e.g. a B200 kwargs variant, not the undecorated default).
-    try:
-        oracle_forward, _dispatch_info = resolve_oracle(oracle_forward, inputs)
-    except OracleDispatchError as e:
-        print(f"  NO_ORACLE_FOR_SHAPE: {str(e)[:200]}")
-        return False
-
-    stochastic = detect_stochastic_outputs(instance, inputs) if skip_stochastic else set()
-
-    with torch.no_grad():
-        eager = instance(*inputs)
-        oracle_out = oracle_forward(inputs)
-
     eager_list = _normalize_outputs(eager)
     oracle_list = _normalize_outputs(oracle_out)
 
@@ -708,8 +748,12 @@ def check_oracle(
         # Value check
         e_f32 = e.float()
         o_f32 = o.float()
-        max_diff = (e_f32 - o_f32).abs().max().item()
-        ok = torch.allclose(e_f32, o_f32, atol=atol, rtol=rtol)
+        both_nan = torch.isnan(e_f32) & torch.isnan(o_f32)
+        diff = (e_f32 - o_f32).abs()
+        if both_nan.any():
+            diff = torch.where(both_nan, torch.zeros_like(diff), diff)
+        max_diff = diff.max().item() if diff.numel() else 0.0
+        ok = torch.allclose(e_f32, o_f32, atol=atol, rtol=rtol, equal_nan=True)
 
         status = "PASS" if ok else "FAIL"
         print(f"  output {i}: {status} (shape={list(e.shape)} dtype={e.dtype} "
@@ -718,6 +762,133 @@ def check_oracle(
             all_pass = False
 
     return all_pass
+
+
+def check_oracle(
+    oracle_forward,
+    instance,
+    inputs,
+    *,
+    atol: float = 1e-2,
+    rtol: float = 1e-2,
+    skip_stochastic: bool = True,
+) -> bool:
+    """Standard oracle correctness check with auto stochastic detection.
+
+    Args:
+        oracle_forward: callable that takes inputs and returns oracle outputs
+        instance: Repro() instance (eager reference)
+        inputs: list of input tensors/values
+        atol: absolute tolerance for allclose
+        rtol: relative tolerance for allclose
+        skip_stochastic: if True, auto-detect and skip stochastic outputs
+
+    Returns:
+        True if all non-stochastic outputs pass.
+    """
+    # Resolve oracle_impl dispatch so --check verifies the SAME callable that
+    # --bench times (e.g. a B200 kwargs variant, not the undecorated default).
+    try:
+        oracle_forward, _dispatch_info = resolve_oracle(oracle_forward, inputs)
+    except OracleDispatchError as e:
+        print(f"  NO_ORACLE_FOR_SHAPE: {str(e)[:200]}")
+        return False
+
+    stochastic = detect_stochastic_outputs(instance, inputs) if skip_stochastic else set()
+
+    with torch.no_grad():
+        eager = instance(*inputs)
+        oracle_out = oracle_forward(inputs)
+
+    return _compare_oracle_outputs(
+        eager, oracle_out, stochastic, atol=atol, rtol=rtol)
+
+
+def _seed_input_generation(seed: int) -> None:
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+
+def check_oracle_all_shapes(
+    oracle_forward,
+    repro_dir,
+    repro_id: str,
+    *,
+    skip_stochastic: bool = True,
+    point: str | None = None,
+    atol: float = 1e-2,
+    rtol: float = 1e-2,
+) -> dict:
+    """Run check_oracle at every shape config from shapes.json/shapes.txt.
+
+    The runner builds separate deterministic input sets for eager and oracle
+    execution. This avoids mutating the oracle inputs during eager reference
+    evaluation for repros with user-visible in-place writes.
+    """
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    repro_dir = Path(repro_dir)
+    repro_file = repro_dir / "repro.py"
+    configs = load_shape_configs(str(repro_file))
+
+    if point is not None:
+        configs = {
+            label: cfg for label, cfg in configs.items()
+            if label == point or label.endswith(f"_{point}")
+        }
+        if not configs:
+            print(f"  NO_SHAPE_POINT: {point}")
+            return {point: False}
+
+    if not configs:
+        inputs = get_inputs(repro_dir)
+        instance = get_repro_instance(repro_dir)
+        return {
+            "default": check_oracle(
+                oracle_forward,
+                instance,
+                inputs,
+                atol=atol,
+                rtol=rtol,
+                skip_stochastic=skip_stochastic,
+            )
+        }
+
+    results = {}
+    for label, config in configs.items():
+        print(f"Checking {repro_id}_{label}...")
+        instance = get_repro_instance(repro_dir)
+
+        _seed_input_generation(0)
+        detect_inputs = make_inputs_from_config(config)
+        stochastic = (
+            detect_stochastic_outputs(instance, detect_inputs)
+            if skip_stochastic
+            else set()
+        )
+
+        _seed_input_generation(1)
+        eager_inputs = make_inputs_from_config(config)
+        _seed_input_generation(1)
+        oracle_inputs = make_inputs_from_config(config)
+
+        try:
+            selected_oracle, _dispatch_info = resolve_oracle(
+                oracle_forward, oracle_inputs)
+        except OracleDispatchError as e:
+            print(f"  NO_ORACLE_FOR_SHAPE: {str(e)[:200]}")
+            results[label] = False
+            continue
+
+        with torch.no_grad():
+            eager = instance(*eager_inputs)
+            oracle_out = selected_oracle(oracle_inputs)
+
+        results[label] = _compare_oracle_outputs(
+            eager, oracle_out, stochastic, atol=atol, rtol=rtol)
+
+    return results
 
 
 # ---------------------------------------------------------------------------
@@ -733,12 +904,20 @@ def bench_oracle(
     warmup: int = 25,
     rep: int = 200,
     rounds: int = 5,
+    _skip_numerics_gate: bool = False,
 ) -> dict:
     """Standard oracle benchmark: oracle vs torch.compile.
 
     Delegates to bench_compare's methodology: CUDAGraph capture+replay,
     exclusive GPU lock, interleaved timing rounds. This ensures oracle
     measurements use the exact same infrastructure as corpus-wide sweeps.
+
+    Now includes:
+    - CUDAGraph warning trap: any CUDAGraph-related warning during capture
+      invalidates the measurement (status=INVALID_CUDAGRAPH_WARNING).
+    - FP64-anchored numerics gate: oracle must not be meaningfully less
+      accurate than compiled output vs a high-precision reference
+      (status=NUMERICS_WORSE_THAN_COMPILED).
 
     Args:
         oracle_forward: callable that takes inputs and returns oracle outputs
@@ -748,6 +927,7 @@ def bench_oracle(
         warmup: warmup iterations per round
         rep: repetitions per round
         rounds: number of interleaved rounds (min-of-N)
+        _skip_numerics_gate: internal flag to bypass fp64 gate (testing only)
 
     Returns:
         Dict with repro_id, oracle_us, compile_us, ratio, status — plus a
@@ -784,14 +964,57 @@ def bench_oracle(
         for _ in range(5):
             compiled(*inputs)
         torch.cuda.synchronize()
-        g_compile = _capture_graph(lambda: compiled(*inputs))
+        g_compile, compile_warnings = _capture_graph_checked(
+            lambda: compiled(*inputs))
+
+    # Check for CUDAGraph warnings on compile capture
+    if compile_warnings:
+        result = {
+            "repro_id": repro_id,
+            "status": "INVALID_CUDAGRAPH_WARNING",
+            "warning_source": "compiled",
+            "warnings": compile_warnings[:5],
+        }
+        if dispatch_info is not None:
+            result["dispatch"] = {"matched": dispatch_info["matched"]}
+        print(json.dumps(result))
+        return result
 
     # --- Warm oracle + capture CUDAGraph (MANDATORY) ---
     with torch.no_grad():
         for _ in range(3):
             oracle_forward(inputs)
         torch.cuda.synchronize()
-        g_oracle = _capture_graph(lambda: oracle_forward(inputs))
+        g_oracle, oracle_warnings = _capture_graph_checked(
+            lambda: oracle_forward(inputs))
+
+    # Check for CUDAGraph warnings on oracle capture
+    if oracle_warnings:
+        result = {
+            "repro_id": repro_id,
+            "status": "INVALID_CUDAGRAPH_WARNING",
+            "warning_source": "oracle",
+            "warnings": oracle_warnings[:5],
+        }
+        if dispatch_info is not None:
+            result["dispatch"] = {"matched": dispatch_info["matched"]}
+        print(json.dumps(result))
+        return result
+
+    # --- FP64-anchored numerics gate (change 3) ---
+    if not _skip_numerics_gate:
+        numerics_result = _run_anchored_numerics_gate(
+            oracle_forward, instance, compiled, inputs)
+        if numerics_result is not None and not numerics_result["pass"]:
+            result = {
+                "repro_id": repro_id,
+                "status": "NUMERICS_WORSE_THAN_COMPILED",
+                "numerics_gate": numerics_result,
+            }
+            if dispatch_info is not None:
+                result["dispatch"] = {"matched": dispatch_info["matched"]}
+            print(json.dumps(result, default=str))
+            return result
 
     # --- Adaptive rep count based on quick estimate ---
     quick_oracle = _time_graph(g_oracle, warmup=5, rep=10)
@@ -835,6 +1058,9 @@ def bench_oracle(
         "ratio": round(ratio, 3),
         "status": status,
     }
+    # Always include numerics_gate info for visibility
+    if not _skip_numerics_gate and numerics_result is not None:
+        result["numerics_gate"] = numerics_result
     if dispatch_info is not None:
         result["dispatch"] = {
             "matched": dispatch_info["matched"],
@@ -846,7 +1072,7 @@ def bench_oracle(
             result["dispatch"]["dtypes_differ"] = True
             result["dispatch"]["tuned_dtypes"] = list(dispatch_info["tuned_dtypes"])
             result["dispatch"]["actual_dtypes"] = list(dispatch_info["actual_dtypes"])
-    print(json.dumps(result))
+    print(json.dumps(result, default=str))
     return result
 
 
@@ -874,8 +1100,82 @@ def _bench_oracle_cpu(oracle_forward, instance, inputs, repro_id, *, warmup, rep
     return result
 
 
+def _run_anchored_numerics_gate(oracle_forward, instance, compiled, inputs):
+    """Run fp64-anchored numerics comparison.
+
+    Builds an fp64 eager reference, computes oracle and compiled outputs,
+    then runs _anchored_numerics_gate. Uses deterministic seeding to
+    regenerate inputs per run (mirrors check_oracle_all_shapes discipline).
+
+    Returns the gate result dict, or None if the gate could not be run.
+    """
+    # Every run gets its OWN copy of the inputs: repros with in-place
+    # writes mutate their inputs, and the gate is only meaningful if the
+    # reference, oracle, and compiled runs all start from the same state.
+    # empty_strided+copy_ rather than clone(): clone() contiguizes
+    # non-dense views, and stride is part of pattern identity here.
+    def _copy_one(t):
+        if any(s == 0 for s in t.stride()):
+            return t.clone()  # expanded: copy_ into 0-stride is undefined
+        out = torch.empty_strided(t.size(), t.stride(),
+                                  dtype=t.dtype, device=t.device)
+        out.copy_(t)
+        return out
+
+    def _clone_inputs(src):
+        return [_copy_one(i) if isinstance(i, torch.Tensor) else i
+                for i in src]
+
+    # Detect stochastic outputs for gating
+    stochastic = detect_stochastic_outputs(instance, _clone_inputs(inputs))
+
+    # Build fp64 reference: deepcopy instance, cast module + float inputs
+    ref_precision = "f64"
+    try:
+        fp64_instance = copy.deepcopy(instance).double()
+        fp64_inputs = []
+        for inp in _clone_inputs(inputs):
+            if isinstance(inp, torch.Tensor) and inp.is_floating_point():
+                fp64_inputs.append(inp.double())
+            else:
+                fp64_inputs.append(inp)
+        _seed_input_generation(1)
+        with torch.no_grad():
+            ref_outs = _normalize_outputs(fp64_instance(*fp64_inputs))
+    except Exception:
+        # fp64 run failed (e.g. ops without fp64 kernels) — fall back to f32
+        ref_precision = "f32"
+        try:
+            # Use the instance itself as the f32 reference
+            _seed_input_generation(1)
+            with torch.no_grad():
+                ref_outs = _normalize_outputs(instance(*_clone_inputs(inputs)))
+        except Exception:
+            return None
+
+    # Get oracle outputs with seeded inputs
+    _seed_input_generation(1)
+    with torch.no_grad():
+        oracle_outs = _normalize_outputs(oracle_forward(_clone_inputs(inputs)))
+
+    # Get compiled outputs with seeded inputs
+    _seed_input_generation(1)
+    with torch.no_grad():
+        compiled_outs = _normalize_outputs(compiled(*_clone_inputs(inputs)))
+
+    # Cast ref_outs to match the comparison dtype for the gate
+    # (the gate casts everything to f64 internally for comparison)
+    if len(oracle_outs) != len(ref_outs) or len(compiled_outs) != len(ref_outs):
+        # Scope mismatch — cannot run gate
+        return None
+
+    return _anchored_numerics_gate(
+        oracle_outs, compiled_outs, ref_outs, stochastic,
+        ref_precision=ref_precision)
+
+
 def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
-    """Benchmark oracle across all shapes in shapes.txt.
+    """Benchmark oracle across all shapes (shapes.json preferred, shapes.txt fallback).
 
     Args:
         oracle_forward: callable that takes inputs and returns oracle outputs
@@ -889,19 +1189,21 @@ def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
     from repro_harness import load_shape_configs, make_inputs_from_config
 
     repro_dir = Path(repro_dir)
-    shapes_file = repro_dir / "shapes.txt"
-    if not shapes_file.exists():
-        # Just run default
+    # load_shape_configs expects a file path whose parent dir it inspects
+    repro_file = repro_dir / "repro.py"
+    configs = load_shape_configs(str(repro_file))
+
+    if not configs:
+        # No shape configs found — just run with default inputs
         inputs = get_inputs(repro_dir)
         instance = get_repro_instance(repro_dir)
         return [bench_oracle(oracle_forward, instance, inputs, repro_id, **kwargs)]
 
     results = []
-    configs = load_shape_configs(shapes_file)
-    for config in configs:
+    for label, config in configs.items():
         inputs = make_inputs_from_config(config)
         instance = get_repro_instance(repro_dir)
-        result = bench_oracle(oracle_forward, instance, inputs, f"{repro_id}_{config.label}", **kwargs)
+        result = bench_oracle(oracle_forward, instance, inputs, f"{repro_id}_{label}", **kwargs)
         results.append(result)
     return results
 
@@ -922,6 +1224,113 @@ def _capture_graph(fn):
         fn()
     torch.cuda.synchronize()
     return g
+
+
+# ---------------------------------------------------------------------------
+# CUDAGraph warning trap (change 2: mechanically enforce warning=INVALID)
+# ---------------------------------------------------------------------------
+
+_CUDAGRAPH_WARNING_PATTERNS = re.compile(
+    r"CUDAGraph|cuda.?graph|graph.?capture|stream.?capture",
+    re.IGNORECASE,
+)
+
+
+def _capture_graph_checked(fn):
+    """Capture a CUDAGraph, trapping any CUDAGraph-related warnings.
+
+    Returns (graph, warning_messages: list[str]). If warning_messages is
+    non-empty the measurement is INVALID.
+    """
+    caught_warnings = []
+    with warnings.catch_warnings(record=True) as ws:
+        warnings.simplefilter("always")
+        g = torch.cuda.CUDAGraph()
+        with torch.no_grad(), torch.cuda.graph(g):
+            fn()
+        torch.cuda.synchronize()
+
+    for w in ws:
+        msg = str(w.message)
+        if _CUDAGRAPH_WARNING_PATTERNS.search(msg):
+            caught_warnings.append(msg)
+    return g, caught_warnings
+
+
+# ---------------------------------------------------------------------------
+# FP64-anchored numerics gate (change 3)
+# ---------------------------------------------------------------------------
+
+def _anchored_numerics_gate(
+    oracle_outs: list[torch.Tensor],
+    compiled_outs: list[torch.Tensor],
+    ref_outs: list[torch.Tensor],
+    stochastic: set[int],
+    *,
+    ref_precision: str = "f64",
+) -> dict:
+    """Compare oracle vs compiled accuracy against a high-precision reference.
+
+    Returns a dict with:
+      - "pass": bool (True if oracle is not meaningfully worse than compiled)
+      - "per_output": list of per-output dicts with err_oracle, err_compiled
+      - "worst_output_idx": index of the worst-ratio output (or None)
+      - "ref_precision": "f64" or "f32"
+
+    Gate: err_oracle <= max(3 * err_compiled, 1e-5 * ref_absmax_scale)
+    per non-stochastic float output. Violation means the oracle uses a
+    formulation substitution (fast exp, exp2-softmax, etc.).
+    """
+    result = {
+        "pass": True,
+        "per_output": [],
+        "worst_output_idx": None,
+        "ref_precision": ref_precision,
+    }
+    worst_ratio = 0.0
+
+    for i, (o_oracle, o_compiled, o_ref) in enumerate(
+        zip(oracle_outs, compiled_outs, ref_outs)
+    ):
+        entry = {"idx": i}
+        if i in stochastic:
+            entry["skip"] = "stochastic"
+            result["per_output"].append(entry)
+            continue
+        if not o_ref.is_floating_point():
+            entry["skip"] = "non_float"
+            result["per_output"].append(entry)
+            continue
+
+        # Cast to f64 for comparison
+        ref_f64 = o_ref.double()
+        oracle_f64 = o_oracle.double()
+        compiled_f64 = o_compiled.double()
+
+        err_oracle = (oracle_f64 - ref_f64).abs().max().item()
+        err_compiled = (compiled_f64 - ref_f64).abs().max().item()
+        ref_absmax = ref_f64.abs().max().item()
+        ref_absmax_scale = max(ref_absmax, 1.0)  # avoid 0-scale
+
+        threshold = max(3.0 * err_compiled, 1e-5 * ref_absmax_scale)
+        passes = err_oracle <= threshold
+
+        entry["err_oracle"] = err_oracle
+        entry["err_compiled"] = err_compiled
+        entry["threshold"] = threshold
+        entry["ref_absmax"] = ref_absmax
+        entry["pass"] = passes
+
+        if not passes:
+            result["pass"] = False
+            ratio = err_oracle / max(err_compiled, 1e-30)
+            if ratio > worst_ratio:
+                worst_ratio = ratio
+                result["worst_output_idx"] = i
+
+        result["per_output"].append(entry)
+
+    return result
 
 
 def _time_graph(graph, warmup, rep):
@@ -1123,3 +1532,161 @@ def _do_bench(fn, device: torch.device, warmup: int = 25, rep: int = 200) -> flo
         elapsed = time.perf_counter() - start
         best_us = min(best_us, elapsed * 1_000_000.0)
     return best_us
+
+
+# ---------------------------------------------------------------------------
+# Shared runner CLI: python -m oracle_harness <canonical_dir> [--check|--bench]
+#
+# Replaces the per-file main() of the old template: slim-format oracles are
+# docstring + kernel + @oracle_impl only, and THIS is how they are checked
+# and benched. Loads <dir>/oracle.py, resolves oracle_forward, and runs the
+# same check/bench paths the old CLI exposed.
+# ---------------------------------------------------------------------------
+
+def _load_oracle_module(canonical_dir):
+    import importlib.util
+    from pathlib import Path
+
+    d = Path(canonical_dir)
+    path = d / "oracle.py"
+    if not path.exists():
+        candidates = sorted(d.glob("oracle_*.py"))
+        if not candidates:
+            raise FileNotFoundError(f"no oracle.py / oracle_*.py in {d}")
+        path = candidates[0]
+    spec = importlib.util.spec_from_file_location(
+        f"_oracle_{d.name}", path)
+    mod = importlib.util.module_from_spec(spec)
+    import sys as _sys
+    _sys.modules[spec.name] = mod
+    spec.loader.exec_module(mod)
+    fn = getattr(mod, "oracle_forward", None)
+    if fn is None:
+        raise AttributeError(f"{path} defines no oracle_forward")
+    return mod, fn, d
+
+
+_INVALID_STATUSES = frozenset({
+    "UNVERIFIED_NUMERICS",
+    "INVALID_CUDAGRAPH_WARNING",
+    "NUMERICS_WORSE_THAN_COMPILED",
+    "NO_ORACLE_FOR_SHAPE",
+})
+
+
+def _runner_main(argv=None):
+    import argparse
+    import json as _json
+
+    ap = argparse.ArgumentParser(
+        prog="python -m oracle_harness",
+        description="Shared check/bench runner for slim-format oracles")
+    ap.add_argument("canonical_dir",
+                    help="repros/canonical/<repro_id> directory")
+    ap.add_argument("--check", action="store_true",
+                    help="numerics check vs Repro() at every shapes.json point")
+    ap.add_argument("--no-skip-stochastic", action="store_true")
+    ap.add_argument("--bench", action="store_true",
+                    help="CUDAGraph bench at every point (bench_oracle). "
+                    "Runs check first; refuses to report numbers for "
+                    "points with failing numerics.")
+    ap.add_argument("--bench-unchecked", action="store_true",
+                    help="Bench WITHOUT prior check gate (escape hatch). "
+                    "Prints a loud warning.")
+    ap.add_argument("--warmup", type=int, default=25)
+    ap.add_argument("--rep", type=int, default=100)
+    ap.add_argument("--point", default=None,
+                    help="restrict to one shape_hash")
+    args = ap.parse_args(argv)
+
+    mod, fn, d = _load_oracle_module(args.canonical_dir)
+    repro_id = d.name
+    out = {"repro": repro_id, "oracle": getattr(mod, "__file__", "?")}
+
+    do_bench = args.bench or args.bench_unchecked
+    # --bench implies --check (bench gated on check)
+    do_check = args.check or (args.bench and not args.bench_unchecked)
+
+    if do_check:
+        results = check_oracle_all_shapes(
+            fn, d, repro_id,
+            skip_stochastic=not args.no_skip_stochastic,
+            point=args.point,
+        )
+        out["check"] = results
+
+    if do_bench:
+        if args.bench_unchecked:
+            print("WARNING: --bench-unchecked bypasses the numerics check "
+                  "gate. Results are NOT validated and should not be used "
+                  "for official floor measurements.", file=sys.stderr)
+
+        from repro_harness import load_shape_configs, make_inputs_from_config
+
+        repro_file = d / "repro.py"
+        configs = load_shape_configs(str(repro_file))
+
+        bench_results = []
+        if not configs:
+            # Single default point
+            check_passed = True
+            if do_check and not args.bench_unchecked:
+                chk = out.get("check", {})
+                check_passed = all(
+                    v not in ("fail", False) for v in chk.values())
+            if check_passed or args.bench_unchecked:
+                inputs = get_inputs(d)
+                instance = get_repro_instance(d)
+                bench_results.append(
+                    bench_oracle(fn, instance, inputs, repro_id,
+                                 warmup=args.warmup, rep=args.rep))
+            else:
+                bench_results.append({
+                    "repro_id": repro_id,
+                    "status": "UNVERIFIED_NUMERICS",
+                })
+        else:
+            for label, config in configs.items():
+                point_id = f"{repro_id}_{label}"
+                # Gate: check must have passed for this point
+                check_passed = True
+                if do_check and not args.bench_unchecked:
+                    chk = out.get("check", {})
+                    check_passed = chk.get(label) not in ("fail", False)
+                    if chk.get(label) is False:
+                        check_passed = False
+
+                if check_passed or args.bench_unchecked:
+                    inputs = make_inputs_from_config(config)
+                    instance = get_repro_instance(d)
+                    bench_results.append(
+                        bench_oracle(fn, instance, inputs, point_id,
+                                     warmup=args.warmup, rep=args.rep))
+                else:
+                    bench_results.append({
+                        "repro_id": point_id,
+                        "status": "UNVERIFIED_NUMERICS",
+                    })
+
+        out["bench"] = bench_results
+
+    print(_json.dumps(out, indent=1, default=str))
+
+    # Exit code: nonzero if ANY point is failed/invalid
+    failed = False
+    chk = out.get("check")
+    if isinstance(chk, dict):
+        failed = any(v in ("fail", False) for v in chk.values())
+    bench_out = out.get("bench")
+    if isinstance(bench_out, list):
+        for b in bench_out:
+            if isinstance(b, dict):
+                st = b.get("status", "")
+                if st in _INVALID_STATUSES:
+                    failed = True
+                    break
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(_runner_main())

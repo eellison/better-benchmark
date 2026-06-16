@@ -1,0 +1,18 @@
+{
+  "pattern_hash": "8f076d992692",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.sum.dim_IntList"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/infer/demucs",
+    "torchbench/train/demucs"
+  ]
+}

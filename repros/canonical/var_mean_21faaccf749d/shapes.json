@@ -1,0 +1,103 @@
+{
+  "points": [
+    {
+      "shape_hash": "cbab746f",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[4096,1536],"bf16"],
+        [[1536],"f32"],
+        [[1536],"f32"],
+        ["S",[8,512,1536]],
+        ["S",[4096,1536]]
+      ]
+    },
+    {
+      "shape_hash": "b2a77780",
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32768,768],"bf16"],
+        [[768],"f32"],
+        [[768],"f32"],
+        ["S",[256,128,768]],
+        ["S",[32768,768]]
+      ]
+    },
+    {
+      "shape_hash": "ca0eabd2",
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,768],"bf16"],
+        [[768],"f32"],
+        [[768],"f32"],
+        ["S",[32,512,768]],
+        ["S",[16384,768]]
+      ]
+    },
+    {
+      "shape_hash": "1398f333",
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32768,128],"bf16"],
+        [[128],"f32"],
+        [[128],"f32"],
+        ["S",[64,512,128]],
+        ["S",[32768,128]]
+      ]
+    },
+    {
+      "shape_hash": "a565199e",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,768],"bf16"],
+        [[768],"f32"],
+        [[768],"f32"],
+        ["S",[8,1024,768]],
+        ["S",[8192,768]]
+      ]
+    },
+    {
+      "shape_hash": "3871c2e1",
+      "models": {
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,1024],"bf16"],
+        [[1024],"f32"],
+        [[1024],"f32"],
+        ["S",[16,512,1024]],
+        ["S",[8192,1024]]
+      ]
+    }
+  ]
+}

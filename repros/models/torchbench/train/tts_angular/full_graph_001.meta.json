@@ -1,51 +1,12 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "select",
-      "shape": [
-        64,
-        256
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "pow_2",
-      "shape": [
-        64,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "tangents_1",
-      "shape": [
-        64,
-        256
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[64,256],"bf16",{"n":"select","st":[12800,1],"off":12544}],
+    [[64,1],"f32",{"n":"pow_2"}],
+    [[64,256],"f32",{"n":"tangents_1"}]
+  ],
+  "outputs": [
+    [[64,50,256],"bf16",{"n":"output_0"}]
   ],
   "tensor_attrs": {},
   "graph": "full_graph_001.py",
@@ -55,5 +16,33 @@
     "mode": "train",
     "model": "tts_angular",
     "graph": "full_graph_001.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 20,
+    "counts": {
+      "fusible_in_partition": 20,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.clamp_min.default": 1,
+        "aten.div.Tensor": 4,
+        "aten.eq.Scalar": 1,
+        "aten.expand.default": 1,
+        "aten.full.default": 2,
+        "aten.ge.Scalar": 1,
+        "aten.mul.Tensor": 2,
+        "aten.neg.default": 1,
+        "aten.select_scatter.default": 1,
+        "aten.sum.dim_IntList": 1,
+        "aten.where.self": 2,
+        "prims.convert_element_type.default": 2
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

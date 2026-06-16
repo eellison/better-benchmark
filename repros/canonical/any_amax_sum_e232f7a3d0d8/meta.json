@@ -1,0 +1,43 @@
+{
+  "pattern_hash": "e232f7a3d0d8",
+  "kind": "reduction",
+  "reduction_types": [
+    "any",
+    "amax",
+    "sum"
+  ],
+  "n_ops": 16,
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.any.dim",
+    "aten.div.Tensor",
+    "aten.eq.Scalar",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.logical_not.default",
+    "aten.logical_not.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 12,
+  "models": [
+    "hf/infer/AlbertForMaskedLM",
+    "hf/infer/BertForMaskedLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/infer/DistilBertForMaskedLM",
+    "hf/infer/ElectraForCausalLM",
+    "hf/infer/M2M100ForConditionalGeneration",
+    "hf/infer/MobileBertForMaskedLM",
+    "hf/infer/RobertaForCausalLM",
+    "hf/train/AlbertForMaskedLM",
+    "hf/train/BertForMaskedLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/DistilBertForMaskedLM"
+  ]
+}

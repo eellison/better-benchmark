@@ -1,0 +1,21 @@
+{
+  "points": [
+    {
+      "shape_hash": "2c3fa82b",
+      "models": {
+        "torchbench/infer/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,16,4,4],"bf16"],
+        [[128,168,4,4],"bf16"],
+        [[184],"bf16"],
+        [[184],"bf16"],
+        [[184],"bf16"],
+        [[184],"bf16"],
+        ["S",[128,184]]
+      ]
+    }
+  ]
+}

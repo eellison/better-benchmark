@@ -1,21 +1,10 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "arg0_1",
-      "shape": [
-        64,
-        128
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[64,128],"f32",{"n":"arg0_1"}]
+  ],
+  "outputs": [
+    [[64,1,128,128],"b8",{"n":"output_0","gen":["randint",0,2]}]
   ],
   "tensor_attrs": {},
   "graph": "full_graph_004.py",
@@ -25,5 +14,29 @@
     "mode": "train",
     "model": "M2M100ForConditionalGeneration",
     "graph": "full_graph_004.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 21,
+    "counts": {
+      "fusible_in_partition": 21,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 2,
+        "aten.bitwise_and.Tensor": 2,
+        "aten.expand.default": 1,
+        "aten.full.default": 1,
+        "aten.index.Tensor": 1,
+        "aten.le.Tensor": 1,
+        "aten.unsqueeze.default": 9,
+        "prims.convert_element_type.default": 1,
+        "prims.iota.default": 3
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

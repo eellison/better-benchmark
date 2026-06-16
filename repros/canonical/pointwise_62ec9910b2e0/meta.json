@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "62ec9910b2e0",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.as_strided.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.unsqueeze.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/AllenaiLongformerBase"
+  ]
+}

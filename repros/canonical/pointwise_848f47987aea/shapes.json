@@ -1,0 +1,24 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7517139",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 2
+        },
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        ["S",[32,-1,128,128]]
+      ]
+    }
+  ]
+}

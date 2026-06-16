@@ -98,6 +98,41 @@ def find_repros(paths: list[Path]) -> list[Path]:
     return repros
 
 
+def find_oracle_dirs(paths: list[Path]) -> list[Path]:
+    """Resolve paths to canonical dirs that contain an oracle (oracle*.py).
+
+    In --oracles mode the worker loads the oracle module from the canonical
+    *directory* (via oracle_harness._load_oracle_module), so the task unit is
+    the directory, not a repro.py file. We pass the directory path itself.
+    """
+    dirs: list[Path] = []
+    seen: set[str] = set()
+
+    def _has_oracle(d: Path) -> bool:
+        return (d / "oracle.py").exists() or bool(list(d.glob("oracle_*.py")))
+
+    for p in paths:
+        if p.is_dir():
+            # A canonical dir directly, or a parent containing many of them.
+            if _has_oracle(p):
+                candidates = [p]
+            else:
+                candidates = [c.parent for c in sorted(p.rglob("oracle.py"))]
+                candidates += [
+                    c.parent for c in sorted(p.rglob("oracle_*.py"))
+                ]
+        elif p.is_file() and p.name == "repro.py":
+            candidates = [p.parent]
+        else:
+            continue
+        for c in candidates:
+            key = str(c.resolve())
+            if key not in seen and _has_oracle(c):
+                seen.add(key)
+                dirs.append(c)
+    return dirs
+
+
 def find_full_graphs(paths: list[Path]) -> list[Path]:
     """Resolve paths to saved full_graph_*.py files."""
     graphs = []
@@ -127,6 +162,8 @@ def _task_display_name(task_path: str) -> str:
     path = Path(task_path)
     if path.name == "repro.py":
         return path.parent.name
+    if path.is_dir():
+        return path.name
     if path.name.startswith("full_graph_") and path.suffix == ".py":
         try:
             from full_graph_harness import infer_full_graph_source
@@ -384,6 +421,154 @@ def _write_results_output(
             _run_metadata(workload_kind=workload_kind, n_results=len(all_results)),
         ),
     )
+
+
+def _oracle_dir_name(task_key: str) -> str:
+    """Canonical dir basename for an oracle task key (a dir path)."""
+    path = Path(task_key)
+    return path.parent.name if path.name == "repro.py" else path.name
+
+
+def _median(values: list[float]) -> float:
+    """Median of a non-empty numeric list."""
+    s = sorted(values)
+    n = len(s)
+    mid = n // 2
+    if n % 2:
+        return s[mid]
+    return (s[mid - 1] + s[mid]) / 2.0
+
+
+def _aggregate_oracle_timings(all_results: dict) -> dict:
+    """Flatten per-dir oracle bench results into the model-tool timings schema.
+
+    model_graph_accounting.py --timings consumes {dir_name -> {...}}. Each
+    point is keyed by SHAPE HASH (the trailing underscore token of the result
+    label, which is ``<model>_<shape_hash[:8]>``) so the model tool can match
+    each occurrence to the oracle timing for ITS shape. A dir's shape points
+    can span ~144x (e.g. 7us..1069us), so booking every occurrence at a single
+    per-dir number badly mis-prices the roll-up.
+
+    Emits per dir:
+      - ``points_by_shape``: {shape_hash -> {oracle_us, compile_us, status,
+        ratio, fallback}} — the authoritative per-shape data the roll-up uses.
+      - ``points``: the original {label -> {...}} dict (back-compat).
+      - ``oracle_us`` / ``compile_us``: representative MEDIAN across valid
+        points (fallback only, used when an occurrence's shape_hash has no
+        timed point; NOT the floor for matched occurrences).
+
+    Floor validity excludes ``_INVALID_STATUSES`` AND ``BAD_ORACLE`` (an oracle
+    slower than compile is not a valid floor). Dirs with no valid point are
+    NOT silently dropped: they are recorded under the top-level ``__failures__``
+    key with a reason, so the file accounts for every processed dir.
+    """
+    from oracle_harness import _INVALID_STATUSES
+
+    # Local exclusion set; do not mutate the shared frozenset.
+    floor_excluded = _INVALID_STATUSES | {"BAD_ORACLE"}
+
+    flat: dict[str, dict] = {}
+    failures: dict[str, dict] = {}
+    for task_key, results in all_results.items():
+        dir_name = _oracle_dir_name(str(task_key))
+        points: dict[str, dict] = {}
+        points_by_shape: dict[str, dict] = {}
+        valid_us: list[float] = []
+        valid_compile: list[float] = []
+        n_total_points = 0
+        n_bad_oracle = 0
+        for label, point in _metric_result_items(results):
+            n_total_points += 1
+            status = point.get("status")
+            us = point.get("oracle_us")
+            compile_us = point.get("compile_us")
+            ratio = point.get("ratio")
+            # dispatch.fallback marks a cross-hardware fallback (no matching
+            # tuned impl for the running GPU); preserve it for visibility.
+            fallback = None
+            dispatch = point.get("dispatch")
+            if isinstance(dispatch, dict):
+                fallback = dispatch.get("fallback")
+            points[label] = {
+                "oracle_us": us,
+                "compile_us": compile_us,
+                "ratio": ratio,
+                "status": status,
+            }
+            # Key per-shape data by the trailing shape-hash token of the label.
+            shape_hash = label.rsplit("_", 1)[-1]
+            shape_entry = {
+                "oracle_us": us,
+                "compile_us": compile_us,
+                "ratio": ratio,
+                "status": status,
+                "fallback": fallback,
+            }
+            existing = points_by_shape.get(shape_hash)
+            # If two labels collapse to the same shape_hash, keep the valid /
+            # faster oracle point (prefer a usable floor over a bad one).
+            if existing is None or _prefer_shape_point(shape_entry, existing,
+                                                        floor_excluded):
+                points_by_shape[shape_hash] = shape_entry
+            if status == "BAD_ORACLE":
+                n_bad_oracle += 1
+            if status not in floor_excluded and isinstance(us, (int, float)):
+                valid_us.append(us)
+                if isinstance(compile_us, (int, float)):
+                    valid_compile.append(compile_us)
+        if not valid_us:
+            # Account for the dir instead of dropping it.
+            if n_total_points == 0:
+                reason = "no_points"
+            elif n_bad_oracle == n_total_points:
+                reason = "all_bad_oracle"
+            else:
+                reason = "no_valid_point"
+            failures[dir_name] = {
+                "reason": reason,
+                "n_points": n_total_points,
+                "n_bad_oracle": n_bad_oracle,
+                "points": points,
+            }
+            continue
+        entry = {
+            # Representative fallback value: MEDIAN (not min) of valid points.
+            "oracle_us": round(_median(valid_us), 2),
+            "n_points": len(valid_us),
+            "points": points,
+            "points_by_shape": points_by_shape,
+        }
+        if valid_compile:
+            entry["compile_us"] = round(_median(valid_compile), 2)
+        flat[dir_name] = entry
+    if failures:
+        flat["__failures__"] = failures
+    return flat
+
+
+def _prefer_shape_point(candidate: dict, existing: dict, floor_excluded) -> bool:
+    """True if ``candidate`` is a better per-shape point than ``existing``.
+
+    Prefer a floor-valid point over an invalid one; among two valid points
+    prefer the faster oracle (the achievable floor for that shape).
+    """
+    cand_us = candidate.get("oracle_us")
+    exist_us = existing.get("oracle_us")
+    cand_valid = (candidate.get("status") not in floor_excluded
+                  and isinstance(cand_us, (int, float)))
+    exist_valid = (existing.get("status") not in floor_excluded
+                   and isinstance(exist_us, (int, float)))
+    if cand_valid != exist_valid:
+        return cand_valid
+    if cand_valid and exist_valid:
+        return cand_us < exist_us
+    # Both invalid: keep whichever has a numeric oracle_us, else keep existing.
+    return isinstance(cand_us, (int, float)) and not isinstance(exist_us, (int, float))
+
+
+def _write_oracle_timings_output(output_path: Path, all_results: dict) -> None:
+    """Write flat {dir_name -> {oracle_us,...}} for model_graph_accounting."""
+    _atomic_write_json(output_path, _aggregate_oracle_timings(all_results))
 
 
 def _is_integer_non_bool_dtype_name(dtype_name: object) -> bool:
@@ -783,6 +968,13 @@ def main():
     parser = argparse.ArgumentParser(description="Parallel GPU benchmark runner")
     parser.add_argument("paths", nargs="*", type=Path,
                         help="repro.py files or directories to benchmark")
+    parser.add_argument("--oracles", action="store_true",
+                        help="Benchmark migrated v2 oracles (oracle.py per canonical "
+                             "dir) instead of the torch.compile path. Mirrors "
+                             "`python -m oracle_harness <dir> --bench`: runs the "
+                             "numerics check gate, then bench_oracle per shape point. "
+                             "With --output writes a flat {dir_name -> {oracle_us,...}} "
+                             "mapping consumable by model_graph_accounting.py --timings.")
     parser.add_argument("--full-graphs", action="store_true",
                         help="Benchmark saved repros/models full_graph_*.py files "
                              "instead of partition repro.py files")
@@ -846,11 +1038,27 @@ def main():
         parser.error("--benchmark-set selects canonical repros and cannot be used with --full-graphs")
     if args.full_graphs and args.update_perf:
         parser.error("--update-perf writes repro perf.json files and is not supported with --full-graphs")
+    if args.oracles and args.full_graphs:
+        parser.error("--oracles and --full-graphs are mutually exclusive")
+    if args.oracles and args.update_perf:
+        parser.error("--update-perf writes repro perf.json files and is not supported with --oracles")
+    if args.oracles and args.benchmark_set:
+        parser.error("--benchmark-set is not supported with --oracles")
 
     # Load benchmark set if specified
     benchmark_entries = None
-    workload_kind = "full_graph" if args.full_graphs else "repro"
-    if args.full_graphs:
+    if args.oracles:
+        workload_kind = "oracle"
+    elif args.full_graphs:
+        workload_kind = "full_graph"
+    else:
+        workload_kind = "repro"
+    if args.oracles:
+        oracle_paths = args.paths or [Path("repros/canonical")]
+        repros = find_oracle_dirs(oracle_paths)
+        # Oracle bench is per shape point internally; --all-shapes is implied.
+        args.all_shapes = True
+    elif args.full_graphs:
         graph_paths = args.paths or [args.models_root]
         repros = find_full_graphs(graph_paths)
     elif args.benchmark_set:
@@ -866,7 +1074,9 @@ def main():
         repros = find_repros([Path("repros/canonical")])
 
     if not repros:
-        if args.full_graphs:
+        if args.oracles:
+            print("No oracle.py dirs found.")
+        elif args.full_graphs:
             print("No full_graph_*.py files found.")
         else:
             print("No repro.py files found.")
@@ -926,8 +1136,12 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
 
-    task_label = "full graphs" if args.full_graphs else "repros"
-    task_unit = "graph" if args.full_graphs else "repro"
+    if args.oracles:
+        task_label, task_unit = "oracles", "oracle"
+    elif args.full_graphs:
+        task_label, task_unit = "full graphs", "graph"
+    else:
+        task_label, task_unit = "repros", "repro"
     print(f"Benchmarking {len(repros)} {task_label} across {n_workers} workers on {len(gpus)} GPUs")
     gpu_labels = [f"{g['index']}:{g['kind']}" for g in gpus]
     print(f"  GPUs: {', '.join(gpu_labels)}")
@@ -958,6 +1172,12 @@ def main():
         "multi_kernel": args.multi_kernel,
         "workload_kind": workload_kind,
     }
+
+    if args.oracles:
+        # Reuse all the existing orchestration (task queue, GPU round-robin,
+        # workers-per-gpu, INDUCTOR_GPU_BENCH_LOCK) — only swap the per-worker
+        # subprocess script for the oracle check+bench loop.
+        args_dict["_persistent_worker_script_factory"] = _oracle_worker_script
 
     # Use threads — the actual GPU work is in subprocess.Popen children,
     # so GIL isn't a bottleneck (threads just do pipe I/O).
@@ -1006,14 +1226,25 @@ def main():
         repro_name = _task_display_name(result["repro"])
         if result["status"] == "ok":
             done += 1
-            best_gap = None
-            for label, r in _metric_result_items(result["results"]):
-                gap = r.get("gap_cd") or r.get("gap_default")
-                if gap and (best_gap is None or gap > best_gap):
-                    best_gap = gap
-            gap_str = f"{best_gap:.2f}x" if best_gap else "?"
+            if args.oracles:
+                from oracle_harness import _INVALID_STATUSES
+                best_us = None
+                for label, r in _metric_result_items(result["results"]):
+                    us = r.get("oracle_us")
+                    if (r.get("status") not in _INVALID_STATUSES
+                            and isinstance(us, (int, float))
+                            and (best_us is None or us < best_us)):
+                        best_us = us
+                metric_str = f"oracle={best_us:.1f}us" if best_us else "no-valid-point"
+            else:
+                best_gap = None
+                for label, r in _metric_result_items(result["results"]):
+                    gap = r.get("gap_cd") or r.get("gap_default")
+                    if gap and (best_gap is None or gap > best_gap):
+                        best_gap = gap
+                metric_str = f"gap={best_gap:.2f}x" if best_gap else "gap=?"
             print(f"  [{done+failed}/{len(repros)}] OK  gpu={result['gpu']}  "
-                  f"{result['elapsed']:.1f}s  gap={gap_str}  {repro_name}", flush=True)
+                  f"{result['elapsed']:.1f}s  {metric_str}  {repro_name}", flush=True)
             all_results[result["repro"]] = result["results"]
         else:
             failed += 1
@@ -1033,7 +1264,9 @@ def main():
                   f"{result['elapsed']:.1f}s  {repro_name}: {result['error'][:80]}", flush=True)
 
         # Incremental save every 50 results
-        if args.output and (done + failed) % 50 == 0:
+        if args.output and args.oracles and (done + failed) % 50 == 0:
+            _write_oracle_timings_output(args.output, all_results)
+        elif args.output and (done + failed) % 50 == 0:
             _write_results_output(
                 args.output,
                 all_results,
@@ -1106,7 +1339,15 @@ def main():
             print(f"  At SOL (<=1.1x): {at_sol}/{len(gaps)} ({at_sol*100//len(gaps)}%)")
 
     # Optional JSON output — include metadata for staleness detection
-    if args.output:
+    if args.output and args.oracles:
+        _write_oracle_timings_output(args.output, all_results)
+        timed = _aggregate_oracle_timings(all_results)
+        n_priced = sum(1 for k in timed if not k.startswith("_"))
+        n_failed = len(timed.get("__failures__", {}))
+        print(f"[output] Wrote {args.output} "
+              f"({n_priced} oracle dirs with valid oracle_us, "
+              f"{n_failed} unpriced)")
+    elif args.output:
         _write_results_output(
             args.output,
             all_results,
@@ -1121,7 +1362,11 @@ def main():
         print(f"[output] Wrote {args.output}")
 
     # Merge into existing baseline
-    if args.merge_into:
+    if args.merge_into and args.oracles:
+        print("[merge-into] not supported in --oracles mode "
+              "(flat timings schema differs from the path-keyed baseline); "
+              "skipped.")
+    elif args.merge_into:
         _merge_into_baseline(
             args.merge_into,
             all_results,
@@ -1378,6 +1623,132 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                 })
 
         _kill_worker(proc)
+
+
+def _oracle_worker_script(gpu_idx: str, args_dict: dict) -> str:
+    """Persistent worker that benchmarks v2 oracles, one canonical dir per line.
+
+    Mirrors the `python -m oracle_harness <dir> --bench` CLI loop in
+    oracle_harness._runner_main (check first, then bench_oracle per shape
+    point, gated on the per-point numerics check). Reuses bench_oracle, which
+    already honors INDUCTOR_GPU_BENCH_LOCK via _gpu_exclusive_lock — the env
+    var is set by _locked_worker, so the per-GPU exclusive timing lock is
+    respected with no extra wiring here.
+
+    The result JSON per dir is:
+        {
+          "<label>": {"oracle_us": float, "compile_us": float,
+                      "ratio": float, "status": str},
+          ...,
+          "_repro": "<dir path>",   # parent-side alignment check
+        }
+    Invalid/failing points carry a "status" in oracle_harness._INVALID_STATUSES
+    and no oracle_us, so the aggregator excludes them.
+
+    Uses the same fd-isolation as _persistent_worker_script: bench_oracle and
+    check_oracle_all_shapes print progress/JSON to stdout; we redirect fd 1 to
+    stderr so only our result JSON reaches the parent's result pipe.
+    """
+    skip_check = bool(args_dict.get("oracle_skip_check", False))
+    return f'''
+import sys, json, os, io
+os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
+
+import torch  # noqa: F401  (init CUDA in this subprocess)
+from pathlib import Path
+from oracle_harness import (
+    _load_oracle_module,
+    check_oracle_all_shapes,
+    bench_oracle,
+    get_inputs,
+    get_repro_instance,
+    _INVALID_STATUSES,
+)
+from repro_harness import load_shape_configs, make_inputs_from_config
+
+WARMUP = {args_dict["n_warmup"]}
+REP = {args_dict["n_rep"]}
+SKIP_CHECK = {skip_check}
+
+# Isolate the result pipe from any stdout pollution (bench_oracle /
+# check_oracle_all_shapes print JSON + progress to fd 1). Keep a private dup of
+# the original stdout for results; point fd 1 (and python stdout) at stderr.
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
+sys.stdout = sys.stderr
+
+def bench_oracle_dir(canonical_dir):
+    mod, fn, d = _load_oracle_module(canonical_dir)
+    repro_id = d.name
+    repro_file = d / "repro.py"
+    configs = load_shape_configs(str(repro_file))
+
+    # Numerics check gate (mirror CLI: --bench implies --check).
+    check = {{}}
+    if not SKIP_CHECK:
+        check = check_oracle_all_shapes(fn, d, repro_id, skip_stochastic=True)
+
+    results = {{}}
+    if not configs:
+        passed = True
+        if not SKIP_CHECK:
+            passed = all(v not in ("fail", False) for v in check.values())
+        if passed:
+            inputs = get_inputs(d)
+            instance = get_repro_instance(d)
+            results["default"] = bench_oracle(
+                fn, instance, inputs, repro_id, warmup=WARMUP, rep=REP)
+        else:
+            results["default"] = {{"repro_id": repro_id,
+                                   "status": "UNVERIFIED_NUMERICS"}}
+        return results
+
+    for label, config in configs.items():
+        point_id = f"{{repro_id}}_{{label}}"
+        passed = True
+        if not SKIP_CHECK:
+            passed = check.get(label) not in ("fail", False)
+        if passed:
+            inputs = make_inputs_from_config(config)
+            instance = get_repro_instance(d)
+            results[label] = bench_oracle(
+                fn, instance, inputs, point_id, warmup=WARMUP, rep=REP)
+        else:
+            results[label] = {{"repro_id": point_id,
+                               "status": "UNVERIFIED_NUMERICS"}}
+    return results
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line or line == "EXIT":
+        break
+    if line.startswith("PREFETCH:"):
+        # No-op for oracles: per-dir module load is cheap relative to bench.
+        continue
+    try:
+        results = bench_oracle_dir(line)
+        results["_repro"] = line
+        _result_file.write(json.dumps(results, default=str) + "\\n")
+        _result_file.flush()
+    except Exception as e:
+        if "CUDA" in str(e) or "device-side assert" in str(e):
+            _result_file.write(f"CUDA_ERROR: {{str(e)[:1000]}}\\n")
+            _result_file.flush()
+            sys.exit(1)
+        _result_file.write(json.dumps({{
+            "_repro": line,
+            "__error__": {{
+                "status": "failed",
+                "category": "runtime_error",
+                "exception_type": type(e).__name__,
+                "error": str(e)[:1000],
+                "reason": "oracle worker failed while benchmarking dir",
+                "hint": "Run `python -m oracle_harness <dir> --bench` directly.",
+            }},
+        }}) + "\\n")
+        _result_file.flush()
+'''
 
 
 def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:

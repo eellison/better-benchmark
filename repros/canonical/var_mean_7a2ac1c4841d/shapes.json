@@ -1,0 +1,805 @@
+{
+  "points": [
+    {
+      "shape_hash": "c2a1e3e9",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[512,80,7,7],"bf16",{"st":[3920,1,560,80]}],
+        [[80],"f32"],
+        [[80],"f32"],
+        [[80],"f32"],
+        [[80],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "7db2aeb2",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,112,7,7],"bf16",{"st":[5488,1,784,112]}],
+        [[112],"f32"],
+        [[112],"f32"],
+        [[112],"f32"],
+        [[112],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "31096850",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512,56,14,14],"bf16",{"st":[10976,1,784,56]}],
+        [[56],"f32"],
+        [[56],"f32"],
+        [[56],"f32"],
+        [[56],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "6f172941",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,80,14,14],"bf16",{"st":[15680,1,1120,80]}],
+        [[80],"f32"],
+        [[80],"f32"],
+        [[80],"f32"],
+        [[80],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "17ef9ad6",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[512,40,14,14],"bf16",{"st":[7840,1,560,40]}],
+        [[40],"f32"],
+        [[40],"f32"],
+        [[40],"f32"],
+        [[40],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "df1d49cf",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,240,14,14],"bf16",{"st":[47040,1,3360,240]}],
+        [[240],"f32"],
+        [[240],"f32"],
+        [[240],"f32"],
+        [[240],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "dd3c979f",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512,20,28,28],"bf16",{"st":[15680,1,560,20]}],
+        [[20],"f32"],
+        [[20],"f32"],
+        [[20],"f32"],
+        [[20],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "17c54342",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,24,28,28],"bf16",{"st":[18816,1,672,24]}],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "2da7ced3",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512,12,56,56],"bf16",{"st":[37632,1,672,12]}],
+        [[12],"f32"],
+        [[12],"f32"],
+        [[12],"f32"],
+        [[12],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "a897ff09",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,16,56,56],"bf16",{"st":[50176,1,896,16]}],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "6058e15b",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,48,56,56],"bf16",{"st":[150528,1,2688,48]}],
+        [[48],"f32"],
+        [[48],"f32"],
+        [[48],"f32"],
+        [[48],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "ce954876",
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,8,112,112],"bf16",{"st":[100352,1,896,8]}],
+        [[8],"f32"],
+        [[8],"f32"],
+        [[8],"f32"],
+        [[8],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "a8a74e41",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,320,7,7],"bf16",{"st":[15680,1,2240,320]}],
+        [[320],"f32"],
+        [[320],"f32"],
+        [[320],"f32"],
+        [[320],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "97fb8c65",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,160,7,7],"bf16",{"st":[7840,1,1120,160]}],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "62c751f1",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,96,14,14],"bf16",{"st":[18816,1,1344,96]}],
+        [[96],"f32"],
+        [[96],"f32"],
+        [[96],"f32"],
+        [[96],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "a20aa279",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,14,14],"bf16",{"st":[12544,1,896,64]}],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b5e847de",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,32,28,28],"bf16",{"st":[25088,1,896,32]}],
+        [[32],"f32"],
+        [[32],"f32"],
+        [[32],"f32"],
+        [[32],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "5c7c7725",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,24,56,56],"bf16",{"st":[75264,1,1344,24]}],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "75c62b73",
+      "models": {
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 1
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,16,112,112],"bf16",{"st":[200704,1,1792,16]}],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "40783eff",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,160,7,7],"bf16",{"st":[7840,1,1120,160]}],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "2a6b1005",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,112,14,14],"bf16",{"st":[21952,1,1568,112]}],
+        [[112],"f32"],
+        [[112],"f32"],
+        [[112],"f32"],
+        [[112],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "1ddb5b13",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,40,28,28],"bf16",{"st":[31360,1,1120,40]}],
+        [[40],"f32"],
+        [[40],"f32"],
+        [[40],"f32"],
+        [[40],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "87cb2ffa",
+      "models": {
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,24,56,56],"bf16",{"st":[75264,1,1344,24]}],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "000da78a",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,160,8,8],"bf16",{"st":[10240,1,1280,160]}],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "3a7a99d6",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,128,16,16],"bf16",{"st":[32768,1,2048,128]}],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[128],"f32"],
+        [[128],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "ddcb5e92",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,96,32,32],"bf16",{"st":[98304,1,3072,96]}],
+        [[96],"f32"],
+        [[96],"f32"],
+        [[96],"f32"],
+        [[96],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "004f43c9",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,64,64,64],"bf16",{"st":[262144,1,4096,64]}],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "98b145fe",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,32,128,128],"bf16",{"st":[524288,1,4096,32]}],
+        [[32],"f32"],
+        [[32],"f32"],
+        [[32],"f32"],
+        [[32],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "0086f84b",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,192,7,7],"bf16",{"st":[9408,1,1344,192]}],
+        [[192],"f32"],
+        [[192],"f32"],
+        [[192],"f32"],
+        [[192],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "5591e6a1",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,112,14,14],"bf16",{"st":[21952,1,1568,112]}],
+        [[112],"f32"],
+        [[112],"f32"],
+        [[112],"f32"],
+        [[112],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "1261775f",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,80,14,14],"bf16",{"st":[15680,1,1120,80]}],
+        [[80],"f32"],
+        [[80],"f32"],
+        [[80],"f32"],
+        [[80],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "cb33c3d1",
+      "models": {
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,40,28,28],"bf16",{"st":[31360,1,1120,40]}],
+        [[40],"f32"],
+        [[40],"f32"],
+        [[40],"f32"],
+        [[40],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "d0ac0091",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,320,7,7],"bf16"],
+        [[320],"f32"],
+        [[320],"f32"],
+        [[320],"f32"],
+        [[320],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "0cca0118",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,192,7,7],"bf16"],
+        [[192],"f32"],
+        [[192],"f32"],
+        [[192],"f32"],
+        [[192],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "f9264590",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,96,14,14],"bf16"],
+        [[96],"f32"],
+        [[96],"f32"],
+        [[96],"f32"],
+        [[96],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b3e3f5ef",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,80,14,14],"bf16"],
+        [[80],"f32"],
+        [[80],"f32"],
+        [[80],"f32"],
+        [[80],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "1a8507ca",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,40,28,28],"bf16"],
+        [[40],"f32"],
+        [[40],"f32"],
+        [[40],"f32"],
+        [[40],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b9d86480",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,24,56,56],"bf16"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "5e2cd32b",
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,16,112,112],"bf16"],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "126e37ab",
+      "models": {
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,320,7,7],"bf16"],
+        [[320],"f32"],
+        [[320],"f32"],
+        [[320],"f32"],
+        [[320],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "a4f815c2",
+      "models": {
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,160,7,7],"bf16"],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "b76cea4d",
+      "models": {
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,96,14,14],"bf16"],
+        [[96],"f32"],
+        [[96],"f32"],
+        [[96],"f32"],
+        [[96],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "df1dfc57",
+      "models": {
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,64,14,14],"bf16"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        [[64],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "7a0912ed",
+      "models": {
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,32,28,28],"bf16"],
+        [[32],"f32"],
+        [[32],"f32"],
+        [[32],"f32"],
+        [[32],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "d7e99106",
+      "models": {
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,24,56,56],"bf16"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "46eca283",
+      "models": {
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[96,16,112,112],"bf16"],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"],
+        [[16],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "0fbf9a67",
+      "models": {
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,160,7,7],"bf16"],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"],
+        [[160],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "fc44e6c2",
+      "models": {
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,112,14,14],"bf16"],
+        [[112],"f32"],
+        [[112],"f32"],
+        [[112],"f32"],
+        [[112],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "21cf057f",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[128,232,7,7],"bf16"],
+        [[232],"f32"],
+        [[232],"f32"],
+        [[232],"f32"],
+        [[232],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "8cbf400d",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 9
+        }
+      },
+      "inputs": [
+        [[128,116,14,14],"bf16"],
+        [[116],"f32"],
+        [[116],"f32"],
+        [[116],"f32"],
+        [[116],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "d1ba5867",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[128,58,28,28],"bf16"],
+        [[58],"f32"],
+        [[58],"f32"],
+        [[58],"f32"],
+        [[58],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "e031939e",
+      "models": {
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,24,28,28],"bf16"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"],
+        [[24],"f32"]
+      ]
+    }
+  ]
+}

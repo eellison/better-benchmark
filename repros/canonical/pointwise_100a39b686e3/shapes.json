@@ -1,0 +1,81 @@
+{
+  "points": [
+    {
+      "shape_hash": "896c6bb5",
+      "models": {
+        "timm/train/adv_inception_v3": {
+          "occurrences": 94
+        },
+        "timm/train/ghostnet_100": {
+          "occurrences": 80
+        },
+        "timm/train/inception_v3": {
+          "occurrences": 94
+        },
+        "timm/train/mobilenetv2_100": {
+          "occurrences": 52
+        },
+        "timm/train/mobilenetv3_large_100": {
+          "occurrences": 46
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 32
+        },
+        "timm/train/repvgg_a2": {
+          "occurrences": 61
+        },
+        "timm/train/tf_efficientnet_b0": {
+          "occurrences": 49
+        },
+        "timm/train/visformer_small": {
+          "occurrences": 28
+        },
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 21
+        },
+        "torchbench/train/dcgan": {
+          "occurrences": 3
+        },
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 52
+        },
+        "torchbench/train/mobilenet_v2": {
+          "occurrences": 52
+        },
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 46
+        },
+        "torchbench/train/densenet121": {
+          "occurrences": 121
+        },
+        "torchbench/train/resnet18": {
+          "occurrences": 20
+        },
+        "torchbench/train/resnet50": {
+          "occurrences": 53
+        },
+        "torchbench/train/resnext50_32x4d": {
+          "occurrences": 53
+        },
+        "torchbench/train/shufflenet_v2_x1_0": {
+          "occurrences": 56
+        },
+        "torchbench/train/pytorch_unet": {
+          "occurrences": 18
+        },
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 52
+        },
+        "torchbench/train/phlippe_resnet": {
+          "occurrences": 19
+        },
+        "torchbench/train/resnet152": {
+          "occurrences": 155
+        }
+      },
+      "inputs": [
+        [[],"i64"]
+      ]
+    }
+  ]
+}

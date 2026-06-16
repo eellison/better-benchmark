@@ -1,0 +1,15 @@
+{
+  "pattern_hash": "99d2c4cec20d",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 2,
+  "origin_ops": [
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "timm/infer/visformer_small",
+    "timm/train/visformer_small"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "points": [
+    {
+      "shape_hash": "4ac62a08",
+      "models": {
+        "genai/static/SoftmaxForward": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8192,262144],"bf16"]
+      ]
+    }
+  ]
+}

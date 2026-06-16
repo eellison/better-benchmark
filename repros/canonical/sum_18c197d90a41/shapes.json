@@ -1,0 +1,34 @@
+{
+  "points": [
+    {
+      "shape_hash": "6f705ec8",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,4096],"b8"],
+        [[128,4096],"bf16"],
+        [[128,4096],"b8"],
+        [[],"bf16"],
+        ["S",[4096]]
+      ]
+    },
+    {
+      "shape_hash": "1bd3f5ad",
+      "models": {
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,4096],"b8"],
+        [[64,4096],"bf16"],
+        [[64,4096],"b8"],
+        [[],"bf16"],
+        ["S",[4096]]
+      ]
+    }
+  ]
+}

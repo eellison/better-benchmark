@@ -1,0 +1,19 @@
+{
+  "points": [
+    {
+      "shape_hash": "ced5d5ea",
+      "models": {
+        "timm/infer/deit_base_distilled_patch16_224": {
+          "occurrences": 1
+        },
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,1000],"bf16"],
+        [[128,1000],"bf16"]
+      ]
+    }
+  ]
+}

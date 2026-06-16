@@ -1,0 +1,37 @@
+{
+  "points": [
+    {
+      "shape_hash": "d3b915a9",
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 14
+        }
+      },
+      "inputs": [
+        [[192,128,128],"bf16"],
+        [[32,6,128,128],"bf16",{"st":[98304,1,768,6]}],
+        ["S",[32,6,128,128]],
+        ["S",[32,6,128,128]],
+        ["S",[192,128,128]]
+      ]
+    },
+    {
+      "shape_hash": "679762f8",
+      "models": {
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 10
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 10
+        }
+      },
+      "inputs": [
+        [[64,1024,1024],"bf16"],
+        [[8,8,1024,1024],"bf16",{"st":[8388608,1,8192,8]}],
+        ["S",[8,8,1024,1024]],
+        ["S",[8,8,1024,1024]],
+        ["S",[64,1024,1024]]
+      ]
+    }
+  ]
+}

@@ -1,689 +1,430 @@
 #!/usr/bin/env python3
-"""Per-model performance attribution tool.
+"""Per-model perf attribution: standalone parts vs end-to-end, exactly.
 
-For model X, answers: "How much time is spent in each partition, and what's
-the achievable floor?"
+Closes the accounting identity on real hardware:
 
-TWO APPROACHES:
+    e2e  ~=  SUM(fusible standalone_us x occurrences)
+           + SUM(extern  standalone_us x occurrences)
+           - G x (total_occurrences - 1)
 
-Approach A (Static accounting, bottom-up):
-  - Map model graphs -> canonical repros via manifest pattern hashes
-  - Look up measured compile_us and oracle_us for each partition
-  - Sum: predicted_model_time = sum(partition_time * count) + non_fusible_time
-  - Sum: achievable_model_time = sum(min(oracle_us, compile_us) * count) + non_fusible
+where G is the CUDAGraph launch floor: the intercept of replay_us vs
+n_kernels, measured at runtime on graphs of k no-op kernels (~4.5us on
+B200). Every standalone point pays one graph launch; the real model pays
+it once, so G is removed per occurrence and added back once. The
+per-kernel-in-graph slope (~0.9us) appears identically on both sides
+(same kernels, same counts) and cancels — only the intercept is
+corrected.
 
-Approach B (End-to-end, top-down):
-  - Load full_graph_*.py, torch.compile, time the whole graph
-  - Compare vs sum-of-partitions from Approach A
-  - Gap reveals cross-graph overhead (dispatch, memory pressure, partition boundaries)
+Validated 2026-06-11 on 10 timm infer models:
+raw parts/e2e 1.14-1.34 -> corrected 1.00-1.09. The two undershoots are
+real perf findings, not accounting error: deit 0.75 (in-model layernorm
+runs up to 4x slower than the identical standalone shape) and nfnet 0.92
+(dominant conv slightly faster standalone). Residual +2-9% above 1.0 is
+compile-context effects (epilogue fusion the standalone repro can't see).
 
-LIMITATIONS:
-  - We do NOT have per-shape oracles. Each repro was captured at ONE specific shape.
-    If the model runs at a different shape (batch size, seq length), our oracle
-    measurement doesn't directly apply.
-  - Non-fusible ops (matmul, conv, embedding lookups) are NOT in the repro corpus.
-    They appear as "non-captured" overhead.
-  - Approach B requires GPU hardware and pytorch installation with CUDA.
+Methodology (must match repro_harness.benchmark_repro):
+  - coordinate_descent_tuning ON
+  - fresh torch._dynamo.reset() + torch.compile per shape point
+    (without it, dynamo marks dims dynamic after the 2nd shape and every
+    later point gets a slow dynamic-shape kernel — the bug that produced
+    0.12x-4.23x attribution scatter in the first validation round)
+  - CUDAGraph capture + do_bench(replay, return_mode="min")
+
+Dedup: nothing is benched twice within a run.
+  - fusible: one bench per (pattern_hash, shape_hash) canonical point,
+    shared across all models via occurrence-count joins
+  - extern: one bench per (target, exact input signature incl. stride),
+    run-level cache shared across models
+
+Usage:
+    python scripts/model_attribution.py --corpus-root /tmp/recapture_corpus/repros \
+        --suite timm --mode infer --models mobilenetv2_100,resnet18
+    python scripts/model_attribution.py --corpus-root ... --models all \
+        --output results/attribution_b200.json
 """
 
 from __future__ import annotations
 
 import argparse
-import csv
+import importlib.util
 import json
-import re
+import math
 import sys
-from collections import defaultdict
-from dataclasses import dataclass, field
+from collections import Counter
 from pathlib import Path
-from typing import Any
 
-# Project root
 ROOT = Path(__file__).resolve().parent.parent
-CANONICAL_DIR = ROOT / "repros" / "canonical"
-MODELS_DIR = ROOT / "repros" / "models"
-RESULTS_DIR = ROOT / "investigation_results"
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "scripts"))
+
+import torch
+import torch.fx as fx
+from triton.testing import do_bench
+
+from model_graph_accounting import analyze_graph, trace_full_graph
+from full_graph_harness import load_full_graph
+from repro_harness import parse_shapes_config
+
+N_WARMUP = 10
+N_REP = 50
 
 
-@dataclass
-class PartitionInfo:
-    """Info about one partition (pattern) in a model graph."""
-    pattern_hash: str
-    repro_id: str  # e.g. "var_mean_0990c69ae9bb"
-    compile_us: float | None = None
-    oracle_us: float | None = None
-    best_compile_us: float | None = None
-    classification: str = "unknown"
-    kind: str = "unknown"  # pointwise, reduction, etc.
-    n_ops: int = 0
-    captured: bool = True  # False if pattern hash has no matching canonical repro
+# ============================================================================
+# CUDAGraph launch floor (measured per run, never hardcoded)
+# ============================================================================
 
+def measure_graph_launch_floor() -> tuple[float, float]:
+    """(intercept_us, slope_us) of replay_us = intercept + slope * n_kernels.
 
-@dataclass
-class ModelGraphInfo:
-    """Info about one model graph (one manifest)."""
-    graph_name: str  # e.g. "torchbench_hf_Bert_infer_000"
-    partitions: list[PartitionInfo] = field(default_factory=list)
-    has_full_graph: bool = False
-    full_graph_path: str | None = None
-
-
-@dataclass
-class ModelAttribution:
-    """Full attribution for a model."""
-    model_name: str  # e.g. "torchbench_hf_Bert_infer"
-    graphs: list[ModelGraphInfo] = field(default_factory=list)
-
-    @property
-    def total_partitions(self) -> int:
-        return sum(len(g.partitions) for g in self.graphs)
-
-    @property
-    def captured_partitions(self) -> int:
-        return sum(1 for g in self.graphs for p in g.partitions if p.captured)
-
-    @property
-    def has_timing(self) -> int:
-        return sum(1 for g in self.graphs for p in g.partitions
-                   if p.captured and p.best_compile_us is not None)
-
-    @property
-    def has_oracle(self) -> int:
-        return sum(1 for g in self.graphs for p in g.partitions
-                   if p.captured and p.oracle_us is not None)
-
-    @property
-    def sum_compile_us(self) -> float:
-        total = 0.0
-        for g in self.graphs:
-            for p in g.partitions:
-                if p.best_compile_us is not None:
-                    total += p.best_compile_us
-        return total
-
-    @property
-    def sum_achievable_us(self) -> float:
-        """Best of oracle_us and best_compile_us for each partition."""
-        total = 0.0
-        for g in self.graphs:
-            for p in g.partitions:
-                if p.best_compile_us is not None:
-                    if p.oracle_us is not None and p.oracle_us < p.best_compile_us:
-                        total += p.oracle_us
-                    else:
-                        total += p.best_compile_us
-        return total
-
-    @property
-    def sum_gap_us(self) -> float:
-        return self.sum_compile_us - self.sum_achievable_us
-
-    @property
-    def speedup(self) -> float:
-        achievable = self.sum_achievable_us
-        if achievable <= 0:
-            return 1.0
-        return self.sum_compile_us / achievable
-
-
-def build_hash_to_repro_id() -> dict[str, str]:
-    """Map pattern_hash -> repro_id from canonical directory names."""
-    mapping = {}
-    if not CANONICAL_DIR.exists():
-        return mapping
-    for d in CANONICAL_DIR.iterdir():
-        if d.is_dir():
-            parts = d.name.rsplit("_", 1)
-            if len(parts) == 2 and len(parts[1]) == 12:
-                mapping[parts[1]] = d.name
-    return mapping
-
-
-def load_baseline_results() -> dict[str, dict[str, Any]]:
-    """Load baseline_results.csv into dict keyed by repro_id."""
-    csv_path = RESULTS_DIR / "baseline_results.csv"
-    if not csv_path.exists():
-        return {}
-    results = {}
-    with open(csv_path) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            results[row["repro_id"]] = row
-    return results
-
-
-def load_oracle_floors() -> dict[str, float]:
-    """Load measured_oracle_floors.csv -> repro_id: oracle_us."""
-    csv_path = RESULTS_DIR / "measured_oracle_floors.csv"
-    if not csv_path.exists():
-        return {}
-    floors = {}
-    with open(csv_path) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            oracle_us = row.get("oracle_us", "")
-            if oracle_us:
-                try:
-                    floors[row["repro_id"]] = float(oracle_us)
-                except ValueError:
-                    pass
-    return floors
-
-
-def load_oracle_tracker() -> dict[str, dict[str, Any]]:
-    """Load oracle_vs_compile_tracker.csv for classification."""
-    csv_path = RESULTS_DIR / "oracle_vs_compile_tracker.csv"
-    if not csv_path.exists():
-        return {}
-    tracker = {}
-    with open(csv_path) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            tracker[row["repro_id"]] = row
-    return tracker
-
-
-def load_repro_meta(repro_id: str) -> dict[str, Any]:
-    """Load meta.json for a canonical repro."""
-    meta_path = CANONICAL_DIR / repro_id / "meta.json"
-    if not meta_path.exists():
-        return {}
-    try:
-        return json.loads(meta_path.read_text())
-    except (json.JSONDecodeError, OSError):
-        return {}
-
-
-def discover_model_manifests() -> dict[str, list[tuple[str, list[str]]]]:
-    """Discover all model manifests.
-
-    Returns: {model_base_name: [(graph_name, [pattern_hashes]), ...]}
+    Graphs of k no-op kernels (1-element add_). The intercept is the
+    per-graph launch cost each standalone measurement pays; the slope is
+    per-kernel-in-graph overhead, identical on both sides of the
+    accounting identity and therefore not corrected.
     """
-    if not MODELS_DIR.exists():
-        return {}
+    x = torch.zeros(1, device="cuda")
+    ks = [1, 2, 5, 10, 20, 50, 100]
+    ts = []
+    for k in ks:
+        torch.cuda.synchronize()
+        g = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(g):
+            for _ in range(k):
+                x.add_(1.0)
+        torch.cuda.synchronize()
+        ts.append(do_bench(lambda: g.replay(), warmup=25, rep=100,
+                           return_mode="min") * 1000)
+    n = len(ks)
+    mk = sum(ks) / n
+    mt = sum(ts) / n
+    slope = (sum((k - mk) * (t - mt) for k, t in zip(ks, ts))
+             / sum((k - mk) ** 2 for k in ks))
+    return mt - slope * mk, slope
 
-    raw_graphs: dict[str, list[tuple[str, list[str]]]] = defaultdict(list)
 
-    for manifest_path in sorted(MODELS_DIR.rglob("manifest.json")):
-        try:
-            data = json.loads(manifest_path.read_text())
-        except (json.JSONDecodeError, OSError):
+# ============================================================================
+# Shared bench primitive
+# ============================================================================
+
+def _bench_replay(fn) -> float:
+    """CUDAGraph-capture fn() and return min replay time in us."""
+    with torch.no_grad():
+        for _ in range(3):
+            fn()
+        torch.cuda.synchronize()
+        g = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(g):
+            fn()
+        torch.cuda.synchronize()
+    return do_bench(lambda: g.replay(), warmup=N_WARMUP, rep=N_REP,
+                    return_mode="min") * 1000
+
+
+# ============================================================================
+# Fusible side: canonical repro points
+# ============================================================================
+
+def bench_fusible_points(needed: set[tuple[str, str]],
+                         canonical_dir: Path) -> dict[tuple[str, str], float]:
+    """Bench each needed (pattern_hash, shape_hash) point exactly once."""
+    times: dict[tuple[str, str], float] = {}
+    needed_patterns = {p for p, _ in needed}
+    for d in sorted(canonical_dir.iterdir()):
+        phash = d.name.rsplit("_", 1)[-1]
+        if phash not in needed_patterns or not (d / "repro.py").exists():
             continue
-
-        graph_name = manifest_path.parent.name
-        patterns = data.get("patterns", [])
-        # Derive base model name by stripping trailing _NNN
-        base = re.sub(r"_\d{3}$", "", graph_name)
-        raw_graphs[base].append((graph_name, patterns))
-
-    return dict(raw_graphs)
-
-
-def discover_full_graphs() -> dict[str, list[Path]]:
-    """Find full_graph_*.py files grouped by model directory."""
-    full_graphs: dict[str, list[Path]] = defaultdict(list)
-    if not MODELS_DIR.exists():
-        return full_graphs
-    for fg in sorted(MODELS_DIR.rglob("full_graph_*.py")):
-        model_dir = fg.parent.name
-        full_graphs[model_dir].append(fg)
-    return dict(full_graphs)
-
-
-def build_attribution(
-    model_name: str,
-    graphs: list[tuple[str, list[str]]],
-    hash_to_repro: dict[str, str],
-    baseline: dict[str, dict[str, Any]],
-    oracle_floors: dict[str, float],
-    oracle_tracker: dict[str, dict[str, Any]],
-    full_graphs: dict[str, list[Path]],
-) -> ModelAttribution:
-    """Build full attribution for one model."""
-    attr = ModelAttribution(model_name=model_name)
-
-    for graph_name, pattern_hashes in graphs:
-        ginfo = ModelGraphInfo(graph_name=graph_name)
-
-        # Check for full graph files
-        fg_list = full_graphs.get(graph_name, [])
-        if fg_list:
-            ginfo.has_full_graph = True
-            ginfo.full_graph_path = str(fg_list[0])
-
-        for phash in pattern_hashes:
-            repro_id = hash_to_repro.get(phash)
-            if repro_id is None:
-                # Pattern hash not found in canonical repros
-                pinfo = PartitionInfo(
-                    pattern_hash=phash,
-                    repro_id=f"UNKNOWN_{phash}",
-                    captured=False,
-                )
-                ginfo.partitions.append(pinfo)
+        spec = importlib.util.spec_from_file_location("r", d / "repro.py")
+        mod = importlib.util.module_from_spec(spec)
+        mod.device = torch.device
+        mod.inf = math.inf
+        mod.nan = float("nan")
+        spec.loader.exec_module(mod)
+        for pt in json.loads((d / "shapes.json").read_text())["points"]:
+            key = (phash, pt["shape_hash"])
+            if key not in needed or key in times:
                 continue
-
-            pinfo = PartitionInfo(
-                pattern_hash=phash,
-                repro_id=repro_id,
-                captured=True,
-            )
-
-            # Load meta for classification
-            meta = load_repro_meta(repro_id)
-            pinfo.kind = meta.get("kind", "unknown")
-            pinfo.n_ops = meta.get("n_ops", 0)
-
-            # Load timing from baseline
-            brow = baseline.get(repro_id)
-            if brow:
-                try:
-                    pinfo.compile_us = float(brow["compiled_us"])
-                except (ValueError, KeyError):
-                    pass
-                try:
-                    pinfo.best_compile_us = float(brow["best_compile_us"])
-                except (ValueError, KeyError):
-                    pass
-
-            # Load oracle floor
-            if repro_id in oracle_floors:
-                pinfo.oracle_us = oracle_floors[repro_id]
-
-            # Load classification from tracker
-            trow = oracle_tracker.get(repro_id)
-            if trow:
-                pinfo.classification = trow.get("family", "unknown")
-            elif brow:
-                # Fallback: use pattern_prefix as classification
-                pinfo.classification = brow.get("pattern_prefix", "unknown")
-
-            ginfo.partitions.append(pinfo)
-
-        attr.graphs.append(ginfo)
-
-    return attr
+            from input_codec import spec_from_compact
+            from repro_harness import make_inputs_from_config
+            specs = [spec_from_compact(e) for e in pt["inputs"]]
+            inputs = [t.cuda() if isinstance(t, torch.Tensor) else t
+                      for t in make_inputs_from_config({"inputs": specs})]
+            torch._dynamo.reset()
+            compiled = torch.compile(mod.Repro())
+            times[key] = _bench_replay(lambda: compiled(*inputs))
+    return times
 
 
-def format_attribution_report(attr: ModelAttribution, verbose: bool = False) -> str:
-    """Format a human-readable attribution report."""
-    lines = []
-    lines.append(f"# Model Attribution: {attr.model_name}")
-    lines.append("")
-    lines.append("## Summary")
-    lines.append("")
-    lines.append(f"- Graphs: {len(attr.graphs)}")
-    lines.append(f"- Total partitions: {attr.total_partitions}")
-    lines.append(f"- Captured in corpus: {attr.captured_partitions}")
-    lines.append(f"- With timing data: {attr.has_timing}")
-    lines.append(f"- With oracle floor: {attr.has_oracle}")
-    lines.append("")
+# ============================================================================
+# Extern side: non-fusible ops at exact input metas
+# ============================================================================
 
-    if attr.has_timing > 0:
-        lines.append("## Approach A: Static Accounting (Bottom-Up)")
-        lines.append("")
-        lines.append(f"- Sum compile time (best config): {attr.sum_compile_us:.1f} us")
-        lines.append(f"- Achievable floor (min of oracle/compile): {attr.sum_achievable_us:.1f} us")
-        lines.append(f"- Gap (opportunity): {attr.sum_gap_us:.1f} us")
-        lines.append(f"- Potential speedup: {attr.speedup:.3f}x")
-        lines.append("")
-        lines.append("### Limitations")
-        lines.append("")
-        lines.append("- Oracles measured at ONE specific shape only; model may run at different shapes")
-        lines.append("- Non-fusible ops (matmul, conv, etc.) not captured in repro corpus")
-        lines.append("- No cross-partition overhead accounted for (dispatch, memory pressure)")
-        non_captured = attr.total_partitions - attr.captured_partitions
-        if non_captured > 0:
-            lines.append(f"- {non_captured} partition(s) not found in canonical corpus")
-        lines.append("")
-
-    # Per-partition detail table
-    lines.append("## Per-Partition Breakdown")
-    lines.append("")
-    lines.append("| # | Graph | Repro ID | Kind | Compile (us) | Oracle (us) | Gap (us) | Classification |")
-    lines.append("|---|-------|----------|------|-------------|-------------|----------|----------------|")
-
-    idx = 0
-    for g in attr.graphs:
-        for p in g.partitions:
-            idx += 1
-            compile_str = f"{p.best_compile_us:.1f}" if p.best_compile_us else "N/A"
-            oracle_str = f"{p.oracle_us:.1f}" if p.oracle_us else "N/A"
-            if p.best_compile_us and p.oracle_us:
-                gap = p.best_compile_us - min(p.oracle_us, p.best_compile_us)
-                gap_str = f"{gap:.1f}"
-            else:
-                gap_str = "N/A"
-            captured_mark = "" if p.captured else " [NOT CAPTURED]"
-            lines.append(
-                f"| {idx} | {g.graph_name} | {p.repro_id}{captured_mark} | "
-                f"{p.kind} | {compile_str} | {oracle_str} | {gap_str} | "
-                f"{p.classification} |"
-            )
-
-    lines.append("")
-
-    # Classification summary
-    class_totals: dict[str, dict[str, float]] = defaultdict(
-        lambda: {"compile": 0.0, "achievable": 0.0, "count": 0}
-    )
-    for g in attr.graphs:
-        for p in g.partitions:
-            if p.best_compile_us is not None:
-                cls = p.classification
-                class_totals[cls]["compile"] += p.best_compile_us
-                if p.oracle_us is not None and p.oracle_us < p.best_compile_us:
-                    class_totals[cls]["achievable"] += p.oracle_us
-                else:
-                    class_totals[cls]["achievable"] += p.best_compile_us
-                class_totals[cls]["count"] += 1
-
-    if class_totals:
-        lines.append("## Time by Classification")
-        lines.append("")
-        lines.append("| Classification | Count | Compile (us) | Achievable (us) | Gap (us) |")
-        lines.append("|---------------|-------|-------------|-----------------|----------|")
-        for cls, totals in sorted(class_totals.items(), key=lambda x: -(x[1]["compile"] - x[1]["achievable"])):
-            gap = totals["compile"] - totals["achievable"]
-            lines.append(
-                f"| {cls} | {int(totals['count'])} | "
-                f"{totals['compile']:.1f} | {totals['achievable']:.1f} | {gap:.1f} |"
-            )
-        lines.append("")
-
-    # Approach B note
-    has_full = any(g.has_full_graph for g in attr.graphs)
-    if has_full:
-        lines.append("## Approach B: End-to-End (Top-Down)")
-        lines.append("")
-        lines.append("Full graph files available for end-to-end benchmarking:")
-        for g in attr.graphs:
-            if g.has_full_graph:
-                lines.append(f"  - {g.full_graph_path}")
-        lines.append("")
-        lines.append("Run with: `python scripts/model_attribution.py --model <name> --bench`")
-        lines.append("")
-        lines.append("NOTE: Approach B requires GPU. Without per-shape oracles, the comparison")
-        lines.append("between A and B reveals cross-graph overhead but the 'achievable' number")
-        lines.append("from A may not match the actual achievable with correct-shape oracles.")
-    else:
-        lines.append("## Approach B: End-to-End (Top-Down)")
-        lines.append("")
-        lines.append("No full_graph_*.py files found for this model.")
-        lines.append("End-to-end timing not available.")
-
-    lines.append("")
-    return "\n".join(lines)
+def _meta_sig(val) -> str:
+    if torch.is_tensor(val):
+        return f"T({list(val.shape)},{val.dtype},{list(val.stride())})"
+    return repr(val)
 
 
-def run_approach_b(attr: ModelAttribution) -> dict[str, Any]:
-    """Run Approach B: compile and time full graphs.
+def _generation_kind_for_arg(node, arg_pos) -> dict | None:
+    """Generation spec for an integer tensor arg of an extern op.
 
-    Returns timing results dict. Requires GPU.
+    Same op semantics as full_graph_harness.infer_index_bounds_from_gm —
+    here the consumer IS the node being benched, so inference is direct:
+    embedding(weight, indices) bounds indices by weight.shape[0];
+    gather/index_select/scatter by input.shape[dim]; _embedding_bag
+    offsets are a sorted-"offsets" kind. Returns a make_inputs_from_config
+    generation dict, or None (harness default: small non-negative ints).
     """
-    try:
-        import torch
-        import torch._inductor.config as cfg
-    except ImportError:
-        return {"error": "PyTorch not available"}
+    def _arg_shape(i):
+        if i >= len(node.args) or not isinstance(node.args[i], fx.Node):
+            return None
+        v = node.args[i].meta.get("val")
+        return list(v.shape) if torch.is_tensor(v) else None
 
-    if not torch.cuda.is_available():
-        return {"error": "CUDA not available"}
+    t = node.target
+    a = torch.ops.aten
+    if t in (a.embedding.default, a._embedding_bag.default) and arg_pos == 1:
+        w = _arg_shape(0)
+        return {"kind": "index", "low": 0, "high": w[0]} if w else None
+    if t == a._embedding_bag.default and arg_pos == 2:
+        idx = _arg_shape(1)
+        return {"kind": "offsets", "high": idx[0]} if idx else None
+    if t in (a.gather.default, a.index_select.default,
+             a.scatter.src, a.scatter.value, a.scatter_add.default):
+        if arg_pos == 2:  # (input, dim, index, ...)
+            inp = _arg_shape(0)
+            dim = node.args[1] if len(node.args) > 1 else 0
+            if inp and isinstance(dim, int):
+                return {"kind": "index", "low": 0, "high": inp[dim]}
+    if t == a.index.Tensor and arg_pos == 1:
+        inp = _arg_shape(0)
+        return {"kind": "index", "low": 0, "high": min(inp)} if inp else None
+    return None
 
-    sys.path.insert(0, str(ROOT))
-    from full_graph_harness import load_full_graph
 
-    results = {}
-    for g in attr.graphs:
-        if not g.has_full_graph:
+def _fabricate(val, dev="cuda", node=None, arg_pos=None):
+    """Materialize a bench input from a fake-tensor meta val.
+
+    REUSES repro_harness.make_inputs_from_config — the project's single
+    input-generation implementation (randn floats, bounded randint index
+    ints, permutation/offsets kinds) — by building the same spec dict the
+    shapes.json pipeline produces. No value semantics live here.
+    """
+    if not torch.is_tensor(val):
+        return val
+    from repro_harness import make_inputs_from_config
+    spec = {
+        "shape": list(val.shape),
+        "dtype": str(val.dtype),
+        "stride": list(val.stride()),
+        "device": dev,
+    }
+    if node is not None and arg_pos is not None:
+        gen = _generation_kind_for_arg(node, arg_pos)
+        if gen:
+            spec["gen"] = gen
+    return make_inputs_from_config({"inputs": [spec]})[0]
+
+
+def _arg_sig(a) -> str:
+    """Exact signature of one arg: tensor metas for Nodes, repr for
+    literals, recursing into containers. (fx.node.map_arg only visits
+    Nodes — literals like conv padding would be silently dropped, merging
+    padding-only-different calls into one point. Caught by
+    test_canonical_invariants.)"""
+    if isinstance(a, fx.Node):
+        return _meta_sig(a.meta.get("val"))
+    if isinstance(a, (list, tuple)):
+        inner = ",".join(_arg_sig(x) for x in a)
+        return f"[{inner}]" if isinstance(a, list) else f"({inner})"
+    if isinstance(a, dict):
+        return "{" + ",".join(f"{k}:{_arg_sig(v)}"
+                              for k, v in sorted(a.items())) + "}"
+    return repr(a)
+
+
+def collect_extern_points(gm) -> dict[tuple[str, str], dict]:
+    """(target, exact input signature) -> {count, node} for non-fusible ops.
+
+    The signature includes shape, dtype AND stride of every tensor arg
+    plus the repr of every literal arg — two conv calls differing only in
+    padding or layout are distinct points.
+    """
+    from capture_hook import get_fusion_partitions, partition_node_is_supported
+
+    partitioned: set = set()
+    for comp in get_fusion_partitions(gm):
+        partitioned.update(comp)
+    points: dict[tuple[str, str], dict] = {}
+    for node in gm.graph.nodes:
+        if node.op != "call_function" or node in partitioned:
             continue
+        if partition_node_is_supported(node):
+            continue
+        key = (str(node.target), _arg_sig((node.args, node.kwargs)))
+        if key in points:
+            points[key]["count"] += 1
+        else:
+            points[key] = {"count": 1, "node": node}
+    return points
 
+
+def bench_extern_point(node) -> float:
+    """Bench one non-fusible op standalone at its exact input metas.
+
+    Top-level positional args carry their position into _fabricate so
+    integer index tensors get inferred valid bounds (embedding indices
+    bounded by the weight's vocab dim, gather indices by input.shape[dim]).
+    """
+    args = tuple(
+        _fabricate(a.meta.get("val"), node=node, arg_pos=i)
+        if isinstance(a, fx.Node)
+        else fx.node.map_arg(a, lambda x: _fabricate(x.meta.get("val")))
+        for i, a in enumerate(node.args)
+    )
+    kwargs = fx.node.map_arg(
+        node.kwargs, lambda x: _fabricate(x.meta.get("val")))
+    return _bench_replay(lambda: node.target(*args, **kwargs))
+
+
+# ============================================================================
+# End-to-end reference
+# ============================================================================
+
+def bench_e2e(graph_path: Path) -> float:
+    inst, inputs, _ = load_full_graph(graph_path, default_device="cuda")
+    inputs = [t.cuda() if isinstance(t, torch.Tensor) else t for t in inputs]
+    torch._dynamo.reset()
+    compiled = torch.compile(inst)
+    return _bench_replay(lambda: compiled(*inputs))
+
+
+# ============================================================================
+# Per-model attribution
+# ============================================================================
+
+def attribute_model(model_dir: Path, canonical_dir: Path,
+                    fusible_cache: dict[tuple[str, str], float],
+                    extern_cache: dict[tuple[str, str], float],
+                    launch_floor_us: float) -> dict:
+    graphs = sorted(model_dir.glob("full_graph_*.py"))
+    fus_occ: Counter = Counter()
+    extern_occ: Counter = Counter()
+    extern_nodes: dict[tuple[str, str], object] = {}
+    e2e_total = 0.0
+    for g in graphs:
+        gm = trace_full_graph(g)
+        acc = analyze_graph(gm, str(g), g.stem)
+        fus_occ.update((o.pattern_hash, o.shape_hash) for o in acc.occurrences)
+        for key, info in collect_extern_points(gm).items():
+            extern_occ[key] += info["count"]
+            extern_nodes.setdefault(key, info["node"])
+        e2e_total += bench_e2e(g)
+
+    # Fusible: bench only points not already in the run cache.
+    missing = set(fus_occ) - set(fusible_cache)
+    fusible_cache.update(bench_fusible_points(missing, canonical_dir))
+    fus_unmatched = {k: n for k, n in fus_occ.items() if k not in fusible_cache}
+    fus_sum = sum(fusible_cache[k] * n for k, n in fus_occ.items()
+                  if k in fusible_cache)
+
+    # Extern: run-level cache keyed on (target, exact signature).
+    extern_failed: list[str] = []
+    for key, node in extern_nodes.items():
+        if key in extern_cache:
+            continue
         try:
-            instance, inputs, definition = load_full_graph(g.full_graph_path)
-            instance = instance.cuda().eval()
+            extern_cache[key] = bench_extern_point(node)
+        except Exception as e:  # noqa: BLE001 -- record, never silently drop
+            extern_failed.append(f"{key[0]}: {type(e).__name__}: {e}")
+    ext_unmatched = {k: n for k, n in extern_occ.items()
+                     if k not in extern_cache}
+    ext_sum = sum(extern_cache[k] * n for k, n in extern_occ.items()
+                  if k in extern_cache)
 
-            # Compile
-            cfg.coordinate_descent_tuning = True
-            cfg.combo_kernels = True
-            compiled = torch.compile(instance)
-
-            # Warmup
-            with torch.no_grad():
-                for _ in range(3):
-                    compiled(*inputs)
-            torch.cuda.synchronize()
-
-            # Time
-            import time
-            torch.cuda.synchronize()
-            start = time.perf_counter()
-            n_rep = 10
-            with torch.no_grad():
-                for _ in range(n_rep):
-                    compiled(*inputs)
-            torch.cuda.synchronize()
-            elapsed = (time.perf_counter() - start) / n_rep * 1e6  # us
-
-            results[g.graph_name] = {
-                "full_graph_us": elapsed,
-                "path": g.full_graph_path,
-            }
-        except Exception as e:
-            results[g.graph_name] = {"error": str(e)}
-
-    return results
+    n_occ = sum(fus_occ.values()) + sum(extern_occ.values())
+    parts = fus_sum + ext_sum
+    # Each standalone occurrence embeds one graph-launch intercept G; the
+    # e2e side embeds G per FULL GRAPH (e2e_total sums one bench_e2e per
+    # graph). Correction is therefore G*(n_occ - n_graphs) — using (n_occ-1)
+    # over-subtracts on multi-graph models (opus verifier, 2026-06-11;
+    # coincidentally equal for the 1-graph timm infer validation set).
+    corrected = parts - launch_floor_us * (n_occ - len(graphs))
+    return {
+        "e2e_us": round(e2e_total, 1),
+        "sum_fusible_us": round(fus_sum, 1),
+        "sum_extern_us": round(ext_sum, 1),
+        "sum_parts_us": round(parts, 1),
+        "corrected_parts_us": round(corrected, 1),
+        "ratio_raw": round(parts / e2e_total, 3),
+        "ratio_corrected": round(corrected / e2e_total, 3),
+        "n_graphs": len(graphs),
+        "n_fusible_occurrences": sum(fus_occ.values()),
+        "n_fusible_points": len(fus_occ),
+        "n_extern_occurrences": sum(extern_occ.values()),
+        "n_extern_points": len(extern_occ),
+        "fusible_unmatched": [f"{p}/{s} x{n}"
+                              for (p, s), n in sorted(fus_unmatched.items())],
+        "extern_unmatched": [f"{t} x{n}"
+                             for (t, _), n in sorted(ext_unmatched.items())],
+        "extern_bench_failures": extern_failed,
+    }
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Per-model performance attribution tool"
-    )
-    parser.add_argument(
-        "--model", "-m",
-        default="all",
-        help="Model name (or 'all' for all models). Partial matches supported.",
-    )
-    parser.add_argument(
-        "--bench", "-b",
-        action="store_true",
-        help="Run Approach B (end-to-end GPU benchmarking). Requires CUDA.",
-    )
-    parser.add_argument(
-        "--output", "-o",
-        default=None,
-        help="Output file path (default: stdout)",
-    )
-    parser.add_argument(
-        "--csv",
-        action="store_true",
-        help="Output CSV format instead of markdown report.",
-    )
-    parser.add_argument(
-        "--top", "-t",
-        type=int,
-        default=0,
-        help="Show only top N models by gap (0 = all)",
-    )
-    parser.add_argument(
-        "--verbose", "-v",
-        action="store_true",
-        help="Include per-graph detail",
-    )
+        description="Standalone-parts vs e2e attribution per model")
+    parser.add_argument("--corpus-root", type=Path, required=True,
+                        help="Corpus root containing models/ and canonical/")
+    parser.add_argument("--suite", default="timm")
+    parser.add_argument("--mode", default="infer")
+    parser.add_argument("--models", required=True,
+                        help="Comma-separated model names, or 'all'")
+    parser.add_argument("--output", "-o", type=Path, default=None)
     args = parser.parse_args()
 
-    # Load data
-    print("Loading data...", file=sys.stderr)
-    hash_to_repro = build_hash_to_repro_id()
-    baseline = load_baseline_results()
-    oracle_floors = load_oracle_floors()
-    oracle_tracker = load_oracle_tracker()
-    model_manifests = discover_model_manifests()
-    full_graphs = discover_full_graphs()
+    import torch._inductor.config as inductor_config
+    inductor_config.coordinate_descent_tuning = True
 
-    print(f"  Canonical repros: {len(hash_to_repro)}", file=sys.stderr)
-    print(f"  Baseline results: {len(baseline)}", file=sys.stderr)
-    print(f"  Oracle floors: {len(oracle_floors)}", file=sys.stderr)
-    print(f"  Model manifests: {len(model_manifests)}", file=sys.stderr)
-    print(f"  Full graph dirs: {len(full_graphs)}", file=sys.stderr)
-
-    # Filter models
-    if args.model == "all":
-        selected_models = list(model_manifests.keys())
+    suite_dir = args.corpus_root / "models" / args.suite / args.mode
+    canonical_dir = args.corpus_root / "canonical"
+    if args.models == "all":
+        model_dirs = sorted(d for d in suite_dir.iterdir() if d.is_dir())
     else:
-        # Partial match
-        selected_models = [
-            m for m in model_manifests.keys()
-            if args.model.lower() in m.lower()
-        ]
-        if not selected_models:
-            print(f"No models matching '{args.model}'. Available:", file=sys.stderr)
-            for m in sorted(model_manifests.keys())[:20]:
-                print(f"  {m}", file=sys.stderr)
-            sys.exit(1)
+        model_dirs = [suite_dir / m for m in args.models.split(",") if m]
 
-    # Build attributions
-    attributions = []
-    for model_name in sorted(selected_models):
-        graphs = model_manifests[model_name]
-        attr = build_attribution(
-            model_name, graphs, hash_to_repro, baseline,
-            oracle_floors, oracle_tracker, full_graphs,
-        )
-        attributions.append(attr)
+    floor_us, slope_us = measure_graph_launch_floor()
+    print(f"CUDAGraph floor: replay = {floor_us:.2f} + {slope_us:.3f} * "
+          f"n_kernels (us)", file=sys.stderr)
 
-    # Sort by gap (descending)
-    attributions.sort(key=lambda a: -a.sum_gap_us)
+    fusible_cache: dict[tuple[str, str], float] = {}
+    extern_cache: dict[tuple[str, str], float] = {}
+    out = {"_launch_floor_us": round(floor_us, 2),
+           "_launch_slope_us": round(slope_us, 3),
+           "_device": torch.cuda.get_device_name(0),
+           "models": {}}
+    for md in model_dirs:
+        if not md.is_dir():
+            out["models"][md.name] = {"error": "model dir not found"}
+            continue
+        try:
+            r = attribute_model(md, canonical_dir, fusible_cache,
+                                extern_cache, floor_us)
+            out["models"][md.name] = r
+            print(f"{md.name}: e2e={r['e2e_us']:.0f}us "
+                  f"parts={r['sum_parts_us']:.0f}us "
+                  f"corrected={r['corrected_parts_us']:.0f}us "
+                  f"ratio={r['ratio_corrected']:.2f} "
+                  f"unmatched={len(r['fusible_unmatched']) + len(r['extern_unmatched'])}",
+                  flush=True)
+        except Exception as e:  # noqa: BLE001 -- per-model isolation
+            out["models"][md.name] = {"error": f"{type(e).__name__}: {e}"}
+            print(f"{md.name}: ERROR {type(e).__name__}: {e}", flush=True)
 
-    if args.top > 0:
-        attributions = attributions[:args.top]
-
-    # Output
-    if args.csv:
-        output_csv(attributions, args.output)
-    else:
-        output_report(attributions, args.output, bench=args.bench, verbose=args.verbose)
-
-
-def output_csv(attributions: list[ModelAttribution], output_path: str | None):
-    """Output CSV summary."""
-    out = open(output_path, "w", newline="") if output_path else sys.stdout
-    writer = csv.writer(out)
-    writer.writerow([
-        "model", "n_graphs", "n_partitions", "n_captured", "n_with_timing",
-        "n_with_oracle", "sum_compile_us", "sum_achievable_us", "gap_us", "speedup",
-    ])
-    for attr in attributions:
-        writer.writerow([
-            attr.model_name,
-            len(attr.graphs),
-            attr.total_partitions,
-            attr.captured_partitions,
-            attr.has_timing,
-            attr.has_oracle,
-            f"{attr.sum_compile_us:.1f}",
-            f"{attr.sum_achievable_us:.1f}",
-            f"{attr.sum_gap_us:.1f}",
-            f"{attr.speedup:.3f}",
-        ])
-    if output_path:
-        out.close()
-
-
-def output_report(
-    attributions: list[ModelAttribution],
-    output_path: str | None,
-    bench: bool = False,
-    verbose: bool = False,
-):
-    """Output markdown report."""
-    lines = []
-    lines.append("# Model Performance Attribution Report")
-    lines.append("")
-    lines.append("## Overview")
-    lines.append("")
-    lines.append(f"Models analyzed: {len(attributions)}")
-    total_compile = sum(a.sum_compile_us for a in attributions)
-    total_achievable = sum(a.sum_achievable_us for a in attributions)
-    total_gap = total_compile - total_achievable
-    lines.append(f"Total compile time across all models: {total_compile:.1f} us")
-    lines.append(f"Total achievable time: {total_achievable:.1f} us")
-    lines.append(f"Total gap (opportunity): {total_gap:.1f} us")
-    if total_achievable > 0:
-        lines.append(f"Overall potential speedup: {total_compile/total_achievable:.3f}x")
-    lines.append("")
-    lines.append("### Key Limitations")
-    lines.append("")
-    lines.append("1. **No per-shape oracles**: Each repro measured at ONE specific shape.")
-    lines.append("   Model may run at different batch/seq shapes; oracle doesn't directly apply.")
-    lines.append("2. **Non-fusible ops not captured**: matmul, conv, embedding are not in corpus.")
-    lines.append("3. **No cross-partition overhead**: dispatch, memory pressure, boundaries not modeled.")
-    lines.append("4. **Approach B can be totally off** without per-shape measurements,")
-    lines.append("   since the full graph runs at the model's actual shape while partition")
-    lines.append("   timings come from potentially different shapes.")
-    lines.append("")
-
-    # Summary table
-    lines.append("## Summary Table (sorted by gap)")
-    lines.append("")
-    lines.append("| Model | Graphs | Partitions | Compile (us) | Achievable (us) | Gap (us) | Speedup |")
-    lines.append("|-------|--------|-----------|-------------|-----------------|----------|---------|")
-    for attr in attributions:
-        if attr.sum_compile_us > 0:
-            lines.append(
-                f"| {attr.model_name} | {len(attr.graphs)} | "
-                f"{attr.total_partitions} | {attr.sum_compile_us:.1f} | "
-                f"{attr.sum_achievable_us:.1f} | {attr.sum_gap_us:.1f} | "
-                f"{attr.speedup:.3f}x |"
-            )
-    lines.append("")
-
-    # Detailed per-model reports
-    if verbose or len(attributions) <= 5:
-        lines.append("## Detailed Per-Model Reports")
-        lines.append("")
-        for attr in attributions:
-            if attr.sum_compile_us > 0:
-                lines.append(format_attribution_report(attr, verbose=verbose))
-                lines.append("---")
-                lines.append("")
-
-    # Approach B results
-    if bench:
-        lines.append("## Approach B: End-to-End Results")
-        lines.append("")
-        lines.append("| Model | Graph | Full Graph (us) | Sum of Parts (us) | Overhead |")
-        lines.append("|-------|-------|-----------------|-------------------|----------|")
-        for attr in attributions:
-            b_results = run_approach_b(attr)
-            for gname, result in b_results.items():
-                if "error" in result:
-                    lines.append(f"| {attr.model_name} | {gname} | ERROR: {result['error']} | - | - |")
-                else:
-                    fg_us = result["full_graph_us"]
-                    # Sum partitions for this graph
-                    sum_parts = 0.0
-                    for g in attr.graphs:
-                        if g.graph_name == gname:
-                            for p in g.partitions:
-                                if p.best_compile_us:
-                                    sum_parts += p.best_compile_us
-                    overhead = fg_us - sum_parts if sum_parts > 0 else 0
-                    lines.append(
-                        f"| {attr.model_name} | {gname} | {fg_us:.1f} | "
-                        f"{sum_parts:.1f} | {overhead:.1f} |"
-                    )
-        lines.append("")
-        lines.append("NOTE: Without per-shape oracles, this comparison has limited validity.")
-        lines.append("The gap between full-graph time and sum-of-partitions reveals cross-graph")
-        lines.append("overhead but shape mismatches can make the numbers incomparable.")
-
-    output = "\n".join(lines)
-    if output_path:
-        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-        Path(output_path).write_text(output + "\n")
-        print(f"Report written to {output_path}", file=sys.stderr)
-    else:
-        print(output)
+    print(f"run cache: {len(fusible_cache)} fusible points, "
+          f"{len(extern_cache)} extern points benched once", file=sys.stderr)
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(out, indent=2) + "\n")
+        print(f"written to {args.output}", file=sys.stderr)
 
 
 if __name__ == "__main__":

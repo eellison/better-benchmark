@@ -1,0 +1,340 @@
+{
+  "points": [
+    {
+      "shape_hash": "85db042c",
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[96,256,8,8],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[96,256,8,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "0af2d571",
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[96,128,16,16],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[96,128,16,16],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3aeeed95",
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[96,64,32,32],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[96,64,32,32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "fd6e1886",
+      "models": {
+        "torchbench/infer/resnet18": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[8,256,14,14],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[8,256,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cd893d5b",
+      "models": {
+        "torchbench/infer/resnet18": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128],"bf16"],
+        [[8,128,28,28],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[128],"bf16"],
+        [[8,128,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "28e6bebb",
+      "models": {
+        "torchbench/infer/resnet18": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[8,64,56,56],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[8,64,56,56],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "08581e62",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2048],"bf16"],
+        [[32,2048,7,7],"bf16"],
+        [[2048],"bf16"],
+        [[2048],"bf16"],
+        [[2048],"bf16"],
+        [[32,2048,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "50714806",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[1024],"bf16"],
+        [[32,1024,14,14],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        [[32,1024,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "4c0cf88f",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[32,512,28,28],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[32,512,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "6b748dff",
+      "models": {
+        "torchbench/infer/resnet50": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[32,256,56,56],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[32,256,56,56],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "7111f2e4",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2048],"bf16"],
+        [[8,2048,7,7],"bf16"],
+        [[2048],"bf16"],
+        [[2048],"bf16"],
+        [[2048],"bf16"],
+        [[8,2048,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2e6c4615",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[1024],"bf16"],
+        [[8,1024,14,14],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        [[8,1024,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e626f5a9",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[8,512,28,28],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[8,512,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "40170966",
+      "models": {
+        "torchbench/infer/resnext50_32x4d": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[8,256,56,56],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[8,256,56,56],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e2161da4",
+      "models": {
+        "torchbench/infer/phlippe_resnet": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64],"bf16"],
+        [[128,64,8,8],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[64],"bf16"],
+        [[128,64,8,8],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "72f4709b",
+      "models": {
+        "torchbench/infer/phlippe_resnet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[32],"bf16"],
+        [[128,32,16,16],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[32],"bf16"],
+        [[128,32,16,16],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "cce8fbb3",
+      "models": {
+        "torchbench/infer/phlippe_resnet": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [[16],"bf16"],
+        [[128,16,32,32],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"],
+        [[16],"bf16"],
+        [[128,16,32,32],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "2f5dac5e",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2048],"bf16"],
+        [[128,2048,7,7],"bf16"],
+        [[2048],"bf16"],
+        [[2048],"bf16"],
+        [[2048],"bf16"],
+        [[128,2048,7,7],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "3bac8de4",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 35
+        }
+      },
+      "inputs": [
+        [[1024],"bf16"],
+        [[128,1024,14,14],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        [[1024],"bf16"],
+        [[128,1024,14,14],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "592ca691",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [[512],"bf16"],
+        [[128,512,28,28],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[512],"bf16"],
+        [[128,512,28,28],"bf16"]
+      ]
+    },
+    {
+      "shape_hash": "e20a55a6",
+      "models": {
+        "torchbench/infer/resnet152": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[256],"bf16"],
+        [[128,256,56,56],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[256],"bf16"],
+        [[128,256,56,56],"bf16"]
+      ]
+    }
+  ]
+}

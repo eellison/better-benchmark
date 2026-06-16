@@ -1,0 +1,142 @@
+{
+  "points": [
+    {
+      "shape_hash": "fec5bff7",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[768,128,3,3],"bf16",{"st":[1152,1,384,128]}],
+        [[768,1,1,1],"bf16"],
+        ["S",[1,768,1152]],
+        ["S",[768,128,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "328a377c",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [[256,128,3,3],"bf16",{"st":[1152,1,384,128]}],
+        [[256,1,1,1],"bf16"],
+        ["S",[1,256,1152]],
+        ["S",[256,128,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "25be6f49",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[128,128,3,3],"bf16",{"st":[1152,1,384,128]}],
+        [[128,1,1,1],"bf16"],
+        ["S",[1,128,1152]],
+        ["S",[128,128,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "503f9220",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/infer/nfnet_l0": {
+          "occurrences": 5
+        }
+      },
+      "inputs": [
+        [[128,64,3,3],"bf16",{"st":[576,1,192,64]}],
+        [[128,1,1,1],"bf16"],
+        ["S",[1,128,576]],
+        ["S",[128,64,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "42d3582f",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,32,3,3],"bf16",{"st":[288,1,96,32]}],
+        [[64,1,1,1],"bf16"],
+        ["S",[1,64,288]],
+        ["S",[64,32,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "fdcbb92a",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[32,16,3,3],"bf16",{"st":[144,1,48,16]}],
+        [[32,1,1,1],"bf16"],
+        ["S",[1,32,144]],
+        ["S",[32,16,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "894d940e",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,3,3,3],"bf16",{"st":[27,1,9,3]}],
+        [[16,1,1,1],"bf16"],
+        ["S",[1,16,27]],
+        ["S",[16,3,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "a866684b",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[384,64,3,3],"bf16",{"st":[576,1,192,64]}],
+        [[384,1,1,1],"bf16"],
+        ["S",[1,384,576]],
+        ["S",[384,64,3,3]]
+      ]
+    },
+    {
+      "shape_hash": "13b6121f",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,64,3,3],"bf16",{"st":[576,1,192,64]}],
+        [[64,1,1,1],"bf16"],
+        ["S",[1,64,576]],
+        ["S",[64,64,3,3]]
+      ]
+    }
+  ]
+}

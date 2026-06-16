@@ -1,0 +1,296 @@
+{
+  "points": [
+    {
+      "shape_hash": "a24dc267",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[3072,1536,1,1],"bf16"],
+        [[3072,1,1,1],"bf16"],
+        ["S",[1,3072,-1]],
+        ["S",[3072,1536,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "b321bd29",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 9
+        }
+      },
+      "inputs": [
+        [[1536,768,1,1],"bf16"],
+        [[1536,1,1,1],"bf16"],
+        ["S",[1,1536,-1]],
+        ["S",[1536,768,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "e5403093",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[768,1536,1,1],"bf16"],
+        [[768,1,1,1],"bf16"],
+        ["S",[1,768,-1]],
+        ["S",[768,1536,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "54d002a2",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1536,1536,1,1],"bf16"],
+        [[1536,1,1,1],"bf16"],
+        ["S",[1,1536,-1]],
+        ["S",[1536,1536,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "1c377997",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        },
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[1536,512,1,1],"bf16"],
+        [[1536,1,1,1],"bf16"],
+        ["S",[1,1536,-1]],
+        ["S",[1536,512,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "067f0896",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[768,512,1,1],"bf16"],
+        [[768,1,1,1],"bf16"],
+        ["S",[1,768,-1]],
+        ["S",[768,512,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "898896cd",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 3
+        },
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,256,1,1],"bf16"],
+        [[512,1,1,1],"bf16"],
+        ["S",[1,512,-1]],
+        ["S",[512,256,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "59475c6e",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,512,1,1],"bf16"],
+        [[256,1,1,1],"bf16"],
+        ["S",[1,256,-1]],
+        ["S",[256,512,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "1098a0cd",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,256,1,1],"bf16"],
+        [[256,1,1,1],"bf16"],
+        ["S",[1,256,-1]],
+        ["S",[256,256,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "6844a365",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 2
+        },
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,128,1,1],"bf16"],
+        [[256,1,1,1],"bf16"],
+        ["S",[1,256,-1]],
+        ["S",[256,128,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "d94b56b7",
+      "models": {
+        "timm/infer/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,128,1,1],"bf16"],
+        [[128,1,1,1],"bf16"],
+        ["S",[1,128,-1]],
+        ["S",[128,128,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "e8722254",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[2304,1536,1,1],"bf16"],
+        [[2304,1,1,1],"bf16"],
+        ["S",[1,2304,-1]],
+        ["S",[2304,1536,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "d7001ca8",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 9
+        }
+      },
+      "inputs": [
+        [[1536,384,1,1],"bf16"],
+        [[1536,1,1,1],"bf16"],
+        ["S",[1,1536,-1]],
+        ["S",[1536,384,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "1adafdac",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[384,1536,1,1],"bf16"],
+        [[384,1,1,1],"bf16"],
+        ["S",[1,384,-1]],
+        ["S",[384,1536,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "f054831c",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[384,512,1,1],"bf16"],
+        [[384,1,1,1],"bf16"],
+        ["S",[1,384,-1]],
+        ["S",[384,512,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "a9bad761",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[512,128,1,1],"bf16"],
+        [[512,1,1,1],"bf16"],
+        ["S",[1,512,-1]],
+        ["S",[512,128,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "d4748368",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,512,1,1],"bf16"],
+        [[128,1,1,1],"bf16"],
+        ["S",[1,128,-1]],
+        ["S",[128,512,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "320fe2b8",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[128,256,1,1],"bf16"],
+        [[128,1,1,1],"bf16"],
+        ["S",[1,128,-1]],
+        ["S",[128,256,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "f8f31da1",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[256,64,1,1],"bf16"],
+        [[256,1,1,1],"bf16"],
+        ["S",[1,256,-1]],
+        ["S",[256,64,1,1]]
+      ]
+    },
+    {
+      "shape_hash": "12c4ea37",
+      "models": {
+        "timm/infer/nfnet_l0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,128,1,1],"bf16"],
+        [[64,1,1,1],"bf16"],
+        ["S",[1,64,-1]],
+        ["S",[64,128,1,1]]
+      ]
+    }
+  ]
+}

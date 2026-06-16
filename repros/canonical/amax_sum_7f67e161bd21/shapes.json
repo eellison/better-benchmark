@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "4f884edd",
+      "models": {
+        "hf/infer/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[192,512,512],"bf16"],
+        ["S",[8,1,512,512]],
+        ["S",[-1,24,512,512]],
+        ["S",[-1,512,512]]
+      ]
+    }
+  ]
+}

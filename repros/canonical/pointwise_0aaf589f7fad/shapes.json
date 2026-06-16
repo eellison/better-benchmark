@@ -1,0 +1,52 @@
+{
+  "points": [
+    {
+      "shape_hash": "631b8e39",
+      "models": {
+        "torchbench/infer/BERT_pytorch": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[2048,768],"bf16"],
+        ["S",[16,128,768]],
+        ["S",[16,-1,12,64]],
+        ["S",[16,12,64,128]],
+        ["S",[192,64,128]]
+      ]
+    },
+    {
+      "shape_hash": "cb7fdfdf",
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4096,384],"bf16"],
+        ["S",[32,128,384]],
+        ["S",[32,128,-1,64]],
+        ["S",[32,6,64,128]],
+        ["S",[192,64,128]]
+      ]
+    },
+    {
+      "shape_hash": "b63e0b0f",
+      "models": {
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 18
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 18
+        }
+      },
+      "inputs": [
+        [[8192,512],"bf16"],
+        ["S",[8,1024,512]],
+        ["S",[8,1024,-1,64]],
+        ["S",[8,8,64,1024]],
+        ["S",[64,64,1024]]
+      ]
+    }
+  ]
+}

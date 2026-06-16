@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "68a9ca47",
+      "models": {
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16384,50272],"bf16"],
+        [[32,512],"i64"],
+        ["S",[32,512,50265]],
+        ["S",[-1,50265]]
+      ]
+    }
+  ]
+}

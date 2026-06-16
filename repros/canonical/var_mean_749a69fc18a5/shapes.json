@@ -1,0 +1,23 @@
+{
+  "points": [
+    {
+      "shape_hash": "5d43e450",
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [[4096,2048],"bf16"],
+        [[32,128,2048],"f32"],
+        [[2048],"f32"],
+        [[2048],"f32"],
+        ["S",[32,128,2048]],
+        ["S",[4096,2048]]
+      ]
+    }
+  ]
+}

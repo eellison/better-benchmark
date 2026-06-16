@@ -1,0 +1,15 @@
+{
+  "points": [
+    {
+      "shape_hash": "de033194",
+      "models": {
+        "torchbench/infer/BERT_pytorch": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[16,2],"bf16"]
+      ]
+    }
+  ]
+}

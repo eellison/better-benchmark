@@ -1,0 +1,28 @@
+{
+  "points": [
+    {
+      "shape_hash": "a7e138d5",
+      "models": {
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024],"bf16"],
+        ["S",[8192]]
+      ]
+    },
+    {
+      "shape_hash": "5002b631",
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[8,1024],"f32"],
+        ["S",[8192]]
+      ]
+    }
+  ]
+}

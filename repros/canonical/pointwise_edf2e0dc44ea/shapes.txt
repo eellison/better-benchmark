@@ -1,6 +1,0 @@
-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_train_d999c84a: (T([128, 2560], f32), T([128], i64))
-hf_blenderbotforcausallm_train_d999c84a: (T([128, 2560], f32), T([128], i64))
-hf_pegasusforcausallm_train_4494d7dc: (T([1024, 1024], f32), T([128], i64))
-hf_blenderbotforcausallm_train_003_d999c84a: (T([128, 2560], f32), T([128], i64, gen=Index(128)))
-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_train_006_d999c84a: (T([128, 2560], f32), T([128], i64, gen=Index(128)))
-torchbench_hf_reformer_infer_001_e19d00d7: (T([320, 256], f16), T([1, 4096], i64, gen=Index(320)))

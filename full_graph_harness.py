@@ -35,6 +35,9 @@ _DTYPE_SHORT_NAMES = {
     "i16": "int16",
     "i8": "int8",
     "u8": "uint8",
+    "u16": "uint16",
+    "u32": "uint32",
+    "u64": "uint64",
     "b8": "bool",
     "f64": "float64",
     "c64": "complex64",
@@ -121,8 +124,19 @@ def placeholder_info_from_gm(gm: Any) -> dict[str, dict]:
     return placeholder_info
 
 
-def infer_index_bounds_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> dict[str, int]:
-    """Infer valid index bounds for integer placeholders by inspecting consumers."""
+def infer_index_bounds_from_gm(
+    gm: Any,
+    placeholder_info: dict[str, dict],
+    constants_out: dict[str, int] | None = None,
+) -> dict[str, int]:
+    """Infer valid index bounds for integer placeholders by inspecting consumers.
+
+    `constants_out` (optional dict, filled in place) receives placeholders
+    whose only safe generation is a CONSTANT value rather than a range —
+    e.g. maxpool offset tensors, where the window-center offset is the one
+    value in-bounds for every window under padding (random offsets put edge
+    windows out of range -> device-side assert in the consuming scatter).
+    """
     import torch
 
     index_consumers = {
@@ -130,8 +144,7 @@ def infer_index_bounds_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> di
         torch.ops.aten.scatter.value: (0, 1),
         torch.ops.aten.scatter_add.default: (0, 1),
         torch.ops.aten.gather.default: (0, 1),
-        torch.ops.aten.index_put.default: (0, None),
-        torch.ops.aten.index.Tensor: (0, None),
+
         torch.ops.aten.index_select.default: (0, 1),
         torch.ops.aten.embedding.default: (0, None),
     }
@@ -153,6 +166,7 @@ def infer_index_bounds_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> di
     }
 
     bounds = {}
+    constants = constants_out if constants_out is not None else {}
     ph_nodes = {n.name: n for n in gm.graph.nodes if n.op == "placeholder"}
 
     def _node_shape(n):
@@ -172,56 +186,137 @@ def infer_index_bounds_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> di
     for name, node in ph_nodes.items():
         info = placeholder_info.get(name, {})
         dtype = info.get("dtype", "")
-        if "int" not in dtype:
+        is_float = "float" in dtype or "bfloat" in dtype
+        if "int" not in dtype and not is_float:
             continue
 
         if "int8" in dtype:
+            # Maxpool OFFSET tensors (offset-within-window). Random offsets
+            # are NOT uniformly valid: offsets_to_indices converts them to
+            # flat indices relative to each window's position, and under
+            # padding the edge windows go negative / past the dim for most
+            # values (offset 0 at a padded edge -> index -113) — the
+            # consuming scatter_add then device-side-asserts and poisons
+            # the CUDA context (the wave-1 torchbench train assert class).
+            # The WINDOW-CENTER offset is in-bounds for every window
+            # (measured: 3x3 pad1 on 112x112 -> [0, 12430] vs dim 12544),
+            # so emit it via constants_out as a constant-value generator.
             for user in node.users:
                 if user.op != "call_function":
                     continue
                 target_name = str(user.target)
                 if "max_pool_offsets_to_indices" not in target_name:
                     continue
-                if len(user.args) >= 2 and isinstance(user.args[1], (list, tuple)):
-                    kernel_size = user.args[1]
-                    bounds[name] = (
-                        int(kernel_size[0] * kernel_size[1])
-                        if len(kernel_size) >= 2
-                        else int(kernel_size[0])
-                    )
+                kernel_size = user.args[1] if len(user.args) >= 2 else None
+                # In canonical (lifted) graphs the kernel size is a
+                # _shape_param placeholder NODE whose meta["val"] holds the
+                # list — resolve it (vgg16: literal-only check fell through
+                # to the 3x3 default const 4 on a 2x2 kernel -> offset 4
+                # invalid -> scatter assert).
+                if (kernel_size is not None
+                        and not isinstance(kernel_size, (list, tuple))
+                        and hasattr(kernel_size, "meta")):
+                    mv = kernel_size.meta.get("val")
+                    if isinstance(mv, (list, tuple)):
+                        kernel_size = mv
+                if isinstance(kernel_size, (list, tuple)) and kernel_size:
+                    if len(kernel_size) >= 2:
+                        kh, kw = int(kernel_size[0]), int(kernel_size[1])
+                        center = (kh // 2) * kw + (kw // 2)
+                    else:
+                        center = int(kernel_size[0]) // 2
+                    constants[name] = center
                     break
-            if name not in bounds:
-                bounds[name] = 9
+            if name not in constants:
+                # Offset 0 (first element of the window) is valid for any
+                # kernel WITHOUT padding; under padding only interior
+                # offsets are — but an unknown kernel size gives no better
+                # choice, and 0 is right far more often than a 3x3 center.
+                constants[name] = 0
             continue
 
-        def _find_bound(start_node, max_hops=3):
-            frontier = [start_node]
+        def _find_bound(start_node, max_hops=8):
+            # Collect EVERY bound the value reaches and return the MIN: a
+            # value consumed by several index ops must satisfy all of them
+            # (Electra: ids flow through gather into the 2-row token-type
+            # embedding — first-found returned the 512 gather bound and the
+            # 2-row table asserted OOB, poisoning the CUDA context).
+            #
+            # The walk follows VALUE flow through int arithmetic too, and
+            # INVERTS each transform when a consumption bound is found
+            # (Longformer: position ids = (ids * mask + 1) indexes a
+            # 4098-row table — the leaf bound is isqrt(4097), not 4098):
+            #   add/sub const c   ->  bound - |c|
+            #   mul const c>0    ->  bound // c
+            #   mul TENSOR       ->  isqrt(bound) (both operands generated
+            #                        by us; each < sqrt(B) keeps product < B)
+            #   add TENSOR       ->  bound // 2  (same reasoning)
+            #   convert/clone/.. ->  unchanged
+            import math as _math
+
+            found: list[int] = []
+
+            def _invert(bound: int, chain) -> int:
+                b = bound
+                for kind, arg in reversed(chain):
+                    if kind == "addc":
+                        b = b - abs(int(arg))
+                    elif kind == "mulc":
+                        c = abs(int(arg))
+                        b = b // c if c > 1 else b
+                    elif kind == "mult":
+                        b = int(_math.isqrt(max(b - 1, 1)))
+                    elif kind == "addt":
+                        b = b // 2
+                    b = max(b, 1)
+                return b
+
+            _INT_ARITH = {
+                torch.ops.aten.add.Tensor: "add",
+                torch.ops.aten.sub.Tensor: "add",   # same inversion class
+                torch.ops.aten.mul.Tensor: "mul",
+            }
+            _VALUE_PRESERVING = {
+                torch.ops.prims.convert_element_type.default,
+            }
+
+            frontier = [(start_node, ())]
             for _hop in range(max_hops):
                 next_frontier = []
-                for n in frontier:
+                for n, chain in frontier:
                     for user in n.users:
                         if user.op != "call_function":
                             continue
                         target = user.target
 
                         if target == torch.ops.aten.embedding.default:
-                            weight_arg = user.args[0] if user.args else None
-                            if weight_arg and hasattr(weight_arg, "meta"):
-                                val = weight_arg.meta.get("val")
-                                if isinstance(val, torch.Tensor) and len(val.shape) > 0:
-                                    return int(val.shape[0])
+                            # only when n is the INDICES arg (args[1])
+                            if len(user.args) > 1 and user.args[1] is n:
+                                weight_arg = user.args[0] if user.args else None
+                                if weight_arg and hasattr(weight_arg, "meta"):
+                                    val = weight_arg.meta.get("val")
+                                    if isinstance(val, torch.Tensor) and len(val.shape) > 0:
+                                        found.append(_invert(int(val.shape[0]), chain))
+                                        continue
 
-                        if target == torch.ops.aten.index.Tensor and len(user.args) >= 2:
+                        if (target in (torch.ops.aten.index.Tensor,
+                                       torch.ops.aten.index_put.default)
+                                and len(user.args) >= 2):
+                            # indices list position maps to DIM, INCLUDING
+                            # None slots (index_put([None, None, i, j]):
+                            # i indexes dim 2, j dim 3 — Yitu: bounding j
+                            # by shape[0]=32 against dim3 size 1 asserted).
                             target_shape = _node_shape(user.args[0])
                             indices = user.args[1]
                             if target_shape and isinstance(indices, (list, tuple)):
                                 for dim, index_node in enumerate(indices):
                                     if index_node is n and dim < len(target_shape):
-                                        return int(target_shape[dim])
+                                        found.append(_invert(int(target_shape[dim]), chain))
 
                         if target == torch.ops.aten.gather.default:
                             if user.args and user.args[0] is n:
-                                next_frontier.append(user)
+                                # n is gather's DATA source: values flow on.
+                                next_frontier.append((user, chain))
                                 continue
 
                         if target in index_consumers:
@@ -229,23 +324,45 @@ def infer_index_bounds_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> di
                             if len(user.args) > target_arg_idx:
                                 target_node = user.args[target_arg_idx]
                                 target_shape = _node_shape(target_node)
-                                if target_shape:
+                                if target_shape and target_node is not n:
                                     if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
                                         dim = user.args[dim_arg_idx]
                                         if isinstance(dim, int) and dim < len(target_shape):
-                                            return int(target_shape[dim])
+                                            found.append(_invert(int(target_shape[dim]), chain))
                                     else:
-                                        return int(target_shape[0])
+                                        found.append(_invert(int(target_shape[0]), chain))
 
-                        if target in passthrough_ops:
-                            next_frontier.append(user)
+                        if target in passthrough_ops or target in _VALUE_PRESERVING:
+                            next_frontier.append((user, chain))
+                        elif target in _INT_ARITH:
+                            kind = _INT_ARITH[target]
+                            other = None
+                            for a in user.args[:2]:
+                                if a is not n:
+                                    other = a
+                            if isinstance(other, (int, float)):
+                                next_frontier.append(
+                                    (user, chain + ((kind + "c", other),)))
+                            else:
+                                next_frontier.append(
+                                    (user, chain + ((kind + "t", None),)))
                 frontier = next_frontier
                 if not frontier:
                     break
+            if found:
+                return min(found)
             return None
 
         bound = _find_bound(node)
         if bound is not None:
+            if is_float:
+                # FLOAT placeholder whose VALUES flow (via convert chains)
+                # into index consumption — OPT: position ids derive from a
+                # float attention mask, (mask - 1).to(int64) + 2 indexes a
+                # 2050-row table. randn would go negative/OOB; generate
+                # bounded non-negative values instead.
+                info.setdefault("gen", {"kind": "index", "low": 0,
+                                        "high": bound})
             bounds[name] = bound
 
     return bounds
@@ -269,9 +386,20 @@ def infer_permutation_indices_from_gm(
             torch.ops.aten.full.default,
         }:
             return None
-        if not n.args or not isinstance(n.args[0], (list, tuple)):
+        if not n.args:
             return None
-        return list(n.args[0])
+        shape_arg = n.args[0]
+        # Canonical graphs lift alloc shapes to _shape_param placeholder
+        # NODES — resolve via meta['val'] (gpt-oss MoE: empty(_shape_param)
+        # blinded the permutation detection; the scatter ordering indices
+        # then generated as random Index -> duplicate positions -> assert).
+        if not isinstance(shape_arg, (list, tuple)) and hasattr(shape_arg, "meta"):
+            mv = shape_arg.meta.get("val")
+            if isinstance(mv, (list, tuple)):
+                shape_arg = mv
+        if not isinstance(shape_arg, (list, tuple)):
+            return None
+        return list(shape_arg)
 
     iota_passthrough_ops = {
         torch.ops.aten.reshape.default,
@@ -289,8 +417,18 @@ def infer_permutation_indices_from_gm(
             if max_hops > 0 and n.target in iota_passthrough_ops and n.args:
                 return _iota_size(n.args[0], max_hops - 1)
             return None
-        if n.args and isinstance(n.args[0], int):
-            return int(n.args[0])
+        if not n.args:
+            return None
+        length = n.args[0]
+        # lifted/symbolic length: resolve via meta['val'] or SymInt hint
+        if not isinstance(length, int) and hasattr(length, "meta"):
+            mv = length.meta.get("val")
+            if isinstance(mv, int):
+                length = mv
+            elif hasattr(mv, "node") and hasattr(mv.node, "hint"):
+                length = int(mv.node.hint)
+        if isinstance(length, int):
+            return length
         return None
 
     for name, node in ph_nodes.items():
@@ -411,16 +549,24 @@ def graph_constraints_from_gm(
     *,
     index_bounds: dict[str, int] | None = None,
     permutation_indices: dict[str, int] | None = None,
+    observed_stats: dict[str, dict] | None = None,
 ) -> dict[str, Any]:
     """Extract replay constraints from an FX GraphModule.
 
     The exporter writes this next to full_graph_*.py so newly added model
     graphs do not depend solely on parsing print_readable annotations.
+
+    Bound hierarchy (settled 2026-06-10):
+      1. graph_inference: known consumer patterns (embedding, gather, scatter)
+      2. observed: fallback from real execution stats (high = observed.max + 1)
+      3. default_unobserved: ONLY when observation was impossible (should not
+         occur for new captures)
     """
     import torch
 
     index_bounds = index_bounds or {}
     permutation_indices = permutation_indices or {}
+    observed_stats = observed_stats or {}
     inputs = []
     outputs = []
     tensor_attrs = {}
@@ -429,24 +575,60 @@ def graph_constraints_from_gm(
         if node.op == "placeholder":
             if torch.is_tensor(value):
                 gen_override = None
+                constraint_source = None
                 if node.name in permutation_indices:
                     gen_override = {
                         "kind": "permutation",
                         "size": int(permutation_indices[node.name]),
                     }
+                    constraint_source = "graph_inference"
                 elif node.name in index_bounds:
                     gen_override = {
                         "kind": "index",
                         "low": 0,
                         "high": int(index_bounds[node.name]),
                     }
-                inputs.append(
-                    _tensor_spec_from_value(
-                        node.name,
-                        value,
-                        gen_override=gen_override,
-                    )
+                    constraint_source = "graph_inference"
+                elif node.name in observed_stats:
+                    # Observed-value fallback: use observed max + 1 as bound
+                    obs = observed_stats[node.name]
+                    dtype_name = _dtype_name(value.dtype)
+                    if _is_integer_or_bool_dtype_name(dtype_name):
+                        gen_override = {
+                            "kind": "index",
+                            "low": 0,
+                            "high": int(obs["max"]) + 1,
+                        }
+                        constraint_source = "observed"
+                else:
+                    # No inference bound and no observation
+                    dtype_name = _dtype_name(value.dtype)
+                    if _is_integer_or_bool_dtype_name(dtype_name):
+                        constraint_source = "default_unobserved"
+
+                spec = _tensor_spec_from_value(
+                    node.name,
+                    value,
+                    gen_override=gen_override,
                 )
+                # Override constraint_source with the hierarchy decision
+                if constraint_source is not None:
+                    spec["constraint_source"] = constraint_source
+                # Attach observed stats alongside (regardless of which source won)
+                if node.name in observed_stats:
+                    spec["observed"] = observed_stats[node.name]
+                    # Note potential permutation: n_unique == numel on 1-D int tensor
+                    obs = observed_stats[node.name]
+                    shape = spec.get("shape", [])
+                    if (
+                        len(shape) == 1
+                        and shape[0] > 0
+                        and obs.get("n_unique") == shape[0]
+                        and _is_integer_or_bool_dtype_name(spec.get("dtype", ""))
+                        and spec.get("dtype", "") != "bool"
+                    ):
+                        spec["maybe_permutation"] = True
+                inputs.append(spec)
             else:
                 inputs.append(_scalar_spec_from_value(node.name, value))
         elif node.op == "get_attr":
@@ -466,12 +648,41 @@ def graph_constraints_from_gm(
                     elif leaf_value is not None:
                         outputs.append(_scalar_spec_from_value(f"output_{idx}", leaf_value))
 
-    return {
+    payload = {
         "schema_version": 1,
         "inputs": inputs,
         "outputs": outputs,
         "tensor_attrs": tensor_attrs,
     }
+    storage_groups = _placeholder_storage_groups(gm)
+    if storage_groups:
+        # Inputs that are VIEWS OF ONE STORAGE (packed-qkv saved views in
+        # backward graphs etc). Regenerating them as independent storages
+        # changes footprint/locality and is wrong under mutation — replay
+        # must allocate one buffer per group and as_strided each member.
+        # Detectable ONLY at capture (live fake vals share a storage; any
+        # later retrace re-fabricates inputs and the identity is gone).
+        payload["storage_groups"] = storage_groups
+    return payload
+
+
+def _placeholder_storage_groups(gm: Any) -> list[list[str]]:
+    """Group placeholder names whose meta vals share one untyped storage."""
+    import torch
+
+    groups: dict[int, list[str]] = {}
+    for node in gm.graph.nodes:
+        if node.op != "placeholder":
+            continue
+        val = (node.meta or {}).get("val")
+        if not torch.is_tensor(val):
+            continue
+        try:
+            key = id(val.untyped_storage())
+        except Exception:
+            continue
+        groups.setdefault(key, []).append(node.name)
+    return [names for names in groups.values() if len(names) > 1]
 
 
 def _fetch_attr(module: Any, target: Any) -> Any:
@@ -499,19 +710,76 @@ def write_full_graph_metadata(
     extra: dict[str, Any] | None = None,
     index_bounds: dict[str, int] | None = None,
     permutation_indices: dict[str, int] | None = None,
+    observed_stats: dict[str, dict] | None = None,
 ) -> Path:
     graph_path = Path(graph_path)
     payload = graph_constraints_from_gm(
         gm,
         index_bounds=index_bounds,
         permutation_indices=permutation_indices,
+        observed_stats=observed_stats,
     )
     payload["graph"] = graph_path.name
     if extra:
         payload.update(extra)
+    # Serialize inputs/outputs/tensor_attrs in the compact shared encoding
+    # (input_codec) — schema_version 2. The verbose dict-per-tensor form
+    # remains the in-memory representation; loaders inflate on read.
+    from input_codec import compact_from_spec
+
+    payload["schema_version"] = 2
+    for key in ("inputs", "outputs"):
+        if payload.get(key):
+            payload[key] = [compact_from_spec(s, include_name=True)
+                            for s in payload[key]]
+    if payload.get("tensor_attrs"):
+        payload["tensor_attrs"] = {
+            name: compact_from_spec(s)
+            for name, s in payload["tensor_attrs"].items()
+        }
     meta_path = graph_path.with_suffix(".meta.json")
-    meta_path.write_text(json.dumps(payload, indent=2) + "\n")
+    meta_path.write_text(_dumps_compact_entries(payload) + "\n")
     return meta_path
+
+
+class _OneLine:
+    """Marker: serialize this value on a single line inside indented JSON."""
+
+    def __init__(self, value):
+        self.value = value
+
+
+def dumps_with_onelines(obj) -> str:
+    """json.dumps(indent=2), but any _OneLine-wrapped value is emitted on a
+    single line (a compact input entry exploded across 12 indented lines
+    would re-create the verbosity the compact encoding exists to remove)."""
+    placeholders: list[str] = []
+
+    class _Enc(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, _OneLine):
+                placeholders.append(
+                    json.dumps(o.value, separators=(",", ":")))
+                return f"@@ONELINE{len(placeholders) - 1}@@"
+            return super().default(o)
+
+    text = json.dumps(obj, indent=2, cls=_Enc)
+    for i, body in enumerate(placeholders):
+        text = text.replace(f'"@@ONELINE{i}@@"', body)
+    return text
+
+
+def _dumps_compact_entries(payload: dict) -> str:
+    """Sidecar serializer: inputs/outputs/tensor_attrs entries one-lined."""
+    marked = dict(payload)
+    for key in ("inputs", "outputs"):
+        if marked.get(key):
+            marked[key] = [_OneLine(e) for e in marked[key]]
+    if marked.get("tensor_attrs"):
+        marked["tensor_attrs"] = {
+            k: _OneLine(v) for k, v in marked["tensor_attrs"].items()
+        }
+    return dumps_with_onelines(marked)
 
 
 def _split_signature_args(sig: str) -> list[str]:
@@ -660,7 +928,10 @@ def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
             "dtype": dtype_name,
             "stride": _parse_stride(stride_str),
             "device": _parse_device(device_str),
-            "storage_offset": 0,
+            # print_readable annotations don't carry storage_offset: None =
+            # unknown (validator skips), never a false claim of 0 — packed
+            # qkv views (offset 192/384/...) are real and sidecar-recorded.
+            "storage_offset": None,
             "generator": generator,
         }
         if generator.get("kind") == "index":
@@ -716,7 +987,22 @@ def load_full_graph_sidecar(graph_path: str | Path) -> dict[str, Any]:
     meta_path = full_graph_meta_path(graph_path)
     if not meta_path.exists():
         return {}
-    return json.loads(meta_path.read_text())
+    sidecar = json.loads(meta_path.read_text())
+    # schema v2: inputs/outputs/tensor_attrs stored in the compact shared
+    # encoding (input_codec); inflate to the verbose in-memory spec dicts
+    # so every downstream consumer is format-agnostic.
+    if sidecar.get("schema_version", 1) >= 2:
+        from input_codec import spec_from_compact
+
+        for key in ("inputs", "outputs"):
+            if sidecar.get(key):
+                sidecar[key] = [spec_from_compact(e) for e in sidecar[key]]
+        if sidecar.get("tensor_attrs"):
+            sidecar["tensor_attrs"] = {
+                name: spec_from_compact(e)
+                for name, e in sidecar["tensor_attrs"].items()
+            }
+    return sidecar
 
 
 def _normalize_dtype_name(dtype_name: Any) -> str:

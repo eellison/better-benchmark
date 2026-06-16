@@ -1,0 +1,47 @@
+{
+  "pattern_hash": "0ada225c0a04",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 14,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.reshape.default",
+    "aten.reshape.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.var_mean.correction",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 20,
+  "models": [
+    "hf/infer/BartForCausalLM",
+    "hf/infer/BlenderbotForCausalLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/infer/GPT2ForSequenceClassification",
+    "hf/infer/GPTNeoForCausalLM",
+    "hf/infer/GPTNeoForSequenceClassification",
+    "hf/infer/M2M100ForConditionalGeneration",
+    "hf/infer/MBartForCausalLM",
+    "hf/infer/MegatronBertForCausalLM",
+    "hf/infer/PLBartForCausalLM",
+    "hf/infer/PegasusForCausalLM",
+    "hf/infer/TrOCRForCausalLM",
+    "hf/infer/XGLMForCausalLM",
+    "hf/infer/openai/whisper-tiny",
+    "hf/train/BartForCausalLM",
+    "hf/train/BlenderbotForCausalLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/GPT2ForSequenceClassification",
+    "timm/infer/vit_base_patch16_siglip_256",
+    "timm/train/vit_base_patch16_siglip_256"
+  ]
+}

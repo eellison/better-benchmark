@@ -1,0 +1,33 @@
+{
+  "points": [
+    {
+      "shape_hash": "07bfd41e",
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/OPTForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [[8192,768],"bf16"],
+        ["S",[4,2048,768]],
+        ["S",[4,-1,12,64]]
+      ]
+    },
+    {
+      "shape_hash": "e6fa82b2",
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [[1,384],"bf16"],
+        ["S",[1,1,384]],
+        ["S",[1,1,-1,64]]
+      ]
+    }
+  ]
+}
