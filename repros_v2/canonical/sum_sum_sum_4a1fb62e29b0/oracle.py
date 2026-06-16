@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete bf16/fp32 masked-LM layer-norm-backward tail by rebuilding the four-input producer, sharing each row's hidden-dimension reductions, storing the returned fp32 gradient and bf16 dropout-masked side tensor, and cooperatively finalizing the two source column reductions plus the bf16-rounded side-output sum from common row-tile partials, whereas Inductor currently schedules the add chain, row-local reductions, dropout-mask/bf16 epilogue, transpose view, and sibling column reductions as separate generic kernels over materialized intermediates; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K multi-output reduction template that keeps row-local scalars, explicit bf16 rounding boundaries, layout side outputs, and compatible column partials in one coordinated producer; the fix is COOPERATIVE_SPLIT_K: add a row-tiled layer-norm-backward reduction template that fuses shared producers, writes view-equivalent side outputs, and finalizes all sibling column reductions together."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete bf16/fp32 masked-LM layer-norm-backward tail by rebuilding the four-input producer, sharing each row's hidden-dimension reductions, storing the returned fp32 gradient and bf16 dropout-masked side tensor, and cooperatively finalizing the two source column reductions plus the bf16-rounded side-output sum from common row-tile partials, whereas Inductor currently schedules the add chain, row-local reductions, dropout-mask/bf16 epilogue, transpose view, and sibling column reductions as separate generic kernels over materialized intermediates; Inductor cannot do this today because its scheduler/codegen has no cooperative split-K multi-output reduction lowering that keeps row-local scalars, explicit bf16 rounding boundaries, layout side outputs, and compatible column partials in one coordinated producer; the fix is COOPERATIVE_SPLIT_K: add a row-tiled layer-norm-backward reduction lowering that fuses shared producers, writes view-equivalent side outputs, and finalizes all sibling column reductions together."""
 from __future__ import annotations
 
 import torch
@@ -89,7 +89,6 @@ def _store_partials_kernel(
 
     acc_x_rhs = tl.zeros((BLOCK_C,), dtype=tl.float32)
     acc_x = tl.zeros((BLOCK_C,), dtype=tl.float32)
-    acc_bf16_side = tl.zeros((BLOCK_C,), dtype=tl.float32)
 
     for local_start in tl.range(0, ROWS_PER_GROUP, BLOCK_R):
         rows = group * ROWS_PER_GROUP + local_start + tl.arange(0, BLOCK_R)
@@ -186,15 +185,10 @@ def _store_partials_kernel(
 
         acc_x_rhs += tl.sum(tl.where(mask, _mul_rn(x, rhs), 0.0), axis=0)
         acc_x += tl.sum(tl.where(mask, x, 0.0), axis=0)
-        acc_bf16_side += tl.sum(
-            tl.where(mask, side_bf16.to(tl.float32), 0.0),
-            axis=0,
-        )
 
     partial_base = group * 3 * CHANNELS + cols
     tl.store(partials_ptr + partial_base, acc_x_rhs, mask=col_mask)
     tl.store(partials_ptr + partial_base + CHANNELS, acc_x, mask=col_mask)
-    tl.store(partials_ptr + partial_base + 2 * CHANNELS, acc_bf16_side, mask=col_mask)
 
 
 @triton.jit
@@ -533,6 +527,34 @@ def _column_partials_kernel(
 
 
 @triton.jit
+def _side_partials_from_bf16_kernel(
+    bf16_out_ptr,
+    partials_ptr,
+    ROWS: tl.constexpr,
+    CHANNELS: tl.constexpr,
+    ROWS_PER_GROUP: tl.constexpr,
+    BLOCK_R: tl.constexpr,
+    BLOCK_C: tl.constexpr,
+):
+    group = tl.program_id(0)
+    col_block = tl.program_id(1)
+    cols = col_block * BLOCK_C + tl.arange(0, BLOCK_C)
+    col_mask = cols < CHANNELS
+    acc_bf16_side = tl.zeros((BLOCK_C,), dtype=tl.float32)
+
+    for local_start in tl.range(0, ROWS_PER_GROUP, BLOCK_R):
+        rows = group * ROWS_PER_GROUP + local_start + tl.arange(0, BLOCK_R)
+        row_mask = rows < ROWS
+        mask = row_mask[:, None] & col_mask[None, :]
+        offsets = rows[:, None] * CHANNELS + cols[None, :]
+        bf16_side = tl.load(bf16_out_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
+        acc_bf16_side += tl.sum(tl.where(mask, bf16_side, 0.0), axis=0)
+
+    partial_base = group * 3 * CHANNELS + 2 * CHANNELS + cols
+    tl.store(partials_ptr + partial_base, acc_bf16_side, mask=col_mask)
+
+
+@triton.jit
 def _finalize_partials_kernel(
     partials_ptr,
     out_x_rhs_ptr,
@@ -667,12 +689,14 @@ def _oracle_forward_c21(
     return grad_out, out_x_rhs, out_x, bf16_out, bf16_out.permute(1, 0), out_bf16_sum
 
 
-@oracle_impl(hardware="B200", point="6de23498", ROWS_PER_GROUP=8, STORE_BLOCK_R=4, FINAL_BLOCK_C=16, num_warps=8)
+@oracle_impl(hardware="B200", point="6de23498", ROWS_PER_GROUP=8, STORE_BLOCK_R=4, SIDE_BLOCK_R=1, SIDE_BLOCK_C=512, FINAL_BLOCK_C=16, num_warps=8)
 def _oracle_forward_6de(
     inputs,
     *,
     ROWS_PER_GROUP: int,
     STORE_BLOCK_R: int,
+    SIDE_BLOCK_R: int,
+    SIDE_BLOCK_C: int,
     FINAL_BLOCK_C: int,
     num_warps: int,
 ):
@@ -756,6 +780,16 @@ def _oracle_forward_6de(
         ROWS_PER_GROUP=ROWS_PER_GROUP,
         num_warps=num_warps,
     )
+    _side_partials_from_bf16_kernel[(num_groups, triton.cdiv(channels, SIDE_BLOCK_C))](
+        bf16_out,
+        partials,
+        ROWS=rows,
+        CHANNELS=channels,
+        ROWS_PER_GROUP=ROWS_PER_GROUP,
+        BLOCK_R=SIDE_BLOCK_R,
+        BLOCK_C=SIDE_BLOCK_C,
+        num_warps=num_warps,
+    )
     group_block = 1 << (num_groups - 1).bit_length()
     _finalize_partials_kernel[(triton.cdiv(channels, FINAL_BLOCK_C),)](
         partials,
@@ -774,13 +808,15 @@ def _oracle_forward_6de(
 # 6de23498: (T([4096,1536], bf16), T([8,512,1536], f32), ...)
 # c21f4298: (T([32768,768], bf16), T([256,128,768], f32), ...)
 # 5acb4703: (T([32768,256], bf16), T([64,512,256], f32), ...)
-@oracle_impl(hardware="B200", point="5acb4703", ROWS_PER_GROUP=64, BLOCK_R=8, BLOCK_C=256, FINAL_BLOCK_C=8, STEPS=2, num_warps=4)
+@oracle_impl(hardware="B200", point="5acb4703", ROWS_PER_GROUP=64, BLOCK_R=8, BLOCK_C=256, SIDE_BLOCK_R=32, SIDE_BLOCK_C=32, FINAL_BLOCK_C=8, STEPS=2, num_warps=4)
 def oracle_forward(
     inputs,
     *,
     ROWS_PER_GROUP: int,
     BLOCK_R: int,
     BLOCK_C: int,
+    SIDE_BLOCK_R: int,
+    SIDE_BLOCK_C: int,
     FINAL_BLOCK_C: int,
     STEPS: int,
     num_warps: int,
@@ -855,6 +891,16 @@ def oracle_forward(
         BLOCK_R=BLOCK_R,
         BLOCK_C=BLOCK_C,
         STEPS=STEPS,
+        num_warps=num_warps,
+    )
+    _side_partials_from_bf16_kernel[(num_groups, triton.cdiv(channels, SIDE_BLOCK_C))](
+        bf16_out,
+        partials,
+        ROWS=rows,
+        CHANNELS=channels,
+        ROWS_PER_GROUP=ROWS_PER_GROUP,
+        BLOCK_R=SIDE_BLOCK_R,
+        BLOCK_C=SIDE_BLOCK_C,
         num_warps=num_warps,
     )
     group_block = 1 << (num_groups - 1).bit_length()
