@@ -599,6 +599,8 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 210 `pointwise_1611fb0c7845`: kept as `needs_work`; faithful alias-only oracle checks pass 2/2, but locked bench is invalid for both points due compiled empty-CUDAGraph warning, so there is no valid floor number.
 - Row 1071 `pointwise_656833e29d89`: claimed for scatter/numerics reaudit/refill.
 - Row 1068 `pointwise_6410fc21ba59`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by fp64 inf/nan gate on all 32 outputs, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=32.86us`, `compile=51.20us`, ratio `1.558`).
+- Row 958 `mean_470cecc170ec`: returned to `needs_work`; parent checks pass but skipped-gate H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=58.69us`, `compile=30.75us`, ratio `0.524`).
+- Row 1083 `pointwise_7308e0024674`: claimed for nan numerics-gate reaudit/refill.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
