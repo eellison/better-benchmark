@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete bf16 PyTorch-UNet BatchNorm-backward tail by splitting the shared `N,H,W` domain for the `where` producer, co-finalizing the two f32 channel summaries, using those summaries to write the full returned bf16 dense gradient, and accumulating the bf16-rounded dense output's returned channel sum from the same split domain, whereas Inductor schedules the sibling channel reductions, dependent dense epilogue, and final bf16-output reduction as separate generic reduction/pointwise regions over replayed or materialized intermediates; Inductor cannot do this today because its scheduler/codegen lacks a B200-tuned cooperative split-K template that coordinates a conditional bf16 producer, multiple channel summaries, a dependent full-tensor epilogue, and a post-cast bf16 side reduction; the fix is COOPERATIVE_SPLIT_K: add a guarded BN-backward split-K lowering that shares compatible channel reductions, preserves the explicit bf16 cast before the final sum, and sinks the vector and dense epilogues into one coordinated plan."""
+"""Gap diagnosis (classification: COOPERATIVE_SPLIT_K): this oracle computes the complete bf16 PyTorch-UNet BatchNorm-backward tail by splitting the shared `N,H,W` domain for the `where` producer, co-finalizing the two f32 channel summaries, using those summaries to write the full returned bf16 dense gradient, and accumulating the bf16-rounded dense output's returned channel sum from the same split domain, whereas Inductor schedules the sibling channel reductions, dependent dense epilogue, and final bf16-output reduction as separate generic reduction/pointwise regions over replayed or materialized intermediates; Inductor cannot do this today because its scheduler/codegen lacks a B200-tuned cooperative split-K lowering that coordinates a conditional bf16 producer, multiple channel summaries, a dependent full-tensor epilogue, and a post-cast bf16 side reduction; the fix is COOPERATIVE_SPLIT_K: add a guarded BN-backward split-K lowering that shares compatible channel reductions, preserves the explicit bf16 cast before the final sum, and sinks the vector and dense epilogues into one coordinated plan."""
 
 import torch
 import triton
@@ -32,6 +32,18 @@ def _f32_mul(a, b):
         "mul.rn.f32 $0, $1, $2;",
         constraints="=f,f,f",
         args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
+def _round_to_bf16_f32(x):
+    return tl.inline_asm_elementwise(
+        "{ .reg .b16 t; cvt.rn.bf16.f32 t, $1; cvt.f32.bf16 $0, t; }",
+        constraints="=f,f",
+        args=[x],
         dtype=tl.float32,
         is_pure=True,
         pack=1,
@@ -163,11 +175,11 @@ def _epilogue_kernel(
     centered_grad = _f32_sub(after_correction, mean_term)
     output_scale = _f32_mul(invstd, weight)
     dense_f32 = _f32_mul(centered_grad, output_scale)
-    dense_bf16 = dense_f32.to(tl.bfloat16)
+    dense_bf16_f32 = _round_to_bf16_f32(dense_f32)
 
-    tl.store(dense_out_ptr + offsets, dense_bf16, mask=active)
+    tl.store(dense_out_ptr + offsets, dense_bf16_f32, mask=active)
 
-    partial_sum = tl.sum(tl.where(active, dense_bf16.to(tl.float32), 0.0), axis=0)
+    partial_sum = tl.sum(tl.where(active, dense_bf16_f32, 0.0), axis=0)
     tl.store(partial_dense_sum_ptr + tl.program_id(1) * C + c, partial_sum)
 
 
@@ -187,7 +199,7 @@ def _finalize_dense_sum_kernel(
         tl.load(partial_dense_sum_ptr + offsets, mask=active, other=0.0).to(tl.float32),
         axis=0,
     )
-    tl.store(dense_sum_out_ptr + c, total.to(tl.bfloat16).to(tl.float32))
+    tl.store(dense_sum_out_ptr + c, _round_to_bf16_f32(total))
 
 
 # 39b5812f: (T([1,64,640,959], bf16), T([], bf16), ...)
