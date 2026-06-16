@@ -33,6 +33,30 @@ def _div_rn_f32(a, b):
 
 
 @triton.jit
+def _mul_rn_f32(a, b):
+    return tl.inline_asm_elementwise(
+        "mul.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
+def _add_rn_f32(a, b):
+    return tl.inline_asm_elementwise(
+        "add.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
 def _product_kernel(
     query_mask_ptr,
     scalar_ptr,
@@ -87,7 +111,7 @@ def _product_kernel(
     tmp33 = tmp30 - tmp32
     tmp34 = libdevice.exp(tmp33)
     tmp36 = _div_rn_f32(tmp34, tmp35)
-    tmp37 = tmp29 * tmp36
+    tmp37 = _mul_rn_f32(tmp29, tmp36)
     tl.store(out_ptr + x6, tmp37)
 
 
@@ -115,12 +139,12 @@ def _sum_fma_kernel(
     shift = tl.load(row_shift_ptr + xindex, eviction_policy="evict_last")
     denom = tl.load(row_denom_ptr + xindex, eviction_policy="evict_last")
     probs = _div_rn_f32(libdevice.exp(logits - shift), denom)
-    out = libdevice.fma(-probs, row_sum, prod2)
+    out = _add_rn_f32(_mul_rn_f32(-probs, row_sum), prod2)
     tl.store(out_ptr + cbase + 513 * x0 + 6208 * x5, out.to(tl.float32))
     prod2_tail = tl.load(product_ptr + 512 + 513 * x0 + 6156 * x1 + 6303744 * x2, eviction_policy="evict_first")
     logits_tail = tl.load(logits_ptr + 512 + 513 * x1 + 525312 * x0 + 6303744 * x2, eviction_policy="evict_first").to(tl.float32)
     probs_tail = _div_rn_f32(libdevice.exp(logits_tail - shift), denom)
-    out_tail = libdevice.fma(-probs_tail, row_sum, prod2_tail)
+    out_tail = _add_rn_f32(_mul_rn_f32(-probs_tail, row_sum), prod2_tail)
     tl.store(out_ptr + 512 + 513 * x0 + 6208 * x5, out_tail.to(tl.float32))
 
 
@@ -285,6 +309,7 @@ def _add_final_kernel(
     tmp69 = tmp65 + tmp68
     tl.store(out_ptr + xout, tmp69)
 
+@oracle_impl(hardware="H100", point="47e7063f", X=512, RX=2, C=512, num_warps=4)
 @oracle_impl(hardware="B200", point="47e7063f", X=1024, RX=1, C=512, num_warps=8)
 def oracle_forward(inputs, *, X: int, RX: int, C: int, num_warps: int):
     (
