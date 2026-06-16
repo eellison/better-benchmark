@@ -34,6 +34,8 @@ def _xlnet_flat_transpose_kernel(
     tl.store(out_ptr + y * 16384 + x, vals, mask=mask)
 
 
+@oracle_impl(hardware="H100", point="144bae60", YBLOCK=64, XBLOCK=128, num_warps=4)
+@oracle_impl(hardware="H100", point="e95c7520", YBLOCK=64, XBLOCK=128, num_warps=4)
 @oracle_impl(hardware="B200", point="144bae60", YBLOCK=16, XBLOCK=128, num_warps=8)
 @oracle_impl(hardware="B200", point="e95c7520", YBLOCK=16, XBLOCK=128, num_warps=8)
 def oracle_forward(inputs, *, YBLOCK, XBLOCK, num_warps):
