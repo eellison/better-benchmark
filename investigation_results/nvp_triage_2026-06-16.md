@@ -60,3 +60,33 @@ the bench-time gate over-blocks on TWO distinct causes, not one:
 Both are bench-gate strictness, not oracle defects. The REAL_BUG set is unchanged
 (20): large-diff sum_*/sum_sum_sum_* reductions + 2 pointwise exact-compare
 (int64/complex64) coverage bugs (584a8c609627, 4254ac4c0d96).
+
+## CORRECTION — REAL_BUG count is 11, not 20 (determinism re-verified)
+
+A more careful triage ran the full set with a DETERMINISM re-check (eager twice,
+unseeded) on every candidate. Result: the genuine-bug count is **11, not 20**.
+The 11 are a clean SUBSET of the earlier 20. The 9 removed were all my
+`max_diff=unknown` rows — they are NONDETERMINISTIC (int64-index / bool RNG
+outputs and their float siblings), which `detect_stochastic_outputs`
+under-detects (its allclose path misses int64/bool). Per the stochastic
+flag-not-block policy these are NOT bugs.
+
+Reclassified out of REAL_BUG (now STOCHASTIC_MASK / flag-not-block):
+pointwise_4254ac4c0d96, pointwise_584a8c609627, sum_sum_sum_ddcfccfb8340,
+var_mean_087d5b4f064d, var_mean_0d6f1eb6e0c6, var_mean_3bc311a8676a,
+var_mean_8187f7c4e01e, var_mean_a7b32508693f, var_mean_dc4abd356145.
+
+### The 11 GENUINE bugs (deterministic float diff, all sum-family reductions)
+- sum_sum_sum_4aae5698dd79 (2.147e9) ; sum_75456ad2c2c7 (3.355e7)
+- sum_4fd6e4019857 (1.678e7) ; sum_7ba9dcb96142 (8.389e6)
+- sum_9b2fcee49b0a (2.097e6) ; sum_sum_sum_d2c97d17f3dc (1.049e6)
+- sum_898c72fb606a (4096) ; sum_444779f98932 (2048)
+- sum_sum_sum_4a1fb62e29b0 (16, deterministic at 2/4 points) ; sum_sum_1e07e3ba8c68 (3.84)
+- sum_sum_sum_cc4b6a77cc6b (2.0)
+
+### THIRD infra finding
+`detect_stochastic_outputs` under-detects int64-index and bool RNG outputs (its
+allclose path misses them), so genuinely-stochastic dirs get exact-compared and
+wrongly fail the gate. Fix it to recognize int64/bool RNG outputs as stochastic.
+This + the fp64-gate + CUDAGraph-warning are the three bench-gate over-strictness
+causes; none are oracle defects.
