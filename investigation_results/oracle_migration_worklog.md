@@ -625,6 +625,7 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 1398 `sum_sum_sum_86e661f4be59`: claimed from the tail for reduction numerics reaudit/refill.
 - Row 1373 `sum_sum_sum_31ea6dc807dd`: claimed from the tail for reduction numerics reaudit/refill.
 - Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; worker candidate fails check on output 3 (`max_diff=8.00`) and skipped-gate H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=359.23us`, `compile=163.68us`, ratio `0.456`), so it was not committed.
+- Row 1365 `sum_sum_sum_1a561863a1c6`: claimed from the tail for reduction numerics reaudit/refill.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 
