@@ -43,11 +43,6 @@ def _aten_inner_sum_1024(values):
 
 @triton.jit
 def _branch_kernel(
-    res0_ptr,
-    res1_ptr,
-    res2_ptr,
-    res3_ptr,
-    res4_ptr,
     bmm_ptr,
     keep_ptr,
     order_ptr,
@@ -56,15 +51,12 @@ def _branch_kernel(
     bias_ptr,
     row_shift_ptr,
     denom_ptr,
-    index_ptr,
     out_ptr,
-    partial_ptr,
     USE_ORDER_MASK: tl.constexpr,
     BATCH_: tl.constexpr,
     HEADS_: tl.constexpr,
     QUERY_: tl.constexpr,
     KEY_: tl.constexpr,
-    BUCKETS_: tl.constexpr,
     SCALE_: tl.constexpr,
     NEG_INF_: tl.constexpr,
     BLOCK_B: tl.constexpr,
@@ -123,50 +115,49 @@ def _branch_kernel(
     if STORE_OUT:
         tl.store(out_ptr + offsets, dscore_bf16, mask=active)
 
-    residual = tl.load(res0_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    residual = residual + tl.load(res1_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    residual = residual + tl.load(res2_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    residual = residual + tl.load(res3_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    residual = residual + tl.load(res4_ptr + offsets, mask=active, other=0.0).to(tl.float32)
-    values = residual + dscore_bf16.to(tl.float32)
-    reduced_k = tl.sum(tl.where(active, values, 0.0), axis=0)
 
-    bucket = tl.load(index_ptr + q * KEY_ + ks, mask=ks < KEY_, other=-1).to(tl.int64)
-    bucket = tl.minimum(tl.maximum(bucket, -BUCKETS_), BUCKETS_ - 1)
-    bucket = tl.where(bucket < 0, bucket + BUCKETS_, bucket)
-    partial_base = ((b_block * HEADS_ + h) * QUERY_ + q) * BUCKETS_
-    for bucket_id in tl.static_range(0, 32):
-        bucket_sum = tl.sum(
-            tl.where((ks < KEY_) & (bucket == bucket_id), reduced_k, 0.0),
-            axis=0,
-        )
-        tl.store(partial_ptr + partial_base + bucket_id, bucket_sum)
+@triton.jit
+def _zero_bucket_kernel(bucket_ptr, BLOCK: tl.constexpr):
+    offsets = tl.arange(0, BLOCK)
+    tl.store(bucket_ptr + offsets, tl.zeros((BLOCK,), tl.float32))
 
 
 @triton.jit
-def _finalize_bucket_kernel(
-    partial_ptr,
-    bucket_out_ptr,
-    B_BLOCKS: tl.constexpr,
+def _bucket_from_dense_linear_kernel(
+    res0_ptr,
+    res1_ptr,
+    res2_ptr,
+    res3_ptr,
+    res4_ptr,
+    dscore_ptr,
+    index_ptr,
+    bucket_ptr,
     HEADS_: tl.constexpr,
     QUERY_: tl.constexpr,
+    KEY_: tl.constexpr,
     BUCKETS_: tl.constexpr,
-    BLOCK_Q: tl.constexpr,
-    BLOCK_BB: tl.constexpr,
+    BLOCK: tl.constexpr,
 ):
-    h = tl.program_id(0)
-    bucket = tl.program_id(1)
-    qs = tl.arange(0, BLOCK_Q)
-    bbs = tl.arange(0, BLOCK_BB)
-    mask = (qs[None, :] < QUERY_) & (bbs[:, None] < B_BLOCKS)
-    offsets = ((bbs[:, None] * HEADS_ + h) * QUERY_ + qs[None, :]) * BUCKETS_ + bucket
-    vals = tl.load(partial_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    total = tl.sum(vals, axis=0)
-    tl.store(bucket_out_ptr + bucket * HEADS_ + h, tl.sum(total, axis=0))
-
-
-def _next_power_of_2(value):
-    return 1 << (int(value) - 1).bit_length()
+    linear = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+    total = QUERY_ * KEY_ * HEADS_
+    mask = linear < total
+    h = linear % HEADS_
+    qk = linear // HEADS_
+    k = qk % KEY_
+    q = qk // KEY_
+    b = tl.arange(0, 8)[:, None]
+    offsets = ((b * HEADS_ + h[None, :]) * QUERY_ + q[None, :]) * KEY_ + k[None, :]
+    vals = tl.load(res0_ptr + offsets, mask=mask[None, :], other=0.0).to(tl.float32)
+    vals = vals + tl.load(res1_ptr + offsets, mask=mask[None, :], other=0.0).to(tl.float32)
+    vals = vals + tl.load(res2_ptr + offsets, mask=mask[None, :], other=0.0).to(tl.float32)
+    vals = vals + tl.load(res3_ptr + offsets, mask=mask[None, :], other=0.0).to(tl.float32)
+    vals = vals + tl.load(res4_ptr + offsets, mask=mask[None, :], other=0.0).to(tl.float32)
+    vals = vals + tl.load(dscore_ptr + offsets, mask=mask[None, :], other=0.0).to(tl.float32)
+    reduced = tl.sum(tl.where(mask[None, :], vals, 0.0), axis=0)
+    bucket = tl.load(index_ptr + q * KEY_ + k, mask=mask, other=-1).to(tl.int64)
+    bucket = tl.minimum(tl.maximum(bucket, -BUCKETS_), BUCKETS_ - 1)
+    bucket = tl.where(bucket < 0, bucket + BUCKETS_, bucket)
+    tl.atomic_add(bucket_ptr + bucket * HEADS_ + h, reduced, sem="relaxed", mask=mask)
 
 
 def _launch_branch(
@@ -185,7 +176,6 @@ def _launch_branch(
     BLOCK_B: int,
     BLOCK_K: int,
     num_warps_branch: int,
-    num_warps_finalize: int,
     store_out: bool,
 ):
     b_blocks = triton.cdiv(BATCH, BLOCK_B)
@@ -194,15 +184,9 @@ def _launch_branch(
         device=bmm.device,
         dtype=torch.bfloat16,
     )
-    partial = torch.empty((b_blocks, HEADS, QUERY, BUCKETS), device=bmm.device, dtype=torch.float32)
     bucket = torch.empty((BUCKETS, HEADS), device=bmm.device, dtype=torch.float32)
 
     _branch_kernel[(HEADS, QUERY, b_blocks)](
-        residuals[0],
-        residuals[1],
-        residuals[2],
-        residuals[3],
-        residuals[4],
         bmm,
         keep,
         order,
@@ -211,15 +195,12 @@ def _launch_branch(
         bias,
         row_shift,
         denom,
-        index,
         out,
-        partial,
         USE_ORDER_MASK=use_order_mask,
         BATCH_=BATCH,
         HEADS_=HEADS,
         QUERY_=QUERY,
         KEY_=KEY,
-        BUCKETS_=BUCKETS,
         SCALE_=SCALE,
         NEG_INF_=NEG_INF_F32,
         BLOCK_B=BLOCK_B,
@@ -228,17 +209,27 @@ def _launch_branch(
         num_warps=num_warps_branch,
         num_stages=3,
     )
-    _finalize_bucket_kernel[(HEADS, BUCKETS)](
-        partial,
+    _zero_bucket_kernel[(1,)](
         bucket,
-        B_BLOCKS=b_blocks,
+        BLOCK=BUCKETS * HEADS,
+        num_warps=8,
+    )
+    _bucket_from_dense_linear_kernel[(triton.cdiv(HEADS * QUERY * KEY, 256),)](
+        residuals[0],
+        residuals[1],
+        residuals[2],
+        residuals[3],
+        residuals[4],
+        out,
+        index,
+        bucket,
         HEADS_=HEADS,
         QUERY_=QUERY,
+        KEY_=KEY,
         BUCKETS_=BUCKETS,
-        BLOCK_Q=QUERY,
-        BLOCK_BB=_next_power_of_2(b_blocks),
-        num_warps=num_warps_finalize,
-        num_stages=3,
+        BLOCK=256,
+        num_warps=8,
+        num_stages=1,
     )
     return out, bucket
 
@@ -251,7 +242,6 @@ def _launch_branch(
     BLOCK_K=1024,
     num_warps_branch0=2,
     num_warps_branch1=8,
-    num_warps_finalize=8,
 )
 def oracle_forward(
     inputs,
@@ -260,7 +250,6 @@ def oracle_forward(
     BLOCK_K: int,
     num_warps_branch0: int,
     num_warps_branch1: int,
-    num_warps_finalize: int,
 ):
     (
         arg0_1,
@@ -307,7 +296,6 @@ def oracle_forward(
         BLOCK_B=BLOCK_B,
         BLOCK_K=BLOCK_K,
         num_warps_branch=num_warps_branch0,
-        num_warps_finalize=num_warps_finalize,
         store_out=True,
     )
     out2, bucket1 = _launch_branch(
@@ -325,7 +313,6 @@ def oracle_forward(
         BLOCK_B=BLOCK_B,
         BLOCK_K=BLOCK_K,
         num_warps_branch=num_warps_branch1,
-        num_warps_finalize=num_warps_finalize,
         store_out=True,
     )
     return out0, bucket0, out2, bucket1
