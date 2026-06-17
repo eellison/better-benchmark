@@ -1,0 +1,1759 @@
+[
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type"
+    ],
+    "n_occurrences": 2962,
+    "n_models": 67,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 362,
+      "GPTJForCausalLM": 169,
+      "GPTJForQuestionAnswering": 169,
+      "XLNetLMHeadModel": 168,
+      "DebertaV2ForMaskedLM": 145,
+      "GPTNeoForSequenceClassification": 145,
+      "MegatronBertForCausalLM": 145,
+      "GPTNeoForCausalLM": 144,
+      "MT5ForConditionalGeneration": 144,
+      "swin_base_patch4_window7_224": 100,
+      "YituTechConvBert": 97,
+      "T5ForConditionalGeneration": 96,
+      "T5Small": 96,
+      "AllenaiLongformerBase": 75,
+      "ElectraForCausalLM": 74,
+      "BERT_pytorch": 74,
+      "BertForMaskedLM": 73,
+      "LayoutLMForMaskedLM": 73,
+      "RobertaForCausalLM": 73,
+      "vit_base_patch16_siglip_256": 53,
+      "deit_base_distilled_patch16_224": 50,
+      "GPT2ForSequenceClassification": 49,
+      "beit_base_patch16_224": 49,
+      "deit_tiny_patch16_224.fb_in1k": 49,
+      "vit_base_patch14_dinov2.lvd142m": 48,
+      "DistilBertForMaskedLM": 37,
+      "mobilevit_s": 37,
+      "DistillGPT2": 24,
+      "BlenderbotForConditionalGeneration": 18,
+      "M2M100ForConditionalGeneration": 18,
+      "BartForCausalLM": 8,
+      "BlenderbotForCausalLM": 8,
+      "MBartForCausalLM": 8,
+      "OPTForCausalLM": 8,
+      "PLBartForCausalLM": 8,
+      "PegasusForCausalLM": 8,
+      "TrOCRForCausalLM": 8,
+      "XGLMForCausalLM": 8,
+      "nvidia_deeprecommender": 6,
+      "lennard_jones": 5,
+      "alexnet": 3,
+      "vgg16": 3,
+      "AlbertForMaskedLM": 2,
+      "mobilenet_v3_large": 2,
+      "adv_inception_v3": 1,
+      "convnextv2_nano.fcmae_ft_in22k_in1k": 1,
+      "dm_nfnet_f0": 1,
+      "ghostnet_100": 1,
+      "inception_v3": 1,
+      "mobilenetv2_100": 1,
+      "mobilenetv3_large_100": 1,
+      "nfnet_l0": 1,
+      "repvgg_a2": 1,
+      "tf_efficientnet_b0": 1,
+      "visformer_small": 1,
+      "LearningToPaint": 1,
+      "densenet121": 1,
+      "functorch_dp_cifar10": 1,
+      "mnasnet1_0": 1,
+      "mobilenet_v2": 1,
+      "phlippe_densenet": 1,
+      "phlippe_resnet": 1,
+      "resnet152": 1,
+      "resnet18": 1,
+      "resnet50": 1,
+      "resnext50_32x4d": 1,
+      "shufflenet_v2_x1_0": 1
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul": "mm_3",
+      "output_shape": [
+        128,
+        4096
+      ]
+    }
+  },
+  {
+    "matmul_op": "bmm",
+    "clean": true,
+    "epilogue_ops": [
+      "clone"
+    ],
+    "n_occurrences": 1167,
+    "n_models": 25,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 120,
+      "XLNetLMHeadModel": 120,
+      "T5ForConditionalGeneration": 90,
+      "T5Small": 90,
+      "GPTJForCausalLM": 84,
+      "GPTJForQuestionAnswering": 84,
+      "GPTNeoForCausalLM": 72,
+      "GPTNeoForSequenceClassification": 72,
+      "DebertaV2ForMaskedLM": 48,
+      "MobileBertForMaskedLM": 48,
+      "swin_base_patch4_window7_224": 48,
+      "AlbertForMaskedLM": 35,
+      "BlenderbotForConditionalGeneration": 28,
+      "M2M100ForConditionalGeneration": 26,
+      "XGLMForCausalLM": 25,
+      "BertForMaskedLM": 24,
+      "ElectraForCausalLM": 24,
+      "RobertaForCausalLM": 24,
+      "gpt-oss-20b": 24,
+      "BERT_pytorch": 24,
+      "TrOCRForCausalLM": 13,
+      "DistilBertForMaskedLM": 12,
+      "AllenaiLongformerBase": 12,
+      "LayoutLMForMaskedLM": 12,
+      "visformer_small": 8
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "bmm_1",
+      "output_shape": [
+        512,
+        512,
+        64
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "clone"
+    ],
+    "n_occurrences": 788,
+    "n_models": 23,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 168,
+      "T5ForConditionalGeneration": 126,
+      "T5Small": 126,
+      "GPTNeoForCausalLM": 72,
+      "GPTNeoForSequenceClassification": 72,
+      "DebertaV2ForMaskedLM": 24,
+      "MegatronBertForCausalLM": 24,
+      "MobileBertForMaskedLM": 24,
+      "XLNetLMHeadModel": 24,
+      "swin_base_patch4_window7_224": 24,
+      "AlbertForMaskedLM": 12,
+      "AllenaiLongformerBase": 12,
+      "BertForMaskedLM": 12,
+      "ElectraForCausalLM": 12,
+      "LayoutLMForMaskedLM": 12,
+      "RobertaForCausalLM": 12,
+      "BERT_pytorch": 12,
+      "whisper-tiny": 8,
+      "DistilBertForMaskedLM": 6,
+      "BlenderbotForConditionalGeneration": 2,
+      "M2M100ForConditionalGeneration": 2,
+      "TrOCRForCausalLM": 1,
+      "XGLMForCausalLM": 1
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_000",
+      "matmul": "mm_2",
+      "output_shape": [
+        4096,
+        2048
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "clone"
+    ],
+    "n_occurrences": 534,
+    "n_models": 14,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 96,
+      "LayoutLMForMaskedLM": 72,
+      "BERT_pytorch": 72,
+      "XGLMForCausalLM": 50,
+      "MobileBertForMaskedLM": 48,
+      "BlenderbotForConditionalGeneration": 28,
+      "M2M100ForConditionalGeneration": 26,
+      "TrOCRForCausalLM": 26,
+      "AlbertForMaskedLM": 24,
+      "BertForMaskedLM": 24,
+      "ElectraForCausalLM": 24,
+      "RobertaForCausalLM": 24,
+      "DistilBertForMaskedLM": 12,
+      "whisper-tiny": 8
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_3",
+      "output_shape": [
+        4096,
+        4096
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "mul",
+      "clone"
+    ],
+    "n_occurrences": 462,
+    "n_models": 11,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 96,
+      "BlenderbotForConditionalGeneration": 56,
+      "M2M100ForConditionalGeneration": 52,
+      "AlbertForMaskedLM": 48,
+      "BertForMaskedLM": 48,
+      "ElectraForCausalLM": 48,
+      "RobertaForCausalLM": 48,
+      "XGLMForCausalLM": 25,
+      "DistilBertForMaskedLM": 24,
+      "TrOCRForCausalLM": 13,
+      "whisper-tiny": 4
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_1",
+      "output_shape": [
+        4096,
+        4096
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "mul",
+      "mul",
+      "erf",
+      "add",
+      "mul",
+      "convert_element_type"
+    ],
+    "n_occurrences": 383,
+    "n_models": 26,
+    "occurrences_by_model": {
+      "BlenderbotForConditionalGeneration": 26,
+      "BlenderbotForCausalLM": 24,
+      "DebertaV2ForMaskedLM": 24,
+      "MegatronBertForCausalLM": 24,
+      "XGLMForCausalLM": 24,
+      "XLNetLMHeadModel": 24,
+      "swin_base_patch4_window7_224": 24,
+      "vit_base_patch16_siglip_256": 13,
+      "AllenaiLongformerBase": 12,
+      "BartForCausalLM": 12,
+      "BertForMaskedLM": 12,
+      "ElectraForCausalLM": 12,
+      "LayoutLMForMaskedLM": 12,
+      "MBartForCausalLM": 12,
+      "PegasusForCausalLM": 12,
+      "RobertaForCausalLM": 12,
+      "TrOCRForCausalLM": 12,
+      "YituTechConvBert": 12,
+      "beit_base_patch16_224": 12,
+      "deit_base_distilled_patch16_224": 12,
+      "deit_tiny_patch16_224.fb_in1k": 12,
+      "vit_base_patch14_dinov2.lvd142m": 12,
+      "BERT_pytorch": 12,
+      "whisper-tiny": 8,
+      "DistilBertForMaskedLM": 6,
+      "PLBartForCausalLM": 6
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "matmul": "addmm",
+      "output_shape": [
+        8192,
+        3072
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "convert_element_type",
+      "mul",
+      "mul",
+      "erf",
+      "add",
+      "mul",
+      "convert_element_type"
+    ],
+    "n_occurrences": 220,
+    "n_models": 23,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 24,
+      "MegatronBertForCausalLM": 24,
+      "swin_base_patch4_window7_224": 24,
+      "vit_base_patch16_siglip_256": 13,
+      "AllenaiLongformerBase": 12,
+      "BertForMaskedLM": 12,
+      "ElectraForCausalLM": 12,
+      "LayoutLMForMaskedLM": 12,
+      "RobertaForCausalLM": 12,
+      "YituTechConvBert": 12,
+      "beit_base_patch16_224": 12,
+      "deit_base_distilled_patch16_224": 12,
+      "deit_tiny_patch16_224.fb_in1k": 12,
+      "vit_base_patch14_dinov2.lvd142m": 12,
+      "DistilBertForMaskedLM": 6,
+      "BlenderbotForConditionalGeneration": 2,
+      "BartForCausalLM": 1,
+      "BlenderbotForCausalLM": 1,
+      "MBartForCausalLM": 1,
+      "PLBartForCausalLM": 1,
+      "PegasusForCausalLM": 1,
+      "TrOCRForCausalLM": 1,
+      "XGLMForCausalLM": 1
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "matmul": "addmm",
+      "output_shape": [
+        8192,
+        3072
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "mul",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul"
+    ],
+    "n_occurrences": 146,
+    "n_models": 8,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 28,
+      "GPTJForQuestionAnswering": 28,
+      "GPTNeoForCausalLM": 24,
+      "GPTNeoForSequenceClassification": 24,
+      "AlbertForMaskedLM": 12,
+      "GPT2ForSequenceClassification": 12,
+      "GoogleFnet": 12,
+      "DistillGPT2": 6
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_5",
+      "output_shape": [
+        4096,
+        16384
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "clone"
+    ],
+    "n_occurrences": 144,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 72,
+      "GPTNeoForSequenceClassification": 72
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_000",
+      "matmul": "mm",
+      "output_shape": [
+        4096,
+        2048
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "relu"
+    ],
+    "n_occurrences": 138,
+    "n_models": 5,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 96,
+      "M2M100ForConditionalGeneration": 24,
+      "OPTForCausalLM": 13,
+      "alexnet": 3,
+      "vgg16": 2
+    },
+    "example": {
+      "model": "M2M100ForConditionalGeneration",
+      "graph": "full_graph_000",
+      "matmul": "addmm_4",
+      "output_shape": [
+        8192,
+        4096
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "mul",
+      "convert_element_type",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "convert_element_type"
+    ],
+    "n_occurrences": 134,
+    "n_models": 7,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 28,
+      "GPTJForQuestionAnswering": 28,
+      "GPTNeoForCausalLM": 24,
+      "GPTNeoForSequenceClassification": 24,
+      "AlbertForMaskedLM": 12,
+      "GPT2ForSequenceClassification": 12,
+      "DistillGPT2": 6
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_5",
+      "output_shape": [
+        4096,
+        16384
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "add",
+      "mul",
+      "add"
+    ],
+    "n_occurrences": 120,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 120
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_8",
+      "output_shape": [
+        32768,
+        128
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": false,
+    "epilogue_ops": [
+      "clone"
+    ],
+    "n_occurrences": 120,
+    "n_models": 4,
+    "occurrences_by_model": {
+      "gemma-3-4b-it": 34,
+      "Mistral-7B-Instruct-v0.3": 32,
+      "Qwen3-0.6B": 28,
+      "gemma-2-2b": 26
+    },
+    "example": {
+      "model": "Qwen3-0.6B",
+      "graph": "full_graph_000",
+      "matmul": "mm_2",
+      "output_shape": [
+        1000,
+        1024
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "neg",
+      "exp",
+      "add",
+      "div",
+      "convert_element_type",
+      "mul"
+    ],
+    "n_occurrences": 120,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "Mistral-7B-Instruct-v0.3": 64,
+      "Qwen3-0.6B": 56
+    },
+    "example": {
+      "model": "Qwen3-0.6B",
+      "graph": "full_graph_000",
+      "matmul": "mm_4",
+      "output_shape": [
+        1000,
+        3072
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "convert_element_type",
+      "mul"
+    ],
+    "n_occurrences": 120,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "gemma-3-4b-it": 68,
+      "gemma-2-2b": 52
+    },
+    "example": {
+      "model": "gemma-2-2b",
+      "graph": "full_graph_000",
+      "matmul": "mm_4",
+      "output_shape": [
+        1000,
+        9216
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "add",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "n_occurrences": 120,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 120
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_8",
+      "output_shape": [
+        32768,
+        128
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "relu",
+      "le"
+    ],
+    "n_occurrences": 98,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 96,
+      "M2M100ForConditionalGeneration": 2
+    },
+    "example": {
+      "model": "M2M100ForConditionalGeneration",
+      "graph": "full_graph_003",
+      "matmul": "addmm_4",
+      "output_shape": [
+        8192,
+        4096
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add"
+    ],
+    "n_occurrences": 72,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 72
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul": "mm_5",
+      "output_shape": [
+        4096,
+        16384
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "mul",
+      "add",
+      "add",
+      "mul",
+      "add"
+    ],
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 48
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_5",
+      "output_shape": [
+        32768,
+        128
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "clone"
+    ],
+    "n_occurrences": 48,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 24,
+      "GPTNeoForSequenceClassification": 24
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_000",
+      "matmul": "mm_1",
+      "output_shape": [
+        4096,
+        2048
+      ]
+    }
+  },
+  {
+    "matmul_op": "bmm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "clone"
+    ],
+    "n_occurrences": 48,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 24,
+      "GPTNeoForSequenceClassification": 24
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_001",
+      "matmul": "bmm_2",
+      "output_shape": [
+        512,
+        128,
+        128
+      ]
+    }
+  },
+  {
+    "matmul_op": "bmm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "clone"
+    ],
+    "n_occurrences": 48,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 24,
+      "GPTNeoForSequenceClassification": 24
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_001",
+      "matmul": "bmm_3",
+      "output_shape": [
+        512,
+        128,
+        128
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "mul",
+      "add",
+      "add",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 48
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_1",
+      "output_shape": [
+        32768,
+        128
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "mul",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "mul"
+    ],
+    "n_occurrences": 32,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 32
+    },
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_000",
+      "matmul": "mm_9",
+      "output_shape": [
+        4096,
+        1024
+      ]
+    }
+  },
+  {
+    "matmul_op": "bmm",
+    "clean": true,
+    "epilogue_ops": [
+      "clone",
+      "clone"
+    ],
+    "n_occurrences": 24,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 24
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "matmul": "bmm_1",
+      "output_shape": [
+        384,
+        256,
+        64
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "mul",
+      "add"
+    ],
+    "n_occurrences": 24,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 24
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_1",
+      "output_shape": [
+        32768,
+        128
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "relu"
+    ],
+    "n_occurrences": 24,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "T5ForConditionalGeneration": 12,
+      "T5Small": 12
+    },
+    "example": {
+      "model": "T5ForConditionalGeneration",
+      "graph": "full_graph_000",
+      "matmul": "mm_9",
+      "output_shape": [
+        8192,
+        2048
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "add",
+      "add"
+    ],
+    "n_occurrences": 24,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 24
+    },
+    "example": {
+      "model": "XLNetLMHeadModel",
+      "graph": "full_graph_000",
+      "matmul": "mm",
+      "output_shape": [
+        8192,
+        1024
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "clone"
+    ],
+    "n_occurrences": 24,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "gpt-oss-20b": 24
+    },
+    "example": {
+      "model": "gpt-oss-20b",
+      "graph": "full_graph_000",
+      "matmul": "addmm_2",
+      "output_shape": [
+        1000,
+        512
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "n_occurrences": 24,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 24
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_2",
+      "output_shape": [
+        32768,
+        128
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type"
+    ],
+    "n_occurrences": 24,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 24
+    },
+    "example": {
+      "model": "XLNetLMHeadModel",
+      "graph": "full_graph_000",
+      "matmul": "mm",
+      "output_shape": [
+        8192,
+        1024
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "clone",
+      "div"
+    ],
+    "n_occurrences": 23,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 23
+    },
+    "example": {
+      "model": "DebertaV2ForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm_7",
+      "output_shape": [
+        4096,
+        1536
+      ]
+    }
+  },
+  {
+    "matmul_op": "bmm",
+    "clean": true,
+    "epilogue_ops": [
+      "mul",
+      "clone"
+    ],
+    "n_occurrences": 22,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 22
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul": "bmm_2",
+      "output_shape": [
+        512,
+        64,
+        512
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "where"
+    ],
+    "n_occurrences": 22,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "T5ForConditionalGeneration": 11,
+      "T5Small": 11
+    },
+    "example": {
+      "model": "T5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "matmul": "mm_23",
+      "output_shape": [
+        8192,
+        2048
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "mul"
+    ],
+    "n_occurrences": 21,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "OPTForCausalLM": 13,
+      "whisper-tiny": 8
+    },
+    "example": {
+      "model": "OPTForCausalLM",
+      "graph": "full_graph_000",
+      "matmul": "addmm",
+      "output_shape": [
+        8192,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "sub",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "pow",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "add",
+      "mul",
+      "add"
+    ],
+    "n_occurrences": 16,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 16
+    },
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "matmul": "mm_3",
+      "output_shape": [
+        4096,
+        1024
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "add",
+      "div",
+      "clone"
+    ],
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 12
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "matmul": "mm",
+      "output_shape": [
+        8192,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "add",
+      "clone"
+    ],
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 12
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "matmul": "mm_1",
+      "output_shape": [
+        8192,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "add",
+      "mul",
+      "clone"
+    ],
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "YituTechConvBert": 12
+    },
+    "example": {
+      "model": "YituTechConvBert",
+      "graph": "full_graph_000",
+      "matmul": "addmm",
+      "output_shape": [
+        16384,
+        384
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "add",
+      "div",
+      "clone"
+    ],
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 12
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "matmul": "mm",
+      "output_shape": [
+        8192,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "add",
+      "clone"
+    ],
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 12
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "matmul": "mm_1",
+      "output_shape": [
+        8192,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "mul",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul"
+    ],
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "GoogleFnet": 12
+    },
+    "example": {
+      "model": "GoogleFnet",
+      "graph": "full_graph_000",
+      "matmul": "addmm_1",
+      "output_shape": [
+        16384,
+        3072
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "add",
+      "convert_element_type",
+      "mul",
+      "clone"
+    ],
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "YituTechConvBert": 12
+    },
+    "example": {
+      "model": "YituTechConvBert",
+      "graph": "full_graph_000",
+      "matmul": "addmm_2",
+      "output_shape": [
+        16384,
+        384
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "clone",
+      "clone"
+    ],
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "YituTechConvBert": 12
+    },
+    "example": {
+      "model": "YituTechConvBert",
+      "graph": "full_graph_001",
+      "matmul": "mm_8",
+      "output_shape": [
+        16384,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "sub",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "pow",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "add",
+      "mul",
+      "add"
+    ],
+    "n_occurrences": 11,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 11
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul": "mm_4",
+      "output_shape": [
+        4096,
+        16384
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add"
+    ],
+    "n_occurrences": 9,
+    "n_models": 3,
+    "occurrences_by_model": {
+      "BartForCausalLM": 3,
+      "PLBartForCausalLM": 3,
+      "TrOCRForCausalLM": 3
+    },
+    "example": {
+      "model": "BartForCausalLM",
+      "graph": "full_graph_007",
+      "matmul": "mm_6",
+      "output_shape": [
+        8192,
+        1024
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "neg",
+      "exp",
+      "add",
+      "div",
+      "convert_element_type"
+    ],
+    "n_occurrences": 9,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "mobilevit_s": 9
+    },
+    "example": {
+      "model": "mobilevit_s",
+      "graph": "full_graph_000",
+      "matmul": "addmm_2",
+      "output_shape": [
+        131072,
+        288
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "convert_element_type",
+      "neg",
+      "exp",
+      "add",
+      "div",
+      "convert_element_type"
+    ],
+    "n_occurrences": 9,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "mobilevit_s": 9
+    },
+    "example": {
+      "model": "mobilevit_s",
+      "graph": "full_graph_000",
+      "matmul": "addmm_2",
+      "output_shape": [
+        131072,
+        288
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "tanh"
+    ],
+    "n_occurrences": 6,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "lennard_jones": 6
+    },
+    "example": {
+      "model": "lennard_jones",
+      "graph": "full_graph_000",
+      "matmul": "addmm",
+      "output_shape": [
+        128,
+        16
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "gt",
+      "mul",
+      "mul",
+      "expm1",
+      "mul",
+      "where",
+      "convert_element_type"
+    ],
+    "n_occurrences": 6,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "nvidia_deeprecommender": 6
+    },
+    "example": {
+      "model": "nvidia_deeprecommender",
+      "graph": "full_graph_000",
+      "matmul": "addmm",
+      "output_shape": [
+        256,
+        512
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "convert_element_type",
+      "gt",
+      "mul",
+      "mul",
+      "expm1",
+      "mul",
+      "where",
+      "convert_element_type"
+    ],
+    "n_occurrences": 5,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "nvidia_deeprecommender": 5
+    },
+    "example": {
+      "model": "nvidia_deeprecommender",
+      "graph": "full_graph_000",
+      "matmul": "addmm",
+      "output_shape": [
+        256,
+        512
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add"
+    ],
+    "n_occurrences": 4,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "BlenderbotForConditionalGeneration": 2,
+      "M2M100ForConditionalGeneration": 2
+    },
+    "example": {
+      "model": "BlenderbotForConditionalGeneration",
+      "graph": "full_graph_010",
+      "matmul": "mm_6",
+      "output_shape": [
+        2048,
+        2560
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "add",
+      "div"
+    ],
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "deit_base_distilled_patch16_224": 4
+    },
+    "example": {
+      "model": "deit_base_distilled_patch16_224",
+      "graph": "full_graph_000",
+      "matmul": "addmm_48",
+      "output_shape": [
+        128,
+        1000
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "add"
+    ],
+    "n_occurrences": 3,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 3
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_005",
+      "matmul": "mm_139",
+      "output_shape": [
+        8192,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "add"
+    ],
+    "n_occurrences": 3,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "vit_base_patch16_siglip_256": 2,
+      "BERT_pytorch": 1
+    },
+    "example": {
+      "model": "vit_base_patch16_siglip_256",
+      "graph": "full_graph_000",
+      "matmul": "addmm_51",
+      "output_shape": [
+        128,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "add"
+    ],
+    "n_occurrences": 2,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "vit_base_patch16_siglip_256": 2
+    },
+    "example": {
+      "model": "vit_base_patch16_siglip_256",
+      "graph": "full_graph_000",
+      "matmul": "addmm_49",
+      "output_shape": [
+        128,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "sigmoid"
+    ],
+    "n_occurrences": 2,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "LearningToPaint": 2
+    },
+    "example": {
+      "model": "LearningToPaint",
+      "graph": "full_graph_000",
+      "matmul": "addmm",
+      "output_shape": [
+        96,
+        65
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": false,
+    "epilogue_ops": [
+      "convert_element_type"
+    ],
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "GoogleFnet": 1
+    },
+    "example": {
+      "model": "GoogleFnet",
+      "graph": "full_graph_000",
+      "matmul": "addmm",
+      "output_shape": [
+        16384,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "div",
+      "tanh",
+      "mul"
+    ],
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "gemma-2-2b": 1
+    },
+    "example": {
+      "model": "gemma-2-2b",
+      "graph": "full_graph_000",
+      "matmul": "mm_182",
+      "output_shape": [
+        1000,
+        256000
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "add"
+    ],
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "vit_base_patch16_siglip_256": 1
+    },
+    "example": {
+      "model": "vit_base_patch16_siglip_256",
+      "graph": "full_graph_000",
+      "matmul": "mm",
+      "output_shape": [
+        128,
+        768
+      ]
+    }
+  },
+  {
+    "matmul_op": "addmm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "add",
+      "clamp_min",
+      "clamp_max",
+      "mul",
+      "div",
+      "convert_element_type"
+    ],
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "mobilenet_v3_large": 1
+    },
+    "example": {
+      "model": "mobilenet_v3_large",
+      "graph": "full_graph_000",
+      "matmul": "addmm",
+      "output_shape": [
+        32,
+        1280
+      ]
+    }
+  },
+  {
+    "matmul_op": "mm",
+    "clean": true,
+    "epilogue_ops": [
+      "convert_element_type",
+      "mul",
+      "mul"
+    ],
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "alexnet": 1
+    },
+    "example": {
+      "model": "alexnet",
+      "graph": "full_graph_001",
+      "matmul": "mm_4",
+      "output_shape": [
+        128,
+        9216
+      ]
+    }
+  }
+]

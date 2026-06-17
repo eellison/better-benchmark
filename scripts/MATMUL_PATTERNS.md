@@ -63,13 +63,23 @@ running bench fleet).
 
 ## Output
 
-`investigation_results/matmul_patterns/`:
-- `matmul_patterns.json` — `summary` + `per_graph` (every epilogue, chain, and
-  fan-in hit with node names, shapes, op signatures, combine op, and whether the
-  bridge partition's `pattern_hash` already exists in `repros/canonical/`) +
-  `failures`.
-- `SUMMARY.md` — totals, top epilogue/bridge/fan-in op-signatures, fan-in
-  combine-op + arity breakdown, concrete examples (one per model).
+`investigation_results/matmul_patterns/` — one **deduped** JSON per pattern
+(each collapses to UNIQUE op-structure signatures, shapes ignored, like the
+corpus `pattern_hash`; `n_occurrences` + `occurrences_by_model` + one concrete
+`example` per signature):
+
+- `index.json` — file manifest + unique-vs-total counts.
+- `summary.json` — corpus rollup (counts + breakdowns).
+- `epilogues.json` — unique matmul + strictly-pointwise epilogue signatures.
+- `chains.json` — unique `mm → pointwise → mm` sequential-chain signatures.
+- `fanins.json` — unique `≥2 matmuls → 1 output` signatures, **clean
+  memory-eliminating first** (strictly-pointwise bridge + `all_exclusive`),
+  then by `total_eliminable_read_bytes`.
+- `failures.json` — graphs that failed to load.
+- `SUMMARY.md` — human-readable totals + top signatures + examples.
+
+Pass `--combined-json` to also emit the single nested `matmul_patterns.json`
+(the full un-deduped per-graph dump; ~15 MB, off by default).
 
 ## Files
 

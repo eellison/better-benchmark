@@ -1,0 +1,5412 @@
+[
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 12,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "b09beca3a7bd",
+    "bridge_in_corpus": true,
+    "n_occurrences": 6,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 6
+    },
+    "total_eliminable_read_bytes": 4831838208,
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "output_shape": [
+        4096,
+        4096
+      ],
+      "eliminable_read_bytes": 402653184
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "mul",
+    "bridge_ops": [
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "convert_element_type",
+      "mul"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "aa77af8fcd54",
+    "bridge_in_corpus": true,
+    "n_occurrences": 60,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "gemma-3-4b-it": 34,
+      "gemma-2-2b": 26
+    },
+    "total_eliminable_read_bytes": 2351104000,
+    "example": {
+      "model": "gemma-2-2b",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          1000,
+          9216
+        ],
+        [
+          1000,
+          9216
+        ]
+      ],
+      "output_shape": [
+        1000,
+        9216
+      ],
+      "eliminable_read_bytes": 36864000
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "mul",
+    "bridge_ops": [
+      "convert_element_type",
+      "neg",
+      "exp",
+      "add",
+      "div",
+      "convert_element_type",
+      "mul"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "7c39bacfff54",
+    "bridge_in_corpus": true,
+    "n_occurrences": 60,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "Mistral-7B-Instruct-v0.3": 32,
+      "Qwen3-0.6B": 28
+    },
+    "total_eliminable_read_bytes": 2179072000,
+    "example": {
+      "model": "Qwen3-0.6B",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          1000,
+          3072
+        ],
+        [
+          1000,
+          3072
+        ]
+      ],
+      "output_shape": [
+        1000,
+        3072
+      ],
+      "eliminable_read_bytes": 12288000
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "addmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "mul",
+      "add",
+      "add",
+      "mul",
+      "add"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "5c3762c611b3",
+    "bridge_in_corpus": true,
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 48
+    },
+    "total_eliminable_read_bytes": 805306368,
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          32768,
+          128
+        ],
+        [
+          32768,
+          128
+        ]
+      ],
+      "output_shape": [
+        256,
+        128,
+        128
+      ],
+      "eliminable_read_bytes": 16777216
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "mul",
+    "bridge_ops": [
+      "mul",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "mul"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "a07e50c2fb69",
+    "bridge_in_corpus": true,
+    "n_occurrences": 16,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 16
+    },
+    "total_eliminable_read_bytes": 268435456,
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          4096,
+          1024
+        ],
+        [
+          4096,
+          1024
+        ]
+      ],
+      "output_shape": [
+        4096,
+        1024
+      ],
+      "eliminable_read_bytes": 16777216
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "ee05f315ed84",
+    "bridge_in_corpus": true,
+    "n_occurrences": 3,
+    "n_models": 3,
+    "occurrences_by_model": {
+      "BartForCausalLM": 1,
+      "PLBartForCausalLM": 1,
+      "TrOCRForCausalLM": 1
+    },
+    "total_eliminable_read_bytes": 226492416,
+    "example": {
+      "model": "BartForCausalLM",
+      "graph": "full_graph_007",
+      "matmul_shapes": [
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ]
+      ],
+      "output_shape": [
+        8,
+        1024,
+        1024
+      ],
+      "eliminable_read_bytes": 50331648
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "514cc391d8e4",
+    "bridge_in_corpus": true,
+    "n_occurrences": 2,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "BlenderbotForConditionalGeneration": 1,
+      "M2M100ForConditionalGeneration": 1
+    },
+    "total_eliminable_read_bytes": 54525952,
+    "example": {
+      "model": "BlenderbotForConditionalGeneration",
+      "graph": "full_graph_010",
+      "matmul_shapes": [
+        [
+          2048,
+          2560
+        ],
+        [
+          2048,
+          2560
+        ]
+      ],
+      "output_shape": [
+        16,
+        128,
+        2560
+      ],
+      "eliminable_read_bytes": 20971520
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "add"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "f2ae34e9b8f1",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 1
+    },
+    "total_eliminable_read_bytes": 37748736,
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_005",
+      "matmul_shapes": [
+        [
+          8192,
+          768
+        ],
+        [
+          8192,
+          768
+        ],
+        [
+          8192,
+          768
+        ]
+      ],
+      "output_shape": [
+        8,
+        1024,
+        768
+      ],
+      "eliminable_read_bytes": 37748736
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "addmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "add",
+      "div"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "7314654d3afc",
+    "bridge_in_corpus": true,
+    "n_occurrences": 2,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "deit_base_distilled_patch16_224": 2
+    },
+    "total_eliminable_read_bytes": 1024000,
+    "example": {
+      "model": "deit_base_distilled_patch16_224",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          128,
+          1000
+        ],
+        [
+          128,
+          1000
+        ]
+      ],
+      "output_shape": [
+        128,
+        1000
+      ],
+      "eliminable_read_bytes": 512000
+    }
+  },
+  {
+    "matmul_ops": [
+      "bmm",
+      "bmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "index",
+      "add",
+      "add",
+      "mul",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "amax",
+      "sub",
+      "mul",
+      "amax",
+      "sub",
+      "abs",
+      "ne",
+      "eq",
+      "mul",
+      "logical_not",
+      "any",
+      "logical_not",
+      "where",
+      "exp",
+      "sum",
+      "div",
+      "inductor_lookup_seed",
+      "inductor_random",
+      "gt",
+      "mul",
+      "mul",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "1d635744b017",
+    "bridge_in_corpus": true,
+    "n_occurrences": 161,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 161
+    },
+    "total_eliminable_read_bytes": 64827162624,
+    "example": {
+      "model": "XLNetLMHeadModel",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          256,
+          512,
+          1024
+        ],
+        [
+          256,
+          512,
+          512
+        ]
+      ],
+      "output_shape": [
+        16,
+        16,
+        512,
+        512
+      ],
+      "eliminable_read_bytes": 402653184
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "4a1fb62e29b0",
+    "bridge_in_corpus": true,
+    "n_occurrences": 570,
+    "n_models": 7,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 138,
+      "XLNetLMHeadModel": 138,
+      "BertForMaskedLM": 66,
+      "ElectraForCausalLM": 66,
+      "LayoutLMForMaskedLM": 66,
+      "RobertaForCausalLM": 66,
+      "DistilBertForMaskedLM": 30
+    },
+    "total_eliminable_read_bytes": 34955329536,
+    "example": {
+      "model": "BertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ]
+      ],
+      "output_shape": [
+        32,
+        512,
+        768
+      ],
+      "eliminable_read_bytes": 75497472
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "convert_element_type",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "8a3378108574",
+    "bridge_in_corpus": true,
+    "n_occurrences": 276,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 138,
+      "GPTNeoForSequenceClassification": 138
+    },
+    "total_eliminable_read_bytes": 13891534848,
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          2048
+        ],
+        [
+          4096,
+          2048
+        ],
+        [
+          4096,
+          2048
+        ]
+      ],
+      "output_shape": [
+        2048
+      ],
+      "eliminable_read_bytes": 50331648
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "convert_element_type",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "e39690a4a03d",
+    "bridge_in_corpus": true,
+    "n_occurrences": 138,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 138
+    },
+    "total_eliminable_read_bytes": 13891534848,
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          32768,
+          512
+        ],
+        [
+          32768,
+          512
+        ],
+        [
+          32768,
+          512
+        ]
+      ],
+      "output_shape": [
+        512
+      ],
+      "eliminable_read_bytes": 100663296
+    }
+  },
+  {
+    "matmul_ops": [
+      "bmm",
+      "bmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "iota",
+      "index",
+      "add",
+      "add",
+      "mul",
+      "convert_element_type",
+      "eq",
+      "abs",
+      "ne",
+      "mul",
+      "logical_not",
+      "any",
+      "logical_not",
+      "convert_element_type",
+      "mul",
+      "amax",
+      "sub",
+      "mul",
+      "amax",
+      "sub",
+      "where",
+      "exp",
+      "sum",
+      "div",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "af50781fc699",
+    "bridge_in_corpus": true,
+    "n_occurrences": 24,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 24
+    },
+    "total_eliminable_read_bytes": 9663676416,
+    "example": {
+      "model": "XLNetLMHeadModel",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          256,
+          512,
+          1024
+        ],
+        [
+          256,
+          512,
+          512
+        ]
+      ],
+      "output_shape": [
+        256,
+        512,
+        512
+      ],
+      "eliminable_read_bytes": 402653184
+    }
+  },
+  {
+    "matmul_ops": [
+      "bmm",
+      "bmm",
+      "bmm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "cat",
+    "bridge_ops": [
+      "mul",
+      "cat",
+      "clone",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "0ff531d655e2",
+    "bridge_in_corpus": false,
+    "n_occurrences": 72,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "swin_base_patch4_window7_224": 72
+    },
+    "total_eliminable_read_bytes": 7167541248,
+    "example": {
+      "model": "swin_base_patch4_window7_224",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          32768,
+          49,
+          32
+        ],
+        [
+          32768,
+          32,
+          49
+        ],
+        [
+          32768,
+          49,
+          32
+        ]
+      ],
+      "output_shape": [
+        401408,
+        384
+      ],
+      "eliminable_read_bytes": 308281344
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "65c3d9f36fd9",
+    "bridge_in_corpus": true,
+    "n_occurrences": 138,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MegatronBertForCausalLM": 138
+    },
+    "total_eliminable_read_bytes": 6945767424,
+    "example": {
+      "model": "MegatronBertForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ]
+      ],
+      "output_shape": [
+        1024
+      ],
+      "eliminable_read_bytes": 50331648
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "56a68a521d26",
+    "bridge_in_corpus": true,
+    "n_occurrences": 66,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "YituTechConvBert": 66
+    },
+    "total_eliminable_read_bytes": 6643777536,
+    "example": {
+      "model": "YituTechConvBert",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ]
+      ],
+      "output_shape": [
+        32,
+        512,
+        768
+      ],
+      "eliminable_read_bytes": 100663296
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "2e7998fcb884",
+    "bridge_in_corpus": true,
+    "n_occurrences": 40,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 40
+    },
+    "total_eliminable_read_bytes": 4026531840,
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "output_shape": [
+        8,
+        512,
+        4096
+      ],
+      "eliminable_read_bytes": 100663296
+    }
+  },
+  {
+    "matmul_ops": [
+      "bmm",
+      "bmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "iota",
+      "index",
+      "add",
+      "add",
+      "mul",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "amax",
+      "sub",
+      "mul",
+      "amax",
+      "sub",
+      "abs",
+      "ne",
+      "eq",
+      "mul",
+      "logical_not",
+      "any",
+      "logical_not",
+      "where",
+      "exp",
+      "sum",
+      "div",
+      "inductor_lookup_seed",
+      "inductor_random",
+      "gt",
+      "mul",
+      "mul",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "99a4f19df20a",
+    "bridge_in_corpus": true,
+    "n_occurrences": 7,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 7
+    },
+    "total_eliminable_read_bytes": 2818572288,
+    "example": {
+      "model": "XLNetLMHeadModel",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          256,
+          512,
+          1024
+        ],
+        [
+          256,
+          512,
+          512
+        ]
+      ],
+      "output_shape": [
+        16,
+        16,
+        512,
+        512
+      ],
+      "eliminable_read_bytes": 402653184
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "pow",
+      "mul",
+      "mul",
+      "div",
+      "pow",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "c634506089db",
+    "bridge_in_corpus": true,
+    "n_occurrences": 136,
+    "n_models": 3,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 56,
+      "T5ForConditionalGeneration": 40,
+      "T5Small": 40
+    },
+    "total_eliminable_read_bytes": 2717908992,
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ]
+      ],
+      "output_shape": [
+        512
+      ],
+      "eliminable_read_bytes": 12582912
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "cc4b6a77cc6b",
+    "bridge_in_corpus": true,
+    "n_occurrences": 66,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 66
+    },
+    "total_eliminable_read_bytes": 2491416576,
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_005",
+      "matmul_shapes": [
+        [
+          8192,
+          768
+        ],
+        [
+          8192,
+          768
+        ],
+        [
+          8192,
+          768
+        ]
+      ],
+      "output_shape": [
+        8,
+        1024,
+        768
+      ],
+      "eliminable_read_bytes": 37748736
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "sum",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "sum",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "565b9b0299d1",
+    "bridge_in_corpus": true,
+    "n_occurrences": 120,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 120
+    },
+    "total_eliminable_read_bytes": 2013265920,
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          32768,
+          128
+        ],
+        [
+          32768,
+          128
+        ]
+      ],
+      "output_shape": [
+        128
+      ],
+      "eliminable_read_bytes": 16777216
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "div",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "836354f50614",
+    "bridge_in_corpus": true,
+    "n_occurrences": 27,
+    "n_models": 7,
+    "occurrences_by_model": {
+      "BlenderbotForConditionalGeneration": 6,
+      "M2M100ForConditionalGeneration": 6,
+      "BlenderbotForCausalLM": 3,
+      "MBartForCausalLM": 3,
+      "OPTForCausalLM": 3,
+      "PegasusForCausalLM": 3,
+      "XGLMForCausalLM": 3
+    },
+    "total_eliminable_read_bytes": 1321205760,
+    "example": {
+      "model": "BlenderbotForCausalLM",
+      "graph": "full_graph_007",
+      "matmul_shapes": [
+        [
+          4096,
+          2560
+        ],
+        [
+          4096,
+          2560
+        ],
+        [
+          4096,
+          2560
+        ]
+      ],
+      "output_shape": [
+        2560
+      ],
+      "eliminable_read_bytes": 62914560
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "convert_element_type",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "c5cdd9ab78b4",
+    "bridge_in_corpus": true,
+    "n_occurrences": 312,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 156,
+      "GPTJForQuestionAnswering": 156
+    },
+    "total_eliminable_read_bytes": 1308622848,
+    "example": {
+      "model": "GPTJForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ]
+      ],
+      "output_shape": [
+        4096
+      ],
+      "eliminable_read_bytes": 4194304
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 12,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "pow",
+      "mul",
+      "mul",
+      "div",
+      "pow",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "f1250e5f7b6e",
+    "bridge_in_corpus": true,
+    "n_occurrences": 8,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "T5ForConditionalGeneration": 4,
+      "T5Small": 4
+    },
+    "total_eliminable_read_bytes": 805306368,
+    "example": {
+      "model": "T5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ],
+        [
+          8192,
+          512
+        ]
+      ],
+      "output_shape": [
+        512
+      ],
+      "eliminable_read_bytes": 100663296
+    }
+  },
+  {
+    "matmul_ops": [
+      "bmm",
+      "bmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "sum",
+      "add",
+      "clone"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "668480e6f63c",
+    "bridge_in_corpus": true,
+    "n_occurrences": 24,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 24
+    },
+    "total_eliminable_read_bytes": 805306368,
+    "example": {
+      "model": "XLNetLMHeadModel",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          256,
+          512,
+          64
+        ],
+        [
+          256,
+          512,
+          64
+        ]
+      ],
+      "output_shape": [
+        8192,
+        1024
+      ],
+      "eliminable_read_bytes": 33554432
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "sum",
+      "add",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "convert_element_type",
+      "sum",
+      "full",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "cb474de4ede0",
+    "bridge_in_corpus": true,
+    "n_occurrences": 7,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 7
+    },
+    "total_eliminable_read_bytes": 704643072,
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          32768,
+          512
+        ],
+        [
+          32768,
+          512
+        ],
+        [
+          32768,
+          512
+        ]
+      ],
+      "output_shape": [
+        512
+      ],
+      "eliminable_read_bytes": 100663296
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "div",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "74f116312f8b",
+    "bridge_in_corpus": true,
+    "n_occurrences": 2,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 1,
+      "DistilBertForMaskedLM": 1
+    },
+    "total_eliminable_read_bytes": 629160960,
+    "example": {
+      "model": "DebertaV2ForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          1536
+        ],
+        [
+          4096,
+          1536
+        ],
+        [
+          4096,
+          1536
+        ],
+        [
+          128104,
+          1536
+        ]
+      ],
+      "output_shape": [
+        128100,
+        1536
+      ],
+      "eliminable_read_bytes": 431284224
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "sum",
+      "mul",
+      "add",
+      "div",
+      "div",
+      "neg",
+      "mul",
+      "div",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "neg",
+      "sum",
+      "add",
+      "mul",
+      "div",
+      "eq",
+      "where",
+      "mul",
+      "mul",
+      "add",
+      "div",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "23ebf74d21f6",
+    "bridge_in_corpus": true,
+    "n_occurrences": 66,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "BERT_pytorch": 66
+    },
+    "total_eliminable_read_bytes": 622854144,
+    "example": {
+      "model": "BERT_pytorch",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          2048,
+          768
+        ],
+        [
+          2048,
+          768
+        ],
+        [
+          2048,
+          768
+        ]
+      ],
+      "output_shape": [
+        768
+      ],
+      "eliminable_read_bytes": 9437184
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "add",
+      "convert_element_type",
+      "sum",
+      "convert_element_type",
+      "convert_element_type",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "c3cfd4211c4e",
+    "bridge_in_corpus": true,
+    "n_occurrences": 6,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 6
+    },
+    "total_eliminable_read_bytes": 603979776,
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "output_shape": [
+        8,
+        512,
+        4096
+      ],
+      "eliminable_read_bytes": 100663296
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "full",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "add",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "add",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "ecce309d13e3",
+    "bridge_in_corpus": true,
+    "n_occurrences": 8,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "LayoutLMForMaskedLM": 8
+    },
+    "total_eliminable_read_bytes": 603979776,
+    "example": {
+      "model": "LayoutLMForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ]
+      ],
+      "output_shape": [
+        768
+      ],
+      "eliminable_read_bytes": 75497472
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "add",
+      "add",
+      "convert_element_type",
+      "var_mean",
+      "sub",
+      "add",
+      "rsqrt",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "3efb2d7c03c8",
+    "bridge_in_corpus": true,
+    "n_occurrences": 272,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 136,
+      "GPTJForQuestionAnswering": 136
+    },
+    "total_eliminable_read_bytes": 570425344,
+    "example": {
+      "model": "GPTJForCausalLM",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ]
+      ],
+      "output_shape": [
+        128,
+        4096
+      ],
+      "eliminable_read_bytes": 2097152
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "div",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "74f116312f8b",
+    "bridge_in_corpus": true,
+    "n_occurrences": 6,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 3,
+      "DistilBertForMaskedLM": 3
+    },
+    "total_eliminable_read_bytes": 566231040,
+    "example": {
+      "model": "DebertaV2ForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          1536
+        ],
+        [
+          4096,
+          1536
+        ],
+        [
+          4096,
+          1536
+        ]
+      ],
+      "output_shape": [
+        1536
+      ],
+      "eliminable_read_bytes": 37748736
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "pow",
+      "mul",
+      "mul",
+      "div",
+      "pow",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "4df091034d07",
+    "bridge_in_corpus": true,
+    "n_occurrences": 64,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 64
+    },
+    "total_eliminable_read_bytes": 536870912,
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ]
+      ],
+      "output_shape": [
+        512
+      ],
+      "eliminable_read_bytes": 8388608
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "add",
+      "add",
+      "add",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "d2b0852482c4",
+    "bridge_in_corpus": true,
+    "n_occurrences": 6,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 3,
+      "ElectraForCausalLM": 3
+    },
+    "total_eliminable_read_bytes": 452984832,
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "output_shape": [
+        4096,
+        4096
+      ],
+      "eliminable_read_bytes": 100663296
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "add",
+      "add",
+      "var_mean",
+      "add",
+      "rsqrt",
+      "sub",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "div"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "28b0ef07dcb9",
+    "bridge_in_corpus": true,
+    "n_occurrences": 214,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 107,
+      "GPTJForQuestionAnswering": 107
+    },
+    "total_eliminable_read_bytes": 448790528,
+    "example": {
+      "model": "GPTJForCausalLM",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ]
+      ],
+      "output_shape": [
+        1,
+        128,
+        4096
+      ],
+      "eliminable_read_bytes": 2097152
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 7,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "pow",
+      "mul",
+      "mul",
+      "div",
+      "pow",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "pow",
+      "mul",
+      "mul",
+      "div",
+      "pow",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "b6027582bc37",
+    "bridge_in_corpus": true,
+    "n_occurrences": 3,
+    "n_models": 3,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 1,
+      "T5ForConditionalGeneration": 1,
+      "T5Small": 1
+    },
+    "total_eliminable_read_bytes": 447741952,
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          250112,
+          512
+        ]
+      ],
+      "output_shape": [
+        250112,
+        512
+      ],
+      "eliminable_read_bytes": 281280512
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "7157158c7b49",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "YituTechConvBert": 4
+    },
+    "total_eliminable_read_bytes": 402653184,
+    "example": {
+      "model": "YituTechConvBert",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ]
+      ],
+      "output_shape": [
+        768
+      ],
+      "eliminable_read_bytes": 100663296
+    }
+  },
+  {
+    "matmul_ops": [
+      "bmm",
+      "bmm",
+      "bmm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "cat",
+    "bridge_ops": [
+      "cat",
+      "clone"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "d14b9f62e2e6",
+    "bridge_in_corpus": true,
+    "n_occurrences": 8,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "visformer_small": 8
+    },
+    "total_eliminable_read_bytes": 346816512,
+    "example": {
+      "model": "visformer_small",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          768,
+          196,
+          64
+        ],
+        [
+          768,
+          64,
+          196
+        ],
+        [
+          768,
+          196,
+          64
+        ]
+      ],
+      "output_shape": [
+        128,
+        1152,
+        14,
+        14
+      ],
+      "eliminable_read_bytes": 57802752
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "f0df0905cd69",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "BertForMaskedLM": 4
+    },
+    "total_eliminable_read_bytes": 301989888,
+    "example": {
+      "model": "BertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ]
+      ],
+      "output_shape": [
+        768
+      ],
+      "eliminable_read_bytes": 75497472
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "9b7df2917dda",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "RobertaForCausalLM": 4
+    },
+    "total_eliminable_read_bytes": 301989888,
+    "example": {
+      "model": "RobertaForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ]
+      ],
+      "output_shape": [
+        768
+      ],
+      "eliminable_read_bytes": 75497472
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 16,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "pow",
+      "mul",
+      "mul",
+      "div",
+      "pow",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "38fa7c1b328d",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 4
+    },
+    "total_eliminable_read_bytes": 268435456,
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ]
+      ],
+      "output_shape": [
+        512
+      ],
+      "eliminable_read_bytes": 67108864
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "div",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "sum",
+      "full",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "2f5510748eeb",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 1
+    },
+    "total_eliminable_read_bytes": 256212992,
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          2048
+        ],
+        [
+          4096,
+          2048
+        ],
+        [
+          4096,
+          2048
+        ],
+        [
+          50264,
+          2048
+        ]
+      ],
+      "output_shape": [
+        50257,
+        2048
+      ],
+      "eliminable_read_bytes": 256212992
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "div",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "sum",
+      "full",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "fe0f5ded79c5",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "GPTNeoForSequenceClassification": 4
+    },
+    "total_eliminable_read_bytes": 201326592,
+    "example": {
+      "model": "GPTNeoForSequenceClassification",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          2048
+        ],
+        [
+          4096,
+          2048
+        ],
+        [
+          4096,
+          2048
+        ]
+      ],
+      "output_shape": [
+        2048
+      ],
+      "eliminable_read_bytes": 50331648
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "full",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "140a28e119af",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MegatronBertForCausalLM": 4
+    },
+    "total_eliminable_read_bytes": 201326592,
+    "example": {
+      "model": "MegatronBertForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ]
+      ],
+      "output_shape": [
+        1024
+      ],
+      "eliminable_read_bytes": 50331648
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "9b7df2917dda",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "RobertaForCausalLM": 1
+    },
+    "total_eliminable_read_bytes": 152715264,
+    "example": {
+      "model": "RobertaForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          50272,
+          768
+        ]
+      ],
+      "output_shape": [
+        50265,
+        768
+      ],
+      "eliminable_read_bytes": 152715264
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "div",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "sum",
+      "full",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "2f5510748eeb",
+    "bridge_in_corpus": true,
+    "n_occurrences": 3,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 3
+    },
+    "total_eliminable_read_bytes": 150994944,
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          2048
+        ],
+        [
+          4096,
+          2048
+        ],
+        [
+          4096,
+          2048
+        ]
+      ],
+      "output_shape": [
+        2048
+      ],
+      "eliminable_read_bytes": 50331648
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "ed482d857957",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "GoogleFnet": 1
+    },
+    "total_eliminable_read_bytes": 148635648,
+    "example": {
+      "model": "GoogleFnet",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          32000,
+          768
+        ],
+        [
+          16384,
+          768
+        ]
+      ],
+      "output_shape": [
+        32000,
+        768
+      ],
+      "eliminable_read_bytes": 148635648
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 5,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "7157158c7b49",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "YituTechConvBert": 1
+    },
+    "total_eliminable_read_bytes": 147545088,
+    "example": {
+      "model": "YituTechConvBert",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          30522,
+          768
+        ]
+      ],
+      "output_shape": [
+        30522,
+        768
+      ],
+      "eliminable_read_bytes": 147545088
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "pow",
+      "mul",
+      "mul",
+      "div",
+      "pow",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "pow",
+      "mul",
+      "mul",
+      "div",
+      "pow",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "b6027582bc37",
+    "bridge_in_corpus": true,
+    "n_occurrences": 6,
+    "n_models": 3,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 2,
+      "T5ForConditionalGeneration": 2,
+      "T5Small": 2
+    },
+    "total_eliminable_read_bytes": 125829120,
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          512
+        ]
+      ],
+      "output_shape": [
+        512
+      ],
+      "eliminable_read_bytes": 12582912
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "f0df0905cd69",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "BertForMaskedLM": 1
+    },
+    "total_eliminable_read_bytes": 122379264,
+    "example": {
+      "model": "BertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          30522,
+          768
+        ]
+      ],
+      "output_shape": [
+        30522,
+        768
+      ],
+      "eliminable_read_bytes": 122379264
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "full",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "add",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "_unsafe_masked_index_put_accumulate",
+      "add",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "ecce309d13e3",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "LayoutLMForMaskedLM": 1
+    },
+    "total_eliminable_read_bytes": 122379264,
+    "example": {
+      "model": "LayoutLMForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          16384,
+          768
+        ],
+        [
+          30522,
+          768
+        ]
+      ],
+      "output_shape": [
+        30522,
+        768
+      ],
+      "eliminable_read_bytes": 122379264
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "9a59fb6b2026",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 1
+    },
+    "total_eliminable_read_bytes": 115867648,
+    "example": {
+      "model": "XLNetLMHeadModel",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ],
+        [
+          32000,
+          1024
+        ]
+      ],
+      "output_shape": [
+        32000,
+        1024
+      ],
+      "eliminable_read_bytes": 115867648
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "full",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "140a28e119af",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MegatronBertForCausalLM": 1
+    },
+    "total_eliminable_read_bytes": 109838336,
+    "example": {
+      "model": "MegatronBertForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ],
+        [
+          8192,
+          1024
+        ],
+        [
+          29056,
+          1024
+        ]
+      ],
+      "output_shape": [
+        29056,
+        1024
+      ],
+      "eliminable_read_bytes": 109838336
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "mul",
+      "mul",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "div",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "full",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "79c321089383",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "DistillGPT2": 1
+    },
+    "total_eliminable_read_bytes": 102371328,
+    "example": {
+      "model": "DistillGPT2",
+      "graph": "full_graph_003",
+      "matmul_shapes": [
+        [
+          16384,
+          768
+        ],
+        [
+          50264,
+          768
+        ]
+      ],
+      "output_shape": [
+        50257,
+        768
+      ],
+      "eliminable_read_bytes": 102371328
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "constant_pad_nd",
+      "full",
+      "slice_scatter",
+      "add",
+      "constant_pad_nd",
+      "slice_scatter",
+      "add",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "d247edd4e4a6",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 1
+    },
+    "total_eliminable_read_bytes": 56426496,
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          32768,
+          384
+        ],
+        [
+          512,
+          30528
+        ]
+      ],
+      "output_shape": [
+        30522,
+        128
+      ],
+      "eliminable_read_bytes": 56426496
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "add",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "div",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "convert_element_type",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "74daaa264688",
+    "bridge_in_corpus": true,
+    "n_occurrences": 12,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 6,
+      "GPTJForQuestionAnswering": 6
+    },
+    "total_eliminable_read_bytes": 50331648,
+    "example": {
+      "model": "GPTJForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ]
+      ],
+      "output_shape": [
+        4096
+      ],
+      "eliminable_read_bytes": 4194304
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 3,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "sum",
+      "mul",
+      "add",
+      "div",
+      "div",
+      "neg",
+      "mul",
+      "div",
+      "sum",
+      "mul",
+      "mul",
+      "sum",
+      "neg",
+      "sum",
+      "add",
+      "mul",
+      "div",
+      "eq",
+      "where",
+      "mul",
+      "mul",
+      "add",
+      "div",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "200f6e0136dd",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "BERT_pytorch": 4
+    },
+    "total_eliminable_read_bytes": 37748736,
+    "example": {
+      "model": "BERT_pytorch",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          2048,
+          768
+        ],
+        [
+          2048,
+          768
+        ],
+        [
+          2048,
+          768
+        ]
+      ],
+      "output_shape": [
+        768
+      ],
+      "eliminable_read_bytes": 9437184
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm",
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 4,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "div",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "add",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "0b5187c8ce05",
+    "bridge_in_corpus": true,
+    "n_occurrences": 6,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 3,
+      "GPTJForQuestionAnswering": 3
+    },
+    "total_eliminable_read_bytes": 25165824,
+    "example": {
+      "model": "GPTJForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ]
+      ],
+      "output_shape": [
+        4096
+      ],
+      "eliminable_read_bytes": 4194304
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "add",
+      "add",
+      "var_mean",
+      "add",
+      "rsqrt",
+      "sub",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "3e7683cb24f2",
+    "bridge_in_corpus": true,
+    "n_occurrences": 10,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 5,
+      "GPTJForQuestionAnswering": 5
+    },
+    "total_eliminable_read_bytes": 20971520,
+    "example": {
+      "model": "GPTJForCausalLM",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          128,
+          4096
+        ],
+        [
+          128,
+          4096
+        ]
+      ],
+      "output_shape": [
+        1,
+        128,
+        4096
+      ],
+      "eliminable_read_bytes": 2097152
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "6b160090a678",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "ElectraForCausalLM": 1
+    },
+    "total_eliminable_read_bytes": 16202240,
+    "example": {
+      "model": "ElectraForCausalLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          32768,
+          128
+        ],
+        [
+          30522,
+          128
+        ]
+      ],
+      "output_shape": [
+        30522,
+        128
+      ],
+      "eliminable_read_bytes": 16202240
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "full",
+      "select_scatter",
+      "add",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "f24f665135f6",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "BERT_pytorch": 4
+    },
+    "total_eliminable_read_bytes": 12681216,
+    "example": {
+      "model": "BERT_pytorch",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          16,
+          768
+        ],
+        [
+          2048,
+          768
+        ]
+      ],
+      "output_shape": [
+        16,
+        128,
+        768
+      ],
+      "eliminable_read_bytes": 3170304
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "sum",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "ge",
+      "lt",
+      "bitwise_and",
+      "ne",
+      "bitwise_and",
+      "full",
+      "_unsafe_masked_index_put_accumulate",
+      "add"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "4ce9013c6e0d",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 1
+    },
+    "total_eliminable_read_bytes": 8728576,
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          4096,
+          128
+        ],
+        [
+          30000,
+          128
+        ]
+      ],
+      "output_shape": [
+        30000,
+        128
+      ],
+      "eliminable_read_bytes": 8728576
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "full",
+      "select_scatter",
+      "select_scatter",
+      "add",
+      "mul",
+      "mul",
+      "sum",
+      "mul",
+      "sum",
+      "mul",
+      "sub",
+      "sub",
+      "mul",
+      "mul",
+      "sum",
+      "sum",
+      "convert_element_type",
+      "sum",
+      "convert_element_type",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": true,
+    "bridge_pattern_hash": "d90a5c698770",
+    "bridge_in_corpus": true,
+    "n_occurrences": 6,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "deit_base_distilled_patch16_224": 6
+    },
+    "total_eliminable_read_bytes": 2359296,
+    "example": {
+      "model": "deit_base_distilled_patch16_224",
+      "graph": "full_graph_001",
+      "matmul_shapes": [
+        [
+          128,
+          768
+        ],
+        [
+          128,
+          768
+        ]
+      ],
+      "output_shape": [
+        128,
+        198,
+        768
+      ],
+      "eliminable_read_bytes": 393216
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "clone",
+      "inductor_lookup_seed",
+      "inductor_random",
+      "lt",
+      "convert_element_type",
+      "div",
+      "mul",
+      "add",
+      "convert_element_type",
+      "var_mean",
+      "add",
+      "rsqrt",
+      "sub",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "fee6fc32d1cc",
+    "bridge_in_corpus": false,
+    "n_occurrences": 8,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "swin_base_patch4_window7_224": 8
+    },
+    "total_eliminable_read_bytes": 308281344,
+    "example": {
+      "model": "swin_base_patch4_window7_224",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          25088,
+          512
+        ],
+        [
+          25088,
+          512
+        ]
+      ],
+      "output_shape": [
+        128,
+        196,
+        512
+      ],
+      "eliminable_read_bytes": 25690112
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "addmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "add",
+      "convert_element_type",
+      "var_mean",
+      "add",
+      "rsqrt",
+      "sub",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "e8d19aecbc03",
+    "bridge_in_corpus": true,
+    "n_occurrences": 5,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 5
+    },
+    "total_eliminable_read_bytes": 167772160,
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "output_shape": [
+        8,
+        512,
+        4096
+      ],
+      "eliminable_read_bytes": 33554432
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "clone",
+      "add",
+      "convert_element_type",
+      "var_mean",
+      "sub",
+      "add",
+      "rsqrt",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "f1e6419d4a7f",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "swin_base_patch4_window7_224": 4
+    },
+    "total_eliminable_read_bytes": 154140672,
+    "example": {
+      "model": "swin_base_patch4_window7_224",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          25088,
+          512
+        ],
+        [
+          25088,
+          512
+        ]
+      ],
+      "output_shape": [
+        128,
+        196,
+        512
+      ],
+      "eliminable_read_bytes": 25690112
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "addmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "add",
+      "convert_element_type",
+      "var_mean",
+      "sub",
+      "add",
+      "rsqrt",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "45f7dfd4a983",
+    "bridge_in_corpus": true,
+    "n_occurrences": 4,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 2,
+      "ElectraForCausalLM": 2
+    },
+    "total_eliminable_read_bytes": 100663296,
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "output_shape": [
+        8,
+        512,
+        4096
+      ],
+      "eliminable_read_bytes": 33554432
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "addmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "inductor_lookup_seed",
+      "inductor_random",
+      "convert_element_type",
+      "gt",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type",
+      "var_mean",
+      "add",
+      "rsqrt",
+      "sub",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "1767f6da7869",
+    "bridge_in_corpus": true,
+    "n_occurrences": 5,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "ElectraForCausalLM": 5
+    },
+    "total_eliminable_read_bytes": 83886080,
+    "example": {
+      "model": "ElectraForCausalLM",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          32768,
+          256
+        ],
+        [
+          32768,
+          256
+        ]
+      ],
+      "output_shape": [
+        64,
+        512,
+        256
+      ],
+      "eliminable_read_bytes": 16777216
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "inductor_lookup_seed",
+      "inductor_random",
+      "lt",
+      "convert_element_type",
+      "div",
+      "mul",
+      "add",
+      "convert_element_type",
+      "var_mean",
+      "add",
+      "rsqrt",
+      "sub",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "569785e28eff",
+    "bridge_in_corpus": false,
+    "n_occurrences": 4,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "swin_base_patch4_window7_224": 4
+    },
+    "total_eliminable_read_bytes": 51380224,
+    "example": {
+      "model": "swin_base_patch4_window7_224",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          6272,
+          1024
+        ],
+        [
+          6272,
+          1024
+        ]
+      ],
+      "output_shape": [
+        128,
+        49,
+        1024
+      ],
+      "eliminable_read_bytes": 12845056
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "add",
+      "convert_element_type",
+      "var_mean",
+      "sub",
+      "add",
+      "rsqrt",
+      "mul",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "0584ac272c37",
+    "bridge_in_corpus": true,
+    "n_occurrences": 2,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "swin_base_patch4_window7_224": 2
+    },
+    "total_eliminable_read_bytes": 25690112,
+    "example": {
+      "model": "swin_base_patch4_window7_224",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          6272,
+          1024
+        ],
+        [
+          6272,
+          1024
+        ]
+      ],
+      "output_shape": [
+        128,
+        49,
+        1024
+      ],
+      "eliminable_read_bytes": 12845056
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "addmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "add"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "d572db383c8a",
+    "bridge_in_corpus": true,
+    "n_occurrences": 2,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "vit_base_patch16_siglip_256": 2
+    },
+    "total_eliminable_read_bytes": 393216,
+    "example": {
+      "model": "vit_base_patch16_siglip_256",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          128,
+          768
+        ],
+        [
+          128,
+          768
+        ]
+      ],
+      "output_shape": [
+        128,
+        768
+      ],
+      "eliminable_read_bytes": 196608
+    }
+  },
+  {
+    "matmul_ops": [
+      "mm",
+      "mm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "mul",
+    "bridge_ops": [
+      "mul",
+      "convert_element_type",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "mul",
+      "inductor_lookup_seed",
+      "inductor_random",
+      "gt",
+      "mul",
+      "mul",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": false,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "85a3fff93f83",
+    "bridge_in_corpus": true,
+    "n_occurrences": 16,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 16
+    },
+    "total_eliminable_read_bytes": 0,
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          4096,
+          1024
+        ],
+        [
+          4096,
+          1024
+        ]
+      ],
+      "output_shape": [
+        4096,
+        1024
+      ],
+      "eliminable_read_bytes": 0
+    }
+  },
+  {
+    "matmul_ops": [
+      "addmm",
+      "addmm"
+    ],
+    "n_matmuls": 2,
+    "combine_op": "add",
+    "bridge_ops": [
+      "mul",
+      "add",
+      "add",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "strictly_pointwise": true,
+    "all_exclusive": false,
+    "bridge_pattern_hash": "d17fec3a0be5",
+    "bridge_in_corpus": true,
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 48
+    },
+    "total_eliminable_read_bytes": 0,
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "matmul_shapes": [
+        [
+          32768,
+          128
+        ],
+        [
+          32768,
+          128
+        ]
+      ],
+      "output_shape": [
+        256,
+        128,
+        128
+      ],
+      "eliminable_read_bytes": 0
+    }
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_003.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 4096 != 64"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_004.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg4_1 dim 0: 4096 != 64"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_005.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg2_1 dim 0: 4096 != 64"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_007.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 4096 != 64"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_008.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg4_1 dim 0: 2048 != 128"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_009.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 2048 != 39"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_010.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 2048 != 128"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_011.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 4096 != 64"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_012.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg2_1 dim 0: 2048 != 128"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_013.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 2048 != 15"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_014.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 2048 != 128"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_015.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg4_1 dim 0: 1024 != 256"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_016.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 1024 != 39"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_017.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 1024 != 256"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_018.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 2048 != 128"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_019.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 1024 != 39"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_020.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 1024 != 15"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_022.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg1_1 dim 0: 512 != 32"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_023.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg1_1 dim 0: 512 != 32"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_024.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg1_1 dim 0: 512 != 32"
+  },
+  {
+    "path": "repros/models/torchbench/infer/opacus_cifar10/full_graph_025.py",
+    "error": "ValueError: full graph sidecar tensor stride does not match forward annotations for arg1_1 dim 0: 512 != 32"
+  }
+]

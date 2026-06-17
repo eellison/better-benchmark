@@ -1,0 +1,489 @@
+{
+  "n_graphs_analyzed": 343,
+  "n_failures": 21,
+  "total_matmuls": 17575,
+  "matmuls_with_pw_epilogue": 8566,
+  "matmuls_with_clean_pw_epilogue": 7943,
+  "mm_pw_mm_chains_total": 6670,
+  "mm_pw_mm_chains_with_pointwise": 6290,
+  "mm_then_mm_no_pointwise": 380,
+  "matmul_fanin_total": 3230,
+  "matmul_fanin_strictly_pointwise": 248,
+  "matmul_fanin_memory_eliminating": 198,
+  "fanin_eliminable_read_bytes_total": 10755547136,
+  "fanin_elim_combine_op_breakdown": {
+    "mul": 136,
+    "add": 62
+  },
+  "fanin_arity_breakdown": {
+    "2": 238,
+    "3": 4,
+    "12": 6
+  },
+  "fanin_combine_op_breakdown": {
+    "mul": 136,
+    "add": 112
+  },
+  "top_epilogue_op_signatures": [
+    {
+      "ops": [
+        "convert_element_type"
+      ],
+      "count": 2963
+    },
+    {
+      "ops": [
+        "clone"
+      ],
+      "count": 2669
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "erf",
+        "mul"
+      ],
+      "count": 603
+    },
+    {
+      "ops": [
+        "clone",
+        "mul"
+      ],
+      "count": 484
+    },
+    {
+      "ops": [
+        "clone",
+        "convert_element_type"
+      ],
+      "count": 288
+    },
+    {
+      "ops": [
+        "add",
+        "mul"
+      ],
+      "count": 192
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "mul"
+      ],
+      "count": 192
+    },
+    {
+      "ops": [
+        "add",
+        "mul",
+        "pow",
+        "tanh"
+      ],
+      "count": 190
+    },
+    {
+      "ops": [
+        "relu"
+      ],
+      "count": 162
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "mul",
+        "pow",
+        "tanh"
+      ],
+      "count": 134
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "div",
+        "exp",
+        "mul",
+        "neg"
+      ],
+      "count": 120
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "mul",
+        "tanh"
+      ],
+      "count": 120
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type"
+      ],
+      "count": 112
+    },
+    {
+      "ops": [
+        "le",
+        "relu"
+      ],
+      "count": 98
+    },
+    {
+      "ops": [
+        "add"
+      ],
+      "count": 30
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "mul",
+        "pow",
+        "sub",
+        "tanh"
+      ],
+      "count": 27
+    },
+    {
+      "ops": [
+        "clone",
+        "div"
+      ],
+      "count": 23
+    },
+    {
+      "ops": [
+        "convert_element_type",
+        "mul",
+        "where"
+      ],
+      "count": 22
+    },
+    {
+      "ops": [
+        "mul"
+      ],
+      "count": 21
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "div",
+        "exp",
+        "neg"
+      ],
+      "count": 18
+    },
+    {
+      "ops": [
+        "add",
+        "clone",
+        "div"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "clone"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "clone",
+        "mul"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "clone",
+        "convert_element_type",
+        "div"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "clone",
+        "convert_element_type"
+      ],
+      "count": 12
+    }
+  ],
+  "top_bridge_op_signatures": [
+    {
+      "ops": [
+        "clone"
+      ],
+      "count": 3096
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "erf",
+        "mul"
+      ],
+      "count": 603
+    },
+    {
+      "ops": [
+        "clone",
+        "mul"
+      ],
+      "count": 502
+    },
+    {
+      "ops": [
+        "clone",
+        "convert_element_type"
+      ],
+      "count": 384
+    },
+    {
+      "ops": [
+        "add",
+        "mul"
+      ],
+      "count": 262
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "mul"
+      ],
+      "count": 262
+    },
+    {
+      "ops": [
+        "add",
+        "mul",
+        "pow",
+        "tanh"
+      ],
+      "count": 190
+    },
+    {
+      "ops": [
+        "relu"
+      ],
+      "count": 162
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "mul",
+        "pow",
+        "tanh"
+      ],
+      "count": 134
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "div",
+        "exp",
+        "mul",
+        "neg"
+      ],
+      "count": 120
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "mul",
+        "tanh"
+      ],
+      "count": 120
+    },
+    {
+      "ops": [
+        "le",
+        "relu"
+      ],
+      "count": 98
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "mul",
+        "pow",
+        "sub",
+        "tanh"
+      ],
+      "count": 86
+    },
+    {
+      "ops": [
+        "add"
+      ],
+      "count": 50
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type"
+      ],
+      "count": 48
+    },
+    {
+      "ops": [
+        "convert_element_type",
+        "mul",
+        "where"
+      ],
+      "count": 44
+    },
+    {
+      "ops": [
+        "clone",
+        "div"
+      ],
+      "count": 23
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "div",
+        "exp",
+        "neg"
+      ],
+      "count": 18
+    },
+    {
+      "ops": [
+        "add",
+        "clone",
+        "div"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "clone"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "clone",
+        "mul"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "clone",
+        "convert_element_type",
+        "div"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "clone",
+        "convert_element_type"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "clone",
+        "convert_element_type",
+        "mul"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "convert_element_type",
+        "expm1",
+        "gt",
+        "mul",
+        "where"
+      ],
+      "count": 9
+    }
+  ],
+  "top_fanin_bridge_signatures": [
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "div",
+        "exp",
+        "mul",
+        "neg"
+      ],
+      "count": 60
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type",
+        "mul",
+        "tanh"
+      ],
+      "count": 60
+    },
+    {
+      "ops": [
+        "add",
+        "mul"
+      ],
+      "count": 48
+    },
+    {
+      "ops": [
+        "add",
+        "mul",
+        "pow",
+        "tanh"
+      ],
+      "count": 16
+    },
+    {
+      "ops": [
+        "add",
+        "convert_element_type"
+      ],
+      "count": 12
+    },
+    {
+      "ops": [
+        "add",
+        "div"
+      ],
+      "count": 2
+    }
+  ],
+  "epilogue_matmul_op_breakdown": {
+    "mm": 4606,
+    "addmm": 2651,
+    "bmm": 1309
+  }
+}

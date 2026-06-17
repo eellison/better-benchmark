@@ -875,6 +875,188 @@ def write_markdown(summary: dict, corpus: dict, out: Path) -> None:
     out.write_text("\n".join(L))
 
 
+def _flat_hits(corpus: dict, pattern_key: str) -> list[dict]:
+    """Every hit of one pattern type, with model/graph/path stamped on each."""
+    rows = []
+    for g in corpus["per_graph"]:
+        for hit in g.get(pattern_key, []):
+            rows.append({
+                "model": g["model"],
+                "graph": g["graph_name"],
+                "path": g["path"],
+                **hit,
+            })
+    return rows
+
+
+def _dedupe(rows: list[dict], key_fn, signature_fn, example_fn,
+            sum_field: str | None = None) -> list[dict]:
+    """Collapse rows sharing a STRUCTURAL signature into one entry.
+
+    Same philosophy as the corpus pattern_hash: the key ignores shapes/node
+    names and keys only on op structure, so the 16 identical gated-MLP fan-ins
+    in MT5 become ONE row with n_occurrences=16 instead of 16 near-duplicates.
+    Each entry keeps a representative `example` (with its concrete shapes) and
+    an `occurrences_by_model` count so you can still see where it lands.
+    """
+    groups: dict = {}
+    order: list = []
+    for r in rows:
+        k = key_fn(r)
+        if k not in groups:
+            groups[k] = []
+            order.append(k)
+        groups[k].append(r)
+
+    out = []
+    for k in order:
+        grp = groups[k]
+        by_model: Counter = Counter(r["model"] for r in grp)
+        entry = dict(signature_fn(grp[0]))
+        entry["n_occurrences"] = len(grp)
+        entry["n_models"] = len(by_model)
+        entry["occurrences_by_model"] = dict(by_model.most_common())
+        if sum_field:
+            entry[f"total_{sum_field}"] = sum(
+                (r.get(sum_field) or 0) for r in grp)
+        entry["example"] = example_fn(grp[0])
+        out.append(entry)
+    return out
+
+
+def write_split_json(summary: dict, corpus: dict, od: Path) -> list[Path]:
+    """Serialize each pattern type into its OWN DEDUPED JSON file under od/.
+
+    The single combined matmul_patterns.json nests every graph's hits and runs
+    to ~15 MB -- unreadable. Instead emit one file per pattern, each a list of
+    UNIQUE structural patterns (shapes ignored, same as the corpus pattern_hash)
+    with an occurrence count + per-model breakdown + one concrete example:
+
+      summary.json    -- the corpus rollup (counts, breakdowns)
+      epilogues.json  -- unique matmul+epilogue signatures
+      chains.json     -- unique mm -> pointwise -> mm signatures
+      fanins.json     -- unique >=2-matmul fan-in signatures (memory-eliminating
+                         first, then by total eliminable_read_bytes desc)
+      failures.json   -- graphs that failed to load
+      index.json      -- file manifest + unique/total counts
+
+    Returns the list of paths written.
+    """
+    written: list[Path] = []
+
+    def _dump(name: str, obj) -> None:
+        p = od / name
+        p.write_text(json.dumps(obj, indent=2))
+        written.append(p)
+
+    # ---- epilogues: key on (matmul op, clean, ordered epilogue ops) ----------
+    epi_rows = _flat_hits(corpus, "epilogues")
+    epilogues = _dedupe(
+        epi_rows,
+        key_fn=lambda r: (r["matmul_op"], r["clean"], tuple(r["epilogue_ops"])),
+        signature_fn=lambda r: {
+            "matmul_op": r["matmul_op"],
+            "clean": r["clean"],
+            "epilogue_ops": r["epilogue_ops"],
+        },
+        example_fn=lambda r: {
+            "model": r["model"], "graph": r["graph"],
+            "matmul": r["matmul"], "output_shape": r["output_shape"],
+        },
+    )
+    epilogues.sort(key=lambda e: -e["n_occurrences"])
+
+    # ---- chains: key on (mm1 op, ordered bridge ops, mm2 op) -----------------
+    chain_rows = _flat_hits(corpus, "chains")
+    chains = _dedupe(
+        chain_rows,
+        key_fn=lambda r: (r["mm1_op"], tuple(r["bridge_pointwise_ops"]), r["mm2_op"]),
+        signature_fn=lambda r: {
+            "mm1_op": r["mm1_op"],
+            "bridge_pointwise_ops": r["bridge_pointwise_ops"],
+            "mm2_op": r["mm2_op"],
+            "bridge_pattern_hash": r["bridge_pattern_hash"],
+            "bridge_in_corpus": r["bridge_in_corpus"],
+        },
+        example_fn=lambda r: {
+            "model": r["model"], "graph": r["graph"],
+            "mm1": r["mm1"], "mm1_out_shape": r["mm1_out_shape"],
+            "mm2": r["mm2"], "mm2_out_shape": r["mm2_out_shape"],
+        },
+    )
+    chains.sort(key=lambda e: -e["n_occurrences"])
+
+    # ---- fanins: key on (sorted matmul ops, combine, bridge ops, exclusive) --
+    fanin_rows = _flat_hits(corpus, "fanins")
+    fanins = _dedupe(
+        fanin_rows,
+        key_fn=lambda r: (
+            tuple(sorted(r["matmul_ops"])), r["combine_op"],
+            tuple(r["bridge_ops"]), r["all_exclusive"], r["strictly_pointwise"],
+        ),
+        signature_fn=lambda r: {
+            "matmul_ops": r["matmul_ops"],
+            "n_matmuls": r["n_matmuls"],
+            "combine_op": r["combine_op"],
+            "bridge_ops": r["bridge_ops"],
+            "strictly_pointwise": r["strictly_pointwise"],
+            "all_exclusive": r["all_exclusive"],
+            "bridge_pattern_hash": r["bridge_pattern_hash"],
+            "bridge_in_corpus": r["bridge_in_corpus"],
+        },
+        example_fn=lambda r: {
+            "model": r["model"], "graph": r["graph"],
+            "matmul_shapes": r["matmul_shapes"],
+            "output_shape": r["output_shape"],
+            "eliminable_read_bytes": r["eliminable_read_bytes"],
+        },
+        sum_field="eliminable_read_bytes",
+    )
+    # Most actionable first: the clean fusion targets -- strictly-pointwise
+    # bridge AND every contributing matmul exclusive (this is the "198
+    # memory-eliminating" set) -- then by total DRAM eliminated across all
+    # occurrences. Non-strict (e.g. softmax-bridge attention) and non-exclusive
+    # signatures sort below.
+    def _fanin_rank(e):
+        clean_elim = e.get("strictly_pointwise") and e.get("all_exclusive")
+        return (
+            not clean_elim,
+            not e.get("all_exclusive", False),
+            -(e.get("total_eliminable_read_bytes") or 0),
+        )
+    fanins.sort(key=_fanin_rank)
+
+    _dump("summary.json", summary)
+    _dump("epilogues.json", epilogues)
+    _dump("chains.json", chains)
+    _dump("fanins.json", fanins)
+    _dump("failures.json", corpus["failures"])
+
+    _dump("index.json", {
+        "files": {
+            "summary.json": "corpus rollup (counts + breakdowns)",
+            "epilogues.json": "unique matmul + strictly-pointwise epilogue signatures",
+            "chains.json": "unique mm -> pointwise -> mm sequential chain signatures",
+            "fanins.json": "unique >=2 matmuls -> 1 output signatures (memory-eliminating first)",
+            "failures.json": "graphs that failed to load",
+        },
+        "note": "each pattern file is DEDUPED by op-structure (shapes ignored, "
+                "like the corpus pattern_hash); n_occurrences is the raw count.",
+        "unique_patterns": {
+            "epilogues": len(epilogues),
+            "chains": len(chains),
+            "fanins": len(fanins),
+        },
+        "total_occurrences": {
+            "epilogues": len(epi_rows),
+            "chains": len(chain_rows),
+            "fanins": len(fanin_rows),
+            "failures": len(corpus["failures"]),
+        },
+    })
+    return written
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -886,7 +1068,10 @@ def main():
                     help="Cap graphs per model (0=all)")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--output-dir", default=None,
-                    help="Write matmul_patterns.json + SUMMARY.md here")
+                    help="Write split per-pattern JSON files + SUMMARY.md here")
+    ap.add_argument("--combined-json", action="store_true",
+                    help="Also write the single nested matmul_patterns.json "
+                         "(off by default; the split files supersede it)")
     args = ap.parse_args()
 
     if not args.model and not args.all:
@@ -912,10 +1097,16 @@ def main():
         if not od.is_absolute():
             od = ROOT / od
         od.mkdir(parents=True, exist_ok=True)
-        (od / "matmul_patterns.json").write_text(
-            json.dumps({"summary": summary, **corpus}, indent=2))
+        written = write_split_json(summary, corpus, od)
         write_markdown(summary, corpus, od / "SUMMARY.md")
-        print(f"\nWrote {od}/matmul_patterns.json and SUMMARY.md", file=sys.stderr)
+        if args.combined_json:
+            (od / "matmul_patterns.json").write_text(
+                json.dumps({"summary": summary, **corpus}, indent=2))
+            written.append(od / "matmul_patterns.json")
+        print(f"\nWrote SUMMARY.md + {len(written)} JSON files to {od}:",
+              file=sys.stderr)
+        for p in written:
+            print(f"  {p.name}", file=sys.stderr)
 
 
 if __name__ == "__main__":

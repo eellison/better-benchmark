@@ -1,0 +1,21 @@
+{
+  "files": {
+    "summary.json": "corpus rollup (counts + breakdowns)",
+    "epilogues.json": "unique matmul + strictly-pointwise epilogue signatures",
+    "chains.json": "unique mm -> pointwise -> mm sequential chain signatures",
+    "fanins.json": "unique >=2 matmuls -> 1 output signatures (memory-eliminating first)",
+    "failures.json": "graphs that failed to load"
+  },
+  "note": "each pattern file is DEDUPED by op-structure (shapes ignored, like the corpus pattern_hash); n_occurrences is the raw count.",
+  "unique_patterns": {
+    "epilogues": 62,
+    "chains": 46,
+    "fanins": 74
+  },
+  "total_occurrences": {
+    "epilogues": 8566,
+    "chains": 6670,
+    "fanins": 3230,
+    "failures": 21
+  }
+}

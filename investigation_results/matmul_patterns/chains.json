@@ -1,0 +1,1596 @@
+[
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "301cf5a13527",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1056,
+    "n_models": 21,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 192,
+      "T5ForConditionalGeneration": 144,
+      "T5Small": 144,
+      "GPTNeoForCausalLM": 96,
+      "GPTNeoForSequenceClassification": 96,
+      "DebertaV2ForMaskedLM": 48,
+      "MobileBertForMaskedLM": 48,
+      "XLNetLMHeadModel": 48,
+      "swin_base_patch4_window7_224": 48,
+      "AlbertForMaskedLM": 24,
+      "AllenaiLongformerBase": 24,
+      "BertForMaskedLM": 24,
+      "ElectraForCausalLM": 24,
+      "LayoutLMForMaskedLM": 24,
+      "RobertaForCausalLM": 24,
+      "BERT_pytorch": 24,
+      "DistilBertForMaskedLM": 12,
+      "BlenderbotForConditionalGeneration": 4,
+      "M2M100ForConditionalGeneration": 4,
+      "TrOCRForCausalLM": 2,
+      "XGLMForCausalLM": 2
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_000",
+      "mm1": "mm_2",
+      "mm1_out_shape": [
+        4096,
+        2048
+      ],
+      "mm2": "bmm_1",
+      "mm2_out_shape": [
+        512,
+        128,
+        128
+      ]
+    }
+  },
+  {
+    "mm1_op": "bmm",
+    "bridge_pointwise_ops": [
+      "clone"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "e87d6ebc9ded",
+    "bridge_in_corpus": true,
+    "n_occurrences": 990,
+    "n_models": 9,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 192,
+      "XLNetLMHeadModel": 168,
+      "T5ForConditionalGeneration": 144,
+      "T5Small": 144,
+      "GPTJForCausalLM": 112,
+      "GPTJForQuestionAnswering": 112,
+      "GPTNeoForCausalLM": 48,
+      "GPTNeoForSequenceClassification": 48,
+      "AlbertForMaskedLM": 22
+    },
+    "example": {
+      "model": "GPTJForCausalLM",
+      "graph": "full_graph_000",
+      "mm1": "bmm_1",
+      "mm1_out_shape": [
+        16,
+        128,
+        256
+      ],
+      "mm2": "mm_3",
+      "mm2_out_shape": [
+        128,
+        4096
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "mul",
+      "mul",
+      "erf",
+      "add",
+      "mul",
+      "convert_element_type"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "826ea0b5f6e4",
+    "bridge_in_corpus": true,
+    "n_occurrences": 603,
+    "n_models": 26,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 48,
+      "MegatronBertForCausalLM": 48,
+      "swin_base_patch4_window7_224": 48,
+      "BlenderbotForConditionalGeneration": 28,
+      "vit_base_patch16_siglip_256": 26,
+      "BlenderbotForCausalLM": 25,
+      "XGLMForCausalLM": 25,
+      "AllenaiLongformerBase": 24,
+      "BertForMaskedLM": 24,
+      "ElectraForCausalLM": 24,
+      "LayoutLMForMaskedLM": 24,
+      "RobertaForCausalLM": 24,
+      "XLNetLMHeadModel": 24,
+      "YituTechConvBert": 24,
+      "beit_base_patch16_224": 24,
+      "deit_base_distilled_patch16_224": 24,
+      "deit_tiny_patch16_224.fb_in1k": 24,
+      "vit_base_patch14_dinov2.lvd142m": 24,
+      "BartForCausalLM": 13,
+      "MBartForCausalLM": 13,
+      "PegasusForCausalLM": 13,
+      "TrOCRForCausalLM": 13,
+      "DistilBertForMaskedLM": 12,
+      "BERT_pytorch": 12,
+      "whisper-tiny": 8,
+      "PLBartForCausalLM": 7
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "mm1": "addmm",
+      "mm1_out_shape": [
+        8192,
+        3072
+      ],
+      "mm2": "addmm_1",
+      "mm2_out_shape": [
+        8192,
+        768
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "301cf5a13527",
+    "bridge_in_corpus": true,
+    "n_occurrences": 514,
+    "n_models": 14,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 96,
+      "BERT_pytorch": 72,
+      "XGLMForCausalLM": 50,
+      "MobileBertForMaskedLM": 48,
+      "LayoutLMForMaskedLM": 36,
+      "BlenderbotForConditionalGeneration": 28,
+      "M2M100ForConditionalGeneration": 26,
+      "TrOCRForCausalLM": 26,
+      "AlbertForMaskedLM": 24,
+      "BertForMaskedLM": 24,
+      "ElectraForCausalLM": 24,
+      "RobertaForCausalLM": 24,
+      "gpt-oss-20b": 24,
+      "DistilBertForMaskedLM": 12
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_3",
+      "mm1_out_shape": [
+        4096,
+        4096
+      ],
+      "mm2": "bmm_1",
+      "mm2_out_shape": [
+        512,
+        512,
+        64
+      ]
+    }
+  },
+  {
+    "mm1_op": "bmm",
+    "bridge_pointwise_ops": [
+      "clone"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "e87d6ebc9ded",
+    "bridge_in_corpus": true,
+    "n_occurrences": 500,
+    "n_models": 17,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 48,
+      "GPTNeoForCausalLM": 48,
+      "GPTNeoForSequenceClassification": 48,
+      "MobileBertForMaskedLM": 48,
+      "swin_base_patch4_window7_224": 48,
+      "BlenderbotForConditionalGeneration": 28,
+      "M2M100ForConditionalGeneration": 26,
+      "XGLMForCausalLM": 25,
+      "AlbertForMaskedLM": 24,
+      "BertForMaskedLM": 24,
+      "ElectraForCausalLM": 24,
+      "RobertaForCausalLM": 24,
+      "gpt-oss-20b": 24,
+      "BERT_pytorch": 24,
+      "TrOCRForCausalLM": 13,
+      "DistilBertForMaskedLM": 12,
+      "LayoutLMForMaskedLM": 12
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "bmm_1",
+      "mm1_out_shape": [
+        512,
+        512,
+        64
+      ],
+      "mm2": "addmm_4",
+      "mm2_out_shape": [
+        4096,
+        4096
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "mul",
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "a18f3869022f",
+    "bridge_in_corpus": true,
+    "n_occurrences": 458,
+    "n_models": 10,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 96,
+      "BlenderbotForConditionalGeneration": 56,
+      "M2M100ForConditionalGeneration": 52,
+      "AlbertForMaskedLM": 48,
+      "BertForMaskedLM": 48,
+      "ElectraForCausalLM": 48,
+      "RobertaForCausalLM": 48,
+      "XGLMForCausalLM": 25,
+      "DistilBertForMaskedLM": 24,
+      "TrOCRForCausalLM": 13
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_1",
+      "mm1_out_shape": [
+        4096,
+        4096
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        512,
+        512,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": null,
+    "bridge_in_corpus": false,
+    "n_occurrences": 368,
+    "n_models": 3,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 144,
+      "GPTJForCausalLM": 112,
+      "GPTJForQuestionAnswering": 112
+    },
+    "example": {
+      "model": "GPTJForCausalLM",
+      "graph": "full_graph_000",
+      "mm1": "mm_2",
+      "mm1_out_shape": [
+        128,
+        4096
+      ],
+      "mm2": "bmm_1",
+      "mm2_out_shape": [
+        16,
+        128,
+        256
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "add",
+      "mul",
+      "add"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "5f698ae9321b",
+    "bridge_in_corpus": true,
+    "n_occurrences": 166,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 166
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_8",
+      "mm1_out_shape": [
+        32768,
+        128
+      ],
+      "mm2": "addmm_9",
+      "mm2_out_shape": [
+        32768,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "add",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "02974718a634",
+    "bridge_in_corpus": true,
+    "n_occurrences": 166,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 166
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_8",
+      "mm1_out_shape": [
+        32768,
+        128
+      ],
+      "mm2": "addmm_9",
+      "mm2_out_shape": [
+        32768,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "mul",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "2d969ac9ad59",
+    "bridge_in_corpus": true,
+    "n_occurrences": 158,
+    "n_models": 8,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 28,
+      "GPTJForQuestionAnswering": 28,
+      "GPTNeoForCausalLM": 24,
+      "GPTNeoForSequenceClassification": 24,
+      "GoogleFnet": 24,
+      "AlbertForMaskedLM": 12,
+      "GPT2ForSequenceClassification": 12,
+      "DistillGPT2": 6
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_5",
+      "mm1_out_shape": [
+        4096,
+        16384
+      ],
+      "mm2": "addmm_6",
+      "mm2_out_shape": [
+        4096,
+        4096
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "03afed5ec8e9",
+    "bridge_in_corpus": true,
+    "n_occurrences": 144,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 72,
+      "GPTNeoForSequenceClassification": 72
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_000",
+      "mm1": "mm",
+      "mm1_out_shape": [
+        4096,
+        2048
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        512,
+        128,
+        128
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "relu"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "edd2629dfab3",
+    "bridge_in_corpus": true,
+    "n_occurrences": 138,
+    "n_models": 5,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 96,
+      "M2M100ForConditionalGeneration": 24,
+      "OPTForCausalLM": 13,
+      "alexnet": 3,
+      "vgg16": 2
+    },
+    "example": {
+      "model": "M2M100ForConditionalGeneration",
+      "graph": "full_graph_000",
+      "mm1": "addmm_4",
+      "mm1_out_shape": [
+        8192,
+        4096
+      ],
+      "mm2": "addmm_5",
+      "mm2_out_shape": [
+        8192,
+        1024
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "mul",
+      "convert_element_type",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "convert_element_type"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "49492eb7035e",
+    "bridge_in_corpus": true,
+    "n_occurrences": 134,
+    "n_models": 7,
+    "occurrences_by_model": {
+      "GPTJForCausalLM": 28,
+      "GPTJForQuestionAnswering": 28,
+      "GPTNeoForCausalLM": 24,
+      "GPTNeoForSequenceClassification": 24,
+      "AlbertForMaskedLM": 12,
+      "GPT2ForSequenceClassification": 12,
+      "DistillGPT2": 6
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_5",
+      "mm1_out_shape": [
+        4096,
+        16384
+      ],
+      "mm2": "addmm_6",
+      "mm2_out_shape": [
+        4096,
+        4096
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "neg",
+      "exp",
+      "add",
+      "div",
+      "convert_element_type",
+      "mul"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "7c39bacfff54",
+    "bridge_in_corpus": true,
+    "n_occurrences": 120,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "Mistral-7B-Instruct-v0.3": 64,
+      "Qwen3-0.6B": 56
+    },
+    "example": {
+      "model": "Qwen3-0.6B",
+      "graph": "full_graph_000",
+      "mm1": "mm_4",
+      "mm1_out_shape": [
+        1000,
+        3072
+      ],
+      "mm2": "mm_6",
+      "mm2_out_shape": [
+        1000,
+        1024
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "convert_element_type",
+      "mul"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "aa77af8fcd54",
+    "bridge_in_corpus": true,
+    "n_occurrences": 120,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "gemma-3-4b-it": 68,
+      "gemma-2-2b": 52
+    },
+    "example": {
+      "model": "gemma-2-2b",
+      "graph": "full_graph_000",
+      "mm1": "mm_4",
+      "mm1_out_shape": [
+        1000,
+        9216
+      ],
+      "mm2": "mm_6",
+      "mm2_out_shape": [
+        1000,
+        2304
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "relu",
+      "le"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "4a3cb5b99475",
+    "bridge_in_corpus": true,
+    "n_occurrences": 98,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 96,
+      "M2M100ForConditionalGeneration": 2
+    },
+    "example": {
+      "model": "M2M100ForConditionalGeneration",
+      "graph": "full_graph_003",
+      "mm1": "addmm_4",
+      "mm1_out_shape": [
+        8192,
+        4096
+      ],
+      "mm2": "addmm_5",
+      "mm2_out_shape": [
+        8192,
+        1024
+      ]
+    }
+  },
+  {
+    "mm1_op": "bmm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "clone"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "340cdea6ba6a",
+    "bridge_in_corpus": true,
+    "n_occurrences": 96,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 48,
+      "GPTNeoForSequenceClassification": 48
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_001",
+      "mm1": "bmm_2",
+      "mm1_out_shape": [
+        512,
+        128,
+        128
+      ],
+      "mm2": "mm_11",
+      "mm2_out_shape": [
+        4096,
+        2048
+      ]
+    }
+  },
+  {
+    "mm1_op": "bmm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "clone"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "045f4feb3853",
+    "bridge_in_corpus": true,
+    "n_occurrences": 96,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 48,
+      "GPTNeoForSequenceClassification": 48
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_001",
+      "mm1": "bmm_3",
+      "mm1_out_shape": [
+        512,
+        128,
+        128
+      ],
+      "mm2": "mm_13",
+      "mm2_out_shape": [
+        4096,
+        2048
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "sub",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "pow",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "add",
+      "mul",
+      "add"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "3116aaaaedd1",
+    "bridge_in_corpus": true,
+    "n_occurrences": 64,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 64
+    },
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "mm1": "mm_3",
+      "mm1_out_shape": [
+        4096,
+        1024
+      ],
+      "mm2": "mm_5",
+      "mm2_out_shape": [
+        4096,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "mul",
+      "add"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "b2b66f70d626",
+    "bridge_in_corpus": true,
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 48
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_1",
+      "mm1_out_shape": [
+        32768,
+        128
+      ],
+      "mm2": "addmm_2",
+      "mm2_out_shape": [
+        32768,
+        128
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "mul",
+      "add",
+      "add",
+      "mul",
+      "add"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "5c3762c611b3",
+    "bridge_in_corpus": true,
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 48
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_5",
+      "mm1_out_shape": [
+        32768,
+        128
+      ],
+      "mm2": "addmm_7",
+      "mm2_out_shape": [
+        32768,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "add",
+      "add"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "2c1752cb59b4",
+    "bridge_in_corpus": true,
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 48
+    },
+    "example": {
+      "model": "XLNetLMHeadModel",
+      "graph": "full_graph_000",
+      "mm1": "mm",
+      "mm1_out_shape": [
+        8192,
+        1024
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        256,
+        512,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "ee109ecb96bb",
+    "bridge_in_corpus": true,
+    "n_occurrences": 48,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "GPTNeoForCausalLM": 24,
+      "GPTNeoForSequenceClassification": 24
+    },
+    "example": {
+      "model": "GPTNeoForCausalLM",
+      "graph": "full_graph_000",
+      "mm1": "mm_1",
+      "mm1_out_shape": [
+        4096,
+        2048
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        512,
+        128,
+        128
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "mul",
+      "add",
+      "add",
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "d17fec3a0be5",
+    "bridge_in_corpus": true,
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 48
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_1",
+      "mm1_out_shape": [
+        32768,
+        128
+      ],
+      "mm2": "addmm_7",
+      "mm2_out_shape": [
+        32768,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "mul",
+      "add",
+      "convert_element_type"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "452ad66ee287",
+    "bridge_in_corpus": true,
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MobileBertForMaskedLM": 48
+    },
+    "example": {
+      "model": "MobileBertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_2",
+      "mm1_out_shape": [
+        32768,
+        128
+      ],
+      "mm2": "addmm_4",
+      "mm2_out_shape": [
+        32768,
+        128
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "add",
+      "convert_element_type",
+      "add",
+      "convert_element_type"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "75d57ea4f44c",
+    "bridge_in_corpus": true,
+    "n_occurrences": 48,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "XLNetLMHeadModel": 48
+    },
+    "example": {
+      "model": "XLNetLMHeadModel",
+      "graph": "full_graph_000",
+      "mm1": "mm",
+      "mm1_out_shape": [
+        8192,
+        1024
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        256,
+        512,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "bmm",
+    "bridge_pointwise_ops": [
+      "mul",
+      "clone"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "07941926c4a4",
+    "bridge_in_corpus": true,
+    "n_occurrences": 44,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 44
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "mm1": "bmm_2",
+      "mm1_out_shape": [
+        512,
+        64,
+        512
+      ],
+      "mm2": "mm_13",
+      "mm2_out_shape": [
+        4096,
+        4096
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "convert_element_type",
+      "mul",
+      "mul",
+      "where"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "0cd85fd63f82",
+    "bridge_in_corpus": true,
+    "n_occurrences": 44,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "T5ForConditionalGeneration": 22,
+      "T5Small": 22
+    },
+    "example": {
+      "model": "T5ForConditionalGeneration",
+      "graph": "full_graph_001",
+      "mm1": "mm_23",
+      "mm1_out_shape": [
+        8192,
+        2048
+      ],
+      "mm2": "mm_25",
+      "mm2_out_shape": [
+        8192,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "mul",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "mul"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "a07e50c2fb69",
+    "bridge_in_corpus": true,
+    "n_occurrences": 32,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "MT5ForConditionalGeneration": 32
+    },
+    "example": {
+      "model": "MT5ForConditionalGeneration",
+      "graph": "full_graph_000",
+      "mm1": "mm_9",
+      "mm1_out_shape": [
+        4096,
+        1024
+      ],
+      "mm2": "mm_11",
+      "mm2_out_shape": [
+        4096,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "bmm",
+    "bridge_pointwise_ops": [
+      "clone",
+      "clone"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "d13382187963",
+    "bridge_in_corpus": true,
+    "n_occurrences": 24,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 24
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "mm1": "bmm_1",
+      "mm1_out_shape": [
+        384,
+        256,
+        64
+      ],
+      "mm2": "mm_3",
+      "mm2_out_shape": [
+        8192,
+        768
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "relu"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "edd2629dfab3",
+    "bridge_in_corpus": true,
+    "n_occurrences": 24,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "T5ForConditionalGeneration": 12,
+      "T5Small": 12
+    },
+    "example": {
+      "model": "T5ForConditionalGeneration",
+      "graph": "full_graph_000",
+      "mm1": "mm_9",
+      "mm1_out_shape": [
+        8192,
+        2048
+      ],
+      "mm2": "mm_10",
+      "mm2_out_shape": [
+        8192,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "clone",
+      "div"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "598163daa1a2",
+    "bridge_in_corpus": true,
+    "n_occurrences": 23,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "DebertaV2ForMaskedLM": 23
+    },
+    "example": {
+      "model": "DebertaV2ForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm_7",
+      "mm1_out_shape": [
+        4096,
+        1536
+      ],
+      "mm2": "bmm_2",
+      "mm2_out_shape": [
+        192,
+        512,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "pow",
+      "mul",
+      "add",
+      "mul",
+      "tanh",
+      "add",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "sub",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "mul",
+      "pow",
+      "mul",
+      "mul",
+      "convert_element_type",
+      "add",
+      "mul",
+      "add"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "562635abba38",
+    "bridge_in_corpus": true,
+    "n_occurrences": 22,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 22
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_001",
+      "mm1": "mm_4",
+      "mm1_out_shape": [
+        4096,
+        16384
+      ],
+      "mm2": "mm_7",
+      "mm2_out_shape": [
+        16384,
+        4096
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "neg",
+      "exp",
+      "add",
+      "div",
+      "convert_element_type"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "15e408415993",
+    "bridge_in_corpus": true,
+    "n_occurrences": 18,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "mobilevit_s": 18
+    },
+    "example": {
+      "model": "mobilevit_s",
+      "graph": "full_graph_000",
+      "mm1": "addmm_2",
+      "mm1_out_shape": [
+        131072,
+        288
+      ],
+      "mm2": "addmm_3",
+      "mm2_out_shape": [
+        131072,
+        144
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": null,
+    "bridge_in_corpus": false,
+    "n_occurrences": 12,
+    "n_models": 2,
+    "occurrences_by_model": {
+      "AlbertForMaskedLM": 6,
+      "ElectraForCausalLM": 6
+    },
+    "example": {
+      "model": "AlbertForMaskedLM",
+      "graph": "full_graph_000",
+      "mm1": "addmm",
+      "mm1_out_shape": [
+        4096,
+        4096
+      ],
+      "mm2": "addmm_3",
+      "mm2_out_shape": [
+        4096,
+        4096
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "add",
+      "div",
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "2b567494bf14",
+    "bridge_in_corpus": true,
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 12
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "mm1": "mm",
+      "mm1_out_shape": [
+        8192,
+        768
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        288,
+        512,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "add",
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "8352994b2efb",
+    "bridge_in_corpus": true,
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 12
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "mm1": "mm_1",
+      "mm1_out_shape": [
+        8192,
+        768
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        288,
+        512,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "add",
+      "mul",
+      "clone"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "07e2552977f5",
+    "bridge_in_corpus": true,
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "YituTechConvBert": 12
+    },
+    "example": {
+      "model": "YituTechConvBert",
+      "graph": "full_graph_000",
+      "mm1": "addmm",
+      "mm1_out_shape": [
+        16384,
+        384
+      ],
+      "mm2": "mm",
+      "mm2_out_shape": [
+        16384,
+        54
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "add",
+      "div",
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "62ec9910b2e0",
+    "bridge_in_corpus": true,
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 12
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "mm1": "mm",
+      "mm1_out_shape": [
+        8192,
+        768
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        288,
+        512,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "add",
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "d65c0807a819",
+    "bridge_in_corpus": true,
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "AllenaiLongformerBase": 12
+    },
+    "example": {
+      "model": "AllenaiLongformerBase",
+      "graph": "full_graph_002",
+      "mm1": "mm_1",
+      "mm1_out_shape": [
+        8192,
+        768
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        288,
+        512,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "add",
+      "convert_element_type",
+      "mul",
+      "clone"
+    ],
+    "mm2_op": "mm",
+    "bridge_pattern_hash": "60c4eafecc9d",
+    "bridge_in_corpus": true,
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "YituTechConvBert": 12
+    },
+    "example": {
+      "model": "YituTechConvBert",
+      "graph": "full_graph_000",
+      "mm1": "addmm_2",
+      "mm1_out_shape": [
+        16384,
+        384
+      ],
+      "mm2": "mm",
+      "mm2_out_shape": [
+        16384,
+        54
+      ]
+    }
+  },
+  {
+    "mm1_op": "mm",
+    "bridge_pointwise_ops": [
+      "clone",
+      "clone"
+    ],
+    "mm2_op": "bmm",
+    "bridge_pattern_hash": "e35c7162abbb",
+    "bridge_in_corpus": true,
+    "n_occurrences": 12,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "YituTechConvBert": 12
+    },
+    "example": {
+      "model": "YituTechConvBert",
+      "graph": "full_graph_001",
+      "mm1": "mm_8",
+      "mm1_out_shape": [
+        16384,
+        768
+      ],
+      "mm2": "bmm",
+      "mm2_out_shape": [
+        98304,
+        9,
+        1
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "gt",
+      "mul",
+      "mul",
+      "expm1",
+      "mul",
+      "where",
+      "convert_element_type"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "b6d762cd3d81",
+    "bridge_in_corpus": true,
+    "n_occurrences": 9,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "nvidia_deeprecommender": 9
+    },
+    "example": {
+      "model": "nvidia_deeprecommender",
+      "graph": "full_graph_000",
+      "mm1": "addmm",
+      "mm1_out_shape": [
+        256,
+        512
+      ],
+      "mm2": "addmm_1",
+      "mm2_out_shape": [
+        256,
+        512
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "tanh"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "edfab1af9465",
+    "bridge_in_corpus": true,
+    "n_occurrences": 6,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "lennard_jones": 6
+    },
+    "example": {
+      "model": "lennard_jones",
+      "graph": "full_graph_000",
+      "mm1": "addmm",
+      "mm1_out_shape": [
+        128,
+        16
+      ],
+      "mm2": "addmm_1",
+      "mm2_out_shape": [
+        128,
+        16
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "add"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "81981d13665a",
+    "bridge_in_corpus": true,
+    "n_occurrences": 2,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "BERT_pytorch": 2
+    },
+    "example": {
+      "model": "BERT_pytorch",
+      "graph": "full_graph_000",
+      "mm1": "addmm_71",
+      "mm1_out_shape": [
+        2048,
+        768
+      ],
+      "mm2": "addmm_72",
+      "mm2_out_shape": [
+        16,
+        2
+      ]
+    }
+  },
+  {
+    "mm1_op": "addmm",
+    "bridge_pointwise_ops": [
+      "convert_element_type",
+      "add",
+      "clamp_min",
+      "clamp_max",
+      "mul",
+      "div",
+      "convert_element_type"
+    ],
+    "mm2_op": "addmm",
+    "bridge_pattern_hash": "5e98a1498875",
+    "bridge_in_corpus": true,
+    "n_occurrences": 1,
+    "n_models": 1,
+    "occurrences_by_model": {
+      "mobilenet_v3_large": 1
+    },
+    "example": {
+      "model": "mobilenet_v3_large",
+      "graph": "full_graph_000",
+      "mm1": "addmm",
+      "mm1_out_shape": [
+        32,
+        1280
+      ],
+      "mm2": "addmm_1",
+      "mm2_out_shape": [
+        32,
+        1000
+      ]
+    }
+  }
+]
