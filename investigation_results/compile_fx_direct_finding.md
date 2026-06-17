@@ -38,13 +38,31 @@ vals straight to compile_fx:
 | telemetry bug | hits the `_shapes_spec` JSON-dump crash | avoided |
 | coupling/guards | must rebuild as `assumptions` | already baked in the graph |
 
-## Open questions before implementing (do NOT snap-decide)
-1. SOURCE OF THE GM. compile_fx needs the FX GraphModule. Two ways:
-   (a) re-trace the repro.py to an FX graph and re-symbolicate dims from the
-       shapes.json symbols table (make_fx with a ShapeEnv seeded at our
-       symbols), then compile_fx; OR
-   (b) keep/serialize the post-grad gm more directly. (a) reuses our codec +
-       symbols; (b) may need a graph serialization we don't have.
+## q1 RESOLVED (2026-06-16): GM source = re-run the repro's own dynamic
+## compile, intercept the post-grad gm, compile_fx that.
+Tried and REJECTED: hand-building a symbolic graph via make_fx +
+create_unbacked_symint (q1-a) — it fights make_fx's unbacked-symint tracing
+mode (`_set_unbacked_bindings` AssertionError) and reallocates symbol names.
+Tried and REJECTED: serialize the post-grad gm (q1-b) — we don't store one.
+
+WHAT WORKS (verified, /tmp/dyn_capture_work/q1_min.py + compile_fx_probe2.py):
+the captured repro's forward ALREADY takes the lifted symints as args and is
+written symbolically (reshape(x,[64,32,2,mul])). So: compile the repro with
+the same dynamic=True + mark_dynamic on the recorded dims the capture used,
+intercept the post-grad gm at the post_grad hook (the SAME mechanism capture
+uses), and hand THAT gm + its symbolic placeholder fake-vals to compile_fx.
+One artifact then serves every binding (proved: hint 16x16 -> (64,64,16,16);
+64x100 & 128x200 from one artifact, no recompile).
+
+Per-binding ARG construction: do NOT hand-roll {name:val} maps (brittle —
+the post-grad graph reallocates/derives symbols like s40, mul). Use the
+codec's instantiate_point(point, symbols, bindings) to build the full,
+consistent concrete input list for each binding, in placeholder order, then
+call compiled(*args). instantiate_point already evaluates every symint/dim/
+stride expr under one binding — exactly what the artifact's call convention
+needs.
+
+Remaining (smaller) open items:
 2. compile_fx is a FRAGILE internal API (bench_parallel.py:37 already flags
    "breaks across PT versions"). Acceptable for a bench harness, but pin the
    call site + guard a clear version-skew error.
