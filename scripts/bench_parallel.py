@@ -240,6 +240,7 @@ def _compute_worker_count(
     num_gpus: int,
     max_workers: int | None,
     workers_per_gpu: int | None,
+    workload_kind: str | None = None,
 ) -> tuple[int, int]:
     """Return (worker_count, effective_workers_per_gpu)."""
     if num_gpus <= 0:
@@ -253,7 +254,24 @@ def _compute_worker_count(
 
     if workers_per_gpu is None:
         if max_workers is None:
-            effective_workers_per_gpu = 1
+            # Default: parallelize compilation across workers. Timing serializes
+            # on the per-GPU lock, but COMPILING workers still allocate GPU memory
+            # (tracing / autotune / intermediates), so the safe default depends on
+            # per-worker memory:
+            #   - repro/oracle kernels: tiny footprint -> pack several per GPU,
+            #     bounded by CPU cores (the real ceiling on compile parallelism).
+            #   - full model graphs: a single compile can hold large GPU memory;
+            #     N concurrent model compiles can co-resident-OOM -> stay conservative.
+            #     (A memory-aware packer that measures per-graph footprint is future work.)
+            if workload_kind == "full_graph":
+                effective_workers_per_gpu = 1
+            else:
+                try:
+                    n_cores = len(os.sched_getaffinity(0))
+                except AttributeError:
+                    n_cores = os.cpu_count() or num_gpus
+                cores_per_gpu = max(1, n_cores // num_gpus)
+                effective_workers_per_gpu = max(1, min(4, cores_per_gpu))
         else:
             effective_workers_per_gpu = max(1, (max_workers + num_gpus - 1) // num_gpus)
     else:
@@ -990,10 +1008,14 @@ def main():
     parser.add_argument("--gpus", default=None,
                         help="Comma-separated physical GPU indices to use, e.g. '0' or '0,1'")
     parser.add_argument("--max-workers", type=int, default=None,
-                        help="Max parallel workers (default: one per matching GPU)")
+                        help="Max parallel workers (default: workers-per-gpu x matching GPUs)")
     parser.add_argument("--workers-per-gpu", type=int, default=None,
-                        help="Max persistent worker subprocesses per matching GPU "
-                             "(default: 1, or enough to satisfy --max-workers)")
+                        help="Max persistent worker subprocesses per matching GPU. "
+                             "Default is workload-aware: min(4, cores/gpus) for "
+                             "repro/oracle kernels (tiny footprint, compile-bound), "
+                             "but 1 for --full-graphs (a model compile can hold large "
+                             "GPU memory; concurrent compiles can OOM). Override "
+                             "explicitly to pack more, or via --max-workers.")
     parser.add_argument("--all-shapes", action="store_true",
                         help="Benchmark all shapes from shapes.txt")
     parser.add_argument("--no-cd", action="store_true",
@@ -1132,6 +1154,7 @@ def main():
             num_gpus=len(gpus),
             max_workers=args.max_workers,
             workers_per_gpu=args.workers_per_gpu,
+            workload_kind=workload_kind,
         )
     except ValueError as exc:
         parser.error(str(exc))
