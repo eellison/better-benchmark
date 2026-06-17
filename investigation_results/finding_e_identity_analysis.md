@@ -85,3 +85,34 @@ handled) — separate work, not blocking.
 NEEDS USER DECISION: Option 1 (make them dedup, canonicalize dynamic
 subgraphs) vs Option 2 (distinct entries, join in accounting). The status
 doc §E claim must be corrected either way.
+
+## RESOLVED (2026-06-16): canonical-symbol FAMILY HASH. (dispatch = later.)
+User direction: "canonicalize the shape expressions — make them stable, the
+same way we order outputs by first use; two equivalent captures should hash
+the same." This is the clean fix for the run-to-run instability AND the
+dispatch-identity question, and it's PROVEN
+(/tmp/scratch_space/dyn_demo/canon_symbols.py):
+
+Canonical rule: rename every free symbol to c0,c1,... by FIRST APPEARANCE
+across the inputs (then guards), left-to-right — exactly the output-ordering
+discipline. Then the canonical FAMILY identity is:
+    family_hash = md5(pattern_hash + canonical_inputs + canonical_guards)
+where canonical_inputs/guards use the renamed symbols and already-canonical
+exprs (canonical_expr_str). VERIFIED: two captures of the GroupNorm family
+(independent dynamo trace contexts) produce IDENTICAL canonical inputs,
+guards, symbols, and family_hash (e17e43ee084d == e17e43ee084d), regardless
+of dynamo's original symbol names.
+
+This makes identity TWO-LEVEL and binding-invariant:
+ - FAMILY (the repro dir): pattern + canonical symbolic structure + canonical
+   guards. "The same dynamic kernel regardless of binding." Guards ARE part
+   of identity (two graphs, same ops, different divisibility => different
+   families). Stable run-to-run.
+ - POINT (within the family): the binding {s0:16,s53:16}.
+
+DISPATCH (deferred per user "discuss later"): a dynamic oracle should match
+on the FAMILY hash (binding selects the point), not the concrete shape tuple
+— one oracle covers the whole family. Implementation (oracle_harness.select
++ registration) is a separate piece, NOT in this branch. This doc records
+the resolved identity scheme; wiring it into shape_hash/dir-naming and into
+dispatch is the follow-up.
