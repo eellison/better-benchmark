@@ -1219,10 +1219,19 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
         "placeholder_info": placeholder_info,
         "shape_params": shape_params,
         # None for static partitions; {symbols, guards, captured_dynamic,
-        # [shape_param_exprs]} for dynamic ones. shape_hash above is computed
-        # from the HINT ints in placeholder_info, so a dynamic capture
-        # dedupes against the static capture of the same hint shapes — the
-        # symbolic block is point metadata, never identity (design §E).
+        # [shape_param_exprs]} for dynamic ones.
+        #
+        # IDENTITY NOTE (review R4 Finding 1, finding_e_identity_analysis.md):
+        # a dynamic capture does NOT dedup against the static capture of the
+        # same hint shapes when the partition has lifted symint inputs — the
+        # symint placeholders perturb shape_hash, and the dynamic DAG skips
+        # canonicalization so pattern_hash differs too. That is CORRECT: a
+        # dynamic kernel is a different kernel (the 2.6x premise). Dynamic
+        # captures form their own identity namespace; the resolved scheme is a
+        # canonical-symbol FAMILY hash (pattern + canonical symbolic structure
+        # + canonical guards) — see finding_e_identity_analysis.md. NOT wired
+        # into shape_hash yet (capture+bench ship first; identity+dispatch are
+        # the follow-up).
         "shape_env_block": shape_env_block,
     }
 

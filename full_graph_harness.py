@@ -167,6 +167,12 @@ def symbolic_block_from_value(value: Any) -> dict | None:
         block["shape_exprs"] = shape_exprs
     if any(e is not None for e in stride_exprs):
         block["stride_exprs"] = stride_exprs
+    # A VIEW can have a symbolic storage_offset (e.g. a slice at a symbolic
+    # start). Record its expr too, else a rebind as_strides at the frozen
+    # hint offset (review R4 Finding 2).
+    off_expr = sym_expr_str(value.storage_offset())
+    if off_expr is not None:
+        block["offset_expr"] = off_expr
     return block or None
 
 

@@ -156,7 +156,12 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
     if dev != "cuda":
         opts["dev"] = dev
     off = spec.get("storage_offset", 0)
-    if off:
+    # A symbolic storage_offset overrides the (hint) int: emit the expr so it
+    # rebinds (review R4 Finding 2). offset_expr lives in the symbolic block.
+    off_expr = (spec.get("symbolic") or {}).get("offset_expr")
+    if off_expr is not None:
+        opts["off"] = off_expr
+    elif off:
         opts["off"] = off
     gen = spec.get("gen") or spec.get("generator")
     if gen:
@@ -215,6 +220,15 @@ def spec_from_compact(entry: list, name: str | None = None) -> dict:
     st_exprs = _exprs_from_slots(stride)
     if st_exprs is not None:
         symbolic["stride_exprs"] = st_exprs
+    # A symbolic storage_offset is an expr string in 'off'; lift it into the
+    # symbolic block (offset_expr) and keep storage_offset numeric (0 — the
+    # real value comes from evaluate_spec at a binding).
+    raw_off = opts.get("off", 0)
+    if isinstance(raw_off, str):
+        symbolic["offset_expr"] = raw_off
+        storage_offset = 0
+    else:
+        storage_offset = raw_off
     spec: dict = {
         "kind": "tensor",
         "name": name,
@@ -222,7 +236,7 @@ def spec_from_compact(entry: list, name: str | None = None) -> dict:
         "dtype": dtype,
         "stride": stride,
         "device": opts.get("dev", "cuda"),
-        "storage_offset": opts.get("off", 0),
+        "storage_offset": storage_offset,
     }
     if symbolic:
         spec["symbolic"] = symbolic
@@ -386,9 +400,11 @@ def is_symbolic_entry(entry) -> bool:
         if any(isinstance(d, str) for d in entry[0]):
             return True
         opts = entry[2] if len(entry) > 2 else {}
-        if isinstance(opts, dict) and any(
-                isinstance(s, str) for s in opts.get("st", [])):
-            return True
+        if isinstance(opts, dict):
+            if any(isinstance(s, str) for s in opts.get("st", [])):
+                return True
+            if isinstance(opts.get("off"), str):   # symbolic storage_offset
+                return True
     return False
 
 
@@ -478,6 +494,11 @@ def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:
     opts = dict(entry[2]) if len(entry) > 2 else {}
     if "st" in opts:
         opts["st"] = [_eval_dim(s, bindings) for s in opts["st"]]
+    # storage_offset can also be symbolic (a view at a symbolic offset);
+    # evaluate it too, else it stays an unevaluated expr string and the
+    # tensor is as_strided at the wrong offset (review R4 Finding 2).
+    if isinstance(opts.get("off"), str):
+        opts["off"] = _eval_dim(opts["off"], bindings)
     if opts:
         out.append(opts)
     return out
@@ -507,6 +528,8 @@ def evaluate_spec(spec: dict, bindings: dict) -> dict:
         base = list(spec.get("stride") or [])
         out["stride"] = [_eval_dim(d, bindings)
                          for d in _overlay_exprs(base, symbolic["stride_exprs"])]
+    if symbolic.get("offset_expr"):
+        out["storage_offset"] = _eval_dim(symbolic["offset_expr"], bindings)
     return out
 
 

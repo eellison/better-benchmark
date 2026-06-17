@@ -2333,3 +2333,72 @@ def test_compile_fx_one_artifact_serves_many_bindings_gpu():
             o = out[0] if isinstance(out, (list, tuple)) else out
             assert o.shape[0] == 64 and o.shape[1] == 64
             assert id(compiled) == artifact_id  # SAME artifact, no recompile
+
+
+def test_symbolic_storage_offset_round_trips():
+    """Review R4 Finding 2: a symbolic storage_offset (a view at a symbolic
+    start) must be detected, round-trip through the codec, and EVALUATE at a
+    binding — else a rebind as_strides at the frozen hint offset. Covers both
+    the compact-entry path and the verbose-spec path."""
+    from input_codec import (compact_from_spec, spec_from_compact,
+                             evaluate_spec, evaluate_symbolic_entry,
+                             is_symbolic_entry)
+    # compact entry
+    e = [[64, "s0"], "f32", {"st": ["s0", 1], "off": "2*s0"}]
+    assert is_symbolic_entry(e)
+    assert evaluate_symbolic_entry(e, {"s0": 16}) == [[64, 16], "f32",
+                                                      {"st": [16, 1], "off": 32}]
+    # verbose spec round-trip carries offset_expr
+    spec = {"kind": "tensor", "shape": [64, 16], "dtype": "float32",
+            "stride": [16, 1], "storage_offset": 0,
+            "symbolic": {"shape_exprs": [None, "s0"],
+                         "stride_exprs": ["s0", None], "offset_expr": "2*s0"}}
+    c = compact_from_spec(spec)
+    assert c[2]["off"] == "2*s0"
+    rt = spec_from_compact(c)
+    assert rt["symbolic"]["offset_expr"] == "2*s0"
+    ev = evaluate_spec(rt, {"s0": 16})
+    assert ev["storage_offset"] == 32
+    # static offset is untouched (no offset_expr appears)
+    s2 = spec_from_compact([[8, 4], "f32", {"st": [12, 1], "off": 4}])
+    assert s2["storage_offset"] == 4
+    assert "offset_expr" not in (s2.get("symbolic") or {})
+
+
+def test_channels_last_dynamic_stride_round_trips():
+    """Coverage gap (R4 Inv 4): channels-last (non-contiguous) DYNAMIC strides
+    survive capture-format round-trip and evaluate to the right concrete
+    stride at a binding. All prior dynamic-stride tests were row-major."""
+    from input_codec import compact_from_spec, spec_from_compact, evaluate_spec
+    # NCHW channels-last [N, C, H, W] with symbolic H,W:
+    # stride = (C*H*W, 1, C*W, C); symbolic over s_h, s_w.
+    spec = {"kind": "tensor", "shape": [8, 16, 16, 16], "dtype": "bfloat16",
+            "stride": [4096, 1, 256, 16],
+            "symbolic": {"shape_exprs": [None, None, "s_h", "s_w"],
+                         "stride_exprs": ["16*s_h*s_w", 1, "16*s_w", 16]}}
+    entry = compact_from_spec(spec)
+    assert entry[0] == [8, 16, "s_h", "s_w"]
+    assert entry[2]["st"] == ["16*s_h*s_w", 1, "16*s_w", 16]
+    rt = spec_from_compact(entry)
+    # rebind H=8, W=32: channels-last stride re-evaluates, NOT contiguous
+    ev = evaluate_spec(rt, {"s_h": 8, "s_w": 32})
+    assert ev["shape"] == [8, 16, 8, 32]
+    assert ev["stride"] == [16 * 8 * 32, 1, 16 * 32, 16]  # [4096,1,512,16]
+    # the stride is genuinely channels-last (dim1 stride 1, not row-major)
+    assert ev["stride"][1] == 1 and ev["stride"][0] != ev["stride"][2]
+
+
+def test_lifted_shape_param_expr_round_trips_and_evaluates():
+    """Coverage gap (R4 Inv 2): an ['S',[...,expr]] lifted shape param with a
+    symbolic dim round-trips and evaluates at a binding (the codec tests
+    covered tensor exprs + ['I',...] but not the S-param evaluate path)."""
+    from input_codec import (spec_from_compact, compact_from_spec,
+                             evaluate_symbolic_entry, is_symbolic_entry)
+    e = ["S", [64, 32, 2, "s0*s53"]]
+    assert is_symbolic_entry(e)
+    assert evaluate_symbolic_entry(e, {"s0": 24, "s53": 24}) == \
+        ["S", [64, 32, 2, 576]]
+    # verbose spec round-trip
+    spec = spec_from_compact(e)
+    assert spec["kind"] == "shape" and spec["dims"] == [64, 32, 2, "s0*s53"]
+    assert compact_from_spec(spec) == e
