@@ -785,6 +785,51 @@ def _unique_graph_count() -> int:
     return int(counters["stats"]["unique_graphs"])
 
 
+def build_compile_fx_dynamic_artifact(repro_cls, trace_inputs, dyn_dims):
+    """ONE dynamic artifact for a captured repro, the faithful way (see
+    investigation_results/compile_fx_direct_finding.md): make_fx the repro
+    SYMBOLICALLY, then torch._inductor.compile_fx the resulting gm using its
+    OWN symbolic placeholder fake-vals as the example inputs (compile_fx
+    detect_fake_mode's them -> compiles dynamic; passing CONCRETE inputs
+    instead would specialize). The make_fx placeholders are in FORWARD order,
+    1:1 with the repro inputs, using our own symbols — no AOTAutograd
+    reordering, no introduced free symints — so per-binding calls are just
+    make_inputs_from_config(binding) -> compiled(*args), no symbol mapping.
+
+    trace_inputs: concrete inputs whose dynamic dims have DISTINCT values
+    (so the symbols stay distinct; equal dims unify into one square symbol).
+    dyn_dims: {input_index: [dims]} to mark_dynamic (from
+    dynamic_dims_for_repro). Returns the compiled callable. Raises loudly on
+    failure (fragile internal API — a PT version skew surfaces here)."""
+    from torch.fx.experimental.proxy_tensor import make_fx
+    import torch._inductor.compile_fx as _cfx
+
+    for idx, dims in (dyn_dims or {}).items():
+        if idx < len(trace_inputs) and isinstance(trace_inputs[idx], torch.Tensor):
+            for d in dims:
+                if d < trace_inputs[idx].dim():
+                    torch._dynamo.mark_dynamic(trace_inputs[idx], d)
+    gm = make_fx(repro_cls(), tracing_mode="symbolic")(*trace_inputs)
+    symbolic_ex = [n.meta.get("val")
+                   for n in gm.graph.nodes if n.op == "placeholder"]
+    return _cfx.compile_fx(gm, symbolic_ex)
+
+
+def _distinct_trace_binding(rows):
+    """Pick a binding whose symbol values are DISTINCT (so make_fx keeps the
+    dynamic dims as distinct symbols, not a unified square symbol). Prefer an
+    existing --bind row with distinct values; else perturb the first row's
+    binding so no two symbols share a value."""
+    for _label, binding, _cfg in rows:
+        if binding and len(set(binding.values())) == len(binding):
+            return binding
+    base = next((b for _l, b, _c in rows if b), None)
+    if not base:
+        return None
+    # perturb to make values distinct: name i -> hint + i
+    return {name: val + i for i, (name, val) in enumerate(sorted(base.items()))}
+
+
 def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     """--bind / --dynamic benchmarking path.
 
@@ -832,9 +877,24 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
                         marked = True
         return marked
 
+    dynamic_mode = getattr(parsed, "dynamic_mode", "mark_dynamic")
+
     all_results = {}
     compiled = None  # dynamic mode: ONE artifact across all rows
-    if mode == "dynamic":
+    if mode == "dynamic" and dynamic_mode == "compile_fx":
+        # FAITHFUL one-artifact path: make_fx the repro symbolically + compile_fx
+        # its symbolic placeholder vals (compile_fx_direct_finding.md). One
+        # artifact serves every binding with NO recompile; per-binding args are
+        # make_inputs_from_config in forward order. Trace at a DISTINCT-dim
+        # binding so the dynamic dims stay distinct symbols.
+        trace_binding = _distinct_trace_binding(rows)
+        trace_inputs = _inputs_for(
+            trace_binding,
+            next(iter(load_shape_configs(
+                repro_file, symbol_bindings=trace_binding).values())))
+        compiled = build_compile_fx_dynamic_artifact(
+            repro_cls, trace_inputs, dyn_dims)
+    elif mode == "dynamic":
         # Kernel counting recompiles (and resets dynamo), so do it BEFORE
         # the compile-once artifact exists. The dynamic compilation's
         # kernel set is binding-independent — count at the first row.
@@ -867,7 +927,7 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         binding_str = format_binding(binding)
         row_key = f"{label}::{binding_str}::{mode}"
         inputs = _inputs_for(binding, cfg)
-        if mode == "dynamic":
+        if mode == "dynamic" and dynamic_mode == "mark_dynamic":
             # Mark this row's fresh inputs at the same captured dims, so the
             # compile-once artifact treats them as the dynamic family (an
             # unmarked input could trigger a fresh specialization == a
@@ -886,6 +946,13 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             compiled_us = _bench_cudagraph_min_us(
                 compiled_static, inputs, parsed.n_warmup, parsed.n_rep)
             recompiled = None  # fresh compile per row by design
+        elif dynamic_mode == "compile_fx":
+            # ONE compile_fx artifact (forward-order args); it CANNOT recompile
+            # (no dynamo) — every binding replays the same dynamic kernel.
+            compiled_us = _bench_cudagraph_min_us(
+                compiled, inputs, parsed.n_warmup, parsed.n_rep)
+            n_kernels, kernel_names = None, None
+            recompiled = False
         else:
             compiled_us = _bench_cudagraph_min_us(
                 compiled, inputs, parsed.n_warmup, parsed.n_rep)
@@ -900,8 +967,10 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
                       f"at this binding (unique_graphs "
                       f"{graphs_before} -> {graphs_after})")
 
-        print(f"[{row_key}] binding={binding_str} mode={mode} "
-              f"time={compiled_us:8.1f} us kernels={n_kernels}"
+        print(f"[{row_key}] binding={binding_str} mode={mode}"
+              f"{'/' + dynamic_mode if mode == 'dynamic' else ''} "
+              f"time={compiled_us:8.1f} us"
+              + (f" kernels={n_kernels}" if n_kernels is not None else "")
               + (" RECOMPILED" if recompiled else ""))
 
         all_results[row_key] = {
@@ -959,12 +1028,19 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                              "static compile (one compile per binding) or "
                              "--dynamic (one compile, measured per binding).")
     parser.add_argument("--dynamic", action="store_true",
-                        help="Compile with torch.compile(dynamic=True) and "
-                             "measure the SAME compiled artifact at every "
-                             "--bind point (CUDAGraph+do_bench min, same "
-                             "methodology as static). Rows record binding, "
-                             "mode, time; recompiles between points are "
-                             "detected and flagged.")
+                        help="Compile dynamically and measure the dynamic "
+                             "artifact at every --bind point (CUDAGraph+"
+                             "do_bench min, same methodology as static).")
+    parser.add_argument("--dynamic-mode", choices=("mark_dynamic", "compile_fx"),
+                        default="compile_fx",
+                        help="How --dynamic builds the artifact. 'compile_fx' "
+                             "(default): make_fx the repro symbolically + "
+                             "torch._inductor.compile_fx its symbolic inputs -> "
+                             "ONE artifact serves every binding, no dynamo, no "
+                             "recompile, forward-order args. 'mark_dynamic': "
+                             "torch.compile with the recorded dims marked "
+                             "(recompiles per binding for lifted-symint repros; "
+                             "kept as a no-internal-API fallback).")
     parser.add_argument("--count-kernels-only", action="store_true",
                         help="Only count generated kernels, skip timing")
     parser.add_argument("--n-warmup", type=int, default=25)

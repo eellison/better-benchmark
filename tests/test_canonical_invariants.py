@@ -2258,3 +2258,78 @@ def test_count_kernels_accepts_dynamic_none_and_second_inputs():
     sig = inspect.signature(count_kernels)
     assert "second_inputs" in sig.parameters
     assert sig.parameters["dynamic"].default is False
+
+
+def test_compile_fx_one_artifact_serves_many_bindings_gpu():
+    """The faithful dynamic-bench path (compile_fx_direct_finding.md): make_fx
+    the captured repro symbolically, compile_fx its SYMBOLIC placeholder vals
+    -> ONE artifact that serves every binding with no recompile, forward-order
+    args. Captures the GroupNorm fixture, builds the artifact, runs 3 bindings."""
+    import json
+    import tempfile
+    import shutil
+    import importlib.util
+    import pytest
+    from pathlib import Path
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required")
+    torch._dynamo.reset()
+    from capture_hook import install_capture_hook, uninstall_capture_hook
+    from merge_captures import _write_shapes_json
+    from repro_harness import (build_compile_fx_dynamic_artifact,
+                               dynamic_dims_for_repro, make_inputs_from_config,
+                               load_shape_configs)
+
+    class _GN(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.w = torch.nn.Parameter(torch.randn(64))
+            self.b = torch.nn.Parameter(torch.randn(64))
+
+        def forward(self, x):
+            v = x.view(64, 32, 2, x.shape[2] * x.shape[3])
+            a, m = torch.var_mean(v, [2, 3], correction=0, keepdim=True)
+            return (((v - m) * torch.rsqrt(a + 1e-5)).view(x.shape)
+                    * self.w[None, :, None, None] + self.b[None, :, None, None])
+
+    with tempfile.TemporaryDirectory() as td:
+        cap = str(Path(td) / "cap")
+        install_capture_hook(cap, label="cfx")
+        try:
+            x = torch.randn(64, 64, 16, 16, device="cuda")
+            torch._dynamo.mark_dynamic(x, 2)
+            torch._dynamo.mark_dynamic(x, 3)
+            with torch.no_grad():
+                torch.compile(_GN().cuda(), dynamic=True)(x)
+        finally:
+            uninstall_capture_hook()
+        entry = json.loads((Path(td) / "cap" / "index.json").read_text())["captured"][0]
+        cdir = Path(td) / "canonical" / "gn"
+        cdir.mkdir(parents=True)
+        (cdir / "repro.py").write_text(Path(entry["file"]).read_text())
+        _write_shapes_json(cdir, entry["shape_hash"], entry.get("signature", ""),
+                           "probe/infer/gn", occurrences=1, inputs=entry["inputs"],
+                           symbols=entry.get("symbols"), guards=entry.get("guards"))
+        repro_py = str(cdir / "repro.py")
+        spec = importlib.util.spec_from_file_location("_cfx_rep", repro_py)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        dyn = dynamic_dims_for_repro(repro_py)
+        syms = sorted(entry["symbols"])
+        # trace at DISTINCT dims so symbols stay distinct
+        tb = {syms[0]: 8, syms[1]: 32}
+        trace_inputs = make_inputs_from_config(
+            next(iter(load_shape_configs(repro_py, symbol_bindings=tb).values())))
+        compiled = build_compile_fx_dynamic_artifact(mod.Repro, trace_inputs, dyn)
+        artifact_id = id(compiled)
+
+        for b in ({syms[0]: 8, syms[1]: 32}, {syms[0]: 16, syms[1]: 16},
+                  {syms[0]: 24, syms[1]: 24}):
+            args = make_inputs_from_config(
+                next(iter(load_shape_configs(repro_py, symbol_bindings=b).values())))
+            with torch.no_grad():
+                out = compiled(*args)
+            o = out[0] if isinstance(out, (list, tuple)) else out
+            assert o.shape[0] == 64 and o.shape[1] == 64
+            assert id(compiled) == artifact_id  # SAME artifact, no recompile

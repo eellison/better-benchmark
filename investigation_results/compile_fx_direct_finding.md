@@ -205,3 +205,35 @@ artifact). The --dynamic-mode=compile_fx flag is left UNWIRED (scaffold
 only) with this finding as the rationale. Net: this investigation's value
 is the clear NEGATIVE — we now know compile_fx isn't the easy win it looked
 like, and why.
+
+## CORRECTION (2026-06-16): the negative above was MY BUG. compile_fx-direct
+## WORKS cleanly — the fix is one line.
+The make_fx attempts "specialized" only because I fed compile_fx CONCRETE
+example inputs. Feed it the make_fx graph's OWN SYMBOLIC placeholder fake-vals
+and it detect_fake_mode's them and compiles DYNAMICALLY. Verified
+(/tmp/dyn_capture_work/makefx_symbolic_ex.py):
+
+  inp = make_inputs_from_config(hint_cfg); mark_dynamic(recorded dims)
+  gm  = make_fx(Repro(), tracing_mode="symbolic")(*inp)
+  ex  = [n.meta['val'] for n in gm.graph.nodes if n.op=='placeholder']
+        # = [[64,64,s7,s92], s7*s92, s7, s92, [64], [64]]  (FORWARD ORDER!)
+  compiled = compile_fx(gm, ex)          # <-- SYMBOLIC ex, NOT concrete inp
+  # then per binding: args = make_inputs_from_config(binding_cfg); compiled(*args)
+
+Result: ONE stable artifact (same object id) serves EVERY binding — 8x32,
+16x16, 24x24, 4x64, 100x7 — no recompile, output shapes all correct. And it
+has the property the dynamo-post-grad path lacked:
+- make_fx placeholders are in FORWARD ORDER, 1:1 with the repro inputs (6==6),
+  using OUR symbols (s7,s92) — NO AOTAutograd reordering, NO free symints
+  (s62/s73). So per-binding args are just make_inputs_from_config(binding) in
+  order -> compiled(*args). No reverse-engineering, no parsing, no fragile
+  mapping.
+- trace at a binding with DISTINCT dim values (e.g. 8x32) so the two dynamic
+  dims get DISTINCT symbols (tracing at 16x16 unifies them into one square
+  symbol s7==s7).
+
+THIS is the path. compile_fx-direct = the faithful dynamic bench AND literal
+one-artifact reuse, with clean correspondence. Supersedes the per-binding
+fallback and the mark_dynamic recompile. Remaining: fragile-internal-API
+guard (pin + clear version-skew error), bench methodology (CUDAGraph+lock on
+the one artifact), static parity.
