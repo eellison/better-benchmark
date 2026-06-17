@@ -429,24 +429,25 @@ def _eval_dim(dim, bindings: dict):
     return int(val)
 
 
-def validate_bindings(symbols: dict, bindings: dict,
-                      guards: list | None = None) -> None:
-    """Check bindings against symbol ranges and residual guards. LOUD on
-    violation — benchmarking an impossible shape answers no question. A guard
-    that does not fold to a concrete True/False under the binding is itself
-    LOUD (an unevaluated torch function must never be read as 'satisfied')."""
+def binding_violation(symbols: dict, bindings: dict,
+                      guards: list | None = None) -> str | None:
+    """Return a reason string for the first range/guard violation under
+    `bindings`, or None if the binding is valid. Pure predicate — never
+    raises — so callers can SEARCH for a valid binding (e.g. perturbing to a
+    distinct warmup shape) without exceptions for control flow. The loud
+    authority validate_bindings() wraps this and raises the same reason."""
     import sympy
 
     for name, val in bindings.items():
         sym = symbols.get(name)
         if sym is None:
-            raise ValueError(f"binding for unknown symbol {name!r} "
-                             f"(table has {sorted(symbols)})")
+            return (f"binding for unknown symbol {name!r} "
+                    f"(table has {sorted(symbols)})")
         lo, hi = (sym.get("range") or [None, None])
         if lo is not None and val < lo:
-            raise ValueError(f"{name}={val} below range min {lo}")
+            return f"{name}={val} below range min {lo}"
         if hi is not None and val > hi:
-            raise ValueError(f"{name}={val} above range max {hi}")
+            return f"{name}={val} above range max {hi}"
     for g in guards or []:
         # Pass the symbol table so sign assumptions come from each symbol's
         # range floor (a zero-capable unbacked symbol must NOT be assumed
@@ -460,16 +461,34 @@ def validate_bindings(symbols: dict, bindings: dict,
             continue
         sub = expr.subs({s: bindings[s.name] for s in expr.free_symbols})
         if sub is sympy.false or sub == sympy.false:
-            raise ValueError(f"binding {bindings} violates guard {g!r}")
+            return f"binding {bindings} violates guard {g!r}"
         # Fully bound but did NOT collapse to concrete True -> an opaque
         # torch function never folded. Refuse rather than silently accept
         # (the interpolate TruncToInt class: a guard that never reduced to
         # sympy.false used to pass every binding).
         if not (sub is sympy.true or sub == sympy.true):
-            raise ValueError(
-                f"guard {g!r} did not reduce to a concrete bool under "
-                f"{bindings} (got {sub!r}); an unrecognized symbolic function "
-                "may not have folded — cannot certify the binding")
+            return (f"guard {g!r} did not reduce to a concrete bool under "
+                    f"{bindings} (got {sub!r}); an unrecognized symbolic "
+                    "function may not have folded — cannot certify the binding")
+    return None
+
+
+def bindings_satisfy(symbols: dict, bindings: dict,
+                     guards: list | None = None) -> bool:
+    """True iff `bindings` satisfies every symbol range and applicable guard.
+    Non-raising sibling of validate_bindings — for search/perturbation."""
+    return binding_violation(symbols, bindings, guards) is None
+
+
+def validate_bindings(symbols: dict, bindings: dict,
+                      guards: list | None = None) -> None:
+    """Check bindings against symbol ranges and residual guards. LOUD on
+    violation — benchmarking an impossible shape answers no question. A guard
+    that does not fold to a concrete True/False under the binding is itself
+    LOUD (an unevaluated torch function must never be read as 'satisfied')."""
+    reason = binding_violation(symbols, bindings, guards)
+    if reason is not None:
+        raise ValueError(reason)
 
 
 def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:

@@ -1,5 +1,24 @@
 # compile_fx-direct: the cleaner alternative to ShapesSpec (2026-06-16)
 
+> **⚠️ CORRECTION (2026-06-17, R4 Finding 1 — read first).** The "faithful
+> dynamic bench" claim below is WRONG and has been reversed. compile_fx-direct
+> (`make_fx(symbolic)` → `compile_fx`) emits a DIFFERENT, more-fused kernel set
+> than the model's real `dynamo→AOT→inductor` graph: for the var_mean
+> GroupNorm fixture it collapses to ONE fused kernel where the model runs TWO
+> (a reduction + a separate pointwise epilogue). Verified 3 independent ways;
+> feeding `make_fx` the inductor decomp table does NOT reconcile them — the
+> make_fx-symbolic graph is simply shaped differently and inductor fuses it
+> differently. So compile_fx times a kernel the model never runs. **The
+> faithful default is now `mark_dynamic`** (which IS the model's real pipeline),
+> with a two-distinct-shape pre-warm to force the GENERAL dynamic kernel (a
+> single marked shape still 0/1/many-specializes). compile_fx is retained as a
+> labeled NON-FAITHFUL diagnostic only. The mechanical "one artifact serves
+> many bindings" property below is real and still holds — it is the FUSION
+> FIDELITY that fails. Full analysis + the reviewer's inverted-direction note
+> in the "## CORRECTION" section at the bottom. Guarded by
+> `test_dynamic_default_measures_general_kernel_gpu` and
+> `test_compile_fx_direct_diverges_from_model_kernels_gpu`.
+
 User hypothesis: "how does the AOT repro run with specific expressions? it
 wouldn't surprise me if it used compile_fx directly... that's the other
 alternative to ShapesSpec." — CONFIRMED, and it is structurally better.
@@ -237,3 +256,72 @@ one-artifact reuse, with clean correspondence. Supersedes the per-binding
 fallback and the mark_dynamic recompile. Remaining: fragile-internal-API
 guard (pin + clear version-skew error), bench methodology (CUDAGraph+lock on
 the one artifact), static parity.
+
+> ⚠️ The "faithful dynamic bench ... Supersedes ... the mark_dynamic"
+> conclusion in this paragraph is REVERSED — see the top banner and the
+> "## CORRECTION" section. compile_fx is the diagnostic; mark_dynamic is the
+> faithful default. The one-artifact-reuse property is the only part that held.
+
+## CORRECTION (2026-06-17): compile_fx-direct is NOT kernel-faithful
+
+Round-4 adversarial review (agent attacking the compile_fx bench path) plus
+three independent reproductions overturned the central claim. The mechanical
+property — one symbolic artifact serves every binding with no recompile — is
+real. The FUSION FIDELITY is not.
+
+**The finding.** At the same repro (var_mean GroupNorm) and a rectangular
+binding, read straight off the inductor cache under a fresh cache:
+
+| path | kernels | structure |
+|---|---|---|
+| model = `dynamo→AOT→inductor` (== `mark_dynamic`, generalized over 2 shapes) | **2** | reduction (`triton_red`/`triton_per_…var_mean`) + separate pointwise epilogue (`triton_poi_…add_mul_rsqrt_sub`) |
+| `compile_fx`-direct (`make_fx(symbolic)`→`compile_fx`) | **1** | one fully-fused reduction kernel |
+
+So `--dynamic-mode=compile_fx` benched a kernel the model never runs. The
+reviewer reported the divergence with the FUSION DIRECTION INVERTED (claiming
+compile_fx was the *less*-fused/slower one, 22µs vs 11µs) — those numbers were
+contaminated by tracing at the square `16×16` binding, which unifies the two
+dims into one symbol (the reviewer's own Finding 4). At a clean rectangular
+binding the direction flips: compile_fx is MORE fused (1 kernel). Either way
+the load-bearing fact is identical and is what matters for a perf bench:
+**the two paths emit different kernels, so compile_fx is off-kernel.**
+
+**Not a decomp-table gap.** Feeding `make_fx(tracing_mode="symbolic",
+decomposition_table=select_decomp_table())` (the inductor decomp table AOT
+uses) still produced 1 fused kernel. The make_fx-symbolic graph is shaped
+differently from dynamo's post-grad graph; inductor fuses it differently. No
+one-line reconciliation exists.
+
+**A second bug the reviewer missed (mark_dynamic specialization).** Even the
+faithful path, as previously wired, timed the WRONG kernel on row 1: marks +
+a SINGLE shape still 0/1/many-specializes (`triton_per_fused`, 1 kernel); only
+a SECOND distinct shape forces the general kernel set (2 kernels). The row
+loop therefore measured a specialization on row 1 and recompiled on rows 2+.
+
+**The fix (shipped this commit).**
+- Default `--dynamic-mode` flipped to `mark_dynamic` (the model's real
+  pipeline). compile_fx demoted to a clearly-labeled non-faithful diagnostic.
+- mark_dynamic path PRE-WARMS the compile-once artifact at two GUARD-VALID,
+  internally-distinct shapes before timing any row → every `--bind` row then
+  times the GENERAL dynamic kernel, no per-row recompile. (Coupled families —
+  an `Eq(s0,s1)` guard — warm at equal-magnitude shapes; the square kernel IS
+  the model's real kernel there.)
+- Guard-aware warmup/trace-binding selection (`_distinct_dynamic_bindings`,
+  `_distinct_trace_binding`) replaces the blind `name→val+i` perturbation that
+  could break ranges / `Eq` couplings / divisibility guards (reviewer
+  Finding 3). Built on the new non-raising `binding_violation` /
+  `bindings_satisfy` predicates (no try/except for control flow).
+
+**Guarded by** `test_dynamic_default_measures_general_kernel_gpu` (every row
+matches the model's reduction+pointwise fusion structure, no recompile) and
+`test_compile_fx_direct_diverges_from_model_kernels_gpu` (pins the 1-vs-2
+divergence; flips loudly if a future torch makes them agree → revisit
+promoting compile_fx).
+
+**Reviewer Finding 2 (warm-FxGraphCache `input0`/`t0` NameError on the 2nd run
+of a lifted-list-param repro through compile_fx)** is now moot for the default
+path (mark_dynamic does not hit it). It remains a latent crash for the
+compile_fx DIAGNOSTIC on lifted-list-param repros; documented, not yet fixed,
+since the diagnostic is off the default path. If compile_fx is ever promoted,
+wrap its build in `fresh_inductor_cache()` or flatten the lifted shape param
+to symints before tracing.

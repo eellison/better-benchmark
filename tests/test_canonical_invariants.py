@@ -2261,10 +2261,14 @@ def test_count_kernels_accepts_dynamic_none_and_second_inputs():
 
 
 def test_compile_fx_one_artifact_serves_many_bindings_gpu():
-    """The faithful dynamic-bench path (compile_fx_direct_finding.md): make_fx
+    """The compile_fx DIAGNOSTIC path (compile_fx_direct_finding.md): make_fx
     the captured repro symbolically, compile_fx its SYMBOLIC placeholder vals
     -> ONE artifact that serves every binding with no recompile, forward-order
-    args. Captures the GroupNorm fixture, builds the artifact, runs 3 bindings."""
+    args. This is the MECHANICAL property (one artifact, many bindings); it is
+    NOT kernel-faithful (R4 Finding 1 — the make_fx-symbolic graph fuses
+    differently from dynamo's, so it times a kernel the model never runs; the
+    faithful default is mark_dynamic). Captures the GroupNorm fixture, builds
+    the artifact, runs 3 bindings."""
     import json
     import tempfile
     import shutil
@@ -2402,3 +2406,291 @@ def test_lifted_shape_param_expr_round_trips_and_evaluates():
     spec = spec_from_compact(e)
     assert spec["kind"] == "shape" and spec["dims"] == [64, 32, 2, "s0*s53"]
     assert compact_from_spec(spec) == e
+
+
+def test_binding_violation_predicate_matches_validate_bindings():
+    """R4: binding_violation is the non-raising predicate validate_bindings
+    wraps. They must agree: predicate returns None iff validate doesn't raise,
+    and the reason string iff it does. Lets the warmup/perturbation search
+    test candidates WITHOUT try/except for control flow."""
+    from input_codec import (binding_violation, bindings_satisfy,
+                             validate_bindings)
+    syms = {"s0": {"hint": 16, "range": [2, None]},
+            "s1": {"hint": 16, "range": [2, 16]}}
+    cases = [
+        ({"s0": 8, "s1": 8}, None, []),                 # valid
+        ({"s0": 8, "s1": 17}, [], None),                # range max
+        ({"s0": 1, "s1": 8}, [], None),                 # range min
+        ({"s0": 8, "s1": 9}, ["Eq(s0, s1)"], None),     # coupling broken
+        ({"s0": 8, "s1": 8}, ["Eq(s0, s1)"], None),     # coupling held -> valid
+    ]
+    for binding, guards, _ in cases:
+        reason = binding_violation(syms, binding, guards)
+        ok = bindings_satisfy(syms, binding, guards)
+        assert ok == (reason is None)
+        if reason is None:
+            validate_bindings(syms, binding, guards)  # must NOT raise
+        else:
+            import pytest
+            with pytest.raises(ValueError):
+                validate_bindings(syms, binding, guards)
+
+
+def test_distinct_dynamic_bindings_respects_guards(tmp_path):
+    """R4 Finding 3+pre-warm: warmup bindings must be INTERNALLY distinct
+    (no square unification) for an uncoupled family, but EQUAL-magnitude
+    (Eq-respecting) for a coupled family — never a guard-violating fabrication.
+    Also: a range-max pin must not be exceeded."""
+    import json
+    from repro_harness import (_distinct_dynamic_bindings,
+                               _distinct_trace_binding,
+                               symbols_and_guards_for_repro)
+    from input_codec import bindings_satisfy
+
+    def write(symbols, guards):
+        d = tmp_path / f"r{len(list(tmp_path.iterdir()))}"
+        d.mkdir()
+        (d / "shapes.json").write_text(json.dumps(
+            {"symbols": symbols, "guards": guards, "points": []}))
+        return str(d / "repro.py")
+
+    syms = {"s0": {"hint": 16, "range": [2, None]},
+            "s53": {"hint": 16, "range": [2, None]}}
+    rows = [("a", {"s0": 8, "s53": 32}, {}), ("b", {"s0": 16, "s53": 16}, {})]
+
+    # Uncoupled -> warmup bindings internally distinct + mutually distinct.
+    rf = write(syms, [])
+    wb = _distinct_dynamic_bindings(rf, rows, {0: [2, 3]}, n=2)
+    assert len(wb) >= 2
+    for b in wb:
+        assert len(set(b.values())) == len(b), f"square warmup {b}"
+    assert {tuple(sorted(b.items())) for b in wb}.__len__() == len(wb)
+
+    # Coupled Eq -> equal-magnitude warmup, every binding satisfies the guard.
+    rf2 = write(syms, ["Eq(s0, s53)"])
+    s2, g2 = symbols_and_guards_for_repro(rf2)
+    wb2 = _distinct_dynamic_bindings(rf2, rows, {0: [2, 3]}, n=2)
+    for b in wb2:
+        assert b["s0"] == b["s53"], f"coupled warmup not equal: {b}"
+        assert bindings_satisfy(s2, b, g2)
+    # trace binding for the coupled family stays equal (no fabricated distinct)
+    tb = _distinct_trace_binding(rf2, [("a", {"s0": 16, "s53": 16}, {})])
+    assert tb["s0"] == tb["s53"]
+
+    # Range-pinned: s1 capped at 16; warmup must never exceed it.
+    syms3 = {"s0": {"hint": 8, "range": [2, None]},
+             "s1": {"hint": 8, "range": [2, 16]}}
+    rf3 = write(syms3, [])
+    wb3 = _distinct_dynamic_bindings(
+        rf3, [("a", {"s0": 8, "s1": 8}, {})], {0: [1, 2]}, n=2)
+    for b in wb3:
+        assert b["s1"] <= 16, f"range-max exceeded: {b}"
+
+
+def test_dynamic_default_measures_general_kernel_gpu():
+    """R4 Finding 1 (CONFIRMED 3x): compile_fx-direct emits a DIFFERENT, less-
+    fused kernel than the model runs, so the FAITHFUL default is mark_dynamic
+    (== the model's real dynamo->AOT->inductor pipeline). This test pins the
+    fix end-to-end through benchmark_repro:
+      (1) the default --dynamic mode is mark_dynamic,
+      (2) the two-distinct-shape pre-warm makes EVERY --bind row time the
+          GENERAL dynamic kernel (no per-row recompile) — without it row 1
+          would specialize (0/1/many) and rows 2+ would recompile,
+      (3) the kernel set equals the dynamo->AOT ground truth (same names).
+    Captures the GroupNorm var_mean fixture (model's real kernels = 2)."""
+    import json
+    import glob
+    import os
+    import tempfile
+    import importlib.util
+    import pytest
+    from pathlib import Path
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required")
+
+    from merge_captures import _write_shapes_json
+    from repro_harness import (benchmark_repro, make_inputs_from_config,
+                               load_shape_configs, dynamic_dims_for_repro)
+    from torch._inductor.utils import fresh_inductor_cache
+    from torch._inductor.codecache import cache_dir
+
+    # default --dynamic-mode is mark_dynamic (the faithful path)
+    import argparse
+    p = argparse.ArgumentParser()
+    p.add_argument("--dynamic-mode", choices=("mark_dynamic", "compile_fx"),
+                   default="mark_dynamic")
+    assert p.parse_args([]).dynamic_mode == "mark_dynamic"
+
+    def latest_call_kernels():
+        for f in sorted(glob.glob(os.path.join(cache_dir(), "**", "*.py"),
+                                  recursive=True), key=os.path.getmtime,
+                        reverse=True):
+            c = Path(f).read_text()
+            if "def call(" in c and ".run(" in c:
+                return sorted(l.strip().split(".run(")[0] for l in c.split("\n")
+                              if ".run(" in l and not l.strip().startswith("#"))
+        return []
+
+    def kernel_kinds(names):
+        """Multiset of inductor kernel KINDS. 'red'/'per' are both reductions
+        (looped vs persistent — a shape-dependent tiling variant, NOT a fusion
+        difference); 'poi' is pointwise. The faithful invariant is the FUSION
+        STRUCTURE (a reduction + a separate pointwise epilogue), not the exact
+        reduction-variant name — which legitimately differs by binding."""
+        kinds = []
+        for n in names:
+            if "triton_per_" in n or "triton_red_" in n:
+                kinds.append("reduction")
+            elif "triton_poi_" in n:
+                kinds.append("pointwise")
+            else:
+                kinds.append(n)  # template/foreach/etc. — compared verbatim
+        return sorted(kinds)
+
+    with tempfile.TemporaryDirectory() as td:
+        torch._dynamo.reset()
+        entry = _capture_dynamic_region(Path(td))
+        cdir = Path(td) / "canonical" / "vm"
+        cdir.mkdir(parents=True)
+        (cdir / "repro.py").write_text(Path(entry["file"]).read_text())
+        _write_shapes_json(cdir, entry["shape_hash"], entry.get("signature", ""),
+                           "probe/infer/gn", occurrences=1, inputs=entry["inputs"],
+                           symbols=entry.get("symbols"), guards=entry.get("guards"))
+        repro_py = str(cdir / "repro.py")
+        spec = importlib.util.spec_from_file_location("_vm_rep", repro_py)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        syms = sorted(entry["symbols"])
+
+        # GROUND TRUTH: dynamo->AOT->inductor at two distinct shapes (generalized)
+        dyn = dynamic_dims_for_repro(repro_py)
+        torch._dynamo.reset()
+        with fresh_inductor_cache():
+            for b in ({syms[0]: 8, syms[1]: 32}, {syms[0]: 12, syms[1]: 40}):
+                inp = make_inputs_from_config(next(iter(
+                    load_shape_configs(repro_py, symbol_bindings=b).values())))
+                for idx, dims in (dyn or {}).items():
+                    for d in dims:
+                        if idx < len(inp) and isinstance(inp[idx], torch.Tensor) \
+                                and d < inp[idx].dim():
+                            torch._dynamo.mark_dynamic(inp[idx], d)
+                with torch.no_grad():
+                    torch.compile(mod.Repro(), dynamic=None)(*inp)
+            torch.cuda.synchronize()
+            ground_truth = latest_call_kernels()
+        assert len(ground_truth) == 2, (
+            f"fixture should run 2 kernels, got {ground_truth}")
+
+        # FAITHFUL default bench: every row must report the general 2-kernel
+        # set and no recompile.
+        res = benchmark_repro(
+            repro_py, mod.Repro, getattr(mod, "make_inputs", None),
+            args=["--dynamic",
+                  "--bind", f"{syms[0]}=8,{syms[1]}=32",
+                  "--bind", f"{syms[0]}=16,{syms[1]}=16",
+                  "--bind", f"{syms[0]}=24,{syms[1]}=24",
+                  "--no-gpu-lock", "--n-warmup", "3", "--n-rep", "10"])
+        assert res, "no rows"
+        for k, v in res.items():
+            assert v["mode"] == "dynamic"
+            assert v["n_kernels"] == len(ground_truth), (
+                f"{k}: n_kernels={v['n_kernels']} != ground truth "
+                f"{len(ground_truth)} (specialized kernel timed?)")
+            assert not v["recompiled"], f"{k}: recompiled (pre-warm failed)"
+            # Same FUSION STRUCTURE as the model's real graph: a reduction +
+            # a separate pointwise epilogue (compile_fx-direct would collapse
+            # this into ONE fused kernel — R4 Finding 1, the bug this guards).
+            assert kernel_kinds(v["kernel_names"]) == kernel_kinds(ground_truth), (
+                f"{k}: kernel kinds {kernel_kinds(v['kernel_names'])} != model's "
+                f"{kernel_kinds(ground_truth)} (names {v['kernel_names']})")
+        assert kernel_kinds(ground_truth) == ["pointwise", "reduction"], (
+            f"fixture fusion structure changed: {ground_truth}")
+
+
+def test_compile_fx_direct_diverges_from_model_kernels_gpu():
+    """R4 Finding 1, pinned as a GUARDED invariant (not just a comment): the
+    compile_fx-direct path fuses var_mean into a DIFFERENT, fewer-kernel set
+    than the model's real dynamo->AOT->inductor graph. This is exactly WHY
+    mark_dynamic is the faithful default. If a future torch version makes the
+    two agree, this test FAILS loudly -> revisit whether compile_fx could be
+    promoted from diagnostic to faithful. Both numbers are read off the SAME
+    captured fixture at the SAME rectangular binding under a fresh cache."""
+    import json
+    import glob
+    import os
+    import tempfile
+    import importlib.util
+    import pytest
+    from pathlib import Path
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required")
+
+    from merge_captures import _write_shapes_json
+    from repro_harness import (build_compile_fx_dynamic_artifact,
+                               make_inputs_from_config, load_shape_configs,
+                               dynamic_dims_for_repro)
+    from torch._inductor.utils import fresh_inductor_cache
+    from torch._inductor.codecache import cache_dir
+
+    def latest_call_kernels():
+        for f in sorted(glob.glob(os.path.join(cache_dir(), "**", "*.py"),
+                                  recursive=True), key=os.path.getmtime,
+                        reverse=True):
+            c = Path(f).read_text()
+            if "def call(" in c and ".run(" in c:
+                return [l.strip().split(".run(")[0] for l in c.split("\n")
+                        if ".run(" in l and not l.strip().startswith("#")]
+        return []
+
+    with tempfile.TemporaryDirectory() as td:
+        torch._dynamo.reset()
+        entry = _capture_dynamic_region(Path(td))
+        cdir = Path(td) / "canonical" / "vm"
+        cdir.mkdir(parents=True)
+        (cdir / "repro.py").write_text(Path(entry["file"]).read_text())
+        _write_shapes_json(cdir, entry["shape_hash"], entry.get("signature", ""),
+                           "probe/infer/gn", occurrences=1, inputs=entry["inputs"],
+                           symbols=entry.get("symbols"), guards=entry.get("guards"))
+        repro_py = str(cdir / "repro.py")
+        spec = importlib.util.spec_from_file_location("_vm_div", repro_py)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        syms = sorted(entry["symbols"])
+        dyn = dynamic_dims_for_repro(repro_py)
+        B1, B2 = {syms[0]: 8, syms[1]: 32}, {syms[0]: 12, syms[1]: 40}
+
+        def mk(b):
+            return make_inputs_from_config(next(iter(
+                load_shape_configs(repro_py, symbol_bindings=b).values())))
+
+        # MODEL (dynamo->AOT) generalized over two distinct shapes
+        torch._dynamo.reset()
+        with fresh_inductor_cache():
+            for b in (B1, B2):
+                inp = mk(b)
+                for idx, dims in (dyn or {}).items():
+                    for d in dims:
+                        if idx < len(inp) and isinstance(inp[idx], torch.Tensor) \
+                                and d < inp[idx].dim():
+                            torch._dynamo.mark_dynamic(inp[idx], d)
+                with torch.no_grad():
+                    torch.compile(mod.Repro(), dynamic=None)(*inp)
+            torch.cuda.synchronize()
+            model_kernels = latest_call_kernels()
+
+        # compile_fx-direct at a DISTINCT (rectangular) trace binding
+        torch._dynamo.reset()
+        with fresh_inductor_cache():
+            compiled = build_compile_fx_dynamic_artifact(mod.Repro, mk(B1), dyn)
+            with torch.no_grad():
+                compiled(*mk(B1)); compiled(*mk(B2))
+            torch.cuda.synchronize()
+            cfx_kernels = latest_call_kernels()
+
+        # THE finding: compile_fx fuses to FEWER kernels than the model runs.
+        assert len(model_kernels) == 2, model_kernels
+        assert len(cfx_kernels) == 1, (
+            f"compile_fx no longer collapses to 1 kernel ({cfx_kernels}); if it "
+            f"now matches the model ({model_kernels}), R4 Finding 1 may be "
+            "resolved upstream -> reconsider promoting compile_fx to faithful")
+        assert cfx_kernels != model_kernels

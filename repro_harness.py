@@ -348,6 +348,96 @@ def dynamic_dims_for_repro(repro_file: str) -> dict[int, list[int]] | None:
     return None
 
 
+def symbols_and_guards_for_repro(repro_file: str) -> tuple[dict, list]:
+    """(symbols_table, guards) from a dynamic repro's shapes.json, or ({}, [])
+    for a static repro / shapes.txt. Used to validate perturbed warmup
+    bindings against ranges + guards (R4 Finding 3: a blind name->val+i
+    perturbation can break Eq(s0,s1) couplings or range-max pins)."""
+    shapes_json = Path(repro_file).parent / "shapes.json"
+    if not shapes_json.exists():
+        return {}, []
+    data = json.loads(shapes_json.read_text())
+    return data.get("symbols") or {}, data.get("guards") or []
+
+
+def _distinct_dynamic_bindings(repro_file, rows, dyn_dims, n=2):
+    """Pick up to `n` GUARD-VALID warmup bindings that force inductor past
+    0/1/many specialization into the GENERAL dynamic kernel — the one the
+    model runs. These are WARMUP shapes (the artifact is timed later at the
+    --bind rows), so they are generated fresh from the symbol table, NOT
+    seeded from the timed rows (a timed row may have equal dims, e.g. 16x16,
+    which makes dynamo specialize on the equality and defeats generalization).
+
+    Two requirements (verified empirically, R4):
+      (1) INTERNALLY DISTINCT — within each warmup binding every symbol takes
+          a DIFFERENT value, so make_fx/dynamo never unify two dims into one
+          square symbol (square specialization == wrong kernel).
+      (2) MUTUALLY DISTINCT — across the warmup set every symbol takes >=2
+          different values, so the 0/1/many rule generalizes EACH symbol.
+
+    A coupling guard (e.g. Eq(s0,s1)) genuinely forbids internal distinctness:
+    the model really runs the square kernel. We never fabricate a binding that
+    breaks a guard — when the distinct candidates all violate guards we fall
+    back to scaled COUPLED (equal-magnitude) shapes, whose square kernel IS the
+    faithful one. Returns >=1 binding (length 1 only if the family is so
+    constrained a single shape is the only reachable one)."""
+    from input_codec import bindings_satisfy
+
+    symbols, guards = symbols_and_guards_for_repro(repro_file)
+    hint = {name: s["hint"] for name, s in (symbols or {}).items()
+            if isinstance(s.get("hint"), int)}
+    if not hint:
+        # No symbol table (hand-written dynamic shapes.json) — fall back to
+        # the --bind rows' bindings, distinct ones first.
+        bs = [b for _l, b, _c in rows if b]
+        return bs[:n] if bs else [None]
+
+    names = sorted(hint)
+
+    def valid(b):
+        return bindings_satisfy(symbols, b, guards)
+
+    seen, out = set(), []
+
+    def add(b):
+        key = tuple(sorted(b.items()))
+        if key not in seen and valid(b):
+            seen.add(key)
+            out.append(b)
+
+    # INTERNALLY-DISTINCT candidates: scale each symbol by a DIFFERENT factor
+    # so no two share a value, across `n` shapes with disjoint factor bands.
+    for shape_idx in range(n + 2):
+        if len(out) >= n:
+            break
+        # symbol j in shape i -> hint * (1 + j) * (1 + shape_idx)
+        add({name: hint[name] * (1 + j) * (1 + shape_idx)
+             for j, name in enumerate(names)})
+    if len(out) >= min(n, 2) and len(out) >= 1:
+        # Got enough internally-distinct guard-valid shapes (or the only ones
+        # reachable). Good — these force the general non-square kernel.
+        if len(out) >= 2 or len(names) == 1:
+            return out[:n]
+    # Coupled / heavily-guarded family: distinct shapes violate guards. Warm
+    # at scaled EQUAL-magnitude shapes (preserves Eq couplings); the square
+    # kernel is then the model's real kernel.
+    out2, seen2 = [], set()
+
+    def add2(b):
+        key = tuple(sorted(b.items()))
+        if key not in seen2 and valid(b):
+            seen2.add(key)
+            out2.append(b)
+
+    for factor in (1, 2, 3, 4):
+        if len(out2) >= n:
+            break
+        add2({name: val * factor for name, val in hint.items()})
+    if out2:
+        return out2[:n]
+    return out[:n] if out else [hint]
+
+
 def parse_shapes_config(config_str: str) -> list:
     """Parse a _shapes_config string and generate inputs. Used by repro._default_make_inputs()."""
     _DTYPE_MAP = {
@@ -815,19 +905,36 @@ def build_compile_fx_dynamic_artifact(repro_cls, trace_inputs, dyn_dims):
     return _cfx.compile_fx(gm, symbolic_ex)
 
 
-def _distinct_trace_binding(rows):
-    """Pick a binding whose symbol values are DISTINCT (so make_fx keeps the
-    dynamic dims as distinct symbols, not a unified square symbol). Prefer an
-    existing --bind row with distinct values; else perturb the first row's
-    binding so no two symbols share a value."""
+def _distinct_trace_binding(repro_file, rows):
+    """Pick a GUARD-VALID binding whose symbol values are DISTINCT (so make_fx
+    keeps the dynamic dims as distinct symbols, not a unified square symbol).
+    Prefer an existing --bind row with distinct values; else perturb the first
+    row's binding so no two symbols share a value WITHOUT violating ranges or
+    guards (R4 Finding 3: a blind name->val+i perturbation breaks Eq(s0,s1)
+    couplings and range-max pins). If the symbols are genuinely coupled-equal
+    (an Eq guard forbids distinct values), there is no distinct binding —
+    return the coupled binding unchanged rather than fabricate an invalid one
+    (make_fx then traces the square kernel, which IS the model's kernel here)."""
+    from input_codec import bindings_satisfy
+
     for _label, binding, _cfg in rows:
         if binding and len(set(binding.values())) == len(binding):
             return binding
     base = next((b for _l, b, _c in rows if b), None)
     if not base:
         return None
-    # perturb to make values distinct: name i -> hint + i
-    return {name: val + i for i, (name, val) in enumerate(sorted(base.items()))}
+    symbols, guards = symbols_and_guards_for_repro(repro_file)
+    # Try perturbations that yield distinct values AND satisfy guards.
+    # Spread by index with several deltas so divisibility/parity guards that
+    # +1 would break can still be met by a larger step.
+    for step in (1, 2, 4, 8):
+        cand = {name: val + step * i
+                for i, (name, val) in enumerate(sorted(base.items()))}
+        if len(set(cand.values())) == len(cand) and (
+                not symbols or bindings_satisfy(symbols, cand, guards)):
+            return cand
+    # No distinct guard-valid binding -> symbols are genuinely coupled-equal.
+    return base
 
 
 def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
@@ -882,12 +989,16 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     all_results = {}
     compiled = None  # dynamic mode: ONE artifact across all rows
     if mode == "dynamic" and dynamic_mode == "compile_fx":
-        # FAITHFUL one-artifact path: make_fx the repro symbolically + compile_fx
-        # its symbolic placeholder vals (compile_fx_direct_finding.md). One
-        # artifact serves every binding with NO recompile; per-binding args are
-        # make_inputs_from_config in forward order. Trace at a DISTINCT-dim
-        # binding so the dynamic dims stay distinct symbols.
-        trace_binding = _distinct_trace_binding(rows)
+        # DIAGNOSTIC one-artifact path (NOT kernel-faithful — R4 Finding 1):
+        # make_fx the repro symbolically + compile_fx its symbolic placeholder
+        # vals. One artifact serves every binding with NO recompile, but the
+        # make_fx-symbolic graph fuses DIFFERENTLY from dynamo's post-grad
+        # graph, so it times a kernel the model never runs (var_mean: 1 fused
+        # kernel here vs the model's 2). Kept for cross-checking / when a repro
+        # cannot be driven through dynamo; the faithful default is
+        # mark_dynamic. Trace at a DISTINCT, GUARD-VALID binding so the dynamic
+        # dims stay distinct symbols (don't unify into a square symbol).
+        trace_binding = _distinct_trace_binding(repro_file, rows)
         trace_inputs = _inputs_for(
             trace_binding,
             next(iter(load_shape_configs(
@@ -895,9 +1006,12 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         compiled = build_compile_fx_dynamic_artifact(
             repro_cls, trace_inputs, dyn_dims)
     elif mode == "dynamic":
-        # Kernel counting recompiles (and resets dynamo), so do it BEFORE
-        # the compile-once artifact exists. The dynamic compilation's
-        # kernel set is binding-independent — count at the first row.
+        # FAITHFUL path: torch.compile with the recorded dims marked == the
+        # model's real dynamo->AOT->inductor pipeline.
+        #
+        # Kernel counting recompiles (and resets dynamo), so do it BEFORE the
+        # compile-once artifact exists. The dynamic kernel set is binding-
+        # independent once generalized.
         _first_label, first_binding, first_cfg = rows[0]
         first_inputs = _inputs_for(first_binding, first_cfg)
         # The compile-once artifact is built from inputs marked at exactly
@@ -922,6 +1036,24 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
                 repro_cls(), first_inputs, dynamic=True)
         torch._dynamo.reset()
         compiled = torch.compile(repro_cls(), dynamic=None if _marked else True)
+        # PRE-WARM to the GENERAL dynamic kernel before timing ANY row.
+        # CRITICAL (R4): a single marked shape still specializes (0/1/many ->
+        # triton_per_fused, 1 kernel); only a SECOND distinct shape forces the
+        # generalized kernel set (triton_red + triton_poi, 2 kernels = what the
+        # model runs). Without this, row 1 would time the specialized kernel
+        # and rows 2+ would each recompile. Warm at guard-valid distinct
+        # bindings (no square unification, no broken Eq/divisibility guards).
+        if _marked:
+            warm_bindings = _distinct_dynamic_bindings(
+                repro_file, rows, dyn_dims, n=2)
+            with torch.no_grad():
+                for wb in warm_bindings:
+                    wcfg = next(iter(load_shape_configs(
+                        repro_file, symbol_bindings=wb).values()))
+                    winputs = _inputs_for(wb, wcfg)
+                    _mark_dynamic(winputs)
+                    compiled(*winputs)
+                torch.cuda.synchronize()
 
     for label, binding, cfg in rows:
         binding_str = format_binding(binding)
@@ -957,15 +1089,18 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             compiled_us = _bench_cudagraph_min_us(
                 compiled, inputs, parsed.n_warmup, parsed.n_rep)
             graphs_after = _unique_graph_count()
-            is_first_row = not any(
-                r.get("mode") == "dynamic" for r in all_results.values())
-            # First dynamic row pays the one compile; later rows must
-            # reuse the artifact — any new graph is a recompile.
-            recompiled = (graphs_after > graphs_before) and not is_first_row
+            # The two-shape pre-warm already drove the artifact to the GENERAL
+            # dynamic kernel before ANY row, so NO row should recompile — not
+            # even the first (the old "first row pays the one compile" pass is
+            # obsolete and would mask a pre-warm miss). Any new graph here means
+            # this binding's shape class escaped the warmup -> a real recompile
+            # whose number is off-artifact.
+            recompiled = graphs_after > graphs_before
             if recompiled:
                 print(f"[{row_key}] WARNING: dynamic artifact recompiled "
                       f"at this binding (unique_graphs "
-                      f"{graphs_before} -> {graphs_after})")
+                      f"{graphs_before} -> {graphs_after}); the pre-warm did "
+                      f"not cover this shape class — number may be off-artifact")
 
         print(f"[{row_key}] binding={binding_str} mode={mode}"
               f"{'/' + dynamic_mode if mode == 'dynamic' else ''} "
@@ -1032,15 +1167,23 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                              "artifact at every --bind point (CUDAGraph+"
                              "do_bench min, same methodology as static).")
     parser.add_argument("--dynamic-mode", choices=("mark_dynamic", "compile_fx"),
-                        default="compile_fx",
-                        help="How --dynamic builds the artifact. 'compile_fx' "
-                             "(default): make_fx the repro symbolically + "
-                             "torch._inductor.compile_fx its symbolic inputs -> "
-                             "ONE artifact serves every binding, no dynamo, no "
-                             "recompile, forward-order args. 'mark_dynamic': "
-                             "torch.compile with the recorded dims marked "
-                             "(recompiles per binding for lifted-symint repros; "
-                             "kept as a no-internal-API fallback).")
+                        default="mark_dynamic",
+                        help="How --dynamic builds the artifact. 'mark_dynamic' "
+                             "(default, FAITHFUL): torch.compile with the "
+                             "recorded dims marked == the model's real "
+                             "dynamo->AOT->inductor pipeline. A two-distinct-"
+                             "shape pre-warm forces the GENERAL dynamic kernel "
+                             "before timing (a single marked shape still "
+                             "specializes via 0/1/many). 'compile_fx': make_fx "
+                             "the repro symbolically + torch._inductor.compile_fx "
+                             "its symbolic inputs -> ONE artifact, no dynamo, no "
+                             "recompile. DIAGNOSTIC ONLY, NOT kernel-faithful: "
+                             "the make_fx-symbolic graph fuses differently from "
+                             "dynamo's post-grad graph, so it times a kernel the "
+                             "model never runs (R4 Finding 1: var_mean compiles "
+                             "to 1 fused kernel here vs the model's 2; even the "
+                             "inductor decomp table does not reconcile them). "
+                             "See investigation_results/compile_fx_direct_finding.md.")
     parser.add_argument("--count-kernels-only", action="store_true",
                         help="Only count generated kernels, skip timing")
     parser.add_argument("--n-warmup", type=int, default=25)
