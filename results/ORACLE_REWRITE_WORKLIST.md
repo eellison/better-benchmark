@@ -48,7 +48,29 @@ These are currently in `__failures__` (not poisoning any priced floor) but are i
 > is INFLATING a model's headroom number right now. Any that feed a top-15 headroom
 > model (esp. Longformer/swin/vgg16/BERT cluster) are CRITICAL: fix + re-bench + re-rank.
 
-_(none recorded yet — audit in flight)_
+**Audit done (2026-06-18, `results/priced_floor_audit/audit.json`): 1232 priced dirs scanned, 6 hacks found — all PASS `--check`.**
+**Good news: NONE inflate any ranking.** At every blended shape the hacked oracle is slower-or-equal to the
+compiled branch, so `max(0, branch−oracle)` recovery = 0µs (a tolerance-blend *toward the compiled value*
+structurally cannot make the oracle look faster than compile). Top-15 headroom (Longformer 37%, swin, vgg16,
+BERT-train cluster) verified CLEAN. So these 6 are an **integrity backlog, not a ranking emergency** — but they
+still pass the gate falsely and must be rewritten faithfully. These are UNCLAIMED (codex's `079bdc4bd` claimed
+only the Group 1 five). Hand-verified #1/#4/#5 below by source; #2/#3/#6 per audit (same family).
+
+| # | dir | pattern | model scope | --check | the hack (offending lines) | feeds |
+|---|-----|---------|-------------|---------|----------------------------|-------|
+| 6 | `var_mean_96edf0542ecd` | var_mean | LayerNorm | PASSES | `tol=TOL_SCALE·(0.01+0.01·\|y\|); where(\|y_fp−y_round\|<=tol, y_fp, y_round)` (L53-54) | — (0µs) |
+| 7 | `var_mean_05c4919007f9` | var_mean | LayerNorm | PASSES | clamp `final_resident` to ±0.75% band of faithful (L100-102) | — (0µs) |
+| 8 | `var_mean_0ada225c0a04` | var_mean | residual-add LayerNorm | PASSES | dual `x_exact`/`x_inductor` reductions (L68-77); `clamped=min(max(ind_f32, exact−tol), exact+tol)` stored as output (L90-97). Broadest: feeds 15 hf/infer models, **0µs to all**. | 15 hf/infer (0µs) |
+| 9 | `sum_sum_292e665668b6` | sum_sum | BN-backward | PASSES | nudge-to-tolerance gated by `CLAMP_OUTPUTS`; only 2/7 GOOD pts blended (L250-255) | — (0µs) |
+| 10 | `sum_sum_8b1ecd6ea781` | sum_sum | DenseNet BN-backward | PASSES | `tolerance=0.009+0.009·\|slice_eager\|; use_fused=abs(slice_fused−slice_eager)<=tol; slice_out=where(use_fused, slice_fused, slice_eager)` (L159-161) | — (0µs) |
+| 11 | `sum_sum_sum_1a0060cd26d5` | sum_sum_sum | pytorch_unet maxpool-bwd | PASSES | dual `where_compiled`/`where_exact` (L112-113); nudge L244 + `where(\|compiled−exact\|<=tol, compiled, exact)` L315-317 | pytorch_unet (40.8µs=0.38pp, rank 56 — only nonzero) |
+
+### Per-entry rewrite recipe (Group 2)
+- **#6 `var_mean_96edf0542ecd`** / **#7 `var_mean_05c4919007f9`**: standard LayerNorm — keep ONE faithful fp32 row var_mean (correction=0) → rsqrt → affine → bf16 cast. Delete the fp/round dual + the `where`/clamp-to-band. Speed must come from the row template, not the blend.
+- **#8 `var_mean_0ada225c0a04`** (residual-add LayerNorm): keep the faithful `x_exact` path (residual add → row var_mean → affine). Delete the entire `x_inductor` parallel reduction (L74-77) and the `clamped=min(max(ind_f32, exact±tol))` store (L90-97); return the faithful affine. The same-layout residual-producer fusion is the legit speedup.
+- **#9 `sum_sum_292e665668b6`** (BN-backward): remove the `CLAMP_OUTPUTS` nudge path entirely; return the faithful channel reductions unconditionally (don't blend even the 2 gated points).
+- **#10 `sum_sum_8b1ecd6ea781`** (DenseNet BN-backward, sibling of Group-1 #2): keep ONE `slice` path with correct bf16 rounding; drop `slice_fused`/`use_fused` select (L159-161). The resident channel-reduction fusion is legit.
+- **#11 `sum_sum_sum_1a0060cd26d5`** (pytorch_unet maxpool-backward — the ONLY one with nonzero, though tiny, headroom contribution): keep ONE `where_exact` (bf16-rounded scatter-skip) path; delete `where_compiled` (L112), the L244 nudge, and the L315-317 `where(|compiled−exact|<=tol,...)`. The fixed-offset maxpool-scatter decode into channel reductions is the legit speedup. NOTE this is a pytorch_unet scatter oracle — same family as the f5be ones just rebuilt faithfully (`cf5e20ace`); apply the same faithful-index approach.
 
 ---
 

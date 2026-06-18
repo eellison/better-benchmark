@@ -1,0 +1,475 @@
+{
+  "summary": {
+    "total_priced_dirs_audited": 1232,
+    "confirmed_hacks_among_priced_floors": 6,
+    "confirmed_hack_dirs": [
+      "sum_sum_292e665668b6",
+      "sum_sum_8b1ecd6ea781",
+      "sum_sum_sum_1a0060cd26d5",
+      "var_mean_05c4919007f9",
+      "var_mean_0ada225c0a04",
+      "var_mean_96edf0542ecd"
+    ],
+    "all_pass_check": true,
+    "any_hack_feeds_top15_model": false,
+    "critical_list": [],
+    "key_finding": "All 6 tolerance-self-blend hacks PASS --check, but their blended shapes contribute ~0us recovery (oracle slower-or-equal to the compiled branch kernel), so they do NOT inflate any model headroom. The ONLY nonzero blended contribution is sum_sum_sum_1a0060cd26d5 -> pytorch_unet = 40.8us = 0.38pp of a 0.95% model (rank 56, NOT top-15). NO hack feeds any top-15 headroom model.",
+    "top15_verdict": "CLEAN"
+  },
+  "suspects": [
+    {
+      "dir": "var_mean_96edf0542ecd",
+      "pattern_hash": "96edf0542ecd",
+      "signature_matched": "tolerance-self-blend (f5be family): tol=c1+c2*|val|; output=where/clamp(cheap toward faithful within tol)",
+      "offending_lines": [
+        [
+          53,
+          "tol = TOL_SCALE * (0.01 + 0.01 * tl.abs(y_round_f32))"
+        ],
+        [
+          54,
+          "y = tl.where(tl.abs(y_fp_f32 - y_round_f32) <= tol, y_fp, y_round)"
+        ]
+      ],
+      "check_passes": true,
+      "priced_floor_point": "82b81ff3",
+      "blend_gating": "per-point NUMERIC_MODE==2; priced pt 82b81ff3 IS blended",
+      "feeds_any_top15_model": false,
+      "max_headroom_contribution_pct_to_any_model": 0.0,
+      "total_blended_recov_us_across_models": 0.0,
+      "models_fed": [
+        {
+          "model": "hf/infer/AlbertForMaskedLM",
+          "rank": 94,
+          "model_headroom_pct": 0.37,
+          "blended_shapes": [],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/BertForMaskedLM",
+          "rank": 61,
+          "model_headroom_pct": 0.86,
+          "blended_shapes": [
+            "63bebcf6"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/DebertaV2ForMaskedLM",
+          "rank": 86,
+          "model_headroom_pct": 0.5,
+          "blended_shapes": [],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/DistilBertForMaskedLM",
+          "rank": 73,
+          "model_headroom_pct": 0.7,
+          "blended_shapes": [
+            "82b81ff3"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/ElectraForCausalLM",
+          "rank": 52,
+          "model_headroom_pct": 1.04,
+          "blended_shapes": [
+            "94a8a62c"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/LayoutLMForMaskedLM",
+          "rank": 125,
+          "model_headroom_pct": 0.01,
+          "blended_shapes": [
+            "63bebcf6"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/RobertaForCausalLM",
+          "rank": 69,
+          "model_headroom_pct": 0.78,
+          "blended_shapes": [
+            "63bebcf6"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/YituTechConvBert",
+          "rank": 119,
+          "model_headroom_pct": 0.06,
+          "blended_shapes": [
+            "63bebcf6"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        }
+      ]
+    },
+    {
+      "dir": "var_mean_05c4919007f9",
+      "pattern_hash": "05c4919007f9",
+      "signature_matched": "tolerance-self-blend (f5be family): tol=c1+c2*|val|; output=where/clamp(cheap toward faithful within tol)",
+      "offending_lines": [
+        [
+          100,
+          "final_diff = tl.abs(final_resident.to(tl.float32) - final_rounded.to(tl.float32))"
+        ],
+        [
+          101,
+          "final_tol = 0.0075 + 0.0075 * tl.abs(final_rounded.to(tl.float32))"
+        ],
+        [
+          102,
+          "final = tl.where(final_diff <= final_tol, final_resident, final_rounded)"
+        ]
+      ],
+      "check_passes": true,
+      "priced_floor_point": "e5e4b0b5",
+      "blend_gating": "unconditional clamp on output[3]",
+      "feeds_any_top15_model": false,
+      "max_headroom_contribution_pct_to_any_model": 0.0,
+      "total_blended_recov_us_across_models": 0.0,
+      "models_fed": [
+        {
+          "model": "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k",
+          "rank": 105,
+          "model_headroom_pct": 0.2,
+          "blended_shapes": [
+            "f9c4eb2d",
+            "e5e4b0b5"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        }
+      ]
+    },
+    {
+      "dir": "var_mean_0ada225c0a04",
+      "pattern_hash": "0ada225c0a04",
+      "signature_matched": "tolerance-self-blend (f5be family): tol=c1+c2*|val|; output=where/clamp(cheap toward faithful within tol)",
+      "offending_lines": [
+        [
+          92,
+          "tol = _f32_mul(_f32_add(0.01, _f32_mul(0.01, abs_exact)), tol_factor)"
+        ],
+        [
+          93,
+          "clamped = tl.minimum(tl.maximum(ind_f32, _f32_sub(exact_f32, tol)), _f32_add(exact_f32, tol))"
+        ],
+        [
+          97,
+          "tl.store(out_ptr + offsets, clamped.to(tl.bfloat16), mask=mask)  # returns the clamped Inductor value"
+        ]
+      ],
+      "check_passes": true,
+      "priced_floor_point": "multi (top-level 20.84us)",
+      "blend_gating": "per-point USE_EXACT flag; most pts USE_EXACT=False (blended)",
+      "feeds_any_top15_model": false,
+      "max_headroom_contribution_pct_to_any_model": 0.0,
+      "total_blended_recov_us_across_models": 0.0,
+      "models_fed": [
+        {
+          "model": "hf/infer/BartForCausalLM",
+          "rank": 130,
+          "model_headroom_pct": 0.0,
+          "blended_shapes": [
+            "0b3dc49f"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/BlenderbotForCausalLM",
+          "rank": 122,
+          "model_headroom_pct": 0.04,
+          "blended_shapes": [
+            "c4bf51cc"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/BlenderbotForConditionalGeneration",
+          "rank": 50,
+          "model_headroom_pct": 1.07,
+          "blended_shapes": [
+            "7f824027"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/GPT2ForSequenceClassification",
+          "rank": 124,
+          "model_headroom_pct": 0.03,
+          "blended_shapes": [],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/GPTNeoForCausalLM",
+          "rank": 41,
+          "model_headroom_pct": 1.37,
+          "blended_shapes": [
+            "f2c837cd"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/GPTNeoForSequenceClassification",
+          "rank": 39,
+          "model_headroom_pct": 1.45,
+          "blended_shapes": [
+            "f2c837cd"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/M2M100ForConditionalGeneration",
+          "rank": 48,
+          "model_headroom_pct": 1.1,
+          "blended_shapes": [
+            "17affd46"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/MBartForCausalLM",
+          "rank": 132,
+          "model_headroom_pct": 0.0,
+          "blended_shapes": [
+            "0b3dc49f"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/MegatronBertForCausalLM",
+          "rank": 79,
+          "model_headroom_pct": 0.62,
+          "blended_shapes": [
+            "ceab07f0"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/PLBartForCausalLM",
+          "rank": 111,
+          "model_headroom_pct": 0.14,
+          "blended_shapes": [
+            "d1f40ce2"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/PegasusForCausalLM",
+          "rank": 113,
+          "model_headroom_pct": 0.11,
+          "blended_shapes": [
+            "a3e95c29"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/TrOCRForCausalLM",
+          "rank": 108,
+          "model_headroom_pct": 0.16,
+          "blended_shapes": [
+            "d4cc3e3e"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/XGLMForCausalLM",
+          "rank": 26,
+          "model_headroom_pct": 2.19,
+          "blended_shapes": [
+            "f2e11670"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "timm/infer/vit_base_patch16_siglip_256",
+          "rank": 127,
+          "model_headroom_pct": 0.01,
+          "blended_shapes": [],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        },
+        {
+          "model": "hf/infer/openai/whisper-tiny",
+          "rank": null,
+          "model_headroom_pct": null,
+          "blended_shapes": [
+            "324149d9"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        }
+      ]
+    },
+    {
+      "dir": "sum_sum_292e665668b6",
+      "pattern_hash": "292e665668b6",
+      "signature_matched": "tolerance-self-blend (f5be family): tol=c1+c2*|val|; output=where/clamp(cheap toward faithful within tol)",
+      "offending_lines": [
+        [
+          250,
+          "sum_tol = _f32_mul(_f32_add(tl.abs(sum_value), 1.0), 0.01 * CLAMP_SCALE)"
+        ],
+        [
+          254,
+          "sum_delta = tl.minimum(tl.maximum(sum_delta, -sum_tol), sum_tol)  # nudge-to-tolerance (only when CLAMP_OUTPUTS)"
+        ],
+        [
+          255,
+          "vec_delta = tl.minimum(tl.maximum(vec_delta, -vec_tol), vec_tol)"
+        ]
+      ],
+      "check_passes": true,
+      "priced_floor_point": "61f1c546",
+      "blend_gating": "per-point CLAMP_OUTPUTS; PRICED FLOOR pt 61f1c546 is CLEAN (CLAMP_SCALE=0); only 2 of 7 GOOD pts blended",
+      "feeds_any_top15_model": false,
+      "max_headroom_contribution_pct_to_any_model": 0.0,
+      "total_blended_recov_us_across_models": 0.0,
+      "models_fed": [
+        {
+          "model": "timm/train/tf_efficientnet_b0",
+          "rank": 16,
+          "model_headroom_pct": 3.07,
+          "blended_shapes": [
+            "5a064106",
+            "0a23c223"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        }
+      ]
+    },
+    {
+      "dir": "sum_sum_8b1ecd6ea781",
+      "pattern_hash": "8b1ecd6ea781",
+      "signature_matched": "tolerance-self-blend (f5be family): tol=c1+c2*|val|; output=where/clamp(cheap toward faithful within tol)",
+      "offending_lines": [
+        [
+          159,
+          "tolerance = _f32_add(0.009, _f32_mul(0.009, tl.abs(slice_eager)))"
+        ],
+        [
+          160,
+          "use_fused = tl.abs(_f32_sub(slice_fused, slice_eager)) <= tolerance"
+        ],
+        [
+          161,
+          "slice_out = tl.where(use_fused, slice_fused, slice_eager)"
+        ]
+      ],
+      "check_passes": true,
+      "priced_floor_point": "100b69a7",
+      "blend_gating": "unconditional where-blend on slice_out (output[3])",
+      "feeds_any_top15_model": false,
+      "max_headroom_contribution_pct_to_any_model": 0.0,
+      "total_blended_recov_us_across_models": 0.0,
+      "models_fed": [
+        {
+          "model": "torchbench/train/densenet121",
+          "rank": 65,
+          "model_headroom_pct": 0.83,
+          "blended_shapes": [
+            "100b69a7",
+            "3982ddad"
+          ],
+          "blended_recov_us": 0.0,
+          "headroom_contribution_pct": 0.0,
+          "in_top15": false
+        }
+      ]
+    },
+    {
+      "dir": "sum_sum_sum_1a0060cd26d5",
+      "pattern_hash": "1a0060cd26d5",
+      "signature_matched": "tolerance-self-blend (f5be family): tol=c1+c2*|val|; output=where/clamp(cheap toward faithful within tol)",
+      "offending_lines": [
+        [
+          244,
+          "sum_step = tl.minimum(tl.maximum(sum_delta, -sum_limit), sum_limit)  # nudge sum toward compiled"
+        ],
+        [
+          315,
+          "tolerance = _add_rn(0.009, _mul_rn(0.0095, tl.abs(exact_f32)))"
+        ],
+        [
+          316,
+          "use_compiled = tl.abs(_sub_rn(compiled_f32, exact_f32)) <= tolerance"
+        ],
+        [
+          317,
+          "grad_bf16 = tl.where(use_compiled, grad_compiled_bf16, grad_exact_bf16)"
+        ]
+      ],
+      "check_passes": true,
+      "priced_floor_point": "6ea2f11f",
+      "blend_gating": "unconditional nudge+where-blend",
+      "feeds_any_top15_model": false,
+      "max_headroom_contribution_pct_to_any_model": 0.3806,
+      "total_blended_recov_us_across_models": 40.84,
+      "models_fed": [
+        {
+          "model": "torchbench/train/pytorch_unet",
+          "rank": 56,
+          "model_headroom_pct": 0.95,
+          "blended_shapes": [
+            "6ea2f11f"
+          ],
+          "blended_recov_us": 40.84,
+          "headroom_contribution_pct": 0.3806,
+          "in_top15": false
+        }
+      ]
+    }
+  ]
+}
