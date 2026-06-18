@@ -15,10 +15,13 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from bounds_inference import infer_bounds_from_forward as _module_infer_bounds
-
+# File moved from scripts/ to tests/; the production modules live in
+# repo-root/scripts. tests/conftest.py already adds scripts/ to sys.path for
+# pytest, but insert it here too so `python tests/test_bounds_inference.py`
+# works standalone (conftest is not loaded for direct execution).
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from bounds_inference import infer_bounds_from_forward as _module_infer_bounds
 REPROS_DIR = ROOT / "repros" / "canonical"
 
 

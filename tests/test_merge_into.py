@@ -22,8 +22,10 @@ from unittest.mock import patch
 
 import pytest
 
-# Import the functions under test
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Import the functions under test. File moved from scripts/ to tests/;
+# bench_parallel lives in repo-root/scripts (tests/conftest.py adds it to
+# sys.path for pytest; insert here too for standalone execution).
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 # bench_parallel uses subprocess for git rev-parse; we mock it globally
 # so tests don't depend on the git state.
 _FAKE_COMMIT = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"

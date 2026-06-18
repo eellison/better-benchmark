@@ -56,7 +56,10 @@ if "repro_harness" not in sys.modules:
     _rh_stub.load_shape_configs = _unset_load_shape_configs
     sys.modules["repro_harness"] = _rh_stub
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# File moved from scripts/ to tests/; bench_parallel lives in
+# repo-root/scripts. conftest.py covers this for pytest; insert here too so
+# `python tests/test_oracle_sharding.py` works standalone.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 import bench_parallel as bp  # noqa: E402
 

@@ -7,8 +7,10 @@ and asserts the correct bound is inferred.
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# File moved from scripts/ to tests/; bounds_inference lives in
+# repo-root/scripts. conftest.py covers this for pytest; insert here too so
+# `python tests/test_bounds_unit.py` works standalone.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from bounds_inference import (
     infer_bounds_from_forward,
