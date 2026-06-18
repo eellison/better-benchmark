@@ -1,0 +1,45 @@
+# Oracle source: results/oracle_floors_2026-06-18_v4/all_oracle_timings_v4_minfloor.json
+# 1533 patterns in floor file
+
+===== LARGEST REMAINING HEADROOM (branch-consistent — what to work on next) =====
+  model                                               %  recov_us orac_cov
+  hf/infer/AllenaiLongformerBase                  37.4%      5637    18/21
+  torchbench/train/tts_angular                    13.0%         2      2/2
+  timm/infer/swin_base_patch4_window7_224          9.7%      1327    35/39
+  torchbench/train/vgg16                           7.0%       951    54/54
+  hf/train/MobileBertForMaskedLM                   5.3%      2713    69/70
+  hf/train/RobertaForCausalLM                      5.2%      1694    67/69
+  hf/train/ElectraForCausalLM                      4.9%      1097    73/75
+  timm/train/adv_inception_v3                      4.7%      1077  133/134
+  timm/train/inception_v3                          4.7%      1077  133/134
+  hf/train/MBartForCausalLM                        4.6%       230    30/31
+  hf/train/BartForCausalLM                         4.4%       220    31/32
+  timm/train/ghostnet_100                          4.3%      1592  243/258
+  torchbench/infer/lennard_jones                   4.2%         2      2/2
+  hf/train/PegasusForCausalLM                      3.8%       330    27/28
+  torchbench/infer/squeezenet1_1                   3.8%        30    12/12
+  median 0.7% mean 1.5% max 37.4% over 152 models
+
+  >100% (should be 0 if arm-consistent): 0  []
+
+===== LARGEST ORIGINAL OPPORTUNITY (baseline-consistent) =====
+  model                                               %  recov_us orac_cov
+  hf/infer/AllenaiLongformerBase                  31.2%      4300    18/21
+  hf/train/TrOCRForCausalLM                       21.9%      2347    38/39
+  hf/train/PegasusForCausalLM                     20.9%      2198    27/28
+  timm/infer/swin_base_patch4_window7_224         18.7%      2853    35/39
+  hf/infer/XLNetLMHeadModel                       18.0%      3012    11/11
+  hf/infer/T5ForConditionalGeneration             16.9%      1166    18/19
+  hf/infer/T5Small                                16.9%      1166    18/19
+  hf/infer/MT5ForConditionalGeneration            15.5%       829    19/20
+  hf/infer/ElectraForCausalLM                     14.0%       861    13/17
+  hf/infer/TrOCRForCausalLM                       13.8%      1457    10/13
+  hf/infer/DistillGPT2                            13.7%       615      3/9 (LOW cov)
+  hf/infer/PLBartForCausalLM                      13.4%       689      4/8
+  hf/infer/DistilBertForMaskedLM                  12.9%       876    13/17
+  hf/infer/XGLMForCausalLM                        12.7%      1074     9/12
+  hf/train/PLBartForCausalLM                      12.0%      1326    31/32
+  median 2.3% mean 4.1% max 31.2% over 152 models
+
+  >100% (should be 0 if arm-consistent): 0  []
+
