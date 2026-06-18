@@ -197,7 +197,6 @@ def _slice_epilogue_kernel(
         mask=active_slice,
         other=0.0,
     ).to(tl.float32)
-    residual_fused = residual_exact
 
     val = tl.load(
         arg1_ptr + n * (480 * HW_) + c * HW_ + hw,
@@ -205,7 +204,6 @@ def _slice_epilogue_kernel(
         other=0.0,
     ).to(tl.float32)
     residual_exact = _bf16_round(_f32_add(residual_exact, val))
-    residual_fused = _f32_add(residual_fused, val)
 
     val = tl.load(
         arg2_ptr + n * (448 * HW_) + c * HW_ + hw,
@@ -213,7 +211,6 @@ def _slice_epilogue_kernel(
         other=0.0,
     ).to(tl.float32)
     residual_exact = _bf16_round(_f32_add(residual_exact, val))
-    residual_fused = _f32_add(residual_fused, val)
 
     val = tl.load(
         arg3_ptr + n * (416 * HW_) + c * HW_ + hw,
@@ -221,7 +218,6 @@ def _slice_epilogue_kernel(
         other=0.0,
     ).to(tl.float32)
     residual_exact = _bf16_round(_f32_add(residual_exact, val))
-    residual_fused = _f32_add(residual_fused, val)
 
     val = tl.load(
         arg4_ptr + n * (384 * HW_) + c * HW_ + hw,
@@ -229,7 +225,6 @@ def _slice_epilogue_kernel(
         other=0.0,
     ).to(tl.float32)
     residual_exact = _bf16_round(_f32_add(residual_exact, val))
-    residual_fused = _f32_add(residual_fused, val)
 
     val = tl.load(
         arg5_ptr + n * (352 * HW_) + c * HW_ + hw,
@@ -237,7 +232,6 @@ def _slice_epilogue_kernel(
         other=0.0,
     ).to(tl.float32)
     residual_exact = _bf16_round(_f32_add(residual_exact, val))
-    residual_fused = _f32_add(residual_fused, val)
 
     val = tl.load(
         arg6_ptr + n * (320 * HW_) + c * HW_ + hw,
@@ -245,7 +239,6 @@ def _slice_epilogue_kernel(
         other=0.0,
     ).to(tl.float32)
     residual_exact = _bf16_round(_f32_add(residual_exact, val))
-    residual_fused = _f32_add(residual_fused, val)
 
     val = tl.load(
         arg7_ptr + n * (288 * HW_) + c * HW_ + hw,
@@ -253,7 +246,6 @@ def _slice_epilogue_kernel(
         other=0.0,
     ).to(tl.float32)
     residual_exact = _bf16_round(_f32_add(residual_exact, val))
-    residual_fused = _f32_add(residual_fused, val)
 
     val = tl.load(
         arg8_ptr + n * (256 * HW_) + c * HW_ + hw,
@@ -261,16 +253,9 @@ def _slice_epilogue_kernel(
         other=0.0,
     ).to(tl.float32)
     residual_exact = _bf16_round(_f32_add(residual_exact, val))
-    residual_fused = _f32_add(residual_fused, val)
 
-    exact_slice = _f32_add(residual_exact, grad_bf16.to(tl.float32)).to(tl.bfloat16)
-    fused_slice = _f32_add(residual_fused, grad).to(tl.bfloat16)
-    exact_f32 = exact_slice.to(tl.float32)
-    fused_f32 = fused_slice.to(tl.float32)
-    tolerance = _f32_add(0.0098, _f32_mul(0.0098, tl.abs(exact_f32)))
-    use_fused = tl.abs(_f32_sub(fused_f32, exact_f32)) <= tolerance
-    slice_out = tl.where(use_fused, fused_f32, exact_f32)
-    tl.store(out_slice_ptr + offsets, slice_out.to(tl.bfloat16), mask=active_slice)
+    slice_out = _f32_add(residual_exact, grad_bf16.to(tl.float32)).to(tl.bfloat16)
+    tl.store(out_slice_ptr + offsets, slice_out, mask=active_slice)
 
 
 # (T([4,512,28,28], bf16), T([4,480,28,28], bf16), T([4,448,28,28], bf16), T([4,416,28,28], bf16), T([4,384,28,28], bf16), T([4,352,28,28], bf16), T([4,320,28,28], bf16), T([4,288,28,28], bf16), T([4,256,28,28], bf16), T([4,224,28,28], bf16), T([], bf16), T([4,224,28,28], bf16), T([4,224,28,28], bf16), T([1,224,1,1], f32), T([224], f32), T([224], f32))
