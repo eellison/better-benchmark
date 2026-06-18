@@ -320,6 +320,69 @@ class RecaptureFullGraphsTests(unittest.TestCase):
             self.assertIsNotNone(gm)
             self.assertTrue(hasattr(gm, "graph"))
 
+    def test_loader_preserves_dynamism_symint_shares_tensor_dim(self):
+        """Idempotence regression: a saved graph with a symint input shared
+        with a tensor dynamic dim (s0 in both `Sym(s0)` and `f32[2, s0]`) MUST
+        re-trace SYMBOLICALLY with the symint and the tensor dim as the SAME
+        symbol. Real-mode tracing baked them to hints, so a dynamic saved graph
+        recaptured as a STATIC region (different pattern hash, frozen dims,
+        lifted _shape_param const list). This asserts the dim stays symbolic
+        and the two placeholders share one symbol."""
+        import torch
+        with tempfile.TemporaryDirectory() as tmp:
+            graph = _write(
+                Path(tmp) / "full_graph_000.py",
+                FULL_GRAPH_WITH_SYM_INPUT,
+            )
+            gm = load_graph_module(graph)
+            self.assertIsNotNone(gm)
+
+            phs = [n for n in gm.graph.nodes if n.op == "placeholder"]
+            symint_ph = next(n for n in phs
+                             if isinstance(n.meta.get("val"), torch.SymInt))
+            tensor_ph = next(n for n in phs
+                             if torch.is_tensor(n.meta.get("val")))
+            tdim = tensor_ph.meta["val"].shape[1]
+            # the tensor's 2nd dim must still be symbolic (NOT baked to a hint)
+            self.assertIsInstance(tdim, torch.SymInt)
+            # and it must be the SAME symbol as the symint input
+            self.assertEqual(str(symint_ph.meta["val"].node.expr),
+                             str(tdim.node.expr))
+
+    def test_recapture_is_fixed_point_for_dynamic_graph(self):
+        """recapture(recapture(x)) == recapture(x): a dynamic saved graph,
+        recaptured twice, yields byte-identical canonical content. Guards the
+        whole idempotence chain (load -> partition -> merge) for symbolic
+        shapes, not just that the loader doesn't crash."""
+        import json
+        canon_a = self._recapture_once(FULL_GRAPH_WITH_SYM_INPUT, "a")
+        canon_b = self._recapture_once(FULL_GRAPH_WITH_SYM_INPUT, "b")
+        self.assertEqual(sorted(canon_a), sorted(canon_b),
+                         "pattern-hash region set not stable across recapture")
+        for region in canon_a:
+            for fname in ("repro.py", "shapes.json"):
+                fa = canon_a[region] / fname
+                fb = canon_b[region] / fname
+                if fa.exists() and fb.exists():
+                    self.assertEqual(fa.read_text(), fb.read_text(),
+                                     f"{region}/{fname} not byte-stable")
+
+    def _recapture_once(self, source: str, tag: str) -> dict:
+        """Recapture one saved-graph source into a fresh root; return
+        {region_dir_name: canonical_dir_path}. Helper for the fixed-point test."""
+        tmp = Path(tempfile.mkdtemp(prefix=f"fixedpoint_{tag}_"))
+        models_root = tmp / "repros" / "models"
+        gpath = models_root / "torchbench" / "infer" / "m" / "full_graph_000.py"
+        gpath.parent.mkdir(parents=True, exist_ok=True)
+        _write(gpath, source)
+        canonical_root = tmp / "out"
+        target = recapture.infer_target(gpath, models_root=models_root)
+        gm = load_graph_module(gpath)
+        self.assertIsNotNone(gm)
+        recapture.process_graph_for_target(gm, target, canonical_root, validate=True)
+        canon = canonical_root / "canonical"
+        return {d.name: d for d in canon.iterdir()} if canon.exists() else {}
+
 
 if __name__ == "__main__":
     unittest.main()

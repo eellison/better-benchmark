@@ -242,6 +242,160 @@ def _forward_takes_no_inputs(content: str) -> bool:
     return fwd_match is not None and not fwd_match.group(1).strip()
 
 
+def _specs_have_symbols(specs) -> bool:
+    """True if any parsed input spec carries a symbolic dim/stride/symint —
+    i.e. the saved graph is dynamic and must be re-traced symbolically."""
+    for s in specs:
+        if not isinstance(s, dict):
+            continue
+        if s.get("kind") == "symint" and s.get("expr") is not None:
+            return True
+        for key in ("shape", "stride"):
+            for d in (s.get(key) or []):
+                if isinstance(d, str):
+                    return True
+        sym = s.get("symbolic") or {}
+        if sym.get("shape_exprs") or sym.get("stride_exprs"):
+            return True
+    return False
+
+
+def _build_symbolic_inputs(specs, dev):
+    """Rebuild the forward inputs for a dynamic saved graph with ONE shared
+    ShapeEnv symbol per symbol NAME, so a symint input (arg2_1:Sym(s16)) and a
+    tensor dynamic dim (arg4_1:[...,s16,...]) trace as the SAME symbol — the
+    structure the model actually had. Returns (FakeTensorMode, inputs), or None
+    if a symbol could not be resolved (caller falls back to real-mode trace).
+
+    Symbols are created backed at their recorded hint (size_hint), mirroring
+    capture; the strides come from the annotation's stride exprs evaluated
+    over the same symbols, so a non-contiguous dynamic tensor round-trips.
+    """
+    import torch
+    from torch.fx.experimental.symbolic_shapes import ShapeEnv, DimDynamic
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch._dynamo.source import LocalSource
+
+    # Collect symbol names + a hint per symbol. A symint spec gives the symbol
+    # its hint directly; a tensor dynamic dim that is a bare symbol with no
+    # symint hint gets a benign default (8). The hint only picks which concrete
+    # size make_fx traces at — the symbol stays symbolic regardless — so the
+    # exact value is immaterial to fidelity, only to which guards get exercised.
+    hints: dict[str, int] = {}
+    for s in specs:
+        if not isinstance(s, dict):
+            continue
+        if s.get("kind") == "symint" and isinstance(s.get("expr"), str):
+            nm = s["expr"]
+            if nm.isidentifier():
+                hints.setdefault(nm, int(s.get("hint", 8) or 8))
+    # Tensor dims that are bare symbol identifiers: seed any still-unhinted ones.
+    for s in specs:
+        if not isinstance(s, dict) or s.get("kind") == "symint":
+            continue
+        for d in (s.get("shape") or []):
+            if isinstance(d, str) and d.isidentifier():
+                hints.setdefault(d, 8)
+    if not hints:
+        return None
+
+    shape_env = ShapeEnv()
+    symnodes: dict[str, object] = {}
+    for nm, h in hints.items():
+        sym = shape_env.create_symbol(
+            h, source=LocalSource(nm), dynamic_dim=DimDynamic.DYNAMIC)
+        symnodes[nm] = shape_env.create_symintnode(sym, hint=h)
+
+    # Evaluate a dim/stride token to a torch SymInt (or int). The expression
+    # MUST be evaluated over the torch SymIntNODES so arithmetic produces torch
+    # SymInts: substituting into a sympy expr instead yields a sympy.Mul that
+    # torch.empty/as_strided reject (verified), and sympy can't be coerced back
+    # to a torch SymInt. The printed-annotation grammar is closed: int literals,
+    # bare symbols, and +/-/* products over them ("64*s16*s82"). We evaluate in
+    # a namespace exposing ONLY the symbol nodes (no builtins); every
+    # identifier in the token is checked to be a known symbol FIRST, so the
+    # evaluation cannot reference anything else — an unrecognized name (e.g. a
+    # FloorDiv/CeilToInt the grammar doesn't cover) returns None and the caller
+    # falls back to real-mode tracing rather than guessing.
+    import re as _re
+    _IDENT = _re.compile(r"[A-Za-z_]\w*")
+
+    def eval_dim(tok):
+        if isinstance(tok, int):
+            return tok
+        if not isinstance(tok, str):
+            return tok
+        tok = tok.strip()
+        if tok.lstrip("-").isdigit():
+            return int(tok)
+        if tok.isidentifier():
+            return symnodes.get(tok)  # bare symbol (None if unknown)
+        # multi-symbol product/sum: charset-bounded AND every identifier known.
+        if not all(c.isalnum() or c in " _*+-" for c in tok):
+            return None
+        if any(name not in symnodes for name in _IDENT.findall(tok)):
+            return None
+        return eval(tok, {"__builtins__": {}, **symnodes})  # symbol-node only
+
+    fake_mode = FakeTensorMode(shape_env=shape_env)
+
+    def _is_contiguous(shape, strides):
+        """Row-major contiguous check that works symbolically: compare each
+        stride to the running product of trailing dims using == over SymInts
+        (guarded). If any comparison can't be decided, treat as non-contiguous
+        (build the explicit strided view) rather than guess."""
+        running = 1
+        for st, d in zip(reversed(strides), reversed(shape)):
+            same = (st == running)
+            if isinstance(same, bool):
+                if not same:
+                    return False
+            else:
+                return False  # symbolic-undecided -> use as_strided
+            running = running * d
+        return True
+
+    def build(spec):
+        kind = spec.get("kind")
+        if kind == "symint":
+            nm = spec.get("expr")
+            return symnodes.get(nm) if nm in symnodes else int(spec.get("hint", 8))
+        if kind == "scalar":
+            return spec.get("value", 1)
+        shape = [eval_dim(d) for d in (spec.get("shape") or [])]
+        if any(d is None for d in shape):
+            return None
+        dtype = spec.get("dtype") or torch.float32
+        if isinstance(dtype, str):
+            dtype = getattr(torch, dtype, torch.float32)
+        device_text = spec.get("device") or ""
+        tdev = torch.device("cuda:0") if device_text.startswith("cuda") and \
+            torch.cuda.is_available() else dev
+        stride_spec = spec.get("stride")
+        with fake_mode:
+            if stride_spec and len(stride_spec) == len(shape):
+                strides = [eval_dim(st) for st in stride_spec]
+                if not any(st is None for st in strides) and \
+                        not _is_contiguous(shape, strides):
+                    # storage big enough for the (symbolic) strided view; the
+                    # arithmetic stays in torch SymInt space (shape/strides are
+                    # SymInts), so torch.empty/as_strided accept it.
+                    storage = 1
+                    for st, d in zip(strides, shape):
+                        storage = storage + st * (d - 1)
+                    base = torch.empty([storage], dtype=dtype, device=tdev)
+                    return torch.as_strided(base, shape, strides)
+            return torch.empty(shape, dtype=dtype, device=tdev)
+
+    inputs = []
+    for spec in specs:
+        built = build(spec)
+        if built is None:
+            return None  # unresolved -> let caller fall back to real mode
+        inputs.append(built)
+    return fake_mode, inputs
+
+
 def load_graph_module(graph_path: Path):
     """Load a post-grad graph txt or fx_graph_runnable as an FX GraphModule.
 
@@ -423,6 +577,27 @@ def load_graph_module(graph_path: Path):
                 ) + 1
                 return make_base((storage_size,)).as_strided(shape, stride)
             return make_base(shape)
+
+        # FAITHFUL DYNAMIC RECAPTURE (idempotence): a saved full graph whose
+        # forward annotations carry symbolic dims/symints (e.g. arg4_1:
+        # "f32[64,64,s16,s82][64*s16*s82,...]" + arg2_1:"Sym(s16)") must be
+        # re-traced SYMBOLICALLY, with the symint inputs sharing the SAME
+        # symbols as the tensor dynamic dims — else make_fx(real) bakes them to
+        # their hints and a dynamic graph recaptures as a STATIC region
+        # (frozen dims + lifted _shape_param const list). The lossy local
+        # annotation parser collapses s16->hint and strides->garbage, so use
+        # full_graph_harness.parse_full_graph_inputs (keeps symbol names +
+        # exprs) and reconstruct shared ShapeEnv symbols. Static graphs (no
+        # symbolic spec) keep the original real-mode path untouched.
+        from full_graph_harness import parse_full_graph_inputs
+        dyn_specs = parse_full_graph_inputs(content)
+        if dyn_specs and _specs_have_symbols(dyn_specs):
+            sym_inputs = _build_symbolic_inputs(dyn_specs, dev)
+            if sym_inputs is not None:
+                fake_mode, inputs = sym_inputs
+                with fake_mode:
+                    gm = make_fx(instance, tracing_mode="symbolic")(*inputs)
+                return gm
 
         inputs = []
         for raw_spec in input_shapes:
