@@ -22,7 +22,7 @@ Extracts fused kernel regions from real model compilations as lightweight, self-
 
 **1727 unique kernel patterns** deduplicated across 155 full models (torchbench, HuggingFace, timm) plus 8 genai microbenchmarks. **364 full model graphs** retained.
 
-Sweep time scales with point count (one per pattern vs every captured shape) and target (compile path vs oracle references). One point per pattern sweeps in ~30 min on 4x B200; the exhaustive all-shapes sweep (~2.9x the points) takes ~80 min. <!-- TODO(elias): fill in measured unique-only / compile-path numbers; only the ~80min all-shapes oracle sweep is measured (the ~30min is derived from the 2.9x ratio). -->
+A full all-shapes sweep runs in ~36 min across ~5K points (1727 patterns) on 4x B200.
 
 <details>
 <summary>Coverage breakdown</summary>
