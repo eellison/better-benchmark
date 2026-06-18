@@ -1,0 +1,200 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "0ada225c0a04": {
+      "324149d9": 1
+    },
+    "826ea0b5f6e4": {
+      "2909fe19": 4,
+      "1b310572": 4
+    },
+    "f4578c128d74": {
+      "324149d9": 8
+    },
+    "320d8d15d623": {
+      "da5fdead": 16
+    },
+    "95ed2ef35da9": {
+      "e6fa82b2": 8
+    },
+    "b19e82f2a47b": {
+      "324149d9": 3
+    },
+    "ec73bf00e3e1": {
+      "aafbb27e": 1
+    },
+    "7ba7efb075cd": {
+      "d7517139": 1
+    },
+    "63cad2383953": {
+      "a5e05174": 1
+    },
+    "0b055fee3826": {
+      "d7517139": 1
+    },
+    "bc5b607a9d91": {
+      "aafbb27e": 4
+    },
+    "b89a1eb0b38d": {
+      "976e9b58": 4
+    },
+    "5d4ed0a3898e": {
+      "da5fdead": 4
+    },
+    "0b4143d6fc46": {
+      "aafbb27e": 3
+    },
+    "fded946cd26f": {
+      "e5172202": 1
+    },
+    "014bbb0703c3": {
+      "af87e8bd": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "ff7ae99a314a",
+      "count": 1,
+      "sig": "((T([1, 80, 3000],torch.bfloat16,[240000, 3000, 1]),T([384, 80, 3],torch.bfloat16,[240, 3, 1]),T([384],torch.bfloat16,[1]),[1],[1],[1],False,[0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 22.39999920129776,
+      "branch_us": 22.39999920129776
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "a66436b0cb29",
+      "count": 1,
+      "sig": "((T([1, 384, 3000],torch.bfloat16,[1152000, 3000, 1]),T([384, 384, 3],torch.bfloat16,[1152, 3, 1]),T([384],torch.bfloat16,[1]),[2],[1],[1],False,[0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "convolution_1",
+      "baseline_us": 30.368000268936157,
+      "branch_us": 30.368000268936157
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "55893451ed8c",
+      "count": 16,
+      "sig": "((T([384],torch.bfloat16,[1]),T([1500, 384],torch.bfloat16,[384, 1]),T([384, 384],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 7.712000049650669,
+      "branch_us": 7.712000049650669
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "066c40de1eaa",
+      "count": 8,
+      "sig": "((T([1500, 384],torch.bfloat16,[384, 1]),T([384, 384],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 7.327999919652939,
+      "branch_us": 7.327999919652939
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "fd2da1adfd6b",
+      "count": 4,
+      "sig": "((T([1, 6, 1500, 64],torch.bfloat16,[576000, 96000, 64, 1]),T([1, 6, 1500, 64],torch.bfloat16,[576000, 96000, 64, 1]),T([1, 6, 1500, 64],torch.bfloat16,[576000, 96000, 64, 1]),None,False),{scale:1.0})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 24.000000208616257,
+      "branch_us": 24.000000208616257
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "039b0376e848",
+      "count": 4,
+      "sig": "((T([1536],torch.bfloat16,[1]),T([1500, 384],torch.bfloat16,[384, 1]),T([384, 1536],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "addmm_3",
+      "baseline_us": 9.088000282645226,
+      "branch_us": 9.088000282645226
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "218e941f6460",
+      "count": 4,
+      "sig": "((T([384],torch.bfloat16,[1]),T([1500, 1536],torch.bfloat16,[1536, 1]),T([1536, 384],torch.bfloat16,[1, 1536])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 9.631999768316746,
+      "branch_us": 9.631999768316746
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "217636694c57",
+      "count": 20,
+      "sig": "((T([384],torch.bfloat16,[1]),T([1, 384],torch.bfloat16,[384, 1]),T([384, 384],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "addmm_20",
+      "baseline_us": 7.071999832987785,
+      "branch_us": 7.071999832987785
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "b46b45e35c5e",
+      "count": 4,
+      "sig": "((T([1, 384],torch.bfloat16,[384, 1]),T([384, 384],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "mm_4",
+      "baseline_us": 6.943999789655209,
+      "branch_us": 6.943999789655209
+    },
+    {
+      "target": "aten._scaled_dot_product_efficient_attention.default",
+      "shape_hash": "747877ec97cc",
+      "count": 4,
+      "sig": "((T([1, 6, 1, 64],torch.bfloat16,[384, 64, 384, 1]),T([1, 6, 1, 64],torch.bfloat16,[384, 64, 384, 1]),T([1, 6, 1, 64],torch.bfloat16,[384, 64, 384, 1]),T([1, 6, 1, 1],torch.bfloat16,[8, 0, 8, 1]),False),{scale:1.0})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "_scaled_dot_product_efficient_attention",
+      "baseline_us": 11.103999800980091,
+      "branch_us": 11.103999800980091
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "fd8b6c40d43f",
+      "count": 4,
+      "sig": "((T([1, 6, 1, 64],torch.bfloat16,[384, 64, 384, 1]),T([1, 6, 1500, 64],torch.bfloat16,[576000, 96000, 64, 1]),T([1, 6, 1500, 64],torch.bfloat16,[576000, 96000, 64, 1]),None,False),{scale:1.0})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention_4",
+      "baseline_us": 10.879999957978725,
+      "branch_us": 10.879999957978725
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "3a1b897f6c92",
+      "count": 4,
+      "sig": "((T([1536],torch.bfloat16,[1]),T([1, 384],torch.bfloat16,[384, 1]),T([384, 1536],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "addmm_26",
+      "baseline_us": 7.679999805986881,
+      "branch_us": 7.679999805986881
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "2b28954dc957",
+      "count": 4,
+      "sig": "((T([384],torch.bfloat16,[1]),T([1, 1536],torch.bfloat16,[1536, 1]),T([1536, 384],torch.bfloat16,[1, 1536])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "addmm_27",
+      "baseline_us": 7.872000336647034,
+      "branch_us": 7.872000336647034
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "3ae17d27b8ca",
+      "count": 1,
+      "sig": "((T([1, 384],torch.bfloat16,[384, 1]),T([384, 51865],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/openai/whisper-tiny/full_graph_000.py",
+      "node": "mm_12",
+      "baseline_us": 30.208000913262367,
+      "branch_us": 30.208000913262367
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "openai__whisper-tiny"
+}

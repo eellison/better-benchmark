@@ -1,0 +1,108 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "644fa7675014": {
+      "cb779bb6": 1
+    },
+    "45f7dfd4a983": {
+      "63bebcf6": 1
+    },
+    "2d969ac9ad59": {
+      "92efc45e": 6
+    },
+    "3a2d56cdea00": {
+      "63bebcf6": 6
+    },
+    "1611fb0c7845": {
+      "74f1c5d9": 6
+    },
+    "f4578c128d74": {
+      "63bebcf6": 5
+    },
+    "aa30343135f0": {
+      "26cc4258": 1
+    },
+    "fda6b7a40722": {
+      "7a2cdb11": 1
+    },
+    "42988b64e7f9": {
+      "c1ee6cd0": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "4ee7f4369123",
+      "count": 6,
+      "sig": "((T([2304],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 2304],torch.bfloat16,[2304, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistillGPT2/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 41.05599969625473,
+      "branch_us": 41.05599969625473
+    },
+    {
+      "target": "aten.cumsum.default",
+      "shape_hash": "47442c977a6b",
+      "count": 1,
+      "sig": "((T([32, 512],torch.bool,[512, 1]),-1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistillGPT2/full_graph_000.py",
+      "node": "cumsum",
+      "baseline_us": 15.231999568641186,
+      "branch_us": 15.231999568641186
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "59ee14564620",
+      "count": 6,
+      "sig": "((T([32, 12, 512, 64],torch.bfloat16,[1179648, 64, 2304, 1]),T([32, 12, 512, 64],torch.bfloat16,[1179648, 64, 2304, 1]),T([32, 12, 512, 64],torch.bfloat16,[1179648, 64, 2304, 1]),T([32, 1, 512, 512],torch.bfloat16,[262144, 262144, 512, 1]),False),{scale:0.125})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistillGPT2/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 110.33599823713303,
+      "branch_us": 110.33599823713303
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "a27a5b48420c",
+      "count": 6,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistillGPT2/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 22.143999114632607,
+      "branch_us": 22.143999114632607
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "5871b24e6b2c",
+      "count": 6,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistillGPT2/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 50.11200159788132,
+      "branch_us": 50.11200159788132
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "5e42afb903c6",
+      "count": 6,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistillGPT2/full_graph_000.py",
+      "node": "addmm_3",
+      "baseline_us": 57.0559985935688,
+      "branch_us": 57.0559985935688
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0f02e040318f",
+      "count": 1,
+      "sig": "((T([16384, 768],torch.bfloat16,[768, 1]),T([768, 50264],torch.bfloat16,[50264, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistillGPT2/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 970.687985420227,
+      "branch_us": 970.687985420227
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "DistillGPT2"
+}

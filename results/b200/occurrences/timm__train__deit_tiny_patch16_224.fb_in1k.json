@@ -1,0 +1,257 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "8bb40810003c": {
+      "2e98be1c": 1,
+      "5cffd879": 12,
+      "e1aec24f": 12,
+      "aafa641b": 12,
+      "2613646b": 12
+    },
+    "ccd411f2a45d": {
+      "dc135658": 1,
+      "fa08f181": 25,
+      "726421b1": 12,
+      "0917226b": 12,
+      "45c33f0e": 1,
+      "e6d34841": 1
+    },
+    "38fe02d3252c": {
+      "0ff22f63": 1
+    },
+    "826ea0b5f6e4": {
+      "5ad79285": 12
+    },
+    "e2ecdbc22ad9": {
+      "0ff22f63": 23
+    },
+    "a42e20fae37b": {
+      "79a90d04": 12
+    },
+    "2b21beb0932e": {
+      "efb792b2": 1
+    },
+    "04d85912d998": {
+      "daeb6b89": 1,
+      "5727c431": 12,
+      "a9e40e42": 12,
+      "e0ab88b0": 12,
+      "32da6b44": 12,
+      "3a15e468": 1
+    },
+    "51b3bd5aa388": {
+      "c8d56283": 1
+    },
+    "6d68a671ec4a": {
+      "8a12efe4": 12
+    },
+    "5b2567b5fdd7": {
+      "0243aeaa": 23
+    },
+    "139a3020e8bf": {
+      "9448cee8": 12
+    },
+    "0931873d4f42": {
+      "7639f983": 1
+    },
+    "c2bf513c1ebf": {
+      "e781aba9": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "0242414b49e1",
+      "count": 1,
+      "sig": "((T([128, 3, 224, 224],torch.bfloat16,[150528, 1, 672, 3]),T([192, 3, 16, 16],torch.bfloat16,[768, 1, 48, 3]),T([192],torch.bfloat16,[1]),[16,16],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 639.7759914398193,
+      "branch_us": 639.7759914398193
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "2e52502f166c",
+      "count": 12,
+      "sig": "((T([576],torch.bfloat16,[1]),T([25216, 192],torch.bfloat16,[192, 1]),T([192, 576],torch.bfloat16,[1, 192])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 16.127999871969223,
+      "branch_us": 16.127999871969223
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "dfaf32944cca",
+      "count": 12,
+      "sig": "((T([128, 3, 197, 64],torch.bfloat16,[113472, 64, 576, 1]),T([128, 3, 197, 64],torch.bfloat16,[113472, 64, 576, 1]),T([128, 3, 197, 64],torch.bfloat16,[113472, 64, 576, 1]),None,True),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 22.39999920129776,
+      "branch_us": 22.39999920129776
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "ea1f3fb8c012",
+      "count": 12,
+      "sig": "((T([192],torch.bfloat16,[1]),T([25216, 192],torch.bfloat16,[192, 1]),T([192, 192],torch.bfloat16,[1, 192])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 12.319999746978283,
+      "branch_us": 12.319999746978283
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "8b27681fb592",
+      "count": 12,
+      "sig": "((T([768],torch.bfloat16,[1]),T([25216, 192],torch.bfloat16,[192, 1]),T([192, 768],torch.bfloat16,[1, 192])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 17.311999574303627,
+      "branch_us": 17.311999574303627
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "a9e5d13a1922",
+      "count": 12,
+      "sig": "((T([192],torch.bfloat16,[1]),T([25216, 768],torch.bfloat16,[768, 1]),T([768, 192],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_000.py",
+      "node": "addmm_3",
+      "baseline_us": 17.40800030529499,
+      "branch_us": 17.40800030529499
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "940ca140b59c",
+      "count": 1,
+      "sig": "((T([1000],torch.bfloat16,[1]),T([128, 192],torch.bfloat16,[192, 1]),T([192, 1000],torch.bfloat16,[1, 192])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_000.py",
+      "node": "addmm_48",
+      "baseline_us": 7.007999811321497,
+      "branch_us": 7.007999811321497
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "3f1d600c7ad9",
+      "count": 1,
+      "sig": "((T([128, 1000],torch.bfloat16,[1000, 1]),T([1000, 192],torch.bfloat16,[192, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 7.840000092983246,
+      "branch_us": 7.840000092983246
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0ca8fce09218",
+      "count": 1,
+      "sig": "((T([1000, 128],torch.bfloat16,[1, 1000]),T([128, 192],torch.bfloat16,[192, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 7.648000027984381,
+      "branch_us": 7.648000027984381
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "15264331eb5b",
+      "count": 12,
+      "sig": "((T([25216, 192],torch.bfloat16,[192, 1]),T([192, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm_2",
+      "baseline_us": 16.063999384641647,
+      "branch_us": 16.063999384641647
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0eeafeb0f2d7",
+      "count": 12,
+      "sig": "((T([192, 25216],torch.bfloat16,[1, 192]),T([25216, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm_3",
+      "baseline_us": 23.679999634623528,
+      "branch_us": 23.679999634623528
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "ceb323694054",
+      "count": 12,
+      "sig": "((T([25216, 768],torch.bfloat16,[768, 1]),T([768, 192],torch.bfloat16,[192, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm_4",
+      "baseline_us": 17.343999817967415,
+      "branch_us": 17.343999817967415
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "58f420673356",
+      "count": 12,
+      "sig": "((T([768, 25216],torch.bfloat16,[1, 768]),T([25216, 192],torch.bfloat16,[192, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm_5",
+      "baseline_us": 23.264000192284584,
+      "branch_us": 23.264000192284584
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "4c2c465e9e0d",
+      "count": 12,
+      "sig": "((T([25216, 192],torch.bfloat16,[192, 1]),T([192, 192],torch.bfloat16,[192, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm_6",
+      "baseline_us": 11.327999643981457,
+      "branch_us": 11.327999643981457
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "eb2531233070",
+      "count": 12,
+      "sig": "((T([192, 25216],torch.bfloat16,[1, 192]),T([25216, 192],torch.bfloat16,[192, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm_7",
+      "baseline_us": 15.072000212967396,
+      "branch_us": 15.072000212967396
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention_backward.default",
+      "shape_hash": "e8323fc4dec2",
+      "count": 12,
+      "sig": "((T([128, 3, 197, 64],torch.bfloat16,[37824, 64, 192, 1]),T([128, 3, 197, 64],torch.bfloat16,[113472, 64, 576, 1]),T([128, 3, 197, 64],torch.bfloat16,[113472, 64, 576, 1]),T([128, 3, 197, 64],torch.bfloat16,[113472, 64, 576, 1]),T([128, 3, 197, 64],torch.bfloat16,[37824, 64, 192, 1]),T([128, 3, 197, 1],torch.float32,[591, 197, 1, 1]),T([],torch.int64,[]),T([],torch.int64,[]),None,None,None,197,197,0.0,False),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "_scaled_dot_product_cudnn_attention_backward",
+      "baseline_us": 54.11199852824211,
+      "branch_us": 54.11199852824211
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "c89dabd540af",
+      "count": 12,
+      "sig": "((T([25216, 576],torch.bfloat16,[576, 1]),T([576, 192],torch.bfloat16,[192, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm_8",
+      "baseline_us": 14.175999909639359,
+      "branch_us": 14.175999909639359
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "318734764ca2",
+      "count": 12,
+      "sig": "((T([576, 25216],torch.bfloat16,[1, 576]),T([25216, 192],torch.bfloat16,[192, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "mm_9",
+      "baseline_us": 23.360000923275948,
+      "branch_us": 23.360000923275948
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8f6c952d6b2a",
+      "count": 1,
+      "sig": "((T([128, 192, 14, 14],torch.bfloat16,[37632, 1, 2688, 192]),T([128, 3, 224, 224],torch.bfloat16,[150528, 1, 672, 3]),T([192, 3, 16, 16],torch.bfloat16,[768, 1, 48, 3]),[192],[16,16],[0,0],[1,1],False,[0,0],1,[False,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/deit_tiny_patch16_224.fb_in1k/full_graph_001.py",
+      "node": "convolution_backward",
+      "baseline_us": 220.89600563049316,
+      "branch_us": 220.89600563049316
+    }
+  ],
+  "trace_errors": [],
+  "suite": "timm",
+  "mode": "train",
+  "model": "deit_tiny_patch16_224.fb_in1k"
+}
