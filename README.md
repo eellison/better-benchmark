@@ -20,7 +20,7 @@ Extracts fused kernel regions from real model compilations as lightweight, self-
 
 ## Corpus
 
-**1727 unique kernel patterns** deduplicated across 155 full models (torchbench, HuggingFace, timm) plus 8 genai microbenchmarks. **364 full model graphs** retained.
+**1727 unique kernel patterns** deduplicated across 158 full models (torchbench, HuggingFace, timm; training + inference) plus 8 genai microbenchmarks. **358 full model graphs** retained.
 
 A full all-shapes sweep runs in ~36 min across ~5K points (1727 patterns) on 4x B200.
 
