@@ -896,11 +896,15 @@ def test_merge_writes_dynamic_symbols_guards_bindings():
     """A dynamic capture index entry (symbols/guards on the entry, exprs in
     inputs) merges into shapes.json with symbols/guards GRAPH-LEVEL and
     bindings/captured_dynamic per point — exactly the schema
-    _parse_shapes_json reads. CPU-only: pure dict plumbing."""
+    _parse_shapes_json reads. Symbol names are CANONICALIZED to s0,s1,... by
+    first appearance at write (dynamo's s53/s0 -> s0/s1: s53 appears first in
+    [64,64,s53,s0]). CPU-only: pure dict plumbing."""
     import json, tempfile
     from pathlib import Path
     from merge_captures import _write_shapes_json
 
+    # dynamo allocated s53 (first in shape) and s0 (second); canonicalize swaps
+    # them: s53 -> s0, s0 -> s1.
     symbols = {"s0": {"hint": 16, "range": [2, None]},
                "s53": {"hint": 16, "range": [2, None]}}
     guards = ["Eq(s0*s53, 256)"]
@@ -913,23 +917,67 @@ def test_merge_writes_dynamic_symbols_guards_bindings():
                            occurrences=1, inputs=inputs,
                            symbols=symbols, guards=guards)
         data = json.loads((d / "shapes.json").read_text())
-        # graph-level
-        assert data["symbols"] == symbols
-        assert data["guards"] == guards
+        # graph-level — CANONICAL names (both hints 16, ranges unchanged)
+        assert data["symbols"] == {"s0": {"hint": 16, "range": [2, None]},
+                                   "s1": {"hint": 16, "range": [2, None]}}
+        # guard canonicalized: s0*s53 (==s1*s0) renders s0*s1
+        assert data["guards"] == ["Eq(s0*s1, 256)"]
         pt = data["points"][0]
         assert pt["captured_dynamic"] is True
-        assert pt["bindings"] == {"s0": 16, "s53": 16}  # hints
-        # exprs preserved verbatim in the point inputs
-        assert pt["inputs"][0][0] == [64, 64, "s53", "s0"]
-        assert pt["inputs"][1] == ["I", 256, "s0*s53"]
+        assert pt["bindings"] == {"s0": 16, "s1": 16}  # hints, canonical names
+        # exprs canonicalized in the point inputs: [...,s53,s0] -> [...,s0,s1]
+        assert pt["inputs"][0][0] == [64, 64, "s0", "s1"]
+        assert pt["inputs"][1] == ["I", 256, "s0*s1"]
 
-        # idempotent re-merge of the same symbols doesn't duplicate guards
+        # idempotent re-merge of the same (canonical) symbols: no dup guards,
+        # one point — AND re-canonicalizing the already-canonical form is a
+        # no-op (s0/s1 stay put).
         _write_shapes_json(d, "deadbeef", "(sig)", "probe/infer/m2",
                            occurrences=1, inputs=inputs,
                            symbols=symbols, guards=guards)
         data2 = json.loads((d / "shapes.json").read_text())
-        assert data2["guards"] == guards, "guard duplicated on re-merge"
+        assert data2["guards"] == ["Eq(s0*s1, 256)"], "guard dup/drift on re-merge"
         assert len(data2["points"]) == 1
+        assert data2["symbols"] == data["symbols"]
+
+
+def test_canonicalize_symbols_first_appearance_order():
+    """Symbol names canonicalize to s0,s1,... by FIRST APPEARANCE across the
+    inputs (then guards), left-to-right — so two captures of the same family
+    with different dynamo names (s17/s15 vs s7/s92) produce IDENTICAL saved
+    structure. Pure (no GPU): exercises merge_captures.canonicalize_symbols."""
+    from merge_captures import canonicalize_symbols, _canonical_symbol_rename
+
+    # s17 appears first (shape dim 2), s15 second -> s17->s0, s15->s1.
+    symbols = {"s17": {"hint": 8, "range": [2, None]},
+               "s15": {"hint": 8, "range": [2, None]}}
+    inputs = [[[64, 64, "s17", "s15"], "f32",
+               {"st": ["64*s15*s17", "s15*s17", "s15", 1]}],
+              ["I", 64, "s15*s17"], ["I", 8, "s17"], ["I", 8, "s15"]]
+    guards = ["Eq(s15*s17, 64)"]
+    bindings = {"s17": 8, "s15": 8}
+
+    assert _canonical_symbol_rename(inputs, guards) == {"s17": "s0", "s15": "s1"}
+    s, i, g, b = canonicalize_symbols(symbols, inputs, guards, bindings)
+    assert set(s) == {"s0", "s1"}
+    assert i[0][0] == [64, 64, "s0", "s1"]
+    assert i[0][2]["st"] == ["64*s0*s1", "s0*s1", "s1", 1]
+    assert i[1] == ["I", 64, "s0*s1"]
+    assert b == {"s0": 8, "s1": 8}
+    assert g == ["Eq(s0*s1, 64)"]
+
+    # A DIFFERENT dynamo naming of the SAME family canonicalizes IDENTICALLY.
+    symbols2 = {"s7": {"hint": 8, "range": [2, None]},
+                "s92": {"hint": 8, "range": [2, None]}}
+    inputs2 = [[[64, 64, "s7", "s92"], "f32",
+                {"st": ["64*s7*s92", "s7*s92", "s92", 1]}],
+               ["I", 64, "s7*s92"], ["I", 8, "s7"], ["I", 8, "s92"]]
+    s2, i2, g2, b2 = canonicalize_symbols(
+        symbols2, inputs2, ["Eq(s7*s92, 64)"], {"s7": 8, "s92": 8})
+    assert (s2, i2, g2, b2) == (s, i, g, b), "equivalent captures not identical"
+
+    # Idempotent: feeding the canonical form back in is a no-op.
+    assert canonicalize_symbols(s, i, g, b) == (s, i, g, b)
 
 
 def test_merge_static_point_has_no_dynamic_fields():
@@ -1791,12 +1839,21 @@ def test_dynamic_capture_merge_load_roundtrip_gpu():
             symbols=entry.get("symbols"), guards=entry.get("guards"))
 
         sj = json.loads((repro_dir / "shapes.json").read_text())
-        assert sj["symbols"] == entry["symbols"]          # graph-level
+        # Symbols are CANONICALIZED to s0,s1,... at write (dynamo's raw names
+        # are run-dependent), so the saved table is canonical, not the entry's
+        # raw names. Same COUNT, canonical NAMES, ranges preserved.
+        assert set(sj["symbols"]) == {f"s{i}" for i in range(len(entry["symbols"]))}
+        # the set of symbol DEFINITIONS (hint+range) is preserved, just renamed
+        def _defs(table):
+            return sorted(json.dumps(v, sort_keys=True) for v in table.values())
+        assert _defs(sj["symbols"]) == _defs(entry["symbols"])
         assert sj["points"][0]["captured_dynamic"] is True
         assert sj["points"][0]["bindings"]                # hint binding
 
         repro_py = str(repro_dir / "repro.py")
-        syms = sorted(entry["symbols"])  # e.g. ['s0', 's53']
+        # rebind via the CANONICAL names the shapes.json now uses (not the
+        # entry's raw dynamo names).
+        syms = sorted(sj["symbols"])  # ['s0', 's1']
 
         def _run(binding):
             cfg = next(iter(load_shape_configs(
@@ -2102,8 +2159,12 @@ def test_harvest_survives_size_hint_raise():
 
 
 def test_merge_distinct_symbolizations_do_not_clobber():
-    """Finding D: two captures of the same shape_hash with DIFFERENT symbol
-    names must not overwrite each other's bindings; each point stays loadable."""
+    """Finding D, post-canonicalization: two captures that are the SAME
+    symbolic family but DIFFERENT bindings each stay loadable and don't
+    overwrite each other. Symbol names canonicalize to s0,s1,... so dynamo's
+    s53/s9 both become s0 — the FAMILY is shared; the distinct points are
+    keyed by shape_hash, each carrying its own binding (the FAMILY/POINT
+    model). A realistic distinct binding => distinct shape_hash."""
     import json, tempfile
     from pathlib import Path
     from merge_captures import _write_shapes_json
@@ -2111,15 +2172,23 @@ def test_merge_distinct_symbolizations_do_not_clobber():
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
         (d / "repro.py").write_text("# stub")
-        _write_shapes_json(d, "hh", "(s)", "m1", occurrences=1,
+        # same family ([64, s], range [2,None]) at two bindings -> two points.
+        _write_shapes_json(d, "h16", "(s)", "m1", occurrences=1,
                            inputs=[[[64, "s53"], "f32"], ["I", 16, "s53"]],
                            symbols={"s53": {"hint": 16, "range": [2, None]}})
-        _write_shapes_json(d, "hh", "(s)", "m2", occurrences=1,
+        _write_shapes_json(d, "h32", "(s)", "m2", occurrences=1,
                            inputs=[[[64, "s9"], "f32"], ["I", 32, "s9"]],
                            symbols={"s9": {"hint": 32, "range": [2, None]}})
         data = json.loads((d / "shapes.json").read_text())
+        # ONE shared canonical family symbol; two binding points.
+        assert set(data["symbols"]) == {"s0"}
         assert len(data["points"]) == 2
-        assert set(data["symbols"]) == {"s53", "s9"}
+        by_hash = {p["shape_hash"]: p for p in data["points"]}
+        assert by_hash["h16"]["bindings"] == {"s0": 16}
+        assert by_hash["h32"]["bindings"] == {"s0": 32}
+        # each point's inputs reference the canonical s0
+        assert by_hash["h16"]["inputs"] == [[[64, "s0"], "f32"], ["I", 16, "s0"]]
+        assert by_hash["h32"]["inputs"] == [[[64, "s0"], "f32"], ["I", 32, "s0"]]
         # both load without 'unbound symbol'
         cfgs = load_shape_configs(str(d / "repro.py"))
         assert len(cfgs) == 2
@@ -2320,7 +2389,9 @@ def test_compile_fx_one_artifact_serves_many_bindings_gpu():
         spec.loader.exec_module(mod)
 
         dyn = dynamic_dims_for_repro(repro_py)
-        syms = sorted(entry["symbols"])
+        # symbols are canonicalized (s0,s1,...) in the written shapes.json;
+        # bind via those names, not the entry's raw dynamo names.
+        syms = sorted(json.loads((cdir / "shapes.json").read_text())["symbols"])
         # trace at DISTINCT dims so symbols stay distinct
         tb = {syms[0]: 8, syms[1]: 32}
         trace_inputs = make_inputs_from_config(
@@ -2560,7 +2631,8 @@ def test_dynamic_default_measures_general_kernel_gpu():
         spec = importlib.util.spec_from_file_location("_vm_rep", repro_py)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        syms = sorted(entry["symbols"])
+        # canonical names from the written shapes.json (not raw dynamo names)
+        syms = sorted(json.loads((cdir / "shapes.json").read_text())["symbols"])
 
         # GROUND TRUTH: dynamo->AOT->inductor at two distinct shapes (generalized)
         dyn = dynamic_dims_for_repro(repro_py)
@@ -2655,7 +2727,8 @@ def test_compile_fx_direct_diverges_from_model_kernels_gpu():
         spec = importlib.util.spec_from_file_location("_vm_div", repro_py)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        syms = sorted(entry["symbols"])
+        # canonical names from the written shapes.json (not raw dynamo names)
+        syms = sorted(json.loads((cdir / "shapes.json").read_text())["symbols"])
         dyn = dynamic_dims_for_repro(repro_py)
         B1, B2 = {syms[0]: 8, syms[1]: 32}, {syms[0]: 12, syms[1]: 40}
 

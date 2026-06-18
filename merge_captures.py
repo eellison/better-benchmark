@@ -51,6 +51,83 @@ def _atomic_write_text(path: Path, text: str) -> None:
     tmp.replace(path)
 
 
+def _symbols_in_order(text) -> list:
+    """Free symbol NAMES in an expr string, in a DETERMINISTIC order. sympy
+    gives free_symbols as an unordered SET, so we order by sympy's own
+    canonical sort_key — the same order sympy renders a commutative product in
+    — which is stable and (unlike a str.find on the rendering) has no
+    substring hazard (find('s1') would match inside 's15'). A bare int or a
+    non-symbolic slot yields []. Per-slot building block of the first-
+    appearance canonical ordering; for the common case (a symbol first appears
+    as a BARE shape dim) the slot has one symbol and order is trivial."""
+    if not isinstance(text, str):
+        return []
+    from input_codec import _sympify_expr
+    expr = _sympify_expr(text)
+    return [s.name for s in sorted(expr.free_symbols, key=lambda s: s.sort_key())]
+
+
+def _canonical_symbol_rename(inputs, guards) -> dict:
+    """Build {original_name -> 's0','s1',...} by FIRST APPEARANCE across the
+    inputs (then guards), left-to-right — the same discipline as ordering
+    outputs by definition order. Makes the saved symbolic structure stable
+    regardless of the names dynamo's ShapeEnv happened to allocate (s17/s15
+    one run, s7/s92 another). Walks the compact input entries in forward
+    order, each slot left-to-right: tensor shape dims, then strides, then
+    ['I',hint,expr] symint exprs and ['S',[dims]] shape-param dims; finally
+    guards. Returns {} if there is nothing to rename."""
+    order: list[str] = []
+    seen: set[str] = set()
+
+    def note(text):
+        for name in _symbols_in_order(text):
+            if name not in seen:
+                seen.add(name)
+                order.append(name)
+
+    for e in (inputs or []):
+        if not isinstance(e, list) or not e:
+            continue
+        if isinstance(e[0], list):                 # [shape, dtype, opts?]
+            for d in e[0]:
+                note(d)
+            if len(e) > 2 and isinstance(e[2], dict):
+                for s in e[2].get("st", []):
+                    note(s)
+                note(e[2].get("off"))
+        elif e[0] == "I":                          # ['I', hint, expr]
+            if len(e) > 2:
+                note(e[2])
+        elif e[0] == "S":                          # ['S', [dims...]]
+            for d in e[1]:
+                note(d)
+    for g in (guards or []):
+        note(g)
+
+    # Already canonical (s0,s1,... in order) -> empty rename (idempotent).
+    target = [f"s{i}" for i in range(len(order))]
+    if order == target:
+        return {}
+    return {old: new for old, new in zip(order, target)}
+
+
+def canonicalize_symbols(symbols, inputs, guards, bindings=None):
+    """Canonicalize a dynamic point's symbol NAMES to s0,s1,... by first
+    appearance (see _canonical_symbol_rename), rewriting the coupled set
+    (symbols table, inputs exprs, guards, bindings) consistently via the
+    sympy-based renamers (substring-safe, simultaneous). Returns the rewritten
+    (symbols, inputs, guards, bindings). A no-op when already canonical."""
+    rename = _canonical_symbol_rename(inputs, guards)
+    if not rename:
+        return symbols, inputs, guards, bindings
+    symbols = {rename.get(n, n): d for n, d in (symbols or {}).items()}
+    inputs = _rename_symbols_in_inputs(inputs, rename)
+    guards = [_rename_symbols_in_expr(g, rename) for g in (guards or [])] or guards
+    if bindings is not None:
+        bindings = {rename.get(n, n): v for n, v in bindings.items()}
+    return symbols, inputs, guards, bindings
+
+
 def _rename_symbols_in_expr(text, rename: dict) -> str:
     """Rename symbols in a sympy-printable expr string via sympy substitution
     (NOT string replace — 's0' must not corrupt 's0_other' or '64*s0'). A bare
@@ -188,6 +265,18 @@ def _write_shapes_json(
             existing_point = point
             break
 
+    # CANONICALIZE symbol names to s0,s1,... by first appearance BEFORE anything
+    # else touches them. dynamo's ShapeEnv allocates names off a global counter
+    # (s17/s15 one run, s7/s92 another) so the SAME family recaptured twice
+    # otherwise lands different symbol names -> non-idempotent shapes.json (the
+    # recapture symbol-drift residual). Canonicalizing here makes the saved
+    # symbolic structure name-stable, so collision detection + the binding
+    # below compare canonical-to-canonical. Idempotent: already-canonical input
+    # renames to itself (no-op).
+    if symbols:
+        symbols, inputs, guards, _ = canonicalize_symbols(
+            symbols, inputs, guards)
+
     # A dynamic point's symbols/guards/bindings/inputs are a COUPLED set: the
     # inputs' expr strings reference exactly these symbol names. Dynamo
     # REALLOCATES symbol names per trace context, so a second capture of the
@@ -203,7 +292,15 @@ def _write_shapes_json(
         rename = {}
         for name, defn in symbols.items():
             other = existing_syms_table.get(name)
-            if other is not None and other != defn:
+            # Collision = same canonical name but a STRUCTURALLY different
+            # symbol. Compare RANGE (+ guard participation, shared graph-level),
+            # NOT the hint: post-canonicalization every point of the same
+            # family gets s0,s1,... so two points differing only in BINDING
+            # (hint 8 vs 4) are the SAME symbol at different points — they MUST
+            # share the name (the whole point of canonicalization), with the
+            # per-point `bindings` carrying the hint. Only a different range is
+            # a genuine clash that the shared symbols table can't hold.
+            if other is not None and other.get("range") != defn.get("range"):
                 # collision with a different definition -> fresh name
                 cand = f"{name}__{shape_hash[:4]}"
                 i = 1
