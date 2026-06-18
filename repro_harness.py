@@ -135,6 +135,12 @@ def _parse_shapes_json(shapes_path: Path,
             from input_codec import spec_from_compact
             specs = [spec_from_compact(e) for e in compact]
             cfg = {"inputs": specs}
+            # The point's shape_hash travels with the config so the oracle
+            # bench loop can dispatch by hash (a DYNAMIC point's shape is
+            # symbolic and won't shape-match concrete inputs — the hash is the
+            # exact dispatch key). The label embeds the hash for readability;
+            # this is the structured copy callers should thread, not parse.
+            cfg["shape_hash"] = shape_hash
             # alias_group_nbytes must travel with the config — specs
             # carrying alias_group crash generation without it
             # (adversarial review bug #1).
@@ -145,7 +151,7 @@ def _parse_shapes_json(shapes_path: Path,
         try:
             inputs = _eval_signature(signature)
             if inputs:
-                configs[label] = {"inputs": inputs}
+                configs[label] = {"inputs": inputs, "shape_hash": shape_hash}
         except Exception:
             continue
 

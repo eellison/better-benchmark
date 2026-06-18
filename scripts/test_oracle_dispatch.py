@@ -218,8 +218,99 @@ def run_tests():
     assert fn is plain_oracle and info is None
     print("PASS unmigrated module unaffected")
 
+    # --- point= dispatch: DYNAMIC point routes by HASH, not shape -----------
+    # A dynamic point's resolved shape is symbolic (64,64,s0,s1) and would
+    # never == concrete runtime shapes; oracle_impl(point=) registers it
+    # shape-less and select(point=hash) routes by hash. One registration
+    # covers the whole family (every binding) — dispatch is identity, the
+    # kernel handles concrete dims internally.
+    _run_point_dispatch_tests()
+
     reset_oracle_registry(MOD)
     print("\nALL DISPATCH TESTS PASS")
+
+
+def _run_point_dispatch_tests():
+    import json
+    import tempfile
+    import types
+    from pathlib import Path
+
+    PMOD = "test_oracle_dispatch_point_fake"
+    reset_oracle_registry(PMOD)
+
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        # A shapes.json with ONE dynamic family, TWO binding points (distinct
+        # shape_hashes), shapes symbolic over s0/s1. (As produced by capture +
+        # canonical symbol naming.)
+        shapes = {
+            "symbols": {"s0": {"hint": 8, "range": [2, None]},
+                        "s1": {"hint": 8, "range": [2, None]}},
+            "guards": [],
+            "points": [
+                {"shape_hash": "aaaa1111", "captured_dynamic": True,
+                 "bindings": {"s0": 8, "s1": 8},
+                 "inputs": [[[64, 64, "s0", "s1"], "f32"]]},
+                {"shape_hash": "bbbb2222", "captured_dynamic": True,
+                 "bindings": {"s0": 24, "s1": 24},
+                 "inputs": [[[64, 64, "s0", "s1"], "f32"]]},
+            ],
+        }
+        (d / "shapes.json").write_text(json.dumps(shapes))
+
+        # A module whose __file__ sits in the dir (oracle_impl resolves the
+        # sibling shapes.json off the registering fn's module file).
+        mod = types.ModuleType(PMOD)
+        mod.__file__ = str(d / "oracle.py")
+        sys.modules[PMOD] = mod
+
+        def pmake(name):
+            def fn(inputs):
+                return name
+            fn.__module__ = PMOD
+            fn.__name__ = name
+            return fn
+
+        # Register ONE kernel per point hash (shape-less; hash is the key).
+        oracle_impl(point="aaaa1111")(pmake("k_8"))
+        oracle_impl(point="bbbb2222")(pmake("k_24"))
+
+        # The dynamic point registered shape-less (symbolic shape dropped).
+        from oracle_harness import get_module_registry
+        reg = get_module_registry(PMOD)
+        assert all(e["shape"] is None for e in reg._entries), \
+            "dynamic point should register shape-less"
+        assert {e["point"] for e in reg._entries} == {"aaaa1111", "bbbb2222"}
+
+        # Dispatch by hash routes to the right kernel — and the SAME hash
+        # matches REGARDLESS of the concrete runtime shape (family coverage).
+        e, info = reg.select(fake_inputs((64, 64, 8, 8)), point="aaaa1111")
+        assert e["fn"].__name__ == "k_8" and info["matched"] in (
+            "point", "point+hardware"), info
+        e, _ = reg.select(fake_inputs((64, 64, 24, 24)), point="bbbb2222")
+        assert e["fn"].__name__ == "k_24"
+        # the 8-point kernel also matches a DIFFERENT concrete shape under its
+        # hash (proves it's hash-keyed, not shape-keyed):
+        e, _ = reg.select(fake_inputs((64, 64, 99, 7)), point="aaaa1111")
+        assert e["fn"].__name__ == "k_8"
+        # no hash threaded -> shape-less entries are NOT shape-general here
+        # (they carry a point), so a bare shape lookup finds nothing -> loud.
+        try:
+            reg.select(fake_inputs((64, 64, 8, 8)))
+            raise AssertionError("expected RuntimeError (no hash, no shape match)")
+        except RuntimeError:
+            pass
+        # unknown hash -> loud (no silent wrong-kernel)
+        try:
+            reg.select(fake_inputs((64, 64, 8, 8)), point="zzzz9999")
+            raise AssertionError("expected RuntimeError (unknown hash)")
+        except RuntimeError:
+            pass
+
+        reset_oracle_registry(PMOD)
+        del sys.modules[PMOD]
+    print("PASS point= dispatch (dynamic point routes by hash, family coverage)")
 
 
 if __name__ == "__main__":

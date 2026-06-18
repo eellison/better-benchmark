@@ -148,11 +148,21 @@ class OracleRegistry:
 
     # -- registration -------------------------------------------------------
 
-    def register(self, hardware=None, shape=None, configs=None, description=None):
+    def register(self, hardware=None, shape=None, configs=None, description=None,
+                 point=None):
         """Decorator to register an oracle implementation.
 
         Args:
             hardware: GPU kind string (e.g. "B200", "H100") or None for any.
+            point: shape_hash (8-hex) of the shapes.json point this impl
+                covers. When set, it is the EXACT dispatch key: select(point=)
+                matches entry["point"] == point, with NO shape comparison. This
+                is how a DYNAMIC point dispatches — its resolved shape is
+                symbolic (e.g. (64,64,s0,s1)) and would never == concrete
+                runtime shapes, but the hash matches exactly. A static point
+                also matches by hash when the caller threads one; otherwise it
+                falls back to shape matching (back-compat). Set by
+                oracle_impl(point=).
             shape: The CONCRETE shape this implementation was written/tuned
                 for. Either a tuple of ints — the key (first tensor) input
                 shape, e.g. (8192, 262144) — or a tuple of tuples covering
@@ -185,16 +195,22 @@ class OracleRegistry:
 
         def decorator(fn):
             for prev in self._entries:
-                if prev["hardware"] == hardware and prev["shape"] == norm_shape:
+                # A duplicate is the same (hardware, shape, point) key. point
+                # MUST be part of the key: a dynamic oracle registers several
+                # shape-less (shape=None) points, one per shape_hash — those
+                # are distinct registrations, not duplicates.
+                if (prev["hardware"] == hardware and prev["shape"] == norm_shape
+                        and prev.get("point") == point):
                     print(f"WARNING: duplicate oracle registration for "
-                          f"(hardware={hardware!r}, shape={norm_shape!r}): "
-                          f"{prev['description']} shadows {description or fn.__name__}",
-                          file=sys.stderr)
+                          f"(hardware={hardware!r}, shape={norm_shape!r}, "
+                          f"point={point!r}): {prev['description']} shadows "
+                          f"{description or fn.__name__}", file=sys.stderr)
                     break
             self._entries.append({
                 "hardware": hardware,
                 "shape": norm_shape,        # tuple of tuples, or None
                 "full_sig": full_sig,       # True if shape covers ALL inputs
+                "point": point,             # shape_hash dispatch key, or None
                 "fn": fn,
                 "configs": dict(configs) if configs else None,
                 "description": description or fn.__name__,
@@ -248,10 +264,18 @@ class OracleRegistry:
         # Key-shape registration: compare the first tensor input only.
         return bool(actual_shapes) and tuple(entry["shape"][0]) == tuple(actual_shapes[0])
 
-    def select(self, inputs):
+    def select(self, inputs, point=None):
         """Select the best-matching entry for the given inputs (no call).
 
-        Match order (first hit wins; registration order breaks ties):
+        `point` (shape_hash, optional): the identity of the shapes.json POINT
+        being benched, threaded by the bench loop (which already knows it). It
+        is the EXACT dispatch key — match order when given:
+          0a. "point+hardware": entry["point"] == point AND hardware == current
+          0b. "point":          entry["point"] == point, any hardware
+        Point matching does NO shape comparison, so it dispatches a DYNAMIC
+        point whose registered shape is symbolic (64,64,s0,s1) and would never
+        == the concrete runtime shape. If no point is threaded (or no entry
+        carries that hash), fall back to shape matching:
           1. "hardware+shape": signature exact AND hardware == current GPU
           2. "shape":          signature exact, tuned on other/any hardware
           3. "hardware":       shape-general (shapes=None), hardware == current
@@ -261,30 +285,48 @@ class OracleRegistry:
 
         Returns (entry, info_dict); info_dict also stored on
         self.last_dispatch_info. info["matched"] is one of the strings above;
-        info["fallback"] is True for anything but "hardware+shape".
+        info["fallback"] is True for anything but "hardware+shape"/"point+hardware".
         """
         current_hw = get_gpu_kind()
         actual_shapes = get_shape_key(inputs)
 
         chosen = None
         matched = None
-        for entry in self._entries:  # 1: exact signature + hardware
-            if self._signature_matches(entry, actual_shapes) and entry["hardware"] == current_hw:
-                chosen, matched = entry, "hardware+shape"
-                break
+        if point is not None:
+            for entry in self._entries:  # 0a: exact point hash + hardware
+                if entry.get("point") == point and entry["hardware"] == current_hw:
+                    chosen, matched = entry, "point+hardware"
+                    break
+            if chosen is None:
+                for entry in self._entries:  # 0b: exact point hash, any hardware
+                    if entry.get("point") == point:
+                        chosen, matched = entry, "point"
+                        break
+        if chosen is None:
+            for entry in self._entries:  # 1: exact signature + hardware
+                if self._signature_matches(entry, actual_shapes) and entry["hardware"] == current_hw:
+                    chosen, matched = entry, "hardware+shape"
+                    break
         if chosen is None:
             for entry in self._entries:  # 2: exact signature, any hardware
                 if self._signature_matches(entry, actual_shapes):
                     chosen, matched = entry, "shape"
                     break
+        # Shape-general fallback (tiers 3/4) must EXCLUDE point-keyed entries:
+        # a shape=None entry that carries a point is tied to ONE specific
+        # shapes.json point (its shape was symbolic, so it registered shape-
+        # less), NOT a general "works at any shape" kernel. It is reachable
+        # ONLY via the point tiers above; never as a shape-general fallback.
         if chosen is None:
             for entry in self._entries:  # 3: shape-general, hardware match
-                if entry["shape"] is None and entry["hardware"] == current_hw:
+                if (entry["shape"] is None and entry.get("point") is None
+                        and entry["hardware"] == current_hw):
                     chosen, matched = entry, "hardware"
                     break
         if chosen is None:
             for entry in self._entries:  # 4: shape-general, unconstrained
-                if entry["shape"] is None and entry["hardware"] is None:
+                if (entry["shape"] is None and entry.get("point") is None
+                        and entry["hardware"] is None):
                     chosen, matched = entry, "any"
                     break
 
@@ -298,7 +340,7 @@ class OracleRegistry:
 
         info = {
             "matched": matched,
-            "fallback": matched != "hardware+shape",
+            "fallback": matched not in ("hardware+shape", "point+hardware"),
             "fn_name": chosen["fn"].__name__,
             "description": chosen["description"],
             "tuned_hardware": chosen["hardware"],
@@ -334,15 +376,18 @@ class OracleRegistry:
         self.last_dispatch_info = info
         return chosen, info
 
-    def dispatch(self, inputs):
+    def dispatch(self, inputs, point=None):
         """Find the best-matching oracle and call it.
 
         Calls fn(inputs, **configs) if the matched registration has configs,
         else fn(inputs). self.last_dispatch_info afterwards describes the
         match; fallback=True means the impl was tuned on other hardware (or is
         a shape-general default), so the measurement may be a soft floor.
+
+        `point` (shape_hash, optional): threaded to select() so a dynamic point
+        dispatches by hash (see select()).
         """
-        entry, _info = self.select(inputs)
+        entry, _info = self.select(inputs, point=point)
         if entry["configs"]:
             return entry["fn"](inputs, **entry["configs"])
         return entry["fn"](inputs)
@@ -538,13 +583,22 @@ def oracle_impl(hardware=None, shapes=None, point=None, description=None,
             specs = [spec_from_compact(e) for e in match.get("inputs", [])]
             entry_shapes = tuple(
                 tuple(s["shape"]) for s in specs if s.get("kind") == "tensor")
+            # A DYNAMIC point's resolved shape carries symbolic dims (e.g.
+            # (64,64,"s0","s1")) — it can't be a shape-match key (it would
+            # never == concrete runtime shapes, and _normalize_shape rejects
+            # non-int dims). The HASH is the dispatch key in that case, so
+            # register shape-less; select(point=) routes by hash. A fully
+            # concrete (static) point keeps its shape for back-compat shape
+            # matching even when no hash is threaded.
+            if any(not isinstance(d, int) for shp in entry_shapes for d in shp):
+                entry_shapes = None
         dec = reg.register(hardware=hardware,
                            shape=entry_shapes,
                            configs=kwargs or None,
-                           description=description)
+                           description=description,
+                           point=point)
         dec(fn)
         reg._entries[-1]["dtypes"] = dtypes
-        reg._entries[-1]["point"] = point
         return fn
     return decorator
 
@@ -554,7 +608,7 @@ def get_module_registry(module_name):
     return _module_registries.get(module_name)
 
 
-def resolve_oracle(oracle_forward, inputs):
+def resolve_oracle(oracle_forward, inputs, point=None):
     """Resolve dispatch for an oracle callable against runtime inputs.
 
     If the oracle's module has `oracle_impl` registrations, select the best
@@ -562,13 +616,17 @@ def resolve_oracle(oracle_forward, inputs):
     configs already bound. If the module has no registrations, returns
     (oracle_forward, None) — unmigrated oracles behave exactly as before.
 
+    `point` (shape_hash, optional): identity of the shapes.json point being
+    benched, threaded by the bench loop so a DYNAMIC point dispatches by hash
+    (its registered shape is symbolic and won't shape-match concrete inputs).
+
     Raises OracleDispatchError if registrations exist but none match.
     """
     reg = _module_registries.get(getattr(oracle_forward, "__module__", None))
     if reg is None or not reg._entries:
         return oracle_forward, None
     try:
-        entry, info = reg.select(inputs)
+        entry, info = reg.select(inputs, point=point)
     except RuntimeError as e:
         raise OracleDispatchError(str(e)) from e
     if entry["configs"]:
@@ -887,6 +945,7 @@ def bench_oracle(
     rep: int = 200,
     rounds: int = 5,
     _skip_numerics_gate: bool = False,
+    point: str | None = None,
 ) -> dict:
     """Standard oracle benchmark: oracle vs torch.compile.
 
@@ -920,7 +979,8 @@ def bench_oracle(
     # --- Resolve oracle_impl dispatch (no-op for unmigrated oracles) ---
     dispatch_info = None
     try:
-        oracle_forward, dispatch_info = resolve_oracle(oracle_forward, inputs)
+        oracle_forward, dispatch_info = resolve_oracle(
+            oracle_forward, inputs, point=point)
     except OracleDispatchError as e:
         result = {
             "repro_id": repro_id,
@@ -1185,7 +1245,13 @@ def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
     for label, config in configs.items():
         inputs = make_inputs_from_config(config)
         instance = get_repro_instance(repro_dir)
-        result = bench_oracle(oracle_forward, instance, inputs, f"{repro_id}_{label}", **kwargs)
+        # Thread the point's shape_hash so dispatch routes by hash — required
+        # for a DYNAMIC point whose registered shape is symbolic (won't shape-
+        # match concrete inputs). load_shape_configs carries it on the config;
+        # static points (no hash) fall through to shape matching unchanged.
+        result = bench_oracle(oracle_forward, instance, inputs,
+                              f"{repro_id}_{label}",
+                              point=config.get("shape_hash"), **kwargs)
         results.append(result)
     return results
 
