@@ -20,7 +20,22 @@ import torch
 
 # Ensure project root is importable
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-os.environ.setdefault("CUDA_VISIBLE_DEVICES", "")
+
+# NOTE: this module is CPU-only by construction -- it drives
+# torch.compile(backend="inductor") over small models that stay on CPU
+# (verified: zero GPU memory allocated even with all GPUs visible), so it is
+# safe to run alongside a production GPU sweep WITHOUT hiding the GPUs.
+#
+# We deliberately do NOT set CUDA_VISIBLE_DEVICES="" here. The previous
+# module-scope ``os.environ.setdefault("CUDA_VISIBLE_DEVICES", "")`` leaked
+# into the whole pytest process and was the root cause of ~14 spurious
+# ``RuntimeError: No CUDA GPUs are available`` failures in OTHER modules
+# (test_adversarial / test_repro_integrity / test_shapes_integrity): once any
+# code calls ``torch.cuda.is_available()`` while GPUs are hidden, ``cuInit``
+# initializes the process's CUDA runtime with zero devices and there is NO
+# in-process recovery -- restoring the env var afterwards does not un-poison
+# the runtime (allocations still fail). Leaving the GPUs visible avoids the
+# poison entirely while keeping these tests on CPU.
 
 from capture_hook import (
     _CaptureState,

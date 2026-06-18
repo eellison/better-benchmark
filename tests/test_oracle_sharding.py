@@ -29,7 +29,6 @@ from pathlib import Path
 
 import pytest
 
-# ── Install torch-free stubs for the lazily-imported modules ────────────────
 # Verbatim copy of oracle_harness._INVALID_STATUSES (oracle_harness.py).
 _INVALID_STATUSES = frozenset({
     "UNVERIFIED_NUMERICS",
@@ -38,14 +37,39 @@ _INVALID_STATUSES = frozenset({
     "NO_ORACLE_FOR_SHAPE",
 })
 
-if "oracle_harness" not in sys.modules:
+# File moved from scripts/ to tests/; bench_parallel lives in
+# repo-root/scripts. conftest.py covers this for pytest; insert here too so
+# `python tests/test_oracle_sharding.py` works standalone.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+
+import bench_parallel as bp  # noqa: E402
+
+
+# ── Torch-free stubs for the lazily-imported modules (SCOPED) ───────────────
+# The two functions under test reach into modules that import torch at module
+# scope, but only via *lazy* (in-function) imports fired at call time:
+#   - ``_aggregate_oracle_timings`` -> ``from oracle_harness import _INVALID_STATUSES``
+#   - ``_expand_oracle_shape_tasks`` -> ``from repro_harness import load_shape_configs``
+# ``bench_parallel`` itself imports cleanly with NO torch, so we install the
+# stubs only for the lifetime of this module's tests via an autouse fixture
+# and RESTORE the original sys.modules entries on teardown. Installing them
+# unconditionally at import time (the previous approach) leaked the stubs into
+# the whole pytest session: any module collected afterwards that did e.g.
+# ``from repro_harness import _eval_signature`` hit the stub and errored
+# ``ImportError: cannot import name ...``. ``_INVALID_STATUSES`` is copied
+# verbatim from oracle_harness.py so floor-exclusion behavior is faithful.
+@pytest.fixture(autouse=True, scope="module")
+def _torch_free_harness_stubs():
+    sentinel = object()
+    saved = {
+        name: sys.modules.get(name, sentinel)
+        for name in ("oracle_harness", "repro_harness")
+    }
+
     _oh_stub = types.ModuleType("oracle_harness")
     _oh_stub._INVALID_STATUSES = _INVALID_STATUSES
     sys.modules["oracle_harness"] = _oh_stub
 
-# repro_harness.load_shape_configs is monkeypatched per-test; the stub here just
-# prevents the real (torch-importing) module from loading on the lazy import.
-if "repro_harness" not in sys.modules:
     _rh_stub = types.ModuleType("repro_harness")
 
     def _unset_load_shape_configs(*_a, **_k):  # pragma: no cover - replaced per test
@@ -56,12 +80,14 @@ if "repro_harness" not in sys.modules:
     _rh_stub.load_shape_configs = _unset_load_shape_configs
     sys.modules["repro_harness"] = _rh_stub
 
-# File moved from scripts/ to tests/; bench_parallel lives in
-# repo-root/scripts. conftest.py covers this for pytest; insert here too so
-# `python tests/test_oracle_sharding.py` works standalone.
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-
-import bench_parallel as bp  # noqa: E402
+    try:
+        yield
+    finally:
+        for name, prev in saved.items():
+            if prev is sentinel:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = prev
 
 
 # ── _make_shape_task_key / _split_shape_task_key round-trip ─────────────────
