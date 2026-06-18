@@ -964,6 +964,15 @@ def bench_oracle(
     # --- Compile with coordinate_descent + capture CUDAGraph (MANDATORY) ---
     import torch._inductor.config as cfg
     cfg.coordinate_descent_tuning = True
+    # Fresh dynamo state per shape, matching the repro path (bench_parallel.py).
+    # Without this, bench_oracle_all_shapes recompiles shapes 2..N DYNAMICally on
+    # the same code object: the symbolic kernel (bf16[512,s44,s56,...]) gets
+    # CUDAGraph-captured and specialized to the wrong shape, inflating compile_us
+    # by 10-46x (a pure positional artifact — later shapes look slow). The model's
+    # real path is per-op static specialization, so a fresh static compile per
+    # shape is the faithful measurement.
+    import torch._dynamo
+    torch._dynamo.reset()
     compiled = torch.compile(instance)
     with torch.no_grad():
         for _ in range(5):
