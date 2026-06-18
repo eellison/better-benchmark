@@ -86,6 +86,92 @@ _SHARED_CACHE_DIR = os.environ.get(
 _RESERVED_TOP_LEVEL_KEYS = {"_metadata", "__failures__", "__summary__"}
 _RESERVED_RESULT_LABELS = {"__graph__"}
 
+# Separator used to encode a (dir, shape_label) task key for --oracles
+# --all-shapes sharding. The task unit becomes one (dir, shape) point so a
+# many-shape dir spreads across all GPUs instead of pinning one worker. The
+# parent regroups results back under their dir before aggregation, preserving
+# the per-dir output contract that model_graph_accounting consumes.
+_SHAPE_TASK_SEP = "::SHAPE::"
+# Label used for the single point of a dir with no shape configs.
+_DEFAULT_SHAPE_TOKEN = "__default__"
+
+
+def _make_shape_task_key(dir_path: str, shape_label: str) -> str:
+    """Encode a (dir, shape_label) sharded oracle task key."""
+    return f"{dir_path}{_SHAPE_TASK_SEP}{shape_label}"
+
+
+def _split_shape_task_key(task_key: str) -> tuple[str, str | None]:
+    """Decode a sharded task key into (dir_path, shape_label).
+
+    A plain dir path (no separator) returns (dir_path, None) so callers can
+    treat un-sharded tasks transparently.
+    """
+    if _SHAPE_TASK_SEP in task_key:
+        dir_path, label = task_key.rsplit(_SHAPE_TASK_SEP, 1)
+        return dir_path, label
+    return task_key, None
+
+
+def _expand_oracle_shape_tasks(dirs: list[Path]) -> list[str]:
+    """Expand oracle dirs into (dir, shape_label) task keys for sharding.
+
+    Each dir's shapes.json points become individual tasks so the worker pool
+    spreads them across all GPUs. A dir with no shape configs yields a single
+    ``<dir>::SHAPE::__default__`` task. The numerics gate + fresh static
+    compile (the per-shape dynamo reset, commit 4ca6d532b) still run once per
+    task, so sharding does NOT reintroduce cross-shape dynamo reuse.
+    """
+    from repro_harness import load_shape_configs
+
+    tasks: list[str] = []
+    for d in dirs:
+        repro_file = d / "repro.py"
+        try:
+            configs = load_shape_configs(str(repro_file))
+        except Exception:
+            configs = None
+        if configs:
+            for label in configs:
+                tasks.append(_make_shape_task_key(str(d), label))
+        else:
+            tasks.append(_make_shape_task_key(str(d), _DEFAULT_SHAPE_TOKEN))
+    return tasks
+
+
+def _regroup_sharded_oracle_failures(sharded_failures: dict) -> dict:
+    """Regroup per-(dir,shape) WORKER EXCEPTIONS back under their dir name.
+
+    With per-shape sharding a worker exception fails ONE (dir,shape) task
+    (keyed ``<dir>::SHAPE::<label>``) rather than the whole dir. A raised shape
+    would otherwise vanish from the per-dir timings file. This returns
+    ``{dir_name -> {failed_shapes:[...], n_failed_shapes, example_error}}`` so
+    the oracle output can account for every queued shape. The CALLER decides
+    whether each dir is still priced (then the record is an annotation) or
+    has no valid floor (then it folds into ``__failures__``), using the
+    aggregator's authoritative priced-dir set rather than guessing here.
+
+    Note: numerics/CUDAGraph-warning/no-oracle statuses are RETURNED by
+    bench_oracle (not raised), so they already appear as invalid-status points
+    in all_results and are handled by the aggregator; only genuine Python
+    exceptions reach sharded_failures and this function.
+    """
+    by_dir: dict[str, dict] = {}
+    for task_key, failure in sharded_failures.items():
+        dir_path, label = _split_shape_task_key(str(task_key))
+        dir_name = _oracle_dir_name(dir_path)
+        entry = by_dir.setdefault(dir_name, {
+            "failed_shapes": [],
+            "n_failed_shapes": 0,
+            "example_error": None,
+        })
+        if label is not None:
+            entry["failed_shapes"].append(label)
+        entry["n_failed_shapes"] += 1
+        if entry["example_error"] is None and isinstance(failure, dict):
+            entry["example_error"] = failure.get("error") or failure.get("reason")
+    return by_dir
+
 
 def find_repros(paths: list[Path]) -> list[Path]:
     """Resolve paths to individual repro.py files."""
@@ -159,6 +245,13 @@ def find_full_graphs(paths: list[Path]) -> list[Path]:
 
 
 def _task_display_name(task_path: str) -> str:
+    # Sharded oracle task keys carry a ::SHAPE::<label> suffix; show dir[label].
+    dir_part, shape_label = _split_shape_task_key(str(task_path))
+    if shape_label is not None:
+        base = Path(dir_part).name
+        if shape_label == _DEFAULT_SHAPE_TOKEN:
+            return base
+        return f"{base}[{shape_label}]"
     path = Path(task_path)
     if path.name == "repro.py":
         return path.parent.name
@@ -442,8 +535,13 @@ def _write_results_output(
 
 
 def _oracle_dir_name(task_key: str) -> str:
-    """Canonical dir basename for an oracle task key (a dir path)."""
-    path = Path(task_key)
+    """Canonical dir basename for an oracle task key (a dir path).
+
+    Tolerates a sharded ``::SHAPE::<label>`` suffix (results are regrouped to
+    bare dir paths before aggregation, but strip defensively).
+    """
+    dir_part, _label = _split_shape_task_key(str(task_key))
+    path = Path(dir_part)
     return path.parent.name if path.name == "repro.py" else path.name
 
 
@@ -484,6 +582,23 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
 
     # Local exclusion set; do not mutate the shared frozenset.
     floor_excluded = _INVALID_STATUSES | {"BAD_ORACLE"}
+
+    # Sharding pre-pass: per-(dir,shape) tasks produce many result payloads
+    # that map to the SAME dir. Merge their per-shape label entries into one
+    # payload per dir BEFORE pricing, so each dir is aggregated once (a plain
+    # ``flat[dir]=entry`` would otherwise let the last shape clobber the rest).
+    # Bare dir keys (un-sharded) pass through unchanged: one key per dir.
+    merged: dict[str, dict] = {}
+    for task_key, results in all_results.items():
+        dir_name = _oracle_dir_name(str(task_key))
+        bucket = merged.setdefault(dir_name, {})
+        if isinstance(results, dict):
+            for label, point in results.items():
+                # Copy only per-shape metric entries (dict-valued labels), the
+                # same items _metric_result_items downstream will price.
+                if isinstance(point, dict):
+                    bucket[label] = point
+    all_results = merged
 
     flat: dict[str, dict] = {}
     failures: dict[str, dict] = {}
@@ -584,9 +699,53 @@ def _prefer_shape_point(candidate: dict, existing: dict, floor_excluded) -> bool
     return isinstance(cand_us, (int, float)) and not isinstance(exist_us, (int, float))
 
 
-def _write_oracle_timings_output(output_path: Path, all_results: dict) -> None:
-    """Write flat {dir_name -> {oracle_us,...}} for model_graph_accounting."""
-    _atomic_write_json(output_path, _aggregate_oracle_timings(all_results))
+def _write_oracle_timings_output(
+    output_path: Path, all_results: dict, failures: dict | None = None
+) -> dict:
+    """Write flat {dir_name -> {oracle_us,...}} for model_graph_accounting.
+
+    ``failures`` (per-shape worker exceptions, keyed by sharded task key) are
+    regrouped per dir so the file accounts for every queued shape: dirs that
+    lost some shapes keep their priced entry with a ``shape_failures`` note;
+    dirs that lost ALL shapes are added to ``__failures__``.
+    """
+    timed = _aggregate_oracle_timings(all_results)
+    if failures:
+        shape_fail = _regroup_sharded_oracle_failures(failures)
+        # Authoritative "still priced?" signal: a dir that produced a valid
+        # floor is a top-level non-reserved key in the aggregator output. A dir
+        # only present under __failures__ (no valid point) is NOT priced — its
+        # raised shapes must still be accounted, never dropped.
+        priced_dirs = {
+            k for k in timed if k not in _RESERVED_TOP_LEVEL_KEYS
+        }
+        agg_failures = timed.setdefault("__failures__", {})
+        for dir_name, entry in shape_fail.items():
+            note = {
+                "n_failed_shapes": entry["n_failed_shapes"],
+                "failed_shapes": entry["failed_shapes"],
+                "example_error": entry["example_error"],
+            }
+            if dir_name in priced_dirs:
+                # Dir still priced from its surviving valid shapes — annotate.
+                timed[dir_name]["shape_failures"] = note
+            else:
+                # Dir has no valid floor. FOLD the raised-shape accounting into
+                # whatever failure entry exists (the aggregator may already
+                # record no_valid_point/all_bad_oracle for invalid-status
+                # points) so the count never vanishes; create one otherwise.
+                existing = agg_failures.get(dir_name)
+                if existing is None:
+                    agg_failures[dir_name] = {
+                        "reason": "all_shapes_failed",
+                        **note,
+                    }
+                else:
+                    existing.setdefault("shape_failures", note)
+        if not agg_failures:
+            timed.pop("__failures__", None)
+    _atomic_write_json(output_path, timed)
+    return timed
 
 
 def _is_integer_non_bool_dtype_name(dtype_name: object) -> bool:
@@ -1075,11 +1234,32 @@ def main():
         workload_kind = "full_graph"
     else:
         workload_kind = "repro"
+    oracle_n_dirs = None
     if args.oracles:
         oracle_paths = args.paths or [Path("repros/canonical")]
-        repros = find_oracle_dirs(oracle_paths)
+        oracle_dirs = find_oracle_dirs(oracle_paths)
+        oracle_n_dirs = len(oracle_dirs)
         # Oracle bench is per shape point internally; --all-shapes is implied.
         args.all_shapes = True
+        # SHARDING: make the task unit a (dir, shape) point rather than a whole
+        # dir, so a big multi-shape dir (e.g. 469 shapes) spreads across all
+        # GPUs instead of pinning ONE worker that compiles them serially while
+        # peers idle. Order biggest-dirs-first so any residual tail is small.
+        # Each task still runs the numerics gate + fresh static compile per
+        # shape (commit 4ca6d532b); sharding is purely a scheduling change.
+        repros = _expand_oracle_shape_tasks(oracle_dirs)
+        # Group a dir's shape tasks contiguously, but place dirs with the most
+        # shapes first. The worker pool pulls round-robin, so emitting the big
+        # dirs' points up front lets all workers chew them in parallel from the
+        # start; the small single-shape dirs drain at the end (cheap, no tail).
+        from collections import Counter as _Counter
+        _dir_task_count = _Counter(_split_shape_task_key(t)[0] for t in repros)
+        repros.sort(
+            key=lambda k: (
+                -_dir_task_count[_split_shape_task_key(k)[0]],
+                _split_shape_task_key(k)[0],
+            )
+        )
     elif args.full_graphs:
         graph_paths = args.paths or [args.models_root]
         repros = find_full_graphs(graph_paths)
@@ -1160,12 +1340,16 @@ def main():
         parser.error(str(exc))
 
     if args.oracles:
-        task_label, task_unit = "oracles", "oracle"
+        task_label, task_unit = "oracle shape-points", "point"
     elif args.full_graphs:
         task_label, task_unit = "full graphs", "graph"
     else:
         task_label, task_unit = "repros", "repro"
-    print(f"Benchmarking {len(repros)} {task_label} across {n_workers} workers on {len(gpus)} GPUs")
+    if args.oracles:
+        print(f"Benchmarking {len(repros)} {task_label} from {oracle_n_dirs} dirs "
+              f"across {n_workers} workers on {len(gpus)} GPUs (sharded per shape)")
+    else:
+        print(f"Benchmarking {len(repros)} {task_label} across {n_workers} workers on {len(gpus)} GPUs")
     gpu_labels = [f"{g['index']}:{g['kind']}" for g in gpus]
     print(f"  GPUs: {', '.join(gpu_labels)}")
     print(f"  Workers per GPU cap: {workers_per_gpu}")
@@ -1288,7 +1472,7 @@ def main():
 
         # Incremental save every 50 results
         if args.output and args.oracles and (done + failed) % 50 == 0:
-            _write_oracle_timings_output(args.output, all_results)
+            _write_oracle_timings_output(args.output, all_results, failures)
         elif args.output and (done + failed) % 50 == 0:
             _write_results_output(
                 args.output,
@@ -1363,8 +1547,7 @@ def main():
 
     # Optional JSON output — include metadata for staleness detection
     if args.output and args.oracles:
-        _write_oracle_timings_output(args.output, all_results)
-        timed = _aggregate_oracle_timings(all_results)
+        timed = _write_oracle_timings_output(args.output, all_results, failures)
         n_priced = sum(1 for k in timed if not k.startswith("_"))
         n_failed = len(timed.get("__failures__", {}))
         print(f"[output] Wrote {args.output} "
@@ -1692,6 +1875,8 @@ from repro_harness import load_shape_configs, make_inputs_from_config
 WARMUP = {args_dict["n_warmup"]}
 REP = {args_dict["n_rep"]}
 SKIP_CHECK = {skip_check}
+SHAPE_SEP = {_SHAPE_TASK_SEP!r}
+DEFAULT_SHAPE_TOKEN = {_DEFAULT_SHAPE_TOKEN!r}
 
 # Isolate the result pipe from any stdout pollution (bench_oracle /
 # check_oracle_all_shapes print JSON + progress to fd 1). Keep a private dup of
@@ -1700,6 +1885,59 @@ _result_fd = os.dup(1)
 _result_file = os.fdopen(_result_fd, "w", buffering=1)
 os.dup2(2, 1)
 sys.stdout = sys.stderr
+
+def bench_oracle_point(canonical_dir, shape_label):
+    """Bench ONE (dir, shape) point — the sharded task unit.
+
+    Runs the numerics gate for just this shape (check_oracle_all_shapes
+    point=...) then bench_oracle for it. bench_oracle does its own per-shape
+    torch._dynamo.reset() + fresh static compile (commit 4ca6d532b), so a
+    single-shape task is identical in measurement to that shape's iteration of
+    the per-dir loop — sharding never reuses dynamo state across shapes.
+
+    Returns {{label: <point result>}} so the parent can regroup all of a dir's
+    shape points into one per-dir payload identical to the un-sharded path.
+    """
+    mod, fn, d = _load_oracle_module(canonical_dir)
+    repro_id = d.name
+    repro_file = d / "repro.py"
+    configs = load_shape_configs(str(repro_file))
+
+    if shape_label == DEFAULT_SHAPE_TOKEN or not configs:
+        # Dir with no shape configs: single default point.
+        check = {{}}
+        if not SKIP_CHECK:
+            check = check_oracle_all_shapes(fn, d, repro_id, skip_stochastic=True)
+        passed = True
+        if not SKIP_CHECK:
+            passed = all(v not in ("fail", False) for v in check.values())
+        if passed:
+            inputs = get_inputs(d)
+            instance = get_repro_instance(d)
+            return {{"default": bench_oracle(
+                fn, instance, inputs, repro_id, warmup=WARMUP, rep=REP)}}
+        return {{"default": {{"repro_id": repro_id,
+                             "status": "UNVERIFIED_NUMERICS"}}}}
+
+    if shape_label not in configs:
+        return {{shape_label: {{"repro_id": repro_id + "_" + shape_label,
+                               "status": "NO_ORACLE_FOR_SHAPE"}}}}
+
+    config = configs[shape_label]
+    point_id = repro_id + "_" + shape_label
+    passed = True
+    if not SKIP_CHECK:
+        # Narrow the numerics gate to just this shape point.
+        check = check_oracle_all_shapes(
+            fn, d, repro_id, skip_stochastic=True, point=shape_label)
+        passed = all(v not in ("fail", False) for v in check.values())
+    if passed:
+        inputs = make_inputs_from_config(config)
+        instance = get_repro_instance(d)
+        return {{shape_label: bench_oracle(
+            fn, instance, inputs, point_id, warmup=WARMUP, rep=REP)}}
+    return {{shape_label: {{"repro_id": point_id,
+                           "status": "UNVERIFIED_NUMERICS"}}}}
 
 def bench_oracle_dir(canonical_dir):
     mod, fn, d = _load_oracle_module(canonical_dir)
@@ -1750,7 +1988,13 @@ for line in sys.stdin:
         # No-op for oracles: per-dir module load is cheap relative to bench.
         continue
     try:
-        results = bench_oracle_dir(line)
+        # Sharded task key: "<dir>::SHAPE::<label>" -> bench ONE shape point.
+        # A bare dir path (no separator) falls back to the whole-dir loop.
+        if SHAPE_SEP in line:
+            canonical_dir, shape_label = line.rsplit(SHAPE_SEP, 1)
+            results = bench_oracle_point(canonical_dir, shape_label)
+        else:
+            results = bench_oracle_dir(line)
         results["_repro"] = line
         _result_file.write(json.dumps(results, default=str) + "\\n")
         _result_file.flush()
@@ -1766,7 +2010,7 @@ for line in sys.stdin:
                 "category": "runtime_error",
                 "exception_type": type(e).__name__,
                 "error": str(e)[:1000],
-                "reason": "oracle worker failed while benchmarking dir",
+                "reason": "oracle worker failed while benchmarking dir/point",
                 "hint": "Run `python -m oracle_harness <dir> --bench` directly.",
             }},
         }}) + "\\n")
