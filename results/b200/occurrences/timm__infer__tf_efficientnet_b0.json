@@ -1,0 +1,552 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "9017f526fe31": {
+      "af408b42": 1
+    },
+    "818c3aa59952": {
+      "4c724370": 1,
+      "6349ba76": 1,
+      "e2542415": 1,
+      "d132f392": 1,
+      "4552b8d5": 1,
+      "3350df9a": 1,
+      "e987d149": 1
+    },
+    "182f6f9450b9": {
+      "5e1cd0cb": 4,
+      "94a8a021": 1,
+      "20c37c70": 2,
+      "2ea19024": 3,
+      "7ccc5d66": 1,
+      "bd79fc38": 1,
+      "6ff05967": 1,
+      "a542f22c": 1,
+      "c5606485": 1,
+      "222a5534": 1
+    },
+    "795cdbe23b17": {
+      "7cbc6888": 4,
+      "283d1fc9": 3,
+      "a698256a": 3,
+      "835aa0b6": 2,
+      "527c1c68": 2,
+      "a03db79e": 1,
+      "0f6006da": 1
+    },
+    "fa289c1b737a": {
+      "64799fb2": 4,
+      "aa1adfec": 1,
+      "8162a5bc": 2,
+      "d46c34b3": 3,
+      "560aaeca": 1,
+      "9ab2d895": 1,
+      "ebe204a7": 1,
+      "51719261": 1,
+      "d53a7e50": 1,
+      "9c97edfa": 1
+    },
+    "88bffcefddc4": {
+      "64799fb2": 4,
+      "8162a5bc": 2,
+      "d46c34b3": 3,
+      "9ab2d895": 1,
+      "51719261": 1,
+      "9c97edfa": 1
+    },
+    "e6ddc8e897ec": {
+      "8858d870": 3,
+      "cbb247bc": 2,
+      "6f6fdd1f": 2,
+      "661bb0c6": 1,
+      "02ba49e6": 1
+    },
+    "46ffe591b5ee": {
+      "8162a5bc": 1,
+      "51719261": 1
+    },
+    "498fa7e126b8": {
+      "9ab2d895": 1,
+      "2e1844e5": 1
+    },
+    "f30674e2e5ee": {
+      "e96942cb": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "95dc82d05cda",
+      "count": 1,
+      "sig": "((T([128, 3, 225, 225],torch.bfloat16,[151875, 1, 675, 3]),T([32, 3, 3, 3],torch.bfloat16,[27, 1, 9, 3]),None,[2,2],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 216.8319970369339,
+      "branch_us": 216.8319970369339
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "45798ccba08f",
+      "count": 1,
+      "sig": "((T([128, 32, 112, 112],torch.bfloat16,[401408, 1, 3584, 32]),T([32, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],32),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_1",
+      "baseline_us": 67.58400052785873,
+      "branch_us": 67.58400052785873
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "854d77395b68",
+      "count": 1,
+      "sig": "((T([128, 32, 1, 1],torch.bfloat16,[32, 1, 1, 1]),T([8, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),T([8],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_2",
+      "baseline_us": 9.600000455975533,
+      "branch_us": 9.600000455975533
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "f080b2c95d39",
+      "count": 1,
+      "sig": "((T([128, 8, 1, 1],torch.bfloat16,[8, 1, 8, 8]),T([32, 8, 1, 1],torch.bfloat16,[8, 1, 8, 8]),T([32],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_3",
+      "baseline_us": 9.79200005531311,
+      "branch_us": 9.79200005531311
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "3dca47810012",
+      "count": 1,
+      "sig": "((T([128, 32, 112, 112],torch.bfloat16,[401408, 1, 3584, 32]),T([16, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_4",
+      "baseline_us": 69.31199878454208,
+      "branch_us": 69.31199878454208
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "1eff3b88f35c",
+      "count": 1,
+      "sig": "((T([128, 16, 112, 112],torch.bfloat16,[200704, 1, 1792, 16]),T([96, 16, 1, 1],torch.bfloat16,[16, 1, 16, 16]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_5",
+      "baseline_us": 83.71199667453766,
+      "branch_us": 83.71199667453766
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "0ca81ed52caf",
+      "count": 1,
+      "sig": "((T([128, 96, 113, 113],torch.bfloat16,[1225824, 1, 10848, 96]),T([96, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[0,0],[1,1],False,[0,0],96),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_6",
+      "baseline_us": 86.97599917650223,
+      "branch_us": 86.97599917650223
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "08075ac903e9",
+      "count": 1,
+      "sig": "((T([128, 96, 1, 1],torch.bfloat16,[96, 1, 1, 1]),T([4, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),T([4],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_7",
+      "baseline_us": 9.855999611318111,
+      "branch_us": 9.855999611318111
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "c7c5fc32943f",
+      "count": 1,
+      "sig": "((T([128, 4, 1, 1],torch.bfloat16,[4, 1, 4, 4]),T([96, 4, 1, 1],torch.bfloat16,[4, 1, 4, 4]),T([96],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_8",
+      "baseline_us": 9.8879998549819,
+      "branch_us": 9.8879998549819
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "0498be8e720a",
+      "count": 1,
+      "sig": "((T([128, 96, 56, 56],torch.bfloat16,[301056, 1, 5376, 96]),T([24, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_9",
+      "baseline_us": 29.600000008940697,
+      "branch_us": 29.600000008940697
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "76302922a04b",
+      "count": 2,
+      "sig": "((T([128, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([144, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_10",
+      "baseline_us": 55.07199838757515,
+      "branch_us": 55.07199838757515
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "0db0d9b0b7c6",
+      "count": 1,
+      "sig": "((T([128, 144, 56, 56],torch.bfloat16,[451584, 1, 8064, 144]),T([144, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],144),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_11",
+      "baseline_us": 75.58400183916092,
+      "branch_us": 75.58400183916092
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "670ef778ee8c",
+      "count": 2,
+      "sig": "((T([128, 144, 1, 1],torch.bfloat16,[144, 1, 1, 1]),T([6, 144, 1, 1],torch.bfloat16,[144, 1, 144, 144]),T([6],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_12",
+      "baseline_us": 11.168000288307667,
+      "branch_us": 11.168000288307667
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "0abaedf3f3a6",
+      "count": 2,
+      "sig": "((T([128, 6, 1, 1],torch.bfloat16,[6, 1, 6, 6]),T([144, 6, 1, 1],torch.bfloat16,[6, 1, 6, 6]),T([144],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_13",
+      "baseline_us": 9.855999611318111,
+      "branch_us": 9.855999611318111
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "21cfe4ed429d",
+      "count": 1,
+      "sig": "((T([128, 144, 56, 56],torch.bfloat16,[451584, 1, 8064, 144]),T([24, 144, 1, 1],torch.bfloat16,[144, 1, 144, 144]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_14",
+      "baseline_us": 38.656000047922134,
+      "branch_us": 38.656000047922134
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "903b93b2b21b",
+      "count": 1,
+      "sig": "((T([128, 144, 59, 59],torch.bfloat16,[501264, 1, 8496, 144]),T([144, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),None,[2,2],[0,0],[1,1],False,[0,0],144),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_16",
+      "baseline_us": 83.77599716186523,
+      "branch_us": 83.77599716186523
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "9299f2b7193f",
+      "count": 1,
+      "sig": "((T([128, 144, 28, 28],torch.bfloat16,[112896, 1, 4032, 144]),T([40, 144, 1, 1],torch.bfloat16,[144, 1, 144, 144]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_19",
+      "baseline_us": 15.263999812304974,
+      "branch_us": 15.263999812304974
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "6be4682f0543",
+      "count": 2,
+      "sig": "((T([128, 40, 28, 28],torch.bfloat16,[31360, 1, 1120, 40]),T([240, 40, 1, 1],torch.bfloat16,[40, 1, 40, 40]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_20",
+      "baseline_us": 24.320000782608986,
+      "branch_us": 24.320000782608986
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "f5326cd548ec",
+      "count": 1,
+      "sig": "((T([128, 240, 28, 28],torch.bfloat16,[188160, 1, 6720, 240]),T([240, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),None,[1,1],[2,2],[1,1],False,[0,0],240),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_21",
+      "baseline_us": 85.75999736785889,
+      "branch_us": 85.75999736785889
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "9454b539f05f",
+      "count": 2,
+      "sig": "((T([128, 240, 1, 1],torch.bfloat16,[240, 1, 1, 1]),T([10, 240, 1, 1],torch.bfloat16,[240, 1, 240, 240]),T([10],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_22",
+      "baseline_us": 11.264000087976456,
+      "branch_us": 11.264000087976456
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "e880b0ea90c6",
+      "count": 2,
+      "sig": "((T([128, 10, 1, 1],torch.bfloat16,[10, 1, 10, 10]),T([240, 10, 1, 1],torch.bfloat16,[10, 1, 10, 10]),T([240],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_23",
+      "baseline_us": 9.759999811649323,
+      "branch_us": 9.759999811649323
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "512e8c3b22b7",
+      "count": 1,
+      "sig": "((T([128, 240, 28, 28],torch.bfloat16,[188160, 1, 6720, 240]),T([40, 240, 1, 1],torch.bfloat16,[240, 1, 240, 240]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_24",
+      "baseline_us": 18.20800080895424,
+      "branch_us": 18.20800080895424
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "589334195c4c",
+      "count": 1,
+      "sig": "((T([128, 240, 29, 29],torch.bfloat16,[201840, 1, 6960, 240]),T([240, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[0,0],[1,1],False,[0,0],240),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_26",
+      "baseline_us": 24.25600029528141,
+      "branch_us": 24.25600029528141
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "25827afc1d90",
+      "count": 1,
+      "sig": "((T([128, 240, 14, 14],torch.bfloat16,[47040, 1, 3360, 240]),T([80, 240, 1, 1],torch.bfloat16,[240, 1, 240, 240]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_29",
+      "baseline_us": 11.231999844312668,
+      "branch_us": 11.231999844312668
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "f8a650af96b5",
+      "count": 3,
+      "sig": "((T([128, 80, 14, 14],torch.bfloat16,[15680, 1, 1120, 80]),T([480, 80, 1, 1],torch.bfloat16,[80, 1, 80, 80]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_30",
+      "baseline_us": 13.183999806642532,
+      "branch_us": 13.183999806642532
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "d5dfa5476121",
+      "count": 2,
+      "sig": "((T([128, 480, 14, 14],torch.bfloat16,[94080, 1, 6720, 480]),T([480, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],480),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_31",
+      "baseline_us": 24.320000782608986,
+      "branch_us": 24.320000782608986
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "940e1ee09cca",
+      "count": 3,
+      "sig": "((T([128, 480, 1, 1],torch.bfloat16,[480, 1, 1, 1]),T([20, 480, 1, 1],torch.bfloat16,[480, 1, 480, 480]),T([20],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_32",
+      "baseline_us": 13.183999806642532,
+      "branch_us": 13.183999806642532
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "350e6cc22f0c",
+      "count": 3,
+      "sig": "((T([128, 20, 1, 1],torch.bfloat16,[20, 1, 20, 20]),T([480, 20, 1, 1],torch.bfloat16,[20, 1, 20, 20]),T([480],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_33",
+      "baseline_us": 9.952000342309475,
+      "branch_us": 9.952000342309475
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "ca5486d9a50a",
+      "count": 2,
+      "sig": "((T([128, 480, 14, 14],torch.bfloat16,[94080, 1, 6720, 480]),T([80, 480, 1, 1],torch.bfloat16,[480, 1, 480, 480]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_34",
+      "baseline_us": 13.919999822974205,
+      "branch_us": 13.919999822974205
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "8b0ed7a2089e",
+      "count": 1,
+      "sig": "((T([128, 480, 14, 14],torch.bfloat16,[94080, 1, 6720, 480]),T([480, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),None,[1,1],[2,2],[1,1],False,[0,0],480),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_41",
+      "baseline_us": 48.0320006608963,
+      "branch_us": 48.0320006608963
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "442def14ce24",
+      "count": 1,
+      "sig": "((T([128, 480, 14, 14],torch.bfloat16,[94080, 1, 6720, 480]),T([112, 480, 1, 1],torch.bfloat16,[480, 1, 480, 480]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_44",
+      "baseline_us": 13.311999849975109,
+      "branch_us": 13.311999849975109
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "3a9fcb02ba30",
+      "count": 3,
+      "sig": "((T([128, 112, 14, 14],torch.bfloat16,[21952, 1, 1568, 112]),T([672, 112, 1, 1],torch.bfloat16,[112, 1, 112, 112]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_45",
+      "baseline_us": 15.231999568641186,
+      "branch_us": 15.231999568641186
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "4a31b54fa7d1",
+      "count": 2,
+      "sig": "((T([128, 672, 14, 14],torch.bfloat16,[131712, 1, 9408, 672]),T([672, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),None,[1,1],[2,2],[1,1],False,[0,0],672),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_46",
+      "baseline_us": 63.19999694824219,
+      "branch_us": 63.19999694824219
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "16bdb4b42a4a",
+      "count": 3,
+      "sig": "((T([128, 672, 1, 1],torch.bfloat16,[672, 1, 1, 1]),T([28, 672, 1, 1],torch.bfloat16,[672, 1, 672, 672]),T([28],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_47",
+      "baseline_us": 13.248000293970108,
+      "branch_us": 13.248000293970108
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "f50ac6dc54d7",
+      "count": 3,
+      "sig": "((T([128, 28, 1, 1],torch.bfloat16,[28, 1, 28, 28]),T([672, 28, 1, 1],torch.bfloat16,[28, 1, 28, 28]),T([672],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_48",
+      "baseline_us": 11.839999817311764,
+      "branch_us": 11.839999817311764
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "c56e61be66ca",
+      "count": 2,
+      "sig": "((T([128, 672, 14, 14],torch.bfloat16,[131712, 1, 9408, 672]),T([112, 672, 1, 1],torch.bfloat16,[672, 1, 672, 672]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_49",
+      "baseline_us": 15.776000916957855,
+      "branch_us": 15.776000916957855
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "ad677d3e26a4",
+      "count": 1,
+      "sig": "((T([128, 672, 17, 17],torch.bfloat16,[194208, 1, 11424, 672]),T([672, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),None,[2,2],[0,0],[1,1],False,[0,0],672),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_56",
+      "baseline_us": 39.872001856565475,
+      "branch_us": 39.872001856565475
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "77f3099c4090",
+      "count": 1,
+      "sig": "((T([128, 672, 7, 7],torch.bfloat16,[32928, 1, 4704, 672]),T([192, 672, 1, 1],torch.bfloat16,[672, 1, 672, 672]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_59",
+      "baseline_us": 10.080000385642052,
+      "branch_us": 10.080000385642052
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "21a344ed59bb",
+      "count": 4,
+      "sig": "((T([128, 192, 7, 7],torch.bfloat16,[9408, 1, 1344, 192]),T([1152, 192, 1, 1],torch.bfloat16,[192, 1, 192, 192]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_60",
+      "baseline_us": 11.264000087976456,
+      "branch_us": 11.264000087976456
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "f3701943454b",
+      "count": 3,
+      "sig": "((T([128, 1152, 7, 7],torch.bfloat16,[56448, 1, 8064, 1152]),T([1152, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),None,[1,1],[2,2],[1,1],False,[0,0],1152),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_61",
+      "baseline_us": 35.77600046992302,
+      "branch_us": 35.77600046992302
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "d65b379074a0",
+      "count": 4,
+      "sig": "((T([128, 1152, 1, 1],torch.bfloat16,[1152, 1, 1, 1]),T([48, 1152, 1, 1],torch.bfloat16,[1152, 1, 1152, 1152]),T([48],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_62",
+      "baseline_us": 11.231999844312668,
+      "branch_us": 11.231999844312668
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "bd67b4ae5d1e",
+      "count": 4,
+      "sig": "((T([128, 48, 1, 1],torch.bfloat16,[48, 1, 48, 48]),T([1152, 48, 1, 1],torch.bfloat16,[48, 1, 48, 48]),T([1152],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_63",
+      "baseline_us": 9.952000342309475,
+      "branch_us": 9.952000342309475
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "1cf2c647574d",
+      "count": 3,
+      "sig": "((T([128, 1152, 7, 7],torch.bfloat16,[56448, 1, 8064, 1152]),T([192, 1152, 1, 1],torch.bfloat16,[1152, 1, 1152, 1152]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_64",
+      "baseline_us": 11.90400030463934,
+      "branch_us": 11.90400030463934
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "7317b99e9d6c",
+      "count": 1,
+      "sig": "((T([128, 1152, 7, 7],torch.bfloat16,[56448, 1, 8064, 1152]),T([1152, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],1152),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_76",
+      "baseline_us": 19.58400011062622,
+      "branch_us": 19.58400011062622
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "b242d196dea3",
+      "count": 1,
+      "sig": "((T([128, 1152, 7, 7],torch.bfloat16,[56448, 1, 8064, 1152]),T([320, 1152, 1, 1],torch.bfloat16,[1152, 1, 1152, 1152]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_79",
+      "baseline_us": 13.120000250637531,
+      "branch_us": 13.120000250637531
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "16d414598862",
+      "count": 1,
+      "sig": "((T([128, 320, 7, 7],torch.bfloat16,[15680, 1, 2240, 320]),T([1280, 320, 1, 1],torch.bfloat16,[320, 1, 320, 320]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "convolution_80",
+      "baseline_us": 13.183999806642532,
+      "branch_us": 13.183999806642532
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "2847f1a8b052",
+      "count": 1,
+      "sig": "((T([1000],torch.bfloat16,[1]),T([128, 1280],torch.bfloat16,[1280, 1]),T([1280, 1000],torch.bfloat16,[1, 1280])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/tf_efficientnet_b0/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 8.00000037997961,
+      "branch_us": 8.00000037997961
+    }
+  ],
+  "trace_errors": [],
+  "suite": "timm",
+  "mode": "infer",
+  "model": "tf_efficientnet_b0"
+}

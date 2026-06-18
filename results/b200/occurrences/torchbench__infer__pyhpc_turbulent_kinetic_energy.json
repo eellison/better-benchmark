@@ -1,0 +1,16 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "43588d3e9780": {
+      "f2c38fe6": 1
+    },
+    "035e4d7f5117": {
+      "d7517139": 1
+    }
+  },
+  "extern": [],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "infer",
+  "model": "pyhpc_turbulent_kinetic_energy"
+}

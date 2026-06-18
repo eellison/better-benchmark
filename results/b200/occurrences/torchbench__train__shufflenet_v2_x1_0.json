@@ -1,0 +1,547 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "8bb40810003c": {
+      "46c132a4": 1
+    },
+    "ccd411f2a45d": {
+      "dc135658": 1,
+      "6726be28": 1,
+      "7662d21d": 9,
+      "ec247fe7": 5,
+      "735b802c": 17,
+      "7044ac58": 9,
+      "8b86722a": 7,
+      "6cf96f8a": 4,
+      "b3ef8e60": 2,
+      "451cc04f": 1,
+      "5bec99de": 1,
+      "008a0950": 1
+    },
+    "19ffdb35cc67": {
+      "5b9efb9c": 1
+    },
+    "100a39b686e3": {
+      "896c6bb5": 56
+    },
+    "33d24326eae6": {
+      "b0183d97": 1,
+      "00e34431": 1,
+      "99b3b05e": 1
+    },
+    "7a2ac1c4841d": {
+      "21cf057f": 5,
+      "8cbf400d": 9,
+      "d1ba5867": 4,
+      "e031939e": 1
+    },
+    "42fad1ece813": {
+      "21cf057f": 3,
+      "9e46e7dc": 1,
+      "8cbf400d": 7,
+      "138137a0": 1,
+      "d1ba5867": 3,
+      "b6bdfd5b": 1
+    },
+    "b12103db1177": {
+      "b0183d97": 2
+    },
+    "e642e2ea37a3": {
+      "24b29630": 1
+    },
+    "e67fddfba074": {
+      "00e34431": 6
+    },
+    "92c45aff3580": {
+      "55c2f021": 1
+    },
+    "fd789e584775": {
+      "99b3b05e": 2
+    },
+    "74b57fcc4507": {
+      "ce5d17b1": 1
+    },
+    "4b4d0668d167": {
+      "75543dfe": 1
+    },
+    "04d85912d998": {
+      "fb36fdc1": 1,
+      "40fe5864": 1,
+      "f4a82139": 2,
+      "ed3cecdb": 4,
+      "9b2aff10": 7,
+      "55bfbbde": 9,
+      "1de4b515": 17,
+      "3e3bfb59": 5,
+      "b26b998a": 9,
+      "48ffb95c": 1,
+      "ed385436": 1
+    },
+    "3a61ea52bbe0": {
+      "5a321d75": 1
+    },
+    "183b124c731f": {
+      "86433bd5": 1,
+      "819a1512": 4,
+      "8a1d8530": 9,
+      "40a8e8e1": 5
+    },
+    "456d637a9bc7": {
+      "3df80ba2": 1
+    },
+    "643db2887a01": {
+      "5556e7e9": 1,
+      "95bfb998": 3,
+      "c0ea6855": 1,
+      "927aa925": 7,
+      "6424a3de": 1,
+      "d8f6241e": 3
+    },
+    "ed4730568670": {
+      "94013926": 2
+    },
+    "41826392af68": {
+      "aa052f71": 1
+    },
+    "b925d072e497": {
+      "8d158a8e": 1
+    },
+    "f9e4c9d243d2": {
+      "82bc110b": 6
+    },
+    "563676e3726c": {
+      "f0fa1db9": 1
+    },
+    "789f08ef70ab": {
+      "c8e869b1": 1
+    },
+    "b1354c2a333b": {
+      "ce2eb236": 2
+    },
+    "1ec65e499477": {
+      "0e23e8e0": 1
+    },
+    "77f6be69be60": {
+      "27bd32b1": 1
+    },
+    "c2bf513c1ebf": {
+      "e781aba9": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "8bf328e519bc",
+      "count": 1,
+      "sig": "((T([128, 3, 224, 224],torch.bfloat16,[150528, 50176, 224, 1]),T([24, 3, 3, 3],torch.bfloat16,[27, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 170.84799706935883,
+      "branch_us": 170.84799706935883
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "1625a7a9a965",
+      "count": 1,
+      "sig": "((T([128, 24, 56, 56],torch.bfloat16,[75264, 3136, 56, 1]),T([24, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],24),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_1",
+      "baseline_us": 28.255999088287354,
+      "branch_us": 28.255999088287354
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "60f02ce3aebc",
+      "count": 1,
+      "sig": "((T([128, 24, 28, 28],torch.bfloat16,[18816, 784, 28, 1]),T([58, 24, 1, 1],torch.bfloat16,[24, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_2",
+      "baseline_us": 20.35200037062168,
+      "branch_us": 20.35200037062168
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "214d7fae7efc",
+      "count": 1,
+      "sig": "((T([128, 24, 56, 56],torch.bfloat16,[75264, 3136, 56, 1]),T([58, 24, 1, 1],torch.bfloat16,[24, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_3",
+      "baseline_us": 19.519999623298645,
+      "branch_us": 19.519999623298645
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "a001d0d918fb",
+      "count": 1,
+      "sig": "((T([128, 58, 56, 56],torch.bfloat16,[181888, 3136, 56, 1]),T([58, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],58),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_4",
+      "baseline_us": 58.20799991488457,
+      "branch_us": 58.20799991488457
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "c9c3b9edaedf",
+      "count": 4,
+      "sig": "((T([128, 58, 28, 28],torch.bfloat16,[45472, 784, 28, 1]),T([58, 58, 1, 1],torch.bfloat16,[58, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_5",
+      "baseline_us": 19.45599913597107,
+      "branch_us": 19.45599913597107
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "91a49bffa6de",
+      "count": 3,
+      "sig": "((T([128, 58, 28, 28],torch.bfloat16,[90944, 784, 28, 1]),T([58, 58, 1, 1],torch.bfloat16,[58, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_6",
+      "baseline_us": 34.40000116825104,
+      "branch_us": 34.40000116825104
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "285811f12822",
+      "count": 3,
+      "sig": "((T([128, 58, 28, 28],torch.bfloat16,[45472, 784, 28, 1]),T([58, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],58),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_7",
+      "baseline_us": 52.99200117588043,
+      "branch_us": 52.99200117588043
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "360c0e34c4a6",
+      "count": 2,
+      "sig": "((T([128, 116, 28, 28],torch.bfloat16,[90944, 784, 28, 1]),T([116, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],116),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_15",
+      "baseline_us": 32.416000962257385,
+      "branch_us": 32.416000962257385
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "e890b18059f4",
+      "count": 9,
+      "sig": "((T([128, 116, 14, 14],torch.bfloat16,[22736, 196, 14, 1]),T([116, 116, 1, 1],torch.bfloat16,[116, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_16",
+      "baseline_us": 13.407999649643898,
+      "branch_us": 13.407999649643898
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "d94105beba27",
+      "count": 1,
+      "sig": "((T([128, 116, 28, 28],torch.bfloat16,[90944, 784, 28, 1]),T([116, 116, 1, 1],torch.bfloat16,[116, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_17",
+      "baseline_us": 32.3840007185936,
+      "branch_us": 32.3840007185936
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "f6323311a445",
+      "count": 7,
+      "sig": "((T([128, 116, 14, 14],torch.bfloat16,[45472, 196, 14, 1]),T([116, 116, 1, 1],torch.bfloat16,[116, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_20",
+      "baseline_us": 23.360000923275948,
+      "branch_us": 23.360000923275948
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "32ee5b109edc",
+      "count": 7,
+      "sig": "((T([128, 116, 14, 14],torch.bfloat16,[22736, 196, 14, 1]),T([116, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],116),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_21",
+      "baseline_us": 30.33600002527237,
+      "branch_us": 30.33600002527237
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "126c5cac367b",
+      "count": 2,
+      "sig": "((T([128, 232, 14, 14],torch.bfloat16,[45472, 196, 14, 1]),T([232, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],232),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_41",
+      "baseline_us": 19.29599978029728,
+      "branch_us": 19.29599978029728
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "03786114b659",
+      "count": 5,
+      "sig": "((T([128, 232, 7, 7],torch.bfloat16,[11368, 49, 7, 1]),T([232, 232, 1, 1],torch.bfloat16,[232, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_42",
+      "baseline_us": 19.487999379634857,
+      "branch_us": 19.487999379634857
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "d1da04b0d292",
+      "count": 1,
+      "sig": "((T([128, 232, 14, 14],torch.bfloat16,[45472, 196, 14, 1]),T([232, 232, 1, 1],torch.bfloat16,[232, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_43",
+      "baseline_us": 29.759999364614487,
+      "branch_us": 29.759999364614487
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "685ef121084b",
+      "count": 3,
+      "sig": "((T([128, 232, 7, 7],torch.bfloat16,[22736, 49, 7, 1]),T([232, 232, 1, 1],torch.bfloat16,[232, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_46",
+      "baseline_us": 26.016000658273697,
+      "branch_us": 26.016000658273697
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "c64ed0bbc033",
+      "count": 3,
+      "sig": "((T([128, 232, 7, 7],torch.bfloat16,[11368, 49, 7, 1]),T([232, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],232),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_47",
+      "baseline_us": 18.144000321626663,
+      "branch_us": 18.144000321626663
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "ed1188bf65a8",
+      "count": 1,
+      "sig": "((T([128, 464, 7, 7],torch.bfloat16,[22736, 49, 7, 1]),T([1024, 464, 1, 1],torch.bfloat16,[464, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "convolution_55",
+      "baseline_us": 35.74400022625923,
+      "branch_us": 35.74400022625923
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "0ba9eea95893",
+      "count": 1,
+      "sig": "((T([1000],torch.bfloat16,[1]),T([128, 1024],torch.bfloat16,[1024, 1]),T([1024, 1000],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 7.7760000713169575,
+      "branch_us": 7.7760000713169575
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "3dcc0a700c07",
+      "count": 1,
+      "sig": "((T([128, 1000],torch.bfloat16,[1000, 1]),T([1000, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 7.935999892652035,
+      "branch_us": 7.935999892652035
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "afcc641cd343",
+      "count": 1,
+      "sig": "((T([1000, 128],torch.bfloat16,[1, 1000]),T([128, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 7.7760000713169575,
+      "branch_us": 7.7760000713169575
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "e02211d836f2",
+      "count": 1,
+      "sig": "((T([128, 1024, 7, 7],torch.bfloat16,[50176, 1, 7168, 1024]),T([128, 464, 7, 7],torch.bfloat16,[22736, 1, 3248, 464]),T([1024, 464, 1, 1],torch.bfloat16,[464, 1, 464, 464]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward",
+      "baseline_us": 26.27200074493885,
+      "branch_us": 26.27200074493885
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "5096a394b8e5",
+      "count": 5,
+      "sig": "((T([128, 232, 7, 7],torch.bfloat16,[11368, 1, 1624, 232]),T([128, 232, 7, 7],torch.bfloat16,[11368, 1, 1624, 232]),T([232, 232, 1, 1],torch.bfloat16,[232, 1, 232, 232]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_1",
+      "baseline_us": 19.936000928282738,
+      "branch_us": 19.936000928282738
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "a7e13173b25a",
+      "count": 3,
+      "sig": "((T([128, 232, 7, 7],torch.bfloat16,[11368, 1, 1624, 232]),T([128, 232, 7, 7],torch.bfloat16,[11368, 1, 1624, 232]),T([232, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[1,1],[1,1],[1,1],False,[0,0],232,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_2",
+      "baseline_us": 24.09599907696247,
+      "branch_us": 24.09599907696247
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "d86671c9380c",
+      "count": 3,
+      "sig": "((T([128, 232, 7, 7],torch.bfloat16,[11368, 1, 1624, 232]),T([128, 232, 7, 7],torch.bfloat16,[22784, 49, 7, 1]),T([232, 232, 1, 1],torch.bfloat16,[232, 1, 232, 232]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_3",
+      "baseline_us": 26.079999282956123,
+      "branch_us": 26.079999282956123
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "68944ad2811f",
+      "count": 2,
+      "sig": "((T([128, 232, 7, 7],torch.bfloat16,[11368, 1, 1624, 232]),T([128, 232, 14, 14],torch.bfloat16,[45472, 1, 3248, 232]),T([232, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],232,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_11",
+      "baseline_us": 39.903998374938965,
+      "branch_us": 39.903998374938965
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "47b9eb4e6285",
+      "count": 1,
+      "sig": "((T([128, 232, 14, 14],torch.bfloat16,[45472, 1, 3248, 232]),T([128, 232, 14, 14],torch.bfloat16,[45472, 1, 3248, 232]),T([232, 232, 1, 1],torch.bfloat16,[232, 1, 232, 232]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_12",
+      "baseline_us": 30.46399913728237,
+      "branch_us": 30.46399913728237
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "2c16590bcc5d",
+      "count": 9,
+      "sig": "((T([128, 116, 14, 14],torch.bfloat16,[22736, 1, 1624, 116]),T([128, 116, 14, 14],torch.bfloat16,[22736, 1, 1624, 116]),T([116, 116, 1, 1],torch.bfloat16,[116, 1, 116, 116]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_15",
+      "baseline_us": 66.43199920654297,
+      "branch_us": 66.43199920654297
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "91e9728ed5b8",
+      "count": 7,
+      "sig": "((T([128, 116, 14, 14],torch.bfloat16,[22736, 1, 1624, 116]),T([128, 116, 14, 14],torch.bfloat16,[22736, 1, 1624, 116]),T([116, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[1,1],[1,1],[1,1],False,[0,0],116,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_16",
+      "baseline_us": 32.3840007185936,
+      "branch_us": 32.3840007185936
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8a883c2f66e6",
+      "count": 7,
+      "sig": "((T([128, 116, 14, 14],torch.bfloat16,[22736, 1, 1624, 116]),T([128, 116, 14, 14],torch.bfloat16,[45504, 196, 14, 1]),T([116, 116, 1, 1],torch.bfloat16,[116, 1, 116, 116]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_17",
+      "baseline_us": 77.69600301980972,
+      "branch_us": 77.69600301980972
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "7977de274149",
+      "count": 2,
+      "sig": "((T([128, 116, 14, 14],torch.bfloat16,[22736, 1, 1624, 116]),T([128, 116, 28, 28],torch.bfloat16,[90944, 1, 3248, 116]),T([116, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],116,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_37",
+      "baseline_us": 67.45599955320358,
+      "branch_us": 67.45599955320358
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "65f4ec6d357b",
+      "count": 1,
+      "sig": "((T([128, 116, 28, 28],torch.bfloat16,[90944, 1, 3248, 116]),T([128, 116, 28, 28],torch.bfloat16,[90944, 1, 3248, 116]),T([116, 116, 1, 1],torch.bfloat16,[116, 1, 116, 116]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_38",
+      "baseline_us": 97.120001912117,
+      "branch_us": 97.120001912117
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "4a5bb9eef0c7",
+      "count": 4,
+      "sig": "((T([128, 58, 28, 28],torch.bfloat16,[45472, 1, 1624, 58]),T([128, 58, 28, 28],torch.bfloat16,[45472, 1, 1624, 58]),T([58, 58, 1, 1],torch.bfloat16,[58, 1, 58, 58]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_41",
+      "baseline_us": 73.37599992752075,
+      "branch_us": 73.37599992752075
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "888eb00d5485",
+      "count": 3,
+      "sig": "((T([128, 58, 28, 28],torch.bfloat16,[45472, 1, 1624, 58]),T([128, 58, 28, 28],torch.bfloat16,[45472, 1, 1624, 58]),T([58, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[1,1],[1,1],[1,1],False,[0,0],58,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_42",
+      "baseline_us": 52.928000688552856,
+      "branch_us": 52.928000688552856
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "115563043360",
+      "count": 3,
+      "sig": "((T([128, 58, 28, 28],torch.bfloat16,[45472, 1, 1624, 58]),T([128, 58, 28, 28],torch.bfloat16,[45504, 784, 28, 1]),T([58, 58, 1, 1],torch.bfloat16,[58, 1, 58, 58]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_43",
+      "baseline_us": 87.90399879217148,
+      "branch_us": 87.90399879217148
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "cb9fbf30f654",
+      "count": 1,
+      "sig": "((T([128, 58, 28, 28],torch.bfloat16,[45472, 1, 1624, 58]),T([128, 58, 56, 56],torch.bfloat16,[181888, 1, 3248, 58]),T([58, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],58,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_51",
+      "baseline_us": 110.23999750614166,
+      "branch_us": 110.23999750614166
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "a185ef57bbc3",
+      "count": 1,
+      "sig": "((T([128, 58, 56, 56],torch.bfloat16,[181888, 1, 3248, 58]),T([128, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([58, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_52",
+      "baseline_us": 101.95200145244598,
+      "branch_us": 101.95200145244598
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "e0f34dfc914a",
+      "count": 1,
+      "sig": "((T([128, 58, 28, 28],torch.bfloat16,[45472, 1, 1624, 58]),T([128, 24, 28, 28],torch.bfloat16,[18816, 1, 672, 24]),T([58, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_53",
+      "baseline_us": 41.79200157523155,
+      "branch_us": 41.79200157523155
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8970fe720f74",
+      "count": 1,
+      "sig": "((T([128, 24, 28, 28],torch.bfloat16,[18816, 1, 672, 24]),T([128, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([24, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],24,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_54",
+      "baseline_us": 63.13599646091461,
+      "branch_us": 63.13599646091461
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "697878441ab2",
+      "count": 1,
+      "sig": "((T([128, 24, 112, 112],torch.bfloat16,[301056, 1, 2688, 24]),T([128, 3, 224, 224],torch.bfloat16,[150528, 1, 672, 3]),T([24, 3, 3, 3],torch.bfloat16,[27, 1, 9, 3]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[False,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/shufflenet_v2_x1_0/full_graph_001.py",
+      "node": "convolution_backward_55",
+      "baseline_us": 237.47199773788452,
+      "branch_us": 237.47199773788452
+    }
+  ],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "train",
+  "model": "shufflenet_v2_x1_0"
+}

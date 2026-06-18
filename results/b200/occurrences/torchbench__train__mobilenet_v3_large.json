@@ -1,0 +1,1201 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "8bb40810003c": {
+      "5617a165": 1,
+      "7cfcfe39": 1
+    },
+    "ccd411f2a45d": {
+      "dc135658": 1,
+      "7036bd6b": 1,
+      "359b1709": 3,
+      "db80c8d7": 2,
+      "aa684dc7": 2,
+      "03c404af": 2,
+      "6235682d": 2,
+      "e1920811": 2,
+      "0073e107": 2,
+      "211473d3": 1,
+      "92a6b7cc": 2,
+      "45d2acd6": 2,
+      "837c7bad": 2,
+      "118ea6bc": 2,
+      "b3e60402": 1,
+      "9875e770": 2,
+      "4d28ec9d": 1,
+      "d3c3b581": 1,
+      "544f0b36": 1,
+      "eecf42f8": 1,
+      "bdcfbdb8": 1,
+      "c8763cd5": 1,
+      "11b53ced": 3,
+      "654bfd80": 1,
+      "9a6374d9": 1,
+      "83890eeb": 2,
+      "a0bf2e69": 2,
+      "029b2ffc": 2,
+      "cf8e1b2f": 1,
+      "19b504d4": 1,
+      "cd8a7a1b": 1,
+      "751bd4ae": 1,
+      "1ef5a22a": 1,
+      "9dc6f46e": 1,
+      "3f9a27a3": 2,
+      "6bc2a838": 2,
+      "dcb5fb85": 2,
+      "36e93be8": 2,
+      "069511b6": 2,
+      "669ded90": 2,
+      "8960c5a6": 1,
+      "ecc00eb8": 3,
+      "f9ebe6cb": 1,
+      "7f1e6805": 2,
+      "62fc72a8": 1,
+      "6fbb626c": 1,
+      "e1054827": 1,
+      "cbcfb3ff": 1,
+      "eecc0939": 1,
+      "f763fd93": 1,
+      "aed6c070": 1,
+      "ee4ffd61": 1,
+      "8ea47b2a": 1,
+      "fae56879": 1
+    },
+    "d49b2da97323": {
+      "040ff6c3": 1
+    },
+    "3a94a106616a": {
+      "e8a9d13a": 1
+    },
+    "100a39b686e3": {
+      "896c6bb5": 46
+    },
+    "5a22dd21d88e": {
+      "007d658d": 2,
+      "16c9375e": 1,
+      "7cea4043": 3,
+      "1e3428af": 2,
+      "dcb799ef": 1,
+      "82eff7d5": 1
+    },
+    "ba870b00a0b3": {
+      "d7edb67c": 2,
+      "f9969da7": 1,
+      "f76fad38": 1,
+      "0c85aae0": 1,
+      "be7a1f98": 2,
+      "38d11fef": 1
+    },
+    "3abc926270f6": {
+      "cc570918": 2,
+      "7eaaa5e5": 2,
+      "6b167218": 1,
+      "3ba76078": 2,
+      "c763255d": 1
+    },
+    "3f4aa90365fa": {
+      "e8a9d13a": 2,
+      "d3bf7421": 1,
+      "8aafc432": 1,
+      "ba044ce1": 1
+    },
+    "522de516d7b7": {
+      "e8a9d13a": 2,
+      "8aafc432": 2,
+      "ba044ce1": 1,
+      "531cd9bd": 4,
+      "76491bca": 2,
+      "4e453d00": 1,
+      "85aaacf2": 1,
+      "5e2cd32b": 1
+    },
+    "7a2ac1c4841d": {
+      "0fbf9a67": 1,
+      "fc44e6c2": 1,
+      "b3e3f5ef": 1,
+      "1a8507ca": 1,
+      "b9d86480": 1
+    },
+    "c98413eb2743": {
+      "00cca0ad": 2,
+      "b7fea7d6": 1
+    },
+    "42fad1ece813": {
+      "00cca0ad": 2,
+      "e85936d9": 3,
+      "7dc93580": 1,
+      "22d6d5c7": 1,
+      "5e2cd32b": 1
+    },
+    "04d85912d998": {
+      "efa63a42": 1,
+      "1238c69e": 1,
+      "cc85f631": 1,
+      "c39d875c": 1,
+      "9357c095": 1,
+      "0539fdea": 1,
+      "216dece3": 3,
+      "24aebc95": 1,
+      "6e52b66f": 2,
+      "df3dbe38": 1,
+      "cc408ab6": 1,
+      "83350839": 2,
+      "c2b68c3e": 2,
+      "6b167218": 2,
+      "658a0097": 2,
+      "0b93ff3c": 2,
+      "90187e0c": 1,
+      "0ec57a61": 1,
+      "deaf11e8": 1,
+      "5065e963": 1,
+      "f3c583c2": 1,
+      "6cc3da18": 1,
+      "6f3a310a": 2,
+      "03b4a772": 2,
+      "daba876c": 2,
+      "f7f61ba5": 1,
+      "a0bc4be4": 1,
+      "32a02f3d": 1,
+      "2ce6048d": 1,
+      "db6f45ba": 1,
+      "b783e2ae": 2,
+      "5c274eea": 1,
+      "4b053b17": 2,
+      "e875c188": 2,
+      "02b08269": 1,
+      "1e23135c": 1,
+      "ce11835b": 1,
+      "1de45ad1": 3,
+      "5ba2cfc0": 2,
+      "3047d934": 2,
+      "fb48e60c": 2,
+      "dcb43c99": 2,
+      "047f3e89": 1,
+      "4fd1884d": 1
+    },
+    "26237066094b": {
+      "7088b6e2": 1
+    },
+    "643db2887a01": {
+      "ae27c8fd": 1,
+      "52ba495d": 1,
+      "7fe614dc": 1,
+      "399d5934": 3,
+      "a38f76ef": 2
+    },
+    "183b124c731f": {
+      "ba1f5763": 1,
+      "3ab290cb": 1,
+      "c37e4be5": 1,
+      "7ef2067a": 1,
+      "4248d2e3": 1,
+      "805fe5b3": 1
+    },
+    "a58657212bf4": {
+      "0dc5b6bd": 1,
+      "864b3c6f": 1,
+      "cf15f756": 1,
+      "f63ebc76": 1,
+      "f35ade00": 1
+    },
+    "3ab1da5a9e6c": {
+      "8f42374e": 1,
+      "a6881a60": 2
+    },
+    "7cfdb80c54c5": {
+      "af287ed4": 1,
+      "48c0f941": 2,
+      "e2abc8eb": 1,
+      "c56de08d": 2,
+      "bb80badd": 1
+    },
+    "e681bc3d9d59": {
+      "c557d2c1": 1,
+      "0e83eb42": 2
+    },
+    "894f3180f3c4": {
+      "864b3c6f": 1,
+      "cf15f756": 2,
+      "f35ade00": 1
+    },
+    "3eee452cee40": {
+      "e9945fee": 1,
+      "90e96d75": 1,
+      "fab0dcaa": 2,
+      "ec0b4267": 4,
+      "d0c4278a": 1,
+      "9542f2d8": 2,
+      "9b1311e4": 2
+    },
+    "245fc9d79aad": {
+      "d6f080d2": 1,
+      "3468f7bd": 1,
+      "26a83dcc": 1,
+      "50dc27bc": 2
+    },
+    "38b494b9c61a": {
+      "6425bce8": 1,
+      "64645353": 1,
+      "e7e0ad11": 1,
+      "239d1349": 2
+    },
+    "d6239b8319dc": {
+      "f4357794": 1
+    },
+    "12bce2738ed4": {
+      "a7c9263b": 1
+    },
+    "29c472896711": {
+      "c7ec772c": 1
+    },
+    "c2bf513c1ebf": {
+      "4b6198d7": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "17170e59b5b2",
+      "count": 1,
+      "sig": "((T([32, 3, 224, 224],torch.bfloat16,[150528, 50176, 224, 1]),T([16, 3, 3, 3],torch.bfloat16,[27, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 50.912000238895416,
+      "branch_us": 50.912000238895416
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "bb58f2cd3dab",
+      "count": 1,
+      "sig": "((T([32, 16, 112, 112],torch.bfloat16,[200704, 12544, 112, 1]),T([16, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],16),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_1",
+      "baseline_us": 58.97599831223488,
+      "branch_us": 58.97599831223488
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "272897bdbda0",
+      "count": 1,
+      "sig": "((T([32, 16, 112, 112],torch.bfloat16,[200704, 12544, 112, 1]),T([16, 16, 1, 1],torch.bfloat16,[16, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_2",
+      "baseline_us": 13.856000266969204,
+      "branch_us": 13.856000266969204
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "eee513640331",
+      "count": 1,
+      "sig": "((T([32, 16, 112, 112],torch.bfloat16,[200704, 12544, 112, 1]),T([64, 16, 1, 1],torch.bfloat16,[16, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_3",
+      "baseline_us": 18.20800080895424,
+      "branch_us": 18.20800080895424
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "1a44defa90b1",
+      "count": 1,
+      "sig": "((T([32, 64, 112, 112],torch.bfloat16,[802816, 12544, 112, 1]),T([64, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],64),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_4",
+      "baseline_us": 65.21599739789963,
+      "branch_us": 65.21599739789963
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "f6f9c5091bb7",
+      "count": 1,
+      "sig": "((T([32, 64, 56, 56],torch.bfloat16,[200704, 3136, 56, 1]),T([24, 64, 1, 1],torch.bfloat16,[64, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_5",
+      "baseline_us": 11.103999800980091,
+      "branch_us": 11.103999800980091
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "e2699190e65e",
+      "count": 2,
+      "sig": "((T([32, 24, 56, 56],torch.bfloat16,[75264, 3136, 56, 1]),T([72, 24, 1, 1],torch.bfloat16,[24, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_6",
+      "baseline_us": 13.088000006973743,
+      "branch_us": 13.088000006973743
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "7a70a245688d",
+      "count": 1,
+      "sig": "((T([32, 72, 56, 56],torch.bfloat16,[225792, 3136, 56, 1]),T([72, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],72),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_7",
+      "baseline_us": 64.31999802589417,
+      "branch_us": 64.31999802589417
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "ff3355d5db65",
+      "count": 1,
+      "sig": "((T([32, 72, 56, 56],torch.bfloat16,[225792, 3136, 56, 1]),T([24, 72, 1, 1],torch.bfloat16,[72, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_8",
+      "baseline_us": 11.872000060975552,
+      "branch_us": 11.872000060975552
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "cc798cb999a7",
+      "count": 1,
+      "sig": "((T([32, 72, 56, 56],torch.bfloat16,[225792, 3136, 56, 1]),T([72, 1, 5, 5],torch.bfloat16,[25, 25, 5, 1]),None,[2,2],[2,2],[1,1],False,[0,0],72),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_10",
+      "baseline_us": 34.591998904943466,
+      "branch_us": 34.591998904943466
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "a40293eb29fe",
+      "count": 1,
+      "sig": "((T([32, 72, 1, 1],torch.bfloat16,[72, 1, 1, 1]),T([24, 72, 1, 1],torch.bfloat16,[72, 1, 1, 1]),T([24],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_11",
+      "baseline_us": 9.151999838650227,
+      "branch_us": 9.151999838650227
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "a2438b4ff985",
+      "count": 1,
+      "sig": "((T([32, 24, 1, 1],torch.bfloat16,[24, 1, 1, 1]),T([72, 24, 1, 1],torch.bfloat16,[24, 1, 1, 1]),T([72],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_12",
+      "baseline_us": 9.088000282645226,
+      "branch_us": 9.088000282645226
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "6269edc57905",
+      "count": 1,
+      "sig": "((T([32, 72, 28, 28],torch.bfloat16,[56448, 784, 28, 1]),T([40, 72, 1, 1],torch.bfloat16,[72, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_13",
+      "baseline_us": 9.824000298976898,
+      "branch_us": 9.824000298976898
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "e9d310953bb1",
+      "count": 2,
+      "sig": "((T([32, 40, 28, 28],torch.bfloat16,[31360, 784, 28, 1]),T([120, 40, 1, 1],torch.bfloat16,[40, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_14",
+      "baseline_us": 12.28800043463707,
+      "branch_us": 12.28800043463707
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "31dbe1be3c98",
+      "count": 2,
+      "sig": "((T([32, 120, 28, 28],torch.bfloat16,[94080, 784, 28, 1]),T([120, 1, 5, 5],torch.bfloat16,[25, 25, 5, 1]),None,[1,1],[2,2],[1,1],False,[0,0],120),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_15",
+      "baseline_us": 48.86399954557419,
+      "branch_us": 48.86399954557419
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "b7f9b765d91a",
+      "count": 2,
+      "sig": "((T([32, 120, 1, 1],torch.bfloat16,[120, 1, 1, 1]),T([32, 120, 1, 1],torch.bfloat16,[120, 1, 1, 1]),T([32],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_16",
+      "baseline_us": 8.991999551653862,
+      "branch_us": 8.991999551653862
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "05e1978410af",
+      "count": 2,
+      "sig": "((T([32, 32, 1, 1],torch.bfloat16,[32, 1, 1, 1]),T([120, 32, 1, 1],torch.bfloat16,[32, 1, 1, 1]),T([120],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_17",
+      "baseline_us": 9.696000255644321,
+      "branch_us": 9.696000255644321
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "3dc081f7ab2c",
+      "count": 2,
+      "sig": "((T([32, 120, 28, 28],torch.bfloat16,[94080, 784, 28, 1]),T([40, 120, 1, 1],torch.bfloat16,[120, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_18",
+      "baseline_us": 10.111999697983265,
+      "branch_us": 10.111999697983265
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "5f730d2884d4",
+      "count": 1,
+      "sig": "((T([32, 40, 28, 28],torch.bfloat16,[31360, 784, 28, 1]),T([240, 40, 1, 1],torch.bfloat16,[40, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_24",
+      "baseline_us": 14.112000353634357,
+      "branch_us": 14.112000353634357
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "53ebb7fe4868",
+      "count": 1,
+      "sig": "((T([32, 240, 28, 28],torch.bfloat16,[188160, 784, 28, 1]),T([240, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],240),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_25",
+      "baseline_us": 19.711999222636223,
+      "branch_us": 19.711999222636223
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "190abcb0eb5b",
+      "count": 1,
+      "sig": "((T([32, 240, 14, 14],torch.bfloat16,[47040, 196, 14, 1]),T([80, 240, 1, 1],torch.bfloat16,[240, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_26",
+      "baseline_us": 11.807999573647976,
+      "branch_us": 11.807999573647976
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "cc0b3814f38d",
+      "count": 1,
+      "sig": "((T([32, 80, 14, 14],torch.bfloat16,[15680, 196, 14, 1]),T([200, 80, 1, 1],torch.bfloat16,[80, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_27",
+      "baseline_us": 9.8879998549819,
+      "branch_us": 9.8879998549819
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "24a079f41883",
+      "count": 1,
+      "sig": "((T([32, 200, 14, 14],torch.bfloat16,[39200, 196, 14, 1]),T([200, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],200),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_28",
+      "baseline_us": 16.3199994713068,
+      "branch_us": 16.3199994713068
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "8a4104c4ac34",
+      "count": 1,
+      "sig": "((T([32, 200, 14, 14],torch.bfloat16,[39200, 196, 14, 1]),T([80, 200, 1, 1],torch.bfloat16,[200, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_29",
+      "baseline_us": 11.168000288307667,
+      "branch_us": 11.168000288307667
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "af0fa42e6fa5",
+      "count": 2,
+      "sig": "((T([32, 80, 14, 14],torch.bfloat16,[15680, 196, 14, 1]),T([184, 80, 1, 1],torch.bfloat16,[80, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_30",
+      "baseline_us": 9.920000098645687,
+      "branch_us": 9.920000098645687
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "a18e24fb03cc",
+      "count": 2,
+      "sig": "((T([32, 184, 14, 14],torch.bfloat16,[36064, 196, 14, 1]),T([184, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],184),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_31",
+      "baseline_us": 15.71200042963028,
+      "branch_us": 15.71200042963028
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "2ed5c69b8cec",
+      "count": 2,
+      "sig": "((T([32, 184, 14, 14],torch.bfloat16,[36064, 196, 14, 1]),T([80, 184, 1, 1],torch.bfloat16,[184, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_32",
+      "baseline_us": 11.103999800980091,
+      "branch_us": 11.103999800980091
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "60d997dceb5a",
+      "count": 1,
+      "sig": "((T([32, 80, 14, 14],torch.bfloat16,[15680, 196, 14, 1]),T([480, 80, 1, 1],torch.bfloat16,[80, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_36",
+      "baseline_us": 11.90400030463934,
+      "branch_us": 11.90400030463934
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "b0b1a9af969a",
+      "count": 1,
+      "sig": "((T([32, 480, 14, 14],torch.bfloat16,[94080, 196, 14, 1]),T([480, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],480),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_37",
+      "baseline_us": 30.46399913728237,
+      "branch_us": 30.46399913728237
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "ff6221a987c6",
+      "count": 1,
+      "sig": "((T([32, 480, 1, 1],torch.bfloat16,[480, 1, 1, 1]),T([120, 480, 1, 1],torch.bfloat16,[480, 1, 1, 1]),T([120],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_38",
+      "baseline_us": 11.872000060975552,
+      "branch_us": 11.872000060975552
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "42692b960618",
+      "count": 1,
+      "sig": "((T([32, 120, 1, 1],torch.bfloat16,[120, 1, 1, 1]),T([480, 120, 1, 1],torch.bfloat16,[120, 1, 1, 1]),T([480],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_39",
+      "baseline_us": 9.79200005531311,
+      "branch_us": 9.79200005531311
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "6e52e603f530",
+      "count": 1,
+      "sig": "((T([32, 480, 14, 14],torch.bfloat16,[94080, 196, 14, 1]),T([112, 480, 1, 1],torch.bfloat16,[480, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_40",
+      "baseline_us": 15.647999942302704,
+      "branch_us": 15.647999942302704
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "1fa87a03fc49",
+      "count": 2,
+      "sig": "((T([32, 112, 14, 14],torch.bfloat16,[21952, 196, 14, 1]),T([672, 112, 1, 1],torch.bfloat16,[112, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_41",
+      "baseline_us": 20.06400004029274,
+      "branch_us": 20.06400004029274
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "b78621e7a0a2",
+      "count": 1,
+      "sig": "((T([32, 672, 14, 14],torch.bfloat16,[131712, 196, 14, 1]),T([672, 1, 3, 3],torch.bfloat16,[9, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],672),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_42",
+      "baseline_us": 40.54399952292442,
+      "branch_us": 40.54399952292442
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "7f409d63c477",
+      "count": 2,
+      "sig": "((T([32, 672, 1, 1],torch.bfloat16,[672, 1, 1, 1]),T([168, 672, 1, 1],torch.bfloat16,[672, 1, 1, 1]),T([168],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_43",
+      "baseline_us": 11.935999616980553,
+      "branch_us": 11.935999616980553
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "ff7147dd99ac",
+      "count": 2,
+      "sig": "((T([32, 168, 1, 1],torch.bfloat16,[168, 1, 1, 1]),T([672, 168, 1, 1],torch.bfloat16,[168, 1, 1, 1]),T([672],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_44",
+      "baseline_us": 9.759999811649323,
+      "branch_us": 9.759999811649323
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "9e9ac63ccdce",
+      "count": 1,
+      "sig": "((T([32, 672, 14, 14],torch.bfloat16,[131712, 196, 14, 1]),T([112, 672, 1, 1],torch.bfloat16,[672, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_45",
+      "baseline_us": 18.52799952030182,
+      "branch_us": 18.52799952030182
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "00b5d10801d8",
+      "count": 1,
+      "sig": "((T([32, 672, 14, 14],torch.bfloat16,[131712, 196, 14, 1]),T([672, 1, 5, 5],torch.bfloat16,[25, 25, 5, 1]),None,[2,2],[2,2],[1,1],False,[0,0],672),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_47",
+      "baseline_us": 22.175999358296394,
+      "branch_us": 22.175999358296394
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "5fa30f4e014e",
+      "count": 1,
+      "sig": "((T([32, 672, 7, 7],torch.bfloat16,[32928, 49, 7, 1]),T([160, 672, 1, 1],torch.bfloat16,[672, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_50",
+      "baseline_us": 16.607999801635742,
+      "branch_us": 16.607999801635742
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "e15856374e7c",
+      "count": 3,
+      "sig": "((T([32, 160, 7, 7],torch.bfloat16,[7840, 49, 7, 1]),T([960, 160, 1, 1],torch.bfloat16,[160, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_51",
+      "baseline_us": 15.135999768972397,
+      "branch_us": 15.135999768972397
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "553688300c20",
+      "count": 2,
+      "sig": "((T([32, 960, 7, 7],torch.bfloat16,[47040, 49, 7, 1]),T([960, 1, 5, 5],torch.bfloat16,[25, 25, 5, 1]),None,[1,1],[2,2],[1,1],False,[0,0],960),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_52",
+      "baseline_us": 27.488000690937042,
+      "branch_us": 27.488000690937042
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "bffda976242d",
+      "count": 2,
+      "sig": "((T([32, 960, 1, 1],torch.bfloat16,[960, 1, 1, 1]),T([240, 960, 1, 1],torch.bfloat16,[960, 1, 1, 1]),T([240],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_53",
+      "baseline_us": 12.415999546647072,
+      "branch_us": 12.415999546647072
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "496684edaea9",
+      "count": 2,
+      "sig": "((T([32, 240, 1, 1],torch.bfloat16,[240, 1, 1, 1]),T([960, 240, 1, 1],torch.bfloat16,[240, 1, 1, 1]),T([960],torch.bfloat16,[1]),[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_54",
+      "baseline_us": 9.920000098645687,
+      "branch_us": 9.920000098645687
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "5ae8e550e79b",
+      "count": 2,
+      "sig": "((T([32, 960, 7, 7],torch.bfloat16,[47040, 49, 7, 1]),T([160, 960, 1, 1],torch.bfloat16,[960, 1, 1, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "convolution_55",
+      "baseline_us": 18.079999834299088,
+      "branch_us": 18.079999834299088
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "9b3828d9251f",
+      "count": 1,
+      "sig": "((T([1280],torch.bfloat16,[1]),T([32, 960],torch.bfloat16,[960, 1]),T([960, 1280],torch.bfloat16,[1, 960])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 7.807999849319458,
+      "branch_us": 7.807999849319458
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "8ee08c3b4c3e",
+      "count": 1,
+      "sig": "((T([1000],torch.bfloat16,[1]),T([32, 1280],torch.bfloat16,[1280, 1]),T([1280, 1000],torch.bfloat16,[1, 1280])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 8.287999778985977,
+      "branch_us": 8.287999778985977
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "7c3daac0251c",
+      "count": 1,
+      "sig": "((T([32, 1000],torch.bfloat16,[1000, 1]),T([1000, 1280],torch.bfloat16,[1280, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 7.679999805986881,
+      "branch_us": 7.679999805986881
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "f997496edec3",
+      "count": 1,
+      "sig": "((T([1000, 32],torch.bfloat16,[1, 1000]),T([32, 1280],torch.bfloat16,[1280, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 7.552000228315592,
+      "branch_us": 7.552000228315592
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "dbb701e08090",
+      "count": 1,
+      "sig": "((T([32, 1280],torch.bfloat16,[1280, 1]),T([1280, 960],torch.bfloat16,[960, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "mm_2",
+      "baseline_us": 8.00000037997961,
+      "branch_us": 8.00000037997961
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0eea63cc449a",
+      "count": 1,
+      "sig": "((T([1280, 32],torch.bfloat16,[1, 1280]),T([32, 960],torch.bfloat16,[960, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "mm_3",
+      "baseline_us": 7.615999784320593,
+      "branch_us": 7.615999784320593
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "3141d63b7f45",
+      "count": 3,
+      "sig": "((T([32, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([32, 160, 7, 7],torch.bfloat16,[7840, 1, 1120, 160]),T([960, 160, 1, 1],torch.bfloat16,[160, 1, 160, 160]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward",
+      "baseline_us": 14.112000353634357,
+      "branch_us": 14.112000353634357
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "087d5003d789",
+      "count": 2,
+      "sig": "((T([32, 160, 7, 7],torch.bfloat16,[7840, 1, 1120, 160]),T([32, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([160, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_1",
+      "baseline_us": 13.919999822974205,
+      "branch_us": 13.919999822974205
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8b769d2ef1b8",
+      "count": 2,
+      "sig": "((T([32, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),T([32, 240, 1, 1],torch.bfloat16,[240, 1, 240, 240]),T([960, 240, 1, 1],torch.bfloat16,[240, 1, 240, 240]),[960],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_2",
+      "baseline_us": 15.359999611973763,
+      "branch_us": 15.359999611973763
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "d8e7be4ca1b1",
+      "count": 2,
+      "sig": "((T([32, 240, 1, 1],torch.bfloat16,[240, 1, 240, 240]),T([32, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),T([240, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),[240],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_3",
+      "baseline_us": 11.90400030463934,
+      "branch_us": 11.90400030463934
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "a9297d5a90b1",
+      "count": 2,
+      "sig": "((T([32, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([32, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([960, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),[0],[1,1],[2,2],[1,1],False,[0,0],960,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_4",
+      "baseline_us": 34.272000193595886,
+      "branch_us": 34.272000193595886
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8326ff53cb02",
+      "count": 1,
+      "sig": "((T([32, 160, 7, 7],torch.bfloat16,[7840, 1, 1120, 160]),T([32, 672, 7, 7],torch.bfloat16,[32928, 1, 4704, 672]),T([160, 672, 1, 1],torch.bfloat16,[672, 1, 672, 672]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_11",
+      "baseline_us": 13.151999562978745,
+      "branch_us": 13.151999562978745
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "4a2f7533e450",
+      "count": 2,
+      "sig": "((T([32, 672, 1, 1],torch.bfloat16,[672, 1, 672, 672]),T([32, 168, 1, 1],torch.bfloat16,[168, 1, 168, 168]),T([672, 168, 1, 1],torch.bfloat16,[168, 1, 168, 168]),[672],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_12",
+      "baseline_us": 13.952000066637993,
+      "branch_us": 13.952000066637993
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "6f49b3e40310",
+      "count": 2,
+      "sig": "((T([32, 168, 1, 1],torch.bfloat16,[168, 1, 168, 168]),T([32, 672, 1, 1],torch.bfloat16,[672, 1, 672, 672]),T([168, 672, 1, 1],torch.bfloat16,[672, 1, 672, 672]),[168],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_13",
+      "baseline_us": 9.664000011980534,
+      "branch_us": 9.664000011980534
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "a19b9389565c",
+      "count": 1,
+      "sig": "((T([32, 672, 7, 7],torch.bfloat16,[32928, 1, 4704, 672]),T([32, 672, 14, 14],torch.bfloat16,[131712, 1, 9408, 672]),T([672, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),[0],[2,2],[2,2],[1,1],False,[0,0],672,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_14",
+      "baseline_us": 46.879999339580536,
+      "branch_us": 46.879999339580536
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "cd2f894c7e00",
+      "count": 2,
+      "sig": "((T([32, 672, 14, 14],torch.bfloat16,[131712, 1, 9408, 672]),T([32, 112, 14, 14],torch.bfloat16,[21952, 1, 1568, 112]),T([672, 112, 1, 1],torch.bfloat16,[112, 1, 112, 112]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_15",
+      "baseline_us": 20.06400004029274,
+      "branch_us": 20.06400004029274
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "02efa3caa537",
+      "count": 1,
+      "sig": "((T([32, 112, 14, 14],torch.bfloat16,[21952, 1, 1568, 112]),T([32, 672, 14, 14],torch.bfloat16,[131712, 1, 9408, 672]),T([112, 672, 1, 1],torch.bfloat16,[672, 1, 672, 672]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_16",
+      "baseline_us": 19.936000928282738,
+      "branch_us": 19.936000928282738
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "16e28056342c",
+      "count": 1,
+      "sig": "((T([32, 672, 14, 14],torch.bfloat16,[131712, 1, 9408, 672]),T([32, 672, 14, 14],torch.bfloat16,[131712, 1, 9408, 672]),T([672, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[1,1],[1,1],[1,1],False,[0,0],672,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_19",
+      "baseline_us": 36.3520011305809,
+      "branch_us": 36.3520011305809
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8bfca1130556",
+      "count": 1,
+      "sig": "((T([32, 112, 14, 14],torch.bfloat16,[21952, 1, 1568, 112]),T([32, 480, 14, 14],torch.bfloat16,[94080, 1, 6720, 480]),T([112, 480, 1, 1],torch.bfloat16,[480, 1, 480, 480]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_21",
+      "baseline_us": 18.0479995906353,
+      "branch_us": 18.0479995906353
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "5699c8b8a048",
+      "count": 1,
+      "sig": "((T([32, 480, 1, 1],torch.bfloat16,[480, 1, 480, 480]),T([32, 120, 1, 1],torch.bfloat16,[120, 1, 120, 120]),T([480, 120, 1, 1],torch.bfloat16,[120, 1, 120, 120]),[480],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_22",
+      "baseline_us": 13.952000066637993,
+      "branch_us": 13.952000066637993
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "c4be160c1800",
+      "count": 1,
+      "sig": "((T([32, 120, 1, 1],torch.bfloat16,[120, 1, 120, 120]),T([32, 480, 1, 1],torch.bfloat16,[480, 1, 480, 480]),T([120, 480, 1, 1],torch.bfloat16,[480, 1, 480, 480]),[120],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_23",
+      "baseline_us": 9.600000455975533,
+      "branch_us": 9.600000455975533
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "b0b8da8733ea",
+      "count": 1,
+      "sig": "((T([32, 480, 14, 14],torch.bfloat16,[94080, 1, 6720, 480]),T([32, 480, 14, 14],torch.bfloat16,[94080, 1, 6720, 480]),T([480, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[1,1],[1,1],[1,1],False,[0,0],480,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_24",
+      "baseline_us": 30.30399978160858,
+      "branch_us": 30.30399978160858
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "7ac2ff509d1e",
+      "count": 1,
+      "sig": "((T([32, 480, 14, 14],torch.bfloat16,[94080, 1, 6720, 480]),T([32, 80, 14, 14],torch.bfloat16,[15680, 1, 1120, 80]),T([480, 80, 1, 1],torch.bfloat16,[80, 1, 80, 80]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_25",
+      "baseline_us": 19.45599913597107,
+      "branch_us": 19.45599913597107
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "a9b7af927b03",
+      "count": 2,
+      "sig": "((T([32, 80, 14, 14],torch.bfloat16,[15680, 1, 1120, 80]),T([32, 184, 14, 14],torch.bfloat16,[36064, 1, 2576, 184]),T([80, 184, 1, 1],torch.bfloat16,[184, 1, 184, 184]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_26",
+      "baseline_us": 20.128000527620316,
+      "branch_us": 20.128000527620316
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "bac9a640f5df",
+      "count": 2,
+      "sig": "((T([32, 184, 14, 14],torch.bfloat16,[36064, 1, 2576, 184]),T([32, 184, 14, 14],torch.bfloat16,[36064, 1, 2576, 184]),T([184, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[1,1],[1,1],[1,1],False,[0,0],184,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_27",
+      "baseline_us": 20.128000527620316,
+      "branch_us": 20.128000527620316
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "31eed75d18b5",
+      "count": 2,
+      "sig": "((T([32, 184, 14, 14],torch.bfloat16,[36064, 1, 2576, 184]),T([32, 80, 14, 14],torch.bfloat16,[15680, 1, 1120, 80]),T([184, 80, 1, 1],torch.bfloat16,[80, 1, 80, 80]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_28",
+      "baseline_us": 19.360000267624855,
+      "branch_us": 19.360000267624855
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "9670b0885ef1",
+      "count": 1,
+      "sig": "((T([32, 80, 14, 14],torch.bfloat16,[15680, 1, 1120, 80]),T([32, 200, 14, 14],torch.bfloat16,[39200, 1, 2800, 200]),T([80, 200, 1, 1],torch.bfloat16,[200, 1, 200, 200]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_32",
+      "baseline_us": 19.200000911951065,
+      "branch_us": 19.200000911951065
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "35f210137251",
+      "count": 1,
+      "sig": "((T([32, 200, 14, 14],torch.bfloat16,[39200, 1, 2800, 200]),T([32, 200, 14, 14],torch.bfloat16,[39200, 1, 2800, 200]),T([200, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[1,1],[1,1],[1,1],False,[0,0],200,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_33",
+      "baseline_us": 22.08000048995018,
+      "branch_us": 22.08000048995018
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "0755b5359f89",
+      "count": 1,
+      "sig": "((T([32, 200, 14, 14],torch.bfloat16,[39200, 1, 2800, 200]),T([32, 80, 14, 14],torch.bfloat16,[15680, 1, 1120, 80]),T([200, 80, 1, 1],torch.bfloat16,[80, 1, 80, 80]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_34",
+      "baseline_us": 19.168000668287277,
+      "branch_us": 19.168000668287277
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8a33a7a6c4ed",
+      "count": 1,
+      "sig": "((T([32, 80, 14, 14],torch.bfloat16,[15680, 1, 1120, 80]),T([32, 240, 14, 14],torch.bfloat16,[47040, 1, 3360, 240]),T([80, 240, 1, 1],torch.bfloat16,[240, 1, 240, 240]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_35",
+      "baseline_us": 17.823999747633934,
+      "branch_us": 17.823999747633934
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "18cbe72506f8",
+      "count": 1,
+      "sig": "((T([32, 240, 14, 14],torch.bfloat16,[47040, 1, 3360, 240]),T([32, 240, 28, 28],torch.bfloat16,[188160, 1, 6720, 240]),T([240, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],240,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_36",
+      "baseline_us": 40.64000025391579,
+      "branch_us": 40.64000025391579
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "913adb973f1e",
+      "count": 1,
+      "sig": "((T([32, 240, 28, 28],torch.bfloat16,[188160, 1, 6720, 240]),T([32, 40, 28, 28],torch.bfloat16,[31360, 1, 1120, 40]),T([240, 40, 1, 1],torch.bfloat16,[40, 1, 40, 40]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_37",
+      "baseline_us": 30.239999294281006,
+      "branch_us": 30.239999294281006
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "58d1ee6b8636",
+      "count": 2,
+      "sig": "((T([32, 40, 28, 28],torch.bfloat16,[31360, 1, 1120, 40]),T([32, 120, 28, 28],torch.bfloat16,[94080, 1, 3360, 120]),T([40, 120, 1, 1],torch.bfloat16,[120, 1, 120, 120]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_38",
+      "baseline_us": 27.327999472618103,
+      "branch_us": 27.327999472618103
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "10e08e2a66d6",
+      "count": 2,
+      "sig": "((T([32, 120, 1, 1],torch.bfloat16,[120, 1, 120, 120]),T([32, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),T([120, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),[120],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_39",
+      "baseline_us": 11.711999773979187,
+      "branch_us": 11.711999773979187
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "36a6237b660d",
+      "count": 2,
+      "sig": "((T([32, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),T([32, 120, 1, 1],torch.bfloat16,[120, 1, 120, 120]),T([32, 120, 1, 1],torch.bfloat16,[120, 1, 120, 120]),[32],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_40",
+      "baseline_us": 11.168000288307667,
+      "branch_us": 11.168000288307667
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8b7fa751bece",
+      "count": 2,
+      "sig": "((T([32, 120, 28, 28],torch.bfloat16,[94080, 1, 3360, 120]),T([32, 120, 28, 28],torch.bfloat16,[94080, 1, 3360, 120]),T([120, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),[0],[1,1],[2,2],[1,1],False,[0,0],120,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_41",
+      "baseline_us": 50.08000135421753,
+      "branch_us": 50.08000135421753
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "74c4143161db",
+      "count": 2,
+      "sig": "((T([32, 120, 28, 28],torch.bfloat16,[94080, 1, 3360, 120]),T([32, 40, 28, 28],torch.bfloat16,[31360, 1, 1120, 40]),T([120, 40, 1, 1],torch.bfloat16,[40, 1, 40, 40]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_42",
+      "baseline_us": 28.255999088287354,
+      "branch_us": 28.255999088287354
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "90e9ab5424ba",
+      "count": 1,
+      "sig": "((T([32, 40, 28, 28],torch.bfloat16,[31360, 1, 1120, 40]),T([32, 72, 28, 28],torch.bfloat16,[56448, 1, 2016, 72]),T([40, 72, 1, 1],torch.bfloat16,[72, 1, 72, 72]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_48",
+      "baseline_us": 28.16000021994114,
+      "branch_us": 28.16000021994114
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "a4d6dd3dccb5",
+      "count": 1,
+      "sig": "((T([32, 72, 1, 1],torch.bfloat16,[72, 1, 72, 72]),T([32, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),T([72, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),[72],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_49",
+      "baseline_us": 11.04000024497509,
+      "branch_us": 11.04000024497509
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "1417eaa7e599",
+      "count": 1,
+      "sig": "((T([32, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),T([32, 72, 1, 1],torch.bfloat16,[72, 1, 72, 72]),T([24, 72, 1, 1],torch.bfloat16,[72, 1, 72, 72]),[24],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_50",
+      "baseline_us": 11.103999800980091,
+      "branch_us": 11.103999800980091
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "f3638e431df1",
+      "count": 1,
+      "sig": "((T([32, 72, 28, 28],torch.bfloat16,[56448, 1, 2016, 72]),T([32, 72, 56, 56],torch.bfloat16,[225792, 1, 4032, 72]),T([72, 1, 5, 5],torch.bfloat16,[25, 1, 5, 1]),[0],[2,2],[2,2],[1,1],False,[0,0],72,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_51",
+      "baseline_us": 75.52000135183334,
+      "branch_us": 75.52000135183334
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "60156ef05718",
+      "count": 2,
+      "sig": "((T([32, 72, 56, 56],torch.bfloat16,[225792, 1, 4032, 72]),T([32, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([72, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_52",
+      "baseline_us": 38.30400109291077,
+      "branch_us": 38.30400109291077
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "e51455dd9a03",
+      "count": 1,
+      "sig": "((T([32, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([32, 72, 56, 56],torch.bfloat16,[225792, 1, 4032, 72]),T([24, 72, 1, 1],torch.bfloat16,[72, 1, 72, 72]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_53",
+      "baseline_us": 38.656000047922134,
+      "branch_us": 38.656000047922134
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "ff6e4ccd55b0",
+      "count": 1,
+      "sig": "((T([32, 72, 56, 56],torch.bfloat16,[225792, 1, 4032, 72]),T([32, 72, 56, 56],torch.bfloat16,[225792, 1, 4032, 72]),T([72, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[1,1],[1,1],[1,1],False,[0,0],72,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_54",
+      "baseline_us": 63.26399743556976,
+      "branch_us": 63.26399743556976
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "93d733d5d74e",
+      "count": 1,
+      "sig": "((T([32, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([32, 64, 56, 56],torch.bfloat16,[200704, 1, 3584, 64]),T([24, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_56",
+      "baseline_us": 31.615998595952988,
+      "branch_us": 31.615998595952988
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "57216f621a55",
+      "count": 1,
+      "sig": "((T([32, 64, 56, 56],torch.bfloat16,[200704, 1, 3584, 64]),T([32, 64, 112, 112],torch.bfloat16,[802816, 1, 7168, 64]),T([64, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],64,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_57",
+      "baseline_us": 115.52000045776367,
+      "branch_us": 115.52000045776367
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "35c7658871ce",
+      "count": 1,
+      "sig": "((T([32, 64, 112, 112],torch.bfloat16,[802816, 1, 7168, 64]),T([32, 16, 112, 112],torch.bfloat16,[200704, 1, 1792, 16]),T([64, 16, 1, 1],torch.bfloat16,[16, 1, 16, 16]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_58",
+      "baseline_us": 60.32000109553337,
+      "branch_us": 60.32000109553337
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "c5e198d55239",
+      "count": 1,
+      "sig": "((T([32, 16, 112, 112],torch.bfloat16,[200704, 1, 1792, 16]),T([32, 16, 112, 112],torch.bfloat16,[200704, 1, 1792, 16]),T([16, 16, 1, 1],torch.bfloat16,[16, 1, 16, 16]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_59",
+      "baseline_us": 60.15999987721443,
+      "branch_us": 60.15999987721443
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "c3421b887bdf",
+      "count": 1,
+      "sig": "((T([32, 16, 112, 112],torch.bfloat16,[200704, 1, 1792, 16]),T([32, 16, 112, 112],torch.bfloat16,[200704, 1, 1792, 16]),T([16, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),[0],[1,1],[1,1],[1,1],False,[0,0],16,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_60",
+      "baseline_us": 82.84799754619598,
+      "branch_us": 82.84799754619598
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "091694ad5e35",
+      "count": 1,
+      "sig": "((T([32, 16, 112, 112],torch.bfloat16,[200704, 1, 1792, 16]),T([32, 3, 224, 224],torch.bfloat16,[150528, 1, 672, 3]),T([16, 3, 3, 3],torch.bfloat16,[27, 1, 9, 3]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[False,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/mobilenet_v3_large/full_graph_001.py",
+      "node": "convolution_backward_61",
+      "baseline_us": 81.34400099515915,
+      "branch_us": 81.34400099515915
+    }
+  ],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "train",
+  "model": "mobilenet_v3_large"
+}

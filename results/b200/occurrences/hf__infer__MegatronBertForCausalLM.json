@@ -1,0 +1,91 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "c94a0970300f": {
+      "4137e900": 1
+    },
+    "af505388b035": {
+      "7648de68": 1
+    },
+    "0ada225c0a04": {
+      "ceab07f0": 1
+    },
+    "826ea0b5f6e4": {
+      "e44d982c": 24
+    },
+    "f4578c128d74": {
+      "ceab07f0": 24
+    },
+    "b89a1eb0b38d": {
+      "903ae292": 24
+    },
+    "b19e82f2a47b": {
+      "ceab07f0": 23
+    },
+    "1a145147e436": {
+      "dc92a431": 1
+    },
+    "035e4d7f5117": {
+      "d7517139": 1
+    },
+    "9375aeadb8d3": {
+      "d7517139": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "31ec7ee2a97f",
+      "count": 97,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([8192, 1024],torch.bfloat16,[1024, 1]),T([1024, 1024],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MegatronBertForCausalLM/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 20.255999639630318,
+      "branch_us": 20.255999639630318
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "7b78fd66197b",
+      "count": 24,
+      "sig": "((T([16, 16, 512, 64],torch.bfloat16,[524288, 64, 1024, 1]),T([16, 16, 512, 64],torch.bfloat16,[524288, 64, 1024, 1]),T([16, 16, 512, 64],torch.bfloat16,[524288, 64, 1024, 1]),None,False),{scale:0.125})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MegatronBertForCausalLM/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 36.448001861572266,
+      "branch_us": 36.448001861572266
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "35db3a520899",
+      "count": 24,
+      "sig": "((T([4096],torch.bfloat16,[1]),T([8192, 1024],torch.bfloat16,[1024, 1]),T([1024, 4096],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MegatronBertForCausalLM/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 44.79999840259552,
+      "branch_us": 44.79999840259552
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "eb679532156d",
+      "count": 24,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([8192, 4096],torch.bfloat16,[4096, 1]),T([4096, 1024],torch.bfloat16,[1, 4096])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MegatronBertForCausalLM/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 48.96000027656555,
+      "branch_us": 48.96000027656555
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "fcac53afdfe9",
+      "count": 1,
+      "sig": "((T([29056],torch.bfloat16,[1]),T([8192, 1024],torch.bfloat16,[1024, 1]),T([1024, 29056],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MegatronBertForCausalLM/full_graph_000.py",
+      "node": "addmm_145",
+      "baseline_us": 294.71999406814575,
+      "branch_us": 294.71999406814575
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "MegatronBertForCausalLM"
+}

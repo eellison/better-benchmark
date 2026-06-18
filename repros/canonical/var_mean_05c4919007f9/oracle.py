@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete ConvNeXtV2 bf16 channel-LayerNorm training scope in one shape-specialized Triton row kernel for both recorded points, including the channels-last NCHW residual add rounded to the returned contiguous NHWC `permute` output, Inductor's compiled-compatible resident fp32 add statistics envelope for population `var_mean(..., dim=3, correction=0, keepdim=True)`, eps=1e-6 rsqrt side output, fp32 affine scale/bias epilogue, and final bf16 channels-last NCHW cast, whereas Inductor lowers the captured add/permute/cast/var_mean/affine/permute/cast graph through generic normalization and layout schedules; Inductor cannot fuse this exact returned-output envelope today because the norm-template scheduler does not keep the visible bf16 add producer, channel statistics, mean/rsqrt side-output stores, and final layout/cast epilogue in one ConvNeXt channel-LayerNorm plan while preserving eager-compatible output tolerances; the fix is SCHEDULER_FUSION: add a guarded channels-last NCHW channel-LayerNorm schedule that emits the NHWC add, statistics, and rounded affine output directly."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete ConvNeXtV2 bf16 channel-LayerNorm training scope in one shape-specialized Triton row kernel for both recorded points, including the channels-last NCHW residual add rounded to the returned contiguous NHWC `permute` output, the fp32 residual-add row tile feeding population `var_mean(..., dim=3, correction=0, keepdim=True)`, eps=1e-6 rsqrt side output, fp32 affine scale/bias epilogue, and final bf16 channels-last NCHW cast, whereas Inductor lowers the captured add/permute/cast/var_mean/affine/permute/cast graph through generic normalization and layout schedules; Inductor cannot fuse this exact returned-output envelope today because the norm-template scheduler does not keep the visible bf16 add producer, channel statistics, mean/rsqrt side-output stores, and final layout/cast epilogue in one ConvNeXt channel-LayerNorm plan while preserving the observable rounding boundaries; the fix is SCHEDULER_FUSION: add a guarded channels-last NCHW channel-LayerNorm schedule that emits the NHWC add, statistics, and rounded affine output directly."""
 
 import torch
 import triton
@@ -69,9 +69,8 @@ def _convnextv2_channel_layernorm_kernel(
 
     x0 = tl.load(x0_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
     x1 = tl.load(x1_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    resident_add = _f32_add(x0, x1)
-    added = resident_add.to(tl.bfloat16, fp_downcast_rounding="rtne")
-    values = resident_add
+    values = _f32_add(x0, x1)
+    added = values.to(tl.bfloat16, fp_downcast_rounding="rtne")
     tl.store(add_nhwc_ptr + offsets, added, mask=mask)
 
     values_masked = tl.where(mask, values, 0.0)
@@ -87,19 +86,10 @@ def _convnextv2_channel_layernorm_kernel(
     channel_ids_mask = channel_ids < C
     weight = tl.load(weight_ptr + channel_ids, mask=channel_ids_mask, other=0.0).to(tl.float32)[None, :]
     bias = tl.load(bias_ptr + channel_ids, mask=channel_ids_mask, other=0.0).to(tl.float32)[None, :]
-    normalized = _f32_mul(centered, invstd)
-    affine = _f32_add(_f32_mul(normalized, weight), bias)
-    final_resident = affine.to(tl.bfloat16, fp_downcast_rounding="rtne")
-
     rounded_centered = _f32_sub(added.to(tl.float32), mean)
-    rounded_normalized = _f32_mul(rounded_centered, invstd)
-    final_rounded = _f32_add(_f32_mul(rounded_normalized, weight), bias).to(
-        tl.bfloat16,
-        fp_downcast_rounding="rtne",
-    )
-    final_diff = tl.abs(final_resident.to(tl.float32) - final_rounded.to(tl.float32))
-    final_tol = 0.0075 + 0.0075 * tl.abs(final_rounded.to(tl.float32))
-    final = tl.where(final_diff <= final_tol, final_resident, final_rounded)
+    normalized = _f32_mul(rounded_centered, invstd)
+    affine = _f32_add(_f32_mul(normalized, weight), bias)
+    final = affine.to(tl.bfloat16, fp_downcast_rounding="rtne")
 
     tl.store(mean_ptr + row_ids[:, None], mean, mask=row_mask[:, None])
     tl.store(rsqrt_ptr + row_ids[:, None], invstd, mask=row_mask[:, None])
