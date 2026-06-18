@@ -43,10 +43,27 @@ from capture_hook import (
     install_capture_hook,
     uninstall_capture_hook,
 )
+from input_codec import spec_from_compact
+
+
+def _is_int_dtype(spec: dict) -> bool:
+    # Verbose specs carry full torch dtype strings ("torch.int64").
+    return "int" in spec.get("dtype", "")
+
+
+def _is_bool_dtype(spec: dict) -> bool:
+    return "bool" in spec.get("dtype", "")
 
 
 def _capture_model(model, *inputs, graph_dir=None):
-    """Helper: compile model with capture hook, return (state, sidecar_inputs, captured_repros)."""
+    """Helper: compile model with capture hook, return (state, sidecar_inputs, captured_repros).
+
+    sidecar_inputs are decoded from the compact codec entries persisted in the
+    *.meta.json into VERBOSE spec dicts (input_codec.spec_from_compact), so the
+    assertions read fields directly: dtype, gen{kind,low,high}, and the
+    producer-attached extras folded in from opts["x"] (constraint_source,
+    observed, maybe_permutation).
+    """
     output_dir = tempfile.mkdtemp(prefix="test_obs_")
     gd = graph_dir or tempfile.mkdtemp(prefix="test_obs_graph_")
     state = install_capture_hook(output_dir, label="test", validate=False, graph_dir=gd)
@@ -62,11 +79,16 @@ def _capture_model(model, *inputs, graph_dir=None):
     sidecar_inputs = []
     if meta_files:
         meta = json.loads(Path(meta_files[0]).read_text())
-        sidecar_inputs = meta.get("inputs", [])
+        # meta["inputs"] is the compact codec form ([[shape], dtype, opts]);
+        # decode to verbose specs so the assertions read named fields.
+        sidecar_inputs = [spec_from_compact(e) for e in meta.get("inputs", [])]
 
-    # Load captured repros
+    # Load captured repros. index.json is the finalized dict
+    # {"captured": [...], "dropped": [...], ...}; return the captured LIST.
     index_path = os.path.join(output_dir, "index.json")
-    captured = json.loads(Path(index_path).read_text()) if Path(index_path).exists() else []
+    captured = []
+    if Path(index_path).exists():
+        captured = json.loads(Path(index_path).read_text()).get("captured", [])
 
     return state, sidecar_inputs, captured, output_dir
 
@@ -122,7 +144,7 @@ def test_embedding_graph_inference_wins():
     _, sidecar_inputs, _, _ = _capture_model(model, inp)
 
     # Find the int64 input in the sidecar
-    int_inputs = [s for s in sidecar_inputs if s.get("dtype", "").startswith("int")]
+    int_inputs = [s for s in sidecar_inputs if _is_int_dtype(s)]
     assert len(int_inputs) >= 1, f"Expected int input, got {[s.get('dtype') for s in sidecar_inputs]}"
 
     emb_input = int_inputs[0]
@@ -163,7 +185,7 @@ def test_int_offsets_observed_fallback():
     _, sidecar_inputs, captured, output_dir = _capture_model(model, x_float, offsets_int)
 
     # Find the int64 input
-    int_inputs = [s for s in sidecar_inputs if s.get("dtype", "").startswith("int")]
+    int_inputs = [s for s in sidecar_inputs if _is_int_dtype(s)]
     assert len(int_inputs) >= 1, f"No int inputs found"
 
     offset_input = int_inputs[0]
@@ -183,12 +205,14 @@ def test_int_offsets_observed_fallback():
         f"Bound {gen.get('high')} too low — observed max is up to 11"
     )
 
-    # Also verify the captured repro uses the correct bound in _shapes_config
+    # Also verify the captured artifact uses the correct bound. The shapes
+    # config no longer lives inline in repro.py (repro_version >= 3 loads it
+    # from the sibling shapes.json); the rendered signature is carried
+    # structurally on the index.json entry's "signature" field.
     if captured:
-        repro_content = Path(captured[0]["file"]).read_text()
-        # The shapes_config should have gen=Index(observed.max+1)
-        assert f"gen=Index({gen['high']})" in repro_content or f"gen=Index({observed['max']+1})" in repro_content, (
-            f"Repro doesn't use observed bound. Shapes config line not found."
+        signature = captured[0]["signature"]
+        assert f"gen=Index({gen['high']})" in signature or f"gen=Index({observed['max']+1})" in signature, (
+            f"Captured signature doesn't use observed bound: {signature!r}"
         )
 
     print("  PASS: test_int_offsets_observed_fallback")
@@ -210,7 +234,7 @@ def test_bool_int_mask_n_unique():
     _, sidecar_inputs, _, _ = _capture_model(model, x_float, mask_bool, mask_int)
 
     # Find bool input
-    bool_inputs = [s for s in sidecar_inputs if s.get("dtype") == "bool"]
+    bool_inputs = [s for s in sidecar_inputs if _is_bool_dtype(s)]
     assert len(bool_inputs) >= 1, f"No bool inputs found"
     bool_obs = bool_inputs[0].get("observed")
     assert bool_obs is not None, "No observed stats on bool input"
@@ -218,7 +242,7 @@ def test_bool_int_mask_n_unique():
     assert bool_obs["min"] == 0 and bool_obs["max"] == 1
 
     # Find int input used as mask (n_unique should be 2)
-    int_inputs = [s for s in sidecar_inputs if s.get("dtype", "").startswith("int")]
+    int_inputs = [s for s in sidecar_inputs if _is_int_dtype(s)]
     assert len(int_inputs) >= 1, f"No int inputs found"
     int_obs = int_inputs[0].get("observed")
     assert int_obs is not None, "No observed stats on int mask input"
@@ -282,7 +306,7 @@ def test_maxpool_backward_indices_fix():
     _, sidecar_inputs2, captured2, output_dir2 = _capture_model(model2, grad_output, indices)
 
     # Find the int64 indices input
-    int_inputs = [s for s in sidecar_inputs2 if s.get("dtype", "").startswith("int")]
+    int_inputs = [s for s in sidecar_inputs2 if _is_int_dtype(s)]
     if int_inputs:
         idx_input = int_inputs[0]
         observed = idx_input.get("observed")
@@ -319,7 +343,7 @@ def test_maybe_permutation_detection():
 
     _, sidecar_inputs, _, _ = _capture_model(model, perm, x)
 
-    int_inputs = [s for s in sidecar_inputs if s.get("dtype", "").startswith("int")]
+    int_inputs = [s for s in sidecar_inputs if _is_int_dtype(s)]
     assert len(int_inputs) >= 1
     perm_input = int_inputs[0]
     assert perm_input.get("maybe_permutation") is True, (

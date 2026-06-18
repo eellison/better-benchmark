@@ -88,7 +88,13 @@ def _default_make_inputs():
 
 
 def test_channels_last_stride_preserved():
-    """Verify channels-last stride appears in captured _shapes_config."""
+    """Verify channels-last stride appears in the captured signature.
+
+    Repro format v3 retired the inline ``_shapes_config`` string in repro.py;
+    the input shapes/strides now live structurally on the captured index
+    entry's ``signature`` (and ``inputs``). The channels-last layout must be
+    preserved there.
+    """
     from capture_hook import _CaptureState
     import torch.fx as fx
 
@@ -105,10 +111,10 @@ def test_channels_last_stride_preserved():
     state.finalize()
 
     assert len(state.captured) == 1
-    content = Path(state.captured[0]['file']).read_text()
-    assert 'stride=' in content, "Channels-last stride not in _shapes_config"
-    # Channel dim should have stride 1
-    assert ', 1,' in content, "Channel stride should be 1 for channels-last"
+    signature = state.captured[0]['signature']
+    assert 'stride=' in signature, f"Channels-last stride not in signature: {signature!r}"
+    # Channel dim (the one with stride 1 under channels-last) must be recorded.
+    assert ', 1,' in signature, f"Channel stride should be 1 for channels-last: {signature!r}"
     print("PASS: channels-last stride preserved in capture")
 
 
@@ -160,7 +166,15 @@ def test_version_tag_present():
     state.finalize()
 
     content = Path(state.captured[0]['file']).read_text()
-    assert '_repro_version = 2' in content, "Missing version tag"
+    # capture_hook emits the v3 template marker. (NOTE: repro_harness.
+    # CURRENT_REPRO_VERSION is still 2 -- a real, separate drift left by the
+    # v3 migration; see test_repro_versioning::
+    # test_capture_hook_template_emits_current_marker which fails as a
+    # true-positive tripwire for that. We assert the actual emitted marker
+    # here rather than the stale constant.)
+    from repro_harness import parse_repro_version
+    assert '_repro_version = 3' in content, "Missing v3 version tag"
+    assert parse_repro_version(content) == 3
     print("PASS: version tag present in captured repro")
 
 
