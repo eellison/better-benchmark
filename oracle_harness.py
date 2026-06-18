@@ -645,6 +645,165 @@ def has_stochastic_ops(repro_path: str | Path) -> bool:
     return any(op in content for op in _STOCHASTIC_OPS)
 
 
+# ---------------------------------------------------------------------------
+# Numerics opt-out (reviewed, per-oracle acceptance of benign precision drift)
+# ---------------------------------------------------------------------------
+#
+# The fp64-anchored numerics gate (see _anchored_numerics_gate) rejects an
+# oracle whose error vs a high-precision reference is meaningfully worse than
+# torch.compile's. That correctly catches formulation substitutions (exp2
+# softmax, fast-math), but it ALSO rejects faithful oracles whose only sin is
+# benign precision drift — bf16-boundary rounding, accumulation order, ULP —
+# which the user's policy treats as NON-BLOCKING (flag, don't drop). Without a
+# release valve those faithful floors are silently lost as no_valid_point.
+#
+# This is the NUMERICS analogue of the STOCHASTIC opt-out: where stochastic
+# outputs are AUTO-detected (run twice, diff) and recorded so the gate skips
+# them, a numerics opt-out is REVIEWED — a human inspected the diff, confirmed
+# it is benign precision drift within a sane bound, and recorded that verdict
+# (with a reason string + evidence) in the repro's meta.json. It is explicit
+# and auditable, NOT a blanket bypass: it is scoped to the fp64 PRECISION gate
+# only and is REFUSED if the observed diff exceeds a plausibility bound (so it
+# can never rubber-stamp a real wrong-math bug behind a "benign" label).
+#
+# Schema (meta.json, top-level key "numerics_optout"):
+#   {
+#     "verified": true,                         # REQUIRED; false/absent => inert
+#     "reason": "bf16 accumulation drift ...",  # REQUIRED non-empty audit note
+#     "max_diff": 1.7e-3,                        # observed |oracle-ref| at review
+#     "reviewed": "2026-06-18",                  # review date (audit trail)
+#     "reviewer": "elias",                       # optional
+#     "outputs": [0, 1]                          # optional: output indices seen
+#   }
+# Only "verified": true (with a non-empty reason) activates it; everything else
+# is documentation/evidence for the audit trail.
+
+#: Plausibility ceiling for an absolute fp64-anchored diff to still count as
+#: "benign precision drift". A diff above this (relative to the reference
+#: magnitude) is implausible for rounding/accumulation/ULP and almost certainly
+#: a real formulation bug — the opt-out is REFUSED so it cannot rubber-stamp it.
+#: Expressed as a fraction of the reference abs-max scale: 5% leaves generous
+#: room for bf16 accumulation (bf16 has ~3 decimal digits, ~0.4% relative ULP)
+#: while still rejecting order-of-magnitude (1e6) "benign" claims outright.
+NUMERICS_OPTOUT_MAX_REL_DIFF = 0.05
+#: Floor on the absolute diff allowed regardless of reference scale, so tiny
+#: reference magnitudes (absmax << 1) don't make the relative bound absurdly
+#: tight on what is still benign bf16 rounding.
+NUMERICS_OPTOUT_ABS_FLOOR = 1e-2
+
+
+def load_numerics_optout(repro_dir: str | Path) -> dict | None:
+    """Load a reviewed numerics opt-out annotation from <repro_dir>/meta.json.
+
+    Returns the opt-out dict iff meta.json has a ``numerics_optout`` object with
+    ``verified`` true AND a non-empty ``reason``; otherwise None (no opt-out, or
+    unverified/malformed). A malformed annotation is treated as absent
+    (fail-closed: the gate applies), never raising — a bad annotation must not
+    silently accept a floor.
+    """
+    repro_dir = Path(repro_dir)
+    meta_path = repro_dir / "meta.json"
+    if not meta_path.exists():
+        return None
+    try:
+        meta = json.loads(meta_path.read_text())
+    except (OSError, ValueError):
+        return None
+    opt = meta.get("numerics_optout") if isinstance(meta, dict) else None
+    if not isinstance(opt, dict) or opt.get("verified") is not True:
+        return None
+    # A verified opt-out MUST carry a non-empty audit reason; reject otherwise
+    # so an opt-out can never be a bare {"verified": true} rubber stamp.
+    reason = opt.get("reason")
+    if not (isinstance(reason, str) and reason.strip()):
+        print(f"  NUMERICS_OPTOUT_IGNORED: {meta_path} has verified opt-out "
+              f"without a non-empty 'reason' — refusing to honor",
+              file=sys.stderr)
+        return None
+    return opt
+
+
+def numerics_optout_applies(numerics_result, optout) -> dict:
+    """Decide whether a verified opt-out may accept a failing numerics gate.
+
+    The opt-out only suppresses the PRECISION gate, and only when every gate
+    violation is a PLAUSIBLE precision drift (|err_oracle| within a sane bound
+    of the reference scale). A single implausibly-large diff — the signature of
+    a real wrong-math bug, not rounding — REFUSES the opt-out so it can't be
+    used to rubber-stamp a bug behind a "benign" label.
+
+    Returns a verdict dict: {"accept": bool, "reason": str, ...optional
+    "worst_offender"}. Pure / side-effect-free so it is unit-testable.
+    """
+    if not optout:
+        return {"accept": False, "reason": "no verified opt-out"}
+    if numerics_result is None:
+        # No gate ran (e.g. scope mismatch) — nothing for the opt-out to accept.
+        return {"accept": False, "reason": "no numerics gate result to accept"}
+
+    offenders = []  # gate-failing float outputs whose diff is implausibly large
+    n_failing = 0
+    for entry in numerics_result.get("per_output", []):
+        if entry.get("pass") is False:
+            n_failing += 1
+            err_oracle = entry.get("err_oracle")
+            ref_absmax = entry.get("ref_absmax", 0.0) or 0.0
+            if not isinstance(err_oracle, (int, float)):
+                continue
+            # A non-finite error (NaN/inf) is NOT a bounded precision drift —
+            # it's a divergence or an fp64-reference pathology. Refuse it: a
+            # "benign" label must never rubber-stamp NaN. (NaN > bound is False
+            # in Python, so this must be checked explicitly, not via the bound.)
+            if not math.isfinite(err_oracle):
+                offenders.append({
+                    "idx": entry.get("idx"),
+                    "err_oracle": err_oracle,
+                    "ref_absmax": ref_absmax,
+                    "plausible_bound": None,
+                    "non_finite": True,
+                })
+                continue
+            bound = max(NUMERICS_OPTOUT_MAX_REL_DIFF * max(ref_absmax, 1e-12),
+                        NUMERICS_OPTOUT_ABS_FLOOR)
+            if err_oracle > bound:
+                offenders.append({
+                    "idx": entry.get("idx"),
+                    "err_oracle": err_oracle,
+                    "ref_absmax": ref_absmax,
+                    "plausible_bound": bound,
+                })
+
+    if offenders:
+        # At least one violation is too large (or non-finite) to be benign
+        # drift -> REFUSE. Sort key treats non-finite as maximally bad so a
+        # NaN/inf offender is reported even alongside large finite ones.
+        def _badness(e):
+            v = e["err_oracle"]
+            return math.inf if not (isinstance(v, (int, float))
+                                    and math.isfinite(v)) else v
+        worst = max(offenders, key=_badness)
+        if worst.get("non_finite"):
+            why = (f"output {worst['idx']} diff is non-finite "
+                   f"({worst['err_oracle']}) — divergence/NaN, not rounding")
+        else:
+            why = (f"output {worst['idx']} diff {worst['err_oracle']:.3e} "
+                   f"exceeds plausible precision-drift bound "
+                   f"{worst['plausible_bound']:.3e} "
+                   f"(ref_absmax={worst['ref_absmax']:.3e}) — looks like a "
+                   f"real bug, not rounding")
+        return {
+            "accept": False,
+            "reason": f"opt-out REFUSED: {why}",
+            "worst_offender": worst,
+        }
+    return {
+        "accept": True,
+        "reason": (f"verified numerics opt-out: {n_failing} output(s) within "
+                   f"plausible precision-drift bound"),
+        "n_failing": n_failing,
+    }
+
+
 def detect_stochastic_outputs(instance, inputs) -> set[int]:
     """Run instance twice with same inputs, find outputs that differ (stochastic).
 
@@ -905,6 +1064,7 @@ def bench_oracle(
     rep: int = 200,
     rounds: int = 5,
     _skip_numerics_gate: bool = False,
+    numerics_optout: dict | None = None,
     disable_gpu_lock: bool = False,
 ) -> dict:
     """Standard oracle benchmark: oracle vs torch.compile.
@@ -919,6 +1079,12 @@ def bench_oracle(
     - FP64-anchored numerics gate: oracle must not be meaningfully less
       accurate than compiled output vs a high-precision reference
       (status=NUMERICS_WORSE_THAN_COMPILED).
+    - Reviewed numerics opt-out: a verified meta.json annotation can accept a
+      faithful oracle whose fp64-gate failure is benign precision drift, so it
+      prices as a floor (status=NUMERICS_OPTOUT_ACCEPTED) instead of being
+      dropped. Scoped to the precision gate and refused for implausibly-large
+      diffs (see numerics_optout_applies); never suppresses CUDAGraph-warning,
+      no-oracle, or scope-mismatch failures.
 
     Args:
         oracle_forward: callable that takes inputs and returns oracle outputs
@@ -929,6 +1095,11 @@ def bench_oracle(
         rep: repetitions per round
         rounds: number of interleaved rounds (min-of-N)
         _skip_numerics_gate: internal flag to bypass fp64 gate (testing only)
+        numerics_optout: reviewed opt-out dict from meta.json (see
+            load_numerics_optout). When the fp64 gate fails but this opt-out is
+            verified AND every violation is within a plausible precision-drift
+            bound, the failure is accepted and the oracle is still timed. None
+            (default) = no opt-out; the gate is authoritative as before.
         disable_gpu_lock: skip the exclusive GPU lock (no-op context manager).
             The lock is ON by default; an INDUCTOR_GPU_BENCH_LOCK=1 /
             TORCHINDUCTOR_GPU_BENCH_LOCK=1 env var force-enables it even when
@@ -1016,19 +1187,31 @@ def bench_oracle(
         return result
 
     # --- FP64-anchored numerics gate (change 3) ---
+    optout_verdict = None  # set when a verified opt-out accepts a gate failure
     if not _skip_numerics_gate:
         numerics_result = _run_anchored_numerics_gate(
             oracle_forward, instance, compiled, inputs)
         if numerics_result is not None and not numerics_result["pass"]:
-            result = {
-                "repro_id": repro_id,
-                "status": "NUMERICS_WORSE_THAN_COMPILED",
-                "numerics_gate": numerics_result,
-            }
-            if dispatch_info is not None:
-                result["dispatch"] = {"matched": dispatch_info["matched"]}
-            print(json.dumps(result, default=str))
-            return result
+            # A reviewed, verified opt-out may accept a benign precision-drift
+            # failure (scoped to THIS gate; refused for implausibly-large
+            # diffs). Everything else still hard-fails as before.
+            verdict = numerics_optout_applies(numerics_result, numerics_optout)
+            if verdict["accept"]:
+                optout_verdict = verdict  # accepted -> fall through to timing
+            else:
+                result = {
+                    "repro_id": repro_id,
+                    "status": "NUMERICS_WORSE_THAN_COMPILED",
+                    "numerics_gate": numerics_result,
+                }
+                # If an opt-out was present but REFUSED (diff too large), record
+                # why — so a rubber-stamp attempt on a real bug is auditable.
+                if numerics_optout:
+                    result["numerics_optout_refused"] = verdict
+                if dispatch_info is not None:
+                    result["dispatch"] = {"matched": dispatch_info["matched"]}
+                print(json.dumps(result, default=str))
+                return result
 
     # --- Adaptive rep count based on quick estimate ---
     quick_oracle = _time_graph(g_oracle, warmup=5, rep=10)
@@ -1058,7 +1241,13 @@ def bench_oracle(
             best_compile_us = min(best_compile_us, compile_us)
 
     ratio = best_compile_us / best_oracle_us if best_oracle_us > 0 else 0.0
-    if ratio > 1.05:
+    if optout_verdict is not None:
+        # The fp64 gate failed but a verified opt-out accepted it as benign
+        # precision drift. Surface that distinctly (so it's never mistaken for
+        # a clean pass) while still carrying timings so the floor is PRICED.
+        # NUMERICS_OPTOUT_ACCEPTED is deliberately NOT in _INVALID_STATUSES.
+        status = "NUMERICS_OPTOUT_ACCEPTED"
+    elif ratio > 1.05:
         status = "GOOD"
     elif ratio < 0.95:
         status = "BAD_ORACLE"
@@ -1075,6 +1264,14 @@ def bench_oracle(
     # Always include numerics_gate info for visibility
     if not _skip_numerics_gate and numerics_result is not None:
         result["numerics_gate"] = numerics_result
+    if optout_verdict is not None:
+        # Record the accepted opt-out (verdict + the reviewed annotation) so a
+        # priced-floor audit can see exactly which floor rode on an opt-out.
+        result["numerics_optout"] = {
+            "accepted": True,
+            "verdict": optout_verdict,
+            "annotation": numerics_optout,
+        }
     if dispatch_info is not None:
         result["dispatch"] = {
             "matched": dispatch_info["matched"],
@@ -1203,6 +1400,10 @@ def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
     from repro_harness import load_shape_configs, make_inputs_from_config
 
     repro_dir = Path(repro_dir)
+    # Honor a reviewed numerics opt-out recorded in this dir's meta.json, unless
+    # the caller passed one explicitly. Loaded once and applied to every shape.
+    if "numerics_optout" not in kwargs:
+        kwargs["numerics_optout"] = load_numerics_optout(repro_dir)
     # load_shape_configs expects a file path whose parent dir it inspects
     repro_file = repro_dir / "repro.py"
     configs = load_shape_configs(str(repro_file))
@@ -1642,6 +1843,9 @@ def _runner_main(argv=None):
 
         repro_file = d / "repro.py"
         configs = load_shape_configs(str(repro_file))
+        # Reviewed numerics opt-out (meta.json) — accepts a benign-precision-
+        # drift fp64-gate failure as a priced floor. None for the vast majority.
+        optout = load_numerics_optout(d)
 
         bench_results = []
         if not configs:
@@ -1657,6 +1861,7 @@ def _runner_main(argv=None):
                 bench_results.append(
                     bench_oracle(fn, instance, inputs, repro_id,
                                  warmup=args.warmup, rep=args.rep,
+                                 numerics_optout=optout,
                                  disable_gpu_lock=args.disable_gpu_lock))
             else:
                 bench_results.append({
@@ -1680,6 +1885,7 @@ def _runner_main(argv=None):
                     bench_results.append(
                         bench_oracle(fn, instance, inputs, point_id,
                                      warmup=args.warmup, rep=args.rep,
+                                     numerics_optout=optout,
                                      disable_gpu_lock=args.disable_gpu_lock))
                 else:
                     bench_results.append({
