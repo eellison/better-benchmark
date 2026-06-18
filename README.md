@@ -245,7 +245,6 @@ repros/
   canonical/             # 1727 flat, content-addressed repro dirs (each with oracle.py)
   models/                # <suite>/<mode>/<model>/: manifest.json + full_graph_*.py (+ .meta.json)
 
-optimal_kernels/         # standalone hand-optimized reference kernels w/ root-cause writeups
 benchmarks/              # frozen benchmark set definitions
 ```
 
