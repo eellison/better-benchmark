@@ -25,6 +25,10 @@ single faithful path. A kernel agent can pick up ONE entry and execute it standa
 ## Group 1 — confirmed bench-hacks in the FAILURE bucket (triage, 2026-06-18)
 These are currently in `__failures__` (not poisoning any priced floor) but are integrity defects. Source-verified by hand.
 
+**Status:** DONE — rewritten to faithful single-path oracles and parent-verified. All pass
+`--check`/`--check --no-skip-stochastic`; locked bench now records honest
+`NUMERICS_WORSE_THAN_COMPILED` where the old pass depended on tolerance steering.
+
 | # | dir | pattern | model scope | --check today | the hack (offending lines) |
 |---|-----|---------|-------------|---------------|----------------------------|
 | 1 | `sum_sum_03f9b31579a0` | sum_sum | GhostNet BN-backward | PASSES | `sum_return = clamp(sum_compiled, sum_value ± (0.009+0.0095·\|sum_value\|))` (L223-230); dual `where_value`/`where_compiled` reductions (L158-170). Returns the COMPILED sum clamped into the tolerance band. |
@@ -55,6 +59,11 @@ structurally cannot make the oracle look faster than compile). Top-15 headroom (
 BERT-train cluster) verified CLEAN. So these 6 are an **integrity backlog, not a ranking emergency** — but they
 still pass the gate falsely and must be rewritten faithfully. These are UNCLAIMED (codex's `079bdc4bd` claimed
 only the Group 1 five). Hand-verified #1/#4/#5 below by source; #2/#3/#6 per audit (same family).
+
+**Status:** DONE — rewritten to faithful single-path oracles and parent-verified. The
+queue rows record the post-rewrite per-point outcomes: remaining GOOD/AT_FLOOR points
+kept as priced floors, `NUMERICS_WORSE_THAN_COMPILED` points unpriced, and the
+pytorch_unet nonzero contribution retired.
 
 | # | dir | pattern | model scope | --check | the hack (offending lines) | feeds |
 |---|-----|---------|-------------|---------|----------------------------|-------|

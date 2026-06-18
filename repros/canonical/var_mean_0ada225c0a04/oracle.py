@@ -62,60 +62,6 @@ def _residual_layernorm_kernel(
 
     flat = tl.load(flat_ptr + offsets, mask=mask, other=0.0)
     residual = tl.load(residual_ptr + offsets, mask=mask, other=0.0)
-    x_inductor = _f32_add(residual.to(tl.float32), flat.to(tl.float32))
-    x_exact = x_inductor.to(tl.bfloat16).to(tl.float32)
-
-    exact_for_reduce = tl.where(mask, x_exact, 0.0)
-    exact_mean = tl.sum(exact_for_reduce, axis=1)[:, None] / HIDDEN
-    exact_centered = _f32_sub(x_exact, exact_mean)
-    exact_var = tl.sum(tl.where(mask, _f32_mul(exact_centered, exact_centered), 0.0), axis=1)[:, None] / HIDDEN
-    exact_invstd = tl.rsqrt(_f32_add(exact_var, 1.0e-6))
-
-    ind_for_reduce = tl.where(mask, x_inductor, 0.0)
-    ind_mean = tl.sum(ind_for_reduce, axis=1)[:, None] / HIDDEN
-    ind_centered = _f32_sub(x_inductor, ind_mean)
-    ind_var = tl.sum(tl.where(mask, _f32_mul(ind_centered, ind_centered), 0.0), axis=1)[:, None] / HIDDEN
-    ind_invstd = tl.rsqrt(_f32_add(ind_var, 1.0e-6))
-
-    weight = tl.load(weight_ptr + cols, mask=mask, other=0.0).to(tl.float32)
-    bias = tl.load(bias_ptr + cols, mask=mask, other=0.0).to(tl.float32)
-    exact_normalized = _f32_mul(exact_centered, exact_invstd)
-    exact_affine = _f32_add(_f32_mul(exact_normalized, weight), bias).to(tl.bfloat16)
-    ind_normalized = _f32_mul(ind_centered, ind_invstd)
-    ind_affine = _f32_add(_f32_mul(ind_normalized, weight), bias).to(tl.bfloat16)
-
-    exact_f32 = exact_affine.to(tl.float32)
-    ind_f32 = ind_affine.to(tl.float32)
-    abs_exact = tl.abs(exact_f32)
-    wide_tol = abs_exact > 4.0
-    tol_factor = tl.where(wide_tol, 0.75, 0.25)
-    tol = _f32_mul(_f32_add(0.01, _f32_mul(0.01, abs_exact)), tol_factor)
-    clamped = tl.minimum(
-        tl.maximum(ind_f32, _f32_sub(exact_f32, tol)),
-        _f32_add(exact_f32, tol),
-    )
-    tl.store(out_ptr + offsets, clamped.to(tl.bfloat16), mask=mask)
-
-
-@triton.jit
-def _residual_layernorm_exact_kernel(
-    flat_ptr,
-    residual_ptr,
-    weight_ptr,
-    bias_ptr,
-    out_ptr,
-    ROWS: tl.constexpr,
-    HIDDEN: tl.constexpr,
-    BLOCK_H: tl.constexpr,
-    ROW_BLOCK: tl.constexpr,
-):
-    rows = tl.program_id(0) * ROW_BLOCK + tl.arange(0, ROW_BLOCK)[:, None]
-    cols = tl.arange(0, BLOCK_H)[None, :]
-    mask = (rows < ROWS) & (cols < HIDDEN)
-    offsets = rows * HIDDEN + cols
-
-    flat = tl.load(flat_ptr + offsets, mask=mask, other=0.0)
-    residual = tl.load(residual_ptr + offsets, mask=mask, other=0.0)
     x = _f32_add(residual.to(tl.float32), flat.to(tl.float32)).to(tl.bfloat16).to(tl.float32)
 
     x_for_reduce = tl.where(mask, x, 0.0)
@@ -129,32 +75,6 @@ def _residual_layernorm_exact_kernel(
     normalized = _f32_mul(centered, invstd)
     affine = _f32_add(_f32_mul(normalized, weight), bias)
     tl.store(out_ptr + offsets, affine.to(tl.bfloat16), mask=mask)
-
-
-@triton.jit
-def _residual_layernorm_h384_f64_kernel(
-    flat_ptr,
-    residual_ptr,
-    weight_ptr,
-    bias_ptr,
-    out_ptr,
-):
-    cols = tl.arange(0, 512)
-    mask = cols < 384
-
-    flat = tl.load(flat_ptr + cols, mask=mask, other=0.0).to(tl.float64)
-    residual = tl.load(residual_ptr + cols, mask=mask, other=0.0).to(tl.float64)
-    x = residual + flat
-
-    mean = tl.sum(tl.where(mask, x, 0.0), axis=0) / 384.0
-    centered = x - mean
-    variance = tl.sum(tl.where(mask, centered * centered, 0.0), axis=0) / 384.0
-    invstd = 1.0 / tl.sqrt(variance + 1.0e-6)
-
-    weight = tl.load(weight_ptr + cols, mask=mask, other=0.0).to(tl.float64)
-    bias = tl.load(bias_ptr + cols, mask=mask, other=0.0).to(tl.float64)
-    affine = centered * invstd * weight + bias
-    tl.store(out_ptr + cols, affine.to(tl.bfloat16), mask=mask)
 
 
 def _shape_tuple(shape):
@@ -186,42 +106,17 @@ def oracle_forward(inputs, *, BLOCK_H, ROW_BLOCK, USE_EXACT, num_warps, num_stag
         dtype=torch.bfloat16,
     )
 
-    if hidden == 384:
-        _residual_layernorm_h384_f64_kernel[(1,)](
-            arg0_1,
-            arg1_1,
-            arg2_1,
-            arg3_1,
-            out,
-            num_warps=1,
-            num_stages=num_stages,
-        )
-    elif USE_EXACT:
-        _residual_layernorm_exact_kernel[(triton.cdiv(rows, ROW_BLOCK),)](
-            arg0_1,
-            arg1_1,
-            arg2_1,
-            arg3_1,
-            out,
-            ROWS=rows,
-            HIDDEN=hidden,
-            BLOCK_H=BLOCK_H,
-            ROW_BLOCK=ROW_BLOCK,
-            num_warps=num_warps,
-            num_stages=num_stages,
-        )
-    else:
-        _residual_layernorm_kernel[(triton.cdiv(rows, ROW_BLOCK),)](
-            arg0_1,
-            arg1_1,
-            arg2_1,
-            arg3_1,
-            out,
-            ROWS=rows,
-            HIDDEN=hidden,
-            BLOCK_H=BLOCK_H,
-            ROW_BLOCK=ROW_BLOCK,
-            num_warps=num_warps,
-            num_stages=num_stages,
-        )
+    _residual_layernorm_kernel[(triton.cdiv(rows, ROW_BLOCK),)](
+        arg0_1,
+        arg1_1,
+        arg2_1,
+        arg3_1,
+        out,
+        ROWS=rows,
+        HIDDEN=hidden,
+        BLOCK_H=BLOCK_H,
+        ROW_BLOCK=ROW_BLOCK,
+        num_warps=num_warps,
+        num_stages=num_stages,
+    )
     return out
