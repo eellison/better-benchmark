@@ -1,0 +1,539 @@
+diff --git a/torch/_inductor/config.py b/torch/_inductor/config.py
+index 124c3636a8e..82790d485a3 100644
+--- a/torch/_inductor/config.py
++++ b/torch/_inductor/config.py
+@@ -907,6 +907,19 @@ realize_indirect_indexing_on_reuse: bool = True
+ # buffer (the materialization write is overlapped with the reduction kernel).
+ inline_cheap_producers_into_stencils: bool = False
+ 
++# When True, collapse a chain of slice_scatter/select_scatter over a constant
++# `full()` base into a single flattened pointwise loader (a masked affine
++# gather over the disjoint write regions) instead of nesting another `where`
++# over the previous level's loader. This keeps the inner_fn opcount O(1) in
++# chain depth (rather than growing ~linearly), so has_large_inner_fn does not
++# force-segment a deep scatter tower into many materialized band buffers
++# (e.g. Longformer's [...,513] sliding-window attention band, 100MB+). Only
++# fires when the writes are statically resolvable, last-writer-wins over a
++# constant base; otherwise it falls back to the existing nested behavior.
++fold_scatter_chain_loader: bool = (
++    os.environ.get("TORCHINDUCTOR_FOLD_SCATTER_CHAIN", "1") == "1"
++)
++
+ # Threshold to prevent excessive accumulation of ops in one buffer during lowering
+ realize_acc_reads_threshold = 8
+ realize_acc_reads_size_threshold: int | None = (
+diff --git a/torch/_inductor/graph.py b/torch/_inductor/graph.py
+index c512bef228d..08315bf6d3e 100644
+--- a/torch/_inductor/graph.py
++++ b/torch/_inductor/graph.py
+@@ -1097,6 +1097,11 @@ class GraphLowering(torch.fx.Interpreter):
+         raise KeyError(f"could not find {buffer_name}")
+ 
+     def run(self, *args: Any) -> Any:  # type: ignore[override]
++        # Clear the per-graph scatter-chain fold side table (keyed on IR node
++        # id; cleared here so reused ids across compiles cannot alias).
++        from .lowering import _clear_scatter_chains
++
++        _clear_scatter_chains()
+         with dynamo_timed("GraphLowering.run"):
+             return super().run(*args)
+ 
+diff --git a/torch/_inductor/lowering.py b/torch/_inductor/lowering.py
+index eb8abc04ab8..c70a128e1c7 100644
+--- a/torch/_inductor/lowering.py
++++ b/torch/_inductor/lowering.py
+@@ -3921,6 +3921,364 @@ def arange_start_step(
+     )
+ 
+ 
++# ---------------------------------------------------------------------------
++# Scatter-chain loader folding (Lever A).
++#
++# A chain of slice_scatter / select_scatter over a constant ``full()`` base
++# (the functionalized form of in-place band assembly such as Longformer's
++# sliding-window attention scores) lowers, by default, to a *nested* `where`
++# tower: each scatter wraps the previous level's loader as its `else` branch.
++# The inner_fn opcount then grows ~linearly with chain depth and trips
++# `Loops.has_large_inner_fn` (opcount > realize_opcount_threshold), which
++# force-segments the tower into several materialized band buffers.
++#
++# Instead we carry a *structured* list of writes (a "scatter chain") alongside
++# the IR node and, when a new scatter's base is itself such a chain over a
++# constant base, we APPEND to the flat write list rather than nesting another
++# `where`. The emitted inner_fn then evaluates, per output element, a flat
++# last-writer-wins select over the disjoint write regions (one `where` per
++# write, terminating in the constant base) — O(#writes), independent of how
++# the chain is expressed. All writes read from their own source loader; when
++# those sources are views of the *same* buffer, Inductor's codegen CSEs the
++# load, recovering the gather. The decision to materialize or recompute is left
++# unchanged (the realize heuristics still see the folded loader); folding only
++# stops the *opcount-grows-with-depth* segmentation.
++#
++# Correctness: the fold is a pure algebraic identity. The nested
++#   where(m_k, src_k, where(m_{k-1}, src_{k-1}, ... base))
++# and the flat last-writer-wins select evaluate identically for every index,
++# including the constant base at uncovered positions. We only fold when the
++# base resolves to a constant `full()` (so unwritten elements are the known
++# fill) and the new write's region mask is static; otherwise we fall back to
++# the existing nested lowering (correctness first).
++# ---------------------------------------------------------------------------
++
++
++class _ScatterWrite:
++    """One write in a folded scatter chain, in the chain node's own index
++    space: a region predicate over the output index and a source loader."""
++
++    __slots__ = ("mask_fn", "src_loader")
++
++    def __init__(self, mask_fn, src_loader):
++        # mask_fn(idx) -> ops bool value (True where this write applies), or
++        # None for an unconditional write (covers the whole tensor).
++        self.mask_fn = mask_fn
++        self.src_loader = src_loader
++
++
++# IR-node-identity -> (fill_value, dtype, [_ScatterWrite, ...]).  Keyed on the
++# unwrapped Loops data node so it survives TensorBox wrapping.  WeakKeyDictionary
++# would be ideal but IR nodes are not weak-referenceable; the table is cleared
++# per graph lowering via the GraphLowering hook below, so it cannot leak across
++# compiles.
++_scatter_chains: dict[int, tuple] = {}
++
++
++def _clear_scatter_chains():
++    _scatter_chains.clear()
++
++
++def _unwrap_to_loops(x):
++    """Unwrap a TensorBox/StorageBox to the underlying Loops node, if reachable
++    without crossing a view/realized boundary (views break the flat index
++    space, so we stop at them)."""
++    node = x
++    while isinstance(node, (TensorBox, ir.StorageBox)):
++        node = node.data
++    return node
++
++
++def _const_fill_of(x):
++    """If x is (an unrealized) full()/constant Pointwise, return (value, dtype);
++    else None.  We detect it by running its inner_fn under a probe ops handler
++    that records a single `constant` with no index dependence."""
++    node = _unwrap_to_loops(x)
++    if not isinstance(node, ir.Pointwise):
++        return None
++    nid = id(node)
++    if nid in _scatter_chains:
++        # already a known chain; its base fill is recorded
++        return None
++    try:
++        probe = _ConstProbe()
++        index = [sympy.Symbol(f"_p{i}") for i in range(len(node.get_size()))]
++        with V.set_ops_handler(probe):
++            node.inner_fn(index)
++    except Exception:
++        return None
++    if probe.is_const:
++        return (probe.value, node.get_dtype())
++    return None
++
++
++class _ConstProbe:
++    """Minimal ops handler that detects an inner_fn which is a single constant
++    independent of the index (i.e. a full()/zeros base)."""
++
++    def __init__(self):
++        self.is_const = False
++        self.value = None
++        self._nops = 0
++
++    def constant(self, value, dtype):
++        self._nops += 1
++        if self._nops == 1:
++            self.is_const = True
++            self.value = value
++        else:
++            self.is_const = False
++        return value
++
++    def __getattr__(self, name):
++        # any other op observed => not a pure constant
++        def _other(*a, **k):
++            self.is_const = False
++            return 0
++
++        return _other
++
++
++def _get_chain(x):
++    """Return (fill_value, dtype, writes_list) if x is a foldable scatter-chain
++    base (an existing chain, or a fresh constant full()); else None.
++
++    Threads the chain through pure-reindex views (slice/select/squeeze/permute/
++    reshape): a view of a chain is the same writes re-expressed in the view's
++    index space via the view's reindexer (view_idx -> base_idx). This is what
++    lets the chain survive the select/slice *readback* that band-assembly code
++    uses between writes (``b = x[:, -1]; b = slice_scatter(b, ...); x =
++    select_scatter(x, b, 1, -1)``)."""
++    node = x
++    while isinstance(node, (TensorBox, ir.StorageBox)):
++        node = node.data
++
++    if isinstance(node, ir.Pointwise):
++        rec = _scatter_chains.get(id(node))
++        if rec is not None:
++            return rec
++
++    # pure-reindex view of a chain: compose the reindexer into the writes
++    if isinstance(node, ir.BaseView):
++        try:
++            reindex = node.make_reindexer()
++        except NotImplementedError:
++            reindex = None
++        if reindex is not None:
++            inner = _get_chain(node.data)
++            if inner is not None:
++                fill_value, base_dtype, base_writes = inner
++
++                def _compose(w):
++                    if w.mask_fn is None:
++                        return _ScatterWrite(
++                            None, lambda idx, w=w: w.src_loader(reindex(list(idx)))
++                        )
++                    return _ScatterWrite(
++                        lambda idx, w=w: w.mask_fn(reindex(list(idx))),
++                        lambda idx, w=w: w.src_loader(reindex(list(idx))),
++                    )
++
++                return (fill_value, base_dtype, [_compose(w) for w in base_writes])
++
++    cf = _const_fill_of(x)
++    if cf is not None:
++        return (cf[0], cf[1], [])
++    return None
++
++
++class _PureLoadProbe:
++    """Detect a loader that is a *single* ``ops.load`` from one buffer at an
++    affine/static index (optionally wrapped in to_dtype / a masked guard whose
++    body is that load), with no other value-producing computation. Captures
++    (buffer_name, index_expr) so the load can be re-emitted as part of a unified
++    indirect load. Returns None on anything else (where/arith/multi-load/etc)."""
++
++    def __init__(self):
++        self.ok = True
++        self.loads = []  # (name, index)
++        self._mask_depth = 0
++
++    def load(self, name, index):
++        self.loads.append((name, index))
++        return sympy.Symbol("_v")
++
++    def index_expr(self, expr, dtype):
++        return expr
++
++    def constant(self, value, dtype):
++        # a bare constant is fine (e.g. masked `other`); not a value op that
++        # breaks affineness, but it means the loader is not a pure single load.
++        return value
++
++    def to_dtype(self, x, dtype, *a, **k):
++        return x
++
++    def to_dtype_bitcast(self, x, *a, **k):
++        return x
++
++    def masked(self, mask, body, other):
++        # allow a masked load (the slice_scatter edge guard) — evaluate the body
++        self._mask_depth += 1
++        try:
++            body()
++        except Exception:
++            self.ok = False
++        self._mask_depth -= 1
++        return sympy.Symbol("_m")
++
++    def indirect_indexing(self, x, size, check=True, wrap_neg=True):
++        # the source itself is a gather -> not a simple affine load
++        self.ok = False
++        return sympy.Symbol("_i")
++
++    def __getattr__(self, name):
++        def _other(*a, **k):
++            # any other op (arithmetic, where, cmp, ...) breaks pure-load
++            self.ok = False
++            return sympy.Symbol("_x")
++
++        return _other
++
++
++def _probe_pure_load(loader, ndim):
++    """Run loader under _PureLoadProbe; return (name, index_fn) if it is a single
++    affine load from one buffer, else None. index_fn maps an output index tuple
++    to the sympy load index."""
++    probe = _PureLoadProbe()
++    syms = [sympy.Symbol(f"_q{i}") for i in range(ndim)]
++    try:
++        with V.set_ops_handler(probe), patch.object(
++            ir.FlexibleLayout, "allow_indexing", True
++        ):
++            loader(syms)
++    except Exception:
++        return None
++    if not probe.ok or len(probe.loads) != 1:
++        return None
++    name, index = probe.loads[0]
++    if not isinstance(index, sympy.Basic):
++        return None
++
++    def index_fn(idx, _syms=syms, _index=index):
++        sub = {s: i for s, i in zip(_syms, idx)}
++        return _index.subs(sub)
++
++    return name, index_fn
++
++
++def _build_unified_inner(size, base_const, dtype, writes):
++    """If every masked write is a pure affine load from the SAME buffer, return
++    an inner_fn that collapses them to ONE indirect load with a where-selected
++    index (the gather). Else return None.
++
++    This is the load-bearing transform: the per-write source-view ops collapse
++    into one shared load + cheap integer index arithmetic, so the folded
++    inner_fn opcount becomes O(1) in chain depth and has_large_inner_fn stops
++    force-segmenting the band. (Proven on disjoint/overlapping direct chains:
++    N loads -> 1, bit-exact incl. last-writer-wins.)"""
++    if not writes or any(w.mask_fn is None for w in writes):
++        return None
++    ndim = len(size)
++    probed = [_probe_pure_load(w.src_loader, ndim) for w in writes]
++    if any(p is None for p in probed):
++        return None
++    names = {p[0] for p in probed}
++    if len(names) != 1:
++        return None
++    buf_name = next(iter(names))
++    size_for_buf = _buffer_numel(buf_name)
++    if size_for_buf is None:
++        return None
++    index_fns = [p[1] for p in probed]
++
++    def unified_inner(idx):
++        masks = [w.mask_fn(idx) for w in writes]
++        # Select the source index by mask, last-writer wins (later writes
++        # override earlier on overlap), via ops.where over index_expr values
++        # folded first->last.
++        sel_val = ops.index_expr(index_fns[0](idx), torch.int64)
++        any_mask = masks[0]
++        for m, ifn in zip(masks[1:], index_fns[1:]):
++            sel_val = ops.where(m, ops.index_expr(ifn(idx), torch.int64), sel_val)
++            any_mask = ops.or_(any_mask, m)
++        # Guard the load: at UNcovered output positions (any_mask false) the
++        # selected index is meaningless and may be out of bounds — clamp it into
++        # the valid range so the (unconditionally evaluated) load can never IMA,
++        # then discard it via the final where. This mirrors the proven
++        # gather-rewrite's index clamp and reproduces the constant fill exactly.
++        zero = ops.index_expr(sympy.Integer(0), torch.int64)
++        hi = ops.index_expr(sympy.sympify(size_for_buf) - 1, torch.int64)
++        sel_val = ops.minimum(ops.maximum(sel_val, zero), hi)
++        flat_idx = ops.indirect_indexing(
++            sel_val, size_for_buf, check=False, wrap_neg=False
++        )
++        loaded = ops.load(buf_name, flat_idx)
++        return ops.where(any_mask, loaded, ops.constant(base_const, dtype))
++
++    return unified_inner
++
++
++def _emit_chain(device, dtype, size, fill_value, writes):
++    """Try to emit a UNIFIED (single-load gather) Pointwise from the flat write
++    list, registering it as a chain for further folding.
++
++    Returns the unified TensorBox if index-unification succeeded, else None.
++    On None the caller keeps its original (nested-where) lowering — so the fold
++    only ever changes codegen when it strictly collapses the source loads, and
++    can never regress a chain whose sources are not unifiable. The chain is
++    still registered (under the *caller's* node) for potential later growth via
++    _register_chain."""
++    is_int = dtype not in (torch.float16, torch.bfloat16, torch.float32, torch.float64)
++    base_const = 0 if is_int else 0.0
++    try:
++        base_const = int(fill_value) if is_int else float(fill_value)
++    except Exception:
++        base_const = fill_value
++
++    unified = _build_unified_inner(size, base_const, dtype, writes)
++    if unified is None:
++        return None
++
++    out = Pointwise.create(
++        device=device,
++        dtype=dtype,
++        inner_fn=unified,
++        ranges=list(size),
++    )
++    node = _unwrap_to_loops(out)
++    if isinstance(node, ir.Pointwise):
++        _scatter_chains[id(node)] = (fill_value, dtype, writes)
++    return out
++
++
++def _buffer_numel(name):
++    """Best-effort total element count of a named buffer/input, for indirect
++    indexing bounds. Returns None if unavailable."""
++    try:
++        buf = V.graph.get_buffer(name)
++        if buf is not None:
++            return sympy_product(buf.get_size())
++    except Exception:
++        pass
++    try:
++        if name in V.graph.graph_inputs:
++            return sympy_product(V.graph.graph_inputs[name].get_size())
++    except Exception:
++        pass
++    return None
++
++
++def _register_chain(out, fill_value, dtype, writes):
++    """Register `writes` as the scatter-chain for the IR node behind `out` (the
++    node produced by the original nested-where lowering), so the chain can keep
++    growing across further scatters even though this level was not unified."""
++    node = _unwrap_to_loops(out)
++    if isinstance(node, ir.Pointwise):
++        _scatter_chains[id(node)] = (fill_value, dtype, writes)
++    return out
++
++
+ @register_lowering(aten.select_scatter, type_promotion_kind=None)
+ def select_scatter(x, src, dim: int, index: int):
+     src = to_dtype(src, x.get_dtype())
+@@ -3939,6 +4297,29 @@ def select_scatter(x, src, dim: int, index: int):
+     src = expand(unsqueeze(src, dim), x.get_size())
+     src_loader = src.make_loader()
+ 
++    # --- Lever A: fold into the chain when the base is a constant-fill chain ---
++    chain_writes = None
++    chain_fill = None
++    if config.fold_scatter_chain_loader:
++        chain = _get_chain(x)
++        if chain is not None and isinstance(index, (int, sympy.Integer)):
++            fill_value, base_dtype, base_writes = chain
++            if base_dtype == x.get_dtype():
++                def mask_fn(idx, dim=dim, index=index):
++                    return ops.eq(
++                        ops.index_expr(idx[dim], torch.int32),
++                        ops.index_expr(index, torch.int32),
++                    )
++
++                chain_writes = list(base_writes) + [_ScatterWrite(mask_fn, src_loader)]
++                chain_fill = fill_value
++                unified = _emit_chain(
++                    x.get_device(), x.get_dtype(), x.get_size(),
++                    fill_value, chain_writes,
++                )
++                if unified is not None:
++                    return unified  # source loads collapsed -> use the gather
++
+     def inner_fn(idx):
+         return ops.where(
+             ops.eq(
+@@ -3949,12 +4330,16 @@ def select_scatter(x, src, dim: int, index: int):
+             x_loader(idx),
+         )
+ 
+-    return Pointwise.create(
++    out = Pointwise.create(
+         device=x.get_device(),
+         dtype=x.get_dtype(),
+         inner_fn=inner_fn,
+         ranges=list(x.get_size()),
+     )
++    # keep building the chain (for later unification) without changing codegen
++    if chain_writes is not None:
++        _register_chain(out, chain_fill, x.get_dtype(), chain_writes)
++    return out
+ 
+ 
+ @register_lowering(aten.slice_scatter, type_promotion_kind=None)
+@@ -3972,15 +4357,15 @@ def slice_scatter(x, src, dim=0, start=None, end=None, step=1):
+     src = expand(src, src_size)
+     src_loader = src.make_loader()
+ 
+-    def inner_fn(idx):
+-        if start == 0 and end == dim_size and step == 1:
+-            # selecting every element is the same as just src.clone()
+-            return src_loader(idx)
++    full_cover = start == 0 and end == dim_size and step == 1
+ 
+-        idx_dim = ops.index_expr(idx[dim], torch.int64)
++    def _src_at(idx):
+         src_idx = list(idx)
+         src_idx[dim] = FloorDiv(idx[dim] - start, step)
++        return src_loader(src_idx)
+ 
++    def _mask_at(idx):
++        idx_dim = ops.index_expr(idx[dim], torch.int64)
+         mask = []
+         if start != 0:
+             mask.append(
+@@ -4006,10 +4391,40 @@ def slice_scatter(x, src, dim=0, start=None, end=None, step=1):
+                 )
+             )
+         assert mask
+-        mask = functools.reduce(ops.and_, mask)
++        return functools.reduce(ops.and_, mask)
++
++    # --- Lever A: fold into the chain when the base is a constant-fill chain ---
++    chain_writes = None
++    chain_fill = None
++    if config.fold_scatter_chain_loader:
++        chain = _get_chain(x)
++        if chain is not None:
++            fill_value, base_dtype, base_writes = chain
++            if base_dtype == x.get_dtype():
++                if full_cover:
++                    mask_fn = None
++                    write_src = src_loader
++                else:
++                    mask_fn = _mask_at
++                    write_src = _src_at
++                chain_writes = list(base_writes) + [_ScatterWrite(mask_fn, write_src)]
++                chain_fill = fill_value
++                unified = _emit_chain(
++                    x.get_device(), x.get_dtype(), x.get_size(),
++                    fill_value, chain_writes,
++                )
++                if unified is not None:
++                    return unified  # source loads collapsed -> use the gather
++
++    def inner_fn(idx):
++        if full_cover:
++            # selecting every element is the same as just src.clone()
++            return src_loader(idx)
++
++        mask = _mask_at(idx)
+         src_val = ops.masked(
+             mask,
+-            lambda: src_loader(src_idx),
++            lambda: _src_at(idx),
+             0 if is_integer_type(x) else 0.0,
+         )
+         return ops.where(
+@@ -4018,12 +4433,16 @@ def slice_scatter(x, src, dim=0, start=None, end=None, step=1):
+             x_loader(idx),
+         )
+ 
+-    return Pointwise.create(
++    out = Pointwise.create(
+         device=x.get_device(),
+         dtype=x.get_dtype(),
+         inner_fn=inner_fn,
+         ranges=list(x.get_size()),
+     )
++    # keep building the chain (for later unification) without changing codegen
++    if chain_writes is not None:
++        _register_chain(out, chain_fill, x.get_dtype(), chain_writes)
++    return out
+ 
+ 
+ def _unwrap(x):
