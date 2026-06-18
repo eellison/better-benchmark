@@ -1,0 +1,1828 @@
+{
+  "__summary__": {
+    "total_no_valid_point": 175,
+    "source_of_backlog": "results/oracle_floors_2026-06-17/all_oracle_timings_full_merged_corrected.json __failures__ where reason==no_valid_point",
+    "note_on_8_gaps": "rebench_8_gaps.json resolved sum_sum_643db2887a01 / var_mean_af505388b035 / var_mean_var_mean_5cc92f5d49c1 (all_bad_oracle / errored, NOT no_valid_point). The 2 NUMERICS dirs named in the task (pointwise_2c331ef4f17f, sum_sum_sum_fb3a1658dadb) are NOT present in this merged file's __failures__ (already promoted/different sweep). So none of the 175 nvp dirs overlap the already-done set; all 175 are triaged here.",
+    "bucket_counts": {
+      "NUMERICS-FAIL": 157,
+      "NEEDS-REWRITE / other (harness empty-graph artifact)": 8,
+      "BENCH-HACK": 5,
+      "STOCHASTIC": 1,
+      "GENUINELY-BAD-ORACLE": 4
+    },
+    "accept_at_compile_floor_count": 170,
+    "accept_at_compile_floor_breakdown": {
+      "NUMERICS-FAIL (faithful, fp64 gate; compile is the floor)": 157,
+      "GENUINELY-BAD-ORACLE (faithful, honestly slower)": 4,
+      "STOCHASTIC (near-parity)": 1,
+      "NEEDS-REWRITE/other = harness empty-graph artifact (zero-work alias oracles, ~0 floor)": 8
+    },
+    "ACTION_A_benchhacks_to_rewrite": [
+      "sum_sum_03f9b31579a0",
+      "sum_sum_e5ed56d5d094",
+      "var_mean_06a6aec610f6",
+      "var_mean_1af9add64387",
+      "var_mean_fbfc0104897d"
+    ],
+    "ACTION_A_detail": {
+      "sum_sum_e5ed56d5d094": {
+        "reason": "tolerance self-blend: tolerance=0.0098+0.0098*abs(exact_f32); use_fused=abs(fused_f32-exact_f32)<=tolerance; slice_out=where(use_fused,fused_f32,exact_f32). Computes a \"fused\" and an \"exact\" path and picks per-element whichever lands inside the verifier band. --check PASSES by construction.",
+        "current_check": "PASS"
+      },
+      "var_mean_06a6aec610f6": {
+        "reason": "strict-vs-resident tolerance blend: full_tol=0.01+0.01*abs(strict); within_tol=abs(candidate-strict)<=full_tol; out=where(within_tol,candidate,out_strict). Dual strict/resident LayerNorm paths, select inside band. --check PASSES by construction.",
+        "current_check": "PASS"
+      },
+      "var_mean_1af9add64387": {
+        "reason": "inductor-vs-eager tolerance blend: tolerance=1e-2+1e-2*abs(y_eager); y=where(abs(y_inductor-y_eager)<=tolerance, y_inductor, y_eager). Textbook self-blend. (--check still FAILS even with the blend.)",
+        "current_check": "FAIL"
+      },
+      "var_mean_fbfc0104897d": {
+        "reason": "clamp-to-tolerance: tolerance=(0.01+0.01*abs(anchor_affine))*0.5; out=min(max(resident_affine, anchor-tol), anchor+tol). Clamps a resident path into a band around the faithful anchor. (--check still FAILS even with the clamp.)",
+        "current_check": "FAIL"
+      },
+      "sum_sum_03f9b31579a0": {
+        "reason": "dual faithful/compiled pipeline + clamp-to-tolerance: builds full \"compiled\" partial buffers (sum_compiled,vec_compiled,gate_compiled,add_compiled) alongside faithful (sum_value,vec_value); sum_return=clamp(sum_compiled, sum_value-tol, sum_value+tol), vec_return likewise (tol=0.009+0.0095*abs). The whole compiled machinery exists only to land in the band. --check PASSES by construction.",
+        "current_check": "PASS"
+      }
+    },
+    "ACTION_B_numerics_to_fix_note": "NUMERICS-FAIL dirs are faithful and need an oracle numerics fix OR acceptance that compile is the floor. There are too many (157) to list as a hand-fix action; they are not integrity issues (no bench-hack) and are fully covered by min(oracle,compile). Per [[numerics-issues-nonblocking]] they are non-blocking. The 5 timing dirs (4 GENUINELY-BAD + 1 STOCHASTIC) also have numerics-failing sibling points but need no action."
+  },
+  "amax_sum_99e031979c34": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "amax_sum_any_32ad3e5c5477": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "amax_sum_bf7830302e6d": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "amax_sum_bf0fd469b53e": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "amax_sum_e24ce795856b": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "amax_sum_f812d7f85634": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_36110ffe9e6c": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_3840584eef9a": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_470cecc170ec": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_083e5d528a28": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_65a318c9ed9c": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_0c02b9c9a1c9": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_aa227dd8002d": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_8b6bcc3d5ac7": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_1e85edda8f16": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_b138a1e42dbc": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 5
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_90c16d3077b1": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_9fffeb5504ef": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_bae5a06d2559": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_9017f526fe31": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_b8f54dc7d592": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_dc61a7b3b5a3": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_f21cc667fe83": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_b5152799a946": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_ea7081208754": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_ee7476ab4c8e": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_00475df23925": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_0390d15a6af8": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 5
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_05ee034feb4c": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_176e8f2b992e": {
+    "bucket": "NEEDS-REWRITE / other (harness empty-graph artifact)",
+    "reason": "ALGEBRAIC_ELIMINATION alias-only oracle (returns as_strided views into input storage; zero device work). Numerics check PASSES bit-exact (max_diff=0). The no-valid-point is a harness artifact: the *compiled* baseline trips INVALID_CUDAGRAPH_WARNING \"The CUDA Graph is empty\" (warning_source=compiled) because the metadata-only workload captures an empty graph. Not an oracle defect; floor is ~0 device work. Effectively accept-at-compile-floor; optionally relax the empty-graph gate for zero-work graphs.",
+    "evidence": {
+      "check": "PASS (bit-exact)",
+      "warning_source": "compiled",
+      "warning": "The CUDA Graph is empty",
+      "orig_statuses": {
+        "INVALID_CUDAGRAPH_WARNING": 1
+      }
+    }
+  },
+  "pointwise_0a49dc00cbaf": {
+    "bucket": "NEEDS-REWRITE / other (harness empty-graph artifact)",
+    "reason": "ALGEBRAIC_ELIMINATION alias-only oracle (returns as_strided views into input storage; zero device work). Numerics check PASSES bit-exact (max_diff=0). The no-valid-point is a harness artifact: the *compiled* baseline trips INVALID_CUDAGRAPH_WARNING \"The CUDA Graph is empty\" (warning_source=compiled) because the metadata-only workload captures an empty graph. Not an oracle defect; floor is ~0 device work. Effectively accept-at-compile-floor; optionally relax the empty-graph gate for zero-work graphs.",
+    "evidence": {
+      "check": "PASS (bit-exact)",
+      "warning_source": "compiled",
+      "warning": "The CUDA Graph is empty",
+      "orig_statuses": {
+        "INVALID_CUDAGRAPH_WARNING": 1
+      }
+    }
+  },
+  "pointwise_1611fb0c7845": {
+    "bucket": "NEEDS-REWRITE / other (harness empty-graph artifact)",
+    "reason": "ALGEBRAIC_ELIMINATION alias-only oracle (returns as_strided views into input storage; zero device work). Numerics check PASSES bit-exact (max_diff=0). The no-valid-point is a harness artifact: the *compiled* baseline trips INVALID_CUDAGRAPH_WARNING \"The CUDA Graph is empty\" (warning_source=compiled) because the metadata-only workload captures an empty graph. Not an oracle defect; floor is ~0 device work. Effectively accept-at-compile-floor; optionally relax the empty-graph gate for zero-work graphs.",
+    "evidence": {
+      "check": "PASS (bit-exact)",
+      "warning_source": "compiled",
+      "warning": "The CUDA Graph is empty",
+      "orig_statuses": {
+        "INVALID_CUDAGRAPH_WARNING": 2
+      }
+    }
+  },
+  "pointwise_06377502b8f5": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_1c9e8dc48812": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_12465c189749": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_1654cbbe1d50": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 16
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_238e96847398": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_2fd75199c31d": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_1354bb80cb3b": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_0e23e54703ef": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_3564f48d3aa2": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_39eaa1204ef2": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_3db3fa64fd30": {
+    "bucket": "NEEDS-REWRITE / other (harness empty-graph artifact)",
+    "reason": "ALGEBRAIC_ELIMINATION alias-only oracle (returns as_strided views into input storage; zero device work). Numerics check PASSES bit-exact (max_diff=0). The no-valid-point is a harness artifact: the *compiled* baseline trips INVALID_CUDAGRAPH_WARNING \"The CUDA Graph is empty\" (warning_source=compiled) because the metadata-only workload captures an empty graph. Not an oracle defect; floor is ~0 device work. Effectively accept-at-compile-floor; optionally relax the empty-graph gate for zero-work graphs.",
+    "evidence": {
+      "check": "PASS (bit-exact)",
+      "warning_source": "compiled",
+      "warning": "The CUDA Graph is empty",
+      "orig_statuses": {
+        "INVALID_CUDAGRAPH_WARNING": 1
+      }
+    }
+  },
+  "pointwise_3c17f0120a71": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_41944c71d2d8": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_48847cbfc2f6": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "mean_fa289c1b737a": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 10
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_4ae2e62440f8": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_457ec7dce9c1": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_498fa7e126b8": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_46ffe591b5ee": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_43588d3e9780": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_5a0f1ca0cc0c": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 7
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_5c9e535343f4": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_52818a8e5cdd": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_6410fc21ba59": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_666951cd0da5": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_6d75f431992b": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_68309e9afcc5": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_656833e29d89": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_7308e0024674": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_6637e72b3b06": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 5
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_783d1118b332": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_7ebac70550be": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_808b2a6357bd": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 8
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_7899d74e0838": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 121
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_818c3aa59952": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 52
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_87cb1a76ed86": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_153f6de83bab": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_9128d8745e42": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_89c74f3242b5": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_9595e73ff43b": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 22
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_a3cc865697d1": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_a42e20fae37b": {
+    "bucket": "NEEDS-REWRITE / other (harness empty-graph artifact)",
+    "reason": "ALGEBRAIC_ELIMINATION alias-only oracle (returns as_strided views into input storage; zero device work). Numerics check PASSES bit-exact (max_diff=0). The no-valid-point is a harness artifact: the *compiled* baseline trips INVALID_CUDAGRAPH_WARNING \"The CUDA Graph is empty\" (warning_source=compiled) because the metadata-only workload captures an empty graph. Not an oracle defect; floor is ~0 device work. Effectively accept-at-compile-floor; optionally relax the empty-graph gate for zero-work graphs.",
+    "evidence": {
+      "check": "PASS (bit-exact)",
+      "warning_source": "compiled",
+      "warning": "The CUDA Graph is empty",
+      "orig_statuses": {
+        "INVALID_CUDAGRAPH_WARNING": 6
+      }
+    }
+  },
+  "pointwise_88bffcefddc4": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 19
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_81485f33f5b9": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 21
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_a22d76c884fc": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_a767fed3fde5": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_a77badc5e988": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_a99945d92cdd": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 6
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_ada23cf7aec6": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 6
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_aa30343135f0": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_99e028e77568": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_b2e54a0ac412": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_b71f0d447f2e": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_b9618a7f8d96": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_ba25986618ef": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_b0a24575ebc9": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_9375aeadb8d3": {
+    "bucket": "NEEDS-REWRITE / other (harness empty-graph artifact)",
+    "reason": "ALGEBRAIC_ELIMINATION alias-only oracle (returns as_strided views into input storage; zero device work). Numerics check PASSES bit-exact (max_diff=0). The no-valid-point is a harness artifact: the *compiled* baseline trips INVALID_CUDAGRAPH_WARNING \"The CUDA Graph is empty\" (warning_source=compiled) because the metadata-only workload captures an empty graph. Not an oracle defect; floor is ~0 device work. Effectively accept-at-compile-floor; optionally relax the empty-graph gate for zero-work graphs.",
+    "evidence": {
+      "check": "PASS (bit-exact)",
+      "warning_source": "compiled",
+      "warning": "The CUDA Graph is empty",
+      "orig_statuses": {
+        "INVALID_CUDAGRAPH_WARNING": 1
+      }
+    }
+  },
+  "pointwise_c1af8096914d": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_c6c7ad63023f": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_c911fb4f9b47": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 20
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_bef60966ace3": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_c9af56d69f6c": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_c96952c07750": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_d5a413a2c233": {
+    "bucket": "NEEDS-REWRITE / other (harness empty-graph artifact)",
+    "reason": "ALGEBRAIC_ELIMINATION alias-only oracle (returns as_strided views into input storage; zero device work). Numerics check PASSES bit-exact (max_diff=0). The no-valid-point is a harness artifact: the *compiled* baseline trips INVALID_CUDAGRAPH_WARNING \"The CUDA Graph is empty\" (warning_source=compiled) because the metadata-only workload captures an empty graph. Not an oracle defect; floor is ~0 device work. Effectively accept-at-compile-floor; optionally relax the empty-graph gate for zero-work graphs.",
+    "evidence": {
+      "check": "PASS (bit-exact)",
+      "warning_source": "compiled",
+      "warning": "The CUDA Graph is empty",
+      "orig_statuses": {
+        "INVALID_CUDAGRAPH_WARNING": 2
+      }
+    }
+  },
+  "pointwise_d29ee9cb59f4": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_d284769f6e7e": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_d8eeabccee6e": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_de8967598ec8": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_e4b7b0947416": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_e2bdfd3a6695": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_e52ac85e10fc": {
+    "bucket": "NEEDS-REWRITE / other (harness empty-graph artifact)",
+    "reason": "ALGEBRAIC_ELIMINATION alias-only oracle (returns as_strided views into input storage; zero device work). Numerics check PASSES bit-exact (max_diff=0). The no-valid-point is a harness artifact: the *compiled* baseline trips INVALID_CUDAGRAPH_WARNING \"The CUDA Graph is empty\" (warning_source=compiled) because the metadata-only workload captures an empty graph. Not an oracle defect; floor is ~0 device work. Effectively accept-at-compile-floor; optionally relax the empty-graph gate for zero-work graphs.",
+    "evidence": {
+      "check": "PASS (bit-exact)",
+      "warning_source": "compiled",
+      "warning": "The CUDA Graph is empty",
+      "orig_statuses": {
+        "INVALID_CUDAGRAPH_WARNING": 1
+      }
+    }
+  },
+  "pointwise_ef7896396d78": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_802def73cfd7": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_ef561a2def29": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_f11bfb86b6b6": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_febb9b4c9d22": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_fc79e17a0171": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_e0570a5d1c15": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_407f0323586d": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "pointwise_e6ddc8e897ec": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 24
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_75456ad2c2c7": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_7ba9dcb96142": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_9b2fcee49b0a": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_b011c33c656b": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_0751856ae3a8": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_0189bf613c7e": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_03f9b31579a0": {
+    "bucket": "BENCH-HACK",
+    "reason": "dual faithful/compiled pipeline + clamp-to-tolerance: builds full \"compiled\" partial buffers (sum_compiled,vec_compiled,gate_compiled,add_compiled) alongside faithful (sum_value,vec_value); sum_return=clamp(sum_compiled, sum_value-tol, sum_value+tol), vec_return likewise (tol=0.009+0.0095*abs). The whole compiled machinery exists only to land in the band. --check PASSES by construction.",
+    "evidence": {
+      "source_signature": "f5be-class tolerance self-blend / clamp-to-tolerance",
+      "current_check": "PASS",
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      }
+    }
+  },
+  "sum_sum_3ab1da5a9e6c": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_3e2827a51f95": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_3280cef0c732": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_6a8cdea856dd": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_898c72fb606a": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_82346b5827d8": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_77f6be69be60": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_86b0392acb3d": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_8edf1c0e03c1": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_a58657212bf4": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 27
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_b00464d36daa": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_9be9812ec7f1": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_b2f43ab7b175": {
+    "bucket": "STOCHASTIC",
+    "reason": "rebench: 1 pt BAD_ORACLE ratio0.935 (9.86 vs 9.22us, near-parity) + 1 pt NUMERICS_WORSE. No single point both numerics-pass AND timing-good; min(oracle,compile) covers it.",
+    "evidence": {
+      "orig_statuses": {
+        "BAD_ORACLE": 1,
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "rebenched": true
+    }
+  },
+  "sum_sum_7040624b7ae1": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_e5ed56d5d094": {
+    "bucket": "BENCH-HACK",
+    "reason": "tolerance self-blend: tolerance=0.0098+0.0098*abs(exact_f32); use_fused=abs(fused_f32-exact_f32)<=tolerance; slice_out=where(use_fused,fused_f32,exact_f32). Computes a \"fused\" and an \"exact\" path and picks per-element whichever lands inside the verifier band. --check PASSES by construction.",
+    "evidence": {
+      "source_signature": "f5be-class tolerance self-blend / clamp-to-tolerance",
+      "current_check": "PASS",
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      }
+    }
+  },
+  "sum_sum_f9d7470ca796": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_0a8714a3041e": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_275ca61fceb8": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_28aca384bafa": {
+    "bucket": "GENUINELY-BAD-ORACLE",
+    "reason": "rebench: BAD_ORACLE ratio0.515 (206.85 vs 106.56us) + 1 NUMERICS_WORSE. Faithful but honestly ~2x slower than compile.",
+    "evidence": {
+      "orig_statuses": {
+        "BAD_ORACLE": 1,
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "rebenched": true
+    }
+  },
+  "sum_sum_sum_31ea6dc807dd": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_4aae5698dd79": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_603e69b709ae": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_59c5b1609d60": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_23c53e2c6899": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_301d492a313d": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_3634d1a62257": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_4a1fb62e29b0": {
+    "bucket": "GENUINELY-BAD-ORACLE",
+    "reason": "rebench: BAD_ORACLE ratios0.874/0.781 + 2 UNVERIFIED_NUMERICS. Faithful, honestly slower.",
+    "evidence": {
+      "orig_statuses": {
+        "BAD_ORACLE": 2,
+        "UNVERIFIED_NUMERICS": 2
+      },
+      "rebenched": true
+    }
+  },
+  "sum_sum_sum_1a561863a1c6": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_81f672a568a0": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_1e07e3ba8c68": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_86e661f4be59": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_c2ae956520f9": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 2
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_d2c97d17f3dc": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_d915970dff62": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_f7a87f05bdd2": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "sum_sum_sum_db03a2e026aa": {
+    "bucket": "GENUINELY-BAD-ORACLE",
+    "reason": "rebench: BAD_ORACLE ratio0.671 (133.95 vs 89.86us) + 1 UNVERIFIED_NUMERICS. Faithful, honestly slower.",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1,
+        "BAD_ORACLE": 1
+      },
+      "rebenched": true
+    }
+  },
+  "sum_sum_sum_ddcfccfb8340": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 4
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_06a6aec610f6": {
+    "bucket": "BENCH-HACK",
+    "reason": "strict-vs-resident tolerance blend: full_tol=0.01+0.01*abs(strict); within_tol=abs(candidate-strict)<=full_tol; out=where(within_tol,candidate,out_strict). Dual strict/resident LayerNorm paths, select inside band. --check PASSES by construction.",
+    "evidence": {
+      "source_signature": "f5be-class tolerance self-blend / clamp-to-tolerance",
+      "current_check": "PASS",
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      }
+    }
+  },
+  "var_mean_08f6231329f7": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_1af9add64387": {
+    "bucket": "BENCH-HACK",
+    "reason": "inductor-vs-eager tolerance blend: tolerance=1e-2+1e-2*abs(y_eager); y=where(abs(y_inductor-y_eager)<=tolerance, y_inductor, y_eager). Textbook self-blend. (--check still FAILS even with the blend.)",
+    "evidence": {
+      "source_signature": "f5be-class tolerance self-blend / clamp-to-tolerance",
+      "current_check": "FAIL",
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1
+      }
+    }
+  },
+  "var_mean_2bd313f3c17f": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_3ad14c3d031f": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_5ec2187b5869": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_3efb2d7c03c8": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_a73bc583f18c": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_cf6bcfd335d5": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_e8d19aecbc03": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_da5aa7a47091": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 3,
+        "UNVERIFIED_NUMERICS": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_eac408f45b9d": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_ec73bf00e3e1": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_fbfc0104897d": {
+    "bucket": "BENCH-HACK",
+    "reason": "clamp-to-tolerance: tolerance=(0.01+0.01*abs(anchor_affine))*0.5; out=min(max(resident_affine, anchor-tol), anchor+tol). Clamps a resident path into a band around the faithful anchor. (--check still FAILS even with the clamp.)",
+    "evidence": {
+      "source_signature": "f5be-class tolerance self-blend / clamp-to-tolerance",
+      "current_check": "FAIL",
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 1
+      }
+    }
+  },
+  "var_mean_fda6b7a40722": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_fbc9e58f2e01": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_var_mean_0dd15b92dc70": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_var_mean_74b57fcc4507": {
+    "bucket": "NUMERICS-FAIL",
+    "reason": "Faithful oracle computing real math; all points fail the fp64 gate (NUMERICS_WORSE_THAN_COMPILED / UNVERIFIED_NUMERICS). Source audit found NO bench-hack signature. Typically bf16-boundary rounding accumulation exceeds compile error vs fp64 ref. Needs a numerics fix in the oracle (or accept that compile is the floor).",
+    "evidence": {
+      "orig_statuses": {
+        "NUMERICS_WORSE_THAN_COMPILED": 1
+      },
+      "source_audit": "clean"
+    }
+  },
+  "var_mean_var_mean_var_mean_3ee1c6df35f0": {
+    "bucket": "GENUINELY-BAD-ORACLE",
+    "reason": "rebench: BAD_ORACLE ratio0.583 (284.45 vs 165.76us) + 2 UNVERIFIED_NUMERICS. Faithful, honestly slower.",
+    "evidence": {
+      "orig_statuses": {
+        "UNVERIFIED_NUMERICS": 2,
+        "BAD_ORACLE": 1
+      },
+      "rebenched": true
+    }
+  }
+}
