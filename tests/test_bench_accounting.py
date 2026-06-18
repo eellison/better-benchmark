@@ -42,6 +42,14 @@ from full_graph_harness import (
     write_full_graph_metadata,
 )
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+from model_graph_accounting import (
+    GraphAccounting,
+    ModelAccounting,
+    PartitionOccurrence,
+    _rollup_occurrence_timings,
+    build_model_report,
+    format_text_report,
+)
 
 
 def _partitioner_supports_skip_horizontal_fusion() -> bool:
@@ -1039,6 +1047,138 @@ def test_capture_hook_process_graph_keeps_getitem_data_dependency_together():
     ]
 
 
+def _occ(pattern_hash, shape_hash, n_ops=2):
+    return PartitionOccurrence(
+        graph_name="full_graph_000.py",
+        pattern_hash=pattern_hash,
+        shape_hash=shape_hash,
+        n_ops=n_ops,
+        op_counts={"aten.add.Tensor": 1},
+        origin_ops=["aten.add.Tensor"],
+        input_shapes=["[4]:f32"],
+        max_output_shape=[4],
+        has_reduction=False,
+    )
+
+
+def _model_accounting(occs):
+    ga = GraphAccounting(graph_path="full_graph_000.py", graph_name="full_graph_000.py")
+    ga.occurrences = list(occs)
+    acc = ModelAccounting(model_name="TinyModel", model_dir="/tmp/TinyModel")
+    acc.graphs = [ga]
+    return acc
+
+
+def test_rollup_classifies_matched_fallback_and_unpriced_occurrences():
+    timing = {
+        "oracle_us": 10.0,
+        "compile_us": 9.0,
+        "points_by_shape": {"shapeA": {"oracle_us": 5.0, "compile_us": 4.0}},
+    }
+    occs = [
+        _occ("p", "shapeA"),   # matched at own shape
+        _occ("p", "shapeB"),   # no point -> dir median fallback
+    ]
+    roll = _rollup_occurrence_timings(timing, occs)
+
+    assert roll["matched_occ"] == 1
+    assert roll["fallback_occ"] == 1
+    assert roll["unpriced_occ"] == 0
+    assert roll["total_occ"] == 2
+    assert roll["mode"] == "partial"
+    # 5.0 (own shape) + 10.0 (dir median) = 15.0
+    assert roll["oracle_us_total"] == 15.0
+
+
+def test_rollup_untimed_dir_marks_all_occurrences_unpriced():
+    occs = [_occ("p", "shapeA"), _occ("p", "shapeB")]
+    roll = _rollup_occurrence_timings(None, occs)
+
+    assert roll["matched_occ"] == 0
+    assert roll["fallback_occ"] == 0
+    assert roll["unpriced_occ"] == 2
+    assert roll["total_occ"] == 2
+    assert roll["mode"] == "untimed"
+    assert roll["oracle_us_total"] is None
+
+
+def test_rollup_timed_dir_without_representative_is_unpriced_for_missing_shapes():
+    # Dir has a per-shape point for shapeA but no representative oracle_us, so a
+    # shapeB occurrence has nothing to fall back to -> unpriced (not silently 0).
+    timing = {
+        "points_by_shape": {"shapeA": {"oracle_us": 5.0, "compile_us": 4.0}},
+    }
+    occs = [_occ("p", "shapeA"), _occ("p", "shapeB")]
+    roll = _rollup_occurrence_timings(timing, occs)
+
+    assert roll["matched_occ"] == 1
+    assert roll["fallback_occ"] == 0
+    assert roll["unpriced_occ"] == 1
+    assert roll["mode"] == "partial"
+    assert roll["oracle_us_total"] == 5.0
+
+
+def test_build_model_report_gates_projection_when_kernels_unpriced():
+    # Pattern "priced" is timed; pattern "untimed" has no timing entry at all.
+    acc = _model_accounting([
+        _occ("priced", "shapeA"),
+        _occ("priced", "shapeA"),
+        _occ("untimed", "shapeC"),
+    ])
+    hash_to_repro = {"priced": "pointwise_priced", "untimed": "pointwise_untimed"}
+    timings = {
+        "pointwise_priced": {
+            "oracle_us": 7.0,
+            "compile_us": 6.0,
+            "points_by_shape": {"shapeA": {"oracle_us": 7.0, "compile_us": 6.0}},
+        },
+        # pointwise_untimed deliberately ABSENT -> untimed.
+    }
+    report = build_model_report(acc, hash_to_repro, timings, {})
+
+    assert report["projection_complete"] is False
+    # Headline floor must NOT be a number when coverage is partial.
+    assert report["fusible_oracle_us_total"] is None
+    assert report["fusible_compile_us_total"] is None
+    assert report["fusible_oracle_us_total_is_lower_bound"] is True
+    # The lower-bound partial sum is still exposed for diagnostics (2 x 7.0).
+    assert report["fusible_oracle_us_total_partial"] == 14.0
+    assert report["unpriced_occurrences"] == 1
+    assert report["priced_occurrences"] == 2
+    assert report["total_occurrences"] == 3
+    unpriced = report["unpriced_kernels"]
+    assert len(unpriced) == 1
+    assert unpriced[0]["pattern_hash"] == "untimed"
+    assert unpriced[0]["unpriced_occ"] == 1
+    # Text report surfaces INCOMPLETE rather than a number.
+    text = format_text_report(report)
+    assert "INCOMPLETE" in text
+    assert "UNAVAILABLE" in text
+
+
+def test_build_model_report_complete_projection_reports_number_unchanged():
+    acc = _model_accounting([
+        _occ("priced", "shapeA"),
+        _occ("priced", "shapeA"),
+    ])
+    hash_to_repro = {"priced": "pointwise_priced"}
+    timings = {
+        "pointwise_priced": {
+            "oracle_us": 7.0,
+            "compile_us": 6.0,
+            "points_by_shape": {"shapeA": {"oracle_us": 7.0, "compile_us": 6.0}},
+        },
+    }
+    report = build_model_report(acc, hash_to_repro, timings, {})
+
+    assert report["projection_complete"] is True
+    assert report["fusible_oracle_us_total"] == 14.0
+    assert report["fusible_oracle_us_total_partial"] == 14.0
+    assert report["fusible_oracle_us_total_is_lower_bound"] is False
+    assert report["unpriced_occurrences"] == 0
+    assert report["unpriced_kernels"] == []
+
+
 def test_gpu_lock_metadata_marks_lock_mode():
     with tempfile.TemporaryDirectory() as tmp:
         with gpu_lock_module.gpu_lock(0, lock_dir=tmp, label="exclusive-test") as lock_path:
@@ -1122,6 +1262,11 @@ if __name__ == "__main__":
     test_capture_hook_emits_batched_permutation_config_for_scatter_inverse_indices()
     test_capture_hook_process_graph_splits_horizontal_fusion_regions()
     test_capture_hook_process_graph_keeps_getitem_data_dependency_together()
+    test_rollup_classifies_matched_fallback_and_unpriced_occurrences()
+    test_rollup_untimed_dir_marks_all_occurrences_unpriced()
+    test_rollup_timed_dir_without_representative_is_unpriced_for_missing_shapes()
+    test_build_model_report_gates_projection_when_kernels_unpriced()
+    test_build_model_report_complete_projection_reports_number_unchanged()
     test_gpu_lock_metadata_marks_lock_mode()
     test_gpu_lock_detects_dead_pid_metadata_while_blocked()
     print("All tests passed.")
