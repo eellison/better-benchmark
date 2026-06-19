@@ -339,6 +339,21 @@ def generate_canonical_repro(
 
     import_block = "\n".join(imports)
 
+    # LEGACY v2 GENERATOR. This emits the RETIRED v2 format on purpose: an
+    # inline `_shapes_config` string + a parse_shapes_config()-based
+    # _default_make_inputs (no sibling shapes.json). It is NOT the current
+    # capture path -- capture_hook.py emits v3 and merge_captures.py copies
+    # those captures verbatim; this function is only reached as the v1-legacy
+    # rebuild fallback (merge_captures.py `src_ver < 2` branch) and the
+    # superseded extract_reductions.update_canonical dynamo-batch path.
+    #
+    # The literal 2 is deliberate and must NOT be bumped to
+    # CURRENT_REPRO_VERSION: the OUTPUT is structurally v2, so stamping a
+    # higher version here would mislabel it (validate_corpus_invariants treats
+    # `_repro_version = 3` as "must have a structured shapes.json", which this
+    # output lacks). Producing real v3 repros requires the shapes.json-emitting
+    # template in capture_hook.py, not this rebuild. Flagged for the NEXT
+    # format migration: retire these callers rather than re-version this text.
     if shapes_config:
         version_block = f"""_repro_version = 2
 _shapes_config = "{shapes_config}"

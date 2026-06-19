@@ -169,7 +169,9 @@ def test_version_tag_present():
     # capture_hook emits the current (v3) template marker.
     from repro_harness import CURRENT_REPRO_VERSION, parse_repro_version
     assert f'_repro_version = {CURRENT_REPRO_VERSION}' in content, "Missing version tag"
-    assert parse_repro_version(content) == CURRENT_REPRO_VERSION == 3
+    # Track the constant, not a frozen literal: a future bump must not silently
+    # rot this assertion (the recurrence the v3 migration demonstrated).
+    assert parse_repro_version(content) == CURRENT_REPRO_VERSION
     print("PASS: version tag present in captured repro")
 
 
