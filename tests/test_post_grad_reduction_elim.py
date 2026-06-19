@@ -7,12 +7,27 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PROTOTYPE = ROOT / "scripts" / "prototype_post_grad_reduction_elim.py"
 REPRO = ROOT / "repros" / "canonical" / "sum_sum_sum_d8e421a07bf7" / "repro.py"
 
 
+@pytest.mark.skipif(
+    not REPRO.exists(),
+    reason=(
+        "Prototype smoke test pinned to the f32 repro sum_sum_sum_d8e421a07bf7, "
+        "which was removed by the atomic bf16 corpus flip (b93ba9f4f). The "
+        "assertions hard-code that graph's exact node names and f32-specific "
+        "reduction_count (131072); the bf16 equivalents have different shapes/"
+        "node structure and do not reproduce them, and "
+        "prototype_post_grad_reduction_elim.py is exploratory tooling not wired "
+        "into any product path. Re-point at a current densenet BN-backward-tail "
+        "repro (and refresh the expected output) to re-enable."
+    ),
+)
 def test_densenet_bn_backward_tail_extraction() -> None:
     output = subprocess.check_output(
         [sys.executable, str(PROTOTYPE), str(REPRO)],
