@@ -55,7 +55,9 @@ class TestShapesJsonWriter(unittest.TestCase):
             point = data["points"][0]
             self.assertEqual(point["shape_hash"], "75902420")
             self.assertEqual(point["signature"], "(T([32, 320, 7, 7], bf16), T([32, 1280], bf16))")
-            self.assertEqual(point["source"], "captured")
+            # NOTE: the per-point "source" field was retired from shapes.json
+            # in the v3 migration (76c4fb8c8) and is read by no consumer; the
+            # writer no longer emits it, so the test no longer asserts it.
             self.assertIn("timm/infer/mobilenetv2_100", point["models"])
             self.assertIsNone(point["models"]["timm/infer/mobilenetv2_100"]["occurrences"])
 

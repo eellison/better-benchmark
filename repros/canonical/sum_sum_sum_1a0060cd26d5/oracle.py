@@ -83,7 +83,7 @@ def _scatter_skip_value(arg0_ptr, arg1_ptr, c, hw, mask):
 
 
 @triton.jit
-def _where_pair_and_centered(
+def _where_and_centered(
     arg0_ptr,
     arg1_ptr,
     arg3_ptr,
@@ -109,38 +109,7 @@ def _where_pair_and_centered(
     scatter_skip = _scatter_skip_value(arg0_ptr, arg1_ptr, c, hw, mask)
     scatter_skip_rounded = _to_bf16_f32(scatter_skip)
     fill = tl.load(fill_ptr).to(tl.float32)
-    where_compiled = tl.where(gate <= 0.0, fill, scatter_skip)
     where_exact = tl.where(gate <= 0.0, fill, scatter_skip_rounded)
-    return where_exact, where_compiled, centered
-
-
-@triton.jit
-def _where_and_centered(
-    arg0_ptr,
-    arg1_ptr,
-    arg3_ptr,
-    mean_ptr,
-    invstd_ptr,
-    weight_ptr,
-    bias_ptr,
-    fill_ptr,
-    c,
-    hw,
-    mask,
-):
-    where_exact, _, centered = _where_pair_and_centered(
-        arg0_ptr,
-        arg1_ptr,
-        arg3_ptr,
-        mean_ptr,
-        invstd_ptr,
-        weight_ptr,
-        bias_ptr,
-        fill_ptr,
-        c,
-        hw,
-        mask,
-    )
     return where_exact, centered
 
 
@@ -156,8 +125,6 @@ def _partial_reduce_kernel(
     fill_ptr,
     partial_sum_exact_ptr,
     partial_dot_exact_ptr,
-    partial_sum_compiled_ptr,
-    partial_dot_compiled_ptr,
     NUM_HW_TILES: tl.constexpr,
     BLOCK_HW: tl.constexpr,
     BLOCK_C: tl.constexpr,
@@ -166,7 +133,7 @@ def _partial_reduce_kernel(
     hw = tl.program_id(1) * BLOCK_HW + tl.arange(0, BLOCK_HW)
     mask = (hw[:, None] < 613760) & (c[None, :] < 64)
 
-    where_exact, where_compiled, centered = _where_pair_and_centered(
+    where_exact, centered = _where_and_centered(
         arg0_ptr,
         arg1_ptr,
         arg3_ptr,
@@ -181,24 +148,15 @@ def _partial_reduce_kernel(
     )
     partial_sum_exact = tl.sum(tl.where(mask, where_exact, 0.0), axis=0)
     partial_dot_exact = tl.sum(tl.where(mask, _mul_rn(where_exact, centered), 0.0), axis=0)
-    partial_sum_compiled = tl.sum(tl.where(mask, where_compiled, 0.0), axis=0)
-    partial_dot_compiled = tl.sum(
-        tl.where(mask, _mul_rn(where_compiled, centered), 0.0),
-        axis=0,
-    )
     out_offsets = tl.program_id(1) * 64 + c
     tl.store(partial_sum_exact_ptr + out_offsets, partial_sum_exact, mask=c < 64)
     tl.store(partial_dot_exact_ptr + out_offsets, partial_dot_exact, mask=c < 64)
-    tl.store(partial_sum_compiled_ptr + out_offsets, partial_sum_compiled, mask=c < 64)
-    tl.store(partial_dot_compiled_ptr + out_offsets, partial_dot_compiled, mask=c < 64)
 
 
 @triton.jit
 def _finalize_reductions_kernel(
     partial_sum_exact_ptr,
     partial_dot_exact_ptr,
-    partial_sum_compiled_ptr,
-    partial_dot_compiled_ptr,
     invstd_ptr,
     weight_ptr,
     sum_out_ptr,
@@ -222,14 +180,6 @@ def _finalize_reductions_kernel(
         tl.load(partial_dot_exact_ptr + offsets, mask=mask, other=0.0).to(tl.float32),
         axis=0,
     )
-    sum_compiled = tl.sum(
-        tl.load(partial_sum_compiled_ptr + offsets, mask=mask, other=0.0).to(tl.float32),
-        axis=0,
-    )
-    dot_compiled = tl.sum(
-        tl.load(partial_dot_compiled_ptr + offsets, mask=mask, other=0.0).to(tl.float32),
-        axis=0,
-    )
     invstd = tl.load(invstd_ptr + c, mask=c < 64, other=0.0).to(tl.float32)
     weight = tl.load(weight_ptr + c, mask=c < 64, other=0.0).to(tl.float32)
     dot_mean = _mul_rn(dot_exact, 1.6293013555787278e-06)
@@ -237,19 +187,9 @@ def _finalize_reductions_kernel(
     correction_scale = _mul_rn(dot_mean, invstd_sq)
     post_scale = _mul_rn(invstd, weight)
     mul10_exact = _mul_rn(dot_exact, invstd)
-    mul10_compiled = _mul_rn(dot_compiled, invstd)
 
-    sum_delta = _sub_rn(sum_compiled, sum_exact)
-    sum_limit = _add_rn(0.009, _mul_rn(0.0095, tl.abs(sum_exact)))
-    sum_step = tl.minimum(tl.maximum(sum_delta, -sum_limit), sum_limit)
-    mul10_delta = _sub_rn(mul10_compiled, mul10_exact)
-    mul10_limit = _add_rn(0.009, _mul_rn(0.0095, tl.abs(mul10_exact)))
-    mul10_step = tl.minimum(tl.maximum(mul10_delta, -mul10_limit), mul10_limit)
-    sum_return = _add_rn(sum_exact, sum_step)
-    mul10_return = _add_rn(mul10_exact, mul10_step)
-
-    tl.store(sum_out_ptr + c, sum_return, mask=c < 64)
-    tl.store(mul10_out_ptr + c, mul10_return, mask=c < 64)
+    tl.store(sum_out_ptr + c, sum_exact, mask=c < 64)
+    tl.store(mul10_out_ptr + c, mul10_exact, mask=c < 64)
     tl.store(mean_term_ptr + c, _mul_rn(sum_exact, 1.6293013555787278e-06), mask=c < 64)
     tl.store(correction_scale_ptr + c, correction_scale, mask=c < 64)
     tl.store(output_scale_ptr + c, post_scale, mask=c < 64)
@@ -279,7 +219,7 @@ def _epilogue_kernel(
     mask = (hw[:, None] < 613760) & (c[None, :] < 64)
     offsets = c[None, :] * 613760 + hw[:, None]
 
-    where_exact, where_compiled, centered = _where_pair_and_centered(
+    where_exact, centered = _where_and_centered(
         arg0_ptr,
         arg1_ptr,
         arg3_ptr,
@@ -302,20 +242,7 @@ def _epilogue_kernel(
     centered_grad_exact = _sub_rn(_sub_rn(where_exact, correction), mean_term[None, :])
     grad_exact = _mul_rn(centered_grad_exact, output_scale[None, :])
     grad_exact_bf16 = grad_exact.to(tl.bfloat16, fp_downcast_rounding="rtne")
-
-    centered_grad_compiled = _sub_rn(
-        _sub_rn(where_compiled, correction),
-        mean_term[None, :],
-    )
-    grad_compiled = _mul_rn(centered_grad_compiled, output_scale[None, :])
-    grad_compiled_bf16 = grad_compiled.to(tl.bfloat16, fp_downcast_rounding="rtne")
-
-    exact_f32 = grad_exact_bf16.to(tl.float32)
-    compiled_f32 = grad_compiled_bf16.to(tl.float32)
-    tolerance = _add_rn(0.009, _mul_rn(0.0095, tl.abs(exact_f32)))
-    use_compiled = tl.abs(_sub_rn(compiled_f32, exact_f32)) <= tolerance
-    grad_bf16 = tl.where(use_compiled, grad_compiled_bf16, grad_exact_bf16)
-    tl.store(out_ptr + offsets, grad_bf16, mask=mask)
+    tl.store(out_ptr + offsets, grad_exact_bf16, mask=mask)
 
     partial = tl.sum(tl.where(mask, grad_exact_bf16.to(tl.float32), 0.0), axis=0)
     tl.store(partial_out_sum_ptr + tl.program_id(1) * 64 + c, partial, mask=c < 64)
@@ -390,8 +317,6 @@ def oracle_forward(
 
     partial_sum_exact = torch.empty((num_reduce_tiles, C), device=device, dtype=torch.float32)
     partial_dot_exact = torch.empty((num_reduce_tiles, C), device=device, dtype=torch.float32)
-    partial_sum_compiled = torch.empty((num_reduce_tiles, C), device=device, dtype=torch.float32)
-    partial_dot_compiled = torch.empty((num_reduce_tiles, C), device=device, dtype=torch.float32)
     sum_out = torch.empty((C,), device=device, dtype=torch.float32)
     mul10_out = torch.empty((C,), device=device, dtype=torch.float32)
     mean_term = torch.empty((C,), device=device, dtype=torch.float32)
@@ -421,8 +346,6 @@ def oracle_forward(
         arg8_1,
         partial_sum_exact,
         partial_dot_exact,
-        partial_sum_compiled,
-        partial_dot_compiled,
         NUM_HW_TILES=num_reduce_tiles,
         BLOCK_HW=REDUCE_BLOCK_HW,
         BLOCK_C=REDUCE_BLOCK_C,
@@ -431,8 +354,6 @@ def oracle_forward(
     _finalize_reductions_kernel[(triton.cdiv(C, FINAL_BLOCK_C),)](
         partial_sum_exact,
         partial_dot_exact,
-        partial_sum_compiled,
-        partial_dot_compiled,
         arg5_1,
         arg6_1,
         sum_out,

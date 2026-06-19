@@ -21,6 +21,10 @@ from oracle_harness import (
     _CUDAGRAPH_WARNING_PATTERNS,
     _INVALID_STATUSES,
     _runner_main,
+    load_numerics_optout,
+    numerics_optout_applies,
+    NUMERICS_OPTOUT_ABS_FLOOR,
+    NUMERICS_OPTOUT_MAX_REL_DIFF,
 )
 
 
@@ -402,3 +406,271 @@ def oracle_forward(inputs):
         }))
         ret = _runner_main([str(d), "--check"])
         assert ret == 1
+
+
+# ============================================================================
+# (e) Numerics opt-out: reviewed acceptance of benign precision drift
+# ============================================================================
+
+def _gate_result(per_output, *, passed=False):
+    """Build a minimal _anchored_numerics_gate-shaped result dict."""
+    return {
+        "pass": passed,
+        "per_output": per_output,
+        "worst_output_idx": next(
+            (e["idx"] for e in per_output if e.get("pass") is False), None),
+        "ref_precision": "f64",
+    }
+
+
+class TestNumericsOptoutLoader:
+    """load_numerics_optout: only a verified+reasoned annotation activates."""
+
+    def _write_meta(self, base, optout):
+        d = Path(base) / "r"
+        d.mkdir(parents=True)
+        meta = {"pattern_hash": "deadbeef", "kind": "reduction"}
+        if optout is not None:
+            meta["numerics_optout"] = optout
+        (d / "meta.json").write_text(json.dumps(meta))
+        return d
+
+    def test_no_meta_returns_none(self, tmp_path):
+        d = tmp_path / "empty"
+        d.mkdir()
+        assert load_numerics_optout(d) is None
+
+    def test_absent_field_returns_none(self, tmp_path):
+        d = self._write_meta(tmp_path, None)
+        assert load_numerics_optout(d) is None
+
+    def test_unverified_returns_none(self, tmp_path):
+        d = self._write_meta(tmp_path, {"verified": False, "reason": "x"})
+        assert load_numerics_optout(d) is None
+        d2 = self._write_meta(tmp_path / "a", {"reason": "x"})  # no 'verified'
+        assert load_numerics_optout(d2) is None
+
+    def test_verified_without_reason_refused(self, tmp_path, capsys):
+        """A bare {'verified': true} with no reason must NOT activate."""
+        d = self._write_meta(tmp_path, {"verified": True})
+        assert load_numerics_optout(d) is None
+        d2 = self._write_meta(tmp_path / "a", {"verified": True, "reason": "  "})
+        assert load_numerics_optout(d2) is None
+
+    def test_verified_with_reason_loads(self, tmp_path):
+        opt = {"verified": True, "reason": "bf16 accumulation drift",
+               "max_diff": 1.7e-3, "reviewed": "2026-06-18"}
+        d = self._write_meta(tmp_path, opt)
+        loaded = load_numerics_optout(d)
+        assert loaded == opt
+
+    def test_malformed_meta_fails_closed(self, tmp_path):
+        """Corrupt meta.json => no opt-out (gate applies), no raise."""
+        d = tmp_path / "r"
+        d.mkdir()
+        (d / "meta.json").write_text("{not valid json")
+        assert load_numerics_optout(d) is None
+
+
+class TestNumericsOptoutApplies:
+    """numerics_optout_applies: the accept/refuse decision logic.
+
+    This is the crux of the mechanism: a verified opt-out accepts BENIGN
+    precision drift but REFUSES an implausibly-large diff (no rubber-stamping
+    a real wrong-math bug), and does nothing without a verified opt-out.
+    """
+
+    _OPTOUT = {"verified": True, "reason": "bf16 accumulation drift, reviewed"}
+
+    def test_no_optout_never_accepts(self):
+        """Without an opt-out, even a benign diff is not accepted."""
+        gate = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": 1e-4,
+             "err_compiled": 1e-6, "ref_absmax": 1.0},
+        ])
+        verdict = numerics_optout_applies(gate, None)
+        assert verdict["accept"] is False
+        assert "no verified opt-out" in verdict["reason"]
+
+    def test_verified_optout_accepts_benign_drift(self):
+        """A verified opt-out accepts a small (benign) precision-drift diff."""
+        # err 8e-4 on ref_absmax 1.0: bound = max(0.05*1.0, 1e-2)=1e-2; 8e-4 < bound
+        gate = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": 8e-4,
+             "err_compiled": 1e-6, "ref_absmax": 1.0},
+        ])
+        verdict = numerics_optout_applies(gate, self._OPTOUT)
+        assert verdict["accept"] is True
+        assert verdict["n_failing"] == 1
+
+    def test_verified_optout_refuses_implausible_diff(self):
+        """An implausibly-large diff (1e6) is REFUSED even with opt-out."""
+        gate = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": 1e6,
+             "err_compiled": 1e-6, "ref_absmax": 1.0},
+        ])
+        verdict = numerics_optout_applies(gate, self._OPTOUT)
+        assert verdict["accept"] is False
+        assert "REFUSED" in verdict["reason"]
+        assert verdict["worst_offender"]["idx"] == 0
+        assert verdict["worst_offender"]["err_oracle"] == 1e6
+
+    def test_relative_bound_scales_with_ref_magnitude(self):
+        """A diff that is large absolutely but small RELATIVE to a large ref
+        is still benign (bound scales with ref_absmax)."""
+        # ref_absmax 1e6 -> bound = 0.05 * 1e6 = 5e4; err 1e4 < bound => accept
+        gate = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": 1e4,
+             "err_compiled": 1.0, "ref_absmax": 1e6},
+        ])
+        verdict = numerics_optout_applies(gate, self._OPTOUT)
+        assert verdict["accept"] is True
+        # Same absolute err on a UNIT-scale ref is implausible => refuse.
+        gate2 = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": 1e4,
+             "err_compiled": 1e-6, "ref_absmax": 1.0},
+        ])
+        assert numerics_optout_applies(gate2, self._OPTOUT)["accept"] is False
+
+    def test_one_implausible_among_benign_refuses_all(self):
+        """If ANY failing output is implausible, the whole opt-out is refused."""
+        gate = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": 1e-3,   # benign
+             "err_compiled": 1e-6, "ref_absmax": 1.0},
+            {"idx": 1, "pass": False, "err_oracle": 50.0,   # implausible
+             "err_compiled": 1e-6, "ref_absmax": 1.0},
+        ])
+        verdict = numerics_optout_applies(gate, self._OPTOUT)
+        assert verdict["accept"] is False
+        assert verdict["worst_offender"]["idx"] == 1
+
+    def test_none_gate_result_not_accepted(self):
+        """No gate result (e.g. scope mismatch) => nothing to accept."""
+        verdict = numerics_optout_applies(None, self._OPTOUT)
+        assert verdict["accept"] is False
+
+    def test_nan_error_refused(self):
+        """A NaN err_oracle is divergence/pathology, NOT benign drift => refuse.
+        (Guards against NaN > bound being False and sneaking through.)"""
+        gate = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": float("nan"),
+             "err_compiled": float("nan"), "ref_absmax": float("nan")},
+        ])
+        verdict = numerics_optout_applies(gate, self._OPTOUT)
+        assert verdict["accept"] is False
+        assert verdict["worst_offender"]["non_finite"] is True
+        assert "non-finite" in verdict["reason"]
+
+    def test_inf_error_refused(self):
+        """An inf err_oracle is likewise refused."""
+        gate = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": float("inf"),
+             "err_compiled": 1e-6, "ref_absmax": 1.0},
+        ])
+        verdict = numerics_optout_applies(gate, self._OPTOUT)
+        assert verdict["accept"] is False
+
+    def test_nan_alongside_benign_refuses(self):
+        """A benign output + a NaN output -> the NaN is reported, refuse all."""
+        gate = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": 1e-3,
+             "err_compiled": 1e-6, "ref_absmax": 1.0},
+            {"idx": 1, "pass": False, "err_oracle": float("nan"),
+             "err_compiled": float("nan"), "ref_absmax": float("nan")},
+        ])
+        verdict = numerics_optout_applies(gate, self._OPTOUT)
+        assert verdict["accept"] is False
+        assert verdict["worst_offender"]["idx"] == 1
+
+    def test_abs_floor_allows_tiny_ref_drift(self):
+        """With a tiny ref magnitude, the absolute floor keeps benign bf16
+        rounding acceptable (the relative bound alone would be too tight)."""
+        # ref_absmax ~0 -> relative bound ~0, but ABS_FLOOR=1e-2 governs.
+        gate = _gate_result([
+            {"idx": 0, "pass": False, "err_oracle": NUMERICS_OPTOUT_ABS_FLOOR / 2,
+             "err_compiled": 1e-9, "ref_absmax": 1e-8},
+        ])
+        verdict = numerics_optout_applies(gate, self._OPTOUT)
+        assert verdict["accept"] is True
+
+
+class TestNumericsOptoutBenchWiring:
+    """bench_oracle honors a verified opt-out: a gate-failing-but-benign oracle
+    PRICES (status NUMERICS_OPTOUT_ACCEPTED + timings) instead of being dropped;
+    an implausible diff still hard-fails; no opt-out behaves as before.
+
+    The GPU-bound internals (compile, CUDAGraph capture, lock, timing) are
+    patched so this runs CPU-only, like the rest of this suite.
+    """
+
+    def _run_bench(self, gate_per_output, optout, monkeypatch):
+        import oracle_harness as oh
+
+        # Pretend we are on CUDA so bench_oracle takes the GPU path.
+        monkeypatch.setattr(oh, "_get_device",
+                            lambda inputs: torch.device("cuda"))
+        # Stub every GPU-touching primitive.
+        monkeypatch.setattr(oh, "_capture_graph_checked",
+                            lambda fn: (MagicMock(), []))
+        monkeypatch.setattr(oh, "_time_graph",
+                            lambda g, warmup, rep: 10.0)  # us
+        monkeypatch.setattr(oh, "_gpu_exclusive_lock",
+                            lambda *a, **k: _nullctx())
+        # Drive the numerics gate deterministically.
+        gate = _gate_result(gate_per_output, passed=False)
+        monkeypatch.setattr(oh, "_run_anchored_numerics_gate",
+                            lambda *a, **k: gate)
+        # torch.compile / dynamo.reset / cuda.synchronize -> no-ops.
+        import torch._dynamo as _dynamo
+        monkeypatch.setattr(torch, "compile", lambda m, **k: m)
+        monkeypatch.setattr(_dynamo, "reset", lambda: None)
+        monkeypatch.setattr(torch.cuda, "synchronize", lambda *a, **k: None)
+        # triton import inside bench_oracle.
+        sys.modules.setdefault("triton", MagicMock())
+        sys.modules.setdefault("triton.testing", MagicMock())
+
+        instance = MagicMock(return_value=torch.zeros(2))
+        oracle_forward = lambda inp: torch.zeros(2)
+        inputs = [torch.zeros(2)]
+        return oh.bench_oracle(oracle_forward, instance, inputs, "test_repro",
+                               numerics_optout=optout, disable_gpu_lock=True)
+
+    def test_benign_drift_with_optout_prices(self, monkeypatch, capsys):
+        per = [{"idx": 0, "pass": False, "err_oracle": 5e-4,
+                "err_compiled": 1e-6, "ref_absmax": 1.0}]
+        optout = {"verified": True, "reason": "bf16 drift, reviewed 2026-06-18"}
+        res = self._run_bench(per, optout, monkeypatch)
+        assert res["status"] == "NUMERICS_OPTOUT_ACCEPTED"
+        # Priced: numeric timings present.
+        assert isinstance(res["oracle_us"], (int, float))
+        assert isinstance(res["compile_us"], (int, float))
+        # Audit trail recorded on the result.
+        assert res["numerics_optout"]["accepted"] is True
+        assert res["numerics_optout"]["annotation"] == optout
+        # And NOT counted as an invalid floor.
+        assert res["status"] not in _INVALID_STATUSES
+
+    def test_implausible_diff_with_optout_still_fails(self, monkeypatch, capsys):
+        per = [{"idx": 0, "pass": False, "err_oracle": 1e6,
+                "err_compiled": 1e-6, "ref_absmax": 1.0}]
+        optout = {"verified": True, "reason": "claims benign (it is not)"}
+        res = self._run_bench(per, optout, monkeypatch)
+        assert res["status"] == "NUMERICS_WORSE_THAN_COMPILED"
+        assert "oracle_us" not in res  # not priced
+        # Refusal recorded for auditability.
+        assert res["numerics_optout_refused"]["accept"] is False
+        assert res["status"] in _INVALID_STATUSES
+
+    def test_no_optout_behaves_as_today(self, monkeypatch, capsys):
+        per = [{"idx": 0, "pass": False, "err_oracle": 5e-4,
+                "err_compiled": 1e-6, "ref_absmax": 1.0}]
+        res = self._run_bench(per, None, monkeypatch)
+        # Same benign diff, but no opt-out -> still dropped as before.
+        assert res["status"] == "NUMERICS_WORSE_THAN_COMPILED"
+        assert "oracle_us" not in res
+        assert "numerics_optout" not in res
+
+
+def _nullctx():
+    import contextlib
+    return contextlib.nullcontext()

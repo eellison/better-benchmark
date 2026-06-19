@@ -75,7 +75,9 @@ class MergeCapturesTests(unittest.TestCase):
 
             meta = json.loads((kept / "meta.json").read_text())
             self.assertEqual(meta["pattern_hash"], pattern_hash)
-            self.assertEqual(meta["models"], ["ModelA", "ModelB"])
+            # Model keys are fully qualified as suite/mode/model (matches the
+            # shapes.json "models" keying); the bare-name form is retired.
+            self.assertEqual(meta["models"], ["hf/train/ModelA", "hf/train/ModelB"])
 
     def test_temporary_capture_for_merge_removes_raw_state(self):
         with tempfile.TemporaryDirectory() as tmp:

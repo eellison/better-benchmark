@@ -142,23 +142,14 @@ def _densenet_bn_tail_kernel(
     residual5 = tl.load(arg5_ptr + offset5, mask=slice_active, other=0.0).to(
         tl.float32
     )
-    residual_eager = _bf16_round_f32(_f32_add(residual0, residual1))
-    residual_eager = _bf16_round_f32(_f32_add(residual_eager, residual2))
-    residual_eager = _bf16_round_f32(_f32_add(residual_eager, residual3))
-    residual_eager = _bf16_round_f32(_f32_add(residual_eager, residual4))
-    residual_eager = _bf16_round_f32(_f32_add(residual_eager, residual5))
-    residual_fused = _f32_add(residual0, residual1)
-    residual_fused = _f32_add(residual_fused, residual2)
-    residual_fused = _f32_add(residual_fused, residual3)
-    residual_fused = _f32_add(residual_fused, residual4)
-    residual_fused = _f32_add(residual_fused, residual5)
+    residual = _bf16_round_f32(_f32_add(residual0, residual1))
+    residual = _bf16_round_f32(_f32_add(residual, residual2))
+    residual = _bf16_round_f32(_f32_add(residual, residual3))
+    residual = _bf16_round_f32(_f32_add(residual, residual4))
+    residual = _bf16_round_f32(_f32_add(residual, residual5))
     slice_c = c - 800
     slice_offset = n * (32 * HW) + slice_c * HW + hw
-    slice_eager = _bf16_round_f32(_f32_add(residual_eager, out_bf16_f32))
-    slice_fused = _bf16_round_f32(_f32_add(residual_fused, out_bf16_f32))
-    tolerance = _f32_add(0.009, _f32_mul(0.009, tl.abs(slice_eager)))
-    use_fused = tl.abs(_f32_sub(slice_fused, slice_eager)) <= tolerance
-    slice_out = tl.where(use_fused, slice_fused, slice_eager)
+    slice_out = _bf16_round_f32(_f32_add(residual, out_bf16_f32))
     tl.store(slice_out_ptr + slice_offset, slice_out, mask=slice_active)
 
 

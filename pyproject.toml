@@ -4,3 +4,9 @@ version = "0.1.0"
 
 [tool.setuptools]
 py-modules = ["repro_harness", "oracle_harness", "byte_accounting", "full_graph_harness", "input_codec", "capture_hook", "merge_captures", "roundtrip_validation"]
+
+[tool.pytest.ini_options]
+# All tests live under tests/. tests/conftest.py puts repo-root and
+# repo-root/scripts on sys.path so the test modules can import the production
+# helpers (bench_parallel, repro_harness, bounds_inference, ...).
+testpaths = ["tests"]

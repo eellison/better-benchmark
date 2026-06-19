@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the complete DINOv2 class-token LayerNorm return scope by sinking the trailing `select(dim=1, index=0).clone()` through the row-independent scaled residual producer, fp32 population `var_mean(..., correction=0)`, eps=1e-6 rsqrt, affine scale/bias, and final bf16 cast, while using Inductor's resident fp32 scaled-add normalization result where it remains inside the captured bf16 tolerance envelope, so only the 128 observable token-0 rows are reduced and stored, whereas Inductor lowers the captured graph as a full `[128,1370,768]` normalization and affine producer before applying the class-token select; Inductor cannot do this today because its normalization scheduler does not commute a constant token select backward through row-local LayerNorm and final cast to prove the other 1369 token rows per batch are dead; the fix is ALGEBRAIC_ELIMINATION: push fixed-token selects through row-local normalization graphs and narrow the scheduled row domain before codegen while preserving the returned bf16 output scope."""
+"""Gap diagnosis (classification: ALGEBRAIC_ELIMINATION): this oracle computes the faithful DINOv2 class-token LayerNorm return scope by sinking the trailing `select(dim=1, index=0).clone()` through the row-independent bf16 scaled residual producer, fp32 population `var_mean(..., correction=0)`, eps=1e-6 rsqrt, affine scale/bias, and final bf16 cast, so only the 128 observable token-0 rows are reduced and stored, whereas Inductor lowers the captured graph as a full `[128,1370,768]` normalization and affine producer before applying the class-token select; Inductor cannot do this today because its normalization scheduler does not commute a constant token select backward through row-local LayerNorm and final cast to prove the other 1369 token rows per batch are dead; the fix is ALGEBRAIC_ELIMINATION: push fixed-token selects through row-local normalization graphs and narrow the scheduled row domain before codegen while preserving the returned bf16 output scope."""
 
 import torch
 import triton
@@ -101,45 +101,19 @@ def _class_token_layernorm_kernel(
         eviction_policy="evict_last",
     ).to(tl.float32)
 
-    scaled_strict = _f32_mul(source, scale).to(tl.bfloat16).to(tl.float32)
-    x_strict = _f32_add(residual, scaled_strict).to(tl.bfloat16).to(tl.float32)
-    strict_for_sum = tl.where(mask, x_strict, 0.0)
-    mean_strict = tl.sum(strict_for_sum, axis=0) / HIDDEN_C
-    centered_strict = _f32_sub(x_strict, mean_strict)
-    var_strict = tl.sum(
-        tl.where(mask, _f32_mul(centered_strict, centered_strict), 0.0),
+    scaled = _f32_mul(source, scale).to(tl.bfloat16).to(tl.float32)
+    x = _f32_add(residual, scaled).to(tl.bfloat16).to(tl.float32)
+    x_for_sum = tl.where(mask, x, 0.0)
+    mean = tl.sum(x_for_sum, axis=0) / HIDDEN_C
+    centered = _f32_sub(x, mean)
+    variance = tl.sum(
+        tl.where(mask, _f32_mul(centered, centered), 0.0),
         axis=0,
     ) / HIDDEN_C
-    invstd_strict = libdevice.rsqrt(_f32_add(var_strict, EPS_C))
-    norm_strict = _f32_mul(centered_strict, invstd_strict)
-    affine_strict = _f32_add(_f32_mul(norm_strict, weight), bias)
-    out_strict = affine_strict.to(tl.bfloat16)
-
-    scaled_resident = _f32_mul(source, scale)
-    x_resident = _f32_add(residual, scaled_resident)
-    resident_for_sum = tl.where(mask, x_resident, 0.0)
-    mean_resident = tl.sum(resident_for_sum, axis=0) / HIDDEN_C
-    centered_resident = _f32_sub(x_resident, mean_resident)
-    var_resident = tl.sum(
-        tl.where(mask, _f32_mul(centered_resident, centered_resident), 0.0),
-        axis=0,
-    ) / HIDDEN_C
-    invstd_resident = libdevice.rsqrt(_f32_add(var_resident, EPS_C))
-    norm_resident = _f32_mul(centered_resident, invstd_resident)
-    affine_resident = _f32_add(_f32_mul(norm_resident, weight), bias)
-    out_resident = affine_resident.to(tl.bfloat16)
-
-    strict_f32 = out_strict.to(tl.float32)
-    resident_f32 = out_resident.to(tl.float32)
-    delta = _f32_sub(resident_f32, strict_f32)
-    full_tol = _f32_add(0.01, _f32_mul(0.01, tl.abs(strict_f32)))
-    soft_tol = _f32_mul(full_tol, 0.95)
-    step = tl.minimum(tl.abs(delta), soft_tol)
-    signed_step = tl.where(delta < 0.0, -step, step)
-    candidate = _f32_add(strict_f32, signed_step).to(tl.bfloat16)
-    candidate_f32 = candidate.to(tl.float32)
-    within_tol = tl.abs(_f32_sub(candidate_f32, strict_f32)) <= full_tol
-    out = tl.where(within_tol, candidate, out_strict)
+    invstd = libdevice.rsqrt(_f32_add(variance, EPS_C))
+    norm = _f32_mul(centered, invstd)
+    affine = _f32_add(_f32_mul(norm, weight), bias)
+    out = affine.to(tl.bfloat16)
     tl.store(out_ptr + batch * HIDDEN_C + cols, out, mask=mask)
 
 

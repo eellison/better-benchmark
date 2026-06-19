@@ -427,15 +427,27 @@ def _rollup_occurrence_timings(
     ``points_by_shape`` is absent (older timings file) we warn and fall back to
     the legacy per-dir-number behaviour.
 
-    Returns: {oracle_us_total, compile_us_total, matched_occ, total_occ, mode}
-    where ``matched_occ`` is how many occurrences hit a per-shape point.
+    Every occurrence is classified into exactly one of three buckets so the
+    caller can coverage-gate the model projection:
+      - matched_occ:  priced at its OWN shape_hash (a per-shape point).
+      - fallback_occ: dir is timed but this shape has no point -> dir median.
+      - unpriced_occ: NO price at all (dir entirely untimed, or dir timed but
+        has no usable representative median to fall back to). These are the
+        occurrences a complete projection MUST NOT silently drop.
+    Invariant: matched_occ + fallback_occ + unpriced_occ == total_occ.
+
+    Returns: {oracle_us_total, compile_us_total, matched_occ, fallback_occ,
+    unpriced_occ, total_occ, mode}.
     """
     total_occ = len(occs)
     if not timing:
+        # Dir is entirely untimed: every occurrence is unpriced.
         return {
             "oracle_us_total": None,
             "compile_us_total": None,
             "matched_occ": 0,
+            "fallback_occ": 0,
+            "unpriced_occ": total_occ,
             "total_occ": total_occ,
             "mode": "untimed",
         }
@@ -455,16 +467,20 @@ def _rollup_occurrence_timings(
                 file=sys.stderr,
             )
             _rollup_occurrence_timings._warned_legacy = True
+        rep_priced = isinstance(rep_oracle, (int, float))
         return {
             "oracle_us_total": (
-                round(rep_oracle * total_occ, 2)
-                if isinstance(rep_oracle, (int, float)) else None
+                round(rep_oracle * total_occ, 2) if rep_priced else None
             ),
             "compile_us_total": (
                 round(rep_compile * total_occ, 2)
                 if isinstance(rep_compile, (int, float)) else None
             ),
+            # The whole dir is priced off one representative number; treat all
+            # occurrences as fallback (priced-ish) if we have one, else unpriced.
             "matched_occ": 0,
+            "fallback_occ": total_occ if rep_priced else 0,
+            "unpriced_occ": 0 if rep_priced else total_occ,
             "total_occ": total_occ,
             "mode": "legacy",
         }
@@ -474,15 +490,23 @@ def _rollup_occurrence_timings(
     have_oracle = False
     have_compile = False
     matched = 0
+    fallback = 0
+    unpriced = 0
+    rep_oracle_ok = isinstance(rep_oracle, (int, float))
     for occ in occs:
         point = by_shape.get(occ.shape_hash)
         o_us = point.get("oracle_us") if isinstance(point, dict) else None
         c_us = point.get("compile_us") if isinstance(point, dict) else None
         if isinstance(o_us, (int, float)):
             matched += 1
-        else:
+        elif rep_oracle_ok:
             # No per-shape timing for this occurrence: use the dir median.
-            o_us = rep_oracle if isinstance(rep_oracle, (int, float)) else None
+            o_us = rep_oracle
+            fallback += 1
+        else:
+            # No per-shape point AND no dir median: this occurrence is unpriced.
+            o_us = None
+            unpriced += 1
         if not isinstance(c_us, (int, float)):
             c_us = rep_compile if isinstance(rep_compile, (int, float)) else None
         if isinstance(o_us, (int, float)):
@@ -492,13 +516,20 @@ def _rollup_occurrence_timings(
             compile_sum += c_us
             have_compile = True
 
-    mode = "per_shape" if matched == total_occ else (
-        "partial" if matched else "fallback_only"
-    )
+    if unpriced == total_occ:
+        mode = "untimed"
+    elif matched == total_occ:
+        mode = "per_shape"
+    elif matched:
+        mode = "partial"
+    else:
+        mode = "fallback_only"
     return {
         "oracle_us_total": round(oracle_sum, 2) if have_oracle else None,
         "compile_us_total": round(compile_sum, 2) if have_compile else None,
         "matched_occ": matched,
+        "fallback_occ": fallback,
+        "unpriced_occ": unpriced,
         "total_occ": total_occ,
         "mode": mode,
     }
@@ -554,6 +585,8 @@ def _pattern_rows(acc: ModelAccounting, hash_to_repro: dict[str, str],
             "oracle_us_total": roll["oracle_us_total"],
             "compile_us_total": roll["compile_us_total"],
             "matched_occ": roll["matched_occ"],
+            "fallback_occ": roll["fallback_occ"],
+            "unpriced_occ": roll["unpriced_occ"],
             "total_occ": roll["total_occ"],
             "rollup_mode": roll["mode"],
         })
@@ -602,6 +635,41 @@ def build_model_report(acc: ModelAccounting, hash_to_repro: dict[str, str],
     matched_occ_total = sum(r.get("matched_occ", 0) for r in timed)
     timed_occ_total = sum(r.get("total_occ", r["occurrences"]) for r in timed)
 
+    # ---- Coverage gate -------------------------------------------------------
+    # A per-model projection is COMPLETE only if EVERY partition occurrence is
+    # priced (matched at its own shape, or fallen back to a timed dir's median).
+    # Occurrences whose dir is entirely untimed -- or whose dir is timed but has
+    # no usable representative -- are UNPRICED. Earlier this code silently
+    # dropped unpriced patterns from `timed` and reported the truncated sum as
+    # the model's floor (e.g. an inference model with 22 unpriced kernels
+    # projected to ~0us, looking complete). Instead, gate the projection: when
+    # any occurrence is unpriced the complete floor is unavailable; we expose
+    # the partial (lower-bound) sum plus the unpriced count/kernels and set the
+    # headline number to None so a consumer cannot mistake it for a floor.
+    matched_all = sum(r.get("matched_occ", 0) for r in pattern_rows)
+    fallback_all = sum(r.get("fallback_occ", 0) for r in pattern_rows)
+    unpriced_all = sum(r.get("unpriced_occ", 0) for r in pattern_rows)
+    all_occ_total = sum(
+        r.get("total_occ", r["occurrences"]) for r in pattern_rows
+    )
+    unpriced_kernels = [
+        {
+            "pattern_hash": r["pattern_hash"],
+            "repro_dir": r["repro_dir"],
+            "occurrences": r["occurrences"],
+            "unpriced_occ": r["unpriced_occ"],
+            "rollup_mode": r["rollup_mode"],
+        }
+        for r in pattern_rows
+        if r.get("unpriced_occ", 0) > 0
+    ]
+    unpriced_kernels.sort(key=lambda k: -k["unpriced_occ"])
+    projection_complete = unpriced_all == 0
+    # Headline floor: a real number ONLY when the projection is complete.
+    # When incomplete it is None; `*_partial` carries the lower-bound sum.
+    projection_oracle_us = total_oracle_us if projection_complete else None
+    projection_compile_us = total_compile_us if projection_complete else None
+
     # For manifest patterns we did NOT re-find, check whether a re-found
     # partition is trace-equivalent (same ops modulo reshape->view / clone
     # canonicalization that make_fx retracing applies to saved graphs).
@@ -644,8 +712,23 @@ def build_model_report(acc: ModelAccounting, hash_to_repro: dict[str, str],
         "total_non_fusible_ops": len(acc.all_non_fusible),
         # Aggregate time: SUM of (per-partition us x occurrence count).
         # Covers only patterns with canonical timings; never an averaged ratio.
-        "fusible_oracle_us_total": total_oracle_us,
-        "fusible_compile_us_total": total_compile_us,
+        # COVERAGE-GATED: the headline floor is a number ONLY when every
+        # partition occurrence is priced. When any occurrence is unpriced the
+        # complete floor is unavailable -> None; the lower-bound (partial) sum
+        # lives in `fusible_oracle_us_total_partial`.
+        "projection_complete": projection_complete,
+        "fusible_oracle_us_total": projection_oracle_us,
+        "fusible_compile_us_total": projection_compile_us,
+        "fusible_oracle_us_total_partial": total_oracle_us,
+        "fusible_compile_us_total_partial": total_compile_us,
+        "fusible_oracle_us_total_is_lower_bound": not projection_complete,
+        # Occurrence coverage across ALL partitions (priced + unpriced):
+        "priced_occurrences": matched_all + fallback_all,
+        "matched_occurrences": matched_all,
+        "fallback_occurrences": fallback_all,
+        "unpriced_occurrences": unpriced_all,
+        "total_occurrences": all_occ_total,
+        "unpriced_kernels": unpriced_kernels,
         "timed_patterns": len(timed),
         "shape_matched_occurrences": matched_occ_total,
         "timed_occurrences": timed_occ_total,
@@ -676,7 +759,7 @@ def format_text_report(report: dict) -> str:
         f"trace-equivalent canonical repro) | "
         f"non-fusible ops: {report['total_non_fusible_ops']}"
     )
-    if report["timed_patterns"]:
+    if report.get("projection_complete"):
         lines.append(
             f"Fusible time projection (SUM of per-shape us over "
             f"{report['timed_patterns']} timed patterns): "
@@ -688,6 +771,31 @@ def format_text_report(report: dict) -> str:
             f"{report['timed_occurrences']} occurrences priced at own shape "
             f"(rest fell back to dir median)"
         )
+    else:
+        # Coverage-gated: some occurrences are UNPRICED, so a complete floor is
+        # unavailable. Never present the partial sum as the model's floor.
+        unpriced_occ = report.get("unpriced_occurrences", 0)
+        total_occ = report.get("total_occurrences", 0)
+        unpriced_kernels = report.get("unpriced_kernels", [])
+        lines.append(
+            f"Fusible time projection: INCOMPLETE -- "
+            f"{unpriced_occ}/{total_occ} partition occurrences across "
+            f"{len(unpriced_kernels)} kernel pattern(s) are UNPRICED "
+            f"(untimed); complete floor UNAVAILABLE."
+        )
+        lines.append(
+            f"  Lower-bound partial sum (priced occurrences only, NOT a floor): "
+            f"oracle={report['fusible_oracle_us_total_partial']}us "
+            f"compile={report['fusible_compile_us_total_partial']}us"
+        )
+        if unpriced_kernels:
+            preview = ", ".join(
+                f"{k['repro_dir'] or k['pattern_hash']} x{k['unpriced_occ']}"
+                for k in unpriced_kernels[:6]
+            )
+            if len(unpriced_kernels) > 6:
+                preview += f", ... +{len(unpriced_kernels) - 6} more"
+            lines.append(f"  Unpriced kernels: {preview}")
     if report["errors"]:
         lines.append(f"ERRORS: {report['errors']}")
     lines.append("")
@@ -851,17 +959,34 @@ def main():
     print(f"\n{'=' * 70}", file=sys.stderr)
     print("SUMMARY", file=sys.stderr)
     print(f"{'=' * 70}", file=sys.stderr)
+    n_incomplete = 0
     for r in reports:
         err_str = f" ({len(r['errors'])} errors)" if r["errors"] else ""
+        if r.get("projection_complete"):
+            proj_str = (
+                f", projection={r['fusible_oracle_us_total']}us"
+            )
+        else:
+            n_incomplete += 1
+            proj_str = (
+                f", projection=INCOMPLETE "
+                f"({r.get('unpriced_occurrences', 0)}/"
+                f"{r.get('total_occurrences', 0)} occ unpriced)"
+            )
         print(
             f"  {r['model_name']}: {r['num_graphs']} graphs, "
             f"{r['total_partition_occurrences']} partition occurrences, "
             f"{r['unique_patterns']} unique patterns "
             f"({r['unmatched_patterns']} unmatched), "
             f"{r['total_non_fusible_ops']} non-fusible ops"
-            f"{err_str}",
+            f"{proj_str}{err_str}",
             file=sys.stderr,
         )
+    print(
+        f"\n  Projection coverage: {len(reports) - n_incomplete}/{len(reports)} "
+        f"models COMPLETE, {n_incomplete} INCOMPLETE (unpriced kernels)",
+        file=sys.stderr,
+    )
 
 
 if __name__ == "__main__":

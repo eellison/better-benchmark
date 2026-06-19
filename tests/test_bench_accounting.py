@@ -41,7 +41,28 @@ from full_graph_harness import (
     result_metadata,
     write_full_graph_metadata,
 )
+from input_codec import spec_from_compact
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+
+
+def _decode_meta_input(entry: list) -> dict:
+    """Decode one compact full-graph-metadata input/tensor_attr entry back to a
+    verbose spec. write_full_graph_metadata persists inputs/tensor_attrs in the
+    input_codec compact form ([[shape], dtype, opts]); the metadata tests assert
+    on named fields, so round-trip through the codec. 'exact' is normalized to a
+    bool (absent -> False) to match the verbose graph_constraints_from_gm form.
+    """
+    spec = spec_from_compact(entry)
+    spec["exact"] = bool(spec.get("exact"))
+    return spec
+from model_graph_accounting import (
+    GraphAccounting,
+    ModelAccounting,
+    PartitionOccurrence,
+    _rollup_occurrence_timings,
+    build_model_report,
+    format_text_report,
+)
 
 
 def _partitioner_supports_skip_horizontal_fusion() -> bool:
@@ -105,13 +126,35 @@ def test_resolve_input_path_rejects_whitespace_only_path():
         raise AssertionError("whitespace-only benchmark path should fail")
 
 
-def test_compute_worker_count_defaults_to_one_worker_per_gpu():
+def test_compute_worker_count_full_graph_defaults_to_one_worker_per_gpu():
+    # full_graph compiles can hold large GPU memory -> stay at 1/GPU
+    # (deterministic, independent of core count).
     assert _compute_worker_count(
         num_repros=1133,
         num_gpus=2,
         max_workers=None,
         workers_per_gpu=None,
+        workload_kind="full_graph",
     ) == (2, 1)
+
+
+def test_compute_worker_count_kernel_default_packs_by_cores():
+    # Kernel/oracle workloads (tiny footprint) default to min(4, cores_per_gpu)
+    # workers per GPU. Mirror that formula here so the test is independent of
+    # the host's core count.
+    import os as _os
+    num_gpus = 2
+    try:
+        n_cores = len(_os.sched_getaffinity(0))
+    except AttributeError:
+        n_cores = _os.cpu_count() or num_gpus
+    expected_per_gpu = max(1, min(4, max(1, n_cores // num_gpus)))
+    assert _compute_worker_count(
+        num_repros=1133,
+        num_gpus=num_gpus,
+        max_workers=None,
+        workers_per_gpu=None,
+    ) == (num_gpus * expected_per_gpu, expected_per_gpu)
 
 
 def test_compute_worker_count_max_workers_raises_effective_gpu_cap():
@@ -397,7 +440,13 @@ class GraphModule(torch.nn.Module):
         assert out.shape == (2, 2)
 
 
-def test_full_graph_harness_rejects_annotation_only_integer_tensor_attrs():
+def test_full_graph_harness_zeros_fallback_for_annotation_only_integer_tensor_attrs():
+    # Policy (9bb85cdbb): an integer tensor attribute with no exact payload is
+    # NO LONGER a hard error. zero is always a valid index, so the harness
+    # WARNS and falls back to a zeros buffer, keeping the graph runnable for
+    # benchmarking. (Was: raise ValueError "requires exact data".)
+    import warnings
+
     source = '''
 import torch
 
@@ -410,12 +459,18 @@ class GraphModule(torch.nn.Module):
         graph = Path(tmp) / "full_graph_000.py"
         graph.write_text(source)
 
-        try:
-            load_full_graph(graph, default_device="cpu")
-        except ValueError as exc:
-            assert "requires exact data" in str(exc)
-        else:
-            raise AssertionError("integer tensor attrs without exact payload should fail")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            instance, _inputs, _definition = load_full_graph(graph, default_device="cpu")
+
+        # Loud about the missing data...
+        assert any("requires exact data" in str(w.message) for w in caught), (
+            f"expected a 'requires exact data' warning, got {[str(w.message) for w in caught]}"
+        )
+        # ...but the graph is runnable: the constant is a zeros buffer.
+        buf = instance._tensor_constant0
+        assert buf.dtype == torch.int64
+        assert int(buf.abs().sum().item()) == 0, "zeros fallback expected"
 
 
 def test_full_graph_sidecar_constraints_override_annotations():
@@ -527,10 +582,11 @@ def test_write_full_graph_metadata_exports_input_constraints():
         payload = json.loads(meta_path.read_text())
 
     constraints = graph_constraints_from_gm(gm)
-    assert payload["inputs"][0]["name"] == "x"
-    assert payload["inputs"][0]["shape"] == [2, 3]
-    assert payload["inputs"][0]["dtype"] == "int64"
-    assert payload["inputs"][0]["exact"] is False
+    inp0 = _decode_meta_input(payload["inputs"][0])
+    assert inp0["name"] == "x"
+    assert inp0["shape"] == [2, 3]
+    assert inp0["dtype"] == "int64"
+    assert inp0["exact"] is False
     assert constraints["outputs"][0]["shape"] == [2, 3]
 
 
@@ -546,8 +602,9 @@ def test_write_full_graph_metadata_exports_exact_get_attr_payloads():
         graph_path.write_text("# graph\n")
         payload = json.loads(write_full_graph_metadata(graph_path, gm).read_text())
 
-    assert payload["tensor_attrs"]["const"]["exact"] is True
-    assert payload["tensor_attrs"]["const"]["data"] == [3, 5]
+    const = _decode_meta_input(payload["tensor_attrs"]["const"])
+    assert const["exact"] is True
+    assert const["data"] == [3, 5]
 
 
 def test_write_full_graph_metadata_marks_meta_integer_attrs_requires_exact():
@@ -562,8 +619,9 @@ def test_write_full_graph_metadata_marks_meta_integer_attrs_requires_exact():
         graph_path.write_text("# graph\n")
         payload = json.loads(write_full_graph_metadata(graph_path, gm).read_text())
 
-    assert payload["tensor_attrs"]["const"]["exact"] is False
-    assert payload["tensor_attrs"]["const"]["requires_exact"] is True
+    const = _decode_meta_input(payload["tensor_attrs"]["const"])
+    assert const["exact"] is False
+    assert const["requires_exact"] is True
 
 
 def test_write_full_graph_metadata_exports_index_and_permutation_constraints():
@@ -586,8 +644,8 @@ def test_write_full_graph_metadata_exports_index_and_permutation_constraints():
         )
         payload = json.loads(meta_path.read_text())
 
-    assert payload["inputs"][0]["gen"] == {"kind": "permutation", "size": 8}
-    assert payload["inputs"][1]["gen"] == {"kind": "index", "low": 0, "high": 2048}
+    assert _decode_meta_input(payload["inputs"][0])["gen"] == {"kind": "permutation", "size": 8}
+    assert _decode_meta_input(payload["inputs"][1])["gen"] == {"kind": "index", "low": 0, "high": 2048}
 
 
 def test_bench_report_flattens_full_graph_and_named_shape_results():
@@ -695,8 +753,9 @@ def test_capture_hook_exports_full_graph_constraints_sidecar():
 
     assert payload["source"]["kind"] == "model"
     assert payload["source"]["model"] == "TinyModel"
-    assert payload["inputs"][0]["shape"] == [4]
-    assert payload["inputs"][0]["dtype"] == "float32"
+    inp0 = _decode_meta_input(payload["inputs"][0])
+    assert inp0["shape"] == [4]
+    assert inp0["dtype"] == "float32"
 
 
 def test_make_inputs_safely_handles_legacy_bool_randn():
@@ -871,7 +930,9 @@ def test_capture_hook_emits_permutation_config_for_inverse_permutation_indices()
     gm = torch.fx.GraphModule({}, graph)
     with tempfile.TemporaryDirectory() as tmp:
         state = _CaptureState(tmp, validate=False)
-        state._generate_repro_file(
+        # v3 repros no longer embed the signature in repro.py; _generate_repro_file
+        # RETURNS (filepath, signature, compact_inputs, alias_group_nbytes).
+        _filepath, signature, _compact, _alias = state._generate_repro_file(
             gm,
             {
                 "idx": {
@@ -884,9 +945,8 @@ def test_capture_hook_emits_permutation_config_for_inverse_permutation_indices()
             {"pattern_hash": "pattern", "shape_hash": "shape"},
             "repro.py",
         )
-        source = (Path(tmp) / "repro.py").read_text()
 
-    assert "T([8], i64, gen=Perm(8))" in source
+    assert "T([8], i64, gen=Perm(8))" in signature
 
 
 def test_capture_hook_emits_batched_permutation_config_for_scatter_inverse_indices():
@@ -930,7 +990,7 @@ def test_capture_hook_emits_batched_permutation_config_for_scatter_inverse_indic
     gm = torch.fx.GraphModule({}, graph)
     with tempfile.TemporaryDirectory() as tmp:
         state = _CaptureState(tmp, validate=False)
-        state._generate_repro_file(
+        _filepath, signature, _compact, _alias = state._generate_repro_file(
             gm,
             {
                 "idx": {
@@ -943,9 +1003,8 @@ def test_capture_hook_emits_batched_permutation_config_for_scatter_inverse_indic
             {"pattern_hash": "pattern", "shape_hash": "shape"},
             "repro.py",
         )
-        source = (Path(tmp) / "repro.py").read_text()
 
-    assert "T([2, 3, 4], i64, gen=Perm(4))" in source
+    assert "T([2, 3, 4], i64, gen=Perm(4))" in signature
 
 
 def _real_targets(nodes):
@@ -1039,6 +1098,138 @@ def test_capture_hook_process_graph_keeps_getitem_data_dependency_together():
     ]
 
 
+def _occ(pattern_hash, shape_hash, n_ops=2):
+    return PartitionOccurrence(
+        graph_name="full_graph_000.py",
+        pattern_hash=pattern_hash,
+        shape_hash=shape_hash,
+        n_ops=n_ops,
+        op_counts={"aten.add.Tensor": 1},
+        origin_ops=["aten.add.Tensor"],
+        input_shapes=["[4]:f32"],
+        max_output_shape=[4],
+        has_reduction=False,
+    )
+
+
+def _model_accounting(occs):
+    ga = GraphAccounting(graph_path="full_graph_000.py", graph_name="full_graph_000.py")
+    ga.occurrences = list(occs)
+    acc = ModelAccounting(model_name="TinyModel", model_dir="/tmp/TinyModel")
+    acc.graphs = [ga]
+    return acc
+
+
+def test_rollup_classifies_matched_fallback_and_unpriced_occurrences():
+    timing = {
+        "oracle_us": 10.0,
+        "compile_us": 9.0,
+        "points_by_shape": {"shapeA": {"oracle_us": 5.0, "compile_us": 4.0}},
+    }
+    occs = [
+        _occ("p", "shapeA"),   # matched at own shape
+        _occ("p", "shapeB"),   # no point -> dir median fallback
+    ]
+    roll = _rollup_occurrence_timings(timing, occs)
+
+    assert roll["matched_occ"] == 1
+    assert roll["fallback_occ"] == 1
+    assert roll["unpriced_occ"] == 0
+    assert roll["total_occ"] == 2
+    assert roll["mode"] == "partial"
+    # 5.0 (own shape) + 10.0 (dir median) = 15.0
+    assert roll["oracle_us_total"] == 15.0
+
+
+def test_rollup_untimed_dir_marks_all_occurrences_unpriced():
+    occs = [_occ("p", "shapeA"), _occ("p", "shapeB")]
+    roll = _rollup_occurrence_timings(None, occs)
+
+    assert roll["matched_occ"] == 0
+    assert roll["fallback_occ"] == 0
+    assert roll["unpriced_occ"] == 2
+    assert roll["total_occ"] == 2
+    assert roll["mode"] == "untimed"
+    assert roll["oracle_us_total"] is None
+
+
+def test_rollup_timed_dir_without_representative_is_unpriced_for_missing_shapes():
+    # Dir has a per-shape point for shapeA but no representative oracle_us, so a
+    # shapeB occurrence has nothing to fall back to -> unpriced (not silently 0).
+    timing = {
+        "points_by_shape": {"shapeA": {"oracle_us": 5.0, "compile_us": 4.0}},
+    }
+    occs = [_occ("p", "shapeA"), _occ("p", "shapeB")]
+    roll = _rollup_occurrence_timings(timing, occs)
+
+    assert roll["matched_occ"] == 1
+    assert roll["fallback_occ"] == 0
+    assert roll["unpriced_occ"] == 1
+    assert roll["mode"] == "partial"
+    assert roll["oracle_us_total"] == 5.0
+
+
+def test_build_model_report_gates_projection_when_kernels_unpriced():
+    # Pattern "priced" is timed; pattern "untimed" has no timing entry at all.
+    acc = _model_accounting([
+        _occ("priced", "shapeA"),
+        _occ("priced", "shapeA"),
+        _occ("untimed", "shapeC"),
+    ])
+    hash_to_repro = {"priced": "pointwise_priced", "untimed": "pointwise_untimed"}
+    timings = {
+        "pointwise_priced": {
+            "oracle_us": 7.0,
+            "compile_us": 6.0,
+            "points_by_shape": {"shapeA": {"oracle_us": 7.0, "compile_us": 6.0}},
+        },
+        # pointwise_untimed deliberately ABSENT -> untimed.
+    }
+    report = build_model_report(acc, hash_to_repro, timings, {})
+
+    assert report["projection_complete"] is False
+    # Headline floor must NOT be a number when coverage is partial.
+    assert report["fusible_oracle_us_total"] is None
+    assert report["fusible_compile_us_total"] is None
+    assert report["fusible_oracle_us_total_is_lower_bound"] is True
+    # The lower-bound partial sum is still exposed for diagnostics (2 x 7.0).
+    assert report["fusible_oracle_us_total_partial"] == 14.0
+    assert report["unpriced_occurrences"] == 1
+    assert report["priced_occurrences"] == 2
+    assert report["total_occurrences"] == 3
+    unpriced = report["unpriced_kernels"]
+    assert len(unpriced) == 1
+    assert unpriced[0]["pattern_hash"] == "untimed"
+    assert unpriced[0]["unpriced_occ"] == 1
+    # Text report surfaces INCOMPLETE rather than a number.
+    text = format_text_report(report)
+    assert "INCOMPLETE" in text
+    assert "UNAVAILABLE" in text
+
+
+def test_build_model_report_complete_projection_reports_number_unchanged():
+    acc = _model_accounting([
+        _occ("priced", "shapeA"),
+        _occ("priced", "shapeA"),
+    ])
+    hash_to_repro = {"priced": "pointwise_priced"}
+    timings = {
+        "pointwise_priced": {
+            "oracle_us": 7.0,
+            "compile_us": 6.0,
+            "points_by_shape": {"shapeA": {"oracle_us": 7.0, "compile_us": 6.0}},
+        },
+    }
+    report = build_model_report(acc, hash_to_repro, timings, {})
+
+    assert report["projection_complete"] is True
+    assert report["fusible_oracle_us_total"] == 14.0
+    assert report["fusible_oracle_us_total_partial"] == 14.0
+    assert report["fusible_oracle_us_total_is_lower_bound"] is False
+    assert report["unpriced_occurrences"] == 0
+    assert report["unpriced_kernels"] == []
+
+
 def test_gpu_lock_metadata_marks_lock_mode():
     with tempfile.TemporaryDirectory() as tmp:
         with gpu_lock_module.gpu_lock(0, lock_dir=tmp, label="exclusive-test") as lock_path:
@@ -1122,6 +1313,11 @@ if __name__ == "__main__":
     test_capture_hook_emits_batched_permutation_config_for_scatter_inverse_indices()
     test_capture_hook_process_graph_splits_horizontal_fusion_regions()
     test_capture_hook_process_graph_keeps_getitem_data_dependency_together()
+    test_rollup_classifies_matched_fallback_and_unpriced_occurrences()
+    test_rollup_untimed_dir_marks_all_occurrences_unpriced()
+    test_rollup_timed_dir_without_representative_is_unpriced_for_missing_shapes()
+    test_build_model_report_gates_projection_when_kernels_unpriced()
+    test_build_model_report_complete_projection_reports_number_unchanged()
     test_gpu_lock_metadata_marks_lock_mode()
     test_gpu_lock_detects_dead_pid_metadata_while_blocked()
     print("All tests passed.")

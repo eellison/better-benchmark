@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the complete PyTorch U-Net bf16 bilinear-upsample-backward scatter feeding BN/ReLU masking and three channel reductions, exploiting the captured point's all-zero index tensors to collapse the four `index_put(accumulate=True)` destinations to the single spatial cell while still preserving the bf16 scatter, mask, and BN-backward cast boundaries and returning the full `[1,128,160,239]` tensor; Inductor currently lowers the four generic scatter-adds, bf16 masking producer, dependent reductions, and final bf16 output reduction as separate materialized kernels; Inductor cannot do this today because its scheduler/codegen does not recognize degenerate indexed scatter-add producers as channel-reduction inputs with a required full-tensor epilogue; the fix is SCATTER_REDUCE: teach Inductor to specialize captured scatter index domains, reduce collapsed scatter producers directly, and fuse the downstream channel reductions plus returned bf16 store."""
+"""Gap diagnosis (classification: SCATTER_REDUCE): this oracle computes the complete PyTorch U-Net bf16 bilinear-upsample-backward scatter feeding BN/ReLU masking and three channel reductions, preserving the real row/column index tensors, duplicate-preserving `index_put(accumulate=True)` behavior, the bf16 scatter/mask/BN-backward cast boundaries, the returned dense `[1,128,160,239]` tensor, and the final bf16-rounded channel sum; Inductor currently lowers the four generic scatter-adds, bf16 masking producer, dependent reductions, and final bf16 output reduction as separate materialized kernels; Inductor cannot do this today because scheduler/codegen does not recognize indexed bilinear-upsample-backward scatter-add producers as channel-reduction inputs with a required full-tensor epilogue; the fix is SCATTER_REDUCE: add a guarded lowering for duplicate-safe indexed bilinear scatter-reduces that fuses the downstream channel reductions plus returned bf16 store."""
 
 import torch
 import triton
@@ -59,38 +59,93 @@ def _to_bf16_f32(x):
 
 
 @triton.jit
-def _source_partial_kernel(
+def _zero4_kernel(
+    scatter0_ptr,
+    scatter1_ptr,
+    scatter2_ptr,
+    scatter3_ptr,
+    N_: tl.constexpr,
+    BLOCK_N: tl.constexpr,
+):
+    offs = tl.program_id(0) * BLOCK_N + tl.arange(0, BLOCK_N)
+    mask = offs < N_
+    zeros = tl.zeros((BLOCK_N,), dtype=tl.float32)
+    tl.store(scatter0_ptr + offs, zeros, mask=mask)
+    tl.store(scatter1_ptr + offs, zeros, mask=mask)
+    tl.store(scatter2_ptr + offs, zeros, mask=mask)
+    tl.store(scatter3_ptr + offs, zeros, mask=mask)
+
+
+@triton.jit
+def _bilinear_scatter_kernel(
     arg0_ptr,
-    partial_ptr,
-    K_: tl.constexpr,
-    TILES_: tl.constexpr,
+    arg1_ptr,
+    arg2_ptr,
+    arg3_ptr,
+    arg4_ptr,
+    arg5_ptr,
+    arg6_ptr,
+    scatter0_ptr,
+    scatter1_ptr,
+    scatter2_ptr,
+    scatter3_ptr,
     BLOCK_K: tl.constexpr,
 ):
     c = tl.program_id(0)
     tile = tl.program_id(1)
     offs = tile * BLOCK_K + tl.arange(0, BLOCK_K)
-    mask = offs < K_
+    mask = offs < 152960
     h = offs // 478
     w = offs - h * 478
+
     src_offsets = (c + 128) * 153280 + h * 479 + w
     x = tl.load(arg0_ptr + src_offsets, mask=mask, other=0.0).to(tl.float32)
-    total = tl.sum(tl.where(mask, x, 0.0), axis=0)
-    tl.store(partial_ptr + c * TILES_ + tile, total)
+    scale_h = tl.load(arg1_ptr + h, mask=mask, other=0.0).to(tl.float32)
+    scale_w = tl.load(arg2_ptr + w, mask=mask, other=0.0).to(tl.float32)
+
+    mul = _f32_mul(x, scale_h)
+    add = _f32_add(x, -mul)
+    mul_1 = _f32_mul(mul, scale_w)
+    add_1 = _f32_add(mul, -mul_1)
+    mul_2 = _f32_mul(add, scale_w)
+    add_2 = _f32_add(add, -mul_2)
+
+    row0 = tl.load(arg3_ptr + h, mask=mask, other=0).to(tl.int64)
+    col0 = tl.load(arg4_ptr + w, mask=mask, other=0).to(tl.int64)
+    col1 = tl.load(arg5_ptr + w, mask=mask, other=0).to(tl.int64)
+    row1 = tl.load(arg6_ptr + h, mask=mask, other=0).to(tl.int64)
+
+    base = c * 38240
+    dst00 = base + row0 * 239 + col0
+    dst01 = base + row0 * 239 + col1
+    dst10 = base + row1 * 239 + col0
+    dst11 = base + row1 * 239 + col1
+    tl.atomic_add(scatter0_ptr + dst00, mul_1, sem="relaxed", mask=mask)
+    tl.atomic_add(scatter1_ptr + dst01, add_1, sem="relaxed", mask=mask)
+    tl.atomic_add(scatter2_ptr + dst10, mul_2, sem="relaxed", mask=mask)
+    tl.atomic_add(scatter3_ptr + dst11, add_2, sem="relaxed", mask=mask)
 
 
 @triton.jit
-def _source_finalize_kernel(
-    partial_ptr,
-    scatter_ptr,
-    TILES_: tl.constexpr,
-    BLOCK_TILES: tl.constexpr,
+def _combine_scatter_kernel(
+    scatter0_ptr,
+    scatter1_ptr,
+    scatter2_ptr,
+    scatter3_ptr,
+    scatter_bf16_ptr,
+    N_: tl.constexpr,
+    BLOCK_N: tl.constexpr,
 ):
-    c = tl.program_id(0)
-    offs = tl.arange(0, BLOCK_TILES)
-    mask = offs < TILES_
-    vals = tl.load(partial_ptr + c * TILES_ + offs, mask=mask, other=0.0).to(tl.float32)
-    total = tl.sum(vals, axis=0)
-    tl.store(scatter_ptr + c, total.to(tl.bfloat16, fp_downcast_rounding="rtne"))
+    offs = tl.program_id(0) * BLOCK_N + tl.arange(0, BLOCK_N)
+    mask = offs < N_
+    v0 = tl.load(scatter0_ptr + offs, mask=mask, other=0.0).to(tl.float32)
+    v1 = tl.load(scatter1_ptr + offs, mask=mask, other=0.0).to(tl.float32)
+    v2 = tl.load(scatter2_ptr + offs, mask=mask, other=0.0).to(tl.float32)
+    v3 = tl.load(scatter3_ptr + offs, mask=mask, other=0.0).to(tl.float32)
+    add_3 = _f32_add(v0, v1)
+    add_4 = _f32_add(add_3, v2)
+    add_5 = _f32_add(add_4, v3)
+    tl.store(scatter_bf16_ptr + offs, add_5.to(tl.bfloat16, fp_downcast_rounding="rtne"), mask=mask)
 
 
 @triton.jit
@@ -101,7 +156,7 @@ def _sum12_partial_kernel(
     arg10_ptr,
     arg11_ptr,
     arg12_ptr,
-    scatter_ptr,
+    scatter_bf16_ptr,
     partial_sum1_ptr,
     partial_sum2_ptr,
     TILES_: tl.constexpr,
@@ -119,14 +174,13 @@ def _sum12_partial_kernel(
     weight = tl.load(arg10_ptr + c).to(tl.float32)
     bias = tl.load(arg11_ptr + c).to(tl.float32)
     scalar = tl.load(arg12_ptr).to(tl.float32)
-    scatter = tl.load(scatter_ptr + c).to(tl.float32)
+    scatter = tl.load(scatter_bf16_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
 
     centered = _f32_sub(x7, mean)
     gate_mul = _f32_mul(_f32_mul(centered, invstd), weight)
     gate = _to_bf16_f32(_f32_add(gate_mul, bias))
     active = gate <= 0.0
-    scatter_or_zero = tl.where(hw == 0, scatter, 0.0)
-    y = tl.where(active, scalar, scatter_or_zero)
+    y = tl.where(active, scalar, scatter)
 
     sum1 = tl.sum(tl.where(mask, y, 0.0), axis=0)
     sum2 = tl.sum(tl.where(mask, _f32_mul(y, centered), 0.0), axis=0)
@@ -168,7 +222,7 @@ def _final_output_partial_kernel(
     arg10_ptr,
     arg11_ptr,
     arg12_ptr,
-    scatter_ptr,
+    scatter_bf16_ptr,
     sum1_ptr,
     sum2_ptr,
     out_ptr,
@@ -188,7 +242,7 @@ def _final_output_partial_kernel(
     weight = tl.load(arg10_ptr + c).to(tl.float32)
     bias = tl.load(arg11_ptr + c).to(tl.float32)
     scalar = tl.load(arg12_ptr).to(tl.float32)
-    scatter = tl.load(scatter_ptr + c).to(tl.float32)
+    scatter = tl.load(scatter_bf16_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
     sum1 = tl.load(sum1_ptr + c).to(tl.float32)
     sum2 = tl.load(sum2_ptr + c).to(tl.float32)
 
@@ -196,8 +250,7 @@ def _final_output_partial_kernel(
     gate_mul = _f32_mul(_f32_mul(centered, invstd), weight)
     gate = _to_bf16_f32(_f32_add(gate_mul, bias))
     active = gate <= 0.0
-    scatter_or_zero = tl.where(hw == 0, scatter, 0.0)
-    y = tl.where(active, scalar, scatter_or_zero)
+    y = tl.where(active, scalar, scatter)
 
     mean_term = _f32_mul(sum1, 2.615062761506276e-05)
     scaled_sum2 = _f32_mul(sum2, 2.615062761506276e-05)
@@ -234,12 +287,23 @@ def _sum4_finalize_kernel(
 
 
 # (T([1,256,320,479], bf16), T([320,1], f32), T([478], f32), T([320,1], i64), T([478], i64), T([478], i64), T([320,1], i64), T([1,128,160,239], bf16), T([1,128,1,1], f32), T([1,128,1,1], f32), T([128], f32), T([128], f32), T([], bf16), S([1,128,160,239]))
-@oracle_impl(hardware="B200", point="0ba1fdea", SRC_BLOCK=1024, HW_BLOCK=512, num_warps=8, final_warps=8)
+@oracle_impl(
+    hardware="B200",
+    point="0ba1fdea",
+    SRC_BLOCK=256,
+    HW_BLOCK=512,
+    ZERO_BLOCK=1024,
+    scatter_warps=8,
+    num_warps=8,
+    final_warps=8,
+)
 def oracle_forward(
     inputs,
     *,
     SRC_BLOCK: int,
     HW_BLOCK: int,
+    ZERO_BLOCK: int,
+    scatter_warps: int,
     num_warps: int,
     final_warps: int,
 ):
@@ -259,29 +323,52 @@ def oracle_forward(
         arg12_1,
         _shape_param_0,
     ) = inputs
-    del arg1_1, arg2_1, arg3_1, arg4_1, arg5_1, arg6_1, _shape_param_0
+    del _shape_param_0
 
     device = arg0_1.device
     src_tiles = triton.cdiv(SRC_H * SRC_W, SRC_BLOCK)
     hw_tiles = triton.cdiv(OUT_HW, HW_BLOCK)
 
-    scatter_partial = torch.empty((C, src_tiles), device=device, dtype=torch.float32)
-    scatter = torch.empty((C,), device=device, dtype=torch.bfloat16)
-    _source_partial_kernel[(C, src_tiles)](
-        arg0_1,
-        scatter_partial,
-        K_=SRC_H * SRC_W,
-        TILES_=src_tiles,
-        BLOCK_K=SRC_BLOCK,
-        num_warps=num_warps,
+    scatter0 = torch.empty((C, OUT_HW), device=device, dtype=torch.float32)
+    scatter1 = torch.empty((C, OUT_HW), device=device, dtype=torch.float32)
+    scatter2 = torch.empty((C, OUT_HW), device=device, dtype=torch.float32)
+    scatter3 = torch.empty((C, OUT_HW), device=device, dtype=torch.float32)
+    scatter_bf16 = torch.empty((C, OUT_HW), device=device, dtype=torch.bfloat16)
+    _zero4_kernel[(triton.cdiv(C * OUT_HW, ZERO_BLOCK),)](
+        scatter0,
+        scatter1,
+        scatter2,
+        scatter3,
+        N_=C * OUT_HW,
+        BLOCK_N=ZERO_BLOCK,
+        num_warps=4,
         num_stages=3,
     )
-    _source_finalize_kernel[(C,)](
-        scatter_partial,
-        scatter,
-        TILES_=src_tiles,
-        BLOCK_TILES=triton.next_power_of_2(src_tiles),
-        num_warps=final_warps,
+    _bilinear_scatter_kernel[(C, src_tiles)](
+        arg0_1,
+        arg1_1,
+        arg2_1,
+        arg3_1,
+        arg4_1,
+        arg5_1,
+        arg6_1,
+        scatter0,
+        scatter1,
+        scatter2,
+        scatter3,
+        BLOCK_K=SRC_BLOCK,
+        num_warps=scatter_warps,
+        num_stages=3,
+    )
+    _combine_scatter_kernel[(triton.cdiv(C * OUT_HW, ZERO_BLOCK),)](
+        scatter0,
+        scatter1,
+        scatter2,
+        scatter3,
+        scatter_bf16,
+        N_=C * OUT_HW,
+        BLOCK_N=ZERO_BLOCK,
+        num_warps=4,
         num_stages=3,
     )
 
@@ -294,7 +381,7 @@ def oracle_forward(
         arg10_1,
         arg11_1,
         arg12_1,
-        scatter,
+        scatter_bf16,
         partial_sum1,
         partial_sum2,
         TILES_=hw_tiles,
@@ -333,7 +420,7 @@ def oracle_forward(
         arg10_1,
         arg11_1,
         arg12_1,
-        scatter,
+        scatter_bf16,
         out_sum1,
         sum2,
         out_tensor,

@@ -29,8 +29,14 @@ scatter_logger.setLevel(logging.DEBUG)
 inductor_logger = logging.getLogger("torch._inductor")
 
 
-def test_pattern_detection_on_repro(repro_id: str):
-    """Load a repro and run compilation to test pattern detection."""
+def _run_pattern_detection_on_repro(repro_id: str):
+    """Load a repro and run compilation to test pattern detection.
+
+    Helper invoked from __main__ with explicit repro ids -- NOT a pytest test
+    (it takes a required ``repro_id`` argument; collecting it as a test errored
+    with ``fixture 'repro_id' not found``). Renamed off the ``test_`` prefix so
+    pytest ignores it; the standalone-script entrypoint below still calls it.
+    """
     repro_dir = Path(__file__).resolve().parents[1] / "repros" / "canonical" / repro_id
     repro_path = repro_dir / "repro.py"
 
@@ -131,18 +137,11 @@ def test_standalone_graph_analysis():
 
     compiled = torch.compile(model, fullgraph=True)
     with torch.no_grad():
-        try:
-            out = compiled(src, row_idx, col_idx)
-            print(f"Compilation successful! Output shape: {out.shape}")
-        except Exception as e:
-            print(f"Compilation failed: {e}")
-            import traceback
-            traceback.print_exc()
-            return False
+        out = compiled(src, row_idx, col_idx)
+        print(f"Compilation successful! Output shape: {out.shape}")
 
     scatter_count = counters.get("inductor", {}).get("scatter_reduce_fusion_applied", 0)
     print(f"  scatter_reduce_fusion_applied: {scatter_count}")
-    return True
 
 
 def test_graph_analysis_via_export():
@@ -218,7 +217,7 @@ def test_graph_analysis_via_export():
     stats = get_scatter_reduce_stats(graph)
     print(f"\n  Stats: {stats}")
 
-    return len(chains) > 0
+    assert len(chains) > 0, "expected at least one scatter-reduce chain"
 
 
 if __name__ == "__main__":
@@ -229,12 +228,22 @@ if __name__ == "__main__":
 
     results = {}
 
+    def _passed(fn, *args):
+        # The pytest-collected tests now assert (raise) instead of returning a
+        # bool; treat "no exception" as PASS for the standalone summary.
+        try:
+            fn(*args)
+            return True
+        except Exception as e:  # noqa: BLE001 - standalone diagnostic summary
+            print(f"  {fn.__name__} FAILED: {e}")
+            return False
+
     # Test 1: Direct graph analysis
-    results["graph_analysis"] = test_graph_analysis_via_export()
+    results["graph_analysis"] = _passed(test_graph_analysis_via_export)
 
     # Test 2: Standalone simple pattern
     torch._dynamo.reset()
-    results["simple_pattern"] = test_standalone_graph_analysis()
+    results["simple_pattern"] = _passed(test_standalone_graph_analysis)
 
     # Test 3: Real repros (if on CUDA)
     if torch.cuda.is_available():
@@ -244,7 +253,7 @@ if __name__ == "__main__":
             "sum_sum_sum_dadf6aa035dd",
         ]:
             torch._dynamo.reset()
-            results[repro_id] = test_pattern_detection_on_repro(repro_id)
+            results[repro_id] = _run_pattern_detection_on_repro(repro_id)
     else:
         print("\nSkipping CUDA-dependent repro tests (no CUDA available)")
 
