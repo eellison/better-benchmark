@@ -179,8 +179,21 @@ def infer_index_bounds_from_gm(
             torch.ops.aten.empty.memory_format,
             torch.ops.aten.full.default,
         }:
-            if n.args and isinstance(n.args[0], (list, tuple)):
-                return list(n.args[0])
+            if n.args:
+                shape_arg = n.args[0]
+                if isinstance(shape_arg, (list, tuple)):
+                    return list(shape_arg)
+                # Canonical (lifted) graphs replace the literal shape list with
+                # a _shape_param_N placeholder NODE whose meta['val'] holds the
+                # concrete list (capture_hook.lift_shape_params). Resolve it —
+                # otherwise index_put(full(_shape_param), [None,None,i,j], ..)
+                # loses its target shape and the index args fall through to the
+                # degenerate [0,1) default (the sum_sum_sum pytorch_unet class:
+                # arg3/arg6 should be [0,320), arg4/arg5 [0,479), not [0,1)).
+                if hasattr(shape_arg, "meta"):
+                    mv = shape_arg.meta.get("val")
+                    if isinstance(mv, (list, tuple)):
+                        return list(mv)
         return None
 
     for name, node in ph_nodes.items():
@@ -300,12 +313,15 @@ def infer_index_bounds_from_gm(
                                         continue
 
                         if (target in (torch.ops.aten.index.Tensor,
-                                       torch.ops.aten.index_put.default)
+                                       torch.ops.aten.index_put.default,
+                                       torch.ops.aten.index_put_.default)
                                 and len(user.args) >= 2):
                             # indices list position maps to DIM, INCLUDING
                             # None slots (index_put([None, None, i, j]):
                             # i indexes dim 2, j dim 3 — Yitu: bounding j
                             # by shape[0]=32 against dim3 size 1 asserted).
+                            # index_put_ (in-place) shares the schema; both
+                            # take (self, indices_list, values, ...).
                             target_shape = _node_shape(user.args[0])
                             indices = user.args[1]
                             if target_shape and isinstance(indices, (list, tuple)):

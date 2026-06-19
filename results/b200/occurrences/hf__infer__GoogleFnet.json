@@ -1,0 +1,95 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "6aa38ad4af60": {
+      "a49a430b": 1
+    },
+    "af84c0099cf6": {
+      "95772c51": 1
+    },
+    "a82162370df1": {
+      "e864a84c": 1
+    },
+    "2d969ac9ad59": {
+      "8f687505": 12
+    },
+    "e45f42fbfc2b": {
+      "98ade792": 12
+    },
+    "d59520e0c4ae": {
+      "e864a84c": 11
+    },
+    "1680d9313873": {
+      "ec769da9": 1
+    },
+    "b992292547d6": {
+      "9a73f5a0": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "598796256151",
+      "count": 2,
+      "sig": "((T([768],torch.float32,[1]),T([16384, 768],torch.float32,[768, 1]),T([768, 768],torch.float32,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GoogleFnet/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 410.46398878097534,
+      "branch_us": 410.46398878097534
+    },
+    {
+      "target": "aten._fft_c2c.default",
+      "shape_hash": "91b335f406a9",
+      "count": 12,
+      "sig": "((T([32, 512, 768],torch.complex64,[393216, 768, 1]),[1,2],0,True),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GoogleFnet/full_graph_000.py",
+      "node": "_fft_c2c",
+      "baseline_us": 104.22399640083313,
+      "branch_us": 104.22399640083313
+    },
+    {
+      "target": "aten.view_as_real.default",
+      "shape_hash": "159284ff45c6",
+      "count": 12,
+      "sig": "((T([32, 512, 768],torch.complex64,[393216, 768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GoogleFnet/full_graph_000.py",
+      "node": "view_as_real",
+      "baseline_us": 2.9120000544935465,
+      "branch_us": 2.9120000544935465
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "2244be0984be",
+      "count": 12,
+      "sig": "((T([3072],torch.float32,[1]),T([16384, 768],torch.float32,[768, 1]),T([768, 3072],torch.float32,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GoogleFnet/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 1521.440029144287,
+      "branch_us": 1521.440029144287
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "f050e87d3037",
+      "count": 12,
+      "sig": "((T([768],torch.float32,[1]),T([16384, 3072],torch.float32,[3072, 1]),T([3072, 768],torch.float32,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GoogleFnet/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 1507.2640180587769,
+      "branch_us": 1507.2640180587769
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "cbeaa097ab73",
+      "count": 1,
+      "sig": "((T([32000],torch.float32,[1]),T([16384, 768],torch.float32,[768, 1]),T([768, 32000],torch.float32,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GoogleFnet/full_graph_000.py",
+      "node": "addmm_26",
+      "baseline_us": 14696.44832611084,
+      "branch_us": 14696.44832611084
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "GoogleFnet"
+}

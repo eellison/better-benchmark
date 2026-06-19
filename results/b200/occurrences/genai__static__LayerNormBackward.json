@@ -1,0 +1,16 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "53c829d32b0c": {
+      "e5ae55b5": 1
+    },
+    "3cac3bbf4e8f": {
+      "4e21884e": 1
+    }
+  },
+  "extern": [],
+  "trace_errors": [],
+  "suite": "genai",
+  "mode": "static",
+  "model": "LayerNormBackward"
+}

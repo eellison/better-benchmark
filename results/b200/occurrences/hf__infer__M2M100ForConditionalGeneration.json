@@ -1,0 +1,142 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "4779980113db": {
+      "4f6a8ed5": 1
+    },
+    "0ada225c0a04": {
+      "17affd46": 1
+    },
+    "edd2629dfab3": {
+      "e44d982c": 24
+    },
+    "f4578c128d74": {
+      "17affd46": 36
+    },
+    "e87d6ebc9ded": {
+      "c23ba4e7": 24
+    },
+    "301cf5a13527": {
+      "ad7b2a2c": 24
+    },
+    "e232f7a3d0d8": {
+      "bcf6fe02": 24
+    },
+    "f2a03dbd04dd": {
+      "ad7b2a2c": 24
+    },
+    "a18f3869022f": {
+      "ad7b2a2c": 24
+    },
+    "035e4d7f5117": {
+      "d7517139": 24
+    },
+    "0a49dc00cbaf": {
+      "d7517139": 48
+    },
+    "b19e82f2a47b": {
+      "17affd46": 22
+    },
+    "a2329fda80e5": {
+      "17affd46": 1
+    },
+    "febb9b4c9d22": {
+      "d7517139": 1
+    },
+    "8fc382fe48ec": {
+      "929234c0": 2
+    },
+    "a80af1a259ac": {
+      "3d748156": 2
+    },
+    "e40852a34050": {
+      "d7517139": 2
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.cumsum.default",
+      "shape_hash": "349a759983bd",
+      "count": 2,
+      "sig": "((T([64, 128],torch.int32,[128, 1]),1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/M2M100ForConditionalGeneration/full_graph_000.py",
+      "node": "cumsum",
+      "baseline_us": 12.032000347971916,
+      "branch_us": 12.032000347971916
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "31ec7ee2a97f",
+      "count": 144,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([8192, 1024],torch.bfloat16,[1024, 1]),T([1024, 1024],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/M2M100ForConditionalGeneration/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 20.255999639630318,
+      "branch_us": 20.255999639630318
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "1721ee5ae17e",
+      "count": 24,
+      "sig": "((T([1024, 128, 64],torch.bfloat16,[8192, 64, 1]),T([1024, 64, 128],torch.bfloat16,[8192, 128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/M2M100ForConditionalGeneration/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 17.920000478625298,
+      "branch_us": 17.920000478625298
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "7dac441119f2",
+      "count": 24,
+      "sig": "((T([1024, 128, 128],torch.bfloat16,[16384, 128, 1]),T([1024, 128, 64],torch.bfloat16,[8192, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/M2M100ForConditionalGeneration/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 18.0479995906353,
+      "branch_us": 18.0479995906353
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "35db3a520899",
+      "count": 24,
+      "sig": "((T([4096],torch.bfloat16,[1]),T([8192, 1024],torch.bfloat16,[1024, 1]),T([1024, 4096],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/M2M100ForConditionalGeneration/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 44.79999840259552,
+      "branch_us": 44.79999840259552
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "eb679532156d",
+      "count": 24,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([8192, 4096],torch.bfloat16,[4096, 1]),T([4096, 1024],torch.bfloat16,[1, 4096])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/M2M100ForConditionalGeneration/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 48.96000027656555,
+      "branch_us": 48.96000027656555
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "6609e817a292",
+      "count": 12,
+      "sig": "((T([64, 16, 128, 64],torch.bfloat16,[131072, 64, 1024, 1]),T([64, 16, 128, 64],torch.bfloat16,[131072, 64, 1024, 1]),T([64, 16, 128, 64],torch.bfloat16,[131072, 64, 1024, 1]),T([64, 1, 128, 128],torch.bfloat16,[16384, 16384, 128, 1]),False),{scale:0.125})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/M2M100ForConditionalGeneration/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 77.82399654388428,
+      "branch_us": 77.82399654388428
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "b91d84b95750",
+      "count": 1,
+      "sig": "((T([8192, 1024],torch.bfloat16,[1024, 1]),T([1024, 128112],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/M2M100ForConditionalGeneration/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 1312.831997871399,
+      "branch_us": 1312.831997871399
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "M2M100ForConditionalGeneration"
+}

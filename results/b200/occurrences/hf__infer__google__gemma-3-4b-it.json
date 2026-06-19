@@ -1,0 +1,126 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "7c0c7b5ccbb8": {
+      "5c119e0a": 1
+    },
+    "aa77af8fcd54": {
+      "5e420cbf": 34
+    },
+    "fdad8a241215": {
+      "5c119e0a": 34
+    },
+    "e52ac85e10fc": {
+      "d7517139": 29
+    },
+    "9640aefa2584": {
+      "ed385436": 29
+    },
+    "7291b09200a4": {
+      "2c02d9cc": 28
+    },
+    "8c30aa48d748": {
+      "5c119e0a": 33
+    },
+    "b3f01ad9586c": {
+      "ed385436": 5
+    },
+    "ee4f8b590982": {
+      "2c02d9cc": 4
+    },
+    "e2bdfd3a6695": {
+      "d7517139": 1
+    },
+    "3084b9796c25": {
+      "5942af01": 1
+    },
+    "d284769f6e7e": {
+      "d7517139": 1
+    },
+    "d52678a47406": {
+      "767ad01a": 1
+    },
+    "104f67c766f1": {
+      "402c18a0": 1
+    },
+    "9f7dce7fb407": {
+      "896c6bb5": 29
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "28e5142cf4fb",
+      "count": 34,
+      "sig": "((T([1000, 2560],torch.bfloat16,[2560, 1]),T([2560, 2048],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/google/gemma-3-4b-it/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 16.03199914097786,
+      "branch_us": 16.03199914097786
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "fd86a19df8a3",
+      "count": 68,
+      "sig": "((T([1000, 2560],torch.bfloat16,[2560, 1]),T([2560, 1024],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/google/gemma-3-4b-it/full_graph_000.py",
+      "node": "mm_1",
+      "baseline_us": 11.807999573647976,
+      "branch_us": 11.807999573647976
+    },
+    {
+      "target": "aten._scaled_dot_product_efficient_attention.default",
+      "shape_hash": "254a4c50d4f1",
+      "count": 34,
+      "sig": "((T([1, 8, 1000, 256],torch.bfloat16,[2048000, 256, 2048, 1]),T([1, 8, 1000, 256],torch.bfloat16,[2048000, 256000, 256, 1]),T([1, 8, 1000, 256],torch.bfloat16,[2048000, 256000, 256, 1]),T([1, 8, 1000, 1000],torch.bfloat16,[1000000, 0, 1000, 1]),False),{scale:0.0625})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/google/gemma-3-4b-it/full_graph_000.py",
+      "node": "_scaled_dot_product_efficient_attention",
+      "baseline_us": 92.86399930715561,
+      "branch_us": 92.86399930715561
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "f5048d123c22",
+      "count": 34,
+      "sig": "((T([1000, 2048],torch.bfloat16,[2048, 1]),T([2048, 2560],torch.bfloat16,[1, 2048])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/google/gemma-3-4b-it/full_graph_000.py",
+      "node": "mm_3",
+      "baseline_us": 15.231999568641186,
+      "branch_us": 15.231999568641186
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "ac5d10c09af0",
+      "count": 68,
+      "sig": "((T([1000, 2560],torch.bfloat16,[2560, 1]),T([2560, 10240],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/google/gemma-3-4b-it/full_graph_000.py",
+      "node": "mm_4",
+      "baseline_us": 40.608000010252,
+      "branch_us": 40.608000010252
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "d1640aabe208",
+      "count": 34,
+      "sig": "((T([1000, 10240],torch.bfloat16,[10240, 1]),T([10240, 2560],torch.bfloat16,[1, 10240])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/google/gemma-3-4b-it/full_graph_000.py",
+      "node": "mm_6",
+      "baseline_us": 41.85599833726883,
+      "branch_us": 41.85599833726883
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "44e614f912c3",
+      "count": 1,
+      "sig": "((T([1000, 2560],torch.bfloat16,[2560, 1]),T([2560, 262208],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/google/gemma-3-4b-it/full_graph_000.py",
+      "node": "mm_238",
+      "baseline_us": 837.3759984970093,
+      "branch_us": 837.3759984970093
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "google__gemma-3-4b-it"
+}

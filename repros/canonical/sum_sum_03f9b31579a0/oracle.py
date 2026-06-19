@@ -98,8 +98,6 @@ def _producer_partial_kernel(
     fill_ptr,
     partial_sum_ptr,
     partial_dot_ptr,
-    partial_sum_compiled_ptr,
-    partial_dot_compiled_ptr,
     R_: tl.constexpr,
     FULL_C_: tl.constexpr,
     C_: tl.constexpr,
@@ -124,7 +122,6 @@ def _producer_partial_kernel(
     gate_source = tl.load(gate_ptr + param_offsets, mask=mask, other=0.0).to(tl.float32)
     shifted = _f32_add(gate_source, 3.0)
     clamped = tl.minimum(tl.maximum(shifted, 0.0), 6.0)
-    gate_compiled = _f32_mul(clamped, 0.16666666666666666)
 
     spatial = tl.load(spatial_ptr + full_offsets, mask=mask, other=0.0).to(tl.float32)
     bias = tl.load(bias_ptr + param_offsets, mask=mask, other=0.0).to(tl.float32)
@@ -132,12 +129,6 @@ def _producer_partial_kernel(
     scaled = _round_bf16_f32(_f32_mul(spatial, gate))
     averaged = _round_bf16_f32(_f32_div(bias, 784.0))
     add_value = _round_bf16_f32(_f32_add(scaled, averaged))
-    add_compiled = _round_bf16_f32(
-        _f32_add(
-            _f32_mul(spatial, gate_compiled),
-            _f32_mul(bias, 0.0012755102040816326),
-        )
-    )
 
     reduce_mask = mask
     tail_offsets = n[:, None] * (C_ * HW_) + hw[:, None] * C_ + channels[None, :]
@@ -156,28 +147,18 @@ def _producer_partial_kernel(
     affine_bf16 = _round_bf16_f32(affine)
     fill = tl.load(fill_ptr).to(tl.float32)
     where_value = tl.where(affine_bf16 <= 0.0, fill, add_value)
-    where_compiled = tl.where(affine <= 0.0, fill, add_compiled)
     where_value = tl.where(reduce_mask, where_value, 0.0)
-    where_compiled = tl.where(reduce_mask, where_compiled, 0.0)
     centered = tl.where(reduce_mask, centered, 0.0)
 
     partial_offsets = tl.program_id(0) * C_ + channels
     tl.store(partial_sum_ptr + partial_offsets, tl.sum(where_value, axis=0), mask=channel_mask)
     tl.store(partial_dot_ptr + partial_offsets, tl.sum(_f32_mul(where_value, centered), axis=0), mask=channel_mask)
-    tl.store(partial_sum_compiled_ptr + partial_offsets, tl.sum(where_compiled, axis=0), mask=channel_mask)
-    tl.store(
-        partial_dot_compiled_ptr + partial_offsets,
-        tl.sum(_f32_mul(where_compiled, centered), axis=0),
-        mask=channel_mask,
-    )
 
 
 @triton.jit
 def _finalize_kernel(
     partial_sum_ptr,
     partial_dot_ptr,
-    partial_sum_compiled_ptr,
-    partial_dot_compiled_ptr,
     invstd_ptr,
     affine_weight_ptr,
     sum_out_ptr,
@@ -198,20 +179,8 @@ def _finalize_kernel(
 
     sum_values = tl.load(partial_sum_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
     dot_values = tl.load(partial_dot_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
-    sum_compiled_values = tl.load(
-        partial_sum_compiled_ptr + offsets,
-        mask=mask,
-        other=0.0,
-    ).to(tl.float32)
-    dot_compiled_values = tl.load(
-        partial_dot_compiled_ptr + offsets,
-        mask=mask,
-        other=0.0,
-    ).to(tl.float32)
     sum_value = tl.sum(sum_values, axis=0)
     dot_value = tl.sum(dot_values, axis=0)
-    sum_compiled = tl.sum(sum_compiled_values, axis=0)
-    dot_compiled = tl.sum(dot_compiled_values, axis=0)
 
     cmask = c < C_
     invstd = tl.load(invstd_ptr + c, mask=cmask, other=0.0).to(tl.float32)
@@ -219,20 +188,9 @@ def _finalize_kernel(
     dot_scaled = _f32_mul(dot_value, INV_R_)
     invstd_sq = _f32_mul(invstd, invstd)
     vec_value = _f32_mul(dot_value, invstd)
-    vec_compiled = _f32_mul(dot_compiled, invstd)
-    sum_tolerance = _f32_add(0.009, _f32_mul(0.0095, tl.abs(sum_value)))
-    vec_tolerance = _f32_add(0.009, _f32_mul(0.0095, tl.abs(vec_value)))
-    sum_return = tl.minimum(
-        tl.maximum(sum_compiled, _f32_sub(sum_value, sum_tolerance)),
-        _f32_add(sum_value, sum_tolerance),
-    )
-    vec_return = tl.minimum(
-        tl.maximum(vec_compiled, _f32_sub(vec_value, vec_tolerance)),
-        _f32_add(vec_value, vec_tolerance),
-    )
 
-    tl.store(sum_out_ptr + c, sum_return, mask=cmask)
-    tl.store(vec_out_ptr + c, vec_return, mask=cmask)
+    tl.store(sum_out_ptr + c, sum_value, mask=cmask)
+    tl.store(vec_out_ptr + c, vec_value, mask=cmask)
     tl.store(mean_term_ptr + c, _f32_mul(sum_value, INV_R_), mask=cmask)
     tl.store(dot_coeff_ptr + c, _f32_mul(dot_scaled, invstd_sq), mask=cmask)
     tl.store(out_scale_ptr + c, _f32_mul(invstd, weight), mask=cmask)
@@ -338,8 +296,6 @@ def oracle_forward(
     )
     partial_sum = torch.empty((num_tiles, C), device=device, dtype=torch.float32)
     partial_dot = torch.empty_like(partial_sum)
-    partial_sum_compiled = torch.empty_like(partial_sum)
-    partial_dot_compiled = torch.empty_like(partial_sum)
     sum_out = torch.empty((C,), device=device, dtype=torch.float32)
     vec_out = torch.empty((C,), device=device, dtype=torch.float32)
     mean_term = torch.empty((C,), device=device, dtype=torch.float32)
@@ -364,8 +320,6 @@ def oracle_forward(
         fill,
         partial_sum,
         partial_dot,
-        partial_sum_compiled,
-        partial_dot_compiled,
         R_=R,
         FULL_C_=FULL_C,
         C_=C,
@@ -379,8 +333,6 @@ def oracle_forward(
     _finalize_kernel[(triton.cdiv(C, FINAL_BLOCK_C),)](
         partial_sum,
         partial_dot,
-        partial_sum_compiled,
-        partial_dot_compiled,
         invstd,
         weight,
         sum_out,

@@ -1,0 +1,1218 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "8bb40810003c": {
+      "46c132a4": 1,
+      "19d8a989": 2,
+      "17dcd71b": 2,
+      "c4cfc269": 2,
+      "291d9f5e": 2,
+      "91ea2354": 1,
+      "76ad9430": 18,
+      "b3e78a1b": 18,
+      "16e5c8c0": 18,
+      "b0db17ee": 18,
+      "fdcbaff1": 1,
+      "8aa63c17": 2,
+      "3851a1ae": 2,
+      "945f2c72": 2,
+      "29a8fd84": 2,
+      "0862d382": 1,
+      "f4e93827": 2,
+      "58e39a16": 2,
+      "60ceae96": 2,
+      "268c45c0": 2
+    },
+    "ccd411f2a45d": {
+      "dc135658": 1,
+      "3dd2d471": 6,
+      "c2b1a89d": 2,
+      "7a1c483f": 2,
+      "7c4f45ce": 38,
+      "52e663b7": 18,
+      "4f6e780a": 18,
+      "c733487c": 4,
+      "726421b1": 2,
+      "db646e9a": 5,
+      "649b2327": 2,
+      "45c33f0e": 1,
+      "0d14e5c1": 1
+    },
+    "fd568be83381": {
+      "56ba9133": 1
+    },
+    "826ea0b5f6e4": {
+      "5cb74639": 2,
+      "2079d386": 18,
+      "a3b11b8d": 2,
+      "de85fb74": 2
+    },
+    "c19bddb082fa": {
+      "f8954c75": 1
+    },
+    "ed86b04d7ae6": {
+      "fecae95d": 2,
+      "31e78315": 18,
+      "c6f70802": 2,
+      "28712c8b": 2
+    },
+    "e90a69237cbd": {
+      "877c9aab": 2
+    },
+    "23f406920a35": {
+      "5a91604c": 2
+    },
+    "008e31418d1e": {
+      "56ba9133": 1
+    },
+    "569785e28eff": {
+      "f8954c75": 1
+    },
+    "9e0c08b76aca": {
+      "c15aa546": 1
+    },
+    "7472bda8da30": {
+      "47c5c517": 1
+    },
+    "3dc2f8ef7fe7": {
+      "28b3f421": 1
+    },
+    "30c69736337b": {
+      "ffc0168e": 9,
+      "e1b8aca1": 1,
+      "4a087790": 1
+    },
+    "b7ccb90bc572": {
+      "5c047c65": 18,
+      "25d25c52": 2,
+      "353652d2": 2
+    },
+    "19869d41ac6b": {
+      "187b069c": 1
+    },
+    "1538a7e1f271": {
+      "372e24af": 1
+    },
+    "551e3bc535d9": {
+      "839b2e69": 9,
+      "11b41d7c": 1,
+      "040f2212": 1
+    },
+    "d3ff003e6de4": {
+      "e07aa834": 1
+    },
+    "972b53f30461": {
+      "28b3f421": 1
+    },
+    "8fedf0970d2b": {
+      "187b069c": 1
+    },
+    "2922ae5c8300": {
+      "372e24af": 1
+    },
+    "781d84a3f051": {
+      "e07aa834": 1
+    },
+    "6b49255f2c13": {
+      "28b3f421": 1
+    },
+    "1586e3c10905": {
+      "187b069c": 1
+    },
+    "3b5d64ce7504": {
+      "372e24af": 1
+    },
+    "07f37f73437d": {
+      "e07aa834": 1
+    },
+    "cf89f7105108": {
+      "28b3f421": 1
+    },
+    "4a6db58a77e3": {
+      "187b069c": 1
+    },
+    "c1e9ae234f78": {
+      "372e24af": 1
+    },
+    "884645635066": {
+      "e07aa834": 1
+    },
+    "1bc6a8d27833": {
+      "28b3f421": 1
+    },
+    "eb031e599874": {
+      "187b069c": 1
+    },
+    "d6477abd4ab3": {
+      "372e24af": 1
+    },
+    "9f2beb43feaf": {
+      "e07aa834": 1
+    },
+    "4048502147a7": {
+      "28b3f421": 1
+    },
+    "40193d17bd3e": {
+      "187b069c": 1
+    },
+    "17c5d8c74496": {
+      "372e24af": 1
+    },
+    "fd7b2f8276e1": {
+      "e07aa834": 1
+    },
+    "66a799806151": {
+      "28b3f421": 1
+    },
+    "81279c6fa239": {
+      "187b069c": 1
+    },
+    "4ffe05b34235": {
+      "372e24af": 1
+    },
+    "91ec4cae6fc0": {
+      "e07aa834": 1
+    },
+    "4fa951e0051a": {
+      "28b3f421": 1
+    },
+    "9b301c55a042": {
+      "187b069c": 1
+    },
+    "46355aca4f22": {
+      "372e24af": 1
+    },
+    "5513e2081de0": {
+      "e07aa834": 1
+    },
+    "99cbf9e1db91": {
+      "28b3f421": 1
+    },
+    "2fa49fece8c7": {
+      "e07aa834": 1
+    },
+    "fee6fc32d1cc": {
+      "372e24af": 1
+    },
+    "ce024955e782": {
+      "1e7f3802": 1,
+      "56769194": 1
+    },
+    "3d6a13b0c1bc": {
+      "dafc024c": 1
+    },
+    "942d4b9c20a0": {
+      "0d823dd8": 1
+    },
+    "768dac1f1bf0": {
+      "f3323ec7": 1
+    },
+    "730664ccc368": {
+      "fd7f9567": 1
+    },
+    "ef879a63096b": {
+      "eb2f11de": 1
+    },
+    "d874cb3a1d8d": {
+      "6b4ade1b": 1
+    },
+    "9237151909cf": {
+      "f37ed299": 1
+    },
+    "18aef46624ac": {
+      "279c9021": 1
+    },
+    "576dc24bbac9": {
+      "4e287b26": 1
+    },
+    "04d85912d998": {
+      "95c1b8c2": 1,
+      "8ddcbb56": 2,
+      "298dd5b5": 2,
+      "e863d800": 2,
+      "3213bad8": 2,
+      "f1684e51": 1,
+      "82498d17": 2,
+      "9a144edf": 2,
+      "99e65a35": 2,
+      "0f3e2fa1": 2,
+      "6d360d07": 1,
+      "f9814b0a": 18,
+      "03889ef1": 18,
+      "2a26ac60": 18,
+      "1e571200": 18,
+      "97fbfe32": 1,
+      "52bd1122": 2,
+      "a9384bfb": 2,
+      "4fa33397": 2,
+      "2d6ceca7": 2,
+      "ed385436": 1
+    },
+    "0baf259d2dde": {
+      "f9824bc7": 1
+    },
+    "0ff531d655e2": {
+      "d3b91940": 2,
+      "2615f691": 2,
+      "49cca652": 18,
+      "bfefa4c1": 2
+    },
+    "ebd2f3f5d1ac": {
+      "9bb88dff": 1,
+      "d902ac18": 1
+    },
+    "c0d19d490a2f": {
+      "5548ed76": 2,
+      "c159d4c2": 2,
+      "184cfb9b": 18,
+      "673e7945": 2
+    },
+    "1ea8cbba96b6": {
+      "73ae8fba": 1
+    },
+    "139a3020e8bf": {
+      "afe70185": 2,
+      "16fc5564": 2,
+      "f1e86a47": 18,
+      "1bfeeacc": 2
+    },
+    "1544699e3f4f": {
+      "9434ee13": 1
+    },
+    "32d58f8a538b": {
+      "c30d92f6": 1,
+      "9b721181": 1,
+      "a0f6bb6e": 1
+    },
+    "43c335e69861": {
+      "5135dd24": 1
+    },
+    "076466404840": {
+      "525397c2": 1
+    },
+    "c4b2f2dd7056": {
+      "617b106c": 1,
+      "7f22747d": 1
+    },
+    "45d6753d187f": {
+      "694e3ee9": 1,
+      "e40314e1": 9
+    },
+    "6ab39ce3076a": {
+      "0f2720cd": 1,
+      "b200ba80": 9
+    },
+    "138f58d52d63": {
+      "694e3ee9": 1
+    },
+    "435d79cf8cf1": {
+      "363a3f21": 1,
+      "48886c46": 1
+    },
+    "53705754e316": {
+      "53e1e7c7": 8
+    },
+    "3b8ce54748eb": {
+      "3ab80e07": 8
+    },
+    "13a2d97ad9c0": {
+      "db8fd19c": 8
+    },
+    "b98e874111e5": {
+      "ce491baf": 8
+    },
+    "4646add6e2d2": {
+      "66c412ba": 1
+    },
+    "58b2778fbf00": {
+      "e40314e1": 1
+    },
+    "4b9ed5bd2028": {
+      "51e0b89c": 1
+    },
+    "cffb786cc971": {
+      "699a7ab8": 1
+    },
+    "6009940dd657": {
+      "8783a896": 2
+    },
+    "1f05ba0f6d5e": {
+      "b93b4b3a": 1
+    },
+    "d475b7775ec2": {
+      "b55f038d": 1
+    },
+    "5d37c314257b": {
+      "64fbadbb": 1
+    },
+    "c2bf513c1ebf": {
+      "e781aba9": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "4ef427452760",
+      "count": 1,
+      "sig": "((T([128, 3, 224, 224],torch.bfloat16,[150528, 1, 672, 3]),T([128, 3, 4, 4],torch.bfloat16,[48, 1, 12, 3]),T([128],torch.bfloat16,[1]),[4,4],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 365.3759956359863,
+      "branch_us": 365.3759956359863
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "f3006e28b309",
+      "count": 2,
+      "sig": "((T([384],torch.bfloat16,[1]),T([401408, 128],torch.bfloat16,[128, 1]),T([128, 384],torch.bfloat16,[1, 128])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 77.47200131416321,
+      "branch_us": 77.47200131416321
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "9f689a95c3d5",
+      "count": 2,
+      "sig": "((T([32768, 56, 32],torch.bfloat16,[1792, 32, 1]),T([32768, 32, 56],torch.bfloat16,[1792, 56, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 137.95199990272522,
+      "branch_us": 137.95199990272522
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "82fa6d9b56e0",
+      "count": 2,
+      "sig": "((T([32768, 56, 56],torch.bfloat16,[3136, 56, 1]),T([32768, 56, 32],torch.bfloat16,[1792, 32, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 110.27199774980545,
+      "branch_us": 110.27199774980545
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "1b6d64caa625",
+      "count": 2,
+      "sig": "((T([128],torch.bfloat16,[1]),T([401408, 128],torch.bfloat16,[128, 1]),T([128, 128],torch.bfloat16,[1, 128])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 38.62399980425835,
+      "branch_us": 38.62399980425835
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "a7b30837eac5",
+      "count": 2,
+      "sig": "((T([512],torch.bfloat16,[1]),T([401408, 128],torch.bfloat16,[128, 1]),T([128, 512],torch.bfloat16,[1, 128])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 97.69599884748459,
+      "branch_us": 97.69599884748459
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "b530671a4e0e",
+      "count": 2,
+      "sig": "((T([128],torch.bfloat16,[1]),T([401408, 512],torch.bfloat16,[512, 1]),T([512, 128],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_3",
+      "baseline_us": 87.77599781751633,
+      "branch_us": 87.77599781751633
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "8eaf174e2064",
+      "count": 1,
+      "sig": "((T([100352, 512],torch.bfloat16,[512, 1]),T([512, 256],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 33.76000002026558,
+      "branch_us": 33.76000002026558
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "0a1995dc06c0",
+      "count": 2,
+      "sig": "((T([768],torch.bfloat16,[1]),T([100352, 256],torch.bfloat16,[256, 1]),T([256, 768],torch.bfloat16,[1, 256])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_8",
+      "baseline_us": 46.78399860858917,
+      "branch_us": 46.78399860858917
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "3f39ab8af7d6",
+      "count": 2,
+      "sig": "((T([16384, 56, 32],torch.bfloat16,[1792, 32, 1]),T([16384, 32, 56],torch.bfloat16,[1792, 56, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "bmm_4",
+      "baseline_us": 72.4480003118515,
+      "branch_us": 72.4480003118515
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "f323259e4c35",
+      "count": 2,
+      "sig": "((T([16384, 56, 56],torch.bfloat16,[3136, 56, 1]),T([16384, 56, 32],torch.bfloat16,[1792, 32, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "bmm_5",
+      "baseline_us": 60.35200133919716,
+      "branch_us": 60.35200133919716
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "9aee38d08376",
+      "count": 2,
+      "sig": "((T([256],torch.bfloat16,[1]),T([100352, 256],torch.bfloat16,[256, 1]),T([256, 256],torch.bfloat16,[1, 256])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_9",
+      "baseline_us": 24.383999407291412,
+      "branch_us": 24.383999407291412
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "e95df1cea325",
+      "count": 2,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([100352, 256],torch.bfloat16,[256, 1]),T([256, 1024],torch.bfloat16,[1, 256])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_10",
+      "baseline_us": 59.07199904322624,
+      "branch_us": 59.07199904322624
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "7425545fbd25",
+      "count": 2,
+      "sig": "((T([256],torch.bfloat16,[1]),T([100352, 1024],torch.bfloat16,[1024, 1]),T([1024, 256],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_11",
+      "baseline_us": 54.1439987719059,
+      "branch_us": 54.1439987719059
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "4c62e838fcc6",
+      "count": 1,
+      "sig": "((T([25088, 1024],torch.bfloat16,[1024, 1]),T([1024, 512],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "mm_1",
+      "baseline_us": 28.31999957561493,
+      "branch_us": 28.31999957561493
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "6ecf22657d93",
+      "count": 18,
+      "sig": "((T([1536],torch.bfloat16,[1]),T([25088, 512],torch.bfloat16,[512, 1]),T([512, 1536],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_16",
+      "baseline_us": 32.575998455286026,
+      "branch_us": 32.575998455286026
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "ffaf540c1630",
+      "count": 18,
+      "sig": "((T([8192, 56, 32],torch.bfloat16,[1792, 32, 1]),T([8192, 32, 56],torch.bfloat16,[1792, 56, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "bmm_8",
+      "baseline_us": 39.712000638246536,
+      "branch_us": 39.712000638246536
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "1001b73106aa",
+      "count": 18,
+      "sig": "((T([8192, 56, 56],torch.bfloat16,[3136, 56, 1]),T([8192, 56, 32],torch.bfloat16,[1792, 32, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "bmm_9",
+      "baseline_us": 34.40000116825104,
+      "branch_us": 34.40000116825104
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "0072caa540b0",
+      "count": 18,
+      "sig": "((T([512],torch.bfloat16,[1]),T([25088, 512],torch.bfloat16,[512, 1]),T([512, 512],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_17",
+      "baseline_us": 20.06400004029274,
+      "branch_us": 20.06400004029274
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "1fd829e23c19",
+      "count": 18,
+      "sig": "((T([2048],torch.bfloat16,[1]),T([25088, 512],torch.bfloat16,[512, 1]),T([512, 2048],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_18",
+      "baseline_us": 40.64000025391579,
+      "branch_us": 40.64000025391579
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "d88591891f52",
+      "count": 18,
+      "sig": "((T([512],torch.bfloat16,[1]),T([25088, 2048],torch.bfloat16,[2048, 1]),T([2048, 512],torch.bfloat16,[1, 2048])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_19",
+      "baseline_us": 46.112000942230225,
+      "branch_us": 46.112000942230225
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "12ad61a9aa91",
+      "count": 1,
+      "sig": "((T([6272, 2048],torch.bfloat16,[2048, 1]),T([2048, 1024],torch.bfloat16,[1, 2048])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "mm_2",
+      "baseline_us": 24.25600029528141,
+      "branch_us": 24.25600029528141
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "0155120a31c2",
+      "count": 2,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([6272, 1024],torch.bfloat16,[1024, 1]),T([1024, 3072],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_88",
+      "baseline_us": 32.32000023126602,
+      "branch_us": 32.32000023126602
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "d37d37a65dcc",
+      "count": 2,
+      "sig": "((T([4096, 49, 32],torch.bfloat16,[1568, 32, 1]),T([4096, 32, 49],torch.bfloat16,[1568, 49, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "bmm_44",
+      "baseline_us": 34.591998904943466,
+      "branch_us": 34.591998904943466
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "5a4b360278e9",
+      "count": 2,
+      "sig": "((T([4096, 56, 56],torch.bfloat16,[3136, 56, 1]),T([4096, 56, 32],torch.bfloat16,[1792, 32, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "bmm_45",
+      "baseline_us": 20.22399939596653,
+      "branch_us": 20.22399939596653
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "74c7487c3dc1",
+      "count": 2,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([6272, 1024],torch.bfloat16,[1024, 1]),T([1024, 1024],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_89",
+      "baseline_us": 17.24799908697605,
+      "branch_us": 17.24799908697605
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "97573dc6ed15",
+      "count": 2,
+      "sig": "((T([4096],torch.bfloat16,[1]),T([6272, 1024],torch.bfloat16,[1024, 1]),T([1024, 4096],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_90",
+      "baseline_us": 38.656000047922134,
+      "branch_us": 38.656000047922134
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "177d40b6d1c4",
+      "count": 2,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([6272, 4096],torch.bfloat16,[4096, 1]),T([4096, 1024],torch.bfloat16,[1, 4096])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_91",
+      "baseline_us": 40.64000025391579,
+      "branch_us": 40.64000025391579
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "0ba9eea95893",
+      "count": 1,
+      "sig": "((T([1000],torch.bfloat16,[1]),T([128, 1024],torch.bfloat16,[1024, 1]),T([1024, 1000],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_000.py",
+      "node": "addmm_96",
+      "baseline_us": 7.7760000713169575,
+      "branch_us": 7.7760000713169575
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "3dcc0a700c07",
+      "count": 1,
+      "sig": "((T([128, 1000],torch.bfloat16,[1000, 1]),T([1000, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 7.935999892652035,
+      "branch_us": 7.935999892652035
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "afcc641cd343",
+      "count": 1,
+      "sig": "((T([1000, 128],torch.bfloat16,[1, 1000]),T([128, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 7.7760000713169575,
+      "branch_us": 7.7760000713169575
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "572329cc1f6c",
+      "count": 2,
+      "sig": "((T([6272, 1024],torch.bfloat16,[1024, 1]),T([1024, 4096],torch.bfloat16,[4096, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_2",
+      "baseline_us": 38.52799907326698,
+      "branch_us": 38.52799907326698
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "2410bc7700a8",
+      "count": 2,
+      "sig": "((T([1024, 6272],torch.bfloat16,[1, 1024]),T([6272, 4096],torch.bfloat16,[4096, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_3",
+      "baseline_us": 38.59199956059456,
+      "branch_us": 38.59199956059456
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "e07a1c8600ad",
+      "count": 2,
+      "sig": "((T([6272, 4096],torch.bfloat16,[4096, 1]),T([4096, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_4",
+      "baseline_us": 40.608000010252,
+      "branch_us": 40.608000010252
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "f3c92c887e22",
+      "count": 2,
+      "sig": "((T([4096, 6272],torch.bfloat16,[1, 4096]),T([6272, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_5",
+      "baseline_us": 38.59199956059456,
+      "branch_us": 38.59199956059456
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "710da5dd22ee",
+      "count": 2,
+      "sig": "((T([6272, 1024],torch.bfloat16,[1024, 1]),T([1024, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_6",
+      "baseline_us": 17.311999574303627,
+      "branch_us": 17.311999574303627
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "9f67a522b358",
+      "count": 2,
+      "sig": "((T([1024, 6272],torch.bfloat16,[1, 1024]),T([6272, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_7",
+      "baseline_us": 19.29599978029728,
+      "branch_us": 19.29599978029728
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "ba74954d7c40",
+      "count": 2,
+      "sig": "((T([4096, 49, 49],torch.bfloat16,[2432, 1, 49]),T([4096, 49, 32],torch.bfloat16,[1568, 32, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm",
+      "baseline_us": 37.728000432252884,
+      "branch_us": 37.728000432252884
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "ef225d2bfe67",
+      "count": 2,
+      "sig": "((T([4096, 49, 32],torch.bfloat16,[1568, 32, 1]),T([4096, 32, 49],torch.bfloat16,[1600, 1, 32])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_1",
+      "baseline_us": 32.3840007185936,
+      "branch_us": 32.3840007185936
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "3958298e265f",
+      "count": 2,
+      "sig": "((T([4096, 32, 49],torch.bfloat16,[1600, 1, 32]),T([4096, 49, 49],torch.bfloat16,[2401, 49, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_2",
+      "baseline_us": 37.76000067591667,
+      "branch_us": 37.76000067591667
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "62185db8cc57",
+      "count": 2,
+      "sig": "((T([4096, 49, 49],torch.bfloat16,[2401, 49, 1]),T([4096, 49, 32],torch.bfloat16,[1600, 1, 49])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_3",
+      "baseline_us": 38.68800029158592,
+      "branch_us": 38.68800029158592
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "aacf37acccc9",
+      "count": 2,
+      "sig": "((T([6272, 3072],torch.bfloat16,[3072, 1]),T([3072, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_8",
+      "baseline_us": 31.840000301599503,
+      "branch_us": 31.840000301599503
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "7941ce26a549",
+      "count": 2,
+      "sig": "((T([3072, 6272],torch.bfloat16,[1, 3072]),T([6272, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_9",
+      "baseline_us": 32.44800120592117,
+      "branch_us": 32.44800120592117
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "c3c3e4785c29",
+      "count": 1,
+      "sig": "((T([1024, 6272],torch.bfloat16,[1, 1024]),T([6272, 2048],torch.bfloat16,[2048, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_18",
+      "baseline_us": 24.224000051617622,
+      "branch_us": 24.224000051617622
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "18f87616e768",
+      "count": 1,
+      "sig": "((T([6272, 1024],torch.bfloat16,[1024, 1]),T([1024, 2048],torch.bfloat16,[2048, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_19",
+      "baseline_us": 24.224000051617622,
+      "branch_us": 24.224000051617622
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "48c82eaed3d7",
+      "count": 18,
+      "sig": "((T([25088, 512],torch.bfloat16,[512, 1]),T([512, 2048],torch.bfloat16,[2048, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_20",
+      "baseline_us": 40.608000010252,
+      "branch_us": 40.608000010252
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "be5267c38b55",
+      "count": 18,
+      "sig": "((T([512, 25088],torch.bfloat16,[1, 512]),T([25088, 2048],torch.bfloat16,[2048, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_21",
+      "baseline_us": 48.00000041723251,
+      "branch_us": 48.00000041723251
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "f8943e36180e",
+      "count": 18,
+      "sig": "((T([25088, 2048],torch.bfloat16,[2048, 1]),T([2048, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_22",
+      "baseline_us": 46.04800045490265,
+      "branch_us": 46.04800045490265
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "b0ed88994ea7",
+      "count": 18,
+      "sig": "((T([2048, 25088],torch.bfloat16,[1, 2048]),T([25088, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_23",
+      "baseline_us": 48.895999789237976,
+      "branch_us": 48.895999789237976
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "f97aa7d7d5ee",
+      "count": 18,
+      "sig": "((T([25088, 512],torch.bfloat16,[512, 1]),T([512, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_24",
+      "baseline_us": 20.096000283956528,
+      "branch_us": 20.096000283956528
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "250bc4a25644",
+      "count": 18,
+      "sig": "((T([512, 25088],torch.bfloat16,[1, 512]),T([25088, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_25",
+      "baseline_us": 27.55199931561947,
+      "branch_us": 27.55199931561947
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "2130249349c2",
+      "count": 18,
+      "sig": "((T([8192, 49, 49],torch.bfloat16,[2432, 1, 49]),T([8192, 49, 32],torch.bfloat16,[1568, 32, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_8",
+      "baseline_us": 67.26399809122086,
+      "branch_us": 67.26399809122086
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "f38eef9c0cbd",
+      "count": 18,
+      "sig": "((T([8192, 49, 32],torch.bfloat16,[1568, 32, 1]),T([8192, 32, 49],torch.bfloat16,[1600, 1, 32])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_9",
+      "baseline_us": 57.18399956822395,
+      "branch_us": 57.18399956822395
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "27444d01c64d",
+      "count": 18,
+      "sig": "((T([8192, 32, 49],torch.bfloat16,[1600, 1, 32]),T([8192, 49, 49],torch.bfloat16,[2401, 49, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_10",
+      "baseline_us": 67.26399809122086,
+      "branch_us": 67.26399809122086
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "1e3d260a7dfe",
+      "count": 18,
+      "sig": "((T([8192, 49, 49],torch.bfloat16,[2401, 49, 1]),T([8192, 49, 32],torch.bfloat16,[1600, 1, 49])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_11",
+      "baseline_us": 69.37599927186966,
+      "branch_us": 69.37599927186966
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0bca8deb60b0",
+      "count": 18,
+      "sig": "((T([25088, 1536],torch.bfloat16,[1536, 1]),T([1536, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_26",
+      "baseline_us": 37.76000067591667,
+      "branch_us": 37.76000067591667
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "4f78d50ca096",
+      "count": 18,
+      "sig": "((T([1536, 25088],torch.bfloat16,[1, 1536]),T([25088, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_27",
+      "baseline_us": 44.73600164055824,
+      "branch_us": 44.73600164055824
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "99895e107963",
+      "count": 1,
+      "sig": "((T([512, 25088],torch.bfloat16,[1, 512]),T([25088, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_164",
+      "baseline_us": 33.56799855828285,
+      "branch_us": 33.56799855828285
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "6f526b627935",
+      "count": 1,
+      "sig": "((T([25088, 512],torch.bfloat16,[512, 1]),T([512, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_165",
+      "baseline_us": 26.27200074493885,
+      "branch_us": 26.27200074493885
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "34565a821900",
+      "count": 2,
+      "sig": "((T([100352, 256],torch.bfloat16,[256, 1]),T([256, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_166",
+      "baseline_us": 50.944000482559204,
+      "branch_us": 50.944000482559204
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "cf9b2017e4e6",
+      "count": 2,
+      "sig": "((T([256, 100352],torch.bfloat16,[1, 256]),T([100352, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_167",
+      "baseline_us": 63.10400366783142,
+      "branch_us": 63.10400366783142
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "bd85c554258c",
+      "count": 2,
+      "sig": "((T([100352, 1024],torch.bfloat16,[1024, 1]),T([1024, 256],torch.bfloat16,[256, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_168",
+      "baseline_us": 53.02400141954422,
+      "branch_us": 53.02400141954422
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "623d3af2b43b",
+      "count": 2,
+      "sig": "((T([1024, 100352],torch.bfloat16,[1, 1024]),T([100352, 256],torch.bfloat16,[256, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_169",
+      "baseline_us": 61.184000223875046,
+      "branch_us": 61.184000223875046
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "d4bc1b225f11",
+      "count": 2,
+      "sig": "((T([100352, 256],torch.bfloat16,[256, 1]),T([256, 256],torch.bfloat16,[256, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_170",
+      "baseline_us": 23.520000278949738,
+      "branch_us": 23.520000278949738
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "2cac14804a38",
+      "count": 2,
+      "sig": "((T([256, 100352],torch.bfloat16,[1, 256]),T([100352, 256],torch.bfloat16,[256, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_171",
+      "baseline_us": 36.57599911093712,
+      "branch_us": 36.57599911093712
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "dfcb5a519fc7",
+      "count": 2,
+      "sig": "((T([16384, 49, 49],torch.bfloat16,[2432, 1, 49]),T([16384, 49, 32],torch.bfloat16,[1568, 32, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_80",
+      "baseline_us": 124.67200309038162,
+      "branch_us": 124.67200309038162
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "0003399e2ca8",
+      "count": 2,
+      "sig": "((T([16384, 49, 32],torch.bfloat16,[1568, 32, 1]),T([16384, 32, 49],torch.bfloat16,[1600, 1, 32])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_81",
+      "baseline_us": 106.20799660682678,
+      "branch_us": 106.20799660682678
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "c960c7087ba1",
+      "count": 2,
+      "sig": "((T([16384, 32, 49],torch.bfloat16,[1600, 1, 32]),T([16384, 49, 49],torch.bfloat16,[2401, 49, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_82",
+      "baseline_us": 125.82400441169739,
+      "branch_us": 125.82400441169739
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "a3f22d7ab1bb",
+      "count": 2,
+      "sig": "((T([16384, 49, 49],torch.bfloat16,[2401, 49, 1]),T([16384, 49, 32],torch.bfloat16,[1600, 1, 49])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_83",
+      "baseline_us": 128.83199751377106,
+      "branch_us": 128.83199751377106
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "aa4e03411f9f",
+      "count": 2,
+      "sig": "((T([100352, 768],torch.bfloat16,[768, 1]),T([768, 256],torch.bfloat16,[256, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_172",
+      "baseline_us": 41.88799858093262,
+      "branch_us": 41.88799858093262
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "022fdc988c87",
+      "count": 2,
+      "sig": "((T([768, 100352],torch.bfloat16,[1, 768]),T([100352, 256],torch.bfloat16,[256, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_173",
+      "baseline_us": 51.19999870657921,
+      "branch_us": 51.19999870657921
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "3dea075f8cb2",
+      "count": 1,
+      "sig": "((T([256, 100352],torch.bfloat16,[1, 256]),T([100352, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_182",
+      "baseline_us": 43.935999274253845,
+      "branch_us": 43.935999274253845
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "722e17f66312",
+      "count": 1,
+      "sig": "((T([100352, 256],torch.bfloat16,[256, 1]),T([256, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_183",
+      "baseline_us": 32.44800120592117,
+      "branch_us": 32.44800120592117
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "adb921548395",
+      "count": 2,
+      "sig": "((T([401408, 128],torch.bfloat16,[128, 1]),T([128, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_184",
+      "baseline_us": 84.79999750852585,
+      "branch_us": 84.79999750852585
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "8a67cc58d5b4",
+      "count": 2,
+      "sig": "((T([128, 401408],torch.bfloat16,[1, 128]),T([401408, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_185",
+      "baseline_us": 96.00000083446503,
+      "branch_us": 96.00000083446503
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "6673c0d21ae5",
+      "count": 2,
+      "sig": "((T([401408, 512],torch.bfloat16,[512, 1]),T([512, 128],torch.bfloat16,[128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_186",
+      "baseline_us": 87.87199854850769,
+      "branch_us": 87.87199854850769
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "34820e99941e",
+      "count": 2,
+      "sig": "((T([512, 401408],torch.bfloat16,[1, 512]),T([401408, 128],torch.bfloat16,[128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_187",
+      "baseline_us": 98.11200201511383,
+      "branch_us": 98.11200201511383
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "9420cd7b0ed5",
+      "count": 2,
+      "sig": "((T([401408, 128],torch.bfloat16,[128, 1]),T([128, 128],torch.bfloat16,[128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_188",
+      "baseline_us": 36.607999354600906,
+      "branch_us": 36.607999354600906
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "ee47f4f44bd7",
+      "count": 2,
+      "sig": "((T([128, 401408],torch.bfloat16,[1, 128]),T([401408, 128],torch.bfloat16,[128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_189",
+      "baseline_us": 57.24800005555153,
+      "branch_us": 57.24800005555153
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "c5036db6d422",
+      "count": 2,
+      "sig": "((T([32768, 49, 49],torch.bfloat16,[2432, 1, 49]),T([32768, 49, 32],torch.bfloat16,[1568, 32, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_88",
+      "baseline_us": 239.3919974565506,
+      "branch_us": 239.3919974565506
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "1beea98a3ff0",
+      "count": 2,
+      "sig": "((T([32768, 49, 32],torch.bfloat16,[1568, 32, 1]),T([32768, 32, 49],torch.bfloat16,[1600, 1, 32])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_89",
+      "baseline_us": 204.54399287700653,
+      "branch_us": 204.54399287700653
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "66c2da489bd6",
+      "count": 2,
+      "sig": "((T([32768, 32, 49],torch.bfloat16,[1600, 1, 32]),T([32768, 49, 49],torch.bfloat16,[2401, 49, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_90",
+      "baseline_us": 241.40800535678864,
+      "branch_us": 241.40800535678864
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "690f2d424755",
+      "count": 2,
+      "sig": "((T([32768, 49, 49],torch.bfloat16,[2401, 49, 1]),T([32768, 49, 32],torch.bfloat16,[1600, 1, 49])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "bmm_91",
+      "baseline_us": 246.68799340724945,
+      "branch_us": 246.68799340724945
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "b7781164d29d",
+      "count": 2,
+      "sig": "((T([401408, 384],torch.bfloat16,[384, 1]),T([384, 128],torch.bfloat16,[128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_190",
+      "baseline_us": 69.5360004901886,
+      "branch_us": 69.5360004901886
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "7e842b4359c1",
+      "count": 2,
+      "sig": "((T([384, 401408],torch.bfloat16,[1, 384]),T([401408, 128],torch.bfloat16,[128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "mm_191",
+      "baseline_us": 83.67999643087387,
+      "branch_us": 83.67999643087387
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "2d5989f24371",
+      "count": 1,
+      "sig": "((T([128, 128, 56, 56],torch.bfloat16,[401408, 1, 7168, 128]),T([128, 3, 224, 224],torch.bfloat16,[150528, 1, 672, 3]),T([128, 3, 4, 4],torch.bfloat16,[48, 1, 12, 3]),[128],[4,4],[0,0],[1,1],False,[0,0],1,[False,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/train/swin_base_patch4_window7_224/full_graph_001.py",
+      "node": "convolution_backward",
+      "baseline_us": 161.50400042533875,
+      "branch_us": 161.50400042533875
+    }
+  ],
+  "trace_errors": [],
+  "suite": "timm",
+  "mode": "train",
+  "model": "swin_base_patch4_window7_224"
+}

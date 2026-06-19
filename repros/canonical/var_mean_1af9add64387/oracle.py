@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 residual LayerNorm alias scope in one fixed-hidden Triton row kernel, including the `[16384,768] -> [32,512,768]` view, Inductor's bf16-input fp32 residual add with an eager-allclose output guard, fp32 correction=0 row statistics over hidden, `rsqrt(var + 1e-12)`, affine epilogue with bf16 weight and bias, final bf16 cast, four `[16384,768]` alias views, and the `[32,768,512]` permute view, whereas Inductor lowers the decomposed view/add/var_mean/affine graph through its generic normalization schedule and metadata view handling; Inductor cannot do this today because the normalization scheduler does not expose a full-scope fixed-K row template that keeps the residual-add tile resident through the reduction, affine cast, and all returned alias/permute outputs; the fix is SCHEDULER_FUSION: extend the LayerNorm row schedule to fuse the residual producer, correction=0 row statistics, exact bf16 cast boundaries, and alias-preserving multi-output epilogue."""
+"""Gap diagnosis (classification: SCHEDULER_FUSION): this oracle computes the complete bf16 residual LayerNorm alias scope in one fixed-hidden Triton row kernel, including the `[16384,768] -> [32,512,768]` view, the bf16-rounded residual add from the captured graph, fp32 correction=0 row statistics over hidden, `rsqrt(var + 1e-12)`, affine epilogue with bf16 weight and bias, final bf16 cast, four `[16384,768]` alias views, and the `[32,768,512]` permute view, whereas Inductor lowers the decomposed view/add/var_mean/affine graph through its generic normalization schedule and metadata view handling; Inductor cannot do this today because the normalization scheduler does not expose a full-scope fixed-K row template that keeps the residual-add tile resident through the reduction, affine cast, and all returned alias/permute outputs; the fix is SCHEDULER_FUSION: extend the LayerNorm row schedule to fuse the residual producer, correction=0 row statistics, exact bf16 cast boundaries, and alias-preserving multi-output epilogue."""
 
 import torch
 import triton
@@ -6,6 +6,30 @@ import triton.language as tl
 from torch._inductor.runtime.triton_helpers import libdevice
 
 from oracle_harness import oracle_impl
+
+
+@triton.jit
+def _f32_add(a, b):
+    return tl.inline_asm_elementwise(
+        "add.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
+
+
+@triton.jit
+def _f32_mul(a, b):
+    return tl.inline_asm_elementwise(
+        "mul.rn.f32 $0, $1, $2;",
+        constraints="=f,f,f",
+        args=[a, b],
+        dtype=tl.float32,
+        is_pure=True,
+        pack=1,
+    )
 
 
 @triton.jit
@@ -30,31 +54,21 @@ def _residual_layernorm_alias_kernel(
     scale = tl.load(weight_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     bias = tl.load(bias_ptr + cols, mask=mask, other=0.0).to(tl.float32)
 
-    x = flat + residual
+    x = _f32_add(flat, residual).to(
+        tl.bfloat16, fp_downcast_rounding="rtne"
+    ).to(tl.float32)
     x_for_reduce = tl.where(mask, x, 0.0)
     mean = tl.sum(x_for_reduce, axis=1)[:, None] / HIDDEN
-    mean_square = tl.sum(tl.where(mask, x * x, 0.0), axis=1)[:, None] / HIDDEN
-    variance = mean_square - mean * mean
-    centered = x - mean
-    y_inductor = (centered * libdevice.rsqrt(variance + 1.0e-12) * scale + bias).to(tl.bfloat16)
-
-    x_eager = x.to(tl.bfloat16).to(tl.float32)
-    x_eager_for_reduce = tl.where(mask, x_eager, 0.0)
-    mean_eager = tl.sum(x_eager_for_reduce, axis=1)[:, None] / HIDDEN
-    mean_square_eager = (
-        tl.sum(tl.where(mask, x_eager * x_eager, 0.0), axis=1)[:, None] / HIDDEN
+    mean_square = (
+        tl.sum(tl.where(mask, _f32_mul(x, x), 0.0), axis=1)[:, None] / HIDDEN
     )
-    variance_eager = mean_square_eager - mean_eager * mean_eager
-    centered_eager = x_eager - mean_eager
-    y_eager = (
-        centered_eager * libdevice.rsqrt(variance_eager + 1.0e-12) * scale + bias
-    ).to(tl.bfloat16)
-
-    y_inductor_f32 = y_inductor.to(tl.float32)
-    y_eager_f32 = y_eager.to(tl.float32)
-    tolerance = 1.0e-2 + 1.0e-2 * tl.abs(y_eager_f32)
-    y = tl.where(tl.abs(y_inductor_f32 - y_eager_f32) <= tolerance, y_inductor, y_eager)
-    tl.store(out_ptr + offsets, y.to(tl.bfloat16), mask=mask)
+    variance = _f32_add(mean_square, -_f32_mul(mean, mean))
+    centered = _f32_add(x, -mean)
+    invstd = libdevice.rsqrt(_f32_add(variance, 1.0e-12))
+    normalized = _f32_mul(centered, invstd)
+    scaled = _f32_mul(normalized, scale)
+    y = _f32_add(scaled, bias).to(tl.bfloat16, fp_downcast_rounding="rtne")
+    tl.store(out_ptr + offsets, y, mask=mask)
 
 
 def _contiguous_stride(shape):

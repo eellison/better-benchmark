@@ -1,6 +1,16 @@
 {
   "pattern_hash": "0e23e54703ef",
   "kind": "pointwise",
+  "numerics_optout": {
+    "verified": true,
+    "reason": "bf16 rounding drift through the GPTJ rotary-embedding pointwise graph (RoPE cat/mul/neg/gather, no reductions). Oracle is faithful: --check vs eager PASSES. The fp64-anchored gate fails only because torch.compile is near-fp64-exact here so its threshold (3x err_compiled ~= 1.1e-4) is tiny; the oracle's float outputs (idx 1,2) differ by ~0.056 against ref_absmax ~11.4-12.1 -> ~0.5% relative, ordinary bf16 ULP/accumulation, not a formulation substitution (idx 0,3 are non-float, exact). Source-audited clean; non-blocking-numerics policy -> flag, not a wrong-math bug. Compile is the floor.",
+    "max_diff": 0.056640625,
+    "ref_absmax": 11.4296875,
+    "relative_diff": 0.005,
+    "outputs": [1, 2],
+    "reviewed": "2026-06-18",
+    "reviewer": "numerics-optout-mechanism (hand example)"
+  },
   "reduction_types": [],
   "n_ops": 76,
   "origin_ops": [

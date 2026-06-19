@@ -1,4 +1,4 @@
-"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete Longformer bf16 embedding plus LayerNorm inference scope in one Triton row kernel, including the word embedding gather, mask-derived position-id arithmetic, position and global embedding gathers, Inductor's fp32-resident embedding sum with an eager-compatible bf16-rounded anchor, hidden-size-768 population var_mean with eps=1e-5 rsqrt, bf16 scale/bias affine epilogue, and final contiguous bf16 `[8,1024,768]` output, whereas Inductor lowers the integer position-id construction, three embedding gathers, row normalization, affine, and final cast through generic scheduler fragments; Inductor cannot do this today because its fixed-hidden normalization template does not canonicalize Longformer indexed embedding assembly as the producer of a row LayerNorm while preserving the eager-compatible output envelope; the fix is NEW_PATTERN: add a guarded Longformer embedding-LayerNorm inference template that folds position-id construction, gathered embedding loads, row statistics, affine, and final bf16 store into one full-scope row plan."""
+"""Gap diagnosis (classification: NEW_PATTERN): this oracle computes the complete Longformer bf16 embedding plus LayerNorm inference scope in one Triton row kernel, including the word embedding gather, mask-derived position-id arithmetic, position and global embedding gathers with the bf16 rounding boundaries from the captured graph, hidden-size-768 population var_mean with eps=1e-5 rsqrt, bf16 scale/bias affine epilogue, and final contiguous bf16 `[8,1024,768]` output, whereas Inductor lowers the integer position-id construction, three embedding gathers, row normalization, affine, and final cast through generic scheduler fragments; Inductor cannot do this today because its fixed-hidden normalization template does not canonicalize Longformer indexed embedding assembly as the producer of a row LayerNorm while preserving the captured bf16 rounding boundaries; the fix is NEW_PATTERN: add a guarded Longformer embedding-LayerNorm inference template that folds position-id construction, gathered embedding loads, row statistics, affine, and final bf16 store into one full-scope row plan."""
 
 import torch
 import triton
@@ -95,23 +95,19 @@ def _longformer_embedding_layernorm_kernel(
         eviction_policy="evict_last",
     ).to(tl.float32)
 
-    x_resident = _f32_add(_f32_add(word, position), global_token[None, :])
-    add_1_anchor = _f32_add(word, position).to(tl.bfloat16, fp_downcast_rounding="rtne").to(tl.float32)
-    x_anchor = _f32_add(add_1_anchor, global_token[None, :]).to(tl.bfloat16, fp_downcast_rounding="rtne").to(tl.float32)
+    add_1 = _f32_add(word, position).to(tl.bfloat16, fp_downcast_rounding="rtne").to(tl.float32)
+    x = _f32_add(add_1, global_token[None, :]).to(tl.bfloat16, fp_downcast_rounding="rtne").to(tl.float32)
 
-    resident_masked = tl.where(mask, x_resident, 0.0)
-    resident_mean = _f32_mul(tl.sum(resident_masked, axis=1), 1.0 / HIDDEN)
-    resident_centered = _f32_sub(x_resident, resident_mean[:, None])
-    resident_centered_masked = tl.where(mask, resident_centered, 0.0)
-    resident_variance = _f32_mul(
-        tl.sum(_f32_mul(resident_centered_masked, resident_centered_masked), axis=1),
+    x_masked = tl.where(mask, x, 0.0)
+    mean = _f32_mul(tl.sum(x_masked, axis=1), 1.0 / HIDDEN)
+    centered = _f32_sub(x, mean[:, None])
+    centered_masked = tl.where(mask, centered, 0.0)
+    variance = _f32_mul(
+        tl.sum(_f32_mul(centered_masked, centered_masked), axis=1),
         1.0 / HIDDEN,
     )
-    resident_invstd = libdevice.rsqrt(_f32_add(resident_variance, EPSILON))
-    resident_normalized = _f32_mul(resident_centered, resident_invstd[:, None])
-
-    anchor_centered = _f32_sub(x_anchor, resident_mean[:, None])
-    anchor_normalized = _f32_mul(anchor_centered, resident_invstd[:, None])
+    invstd = libdevice.rsqrt(_f32_add(variance, EPSILON))
+    normalized = _f32_mul(centered, invstd[:, None])
 
     weight = tl.load(
         weight_ptr + cols,
@@ -125,17 +121,7 @@ def _longformer_embedding_layernorm_kernel(
         other=0.0,
         eviction_policy="evict_last",
     ).to(tl.float32)
-    resident_affine = _f32_add(_f32_mul(resident_normalized, weight[None, :]), bias[None, :]).to(
-        tl.bfloat16, fp_downcast_rounding="rtne"
-    ).to(tl.float32)
-    anchor_affine = _f32_add(_f32_mul(anchor_normalized, weight[None, :]), bias[None, :]).to(
-        tl.bfloat16, fp_downcast_rounding="rtne"
-    ).to(tl.float32)
-    tolerance = _f32_mul(_f32_add(0.01, _f32_mul(0.01, tl.abs(anchor_affine))), 0.5)
-    affine = tl.minimum(
-        tl.maximum(resident_affine, _f32_sub(anchor_affine, tolerance)),
-        _f32_add(anchor_affine, tolerance),
-    )
+    affine = _f32_add(_f32_mul(normalized, weight[None, :]), bias[None, :])
     tl.store(
         out_ptr + offsets,
         affine.to(tl.bfloat16, fp_downcast_rounding="rtne"),
