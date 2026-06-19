@@ -22,7 +22,12 @@ import torch._inductor.inductor_prims  # noqa: F401
 
 
 UNVERSIONED_REPRO_VERSION = 0
-CURRENT_REPRO_VERSION = 2
+# v3: default inputs load from the sibling shapes.json; the inline
+# `_shapes_config` string was retired (capture_hook template + the entire
+# canonical corpus emit v3). Bumped here to match what capture_hook.py
+# actually writes -- the v3 migration (76c4fb8c8) changed the template and
+# the corpus but left this constant at 2.
+CURRENT_REPRO_VERSION = 3
 _REPRO_VERSION_RE = re.compile(
     r"^_repro_version\s*=\s*(\d+)\s*(?:#.*)?$",
 )

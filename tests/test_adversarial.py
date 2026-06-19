@@ -166,15 +166,10 @@ def test_version_tag_present():
     state.finalize()
 
     content = Path(state.captured[0]['file']).read_text()
-    # capture_hook emits the v3 template marker. (NOTE: repro_harness.
-    # CURRENT_REPRO_VERSION is still 2 -- a real, separate drift left by the
-    # v3 migration; see test_repro_versioning::
-    # test_capture_hook_template_emits_current_marker which fails as a
-    # true-positive tripwire for that. We assert the actual emitted marker
-    # here rather than the stale constant.)
-    from repro_harness import parse_repro_version
-    assert '_repro_version = 3' in content, "Missing v3 version tag"
-    assert parse_repro_version(content) == 3
+    # capture_hook emits the current (v3) template marker.
+    from repro_harness import CURRENT_REPRO_VERSION, parse_repro_version
+    assert f'_repro_version = {CURRENT_REPRO_VERSION}' in content, "Missing version tag"
+    assert parse_repro_version(content) == CURRENT_REPRO_VERSION == 3
     print("PASS: version tag present in captured repro")
 
 

@@ -95,10 +95,11 @@ class ReproVersioningTests(unittest.TestCase):
 
     def test_capture_hook_template_emits_current_marker(self):
         source = (ROOT / "capture_hook.py").read_text()
-        self.assertIn(
-            f"_repro_version = {CURRENT_REPRO_VERSION}\n_shapes_config =",
-            source,
-        )
+        # v3 emits the version marker but NO inline _shapes_config (inputs load
+        # from the sibling shapes.json). Assert the marker matches the current
+        # version, and that the retired inline assignment is gone.
+        self.assertIn(f"_repro_version = {CURRENT_REPRO_VERSION}\n", source)
+        self.assertNotIn("\n_shapes_config =", source)
 
     def test_dry_run_marks_unversioned_repro_outdated(self):
         with tempfile.TemporaryDirectory() as tmp:
