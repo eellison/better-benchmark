@@ -29,8 +29,8 @@ python compute_ab.py results/b200/244fdb379d11 results/b200/daa79cd25ca   # expl
 | | |
 |---|---|
 | **Hardware** | 4x NVIDIA B200 (SM100), GPU lock on, CUDAGraph replay, min-of-N |
-| **pytorch BASELINE** | `244fdb379d11d5925da5610b22e1466222c4afb9` (merge-base / ancestor of the perf branch) |
-| **pytorch BRANCH (WIP perf work)** | `daa79cd25ca9a80bfd65799394cf4255d6be75a6` (`tmp_work` HEAD — the perf work under test) |
+| **pytorch BASELINE** | `trunk@244fdb379d11d5925da5610b22e1466222c4afb9` (merge-base / ancestor of the perf branch; ref recorded as `pytorch_ref: "trunk"`) |
+| **pytorch BRANCH (WIP perf work)** | `tmp_work@daa79cd25ca9a80bfd65799394cf4255d6be75a6` (`tmp_work` HEAD — the perf work under test; ref recorded as `pytorch_ref: "tmp_work"`) |
 | **better-benchmark commit** | baseline run `3710b851` / branch run `a7f8b0af` (recorded as `bb_commit` in each file) |
 | **swap set** | `torch/_inductor` + `torch/utils/_sympy/value_ranges.py` (Python-only, no rebuild; fresh `TORCHINDUCTOR_CACHE_DIR` per arm) |
 | **corpus** | 1727 unique kernel patterns / 4977 (dir,shape) points; 158 non-genai models (73 train + 85 infer) + 8 genai microbenchmarks |
@@ -95,7 +95,12 @@ is where the Deliverable-2 ceiling was swept; Deliverable 1 needs `kernels.json`
 
 ### `_metadata` schema (every JSON)
 
-Each file carries exactly one `pytorch_commit` (the distinguishing axis), the
+Each file carries exactly one `pytorch_commit` (the distinguishing axis) and a
+`pytorch_ref` — the git branch/ref that commit was HEAD of at measurement time
+(`tmp_work` for the branch arm, `trunk` for the baseline). The ref disambiguates a
+*moving* branch: `daa79cd25ca` is `tmp_work`'s HEAD today, but once `tmp_work`
+advances that SHA is an orphan hash with no context, so the branch name is captured
+as structured provenance (not just in the `harness_caveats` prose). Also present: the
 `bb_commit` (the better-benchmark commit that ran it — the old bare `commit` field,
 renamed and preserved), `hardware`, `date`, `sweep_type` (`kernels` | `oracle_floor` |
 `projection`), `corpus_size`, and `harness_caveats`. The kernel files also retain their

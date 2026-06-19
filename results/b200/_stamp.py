@@ -19,6 +19,12 @@ B200 = ROOT / "results" / "b200"
 
 BRANCH_SHA = "daa79cd25ca9a80bfd65799394cf4255d6be75a6"
 BASELINE_SHA = "244fdb379d11d5925da5610b22e1466222c4afb9"
+# The git ref each SHA was HEAD of at measurement time. A SHA alone is ambiguous
+# for a MOVING branch (daa79cd25ca is tmp_work HEAD today; once tmp_work advances
+# it becomes an orphan hash), so the branch name is recorded as structured
+# provenance (`pytorch_ref`), not only in the harness_caveats prose.
+BRANCH_REF = "tmp_work"
+BASELINE_REF = "trunk"
 BRANCH_DIR = B200 / "daa79cd25ca"
 BASELINE_DIR = B200 / "244fdb379d11"
 
@@ -33,9 +39,10 @@ ORACLE = ROOT / "results" / "oracle_floors_2026-06-18_v4"
 PROJ = ORACLE / "model_projections"
 
 
-def base_meta(pytorch_sha, bb_commit, sweep_type):
+def base_meta(pytorch_sha, bb_commit, sweep_type, pytorch_ref):
     return {
         "pytorch_commit": pytorch_sha,
+        "pytorch_ref": pytorch_ref,
         "bb_commit": bb_commit,
         "hardware": HW,
         "date": DATE,
@@ -45,16 +52,18 @@ def base_meta(pytorch_sha, bb_commit, sweep_type):
     }
 
 
-def stamp_kernels(src: Path, dst: Path, pytorch_sha: str, sweep_type: str):
+def stamp_kernels(src: Path, dst: Path, pytorch_sha: str, sweep_type: str,
+                  pytorch_ref: str):
     """Kernels JSON: existing `_metadata.commit` is the BETTER-BENCHMARK commit.
-    Rename it -> `bb_commit` (preserve value), ADD `pytorch_commit`. The kernel
-    payload (every non-`_` key) is untouched."""
+    Rename it -> `bb_commit` (preserve value), ADD `pytorch_commit` + the
+    `pytorch_ref` branch label. The kernel payload (every non-`_` key) is
+    untouched."""
     src_text = src.read_text()
     data = json.loads(src_text)
     old_meta = data.get("_metadata", {})
     bb_commit = old_meta.get("commit")  # better-benchmark commit, preserve value
 
-    new_meta = base_meta(pytorch_sha, bb_commit, sweep_type)
+    new_meta = base_meta(pytorch_sha, bb_commit, sweep_type, pytorch_ref)
     # carry forward the original bench-tool fields for provenance, dropping the
     # ambiguous bare `commit` (now expressed as bb_commit + pytorch_commit).
     for k, v in old_meta.items():
@@ -68,24 +77,25 @@ def stamp_kernels(src: Path, dst: Path, pytorch_sha: str, sweep_type: str):
 
 
 def stamp_oracle(src: Path, dst: Path, pytorch_sha: str, sweep_type: str,
-                 bb_commit: str):
+                 bb_commit: str, pytorch_ref: str):
     """Oracle-floor JSON: a flat dict keyed by pattern dir, NO existing
     `_metadata`. Add one; leave every pattern entry untouched."""
     src_text = src.read_text()
     data = json.loads(src_text)
     assert "_metadata" not in data, f"{src} unexpectedly already has _metadata"
-    data = {"_metadata": base_meta(pytorch_sha, bb_commit, sweep_type), **data}
+    data = {"_metadata": base_meta(pytorch_sha, bb_commit, sweep_type, pytorch_ref), **data}
     dst.write_text(json.dumps(data, indent=2) + "\n")
     _verify_roundtrip_dict(src_text, dst, label=dst.name)
 
 
-def stamp_projection(src: Path, dst: Path, pytorch_sha: str, bb_commit: str):
+def stamp_projection(src: Path, dst: Path, pytorch_sha: str, bb_commit: str,
+                     pytorch_ref: str):
     """Projection JSON is a LIST of model rows. Wrap as
     {"_metadata": {...}, "models": [...]} (noted in README)."""
     src_text = src.read_text()
     data = json.loads(src_text)
     assert isinstance(data, list), f"{src} expected a list, got {type(data)}"
-    meta = base_meta(pytorch_sha, bb_commit, "projection")
+    meta = base_meta(pytorch_sha, bb_commit, "projection", pytorch_ref)
     meta["wrapping_note"] = ("source was a bare JSON list of model rows; wrapped "
                              "as {_metadata, models:[...]} for stamping")
     out = {"_metadata": meta, "models": data}
@@ -116,22 +126,24 @@ def main():
     branch_bb = json.loads(branch_kernels_src.read_text())["_metadata"]["commit"]
 
     stamp_kernels(branch_kernels_src, BRANCH_DIR / "kernels.json",
-                  BRANCH_SHA, "kernels")
+                  BRANCH_SHA, "kernels", BRANCH_REF)
     stamp_oracle(ORACLE / "all_oracle_timings_v4.json",
                  BRANCH_DIR / "oracle_floors.json", BRANCH_SHA, "oracle_floor",
-                 branch_bb)
+                 branch_bb, BRANCH_REF)
     stamp_oracle(ORACLE / "all_oracle_timings_v4_minfloor.json",
                  BRANCH_DIR / "oracle_floors_minfloor.json", BRANCH_SHA,
-                 "oracle_floor", branch_bb)
+                 "oracle_floor", branch_bb, BRANCH_REF)
     stamp_projection(PROJ / "projections_v4_coveragegated.json",
-                     BRANCH_DIR / "projections.json", BRANCH_SHA, branch_bb)
+                     BRANCH_DIR / "projections.json", BRANCH_SHA, branch_bb,
+                     BRANCH_REF)
     stamp_projection(PROJ / "projections_v4_minfloor.json",
                      BRANCH_DIR / "projections_minfloor.json", BRANCH_SHA,
-                     branch_bb)
+                     branch_bb, BRANCH_REF)
 
     print("\nStamping BASELINE arm (pytorch 244fdb379d11):")
     stamp_kernels(REV / "baseline_kernels.json",
-                  BASELINE_DIR / "kernels.json", BASELINE_SHA, "kernels")
+                  BASELINE_DIR / "kernels.json", BASELINE_SHA, "kernels",
+                  BASELINE_REF)
 
     print("\nCopying prose deliverables to results/b200/ top level:")
     prose = [

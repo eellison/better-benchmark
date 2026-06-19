@@ -140,7 +140,11 @@ def pytorch_commit_of(commit_dir: Path) -> str:
     sha = meta.get("pytorch_commit")
     if not sha:
         raise SystemExit(f"{commit_dir}/kernels.json has no _metadata.pytorch_commit")
-    return sha
+    # Prefer the self-describing "<ref>@<sha>" form when a structured pytorch_ref
+    # is present. A bare SHA is ambiguous for a moving branch (e.g. tmp_work);
+    # the ref disambiguates which branch the commit was HEAD of at measurement.
+    ref = meta.get("pytorch_ref")
+    return f"{ref}@{sha}" if ref else sha
 
 
 def summarize(pcts):
