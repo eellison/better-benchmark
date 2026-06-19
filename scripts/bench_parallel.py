@@ -454,19 +454,101 @@ def _infer_workload_kind_from_payload(
     return None
 
 
-def _run_metadata(*, workload_kind: str | None, n_results: int) -> dict:
+def _git_query(args: list[str], *, cwd: str | None = None) -> str | None:
+    """Run a read-only ``git`` query, returning stripped stdout or None.
+
+    Fully defensive: any failure (git missing, not a repo, timeout, non-zero
+    exit) returns None so a metadata helper never crashes a bench run. These are
+    pure reads (``rev-parse`` / ``symbolic-ref``); they never mutate the repo.
+    """
     import subprocess
 
-    commit = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        capture_output=True,
-        text=True,
-        timeout=5,
-    ).stdout.strip()
+    try:
+        proc = subprocess.run(
+            ["git", *args],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            cwd=cwd,
+        )
+    except Exception:
+        return None
+    if proc.returncode != 0:
+        return None
+    out = proc.stdout.strip()
+    return out or None
+
+
+def _pytorch_provenance() -> tuple[str | None, str | None]:
+    """Resolve (pytorch_commit, pytorch_ref) for the torch being benchmarked.
+
+    Strategy:
+      1. Locate the pytorch source tree via ``torch.__file__`` and ask git for
+         HEAD (the exact commit) and the branch/ref it is on. ``git`` walks up to
+         the enclosing ``.git`` automatically, so running it from the torch
+         package dir resolves a source checkout (e.g. /tmp/pytorch-work/torch ->
+         /tmp/pytorch-work/.git).
+      2. Detached HEAD: ``symbolic-ref`` fails, so the ref is recorded as
+         ``"DETACHED"`` (the commit is still captured).
+      3. Installed wheel (no git checkout): fall back to
+         ``torch.version.git_version`` for the commit and ``pytorch_ref = None``.
+      4. torch not importable at all: return ``(None, None)``.
+
+    Never raises — this feeds run metadata and must not abort a bench.
+    """
+    try:
+        import torch
+    except Exception:
+        return None, None
+
+    torch_file = getattr(torch, "__file__", None)
+    torch_src = None
+    if torch_file:
+        try:
+            from pathlib import Path as _Path
+
+            torch_src = str(_Path(torch_file).resolve().parent)
+        except Exception:
+            torch_src = None
+
+    commit = None
+    ref = None
+    if torch_src:
+        commit = _git_query(["rev-parse", "HEAD"], cwd=torch_src)
+        if commit is not None:
+            # It's a git checkout. Resolve the branch/ref. abbrev-ref returns
+            # the literal "HEAD" when detached; treat that (and a failed
+            # symbolic-ref) as a detached HEAD.
+            ref = _git_query(["symbolic-ref", "--short", "-q", "HEAD"], cwd=torch_src)
+            if ref is None:
+                abbrev = _git_query(["rev-parse", "--abbrev-ref", "HEAD"], cwd=torch_src)
+                ref = "DETACHED" if (abbrev is None or abbrev == "HEAD") else abbrev
+
+    if commit is None:
+        # Not a git checkout (installed wheel) — fall back to the SHA baked into
+        # the wheel by the build, with no branch context.
+        commit = getattr(getattr(torch, "version", None), "git_version", None) or None
+        ref = None
+
+    return commit, ref
+
+
+def _run_metadata(*, workload_kind: str | None, n_results: int) -> dict:
+    commit = _git_query(["rev-parse", "HEAD"]) or ""
+    pytorch_commit, pytorch_ref = _pytorch_provenance()
     metadata = {
         "schema_version": 1,
         "tool": "scripts/bench_parallel.py",
+        # better-benchmark repo commit (the bench tooling). Kept as "commit" for
+        # back-compat with existing _metadata consumers (results/b200/_stamp.py,
+        # the merge path, and tests). The pytorch provenance is separate below.
         "commit": commit,
+        # The pytorch under test: commit (exact SHA) + ref (branch/tag the commit
+        # was HEAD of — disambiguates a MOVING branch, since a SHA alone becomes
+        # an orphan hash once the branch advances). null when torch is an
+        # installed wheel / not a git checkout.
+        "pytorch_commit": pytorch_commit,
+        "pytorch_ref": pytorch_ref,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "n_repros": n_results,
         "n_results": n_results,
@@ -906,13 +988,10 @@ def _merge_into_baseline_locked(
     workload_kind: str | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
-    import subprocess as _sp
-
     if not baseline_path.exists():
         print(f"[merge-into] {baseline_path} does not exist, writing fresh")
-        commit = _sp.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
-        ).stdout.strip()
+        commit = _git_query(["rev-parse", "HEAD"]) or ""
+        pytorch_commit, pytorch_ref = _pytorch_provenance()
         failed_count, skipped_count = _failure_status_counts(new_failures)
         payload = _results_payload(
             new_results, new_failures,
@@ -926,6 +1005,8 @@ def _merge_into_baseline_locked(
                 "schema_version": 1,
                 "tool": "scripts/bench_parallel.py",
                 "commit": commit,
+                "pytorch_commit": pytorch_commit,
+                "pytorch_ref": pytorch_ref,
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "n_repros": len(new_results),
                 "n_results": len(new_results),
@@ -970,10 +1051,13 @@ def _merge_into_baseline_locked(
         old_failures[repro_path] = failure
         existing.pop(repro_path, None)
 
-    commit = _sp.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
-    ).stdout.strip()
+    commit = _git_query(["rev-parse", "HEAD"]) or ""
+    pytorch_commit, pytorch_ref = _pytorch_provenance()
     old_meta["commit"] = commit
+    # Refresh pytorch provenance too: a re-merge re-measures against the current
+    # torch, and the ref (e.g. tmp_work) may now point at a newer commit.
+    old_meta["pytorch_commit"] = pytorch_commit
+    old_meta["pytorch_ref"] = pytorch_ref
     old_meta["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ")
     old_meta.setdefault("schema_version", 1)
     old_meta.setdefault("tool", "scripts/bench_parallel.py")

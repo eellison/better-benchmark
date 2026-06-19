@@ -39,7 +39,13 @@ def _mock_sp_run(*args, **kwargs):
     return FakeResult()
 
 
-from bench_parallel import _merge_into_baseline, _results_payload
+from bench_parallel import (
+    _git_query,
+    _merge_into_baseline,
+    _pytorch_provenance,
+    _results_payload,
+    _run_metadata,
+)
 
 
 # ─── Fixtures ────────────────────────────────────────────────────────────────
@@ -639,3 +645,135 @@ class TestMergeIntoBaseline:
         data = json.loads(baseline.read_text())
         assert "repro/b/repro.py" in data["__failures__"]
         assert len(data["__failures__"]["repro/b/repro.py"]["error"]) == 100000
+
+
+class _FakeTorch:
+    """Stand-in for the ``torch`` module imported by _pytorch_provenance."""
+
+    class version:  # noqa: N801 — mirrors torch.version namespace
+        git_version = None
+
+    def __init__(self, *, file="/fake/pytorch/torch/__init__.py", git_version=None):
+        self.__file__ = file
+        self.version = type("version", (), {"git_version": git_version})
+
+
+def _install_fake_torch(monkeypatch, fake):
+    """Make ``import torch`` inside _pytorch_provenance resolve to ``fake``."""
+    import builtins
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "torch":
+            if fake is None:
+                raise ImportError("no torch")
+            return fake
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+
+class TestPytorchProvenance:
+    """_pytorch_provenance resolves the pytorch commit + branch/ref defensively."""
+
+    def test_git_checkout_branch(self, monkeypatch):
+        """Source checkout on a branch: commit from HEAD, ref from symbolic-ref."""
+        _install_fake_torch(monkeypatch, _FakeTorch())
+
+        def fake_git(args, cwd=None):
+            if args[:2] == ["rev-parse", "HEAD"]:
+                return "daa79cd25ca9a80bfd65799394cf4255d6be75a6"
+            if args[0] == "symbolic-ref":
+                return "tmp_work"
+            return None
+
+        monkeypatch.setattr("bench_parallel._git_query", fake_git)
+        commit, ref = _pytorch_provenance()
+        assert commit == "daa79cd25ca9a80bfd65799394cf4255d6be75a6"
+        assert ref == "tmp_work"
+
+    def test_detached_head(self, monkeypatch):
+        """Detached HEAD: symbolic-ref fails, abbrev-ref == 'HEAD' -> 'DETACHED'."""
+        _install_fake_torch(monkeypatch, _FakeTorch())
+
+        def fake_git(args, cwd=None):
+            if args[:2] == ["rev-parse", "HEAD"]:
+                return "deadbeef" * 5
+            if args[0] == "symbolic-ref":
+                return None  # detached: symbolic-ref -q exits non-zero
+            if args[:2] == ["rev-parse", "--abbrev-ref"]:
+                return "HEAD"  # git's literal sentinel for detached HEAD
+            return None
+
+        monkeypatch.setattr("bench_parallel._git_query", fake_git)
+        commit, ref = _pytorch_provenance()
+        assert commit == "deadbeef" * 5
+        assert ref == "DETACHED"
+
+    def test_wheel_install_fallback(self, monkeypatch):
+        """Installed wheel (no git checkout): commit from torch.version.git_version,
+        ref is None — never crashes."""
+        _install_fake_torch(
+            monkeypatch,
+            _FakeTorch(git_version="abc123def456abc123def456abc123def456abcd"),
+        )
+        # Not a git repo: every git query fails.
+        monkeypatch.setattr("bench_parallel._git_query", lambda args, cwd=None: None)
+        commit, ref = _pytorch_provenance()
+        assert commit == "abc123def456abc123def456abc123def456abcd"
+        assert ref is None
+
+    def test_torch_not_importable(self, monkeypatch):
+        """torch missing entirely: (None, None), no crash."""
+        _install_fake_torch(monkeypatch, None)
+        monkeypatch.setattr("bench_parallel._git_query", lambda args, cwd=None: None)
+        assert _pytorch_provenance() == (None, None)
+
+    def test_git_query_never_raises(self, monkeypatch):
+        """_git_query swallows subprocess failures and returns None."""
+        def boom(*args, **kwargs):
+            raise OSError("git not found")
+
+        monkeypatch.setattr("subprocess.run", boom)
+        assert _git_query(["rev-parse", "HEAD"]) is None
+
+
+class TestRunMetadata:
+    """_run_metadata emits pytorch provenance alongside the back-compat bb commit."""
+
+    def test_emits_pytorch_commit_and_ref(self, monkeypatch):
+        # bb-repo commit query (cwd=None) vs pytorch query are both routed
+        # through _git_query; the provenance helper is mocked directly.
+        monkeypatch.setattr(
+            "bench_parallel._git_query",
+            lambda args, cwd=None: "bbcommit0000000000000000000000000000000",
+        )
+        monkeypatch.setattr(
+            "bench_parallel._pytorch_provenance",
+            lambda: ("ptcommit1111111111111111111111111111111", "tmp_work"),
+        )
+        md = _run_metadata(workload_kind="repro", n_results=5)
+        # New structured pytorch provenance:
+        assert md["pytorch_commit"] == "ptcommit1111111111111111111111111111111"
+        assert md["pytorch_ref"] == "tmp_work"
+        # Back-compat: the bb-repo commit field is still present (consumers:
+        # results/b200/_stamp.py, the merge path, TestMergeIntoBaseline above).
+        assert md["commit"] == "bbcommit0000000000000000000000000000000"
+        assert md["workload_kind"] == "repro"
+        assert md["n_results"] == 5
+
+    def test_pytorch_ref_null_on_wheel(self, monkeypatch):
+        """When provenance can't resolve a ref (wheel), pytorch_ref is null but
+        the key is still present and _run_metadata does not crash."""
+        monkeypatch.setattr(
+            "bench_parallel._git_query", lambda args, cwd=None: "bbcommit"
+        )
+        monkeypatch.setattr(
+            "bench_parallel._pytorch_provenance",
+            lambda: ("wheelsha", None),
+        )
+        md = _run_metadata(workload_kind=None, n_results=1)
+        assert md["pytorch_commit"] == "wheelsha"
+        assert md["pytorch_ref"] is None
+        assert "workload_kind" not in md  # omitted when falsy
