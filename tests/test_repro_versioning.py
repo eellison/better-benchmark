@@ -95,11 +95,22 @@ class ReproVersioningTests(unittest.TestCase):
 
     def test_capture_hook_template_emits_current_marker(self):
         source = (ROOT / "capture_hook.py").read_text()
-        # v3 emits the version marker but NO inline _shapes_config (inputs load
-        # from the sibling shapes.json). Assert the marker matches the current
-        # version, and that the retired inline assignment is gone.
-        self.assertIn(f"_repro_version = {CURRENT_REPRO_VERSION}\n", source)
+        # The marker is DERIVED from CURRENT_REPRO_VERSION (interpolated into
+        # the generated-repro f-string template), not a hardcoded literal --
+        # so a future format bump that touches only the constant can never
+        # leave this writer stamping a stale version (the exact bug the v3
+        # migration hit). Pin the derivation, and confirm the retired inline
+        # _shapes_config assignment is gone.
+        self.assertIn("_repro_version = {CURRENT_REPRO_VERSION}\n", source)
         self.assertNotIn("\n_shapes_config =", source)
+
+    def test_capture_hook_derived_marker_resolves_to_current(self):
+        # Prove the derived template actually resolves to the current version:
+        # the module-level constant capture_hook interpolates must equal the
+        # harness constant the rest of the toolchain reads.
+        import capture_hook
+
+        self.assertEqual(capture_hook.CURRENT_REPRO_VERSION, CURRENT_REPRO_VERSION)
 
     def test_dry_run_marks_unversioned_repro_outdated(self):
         with tempfile.TemporaryDirectory() as tmp:

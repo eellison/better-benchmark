@@ -18,7 +18,12 @@ from typing import Any
 
 
 UNVERSIONED_REPRO_VERSION = 0
-DEFAULT_CURRENT_REPRO_VERSION = 2
+# Fallback only when repro_harness.py is absent or CURRENT_REPRO_VERSION cannot
+# be parsed from it (detect_current_repro_version). The live path parses the
+# constant directly; this must track it so a parse failure degrades to the
+# real current version, not a stale guess. Kept in sync with
+# repro_harness.CURRENT_REPRO_VERSION (3).
+DEFAULT_CURRENT_REPRO_VERSION = 3
 KNOWN_MODES = {"infer", "train"}
 _REPRO_VERSION_RE = re.compile(r"^_repro_version\s*=\s*(\d+)\s*(?:#.*)?$")
 _REPRO_VERSION_ASSIGN_RE = re.compile(r"^_repro_version\s*=.*$", re.MULTILINE)
