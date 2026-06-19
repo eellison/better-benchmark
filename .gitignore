@@ -57,12 +57,8 @@ tune_kernel.py
 validation_results.json
 *.best_config
 
-# Perf sweep outputs — kept locally by default. The curated, self-contained
-# B200 deliverable snapshot under results/b200/ IS published (un-ignored below);
-# the remaining scratch sweep dirs stay local.
+# Perf sweep outputs — kept locally, not published until results are ready
 results/
-!results/b200/
-!results/b200/**
 
 # Session investigation notebook + perf-bearing session logs — kept locally,
 # preserved on the investigations-june-2026 branch + tags, not published to main.
