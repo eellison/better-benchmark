@@ -1225,6 +1225,32 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             })
 
 
+def _parse_inductor_config(pairs):
+    """Parse repeated NAME=VALUE strings into a {name: python_value} dict.
+
+    NAME may be dotted (e.g. triton.multi_kernel). VALUE is parsed with
+    ast.literal_eval (so True/False/ints/floats/None/quoted strings work),
+    falling back to the raw string when it isn't a valid literal.
+    """
+    import ast
+    out = {}
+    for item in pairs or []:
+        if "=" not in item:
+            raise ValueError(f"--inductor-config expects NAME=VALUE, got: {item!r}")
+        name, _, raw = item.partition("=")
+        name = name.strip()
+        if not name or not all(seg.isidentifier() for seg in name.split(".")):
+            raise ValueError(
+                f"--inductor-config NAME must be a (dotted) identifier, got: {name!r}"
+            )
+        try:
+            value = ast.literal_eval(raw)
+        except (ValueError, SyntaxError):
+            value = raw
+        out[name] = value
+    return out
+
+
 def main():
     parser = argparse.ArgumentParser(description="Parallel GPU benchmark runner")
     parser.add_argument("paths", nargs="*", type=Path,
@@ -1263,10 +1289,16 @@ def main():
                         help="Benchmark all shapes from shapes.txt")
     parser.add_argument("--no-cd", action="store_true",
                         help="Skip coordinate descent tuning")
-    parser.add_argument("--combo-kernels", action="store_true",
-                        help="Enable inductor combo_kernels config")
-    parser.add_argument("--multi-kernel", type=int, default=0,
-                        help="Set inductor multi_kernel config (0=off, 1=on)")
+    parser.add_argument("--inductor-config", action="append", metavar="NAME=VALUE",
+                        default=None,
+                        help="Set an arbitrary torch._inductor.config.<NAME> for the "
+                             "sweep. Repeatable. VALUE is parsed as a Python literal "
+                             "(True/False/ints/floats/quoted strings) with a fallback to "
+                             "a raw string. Dotted names like triton.multi_kernel are "
+                             "supported. Applies to every torch.compile, including "
+                             "coordinate descent. Example: --inductor-config "
+                             "combo_kernels=True --inductor-config "
+                             "combo_kernel_max_num_nodes=16")
     parser.add_argument("--update-perf", action="store_true",
                         help="Write results to each repro's perf.json")
     parser.add_argument("--hardware", default=None,
@@ -1290,6 +1322,11 @@ def main():
     parser.add_argument("--merge-into", type=Path, default=None,
                         help="Merge results into an existing baseline JSON (updates only the benchmarked repros)")
     args = parser.parse_args()
+
+    try:
+        extra_inductor_config = _parse_inductor_config(args.inductor_config)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     # Compare mode: just read existing perf.json and diff
     if args.compare:
@@ -1440,6 +1477,8 @@ def main():
     if args.share_cache:
         print(f"  Shared inductor cache: {_SHARED_CACHE_DIR}")
     print(f"  Prefetch: enabled (overlaps module loading with GPU timing)")
+    if extra_inductor_config:
+        print(f"  Extra inductor config: {extra_inductor_config}")
     print()
 
     # Fill task queue (use regular queue since workers are threads)
@@ -1459,8 +1498,7 @@ def main():
         "share_cache": args.share_cache,
         "strict_gpu_lock": args.strict_gpu_lock,
         "n_workers": n_workers,
-        "combo_kernels": args.combo_kernels,
-        "multi_kernel": args.multi_kernel,
+        "extra_inductor_config": extra_inductor_config,
         "workload_kind": workload_kind,
     }
 
@@ -2115,6 +2153,7 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     prefetch thread or module import prints to stdout, shifting the result
     stream).
     """
+    extra_inductor_config = args_dict.get("extra_inductor_config", {}) or {}
     return f'''
 import builtins, contextlib, fcntl, io, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
@@ -2131,12 +2170,16 @@ from full_graph_harness import load_full_graph_definition, load_full_graph, resu
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 WORKLOAD_KIND = {args_dict.get("workload_kind", "repro")!r}
 
-# Extra inductor config knobs
-if {args_dict.get("combo_kernels", False)}:
-    inductor_config.combo_kernels = True
-    inductor_config.combo_kernel_per_subkernel_blocks = True
-if {args_dict.get("multi_kernel", 0)}:
-    inductor_config.triton.multi_kernel = {args_dict.get("multi_kernel", 0)}
+# Inductor config knobs from --inductor-config NAME=VALUE. Dotted names
+# (e.g. triton.multi_kernel) work. Unknown names warn rather than fail.
+for _ck_name, _ck_val in {extra_inductor_config!r}.items():
+    _ck_obj = inductor_config
+    *_ck_parents, _ck_leaf = _ck_name.split(".")
+    for _ck_p in _ck_parents:
+        _ck_obj = getattr(_ck_obj, _ck_p)
+    if not hasattr(_ck_obj, _ck_leaf):
+        print(f"WARNING: unknown inductor config: {{_ck_name}}", file=sys.stderr)
+    setattr(_ck_obj, _ck_leaf, _ck_val)
 
 # --- Prefetch infrastructure ---
 # Pre-imports the next repro module while the current one is being timed.
@@ -2649,6 +2692,7 @@ for line in sys.stdin:
 
 def _worker_script(repro_path: str, gpu_idx: str, args_dict: dict) -> str:
     """Generate a self-contained benchmark script for one repro."""
+    extra_inductor_config = args_dict.get("extra_inductor_config", {}) or {}
     return f'''
 import sys, json, os
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
@@ -2659,12 +2703,16 @@ import torch._inductor.metrics as inductor_metrics
 from triton.testing import do_bench
 import importlib.util, math
 
-# Extra inductor config knobs
-if {args_dict.get("combo_kernels", False)}:
-    inductor_config.combo_kernels = True
-    inductor_config.combo_kernel_per_subkernel_blocks = True
-if {args_dict.get("multi_kernel", 0)}:
-    inductor_config.triton.multi_kernel = {args_dict.get("multi_kernel", 0)}
+# Inductor config knobs from --inductor-config NAME=VALUE. Dotted names
+# (e.g. triton.multi_kernel) work. Unknown names warn rather than fail.
+for _ck_name, _ck_val in {extra_inductor_config!r}.items():
+    _ck_obj = inductor_config
+    *_ck_parents, _ck_leaf = _ck_name.split(".")
+    for _ck_p in _ck_parents:
+        _ck_obj = getattr(_ck_obj, _ck_p)
+    if not hasattr(_ck_obj, _ck_leaf):
+        print(f"WARNING: unknown inductor config: {{_ck_name}}", file=sys.stderr)
+    setattr(_ck_obj, _ck_leaf, _ck_val)
 
 spec = importlib.util.spec_from_file_location("repro", "{repro_path}")
 mod = importlib.util.module_from_spec(spec)
