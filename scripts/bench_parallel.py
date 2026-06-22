@@ -139,6 +139,127 @@ def _expand_oracle_shape_tasks(dirs: list[Path]) -> list[str]:
     return tasks
 
 
+def _expand_repro_shape_tasks(repros: list[Path]) -> list[str]:
+    """Expand repro.py files into (repro, shape_label) task keys for sharding.
+
+    The repro --all-shapes equivalent of ``_expand_oracle_shape_tasks``: each
+    repro.py's shapes.json points become individual tasks so the worker pool
+    spreads them across all GPUs, instead of one worker looping every shape of a
+    big dir serially while peers idle. A repro with no shape configs yields a
+    single ``<repro.py>::SHAPE::__default__`` task (one default point, same as
+    the un-sharded all_shapes=False/empty-configs branch).
+
+    The task key wraps the repro.py file path (NOT the dir): the repro path
+    output JSON, --update-perf, and --merge-into are all keyed by the bare
+    repro.py path, so the worker benches one shape and the parent regroups the
+    per-shape payloads back under that bare path (see
+    ``_regroup_sharded_repro_results``). The worker still does a fresh
+    torch._dynamo.reset() + compile per shape — sharding changes only the task
+    GRANULARITY, never WHAT is measured.
+    """
+    from repro_harness import load_shape_configs
+
+    tasks: list[str] = []
+    for repro_file in repros:
+        try:
+            configs = load_shape_configs(str(repro_file))
+        except Exception:
+            configs = None
+        if configs:
+            for label in configs:
+                tasks.append(_make_shape_task_key(str(repro_file), label))
+        else:
+            tasks.append(_make_shape_task_key(str(repro_file), _DEFAULT_SHAPE_TOKEN))
+    return tasks
+
+
+def _sort_shape_tasks_big_dirs_first(tasks: list[str]) -> list[str]:
+    """Order sharded (path, shape) tasks so the biggest dirs drain first.
+
+    Shared by the oracle and repro sharded paths. Groups a path's shape tasks
+    contiguously but places the paths with the most shapes first: the worker
+    pool pulls round-robin, so emitting the big paths' points up front lets all
+    workers chew them in parallel from the start; the small single-shape paths
+    drain at the end (cheap, no straggler tail).
+    """
+    from collections import Counter
+
+    dir_task_count = Counter(_split_shape_task_key(t)[0] for t in tasks)
+    return sorted(
+        tasks,
+        key=lambda k: (
+            -dir_task_count[_split_shape_task_key(k)[0]],
+            _split_shape_task_key(k)[0],
+        ),
+    )
+
+
+def _regroup_sharded_repro_results(all_results: dict) -> dict:
+    """Regroup per-(repro, shape) sharded payloads back under their repro.py path.
+
+    With repro --all-shapes sharding the task unit is one
+    ``<repro.py>::SHAPE::<label>`` key, and each worker returns a single-shape
+    payload ``{<shape_label>: {compiled_us, ...}}``. Downstream consumers (the
+    --output JSON schema, --update-perf, --merge-into, the gap roll-up) all
+    expect ONE payload per repro.py keyed by the bare path, with every shape
+    label merged inside it — byte-identical to the un-sharded in-worker-loop
+    output. This merges all of a repro's shape payloads back into that shape.
+
+    Bare repro.py keys (un-sharded, e.g. all_shapes=False) pass through
+    unchanged: one key per repro, no separator.
+    """
+    merged: dict[str, dict] = {}
+    for task_key, results in all_results.items():
+        repro_path, _label = _split_shape_task_key(str(task_key))
+        bucket = merged.setdefault(repro_path, {})
+        if isinstance(results, dict):
+            for label, point in results.items():
+                bucket[label] = point
+    return merged
+
+
+def _regroup_sharded_repro_failures(all_results: dict, failures: dict) -> dict:
+    """Collapse per-(repro, shape) worker failures back under their repro.py path.
+
+    A worker exception fails ONE (repro, shape) task keyed
+    ``<repro.py>::SHAPE::<label>`` rather than the whole repro. The repro path's
+    failure map is keyed by repro.py path, so fold each sharded failure back.
+
+    Two cases, neither of which alters a SUCCEEDING repro's payload (the
+    success schema stays byte-identical to the un-sharded path):
+      - No shape of this repro succeeded (bare path absent from ``all_results``):
+        record ONE failure entry under the bare repro.py path, annotated with
+        the failed shape labels.
+      - At least one shape succeeded: that repro's success payload is left
+        untouched; the failed shapes are recorded under the SHAPE-qualified task
+        key so they are accounted (resumable) without colliding with — or
+        mutating — the bare-path success entry.
+    """
+    succeeded = set(all_results)
+    regrouped: dict[str, dict] = {}
+    for task_key, failure in failures.items():
+        repro_path, label = _split_shape_task_key(str(task_key))
+        # Un-sharded failure (no ::SHAPE:: suffix): pass through untouched.
+        if label is None:
+            regrouped[task_key] = failure
+            continue
+        if repro_path in succeeded:
+            # Some shape(s) of this repro succeeded — keep the success payload
+            # byte-identical; record this shape's failure under its own key.
+            regrouped[str(task_key)] = failure
+            continue
+        # No shape of this repro succeeded: collapse to one entry per repro,
+        # annotated with which shape labels failed.
+        existing = regrouped.get(repro_path)
+        if existing is None:
+            entry = dict(failure) if isinstance(failure, dict) else {"error": str(failure)}
+            entry["failed_shapes"] = [label]
+            regrouped[repro_path] = entry
+        else:
+            existing.setdefault("failed_shapes", []).append(label)
+    return regrouped
+
+
 def _regroup_sharded_oracle_failures(sharded_failures: dict) -> dict:
     """Regroup per-(dir,shape) WORKER EXCEPTIONS back under their dir name.
 
@@ -1331,18 +1452,8 @@ def main():
         # peers idle. Order biggest-dirs-first so any residual tail is small.
         # Each task still runs the numerics gate + fresh static compile per
         # shape (commit 4ca6d532b); sharding is purely a scheduling change.
-        repros = _expand_oracle_shape_tasks(oracle_dirs)
-        # Group a dir's shape tasks contiguously, but place dirs with the most
-        # shapes first. The worker pool pulls round-robin, so emitting the big
-        # dirs' points up front lets all workers chew them in parallel from the
-        # start; the small single-shape dirs drain at the end (cheap, no tail).
-        from collections import Counter as _Counter
-        _dir_task_count = _Counter(_split_shape_task_key(t)[0] for t in repros)
-        repros.sort(
-            key=lambda k: (
-                -_dir_task_count[_split_shape_task_key(k)[0]],
-                _split_shape_task_key(k)[0],
-            )
+        repros = _sort_shape_tasks_big_dirs_first(
+            _expand_oracle_shape_tasks(oracle_dirs)
         )
     elif args.full_graphs:
         graph_paths = args.paths or [args.models_root]
@@ -1367,6 +1478,22 @@ def main():
         else:
             print("No repro.py files found.")
         return
+
+    # SHARDING (repro --all-shapes path): make the task unit a (repro, shape)
+    # point rather than a whole repro.py, so a big multi-shape dir (e.g. the
+    # 469-shape pointwise_04d85912d998) spreads across all GPUs instead of
+    # pinning ONE worker that loops them serially while peers idle — the exact
+    # straggler the oracle sharding fix (commit 1b3c9c330) killed, here applied
+    # to the plain repro path. The worker benches ONE shape per task with its
+    # own torch._dynamo.reset() + compile (unchanged methodology); the parent
+    # regroups the per-shape payloads back under each bare repro.py path so the
+    # output JSON / perf.json / merge schema is byte-identical to the
+    # un-sharded in-worker-loop path. Only granularity changes, not the numbers.
+    shard_repros = not args.oracles and not args.full_graphs and args.all_shapes
+    if shard_repros:
+        repros = _sort_shape_tasks_big_dirs_first(
+            _expand_repro_shape_tasks(repros)
+        )
 
     total_requested = len(repros)
     preflight_failures: dict[str, dict] = {}
@@ -1558,10 +1685,18 @@ def main():
         if args.output and args.oracles and (done + failed) % 50 == 0:
             _write_oracle_timings_output(args.output, all_results, failures)
         elif args.output and (done + failed) % 50 == 0:
+            # Regroup sharded (repro, shape) keys back to bare repro.py paths so
+            # the incremental snapshot uses the same schema as the final write
+            # (a no-op on un-sharded keys).
+            if shard_repros:
+                snap_results = _regroup_sharded_repro_results(all_results)
+                snap_failures = _regroup_sharded_repro_failures(snap_results, failures)
+            else:
+                snap_results, snap_failures = all_results, failures
             _write_results_output(
                 args.output,
-                all_results,
-                failures,
+                snap_results,
+                snap_failures,
                 total=total_requested,
                 done=done,
                 failed=failed + preflight_failed,
@@ -1585,6 +1720,29 @@ def main():
     total_failed = failed + preflight_failed
     print(f"\nDone: {done} ok, {total_failed} failed, {skipped} skipped in {elapsed_total:.1f}s "
           f"({elapsed_total/max(done+failed,1):.1f}s/{task_unit} effective)")
+
+    # REGROUP (repro sharding): collapse the per-(repro, shape) sharded payloads
+    # — keyed by "<repro.py>::SHAPE::<label>", each carrying one shape — back
+    # under their bare repro.py path with every shape merged inside, so the
+    # output JSON / perf.json / merge schema is identical to the un-sharded
+    # in-worker-loop path. A no-op on bare repro keys (un-sharded). Failures are
+    # likewise folded back per repro.py path.
+    if shard_repros:
+        all_results = _regroup_sharded_repro_results(all_results)
+        failures = _regroup_sharded_repro_failures(all_results, failures)
+        # The summary counts were tallied per shape-task; restate them per
+        # repro (the regrouped unit) so __summary__ reflects repros, not shards.
+        # A failure key that is a SHAPE-qualified task key belongs to a repro
+        # that has surviving shapes in all_results (already counted as done), so
+        # it must NOT also count as a failed repro — only bare-path failures do.
+        done = len(all_results)
+        failed = sum(
+            1 for k, f in failures.items()
+            if _split_shape_task_key(str(k))[1] is None
+            and not (isinstance(f, dict) and f.get("status") == "skipped")
+        )
+        total_failed = failed + preflight_failed
+        total_requested = done + failed + skipped + preflight_failed
 
     # Save perf.json per repro
     if args.update_perf and all_results:
@@ -2130,6 +2288,18 @@ from full_graph_harness import load_full_graph_definition, load_full_graph, resu
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 WORKLOAD_KIND = {args_dict.get("workload_kind", "repro")!r}
+# (repro, shape) sharding: a task key may be "<repro.py>::SHAPE::<label>",
+# meaning bench ONLY that one shape. A bare path (no separator) benches all
+# shapes as before (un-sharded fallback).
+SHAPE_SEP = {_SHAPE_TASK_SEP!r}
+DEFAULT_SHAPE_TOKEN = {_DEFAULT_SHAPE_TOKEN!r}
+
+def _split_task_key(task_key):
+    \"\"\"(repro_path, shape_label|None) from a possibly-sharded task key.\"\"\"
+    if SHAPE_SEP in task_key:
+        path, label = task_key.rsplit(SHAPE_SEP, 1)
+        return path, label
+    return task_key, None
 
 # Extra inductor config knobs
 if {args_dict.get("combo_kernels", False)}:
@@ -2326,6 +2496,10 @@ def _prefetch_module(repro_path):
     any print statements in the loaded module from polluting the JSON result
     stream on stdout (which would cause result misalignment in the parent).
     """
+    # Cache by the FULL task key (so a sharded "<repro.py>::SHAPE::<label>" key
+    # round-trips through _get_or_load_module unchanged), but load the module
+    # from the bare repro.py path with the shape suffix stripped.
+    file_path, _shape_label = _split_task_key(repro_path)
     try:
         # Redirect stdout in this thread to prevent pollution of the result pipe.
         # stderr is fine (parent drains it separately).
@@ -2333,18 +2507,18 @@ def _prefetch_module(repro_path):
         sys.stdout = io.StringIO()
         try:
             if WORKLOAD_KIND == "full_graph":
-                definition = load_full_graph_definition(repro_path)
+                definition = load_full_graph_definition(file_path)
                 with _prefetch_lock:
                     _prefetch_cache[repro_path] = definition
                 return
-            spec = importlib.util.spec_from_file_location("repro_prefetch", repro_path)
+            spec = importlib.util.spec_from_file_location("repro_prefetch", file_path)
             mod = importlib.util.module_from_spec(spec)
             mod.device = torch.device
             mod.inf = math.inf
             mod.nan = math.nan
             spec.loader.exec_module(mod)
             instance = mod.Repro()
-            configs = load_shape_configs(repro_path)
+            configs = load_shape_configs(file_path)
             with _prefetch_lock:
                 _prefetch_cache[repro_path] = (mod, instance, configs)
         finally:
@@ -2353,26 +2527,32 @@ def _prefetch_module(repro_path):
         pass  # prefetch failure is non-fatal; bench_one will load normally
 
 def _get_or_load_module(repro_path):
-    """Get module from prefetch cache, or load synchronously."""
+    """Get module from prefetch cache, or load synchronously.
+
+    ``repro_path`` is the FULL task key, possibly carrying a ::SHAPE:: suffix;
+    the module is loaded from the bare repro.py path with the suffix stripped.
+    """
     with _prefetch_lock:
         cached = _prefetch_cache.pop(repro_path, None)
     if cached is not None:
         return cached
+    file_path, _shape_label = _split_task_key(repro_path)
     # Synchronous fallback
-    spec = importlib.util.spec_from_file_location("repro", repro_path)
+    spec = importlib.util.spec_from_file_location("repro", file_path)
     mod = importlib.util.module_from_spec(spec)
     mod.device = torch.device
     mod.inf = math.inf
     mod.nan = math.nan
     spec.loader.exec_module(mod)
     instance = mod.Repro()
-    configs = load_shape_configs(repro_path)
+    configs = load_shape_configs(file_path)
     return (mod, instance, configs)
 
 def _get_or_load_full_graph(repro_path):
+    file_path, _shape_label = _split_task_key(repro_path)
     with _prefetch_lock:
         cached = _prefetch_cache.pop(repro_path, None)
-    definition = cached if cached is not None else load_full_graph_definition(repro_path)
+    definition = cached if cached is not None else load_full_graph_definition(file_path)
     instance, inputs, definition = load_full_graph(definition, default_device="cuda")
     return instance, inputs, definition
 
@@ -2491,10 +2671,27 @@ def bench_one(repro_path):
     if WORKLOAD_KIND == "full_graph":
         return bench_full_graph_one(repro_path)
 
+    # Decode a possibly-sharded "<repro.py>::SHAPE::<label>" task key. When a
+    # shape label is present, bench ONLY that shape (the sharded unit); the
+    # per-shape body below is byte-identical to that shape's iteration of the
+    # un-sharded all-shapes loop (same dynamo reset + fresh compile). The
+    # parent regroups all of a repro's per-shape payloads back under its bare
+    # repro.py path, so the output is unchanged.
+    _file_path, shape_label = _split_task_key(repro_path)
     mod, instance, configs = _get_or_load_module(repro_path)
 
     all_shapes = {args_dict["all_shapes"]}
-    if all_shapes and configs:
+    if shape_label is not None and shape_label != DEFAULT_SHAPE_TOKEN:
+        # Sharded: a specific named shape point.
+        if not configs or shape_label not in configs:
+            raise KeyError(
+                f"shape {{shape_label!r}} not found in configs for {{_file_path}}"
+            )
+        shape_items = [(shape_label, configs[shape_label])]
+    elif shape_label == DEFAULT_SHAPE_TOKEN:
+        # Sharded: the single default point of a repro with no shape configs.
+        shape_items = [(None, None)]
+    elif all_shapes and configs:
         shape_items = list(configs.items())
     else:
         shape_items = [(None, None)]

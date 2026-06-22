@@ -412,5 +412,154 @@ def test_write_case_e_aggregator_failures_survive_untouched():
         assert "dirA" in timed and timed["dirA"]["n_points"] == 1
 
 
+# ── REPRO --all-shapes sharding: expansion + regroup ────────────────────────
+# Mirrors the oracle sharding but for the plain repro path (no --oracles). The
+# task unit becomes one (repro.py, shape) point; the parent regroups per-shape
+# payloads back under the bare repro.py path so the output is byte-identical to
+# the un-sharded in-worker-loop path.
+
+def test_expand_repro_shape_tasks(monkeypatch):
+    multi = Path("/x/repros/canonical/multi/repro.py")
+    single = Path("/x/repros/canonical/single/repro.py")
+    noconfig = Path("/x/repros/canonical/none/repro.py")
+
+    def fake_load(repro_file, symbol_bindings=None):
+        d = Path(repro_file).parent.name
+        if d == "multi":
+            return {"s0=8": object(), "s0=16": object()}
+        if d == "single":
+            return {"only": object()}
+        if d == "none":
+            return {}
+        raise FileNotFoundError(repro_file)
+
+    monkeypatch.setattr(sys.modules["repro_harness"], "load_shape_configs", fake_load)
+
+    tasks = bp._expand_repro_shape_tasks([multi, single, noconfig])
+    assert tasks == [
+        f"{multi}::SHAPE::s0=8",
+        f"{multi}::SHAPE::s0=16",
+        f"{single}::SHAPE::only",
+        f"{noconfig}::SHAPE::__default__",
+    ]
+
+
+def test_expand_repro_shape_tasks_load_raises_falls_back_to_default(monkeypatch):
+    p = Path("/x/repros/canonical/boom/repro.py")
+
+    def boom(repro_file, symbol_bindings=None):
+        raise RuntimeError("bad shapes.json")
+
+    monkeypatch.setattr(sys.modules["repro_harness"], "load_shape_configs", boom)
+    assert bp._expand_repro_shape_tasks([p]) == [f"{p}::SHAPE::__default__"]
+
+
+def test_sort_shape_tasks_big_dirs_first():
+    # Two shapes of dirB + one of dirA + three of dirC -> dirC (3) then dirB (2)
+    # then dirA (1); within a dir, original relative order is preserved by the
+    # stable sort, and ties between equal-count dirs break on path.
+    tasks = [
+        bp._make_shape_task_key("/r/dirA/repro.py", "a0"),
+        bp._make_shape_task_key("/r/dirB/repro.py", "b0"),
+        bp._make_shape_task_key("/r/dirB/repro.py", "b1"),
+        bp._make_shape_task_key("/r/dirC/repro.py", "c0"),
+        bp._make_shape_task_key("/r/dirC/repro.py", "c1"),
+        bp._make_shape_task_key("/r/dirC/repro.py", "c2"),
+    ]
+    out = bp._sort_shape_tasks_big_dirs_first(tasks)
+    dirs_in_order = [bp._split_shape_task_key(t)[0] for t in out]
+    # dirC (3 shapes) first, then dirB (2), then dirA (1)
+    assert dirs_in_order == [
+        "/r/dirC/repro.py", "/r/dirC/repro.py", "/r/dirC/repro.py",
+        "/r/dirB/repro.py", "/r/dirB/repro.py",
+        "/r/dirA/repro.py",
+    ]
+
+
+def _per_repro_shape_payloads():
+    """Per-(repro, shape) payloads: {repro.py::SHAPE::label: {label: point}}."""
+    a = "/r/canonical/dirA/repro.py"
+    return {
+        bp._make_shape_task_key(a, "s0=8"): {
+            "s0=8": {"compiled_us": 10.0, "coord_descent_us": 9.0,
+                     "memcopy_sol_us": 5.0, "total_bytes": 1024,
+                     "gap_default": 2.0, "gap_cd": 1.8},
+        },
+        bp._make_shape_task_key(a, "s0=16"): {
+            "s0=16": {"compiled_us": 20.0, "coord_descent_us": 18.0,
+                      "memcopy_sol_us": 5.0, "total_bytes": 2048,
+                      "gap_default": 4.0, "gap_cd": 3.6},
+        },
+    }
+
+
+def _per_repro_unsharded_payload():
+    """The equivalent un-sharded payload: one repro.py key, both shapes inside."""
+    a = "/r/canonical/dirA/repro.py"
+    return {
+        a: {
+            "s0=8": {"compiled_us": 10.0, "coord_descent_us": 9.0,
+                     "memcopy_sol_us": 5.0, "total_bytes": 1024,
+                     "gap_default": 2.0, "gap_cd": 1.8},
+            "s0=16": {"compiled_us": 20.0, "coord_descent_us": 18.0,
+                      "memcopy_sol_us": 5.0, "total_bytes": 2048,
+                      "gap_default": 4.0, "gap_cd": 3.6},
+        },
+    }
+
+
+def test_regroup_sharded_repro_results_equals_unsharded():
+    # THE KEY equivalence: per-(repro, shape) payloads regroup IDENTICALLY to
+    # the one-payload-per-repro (un-sharded in-worker-loop) output.
+    regrouped = bp._regroup_sharded_repro_results(_per_repro_shape_payloads())
+    assert regrouped == _per_repro_unsharded_payload()
+
+
+def test_regroup_sharded_repro_results_bare_keys_passthrough():
+    # Un-sharded (bare repro.py) keys pass through unchanged (idempotent).
+    unsharded = _per_repro_unsharded_payload()
+    assert bp._regroup_sharded_repro_results(unsharded) == unsharded
+
+
+def test_regroup_repro_failures_all_shapes_failed():
+    # No shape of the repro succeeded -> ONE failure entry under the bare path,
+    # annotated with the failed shape labels.
+    a = "/r/canonical/dirA/repro.py"
+    all_results = {}  # nothing succeeded
+    failures = {
+        bp._make_shape_task_key(a, "s0=8"): {"error": "boom-8"},
+        bp._make_shape_task_key(a, "s0=16"): {"error": "boom-16"},
+    }
+    out = bp._regroup_sharded_repro_failures(all_results, failures)
+    assert set(out) == {a}
+    assert out[a]["error"] == "boom-8"           # first-seen failure preserved
+    assert sorted(out[a]["failed_shapes"]) == ["s0=16", "s0=8"]
+
+
+def test_regroup_repro_failures_partial_keeps_success_byte_identical():
+    # Some shapes succeeded -> the success payload is left BYTE-IDENTICAL; the
+    # failed shape is recorded under its SHAPE-qualified key (no collision).
+    a = "/r/canonical/dirA/repro.py"
+    all_results = bp._regroup_sharded_repro_results(_per_repro_shape_payloads())
+    success_before = json.loads(json.dumps(all_results))  # deep copy snapshot
+    failures = {
+        bp._make_shape_task_key(a, "s0=32"): {"error": "boom-32"},
+    }
+    out = bp._regroup_sharded_repro_failures(all_results, failures)
+    # success payload untouched
+    assert all_results == success_before
+    # the failed shape is accounted under its shape-qualified key, NOT the bare path
+    assert a not in out
+    assert bp._make_shape_task_key(a, "s0=32") in out
+    assert out[bp._make_shape_task_key(a, "s0=32")]["error"] == "boom-32"
+
+
+def test_regroup_repro_failures_bare_failure_passthrough():
+    # An un-sharded (bare-path) failure passes through untouched.
+    failures = {"/r/canonical/dirX/repro.py": {"error": "whole-repro-failed"}}
+    out = bp._regroup_sharded_repro_failures({}, failures)
+    assert out == failures
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))
