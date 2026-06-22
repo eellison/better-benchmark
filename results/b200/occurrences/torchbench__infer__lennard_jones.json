@@ -1,0 +1,37 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "edfab1af9465": {
+      "5a025cf0": 3
+    },
+    "38f32925c62e": {
+      "c67d6e69": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "053843685bb4",
+      "count": 3,
+      "sig": "((T([16],torch.bfloat16,[1]),T([128, 16],torch.bfloat16,[16, 1]),T([16, 16],torch.bfloat16,[1, 16])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/lennard_jones/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 6.432000081986189,
+      "branch_us": 6.432000081986189
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "70c9ea940dd2",
+      "count": 1,
+      "sig": "((T([1],torch.bfloat16,[1]),T([128, 16],torch.bfloat16,[16, 1]),T([16, 1],torch.bfloat16,[1, 16])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/lennard_jones/full_graph_000.py",
+      "node": "addmm_3",
+      "baseline_us": 7.807999849319458,
+      "branch_us": 7.807999849319458
+    }
+  ],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "infer",
+  "model": "lennard_jones"
+}

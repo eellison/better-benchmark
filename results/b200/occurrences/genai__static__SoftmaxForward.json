@@ -1,0 +1,13 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "7079889cfc04": {
+      "4ac62a08": 1
+    }
+  },
+  "extern": [],
+  "trace_errors": [],
+  "suite": "genai",
+  "mode": "static",
+  "model": "SoftmaxForward"
+}

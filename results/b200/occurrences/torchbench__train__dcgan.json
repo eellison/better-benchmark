@@ -1,0 +1,151 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "246850b7c198": {
+      "dda9fef3": 1
+    },
+    "ccd411f2a45d": {
+      "2f739afe": 1,
+      "5fb31b1a": 1,
+      "801b14cc": 1,
+      "5b1518f0": 1,
+      "2d2df877": 1,
+      "a093300e": 1
+    },
+    "3b8a231721ed": {
+      "1918a7da": 1,
+      "1e748ae3": 1,
+      "c42a1f04": 1
+    },
+    "100a39b686e3": {
+      "896c6bb5": 3
+    },
+    "0872313c7e7a": {
+      "356e4166": 1
+    },
+    "04d85912d998": {
+      "55a8fc61": 1,
+      "5b88fe45": 1,
+      "8ce49709": 1,
+      "e8017db1": 1,
+      "73879c72": 1
+    },
+    "e65ebcfd5b2c": {
+      "78d93924": 1
+    },
+    "12fc8ebf8180": {
+      "a564ddd4": 1,
+      "49f9b4bd": 1,
+      "15406f9b": 1
+    },
+    "e8ae58ea3c65": {
+      "8ebdd403": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "8c03ed956100",
+      "count": 1,
+      "sig": "((T([32, 3, 64, 64],torch.bfloat16,[12288, 4096, 64, 1]),T([64, 3, 4, 4],torch.bfloat16,[48, 16, 4, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 18.271999433636665,
+      "branch_us": 18.271999433636665
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "a9e72efbff3b",
+      "count": 1,
+      "sig": "((T([32, 64, 32, 32],torch.bfloat16,[65536, 1024, 32, 1]),T([128, 64, 4, 4],torch.bfloat16,[1024, 16, 4, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_000.py",
+      "node": "convolution_1",
+      "baseline_us": 26.30399912595749,
+      "branch_us": 26.30399912595749
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "b8ff1a07b2e1",
+      "count": 1,
+      "sig": "((T([32, 128, 16, 16],torch.bfloat16,[32768, 256, 16, 1]),T([256, 128, 4, 4],torch.bfloat16,[2048, 16, 4, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_000.py",
+      "node": "convolution_2",
+      "baseline_us": 22.207999601960182,
+      "branch_us": 22.207999601960182
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "4410b50aecb2",
+      "count": 1,
+      "sig": "((T([32, 256, 8, 8],torch.bfloat16,[16384, 64, 8, 1]),T([512, 256, 4, 4],torch.bfloat16,[4096, 16, 4, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_000.py",
+      "node": "convolution_3",
+      "baseline_us": 28.44800055027008,
+      "branch_us": 28.44800055027008
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "b3e0ff7569de",
+      "count": 1,
+      "sig": "((T([32, 512, 4, 4],torch.bfloat16,[8192, 16, 4, 1]),T([1, 512, 4, 4],torch.bfloat16,[8192, 16, 4, 1]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_000.py",
+      "node": "convolution_4",
+      "baseline_us": 34.2399999499321,
+      "branch_us": 34.2399999499321
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "df4103267d3a",
+      "count": 1,
+      "sig": "((T([32, 1, 1, 1],torch.bfloat16,[1, 1, 1, 1]),T([32, 512, 4, 4],torch.bfloat16,[8192, 16, 4, 1]),T([1, 512, 4, 4],torch.bfloat16,[8192, 16, 4, 1]),[0],[1,1],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_001.py",
+      "node": "convolution_backward",
+      "baseline_us": 46.81599885225296,
+      "branch_us": 46.81599885225296
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "c859fa6d609b",
+      "count": 1,
+      "sig": "((T([32, 512, 4, 4],torch.bfloat16,[8192, 16, 4, 1]),T([32, 256, 8, 8],torch.bfloat16,[16384, 64, 8, 1]),T([512, 256, 4, 4],torch.bfloat16,[4096, 16, 4, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_001.py",
+      "node": "convolution_backward_1",
+      "baseline_us": 52.86400020122528,
+      "branch_us": 52.86400020122528
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "3d5bb5fd60ae",
+      "count": 1,
+      "sig": "((T([32, 256, 8, 8],torch.bfloat16,[16384, 64, 8, 1]),T([32, 128, 16, 16],torch.bfloat16,[32768, 256, 16, 1]),T([256, 128, 4, 4],torch.bfloat16,[2048, 16, 4, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_001.py",
+      "node": "convolution_backward_2",
+      "baseline_us": 44.64000090956688,
+      "branch_us": 44.64000090956688
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "0ac7c326b07a",
+      "count": 1,
+      "sig": "((T([32, 128, 16, 16],torch.bfloat16,[32768, 256, 16, 1]),T([32, 64, 32, 32],torch.bfloat16,[65536, 1024, 32, 1]),T([128, 64, 4, 4],torch.bfloat16,[1024, 16, 4, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_001.py",
+      "node": "convolution_backward_3",
+      "baseline_us": 62.3680017888546,
+      "branch_us": 62.3680017888546
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "20fcc42af7fc",
+      "count": 1,
+      "sig": "((T([32, 64, 32, 32],torch.bfloat16,[65536, 1024, 32, 1]),T([32, 3, 64, 64],torch.bfloat16,[12288, 4096, 64, 1]),T([64, 3, 4, 4],torch.bfloat16,[48, 16, 4, 1]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[False,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/dcgan/full_graph_001.py",
+      "node": "convolution_backward_4",
+      "baseline_us": 45.951999723911285,
+      "branch_us": 45.951999723911285
+    }
+  ],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "train",
+  "model": "dcgan"
+}

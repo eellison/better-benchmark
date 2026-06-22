@@ -1,0 +1,202 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "b6d762cd3d81": {
+      "58f85f13": 1,
+      "f1684e51": 4
+    },
+    "8bb40810003c": {
+      "43065864": 1,
+      "16e5c8c0": 2,
+      "fdcbaff1": 1,
+      "25dff7ef": 1
+    },
+    "ccd411f2a45d": {
+      "bc96487a": 1,
+      "7c4f45ce": 4,
+      "3dd2d471": 1,
+      "383d0ce2": 1
+    },
+    "ac8d8e1c9b73": {
+      "0f3e2fa1": 1
+    },
+    "dda19333a406": {
+      "af408fe3": 1
+    },
+    "adee6b94a0b8": {
+      "a7f39cdb": 1
+    },
+    "f7babc5c978c": {
+      "b4e770d9": 1
+    },
+    "dbd126b833fb": {
+      "3a1fd470": 1
+    },
+    "04d85912d998": {
+      "03889ef1": 2,
+      "ab519e15": 1,
+      "6d360d07": 1
+    },
+    "53ecd5ca9ebe": {
+      "a7f39cdb": 3
+    },
+    "7039286a336e": {
+      "35648b40": 1
+    },
+    "29959fe03fc6": {
+      "e874c124": 1
+    },
+    "f88c36f2e98a": {
+      "580b2d03": 1
+    },
+    "b7a98f3c6228": {
+      "348dd978": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "ab80622446b4",
+      "count": 1,
+      "sig": "((T([512],torch.bfloat16,[1]),T([256, 197951],torch.bfloat16,[197951, 1]),T([197951, 512],torch.bfloat16,[1, 197951])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 546.720027923584,
+      "branch_us": 546.720027923584
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "c9e6146c7398",
+      "count": 2,
+      "sig": "((T([512],torch.bfloat16,[1]),T([256, 512],torch.bfloat16,[512, 1]),T([512, 512],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 7.807999849319458,
+      "branch_us": 7.807999849319458
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "40e5f490cfe0",
+      "count": 1,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([256, 512],torch.bfloat16,[512, 1]),T([512, 1024],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 7.74399982765317,
+      "branch_us": 7.74399982765317
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "aa79c78152a6",
+      "count": 1,
+      "sig": "((T([512],torch.bfloat16,[1]),T([256, 1024],torch.bfloat16,[1024, 1]),T([1024, 512],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_000.py",
+      "node": "addmm_3",
+      "baseline_us": 7.807999849319458,
+      "branch_us": 7.807999849319458
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "00f2fdd3012d",
+      "count": 1,
+      "sig": "((T([197951],torch.bfloat16,[1]),T([256, 512],torch.bfloat16,[512, 1]),T([512, 197951],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 462.5920057296753,
+      "branch_us": 462.5920057296753
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "2bc3c8585623",
+      "count": 1,
+      "sig": "((T([256, 197952],torch.bfloat16,[197952, 1]),T([197952, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 71.42399996519089,
+      "branch_us": 71.42399996519089
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "678f717148e2",
+      "count": 1,
+      "sig": "((T([197952, 256],torch.bfloat16,[256, 1]),T([256, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 54.816000163555145,
+      "branch_us": 54.816000163555145
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "b40b6839f289",
+      "count": 2,
+      "sig": "((T([256, 512],torch.bfloat16,[512, 1]),T([512, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_001.py",
+      "node": "mm_2",
+      "baseline_us": 7.040000054985285,
+      "branch_us": 7.040000054985285
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "610dc20e5b15",
+      "count": 2,
+      "sig": "((T([512, 256],torch.bfloat16,[1, 512]),T([256, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_001.py",
+      "node": "mm_3",
+      "baseline_us": 6.943999789655209,
+      "branch_us": 6.943999789655209
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "8fd9bccbdf39",
+      "count": 1,
+      "sig": "((T([256, 512],torch.bfloat16,[512, 1]),T([512, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_001.py",
+      "node": "mm_4",
+      "baseline_us": 7.007999811321497,
+      "branch_us": 7.007999811321497
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "5a32b61e09e3",
+      "count": 1,
+      "sig": "((T([512, 256],torch.bfloat16,[1, 512]),T([256, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_001.py",
+      "node": "mm_5",
+      "baseline_us": 7.040000054985285,
+      "branch_us": 7.040000054985285
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "ac6339188243",
+      "count": 1,
+      "sig": "((T([256, 1024],torch.bfloat16,[1024, 1]),T([1024, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_001.py",
+      "node": "mm_6",
+      "baseline_us": 7.679999805986881,
+      "branch_us": 7.679999805986881
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "dc6fb477d1d6",
+      "count": 1,
+      "sig": "((T([1024, 256],torch.bfloat16,[1, 1024]),T([256, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_001.py",
+      "node": "mm_7",
+      "baseline_us": 7.040000054985285,
+      "branch_us": 7.040000054985285
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "061e821e3f16",
+      "count": 1,
+      "sig": "((T([512, 256],torch.bfloat16,[1, 512]),T([256, 197952],torch.bfloat16,[197952, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/nvidia_deeprecommender/full_graph_001.py",
+      "node": "mm_10",
+      "baseline_us": 57.023998349905014,
+      "branch_us": 57.023998349905014
+    }
+  ],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "train",
+  "model": "nvidia_deeprecommender"
+}

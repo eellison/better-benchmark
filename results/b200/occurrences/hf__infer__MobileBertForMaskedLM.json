@@ -1,0 +1,149 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "1d3ecc85e538": {
+      "6f08aca4": 1
+    },
+    "1bce79493ef1": {
+      "0fc085ac": 1
+    },
+    "8ae98a8e9539": {
+      "b4251142": 1
+    },
+    "435f6504efa7": {
+      "09b2e78e": 1,
+      "d2ddc3c7": 24
+    },
+    "edd2629dfab3": {
+      "47a892ec": 96
+    },
+    "5f698ae9321b": {
+      "d2ddc3c7": 72
+    },
+    "5c3762c611b3": {
+      "b07f4689": 24
+    },
+    "e87d6ebc9ded": {
+      "d528e08b": 24
+    },
+    "301cf5a13527": {
+      "3ab46e72": 24
+    },
+    "e232f7a3d0d8": {
+      "bcf6fe02": 24
+    },
+    "f2a03dbd04dd": {
+      "3ab46e72": 24
+    },
+    "a18f3869022f": {
+      "3ab46e72": 24
+    },
+    "b2b66f70d626": {
+      "bc0fb1fb": 24
+    },
+    "b79cf7b4f823": {
+      "09b2e78e": 23
+    },
+    "18acdd25ec9e": {
+      "0c4f2b31": 1
+    },
+    "36787f0bfc90": {
+      "875862cf": 1
+    },
+    "035e4d7f5117": {
+      "d7517139": 24
+    },
+    "0a49dc00cbaf": {
+      "d7517139": 48
+    },
+    "e40852a34050": {
+      "d7517139": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "cf0dee21ceed",
+      "count": 1,
+      "sig": "((T([512],torch.bfloat16,[1]),T([32768, 384],torch.bfloat16,[384, 1]),T([384, 512],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MobileBertForMaskedLM/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 20.479999482631683,
+      "branch_us": 20.479999482631683
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "4f8a395d6da0",
+      "count": 168,
+      "sig": "((T([128],torch.bfloat16,[1]),T([32768, 512],torch.bfloat16,[512, 1]),T([512, 128],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MobileBertForMaskedLM/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 15.968000516295433,
+      "branch_us": 15.968000516295433
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "9132856d4b85",
+      "count": 72,
+      "sig": "((T([128],torch.bfloat16,[1]),T([32768, 128],torch.bfloat16,[128, 1]),T([128, 128],torch.bfloat16,[1, 128])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MobileBertForMaskedLM/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 10.048000141978264,
+      "branch_us": 10.048000141978264
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "1243d6f4734c",
+      "count": 24,
+      "sig": "((T([1024, 128, 32],torch.bfloat16,[4096, 32, 1]),T([1024, 32, 128],torch.bfloat16,[4096, 128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MobileBertForMaskedLM/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 16.03199914097786,
+      "branch_us": 16.03199914097786
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "77d1aa8e589f",
+      "count": 24,
+      "sig": "((T([1024, 128, 128],torch.bfloat16,[16384, 128, 1]),T([1024, 128, 32],torch.bfloat16,[4096, 32, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MobileBertForMaskedLM/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 16.16000011563301,
+      "branch_us": 16.16000011563301
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "4edcb6b53548",
+      "count": 120,
+      "sig": "((T([512],torch.bfloat16,[1]),T([32768, 128],torch.bfloat16,[128, 1]),T([128, 512],torch.bfloat16,[1, 128])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MobileBertForMaskedLM/full_graph_000.py",
+      "node": "addmm_7",
+      "baseline_us": 16.256000846624374,
+      "branch_us": 16.256000846624374
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "bdbe25eb6369",
+      "count": 1,
+      "sig": "((T([512],torch.bfloat16,[1]),T([32768, 512],torch.bfloat16,[512, 1]),T([512, 512],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MobileBertForMaskedLM/full_graph_000.py",
+      "node": "addmm_361",
+      "baseline_us": 23.520000278949738,
+      "branch_us": 23.520000278949738
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "9e88c40ed2d9",
+      "count": 1,
+      "sig": "((T([32768, 512],torch.bfloat16,[512, 1]),T([512, 30528],torch.bfloat16,[30528, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MobileBertForMaskedLM/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 726.9440293312073,
+      "branch_us": 726.9440293312073
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "MobileBertForMaskedLM"
+}
