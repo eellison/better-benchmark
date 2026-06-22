@@ -28,6 +28,14 @@ BASELINE_REF = "trunk"
 BRANCH_DIR = B200 / "daa79cd25ca"
 BASELINE_DIR = B200 / "244fdb379d11"
 
+# HONEST D1 baseline (the perf branch's TRUE base). 244fdb above is the older,
+# contaminated superset baseline (56 upstream PRs between it and 5e2ab) and is
+# kept only as a labeled cross-reference; 5e2ab is compute_ab.py's default.
+BASE5E2AB_SHA = "5e2ab3055de1bc4bffe2e7feffe1fc7ff7af8b10"
+BASE5E2AB_REF = "trunk"
+BASE5E2AB_DIR = B200 / "5e2ab3055de"
+REBASE = ROOT / "results" / "perf_ab" / "rebaseline_5e2ab_2026-06-19"
+
 CORPUS_SIZE = {"patterns": 1727, "points": 4977, "models_non_genai": 158, "genai": 8}
 HW = "4x NVIDIA B200"
 DATE = "2026-06-18"
@@ -106,6 +114,48 @@ def stamp_projection(src: Path, dst: Path, pytorch_sha: str, bb_commit: str,
     print(f"  [roundtrip OK] {dst.name}: models list == source ({len(data)} rows)")
 
 
+def stamp_base5e2ab(src: Path, dst: Path):
+    """HONEST D1 baseline (5e2ab3055de). The bench tool mis-stamped this arm's
+    pytorch_commit as the live git HEAD (daa79/tmp_work) because the 5e2ab base
+    was applied as a Python-only inductor source swap that does not move git HEAD.
+    Correct the metadata to the ACTUALLY-MEASURED sources (5e2ab) and record the
+    swap + original mis-stamp in harness_caveats. Kernel payload untouched."""
+    src_text = src.read_text()
+    data = json.loads(src_text)
+    old_meta = data.get("_metadata", {})
+    new_meta = {
+        "pytorch_commit": BASE5E2AB_SHA,
+        "pytorch_ref": BASE5E2AB_REF,
+        "bb_commit": old_meta.get("commit", "e0b93780bfb93899f1cba633c099fa611d46ecb3"),
+        "hardware": HW,
+        "date": "2026-06-19",
+        "sweep_type": "kernels",
+        "corpus_size": dict(CORPUS_SIZE),
+        "harness_caveats": (
+            "TRUE perf-work base (NOT 244fdb379d11, which is contaminated by 56 "
+            "upstream PRs). Measured via Python-only inductor source swap "
+            "(git checkout 5e2ab3055de -- torch/_inductor torch/utils/_sympy/value_ranges.py) "
+            "with fresh TORCHINDUCTOR_CACHE_DIR; git HEAD stayed at tmp_work/daa79cd25ca "
+            "during the swap, so the original bench-tool _metadata mis-stamped "
+            "pytorch_commit=daa79/ref=work2 (corrected here to the actually-measured "
+            "5e2ab sources). dynamo-reset-per-shape fix applied; genai excluded from "
+            "headline aggregates."
+        ),
+        "schema_version": old_meta.get("schema_version", 1),
+        "tool": old_meta.get("tool", "scripts/bench_parallel.py"),
+        "timestamp": old_meta.get("timestamp"),
+        "n_repros": old_meta.get("n_repros"),
+        "n_results": old_meta.get("n_results"),
+        "workload_kind": old_meta.get("workload_kind", "repro"),
+        "source_artifact": "results/perf_ab/rebaseline_5e2ab_2026-06-19/baseline_5e2ab_kernels.json",
+        "swap_cache_dir": "/tmp/tmp.VwxE7qKM7l",
+    }
+    data["_metadata"] = new_meta
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text(json.dumps(data, indent=2) + "\n")
+    _verify_roundtrip_dict(src_text, dst, label=dst.name)
+
+
 def _verify_roundtrip_dict(src_text: str, dst: Path, label: str):
     """Confirm every non-`_metadata` key/value round-trips unchanged."""
     src_data = json.loads(src_text)
@@ -140,10 +190,14 @@ def main():
                      BRANCH_DIR / "projections_minfloor.json", BRANCH_SHA,
                      branch_bb, BRANCH_REF)
 
-    print("\nStamping BASELINE arm (pytorch 244fdb379d11):")
+    print("\nStamping CONTAMINATED SUPERSET baseline arm (pytorch 244fdb379d11):")
     stamp_kernels(REV / "baseline_kernels.json",
                   BASELINE_DIR / "kernels.json", BASELINE_SHA, "kernels",
                   BASELINE_REF)
+
+    print("\nStamping HONEST D1 baseline arm (pytorch 5e2ab3055de):")
+    stamp_base5e2ab(REBASE / "baseline_5e2ab_kernels.json",
+                    BASE5E2AB_DIR / "kernels.json")
 
     print("\nCopying prose deliverables to results/b200/ top level:")
     prose = [

@@ -35,7 +35,16 @@ sidecars. Copy results/b200/ anywhere and `python compute_ab.py` still works.
 
 Usage:
   python compute_ab.py [BASELINE_DIR] [BRANCH_DIR]
-  # defaults: results/b200/244fdb379d11  results/b200/daa79cd25ca
+  # defaults: results/b200/5e2ab3055de  results/b200/daa79cd25ca
+
+The DEFAULT BASELINE is the perf-work's TRUE base 5e2ab3055de (the honest A/B).
+The older 244fdb379d11 arm is also stored as a sibling, but it is CONTAMINATED:
+56 upstream pytorch-main PRs landed between 244fdb and 5e2ab independently of this
+branch, so `branch vs 244fdb` conflates this-branch's work with that upstream work.
+Pass `results/b200/244fdb379d11 results/b200/daa79cd25ca` explicitly to reproduce
+the contaminated superset number (median +2.18% / mean +4.33% / geomean +4.84%);
+the entire ~0.3pp geomean delta is one upstream cross-entropy sum-reduction kernel
+(`sum_81b4fd73f8d1`, ~2x faster upstream) mis-credited to 2 train models.
 
 Each DIR must contain a kernels.json with _metadata.pytorch_commit. The script
 prints the headline (median / mean / geomean, win/regress/flat counts) and cites
@@ -60,7 +69,10 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 OCCDIR = HERE / "occurrences"
 
-DEFAULT_BASELINE = HERE / "244fdb379d11"
+# DEFAULT baseline = the perf-work's TRUE base 5e2ab3055de (the honest A/B). The
+# contaminated 244fdb379d11 arm is kept as a sibling but is NOT the default; pass
+# it explicitly to reproduce the superset (branch + 56 upstream PRs) number.
+DEFAULT_BASELINE = HERE / "5e2ab3055de"
 DEFAULT_BRANCH = HERE / "daa79cd25ca"
 
 

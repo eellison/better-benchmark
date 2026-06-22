@@ -20,8 +20,9 @@ no `pytorch_baseline_commit`/`pytorch_branch_commit` dual fields anywhere — bo
 commits' measurements are stored as siblings, and the A/B is computed from them.
 
 ```
-python compute_ab.py        # derives the headline from the two dirs below
-python compute_ab.py results/b200/244fdb379d11 results/b200/daa79cd25ca   # explicit
+python compute_ab.py        # derives the HONEST headline (5e2ab base -> branch)
+python compute_ab.py results/b200/5e2ab3055de results/b200/daa79cd25ca    # explicit (== default)
+python compute_ab.py results/b200/244fdb379d11 results/b200/daa79cd25ca   # CONTAMINATED superset (see footnote)
 ```
 
 ## Provenance (what produced these numbers)
@@ -29,7 +30,8 @@ python compute_ab.py results/b200/244fdb379d11 results/b200/daa79cd25ca   # expl
 | | |
 |---|---|
 | **Hardware** | 4x NVIDIA B200 (SM100), GPU lock on, CUDAGraph replay, min-of-N |
-| **pytorch BASELINE** | `trunk@244fdb379d11d5925da5610b22e1466222c4afb9` (merge-base / ancestor of the perf branch; ref recorded as `pytorch_ref: "trunk"`) |
+| **pytorch BASELINE (D1, honest)** | `trunk@5e2ab3055de1bc4bffe2e7feffe1fc7ff7af8b10` (the perf branch's TRUE base — the commit it forked from; `pytorch_ref: "trunk"`). This is `compute_ab.py`'s default baseline. |
+| **pytorch BASELINE (superset, contaminated — footnote only)** | `trunk@244fdb379d11d5925da5610b22e1466222c4afb9` (an *older* ancestor; **56 upstream pytorch-main PRs** sit between it and `5e2ab`, so `branch vs 244fdb` over-credits this branch with that upstream work — see footnote ‡). |
 | **pytorch BRANCH (WIP perf work)** | `tmp_work@daa79cd25ca9a80bfd65799394cf4255d6be75a6` (`tmp_work` HEAD — the perf work under test; ref recorded as `pytorch_ref: "tmp_work"`) |
 | **better-benchmark commit** | baseline run `3710b851` / branch run `a7f8b0af` (recorded as `bb_commit` in each file) |
 | **swap set** | `torch/_inductor` + `torch/utils/_sympy/value_ranges.py` (Python-only, no rebuild; fresh `TORCHINDUCTOR_CACHE_DIR` per arm) |
@@ -40,17 +42,41 @@ python compute_ab.py results/b200/244fdb379d11 results/b200/daa79cd25ca   # expl
 ## Headline results (genai/microbenchmarks EXCLUDED — always cite this cut)
 
 ### Deliverable 1 — perf-branch model improvement (A/B), **DERIVED** via `compute_ab.py`
-- **geomean +4.83% speedup** (≈1.048x; `compute_ab.py` prints the unrounded +4.838%),
-  **median +2.18%**, **mean +4.33%** — 119 improved / 31 regressed / 8 flat, over 158
-  non-genai models (range −20.0% .. +28.0%).
-- Derived from pytorch `244fdb379d11` (baseline) → `daa79cd25ca` (branch). **Run
-  `compute_ab.py` to reproduce** — it is not a stored number.
+- **geomean +4.51% speedup** (≈1.045x; `compute_ab.py` prints the unrounded +4.510%),
+  **median +2.18%**, **mean +4.05%** — 120 improved / 28 regressed / 10 flat, over 158
+  non-genai models (range −20.0% .. +28.4%).
+- Derived from pytorch `5e2ab3055de` (the branch's TRUE base) → `daa79cd25ca` (branch).
+  **Run `compute_ab.py` to reproduce** (default arms) — it is not a stored number.
 - **Largest regression: `torchbench/infer/pytorch_unet` −19.97%**; best improvement
-  `torchbench/infer/pyhpc_isoneutral_mixing` +27.97%. `compute_ab.py` prints the full
+  `torchbench/infer/pyhpc_isoneutral_mixing` +28.4%. `compute_ab.py` prints the full
   worst-8 / best-5 (genai-excluded) regression block.
 - A/A noise floor ±0.82% → the win is real, above noise. Re-validated on the
   dynamo-reset-fixed harness; cache isolation + swap integrity confirmed
-  (`REVALIDATION_SUMMARY.md`).
+  (`REVALIDATION_SUMMARY.md`). Re-baselined to the correct base `5e2ab` 2026-06-19
+  (`results/perf_ab/rebaseline_5e2ab_2026-06-19/`).
+
+> ‡ **Footnote — the contaminated `244fdb` superset number.** The previously-cited
+> headline used baseline `244fdb379d11`, giving **median +2.18% / mean +4.33% /
+> geomean +4.84%** (n=158). That baseline is an *older* ancestor: **56 upstream
+> pytorch-main PRs** (all `(#NNNNNN)`-tagged, touching `scheduler.py`/`lowering.py`)
+> landed between `244fdb` and the perf branch's true base `5e2ab3055de`,
+> independently of this branch. So `branch vs 244fdb` conflates this branch's work
+> with that upstream work. **Re-baselining to `5e2ab` (the honest A/B above) leaves
+> the median UNCHANGED (+2.18%) and trims the mean/geomean by ~0.3pp.** That entire
+> ~0.3pp delta is **one upstream cross-entropy / NLL sum-reduction kernel**
+> (`sum_81b4fd73f8d1`, ~2x faster upstream) mis-credited to just 2 train models
+> (TrOCR +23%→+5%, Pegasus +21%→+5%). Per-point cross-baseline drift is at the A/A
+> floor (signed +0.000%; only 2/4977 points exceed +30%, both that one kernel).
+> `python compute_ab.py results/b200/244fdb379d11 results/b200/daa79cd25ca`
+> reproduces the contaminated superset for cross-reference.
+
+> **compile_us run-to-run variance caveat.** Individual per-kernel `compile_us`
+> values (and therefore individual per-model A/B ratios and individual
+> oracle-vs-compile ratios) carry run-to-run variance — e.g. on a capstone re-run
+> the Longformer driver's compile dropped 785→637 µs (ratio 2.45→1.99) while its
+> oracle floor was identical (320.3→320.5 µs). The **stable deliverable** is the
+> **oracle FLOORS + the D2 ranking** (capstone median oracle ratio 0.9992); cite
+> those as durable. Individual compile ratios are point-in-time.
 
 ### Deliverable 2 — distance to the reference-kernel (oracle) ceiling, **measured at the branch**
 - **geomean +1.37%** potential speedup if every model hit its agent-kernel ceiling;
@@ -61,9 +87,10 @@ python compute_ab.py results/b200/244fdb379d11 results/b200/daa79cd25ca   # expl
 - Two-floor accounting: **oracle-floor** (reference-kernel ceiling / optimization target)
   vs **min-floor** = min(oracle, compile) (achievable today). See `TWO_FLOOR_README.md`.
 
-> **Geomeans** (D1 +4.83%, D2 +1.37%) were **computed 2026-06-18 and are not yet emitted
-> by a committed metric script.** `compute_ab.py` recomputes the D1 geomean on the fly and
-> labels it as such; the median/mean are the long-standing committed cuts.
+> **Geomeans** (D1 +4.51% vs the honest `5e2ab` base, D2 +1.37%) were **computed
+> 2026-06-18/19 and are not yet emitted by a committed metric script.**
+> `compute_ab.py` recomputes the D1 geomean on the fly and labels it as such; the
+> median/mean are the long-standing committed cuts.
 
 ## Layout
 
@@ -78,8 +105,11 @@ results/b200/
   REVALIDATION_SUMMARY.md        <- the D1 A/B re-validation (adversarial checks, cache isolation)
   longformer_HANDOFF.md          <- the #1 D2 result: root cause + fix design + handoff
 
-  244fdb379d11/                  <- BASELINE pytorch commit (measurement-set)
+  5e2ab3055de/                   <- BASELINE pytorch commit (HONEST D1 base; compute_ab.py default)
      kernels.json                   per-(dir,shape) compile-time measurements; _metadata.sweep_type=kernels
+
+  244fdb379d11/                  <- contaminated SUPERSET baseline (older ancestor; footnote ‡ only)
+     kernels.json                   kept for cross-reference; pass explicitly to compute_ab.py
 
   daa79cd25ca/                   <- BRANCH pytorch commit (measurement-set)
      kernels.json                   per-(dir,shape) measurements; sweep_type=kernels
@@ -97,10 +127,21 @@ is where the Deliverable-2 ceiling was swept; Deliverable 1 needs `kernels.json`
 
 Each file carries exactly one `pytorch_commit` (the distinguishing axis) and a
 `pytorch_ref` — the git branch/ref that commit was HEAD of at measurement time
-(`tmp_work` for the branch arm, `trunk` for the baseline). The ref disambiguates a
+(`tmp_work` for the branch arm, `trunk` for the two baselines). The ref disambiguates a
 *moving* branch: `daa79cd25ca` is `tmp_work`'s HEAD today, but once `tmp_work`
 advances that SHA is an orphan hash with no context, so the branch name is captured
-as structured provenance (not just in the `harness_caveats` prose). Also present: the
+as structured provenance (not just in the `harness_caveats` prose).
+
+> **Note on the `5e2ab3055de` arm's `pytorch_commit`.** That baseline was measured
+> via a Python-only inductor source swap (`git checkout 5e2ab -- torch/_inductor …`)
+> while git HEAD stayed at `tmp_work`/`daa79`, so the bench tool originally
+> mis-stamped `pytorch_commit=daa79`/`pytorch_ref=work2`. Its `_metadata` here is
+> corrected to the *actually-measured* sources (`pytorch_commit=5e2ab3055de`,
+> `pytorch_ref=trunk`); `harness_caveats` records the swap + the original mis-stamp,
+> and `source_artifact` points at the raw arm in
+> `results/perf_ab/rebaseline_5e2ab_2026-06-19/`.
+
+Also present: the
 `bb_commit` (the better-benchmark commit that ran it — the old bare `commit` field,
 renamed and preserved), `hardware`, `date`, `sweep_type` (`kernels` | `oracle_floor` |
 `projection`), `corpus_size`, and `harness_caveats`. The kernel files also retain their
@@ -126,7 +167,8 @@ are wrapped here as `{"_metadata": {...}, "models": [...]}` so they can carry me
   them into the headline mean/median/geomean**. They are much larger
   (`CrossEntropyForward +66.16%`, `SoftmaxForward +40.19%`, `CrossEntropyBackward
   +41.62%`, …). `compute_ab.py` also prints a genai-**included** reference line
-  (median +2.30% / mean +5.31% / geomean +6.33%, n=166) explicitly marked NOT the headline.
+  (against the honest `5e2ab` base: median +2.46% / mean +5.04% / geomean +6.02%,
+  n=166) explicitly marked NOT the headline.
 - **Same extern both arms**: externs (cuBLAS/cuDNN/flash) are inductor-invariant, so the
   *same* extern price feeds both arms (all 3937 priced extern entries have
   `baseline_us == branch_us`). It enters only the A/B denominator and cancels in the
