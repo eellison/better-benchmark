@@ -67,10 +67,6 @@ python scripts/bench_parallel.py repros/canonical --oracles --gpus 0,1 \
 python scripts/bench_parallel.py --full-graphs --gpus 0,1 \
   --workers-per-gpu 2 --combo-kernels --output full_graph_results.json
 
-# Re-benchmark a subset and merge into existing baseline
-python scripts/bench_parallel.py repros/canonical/pointwise_000209e1748d \
-  --gpus 0 --merge-into results.json
-
 # Validate all repros run correctly in eager mode
 python scripts/validate_eager.py --gpus 0,1 --max-workers 4
 ```
@@ -87,7 +83,6 @@ substitutions), and are timed exclusively through
 `oracle_harness.bench_oracle()`.
 
 ```bash
-# GPU bench lock is on by default (pass --disable-gpu-lock to skip it)
 python repros/canonical/mean_014afd4984e6/oracle.py --bench
 ```
 
@@ -110,10 +105,84 @@ Per-kernel timings aggregate to the **model level**: partition a model's full po
 ```bash
 # Aggregate per-kernel times to a model-level estimate
 python scripts/model_graph_accounting.py --model BertForMaskedLM --timings results/all_oracle_timings.json
-
-# Reconcile the aggregate against measured end-to-end time
-python scripts/model_attribution.py --corpus-root repros --suite hf --mode infer
 ```
+
+## Measuring a compiler change
+
+The point of the corpus is to make a `torch.compile` change's effect **visible
+and reproducible**: sweep two commits, diff the kernels, and roll the diff up to
+a per-model end-to-end number you can actually defend.
+
+**Headline.** A recent inductor perf branch (base `5e2ab` → HEAD `daa79`) is
+**+2.18% median / +4.51% geomean** per-model end-to-end across **158 models**
+(genai-excluded). The win is **concentrated**, not broad: an `rsqrt`
+canonicalization carries roughly half of it (it lights up conv/BatchNorm
+models), and a handful of other kernel families carry the rest — most models
+move <1%.
+
+### Workflow
+
+```bash
+# (a) Sweep two commits into two JSONs (one per commit; LOCKED GPU path).
+#     Check out commit A, sweep; check out commit B, sweep.
+python scripts/bench_parallel.py repros/canonical --all-shapes \
+    --gpus 0,1,2,3 --tag baseA --output base.json
+python scripts/bench_parallel.py repros/canonical --all-shapes \
+    --gpus 0,1,2,3 --tag headB --output head.json
+
+# (b) Per-kernel A/B table (DIRECTION: which kernel families moved).
+python scripts/bench_report.py --compare base.json head.json --output-md ab.md
+
+# (c) Roll up to per-model end-to-end — the trusted headline (no GPU needed).
+python scripts/perf_ab_rollup.py --base base.json --head head.json
+```
+
+Step (b) emits a per-kernel markdown table — biggest movers in each direction:
+
+```markdown
+## base 5e2ab vs HEAD daa79
+### Improvements
+| Kernel | Base (us) | Head (us) | Delta |
+|--------|-----------|-----------|-------|
+| var_mean_5a22dd21d88e[mobilenet_v3_large] | 348.1 | 18.0 | -94.8% |
+| var_mean_42fad1ece813[mnasnet1_0]         | 241.4 | 23.9 | -90.1% |
+```
+
+Step (c) is a thin wrapper — no new timing code, consumes the two sweep JSONs,
+and reuses the per-model accounting (fusible partitions + externs) to compute a
+**shape-matched, genai-excluded, per-model-e2e** geomean: the trusted headline.
+
+### What the numbers look like
+
+The per-kernel table and the per-model rollup are **different metrics, on
+purpose**. The kernel geomean overstates model impact ~2–3× because most of a
+model's time sits in externs (conv/GEMM/SDPA) the change never touches; the
+rollup's extern denominator dilutes the win back to reality. Show both:
+
+| Kernel family (example) | Per-kernel Δ | Why |
+|-------------------------|-------------:|-----|
+| `var_mean_*` (BatchNorm `rsqrt`) | −85% … −94% | `reciprocal(sqrt(x)) → rsqrt(x)` canonicalization |
+| online-softmax `amax_*` loops | ~+0.8pp geomean | fast combine for softmax/cross-entropy |
+| `pointwise_*` (transcendental reuse) | mixed | materialize multi-user nodes |
+
+| Model (per-model e2e rollup) | Δ e2e | Note |
+|------------------------------|------:|------|
+| `timm/infer/repvgg_a2`            | **+25.9%** | conv/BN-heavy; rsqrt-dominated |
+| `timm/infer/mobilenetv2_100`      | **+25.3%** | conv/BN-heavy |
+| `torchbench/infer/shufflenet_v2_x1_0` | **+10.5%** | conv/BN-heavy |
+| **median across 158 models**     | **+2.18%** | most models move <1% |
+
+So a −90% kernel row does *not* mean a −90% model — `repvgg_a2`'s +25.9% is the
+honest end-to-end consequence of those BatchNorm kernels shrinking, and the
+**median model** only moves +2.18% because the win is concentrated.
+
+### Trust the rollup, not the raw kernel diff
+
+The per-kernel table (step b) is for **direction** — which kernel families
+moved — not for the headline. It diffs every captured point independently, so a
+big individual row doesn't translate to a model-level win, and its raw
+improved/regressed counts are noisy. The headline comes from the per-model
+rollup (step c), which weights each kernel by how a model actually uses it.
 
 ## Extraction
 
@@ -236,7 +305,8 @@ scripts/
   model_graph_accounting.py  # aggregate per-kernel times to a model-level estimate
   model_attribution.py   # reconcile the aggregate against measured e2e (launch-corrected)
   gc_corpus.py           # corpus reference-counting / migration transaction tool
-  bench_report.py        # before/after comparison reports
+  bench_report.py        # before/after comparison reports (raw per-kernel A/B table)
+  perf_ab_rollup.py      # careful A/B: shape-matched, genai-excl, per-model-e2e rollup
   test_adversarial.py    # infrastructure regression tests
   test_merge_into.py     # --merge-into adversarial tests
   test_bench_recovery.py # worker failure recovery tests
