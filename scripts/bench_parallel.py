@@ -65,6 +65,7 @@ import argparse
 import json
 import multiprocessing as mp
 import os
+import subprocess
 import sys
 import tempfile
 import time
@@ -325,6 +326,139 @@ def _filter_gpus(gpus: list[dict[str, str]], selected: str | None) -> list[dict[
         return gpus
 
     return [gpu for gpu in gpus if gpu["index"] in wanted]
+
+
+# --- GPU clock locking -----------------------------------------------------
+#
+# WHY: GPU SM-clock boost/ramp variance is a benchmark-noise source. It inflates
+# per-kernel/per-point spread; min-of-N timing + per-model rollup absorb most of
+# it, but pinning the SM clock removes the variance at the source — most valuable
+# for the per-kernel and genai-micro numbers where there's no rollup to smooth it.
+#
+# Empirically verified (2026-06-23, 4x B200):
+#   - `sudo nvidia-smi -pm 1` (persistence) + `sudo nvidia-smi -lgc <min>,<max>`
+#     works (passwordless sudo present on this box).
+#   - 1965 MHz is a valid bin but an OPPORTUNISTIC boost the B200 CANNOT sustain
+#     under load: even locked to 1965,1965 the achieved clock under load is 1852.
+#     The highest SUSTAINABLE bin is 1852 MHz — locked to 1852,1852 the clock
+#     holds a rock-steady 1852 under sustained load on all 4 GPUs (throttle reason
+#     0x00). Hence the DEFAULT lock target is 1852, NOT the max boost bin.
+#   - Reset with `sudo nvidia-smi -rgc`.
+#
+# NON-BLOCKING CONTRACT (critical): clock locking is a best-effort optimization,
+# never a hard dependency. ANY failure (no sudo, permission denied, nvidia-smi
+# missing, non-NVIDIA box, a GPU rejecting the set, CI) must emit a stderr WARNING
+# and let the sweep continue with default clocks. Nothing here ever raises,
+# aborts, or sys.exits. We use `sudo -n` (non-interactive) so a password prompt
+# fails fast rather than hanging the sweep.
+#
+# VERIFY via the set-command's own returncode/stderr, NOT --query-gpu: the lock
+# fields read N/A / deprecated on this driver. The reliable success signal is the
+# `-lgc` returncode + stderr ("GPU clocks set to ..." vs "does not have
+# permission"). We do NOT treat a low sampled idle clock as failure — idle GPUs
+# float down; the lock governs the under-load clock.
+
+def _run_clock_cmd(cmd: list[str]) -> subprocess.CompletedProcess | None:
+    """Run a sudo/nvidia-smi command non-interactively, never raising.
+
+    Returns the CompletedProcess on success-or-controlled-failure, or None if the
+    command could not even be launched (e.g. sudo/nvidia-smi missing). Callers
+    inspect .returncode / .stderr; a None or non-zero return is a warn-and-continue
+    signal, never an error.
+    """
+    try:
+        return subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=30,
+        )
+    except Exception as exc:  # FileNotFoundError, TimeoutExpired, OSError, ...
+        print(
+            f"[clock-lock] WARNING: command failed to launch ({' '.join(cmd)}): "
+            f"{type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
+        return None
+
+
+def _lock_gpu_clocks(indices: list[str], mhz: int) -> set[str]:
+    """Best-effort lock the SM clock of the given GPU indices to ``mhz``.
+
+    Returns the set of indices we successfully locked (possibly empty). NEVER
+    raises and NEVER aborts the process: every failure path only warns to stderr.
+    """
+    if not indices:
+        return set()
+
+    # Persistence mode once (keeps the driver loaded so the lock sticks). A
+    # failure here is non-fatal — try the per-GPU lock anyway and let it report.
+    pm = _run_clock_cmd(["sudo", "-n", "nvidia-smi", "-pm", "1"])
+    if pm is None or pm.returncode != 0:
+        detail = (pm.stderr or "").strip() if pm is not None else "could not launch sudo/nvidia-smi"
+        print(
+            "[clock-lock] WARNING: could not enable persistence mode "
+            f"(-pm 1): {detail or 'non-zero exit'}",
+            file=sys.stderr,
+        )
+
+    locked: set[str] = set()
+    for idx in indices:
+        # Per-GPU -i is safest: one rejecting GPU doesn't block the others.
+        res = _run_clock_cmd(
+            ["sudo", "-n", "nvidia-smi", "-lgc", f"{mhz},{mhz}", "-i", str(idx)]
+        )
+        if res is not None and res.returncode == 0:
+            # Success signal is the returncode (stderr message wording varies by
+            # driver; "GPU clocks set to ..." goes to stdout on this box).
+            locked.add(str(idx))
+        else:
+            detail = (res.stderr or res.stdout or "").strip() if res is not None else "could not launch sudo/nvidia-smi"
+            print(
+                f"[clock-lock] WARNING: failed to lock GPU {idx} to {mhz}MHz: "
+                f"{detail or 'non-zero exit'}",
+                file=sys.stderr,
+            )
+
+    if locked:
+        print(
+            f"[clock-lock] locked {len(locked)}/{len(indices)} GPUs to {mhz}MHz",
+            file=sys.stderr,
+        )
+    else:
+        print(
+            "[clock-lock] unavailable (no sudo / permission) — running with "
+            "default clocks; per-kernel variance will be higher",
+            file=sys.stderr,
+        )
+    return locked
+
+
+def _reset_gpu_clocks(indices: set[str]) -> None:
+    """Best-effort reset (un-lock) the SM clock of the given GPU indices.
+
+    Only call with indices we actually locked. NEVER raises; reset failure only
+    warns so a teardown problem can't mask the sweep's real result.
+    """
+    if not indices:
+        return
+    reset_ok = 0
+    for idx in sorted(indices):
+        res = _run_clock_cmd(["sudo", "-n", "nvidia-smi", "-rgc", "-i", str(idx)])
+        if res is not None and res.returncode == 0:
+            reset_ok += 1
+        else:
+            detail = (res.stderr or res.stdout or "").strip() if res is not None else "could not launch sudo/nvidia-smi"
+            print(
+                f"[clock-lock] WARNING: failed to reset GPU {idx} clocks: "
+                f"{detail or 'non-zero exit'}",
+                file=sys.stderr,
+            )
+    print(
+        f"[clock-lock] reset {reset_ok}/{len(indices)} GPUs to default clocks",
+        file=sys.stderr,
+    )
 
 
 def _compute_worker_count(
@@ -1289,6 +1423,19 @@ def main():
                         help="Write all results to a JSON file")
     parser.add_argument("--merge-into", type=Path, default=None,
                         help="Merge results into an existing baseline JSON (updates only the benchmarked repros)")
+    parser.add_argument("--lock-clocks", action=argparse.BooleanOptionalAction, default=True,
+                        help="Lock the SM clock of the sweep's GPUs to a sustainable bin before "
+                             "timing to remove boost/ramp variance (best-effort, non-blocking — "
+                             "warns and continues if sudo/nvidia-smi is unavailable). "
+                             "Use --no-lock-clocks to disable. (default: enabled)")
+    parser.add_argument("--lock-clocks-mhz", type=int, default=1852,
+                        help="SM clock bin (MHz) to lock to when --lock-clocks is enabled. "
+                             "Default 1852 = highest SUSTAINABLE B200 bin (1965 is an "
+                             "opportunistic boost that drops to 1852 under load).")
+    parser.add_argument("--no-reset-clocks", dest="reset_clocks", action="store_false", default=True,
+                        help="Leave the SM clock pinned on exit instead of resetting it "
+                             "(useful for back-to-back sweeps). By default we reset on exit any "
+                             "GPUs we locked. Only the GPUs we actually locked are ever reset.")
     args = parser.parse_args()
 
     # Compare mode: just read existing perf.json and diff
@@ -1412,6 +1559,20 @@ def main():
             return
 
     gpus = _filter_gpus(matching_gpus(args.device_kind), args.gpus)
+
+    # Lock the SM clock of exactly the GPUs this sweep uses (best-effort, never
+    # fatal — see _lock_gpu_clocks for the non-blocking contract). Reset on exit
+    # via atexit so the node isn't left pinned regardless of how main() returns
+    # (normal exit, worker-death break, or an unexpected exception). We only ever
+    # reset the GPUs we actually locked. atexit reset is itself non-blocking.
+    if args.lock_clocks:
+        locked_indices = _lock_gpu_clocks(
+            [g["index"] for g in gpus], args.lock_clocks_mhz
+        )
+        if locked_indices and args.reset_clocks:
+            import atexit
+            atexit.register(_reset_gpu_clocks, locked_indices)
+
     try:
         n_workers, workers_per_gpu = _compute_worker_count(
             num_repros=len(repros),
