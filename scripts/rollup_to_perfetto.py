@@ -488,15 +488,32 @@ def emit(events: list[dict]) -> dict:
 # One unified execution-ordered timeline; fusible vs extern are different track
 # rows (tids) purely for color, but ts is a single advancing clock so the slices
 # read as one run.
+#
+# ORACLE-CEILING OVERLAY (opt-in via --oracle-timings <json>): adds a THIRD
+# track (tid 3) on the SAME shared clock. For every FUSIBLE node, an oracle
+# slice starts at the same ts as that node\'s compile slice (tid 1), with
+# dur = its oracle_us (the reference-kernel ceiling), looked up by the verified
+# pattern_hash->family / shape_hash->point join (see _oracle_lookup). So the
+# fusible-compile row (tid 1) and the oracle row (tid 3) are vertically
+# comparable kernel-by-kernel: the per-kernel gap is the compile bar minus the
+# oracle bar, in real execution context. Externs are NOT oracle targets, so the
+# oracle track mirrors each extern\'s SAME real us -- the externs CANCEL between
+# the compile-track total and the oracle-track total, leaving the fusible-only
+# headroom as the difference. Misses (unpriced family / no point / null oracle)
+# are drawn 0-dur and labeled "[no-oracle:<reason>]", never silently dropped.
+# This is a pure CPU JSON join: no GPU, no new benching.
 
 TID_FUSIBLE = 1
 TID_EXTERN_REAL = 2
-TRACK_FUSIBLE = "fusible (real us)"
+TID_ORACLE_CEIL = 3  # oracle (reference-kernel) ceiling overlay; fusible-only
+TRACK_FUSIBLE = "fusible (current compile, real us)"
 TRACK_EXTERN_REAL = "extern (real us: conv/GEMM/SDPA)"
+TRACK_ORACLE_CEIL = "oracle ceiling (fusible: ref-kernel us; extern: same real us)"
 
 
-def _attr_process_metadata(pid: int, model_name: str) -> list[dict]:
-    return [
+def _attr_process_metadata(pid: int, model_name: str,
+                           with_oracle: bool = False) -> list[dict]:
+    md = [
         {"name": "process_name", "ph": "M", "pid": pid, "tid": 0,
          "args": {"name": model_name}},
         {"name": "thread_name", "ph": "M", "pid": pid, "tid": TID_FUSIBLE,
@@ -504,30 +521,144 @@ def _attr_process_metadata(pid: int, model_name: str) -> list[dict]:
         {"name": "thread_name", "ph": "M", "pid": pid, "tid": TID_EXTERN_REAL,
          "args": {"name": TRACK_EXTERN_REAL}},
     ]
+    if with_oracle:
+        md.append(
+            {"name": "thread_name", "ph": "M", "pid": pid, "tid": TID_ORACLE_CEIL,
+             "args": {"name": TRACK_ORACLE_CEIL}})
+    return md
 
 
-def build_trace_from_attribution(pid: int, model_name: str,
-                                 model_result: dict) -> tuple[list[dict], dict]:
+# ---------------------------------------------------------------------------
+# Oracle-ceiling join (CPU-only; pure JSON lookup, NO new benching)
+# ---------------------------------------------------------------------------
+#
+# A fusible per_node entry carries key = [pattern_hash, shape_hash]. The oracle
+# timings file (results/all_oracle_timings_b200_v2.json) is a dict keyed by
+# CANONICAL DIR NAME (verified: == "<kind>_<pattern_hash>", the dir's leaf hash
+# IS the pattern_hash and every one of its 1381 family keys is an existing
+# repros/canonical/<dir>). Each family value has "points" keyed by
+# "<modelname>_<shape_hash>". So the verified join is:
+#
+#   pattern_hash --(build_hash_to_repro: meta.json pattern_hash -> dir name)-->
+#       family dir name --> timings[family]  (family may be ABSENT = unpriced)
+#   shape_hash   --> the point whose key ENDS WITH "_<shape_hash>" within that
+#       family's points (prefer the exact "<model>_<shape_hash>", else any point
+#       with that shape_hash suffix).
+#
+# A miss is HONEST and visible (see has_oracle:false below), never dropped:
+#   - NO_FAMILY     : pattern_hash not in build_hash_to_repro (no canonical dir)
+#   - FAM_UNPRICED  : canonical dir exists but family absent from timings file
+#                     (e.g. mobilenet's inference pointwise BN-fold patterns were
+#                      never oracle-benched -- only its reduction patterns were)
+#   - NO_POINT      : family priced but no point carries this shape_hash
+
+
+def _oracle_lookup(key, model_name: str, timings: dict[str, dict],
+                   hash_to_repro: dict[str, str]) -> dict:
+    """Resolve a fusible node's [pattern_hash, shape_hash] -> oracle point.
+
+    Returns a dict: {has_oracle, miss_reason, family, point_key, oracle_us,
+    compile_us, ratio, status}. has_oracle is False on any miss (oracle_us None).
+    """
+    out = {"has_oracle": False, "miss_reason": None, "family": None,
+           "point_key": None, "oracle_us": None, "compile_us": None,
+           "ratio": None, "status": None}
+    if not (isinstance(key, (list, tuple)) and len(key) >= 2):
+        out["miss_reason"] = "NO_KEY"
+        return out
+    phash, shash = key[0], key[1]
+    family = hash_to_repro.get(phash)
+    out["family"] = family
+    if not family:
+        out["miss_reason"] = "NO_FAMILY"
+        return out
+    fam = timings.get(family)
+    if not isinstance(fam, dict) or "points" not in fam:
+        out["miss_reason"] = "FAM_UNPRICED"
+        return out
+    pts = fam["points"]
+    pv = pts.get(f"{model_name}_{shash}")
+    pk = f"{model_name}_{shash}" if pv is not None else None
+    if pv is None:  # fall back to any point carrying this shape_hash suffix
+        for k, v in pts.items():
+            if k.endswith(f"_{shash}"):
+                pv, pk = v, k
+                break
+    if pv is None:
+        out["miss_reason"] = "NO_POINT"
+        return out
+    out["point_key"] = pk
+    o = pv.get("oracle_us")
+    c = pv.get("compile_us")
+    out["oracle_us"] = o if isinstance(o, (int, float)) else None
+    out["compile_us"] = c if isinstance(c, (int, float)) else None
+    out["ratio"] = pv.get("ratio")
+    out["status"] = pv.get("status")
+    # A priced family point can still have null oracle_us (e.g. status
+    # NUMERICS_WORSE_THAN_COMPILED) -- treat as a no-oracle miss but keep status.
+    if out["oracle_us"] is None:
+        out["miss_reason"] = "POINT_NULL_ORACLE"
+        return out
+    out["has_oracle"] = True
+    return out
+
+
+def build_trace_from_attribution(
+        pid: int, model_name: str, model_result: dict,
+        timings: dict[str, dict] | None = None,
+        hash_to_repro: dict[str, str] | None = None,
+) -> tuple[list[dict], dict]:
     """Build a true-to-e2e trace from one model's model_attribution result dict
     (which must contain a per_node ordered list -- run with --collect-order).
 
-    Slices are laid in per_node order on ONE advancing clock; fusible and extern
-    sit on separate track rows for color. A node with us==null (point that failed
-    or did not match the cache) is drawn as a zero-width marker labeled
-    "[no us]" so the order stays honest but it adds nothing to the total.
+    Slices are laid in per_node order on ONE advancing clock (ts advances by the
+    REAL measured us of each node); fusible (current compile) and extern sit on
+    separate track rows (tid 1, tid 2) purely for color. A node with us==null is
+    a zero-width "[no us]" marker so order stays honest but adds nothing.
+
+    ORACLE-CEILING OVERLAY (when ``timings`` + ``hash_to_repro`` are supplied):
+    a THIRD track (tid 3) is emitted on the SAME shared clock -- each oracle
+    slice starts at the SAME ts as the corresponding node's compile/extern slice,
+    so the rows line up kernel-by-kernel and the per-kernel gap (compile bar minus
+    oracle bar) is visible IN EXECUTION CONTEXT. Contents of the oracle track:
+      * FUSIBLE node: dur = its oracle_us (reference-kernel ceiling) looked up via
+        the verified pattern_hash->family / shape_hash->point join. On a MISS
+        (unpriced family, no matching point, or null oracle) the slice is drawn
+        0-dur and labeled "[no-oracle:<reason>]" with has_oracle:false -- never
+        silently dropped. The oracle slice carries pattern_hash, shape_hash,
+        oracle_us, matched_compile_us, ratio and the timings status as args.
+      * EXTERN node (conv/GEMM/SDPA): externs are NOT oracle targets, so the
+        SAME real us is mirrored onto the oracle clock. This keeps the two clocks
+        aligned: oracle-track total = sum(oracle_us over priced fusible) +
+        sum(real fusible us over unpriced fusible) + sum(real extern us);
+        compile-track total = sum(real fusible us) + sum(real extern us). The
+        externs CANCEL between the two totals, so the difference is the
+        fusible-only headroom. (NOT "oracle makes convs faster".)
+
     Returns (events, per-model summary)."""
+    overlay = bool(timings is not None and hash_to_repro is not None)
     per_node = model_result.get("per_node") or []
-    events = _attr_process_metadata(pid, model_name)
+    events = _attr_process_metadata(pid, model_name, with_oracle=overlay)
     ts = 0.0
     sum_us = fusible_us = extern_us = 0.0
     n_fusible = n_extern = n_missing = 0
+    # oracle-clock accumulators (only meaningful when overlay is on)
+    oracle_total = 0.0          # full oracle-track length (fusible oracle + externs)
+    oracle_fusible_us = 0.0     # fusible-only oracle time (priced -> oracle_us,
+                                #   unpriced -> the node's real compile us)
+    n_oracle_hit = n_oracle_miss = 0
+    miss_reasons: Counter = Counter()
     last_graph = None
     first_slices: list[str] = []
+    # paired compile-vs-oracle proof rows for the report (fusible nodes)
+    pair_rows: list[dict] = []
     for item in per_node:
         gname = item.get("graph_name")
         if gname != last_graph and last_graph is not None:
             events.append(_graph_boundary(pid, TID_FUSIBLE, ts, gname))
             events.append(_graph_boundary(pid, TID_EXTERN_REAL, ts, gname))
+            if overlay:
+                events.append(_graph_boundary(pid, TID_ORACLE_CEIL, ts, gname))
         last_graph = gname
         is_fusible = item.get("kind") == "fusible"
         tid = TID_FUSIBLE if is_fusible else TID_EXTERN_REAL
@@ -555,6 +686,90 @@ def build_trace_from_attribution(pid: int, model_name: str,
                 "has_real_us": has_us,
             },
         })
+
+        # ---- oracle-ceiling overlay slice (tid 3), at the SAME ts -----------
+        if overlay:
+            if is_fusible:
+                oj = _oracle_lookup(item.get("key"), model_name, timings,
+                                    hash_to_repro)
+                if oj["has_oracle"]:
+                    o_dur = float(oj["oracle_us"])
+                    n_oracle_hit += 1
+                    o_name = f"{label} (oracle)"
+                else:
+                    # MISS: keep the node visible. Draw 0-dur, but for the
+                    # oracle-track *length* substitute the node's own real us so
+                    # the timeline does not collapse where pricing is missing.
+                    o_dur = 0.0
+                    n_oracle_miss += 1
+                    miss_reasons[oj["miss_reason"] or "?"] += 1
+                    o_name = (f"{label} [no-oracle:{oj['miss_reason']}]")
+                events.append({
+                    "name": o_name,
+                    "ph": "X",
+                    "ts": round(ts, 3),
+                    "dur": round(o_dur, 3),
+                    "pid": pid, "tid": TID_ORACLE_CEIL,
+                    "args": {
+                        "kind": "fusible",
+                        "graph": gname,
+                        "node_name": item.get("node_name"),
+                        "order_index": item.get("order_index"),
+                        "pattern_hash": (item.get("key") or [None])[0],
+                        "shape_hash": (item.get("key") or [None, None])[1],
+                        "oracle_us": oj["oracle_us"],
+                        "matched_compile_us": oj["compile_us"],
+                        "node_real_compile_us": us,
+                        "ratio": oj["ratio"],
+                        "status": oj["status"],
+                        "has_oracle": oj["has_oracle"],
+                        "miss_reason": oj["miss_reason"],
+                        "family": oj["family"],
+                        "point_key": oj["point_key"],
+                    },
+                })
+                # oracle-track length: priced -> oracle_us; miss -> real us
+                oracle_total += o_dur if oj["has_oracle"] else dur
+                oracle_fusible_us += o_dur if oj["has_oracle"] else dur
+                if len(pair_rows) < 12:
+                    pair_rows.append({
+                        "label": label,
+                        "pattern_hash": (item.get("key") or [None])[0],
+                        "shape_hash": (item.get("key") or [None, None])[1],
+                        "compile_us": round(dur, 2) if has_us else None,
+                        "oracle_us": (round(oj["oracle_us"], 2)
+                                      if oj["has_oracle"] else None),
+                        "ratio_compile_over_oracle": (
+                            round(dur / oj["oracle_us"], 3)
+                            if oj["has_oracle"] and oj["oracle_us"] else None),
+                        "status": oj["status"],
+                        "has_oracle": oj["has_oracle"],
+                        "miss_reason": oj["miss_reason"],
+                    })
+            else:
+                # extern: NOT an oracle target -> mirror its real us on the
+                # oracle clock so externs cancel between the two totals.
+                events.append({
+                    "name": f"{label} (extern: no oracle, real us)"
+                            + ("" if has_us else " [no us]"),
+                    "ph": "X",
+                    "ts": round(ts, 3),
+                    "dur": round(dur, 3),
+                    "pid": pid, "tid": TID_ORACLE_CEIL,
+                    "args": {
+                        "kind": "extern",
+                        "graph": gname,
+                        "node_name": item.get("node_name"),
+                        "order_index": item.get("order_index"),
+                        "key": item.get("key"),
+                        "us": us,
+                        "has_oracle": False,
+                        "note": "extern is not an oracle target; same real us "
+                                "mirrored so externs cancel between the clocks.",
+                    },
+                })
+                oracle_total += dur
+
         ts += dur
         sum_us += dur
         if is_fusible:
@@ -586,13 +801,38 @@ def build_trace_from_attribution(pid: int, model_name: str,
                             if isinstance(e2e, (int, float)) and e2e else None),
         "first_slices_in_execution_order": first_slices,
     }
+    if overlay:
+        # compile-side fusible total == summed_fusible_us (the real compile us).
+        compile_fusible = fusible_us
+        summary.update({
+            "oracle_overlay": True,
+            "n_oracle_hit": n_oracle_hit,
+            "n_oracle_miss": n_oracle_miss,
+            "oracle_miss_reasons": dict(miss_reasons),
+            # full-track lengths (fusible part + externs); externs identical
+            "compile_track_total_us": round(sum_us, 2),
+            "oracle_track_total_us": round(oracle_total, 2),
+            # fusible-only headroom (externs cancel)
+            "compile_fusible_us": round(compile_fusible, 2),
+            "oracle_fusible_us": round(oracle_fusible_us, 2),
+            "fusible_compile_over_oracle_ratio": (
+                round(compile_fusible / oracle_fusible_us, 4)
+                if oracle_fusible_us else None),
+            "fusible_headroom_us": round(compile_fusible - oracle_fusible_us, 2),
+            "compile_vs_oracle_pairs": pair_rows,
+        })
     return events, summary
 
 
 def run_attribution_mode(attribution_json: Path, model_filter: str | None,
-                         all_models: bool, out: Path) -> None:
+                         all_models: bool, out: Path,
+                         oracle_timings: Path | None = None) -> None:
     """Consume a model_attribution --collect-order output JSON and emit a
-    true-to-e2e Chrome-trace (one process per selected model)."""
+    true-to-e2e Chrome-trace (one process per selected model).
+
+    If ``oracle_timings`` is given, also emit the oracle-ceiling overlay track
+    (tid 3) per model -- pure CPU JSON join, NO new benching. See
+    build_trace_from_attribution for the join + cancellation semantics."""
     import json
     data = json.loads(Path(attribution_json).read_text())
     models = data.get("models", {})
@@ -606,10 +846,22 @@ def run_attribution_mode(attribution_json: Path, model_filter: str | None,
         raise SystemExit(
             f"No models with a per_node list in {attribution_json}. Run "
             f"model_attribution.py with --collect-order first.")
+
+    timings = hash_to_repro = None
+    if oracle_timings is not None:
+        timings = mga.load_timings(Path(oracle_timings))
+        hash_to_repro = mga.build_hash_to_repro()
+        print(f"[rollup_to_perfetto:attribution] oracle overlay ON: "
+              f"{len(timings)} priced families, "
+              f"{len(hash_to_repro)} pattern_hash->dir mappings "
+              f"(from {oracle_timings})", file=sys.stderr)
+
     all_events: list[dict] = []
     summary: dict[str, Any] = {}
     for pid, name in enumerate(names, start=1):
-        events, s = build_trace_from_attribution(pid, name, models[name])
+        events, s = build_trace_from_attribution(
+            pid, name, models[name], timings=timings,
+            hash_to_repro=hash_to_repro)
         all_events += events
         summary[name] = s
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -634,6 +886,29 @@ def run_attribution_mode(attribution_json: Path, model_filter: str | None,
             print("    first slices (execution order): "
                   + " -> ".join(s["first_slices_in_execution_order"][:10]),
                   file=sys.stderr)
+        if s.get("oracle_overlay"):
+            print(
+                f"    ORACLE CEILING: hit={s['n_oracle_hit']} "
+                f"miss={s['n_oracle_miss']} {s['oracle_miss_reasons']} | "
+                f"compile_track_total={s['compile_track_total_us']}us "
+                f"oracle_track_total={s['oracle_track_total_us']}us "
+                f"(externs cancel) | FUSIBLE-ONLY: "
+                f"compile={s['compile_fusible_us']}us "
+                f"oracle={s['oracle_fusible_us']}us "
+                f"ratio(compile/oracle)={s['fusible_compile_over_oracle_ratio']} "
+                f"headroom={s['fusible_headroom_us']}us",
+                file=sys.stderr,
+            )
+            for r in s["compile_vs_oracle_pairs"][:10]:
+                if r["has_oracle"]:
+                    print(f"      [fusible] {r['label']}: compile="
+                          f"{r['compile_us']}us oracle={r['oracle_us']}us "
+                          f"ratio={r['ratio_compile_over_oracle']} "
+                          f"status={r['status']}", file=sys.stderr)
+                else:
+                    print(f"      [fusible] {r['label']}: compile="
+                          f"{r['compile_us']}us oracle=MISS"
+                          f"({r['miss_reason']})", file=sys.stderr)
     print("\n  View: drag the JSON into https://ui.perfetto.dev "
           "(or chrome://tracing -> Load).", file=sys.stderr)
 
@@ -675,6 +950,15 @@ def main() -> None:
     p.add_argument("--attribution",
                    help="Path to a model_attribution.py --collect-order output "
                         "JSON (required for --source attribution).")
+    p.add_argument("--oracle-timings", dest="oracle_timings", default=None,
+                   help="ONLY for --source attribution: per-oracle timings JSON "
+                        "(e.g. results/all_oracle_timings_b200_v2.json). When "
+                        "given, adds a THIRD track (tid 3) = the oracle "
+                        "(reference-kernel) ceiling, per fusible kernel, in the "
+                        "same execution order -- so the per-kernel compile-vs-"
+                        "oracle gap is visible. Pure CPU JSON join, no benching. "
+                        "Externs have no oracle, so their real us is mirrored "
+                        "onto the oracle clock (they cancel between the totals).")
     p.add_argument("--timings", default=str(DEFAULT_TIMINGS),
                    help="Per-oracle timings JSON keyed by canonical dir "
                         "(default: results/all_oracle_timings_b200_v2.json -- "
@@ -690,8 +974,10 @@ def main() -> None:
     if args.source == "attribution":
         if not args.attribution:
             raise SystemExit("--source attribution requires --attribution <json>")
-        run_attribution_mode(Path(args.attribution), args.model, args.all,
-                             Path(args.out))
+        run_attribution_mode(
+            Path(args.attribution), args.model, args.all, Path(args.out),
+            oracle_timings=(Path(args.oracle_timings)
+                            if args.oracle_timings else None))
         return
 
     # MODE 1 (default): oracle-vs-compile accounting (re-runs partition pass).
