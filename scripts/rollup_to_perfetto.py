@@ -2,6 +2,18 @@
 """Export a model's per-kernel rollup as a Perfetto / Chrome-trace JSON, in the
 model's REAL GRAPH-EXECUTION ORDER (a reconstructed invocation timeline).
 
+TWO MODES (--source):
+  accounting (default): oracle-vs-compile accounting. Only fusible kernels are
+      timed (two tracks, oracle ceiling vs current compile); externs are
+      fixed-width "untimed" markers. Re-runs model_graph_accounting's partition
+      pass + a --timings file. (Everything below describes this mode.)
+  attribution: TRUE-to-e2e. Consumes scripts/model_attribution.py run with
+      --collect-order, whose per_node list carries REAL measured us for BOTH
+      fusible partitions AND externs (conv/GEMM/SDPA), benched once under the GPU
+      lock by model_attribution. One execution-ordered timeline where every bar
+      is real and the summed durations reconstruct the model's measured
+      sum_parts_us / e2e_us. See build_trace_from_attribution / MODE 2 below.
+
 A model's kernel rollup is, in effect, a flame profile: a sequence of kernels
 whose per-kernel times sum to an end-to-end estimate. This tool turns that into
 a Chrome Trace Event Format JSON so you can SEE it in Perfetto / chrome://tracing
@@ -458,6 +470,175 @@ def emit(events: list[dict]) -> dict:
 
 
 # ===========================================================================
+# MODE 2: TRUE-to-e2e trace from model_attribution's per_node ordered list
+# ===========================================================================
+#
+# The default mode above is the ORACLE-vs-COMPILE accounting view: only fusible
+# kernels are timed (two tracks), externs are fixed-width "untimed" markers.
+#
+# This mode instead consumes scripts/model_attribution.py run with
+# --collect-order, whose per_node list is the model's EXECUTION-ORDERED timeline
+# with REAL measured us for BOTH fusible partitions AND externs (conv/GEMM/SDPA),
+# benched once under the GPU lock by model_attribution and looked up from its
+# populated caches. No new timing happens here -- we just lay those durations end
+# to end. The headline: the summed slice durations reconstruct the model's
+# measured sum_parts_us (and, after the launch-floor correction model_attribution
+# documents, the measured e2e_us). Every bar is real.
+#
+# One unified execution-ordered timeline; fusible vs extern are different track
+# rows (tids) purely for color, but ts is a single advancing clock so the slices
+# read as one run.
+
+TID_FUSIBLE = 1
+TID_EXTERN_REAL = 2
+TRACK_FUSIBLE = "fusible (real us)"
+TRACK_EXTERN_REAL = "extern (real us: conv/GEMM/SDPA)"
+
+
+def _attr_process_metadata(pid: int, model_name: str) -> list[dict]:
+    return [
+        {"name": "process_name", "ph": "M", "pid": pid, "tid": 0,
+         "args": {"name": model_name}},
+        {"name": "thread_name", "ph": "M", "pid": pid, "tid": TID_FUSIBLE,
+         "args": {"name": TRACK_FUSIBLE}},
+        {"name": "thread_name", "ph": "M", "pid": pid, "tid": TID_EXTERN_REAL,
+         "args": {"name": TRACK_EXTERN_REAL}},
+    ]
+
+
+def build_trace_from_attribution(pid: int, model_name: str,
+                                 model_result: dict) -> tuple[list[dict], dict]:
+    """Build a true-to-e2e trace from one model's model_attribution result dict
+    (which must contain a per_node ordered list -- run with --collect-order).
+
+    Slices are laid in per_node order on ONE advancing clock; fusible and extern
+    sit on separate track rows for color. A node with us==null (point that failed
+    or did not match the cache) is drawn as a zero-width marker labeled
+    "[no us]" so the order stays honest but it adds nothing to the total.
+    Returns (events, per-model summary)."""
+    per_node = model_result.get("per_node") or []
+    events = _attr_process_metadata(pid, model_name)
+    ts = 0.0
+    sum_us = fusible_us = extern_us = 0.0
+    n_fusible = n_extern = n_missing = 0
+    last_graph = None
+    first_slices: list[str] = []
+    for item in per_node:
+        gname = item.get("graph_name")
+        if gname != last_graph and last_graph is not None:
+            events.append(_graph_boundary(pid, TID_FUSIBLE, ts, gname))
+            events.append(_graph_boundary(pid, TID_EXTERN_REAL, ts, gname))
+        last_graph = gname
+        is_fusible = item.get("kind") == "fusible"
+        tid = TID_FUSIBLE if is_fusible else TID_EXTERN_REAL
+        us = item.get("us")
+        has_us = isinstance(us, (int, float))
+        dur = float(us) if has_us else 0.0
+        label = item.get("label") or item.get("node_name") or "?"
+        if len(first_slices) < 12:
+            tag = "fusible" if is_fusible else "extern"
+            first_slices.append(f"[{tag}] {label}"
+                                + ("" if has_us else " [no us]"))
+        events.append({
+            "name": f"{label}" + ("" if has_us else " [no us]"),
+            "ph": "X",
+            "ts": round(ts, 3),
+            "dur": round(dur, 3),
+            "pid": pid, "tid": tid,
+            "args": {
+                "kind": item.get("kind"),
+                "graph": gname,
+                "node_name": item.get("node_name"),
+                "order_index": item.get("order_index"),
+                "key": item.get("key"),
+                "us": us,
+                "has_real_us": has_us,
+            },
+        })
+        ts += dur
+        sum_us += dur
+        if is_fusible:
+            fusible_us += dur
+            n_fusible += 1
+        else:
+            extern_us += dur
+            n_extern += 1
+        if not has_us:
+            n_missing += 1
+
+    e2e = model_result.get("e2e_us")
+    sum_parts = model_result.get("sum_parts_us")
+    summary = {
+        "pid": pid,
+        "n_slices": n_fusible + n_extern,
+        "n_fusible_slices": n_fusible,
+        "n_extern_slices": n_extern,
+        "n_missing_us_slices": n_missing,
+        "summed_slice_us": round(sum_us, 2),
+        "summed_fusible_us": round(fusible_us, 2),
+        "summed_extern_us": round(extern_us, 2),
+        "model_attribution_sum_parts_us": sum_parts,
+        "model_attribution_e2e_us": e2e,
+        "summed_over_sum_parts": (round(sum_us / sum_parts, 4)
+                                  if isinstance(sum_parts, (int, float))
+                                  and sum_parts else None),
+        "summed_over_e2e": (round(sum_us / e2e, 4)
+                            if isinstance(e2e, (int, float)) and e2e else None),
+        "first_slices_in_execution_order": first_slices,
+    }
+    return events, summary
+
+
+def run_attribution_mode(attribution_json: Path, model_filter: str | None,
+                         all_models: bool, out: Path) -> None:
+    """Consume a model_attribution --collect-order output JSON and emit a
+    true-to-e2e Chrome-trace (one process per selected model)."""
+    import json
+    data = json.loads(Path(attribution_json).read_text())
+    models = data.get("models", {})
+    names = sorted(n for n in models
+                   if isinstance(models[n], dict) and "per_node" in models[n])
+    if not all_models:
+        if not model_filter:
+            raise SystemExit("attribution mode needs --model or --all")
+        names = [n for n in names if model_filter.lower() in n.lower()]
+    if not names:
+        raise SystemExit(
+            f"No models with a per_node list in {attribution_json}. Run "
+            f"model_attribution.py with --collect-order first.")
+    all_events: list[dict] = []
+    summary: dict[str, Any] = {}
+    for pid, name in enumerate(names, start=1):
+        events, s = build_trace_from_attribution(pid, name, models[name])
+        all_events += events
+        summary[name] = s
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(emit(all_events), indent=2))
+    print(f"\n[rollup_to_perfetto:attribution] wrote {out} "
+          f"({len(all_events)} events across {len(names)} model(s))",
+          file=sys.stderr)
+    for name, s in summary.items():
+        print(
+            f"  {name}: slices={s['n_slices']} "
+            f"(fusible={s['n_fusible_slices']} extern={s['n_extern_slices']} "
+            f"no_us={s['n_missing_us_slices']}) | "
+            f"summed={s['summed_slice_us']}us "
+            f"(fusible={s['summed_fusible_us']} extern={s['summed_extern_us']}) "
+            f"sum_parts={s['model_attribution_sum_parts_us']}us "
+            f"e2e={s['model_attribution_e2e_us']}us "
+            f"summed/sum_parts={s['summed_over_sum_parts']} "
+            f"summed/e2e={s['summed_over_e2e']}",
+            file=sys.stderr,
+        )
+        if s["first_slices_in_execution_order"]:
+            print("    first slices (execution order): "
+                  + " -> ".join(s["first_slices_in_execution_order"][:10]),
+                  file=sys.stderr)
+    print("\n  View: drag the JSON into https://ui.perfetto.dev "
+          "(or chrome://tracing -> Load).", file=sys.stderr)
+
+
+# ===========================================================================
 # Model discovery / selection
 # ===========================================================================
 
@@ -484,6 +665,16 @@ def main() -> None:
                      help="Model name filter (partial match)")
     src.add_argument("--all", "-a", action="store_true",
                      help="All models (one process per model in one trace)")
+    p.add_argument("--source", choices=("accounting", "attribution"),
+                   default="accounting",
+                   help="accounting (default): oracle-vs-compile, kernels only, "
+                        "externs untimed -- re-runs the partition pass. "
+                        "attribution: TRUE-to-e2e from a model_attribution "
+                        "--collect-order JSON (fusible AND externs have REAL "
+                        "measured us; sums to the model's sum_parts/e2e).")
+    p.add_argument("--attribution",
+                   help="Path to a model_attribution.py --collect-order output "
+                        "JSON (required for --source attribution).")
     p.add_argument("--timings", default=str(DEFAULT_TIMINGS),
                    help="Per-oracle timings JSON keyed by canonical dir "
                         "(default: results/all_oracle_timings_b200_v2.json -- "
@@ -495,6 +686,15 @@ def main() -> None:
                    help="Output Chrome-trace JSON path")
     args = p.parse_args()
 
+    # MODE 2: true-to-e2e from a model_attribution --collect-order JSON.
+    if args.source == "attribution":
+        if not args.attribution:
+            raise SystemExit("--source attribution requires --attribution <json>")
+        run_attribution_mode(Path(args.attribution), args.model, args.all,
+                             Path(args.out))
+        return
+
+    # MODE 1 (default): oracle-vs-compile accounting (re-runs partition pass).
     model_dirs = select_model_dirs(args.model, args.all)
     if not model_dirs:
         raise SystemExit(f"No models matching '{args.model}'")

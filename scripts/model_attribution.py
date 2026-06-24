@@ -667,14 +667,53 @@ def bench_e2e_isolated(graph_path: str) -> tuple[float | None, str | None]:
 
 
 # ============================================================================
+# Ordered per-node timeline (additive; default-off via collect_order)
+# ============================================================================
+
+def _ordered_per_node(gm, graph_name, fusible_cache, extern_cache) -> list[dict]:
+    """Re-walk ONE graph in node order and emit each fusible partition (anchored
+    at its last node) and each extern in execution order, with us looked up in
+    the ALREADY-POPULATED caches. Reuses the same partitioner + extern keys the
+    rest of this module uses; adds no benching. Consumer turns this into a
+    true-to-e2e trace (all Perfetto logic lives there, not here)."""
+    from capture_hook import (compute_partition_pattern, get_fusion_partitions,
+                              partition_node_is_supported)
+    order = {n: i for i, n in enumerate(gm.graph.nodes)}
+    anchored, partitioned = {}, set()
+    for comp in get_fusion_partitions(gm):
+        pat = compute_partition_pattern(comp, gm)
+        partitioned.update(comp)
+        if pat is not None:
+            anchored[max(comp, key=order.get)] = (pat["pattern_hash"],
+                                                  pat["shape_hash"])
+    out = []
+    for n in gm.graph.nodes:
+        if n in anchored:
+            k = anchored[n]
+            out.append({"graph_name": graph_name, "node_name": n.name,
+                        "order_index": order[n], "kind": "fusible", "key": list(k),
+                        "us": fusible_cache.get(k),
+                        "label": f"{k[0]}/{k[1]}"})
+        elif n.op == "call_function" and n not in partitioned \
+                and not partition_node_is_supported(n):
+            k = (str(n.target), _arg_sig((n.args, n.kwargs)))
+            out.append({"graph_name": graph_name, "node_name": n.name,
+                        "order_index": order[n], "kind": "extern", "key": list(k),
+                        "us": extern_cache.get(k), "label": str(n.target)})
+    return out
+
+
+# ============================================================================
 # Per-model attribution
 # ============================================================================
 
 def attribute_model(model_dir: Path, canonical_dir: Path,
                     fusible_cache: dict[tuple[str, str], float],
                     extern_cache: dict[tuple[str, str], float],
-                    launch_floor_us: float) -> dict:
+                    launch_floor_us: float,
+                    collect_order: bool = False) -> dict:
     graphs = sorted(model_dir.glob("full_graph_*.py"))
+    order_gms: list = []  # retained graphs for the per_node pass (collect_order)
     fus_occ: Counter = Counter()
     extern_occ: Counter = Counter()
     # key -> (graph_path, node_name): a stable handle to re-find + bench the
@@ -685,6 +724,8 @@ def attribute_model(model_dir: Path, canonical_dir: Path,
     n_e2e_ok = 0
     for g in graphs:
         gm = trace_full_graph(g)
+        if collect_order:
+            order_gms.append((gm, g.stem))
         acc = analyze_graph(gm, str(g), g.stem)
         fus_occ.update((o.pattern_hash, o.shape_hash) for o in acc.occurrences)
         for key, info in collect_extern_points(gm, graph=g).items():
@@ -756,7 +797,7 @@ def attribute_model(model_dir: Path, canonical_dir: Path,
     ratio_raw = round(parts / e2e_total, 3) if (e2e_complete and e2e_total) else None
     ratio_corrected = (round(corrected / e2e_total, 3)
                        if (e2e_complete and e2e_total) else None)
-    return {
+    result = {
         "e2e_us": round(e2e_total, 1),
         "e2e_complete": e2e_complete,
         "n_e2e_graphs_ok": n_e2e_ok,
@@ -778,6 +819,11 @@ def attribute_model(model_dir: Path, canonical_dir: Path,
         "extern_bench_failures": extern_failed,
         "e2e_bench_failures": e2e_failed,
     }
+    if collect_order:  # additive: ordered timeline w/ real cached us per node
+        result["per_node"] = [e for gm, gn in order_gms
+                              for e in _ordered_per_node(gm, gn, fusible_cache,
+                                                         extern_cache)]
+    return result
 
 
 def main():
@@ -804,6 +850,10 @@ def main():
     parser.add_argument("--models", required=True,
                         help="Comma-separated model names, or 'all'")
     parser.add_argument("--output", "-o", type=Path, default=None)
+    parser.add_argument("--collect-order", action="store_true",
+                        help="Additionally emit a per_node ordered timeline "
+                             "(execution-ordered fusible+extern with cached us) "
+                             "for true-to-e2e tracing. Off by default; no cost.")
     args = parser.parse_args()
 
     import torch._inductor.config as inductor_config
@@ -832,7 +882,8 @@ def main():
             continue
         try:
             r = attribute_model(md, canonical_dir, fusible_cache,
-                                extern_cache, floor_us)
+                                extern_cache, floor_us,
+                                collect_order=args.collect_order)
             out["models"][md.name] = r
             ratio = (f"{r['ratio_corrected']:.2f}"
                      if r["ratio_corrected"] is not None else "n/a(e2e partial)")
