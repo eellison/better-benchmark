@@ -1,0 +1,1 @@
+../../../repros/canonical/pointwise_6af37bbd9857/repro.py

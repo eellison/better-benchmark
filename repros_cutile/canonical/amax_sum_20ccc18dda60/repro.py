@@ -1,0 +1,1 @@
+../../../repros/canonical/amax_sum_20ccc18dda60/repro.py
