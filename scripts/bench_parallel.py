@@ -1415,6 +1415,10 @@ def main():
                         help="Hold a shared GPU lock during setup/warmup/capture "
                              "and upgrade to exclusive for timing/autotune. "
                              "Slower, useful for variance validation.")
+    parser.add_argument("--compile-time", action="store_true",
+                        help="Record cold-compile wall time (compile_time_s) for each "
+                             "--full-graphs model. Forces 1 GPU / 1 worker (compile is "
+                             "CPU-bound). Opt-in; off by default.")
     parser.add_argument("--tag", default=None,
                         help="Tag for this run (e.g. 'baseline', 'my_fix'). Used to key results in perf.json for comparison.")
     parser.add_argument("--compare", type=str, nargs=2, metavar=("TAG_A", "TAG_B"),
@@ -1560,6 +1564,10 @@ def main():
 
     gpus = _filter_gpus(matching_gpus(args.device_kind), args.gpus)
 
+    if args.compile_time and len(gpus) > 1:
+        print(f"[compile-time] serializing to 1 GPU: {gpus[0]['index']}:{gpus[0]['kind']}")
+        gpus = gpus[:1]
+
     # Lock the SM clock of exactly the GPUs this sweep uses (best-effort, never
     # fatal — see _lock_gpu_clocks for the non-blocking contract). Reset on exit
     # via atexit so the node isn't left pinned regardless of how main() returns
@@ -1583,6 +1591,9 @@ def main():
         )
     except ValueError as exc:
         parser.error(str(exc))
+
+    if args.compile_time:
+        n_workers, workers_per_gpu = 1, 1
 
     if args.oracles:
         task_label, task_unit = "oracle shape-points", "point"
@@ -1623,6 +1634,7 @@ def main():
         "combo_kernels": args.combo_kernels,
         "multi_kernel": args.multi_kernel,
         "workload_kind": workload_kind,
+        "compile_time": args.compile_time,
     }
 
     if args.oracles:
@@ -2288,6 +2300,7 @@ import importlib.util, math
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
 from byte_accounting import count_bytes_effective
 from full_graph_harness import load_full_graph_definition, load_full_graph, result_metadata, tensor_bytes
+from torch._inductor.utils import fresh_cache
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 WORKLOAD_KIND = {args_dict.get("workload_kind", "repro")!r}
@@ -2579,7 +2592,18 @@ def bench_full_graph_one(repro_path):
     # Compile default
     inductor_metrics.reset()
     torch._dynamo.reset()
-    compiled = torch.compile(instance)
+    # Opt-in: cold-compile wall time.
+    compile_time_s = None
+    if {args_dict.get("compile_time", False)}:
+        with fresh_cache():
+            _t0 = time.perf_counter()
+            compiled = torch.compile(instance)
+            with torch.no_grad():
+                compiled(*inputs)
+            torch.cuda.synchronize()
+            compile_time_s = time.perf_counter() - _t0
+    else:
+        compiled = torch.compile(instance)
     with gpu_setup_lock():
         with torch.no_grad():
             graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
@@ -2632,7 +2656,7 @@ def bench_full_graph_one(repro_path):
     compiled_us = min(default_times)
     cd_us = min(cd_times) if cd_times else None
 
-    return {{
+    result = {{
         "__graph__": result_metadata(_definition),
         "default": {{
             "compiled_us": compiled_us,
@@ -2647,6 +2671,9 @@ def bench_full_graph_one(repro_path):
             "gap_cd": None,
         }}
     }}
+    if {args_dict.get("compile_time", False)}:
+        result["default"]["compile_time_s"] = compile_time_s
+    return result
 
 def bench_one(repro_path):
     if WORKLOAD_KIND == "full_graph":
