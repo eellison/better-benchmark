@@ -298,6 +298,28 @@ def test_default_worker_setup_does_not_take_gpu_lock():
     assert "do_bench(" in script
 
 
+def test_compile_time_flag_gates_full_graph_cold_compile():
+    """--compile-time adds compile_time_s (cold compile via fresh_cache) when on; dead-guarded when off."""
+    base = {
+        "root": str(ROOT),
+        "all_shapes": False,
+        "no_cd": True,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": False,
+    }
+
+    on = _persistent_worker_script("0", {**base, "compile_time": True})
+    assert "from torch._inductor.utils import fresh_cache" in on
+    assert "compile_time_s = None\n    if True:" in on
+    assert "with fresh_cache():" in on
+    assert 'if True:\n        result["default"]["compile_time_s"] = compile_time_s' in on
+
+    off = _persistent_worker_script("0", base)
+    assert "compile_time_s = None\n    if False:" in off
+    assert 'if False:\n        result["default"]["compile_time_s"] = compile_time_s' in off
+
+
 def test_strict_setup_lock_uses_inductor_lock_hook(monkeypatch, tmp_path):
     try:
         from torch._inductor.runtime import benchmarking as inductor_benchmarking
