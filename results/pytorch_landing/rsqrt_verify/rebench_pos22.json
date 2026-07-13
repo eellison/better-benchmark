@@ -1,0 +1,229 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "ecf1955002c2aadddb188585841d718971bb4848",
+    "pytorch_commit": "f595e0cac3a7261fb0c34b9d8ffc29a6319e0f9f",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-06-23T02:34:32Z",
+    "n_repros": 1,
+    "n_results": 1,
+    "workload_kind": "repro"
+  },
+  "repros/canonical/pointwise_2c331ef4f17f/repro.py": {
+    "repvgg_a2_82978638": {
+      "compiled_us": 39.903998374938965,
+      "coord_descent_us": 37.76000067591667,
+      "memcopy_sol_us": 13.248000293970108,
+      "total_bytes": 57808896,
+      "n_kernels": 1,
+      "gap_default": 3.0120771051840527,
+      "gap_cd": 2.850241533667788
+    },
+    "resnet18_1fa31355": {
+      "compiled_us": 7.455999962985516,
+      "coord_descent_us": 8.031999692320824,
+      "memcopy_sol_us": 6.111999973654747,
+      "total_bytes": 2412544,
+      "n_kernels": 1,
+      "gap_default": 1.2198952871603346,
+      "gap_cd": 1.314136080978742
+    },
+    "repvgg_a2_7ee473b0": {
+      "compiled_us": 352.03200578689575,
+      "coord_descent_us": 334.56000685691833,
+      "memcopy_sol_us": 95.07200121879578,
+      "total_bytes": 616563712,
+      "n_kernels": 1,
+      "gap_default": 3.7027936855640613,
+      "gap_cd": 3.5190171929480294
+    },
+    "LearningToPaint_5c9d3965": {
+      "compiled_us": 13.824000023305416,
+      "coord_descent_us": 13.407999649643898,
+      "memcopy_sol_us": 8.86400043964386,
+      "total_bytes": 18876416,
+      "n_kernels": 1,
+      "gap_default": 1.5595667122801768,
+      "gap_cd": 1.512635264510728
+    },
+    "repvgg_a2_3f9335c1": {
+      "compiled_us": 72.54400104284286,
+      "coord_descent_us": 68.44799965620041,
+      "memcopy_sol_us": 23.360000923275948,
+      "total_bytes": 115608576,
+      "n_kernels": 1,
+      "gap_default": 3.1054793739566975,
+      "gap_cd": 2.9301368557737812
+    },
+    "resnet18_5e705d74": {
+      "compiled_us": 9.151999838650227,
+      "coord_descent_us": 8.352000266313553,
+      "memcopy_sol_us": 6.84799998998642,
+      "total_bytes": 4818944,
+      "n_kernels": 1,
+      "gap_default": 1.3364485765234904,
+      "gap_cd": 1.2196262088969594
+    },
+    "LearningToPaint_f5c6beac": {
+      "compiled_us": 9.600000455975533,
+      "coord_descent_us": 8.991999551653862,
+      "memcopy_sol_us": 6.912000011652708,
+      "total_bytes": 4726784,
+      "n_kernels": 1,
+      "gap_default": 1.3888889525160901,
+      "gap_cd": 1.3009258588678463
+    },
+    "LearningToPaint_2c26d0d1": {
+      "compiled_us": 20.06400004029274,
+      "coord_descent_us": 19.840000197291374,
+      "memcopy_sol_us": 11.136000044643879,
+      "total_bytes": 37749760,
+      "n_kernels": 1,
+      "gap_default": 1.80172413432622,
+      "gap_cd": 1.7816092059764215
+    },
+    "repvgg_a2_b691104d": {
+      "compiled_us": 138.11199367046356,
+      "coord_descent_us": 130.72000443935394,
+      "memcopy_sol_us": 39.84000161290169,
+      "total_bytes": 231212544,
+      "n_kernels": 1,
+      "gap_default": 3.4666663674465745,
+      "gap_cd": 3.2811244765869163
+    },
+    "resnet50_88658619": {
+      "compiled_us": 19.29599978029728,
+      "coord_descent_us": 19.328000023961067,
+      "memcopy_sol_us": 8.927999995648861,
+      "total_bytes": 19300352,
+      "n_kernels": 1,
+      "gap_default": 2.1612902990256893,
+      "gap_cd": 2.1648745557102083
+    },
+    "LearningToPaint_d58c5fd0": {
+      "compiled_us": 11.42400037497282,
+      "coord_descent_us": 11.168000288307667,
+      "memcopy_sol_us": 8.128000423312187,
+      "total_bytes": 9441280,
+      "n_kernels": 1,
+      "gap_default": 1.405511783957007,
+      "gap_cd": 1.374015711942676
+    },
+    "resnet18_e4b64a12": {
+      "compiled_us": 6.912000011652708,
+      "coord_descent_us": 7.040000054985285,
+      "memcopy_sol_us": 5.98399993032217,
+      "total_bytes": 1212416,
+      "n_kernels": 1,
+      "gap_default": 1.1550802293008342,
+      "gap_cd": 1.1764706111228616
+    },
+    "resnet50_cf13ba44": {
+      "compiled_us": 25.312000885605812,
+      "coord_descent_us": 22.463999688625336,
+      "memcopy_sol_us": 11.392000131309032,
+      "total_bytes": 38551552,
+      "n_kernels": 1,
+      "gap_default": 2.2219101644881443,
+      "gap_cd": 1.9719100622977295
+    },
+    "resnet50_27f9b106": {
+      "compiled_us": 34.623999148607254,
+      "coord_descent_us": 34.623999148607254,
+      "memcopy_sol_us": 17.343999817967415,
+      "total_bytes": 77078528,
+      "n_kernels": 1,
+      "gap_default": 1.9963099349631408,
+      "gap_cd": 1.9963099349631408
+    },
+    "resnet50_cc596ad9": {
+      "compiled_us": 59.07199904322624,
+      "coord_descent_us": 59.039998799562454,
+      "memcopy_sol_us": 28.64000014960766,
+      "total_bytes": 154144768,
+      "n_kernels": 1,
+      "gap_default": 2.06256978822102,
+      "gap_cd": 2.0614524612832885
+    },
+    "resnext50_32x4d_68f48f4e": {
+      "compiled_us": 9.344000369310379,
+      "coord_descent_us": 9.79200005531311,
+      "memcopy_sol_us": 6.84799998998642,
+      "total_bytes": 4849664,
+      "n_kernels": 1,
+      "gap_default": 1.3644860372333192,
+      "gap_cd": 1.4299065522242398
+    },
+    "resnext50_32x4d_eceeb412": {
+      "compiled_us": 11.648000217974186,
+      "coord_descent_us": 11.136000044643879,
+      "memcopy_sol_us": 8.031999692320824,
+      "total_bytes": 9650176,
+      "n_kernels": 1,
+      "gap_default": 1.4501992858777775,
+      "gap_cd": 1.3864542419356298
+    },
+    "resnext50_32x4d_76020c9d": {
+      "compiled_us": 14.08000010997057,
+      "coord_descent_us": 13.952000066637993,
+      "memcopy_sol_us": 8.960000239312649,
+      "total_bytes": 19275776,
+      "n_kernels": 1,
+      "gap_default": 1.571428541730786,
+      "gap_cd": 1.5571428229904039
+    },
+    "resnext50_32x4d_0f0aebfd": {
+      "compiled_us": 20.22399939596653,
+      "coord_descent_us": 20.255999639630318,
+      "memcopy_sol_us": 10.27199998497963,
+      "total_bytes": 38539264,
+      "n_kernels": 1,
+      "gap_default": 1.968847296100014,
+      "gap_cd": 1.9719625846232405
+    },
+    "resnet152_e006e72d": {
+      "compiled_us": 57.151999324560165,
+      "coord_descent_us": 57.11999908089638,
+      "memcopy_sol_us": 15.168000012636185,
+      "total_bytes": 77103104,
+      "n_kernels": 1,
+      "gap_default": 3.767932441781901,
+      "gap_cd": 3.7658227210779764
+    },
+    "resnet152_83969398": {
+      "compiled_us": 76.7040029168129,
+      "coord_descent_us": 69.47200000286102,
+      "memcopy_sol_us": 28.76799926161766,
+      "total_bytes": 154157056,
+      "n_kernels": 1,
+      "gap_default": 2.666296054142061,
+      "gap_cd": 2.414905512582891
+    },
+    "resnet152_b188d91d": {
+      "compiled_us": 116.5120005607605,
+      "coord_descent_us": 116.57600104808807,
+      "memcopy_sol_us": 51.10400170087814,
+      "total_bytes": 308289536,
+      "n_kernels": 1,
+      "gap_default": 2.2798997472395284,
+      "gap_cd": 2.2811521048866297
+    },
+    "resnet152_795eaade": {
+      "compiled_us": 212.67199516296387,
+      "coord_descent_us": 212.67199516296387,
+      "memcopy_sol_us": 95.07200121879578,
+      "total_bytes": 616566784,
+      "n_kernels": 1,
+      "gap_default": 2.2369571738952576,
+      "gap_cd": 2.2369571738952576
+    }
+  },
+  "__summary__": {
+    "total": 1,
+    "ok": 1,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 40.33717441558838
+  }
+}

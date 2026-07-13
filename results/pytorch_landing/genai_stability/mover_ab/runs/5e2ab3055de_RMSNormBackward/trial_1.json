@@ -1,0 +1,218 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "ecf1955002c2aadddb188585841d718971bb4848",
+    "pytorch_commit": "5e2ab3055de1bc4bffe2e7feffe1fc7ff7af8b10",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-06-23T03:39:51Z",
+    "n_repros": 2,
+    "n_results": 2,
+    "workload_kind": "full_graph"
+  },
+  "repros/models/genai/static/RMSNormBackward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/static/RMSNormBackward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "static/RMSNormBackward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "arg0_1",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": [
+              512,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "arg1_1",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": [
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          }
+        ],
+        "tensor_attrs": {},
+        "outputs": [
+          {
+            "kind": "tensor",
+            "name": "output_0",
+            "shape": [],
+            "dtype": "bfloat16",
+            "stride": [],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "output_1",
+            "shape": [
+              1152000,
+              1
+            ],
+            "dtype": "float32",
+            "stride": [
+              1,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          }
+        ]
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 394.9759900569916,
+      "coord_descent_us": 251.23199820518494,
+      "memcopy_sol_us": null,
+      "input_bytes": 1179650048,
+      "output_bytes": 4608002,
+      "naive_io_bytes": 1184258050,
+      "n_kernels": 2,
+      "num_inputs": 2,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "repros/models/genai/static/RMSNormBackward/full_graph_001.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/static/RMSNormBackward/full_graph_001.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "static/RMSNormBackward",
+        "graph": "full_graph_001.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "arg0_1",
+            "shape": [],
+            "dtype": "bfloat16",
+            "stride": [],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "arg1_1",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": [
+              512,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "arg2_1",
+            "shape": [
+              1152000,
+              1
+            ],
+            "dtype": "float32",
+            "stride": [
+              1,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "arg3_1",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": [
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          }
+        ],
+        "tensor_attrs": {},
+        "outputs": [
+          {
+            "kind": "tensor",
+            "name": "output_0",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": [
+              512,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "output_1",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": [
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          }
+        ]
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 397.0879912376404,
+      "coord_descent_us": 386.84800267219543,
+      "memcopy_sol_us": null,
+      "input_bytes": 1184258050,
+      "output_bytes": 1179650048,
+      "naive_io_bytes": 2363908098,
+      "n_kernels": 1,
+      "num_inputs": 4,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "__summary__": {
+    "total": 2,
+    "ok": 2,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 16.571670293807983
+  }
+}

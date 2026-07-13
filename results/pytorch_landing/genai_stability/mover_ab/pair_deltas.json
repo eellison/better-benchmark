@@ -1,0 +1,3546 @@
+[
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "CrossEntropyBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 2171.62,
+  "mover_us": 2453.38,
+  "delta_pct": -12.975,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "CrossEntropyForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 2133.86,
+  "mover_us": 2449.31,
+  "delta_pct": -14.783,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "LayerNormBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 392.06,
+  "mover_us": 816.9,
+  "delta_pct": -108.361,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 256,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 256,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "LayerNormBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 695.23,
+  "mover_us": 680.1,
+  "delta_pct": 2.176,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 256,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 256,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "LayerNormForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 342.98,
+  "mover_us": 342.94,
+  "delta_pct": 0.012,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "RMSNormBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 394.94,
+  "mover_us": 816.96,
+  "delta_pct": -106.857,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "RMSNormBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 396.32,
+  "mover_us": 380.86,
+  "delta_pct": 3.901,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "RMSNormForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 343.14,
+  "mover_us": 343.07,
+  "delta_pct": 0.02,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "SoftmaxBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 3350.53,
+  "mover_us": 3988.51,
+  "delta_pct": -19.041,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 512,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "SoftmaxBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 2879.42,
+  "mover_us": 3597.31,
+  "delta_pct": -24.932,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 512,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 2048,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "mega-commit",
+  "A": "5e2ab3055de",
+  "B": "97385fb3273",
+  "micro": "SoftmaxForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 3461.92,
+  "mover_us": 3928.93,
+  "delta_pct": -13.49,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "CrossEntropyBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 1977.54,
+  "mover_us": 716.58,
+  "delta_pct": 63.764,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": false
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "CrossEntropyForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 1970.02,
+  "mover_us": 708.42,
+  "delta_pct": 64.04,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": false
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "LayerNormBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 306.88,
+  "mover_us": 306.85,
+  "delta_pct": 0.01,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 256,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 512,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "LayerNormBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 679.94,
+  "mover_us": 677.7,
+  "delta_pct": 0.329,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 256,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 512,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "LayerNormForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 343.01,
+  "mover_us": 342.85,
+  "delta_pct": 0.047,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "RMSNormBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 306.98,
+  "mover_us": 307.04,
+  "delta_pct": -0.02,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "RMSNormBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 381.98,
+  "mover_us": 382.91,
+  "delta_pct": -0.243,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "RMSNormForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 343.78,
+  "mover_us": 343.81,
+  "delta_pct": -0.009,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "SoftmaxBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 3527.52,
+  "mover_us": 1433.31,
+  "delta_pct": 59.368,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": false
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "SoftmaxBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 2879.46,
+  "mover_us": 2878.37,
+  "delta_pct": 0.038,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": false
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "scalar-acc",
+  "A": "a85d79a900a",
+  "B": "9dde2c59a51",
+  "micro": "SoftmaxForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 3539.04,
+  "mover_us": 1904.51,
+  "delta_pct": 46.186,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": false
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "CrossEntropyBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 2445.31,
+  "mover_us": 1977.31,
+  "delta_pct": 19.139,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "CrossEntropyForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 2450.27,
+  "mover_us": 1970.05,
+  "delta_pct": 19.599,
+  "verdict": "real",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "LayerNormBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 306.91,
+  "mover_us": 306.91,
+  "delta_pct": 0.0,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 128,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 128,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "LayerNormBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 677.76,
+  "mover_us": 677.82,
+  "delta_pct": -0.009,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 128,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 128,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "LayerNormForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 342.11,
+  "mover_us": 342.94,
+  "delta_pct": -0.243,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "RMSNormBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 306.88,
+  "mover_us": 306.91,
+  "delta_pct": -0.01,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "RMSNormBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 382.78,
+  "mover_us": 381.95,
+  "delta_pct": 0.217,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "RMSNormForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 343.78,
+  "mover_us": 343.81,
+  "delta_pct": -0.009,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "SoftmaxBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 3985.28,
+  "mover_us": 3527.68,
+  "delta_pct": 11.482,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "SoftmaxBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 2879.42,
+  "mover_us": 2879.36,
+  "delta_pct": 0.002,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "online-softmax",
+  "A": "e9a67c98a8c",
+  "B": "a26fc2c8bf4",
+  "micro": "SoftmaxForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 3928.96,
+  "mover_us": 3538.94,
+  "delta_pct": 9.927,
+  "verdict": "real",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "CrossEntropyBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 2445.31,
+  "mover_us": 2446.08,
+  "delta_pct": -0.031,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "CrossEntropyForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 2450.24,
+  "mover_us": 2450.05,
+  "delta_pct": 0.008,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "LayerNormBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 306.91,
+  "mover_us": 306.94,
+  "delta_pct": -0.01,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 512,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 512,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "LayerNormBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 678.78,
+  "mover_us": 677.92,
+  "delta_pct": 0.127,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 512,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 512,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "LayerNormForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 342.91,
+  "mover_us": 342.98,
+  "delta_pct": -0.02,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "RMSNormBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 306.94,
+  "mover_us": 306.14,
+  "delta_pct": 0.261,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "RMSNormBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 380.96,
+  "mover_us": 380.86,
+  "delta_pct": 0.026,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 4,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 16,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 4,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 8,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "RMSNormForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 343.74,
+  "mover_us": 343.78,
+  "delta_pct": -0.012,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 1,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "SoftmaxBackward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 3985.25,
+  "mover_us": 3985.25,
+  "delta_pct": 0.0,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "SoftmaxBackward",
+  "graph": "full_graph_001.py",
+  "predecessor_us": 2879.39,
+  "mover_us": 2879.36,
+  "delta_pct": 0.001,
+  "verdict": "no-move",
+  "config_flip": true,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 32,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": null,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   },
+   {
+    "XBLOCK": 2,
+    "R0_BLOCK": 1024,
+    "R1_BLOCK": null,
+    "num_warps": 8,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ },
+ {
+  "pair": "rotate_half",
+  "A": "52d4cadfac0",
+  "B": "1406552b9d3",
+  "micro": "SoftmaxForward",
+  "graph": "full_graph_000.py",
+  "predecessor_us": 3928.96,
+  "mover_us": 3928.99,
+  "delta_pct": -0.001,
+  "verdict": "no-move",
+  "config_flip": false,
+  "best_config_A": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ],
+  "best_config_B": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 4096,
+    "R1_BLOCK": null,
+    "num_warps": 2,
+    "num_stages": 1,
+    "found_by_coordesc": true
+   }
+  ]
+ }
+]

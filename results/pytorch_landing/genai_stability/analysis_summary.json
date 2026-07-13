@@ -1,0 +1,146 @@
+{
+  "commit_HEAD": "daa79cd25ca",
+  "commit_BASE": "5e2ab3055de",
+  "harness": "bench_parallel.py --full-graphs (do_bench return_mode=min, warmup=25, rep=100, per-GPU lock)",
+  "HEAD": {
+    "SoftmaxForward": {
+      "cold_compiled_us": {
+        "n": 8,
+        "min": 1904.5,
+        "max": 1911.7,
+        "median": 1904.6,
+        "spread_pct": 0.38,
+        "stdev_pct": 0.172
+      },
+      "warm_compiled_us": {
+        "n": 8,
+        "min": 1912.7,
+        "max": 1919.9,
+        "median": 1918.9,
+        "spread_pct": 0.38,
+        "stdev_pct": 0.146
+      },
+      "cold_cd_us": {
+        "n": 8,
+        "min": 1908.8,
+        "max": 1916.8,
+        "median": 1909.6,
+        "spread_pct": 0.42,
+        "stdev_pct": 0.178
+      },
+      "configs_cold": [
+        [
+          16384,
+          8
+        ]
+      ],
+      "exp_path_cold": [
+        [
+          0,
+          6
+        ]
+      ],
+      "source_identical_cold": true
+    },
+    "CrossEntropyForward": {
+      "cold_compiled_us": {
+        "n": 8,
+        "min": 708.4,
+        "max": 708.6,
+        "median": 708.5,
+        "spread_pct": 0.03,
+        "stdev_pct": 0.009
+      },
+      "warm_compiled_us": {
+        "n": 8,
+        "min": 746.3,
+        "max": 747.3,
+        "median": 746.4,
+        "spread_pct": 0.13,
+        "stdev_pct": 0.056
+      },
+      "cold_cd_us": {
+        "n": 8,
+        "min": 708.4,
+        "max": 708.5,
+        "median": 708.4,
+        "spread_pct": 0.03,
+        "stdev_pct": 0.009
+      },
+      "configs_cold": [
+        [
+          8192,
+          4
+        ]
+      ],
+      "exp_path_cold": [],
+      "source_identical_cold": true
+    },
+    "RMSNormForward": {
+      "cold_compiled_us": {
+        "n": 8,
+        "min": 343.8,
+        "max": 344.0,
+        "median": 343.9,
+        "spread_pct": 0.07,
+        "stdev_pct": 0.019
+      },
+      "warm_compiled_us": {
+        "n": 8,
+        "min": 343.7,
+        "max": 343.8,
+        "median": 343.8,
+        "spread_pct": 0.04,
+        "stdev_pct": 0.013
+      },
+      "cold_cd_us": {
+        "n": 8,
+        "min": 343.9,
+        "max": 345.1,
+        "median": 345.0,
+        "spread_pct": 0.36,
+        "stdev_pct": 0.141
+      },
+      "configs_cold": [
+        [
+          null,
+          1
+        ]
+      ],
+      "exp_path_cold": [],
+      "source_identical_cold": true
+    }
+  },
+  "transition_commit": "9dde2c59a51",
+  "BASE_5e2ab": {
+    "SoftmaxForward": {
+      "cold_compiled_us": {
+        "n": 8,
+        "min": 3461.9,
+        "max": 3462.1,
+        "spread_pct": 0.006,
+        "median": 3462.0
+      },
+      "exp_path": "libdevice.exp (2x), NO tl_math",
+      "config": "R0_BLOCK 16384/w8 (default); CD flips 2048<->4096 (both ~3183us, 0.15% apart)"
+    }
+  },
+  "fast_math_test_at_BASE": {
+    "default_libdevice_us": 3462.0,
+    "forced_use_fast_math_tlmath_us": 2971.7,
+    "exp_path_improvement_pct": 14.2,
+    "note": "flipping libdevice->tl_math recovers ~14%, NOT the full 45%. Remaining 36% is scalar-acc reduction structure (commit 9dde2c59a51)."
+  },
+  "transition": {
+    "a85d79a900a_pre": {
+      "us": 3539,
+      "exp": "tl_math (already fast-exp!)",
+      "note": "SLOW despite tl_math -> exp is not the dominant factor"
+    },
+    "9dde2c59a51_flip": {
+      "us": 1905,
+      "subject": "Ungate scalar-acc configs from CD + raise rnumel ceiling (3541->1905)",
+      "note": "the real ~46% win = scalar-acc reduction config, stable across cold runs"
+    }
+  }
+}

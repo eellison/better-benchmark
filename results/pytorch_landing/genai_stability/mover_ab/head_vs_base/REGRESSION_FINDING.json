@@ -1,0 +1,12 @@
+{
+  "question": "Does the mega-commit RMSNormBackward/LayerNormBackward ~2x regression (395->817us) PERSIST at HEAD?",
+  "answer": "HEALED \u2014 does NOT ship. Directly measured at HEAD daa79cd25ca: RMSNormBackward/000=306.9us, LayerNormBackward/000=307.0us (mega had 817; BASE 395/392). HEAD is faster than BASE on both.",
+  "heal_location": "between mega-commit 97385fb3273 and a85d79a900a (scalar-acc predecessor). norm-bwd/000 trajectory: BASE 395 -> mega 817 -> a85d79a900a 307 -> stays ~307 through HEAD (all 4 mover pairs).",
+  "mechanism": "Regressed kernel = the second reduction in RMSNorm/LayerNorm backward fusion (triton_*_mul_sum_1, the weight-gradient dw reduction over the token dim). MEGA emitted it as a LOOPED reduction (triton_red_fused_..._sum_1 @triton_heuristics.reduction, R0_BLOCK multi-pass) = ~2x slower for this r0-resident shape. BASE and HEAD emit it as a SINGLE-PASS triton_per_fused_..._sum_1 @triton_heuristics.persistent_reduction. The MixOrderReduction split kernel (sum_0, fixed_config RSPLIT_SIZE=128, mor_finalize) is BIT-IDENTICAL between mega and HEAD and is NOT the regression. HEAD beats BASE because HEAD turns ALL of these reductions persistent (0 looped reduction kernels vs BASE's 2), shaving a further ~22% off norm-bwd.",
+  "kernel_type_counts_RMSNormBackward": {
+    "BASE": "4 persistent_reduction, 2 reduction(looped)",
+    "MEGA": "4 persistent_reduction, 2 reduction(looped), 2 fixed_config(mor_finalize)",
+    "HEAD": "8 persistent_reduction, 2 fixed_config(mor_finalize)  <- 0 looped"
+  },
+  "ship_status": "NO shipped regression. The 817us is an artifact of benching the SQUASHED mega-commit in isolation; that synthetic aggregate state never appears as a real branch HEAD."
+}

@@ -1,0 +1,220 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "ecf1955002c2aadddb188585841d718971bb4848",
+    "pytorch_commit": "a73d1583b348acfadfb2089e87e9c94572120910",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-06-23T02:42:54Z",
+    "n_repros": 1,
+    "n_results": 1,
+    "workload_kind": "repro"
+  },
+  "repros/canonical/pointwise_9595e73ff43b/repro.py": {
+    "mobilenetv2_100_54640677": {
+      "compiled_us": 14.047999866306782,
+      "coord_descent_us": 13.856000266969204,
+      "memcopy_sol_us": 11.136000044643879,
+      "total_bytes": 38538240,
+      "n_kernels": 1,
+      "gap_default": 1.2614942358107746,
+      "gap_cd": 1.2442528925485747
+    },
+    "mobilenetv2_100_8a10670c": {
+      "compiled_us": 11.807999573647976,
+      "coord_descent_us": 11.935999616980553,
+      "memcopy_sol_us": 10.143999941647053,
+      "total_bytes": 24092160,
+      "n_kernels": 1,
+      "gap_default": 1.1640378195556993,
+      "gap_cd": 1.1766561204299986
+    },
+    "mobilenetv2_100_ebe204a7": {
+      "compiled_us": 18.271999433636665,
+      "coord_descent_us": 18.144000321626663,
+      "memcopy_sol_us": 15.104000456631184,
+      "total_bytes": 57803904,
+      "n_kernels": 1,
+      "gap_default": 1.2097456886406952,
+      "gap_cd": 1.201271171417425
+    },
+    "mobilenetv2_100_2e1844e5": {
+      "compiled_us": 132.79999792575836,
+      "coord_descent_us": 124.76799637079239,
+      "memcopy_sol_us": 96.25600278377533,
+      "total_bytes": 616563456,
+      "n_kernels": 1,
+      "gap_default": 1.3796541938695879,
+      "gap_cd": 1.2962100311921843
+    },
+    "mobilenetv2_100_1ee4ce98": {
+      "compiled_us": 9.983999654650688,
+      "coord_descent_us": 9.855999611318111,
+      "memcopy_sol_us": 8.927999995648861,
+      "total_bytes": 19269120,
+      "n_kernels": 1,
+      "gap_default": 1.1182795317558778,
+      "gap_cd": 1.1039426093326075
+    },
+    "mobilenetv2_100_82cef4c9": {
+      "compiled_us": 8.960000239312649,
+      "coord_descent_us": 8.991999551653862,
+      "memcopy_sol_us": 8.00000037997961,
+      "total_bytes": 14455296,
+      "n_kernels": 1,
+      "gap_default": 1.1199999767169369,
+      "gap_cd": 1.1239998905696027
+    },
+    "mobilenetv2_100_51719261": {
+      "compiled_us": 54.1439987719059,
+      "coord_descent_us": 52.09600180387497,
+      "memcopy_sol_us": 39.903998374938965,
+      "total_bytes": 231212160,
+      "n_kernels": 1,
+      "gap_default": 1.3568564799739498,
+      "gap_cd": 1.3055333782439453
+    },
+    "mobilenetv2_100_9c97edfa": {
+      "compiled_us": 49.8879998922348,
+      "coord_descent_us": 36.41600161790848,
+      "memcopy_sol_us": 36.73600032925606,
+      "total_bytes": 205521152,
+      "n_kernels": 1,
+      "gap_default": 1.3580139221771692,
+      "gap_cd": 0.9912892337630796
+    },
+    "mobilenetv2_100_ba8126d9": {
+      "compiled_us": 22.143999114632607,
+      "coord_descent_us": 22.175999358296394,
+      "memcopy_sol_us": 18.20800080895424,
+      "total_bytes": 77071872,
+      "n_kernels": 1,
+      "gap_default": 1.2161686143897106,
+      "gap_cd": 1.2179260969381545
+    },
+    "mobilenetv2_100_2cf7960f": {
+      "compiled_us": 17.983999103307724,
+      "coord_descent_us": 18.0479995906353,
+      "memcopy_sol_us": 14.431999996304512,
+      "total_bytes": 57807360,
+      "n_kernels": 1,
+      "gap_default": 1.2461196721114707,
+      "gap_cd": 1.2505542956802043
+    },
+    "mobilenetv2_100_d53a7e50": {
+      "compiled_us": 38.495998829603195,
+      "coord_descent_us": 36.67199984192848,
+      "memcopy_sol_us": 29.472000896930695,
+      "total_bytes": 154141440,
+      "n_kernels": 1,
+      "gap_default": 1.3061888456176143,
+      "gap_cd": 1.2442996310354897
+    },
+    "mobilenet_v2_3bdac97c": {
+      "compiled_us": 7.104000076651573,
+      "coord_descent_us": 7.296000141650438,
+      "memcopy_sol_us": 6.87999976798892,
+      "total_bytes": 3018240,
+      "n_kernels": 1,
+      "gap_default": 1.0325581854965862,
+      "gap_cd": 1.0604651726293761
+    },
+    "mobilenet_v2_66878456": {
+      "compiled_us": 6.87999976798892,
+      "coord_descent_us": 6.943999789655209,
+      "memcopy_sol_us": 6.111999973654747,
+      "total_bytes": 1810944,
+      "n_kernels": 1,
+      "gap_default": 1.1256544171538891,
+      "gap_cd": 1.1361256249323832
+    },
+    "mobilenet_v2_0598891b": {
+      "compiled_us": 7.455999962985516,
+      "coord_descent_us": 7.488000206649303,
+      "memcopy_sol_us": 7.168000098317862,
+      "total_bytes": 7229952,
+      "n_kernels": 1,
+      "gap_default": 1.040178551997403,
+      "gap_cd": 1.044642871643729
+    },
+    "mobilenet_v2_91334d30": {
+      "compiled_us": 7.071999832987785,
+      "coord_descent_us": 7.071999832987785,
+      "memcopy_sol_us": 6.912000011652708,
+      "total_bytes": 4819968,
+      "n_kernels": 1,
+      "gap_default": 1.0231481222606105,
+      "gap_cd": 1.0231481222606105
+    },
+    "mobilenet_v2_e5f12ec5": {
+      "compiled_us": 6.496000103652477,
+      "coord_descent_us": 6.304000038653612,
+      "memcopy_sol_us": 6.752000190317631,
+      "total_bytes": 2409984,
+      "n_kernels": 1,
+      "gap_default": 0.9620852962900893,
+      "gap_cd": 0.9336492685076563
+    },
+    "mobilenet_v2_94494857": {
+      "compiled_us": 7.615999784320593,
+      "coord_descent_us": 7.679999805986881,
+      "memcopy_sol_us": 8.0960001796484,
+      "total_bytes": 9635328,
+      "n_kernels": 1,
+      "gap_default": 0.9407114149361775,
+      "gap_cd": 0.9486165557768571
+    },
+    "mobilenet_v2_1cc752a4": {
+      "compiled_us": 7.2639998979866505,
+      "coord_descent_us": 7.327999919652939,
+      "memcopy_sol_us": 7.135999854654074,
+      "total_bytes": 7226496,
+      "n_kernels": 1,
+      "gap_default": 1.017937226168677,
+      "gap_cd": 1.0269058392530155
+    },
+    "mobilenet_v2_92d91bac": {
+      "compiled_us": 11.19999960064888,
+      "coord_descent_us": 11.168000288307667,
+      "memcopy_sol_us": 10.688000358641148,
+      "total_bytes": 28902528,
+      "n_kernels": 1,
+      "gap_default": 1.0479041190893847,
+      "gap_cd": 1.0449101715531328
+    },
+    "mobilenet_v2_3de61eda": {
+      "compiled_us": 9.503999724984169,
+      "coord_descent_us": 9.056000038981438,
+      "memcopy_sol_us": 9.02399979531765,
+      "total_bytes": 19268352,
+      "n_kernels": 1,
+      "gap_default": 1.0531914827741442,
+      "gap_cd": 1.0035461263729628
+    },
+    "mobilenet_v2_8dd8c35d": {
+      "compiled_us": 19.872000440955162,
+      "coord_descent_us": 18.0479995906353,
+      "memcopy_sol_us": 18.303999677300453,
+      "total_bytes": 77071104,
+      "n_kernels": 1,
+      "gap_default": 1.0856643788952451,
+      "gap_cd": 0.9860139810326467
+    },
+    "mobilenet_v2_522f10e2": {
+      "compiled_us": 10.400000028312206,
+      "coord_descent_us": 9.8879998549819,
+      "memcopy_sol_us": 10.080000385642052,
+      "total_bytes": 25690368,
+      "n_kernels": 1,
+      "gap_default": 1.0317459950820995,
+      "gap_cd": 0.9809523290362531
+    }
+  },
+  "__summary__": {
+    "total": 1,
+    "ok": 1,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 37.31418514251709
+  }
+}

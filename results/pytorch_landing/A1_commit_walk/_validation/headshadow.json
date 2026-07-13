@@ -1,0 +1,75 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "f47ad040cfa6c50e37881bf981b4c4050e7c0e38",
+    "pytorch_commit": "daa79cd25ca9a80bfd65799394cf4255d6be75a6",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-06-22T02:07:50Z",
+    "n_repros": 5,
+    "n_results": 5,
+    "workload_kind": "repro"
+  },
+  "repros/canonical/amax_sum_089fdab8f22b/repro.py": {
+    "MT5ForConditionalGeneration_dda3d8e0": {
+      "compiled_us": 23.423999547958374,
+      "coord_descent_us": 23.360000923275948,
+      "memcopy_sol_us": 11.04000024497509,
+      "total_bytes": 34800288,
+      "n_kernels": 1,
+      "gap_default": 2.121739042408076,
+      "gap_cd": 2.1159420656633015
+    }
+  },
+  "repros/canonical/amax_amax_any_20f548adfc44/repro.py": {
+    "LayoutLMForMaskedLM_279c055a": {
+      "compiled_us": 503.84002923965454,
+      "coord_descent_us": 428.8319945335388,
+      "memcopy_sol_us": 78.78399640321732,
+      "total_bytes": 505872680,
+      "n_kernels": 1,
+      "gap_default": 6.395207811761617,
+      "gap_cd": 5.44313584117734
+    }
+  },
+  "repros/canonical/amax_amax_any_98dd9cb433ce/repro.py": {
+    "LayoutLMForMaskedLM_279c055a": {
+      "compiled_us": 503.80802154541016,
+      "coord_descent_us": 427.8079867362976,
+      "memcopy_sol_us": 79.8719972372055,
+      "total_bytes": 505872680,
+      "n_kernels": 1,
+      "gap_default": 6.307692795626366,
+      "gap_cd": 5.356169891004286
+    }
+  },
+  "repros/canonical/amax_amax_any_f7b091f87d06/repro.py": {
+    "XLNetLMHeadModel_782e420b": {
+      "compiled_us": 411.327987909317,
+      "coord_descent_us": 365.28000235557556,
+      "memcopy_sol_us": 93.28000247478485,
+      "total_bytes": 605688600,
+      "n_kernels": 1,
+      "gap_default": 4.409605242243704,
+      "gap_cd": 3.9159518939154925
+    }
+  },
+  "repros/canonical/amax_amax_any_64122cb93d29/repro.py": {
+    "XLNetLMHeadModel_782e420b": {
+      "compiled_us": 412.31998801231384,
+      "coord_descent_us": 351.8719971179962,
+      "memcopy_sol_us": 93.12000125646591,
+      "total_bytes": 605688600,
+      "n_kernels": 1,
+      "gap_default": 4.42783486306798,
+      "gap_cd": 3.77869407614042
+    }
+  },
+  "__summary__": {
+    "total": 5,
+    "ok": 5,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 18.133490562438965
+  }
+}

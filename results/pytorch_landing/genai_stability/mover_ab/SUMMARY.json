@@ -1,0 +1,203 @@
+{
+  "method": "bench_parallel.py --full-graphs, per-GPU lock, fresh inductor cache per (commit,micro), shared TRITON_CACHE_DIR, N=3 cold (bump to 5 if spread>1%)",
+  "shadow": "throwaway git worktree per commit; PYTHONPATH shadow of pure-python inductor; prebuilt .so from /tmp/pytorch-work (daa79cd25ca) symlinked; pytorch_commit verified in bench metadata each run",
+  "detection_threshold_pct": 0.5,
+  "real_signal_pct": 1.0,
+  "metric": "compiled_us min-of-N (default heuristic config, not coord-descent)",
+  "pairs": {
+    "mega-commit": {
+      "predecessor": "5e2ab3055de",
+      "mover": "97385fb3273",
+      "n_micro_graphs": 11,
+      "n_real_moves": 9,
+      "n_no_move": 2,
+      "families_moved": [
+        "CrossEntropy",
+        "LayerNorm",
+        "RMSNorm",
+        "Softmax"
+      ],
+      "max_improvement_pct": 3.9,
+      "max_regression_pct": -108.36,
+      "moves": [
+        {
+          "micro": "CrossEntropyBackward",
+          "graph": "000",
+          "pred_us": 2171.62,
+          "mover_us": 2453.38,
+          "delta_pct": -12.975,
+          "config_flip": true
+        },
+        {
+          "micro": "CrossEntropyForward",
+          "graph": "000",
+          "pred_us": 2133.86,
+          "mover_us": 2449.31,
+          "delta_pct": -14.783,
+          "config_flip": true
+        },
+        {
+          "micro": "LayerNormBackward",
+          "graph": "000",
+          "pred_us": 392.06,
+          "mover_us": 816.9,
+          "delta_pct": -108.361,
+          "config_flip": true
+        },
+        {
+          "micro": "LayerNormBackward",
+          "graph": "001",
+          "pred_us": 695.23,
+          "mover_us": 680.1,
+          "delta_pct": 2.176,
+          "config_flip": true
+        },
+        {
+          "micro": "RMSNormBackward",
+          "graph": "000",
+          "pred_us": 394.94,
+          "mover_us": 816.96,
+          "delta_pct": -106.857,
+          "config_flip": true
+        },
+        {
+          "micro": "RMSNormBackward",
+          "graph": "001",
+          "pred_us": 396.32,
+          "mover_us": 380.86,
+          "delta_pct": 3.901,
+          "config_flip": true
+        },
+        {
+          "micro": "SoftmaxBackward",
+          "graph": "000",
+          "pred_us": 3350.53,
+          "mover_us": 3988.51,
+          "delta_pct": -19.041,
+          "config_flip": true
+        },
+        {
+          "micro": "SoftmaxBackward",
+          "graph": "001",
+          "pred_us": 2879.42,
+          "mover_us": 3597.31,
+          "delta_pct": -24.932,
+          "config_flip": true
+        },
+        {
+          "micro": "SoftmaxForward",
+          "graph": "000",
+          "pred_us": 3461.92,
+          "mover_us": 3928.93,
+          "delta_pct": -13.49,
+          "config_flip": true
+        }
+      ]
+    },
+    "scalar-acc": {
+      "predecessor": "a85d79a900a",
+      "mover": "9dde2c59a51",
+      "n_micro_graphs": 11,
+      "n_real_moves": 4,
+      "n_no_move": 7,
+      "families_moved": [
+        "CrossEntropy",
+        "Softmax"
+      ],
+      "max_improvement_pct": 64.04,
+      "max_regression_pct": -0.24,
+      "moves": [
+        {
+          "micro": "CrossEntropyBackward",
+          "graph": "000",
+          "pred_us": 1977.54,
+          "mover_us": 716.58,
+          "delta_pct": 63.764,
+          "config_flip": true
+        },
+        {
+          "micro": "CrossEntropyForward",
+          "graph": "000",
+          "pred_us": 1970.02,
+          "mover_us": 708.42,
+          "delta_pct": 64.04,
+          "config_flip": true
+        },
+        {
+          "micro": "SoftmaxBackward",
+          "graph": "000",
+          "pred_us": 3527.52,
+          "mover_us": 1433.31,
+          "delta_pct": 59.368,
+          "config_flip": true
+        },
+        {
+          "micro": "SoftmaxForward",
+          "graph": "000",
+          "pred_us": 3539.04,
+          "mover_us": 1904.51,
+          "delta_pct": 46.186,
+          "config_flip": true
+        }
+      ]
+    },
+    "online-softmax": {
+      "predecessor": "e9a67c98a8c",
+      "mover": "a26fc2c8bf4",
+      "n_micro_graphs": 11,
+      "n_real_moves": 4,
+      "n_no_move": 7,
+      "families_moved": [
+        "CrossEntropy",
+        "Softmax"
+      ],
+      "max_improvement_pct": 19.6,
+      "max_regression_pct": -0.24,
+      "moves": [
+        {
+          "micro": "CrossEntropyBackward",
+          "graph": "000",
+          "pred_us": 2445.31,
+          "mover_us": 1977.31,
+          "delta_pct": 19.139,
+          "config_flip": true
+        },
+        {
+          "micro": "CrossEntropyForward",
+          "graph": "000",
+          "pred_us": 2450.27,
+          "mover_us": 1970.05,
+          "delta_pct": 19.599,
+          "config_flip": false
+        },
+        {
+          "micro": "SoftmaxBackward",
+          "graph": "000",
+          "pred_us": 3985.28,
+          "mover_us": 3527.68,
+          "delta_pct": 11.482,
+          "config_flip": true
+        },
+        {
+          "micro": "SoftmaxForward",
+          "graph": "000",
+          "pred_us": 3928.96,
+          "mover_us": 3538.94,
+          "delta_pct": 9.927,
+          "config_flip": true
+        }
+      ]
+    },
+    "rotate_half": {
+      "predecessor": "52d4cadfac0",
+      "mover": "1406552b9d3",
+      "n_micro_graphs": 11,
+      "n_real_moves": 0,
+      "n_no_move": 11,
+      "families_moved": [],
+      "max_improvement_pct": 0.26,
+      "max_regression_pct": -0.03,
+      "moves": []
+    }
+  }
+}

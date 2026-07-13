@@ -1,0 +1,211 @@
+{
+  "agg": {
+    "amax_sum_14cb1ca39cba": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_31d85970adb2": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_528a3c274a41": {
+      "slice_scatter_partial_elisions": 4
+    },
+    "amax_sum_7303c49b6018": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_79b08bfeb860": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_884c406c2df8": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_8f72f9914b96": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_99e031979c34": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_abc117528ea8": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_bf0fd469b53e": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_bf7830302e6d": {
+      "slice_scatter_partial_elisions": 2
+    },
+    "amax_sum_e24ce795856b": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "amax_sum_f812d7f85634": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "pointwise_00475df23925": {
+      "layout_transform_store_sinking": 1
+    },
+    "pointwise_3c17f0120a71": {
+      "layout_transform_store_sinking": 1
+    },
+    "pointwise_41944c71d2d8": {
+      "layout_transform_store_sinking": 1
+    },
+    "pointwise_43588d3e9780": {
+      "slice_scatter_elisions": 35,
+      "slice_scatter_partial_elisions": 2
+    },
+    "pointwise_656833e29d89": {
+      "slice_scatter_elisions": 202
+    },
+    "pointwise_666951cd0da5": {
+      "layout_transform_store_sinking": 1
+    },
+    "pointwise_7308e0024674": {
+      "layout_transform_store_sinking": 1
+    },
+    "pointwise_99e028e77568": {
+      "layout_transform_store_sinking": 1
+    },
+    "pointwise_ba25986618ef": {
+      "layout_transform_store_sinking": 1
+    },
+    "sum_444779f98932": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "sum_7ba9dcb96142": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "sum_894e623ad263": {
+      "as_strided_scatter_elisions": 1
+    },
+    "sum_a09fa3089339": {
+      "as_strided_scatter_elisions": 1
+    },
+    "sum_b011c33c656b": {
+      "slice_scatter_partial_elisions": 1
+    },
+    "sum_sum_019999975a39": {
+      "as_strided_scatter_elisions": 1
+    },
+    "sum_sum_1ed9095f244e": {
+      "as_strided_scatter_elisions": 1
+    },
+    "sum_sum_1f47655da3e5": {
+      "as_strided_scatter_elisions": 1
+    },
+    "sum_sum_808b052d7393": {
+      "as_strided_scatter_elisions": 1
+    },
+    "sum_sum_bbf2f7bed268": {
+      "as_strided_scatter_elisions": 1
+    },
+    "sum_sum_sum_23c53e2c6899": {
+      "linear_reduction_elimination": 2
+    },
+    "sum_sum_sum_2b1b93ca6e56": {
+      "linear_reduction_elimination": 4
+    },
+    "sum_sum_sum_3d8e3038c144": {
+      "linear_reduction_elimination": 2
+    },
+    "sum_sum_sum_77f93c745c34": {
+      "as_strided_scatter_elisions": 1
+    },
+    "sum_sum_sum_7c4a1a0a4d8d": {
+      "as_strided_scatter_elisions": 1
+    },
+    "sum_sum_sum_81f672a568a0": {
+      "linear_reduction_elimination": 2
+    },
+    "sum_sum_sum_83f07a242da7": {
+      "linear_reduction_elimination": 2
+    },
+    "sum_sum_sum_874ba88ee22e": {
+      "linear_reduction_elimination": 2
+    },
+    "sum_sum_sum_c0d30ef6f9c5": {
+      "as_strided_scatter_elisions": 1
+    },
+    "var_mean_33d24326eae6": {
+      "layout_transform_store_sinking": 1
+    },
+    "var_mean_b12103db1177": {
+      "layout_transform_store_sinking": 1
+    },
+    "var_mean_e67fddfba074": {
+      "layout_transform_store_sinking": 1
+    },
+    "var_mean_fd789e584775": {
+      "layout_transform_store_sinking": 1
+    },
+    "var_mean_var_mean_74b57fcc4507": {
+      "layout_transform_store_sinking": 1
+    },
+    "var_mean_var_mean_92c45aff3580": {
+      "layout_transform_store_sinking": 1
+    },
+    "var_mean_var_mean_e642e2ea37a3": {
+      "layout_transform_store_sinking": 1
+    }
+  },
+  "errors": {},
+  "by_counter": {
+    "slice_scatter_partial_elisions": [
+      "amax_sum_14cb1ca39cba",
+      "amax_sum_31d85970adb2",
+      "amax_sum_528a3c274a41",
+      "amax_sum_7303c49b6018",
+      "amax_sum_79b08bfeb860",
+      "amax_sum_884c406c2df8",
+      "amax_sum_8f72f9914b96",
+      "amax_sum_99e031979c34",
+      "amax_sum_abc117528ea8",
+      "amax_sum_bf0fd469b53e",
+      "amax_sum_bf7830302e6d",
+      "amax_sum_e24ce795856b",
+      "amax_sum_f812d7f85634",
+      "pointwise_43588d3e9780",
+      "sum_444779f98932",
+      "sum_7ba9dcb96142",
+      "sum_b011c33c656b"
+    ],
+    "layout_transform_store_sinking": [
+      "pointwise_00475df23925",
+      "pointwise_3c17f0120a71",
+      "pointwise_41944c71d2d8",
+      "pointwise_666951cd0da5",
+      "pointwise_7308e0024674",
+      "pointwise_99e028e77568",
+      "pointwise_ba25986618ef",
+      "var_mean_33d24326eae6",
+      "var_mean_b12103db1177",
+      "var_mean_e67fddfba074",
+      "var_mean_fd789e584775",
+      "var_mean_var_mean_74b57fcc4507",
+      "var_mean_var_mean_92c45aff3580",
+      "var_mean_var_mean_e642e2ea37a3"
+    ],
+    "slice_scatter_elisions": [
+      "pointwise_43588d3e9780",
+      "pointwise_656833e29d89"
+    ],
+    "as_strided_scatter_elisions": [
+      "sum_894e623ad263",
+      "sum_a09fa3089339",
+      "sum_sum_019999975a39",
+      "sum_sum_1ed9095f244e",
+      "sum_sum_1f47655da3e5",
+      "sum_sum_808b052d7393",
+      "sum_sum_bbf2f7bed268",
+      "sum_sum_sum_77f93c745c34",
+      "sum_sum_sum_7c4a1a0a4d8d",
+      "sum_sum_sum_c0d30ef6f9c5"
+    ],
+    "linear_reduction_elimination": [
+      "sum_sum_sum_23c53e2c6899",
+      "sum_sum_sum_2b1b93ca6e56",
+      "sum_sum_sum_3d8e3038c144",
+      "sum_sum_sum_81f672a568a0",
+      "sum_sum_sum_83f07a242da7",
+      "sum_sum_sum_874ba88ee22e"
+    ]
+  }
+}

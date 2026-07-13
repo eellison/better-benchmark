@@ -1,0 +1,754 @@
+[
+ {
+  "bench": "SoftmaxForward",
+  "mode": "cold",
+  "trial": 0,
+  "rc": 0,
+  "wall_s": 11.3,
+  "compiled_us": 1904.47998046875,
+  "coord_descent_us": 1908.8640213012695,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 201,
+    "triton_cache_hash": "33F7ZISP7UIZSE6POR2J4VGELTAJSERFYZZX6RI36VPGCUDVX2VA",
+    "_file": "09adf3c5716bc217e21e290bf21dd76c7e339f68723451039c9da172ad518932.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 1312,
+    "triton_cache_hash": null,
+    "_file": "69bfc866d4b71207373ef1b96e4fec3265ac1ffbefb15c3fc783b4ba98a640c2.best_config"
+   }
+  ],
+  "source_sha": "0ae9a87338a06e73",
+  "source_norm_sha": "2dc6007d14194786",
+  "exp_libdevice": 0,
+  "exp_tlmath": 6
+ },
+ {
+  "bench": "SoftmaxForward",
+  "mode": "cold",
+  "trial": 1,
+  "rc": 0,
+  "wall_s": 11.2,
+  "compiled_us": 1910.5600118637085,
+  "coord_descent_us": 1915.6479835510254,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 201,
+    "triton_cache_hash": "33F7ZISP7UIZSE6POR2J4VGELTAJSERFYZZX6RI36VPGCUDVX2VA",
+    "_file": "09adf3c5716bc217e21e290bf21dd76c7e339f68723451039c9da172ad518932.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 1301,
+    "triton_cache_hash": null,
+    "_file": "69bfc866d4b71207373ef1b96e4fec3265ac1ffbefb15c3fc783b4ba98a640c2.best_config"
+   }
+  ],
+  "source_sha": "a4acaf74ab9e0e40",
+  "source_norm_sha": "dc9911b758d02f5e",
+  "exp_libdevice": 0,
+  "exp_tlmath": 6
+ },
+ {
+  "bench": "SoftmaxForward",
+  "mode": "cold",
+  "trial": 2,
+  "rc": 0,
+  "wall_s": 11.6,
+  "compiled_us": 1911.7120504379272,
+  "coord_descent_us": 1916.8319702148438,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 201,
+    "triton_cache_hash": "33F7ZISP7UIZSE6POR2J4VGELTAJSERFYZZX6RI36VPGCUDVX2VA",
+    "_file": "09adf3c5716bc217e21e290bf21dd76c7e339f68723451039c9da172ad518932.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 1383,
+    "triton_cache_hash": null,
+    "_file": "69bfc866d4b71207373ef1b96e4fec3265ac1ffbefb15c3fc783b4ba98a640c2.best_config"
+   }
+  ],
+  "source_sha": "70c358c43a0b6aad",
+  "source_norm_sha": "072e0999452c04fa",
+  "exp_libdevice": 0,
+  "exp_tlmath": 6
+ },
+ {
+  "bench": "SoftmaxForward",
+  "mode": "cold",
+  "trial": 3,
+  "rc": 0,
+  "wall_s": 11.3,
+  "compiled_us": 1904.6399593353271,
+  "coord_descent_us": 1909.6959829330444,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 202,
+    "triton_cache_hash": "33F7ZISP7UIZSE6POR2J4VGELTAJSERFYZZX6RI36VPGCUDVX2VA",
+    "_file": "09adf3c5716bc217e21e290bf21dd76c7e339f68723451039c9da172ad518932.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 1325,
+    "triton_cache_hash": null,
+    "_file": "69bfc866d4b71207373ef1b96e4fec3265ac1ffbefb15c3fc783b4ba98a640c2.best_config"
+   }
+  ],
+  "source_sha": "466e06809913112b",
+  "source_norm_sha": "3a2ed0346add51bf",
+  "exp_libdevice": 0,
+  "exp_tlmath": 6
+ },
+ {
+  "bench": "SoftmaxForward",
+  "mode": "cold",
+  "trial": 4,
+  "rc": 0,
+  "wall_s": 10.9,
+  "compiled_us": 1904.5759439468384,
+  "coord_descent_us": 1908.8000059127808,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 203,
+    "triton_cache_hash": "33F7ZISP7UIZSE6POR2J4VGELTAJSERFYZZX6RI36VPGCUDVX2VA",
+    "_file": "09adf3c5716bc217e21e290bf21dd76c7e339f68723451039c9da172ad518932.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 1321,
+    "triton_cache_hash": null,
+    "_file": "69bfc866d4b71207373ef1b96e4fec3265ac1ffbefb15c3fc783b4ba98a640c2.best_config"
+   }
+  ],
+  "source_sha": "2d931fb7f477be61",
+  "source_norm_sha": "32e5731325990979",
+  "exp_libdevice": 0,
+  "exp_tlmath": 6
+ },
+ {
+  "bench": "SoftmaxForward",
+  "mode": "cold",
+  "trial": 5,
+  "rc": 0,
+  "wall_s": 11.0,
+  "compiled_us": 1904.5759439468384,
+  "coord_descent_us": 1908.7680578231812,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 201,
+    "triton_cache_hash": "33F7ZISP7UIZSE6POR2J4VGELTAJSERFYZZX6RI36VPGCUDVX2VA",
+    "_file": "09adf3c5716bc217e21e290bf21dd76c7e339f68723451039c9da172ad518932.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 1311,
+    "triton_cache_hash": null,
+    "_file": "69bfc866d4b71207373ef1b96e4fec3265ac1ffbefb15c3fc783b4ba98a640c2.best_config"
+   }
+  ],
+  "source_sha": "cd97719541ee13ff",
+  "source_norm_sha": "ef56bb2ceea96007",
+  "exp_libdevice": 0,
+  "exp_tlmath": 6
+ },
+ {
+  "bench": "SoftmaxForward",
+  "mode": "cold",
+  "trial": 6,
+  "rc": 0,
+  "wall_s": 10.9,
+  "compiled_us": 1911.5840196609497,
+  "coord_descent_us": 1915.8719778060913,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 201,
+    "triton_cache_hash": "33F7ZISP7UIZSE6POR2J4VGELTAJSERFYZZX6RI36VPGCUDVX2VA",
+    "_file": "09adf3c5716bc217e21e290bf21dd76c7e339f68723451039c9da172ad518932.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 1322,
+    "triton_cache_hash": null,
+    "_file": "69bfc866d4b71207373ef1b96e4fec3265ac1ffbefb15c3fc783b4ba98a640c2.best_config"
+   }
+  ],
+  "source_sha": "22bb11a03259fae2",
+  "source_norm_sha": "2f33c4c5cdbfc74a",
+  "exp_libdevice": 0,
+  "exp_tlmath": 6
+ },
+ {
+  "bench": "SoftmaxForward",
+  "mode": "cold",
+  "trial": 7,
+  "rc": 0,
+  "wall_s": 11.1,
+  "compiled_us": 1904.47998046875,
+  "coord_descent_us": 1909.5360040664673,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 201,
+    "triton_cache_hash": "33F7ZISP7UIZSE6POR2J4VGELTAJSERFYZZX6RI36VPGCUDVX2VA",
+    "_file": "09adf3c5716bc217e21e290bf21dd76c7e339f68723451039c9da172ad518932.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 16384,
+    "num_warps": 8,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 1300,
+    "triton_cache_hash": null,
+    "_file": "69bfc866d4b71207373ef1b96e4fec3265ac1ffbefb15c3fc783b4ba98a640c2.best_config"
+   }
+  ],
+  "source_sha": "789e3dcb74c66136",
+  "source_norm_sha": "f85fbe73da272cda",
+  "exp_libdevice": 0,
+  "exp_tlmath": 6
+ },
+ {
+  "bench": "CrossEntropyForward",
+  "mode": "cold",
+  "trial": 0,
+  "rc": 0,
+  "wall_s": 10.5,
+  "compiled_us": 708.4800004959106,
+  "coord_descent_us": 708.5440158843994,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 858,
+    "triton_cache_hash": null,
+    "_file": "df6adafe347cd865c895c8a384af9919837aa022533218f593548468f3e4eb3c.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 170,
+    "triton_cache_hash": "QD3FGGCWGQGCW5NVKRLFNRK5XKL4S2HYFXAGTEEZOPX7MI2MDRWA",
+    "_file": "25dda1f84178b1a228bc98699d02d2b51b47eb1c447544b34fff114a2953c031.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "CrossEntropyForward",
+  "mode": "cold",
+  "trial": 1,
+  "rc": 0,
+  "wall_s": 10.7,
+  "compiled_us": 708.4479928016663,
+  "coord_descent_us": 708.3520293235779,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 841,
+    "triton_cache_hash": null,
+    "_file": "df6adafe347cd865c895c8a384af9919837aa022533218f593548468f3e4eb3c.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 167,
+    "triton_cache_hash": "QD3FGGCWGQGCW5NVKRLFNRK5XKL4S2HYFXAGTEEZOPX7MI2MDRWA",
+    "_file": "25dda1f84178b1a228bc98699d02d2b51b47eb1c447544b34fff114a2953c031.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "CrossEntropyForward",
+  "mode": "cold",
+  "trial": 2,
+  "rc": 0,
+  "wall_s": 10.8,
+  "compiled_us": 708.4479928016663,
+  "coord_descent_us": 708.4479928016663,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 881,
+    "triton_cache_hash": null,
+    "_file": "df6adafe347cd865c895c8a384af9919837aa022533218f593548468f3e4eb3c.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 167,
+    "triton_cache_hash": "QD3FGGCWGQGCW5NVKRLFNRK5XKL4S2HYFXAGTEEZOPX7MI2MDRWA",
+    "_file": "25dda1f84178b1a228bc98699d02d2b51b47eb1c447544b34fff114a2953c031.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "CrossEntropyForward",
+  "mode": "cold",
+  "trial": 3,
+  "rc": 0,
+  "wall_s": 10.5,
+  "compiled_us": 708.4159851074219,
+  "coord_descent_us": 708.4479928016663,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 850,
+    "triton_cache_hash": null,
+    "_file": "df6adafe347cd865c895c8a384af9919837aa022533218f593548468f3e4eb3c.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 167,
+    "triton_cache_hash": "QD3FGGCWGQGCW5NVKRLFNRK5XKL4S2HYFXAGTEEZOPX7MI2MDRWA",
+    "_file": "25dda1f84178b1a228bc98699d02d2b51b47eb1c447544b34fff114a2953c031.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "CrossEntropyForward",
+  "mode": "cold",
+  "trial": 4,
+  "rc": 0,
+  "wall_s": 10.7,
+  "compiled_us": 708.5760235786438,
+  "coord_descent_us": 708.512008190155,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 847,
+    "triton_cache_hash": null,
+    "_file": "df6adafe347cd865c895c8a384af9919837aa022533218f593548468f3e4eb3c.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 170,
+    "triton_cache_hash": "QD3FGGCWGQGCW5NVKRLFNRK5XKL4S2HYFXAGTEEZOPX7MI2MDRWA",
+    "_file": "25dda1f84178b1a228bc98699d02d2b51b47eb1c447544b34fff114a2953c031.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "CrossEntropyForward",
+  "mode": "cold",
+  "trial": 5,
+  "rc": 0,
+  "wall_s": 10.3,
+  "compiled_us": 708.3520293235779,
+  "coord_descent_us": 708.4159851074219,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 857,
+    "triton_cache_hash": null,
+    "_file": "df6adafe347cd865c895c8a384af9919837aa022533218f593548468f3e4eb3c.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 167,
+    "triton_cache_hash": "QD3FGGCWGQGCW5NVKRLFNRK5XKL4S2HYFXAGTEEZOPX7MI2MDRWA",
+    "_file": "25dda1f84178b1a228bc98699d02d2b51b47eb1c447544b34fff114a2953c031.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "CrossEntropyForward",
+  "mode": "cold",
+  "trial": 6,
+  "rc": 0,
+  "wall_s": 10.7,
+  "compiled_us": 708.512008190155,
+  "coord_descent_us": 708.512008190155,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 892,
+    "triton_cache_hash": null,
+    "_file": "df6adafe347cd865c895c8a384af9919837aa022533218f593548468f3e4eb3c.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 167,
+    "triton_cache_hash": "QD3FGGCWGQGCW5NVKRLFNRK5XKL4S2HYFXAGTEEZOPX7MI2MDRWA",
+    "_file": "25dda1f84178b1a228bc98699d02d2b51b47eb1c447544b34fff114a2953c031.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "CrossEntropyForward",
+  "mode": "cold",
+  "trial": 7,
+  "rc": 0,
+  "wall_s": 10.6,
+  "compiled_us": 708.512008190155,
+  "coord_descent_us": 708.3839774131775,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": true,
+    "time_taken_ms": 841,
+    "triton_cache_hash": null,
+    "_file": "df6adafe347cd865c895c8a384af9919837aa022533218f593548468f3e4eb3c.best_config"
+   },
+   {
+    "XBLOCK": 1,
+    "R0_BLOCK": 8192,
+    "num_warps": 4,
+    "num_stages": 1,
+    "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+    "found_by_coordesc": false,
+    "time_taken_ms": 167,
+    "triton_cache_hash": "QD3FGGCWGQGCW5NVKRLFNRK5XKL4S2HYFXAGTEEZOPX7MI2MDRWA",
+    "_file": "25dda1f84178b1a228bc98699d02d2b51b47eb1c447544b34fff114a2953c031.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "RMSNormForward",
+  "mode": "cold",
+  "trial": 0,
+  "rc": 0,
+  "wall_s": 9.1,
+  "compiled_us": 343.84000301361084,
+  "coord_descent_us": 343.8720107078552,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 2,
+    "num_warps": 1,
+    "num_stages": 1,
+    "configs_hash": "cd4f7b11056da5d219bb00da20cd25cf077aef51e8a687359cb4ab3693e08253",
+    "found_by_coordesc": true,
+    "time_taken_ms": 404,
+    "triton_cache_hash": null,
+    "_file": "23de748e4def12048df61617ca75f93a0d95febdc2f1c7e85683545f504ace3d.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "RMSNormForward",
+  "mode": "cold",
+  "trial": 1,
+  "rc": 0,
+  "wall_s": 9.0,
+  "compiled_us": 343.9039885997772,
+  "coord_descent_us": 345.0559973716736,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 2,
+    "num_warps": 1,
+    "num_stages": 1,
+    "configs_hash": "cd4f7b11056da5d219bb00da20cd25cf077aef51e8a687359cb4ab3693e08253",
+    "found_by_coordesc": true,
+    "time_taken_ms": 408,
+    "triton_cache_hash": null,
+    "_file": "23de748e4def12048df61617ca75f93a0d95febdc2f1c7e85683545f504ace3d.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "RMSNormForward",
+  "mode": "cold",
+  "trial": 2,
+  "rc": 0,
+  "wall_s": 9.1,
+  "compiled_us": 343.9359962940216,
+  "coord_descent_us": 344.09600496292114,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 2,
+    "num_warps": 1,
+    "num_stages": 1,
+    "configs_hash": "cd4f7b11056da5d219bb00da20cd25cf077aef51e8a687359cb4ab3693e08253",
+    "found_by_coordesc": true,
+    "time_taken_ms": 445,
+    "triton_cache_hash": null,
+    "_file": "23de748e4def12048df61617ca75f93a0d95febdc2f1c7e85683545f504ace3d.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "RMSNormForward",
+  "mode": "cold",
+  "trial": 3,
+  "rc": 0,
+  "wall_s": 8.9,
+  "compiled_us": 343.77598762512207,
+  "coord_descent_us": 345.0239896774292,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 2,
+    "num_warps": 1,
+    "num_stages": 1,
+    "configs_hash": "cd4f7b11056da5d219bb00da20cd25cf077aef51e8a687359cb4ab3693e08253",
+    "found_by_coordesc": true,
+    "time_taken_ms": 407,
+    "triton_cache_hash": null,
+    "_file": "23de748e4def12048df61617ca75f93a0d95febdc2f1c7e85683545f504ace3d.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "RMSNormForward",
+  "mode": "cold",
+  "trial": 4,
+  "rc": 0,
+  "wall_s": 9.0,
+  "compiled_us": 343.84000301361084,
+  "coord_descent_us": 345.08800506591797,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 2,
+    "num_warps": 1,
+    "num_stages": 1,
+    "configs_hash": "cd4f7b11056da5d219bb00da20cd25cf077aef51e8a687359cb4ab3693e08253",
+    "found_by_coordesc": true,
+    "time_taken_ms": 403,
+    "triton_cache_hash": null,
+    "_file": "23de748e4def12048df61617ca75f93a0d95febdc2f1c7e85683545f504ace3d.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "RMSNormForward",
+  "mode": "cold",
+  "trial": 5,
+  "rc": 0,
+  "wall_s": 9.3,
+  "compiled_us": 343.8720107078552,
+  "coord_descent_us": 344.92799639701843,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 2,
+    "num_warps": 1,
+    "num_stages": 1,
+    "configs_hash": "cd4f7b11056da5d219bb00da20cd25cf077aef51e8a687359cb4ab3693e08253",
+    "found_by_coordesc": true,
+    "time_taken_ms": 404,
+    "triton_cache_hash": null,
+    "_file": "23de748e4def12048df61617ca75f93a0d95febdc2f1c7e85683545f504ace3d.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "RMSNormForward",
+  "mode": "cold",
+  "trial": 6,
+  "rc": 0,
+  "wall_s": 9.2,
+  "compiled_us": 344.0000116825104,
+  "coord_descent_us": 344.2240059375763,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 2,
+    "num_warps": 1,
+    "num_stages": 1,
+    "configs_hash": "cd4f7b11056da5d219bb00da20cd25cf077aef51e8a687359cb4ab3693e08253",
+    "found_by_coordesc": true,
+    "time_taken_ms": 414,
+    "triton_cache_hash": null,
+    "_file": "23de748e4def12048df61617ca75f93a0d95febdc2f1c7e85683545f504ace3d.best_config"
+   }
+  ]
+ },
+ {
+  "bench": "RMSNormForward",
+  "mode": "cold",
+  "trial": 7,
+  "rc": 0,
+  "wall_s": 8.9,
+  "compiled_us": 343.9039885997772,
+  "coord_descent_us": 345.12001276016235,
+  "n_kernels": 1,
+  "best_configs": [
+   {
+    "XBLOCK": 2,
+    "num_warps": 1,
+    "num_stages": 1,
+    "configs_hash": "cd4f7b11056da5d219bb00da20cd25cf077aef51e8a687359cb4ab3693e08253",
+    "found_by_coordesc": true,
+    "time_taken_ms": 410,
+    "triton_cache_hash": null,
+    "_file": "23de748e4def12048df61617ca75f93a0d95febdc2f1c7e85683545f504ace3d.best_config"
+   }
+  ]
+ }
+]

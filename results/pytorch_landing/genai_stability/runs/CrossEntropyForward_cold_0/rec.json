@@ -1,0 +1,34 @@
+{
+ "bench": "CrossEntropyForward",
+ "mode": "cold",
+ "trial": 0,
+ "rc": 0,
+ "wall_s": 10.5,
+ "compiled_us": 708.4800004959106,
+ "coord_descent_us": 708.5440158843994,
+ "n_kernels": 1,
+ "best_configs": [
+  {
+   "XBLOCK": 1,
+   "R0_BLOCK": 8192,
+   "num_warps": 4,
+   "num_stages": 1,
+   "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+   "found_by_coordesc": true,
+   "time_taken_ms": 858,
+   "triton_cache_hash": null,
+   "_file": "df6adafe347cd865c895c8a384af9919837aa022533218f593548468f3e4eb3c.best_config"
+  },
+  {
+   "XBLOCK": 1,
+   "R0_BLOCK": 8192,
+   "num_warps": 4,
+   "num_stages": 1,
+   "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+   "found_by_coordesc": false,
+   "time_taken_ms": 170,
+   "triton_cache_hash": "QD3FGGCWGQGCW5NVKRLFNRK5XKL4S2HYFXAGTEEZOPX7MI2MDRWA",
+   "_file": "25dda1f84178b1a228bc98699d02d2b51b47eb1c447544b34fff114a2953c031.best_config"
+  }
+ ]
+}

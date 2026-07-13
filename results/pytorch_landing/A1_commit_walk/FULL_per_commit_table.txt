@@ -1,0 +1,40 @@
+FULL PER-COMMIT ATTRIBUTION (geomean vs prev benched commit, genai-excl, 5e2ab..HEAD)
+======================================================================
+  pos 0-> 1 47aafe246e1  -0.44pp  Update
+  pos 1-> 2 ac93f5b2845  +0.34pp  Update (base update)
+  pos 2-> 3 aa798f9f052  +0.02pp  Update
+  pos 3-> 4 9c296b0e9b4  +0.46pp  Update
+  pos 4-> 5 a1c8cd8e1c9  +0.14pp  Update
+  pos 5-> 6 111efb8724a  -0.30pp  Update
+  pos 6-> 7 97385fb3273  +1.95pp  [inductor] All kernel optimization improvements (June 2
+  pos 7-> 8 ab29345d82d  +1.22pp  [inductor] CE loop-invariant hoisting: realize gather b
+  pos 8-> 9 f9493caabcd  -0.10pp  [inductor] Relax pointwise_cat guard: allow view/realiz
+  pos 9->10 ca8f961d6b0  +0.59pp  [inductor] Gate scalar_acc on num_load <= 4 (fix 14-22%
+  pos10->11 94ad050dee0  -0.05pp  [inductor] Add select_scatter_sparsity pass + split_cat
+  pos11->12 1a824e0747a  +0.83pp  [inductor] Raise realize_reads_threshold from 4 to 30
+  pos12->13 f74a7f13723  -0.82pp  Revert "[inductor] Raise realize_reads_threshold from 4
+  pos13->14 afc3d5956d5  +0.11pp  [inductor] Elide constant-index bounds checks + split-r
+  pos14->21 905450a5a5d  +0.29pp  [inductor] WIP: scheduler-level inline_recomputable_pro
+  pos21->22 f595e0cac3a  +0.50pp  [inductor] Fix topological ordering bug in select_scatt
+  pos22->23 a73d1583b34  +5.64pp  [inductor] Canonicalize reciprocal(sqrt(x)) to rsqrt(x)
+  pos23->26 86c5451e197  -0.76pp  [inductor] BN-inference affine folding FX pass (pointwi
+  pos26->27 f0b54e1aa1f  +0.35pp  Revert "[inductor] Tune num_stages for memory-bound poi
+  pos27->28 d2cd52d3117  +0.14pp  [inductor] Raise persistent reduction threshold for INN
+  pos28->29 62f27911a59  -0.24pp  Revert "[inductor] Raise persistent reduction threshold
+  pos29->30 b1e8a30af15  +0.05pp  [inductor] Materialize multi-user transcendental nodes 
+  pos30->35 4427bfd553c  +0.35pp  [inductor] Extend scatter_add_into_fusion to handle dty
+  pos35->37 d8e9914094a  +0.18pp  [inductor] Add scatter read bypass pass for Longformer 
+  pos37->40 d95f59fb1bc  -0.07pp  [inductor] Fix pointwise_cat shared reads heuristic for
+  pos40->61 44802547aa9  -0.26pp  [inductor] Fix assertion crash in _get_nd_reduction_num
+  pos61->66 1406552b9d3  +0.37pp  [inductor] Rotate-half gather pass: RoPE rotation as si
+  pos66->69 5489b8c2bb9  -0.16pp  [inductor] Eliminate scatter_add feeding full reduction
+  pos69->71 bdc289b3644  -0.14pp  [inductor] Split partially-saturated multi-output reduc
+  pos71->76 e9a67c98a8c  +0.06pp  [inductor] Restrict evict_first drop to kernels whose i
+  pos76->77 a26fc2c8bf4  +0.83pp  [inductor] Fast combine for online-softmax loops (amax_
+  pos77->78 60dd3839913  -0.10pp  [inductor] dedupe_graph_outputs: pick earliest node in 
+  pos78->79 56959375c33  +0.13pp  [inductor] Decode affine-iota overlapping-window index_
+  pos79->80 a85d79a900a  +0.25pp  [inductor] Segment-aligned split introduction (sum_0bec
+  pos80->81 9dde2c59a51  +0.44pp  [inductor] Ungate scalar-acc configs from CD + raise rn
+  pos81->82 daa79cd25ca  -0.10pp  [inductor] dedupe_graph_outputs: iterative structural h
+
+  (37 states benched; gaps = unbenched flat-span commits, not drilled per delta-driven rule)

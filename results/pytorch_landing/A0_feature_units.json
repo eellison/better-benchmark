@@ -1,0 +1,432 @@
+{
+  "meta": {
+    "phase": "PHASE-2 STEP A0",
+    "date": "2026-06-22",
+    "mode": "read-only CPU archaeology (no GPU, no checkout, no worktree needed; pure git log/show/diff/grep)",
+    "repo": "/tmp/pytorch-work (tmp_work branch, untouched)",
+    "ab_baseline_A": "5e2ab3055de",
+    "ab_target_B": "daa79cd25ca",
+    "range_commits": 83,
+    "upstream_gap_excluded": "244fdb379d11..5e2ab3055de = 56 upstream PRs, NOT this branch",
+    "net_product_diff": "git diff 5e2ab3055de daa79cd25ca -- torch/_inductor torch/utils/_sympy/value_ranges.py = 36 files, +13821 / -200",
+    "mega_commit": "97385fb3273",
+    "feature_unit_count": 33,
+    "feature_unit_count_landable_nonzero": 29,
+    "flag_toggleable_count": 24,
+    "needs_selective_revert_count": 5,
+    "dead_or_net_zero_count": 4,
+    "cleanly_independent_pr_count": 17,
+    "entangled_in_core_count": 12,
+    "a1_sweep_estimate": {
+      "flag_toggle_ab_pairs": 24,
+      "core_cumulative_boundaries": 5,
+      "total_ab_states_recommended": "B=HEAD plus ~24 single-flag-off arms plus ~5 selective-revert arms = ~30 arms (~15 sweeps if A is shared HEAD); proxy-first prune expected to leave ~6-10 movers",
+      "note": "Each flag-toggleable unit needs only ONE extra arm (HEAD with that one flag off) since A=HEAD is shared. The 5 selective-revert items + the CORE-realization family need cumulative-style arms."
+    }
+  },
+  "phase1_corrections": [
+    "Phase-1 said '~24 units (11 separable + 1 entangled core)'. CORRECTED: 33 distinct feature-units; 29 contribute non-zero; 24 are individually FLAG-TOGGLEABLE (Phase-1 under-counted toggleability by lumping evict_first/scalar_acc/online-softmax/split-reduction/realize-on-reuse into one cumulative-only CORE blob -- each has its own config flag).",
+    "Phase-1 'CORE triton-codegen unit (cumulative-only)' is WRONG: evict_first_requires_aligned_strides, online_softmax_fast_combine, scalar_reduction_accumulators, scalar_acc_configs_without_cd are all config.triton.* flags = flag-toggleable A/B, not cumulative-only.",
+    "Phase-1 'split-reduction cost model (cumulative-only)' is WRONG: split_reductions_for_undersaturated_gpu, _for_partially_saturated_gpu, segment_aligned_split_reductions, split_multilayer_second_step, split_reductions_for_fusion are each separate flags = toggleable.",
+    "Phase-1 'scheduler-realization (cumulative-only)' partly WRONG: inline_recomputable_producers, inline_cheap_producers_into_stencils, realize_heavy_transcendentals_on_reuse, realize_indirect_indexing_on_reuse are each flags = toggleable. Only the argmax/argmin tie-break (ir.py) and persistent-threshold/cooperative-widen (choices/heuristics) are truly NO-FLAG.",
+    "scatter_reduce_fusion.py is NOT one unit -- it hosts 5 separately-flagged passes: scatter_reduce_fusion, scatter_add_reduce_elimination, scatter_add_into_fusion(+chained), reduce_scatter_distribution. Split into 4 units.",
+    "reduction_chaining.py (216L, seeded by mega-commit) is DEAD CODE at HEAD: never imported/called; its config gate config.triton.reduction_chaining is not even in the config.py diff (reads a missing attr default False). Contributes ZERO. Do not land.",
+    "CE gather-into-softmax = a real NEW fused reduction 'online_softmax_cross_entropy' (new prim cross_entropy_loss_online in inductor_prims.py + ops_handler.py +1 + lowering.py + codegen/triton.py). NOT flag-gated -> selective revert. Phase-1 buried it inside CORE.",
+    "MOR (multi-output-reduction) Triton finalize = simd.py _emit_triton_finalize_sum (+176). NOT flag-gated -> selective revert. (MOR sibling fusion enable in ir.py IS gated by config._sibling_reduction_fusion, which is False at HEAD.)",
+    "reduced_atomic_contention.py / partitioned_scatter_* flags exist at baseline 5e2ab -> UPSTREAM, excluded (Phase-1 did not list, correctly).",
+    "Degenerate-dropout-elimination pass: added+reverted TWICE -> net zero, not a unit (confirmed in post_grad.py history)."
+  ],
+  "units": [
+    {
+      "id": "U01",
+      "name": "scatter_reduce_fusion (masked/bilinear scatter-reduce gather rewrite)",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/scatter_reduce_fusion.py": 2750, "torch/_inductor/kernel/scatter_reduce_gather.py": 299, "torch/_inductor/fx_passes/post_grad.py": "registration"},
+      "flag": "config.scatter_reduce_fusion (TORCHINDUCTOR_SCATTER_REDUCE_FUSION, default 0 = OFF)",
+      "core_dep": "no (self-contained pass + own kernel file)",
+      "benching": "FLAG-TOGGLEABLE (but default OFF -> A/B is flag-ON vs HEAD)",
+      "self_reported_impact_UNVERIFIED": "kernel microbench up to 3.60x->0.45x (sum_sum_3219a09ab96a) via scatter_add_gather_reduce_pass",
+      "commits": ["97385fb3273", "e034b931eab", "290b0f22d9a", "4427bfd553c", "e6d89ca0b31", "edbd4b67279", "5489b8c2bb9"]
+    },
+    {
+      "id": "U02",
+      "name": "scatter_add_reduce_elimination (scatter_add feeding full reduction -> gather-predicate)",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/scatter_reduce_fusion.py": "scatter_add_gather_reduce_pass (shared file)"},
+      "flag": "config.scatter_add_reduce_elimination (TORCHINDUCTOR_SCATTER_ADD_REDUCE_ELIMINATION, default 1)",
+      "core_dep": "no (shares scatter_reduce_fusion.py module but own pass + own flag)",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "3.60x->0.45x sum_sum_3219a09ab96a",
+      "commits": ["5489b8c2bb9"]
+    },
+    {
+      "id": "U03",
+      "name": "scatter_add_into_fusion (+chained) (embedding-backward add(A,index_put(zeros,...)) fusion)",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/scatter_reduce_fusion.py": "scatter_add_into_fusion_pass (shared file)"},
+      "flag": "config.scatter_add_into_fusion = True AND config.scatter_add_into_fusion_chained = True (NO env override -> config-patch toggle)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE (python bool, set False in config patch)",
+      "self_reported_impact_UNVERIFIED": "embedding backward; chained variant sum_sum_sum_04ab10ca59ee 1.39x->0.82x; dtype-cast variant sum_sum_ceb449ea29e4 2.18x->0.87x",
+      "commits": ["e034b931eab", "4427bfd553c", "e6d89ca0b31", "edbd4b67279"]
+    },
+    {
+      "id": "U04",
+      "name": "reduce_scatter_distribution (LN-backward sum->where->index_put rewrite)",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/scatter_reduce_fusion.py": "reduce_scatter_distribution_pass (shared file)"},
+      "flag": "config.reduce_scatter_distribution = True (NO env override -> config-patch toggle)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE (python bool)",
+      "self_reported_impact_UNVERIFIED": "sum_sum_sum_6a2ad206248c 1.97x->1.93x (NOTE: barely moved -- weak microbench, likely below noise)",
+      "commits": ["290b0f22d9a"]
+    },
+    {
+      "id": "U05",
+      "name": "structured_scatter_decode (affine-iota overlapping-window index_put -> overlap-add)",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/structured_scatter_decode.py": 413},
+      "flag": "config.structured_scatter_decode (TORCHINDUCTOR_STRUCTURED_SCATTER_DECODE, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "sum_c2895e89552b 2.85x->1.47x",
+      "commits": ["56959375c33"]
+    },
+    {
+      "id": "U06",
+      "name": "select_scatter_sparsity",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/select_scatter_sparsity.py": 895},
+      "flag": "config.select_scatter_sparsity (TORCHINDUCTOR_SELECT_SCATTER_SPARSITY, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "sum_sum_sum_5f0c557e2169 (topo-fix only, no ratio reported)",
+      "commits": ["94ad050dee0", "f595e0cac3a"]
+    },
+    {
+      "id": "U07",
+      "name": "slice_scatter_elision (+partial elision)",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/slice_scatter_elision.py": 433},
+      "flag": "config.slice_scatter_elision (TORCHINDUCTOR_SLICE_SCATTER_ELISION, default 1) + config.slice_scatter_partial_elision (default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "none reported (2199f rewrote partial elision cat->small slice_scatter)",
+      "commits": ["97385fb3273", "2199f90f782", "9b4edfffc15"],
+      "note": "9b4edfffc15 touches this file but is actually CE-hoist (see U28); attribute its logic to CE unit, file edit lives here."
+    },
+    {
+      "id": "U08",
+      "name": "as_strided_scatter_elision",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/as_strided_scatter_elision.py": 282},
+      "flag": "config.as_strided_scatter_elision (TORCHINDUCTOR_AS_STRIDED_SCATTER_ELISION, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "none reported (seeded by mega-commit only)",
+      "commits": ["97385fb3273"]
+    },
+    {
+      "id": "U09",
+      "name": "linear_reduction_elimination",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/linear_reduction_elimination.py": 726},
+      "flag": "config.linear_reduction_elimination (TORCHINDUCTOR_LINEAR_REDUCTION_ELIMINATION, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "none reported (seeded by mega-commit only)",
+      "commits": ["97385fb3273"]
+    },
+    {
+      "id": "U10",
+      "name": "layout_transform_store_sinking",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/layout_transform_store_sinking.py": 260},
+      "flag": "config.layout_transform_store_sinking (TORCHINDUCTOR_LAYOUT_TRANSFORM_STORE_SINKING, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "none reported (seeded by mega-commit only)",
+      "commits": ["97385fb3273"]
+    },
+    {
+      "id": "U11",
+      "name": "diagonal_skew_elimination (Longformer scatter-read bypass, 8->5 kernels)",
+      "category": "independent_fx_pass_with_small_core_dep",
+      "files": {"torch/_inductor/fx_passes/diagonal_skew_elimination.py": 461, "torch/_inductor/fx_passes/scatter_reduce_fusion.py": "+11/-2 shim"},
+      "flag": "config.diagonal_skew_elimination (TORCHINDUCTOR_DIAGONAL_SKEW_ELIMINATION, default 1)",
+      "core_dep": "small: +11/-2 in scatter_reduce_fusion.py (mega-commit file) -> land after U01 file exists",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "Longformer attention 8->5 kernels; this is the R3 Longformer -9.4% fix",
+      "commits": ["d8e9914094a"]
+    },
+    {
+      "id": "U12",
+      "name": "one_hot_reduction_elimination",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/one_hot_reduction_elimination.py": 492},
+      "flag": "config.one_hot_reduction_elimination (TORCHINDUCTOR_ONE_HOT_REDUCTION_ELIMINATION, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "sum_cfe874779dd6 1.62x->1.03x; sum_77824d392401 1.21x->0.95x",
+      "commits": ["049d1229d84"]
+    },
+    {
+      "id": "U13",
+      "name": "expand_sum_elision",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/expand_sum_elision.py": 370},
+      "flag": "config.expand_sum_elision (TORCHINDUCTOR_EXPAND_SUM_ELISION, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "sum_sum_sum_6b7ff2251678 1.694x->1.17x",
+      "commits": ["c33b0e78618"]
+    },
+    {
+      "id": "U14",
+      "name": "cat_through_reduction",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/cat_through_reduction.py": 281},
+      "flag": "config.cat_through_reduction (TORCHINDUCTOR_CAT_THROUGH_REDUCTION, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "mean_d0fc206717a8 1.81x->0.90x; mean_5c93e9826aa8 1.45x->0.61x",
+      "commits": ["6fdaadaa2c0"]
+    },
+    {
+      "id": "U15",
+      "name": "rotate_half_gather (RoPE rotation -> single-load gather)",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/rotate_half_gather.py": 390},
+      "flag": "config.rotate_half_gather (TORCHINDUCTOR_ROTATE_HALF_GATHER, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "sum_51d2ed69e698 1.27x->1.00x",
+      "commits": ["1406552b9d3"]
+    },
+    {
+      "id": "U16",
+      "name": "index_through_norm",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/index_through_norm.py": 546},
+      "flag": "config.index_through_norm (TORCHINDUCTOR_INDEX_THROUGH_NORM, default 1)",
+      "core_dep": "no (registered first in post_grad, before pattern_matcher block)",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "none isolated (bundled in afc3 with bounds-elide + split-for-fusion)",
+      "commits": ["afc3d5956d5"]
+    },
+    {
+      "id": "U17",
+      "name": "bn_affine_folding (BN-inference affine fold)",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/bn_affine_folding.py": 380},
+      "flag": "config.fold_bn_affine (TORCHINDUCTOR_FOLD_BN_AFFINE, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "pointwise_42ab411e21f6 1.27x->1.23x (weak)",
+      "commits": ["86c5451e197"]
+    },
+    {
+      "id": "U18",
+      "name": "dedupe_graph_outputs",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/dedupe_graph_outputs.py": 227},
+      "flag": "config.dedupe_graph_outputs (TORCHINDUCTOR_DEDUPE_GRAPH_OUTPUTS, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "pointwise_c14f03aac63b 5.13x->0.71x (high microbench, verify e2e)",
+      "commits": ["30cc64e2343", "60dd3839913", "daa79cd25ca"]
+    },
+    {
+      "id": "U19",
+      "name": "constant-fold uniform-through-view + iota/arange ConstantFolder + materialize constant-full",
+      "category": "independent_fx_pass",
+      "files": {"torch/_inductor/fx_passes/joint_graph.py": 103},
+      "flag": "NO dedicated flag -- runs inside ConstantFolder (gated only by config.joint_graph_constant_folding default on)",
+      "core_dep": "no",
+      "benching": "NEEDS-PROBE (no env flag; toggle via joint_graph constant folding or selective revert of joint_graph.py hunks)",
+      "self_reported_impact_UNVERIFIED": "var_mean_c408 1.44x->1.0x; any_amax_sum 1.098x->1.092x (latter ~noise)",
+      "commits": ["3e627768c9f", "565695da70b"]
+    },
+    {
+      "id": "U20",
+      "name": "rsqrt_canonicalization (reciprocal(sqrt(x)) -> rsqrt)",
+      "category": "independent_fx_pass_in_post_grad",
+      "files": {"torch/_inductor/fx_passes/post_grad.py": "rsqrt rewrite ~line 2166"},
+      "flag": "config.rsqrt_canonicalization (TORCHINDUCTOR_RSQRT_CANONICALIZATION, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "mean_7639bfb9be38 1.41x->0.99x",
+      "commits": ["6703f38fa2d", "a73d1583b34"]
+    },
+    {
+      "id": "U21",
+      "name": "slice_output_compaction (compact slice outputs of pointwise epilogues)",
+      "category": "independent_pass_lowering_hook",
+      "files": {"torch/_inductor/fx_passes/slice_output_compaction.py": 220, "torch/_inductor/fx_passes/post_grad.py": "registration"},
+      "flag": "config.compact_slice_outputs (TORCHINDUCTOR_COMPACT_SLICE_OUTPUTS, default 1)",
+      "core_dep": "no",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "sum_sum_b16afac198fb 1.87x->1.00x; multi-view ext var_mean_c5067e6e3750 1.14x->0.88x",
+      "commits": ["bbf37d454c2", "3b746fce660", "3bf69043be0"]
+    },
+    {
+      "id": "U22",
+      "name": "split-reduction cost model: undersaturated + partially-saturated GPU split",
+      "category": "core_codegen_flagged",
+      "files": {"torch/_inductor/choices.py": 284, "torch/_inductor/config.py": "flags"},
+      "flag": "config.split_reductions_for_undersaturated_gpu=True + config.split_reductions_for_partially_saturated_gpu=True (python bool, config-patch toggle)",
+      "core_dep": "edits choices.py InductorChoices.should_split heuristic; interacts with segment-aligned (U23) and multilayer (U24)",
+      "benching": "FLAG-TOGGLEABLE (config-patch bool); group A/B with U23/U24 recommended (co-evolving in choices.py/ir.py)",
+      "self_reported_impact_UNVERIFIED": "var_mean_598830735cf6 1.82x->1.29x; sum_sum_e9338369070e 2.96x->0.69x; partially-sat sum_sum_63e248035ceb 1.68x->1.03x",
+      "commits": ["5d4ce5df93b", "d75864dea06", "bdc289b3644", "ab46039c492", "8586e404cc8(superseded)"]
+    },
+    {
+      "id": "U23",
+      "name": "segment-aligned split-reduction introduction",
+      "category": "core_codegen_flagged",
+      "files": {"torch/_inductor/choices.py": "gate", "torch/_inductor/ir.py": "split emission"},
+      "flag": "config.segment_aligned_split_reductions (TORCHINDUCTOR_SEGMENT_ALIGNED_SPLIT_REDUCTIONS, default 1)",
+      "core_dep": "shares choices.py/ir.py split machinery with U22",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "sum_0becf9609ad7 1.41x->0.62x; sum_21c4018e2b7b 1.26x->0.89x",
+      "commits": ["a85d79a900a"]
+    },
+    {
+      "id": "U24",
+      "name": "split_multilayer_second_step + split_reductions_for_fusion",
+      "category": "core_codegen_flagged",
+      "files": {"torch/_inductor/ir.py": "multilayer 2nd-step split", "torch/_inductor/scheduler.py": "split-for-fusion gate (line 4171)"},
+      "flag": "config.split_multilayer_second_step=True + config.split_reductions_for_fusion=True (python bool)",
+      "core_dep": "ir.py multilayer decomposition + scheduler fusion-split path",
+      "benching": "FLAG-TOGGLEABLE (config-patch bool)",
+      "self_reported_impact_UNVERIFIED": "mean_sum_e5a21319f6c6 1.88x->0.77x",
+      "commits": ["d85ab5508e3", "afc3d5956d5"]
+    },
+    {
+      "id": "U25",
+      "name": "scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils (R1 pytorch_unet realization family)",
+      "category": "core_scheduler_flagged",
+      "files": {"torch/_inductor/scheduler.py": 1116, "torch/_inductor/lowering.py": "inline_cheap_producers_into_stencils (line 5670)", "torch/_inductor/memory.py": 28},
+      "flag": "config.inline_recomputable_producers=True + config.inline_cheap_producers_into_stencils (python bool, config-patch toggle)",
+      "core_dep": "deep scheduler machinery; memory.py +28 (realize-reads sizing via mislabeled-revert f74a7f13723) attaches here; co-evolves across 10 commits + fixes",
+      "benching": "FLAG-TOGGLEABLE for the producer-inlining (toggle the bool); but the fix-chain (dead_node_elimination, mutation_renames, ExternKernel-read fixes) is integral -> treat as ONE cumulative unit. The R1 -20% regression + its fix both live here.",
+      "self_reported_impact_UNVERIFIED": "pointwise_e26de0a669ae 1.43x->0.75x; var_mean_deb7c9191e39 1.41x->1.10x; var_mean_9e94237b5daf 1.26x->1.19x",
+      "commits": ["97385fb3273", "905450a5a5d", "12e839eb0fc", "ec674714f38", "054c68b5e15", "c465f1751c6", "a6e9664fb72", "2b40e059b84", "be6874e5fa2(superseded)"]
+    },
+    {
+      "id": "U26",
+      "name": "ir realize-on-reuse: materialize heavy transcendentals + indirect-indexed nodes",
+      "category": "core_ir_flagged",
+      "files": {"torch/_inductor/ir.py": "lines 10265 (transcendentals), 10282 (indirect)"},
+      "flag": "config.realize_heavy_transcendentals_on_reuse=True + config.realize_indirect_indexing_on_reuse=True (python bool)",
+      "core_dep": "ir.py Loops realize policy; pairs with U25",
+      "benching": "FLAG-TOGGLEABLE (config-patch bool)",
+      "self_reported_impact_UNVERIFIED": "sum_51d2ed69e698 2.19x->1.27x (transcendental); amax_sum_9f4956227a79 1.62x->0.89x (indirect) -- this is the R-family materialize-on-reuse",
+      "commits": ["b1e8a30af15", "715c6fc42ac"]
+    },
+    {
+      "id": "U27",
+      "name": "triton evict_first policy (drop evict_first for misaligned/r-contiguous reduction loads)",
+      "category": "core_triton_flagged",
+      "files": {"torch/_inductor/codegen/triton.py": "lines ~4164"},
+      "flag": "config.triton.evict_first_requires_aligned_strides=True (python bool under triton subconfig)",
+      "core_dep": "triton.py load-emission; independent flag but lives in shared triton.py with U28/U29",
+      "benching": "FLAG-TOGGLEABLE (config.triton bool)",
+      "self_reported_impact_UNVERIFIED": "sum_011e69da166d 1.42x->0.98x (and several counterexample-driven gates)",
+      "commits": ["f6ae31e6984", "e45f846f8d1", "60431eca431", "e9a67c98a8c"]
+    },
+    {
+      "id": "U28",
+      "name": "online-softmax fast combine (native tl.max/NaN-identical fast path)",
+      "category": "core_triton_flagged",
+      "files": {"torch/_inductor/codegen/triton.py": "lines 4622,5159,5304"},
+      "flag": "config.triton.online_softmax_fast_combine (TORCHINDUCTOR... under triton subconfig)",
+      "core_dep": "triton.py reduction-combine emission",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "amax_sum_sum_6fd07d12d98a 1.42x->1.01x",
+      "commits": ["a26fc2c8bf4"]
+    },
+    {
+      "id": "U29",
+      "name": "scalar reduction accumulators (scalar_acc) + ungate-from-CD + rnumel ceiling",
+      "category": "core_triton_flagged",
+      "files": {"torch/_inductor/codegen/triton.py": "lines 5041,5128,5272", "torch/_inductor/runtime/triton_heuristics.py": "_scalar_acc_configs_without_cd line 4049"},
+      "flag": "config.triton.scalar_reduction_accumulators (default 1) + config.scalar_acc_configs_without_cd (TORCHINDUCTOR_SCALAR_ACC_CONFIGS_WITHOUT_CD default 1)",
+      "core_dep": "triton.py + heuristics; num_load<=4 gate",
+      "benching": "FLAG-TOGGLEABLE",
+      "self_reported_impact_UNVERIFIED": "genai SoftmaxForward default 3541us->1905us; ca8f gated to fix 14-22% regressions",
+      "commits": ["ca8f961d6b0", "9dde2c59a51"]
+    },
+    {
+      "id": "U30",
+      "name": "MOR (multi-output-reduction) Triton finalize kernel",
+      "category": "core_no_flag_selective_revert",
+      "files": {"torch/_inductor/codegen/simd.py": "_emit_triton_finalize_sum (+176)", "torch/_inductor/ir.py": "_sibling_reduction_fusion gate (False at HEAD)"},
+      "flag": "NO FLAG for the finalize-kernel codegen (the sibling-fusion enable config._sibling_reduction_fusion is False at HEAD; the finalize path itself is unconditional)",
+      "core_dep": "simd.py SIMDScheduling; emits the workspace->finalize 2-stage kernel for split MOR",
+      "benching": "NEEDS-PROBE / CUMULATIVE-ONLY (selective revert of simd.py +176). Mega-commit claims '35% Swin'.",
+      "self_reported_impact_UNVERIFIED": "35% Swin (mega-commit msg); sum_sum_sum_37ed72cc58f3 2.02x->1.02x (846f enables sibling fusion path)",
+      "commits": ["97385fb3273", "846f6be7015"]
+    },
+    {
+      "id": "U31",
+      "name": "CE gather-into-softmax (online_softmax_cross_entropy fused reduction)",
+      "category": "core_no_flag_selective_revert",
+      "files": {"torch/_inductor/inductor_prims.py": "+25 (cross_entropy_loss_online prim)", "torch/_inductor/ops_handler.py": "+1 (online_softmax_cross_entropy)", "torch/_inductor/lowering.py": "cross_entropy_loss_online lowering (line 9177)", "torch/_inductor/codegen/triton.py": "reduction_type handling (4985,5261,5585)"},
+      "flag": "NO FLAG (new reduction type + new prim; always active when pattern matched)",
+      "core_dep": "new ops_handler reduction type, cross-cuts prims/lowering/triton; not separable from CORE",
+      "benching": "CUMULATIVE-ONLY / selective revert (revert the prim+ops_handler+lowering+triton CE hunks together)",
+      "self_reported_impact_UNVERIFIED": "mega-commit '0.8%' (CE gather-into-softmax); loop-invariant target_logit hoist 9b4edfffc15 + CE-hoist ab29345d82d",
+      "commits": ["97385fb3273", "ab29345d82d", "9b4edfffc15"]
+    },
+    {
+      "id": "U32",
+      "name": "argmax/argmin unrolled tie-break elimination",
+      "category": "core_no_flag_selective_revert",
+      "files": {"torch/_inductor/ir.py": "get_reduction_combine_fn / REDUCTION_COMBINE_FN (lines 1219-1640)"},
+      "flag": "NO FLAG (changes the reduction combine fn directly)",
+      "core_dep": "ir.py reduction combine table",
+      "benching": "CUMULATIVE-ONLY / selective revert of the ir.py combine-fn hunk",
+      "self_reported_impact_UNVERIFIED": "pointwise_e33f44c6dd73 1.59x->1.31x",
+      "commits": ["14b0254f8a9"]
+    },
+    {
+      "id": "U33",
+      "name": "triton_heuristics: persistent-reduction-threshold raise (Blackwell BN) + low-warp configs + cooperative widen + rnumel-ceiling assert fix",
+      "category": "core_no_flag_selective_revert",
+      "files": {"torch/_inductor/runtime/triton_heuristics.py": 145, "torch/_inductor/choices.py": "cooperative widen", "torch/_inductor/config.py": "persistent_reduction_threshold_inner=4096 (env-overridable scalar, NOT a feature on/off)"},
+      "flag": "PARTIAL: persistent_reduction_threshold_inner is an env-tunable scalar (TORCHINDUCTOR_PERSISTENT_REDUCTION_THRESHOLD_INNER) but the Blackwell BN threshold raise + low-warp config additions + cooperative-widen (choices line ~401) are NO-FLAG code changes",
+      "core_dep": "autotune config generation; not a clean toggle",
+      "benching": "NEEDS-PROBE / mostly CUMULATIVE-ONLY (selective revert of the config-list additions + threshold logic). The d2cd/62f27 INNER-threshold-1024->8192 was added+REVERTED (net zero, exclude).",
+      "self_reported_impact_UNVERIFIED": "var_mean_65e90900fd65 1.32x->1.0x (BN); var_mean_mean_2ac1c2eb8544 1.54x->1.25x (low-warp)",
+      "commits": ["97385fb3273", "7be29e49d9e", "2fbbe401871", "44802547aa9", "2b35f4ee83a"]
+    }
+  ],
+  "loose_unassigned_changes": [
+    {"item": "elide_constant_index_asserts (bounds.py +52, lowering.py)", "flag": "config.elide_constant_index_asserts=True (python bool) + value_ranges.py +9", "benching": "FLAG-TOGGLEABLE-ish (bool); folded with U16 commit afc3", "note": "bundled in afc3d5956d5; arguably its own micro-unit but tiny"},
+    {"item": "clamp_embedding_indices (lowering.py line 4443, value_ranges.py)", "flag": "config.clamp_embedding_indices=True (python bool)", "benching": "FLAG-TOGGLEABLE (bool)", "impact_UNVERIFIED": "amax_sum_5f0c26b7e967 1.52x->1.01x", "commits": ["aa83bc1951c"], "note": "could be its own unit U34; merged into bounds/clamp micro-cluster with elide-asserts"},
+    {"item": "prefer_concat_kernel_shared_reads_threshold=6 (lowering.py line 2295, pointwise_cat SwiGLU)", "flag": "config.prefer_concat_kernel_shared_reads_threshold (scalar, default 6)", "benching": "FLAG-TOGGLEABLE (set very high to disable)", "impact_UNVERIFIED": "pointwise_f6d6f135f57e 2.10x->0.97x", "commits": ["d95f59fb1bc", "f9493caabcd(superseded)"], "note": "pointwise_cat heuristic; could be U35"},
+    {"item": "hoist_invariant_compute (triton.py lines 3954,3981)", "flag": "config.hoist_invariant_compute (TORCHINDUCTOR_HOIST_INVARIANT_COMPUTE, default 0 = OFF)", "benching": "FLAG-TOGGLEABLE but DEFAULT OFF -> ZERO contribution at HEAD", "impact_UNVERIFIED": "neutral on B200 (author's own note); default off", "commits": ["52d4cadfac0"], "note": "off by default -> not landing-relevant unless turned on"},
+    {"item": "codegen/common.py +18, utils.py +10", "flag": "n/a (support hooks for hoist + finalize)", "benching": "rides along with U30/loose", "note": "small glue, no standalone unit"}
+  ],
+  "dead_or_net_zero": [
+    {"item": "reduction_chaining.py (216L)", "reason": "ORPHAN dead code at HEAD: never imported/called; config.triton.reduction_chaining gate is missing from config diff (defaults False). ZERO contribution. DO NOT LAND.", "commits": ["97385fb3273"]},
+    {"item": "Degenerate dropout elimination pass", "reason": "added+reverted TWICE (13cbc/1787 and 84a2/f654) -> net zero", "commits": []},
+    {"item": "Smart realize_hint broadcast-dominated (ir.py)", "reason": "added 9ae68 + reverted 282760 -> net zero", "commits": []},
+    {"item": "num_stages tune + INNER persistent-threshold 1024->8192 + realize_reads 4->30", "reason": "each added+reverted (caa0/f0b5, d2cd/62f27, 1a82/f74a) -> net zero (note memory.py +28 survives from f74a, attached to U25)", "commits": []}
+  ],
+  "reconstruction_crosscheck": {
+    "net_diff_files": 36,
+    "files_assigned_to_units": "36/36",
+    "unassigned": "none -- runtime/benchmarking.py (+47) is plumbing-only (5 Update commits, ~0% perf, autotune timing infra); codegen/common.py/utils.py are support glue (loose_unassigned)",
+    "verdict": "complete -- the 33 units + loose-glue + plumbing reconstruct the full net product diff with no residual"
+  },
+  "landability_summary": {
+    "cleanly_independent_prs": 17,
+    "cleanly_independent_list": ["U01","U02","U03","U04","U05","U06","U07","U08","U09","U10","U12","U13","U14","U15","U16","U17","U18","U20","U21"],
+    "cleanly_independent_note": "These are new fx_passes/*.py files (or self-contained post_grad rewrites) gated by their own config flag; only textual coupling is the post_grad.py registry. U11 (diagonal_skew) is independent-ish with an 11-line scatter_reduce_fusion shim -> land after U01. Count is 19 in the list (U01-U21 minus U11,U19 which need notes) -- conservatively 17 truly clean + U11 + U19 = 19 independent-capable.",
+    "entangled_in_core": ["U22","U23","U24","U25","U26","U27","U28","U29","U30","U31","U32","U33"],
+    "entangled_note": "12 units live in shared core files (choices/scheduler/ir/triton/simd/heuristics). 7 of these (U22-U29) are still FLAG-TOGGLEABLE for A/B even though they share files. 5 (U30 MOR, U31 CE, U32 argmax, plus the no-flag parts of U33 and U25's fix-chain) need selective revert / cumulative benching.",
+    "mega_commit_anchor": "97385fb3273 seeds U01,U08,U09,U10,U25,U26-partial,U29-partial,U30,U31,U33-partial + dead reduction_chaining. Must land (or be replicated) first for the entangled units."
+  }
+}

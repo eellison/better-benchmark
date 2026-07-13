@@ -1,0 +1,117 @@
+{
+  "SoftmaxForward": {
+    "full_graph_000.py": {
+      "compiled_us_median": 1911.74,
+      "compiled_us_min": 1904.32,
+      "compiled_us_spread_pct": 0.39,
+      "cd_us_median": 1915.94,
+      "cd_us_min": 1908.74,
+      "n_kernels": 1,
+      "n_trials": 3
+    }
+  },
+  "SoftmaxBackward": {
+    "full_graph_000.py": {
+      "compiled_us_median": 1433.34,
+      "compiled_us_min": 1432.51,
+      "compiled_us_spread_pct": 0.065,
+      "cd_us_median": 1402.66,
+      "cd_us_min": 1401.89,
+      "n_kernels": 2,
+      "n_trials": 3
+    },
+    "full_graph_001.py": {
+      "compiled_us_median": 2880.26,
+      "compiled_us_min": 2879.52,
+      "compiled_us_spread_pct": 0.032,
+      "cd_us_median": 2458.5,
+      "cd_us_min": 2458.5,
+      "n_kernels": 1,
+      "n_trials": 3
+    }
+  },
+  "CrossEntropyForward": {
+    "full_graph_000.py": {
+      "compiled_us_median": 708.51,
+      "compiled_us_min": 708.35,
+      "compiled_us_spread_pct": 0.027,
+      "cd_us_median": 708.42,
+      "cd_us_min": 708.38,
+      "n_kernels": 1,
+      "n_trials": 3
+    }
+  },
+  "CrossEntropyBackward": {
+    "full_graph_000.py": {
+      "compiled_us_median": 716.54,
+      "compiled_us_min": 715.84,
+      "compiled_us_spread_pct": 0.116,
+      "cd_us_median": 715.78,
+      "cd_us_min": 715.74,
+      "n_kernels": 2,
+      "n_trials": 3
+    }
+  },
+  "RMSNormForward": {
+    "full_graph_000.py": {
+      "compiled_us_median": 343.87,
+      "compiled_us_min": 342.98,
+      "compiled_us_spread_pct": 0.28,
+      "cd_us_median": 344.13,
+      "cd_us_min": 344.03,
+      "n_kernels": 1,
+      "n_trials": 3
+    }
+  },
+  "RMSNormBackward": {
+    "full_graph_000.py": {
+      "compiled_us_median": 307.04,
+      "compiled_us_min": 306.85,
+      "compiled_us_spread_pct": 0.063,
+      "cd_us_median": 227.04,
+      "cd_us_min": 226.24,
+      "n_kernels": 3,
+      "n_trials": 3
+    },
+    "full_graph_001.py": {
+      "compiled_us_median": 382.85,
+      "compiled_us_min": 382.82,
+      "compiled_us_spread_pct": 0.025,
+      "cd_us_median": 372.61,
+      "cd_us_min": 372.54,
+      "n_kernels": 1,
+      "n_trials": 3
+    }
+  },
+  "LayerNormForward": {
+    "full_graph_000.py": {
+      "compiled_us_median": 342.91,
+      "compiled_us_min": 342.91,
+      "compiled_us_spread_pct": 0.065,
+      "cd_us_median": 343.9,
+      "cd_us_min": 343.84,
+      "n_kernels": 1,
+      "n_trials": 3
+    }
+  },
+  "LayerNormBackward": {
+    "full_graph_000.py": {
+      "compiled_us_median": 306.94,
+      "compiled_us_min": 306.94,
+      "compiled_us_spread_pct": 0.031,
+      "cd_us_median": 268.1,
+      "cd_us_min": 268.06,
+      "n_kernels": 3,
+      "n_trials": 3
+    },
+    "full_graph_001.py": {
+      "compiled_us_median": 679.94,
+      "compiled_us_min": 677.82,
+      "compiled_us_spread_pct": 0.463,
+      "cd_us_median": 380.0,
+      "cd_us_min": 379.94,
+      "n_kernels": 2,
+      "n_trials": 3
+    }
+  }
+}

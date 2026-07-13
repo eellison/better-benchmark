@@ -1,0 +1,38 @@
+{
+ "bench": "SoftmaxForward",
+ "mode": "warm",
+ "trial": 6,
+ "rc": 0,
+ "wall_s": 8.9,
+ "compiled_us": 1918.6880588531494,
+ "coord_descent_us": 1924.064040184021,
+ "n_kernels": 1,
+ "best_configs": [
+  {
+   "XBLOCK": 1,
+   "R0_BLOCK": 16384,
+   "num_warps": 8,
+   "num_stages": 1,
+   "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+   "found_by_coordesc": false,
+   "time_taken_ms": 201,
+   "triton_cache_hash": "33F7ZISP7UIZSE6POR2J4VGELTAJSERFYZZX6RI36VPGCUDVX2VA",
+   "_file": "09adf3c5716bc217e21e290bf21dd76c7e339f68723451039c9da172ad518932.best_config"
+  },
+  {
+   "XBLOCK": 1,
+   "R0_BLOCK": 16384,
+   "num_warps": 8,
+   "num_stages": 1,
+   "configs_hash": "291fb62d2d3d2c0f3c58726e931f069726bf7c930785cf1b5435c7a42d4af5c7",
+   "found_by_coordesc": true,
+   "time_taken_ms": 1307,
+   "triton_cache_hash": null,
+   "_file": "69bfc866d4b71207373ef1b96e4fec3265ac1ffbefb15c3fc783b4ba98a640c2.best_config"
+  }
+ ],
+ "source_sha": "6f6d7d3fda9f14f4",
+ "source_norm_sha": "f4f527062dd65ae4",
+ "exp_libdevice": 0,
+ "exp_tlmath": 6
+}
