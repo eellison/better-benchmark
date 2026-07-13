@@ -1419,6 +1419,9 @@ def main():
                         help="Record cold-compile wall time (compile_time_s) for each "
                              "--full-graphs model. Forces 1 GPU / 1 worker (compile is "
                              "CPU-bound). Opt-in; off by default.")
+    parser.add_argument("--peak-memory", action="store_true",
+                        help="Record peak GPU memory usage (peak_memory_bytes) for each "
+                             "--full-graphs model. Opt-in; off by default.")
     parser.add_argument("--tag", default=None,
                         help="Tag for this run (e.g. 'baseline', 'my_fix'). Used to key results in perf.json for comparison.")
     parser.add_argument("--compare", type=str, nargs=2, metavar=("TAG_A", "TAG_B"),
@@ -1592,6 +1595,11 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
 
+    if args.peak_memory:
+        # --peak-memory: 1 worker per GPU.
+        workers_per_gpu = 1
+        n_workers = min(n_workers, len(gpus))
+
     if args.compile_time:
         n_workers, workers_per_gpu = 1, 1
 
@@ -1635,6 +1643,7 @@ def main():
         "multi_kernel": args.multi_kernel,
         "workload_kind": workload_kind,
         "compile_time": args.compile_time,
+        "peak_memory": args.peak_memory,
     }
 
     if args.oracles:
@@ -2289,7 +2298,7 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     stream).
     """
     return f'''
-import builtins, contextlib, fcntl, io, re, sys, json, os, tempfile, threading, time
+import builtins, contextlib, fcntl, gc, io, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
 
 import torch, torch._dynamo
@@ -2609,6 +2618,19 @@ def bench_full_graph_one(repro_path):
             graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
     n_kernels = inductor_metrics.generated_kernel_count
 
+    # Opt-in: peak allocated memory of a direct compiled forward.
+    peak_memory_bytes = None
+    if {args_dict.get("peak_memory", False)}:
+        with gpu_setup_lock():
+            with torch.no_grad():
+                gc.collect()
+                torch.cuda.empty_cache()
+                torch.cuda.reset_peak_memory_stats()
+                _pm_out = compiled(*inputs)
+                torch.cuda.synchronize()
+            peak_memory_bytes = torch.cuda.max_memory_allocated()
+            del _pm_out
+
     # Compile coordinate descent
     do_cd = not {args_dict["no_cd"]}
     graph_cd = None
@@ -2673,6 +2695,8 @@ def bench_full_graph_one(repro_path):
     }}
     if {args_dict.get("compile_time", False)}:
         result["default"]["compile_time_s"] = compile_time_s
+    if {args_dict.get("peak_memory", False)}:
+        result["default"]["peak_memory_bytes"] = peak_memory_bytes
     return result
 
 def bench_one(repro_path):
