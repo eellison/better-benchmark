@@ -1415,6 +1415,9 @@ def main():
                         help="Hold a shared GPU lock during setup/warmup/capture "
                              "and upgrade to exclusive for timing/autotune. "
                              "Slower, useful for variance validation.")
+    parser.add_argument("--peak-memory", action="store_true",
+                        help="Record peak GPU memory usage (peak_memory_bytes) for each "
+                             "--full-graphs model. Opt-in; off by default.")
     parser.add_argument("--tag", default=None,
                         help="Tag for this run (e.g. 'baseline', 'my_fix'). Used to key results in perf.json for comparison.")
     parser.add_argument("--compare", type=str, nargs=2, metavar=("TAG_A", "TAG_B"),
@@ -1623,6 +1626,7 @@ def main():
         "combo_kernels": args.combo_kernels,
         "multi_kernel": args.multi_kernel,
         "workload_kind": workload_kind,
+        "peak_memory": args.peak_memory,
     }
 
     if args.oracles:
@@ -2585,6 +2589,20 @@ def bench_full_graph_one(repro_path):
             graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
     n_kernels = inductor_metrics.generated_kernel_count
 
+    # Opt-in: peak allocated memory of a direct compiled forward.
+    peak_memory_bytes = None
+    if {args_dict.get("peak_memory", False)}:
+        with gpu_setup_lock():
+            with torch.no_grad():
+                for _ in range(2):
+                    compiled(*inputs)
+                torch.cuda.synchronize()
+                torch.cuda.reset_peak_memory_stats()
+                _pm_out = compiled(*inputs)
+                torch.cuda.synchronize()
+            peak_memory_bytes = torch.cuda.max_memory_allocated()
+            del _pm_out
+
     # Compile coordinate descent
     do_cd = not {args_dict["no_cd"]}
     graph_cd = None
@@ -2632,7 +2650,7 @@ def bench_full_graph_one(repro_path):
     compiled_us = min(default_times)
     cd_us = min(cd_times) if cd_times else None
 
-    return {{
+    result = {{
         "__graph__": result_metadata(_definition),
         "default": {{
             "compiled_us": compiled_us,
@@ -2647,6 +2665,9 @@ def bench_full_graph_one(repro_path):
             "gap_cd": None,
         }}
     }}
+    if {args_dict.get("peak_memory", False)}:
+        result["default"]["peak_memory_bytes"] = peak_memory_bytes
+    return result
 
 def bench_one(repro_path):
     if WORKLOAD_KIND == "full_graph":
