@@ -65,7 +65,10 @@ python scripts/bench_parallel.py repros/canonical --oracles --gpus 0,1 \
 # Parallel sweep of saved model full graphs
 # (latency + input constraints; legacy annotation-only graphs are skipped)
 python scripts/bench_parallel.py --full-graphs --gpus 0,1 \
-  --workers-per-gpu 2 --combo-kernels --output full_graph_results.json
+  --workers-per-gpu 2 \
+  --inductor-config combo_kernels=True \
+  --inductor-config combo_kernel_per_subkernel_blocks=True \
+  --output full_graph_results.json
 
 # Validate all repros run correctly in eager mode
 python scripts/validate_eager.py --gpus 0,1 --max-workers 4
