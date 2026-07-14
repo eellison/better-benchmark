@@ -56,7 +56,14 @@
 | reduction_chaining.py | in mega | 0 | 0 | Dead code, never called. |
 
 ## SELECTIVE-REVERT TO ATTRIBUTE (no flag — bulk of mega's claimed +1.95pp/+0.71pp lives here)
-- **U30** MOR-finalize ("35% Swin" — bench against Swin rollup)
+- **U30** MOR-finalize — **e2e MEASURED (2026-07-14, full-corpus A/B, both arms fresh):
+  +0.25pp e2e geomean** (genai-excl, n=158; isolated-to-surface +0.15pp) — sub-floor
+  corpus-wide (±0.82pp) but coherent: the 29 touched transformer/timm TRAIN models gain
+  ~+0.95pp geomean with ZERO regressions (Electra +2.4, beit +1.8, convnextv2 +1.7,
+  DebertaV2/MegatronBert/GPTNeo ~+1.4). Kernel win re-confirmed: 1.140x geomean over the
+  52 sum_sum_sum repros (prior 1.135x reproduces). Land as a kernel-codegen improvement
+  with a modest, positive, transformer-TRAIN-concentrated e2e contribution.
+  Data: /tmp/scratch_space/u30_e2e/RESULT.json
 - **U31** CE-prim (bench against CrossEntropy genai micros)
 - **U33** Blackwell-BN + low-warp configs
 These can't be flag-ablated; their isolated impact is UNMEASURED. The mega's model-e2e +0.71pp is mostly here (only U10 of the 6 flag-units is a clean positive; U09/U25 net-negative).
