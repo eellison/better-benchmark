@@ -81,7 +81,30 @@ first proof-of-concept of the overlay format.
 
 ## How to regenerate
 
-Run from the repo root. The GPU step (~4 min/model) needs the lock + pinned
+One command, from the repo root (GPU lock available; ~4 min GPU per model):
+
+```bash
+# full demo set (AllenaiLongformerBase, alexnet, mobilenetv2_100)
+python scripts/regen_perfetto_demos.py
+
+# only the CPU overlay join, reusing the attr_*.json already in this dir
+# (for when only the timings/oracle side changed) -- seconds, no GPU
+python scripts/regen_perfetto_demos.py --skip-gpu
+
+# a subset / a different timings file
+python scripts/regen_perfetto_demos.py --models alexnet --timings results/all_oracle_timings_b200_v2.json
+```
+
+Per model it runs the locked GPU attribution step then the CPU overlay join
+(the two manual steps below), validates the trace (valid JSON, >0 slices on
+tids 1/2/3), applies the `_UNPRICED_example` naming when ALL fusible oracle
+slices are misses, and refreshes `MANIFEST.json` in this dir (per-trace
+provenance: PyTorch commit, timings file + family count, ratios) so
+staleness is visible.
+
+### Manual two-step (what the one-liner does per model)
+
+The GPU step (~4 min/model) needs the lock + pinned
 clocks; the overlay step is a pure CPU JSON join (seconds).
 
 ```bash
