@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The corpus pipeline — capture, partition, dedupe</title>
+<style>
+  :root { color-scheme: light; }
+  html,body { margin:0; padding:0; background:#f9f9f7; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .viz-root { position:relative; width:1052px; margin:28px auto; background:#fcfcfb;
+    border:1px solid rgba(11,11,11,0.10); border-radius:8px; padding:22px 26px 18px; box-sizing:border-box; }
+  h1 { font-size:17px; font-weight:650; color:#0b0b0b; margin:0 0 3px; letter-spacing:-0.01em; }
+  .sub { font-size:13px; color:#52514e; margin:0 0 14px; }
+  .foot { font-size:11px; color:#898781; margin-top:10px; line-height:1.45; }
+  svg { display:block; }
+  svg text { font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+</style></head>
+<body>
+<figure class="viz-root" style="margin:28px auto;">
+  <h1>The corpus pipeline</h1>
+  <p class="sub">capture once &rarr; partition &rarr; dedupe &rarr; standalone microbenchmarks</p>
+  <svg width="1000" height="210" viewBox="0 0 1000 210" role="img" aria-label="Pipeline from 158 models through capture, partition, and dedupe to 1,727 canonical repros and about 5,000 benchmark points">
+    <!-- boxes: y=30, h=96, w=142; x = 8,176,344,512,680,848 -->
+    <rect x="8"   y="30" width="142" height="96" rx="6" fill="#f7f6f2" stroke="rgba(11,11,11,0.35)" stroke-width="1"/>
+    <rect x="176" y="30" width="142" height="96" rx="6" fill="#f7f6f2" stroke="rgba(11,11,11,0.35)" stroke-width="1"/>
+    <rect x="344" y="30" width="142" height="96" rx="6" fill="#f7f6f2" stroke="rgba(11,11,11,0.35)" stroke-width="1"/>
+    <rect x="512" y="30" width="142" height="96" rx="6" fill="#f7f6f2" stroke="rgba(11,11,11,0.35)" stroke-width="1"/>
+    <rect x="680" y="30" width="142" height="96" rx="6" fill="#f7f6f2" stroke="rgba(11,11,11,0.35)" stroke-width="1"/>
+    <rect x="848" y="30" width="142" height="96" rx="6" fill="#f7f6f2" stroke="rgba(11,11,11,0.35)" stroke-width="1"/>
+
+    <!-- box 1: 158 models -->
+    <text x="79" y="67"  font-size="13" font-weight="650" fill="#0b0b0b" text-anchor="middle">158 models</text>
+    <text x="79" y="84"  font-size="12" fill="#52514e" text-anchor="middle">torchbench &#183; HF &#183; timm</text>
+    <text x="79" y="99"  font-size="12" fill="#52514e" text-anchor="middle">(+8 genai micros)</text>
+
+    <!-- box 2: capture -->
+    <text x="247" y="55"  font-size="12" fill="#52514e" text-anchor="middle">capture post-grad</text>
+    <text x="247" y="70"  font-size="12" fill="#52514e" text-anchor="middle">FX graphs</text>
+    <text x="247" y="88"  font-size="13" font-weight="650" fill="#0b0b0b" text-anchor="middle">358 full graphs</text>
+    <text x="247" y="103" font-size="12" fill="#52514e" text-anchor="middle">retained</text>
+
+    <!-- box 3: partition -->
+    <text x="415" y="55"  font-size="12" fill="#52514e" text-anchor="middle">partition: excise</text>
+    <text x="415" y="70"  font-size="12" fill="#52514e" text-anchor="middle">compute-bound</text>
+    <text x="415" y="85"  font-size="12" fill="#52514e" text-anchor="middle">(GEMM/conv/SDPA)</text>
+    <text x="415" y="102" font-size="12" font-weight="650" fill="#0b0b0b" text-anchor="middle">&#8594; ideal fusion groups</text>
+
+    <!-- box 4: dedupe -->
+    <text x="583" y="74"  font-size="12" fill="#52514e" text-anchor="middle">dedupe by</text>
+    <text x="583" y="89"  font-size="12" fill="#52514e" text-anchor="middle">pattern hash</text>
+
+    <!-- box 5: 1,727 repros -->
+    <text x="751" y="74"  font-size="13" font-weight="650" fill="#0b0b0b" text-anchor="middle">1,727 canonical</text>
+    <text x="751" y="90"  font-size="12" fill="#52514e" text-anchor="middle">repros</text>
+
+    <!-- box 6: shapes / points -->
+    <text x="919" y="52"  font-size="12" fill="#52514e" text-anchor="middle">&#215; captured shapes =</text>
+    <text x="919" y="70"  font-size="13" font-weight="650" fill="#0b0b0b" text-anchor="middle">~5,000 compile</text>
+    <text x="919" y="86"  font-size="12" fill="#52514e" text-anchor="middle">benchmark points</text>
+    <text x="919" y="103" font-size="12" fill="#52514e" text-anchor="middle">&#183; oracle per pattern</text>
+
+    <!-- arrows between boxes, y=78 -->
+    <g stroke="#52514e" stroke-width="1" fill="#52514e">
+      <line x1="150" y1="78" x2="169" y2="78"/><path d="M169,74 L176,78 L169,82 Z" stroke="none"/>
+      <line x1="318" y1="78" x2="337" y2="78"/><path d="M337,74 L344,78 L337,82 Z" stroke="none"/>
+      <line x1="486" y1="78" x2="505" y2="78"/><path d="M505,74 L512,78 L505,82 Z" stroke="none"/>
+      <line x1="654" y1="78" x2="673" y2="78"/><path d="M673,74 L680,78 L673,82 Z" stroke="none"/>
+      <line x1="822" y1="78" x2="841" y2="78"/><path d="M841,74 L848,78 L841,82 Z" stroke="none"/>
+    </g>
+
+    <!-- return spur: retained full graphs -> partition, re-runnable -->
+    <path d="M247,126 C247,168 415,168 415,133" fill="none" stroke="#898781" stroke-width="1"/>
+    <path d="M411,140 L415,133 L419,140 Z" fill="#898781"/>
+    <text x="331" y="188" font-size="11" fill="#898781" text-anchor="middle">re-partition anytime &#8212; no model re-runs</text>
+  </svg>
+  <p class="foot">From 158 models to 1,727 standalone microbenchmarks: capture once, partition, dedupe; retained full graphs make re-partitioning free.</p>
+</figure>
+</body></html>

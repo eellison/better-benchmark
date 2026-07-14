@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Post figures</title>
+<style>
+  body { font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:#f9f9f7; color:#0b0b0b; max-width:760px; margin:48px auto; padding:0 24px; }
+  h1 { font-size:20px; } li { margin:10px 0; font-size:15px; }
+  a { color:#1c5cab; } .d { color:#52514e; font-size:13px; }
+</style></head><body>
+<h1>Perf-engineering post figures</h1>
+<ol>
+  <li><a href="fig1_per_commit.html">Fig 1 — Which commits carry the win (per-commit marginal delta)</a>
+      <div class="d">30 named commits, kernel-geomean vs per-model e2e, aligned diverging panels</div></li>
+  <li><a href="fig2_per_model.html">Fig 2 — 158 models, before → after (concentration)</a>
+      <div class="d">sorted per-model e2e change, median +2.21%, ±0.82% noise band</div></li>
+  <li><a href="fig3_timeline.html">Fig 3 — Kernels in execution order: current vs ceiling</a>
+      <div class="d">46 kernel pairs, compile 14,583 µs vs oracle 2,715 µs (5.4×)</div></li>
+</ol>
+</body></html>
