@@ -112,38 +112,26 @@ python scripts/model_graph_accounting.py --model BertForMaskedLM --timings resul
 
 ## Measuring a compiler change
 
-The point of the corpus is to make a `torch.compile` change's effect **visible
-and reproducible**: sweep two commits, diff the kernels, and roll the diff up to
-a per-model end-to-end number you can actually defend.
-
-**Headline.** A recent inductor perf branch (base `5e2ab` → HEAD `daa79`) is
-**+2.18% median / +4.51% geomean** per-model end-to-end across **158 models**
-(genai-excluded). The win is **concentrated**, not broad: an `rsqrt`
-canonicalization carries roughly half of it (it lights up conv/BatchNorm
-models), and a handful of other kernel families carry the rest — most models
-move <1%.
-
-### Workflow
+To A/B a `torch.compile` change: sweep the corpus at two commits, diff the
+kernels, and roll the diff up to a per-model end-to-end estimate.
 
 ```bash
-# (a) Sweep two commits into two JSONs (one per commit; LOCKED GPU path).
-#     Check out commit A, sweep; check out commit B, sweep.
+# (a) Sweep each commit into a JSON (locked GPU path).
 python scripts/bench_parallel.py repros/canonical --all-shapes \
     --gpus 0,1,2,3 --tag baseA --output base.json
 python scripts/bench_parallel.py repros/canonical --all-shapes \
     --gpus 0,1,2,3 --tag headB --output head.json
 
-# (b) Per-kernel A/B table (DIRECTION: which kernel families moved).
+# (b) Per-kernel A/B table — which kernel families moved.
 python scripts/bench_report.py --compare base.json head.json --output-md ab.md
 
-# (c) Roll up to per-model end-to-end — the trusted headline (no GPU needed).
+# (c) Per-model end-to-end rollup (no GPU needed).
 python scripts/perf_ab_rollup.py --base base.json --head head.json
 ```
 
-Step (b) emits a per-kernel markdown table — biggest movers in each direction:
+Step (b) emits a per-kernel markdown table of the biggest movers:
 
 ```markdown
-## base 5e2ab vs HEAD daa79
 ### Improvements
 | Kernel | Base (us) | Head (us) | Delta |
 |--------|-----------|-----------|-------|
@@ -151,41 +139,14 @@ Step (b) emits a per-kernel markdown table — biggest movers in each direction:
 | var_mean_42fad1ece813[mnasnet1_0]         | 241.4 | 23.9 | -90.1% |
 ```
 
-Step (c) is a thin wrapper — no new timing code, consumes the two sweep JSONs,
-and reuses the per-model accounting (fusible partitions + externs) to compute a
-**shape-matched, genai-excluded, per-model-e2e** geomean: the trusted headline.
+Step (c) reuses the per-model accounting (fusible partitions + externs) to
+report a shape-matched, occurrence-weighted per-model geomean/median.
 
-### What the numbers look like
-
-The per-kernel table and the per-model rollup are **different metrics, on
-purpose**. The kernel geomean overstates model impact ~2–3× because most of a
-model's time sits in externs (conv/GEMM/SDPA) the change never touches; the
-rollup's extern denominator dilutes the win back to reality. Show both:
-
-| Kernel family (example) | Per-kernel Δ | Why |
-|-------------------------|-------------:|-----|
-| `var_mean_*` (BatchNorm `rsqrt`) | −85% … −94% | `reciprocal(sqrt(x)) → rsqrt(x)` canonicalization |
-| online-softmax `amax_*` loops | ~+0.8pp geomean | fast combine for softmax/cross-entropy |
-| `pointwise_*` (transcendental reuse) | mixed | materialize multi-user nodes |
-
-| Model (per-model e2e rollup) | Δ e2e | Note |
-|------------------------------|------:|------|
-| `timm/infer/repvgg_a2`            | **+25.9%** | conv/BN-heavy; rsqrt-dominated |
-| `timm/infer/mobilenetv2_100`      | **+25.3%** | conv/BN-heavy |
-| `torchbench/infer/shufflenet_v2_x1_0` | **+10.5%** | conv/BN-heavy |
-| **median across 158 models**     | **+2.18%** | most models move <1% |
-
-So a −90% kernel row does *not* mean a −90% model — `repvgg_a2`'s +25.9% is the
-honest end-to-end consequence of those BatchNorm kernels shrinking, and the
-**median model** only moves +2.18% because the win is concentrated.
-
-### Trust the rollup, not the raw kernel diff
-
-The per-kernel table (step b) is for **direction** — which kernel families
-moved — not for the headline. It diffs every captured point independently, so a
-big individual row doesn't translate to a model-level win, and its raw
-improved/regressed counts are noisy. The headline comes from the per-model
-rollup (step c), which weights each kernel by how a model actually uses it.
+The two are different metrics on purpose: the per-kernel table shows *which*
+kernels moved, while the rollup weights each kernel by how a model actually
+uses it and dilutes it by the extern (conv/GEMM/SDPA) time the change never
+touches — so a large kernel win translates to a much smaller model-level
+number. Quote model-level results from the rollup.
 
 ## Extraction
 
