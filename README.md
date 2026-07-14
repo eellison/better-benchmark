@@ -146,7 +146,8 @@ The two are different metrics on purpose: the per-kernel table shows *which*
 kernels moved, while the rollup weights each kernel by how a model actually
 uses it and dilutes it by the extern (conv/GEMM/SDPA) time the change never
 touches — so a large kernel win translates to a much smaller model-level
-number. Quote model-level results from the rollup.
+number. When reporting a model-level result, use the rollup's number, not one
+extrapolated from the kernel table.
 
 ## Extraction
 
