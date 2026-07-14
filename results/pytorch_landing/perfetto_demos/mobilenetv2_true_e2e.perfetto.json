@@ -1,0 +1,2132 @@
+{
+  "traceEvents": [
+    {
+      "name": "process_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 0,
+      "args": {
+        "name": "mobilenetv2_100"
+      }
+    },
+    {
+      "name": "thread_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "name": "fusible (real us)"
+      }
+    },
+    {
+      "name": "thread_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "name": "extern (real us: conv/GEMM/SDPA)"
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 0.0,
+      "dur": 216.032,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution",
+        "order_index": 263,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 3, 224, 224],torch.bfloat16,[150528, 1, 672, 3]),T([32, 3, 3, 3],torch.bfloat16,[27, 1, 9, 3]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 216.0319983959198,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/9c97edfa",
+      "ph": "X",
+      "ts": 216.032,
+      "dur": 36.544,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_4",
+        "order_index": 286,
+        "key": [
+          "9595e73ff43b",
+          "9c97edfa"
+        ],
+        "us": 36.54399886727333,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 252.576,
+      "dur": 67.488,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_1",
+        "order_index": 287,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 32, 112, 112],torch.bfloat16,[401408, 1, 3584, 32]),T([32, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],32),{})"
+        ],
+        "us": 67.48799979686737,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/9c97edfa",
+      "ph": "X",
+      "ts": 320.064,
+      "dur": 36.544,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_9",
+        "order_index": 310,
+        "key": [
+          "9595e73ff43b",
+          "9c97edfa"
+        ],
+        "us": 36.54399886727333,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 356.608,
+      "dur": 69.344,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_2",
+        "order_index": 311,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 32, 112, 112],torch.bfloat16,[401408, 1, 3584, 32]),T([16, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 69.34399902820587,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "818c3aa59952/e987d149",
+      "ph": "X",
+      "ts": 425.952,
+      "dur": 22.048,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_12",
+        "order_index": 330,
+        "key": [
+          "818c3aa59952",
+          "e987d149"
+        ],
+        "us": 22.048000246286392,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 448.0,
+      "dur": 84.832,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_3",
+        "order_index": 331,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 16, 112, 112],torch.bfloat16,[200704, 1, 1792, 16]),T([96, 16, 1, 1],torch.bfloat16,[16, 1, 16, 16]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 84.83199775218964,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/2e1844e5",
+      "ph": "X",
+      "ts": 532.832,
+      "dur": 118.624,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_17",
+        "order_index": 354,
+        "key": [
+          "9595e73ff43b",
+          "2e1844e5"
+        ],
+        "us": 118.6240017414093,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 651.456,
+      "dur": 87.808,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_4",
+        "order_index": 355,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 96, 112, 112],torch.bfloat16,[1204224, 1, 10752, 96]),T([96, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],96),{})"
+        ],
+        "us": 87.80799806118011,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/d53a7e50",
+      "ph": "X",
+      "ts": 739.264,
+      "dur": 35.648,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_22",
+        "order_index": 378,
+        "key": [
+          "9595e73ff43b",
+          "d53a7e50"
+        ],
+        "us": 35.64799949526787,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 774.912,
+      "dur": 29.728,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_5",
+        "order_index": 379,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 96, 56, 56],torch.bfloat16,[301056, 1, 5376, 96]),T([24, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 29.7279991209507,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "818c3aa59952/3350df9a",
+      "ph": "X",
+      "ts": 804.64,
+      "dur": 13.12,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_25",
+        "order_index": 398,
+        "key": [
+          "818c3aa59952",
+          "3350df9a"
+        ],
+        "us": 13.120000250637531,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 817.76,
+      "dur": 54.304,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_6",
+        "order_index": 399,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([144, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 54.30399999022484,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/51719261",
+      "ph": "X",
+      "ts": 872.064,
+      "dur": 48.992,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_30",
+        "order_index": 422,
+        "key": [
+          "9595e73ff43b",
+          "51719261"
+        ],
+        "us": 48.99200052022934,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 921.056,
+      "dur": 75.552,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_7",
+        "order_index": 423,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 144, 56, 56],torch.bfloat16,[451584, 1, 8064, 144]),T([144, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],144),{})"
+        ],
+        "us": 75.55200159549713,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/51719261",
+      "ph": "X",
+      "ts": 996.608,
+      "dur": 48.992,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_35",
+        "order_index": 446,
+        "key": [
+          "9595e73ff43b",
+          "51719261"
+        ],
+        "us": 48.99200052022934,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1045.6,
+      "dur": 35.872,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_8",
+        "order_index": 447,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 144, 56, 56],torch.bfloat16,[451584, 1, 8064, 144]),T([24, 144, 1, 1],torch.bfloat16,[144, 1, 144, 144]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 35.87200120091438,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/02ba49e6",
+      "ph": "X",
+      "ts": 1081.472,
+      "dur": 16.256,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_18",
+        "order_index": 467,
+        "key": [
+          "e6ddc8e897ec",
+          "02ba49e6"
+        ],
+        "us": 16.256000846624374,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1097.728,
+      "dur": 54.304,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_9",
+        "order_index": 468,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([144, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 54.30399999022484,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/51719261",
+      "ph": "X",
+      "ts": 1152.032,
+      "dur": 48.992,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_43",
+        "order_index": 491,
+        "key": [
+          "9595e73ff43b",
+          "51719261"
+        ],
+        "us": 48.99200052022934,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1201.024,
+      "dur": 42.72,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_10",
+        "order_index": 492,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 144, 56, 56],torch.bfloat16,[451584, 1, 8064, 144]),T([144, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],144),{})"
+        ],
+        "us": 42.7200011909008,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/ebe204a7",
+      "ph": "X",
+      "ts": 1243.744,
+      "dur": 17.376,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_48",
+        "order_index": 515,
+        "key": [
+          "9595e73ff43b",
+          "ebe204a7"
+        ],
+        "us": 17.376000061631203,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1261.12,
+      "dur": 14.016,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_11",
+        "order_index": 516,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 144, 28, 28],torch.bfloat16,[112896, 1, 4032, 144]),T([32, 144, 1, 1],torch.bfloat16,[144, 1, 144, 144]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 14.015999622642994,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "818c3aa59952/3ddafcba",
+      "ph": "X",
+      "ts": 1275.136,
+      "dur": 9.024,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_51",
+        "order_index": 535,
+        "key": [
+          "818c3aa59952",
+          "3ddafcba"
+        ],
+        "us": 9.02399979531765,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1284.16,
+      "dur": 16.192,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_12",
+        "order_index": 536,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 32, 28, 28],torch.bfloat16,[25088, 1, 896, 32]),T([192, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 16.1920003592968,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/ba8126d9",
+      "ph": "X",
+      "ts": 1300.352,
+      "dur": 21.408,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_56",
+        "order_index": 559,
+        "key": [
+          "9595e73ff43b",
+          "ba8126d9"
+        ],
+        "us": 21.407999098300934,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1321.76,
+      "dur": 33.376,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_13",
+        "order_index": 560,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([192, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],192),{})"
+        ],
+        "us": 33.376000821590424,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/ba8126d9",
+      "ph": "X",
+      "ts": 1355.136,
+      "dur": 21.408,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_61",
+        "order_index": 583,
+        "key": [
+          "9595e73ff43b",
+          "ba8126d9"
+        ],
+        "us": 21.407999098300934,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1376.544,
+      "dur": 15.136,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_14",
+        "order_index": 584,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([32, 192, 1, 1],torch.bfloat16,[192, 1, 192, 192]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 15.135999768972397,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/2cdd53e8",
+      "ph": "X",
+      "ts": 1391.68,
+      "dur": 9.728,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_31",
+        "order_index": 604,
+        "key": [
+          "e6ddc8e897ec",
+          "2cdd53e8"
+        ],
+        "us": 9.727999567985535,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1401.408,
+      "dur": 16.192,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_15",
+        "order_index": 605,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 32, 28, 28],torch.bfloat16,[25088, 1, 896, 32]),T([192, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 16.1920003592968,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/ba8126d9",
+      "ph": "X",
+      "ts": 1417.6,
+      "dur": 21.408,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_69",
+        "order_index": 628,
+        "key": [
+          "9595e73ff43b",
+          "ba8126d9"
+        ],
+        "us": 21.407999098300934,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1439.008,
+      "dur": 33.376,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_16",
+        "order_index": 629,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([192, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],192),{})"
+        ],
+        "us": 33.376000821590424,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/ba8126d9",
+      "ph": "X",
+      "ts": 1472.384,
+      "dur": 21.408,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_74",
+        "order_index": 652,
+        "key": [
+          "9595e73ff43b",
+          "ba8126d9"
+        ],
+        "us": 21.407999098300934,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1493.792,
+      "dur": 15.136,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_17",
+        "order_index": 653,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([32, 192, 1, 1],torch.bfloat16,[192, 1, 192, 192]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 15.135999768972397,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/2cdd53e8",
+      "ph": "X",
+      "ts": 1508.928,
+      "dur": 9.728,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_38",
+        "order_index": 673,
+        "key": [
+          "e6ddc8e897ec",
+          "2cdd53e8"
+        ],
+        "us": 9.727999567985535,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1518.656,
+      "dur": 16.192,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_18",
+        "order_index": 674,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 32, 28, 28],torch.bfloat16,[25088, 1, 896, 32]),T([192, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 16.1920003592968,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/ba8126d9",
+      "ph": "X",
+      "ts": 1534.848,
+      "dur": 21.408,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_82",
+        "order_index": 697,
+        "key": [
+          "9595e73ff43b",
+          "ba8126d9"
+        ],
+        "us": 21.407999098300934,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1556.256,
+      "dur": 21.536,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_19",
+        "order_index": 698,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([192, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],192),{})"
+        ],
+        "us": 21.536000072956085,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/1ee4ce98",
+      "ph": "X",
+      "ts": 1577.792,
+      "dur": 9.856,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_87",
+        "order_index": 721,
+        "key": [
+          "9595e73ff43b",
+          "1ee4ce98"
+        ],
+        "us": 9.855999611318111,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1587.648,
+      "dur": 9.696,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_20",
+        "order_index": 722,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 192, 14, 14],torch.bfloat16,[37632, 1, 2688, 192]),T([64, 192, 1, 1],torch.bfloat16,[192, 1, 192, 192]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 9.696000255644321,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "818c3aa59952/ecb9a0d7",
+      "ph": "X",
+      "ts": 1597.344,
+      "dur": 7.776,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_90",
+        "order_index": 741,
+        "key": [
+          "818c3aa59952",
+          "ecb9a0d7"
+        ],
+        "us": 7.7760000713169575,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1605.12,
+      "dur": 11.104,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_21",
+        "order_index": 742,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 64, 14, 14],torch.bfloat16,[12544, 1, 896, 64]),T([384, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 11.103999800980091,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/54640677",
+      "ph": "X",
+      "ts": 1616.224,
+      "dur": 13.856,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_95",
+        "order_index": 765,
+        "key": [
+          "9595e73ff43b",
+          "54640677"
+        ],
+        "us": 13.856000266969204,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1630.08,
+      "dur": 21.28,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_22",
+        "order_index": 766,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([384, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],384),{})"
+        ],
+        "us": 21.27999998629093,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/54640677",
+      "ph": "X",
+      "ts": 1651.36,
+      "dur": 13.856,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_100",
+        "order_index": 789,
+        "key": [
+          "9595e73ff43b",
+          "54640677"
+        ],
+        "us": 13.856000266969204,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1665.216,
+      "dur": 11.776,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_23",
+        "order_index": 790,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([64, 384, 1, 1],torch.bfloat16,[384, 1, 384, 384]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 11.776000261306763,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/dee7c6c7",
+      "ph": "X",
+      "ts": 1676.992,
+      "dur": 7.968,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_51",
+        "order_index": 810,
+        "key": [
+          "e6ddc8e897ec",
+          "dee7c6c7"
+        ],
+        "us": 7.968000136315823,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1684.96,
+      "dur": 11.104,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_24",
+        "order_index": 811,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 64, 14, 14],torch.bfloat16,[12544, 1, 896, 64]),T([384, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 11.103999800980091,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/54640677",
+      "ph": "X",
+      "ts": 1696.064,
+      "dur": 13.856,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_108",
+        "order_index": 834,
+        "key": [
+          "9595e73ff43b",
+          "54640677"
+        ],
+        "us": 13.856000266969204,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1709.92,
+      "dur": 21.28,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_25",
+        "order_index": 835,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([384, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],384),{})"
+        ],
+        "us": 21.27999998629093,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/54640677",
+      "ph": "X",
+      "ts": 1731.2,
+      "dur": 13.856,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_113",
+        "order_index": 858,
+        "key": [
+          "9595e73ff43b",
+          "54640677"
+        ],
+        "us": 13.856000266969204,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1745.056,
+      "dur": 11.776,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_26",
+        "order_index": 859,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([64, 384, 1, 1],torch.bfloat16,[384, 1, 384, 384]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 11.776000261306763,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/dee7c6c7",
+      "ph": "X",
+      "ts": 1756.832,
+      "dur": 7.968,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_58",
+        "order_index": 879,
+        "key": [
+          "e6ddc8e897ec",
+          "dee7c6c7"
+        ],
+        "us": 7.968000136315823,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1764.8,
+      "dur": 11.104,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_27",
+        "order_index": 880,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 64, 14, 14],torch.bfloat16,[12544, 1, 896, 64]),T([384, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 11.103999800980091,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/54640677",
+      "ph": "X",
+      "ts": 1775.904,
+      "dur": 13.856,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_121",
+        "order_index": 903,
+        "key": [
+          "9595e73ff43b",
+          "54640677"
+        ],
+        "us": 13.856000266969204,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1789.76,
+      "dur": 21.28,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_28",
+        "order_index": 904,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([384, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],384),{})"
+        ],
+        "us": 21.27999998629093,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/54640677",
+      "ph": "X",
+      "ts": 1811.04,
+      "dur": 13.856,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_126",
+        "order_index": 927,
+        "key": [
+          "9595e73ff43b",
+          "54640677"
+        ],
+        "us": 13.856000266969204,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1824.896,
+      "dur": 11.776,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_29",
+        "order_index": 928,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([64, 384, 1, 1],torch.bfloat16,[384, 1, 384, 384]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 11.776000261306763,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/dee7c6c7",
+      "ph": "X",
+      "ts": 1836.672,
+      "dur": 7.968,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_65",
+        "order_index": 948,
+        "key": [
+          "e6ddc8e897ec",
+          "dee7c6c7"
+        ],
+        "us": 7.968000136315823,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1844.64,
+      "dur": 11.104,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_30",
+        "order_index": 949,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 64, 14, 14],torch.bfloat16,[12544, 1, 896, 64]),T([384, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 11.103999800980091,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/54640677",
+      "ph": "X",
+      "ts": 1855.744,
+      "dur": 13.856,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_134",
+        "order_index": 972,
+        "key": [
+          "9595e73ff43b",
+          "54640677"
+        ],
+        "us": 13.856000266969204,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1869.6,
+      "dur": 21.28,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_31",
+        "order_index": 973,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([384, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],384),{})"
+        ],
+        "us": 21.27999998629093,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/54640677",
+      "ph": "X",
+      "ts": 1890.88,
+      "dur": 13.856,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_139",
+        "order_index": 996,
+        "key": [
+          "9595e73ff43b",
+          "54640677"
+        ],
+        "us": 13.856000266969204,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1904.736,
+      "dur": 12.0,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_32",
+        "order_index": 997,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([96, 384, 1, 1],torch.bfloat16,[384, 1, 384, 384]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 12.000000104308128,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "818c3aa59952/c68fd75d",
+      "ph": "X",
+      "ts": 1916.736,
+      "dur": 7.84,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_142",
+        "order_index": 1016,
+        "key": [
+          "818c3aa59952",
+          "c68fd75d"
+        ],
+        "us": 7.840000092983246,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1924.576,
+      "dur": 14.048,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_33",
+        "order_index": 1017,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 96, 14, 14],torch.bfloat16,[18816, 1, 1344, 96]),T([576, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 14.047999866306782,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/2cf7960f",
+      "ph": "X",
+      "ts": 1938.624,
+      "dur": 17.248,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_147",
+        "order_index": 1040,
+        "key": [
+          "9595e73ff43b",
+          "2cf7960f"
+        ],
+        "us": 17.24799908697605,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1955.872,
+      "dur": 26.496,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_34",
+        "order_index": 1041,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([576, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],576),{})"
+        ],
+        "us": 26.496000587940216,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/2cf7960f",
+      "ph": "X",
+      "ts": 1982.368,
+      "dur": 17.248,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_152",
+        "order_index": 1064,
+        "key": [
+          "9595e73ff43b",
+          "2cf7960f"
+        ],
+        "us": 17.24799908697605,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1999.616,
+      "dur": 13.984,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_35",
+        "order_index": 1065,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([96, 576, 1, 1],torch.bfloat16,[576, 1, 576, 576]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 13.98400031030178,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/cbfa3b6c",
+      "ph": "X",
+      "ts": 2013.6,
+      "dur": 9.152,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_78",
+        "order_index": 1085,
+        "key": [
+          "e6ddc8e897ec",
+          "cbfa3b6c"
+        ],
+        "us": 9.151999838650227,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2022.752,
+      "dur": 14.048,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_36",
+        "order_index": 1086,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 96, 14, 14],torch.bfloat16,[18816, 1, 1344, 96]),T([576, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 14.047999866306782,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/2cf7960f",
+      "ph": "X",
+      "ts": 2036.8,
+      "dur": 17.248,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_160",
+        "order_index": 1109,
+        "key": [
+          "9595e73ff43b",
+          "2cf7960f"
+        ],
+        "us": 17.24799908697605,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2054.048,
+      "dur": 26.496,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_37",
+        "order_index": 1110,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([576, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],576),{})"
+        ],
+        "us": 26.496000587940216,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/2cf7960f",
+      "ph": "X",
+      "ts": 2080.544,
+      "dur": 17.248,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_165",
+        "order_index": 1133,
+        "key": [
+          "9595e73ff43b",
+          "2cf7960f"
+        ],
+        "us": 17.24799908697605,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2097.792,
+      "dur": 13.984,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_38",
+        "order_index": 1134,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([96, 576, 1, 1],torch.bfloat16,[576, 1, 576, 576]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 13.98400031030178,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/cbfa3b6c",
+      "ph": "X",
+      "ts": 2111.776,
+      "dur": 9.152,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_85",
+        "order_index": 1154,
+        "key": [
+          "e6ddc8e897ec",
+          "cbfa3b6c"
+        ],
+        "us": 9.151999838650227,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2120.928,
+      "dur": 14.048,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_39",
+        "order_index": 1155,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 96, 14, 14],torch.bfloat16,[18816, 1, 1344, 96]),T([576, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 14.047999866306782,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/2cf7960f",
+      "ph": "X",
+      "ts": 2134.976,
+      "dur": 17.248,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_173",
+        "order_index": 1178,
+        "key": [
+          "9595e73ff43b",
+          "2cf7960f"
+        ],
+        "us": 17.24799908697605,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2152.224,
+      "dur": 16.16,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_40",
+        "order_index": 1179,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([576, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],576),{})"
+        ],
+        "us": 16.16000011563301,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/82cef4c9",
+      "ph": "X",
+      "ts": 2168.384,
+      "dur": 9.728,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_178",
+        "order_index": 1202,
+        "key": [
+          "9595e73ff43b",
+          "82cef4c9"
+        ],
+        "us": 9.727999567985535,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2178.112,
+      "dur": 9.728,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_41",
+        "order_index": 1203,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 576, 7, 7],torch.bfloat16,[28224, 1, 4032, 576]),T([160, 576, 1, 1],torch.bfloat16,[576, 1, 576, 576]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 9.727999567985535,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "818c3aa59952/ef49f65d",
+      "ph": "X",
+      "ts": 2187.84,
+      "dur": 7.008,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_181",
+        "order_index": 1222,
+        "key": [
+          "818c3aa59952",
+          "ef49f65d"
+        ],
+        "us": 7.007999811321497,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2194.848,
+      "dur": 10.176,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_42",
+        "order_index": 1223,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 160, 7, 7],torch.bfloat16,[7840, 1, 1120, 160]),T([960, 160, 1, 1],torch.bfloat16,[160, 1, 160, 160]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 10.17600018531084,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/8a10670c",
+      "ph": "X",
+      "ts": 2205.024,
+      "dur": 11.072,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_186",
+        "order_index": 1246,
+        "key": [
+          "9595e73ff43b",
+          "8a10670c"
+        ],
+        "us": 11.071999557316303,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2216.096,
+      "dur": 18.112,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_43",
+        "order_index": 1247,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([960, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],960),{})"
+        ],
+        "us": 18.112000077962875,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/8a10670c",
+      "ph": "X",
+      "ts": 2234.208,
+      "dur": 11.072,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_191",
+        "order_index": 1270,
+        "key": [
+          "9595e73ff43b",
+          "8a10670c"
+        ],
+        "us": 11.071999557316303,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2245.28,
+      "dur": 11.008,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_44",
+        "order_index": 1271,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([160, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 11.008000001311302,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/1b9786b5",
+      "ph": "X",
+      "ts": 2256.288,
+      "dur": 7.872,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_98",
+        "order_index": 1291,
+        "key": [
+          "e6ddc8e897ec",
+          "1b9786b5"
+        ],
+        "us": 7.872000336647034,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2264.16,
+      "dur": 10.176,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_45",
+        "order_index": 1292,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 160, 7, 7],torch.bfloat16,[7840, 1, 1120, 160]),T([960, 160, 1, 1],torch.bfloat16,[160, 1, 160, 160]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 10.17600018531084,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/8a10670c",
+      "ph": "X",
+      "ts": 2274.336,
+      "dur": 11.072,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_199",
+        "order_index": 1315,
+        "key": [
+          "9595e73ff43b",
+          "8a10670c"
+        ],
+        "us": 11.071999557316303,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2285.408,
+      "dur": 18.112,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_46",
+        "order_index": 1316,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([960, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],960),{})"
+        ],
+        "us": 18.112000077962875,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/8a10670c",
+      "ph": "X",
+      "ts": 2303.52,
+      "dur": 11.072,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_204",
+        "order_index": 1339,
+        "key": [
+          "9595e73ff43b",
+          "8a10670c"
+        ],
+        "us": 11.071999557316303,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2314.592,
+      "dur": 11.008,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_47",
+        "order_index": 1340,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([160, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 11.008000001311302,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "e6ddc8e897ec/1b9786b5",
+      "ph": "X",
+      "ts": 2325.6,
+      "dur": 7.872,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "add_105",
+        "order_index": 1360,
+        "key": [
+          "e6ddc8e897ec",
+          "1b9786b5"
+        ],
+        "us": 7.872000336647034,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2333.472,
+      "dur": 10.176,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_48",
+        "order_index": 1361,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 160, 7, 7],torch.bfloat16,[7840, 1, 1120, 160]),T([960, 160, 1, 1],torch.bfloat16,[160, 1, 160, 160]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 10.17600018531084,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/8a10670c",
+      "ph": "X",
+      "ts": 2343.648,
+      "dur": 11.072,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_212",
+        "order_index": 1384,
+        "key": [
+          "9595e73ff43b",
+          "8a10670c"
+        ],
+        "us": 11.071999557316303,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2354.72,
+      "dur": 18.112,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_49",
+        "order_index": 1385,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([960, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],960),{})"
+        ],
+        "us": 18.112000077962875,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "9595e73ff43b/8a10670c",
+      "ph": "X",
+      "ts": 2372.832,
+      "dur": 11.072,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_217",
+        "order_index": 1408,
+        "key": [
+          "9595e73ff43b",
+          "8a10670c"
+        ],
+        "us": 11.071999557316303,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2383.904,
+      "dur": 12.128,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_50",
+        "order_index": 1409,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([320, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 12.128000147640705,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "818c3aa59952/4c724370",
+      "ph": "X",
+      "ts": 2396.032,
+      "dur": 7.904,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "convert_element_type_220",
+        "order_index": 1428,
+        "key": [
+          "818c3aa59952",
+          "4c724370"
+        ],
+        "us": 7.903999648988247,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 2403.936,
+      "dur": 13.088,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_51",
+        "order_index": 1429,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 320, 7, 7],torch.bfloat16,[15680, 1, 2240, 320]),T([1280, 320, 1, 1],torch.bfloat16,[320, 1, 320, 320]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 13.088000006973743,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "083e5d528a28/af408b42",
+      "ph": "X",
+      "ts": 2417.024,
+      "dur": 12.544,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "view",
+        "order_index": 1455,
+        "key": [
+          "083e5d528a28",
+          "af408b42"
+        ],
+        "us": 12.543999589979649,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.addmm.default",
+      "ph": "X",
+      "ts": 2429.568,
+      "dur": 8.064,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "addmm",
+        "order_index": 1457,
+        "key": [
+          "aten.addmm.default",
+          "((T([1000],torch.bfloat16,[1]),T([128, 1280],torch.bfloat16,[1280, 1]),T([1280, 1000],torch.bfloat16,[1, 1280])),{})"
+        ],
+        "us": 8.063999935984612,
+        "has_real_us": true
+      }
+    }
+  ],
+  "displayTimeUnit": "ns"
+}
