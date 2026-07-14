@@ -43,9 +43,11 @@ equals its compile bar — compile is AT the reference-kernel ceiling.
   (compile marginally beats the oracle; statuses GOOD/AT_FLOOR)
 - Attribution source: `attr_alexnet.json` (in this dir).
 
-### 3. `mobilenetv2_100_oracle_overlay.perfetto.json` — honest all-miss (gate-rejected families)
+### 3. `mobilenetv2_100_UNPRICED_example.perfetto.json` — NOT a showcase (all oracle slices are 0-dur markers)
 
-A finding, not a demo: even after the gap-fill (1,514 priced families),
+Open Longformer or alexnet above to see the overlay working. This file is kept
+only as the honest coverage example: its fusible oracle lane is all
+`[no-oracle]` zero-width markers, because even after the gap-fill (1,514 priced families),
 mobilenetv2_100 inference remains 0-hit — all 52 fusible slices are
 `[no-oracle:FAM_UNPRICED]` 0-dur markers.
 
