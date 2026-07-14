@@ -1480,6 +1480,18 @@ def main():
     parser.add_argument("--peak-memory", action="store_true",
                         help="Record peak GPU memory usage (peak_memory_bytes) for each "
                              "--full-graphs model. Opt-in; off by default.")
+    parser.add_argument("--profile", action="store_true",
+                        help="Export a torch.profiler Chrome trace per --full-graphs model "
+                             "to --profile-dir (viewable in Perfetto / chrome://tracing). "
+                             "Profiled in a separate run after timing; don't quote a --profile "
+                             "run's timing JSON as a clean timing arm (use a separate non-profile "
+                             "run). Forces 1 worker/GPU. Opt-in; off by default.")
+    parser.add_argument("--profile-dir", type=Path, default=Path("profiles"),
+                        help="Directory root for --profile traces (mirrors the "
+                             "repros/models/<suite>/<mode>/<model>/ tree). Default: profiles/")
+    parser.add_argument("--profile-details", action="store_true",
+                        help="Richer --profile traces: record_shapes/profile_memory/"
+                             "with_stack/with_modules (bigger files, more overhead).")
     parser.add_argument("--tag", default=None,
                         help="Tag for this run (e.g. 'baseline', 'my_fix'). Used to key results in perf.json for comparison.")
     parser.add_argument("--compare", type=str, nargs=2, metavar=("TAG_A", "TAG_B"),
@@ -1664,8 +1676,8 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
 
-    if args.peak_memory:
-        # --peak-memory: 1 worker per GPU.
+    if args.peak_memory or args.profile:
+        # --peak-memory / --profile: 1 worker per GPU.
         workers_per_gpu = 1
         n_workers = min(n_workers, len(gpus))
 
@@ -1714,6 +1726,10 @@ def main():
         "workload_kind": workload_kind,
         "compile_time": args.compile_time,
         "peak_memory": args.peak_memory,
+        "profile": args.profile,
+        "profile_dir": str(args.profile_dir),
+        "profile_details": args.profile_details,
+        "tag": args.tag or "latest",
     }
 
     if args.oracles:
@@ -2390,6 +2406,10 @@ from torch._inductor.utils import fresh_cache
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 WORKLOAD_KIND = {args_dict.get("workload_kind", "repro")!r}
+PROFILE = {args_dict.get("profile", False)}
+PROFILE_DIR = {args_dict.get("profile_dir", "profiles")!r}
+PROFILE_DETAILS = {args_dict.get("profile_details", False)}
+TAG = {args_dict.get("tag", "latest")!r}
 
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
@@ -2751,6 +2771,34 @@ def bench_full_graph_one(repro_path):
     compiled_us = min(default_times)
     cd_us = min(cd_times) if cd_times else None
 
+    # Opt-in: torch.profiler trace (separate run).
+    profile_trace = None
+    if PROFILE:
+        try:
+            from torch.profiler import profile as _tprof, ProfilerActivity
+            _prof_kw = dict(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA])
+            if PROFILE_DETAILS:
+                _prof_kw.update(record_shapes=True, profile_memory=True,
+                                with_stack=True, with_modules=True)
+            with gpu_setup_lock():
+                with torch.no_grad():
+                    for _ in range(3):
+                        compiled(*inputs)
+                    torch.cuda.synchronize()
+                    with _tprof(**_prof_kw) as _prof:
+                        for _ in range(3 if PROFILE_DETAILS else 10):
+                            compiled(*inputs)
+                        torch.cuda.synchronize()
+            _rel = os.path.relpath(repro_path, os.path.join({args_dict["root"]!r}, "repros", "models"))
+            if _rel.startswith(".."):
+                _rel = os.path.relpath(os.path.abspath(repro_path), os.sep)
+            profile_trace = os.path.join(PROFILE_DIR, TAG, os.path.splitext(_rel)[0] + ".json")
+            os.makedirs(os.path.dirname(profile_trace) or ".", exist_ok=True)
+            _prof.export_chrome_trace(profile_trace)
+        except Exception as _pe:
+            print(f"WARNING: --profile failed for {{repro_path}}: {{_pe}}", file=sys.stderr)
+            profile_trace = None
+
     result = {{
         "__graph__": result_metadata(_definition),
         "default": {{
@@ -2770,6 +2818,8 @@ def bench_full_graph_one(repro_path):
         result["default"]["compile_time_s"] = compile_time_s
     if {args_dict.get("peak_memory", False)}:
         result["default"]["peak_memory_bytes"] = peak_memory_bytes
+    if PROFILE:
+        result["default"]["profile_trace"] = profile_trace
     return result
 
 def bench_one(repro_path):
