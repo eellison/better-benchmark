@@ -30,7 +30,7 @@
 | # | Commit | Unit | Feature | kernel Δ | model Δ | Gate required |
 |---|--------|------|---------|---------:|--------:|---------------|
 | 6 | `d8e9914094a` | U11 | diagonal_skew (Longformer) | +0.18pp | +0.03pp | **R3 patch** (validated). Without it: Longformer −9.4% (the #1 model). |
-| 7 | `905450a5a5d`+chain | U25 | inline_recomputable_producers | +0.29pp (span) | +0.20pp (span) | **R1 patch** — but R1 may only cover the unet stencil case, NOT the XLNet/XGLM/GPTNeo nk1→1 regressions (ablation: net-NEG 0.9826). **OPEN: R1-covers-transformers check** before landing. |
+| 7 | `905450a5a5d`+chain | U25 | inline_recomputable_producers | +0.29pp (span) | +0.20pp (span) | **REWORK — R1 is NOT sufficient (RESOLVED 2026-07-14).** Measured: R1 fixes ONLY the unet stencil class (737→217us, 3.4x) and preserves the Longformer win, but class-B transformer regressions (XLNet/XGLM/GPTNeo, 1.33-1.43x vs pass-off) are BYTE-IDENTICAL codegen under R1 — its extra_loads term is mechanically 0 for stencil_reads=1 inlines. Needs two additional cost-model terms: (1) split memory_saved across multi-consumers, (2) price producer re-loads per r0 pass when inlining flips a persistent reduction to looped. Handoff: /tmp/scratch_space/r1_transformer_check/VERDICT.json. Do NOT land U25 with R1 alone. |
 
 ## TIER 3 — BUNDLE (real but sub-floor; ship inside a family PR, never headline)
 
@@ -64,4 +64,4 @@ These can't be flag-ablated; their isolated impact is UNMEASURED. The mega's mod
 ---
 
 ### One-line summary
-**Land rsqrt (≈half the model win) + 4 clean Tier-1 PRs (CE-hoist, online-softmax, scalar_acc, U10), then 2 gated PRs (diagonal-skew+R3, inline+R1).** Tier-3 bundles ride along inside family PRs. Drop the 7 net-neg/dead/reverted items. The 3 no-flag mega units need selective-revert arms if you want their contribution proven rather than assumed.
+**Land rsqrt (≈half the model win) + 4 clean Tier-1 PRs (CE-hoist, online-softmax, scalar_acc, U10) + U30 MOR-finalize, then 1 gated PR (diagonal-skew+R3).** Inline (U25) moved to REWORK — the R1-covers-transformers check (2026-07-14) proved R1 fixes only the stencil class; U25 needs two more cost-model terms before it's landable. Tier-3 bundles ride along inside family PRs. Drop the 7 net-neg/dead/reverted items. (U30/U31/U33 were resolved by selective-revert: U30 lands, U31 drops, U33 is separate commits — see A2 §7.)
