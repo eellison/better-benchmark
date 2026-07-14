@@ -1343,10 +1343,10 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
     import torch
     import torch._dynamo
     import torch._inductor.config as inductor_config
-    from triton.testing import do_bench
     import importlib.util
     import math
     from byte_accounting import count_bytes_effective
+    from repro_harness import timed_min_us
 
     def load_and_bench(repro_path: str, all_shapes: bool, no_cd: bool,
                        n_warmup: int, n_rep: int) -> dict:
@@ -1394,27 +1394,27 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             copy_elems = max(total_bytes // (2 * 4), 256)
             src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
             dst = torch.empty_like(src)
-            sol_us = do_bench(
+            sol_us = timed_min_us(
                 lambda: torch.add(src, 1, out=dst),
                 warmup=n_warmup,
                 rep=n_rep,
-                return_mode="min",
-            ) * 1000
+                use_cudagraph=False,
+            )
             del src, dst
 
-            # Compiled
+            # Compiled (no CUDAGraph in this legacy path — direct calls)
             torch._dynamo.reset()
             compiled = torch.compile(instance)
             with torch.no_grad():
                 for _ in range(3):
                     compiled(*inputs)
                 torch.cuda.synchronize()
-            compiled_us = do_bench(
+            compiled_us = timed_min_us(
                 lambda: compiled(*inputs),
                 warmup=n_warmup,
                 rep=n_rep,
-                return_mode="min",
-            ) * 1000
+                use_cudagraph=False,
+            )
 
             # Coord descent
             cd_us = None
@@ -1426,12 +1426,12 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
                     for _ in range(3):
                         compiled_cd(*inputs)
                     torch.cuda.synchronize()
-                cd_us = do_bench(
+                cd_us = timed_min_us(
                     lambda: compiled_cd(*inputs),
                     warmup=n_warmup,
                     rep=n_rep,
-                    return_mode="min",
-                ) * 1000
+                    use_cudagraph=False,
+                )
                 inductor_config.coordinate_descent_tuning = False
 
             results[label] = {
@@ -2433,6 +2433,15 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     to detect and recover from stdout pipeline misalignment (e.g., if a
     prefetch thread or module import prints to stdout, shifting the result
     stream).
+
+    NOTE on timing: the generated script's do_bench calls (inside this
+    string template) deliberately do NOT go through
+    repro_harness.timed_min_us — the worker interleaves capture / lock
+    upgrade / timing under its own shared/exclusive lock protocol
+    (gpu_setup_lock / gpu_bench_lock via INDUCTOR_GPU_BENCH_LOCK), and the
+    same recipe (do_bench return_mode='min' * 1000) is inlined to keep the
+    worker protocol self-contained. Keep it byte-equivalent to
+    timed_min_us(..., use_cudagraph=False, lock=None).
     """
     return f'''
 import builtins, contextlib, fcntl, io, re, sys, json, os, tempfile, threading, time
@@ -3006,7 +3015,15 @@ for line in sys.stdin:
 
 
 def _worker_script(repro_path: str, gpu_idx: str, args_dict: dict) -> str:
-    """Generate a self-contained benchmark script for one repro."""
+    """Generate a self-contained benchmark script for one repro.
+
+    NOTE on timing: like _persistent_worker_script, the do_bench calls here
+    live inside a generated-source string and stay inlined (not routed
+    through repro_harness.timed_min_us) to keep the one-shot script
+    self-contained; the recipe must stay byte-equivalent to
+    timed_min_us(..., use_cudagraph=False, lock=None) under the worker's
+    own lock protocol.
+    """
     return f'''
 import sys, json, os
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"

@@ -1130,8 +1130,6 @@ def bench_oracle(
         return _bench_oracle_cpu(oracle_forward, instance, inputs, repro_id,
                                  warmup=warmup, rep=rep)
 
-    from triton.testing import do_bench
-
     # --- Compile with coordinate_descent + capture CUDAGraph (MANDATORY) ---
     import torch._inductor.config as cfg
     cfg.coordinate_descent_tuning = True
@@ -1549,10 +1547,16 @@ def _anchored_numerics_gate(
 
 
 def _time_graph(graph, warmup, rep):
-    """Time a CUDAGraph replay. Returns microseconds."""
-    from triton.testing import do_bench
-    ms = do_bench(lambda: graph.replay(), warmup=warmup, rep=rep, return_mode="min")
-    return ms * 1000.0
+    """Time a CUDAGraph replay. Returns microseconds.
+
+    Thin named wrapper over repro_harness.timed_min_us (the shared timing
+    primitive) — kept as an indirection because callers/tests reference it
+    by name. Lock handling stays with the caller: bench_oracle times inside
+    _gpu_exclusive_lock, so no lock is taken here (lock=None).
+    """
+    from repro_harness import timed_min_us
+    return timed_min_us(lambda: graph.replay(), warmup=warmup, rep=rep,
+                        use_cudagraph=False)
 
 
 # ---------------------------------------------------------------------------
@@ -1721,15 +1725,17 @@ def _do_bench(fn, device: torch.device, warmup: int = 25, rep: int = 200) -> flo
     Uses triton.testing.do_bench if available, otherwise manual timing.
     """
     try:
-        import triton
+        import triton  # noqa: F401
         has_triton = True
     except ImportError:
         has_triton = False
 
     if has_triton and device.type == "cuda":
-        from triton.testing import do_bench
-        # do_bench returns milliseconds; convert to microseconds
-        return do_bench(fn, warmup=warmup, rep=rep, return_mode="min") * 1000.0
+        # Delegate to the shared primitive (raw do_bench min, no CUDAGraph
+        # here — callers time fn directly). Lock handling stays with the
+        # caller (bench paths hold _gpu_exclusive_lock).
+        from repro_harness import timed_min_us
+        return timed_min_us(fn, warmup=warmup, rep=rep, use_cudagraph=False)
 
     # Fallback: manual timing
     for _ in range(warmup):

@@ -111,7 +111,15 @@ def _config_label(spec: str) -> str:
 
 
 def _persistent_compare_worker_script(gpu_idx: str, args_dict: dict) -> str:
-    """Generate the worker subprocess script for N-config comparison."""
+    """Generate the worker subprocess script for N-config comparison.
+
+    NOTE on timing: the do_bench calls live inside this generated-source
+    string and stay inlined (not routed through repro_harness.timed_min_us)
+    because the worker interleaves N configs' timing rounds under ONE
+    exclusive gpu_bench_lock hold — a protocol the shared helper does not
+    model. Keep the inner recipe byte-equivalent to
+    timed_min_us(..., use_cudagraph=False, lock=None).
+    """
     configs_list = [_parse_config_spec(spec) for spec in args_dict["configs"]]
     configs_json = json.dumps(configs_list)
     labels_json = json.dumps(args_dict["labels"])

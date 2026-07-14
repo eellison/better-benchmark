@@ -61,11 +61,10 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import torch
 import torch.fx as fx
-from triton.testing import do_bench
 
 from model_graph_accounting import analyze_graph, trace_full_graph
 from full_graph_harness import load_full_graph
-from repro_harness import parse_shapes_config
+from repro_harness import parse_shapes_config, timed_min_us
 
 N_WARMUP = 10
 N_REP = 50
@@ -93,8 +92,8 @@ def measure_graph_launch_floor() -> tuple[float, float]:
             for _ in range(k):
                 x.add_(1.0)
         torch.cuda.synchronize()
-        ts.append(do_bench(lambda: g.replay(), warmup=25, rep=100,
-                           return_mode="min") * 1000)
+        ts.append(timed_min_us(lambda: g.replay(), warmup=25, rep=100,
+                               use_cudagraph=False))
     n = len(ks)
     mk = sum(ks) / n
     mt = sum(ts) / n
@@ -108,17 +107,15 @@ def measure_graph_launch_floor() -> tuple[float, float]:
 # ============================================================================
 
 def _bench_replay(fn) -> float:
-    """CUDAGraph-capture fn() and return min replay time in us."""
-    with torch.no_grad():
-        for _ in range(3):
-            fn()
-        torch.cuda.synchronize()
-        g = torch.cuda.CUDAGraph()
-        with torch.cuda.graph(g):
-            fn()
-        torch.cuda.synchronize()
-    return do_bench(lambda: g.replay(), warmup=N_WARMUP, rep=N_REP,
-                    return_mode="min") * 1000
+    """CUDAGraph-capture fn() and return min replay time in us.
+
+    Delegates to repro_harness.timed_min_us (the shared primitive). Lock
+    handling is unchanged from before the consolidation (lock=None here):
+    extern/e2e timing runs in child subprocesses launched with
+    INDUCTOR_GPU_BENCH_LOCK=1 (see the *_isolated helpers); fusible-point
+    timing runs in the driving process.
+    """
+    return timed_min_us(fn, warmup=N_WARMUP, rep=N_REP)
 
 
 # ============================================================================

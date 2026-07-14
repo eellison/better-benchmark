@@ -51,17 +51,19 @@ try:
 
     # Benchmark UNDER THE GPU LOCK. Running one repro per process is NOT enough
     # to get a clean number: a co-tenant kernel from any other process on this
-    # GPU inflates the timing window. The lock (advisory flock per GPU) is what
-    # actually serializes the timed region. (See tests/test_no_unlocked_timing.py.)
-    from gpu_lock import gpu_lock
-    from triton.testing import do_bench
+    # GPU inflates the timing window. The lock (advisory flock per GPU, via
+    # gpu_lock inside timed_min_us) is what actually serializes the timed
+    # region. (See tests/test_no_unlocked_timing.py.)
+    #
     # Lock logical index 0: the caller (rerun_oom_singles.py) already pins this
     # subprocess to one physical GPU via CUDA_VISIBLE_DEVICES, and CVD remaps that
     # device to logical index 0 — the same index the caller's lock dir is keyed on.
     # (We can't auto-discover/re-pin via gpu_lock_for_kind here: torch is imported
     # and CUDA is initialized at module top, so the visible device is already fixed.)
-    with gpu_lock(0, label="single_repro_runner"):
-        t_us = do_bench(lambda: g.replay(), warmup=25, rep=200, return_mode='min') * 1000
+    from repro_harness import timed_min_us
+    t_us = timed_min_us(lambda: g.replay(), warmup=25, rep=200,
+                        use_cudagraph=False, lock=0,
+                        lock_label="single_repro_runner")
     print(json.dumps({"status": "ok", "time_us": t_us, "compile_time_s": compile_time}))
 except Exception as e:
     traceback.print_exc(file=sys.stderr)

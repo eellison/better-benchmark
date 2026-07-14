@@ -704,26 +704,79 @@ def _detect_hardware() -> str:
         return "unknown"
 
 
-def _bench_cudagraph_min_us(call_fn, inputs, n_warmup: int, n_rep: int) -> float:
-    """Warm up, capture one CUDAGraph of call_fn(*inputs), and time replay.
+def timed_min_us(fn, *, warmup: int = 25, rep: int = 200,
+                 use_cudagraph: bool = True, lock=None,
+                 lock_label: str = "timed_min_us") -> float:
+    """THE shared GPU timing primitive. Returns microseconds (min-of-rep).
 
-    This is THE timing methodology for repros (3 warmup calls, CUDAGraph
-    capture, do_bench return_mode='min') — both the static path and the
-    --dynamic path go through here so their numbers are comparable.
+    Canonical recipe: optionally warm up (3 no_grad calls), capture ``fn``
+    into one CUDAGraph and time its replay; always
+    ``triton.testing.do_bench(..., return_mode='min')`` times 1000. Every
+    in-process timing path (repro benchmarks, oracle floors, attribution,
+    A/B compare workers) funnels through this so numbers stay comparable —
+    do NOT hand-roll new do_bench wrappers (see
+    tests/test_no_unlocked_timing.py).
+
+    Args:
+        fn: zero-arg callable to time (already device-ready).
+        use_cudagraph: True (default) — warm up fn 3x under no_grad, capture
+            one CUDAGraph, and time replay. False — time fn() directly
+            (e.g. fn already replays a captured graph, or graph capture is
+            deliberately not used, as for the memcopy-SOL reference).
+        lock: how the exclusive per-GPU benchmark lock is handled:
+            - None: no lock handling HERE — the caller manages it (e.g.
+              benchmark_repro wraps the whole run in gpu_lock /
+              gpu_lock_for_kind; bench_oracle times inside
+              _gpu_exclusive_lock). The timed region MUST still be covered
+              by a caller-held lock.
+            - 'held': assert the locked-worker env flag
+              (INDUCTOR_GPU_BENCH_LOCK / TORCHINDUCTOR_GPU_BENCH_LOCK) is
+              set, as bench_parallel workers do; raise if not.
+            - int/str GPU index: acquire scripts/gpu_lock.gpu_lock(index,
+              label=lock_label) around the timed region only.
     """
     from triton.testing import do_bench
 
-    with torch.no_grad():
-        for _ in range(3):
-            call_fn(*inputs)
-        torch.cuda.synchronize()
-        g = torch.cuda.CUDAGraph()
-        with torch.cuda.graph(g):
-            call_fn(*inputs)
-        torch.cuda.synchronize()
-    ms = do_bench(lambda: g.replay(), warmup=n_warmup, rep=n_rep,
-                  return_mode="min")
-    return ms * 1000
+    if use_cudagraph:
+        with torch.no_grad():
+            for _ in range(3):
+                fn()
+            torch.cuda.synchronize()
+            g = torch.cuda.CUDAGraph()
+            with torch.cuda.graph(g):
+                fn()
+            torch.cuda.synchronize()
+        target = lambda: g.replay()  # noqa: E731
+    else:
+        target = fn
+
+    def _measure():
+        return do_bench(target, warmup=warmup, rep=rep,
+                        return_mode="min") * 1000.0
+
+    if lock is None:
+        return _measure()
+    if lock == "held":
+        held = any(
+            os.environ.get(v, "").strip().lower() in ("1", "true", "yes", "on")
+            for v in ("INDUCTOR_GPU_BENCH_LOCK", "TORCHINDUCTOR_GPU_BENCH_LOCK")
+        )
+        if not held:
+            raise RuntimeError(
+                "timed_min_us(lock='held'): INDUCTOR_GPU_BENCH_LOCK is not "
+                "set — this process is not a locked benchmark worker. An "
+                "unlocked timing window is INVALID; acquire gpu_lock or run "
+                "under bench_parallel."
+            )
+        return _measure()
+    # int/str GPU index: acquire the exclusive per-GPU lock for the timed
+    # region. gpu_lock.py lives in scripts/, which may not be on sys.path.
+    scripts_dir = str(Path(__file__).resolve().parent / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    from gpu_lock import gpu_lock
+    with gpu_lock(lock, label=lock_label):
+        return _measure()
 
 
 def _unique_graph_count() -> int:
@@ -784,12 +837,14 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             n_kernels, kernel_names = count_kernels(mod, inputs)
             torch._dynamo.reset()
             compiled_static = torch.compile(mod)
-            compiled_us = _bench_cudagraph_min_us(
-                compiled_static, inputs, parsed.n_warmup, parsed.n_rep)
+            compiled_us = timed_min_us(
+                lambda: compiled_static(*inputs),
+                warmup=parsed.n_warmup, rep=parsed.n_rep)
             recompiled = None  # fresh compile per row by design
         else:
-            compiled_us = _bench_cudagraph_min_us(
-                compiled, inputs, parsed.n_warmup, parsed.n_rep)
+            compiled_us = timed_min_us(
+                lambda: compiled(*inputs),
+                warmup=parsed.n_warmup, rep=parsed.n_rep)
             graphs_after = _unique_graph_count()
             is_first_row = not any(
                 r.get("mode") == "dynamic" for r in all_results.values())
@@ -837,8 +892,6 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
     Supports --shape, --all-shapes, --hardware, --no-cd, --output,
     --count-kernels-only, --update-perf, --gpu, --device-kind.
     """
-    from triton.testing import do_bench
-
     parser = argparse.ArgumentParser(description="Benchmark canonical repro")
     parser.add_argument("--shape", type=str, default=None,
                         help="Named shape config from shapes.json")
@@ -949,27 +1002,21 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                 }
                 continue
 
-            # SOL: memcopy same total bytes
+            # SOL: memcopy same total bytes (raw do_bench, no CUDAGraph)
             copy_elems = max(total_bytes // (2 * 4), 256)
             src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
             dst = torch.empty_like(src)
-            sol_ms = do_bench(lambda: torch.add(src, 1, out=dst), warmup=parsed.n_warmup, rep=parsed.n_rep, return_mode="min")
-            sol_us = sol_ms * 1000
+            sol_us = timed_min_us(lambda: torch.add(src, 1, out=dst),
+                                  warmup=parsed.n_warmup, rep=parsed.n_rep,
+                                  use_cudagraph=False)
             del src, dst
 
             # Compiled (default heuristics) with CUDAGraph replay
             torch._dynamo.reset()
             compiled = torch.compile(mod)
-            with torch.no_grad():
-                for _ in range(3):
-                    compiled(*inputs)
-                torch.cuda.synchronize()
-                g = torch.cuda.CUDAGraph()
-                with torch.cuda.graph(g):
-                    compiled(*inputs)
-                torch.cuda.synchronize()
-            compiled_ms = do_bench(lambda: g.replay(), warmup=parsed.n_warmup, rep=parsed.n_rep, return_mode="min")
-            compiled_us = compiled_ms * 1000
+            compiled_us = timed_min_us(lambda: compiled(*inputs),
+                                       warmup=parsed.n_warmup,
+                                       rep=parsed.n_rep)
 
             # Compiled with coordinate descent tuning
             cd_us = None
@@ -977,16 +1024,9 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                 inductor_config.coordinate_descent_tuning = True
                 torch._dynamo.reset()
                 compiled_cd = torch.compile(mod)
-                with torch.no_grad():
-                    for _ in range(3):
-                        compiled_cd(*inputs)
-                    torch.cuda.synchronize()
-                    g_cd = torch.cuda.CUDAGraph()
-                    with torch.cuda.graph(g_cd):
-                        compiled_cd(*inputs)
-                    torch.cuda.synchronize()
-                cd_ms = do_bench(lambda: g_cd.replay(), warmup=parsed.n_warmup, rep=parsed.n_rep, return_mode="min")
-                cd_us = cd_ms * 1000
+                cd_us = timed_min_us(lambda: compiled_cd(*inputs),
+                                     warmup=parsed.n_warmup,
+                                     rep=parsed.n_rep)
                 inductor_config.coordinate_descent_tuning = False
 
             print(f"\n[{label}] Kernel data: {total_bytes / 1024:.1f} KB (read+write)")
