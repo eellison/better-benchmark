@@ -1,0 +1,1289 @@
+{
+  "_launch_floor_us": 4.92,
+  "_launch_slope_us": 1.058,
+  "_device": "NVIDIA B200",
+  "models": {
+    "mobilenetv2_100": {
+      "e2e_us": 1863.6,
+      "e2e_complete": true,
+      "n_e2e_graphs_ok": 1,
+      "sum_fusible_us": 962.8,
+      "sum_extern_us": 1474.8,
+      "sum_parts_us": 2437.6,
+      "corrected_parts_us": 1926.3,
+      "ratio_raw": 1.308,
+      "ratio_corrected": 1.034,
+      "n_graphs": 1,
+      "n_fusible_occurrences": 52,
+      "n_fusible_points": 24,
+      "n_extern_occurrences": 53,
+      "n_extern_points": 31,
+      "fusible_unmatched": [],
+      "extern_unmatched": [],
+      "extern_bench_failures": [],
+      "e2e_bench_failures": [],
+      "per_node": [
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution",
+          "order_index": 263,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 3, 224, 224],torch.bfloat16,[150528, 1, 672, 3]),T([32, 3, 3, 3],torch.bfloat16,[27, 1, 9, 3]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 216.0319983959198,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_4",
+          "order_index": 286,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "9c97edfa"
+          ],
+          "us": 36.54399886727333,
+          "label": "9595e73ff43b/9c97edfa"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_1",
+          "order_index": 287,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 32, 112, 112],torch.bfloat16,[401408, 1, 3584, 32]),T([32, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],32),{})"
+          ],
+          "us": 67.48799979686737,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_9",
+          "order_index": 310,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "9c97edfa"
+          ],
+          "us": 36.54399886727333,
+          "label": "9595e73ff43b/9c97edfa"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_2",
+          "order_index": 311,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 32, 112, 112],torch.bfloat16,[401408, 1, 3584, 32]),T([16, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 69.34399902820587,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_12",
+          "order_index": 330,
+          "kind": "fusible",
+          "key": [
+            "818c3aa59952",
+            "e987d149"
+          ],
+          "us": 22.048000246286392,
+          "label": "818c3aa59952/e987d149"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_3",
+          "order_index": 331,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 16, 112, 112],torch.bfloat16,[200704, 1, 1792, 16]),T([96, 16, 1, 1],torch.bfloat16,[16, 1, 16, 16]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 84.83199775218964,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_17",
+          "order_index": 354,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "2e1844e5"
+          ],
+          "us": 118.6240017414093,
+          "label": "9595e73ff43b/2e1844e5"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_4",
+          "order_index": 355,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 96, 112, 112],torch.bfloat16,[1204224, 1, 10752, 96]),T([96, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],96),{})"
+          ],
+          "us": 87.80799806118011,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_22",
+          "order_index": 378,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "d53a7e50"
+          ],
+          "us": 35.64799949526787,
+          "label": "9595e73ff43b/d53a7e50"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_5",
+          "order_index": 379,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 96, 56, 56],torch.bfloat16,[301056, 1, 5376, 96]),T([24, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 29.7279991209507,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_25",
+          "order_index": 398,
+          "kind": "fusible",
+          "key": [
+            "818c3aa59952",
+            "3350df9a"
+          ],
+          "us": 13.120000250637531,
+          "label": "818c3aa59952/3350df9a"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_6",
+          "order_index": 399,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([144, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 54.30399999022484,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_30",
+          "order_index": 422,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "51719261"
+          ],
+          "us": 48.99200052022934,
+          "label": "9595e73ff43b/51719261"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_7",
+          "order_index": 423,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 144, 56, 56],torch.bfloat16,[451584, 1, 8064, 144]),T([144, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],144),{})"
+          ],
+          "us": 75.55200159549713,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_35",
+          "order_index": 446,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "51719261"
+          ],
+          "us": 48.99200052022934,
+          "label": "9595e73ff43b/51719261"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_8",
+          "order_index": 447,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 144, 56, 56],torch.bfloat16,[451584, 1, 8064, 144]),T([24, 144, 1, 1],torch.bfloat16,[144, 1, 144, 144]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 35.87200120091438,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_18",
+          "order_index": 467,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "02ba49e6"
+          ],
+          "us": 16.256000846624374,
+          "label": "e6ddc8e897ec/02ba49e6"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_9",
+          "order_index": 468,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 24, 56, 56],torch.bfloat16,[75264, 1, 1344, 24]),T([144, 24, 1, 1],torch.bfloat16,[24, 1, 24, 24]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 54.30399999022484,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_43",
+          "order_index": 491,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "51719261"
+          ],
+          "us": 48.99200052022934,
+          "label": "9595e73ff43b/51719261"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_10",
+          "order_index": 492,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 144, 56, 56],torch.bfloat16,[451584, 1, 8064, 144]),T([144, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],144),{})"
+          ],
+          "us": 42.7200011909008,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_48",
+          "order_index": 515,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "ebe204a7"
+          ],
+          "us": 17.376000061631203,
+          "label": "9595e73ff43b/ebe204a7"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_11",
+          "order_index": 516,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 144, 28, 28],torch.bfloat16,[112896, 1, 4032, 144]),T([32, 144, 1, 1],torch.bfloat16,[144, 1, 144, 144]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 14.015999622642994,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_51",
+          "order_index": 535,
+          "kind": "fusible",
+          "key": [
+            "818c3aa59952",
+            "3ddafcba"
+          ],
+          "us": 9.02399979531765,
+          "label": "818c3aa59952/3ddafcba"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_12",
+          "order_index": 536,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 32, 28, 28],torch.bfloat16,[25088, 1, 896, 32]),T([192, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 16.1920003592968,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_56",
+          "order_index": 559,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "ba8126d9"
+          ],
+          "us": 21.407999098300934,
+          "label": "9595e73ff43b/ba8126d9"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_13",
+          "order_index": 560,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([192, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],192),{})"
+          ],
+          "us": 33.376000821590424,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_61",
+          "order_index": 583,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "ba8126d9"
+          ],
+          "us": 21.407999098300934,
+          "label": "9595e73ff43b/ba8126d9"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_14",
+          "order_index": 584,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([32, 192, 1, 1],torch.bfloat16,[192, 1, 192, 192]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 15.135999768972397,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_31",
+          "order_index": 604,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "2cdd53e8"
+          ],
+          "us": 9.727999567985535,
+          "label": "e6ddc8e897ec/2cdd53e8"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_15",
+          "order_index": 605,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 32, 28, 28],torch.bfloat16,[25088, 1, 896, 32]),T([192, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 16.1920003592968,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_69",
+          "order_index": 628,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "ba8126d9"
+          ],
+          "us": 21.407999098300934,
+          "label": "9595e73ff43b/ba8126d9"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_16",
+          "order_index": 629,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([192, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],192),{})"
+          ],
+          "us": 33.376000821590424,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_74",
+          "order_index": 652,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "ba8126d9"
+          ],
+          "us": 21.407999098300934,
+          "label": "9595e73ff43b/ba8126d9"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_17",
+          "order_index": 653,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([32, 192, 1, 1],torch.bfloat16,[192, 1, 192, 192]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 15.135999768972397,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_38",
+          "order_index": 673,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "2cdd53e8"
+          ],
+          "us": 9.727999567985535,
+          "label": "e6ddc8e897ec/2cdd53e8"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_18",
+          "order_index": 674,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 32, 28, 28],torch.bfloat16,[25088, 1, 896, 32]),T([192, 32, 1, 1],torch.bfloat16,[32, 1, 32, 32]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 16.1920003592968,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_82",
+          "order_index": 697,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "ba8126d9"
+          ],
+          "us": 21.407999098300934,
+          "label": "9595e73ff43b/ba8126d9"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_19",
+          "order_index": 698,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 192, 28, 28],torch.bfloat16,[150528, 1, 5376, 192]),T([192, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],192),{})"
+          ],
+          "us": 21.536000072956085,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_87",
+          "order_index": 721,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "1ee4ce98"
+          ],
+          "us": 9.855999611318111,
+          "label": "9595e73ff43b/1ee4ce98"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_20",
+          "order_index": 722,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 192, 14, 14],torch.bfloat16,[37632, 1, 2688, 192]),T([64, 192, 1, 1],torch.bfloat16,[192, 1, 192, 192]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 9.696000255644321,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_90",
+          "order_index": 741,
+          "kind": "fusible",
+          "key": [
+            "818c3aa59952",
+            "ecb9a0d7"
+          ],
+          "us": 7.7760000713169575,
+          "label": "818c3aa59952/ecb9a0d7"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_21",
+          "order_index": 742,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 64, 14, 14],torch.bfloat16,[12544, 1, 896, 64]),T([384, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 11.103999800980091,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_95",
+          "order_index": 765,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "54640677"
+          ],
+          "us": 13.856000266969204,
+          "label": "9595e73ff43b/54640677"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_22",
+          "order_index": 766,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([384, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],384),{})"
+          ],
+          "us": 21.27999998629093,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_100",
+          "order_index": 789,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "54640677"
+          ],
+          "us": 13.856000266969204,
+          "label": "9595e73ff43b/54640677"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_23",
+          "order_index": 790,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([64, 384, 1, 1],torch.bfloat16,[384, 1, 384, 384]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 11.776000261306763,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_51",
+          "order_index": 810,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "dee7c6c7"
+          ],
+          "us": 7.968000136315823,
+          "label": "e6ddc8e897ec/dee7c6c7"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_24",
+          "order_index": 811,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 64, 14, 14],torch.bfloat16,[12544, 1, 896, 64]),T([384, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 11.103999800980091,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_108",
+          "order_index": 834,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "54640677"
+          ],
+          "us": 13.856000266969204,
+          "label": "9595e73ff43b/54640677"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_25",
+          "order_index": 835,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([384, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],384),{})"
+          ],
+          "us": 21.27999998629093,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_113",
+          "order_index": 858,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "54640677"
+          ],
+          "us": 13.856000266969204,
+          "label": "9595e73ff43b/54640677"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_26",
+          "order_index": 859,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([64, 384, 1, 1],torch.bfloat16,[384, 1, 384, 384]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 11.776000261306763,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_58",
+          "order_index": 879,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "dee7c6c7"
+          ],
+          "us": 7.968000136315823,
+          "label": "e6ddc8e897ec/dee7c6c7"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_27",
+          "order_index": 880,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 64, 14, 14],torch.bfloat16,[12544, 1, 896, 64]),T([384, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 11.103999800980091,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_121",
+          "order_index": 903,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "54640677"
+          ],
+          "us": 13.856000266969204,
+          "label": "9595e73ff43b/54640677"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_28",
+          "order_index": 904,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([384, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],384),{})"
+          ],
+          "us": 21.27999998629093,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_126",
+          "order_index": 927,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "54640677"
+          ],
+          "us": 13.856000266969204,
+          "label": "9595e73ff43b/54640677"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_29",
+          "order_index": 928,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([64, 384, 1, 1],torch.bfloat16,[384, 1, 384, 384]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 11.776000261306763,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_65",
+          "order_index": 948,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "dee7c6c7"
+          ],
+          "us": 7.968000136315823,
+          "label": "e6ddc8e897ec/dee7c6c7"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_30",
+          "order_index": 949,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 64, 14, 14],torch.bfloat16,[12544, 1, 896, 64]),T([384, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 11.103999800980091,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_134",
+          "order_index": 972,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "54640677"
+          ],
+          "us": 13.856000266969204,
+          "label": "9595e73ff43b/54640677"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_31",
+          "order_index": 973,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([384, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],384),{})"
+          ],
+          "us": 21.27999998629093,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_139",
+          "order_index": 996,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "54640677"
+          ],
+          "us": 13.856000266969204,
+          "label": "9595e73ff43b/54640677"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_32",
+          "order_index": 997,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 384, 14, 14],torch.bfloat16,[75264, 1, 5376, 384]),T([96, 384, 1, 1],torch.bfloat16,[384, 1, 384, 384]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 12.000000104308128,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_142",
+          "order_index": 1016,
+          "kind": "fusible",
+          "key": [
+            "818c3aa59952",
+            "c68fd75d"
+          ],
+          "us": 7.840000092983246,
+          "label": "818c3aa59952/c68fd75d"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_33",
+          "order_index": 1017,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 96, 14, 14],torch.bfloat16,[18816, 1, 1344, 96]),T([576, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 14.047999866306782,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_147",
+          "order_index": 1040,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "2cf7960f"
+          ],
+          "us": 17.24799908697605,
+          "label": "9595e73ff43b/2cf7960f"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_34",
+          "order_index": 1041,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([576, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],576),{})"
+          ],
+          "us": 26.496000587940216,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_152",
+          "order_index": 1064,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "2cf7960f"
+          ],
+          "us": 17.24799908697605,
+          "label": "9595e73ff43b/2cf7960f"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_35",
+          "order_index": 1065,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([96, 576, 1, 1],torch.bfloat16,[576, 1, 576, 576]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 13.98400031030178,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_78",
+          "order_index": 1085,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "cbfa3b6c"
+          ],
+          "us": 9.151999838650227,
+          "label": "e6ddc8e897ec/cbfa3b6c"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_36",
+          "order_index": 1086,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 96, 14, 14],torch.bfloat16,[18816, 1, 1344, 96]),T([576, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 14.047999866306782,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_160",
+          "order_index": 1109,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "2cf7960f"
+          ],
+          "us": 17.24799908697605,
+          "label": "9595e73ff43b/2cf7960f"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_37",
+          "order_index": 1110,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([576, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],576),{})"
+          ],
+          "us": 26.496000587940216,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_165",
+          "order_index": 1133,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "2cf7960f"
+          ],
+          "us": 17.24799908697605,
+          "label": "9595e73ff43b/2cf7960f"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_38",
+          "order_index": 1134,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([96, 576, 1, 1],torch.bfloat16,[576, 1, 576, 576]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 13.98400031030178,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_85",
+          "order_index": 1154,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "cbfa3b6c"
+          ],
+          "us": 9.151999838650227,
+          "label": "e6ddc8e897ec/cbfa3b6c"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_39",
+          "order_index": 1155,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 96, 14, 14],torch.bfloat16,[18816, 1, 1344, 96]),T([576, 96, 1, 1],torch.bfloat16,[96, 1, 96, 96]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 14.047999866306782,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_173",
+          "order_index": 1178,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "2cf7960f"
+          ],
+          "us": 17.24799908697605,
+          "label": "9595e73ff43b/2cf7960f"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_40",
+          "order_index": 1179,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 576, 14, 14],torch.bfloat16,[112896, 1, 8064, 576]),T([576, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],576),{})"
+          ],
+          "us": 16.16000011563301,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_178",
+          "order_index": 1202,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "82cef4c9"
+          ],
+          "us": 9.727999567985535,
+          "label": "9595e73ff43b/82cef4c9"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_41",
+          "order_index": 1203,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 576, 7, 7],torch.bfloat16,[28224, 1, 4032, 576]),T([160, 576, 1, 1],torch.bfloat16,[576, 1, 576, 576]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 9.727999567985535,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_181",
+          "order_index": 1222,
+          "kind": "fusible",
+          "key": [
+            "818c3aa59952",
+            "ef49f65d"
+          ],
+          "us": 7.007999811321497,
+          "label": "818c3aa59952/ef49f65d"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_42",
+          "order_index": 1223,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 160, 7, 7],torch.bfloat16,[7840, 1, 1120, 160]),T([960, 160, 1, 1],torch.bfloat16,[160, 1, 160, 160]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 10.17600018531084,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_186",
+          "order_index": 1246,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "8a10670c"
+          ],
+          "us": 11.071999557316303,
+          "label": "9595e73ff43b/8a10670c"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_43",
+          "order_index": 1247,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([960, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],960),{})"
+          ],
+          "us": 18.112000077962875,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_191",
+          "order_index": 1270,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "8a10670c"
+          ],
+          "us": 11.071999557316303,
+          "label": "9595e73ff43b/8a10670c"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_44",
+          "order_index": 1271,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([160, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 11.008000001311302,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_98",
+          "order_index": 1291,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "1b9786b5"
+          ],
+          "us": 7.872000336647034,
+          "label": "e6ddc8e897ec/1b9786b5"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_45",
+          "order_index": 1292,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 160, 7, 7],torch.bfloat16,[7840, 1, 1120, 160]),T([960, 160, 1, 1],torch.bfloat16,[160, 1, 160, 160]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 10.17600018531084,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_199",
+          "order_index": 1315,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "8a10670c"
+          ],
+          "us": 11.071999557316303,
+          "label": "9595e73ff43b/8a10670c"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_46",
+          "order_index": 1316,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([960, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],960),{})"
+          ],
+          "us": 18.112000077962875,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_204",
+          "order_index": 1339,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "8a10670c"
+          ],
+          "us": 11.071999557316303,
+          "label": "9595e73ff43b/8a10670c"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_47",
+          "order_index": 1340,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([160, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 11.008000001311302,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "add_105",
+          "order_index": 1360,
+          "kind": "fusible",
+          "key": [
+            "e6ddc8e897ec",
+            "1b9786b5"
+          ],
+          "us": 7.872000336647034,
+          "label": "e6ddc8e897ec/1b9786b5"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_48",
+          "order_index": 1361,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 160, 7, 7],torch.bfloat16,[7840, 1, 1120, 160]),T([960, 160, 1, 1],torch.bfloat16,[160, 1, 160, 160]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 10.17600018531084,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_212",
+          "order_index": 1384,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "8a10670c"
+          ],
+          "us": 11.071999557316303,
+          "label": "9595e73ff43b/8a10670c"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_49",
+          "order_index": 1385,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([960, 1, 3, 3],torch.bfloat16,[9, 1, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],960),{})"
+          ],
+          "us": 18.112000077962875,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_217",
+          "order_index": 1408,
+          "kind": "fusible",
+          "key": [
+            "9595e73ff43b",
+            "8a10670c"
+          ],
+          "us": 11.071999557316303,
+          "label": "9595e73ff43b/8a10670c"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_50",
+          "order_index": 1409,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 960, 7, 7],torch.bfloat16,[47040, 1, 6720, 960]),T([320, 960, 1, 1],torch.bfloat16,[960, 1, 960, 960]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 12.128000147640705,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_220",
+          "order_index": 1428,
+          "kind": "fusible",
+          "key": [
+            "818c3aa59952",
+            "4c724370"
+          ],
+          "us": 7.903999648988247,
+          "label": "818c3aa59952/4c724370"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_51",
+          "order_index": 1429,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 320, 7, 7],torch.bfloat16,[15680, 1, 2240, 320]),T([1280, 320, 1, 1],torch.bfloat16,[320, 1, 320, 320]),None,[1,1],[0,0],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 13.088000006973743,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "view",
+          "order_index": 1455,
+          "kind": "fusible",
+          "key": [
+            "083e5d528a28",
+            "af408b42"
+          ],
+          "us": 12.543999589979649,
+          "label": "083e5d528a28/af408b42"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "addmm",
+          "order_index": 1457,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([1000],torch.bfloat16,[1]),T([128, 1280],torch.bfloat16,[1280, 1]),T([1280, 1000],torch.bfloat16,[1, 1280])),{})"
+          ],
+          "us": 8.063999935984612,
+          "label": "aten.addmm.default"
+        }
+      ]
+    }
+  }
+}

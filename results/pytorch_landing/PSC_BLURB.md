@@ -19,9 +19,10 @@ accounting that rolls kernel wins up to end-to-end impact.
   commits (≈ the GPU cost of 1–2 nightly runs); identified that one rsqrt
   canonicalization carries ~half the win, isolated the other landable units,
   and caught several net-negative/dead features before they shipped.
-- **Ceiling analysis:** with oracle coverage now complete over the corpus, the
-  median model sits ~0.6% from the reference-kernel ceiling; remaining headroom
-  is concentrated and named (Longformer 37%).
+- **Ceiling analysis:** with all 1,727 kernel families swept (1,514 with usable
+  floors; 213 gate-rejected), the median model sits ~0.6% from the
+  reference-kernel ceiling; remaining headroom is concentrated and named
+  (Longformer 37%).
 - **Measurement rigor as product:** GPU-locked timing (CI-guarded), automatic
   clock pinning, measured noise floors (±0.82% model / ~0.2% kernel geomean),
   and a numerics gate + source audit that rejected ~30% of agent-written

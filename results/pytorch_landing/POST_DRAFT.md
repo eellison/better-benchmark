@@ -1,3 +1,5 @@
+> **SUPERSEDED by INNER_LOOP_POST.md** — this is the old 2026-06-23 draft; some numbers (e.g. ~0.4% ceiling distance, pre-gapfill gate counts) are stale. Do not fix here; read INNER_LOOP_POST.md.
+
 # Hill-climbing Inductor with a kernel benchmark corpus — what we built and what it found
 
 *(Draft post — Elias. Numbers as of 2026-06-23, 4×B200. All measured through the

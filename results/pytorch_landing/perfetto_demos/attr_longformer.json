@@ -1,0 +1,2789 @@
+{
+  "_launch_floor_us": 4.81,
+  "_launch_slope_us": 1.537,
+  "_device": "NVIDIA B200",
+  "models": {
+    "AllenaiLongformerBase": {
+      "e2e_us": 14451.9,
+      "e2e_complete": true,
+      "n_e2e_graphs_ok": 4,
+      "sum_fusible_us": 11907.5,
+      "sum_extern_us": 3880.4,
+      "sum_parts_us": 15787.9,
+      "corrected_parts_us": 14701.8,
+      "ratio_raw": 1.092,
+      "ratio_corrected": 1.017,
+      "n_graphs": 4,
+      "n_fusible_occurrences": 131,
+      "n_fusible_points": 21,
+      "n_extern_occurrences": 99,
+      "n_extern_points": 8,
+      "fusible_unmatched": [],
+      "extern_unmatched": [],
+      "extern_bench_failures": [],
+      "e2e_bench_failures": [],
+      "per_node": [
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "sub",
+          "order_index": 10,
+          "kind": "fusible",
+          "key": [
+            "9375aeadb8d3",
+            "d7517139"
+          ],
+          "us": 2.816000021994114,
+          "label": "9375aeadb8d3/d7517139"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_1",
+          "order_index": 13,
+          "kind": "fusible",
+          "key": [
+            "a80af1a259ac",
+            "0105f520"
+          ],
+          "us": 5.663999821990728,
+          "label": "a80af1a259ac/0105f520"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "cumsum",
+          "order_index": 14,
+          "kind": "extern",
+          "key": [
+            "aten.cumsum.default",
+            "((T([8, 1024],torch.int32,[1024, 1]),1),{})"
+          ],
+          "us": 14.047999866306782,
+          "label": "aten.cumsum.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convert_element_type_5",
+          "order_index": 34,
+          "kind": "fusible",
+          "key": [
+            "fbfc0104897d",
+            "e3ff68de"
+          ],
+          "us": 13.088000006973743,
+          "label": "fbfc0104897d/e3ff68de"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "select_1",
+          "order_index": 37,
+          "kind": "fusible",
+          "key": [
+            "57dd467b4a45",
+            "d7517139"
+          ],
+          "us": 5.663999821990728,
+          "label": "57dd467b4a45/d7517139"
+        },
+        {
+          "graph_name": "full_graph_001",
+          "node_name": "any_1",
+          "order_index": 3,
+          "kind": "fusible",
+          "key": [
+            "1918882eece2",
+            "a7e138d5"
+          ],
+          "us": 6.304000038653612,
+          "label": "1918882eece2/a7e138d5"
+        },
+        {
+          "graph_name": "full_graph_001",
+          "node_name": "lt",
+          "order_index": 4,
+          "kind": "fusible",
+          "key": [
+            "403020d93ad2",
+            "a7e138d5"
+          ],
+          "us": 5.727999843657017,
+          "label": "403020d93ad2/a7e138d5"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full",
+          "order_index": 195,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_1",
+          "order_index": 196,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm",
+          "order_index": 208,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_5",
+          "order_index": 220,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_1",
+          "order_index": 224,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_11",
+          "order_index": 237,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm",
+          "order_index": 238,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_38",
+          "order_index": 468,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_39",
+          "order_index": 470,
+          "kind": "fusible",
+          "key": [
+            "c0f1f15a4e49",
+            "2973ba0c"
+          ],
+          "us": 9.855999611318111,
+          "label": "c0f1f15a4e49/2973ba0c"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_2",
+          "order_index": 472,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_43",
+          "order_index": 483,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_1",
+          "order_index": 484,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_48",
+          "order_index": 495,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_3",
+          "order_index": 497,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_50",
+          "order_index": 512,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm",
+          "order_index": 514,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_52",
+          "order_index": 523,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_1",
+          "order_index": 525,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_13",
+          "order_index": 532,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_14",
+          "order_index": 533,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_4",
+          "order_index": 552,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_59",
+          "order_index": 564,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_5",
+          "order_index": 568,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_65",
+          "order_index": 581,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_2",
+          "order_index": 582,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_92",
+          "order_index": 812,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_93",
+          "order_index": 814,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_6",
+          "order_index": 816,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_97",
+          "order_index": 827,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_3",
+          "order_index": 828,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_102",
+          "order_index": 839,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_7",
+          "order_index": 841,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_104",
+          "order_index": 856,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_2",
+          "order_index": 858,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_106",
+          "order_index": 867,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_3",
+          "order_index": 869,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_26",
+          "order_index": 876,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_27",
+          "order_index": 877,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_8",
+          "order_index": 896,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_113",
+          "order_index": 908,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_9",
+          "order_index": 912,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_119",
+          "order_index": 925,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_4",
+          "order_index": 926,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_146",
+          "order_index": 1156,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_147",
+          "order_index": 1158,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_10",
+          "order_index": 1160,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_151",
+          "order_index": 1171,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_5",
+          "order_index": 1172,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_156",
+          "order_index": 1183,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_11",
+          "order_index": 1185,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_158",
+          "order_index": 1200,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_4",
+          "order_index": 1202,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_160",
+          "order_index": 1211,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_5",
+          "order_index": 1213,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_39",
+          "order_index": 1220,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_40",
+          "order_index": 1221,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_12",
+          "order_index": 1240,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_167",
+          "order_index": 1252,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_13",
+          "order_index": 1256,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_173",
+          "order_index": 1269,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_6",
+          "order_index": 1270,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_200",
+          "order_index": 1500,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_201",
+          "order_index": 1502,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_14",
+          "order_index": 1504,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_205",
+          "order_index": 1515,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_7",
+          "order_index": 1516,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_210",
+          "order_index": 1527,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_15",
+          "order_index": 1529,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_212",
+          "order_index": 1544,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_6",
+          "order_index": 1546,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_214",
+          "order_index": 1555,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_7",
+          "order_index": 1557,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_52",
+          "order_index": 1564,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_53",
+          "order_index": 1565,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_16",
+          "order_index": 1584,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_221",
+          "order_index": 1596,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_17",
+          "order_index": 1600,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_227",
+          "order_index": 1613,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_8",
+          "order_index": 1614,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_254",
+          "order_index": 1844,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_255",
+          "order_index": 1846,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_18",
+          "order_index": 1848,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_259",
+          "order_index": 1859,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_9",
+          "order_index": 1860,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_264",
+          "order_index": 1871,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_19",
+          "order_index": 1873,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_266",
+          "order_index": 1888,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_8",
+          "order_index": 1890,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_268",
+          "order_index": 1899,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_9",
+          "order_index": 1901,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_65",
+          "order_index": 1908,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_66",
+          "order_index": 1909,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_20",
+          "order_index": 1928,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_275",
+          "order_index": 1940,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_21",
+          "order_index": 1944,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_281",
+          "order_index": 1957,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_10",
+          "order_index": 1958,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_308",
+          "order_index": 2188,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_309",
+          "order_index": 2190,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_22",
+          "order_index": 2192,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_313",
+          "order_index": 2203,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_11",
+          "order_index": 2204,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_318",
+          "order_index": 2215,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_23",
+          "order_index": 2217,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_320",
+          "order_index": 2232,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_10",
+          "order_index": 2234,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_322",
+          "order_index": 2243,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_11",
+          "order_index": 2245,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_78",
+          "order_index": 2252,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_79",
+          "order_index": 2253,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_24",
+          "order_index": 2272,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_329",
+          "order_index": 2284,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_25",
+          "order_index": 2288,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_335",
+          "order_index": 2301,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_12",
+          "order_index": 2302,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_362",
+          "order_index": 2532,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_363",
+          "order_index": 2534,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_26",
+          "order_index": 2536,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_367",
+          "order_index": 2547,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_13",
+          "order_index": 2548,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_372",
+          "order_index": 2559,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_27",
+          "order_index": 2561,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_374",
+          "order_index": 2576,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_12",
+          "order_index": 2578,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_376",
+          "order_index": 2587,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_13",
+          "order_index": 2589,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_91",
+          "order_index": 2596,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_92",
+          "order_index": 2597,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_28",
+          "order_index": 2616,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_383",
+          "order_index": 2628,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_29",
+          "order_index": 2632,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_389",
+          "order_index": 2645,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_14",
+          "order_index": 2646,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_416",
+          "order_index": 2876,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_417",
+          "order_index": 2878,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_30",
+          "order_index": 2880,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_421",
+          "order_index": 2891,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_15",
+          "order_index": 2892,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_426",
+          "order_index": 2903,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_31",
+          "order_index": 2905,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_428",
+          "order_index": 2920,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_14",
+          "order_index": 2922,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_430",
+          "order_index": 2931,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_15",
+          "order_index": 2933,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_104",
+          "order_index": 2940,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_105",
+          "order_index": 2941,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_32",
+          "order_index": 2960,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_437",
+          "order_index": 2972,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_33",
+          "order_index": 2976,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_443",
+          "order_index": 2989,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_16",
+          "order_index": 2990,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_470",
+          "order_index": 3220,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_471",
+          "order_index": 3222,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_34",
+          "order_index": 3224,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_475",
+          "order_index": 3235,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_17",
+          "order_index": 3236,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_480",
+          "order_index": 3247,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_35",
+          "order_index": 3249,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_482",
+          "order_index": 3264,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_16",
+          "order_index": 3266,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_484",
+          "order_index": 3275,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_17",
+          "order_index": 3277,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_117",
+          "order_index": 3284,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_118",
+          "order_index": 3285,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_36",
+          "order_index": 3304,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_491",
+          "order_index": 3316,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_37",
+          "order_index": 3320,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_497",
+          "order_index": 3333,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_18",
+          "order_index": 3334,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_524",
+          "order_index": 3564,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_525",
+          "order_index": 3566,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_38",
+          "order_index": 3568,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_529",
+          "order_index": 3579,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_19",
+          "order_index": 3580,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_534",
+          "order_index": 3591,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_39",
+          "order_index": 3593,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_536",
+          "order_index": 3608,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_18",
+          "order_index": 3610,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_538",
+          "order_index": 3619,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_19",
+          "order_index": 3621,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_130",
+          "order_index": 3628,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_131",
+          "order_index": 3629,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_40",
+          "order_index": 3648,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_545",
+          "order_index": 3660,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_41",
+          "order_index": 3664,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_551",
+          "order_index": 3677,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_20",
+          "order_index": 3678,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_578",
+          "order_index": 3908,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_579",
+          "order_index": 3910,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_42",
+          "order_index": 3912,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_583",
+          "order_index": 3923,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_21",
+          "order_index": 3924,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_588",
+          "order_index": 3935,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_43",
+          "order_index": 3937,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_590",
+          "order_index": 3952,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_20",
+          "order_index": 3954,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_592",
+          "order_index": 3963,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_21",
+          "order_index": 3965,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_143",
+          "order_index": 3972,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "full_144",
+          "order_index": 3973,
+          "kind": "fusible",
+          "key": [
+            "035e4d7f5117",
+            "d7517139"
+          ],
+          "us": 7.199999876320362,
+          "label": "035e4d7f5117/d7517139"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_44",
+          "order_index": 3992,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_599",
+          "order_index": 4004,
+          "kind": "fusible",
+          "key": [
+            "2b567494bf14",
+            "5fa3702b"
+          ],
+          "us": 11.071999557316303,
+          "label": "2b567494bf14/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_45",
+          "order_index": 4008,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_605",
+          "order_index": 4021,
+          "kind": "fusible",
+          "key": [
+            "8352994b2efb",
+            "5fa3702b"
+          ],
+          "us": 11.19999960064888,
+          "label": "8352994b2efb/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_22",
+          "order_index": 4022,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})"
+          ],
+          "us": 35.64799949526787,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_632",
+          "order_index": 4252,
+          "kind": "fusible",
+          "key": [
+            "528a3c274a41",
+            "79c25467"
+          ],
+          "us": 833.3119750022888,
+          "label": "528a3c274a41/79c25467"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_633",
+          "order_index": 4254,
+          "kind": "fusible",
+          "key": [
+            "cf6bcfd335d5",
+            "1cea4d76"
+          ],
+          "us": 14.08000010997057,
+          "label": "cf6bcfd335d5/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_46",
+          "order_index": 4256,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_637",
+          "order_index": 4267,
+          "kind": "fusible",
+          "key": [
+            "07c6ea330ab4",
+            "5fa3702b"
+          ],
+          "us": 15.200000256299973,
+          "label": "07c6ea330ab4/5fa3702b"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "bmm_23",
+          "order_index": 4268,
+          "kind": "extern",
+          "key": [
+            "aten.bmm.default",
+            "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})"
+          ],
+          "us": 120.57600170373917,
+          "label": "aten.bmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_642",
+          "order_index": 4279,
+          "kind": "fusible",
+          "key": [
+            "d13382187963",
+            "ced82531"
+          ],
+          "us": 13.21600005030632,
+          "label": "d13382187963/ced82531"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "mm_47",
+          "order_index": 4281,
+          "kind": "extern",
+          "key": [
+            "aten.mm.default",
+            "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.87199978530407,
+          "label": "aten.mm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_644",
+          "order_index": 4296,
+          "kind": "fusible",
+          "key": [
+            "bb07b717c0ae",
+            "432bb161"
+          ],
+          "us": 13.120000250637531,
+          "label": "bb07b717c0ae/432bb161"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_22",
+          "order_index": 4298,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 30.46399913728237,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "view_646",
+          "order_index": 4307,
+          "kind": "fusible",
+          "key": [
+            "826ea0b5f6e4",
+            "d05618d1"
+          ],
+          "us": 32.51200169324875,
+          "label": "826ea0b5f6e4/d05618d1"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "addmm_23",
+          "order_index": 4309,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})"
+          ],
+          "us": 36.41600161790848,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_002",
+          "node_name": "convert_element_type_155",
+          "order_index": 4322,
+          "kind": "fusible",
+          "key": [
+            "80e7ff4dee7f",
+            "1cea4d76"
+          ],
+          "us": 12.000000104308128,
+          "label": "80e7ff4dee7f/1cea4d76"
+        },
+        {
+          "graph_name": "full_graph_003",
+          "node_name": "addmm",
+          "order_index": 10,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([768],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})"
+          ],
+          "us": 15.839999541640282,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_003",
+          "node_name": "cat",
+          "order_index": 26,
+          "kind": "fusible",
+          "key": [
+            "647d3ac3f711",
+            "0bd4da28"
+          ],
+          "us": 5.696000065654516,
+          "label": "647d3ac3f711/0bd4da28"
+        },
+        {
+          "graph_name": "full_graph_003",
+          "node_name": "view_3",
+          "order_index": 34,
+          "kind": "fusible",
+          "key": [
+            "af505388b035",
+            "6462934d"
+          ],
+          "us": 15.968000516295433,
+          "label": "af505388b035/6462934d"
+        },
+        {
+          "graph_name": "full_graph_003",
+          "node_name": "constant_pad_nd",
+          "order_index": 36,
+          "kind": "fusible",
+          "key": [
+            "644fa7675014",
+            "d59edba9"
+          ],
+          "us": 32.3840007185936,
+          "label": "644fa7675014/d59edba9"
+        },
+        {
+          "graph_name": "full_graph_003",
+          "node_name": "addmm_1",
+          "order_index": 37,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([50272],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 50272],torch.bfloat16,[50272, 1])),{})"
+          ],
+          "us": 411.42401099205017,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_003",
+          "node_name": "div",
+          "order_index": 62,
+          "kind": "fusible",
+          "key": [
+            "822c7c06b882",
+            "4445581e"
+          ],
+          "us": 309.02400612831116,
+          "label": "822c7c06b882/4445581e"
+        }
+      ]
+    }
+  }
+}

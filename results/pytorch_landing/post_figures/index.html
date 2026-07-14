@@ -7,6 +7,10 @@
 </style></head><body>
 <h1>Perf-engineering post figures</h1>
 <ol>
+  <li><a href="fig0_pipeline.html">Fig 0 — The corpus pipeline (capture → partition → dedupe → corpus)</a>
+      <div class="d">how 158 models become 1,727 deduplicated kernel microbenchmarks</div></li>
+  <li><a href="fig_cost.html">Fig C — What a datapoint costs (dashboard vs corpus)</a>
+      <div class="d">GPU-hours + wall-clock per datapoint, inductor-perf-nightly-h100 vs corpus sweep</div></li>
   <li><a href="fig1_per_commit.html">Fig 1 — Which commits carry the win (per-commit marginal delta)</a>
       <div class="d">30 named commits, kernel-geomean vs per-model e2e, aligned diverging panels</div></li>
   <li><a href="fig2_per_model.html">Fig 2 — 158 models, before → after (concentration)</a>
