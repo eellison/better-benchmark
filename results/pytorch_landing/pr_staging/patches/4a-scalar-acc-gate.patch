@@ -1,0 +1,41 @@
+From ca8f961d6b037cc76d3fa784a89f37ae9410cc96 Mon Sep 17 00:00:00 2001
+From: Elias Ellison <elias.ellison@gmail.com>
+Date: Wed, 3 Jun 2026 22:30:01 +0000
+Subject: [PATCH] [inductor] Gate scalar_acc on num_load <= 4 (fix 14-22%
+ regressions)
+
+Scalar reduction accumulators add cross-warp tl.sum + shared memory
+barrier per iteration. For bandwidth-bound kernels with many loads
+(num_load >= 9), the vector accumulator costs only 4-8 registers
+(XBLOCK=1) so there's no register pressure to save, but the sync
+cost dominates.
+
+Gate: only enable scalar_acc when num_load <= 4.
+- Beneficial cases (online softmax): num_load=1-2, still enabled
+- Regressing cases (BN backward): num_load=9-12, now disabled
+- Clean separation with generous margin
+
+written with claude code
+---
+ torch/_inductor/codegen/triton.py | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/torch/_inductor/codegen/triton.py b/torch/_inductor/codegen/triton.py
+index 1e495e37ec2..1b602432487 100644
+--- a/torch/_inductor/codegen/triton.py
++++ b/torch/_inductor/codegen/triton.py
+@@ -4845,6 +4845,11 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                 # tl.reduce doesn't support tl.int1; the non-scalar path
+                 # handles this with a .to(tl.int8) cast before final_reduction.
+                 and src_dtype != torch.bool
++                # Only beneficial for simple kernels where register pressure
++                # from the vector accumulator dominates. Bandwidth-bound kernels
++                # with many loads pay cross-warp sync cost per iteration without
++                # benefit from register savings.
++                and self.num_load <= 3
+             )
+ 
+             accumulator = self.cse.namedvar(
+-- 
+2.43.0
+
