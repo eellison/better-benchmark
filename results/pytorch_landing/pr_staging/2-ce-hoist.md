@@ -51,6 +51,27 @@ of the reduction loop** (loaded once after `online_softmax_reduce`, not
 per-iteration) — the Path-B loop-invariant hoist this PR exists to produce.
 Numerics vs eager: **EXACT** (`max_abs=0.0`). **Net: imports + compiles a
 representative repro to a numerics-valid result on B200; full CI not run.**
+**Perf verification (2026-07-15, B200, A/B PYTHONPATH-shadow base 5e2ab vs branch
+tip, fresh inductor cache per arm, bench_parallel locked path): FAILS — perf-neutral
+vs clean base on every targeted bench.** genai CrossEntropyForward full_graph
+(8192×262144): 2261.7 → 2260.9us (1.00x); corpus CE repros
+`amax_sum_sum_42988b64e7f9` (DistillGPT2 1247.0→1246.9us) and
+`amax_sum_sum_4bf8a79efec4` (GPTNeo 329.6→329.5us, Roberta 1247.0→1246.0us) — all
+1.00x. Root cause: on clean base the gather is ALREADY hoisted — base lowers genai
+CE to a single fused `prepare_softmax_online` kernel with the target-logit gather
+outside the reduction loop, and the branch's generated kernel is **byte-identical**
+to base's (diff of generated code, modulo cache paths). On the corpus repros the
+pass does fire (graph rewritten to `cross_entropy_loss_online`) but timing is exact
+parity. The original **+1.22pp was measured relative to the mega-commit
+`97385fb3273` state, whose Path-A in-loop CE reduction had REGRESSED these kernels**
+(walk: DistillGPT2 1246.8 pre-mega → 3670.8 mega → 1329.1 post-hoist); `ab29345`
+fixed the mega's regression rather than beating pre-mega base. Also: a
+prereq-only arm (1cca4ca8347 without ab29345) crashes compiling the corpus CE
+repros (`NotImplementedError: online_softmax_cross_entropy combine not used
+directly`) — the two commits are only valid as a unit, and as a unit they deliver
+no speedup over clean base. **Recommendation: do not upstream standalone on a perf
+claim; its value is only as scaffolding-fix inside the mega lineage.** Raw data:
+`perf_verify/RESULTS.json` (this dir).
 
 ## Summary
 When the reduction dim is large, pre-computes the target-logit gather as a separate

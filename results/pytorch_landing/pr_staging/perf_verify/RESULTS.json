@@ -1,0 +1,149 @@
+{
+ "verified": "2026-07-15",
+ "method": "PYTHONPATH shadow (throwaway git worktrees under /tmp/pt-verify-wt, prebuilt HEAD .so + generated artifacts symlinked in; every branch base..tip diff is pure-python) over torch 2.13.0a0 on B200. BASE arm = bare 5e2ab3055de shadow; BRANCH arm = PR branch tip shadow. Fresh TORCHINDUCTOR_CACHE_DIR per arm. All timing via scripts/bench_parallel.py (locked GPU path, clock lock 1852MHz, --no-cd, min-of-rounds do_bench). Same repro set both arms; branch arms repeated (run2) - repeats matched to <0.1%, so within-session noise is far below the cross-session 8% p95 floor. Arm separation proven by: output _metadata.pytorch_commit per arm, base cache emits 0 rsqrt kernels vs 56 on the rsqrt arm, and base SoftmaxForward ~3657us (matches the documented ~3541us pre-fix level).",
+ "prs": {
+  "pr/rsqrt-clean": {
+   "bench": "repros/canonical/{pointwise_2c331ef4f17f,pointwise_9128d8745e42,mean_3840584eef9a} --all-shapes (28 points)",
+   "repro_set_note": "The task-suggested var_mean_5a22dd21d88e / var_mean_42fad1ece813 already contain aten.rsqrt in their captured graphs (pass cannot fire; commit-walk showed ~1.00x on them), so the actually affected reciprocal(sqrt) family from the walk's own top-improvements list was benched instead.",
+   "expected": "order 2x on affected kernels (walk: 2.1-2.6x on this family)",
+   "measured": {
+    "geomean_speedup": 1.725,
+    "min": 1.03,
+    "max": 2.63,
+    "highlights": {
+     "pointwise_2c331ef4f17f/repvgg_a2_7ee473b0": [
+      373.7,
+      143.2,
+      2.61
+     ],
+     "pointwise_9128d8745e42/repvgg_a2_c9e29114": [
+      231.1,
+      87.8,
+      2.63
+     ],
+     "pointwise_2c331ef4f17f/resnet152_795eaade": [
+      231.2,
+      95.8,
+      2.41
+     ]
+    },
+    "walk_agreement": "point-for-point match with the a73d1583b34 commit-walk deltas (e.g. repvgg 2.59x walk vs 2.61x here)"
+   },
+   "feature_proof": "base cache: 0 kernels emit rsqrt; branch cache: 56 kernels emit libdevice.rsqrt/tl.rsqrt",
+   "verdict": "REPRODUCES"
+  },
+  "pr/ce-hoist-clean": {
+   "bench": "genai CrossEntropyForward full_graph (8192x262144) + repros/canonical/{amax_sum_sum_42988b64e7f9,amax_sum_sum_4bf8a79efec4} --all-shapes",
+   "expected": "a real improvement from the hoist (original claim +1.22pp kernel-geomean, measured mega->hoist in the walk)",
+   "measured": {
+    "genai_CE_us": [
+     2261.7,
+     2260.9,
+     1.0
+    ],
+    "corpus_CE": {
+     "amax_sum_sum_42988b64e7f9/DistillGPT2": [
+      1247.0,
+      1246.9,
+      1.0
+     ],
+     "amax_sum_sum_4bf8a79efec4/GPTNeo": [
+      329.6,
+      329.5,
+      1.0
+     ],
+     "amax_sum_sum_4bf8a79efec4/Roberta": [
+      1247.0,
+      1246.0,
+      1.0
+     ]
+    }
+   },
+   "root_cause": "On clean base 5e2ab the CE gather is ALREADY hoisted: base lowers the genai CE graph to a single fused prepare_softmax_online kernel with the target-logit gather outside the reduction loop, and the branch's generated kernel code is byte-identical to base's (verified by diff of the generated .py, modulo cache paths). On the corpus CE repros the pass DOES fire (graph rewritten to cross_entropy_loss_online; kernel names change) but timing is exactly parity. The original +1.22pp was measured relative to the mega-commit state 97385fb3273, whose Path-A in-loop CE reduction had REGRESSED these kernels (walk: DistillGPT2 1246.8 pre-mega -> 3670.8 mega -> 1329.1 post-hoist); ab29345 fixed the mega's regression rather than beating pre-mega base. Standalone on clean base it is perf-neutral on every targeted bench.",
+   "verdict": "FAILS (perf-neutral vs clean base; the claimed gain was relative to the mega-commit's regressed state, which this carved branch does not include)",
+   "prereq_only_note": "A prereq-only arm (1cca4ca8347 alone, Path A) FAILS to compile the corpus CE repros (NotImplementedError: online_softmax_cross_entropy combine not used directly), i.e. within the carved branch the ab29345 Path-B commit is required for the prereq's CE path to function at all. The two commits are a valid unit but their combined perf contribution vs clean base is zero."
+  },
+  "pr/online-softmax-clean": {
+   "bench": "repros/canonical/{amax_sum_02064a1e60ac,amax_sum_sum_04ddf882ff17,amax_sum_sum_3f000d9caa57} --all-shapes (5 points)",
+   "repro_set_note": "the commit's own named repro amax_sum_sum_6fd07d12d98a no longer exists in the corpus (renamed/GC'd); nearest family members benched",
+   "flag_default": "online_softmax_fast_combine default ON in the branch (env-gated, '1')",
+   "expected": "named repro ~29% faster (gap 1.42x->1.01x); walk showed 1.36x/1.28x on 04ddf882ff17/3f000d9caa57 vs the mega-lineage pre-state",
+   "measured": {
+    "branch_vs_base": {
+     "amax_sum_02064a1e60ac/TrOCR": [
+      154.5,
+      78.7,
+      1.96
+     ],
+     "amax_sum_sum_04ddf882ff17/MobileBert": [
+      2181.1,
+      2112.3,
+      1.03
+     ],
+     "amax_sum_sum_3f000d9caa57/Bart": [
+      626.5,
+      563.1,
+      1.11
+     ],
+     "amax_sum_sum_3f000d9caa57/Pegasus": [
+      1224.4,
+      1091.4,
+      1.12
+     ],
+     "amax_sum_sum_3f000d9caa57/TrOCR": [
+      1225.5,
+      1091.4,
+      1.12
+     ],
+     "geomean": 1.232
+    },
+    "flag_isolation": {
+     "note": "branch-with-flag-OFF vs base: prereq scaffolding alone regresses amax_sum_sum 0.90-0.92x but wins 1.72x on 02064a; flag ON vs OFF recovers 1.14-1.22x on every point",
+     "flag_on_vs_off_geomean": 1.184
+    },
+    "gap_named_family": "amax_sum_02064a1e60ac gap 3.22x -> 1.64x (base->branch)"
+   },
+   "verdict": "REPRODUCES (directionally): real 1.03-1.96x wins vs base, geomean 1.23x on the affected family; the fast-combine flag itself delivers a consistent 1.14-1.22x. Exact named-repro claim not checkable (repro gone). Caveat: the carried prereq scaffolding alone costs 8-10% on some amax_sum_sum points, which the flag more than recovers - net positive on every benched point."
+  },
+  "pr/scalar-acc-clean": {
+   "bench": "genai SoftmaxForward + CrossEntropyForward full_graphs (8192x262144)",
+   "expected": "SoftmaxForward ~3541->~1905us (~1.86x); CrossEntropyForward +60%+",
+   "measured": {
+    "SoftmaxForward_us": [
+     3656.8,
+     2030.3,
+     1.8
+    ],
+    "CrossEntropyForward_us": [
+     2261.7,
+     1024.8,
+     2.21
+    ],
+    "repeat_run2": {
+     "SoftmaxForward": [
+      3656.7,
+      2029.6
+     ],
+     "CrossEntropyForward": [
+      2261.7,
+      1024.8
+     ]
+    }
+   },
+   "note": "base arm at 3657us confirms the pre-fix level (~3541 claimed); branch 2030us vs claimed 1905us - same magnitude, slightly less in absolute (different session/clock bin), ratio 1.80x vs claimed 1.86x",
+   "verdict": "REPRODUCES"
+  }
+ },
+ "overall": {
+  "pr/rsqrt-clean": "REPRODUCES",
+  "pr/ce-hoist-clean": "FAILS (perf-neutral vs base on all targeted benches)",
+  "pr/online-softmax-clean": "REPRODUCES (directionally; named repro gone; net-positive everywhere benched)",
+  "pr/scalar-acc-clean": "REPRODUCES"
+ },
+ "provenance": {
+  "pytorch_work_head": "daa79cd25ca (untouched)",
+  "worktrees": "throwaway /tmp/pt-verify-wt/* removed after verification",
+  "pushes_to_pytorch_remotes": "none",
+  "artifacts": "/tmp/scratch_space/pr_perf_verify/ (raw bench JSONs, logs, per-arm caches, compare.py, run_all.sh)"
+ }
+}

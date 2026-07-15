@@ -39,6 +39,13 @@ synthetic pure-sum reductions: `num_load=2` (<=3) selects the scalar path,
 `num_load=6` (>3) falls back to the vector path — both compile, `max_abs<=1.2e-4`.
 **Net: imports + compiles a representative repro to a numerics-valid result on
 B200, the num_load<=3 gate exercised both ways; full CI not run.**
+**Perf verification (2026-07-15, B200, A/B PYTHONPATH-shadow base 5e2ab vs branch
+tip, fresh inductor cache per arm, bench_parallel locked path): REPRODUCES.**
+genai full_graphs (8192×262144): SoftmaxForward 3656.8 → 2030.3us (**1.80x**;
+claim was 3541→1905 ≈ 1.86x — same magnitude, base arm's 3657us confirms the
+pre-fix level), CrossEntropyForward 2261.7 → 1024.8us (**2.21x**, beating the
+"+60%+" expectation). Repeat run matched to <0.1% on both. Raw data:
+`perf_verify/RESULTS.json` (this dir).
 
 ## Shared scaffolding note
 The prereq's `reduction()` codegen rewrite is the same one PR3 (online-softmax)

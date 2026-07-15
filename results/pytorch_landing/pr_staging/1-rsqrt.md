@@ -15,6 +15,15 @@ Numerics vs eager on realistic BN inputs: finite, `max_abs=1.25e-1` (bf16),
 `mean_abs=1.4e-3` — the documented marginal `rsqrt.approx` precision loss vs the
 software sqrt+div, no NaN. **Net: imports + compiles a representative repro to a
 numerics-valid result on B200; full CI not run.**
+**Perf verification (2026-07-15, B200, A/B PYTHONPATH-shadow base 5e2ab vs branch
+tip, fresh inductor cache per arm, bench_parallel locked path): REPRODUCES.**
+28 shape points across `pointwise_2c331ef4f17f` + `pointwise_9128d8745e42` +
+`mean_3840584eef9a` (the reciprocal(sqrt) family — note: the `var_mean_*` repros
+already carry `aten.rsqrt` in-graph, the pass can't fire there): **geomean 1.73x,
+max 2.63x** (repvgg_a2 373.7→143.2us = 2.61x; resnet152 231.2→95.8us = 2.41x),
+point-for-point matching the a73d1583b34 commit-walk deltas. Feature proof: base
+arm cache emits 0 rsqrt kernels, branch arm 56. Raw data:
+`perf_verify/RESULTS.json` (this dir).
 
 ## Summary
 A post-grad peephole that rewrites `reciprocal(sqrt(x))` and `div(1, sqrt(x))` to

@@ -36,6 +36,21 @@ substitution `a26fc2c8bf4` introduces. Numerics vs eager: **EXACT**
 (`max_abs=0.0`) in both flag states. **Net: imports + compiles a representative
 repro to a numerics-valid result on B200, fast-combine flag path exercised both
 ways without crash; full CI not run.**
+**Perf verification (2026-07-15, B200, A/B PYTHONPATH-shadow base 5e2ab vs branch
+tip, fresh inductor cache per arm, bench_parallel locked path): REPRODUCES
+(directionally).** The commit's own named repro `amax_sum_sum_6fd07d12d98a` no
+longer exists in the corpus, so the nearest affected family was benched (5 shape
+points): branch vs base `amax_sum_02064a1e60ac`/TrOCR 154.5→78.7us (**1.96x**, gap
+3.22x→1.64x), `amax_sum_sum_3f000d9caa57` 1.11–1.12x on all 3 points,
+`amax_sum_sum_04ddf882ff17` 1.03x — **geomean 1.23x**, every point net-positive
+(repeat run matched to <0.1%). Flag isolation (branch with
+`TORCHINDUCTOR_ONLINE_SOFTMAX_FAST_COMBINE=0`): the carried prereq scaffolding
+alone REGRESSES the amax_sum_sum points 0.90–0.92x vs base; the fast-combine flag
+recovers a consistent **1.14–1.22x on every point** (flag-on-vs-off geomean
+1.18x), more than paying back the scaffolding cost. The flag defaults ON in the
+branch. Caveat for review: if the prereq is upstreamed separately from the
+fast-combine commit, the intermediate state is a measured 8–10% regression on this
+family. Raw data: `perf_verify/RESULTS.json` (this dir).
 
 ## Shared scaffolding note
 The prereq's `reduction()` codegen rewrite is the same one PR4 (scalar-acc) needs.

@@ -1,0 +1,49 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "862f00e6ee3e982a95e023662427766c88ecf0e5",
+    "pytorch_commit": "1cca4ca8347a667ba8253b555920b3fb3450496e",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-07-15T11:31:39Z",
+    "n_repros": 0,
+    "n_results": 0,
+    "workload_kind": "repro"
+  },
+  "__failures__": {
+    "repros/canonical/amax_sum_sum_4bf8a79efec4/repro.py": {
+      "status": "failed",
+      "gpu": "0",
+      "elapsed": 5.628174543380737,
+      "error": "NotImplementedError: online_softmax_cross_entropy combine not used directly\n\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\n",
+      "category": "runtime_error",
+      "reason": "worker failed while benchmarking workload",
+      "hint": "Inspect worker stderr or rerun this workload directly.",
+      "exception_type": "InductorError",
+      "failed_shapes": [
+        "GPTNeoForCausalLM_f891741b",
+        "RobertaForCausalLM_68a9ca47"
+      ]
+    },
+    "repros/canonical/amax_sum_sum_42988b64e7f9/repro.py": {
+      "status": "failed",
+      "gpu": "2",
+      "elapsed": 5.62803053855896,
+      "error": "NotImplementedError: online_softmax_cross_entropy combine not used directly\n\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\n",
+      "category": "runtime_error",
+      "reason": "worker failed while benchmarking workload",
+      "hint": "Inspect worker stderr or rerun this workload directly.",
+      "exception_type": "InductorError",
+      "failed_shapes": [
+        "DistillGPT2_c1ee6cd0"
+      ]
+    }
+  },
+  "__summary__": {
+    "total": 2,
+    "ok": 0,
+    "failed": 2,
+    "skipped": 0,
+    "elapsed_s": 8.544743299484253
+  }
+}

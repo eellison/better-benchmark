@@ -1,0 +1,51 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "862f00e6ee3e982a95e023662427766c88ecf0e5",
+    "pytorch_commit": "5e2ab3055de1bc4bffe2e7feffe1fc7ff7af8b10",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-07-15T11:22:09Z",
+    "n_repros": 2,
+    "n_results": 2,
+    "workload_kind": "repro"
+  },
+  "repros/canonical/amax_sum_sum_4bf8a79efec4/repro.py": {
+    "GPTNeoForCausalLM_f891741b": {
+      "compiled_us": 329.5679986476898,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 125.69600343704224,
+      "total_bytes": 823443460,
+      "n_kernels": 2,
+      "gap_default": 2.621944927730034,
+      "gap_cd": null
+    },
+    "RobertaForCausalLM_68a9ca47": {
+      "compiled_us": 1247.007966041565,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 479.36001420021057,
+      "total_bytes": 3294298116,
+      "n_kernels": 2,
+      "gap_default": 2.601401721255659,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/amax_sum_sum_42988b64e7f9/repro.py": {
+    "DistillGPT2_c1ee6cd0": {
+      "compiled_us": 1247.007966041565,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 242.5599992275238,
+      "total_bytes": 1646952452,
+      "n_kernels": 2,
+      "gap_default": 5.141028900119093,
+      "gap_cd": null
+    }
+  },
+  "__summary__": {
+    "total": 2,
+    "ok": 2,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 8.2487952709198
+  }
+}
