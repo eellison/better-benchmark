@@ -39,7 +39,18 @@ attempt confirmed modify/delete + content conflicts; excluded.
 intended commits; prim + lowering fn + Path-B `OnlineSoftmaxReduction.create` +
 postgrad pass/wiring all present; `CrossEntropyOnlineReduction` import removed
 from `lowering.py` (0 refs) as intended; patch applies clean onto pristine base.
-**Caveat:** ast-parse + symbol-grep only — no torch build here, not compiled/run.
+**Compile-smoke (2026-07-15, B200, PYTHONPATH-shadow):** import OK (y) — the
+carved `cross_entropy_loss_online` prim, `CrossEntropyOnlineReduction` (ir),
+`online_softmax` config, and the postgrad gather-fusion pass all resolve at
+import; `CrossEntropyOnlineReduction` is absent from `lowering` at runtime (Path
+B). Representative repro
+`repros/models/genai/static/CrossEntropyForward/full_graph_000.py` (8192x262144)
+`torch.compile`s to completion — **GOOD**. It lowers to a single fused
+`online_softmax_reduce` kernel in which the **target-logit gather is hoisted OUT
+of the reduction loop** (loaded once after `online_softmax_reduce`, not
+per-iteration) — the Path-B loop-invariant hoist this PR exists to produce.
+Numerics vs eager: **EXACT** (`max_abs=0.0`). **Net: imports + compiles a
+representative repro to a numerics-valid result on B200; full CI not run.**
 
 ## Summary
 When the reduction dim is large, pre-computes the target-logit gather as a separate

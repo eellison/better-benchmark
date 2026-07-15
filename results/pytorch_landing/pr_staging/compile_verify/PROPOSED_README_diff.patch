@@ -1,0 +1,41 @@
+diff --git a/results/pytorch_landing/pr_staging/README.md b/results/pytorch_landing/pr_staging/README.md
+index 9225d3a19..0d4716963 100644
+--- a/results/pytorch_landing/pr_staging/README.md
++++ b/results/pytorch_landing/pr_staging/README.md
+@@ -67,11 +67,31 @@ ast.parse(sys.stdin.read())'`); and each symbol the PR references is confirmed
+ defined in the branch tree by grep. Each regenerated patch was `git apply
+ --check`'d onto a pristine `5e2ab3055de` checkout and applies clean.
+ 
+-**Caveat (stated honestly):** this environment is CPU-only with no PyTorch
+-build, so nothing was compiled or run. The bar met is: clean apply on base +
+-ast-parse of every touched file + symbol-presence grep + internal consistency
+-(e.g. carried config flags referenced by carried code are defined). Runtime /
+-numerics are NOT verified here.
++### Compile-smoke (2026-07-15, B200 — the "does it actually work" gate)
++
++Each branch was checked out into a throwaway worktree and **shadow-imported**:
++`PYTHONPATH=<worktree>` so the branch's pure-python `torch/_inductor` shadows,
++reusing the prebuilt HEAD `.so` at `/tmp/pytorch-work` (valid because `base..HEAD`
++touches **0 non-`.py` files** — all pure-python inductor). Each representative
++repro was driven through `torch.compile` under the locked GPU path
++(`scripts/with_gpu_lock.py --gpu 0`), numerics-checked vs eager. Raw logs +
++`VERIFICATION_RESULTS.json` under `compile_verify/`.
++
++| PR | import | compile-smoke repro | status | feature fired | numerics vs eager |
++|----|--------|---------------------|--------|---------------|-------------------|
++| **1. rsqrt** | OK | `pointwise_2c331ef4f17f` (repvgg BN) | **GOOD** | kernel emits `libdevice.rsqrt` | finite, `max_abs=1.25e-1` bf16 (documented `rsqrt.approx` loss) |
++| **2. CE-hoist** | OK | genai `CrossEntropyForward` full_graph | **GOOD** | Path-B: target-logit gather hoisted OUT of the reduction loop | **EXACT** (`max_abs=0.0`) |
++| **3. online-softmax** | OK | `amax_sum_02064a1e60ac` | **GOOD** | A/B: flag on → native `tl.max` fast path; off → `max2` | **EXACT** (`max_abs=0.0`) both states |
++| **4. scalar-acc** | OK | genai `SoftmaxForward` full_graph + synthetic | **GOOD** | A/B: flag on → scalar `tl.full([XBLOCK])` accum; `num_load<=3` gate proven both ways | `max_abs<=1.2e-4` (within bf16) |
++
++**All 4 import clean, compile a representative repro to a numerics-valid result,
++and fire the intended codegen. No blockers.** Minor: PR4's shipped gate is
++`num_load <= 3` (commit *title* says `<= 4` — message/doc discrepancy, not a
++functional gap). Bar met: clean apply on base + ast-parse + symbol grep +
++**shadow-import with no ImportError/AttributeError + `torch.compile` of a
++representative repro to a numerics-valid B200 result with the feature codegen
++confirmed present.** Full upstream CI (all shapes / all models / perf regression
++suite) is NOT run here.
+ 
+ ## Artifacts
+ 

@@ -5,8 +5,16 @@
 `a73d1583b34`). **How made mergeable:** nothing needed — clean standalone pick.
 **Verification (2026-07-15):** roots on base; 0 conflict markers; the one touched
 file `torch/_inductor/fx_passes/post_grad.py` ast-parses; patch applies clean onto
-a pristine `5e2ab3055de`. **Caveat:** ast-parse only — no torch build here, not
-compiled or run.
+a pristine `5e2ab3055de`.
+**Compile-smoke (2026-07-15, B200, PYTHONPATH-shadow of the branch over the
+prebuilt HEAD `.so`):** import OK (y); representative repro
+`repros/canonical/pointwise_2c331ef4f17f` (repvgg reciprocal(sqrt) BN pattern)
+`torch.compile`s to completion — **GOOD**. The generated kernel emits
+`libdevice.rsqrt` (the peephole fired: `reciprocal(sqrt(x)) -> rsqrt(x)`).
+Numerics vs eager on realistic BN inputs: finite, `max_abs=1.25e-1` (bf16),
+`mean_abs=1.4e-3` — the documented marginal `rsqrt.approx` precision loss vs the
+software sqrt+div, no NaN. **Net: imports + compiles a representative repro to a
+numerics-valid result on B200; full CI not run.**
 
 ## Summary
 A post-grad peephole that rewrites `reciprocal(sqrt(x))` and `div(1, sqrt(x))` to

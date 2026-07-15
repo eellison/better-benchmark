@@ -24,9 +24,21 @@ cherry-pick with zero conflict.
 ## Verification (2026-07-15)
 3 touched `.py` files ast-parse; 0 conflict markers; symbols
 `scalar_reduction_accumulators`, `scalar_acc_configs_without_cd`,
-`use_scalar_acc`, and the `num_load <= 3`/`<= 4` gate all present; patch applies
-clean onto pristine base. **Caveat:** ast-parse + symbol-grep only — no torch
-build, not compiled/run.
+`use_scalar_acc`, and the gate all present; patch applies clean onto pristine
+base. **Note:** the shipped gate text is `self.num_load <= 3` (the commit
+`ca8f961d6b0` *title* says `<= 4`; that's a commit-message/doc discrepancy, not a
+functional gap — the code gates at `<= 3`).
+**Compile-smoke (2026-07-15, B200, PYTHONPATH-shadow):** import OK (y) — all the
+above symbols + the `MAX_R0_BLOCK` heuristics block resolve. Representative repro
+`repros/models/genai/static/SoftmaxForward/full_graph_000.py` (8192x262144)
+`torch.compile`s to completion — **GOOD** (`max_abs=4.8e-7`, within bf16). Flag
+A/B (reset between runs): with `scalar_reduction_accumulators` **off** the kernel
+keeps a vector accumulator `tl.full([XBLOCK, R0_BLOCK])`; **on** it uses a scalar
+accumulator `tl.full([XBLOCK])`. **num_load gate proven both directions** on
+synthetic pure-sum reductions: `num_load=2` (<=3) selects the scalar path,
+`num_load=6` (>3) falls back to the vector path — both compile, `max_abs<=1.2e-4`.
+**Net: imports + compiles a representative repro to a numerics-valid result on
+B200, the num_load<=3 gate exercised both ways; full CI not run.**
 
 ## Shared scaffolding note
 The prereq's `reduction()` codegen rewrite is the same one PR3 (online-softmax)

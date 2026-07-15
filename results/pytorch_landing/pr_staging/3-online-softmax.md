@@ -24,8 +24,18 @@ mega-introduced) plus one TEXTUAL CONTEXT drift, resolved as above.
 `online_softmax_fast_combine` (config), `_rewrite_masked_load_other_neg_inf`,
 `_online_softmax_fast_max`, and the `DeferredLineBase` import all present
 (`DeferredLineBase` is defined in `utils.py` at base); patch applies clean onto
-pristine base. **Caveat:** ast-parse + symbol-grep only — no torch build, not
-compiled/run.
+pristine base.
+**Compile-smoke (2026-07-15, B200, PYTHONPATH-shadow):** import OK (y) — all the
+above symbols resolve at import. Representative repro
+`repros/canonical/amax_sum_02064a1e60ac` (softmax) `torch.compile`s to a looped
+`triton_red` online-softmax kernel — **GOOD**. Flag A/B (`torch._dynamo.reset()`
+between runs): with `online_softmax_fast_combine` **off** the kernel uses
+`triton_helpers.max2` (0 fast lines); **on** it uses the native
+`tl.max(tl.where(..., -inf))` fast path (1 fast line, 0 `max2`) — the exact
+substitution `a26fc2c8bf4` introduces. Numerics vs eager: **EXACT**
+(`max_abs=0.0`) in both flag states. **Net: imports + compiles a representative
+repro to a numerics-valid result on B200, fast-combine flag path exercised both
+ways without crash; full CI not run.**
 
 ## Shared scaffolding note
 The prereq's `reduction()` codegen rewrite is the same one PR4 (scalar-acc) needs.

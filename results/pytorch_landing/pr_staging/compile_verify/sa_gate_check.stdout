@@ -1,0 +1,14 @@
+[gpu-lock] acquired /tmp/compile_utils_gpu_locks/gpu_0.lock
+Traceback (most recent call last):
+  File "/tmp/sa_ab.py", line 9, in <module>
+    inst,inputs,defn = load_full_graph(sys.argv[1], default_device="cuda")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scratch_space/better_benchmark/full_graph_harness.py", line 1671, in load_full_graph
+    else load_full_graph_definition(graph_path_or_definition)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scratch_space/better_benchmark/full_graph_harness.py", line 1271, in load_full_graph_definition
+    exec(compile(content, str(path), "exec"), exec_globals)
+  File "repros/canonical/amax_sum_02064a1e60ac/repro.py", line 15, in <module>
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+                                ^^^^^^^^
+NameError: name '__file__' is not defined. Did you mean: '__name__'?
