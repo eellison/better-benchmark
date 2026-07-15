@@ -1,0 +1,899 @@
+From 239a84e25502246ad90afc71c2f949c694b0e5e7 Mon Sep 17 00:00:00 2001
+From: Elias Ellison <elias.ellison@gmail.com>
+Date: Wed, 15 Jul 2026 01:37:08 +0000
+Subject: [PATCH 1/2] [inductor] Scalar/online-softmax reduction codegen
+ (prerequisite for online-softmax fast-combine PR)
+
+Minimal scaffolding carved from the June 2026 mega-commit 97385fb3273:
+- config.triton.scalar_reduction_accumulators flag
+- the reduction() codegen rewrite in codegen/triton.py adding the scalar
+  online-softmax path (_block_max / running-max loop) and the interleaved
+  scalar accumulator + online_softmax_cross_entropy codegen.
+
+This is the codepath the fast-combine PR (a26fc2c8bf4) patches; it is carried
+whole as an indivisible method rewrite.
+
+written with claude code
+---
+ torch/_inductor/codegen/triton.py | 455 +++++++++++++++++++++++++-----
+ torch/_inductor/config.py         |   9 +
+ 2 files changed, 401 insertions(+), 63 deletions(-)
+
+diff --git a/torch/_inductor/codegen/triton.py b/torch/_inductor/codegen/triton.py
+index bb6b8105043..1e495e37ec2 100644
+--- a/torch/_inductor/codegen/triton.py
++++ b/torch/_inductor/codegen/triton.py
+@@ -1465,8 +1465,11 @@ class TritonOverrides(OpOverrides):
+         """
+         if config.use_fast_math:
+             return f"tl_math.exp({x})"
+-        else:
+-            return f"libdevice.exp({x})"
++        # Use fast exp in online softmax kernels to match the accumulation
++        # pass which already uses tl_math.exp unconditionally.
++        if getattr(V.kernel, "has_online_softmax", False):
++            return f"tl_math.exp({x})"
++        return f"libdevice.exp({x})"
+ 
+     @staticmethod
+     @maybe_upcast_float32()
+@@ -3079,6 +3082,7 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+         self.has_load_with_contiguous_rdim = False
+         # We track the store name since a store can be canceled later
+         self.stores_with_contiguous_rdim: list[str] = []
++        self.has_online_softmax = False
+ 
+     def triton_tensor_ndim(self) -> int:
+         return sum(int(tree.tensor_dim is not None) for tree in self.range_trees)
+@@ -4702,7 +4706,7 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                 )
+ 
+             masked_value: CSEVariable | Sequence[CSEVariable] | None
+-            if reduction_type == "online_softmax_reduce" and not isinstance(
++            if reduction_type in ("online_softmax_reduce", "online_softmax_cross_entropy") and not isinstance(
+                 value, tuple
+             ):
+                 # Don't generate mask value for online_softmax since we
+@@ -4782,6 +4786,37 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                     # All data is loaded to register anyway, no need to do
+                     # online softmax
+                     result_var = self.prepare_softmax_twopass_fallback(dtype, value)
++            elif reduction_type == "online_softmax_cross_entropy":
++                # For cross-entropy, value is (logit_val, target_idx)
++                if isinstance(value, tuple):
++                    logit_val, target_idx = value
++                    # Do the online softmax on logit_val
++                    assert isinstance(masked_value, Sequence)
++                    result_sum = self.cse.newvar(
++                        dtype=dtype, shape=cast(CSEVariable, result_var).shape
++                    )
++                    result_var = self.online_softmax_reduce_final_reduction(
++                        self.compute,
++                        result_var,
++                        result_sum,
++                        masked_value[0],
++                        masked_value[1],
++                        dim,
++                        dtype,
++                    )
++                    # The target_logit is the third output: use the target_idx
++                    # to index into the logits. In persistent reduction, the
++                    # data is already loaded, so just extract the target element.
++                    result_target = self.cse.newvar(
++                        dtype=dtype, shape=cast(CSEVariable, result_var[0]).shape
++                    )
++                    # target_idx is already loaded for each row; use it
++                    # In persistent mode the gather was already computed by inner_fn
++                    # We store target_idx as the third element
++                    result_var = (*result_var, target_idx)
++                else:
++                    # Fallback: 2-pass softmax + separate gather
++                    result_var = self.prepare_softmax_twopass_fallback(dtype, value)
+             else:
+                 assert isinstance(masked_value, CSEVariable)
+                 _result, _dtype, _shape = final_reduction(
+@@ -4796,6 +4831,22 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                 if reduction_type in arg_with_value_reduction_types
+                 else result_var
+             )
++            # Scalar accumulator optimization: for simple associative reductions,
++            # registers by accumulating into a scalar per x-element instead
++            # of keeping the full R0_BLOCK tile alive. This enables much
++            # larger R0_BLOCK (2048/4096) without register spilling.
++            # Only for simple associative reductions — NOT welford/online_softmax/argmax.
++            _SCALAR_ACC_REDUCTION_TYPES = frozenset(
++                {"sum", "max", "min", "prod", "xor_sum", "any"}
++            )
++            use_scalar_acc = (
++                config.triton.scalar_reduction_accumulators
++                and reduction_type in _SCALAR_ACC_REDUCTION_TYPES
++                # tl.reduce doesn't support tl.int1; the non-scalar path
++                # handles this with a .to(tl.int8) cast before final_reduction.
++                and src_dtype != torch.bool
++            )
++
+             accumulator = self.cse.namedvar(
+                 f"_{result_prefix}",
+                 dtype=torch_acc_type,
+@@ -4815,6 +4866,17 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                     self.body.writeline(
+                         f"{accumulator} = tl.full({dense_size_str}, {default}, {acc_type})"
+                     )
++                elif use_scalar_acc:
++                    # Scalar accumulator: shape excludes the reduction dimension(s)
++                    non_reduce_sizes = self.dense_size_list()[:dim]
++                    if non_reduce_sizes:
++                        scalar_acc_size_str = f"[{', '.join(non_reduce_sizes)}]"
++                    else:
++                        scalar_acc_size_str = "[1]"
++                    accumulator.shape = tuple(non_reduce_sizes) if non_reduce_sizes else ("1",)
++                    self.body.writeline(
++                        f"{accumulator} = tl.full({scalar_acc_size_str}, {default}, {acc_type})"
++                    )
+                 else:
+                     self.body.writeline(
+                         f"{accumulator} = tl.full({self.dense_size_str()}, {default}, {acc_type})"
+@@ -4855,93 +4917,331 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                     result_var, reduction_type, value, where_cond, acc_type, dtype
+                 )
+             elif reduction_type == "online_softmax_reduce":
++                self.has_online_softmax = True
+                 accumulator_max = f"_{result_var}_max"
+                 accumulator_sum = f"_{result_var}_sum"
+ 
+-                # setup accumulator
+-                self.body.writeline(
+-                    f"{accumulator_max} = tl.full({self.dense_size_str()}, float('-inf'), {acc_type})"
+-                )
+-                self.body.writeline(
+-                    f"{accumulator_sum} = tl.zeros({self.dense_size_str()}, {acc_type})"
++                use_scalar_online_softmax = (
++                    config.triton.scalar_reduction_accumulators
+                 )
+ 
+-                # combine
+-                # Note, we pass config.use_fast_math to the JITFunction
+-                # since a triton kernel can not access a config.
+-                if isinstance(value, tuple):
+-                    value_max, value_sum = value
++                if use_scalar_online_softmax:
++                    # Scalar accumulator path for online softmax: reduce each
++                    # block to scalars within each iteration, keeping only
++                    # [XBLOCK]-sized accumulators instead of [XBLOCK, R0_BLOCK].
++                    # This dramatically reduces register pressure and enables
++                    # larger R0_BLOCK tiles.
++                    non_reduce_sizes = self.dense_size_list()[:dim]
++                    if non_reduce_sizes:
++                        scalar_acc_size_str = f"[{', '.join(non_reduce_sizes)}]"
++                    else:
++                        scalar_acc_size_str = "[1]"
++
++                    # setup scalar accumulators
++                    self.body.writeline(
++                        f"{accumulator_max} = tl.full({scalar_acc_size_str}, float('-inf'), {acc_type})"
++                    )
++                    self.body.writeline(
++                        f"{accumulator_sum} = tl.full({scalar_acc_size_str}, 0.0, {acc_type})"
++                    )
++
++                    # In-loop combine with scalar accumulators:
++                    # 1. block_max = max(value) over reduction dim
++                    # 2. new_max = max(running_max, block_max)
++                    # 3. correction = exp(running_max - new_max)
++                    # 4. block_sum = sum(exp(value - new_max)) over reduction dim
++                    # 5. running_sum = running_sum * correction + block_sum
++                    # 6. running_max = new_max
++                    if cond:
++                        masked_val_for_max = f"tl.where({cond}, {value}, float('-inf'))"
++                        masked_val_for_sum = masked_val_for_max
++                    else:
++                        masked_val_for_max = str(value)
++                        masked_val_for_sum = str(value)
++
+                     self.compute.splice(
+                         f"""
+-                        {accumulator_max}_next, {accumulator_sum}_next = triton_helpers.online_softmax_combine_with_sum(
+-                            {accumulator_max}, {accumulator_sum}, {value_max}, {value_sum}, {config.use_fast_math}
++                        {accumulator_max}_block_max = triton_helpers.max2({masked_val_for_max}, {dim})
++                        {accumulator_max}_new = triton_helpers.maximum({accumulator_max}, {accumulator_max}_block_max)
++                        {accumulator_sum}_correction = tl_math.exp(({accumulator_max} - {accumulator_max}_new).to(tl.float32))
++                        {accumulator_sum}_block = tl.sum(
++                            tl_math.exp(({masked_val_for_sum} - {self.reduction_resize(f"{accumulator_max}_new")}).to(tl.float32)),
++                            {dim}
+                         )
++                        {accumulator_sum} = {accumulator_sum} * {accumulator_sum}_correction + {accumulator_sum}_block
++                        {accumulator_max} = {accumulator_max}_new
+                         """
+                     )
++
++                    # After the loop, reshape accumulators to add back the
++                    # reduced singleton dimension
++                    result_max = result_var
++                    result_sum = self.cse.newvar(dtype=dtype, shape=result_max.shape)
++                    self.post_loop_combine.splice(
++                        f"""
++                        {result_max} = {self.reduction_resize(f"{accumulator_max}")}
++                        {result_sum} = {self.reduction_resize(f"{accumulator_sum}")}
++                        """
++                    )
++                    result_var = result_max, result_sum
+                 else:
++                    # Original vector accumulator path
++                    # setup accumulator
++                    self.body.writeline(
++                        f"{accumulator_max} = tl.full({self.dense_size_str()}, float('-inf'), {acc_type})"
++                    )
++                    self.body.writeline(
++                        f"{accumulator_sum} = tl.zeros({self.dense_size_str()}, {acc_type})"
++                    )
++
++                    # combine
++                    # Note, we pass config.use_fast_math to the JITFunction
++                    # since a triton kernel can not access a config.
++                    if isinstance(value, tuple):
++                        value_max, value_sum = value
++                        self.compute.splice(
++                            f"""
++                            {accumulator_max}_next, {accumulator_sum}_next = triton_helpers.online_softmax_combine_with_sum(
++                                {accumulator_max}, {accumulator_sum}, {value_max}, {value_sum}, {config.use_fast_math}
++                            )
++                            """
++                        )
++                    else:
++                        self.compute.splice(
++                            f"""
++                            {accumulator_max}_next, {accumulator_sum}_next = triton_helpers.online_softmax_combine(
++                                {accumulator_max}, {accumulator_sum}, {value}, {config.use_fast_math}
++                            )
++                            """
++                        )
++
++                    # mask
++                    self.compute.splice(
++                        f"""
++                        {accumulator_max} = {where_cond(f"{accumulator_max}_next", accumulator_max)}
++                        {accumulator_sum} = {where_cond(f"{accumulator_sum}_next", accumulator_sum)}
++                        """
++                    )
++
++                    # reduce. Similar to the final reduction for coopereative
++                    # reduction
++                    result_max = result_var
++                    result_sum = self.cse.newvar(
++                        dtype=dtype, shape=cast(Any, result_max).shape
++                    )
++
++                    result_var = self.online_softmax_reduce_final_reduction(
++                        self.post_loop_combine,
++                        result_max,
++                        result_sum,
++                        accumulator_max,
++                        accumulator_sum,
++                        dim,
++                        dtype,
++                    )
++            elif reduction_type == "online_softmax_cross_entropy":
++                # Cross-entropy online: value is (logit_val, target_idx)
++                # We do online softmax on logit_val and also gather the target logit
++                self.has_online_softmax = True
++                assert isinstance(value, tuple) and len(value) == 2
++                logit_val, target_idx = value
++
++                accumulator_max = f"_{result_var}_max"
++                accumulator_sum = f"_{result_var}_sum"
++                accumulator_target = f"_{result_var}_target"
++
++                use_scalar = config.triton.scalar_reduction_accumulators
++
++                if use_scalar:
++                    non_reduce_sizes = self.dense_size_list()[:dim]
++                    if non_reduce_sizes:
++                        scalar_acc_size_str = f"[{', '.join(non_reduce_sizes)}]"
++                    else:
++                        scalar_acc_size_str = "[1]"
++
++                    # Setup scalar accumulators for max and sum
++                    self.body.writeline(
++                        f"{accumulator_max} = tl.full({scalar_acc_size_str}, float('-inf'), {acc_type})"
++                    )
++                    self.body.writeline(
++                        f"{accumulator_sum} = tl.full({scalar_acc_size_str}, 0.0, {acc_type})"
++                    )
++                    # Target logit accumulator: loaded once, kept across iterations
++                    # We use a flag to track if it's been loaded
++                    self.body.writeline(
++                        f"{accumulator_target} = tl.full({scalar_acc_size_str}, 0.0, {acc_type})"
++                    )
++                    self.body.writeline(
++                        f"{accumulator_target}_loaded = tl.full({scalar_acc_size_str}, 0, tl.int1)"
++                    )
++
++                    # In-loop: online softmax combine on logit_val
++                    if cond:
++                        masked_val_for_max = f"tl.where({cond}, {logit_val}, float('-inf'))"
++                        masked_val_for_sum = masked_val_for_max
++                    else:
++                        masked_val_for_max = str(logit_val)
++                        masked_val_for_sum = str(logit_val)
++
+                     self.compute.splice(
+                         f"""
+-                        {accumulator_max}_next, {accumulator_sum}_next = triton_helpers.online_softmax_combine(
+-                            {accumulator_max}, {accumulator_sum}, {value}, {config.use_fast_math}
++                        {accumulator_max}_block_max = triton_helpers.max2({masked_val_for_max}, {dim})
++                        {accumulator_max}_new = triton_helpers.maximum({accumulator_max}, {accumulator_max}_block_max)
++                        {accumulator_sum}_correction = tl_math.exp(({accumulator_max} - {accumulator_max}_new).to(tl.float32))
++                        {accumulator_sum}_block = tl.sum(
++                            tl_math.exp(({masked_val_for_sum} - {self.reduction_resize(f"{accumulator_max}_new")}).to(tl.float32)),
++                            {dim}
+                         )
++                        {accumulator_sum} = {accumulator_sum} * {accumulator_sum}_correction + {accumulator_sum}_block
++                        {accumulator_max} = {accumulator_max}_new
+                         """
+                     )
+ 
+-                # mask
+-                self.compute.splice(
+-                    f"""
+-                    {accumulator_max} = {where_cond(f"{accumulator_max}_next", accumulator_max)}
+-                    {accumulator_sum} = {where_cond(f"{accumulator_sum}_next", accumulator_sum)}
+-                    """
+-                )
++                    # In-loop: capture the target logit value.
++                    # target_logit (from inner_fn) is [XBLOCK, R0_BLOCK] but has the
++                    # SAME value across the R0_BLOCK dim (it only depends on outer idx).
++                    # We capture it on the first iteration (when _loaded is False)
++                    # and keep it for subsequent iterations.
++                    # Since the load is loop-invariant (same address each iter),
++                    # the Triton compiler should hoist it via LICM.
++                    if cond:
++                        target_val_expr = f"triton_helpers.max2(tl.where({cond}, {target_idx}.to({acc_type}), float('-inf')), {dim})"
++                    else:
++                        target_val_expr = f"triton_helpers.max2({target_idx}.to({acc_type}), {dim})"
++                    self.compute.splice(
++                        f"""
++                        {accumulator_target} = tl.where({accumulator_target}_loaded, {accumulator_target}, {target_val_expr})
++                        {accumulator_target}_loaded = tl.full({scalar_acc_size_str}, 1, tl.int1)
++                        """
++                    )
+ 
+-                # reduce. Similar to the final reduction for coopereative
+-                # reduction
+-                result_max = result_var
+-                result_sum = self.cse.newvar(
+-                    dtype=dtype, shape=cast(Any, result_max).shape
+-                )
++                    # Post-loop: reshape accumulators
++                    result_max = result_var
++                    result_sum = self.cse.newvar(dtype=dtype, shape=result_max.shape)
++                    result_target = self.cse.newvar(dtype=dtype, shape=result_max.shape)
++                    self.post_loop_combine.splice(
++                        f"""
++                        {result_max} = {self.reduction_resize(f"{accumulator_max}")}
++                        {result_sum} = {self.reduction_resize(f"{accumulator_sum}")}
++                        {result_target} = {self.reduction_resize(f"{accumulator_target}")}
++                        """
++                    )
++                    result_var = result_max, result_sum, result_target
++                else:
++                    # Vector accumulator path - fallback to 2-pass
++                    # For now, just do online softmax and pass target_idx through
++                    logit_val_v = logit_val
++                    accumulator_max_name = accumulator_max
++                    accumulator_sum_name = accumulator_sum
+ 
+-                result_var = self.online_softmax_reduce_final_reduction(
+-                    self.post_loop_combine,
+-                    result_max,
+-                    result_sum,
+-                    accumulator_max,
+-                    accumulator_sum,
+-                    dim,
+-                    dtype,
+-                )
++                    self.body.writeline(
++                        f"{accumulator_max_name} = tl.full({self.dense_size_str()}, float('-inf'), {acc_type})"
++                    )
++                    self.body.writeline(
++                        f"{accumulator_sum_name} = tl.zeros({self.dense_size_str()}, {acc_type})"
++                    )
++                    self.body.writeline(
++                        f"{accumulator_target} = tl.zeros({self.dense_size_str()}, {acc_type})"
++                    )
++                    self.body.writeline(
++                        f"{accumulator_target}_loaded = tl.zeros({self.dense_size_str()}, tl.int1)"
++                    )
++
++                    self.compute.splice(
++                        f"""
++                        {accumulator_max_name}_next, {accumulator_sum_name}_next = triton_helpers.online_softmax_combine(
++                            {accumulator_max_name}, {accumulator_sum_name}, {logit_val_v}, {config.use_fast_math}
++                        )
++                        {accumulator_max_name} = {where_cond(f"{accumulator_max_name}_next", accumulator_max_name)}
++                        {accumulator_sum_name} = {where_cond(f"{accumulator_sum_name}_next", accumulator_sum_name)}
++                        {accumulator_target} = tl.where({accumulator_target}_loaded, {accumulator_target}, {target_idx}.to({acc_type}))
++                        {accumulator_target}_loaded = tl.full({self.dense_size_str()}, True, tl.int1)
++                        """
++                    )
++
++                    result_max = result_var
++                    result_sum = self.cse.newvar(dtype=dtype, shape=cast(Any, result_max).shape)
++                    result_target = self.cse.newvar(dtype=dtype, shape=cast(Any, result_max).shape)
++
++                    result_var = self.online_softmax_reduce_final_reduction(
++                        self.post_loop_combine,
++                        result_max,
++                        result_sum,
++                        accumulator_max_name,
++                        accumulator_sum_name,
++                        dim,
++                        dtype,
++                    )
++                    # The target is already scalar per row, just reduce (take any)
++                    self.post_loop_combine.splice(
++                        f"""
++                        {result_target} = triton_helpers.max2({accumulator_target}, {dim})
++                        {result_target} = {self.reduction_resize(str(result_target))}
++                        """
++                    )
++                    result_var = (*result_var, result_target)
+             else:
+                 combine_fn = ir.get_reduction_combine_fn(reduction_type, src_dtype)
+-                updated = combine_fn(accumulator, value)
+-                if reduction_type == "dot":
++                if use_scalar_acc:
++                    # Scalar accumulator path: reduce the value within each
++                    # iteration and combine with the scalar accumulator.
++                    # First mask the value with the identity element so that
++                    # out-of-bounds elements do not affect the reduction.
++                    triton_reduction_fn = get_triton_reduction_function(
++                        reduction_type
++                    )
++                    if cond:
++                        masked_val = f"tl.where({cond}, {value}, {default})"
++                    else:
++                        masked_val = str(value)
++                    # Reduce over the innermost (reduction) dimension
++                    reduced_val = self.cse.generate(
++                        self.compute,
++                        f"{triton_reduction_fn}({masked_val}, {dim})",
++                        dtype=torch_acc_type,
++                        shape=accumulator.shape,
++                    )
++                    updated = combine_fn(accumulator, reduced_val)
+                     self.compute.writeline(f"{accumulator} = {updated}")
+-                else:
+-                    self.compute.writeline(
+-                        f"{accumulator} = {where_cond(updated, accumulator)}"
++
++                    # After the loop, the accumulator IS the result - just
++                    # reshape to add back the reduced singleton dimension.
++                    result_str, result_shape = self.reduction_resize_and_shape(
++                        str(accumulator), accumulator.shape
++                    )
++                    self.post_loop_combine.writeline(
++                        f"{result_var} = {result_str}"
+                     )
++                else:
++                    updated = combine_fn(accumulator, value)
++                    if reduction_type == "dot":
++                        self.compute.writeline(f"{accumulator} = {updated}")
++                    else:
++                        self.compute.writeline(
++                            f"{accumulator} = {where_cond(updated, accumulator)}"
++                        )
++
++                    if src_dtype == torch.bool:
++                        # This is only really used for aten.any. It changes the
++                        # final reduction of a non-persistent reduction from
++                        #     tmp5 = triton_helpers.max(_tmp5, 1)[:, None]
++                        # to
++                        #     tmp5 = triton_helpers.max(_tmp5.to(tl.int8), 1)[:, None].to(tl.int1)
++                        # which is needed because tl.reduce doesn't support tl.int1
++                        accumulator = self.cse.generate(
++                            self.post_loop_combine,
++                            f"{accumulator}.to(tl.int8)",
++                            dtype=torch.int8,
++                            shape=accumulator.shape,
++                        )
+ 
+-                if src_dtype == torch.bool:
+-                    # This is only really used for aten.any. It changes the
+-                    # final reduction of a non-persistent reduction from
+-                    #     tmp5 = triton_helpers.max(_tmp5, 1)[:, None]
+-                    # to
+-                    #     tmp5 = triton_helpers.max(_tmp5.to(tl.int8), 1)[:, None].to(tl.int1)
+-                    # which is needed because tl.reduce doesn't support tl.int1
+-                    accumulator = self.cse.generate(
++                    final_reduction_define(
+                         self.post_loop_combine,
+-                        f"{accumulator}.to(tl.int8)",
+-                        dtype=torch.int8,
+-                        shape=accumulator.shape,
++                        cast(CSEVariable, result_var),
++                        accumulator,
++                        None,
+                     )
+ 
+-                final_reduction_define(
+-                    self.post_loop_combine,
+-                    cast(CSEVariable, result_var),
+-                    accumulator,
+-                    None,
+-                )
+-
+         if self.cooperative_reduction:
+             default = ir.Reduction.default_accumulator(reduction_type, src_dtype)
+             exit_stack = contextlib.ExitStack()
+@@ -5035,6 +5335,33 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                     dim,
+                     dtype,
+                 )
++            elif reduction_type == "online_softmax_cross_entropy":
++                result_max, result_sum, result_target = cast(
++                    tuple[CSEVariable, CSEVariable, CSEVariable], result_var
++                )
++                assert isinstance(default, Sequence)
++                peer_max = self.codegen_cooperative_reduction_peer_combine(
++                    result_max, upcast_acc_dtype(src_dtype), default[0]
++                )
++                peer_sum = self.codegen_cooperative_reduction_peer_combine(
++                    result_sum, upcast_acc_dtype(src_dtype), default[1]
++                )
++                self.online_softmax_reduce_final_reduction(
++                    self.post_loop_store,
++                    result_max,
++                    result_sum,
++                    peer_max,
++                    peer_sum,
++                    dim,
++                    dtype,
++                )
++                # Target logit: just take max of peers (all should be the same value)
++                peer_target = self.codegen_cooperative_reduction_peer_combine(
++                    result_target, upcast_acc_dtype(src_dtype), default[2]
++                )
++                self.post_loop_store.writeline(
++                    f"{result_target} = triton_helpers.maximum({result_target}, {peer_target})"
++                )
+             else:
+                 peers = self.codegen_cooperative_reduction_peer_combine(
+                     cast(CSEVariable, result_var), upcast_acc_dtype(src_dtype), default
+@@ -6140,6 +6467,8 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+             out["min_xblock"] = self.min_xblock
+         if self.min_rblock is not None:
+             out["min_rblock"] = self.min_rblock
++        if self.has_online_softmax:
++            out["has_online_softmax"] = True
+         if self.cooperative_reduction:
+             out["persistent_reduction"] = self.persistent_reduction
+         if (rblock := self._get_native_matmul_persistent_rblock()) is not None:
+diff --git a/torch/_inductor/config.py b/torch/_inductor/config.py
+index 0af0521eac3..18633fbea0c 100644
+--- a/torch/_inductor/config.py
++++ b/torch/_inductor/config.py
+@@ -2027,6 +2027,15 @@ class triton:
+     # We should revisit this once we understand more of the source of register spills.
+     spill_threshold: int = 32 if torch.version.hip else 16
+ 
++    # Use scalar accumulators for simple associative reductions (sum, max,
++    # min, prod, xor_sum, any) in non-persistent reduction loops.  This
++    # reduces register pressure by accumulating into a scalar per x-element
++    # instead of keeping the full R0_BLOCK tile alive across iterations.
++    # Only applies when paired with large R0_BLOCK configs (2048/4096).
++    scalar_reduction_accumulators = (
++        os.environ.get("TORCHINDUCTOR_SCALAR_REDUCTION_ACCUMULATORS", "1") == "1"
++    )
++
+     # Generate code containing the newer tl.make_block_ptr() API for loads/store
+     use_block_ptr = False
+ 
+-- 
+2.43.0
+
+
+From 5205038a9edc306d70241cbb84223b1c39214907 Mon Sep 17 00:00:00 2001
+From: Elias Ellison <elias.ellison@gmail.com>
+Date: Wed, 10 Jun 2026 21:04:27 +0000
+Subject: [PATCH 2/2] [inductor] Fast combine for online-softmax loops
+ (amax_sum_sum_6fd07d12d98a, 1.42x->1.01x)
+
+Online-softmax reduction loops (looped scalar-accumulator path and the
+persistent two-pass fallback) generated:
+
+  tmp0 = tl.load(..., r0_mask, other=0.0)
+  block_max = triton_helpers.max2(tl.where(r0_mask, tmp0, float('-inf')), 1)
+
+Two costs on top of an optimal loop:
+1. triton_helpers.max2 is tl.reduce with a custom NaN-propagating combine
+   fn; it compiles to substantially slower code than native tl.max
+   (~15% on f32[16384, 50257] CE rows on B200).
+2. The masked load fills 0.0 then re-masks to -inf inside the loop.
+
+Fix, behind new config triton.online_softmax_fast_combine (default True):
+- emit tl.max for the per-block max of online-softmax reductions;
+- when the reduction input is a direct masked load whose mask equals the
+  reduction mask, rewrite the load to other=float('-inf') and skip the
+  in-loop tl.where re-masking (applies to both the looped path and the
+  persistent two-pass fallback used by prepare_softmax_online /
+  cross_entropy_loss_online).
+
+NaN semantics: exp(NaN) = NaN, so the sum_exp output still poisons any
+softmax / log-softmax / cross-entropy computed from (max, sum); verified
+NaN rows and all -inf rows match eager. ignore_index CE verified exact
+with ignored labels present, absent, and all-ignored (NaN mean).
+
+Benchmarks (B200, oracle --bench, fresh cache):
+- amax_sum_sum_6fd07d12d98a DistillGPT2 infer shifted-label ignore-index
+  CE mean: 738 -> 531us, 1.42x -> 1.01x AT_FLOOR
+- amax_sum_sum_86d05d6810f4 DistillGPT2 train: 739 -> 531us, 1.42x -> 1.01x
+- amax_sum_sum_e2f518f0a274 GPT2 causal-LM CE: 149 -> 97us, 1.64x -> 1.08x
+- amax_sum_d112f48ea917 Reformer stable softmax: 101 -> 77us, 1.34x -> 1.03x
+- amax_sum_sum_0e37ca9164b3 Blenderbot CE: 44 -> 36us, 1.30x -> 1.06x
+Regressions: none (amax_sum_f5253e4f250e 1.03x, amax_sum_17ab35828f89
+0.91x, sum_sum_b16afac198fb 0.95x, amax_sum_9940b361e5b4 2.54x vs 2.60x
+baseline; test_online_softmax.py failures identical before/after).
+
+written with claude code
+---
+ torch/_inductor/codegen/triton.py | 138 ++++++++++++++++++++++++++++--
+ torch/_inductor/config.py         |  15 ++++
+ 2 files changed, 147 insertions(+), 6 deletions(-)
+
+diff --git a/torch/_inductor/codegen/triton.py b/torch/_inductor/codegen/triton.py
+index 1e495e37ec2..3e14d90ab92 100644
+--- a/torch/_inductor/codegen/triton.py
++++ b/torch/_inductor/codegen/triton.py
+@@ -71,6 +71,7 @@ from ..shape_propagation import get_broadcasted_shape
+ from ..stream_utils import get_raw_stream_name
+ from ..utils import (
+     cache_on_self,
++    DeferredLineBase,
+     DelayReplaceLine,
+     device_supports_fp64,
+     get_bounds_index_expr,
+@@ -3083,6 +3084,10 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+         # We track the store name since a store can be canceled later
+         self.stores_with_contiguous_rdim: list[str] = []
+         self.has_online_softmax = False
++        # Set while generating the twopass fallback of an online-softmax
++        # reduction whose input load was rewritten to fill masked lanes with
++        # -inf; makes the inner "max" reduction use tl.max without re-masking.
++        self._online_softmax_fast_max = False
+ 
+     def triton_tensor_ndim(self) -> int:
+         return sum(int(tree.tensor_dim is not None) for tree in self.range_trees)
+@@ -4452,6 +4457,74 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+             shape=tuple(target_shape),
+         )
+ 
++    def _rewrite_masked_load_other_neg_inf(self, load_var, masks) -> bool:
++        """
++        Try to rewrite the masked tl.load feeding an online-softmax reduction
++        so that masked-out lanes are filled with -inf directly
++        (``other=float("-inf")``) instead of 0.0.  This lets the caller skip
++        the per-iteration ``tl.where(mask, value, -inf)`` re-masking in the
++        reduction loop, which measurably speeds up bandwidth-bound
++        online-softmax kernels.
++
++        Only fires when ``load_var`` is the direct result of a single masked
++        load (no intermediate compute) whose mask is exactly the reduction
++        mask.  Masked-out lanes of a load are never observable through other
++        consumers (reductions re-mask with their own default and stores are
++        masked), so changing the fill value is safe.
++
++        Returns True if the load was rewritten.
++        """
++        if self._load_mask is not None:
++            return False
++        # Native-matmul masking decisions inspect the textual "other=0.0" in
++        # CSE cache keys (ops.dot); don't invalidate them.
++        if self.is_native_matmul:
++            return False
++        if not isinstance(load_var, TritonCSEVariable):
++            return False
++        if load_var.dtype is None or not load_var.dtype.is_floating_point:
++            return False
++        if load_var.mask_vars != OrderedSet(masks):
++            return False
++
++        target_prefix = f"{load_var} = tl.load("
++        old_other = ", other=0.0"
++        new_other = ", other=float(\"-inf\")"
++        for i, line in enumerate(self.loads._lines):
++            text = line.line if isinstance(line, DeferredLineBase) else line
++            if not isinstance(text, str):
++                continue
++            stripped = text.strip()
++            if not stripped.startswith(target_prefix):
++                continue
++            if stripped.count(old_other) != 1:
++                return False
++            new_text = text.replace(old_other, new_other)
++            if isinstance(line, DeferredLineBase):
++                line.line = new_text
++            else:
++                self.loads._lines[i] = new_text
++            return True
++        return False
++
++    def _twopass_fallback_maybe_fast_max(self, dtype, value, pre_broadcast_value, masks):
++        """
++        Persistent-reduction fallback for online softmax.  If the input is a
++        direct masked load, rewrite it to fill -inf so the inner max reduction
++        can skip re-masking and use native tl.max (see
++        config.triton.online_softmax_fast_combine).
++        """
++        if config.triton.online_softmax_fast_combine and self._rewrite_masked_load_other_neg_inf(
++            pre_broadcast_value, masks
++        ):
++            prior = self._online_softmax_fast_max
++            self._online_softmax_fast_max = True
++            try:
++                return self.prepare_softmax_twopass_fallback(dtype, value)
++            finally:
++                self._online_softmax_fast_max = prior
++        return self.prepare_softmax_twopass_fallback(dtype, value)
++
+     def reduction(
+         self,
+         dtype: torch.dtype,
+@@ -4518,6 +4591,9 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+         # tmp0 in the triton code is either a scalar, or single-element tensor
+         # so if we emit tl.sum directly, it will only give 1 instead of RBLOCK * 1
+         # To avoid this, we broadcast to the expected shape first.
++        # Keep the pre-broadcast value around so online-softmax can trace it
++        # back to a direct masked load (see _try_rewrite_load_fill_neg_inf).
++        pre_broadcast_value = value
+         value = self._map_tuple_or_scalar(
+             lambda v: self.cse.generate(
+                 self.compute,
+@@ -4562,6 +4638,11 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+             Helper to generate a reduction call, e.g. tl.sum.
+             """
+             triton_reduction_fn = get_triton_reduction_function(reduction_type)
++            if reduction_type == "max" and self._online_softmax_fast_max:
++                # See config.triton.online_softmax_fast_combine: native tl.max
++                # is much faster than triton_helpers.max2; NaNs still poison
++                # the downstream exp/sum.
++                triton_reduction_fn = "tl.max"
+ 
+             value = self.reduction_collapse_dims(buffer, value, dtype)
+             if reduction_type == "dot":
+@@ -4720,6 +4801,12 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                 # Since tl.dot performs reduction within the triton block,
+                 # masking should happen before the tl.dot is called.
+                 masked_value = self.cse.generate(self.compute, value, dtype=value.dtype)
++            elif reduction_type == "max" and self._online_softmax_fast_max:
++                # The load feeding this max was rewritten to fill masked-out
++                # lanes with -inf (the max identity); no re-masking needed.
++                masked_value = self.cse.generate(
++                    self.compute, value, dtype=value.dtype, shape=value.shape
++                )
+             else:
+                 masked_value = _mask_value(value, default)
+ 
+@@ -4785,7 +4872,9 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                 else:
+                     # All data is loaded to register anyway, no need to do
+                     # online softmax
+-                    result_var = self.prepare_softmax_twopass_fallback(dtype, value)
++                    result_var = self._twopass_fallback_maybe_fast_max(
++                        dtype, value, pre_broadcast_value, masks
++                    )
+             elif reduction_type == "online_softmax_cross_entropy":
+                 # For cross-entropy, value is (logit_val, target_idx)
+                 if isinstance(value, tuple):
+@@ -4816,7 +4905,9 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                     result_var = (*result_var, target_idx)
+                 else:
+                     # Fallback: 2-pass softmax + separate gather
+-                    result_var = self.prepare_softmax_twopass_fallback(dtype, value)
++                    result_var = self._twopass_fallback_maybe_fast_max(
++                        dtype, value, pre_broadcast_value, masks
++                    )
+             else:
+                 assert isinstance(masked_value, CSEVariable)
+                 _result, _dtype, _shape = final_reduction(
+@@ -4952,16 +5043,32 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                     # 4. block_sum = sum(exp(value - new_max)) over reduction dim
+                     # 5. running_sum = running_sum * correction + block_sum
+                     # 6. running_max = new_max
+-                    if cond:
++                    if cond and not (
++                        config.triton.online_softmax_fast_combine
++                        and self._rewrite_masked_load_other_neg_inf(
++                            pre_broadcast_value, masks
++                        )
++                    ):
+                         masked_val_for_max = f"tl.where({cond}, {value}, float('-inf'))"
+                         masked_val_for_sum = masked_val_for_max
+                     else:
+                         masked_val_for_max = str(value)
+                         masked_val_for_sum = str(value)
+ 
++                    # tl.max compiles to much faster code than
++                    # triton_helpers.max2 (generic tl.reduce with NaN
++                    # propagation).  NaN inputs still poison the sum output
++                    # via exp(NaN), so downstream softmax/log-softmax stays
++                    # NaN-identical.  See config.triton.online_softmax_fast_combine.
++                    block_max_fn = (
++                        "tl.max"
++                        if config.triton.online_softmax_fast_combine
++                        else "triton_helpers.max2"
++                    )
++
+                     self.compute.splice(
+                         f"""
+-                        {accumulator_max}_block_max = triton_helpers.max2({masked_val_for_max}, {dim})
++                        {accumulator_max}_block_max = {block_max_fn}({masked_val_for_max}, {dim})
+                         {accumulator_max}_new = triton_helpers.maximum({accumulator_max}, {accumulator_max}_block_max)
+                         {accumulator_sum}_correction = tl_math.exp(({accumulator_max} - {accumulator_max}_new).to(tl.float32))
+                         {accumulator_sum}_block = tl.sum(
+@@ -5076,16 +5183,35 @@ class TritonKernel(SIMDKernel[TritonCSEVariable]):
+                     )
+ 
+                     # In-loop: online softmax combine on logit_val
+-                    if cond:
++                    pre_broadcast_logit = (
++                        pre_broadcast_value[0]
++                        if isinstance(pre_broadcast_value, tuple)
++                        else pre_broadcast_value
++                    )
++                    if cond and not (
++                        config.triton.online_softmax_fast_combine
++                        and self._rewrite_masked_load_other_neg_inf(
++                            pre_broadcast_logit, masks
++                        )
++                    ):
+                         masked_val_for_max = f"tl.where({cond}, {logit_val}, float('-inf'))"
+                         masked_val_for_sum = masked_val_for_max
+                     else:
+                         masked_val_for_max = str(logit_val)
+                         masked_val_for_sum = str(logit_val)
+ 
++                    # See note in online_softmax_reduce: tl.max is much faster
++                    # than triton_helpers.max2 and the sum output still
++                    # propagates NaNs.
++                    block_max_fn = (
++                        "tl.max"
++                        if config.triton.online_softmax_fast_combine
++                        else "triton_helpers.max2"
++                    )
++
+                     self.compute.splice(
+                         f"""
+-                        {accumulator_max}_block_max = triton_helpers.max2({masked_val_for_max}, {dim})
++                        {accumulator_max}_block_max = {block_max_fn}({masked_val_for_max}, {dim})
+                         {accumulator_max}_new = triton_helpers.maximum({accumulator_max}, {accumulator_max}_block_max)
+                         {accumulator_sum}_correction = tl_math.exp(({accumulator_max} - {accumulator_max}_new).to(tl.float32))
+                         {accumulator_sum}_block = tl.sum(
+diff --git a/torch/_inductor/config.py b/torch/_inductor/config.py
+index 18633fbea0c..f1b05184d70 100644
+--- a/torch/_inductor/config.py
++++ b/torch/_inductor/config.py
+@@ -2036,6 +2036,21 @@ class triton:
+         os.environ.get("TORCHINDUCTOR_SCALAR_REDUCTION_ACCUMULATORS", "1") == "1"
+     )
+ 
++    # Speed up the inner loop of online-softmax reductions:
++    #  1. use native tl.max for the per-block running max instead of
++    #     triton_helpers.max2 (generic tl.reduce with a NaN-propagating
++    #     combine fn), which compiles to substantially faster code; and
++    #  2. when the value feeding the reduction is a direct masked load,
++    #     load with other=-inf and skip the in-loop
++    #     tl.where(mask, value, -inf) re-masking.
++    # NaN inputs still poison the sum_exp output (exp(NaN) = NaN), so
++    # softmax / log-softmax / cross-entropy results computed from
++    # (max, sum) remain NaN-identical; only the raw max output may
++    # differ in the presence of NaNs.
++    online_softmax_fast_combine = (
++        os.environ.get("TORCHINDUCTOR_ONLINE_SOFTMAX_FAST_COMBINE", "1") == "1"
++    )
++
+     # Generate code containing the newer tl.make_block_ptr() API for loads/store
+     use_block_ptr = False
+ 
+-- 
+2.43.0
+

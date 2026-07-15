@@ -1,4 +1,4 @@
-From a73d1583b348acfadfb2089e87e9c94572120910 Mon Sep 17 00:00:00 2001
+From a07f66f9996d2f6a3f1176f68f60bd4ddcc056ee Mon Sep 17 00:00:00 2001
 From: Elias Ellison <elias.ellison@gmail.com>
 Date: Fri, 5 Jun 2026 15:40:38 +0000
 Subject: [PATCH] [inductor] Canonicalize reciprocal(sqrt(x)) to rsqrt(x)
@@ -15,10 +15,10 @@ written with claude code
  1 file changed, 45 insertions(+)
 
 diff --git a/torch/_inductor/fx_passes/post_grad.py b/torch/_inductor/fx_passes/post_grad.py
-index 93195fa3075..c818d572bf8 100644
+index 89764ca908d..428e64ead33 100644
 --- a/torch/_inductor/fx_passes/post_grad.py
 +++ b/torch/_inductor/fx_passes/post_grad.py
-@@ -2085,6 +2085,51 @@ def cat_splitwithsizes_replace(match, input_):
+@@ -1609,6 +1609,51 @@ def cat_splitwithsizes_replace(match, input_):
      return input_
  
  

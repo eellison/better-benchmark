@@ -1,8 +1,573 @@
-From ab29345d82d4a6c0ed48e05493c988f1a51ecfa6 Mon Sep 17 00:00:00 2001
+From 1cca4ca8347a667ba8253b555920b3fb3450496e Mon Sep 17 00:00:00 2001
+From: Elias Ellison <elias.ellison@gmail.com>
+Date: Wed, 15 Jul 2026 01:44:51 +0000
+Subject: [PATCH 1/2] [inductor] Cross-entropy online-softmax fusion infra
+ (prerequisite for CE loop-invariant hoist PR)
+
+Minimal scaffolding carved from the June 2026 mega-commit 97385fb3273, limited
+to the cross-entropy-online path:
+- inductor_prims.cross_entropy_loss_online prim (+ eager impl)
+- ops_handler ReductionType 'online_softmax_cross_entropy'
+- ir.py: CrossEntropyOnlineReduction + reduction combine/default/num_outputs
+- utils.reduction_num_outputs handling
+- lowering.py: cross_entropy_loss_online register_lowering (mega 'Path A')
+- fx_passes/post_grad.py: _cross_entropy_gather_fusion_pass + wiring under
+  config.online_softmax
+
+This is the exact pre-image the CE-hoist commit (ab29345d82d) rewrites; the
+sibling-reduction-fusion prototype bits in ir.py are carried as part of the
+mega ir hunk (guarded by config._sibling_reduction_fusion, default False).
+
+written with claude code
+---
+ torch/_inductor/config.py              |   3 +
+ torch/_inductor/fx_passes/post_grad.py | 210 +++++++++++++++++++++++++
+ torch/_inductor/inductor_prims.py      |  25 +++
+ torch/_inductor/ir.py                  | 108 +++++++++++++
+ torch/_inductor/lowering.py            |  69 ++++++++
+ torch/_inductor/ops_handler.py         |   1 +
+ torch/_inductor/utils.py               |   2 +-
+ 7 files changed, 417 insertions(+), 1 deletion(-)
+
+diff --git a/torch/_inductor/config.py b/torch/_inductor/config.py
+index 0af0521eac3..58668a26b4e 100644
+--- a/torch/_inductor/config.py
++++ b/torch/_inductor/config.py
+@@ -1005,6 +1005,9 @@ conv_1x1_as_mm = False
+ # enabling both of these will implicitly disable split_reductions
+ split_reductions = os.getenv("TORCHINDUCTOR_SPLIT_REDUCTIONS", "1") == "1"
+ 
++# PROTOTYPE: Force OUTER reductions to use INNER splitting to enable sibling fusion
++_sibling_reduction_fusion = False
++
+ # A deterministic mode that skips any on device benchmarking in Inductor
+ # if we know they affect numerics.  WARNING: Expect perf hit in this mode.
+ deterministic = os.getenv("TORCHINDUCTOR_DETERMINISTIC") == "1"
+diff --git a/torch/_inductor/fx_passes/post_grad.py b/torch/_inductor/fx_passes/post_grad.py
+index 89764ca908d..ac8395ffc93 100644
+--- a/torch/_inductor/fx_passes/post_grad.py
++++ b/torch/_inductor/fx_passes/post_grad.py
+@@ -141,6 +141,209 @@ def _chain_random_ops_for_ordering(graph: torch.fx.Graph) -> None:
+     preserve_node_ordering(graph, additional_deps_map)
+ 
+ 
++def _cross_entropy_gather_fusion_pass(graph: torch.fx.Graph, gm=None):
++    """
++    Detect the cross-entropy gather-into-softmax pattern and fuse.
++
++    After prepare_softmax_online fires, the graph has:
++        max, sum_exp = prepare_softmax_online(logits, dim)
++        xsub = logits - max
++        log_sum_exp = log(sum_exp)
++        log_softmax = xsub - log_sum_exp
++        target_logprob = gather(log_softmax, dim, targets_unsqueezed)
++
++    This rewrites to use cross_entropy_loss_online which fuses the gather
++    into the online softmax kernel:
++        max, sum_exp, target_logit = cross_entropy_loss_online(logits, targets, dim)
++    And replaces: target_logprob = target_logit - max - log(sum_exp)
++    """
++    from torch._inductor.inductor_prims import cross_entropy_loss_online
++
++    changed = False
++    for node in list(graph.nodes):
++        # Look for prepare_softmax_online calls
++        if not (
++            node.op == "call_function"
++            and node.target == torch.ops.prims.prepare_softmax_online.default
++        ):
++            continue
++
++        logits_node = node.args[0]
++        dim = node.args[1]
++
++        # Find getitem users (max=0, sum_exp=1)
++        max_node = None
++        sum_exp_node = None
++        for user in node.users:
++            if user.op == "call_function" and user.target == operator.getitem:
++                if user.args[1] == 0:
++                    max_node = user
++                elif user.args[1] == 1:
++                    sum_exp_node = user
++
++        if max_node is None or sum_exp_node is None:
++            continue
++
++        # Look for the pattern: sub(logits, max) -> sub(_, log(sum_exp)) -> gather
++        # Find: xsub = sub(logits, max)
++        xsub_node = None
++        for user in max_node.users:
++            if (
++                user.op == "call_function"
++                and user.target == torch.ops.aten.sub.Tensor
++                and user.args[0] is logits_node
++                and user.args[1] is max_node
++            ):
++                xsub_node = user
++                break
++
++        if xsub_node is None:
++            continue
++
++        # Find: log_sum_exp = log(sum_exp)
++        log_node = None
++        for user in sum_exp_node.users:
++            if (
++                user.op == "call_function"
++                and user.target == torch.ops.aten.log.default
++                and user.args[0] is sum_exp_node
++            ):
++                log_node = user
++                break
++
++        if log_node is None:
++            continue
++
++        # Find: log_softmax = sub(xsub, log_sum_exp)
++        log_softmax_node = None
++        for user in xsub_node.users:
++            if (
++                user.op == "call_function"
++                and user.target == torch.ops.aten.sub.Tensor
++                and user.args[0] is xsub_node
++                and user.args[1] is log_node
++            ):
++                log_softmax_node = user
++                break
++
++        if log_softmax_node is None:
++            continue
++
++        # Find: gather(log_softmax, dim, targets_unsqueezed)
++        gather_node = None
++        for user in log_softmax_node.users:
++            if (
++                user.op == "call_function"
++                and user.target == torch.ops.aten.gather.default
++                and user.args[0] is log_softmax_node
++                and user.args[1] == dim
++            ):
++                gather_node = user
++                break
++
++        if gather_node is None:
++            continue
++
++        # Check that log_softmax_node has only one user (the gather)
++        # If it has other users, we can't eliminate it
++        if len(log_softmax_node.users) != 1:
++            continue
++
++        # Also check xsub_node is only used by log_softmax
++        if len(xsub_node.users) != 1:
++            continue
++
++        # Found the full pattern! Now rewrite.
++        # The gather index is targets_unsqueezed (shape [N, 1] for dim=1)
++        targets_unsqueezed = gather_node.args[2]
++
++        # Find the unsqueeze to get the raw targets
++        # targets_unsqueezed = unsqueeze(targets, dim)
++        if (
++            targets_unsqueezed.op == "call_function"
++            and targets_unsqueezed.target == torch.ops.aten.unsqueeze.default
++        ):
++            targets_node = targets_unsqueezed.args[0]
++        else:
++            # Can't easily extract targets, skip
++            continue
++
++        # Insert cross_entropy_loss_online(logits, targets, dim)
++        with graph.inserting_before(node):
++            fused_node = graph.call_function(
++                cross_entropy_loss_online,
++                args=(logits_node, targets_node, dim),
++            )
++            # Copy metadata from original node
++            if hasattr(node, "meta") and "val" in node.meta:
++                orig_max_meta = max_node.meta.get("val") if max_node else None
++                orig_sum_meta = sum_exp_node.meta.get("val") if sum_exp_node else None
++                orig_gather_meta = gather_node.meta.get("val") if gather_node else None
++                if orig_max_meta is not None and orig_sum_meta is not None and orig_gather_meta is not None:
++                    fused_node.meta["val"] = (orig_max_meta, orig_sum_meta, orig_gather_meta)
++
++            # Create getitem nodes for the 3 outputs
++            new_max = graph.call_function(operator.getitem, args=(fused_node, 0))
++            new_sum_exp = graph.call_function(operator.getitem, args=(fused_node, 1))
++            new_target_logit = graph.call_function(operator.getitem, args=(fused_node, 2))
++
++            if max_node.meta.get("val") is not None:
++                new_max.meta["val"] = max_node.meta["val"]
++            if sum_exp_node.meta.get("val") is not None:
++                new_sum_exp.meta["val"] = sum_exp_node.meta["val"]
++            if gather_node.meta.get("val") is not None:
++                new_target_logit.meta["val"] = gather_node.meta["val"]
++
++            # Compute log_softmax_at_target = target_logit - max - log(sum_exp)
++            # This gives the same value as gather(log_softmax, dim, targets)
++            new_log_sum_exp = graph.call_function(
++                torch.ops.aten.log.default, args=(new_sum_exp,)
++            )
++            # target_logit - max
++            sub1 = graph.call_function(
++                torch.ops.aten.sub.Tensor, args=(new_target_logit, new_max)
++            )
++            # (target_logit - max) - log(sum_exp) = log_softmax[target]
++            log_softmax_at_target = graph.call_function(
++                torch.ops.aten.sub.Tensor, args=(sub1, new_log_sum_exp)
++            )
++
++            if gather_node.meta.get("val") is not None:
++                new_log_sum_exp.meta["val"] = sum_exp_node.meta["val"]  # same shape
++                sub1.meta["val"] = gather_node.meta["val"]
++                log_softmax_at_target.meta["val"] = gather_node.meta["val"]
++
++        # Replace uses:
++        # - max_node users -> new_max (ONLY for users other than xsub)
++        # - sum_exp_node users -> new_sum_exp (ONLY for users other than log)
++        # - gather_node users -> log_softmax_at_target (the correct value)
++        max_node.replace_all_uses_with(new_max)
++        sum_exp_node.replace_all_uses_with(new_sum_exp)
++        gather_node.replace_all_uses_with(log_softmax_at_target)
++
++        # Remove old nodes (in reverse order of dependencies)
++        graph.erase_node(gather_node)
++        if len(log_softmax_node.users) == 0:
++            graph.erase_node(log_softmax_node)
++        if len(xsub_node.users) == 0:
++            graph.erase_node(xsub_node)
++        if len(log_node.users) == 0:
++            graph.erase_node(log_node)
++        if len(max_node.users) == 0:
++            graph.erase_node(max_node)
++        if len(sum_exp_node.users) == 0:
++            graph.erase_node(sum_exp_node)
++        if len(node.users) == 0:
++            graph.erase_node(node)
++        # Also clean up targets_unsqueezed if unused
++        if len(targets_unsqueezed.users) == 0:
++            graph.erase_node(targets_unsqueezed)
++
++        changed = True
++
++    return changed
++
++
+ def post_grad_passes(gm: torch.fx.GraphModule, is_inference: bool):
+     """
+     Passes that run on after grad.  This is called once on the forwards
+@@ -238,6 +441,13 @@ def post_grad_passes(gm: torch.fx.GraphModule, is_inference: bool):
+         if config.b2b_gemm_pass:
+             B2B_GEMM_PASS.apply(gm.graph)  # type: ignore[arg-type]
+ 
++        if config.online_softmax:
++            GraphTransformObserver(
++                gm, "cross_entropy_gather_fusion"
++            ).apply_graph_pass(
++                functools.partial(_cross_entropy_gather_fusion_pass, gm=gm)
++            )
++
+     if config._micro_pipeline_tp:
+         micro_pipeline_tp_pass(gm.graph)
+ 
+diff --git a/torch/_inductor/inductor_prims.py b/torch/_inductor/inductor_prims.py
+index 7576eb6cd9b..3b510e36f45 100644
+--- a/torch/_inductor/inductor_prims.py
++++ b/torch/_inductor/inductor_prims.py
+@@ -265,6 +265,31 @@ prepare_softmax_online = make_prim(
+ )
+ 
+ 
++def eager_cross_entropy_loss_online(
++    logits: Tensor, targets: Tensor, dim: int
++) -> tuple[Tensor, Tensor, Tensor]:
++    """
++    Fused cross-entropy: computes max, sum_exp, and gathered target logit in one pass.
++    Returns (max, sum_exp, target_logit) where:
++      - max = amax(logits, dim, keepdim=True)
++      - sum_exp = sum(exp(logits - max), dim, keepdim=True)
++      - target_logit = gather(logits, dim, targets.unsqueeze(dim))
++    The loss is then: max + log(sum_exp) - target_logit (negated log_softmax at target).
++    """
++    amax = torch.amax(logits, dim, keepdim=True)
++    sum_exp = torch.sum(torch.exp(logits - amax), dim, keepdim=True)
++    target_logit = torch.gather(logits, dim, targets.unsqueeze(dim))
++    return amax, sum_exp, target_logit
++
++
++cross_entropy_loss_online = make_prim(
++    "cross_entropy_loss_online(Tensor logits, Tensor targets, int dim) -> (Tensor, Tensor, Tensor)",
++    eager_cross_entropy_loss_online,
++    return_type=(_prims.RETURN_TYPE.NEW, _prims.RETURN_TYPE.NEW, _prims.RETURN_TYPE.NEW),
++    doc="Fused cross-entropy online: computes max, sum_exp, and target logit in one reduction pass.",
++)
++
++
+ def _flattened_index_to_nd(indices, width):
+     import sympy
+ 
+diff --git a/torch/_inductor/ir.py b/torch/_inductor/ir.py
+index 50cc28e2848..4a300e5821e 100644
+--- a/torch/_inductor/ir.py
++++ b/torch/_inductor/ir.py
+@@ -1291,6 +1291,12 @@ def get_reduction_combine_fn(
+ 
+         return welford_combine_fn
+ 
++    elif reduction_type == "online_softmax_cross_entropy":
++        # Not used in practice (handled specially in codegen), but needed for IR validation
++        def cross_entropy_combine_fn(a, b):
++            raise NotImplementedError("online_softmax_cross_entropy combine not used directly")
++        return cross_entropy_combine_fn
++
+     else:
+         raise NotImplementedError(f"unknown reduction_type={reduction_type}")
+ 
+@@ -1740,6 +1746,21 @@ class Reduction(Loops):
+             reduction_numel,
+             input_node,
+         )
++        # PROTOTYPE: Reconcile sibling reductions to use same split for fusion
++        if config._sibling_reduction_fusion and split > 1:
++            _sibling_key = (tuple(int(r) for r in ranges), tuple(int(r) for r in reduction_ranges), device)
++            _sibling_registry = getattr(V.graph, "_sibling_reduction_splits", None)
++            if _sibling_registry is None:
++                V.graph._sibling_reduction_splits = {}  # type: ignore[attr-defined]
++                _sibling_registry = V.graph._sibling_reduction_splits
++            if _sibling_key in _sibling_registry:
++                # A sibling reduction with same shape exists - match its split
++                prev_hint, prev_split = _sibling_registry[_sibling_key]
++                if prev_split != split:
++                    hint = prev_hint
++                    split = prev_split
++            else:
++                _sibling_registry[_sibling_key] = (hint, split)
+ 
+         def _maybe_increase_split(split: int) -> int:
+             # don't apply min_num_split constraint for static shape case.
+@@ -1876,6 +1897,7 @@ class Reduction(Loops):
+             "welford_reduce": (zero, zero, zero),
+             "welford_combine": (zero, zero, zero),
+             "online_softmax_reduce": (float("-inf"), zero),
++            "online_softmax_cross_entropy": (float("-inf"), zero, zero),
+         }[reduction_type]
+ 
+     @staticmethod
+@@ -2529,6 +2551,92 @@ class OnlineSoftmaxReduction(MultiOutputReduction):
+         )
+ 
+ 
++class CrossEntropyOnlineReduction(MultiOutputReduction):
++    """
++    Multi-output reduction that computes softmax max/sum AND gathers target logit
++    in one kernel pass. Returns (max, sum_exp, target_logit).
++
++    The inner_fn returns a tuple (logit_value, target_logit_value) where:
++    - logit_value is the logit at the current (row, col) position
++    - target_logit_value is logits[row, target[row]] (same for all cols in row)
++    """
++
++    @classmethod
++    def _create_no_split(
++        cls,
++        device: torch.device,
++        dst_dtype: torch.dtype,
++        src_dtype: torch.dtype,
++        inner_fn: Callable[..., Any],
++        ranges: Sequence[Expr],
++        reduction_ranges: Sequence[Expr],
++        num_output: int,
++        reduction_hint: ReductionHint = ReductionHint.DEFAULT,
++        input_node: IRNode | None = None,
++    ) -> Sequence[TensorBox]:
++        assert num_output == 3
++        results = tuple(
++            TensorBox.create(
++                MultiOutputReduction(
++                    device,
++                    dst_dtype,
++                    inner_fn,
++                    ranges,
++                    reduction_ranges,
++                    "online_softmax_cross_entropy",
++                    src_dtype,
++                    reduction_hint,
++                    output_idx,
++                )
++            )
++            for output_idx in range(num_output)
++        )
++        for t in results:
++            t.realize()
++        return results
++
++    @classmethod
++    def create(  # type: ignore[override]
++        cls,
++        device: torch.device,
++        dst_dtype: torch.dtype,
++        src_dtype: torch.dtype,
++        inner_fn: Callable[..., Any],
++        ranges: Sequence[Expr],
++        reduction_ranges: Sequence[Expr],
++        num_output: int,
++        reduction_hint: ReductionHint = ReductionHint.DEFAULT,
++        input_node: IRNode | None = None,
++    ) -> Sequence[TensorBox]:
++        reduction_numel = V.graph.sizevars.simplify(sympy_product(reduction_ranges))
++        hint, split = Reduction.num_splits(
++            device,
++            dst_dtype,
++            src_dtype,
++            inner_fn,
++            ranges,
++            reduction_ranges,
++            reduction_type="online_softmax_cross_entropy",
++            reduction_numel=reduction_numel,
++            input_node=input_node,
++        )
++        if reduction_hint == ReductionHint.DEFAULT:
++            reduction_hint = hint
++        # For cross-entropy, we don't support split reductions (the gather
++        # complicates multilayer). Fall back to no-split always.
++        return cls._create_no_split(
++            device,
++            dst_dtype,
++            src_dtype,
++            inner_fn,
++            ranges,
++            reduction_ranges,
++            num_output,
++            reduction_hint,
++            input_node,
++        )
++
++
+ class WelfordReduction(MultiOutputReduction):
+     @classmethod
+     def create(  # type: ignore[override]
+diff --git a/torch/_inductor/lowering.py b/torch/_inductor/lowering.py
+index 450ca6bdad9..262b2d2ba93 100644
+--- a/torch/_inductor/lowering.py
++++ b/torch/_inductor/lowering.py
+@@ -73,6 +73,7 @@ from .ir import (
+     IRNode,
+     is_triton,
+     MutableBox,
++    CrossEntropyOnlineReduction,
+     OnlineSoftmaxReduction,
+     ops_wrapper,
+     PermuteView,
+@@ -8906,6 +8907,74 @@ def prepare_softmax_online(x, dim):
+         return amax, xsum
+ 
+ 
++@register_lowering(inductor_prims.cross_entropy_loss_online, type_promotion_kind=None)
++def cross_entropy_loss_online(x, targets, dim):
++    """
++    Lowering inductor_prims.cross_entropy_loss_online to compute max/sum/target_logit
++    with online softmax reductions + gather in one kernel when profitable.
++    Returns (max, sum_exp, target_logit).
++    """
++    kwargs = _make_reduction_inner(
++        x, axis=dim, keepdims=True, dtype=None, override_return_dtype=None
++    )
++
++    rnumel = V.graph.sizevars.simplify(sympy_product(kwargs["reduction_ranges"]))
++
++    if V.graph.sizevars.statically_known_geq(
++        rnumel, config.unroll_reductions_threshold
++    ):
++        # Create a combined inner_fn that returns (logit_value, target_logit_value)
++        logits_loader = x.make_loader()
++        targets_loader = targets.make_loader()
++
++        x_size = x.get_size()
++        dim_normalized = dim if dim >= 0 else dim + len(x_size)
++        axis = OrderedSet[int](_validate_reduction_axis(x, dim))
++
++        kept_idx = []
++        reduced_idx = []
++        for i in range(len(x_size)):
++            if i in axis:
++                reduced_idx.append(i)
++            else:
++                kept_idx.append(i)
++
++        def combined_inner_fn(index, reduction_index):
++            # Reconstruct full index for logits load
++            assert len(reduction_index) == len(reduced_idx)
++            outer_index = [index[i] for i in kept_idx]
++            new_index = [None] * (len(outer_index) + len(reduction_index))
++            for idx, var in itertools.chain(
++                zip(kept_idx, outer_index), zip(reduced_idx, reduction_index)
++            ):
++                new_index[idx] = var
++            logit_val = logits_loader(new_index)
++            # Load target logit via indirect indexing:
++            target_col = targets_loader(outer_index)
++            gather_idx = ops.indirect_indexing(target_col, x_size[dim_normalized], wrap_neg=False)
++            gather_index = list(new_index)
++            gather_index[dim_normalized] = gather_idx
++            target_logit_val = logits_loader(gather_index)
++            return (logit_val, target_logit_val)
++
++        max_tensor, sum_tensor, target_logit_tensor = (
++            CrossEntropyOnlineReduction.create(
++                input_node=x,
++                num_output=3,
++                inner_fn=combined_inner_fn,
++                **{k: v for k, v in kwargs.items() if k != "inner_fn"},
++            )
++        )
++        return max_tensor, sum_tensor, target_logit_tensor
++    else:
++        # Fallback: separate computations
++        amax = reduce_amax(x, dim, keepdims=True)
++        exp = lowerings[aten.exp](sub(x, amax))
++        xsum = sum_(exp, dim, keepdims=True)
++        target_logit = lowerings[aten.gather](x, dim, lowerings[aten.unsqueeze](targets, dim))
++        return amax, xsum, target_logit
++
++
+ @register_lowering(inductor_prims.cvt_e8m0_rceil, type_promotion_kind=None)
+ def cvt_e8m0_rceil_lowering(inp):
+     """
+diff --git a/torch/_inductor/ops_handler.py b/torch/_inductor/ops_handler.py
+index 3c38f1001fc..f7146b5b3df 100644
+--- a/torch/_inductor/ops_handler.py
++++ b/torch/_inductor/ops_handler.py
+@@ -51,6 +51,7 @@ ReductionType = Literal[
+     "dot",
+     "xor_sum",
+     "online_softmax_reduce",
++    "online_softmax_cross_entropy",
+ ]
+ 
+ 
+diff --git a/torch/_inductor/utils.py b/torch/_inductor/utils.py
+index 85ad05b1314..afda601490f 100644
+--- a/torch/_inductor/utils.py
++++ b/torch/_inductor/utils.py
+@@ -3202,7 +3202,7 @@ def is_welford_reduction(reduction_type: str) -> bool:
+ 
+ 
+ def reduction_num_outputs(reduction_type: str) -> int:
+-    if is_welford_reduction(reduction_type):
++    if is_welford_reduction(reduction_type) or reduction_type == "online_softmax_cross_entropy":
+         return 3
+     elif reduction_type in (
+         "argmax_with_value",
+-- 
+2.43.0
+
+
+From 8a52af079e5953d8d06bb95f3fa11b96b7b32e40 Mon Sep 17 00:00:00 2001
 From: Elias Ellison <elias.ellison@gmail.com>
 Date: Wed, 3 Jun 2026 22:09:56 +0000
-Subject: [PATCH] [inductor] CE loop-invariant hoisting: realize gather before
- reduction
+Subject: [PATCH 2/2] [inductor] CE loop-invariant hoisting: realize gather
+ before reduction
 
 Compute logits[row, target[row]] as a separate Pointwise.create().realize()
 before the online softmax reduction, instead of embedding it inside the

@@ -2,7 +2,36 @@
 
 **Commits:** `ca8f961d6b0` (gate) + `9dde2c59a51` (ungate-from-CD + rnumel ceiling) — ship together.
 **Flags:** `config.triton.scalar_reduction_accumulators` + `config.scalar_acc_configs_without_cd`.
-**Status:** DEPENDS ON mega-commit — `scalar_reduction_accumulators` is introduced there; conflicts on bare base (triton_heuristics.py).
+**Status:** MERGE-READY via carved prerequisite — `pr/scalar-acc-clean`.
+
+## Branch & how made mergeable
+`pr/scalar-acc-clean` (rooted on `5e2ab3055de`):
+- `6b5a0810183` — **prerequisite**, carved from mega `97385fb3273`:
+  `config.triton.scalar_reduction_accumulators`, the `reduction()` codegen
+  rewrite in `codegen/triton.py` (the `use_scalar_acc` block + scalar
+  online-softmax path, carried whole), and the `MAX_R0_BLOCK` scalar-acc branch
+  in `runtime/triton_heuristics.py`.
+- `5e81e8825b4` — `ca8f961d6b0` cherry-picked clean (appends `num_load <= 4` gate).
+- `4a2db251d12` — `9dde2c59a51` cherry-picked clean (ungate + `MAX_R0_BLOCK`
+  ceiling raise + `scalar_acc_configs_without_cd` flag + extra configs).
+
+## Conflict classification
+REAL SYMBOL DEPENDENCY: the whole `use_scalar_acc` codegen block and the
+`scalar_reduction_accumulators` flag are mega-introduced; the two PR commits only
+append a gate / ungate on top. Carved the codegen prereq; both PR commits then
+cherry-pick with zero conflict.
+
+## Verification (2026-07-15)
+3 touched `.py` files ast-parse; 0 conflict markers; symbols
+`scalar_reduction_accumulators`, `scalar_acc_configs_without_cd`,
+`use_scalar_acc`, and the `num_load <= 3`/`<= 4` gate all present; patch applies
+clean onto pristine base. **Caveat:** ast-parse + symbol-grep only — no torch
+build, not compiled/run.
+
+## Shared scaffolding note
+The prereq's `reduction()` codegen rewrite is the same one PR3 (online-softmax)
+needs (PR4 additionally carries the heuristics `MAX_R0_BLOCK` block). If
+upstreamed together, merge the two prereqs into one shared scaffolding PR.
 
 ## Summary
 Enables scalar-accumulator reduction configs (ungated from coordinate-descent, with
