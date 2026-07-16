@@ -13,3 +13,6 @@ Notes:
 - Bodies are minimal per user directive (disclosure block, one-paragraph summary, impact line, load-bearing caveat, attribution).
 - Nothing pushed to pytorch/pytorch directly; fork branches only, PRs opened via gh as eellison.
 - /tmp/pytorch-work HEAD (work2 @ daa79cd25ca) untouched; throwaway worktrees under /tmp/bb-pr-worktrees removed after use; no force-pushes.
+
+## Update 2026-07-16: #190208 rebased onto main (post-fmax #189162)
+fmax merged to main (2eaa680c065) — overlaps only the two-pass fallback, NOT our online-combine loop. Rebased bb/online-softmax-fast-combine onto main+fmax (real rebuild, torch 2.14), dropped the redundant two-pass hunk. **Win survives: 1.24x geomean on the 5 online-softmax repros vs main+fmax** (amax_sum_02064a1e60ac 1.99x). PR #190208 force-pushed + body updated. Still draft/WIP.
