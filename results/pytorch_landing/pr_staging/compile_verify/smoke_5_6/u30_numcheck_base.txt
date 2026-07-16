@@ -1,0 +1,6 @@
+out[0] shape=(8, 1024, 1024) dtype=torch.float32 max_abs=3.906e-03 max_rel_vs_eager=1.633e-02 | vs_fp64: eager_err=3.906e-03 compiled_err=3.906e-03
+out[1] shape=(1024,) dtype=torch.float32 max_abs=9.155e-05 max_rel_vs_eager=5.780e-05 | vs_fp64: eager_err=7.629e-05 compiled_err=6.104e-05
+out[2] shape=(1024,) dtype=torch.float32 max_abs=1.068e-04 max_rel_vs_eager=3.805e-05 | vs_fp64: eager_err=6.104e-05 compiled_err=6.866e-05
+out[3] shape=(8192, 1024) dtype=torch.bfloat16 max_abs=2.560e+02 max_rel_vs_eager=1.907e-02 | vs_fp64: eager_err=8.000e+00 compiled_err=2.560e+02
+out[4] shape=(1024, 8192) dtype=torch.bfloat16 max_abs=2.560e+02 max_rel_vs_eager=1.907e-02 | vs_fp64: eager_err=8.000e+00 compiled_err=2.560e+02
+out[5] shape=(1024,) dtype=torch.float32 max_abs=2.487e+03 max_rel_vs_eager=5.653e+00 | vs_fp64: eager_err=0.000e+00 compiled_err=2.487e+03
