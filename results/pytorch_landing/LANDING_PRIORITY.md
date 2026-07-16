@@ -23,7 +23,7 @@
 | 2 | `ab29345d82d` | U31 | CE loop-invariant hoist | **+1.22pp** | **+0.54pp** | Above model floor. Selective-revert PR (carries online_softmax_cross_entropy prim). |
 | 3 | `a26fc2c8bf4` | U28 | online-softmax fast combine | +0.83pp | +0.33pp | Own flag. Big genai lever too (Softmax +10%, CE +20%). |
 | 4 | `ca8f961d6b0`+`9dde2c59a51` | U29 | scalar_acc + num_load≤4 gate | +0.59 / +0.44pp | +0.18 / +0.06pp | Gate is a regression-FIXER. THE genai lever (Softmax +46%, CE +64%). Ship the two together. |
-| 5 | **U10** (in `97385fb3273`) | U10 | layout_transform_store_sinking | **+1.20× on its 14 kernels** | small (ShuffleNet-only) | Only clean win the mega-ablation found. Structural (nk 1→3). LAND clean; verify per-model on ShuffleNet rollup. |
+| 5 | **U10** (in `97385fb3273`) | U10 | layout_transform_store_sinking | **1.38× measured (18/18, 0 regress)** | small (ShuffleNet-only) | **DEPRIORITIZED (2026-07-16, maintainer call)** — kernel win real and perf-verified, but e2e is ShuffleNet-local; not worth standalone upstream effort. Branch pr/layout-sinking-clean + evidence kept. |
 
 ## TIER 2 — LAND-WITH-GATE (real win, ships a regression unless gated)
 

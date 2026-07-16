@@ -1,5 +1,10 @@
 # PR 5 — Layout-transform store sinking (channel shuffle) — U10
 
+> **STATUS: DEPRIORITIZED (2026-07-16, maintainer call).** Kernel win is real
+> (1.38x, 18/18, 0 regress) but e2e impact is ShuffleNet-local and small — not
+> worth standalone upstream effort. Branch + evidence kept; revisit only if
+> layout-transform patterns show up in models that matter.
+
 **Unit:** U10, carved from mega-commit `97385fb3273`.
 **Flag:** `config.layout_transform_store_sinking`
 (`TORCHINDUCTOR_LAYOUT_TRANSFORM_STORE_SINKING`, default on).
