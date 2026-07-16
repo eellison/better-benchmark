@@ -1,0 +1,210 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "29bbacab5df99eebe6efd00f332927dc7b0c4648",
+    "pytorch_commit": "f56267540e413e2f05efc70efff4e1a5919a2682",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-07-15T23:46:28Z",
+    "n_repros": 14,
+    "n_results": 14,
+    "workload_kind": "repro"
+  },
+  "repros/canonical/pointwise_ba25986618ef/repro.py": {
+    "shufflenet_v2_x1_0_ef47f5e1": {
+      "compiled_us": 17.983999103307724,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 10.208000428974628,
+      "total_bytes": 23282128,
+      "n_kernels": 1,
+      "gap_default": 1.7617553240163977,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/pointwise_666951cd0da5/repro.py": {
+    "shufflenet_v2_x1_0_1e6a9948": {
+      "compiled_us": 14.047999866306782,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.0960001796484,
+      "total_bytes": 11641760,
+      "n_kernels": 1,
+      "gap_default": 1.7351778105959568,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/pointwise_7308e0024674/repro.py": {
+    "shufflenet_v2_x1_0_cff026d0": {
+      "compiled_us": 29.632000252604485,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 10.080000385642052,
+      "total_bytes": 23282592,
+      "n_kernels": 1,
+      "gap_default": 2.939682452275725,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/pointwise_3c17f0120a71/repro.py": {
+    "shufflenet_v2_x1_0_f47c0655": {
+      "compiled_us": 19.071999937295914,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.031999692320824,
+      "total_bytes": 11642688,
+      "n_kernels": 1,
+      "gap_default": 2.374502075184357,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/var_mean_b12103db1177/repro.py": {
+    "shufflenet_v2_x1_0_b0183d97": {
+      "compiled_us": 15.104000456631184,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 7.807999849319458,
+      "total_bytes": 11648256,
+      "n_kernels": 2,
+      "gap_default": 1.934426325321669,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/var_mean_33d24326eae6/repro.py": {
+    "shufflenet_v2_x1_0_99b3b05e": {
+      "compiled_us": 67.391999065876,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 12.992000207304955,
+      "total_bytes": 46565184,
+      "n_kernels": 2,
+      "gap_default": 5.18719196355799,
+      "gap_cd": null
+    },
+    "shufflenet_v2_x1_0_b0183d97": {
+      "compiled_us": 15.200000256299973,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 7.840000092983246,
+      "total_bytes": 11648256,
+      "n_kernels": 2,
+      "gap_default": 1.938775519901318,
+      "gap_cd": null
+    },
+    "shufflenet_v2_x1_0_00e34431": {
+      "compiled_us": 19.999999552965164,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.056000038981438,
+      "total_bytes": 23285376,
+      "n_kernels": 2,
+      "gap_default": 2.2084805065012607,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/var_mean_e67fddfba074/repro.py": {
+    "shufflenet_v2_x1_0_00e34431": {
+      "compiled_us": 19.711999222636223,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.151999838650227,
+      "total_bytes": 23285376,
+      "n_kernels": 2,
+      "gap_default": 2.15384610687924,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/var_mean_var_mean_74b57fcc4507/repro.py": {
+    "shufflenet_v2_x1_0_ce5d17b1": {
+      "compiled_us": 144.19199526309967,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 13.183999806642532,
+      "total_bytes": 46567040,
+      "n_kernels": 4,
+      "gap_default": 10.936893004993143,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/var_mean_var_mean_92c45aff3580/repro.py": {
+    "shufflenet_v2_x1_0_55c2f021": {
+      "compiled_us": 23.93599972128868,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.119999594986439,
+      "total_bytes": 23289088,
+      "n_kernels": 2,
+      "gap_default": 2.6245614895034732,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/var_mean_var_mean_e642e2ea37a3/repro.py": {
+    "shufflenet_v2_x1_0_24b29630": {
+      "compiled_us": 19.231999292969704,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 7.935999892652035,
+      "total_bytes": 11655680,
+      "n_kernels": 2,
+      "gap_default": 2.4233870404631266,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/pointwise_41944c71d2d8/repro.py": {
+    "shufflenet_v2_x1_0_46084af7": {
+      "compiled_us": 10.879999957978725,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.976000033318996,
+      "total_bytes": 5822272,
+      "n_kernels": 1,
+      "gap_default": 1.5596330140500743,
+      "gap_cd": null
+    },
+    "shufflenet_v2_x1_0_1e6a9948": {
+      "compiled_us": 13.98400031030178,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.063999935984612,
+      "total_bytes": 11641760,
+      "n_kernels": 1,
+      "gap_default": 1.7341270363730898,
+      "gap_cd": null
+    },
+    "shufflenet_v2_x1_0_ef47f5e1": {
+      "compiled_us": 17.535999417304993,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 9.184000082314014,
+      "total_bytes": 23282128,
+      "n_kernels": 1,
+      "gap_default": 1.909407584944903,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/pointwise_00475df23925/repro.py": {
+    "shufflenet_v2_x1_0_46084af7": {
+      "compiled_us": 11.04000024497509,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.943999789655209,
+      "total_bytes": 5822272,
+      "n_kernels": 1,
+      "gap_default": 1.5898618345901852,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/pointwise_99e028e77568/repro.py": {
+    "shufflenet_v2_x1_0_5e3665ee": {
+      "compiled_us": 13.98400031030178,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 6.943999789655209,
+      "total_bytes": 5824128,
+      "n_kernels": 1,
+      "gap_default": 2.0138249904809014,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/var_mean_fd789e584775/repro.py": {
+    "shufflenet_v2_x1_0_99b3b05e": {
+      "compiled_us": 76.57600194215775,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 12.959999963641167,
+      "total_bytes": 46565184,
+      "n_kernels": 4,
+      "gap_default": 5.908642141742985,
+      "gap_cd": null
+    }
+  },
+  "__summary__": {
+    "total": 14,
+    "ok": 14,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 21.29089093208313
+  }
+}

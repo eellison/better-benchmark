@@ -1,0 +1,149 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "29bbacab5df99eebe6efd00f332927dc7b0c4648",
+    "pytorch_commit": "8d664ddc25ec05910658273a59c101962e12b6ab",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-07-15T23:46:45Z",
+    "n_repros": 6,
+    "n_results": 6,
+    "workload_kind": "repro"
+  },
+  "repros/canonical/sum_sum_sum_11d45d703ba6/repro.py": {
+    "XLNetLMHeadModel_8bec5e94": {
+      "compiled_us": 42.43199899792671,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 27.23200060427189,
+      "total_bytes": 142651392,
+      "n_kernels": 1,
+      "gap_default": 1.5581667911416834,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/sum_sum_sum_907cbb3d9f19/repro.py": {
+    "GoogleFnet_356087b1": {
+      "compiled_us": 87.90399879217148,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 64.44799900054932,
+      "total_bytes": 402727936,
+      "n_kernels": 2,
+      "gap_default": 1.3639523360752013,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/sum_sum_sum_260a107eaf32/repro.py": {
+    "BertForMaskedLM_9846b7f2": {
+      "compiled_us": 74.65600222349167,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 37.696000188589096,
+      "total_bytes": 213987328,
+      "n_kernels": 3,
+      "gap_default": 1.9804754310801038,
+      "gap_cd": null
+    },
+    "PLBartForCausalLM_102da4dd": {
+      "compiled_us": 75.29599964618683,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 37.567999213933945,
+      "total_bytes": 213987328,
+      "n_kernels": 3,
+      "gap_default": 2.0042589763007554,
+      "gap_cd": null
+    },
+    "DebertaV2ForMaskedLM_75b78b2c": {
+      "compiled_us": 48.79999905824661,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 22.52800017595291,
+      "total_bytes": 106995712,
+      "n_kernels": 3,
+      "gap_default": 2.166193123095642,
+      "gap_cd": null
+    },
+    "ElectraForCausalLM_f51dabe2": {
+      "compiled_us": 46.751998364925385,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 27.456000447273254,
+      "total_bytes": 142741504,
+      "n_kernels": 3,
+      "gap_default": 1.7027971155051638,
+      "gap_cd": null
+    },
+    "BartForCausalLM_540cb101": {
+      "compiled_us": 48.79999905824661,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 27.39199995994568,
+      "total_bytes": 142655488,
+      "n_kernels": 3,
+      "gap_default": 1.7815420242992506,
+      "gap_cd": null
+    },
+    "TrOCRForCausalLM_7f0c11fc": {
+      "compiled_us": 79.6160027384758,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 47.968000173568726,
+      "total_bytes": 285294592,
+      "n_kernels": 3,
+      "gap_default": 1.6597732332052841,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/sum_sum_sum_2261b2f5694a/repro.py": {
+    "MobileBertForMaskedLM_81eeb2b9": {
+      "compiled_us": 48.448000103235245,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 19.58400011062622,
+      "total_bytes": 100933634,
+      "n_kernels": 4,
+      "gap_default": 2.4738562004474,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/sum_sum_sum_0703a79bc871/repro.py": {
+    "mobilevit_s_1c6da2dd": {
+      "compiled_us": 101.98400169610977,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 14.208000153303146,
+      "total_bytes": 50596096,
+      "n_kernels": 2,
+      "gap_default": 7.177927969855774,
+      "gap_cd": null
+    },
+    "mobilevit_s_30b03cad": {
+      "compiled_us": 183.20000171661377,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 28.9280004799366,
+      "total_bytes": 152045248,
+      "n_kernels": 2,
+      "gap_default": 6.332964556042322,
+      "gap_cd": null
+    },
+    "mobilevit_s_0c9dc299": {
+      "compiled_us": 27.456000447273254,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 8.671999908983707,
+      "total_bytes": 15797056,
+      "n_kernels": 5,
+      "gap_default": 3.1660517453223647,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/sum_sum_sum_ecce309d13e3/repro.py": {
+    "LayoutLMForMaskedLM_1bcea4a2": {
+      "compiled_us": 386.8800103664398,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 56.09599873423576,
+      "total_bytes": 344678400,
+      "n_kernels": 15,
+      "gap_default": 6.896748771678868,
+      "gap_cd": null
+    }
+  },
+  "__summary__": {
+    "total": 6,
+    "ok": 6,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 13.856701850891113
+  }
+}

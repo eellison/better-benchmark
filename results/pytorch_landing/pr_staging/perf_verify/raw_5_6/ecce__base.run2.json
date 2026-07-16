@@ -1,0 +1,31 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "29bbacab5df99eebe6efd00f332927dc7b0c4648",
+    "pytorch_commit": "5e2ab3055de1bc4bffe2e7feffe1fc7ff7af8b10",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-07-15T23:48:51Z",
+    "n_repros": 1,
+    "n_results": 1,
+    "workload_kind": "repro"
+  },
+  "repros/canonical/sum_sum_sum_ecce309d13e3/repro.py": {
+    "LayoutLMForMaskedLM_1bcea4a2": {
+      "compiled_us": 560.6719851493835,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 56.15999922156334,
+      "total_bytes": 344678400,
+      "n_kernels": 15,
+      "gap_default": 9.983475657423202,
+      "gap_cd": null
+    }
+  },
+  "__summary__": {
+    "total": 1,
+    "ok": 1,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 8.775891065597534
+  }
+}

@@ -1,0 +1,54 @@
+{
+ "verified": "2026-07-15",
+ "method": "PYTHONPATH shadow (throwaway git worktrees under /tmp/pt-verify-wt/{base,layout-sinking,mor-finalize}, prebuilt HEAD .so + generated artifacts symlinked in; both branch diffs are pure-python inductor) over torch 2.13.0a0 on B200. BASE arm = bare 5e2ab3055de shadow; BRANCH arm = PR branch tip shadow. Fresh TORCHINDUCTOR_CACHE_DIR per (arm,set). All timing via scripts/bench_parallel.py (locked GPU path, clock lock 1852MHz, --no-cd, min-of-rounds do_bench). Same repro set both arms; branch arms repeated (run2). Arm separation proven by output _metadata.pytorch_commit per arm (5e2ab3055de vs f56267540e4 vs 8d664ddc25e) and by structural codegen tells (counter/nk for U10, triton_mor_finalize_sum marker for U30).",
+ "prs": {
+  "pr/layout-sinking-clean": {
+   "bench": "all 14 flag-ablation-affected shufflenet_v2 repros (mega_ablation affected_U10.txt) --all-shapes = 18 shape points",
+   "expected": "~1.20x kernel geomean (flag-ablation at HEAD measured flag-off/control = 1.2003)",
+   "measured": {
+    "geomean_speedup": 1.3786,
+    "min": 1.14,
+    "max": 2.37,
+    "n_points": 18,
+    "noise_run1_vs_run2_geomean": 0.9875,
+    "highlights": {
+     "var_mean_var_mean_92c45aff3580/shufflenet_55c2f021": [57.1, 24.1, 2.37],
+     "var_mean_var_mean_e642e2ea37a3/shufflenet_24b29630": [34.7, 19.5, 1.78],
+     "var_mean_33d24326eae6/shufflenet_00e34431": [32.3, 19.3, 1.67],
+     "pointwise_ba25986618ef/shufflenet_ef47f5e1": [27.4, 18.0, 1.53]
+    },
+    "structural": "n_kernels drops on 12/18 points (2->1, 4->1, 4->2, 6->4); 18/18 points faster, none regress"
+   },
+   "expected_vs_measured_note": "Measured 1.38x EXCEEDS the expected 1.20x. The 1.2003 flag-ablation was the MARGINAL contribution at HEAD daa79cd25ca, where other landed units (scalar-acc, Blackwell-BN heuristics, etc.) had already sped up these var_mean/pointwise kernels; against clean base 5e2ab the same pass removes more of the remaining gap.",
+   "feature_proof": "counters['inductor']['layout_transform_store_sinking']=1 on affected repros (0 on base arm); flag-off on the branch arm (TORCHINDUCTOR_LAYOUT_TRANSFORM_STORE_SINKING=0) restores base codegen exactly (njit 2->4, counter 0)",
+   "verdict": "REPRODUCES (exceeds: 1.38x vs expected 1.20x; every point faster)"
+  },
+  "pr/mor-finalize-clean": {
+   "bench": "6 of the 52 affected sum_sum_sum repros (260a107eaf32 incl. its 7 model shape points, 11d45d703ba6 XLNet, 2261b2f5694a MobileBert, 0703a79bc871 mobilevit, 907cbb3d9f19 GoogleFnet, ecce309d13e3 LayoutLM) --all-shapes = 13 shape points",
+   "expected": "~1.14x kernel geomean (CORE_REVERT 1.135x, u30_e2e re-run 1.140x)",
+   "measured": {
+    "geomean_speedup_as_measured": 1.1732,
+    "geomean_excluding_bistable_point": 1.2225,
+    "geomean_with_isolated_corrected_outlier": 1.2065,
+    "n_points": 13,
+    "noise_run1_vs_run2_geomean": 1.0132,
+    "highlights": {
+     "sum_sum_sum_11d45d703ba6/XLNet": [61.3, 42.6, 1.44],
+     "sum_sum_sum_260a107eaf32/Bart": [69.1, 48.8, 1.42],
+     "sum_sum_sum_260a107eaf32/Electra": [63.5, 46.8, 1.36],
+     "sum_sum_sum_2261b2f5694a/MobileBert": [64.8, 49.0, 1.32]
+    },
+    "outlier_investigation": "sum_sum_sum_ecce309d13e3/LayoutLM read 0.72x in the batch A/B (base 330.6 vs branch 462.0), but the point is autotune-bistable: branch run2 in the same batch gave 386.9 (1.19x self-variance) and the BASE arm itself swings 330.6 -> 560.7/560.8 across fresh-cache runs (1.7x self-variance, 15-kernel graph, --no-cd). Isolated sequential re-bench, fresh caches, 2 runs per arm: base 560.7/560.8 vs branch 543.6/545.6 => branch FASTER 1.03x. No reproducible regression.",
+    "structural": "12/13 points 1.04-1.44x faster; XLNet best 1.44x matches CORE_REVERT's documented best (1.46x, same repro)"
+   },
+   "feature_proof": "branch arm generated code contains 4 triton_mor_finalize_sum kernel defs on sum_sum_sum_260a107eaf32 (base 0); aggregate @triton.jit count 10 vs 6; kill switch TORCHINDUCTOR_TRITON_FINALIZE_SUM=0 on the branch arm restores base codegen exactly (0 markers, njit 6)",
+   "verdict": "REPRODUCES (1.17x as-measured vs expected 1.14x; the single negative reading does not survive re-measurement)"
+  }
+ },
+ "provenance": {
+  "pytorch_work_head": "daa79cd25ca (untouched)",
+  "worktrees": "throwaway /tmp/pt-carve-wt + /tmp/pt-verify-wt/{base,layout-sinking,mor-finalize} removed after verification",
+  "pushes_to_pytorch_remotes": "none; branches pr/layout-sinking-clean (f56267540e4) and pr/mor-finalize-clean (8d664ddc25e) are local-only",
+  "artifacts": "/tmp/scratch_space/pr56_verify/ (raw bench JSONs, smoke logs, compare.py, run_perf.sh, patches)"
+ }
+}
