@@ -66,4 +66,56 @@ together: the gate is a regression-fixer — the ungated version caused measured
 Softmax/CE/reduction genai micros; verify the gate holds (no >2% regressions on the
 num_load>4 cohort). Flag-gated A/B.
 
+## Rebase onto current main + PR #190207 refresh (2026-07-16)
+Rebased the change onto `origin/main` @ `ed8fd16c0e1` and force-pushed to fork
+`bb/scalar-acc-reductions` (PR #190207, still **draft/[WIP]**). New tip
+`9851b7b942b`.
+
+**What moved (PRs #183277/#183278 refactor):** the reduction autotuning
+heuristics were relocated from `runtime/triton_heuristics.py` into
+`heuristics/triton_codegen/reduction.py` (now class-based:
+`ReductionHeuristic.get_configs`; `_reduction_configs`/`reduction` in
+`triton_heuristics.py` just delegate). Re-expressed there: the `MAX_R0_BLOCK`
+scalar-acc branch (now at the `device_major` block, ~line 226), the
+`_scalar_acc_configs_without_cd` helper, and the two extra large-`R0_BLOCK`
+candidates wired into the `ReductionHint.INNER` return + `result_configs`.
+`config.py` flags and the `codegen/triton.py` `reduction()` rewrite stayed in
+place (that file did not move, though it diverged ~1000 lines — ported
+hunk-by-hunk, not `git apply`).
+
+**Simplifications:**
+- Collapsed 3 commits → **2** (feature + gate).
+- **Dropped the `online_softmax_cross_entropy` codegen scaffolding entirely** —
+  it is not a real `ReductionType` on main (not in the `ops_handler` Literal, no
+  lowering emits it), so all three of its branches were unreachable dead code.
+- Fixed the `<=4`/`<=3` mismatch: code gates at `self.num_load <= 3` (as
+  shipped/measured); corrected all commit-message/comment text to say `<= 3`.
+- `frozenset({...})` for the reduction-type set → plain tuple (membership only;
+  also sidesteps the `set_linter` autofix).
+
+**Determinism-filter interaction (checked):** main added
+`filter_reduction_configs_for_determinism` (`triton_heuristics.py`), called in
+`reduction()` **after** `_reduction_configs`. Our extra scalar-acc candidates
+only enlarge the candidate pool; in deterministic mode the filter dedups and
+collapses to a single config via `_pick_config` (2nd-largest R0_BLOCK, then
+num_warps, then XBLOCK). Nothing filters scalar-acc configs *by name* — no
+correctness issue; det-mode may or may not pick a large-R0 config, which is the
+intended det behavior. No change needed.
+
+**Test:** added to `test/inductor/test_online_softmax.py` —
+`test_scalar_acc_reduction_codegen` (asserts `[XBLOCK]` accumulator, in-loop
+`tl.sum(...,1)`, no post-loop `tl.sum(_tmp`, numerics `same`) and
+`test_scalar_acc_reduction_num_load_gate` (5 loads → `[XBLOCK, R0_BLOCK]` vector
+path + post-loop `tl.sum(_tmp`, numerics `same`). Markers validated against
+functionally-equivalent codegen from the installed torch (work2 tip, OLD
+structure) — all assertions pass. This validates the codegen strings, not
+rebased-tree perf.
+
+**Verify honesty:** ast-parse (4 files) + `lintrunner -a` clean (only
+environmental PYREFLY `No attribute in module torch._C` from unbuilt torch, repo-
+wide, not our edits) + manual review. **Rebuild deferred** — no main-built `.so`;
+the importable torch is the work2 tip `daa79cd`, a *different* tip, so it does
+NOT cover the rebased scalar-acc tree. Perf (1.80x SoftmaxForward / 2.21x CE) is
+cited as **PRIOR** (June base), not re-measured on this rebase.
+
 written with claude code
