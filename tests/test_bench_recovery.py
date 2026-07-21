@@ -345,6 +345,29 @@ def test_peak_memory_flag_gates_full_graph_memory_probe():
     assert 'if False:\n        result["default"]["peak_memory_bytes"] = peak_memory_bytes' in off
 
 
+def test_profile_flag_gates_full_graph_trace():
+    """--profile injects a torch.profiler run + export_chrome_trace when on; gated off otherwise."""
+    base = {
+        "root": str(ROOT),
+        "all_shapes": False,
+        "no_cd": True,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": False,
+    }
+
+    on = _persistent_worker_script("0", {**base, "profile": True, "profile_dir": "profiles", "tag": "my_fix"})
+    assert "PROFILE = True" in on
+    assert "TAG = 'my_fix'" in on
+    assert "os.path.join(PROFILE_DIR, TAG," in on
+    assert "from torch.profiler import profile as _tprof, ProfilerActivity" in on
+    assert "_prof.export_chrome_trace(" in on
+    assert 'result["default"]["profile_trace"] = profile_trace' in on
+
+    off = _persistent_worker_script("0", base)
+    assert "PROFILE = False" in off
+
+
 def test_strict_setup_lock_uses_inductor_lock_hook(monkeypatch, tmp_path):
     try:
         from torch._inductor.runtime import benchmarking as inductor_benchmarking
