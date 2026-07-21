@@ -345,6 +345,31 @@ def test_peak_memory_flag_gates_full_graph_memory_probe():
     assert 'if False:\n        result["default"]["peak_memory_bytes"] = peak_memory_bytes' in off
 
 
+def test_memory_snapshot_flag_gates_full_graph_snapshot():
+    """--memory-snapshot injects a guarded _record_memory_history/_dump_snapshot run when on; gated off otherwise."""
+    base = {
+        "root": str(ROOT),
+        "all_shapes": False,
+        "no_cd": True,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": False,
+    }
+
+    on = _persistent_worker_script("0", {**base, "memory_snapshot": True, "memory_snapshot_dir": "memory_snapshots", "tag": "my_fix"})
+    assert "MEMORY_SNAPSHOT = True" in on
+    assert "TAG = 'my_fix'" in on
+    assert "os.path.join(MEMORY_SNAPSHOT_DIR, TAG," in on
+    assert "torch.cuda.memory._record_memory_history(max_entries=100000)" in on
+    assert "torch.cuda.memory._dump_snapshot(memory_snapshot)" in on
+    assert "torch.cuda.memory._record_memory_history(enabled=None)" in on
+    assert 'result["default"]["memory_snapshot"] = memory_snapshot' in on
+    assert "except Exception as _me:" in on
+
+    off = _persistent_worker_script("0", base)
+    assert "MEMORY_SNAPSHOT = False" in off
+
+
 def test_strict_setup_lock_uses_inductor_lock_hook(monkeypatch, tmp_path):
     try:
         from torch._inductor.runtime import benchmarking as inductor_benchmarking

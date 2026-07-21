@@ -1480,6 +1480,15 @@ def main():
     parser.add_argument("--peak-memory", action="store_true",
                         help="Record peak GPU memory usage (peak_memory_bytes) for each "
                              "--full-graphs model. Opt-in; off by default.")
+    parser.add_argument("--memory-snapshot", action="store_true",
+                        help="Dump a CUDA memory snapshot (.pickle) per --full-graphs model "
+                             "to --memory-snapshot-dir, for pytorch.org/memory_viz. Steady-state "
+                             "snapshot (recorded post-warmup, not the compile/first-iteration "
+                             "peak; history capped at 100k events). Separate run, forces 1 "
+                             "worker/GPU. Opt-in; off by default.")
+    parser.add_argument("--memory-snapshot-dir", type=Path, default=Path("memory_snapshots"),
+                        help="Directory root for --memory-snapshot pickles (mirrors the "
+                             "repros/models tree). Default: memory_snapshots/")
     parser.add_argument("--tag", default=None,
                         help="Tag for this run (e.g. 'baseline', 'my_fix'). Used to key results in perf.json for comparison.")
     parser.add_argument("--compare", type=str, nargs=2, metavar=("TAG_A", "TAG_B"),
@@ -1664,8 +1673,8 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
 
-    if args.peak_memory:
-        # --peak-memory: 1 worker per GPU.
+    if args.peak_memory or args.memory_snapshot:
+        # --peak-memory / --memory-snapshot: 1 worker per GPU.
         workers_per_gpu = 1
         n_workers = min(n_workers, len(gpus))
 
@@ -1714,6 +1723,10 @@ def main():
         "workload_kind": workload_kind,
         "compile_time": args.compile_time,
         "peak_memory": args.peak_memory,
+        "memory_snapshot": args.memory_snapshot,
+        "memory_snapshot_dir": str(args.memory_snapshot_dir),
+        "models_root": str(Path(root) / args.models_root),
+        "tag": args.tag or "latest",
     }
 
     if args.oracles:
@@ -2390,6 +2403,9 @@ from torch._inductor.utils import fresh_cache
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 WORKLOAD_KIND = {args_dict.get("workload_kind", "repro")!r}
+MEMORY_SNAPSHOT = {args_dict.get("memory_snapshot", False)}
+MEMORY_SNAPSHOT_DIR = {args_dict.get("memory_snapshot_dir", "memory_snapshots")!r}
+TAG = {args_dict.get("tag", "latest")!r}
 
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
@@ -2751,6 +2767,32 @@ def bench_full_graph_one(repro_path):
     compiled_us = min(default_times)
     cd_us = min(cd_times) if cd_times else None
 
+    # Opt-in: CUDA memory snapshot (separate run).
+    memory_snapshot = None
+    if MEMORY_SNAPSHOT:
+        try:
+            _rel = os.path.relpath(repro_path, {args_dict.get("models_root", "repros/models")!r})
+            if _rel.startswith(".."):
+                _rel = os.path.relpath(os.path.abspath(repro_path), os.sep)
+            memory_snapshot = os.path.join(MEMORY_SNAPSHOT_DIR, TAG, os.path.splitext(_rel)[0] + ".pickle")
+            os.makedirs(os.path.dirname(memory_snapshot) or ".", exist_ok=True)
+            with gpu_setup_lock():
+                with torch.no_grad():
+                    for _ in range(3):
+                        compiled(*inputs)
+                    torch.cuda.synchronize()
+                    torch.cuda.memory._record_memory_history(max_entries=100000)
+                    try:
+                        for _ in range(3):
+                            compiled(*inputs)
+                        torch.cuda.synchronize()
+                        torch.cuda.memory._dump_snapshot(memory_snapshot)
+                    finally:
+                        torch.cuda.memory._record_memory_history(enabled=None)
+        except Exception as _me:
+            print(f"WARNING: --memory-snapshot failed for {{repro_path}}: {{_me}}", file=sys.stderr)
+            memory_snapshot = None
+
     result = {{
         "__graph__": result_metadata(_definition),
         "default": {{
@@ -2770,6 +2812,8 @@ def bench_full_graph_one(repro_path):
         result["default"]["compile_time_s"] = compile_time_s
     if {args_dict.get("peak_memory", False)}:
         result["default"]["peak_memory_bytes"] = peak_memory_bytes
+    if MEMORY_SNAPSHOT:
+        result["default"]["memory_snapshot"] = memory_snapshot
     return result
 
 def bench_one(repro_path):
