@@ -382,6 +382,39 @@ def _node_scalar(node, pos, default=None):
     return default
 
 
+def _sdpa_inductor_layout(tensor: torch.Tensor) -> torch.Tensor:
+    """Apply the SDPA constraint behavior needed by flash-backward replay."""
+    if tensor.ndim not in (3, 4):
+        return tensor
+    non_last_aligned = all(stride % 8 == 0 for stride in tensor.stride()[:-1])
+    last_dense = tensor.stride(-1) == 1 or tensor.size(-1) <= 1
+    if non_last_aligned and last_dense:
+        return tensor
+
+    # sdpa_constraint derives an order from the captured FX strides. An input
+    # already satisfies that order, so require_stride_order() preserves it.
+    # Only a non-fastest last dimension switches the requirement to contiguous.
+    fill_order = sorted(
+        range(tensor.ndim), key=lambda dim: (tensor.stride(dim), dim)
+    )
+    if fill_order[0] == tensor.ndim - 1:
+        return tensor
+
+    # require_stride_order ignores singleton dimensions. A captured tensor may
+    # therefore already satisfy contiguous order even when a size-1 dimension
+    # owns the smallest physical stride.
+    non_singleton_dims = [
+        dim for dim in reversed(range(tensor.ndim)) if tensor.size(dim) != 1
+    ]
+    ordered_strides = [tensor.stride(dim) for dim in non_singleton_dims]
+    if all(
+        left <= right
+        for left, right in zip(ordered_strides, ordered_strides[1:])
+    ):
+        return tensor
+    return tensor.contiguous()
+
+
 def _bench_sdpa_backward(node, kind: str) -> float:
     """Forward-synthesize valid aux, then CUDAGraph-time only the backward.
 
@@ -399,15 +432,14 @@ def _bench_sdpa_backward(node, kind: str) -> float:
         # bwd args: (grad_out, q, k, v, attn_bias, out, logsumexp,
         #            philox_seed, philox_offset, dropout_p, grad_input_mask,
         #            is_causal=False, *, scale)
-        # attn_bias (arg 4) must be a FULL [B,H,S,S] tensor — the captured
-        # node's bias is an expand with a 0-stride (broadcast) H dim, which
-        # the backward kernel rejects; materialize it dense.
+        # Preserve the captured padded/broadcast layout. Efficient attention
+        # validates bias stride alignment, so a fresh contiguous tensor can
+        # be invalid even though the captured expanded view is accepted.
         bias_val = node.args[4].meta.get("val") if isinstance(
             node.args[4], fx.Node) else None
         attn_bias = None
         if torch.is_tensor(bias_val):
-            attn_bias = torch.randn(
-                list(bias_val.shape), dtype=bias_val.dtype, device="cuda")
+            attn_bias = fab(4)
         dropout_p = _node_scalar(node, 9, 0.0)
         grad_input_mask = _node_scalar(node, 10, [True, True, True, False])
         is_causal = _node_scalar(node, 11, False)
@@ -432,16 +464,36 @@ def _bench_sdpa_backward(node, kind: str) -> float:
         # philox_offset ARE the forward's rng_state / unused tensors verbatim
         # (the autograd formula passes them straight through). Random ints
         # there segfault under dropout, so the real fwd aux is required.
-        (out, logsumexp, cum_q, cum_k, max_q, max_k, philox_seed,
+        forward_q, forward_k, forward_v = (
+            q.contiguous(),
+            k.contiguous(),
+            v.contiguous(),
+        )
+        (forward_out, forward_logsumexp, cum_q, cum_k, max_q, max_k, philox_seed,
          philox_offset, _dbg) = \
             a._scaled_dot_product_flash_attention.default(
-                q, k, v, dropout_p, is_causal, False, scale=scale)
-        bwd_args = (grad_out, q, k, v, out, logsumexp, cum_q, cum_k,
-                    max_q, max_k, dropout_p, is_causal,
-                    philox_seed, philox_offset)
+                forward_q, forward_k, forward_v,
+                dropout_p, is_causal, False, scale=scale)
+        # Restore the captured output layout. Layout conversions belong inside
+        # the timed closure because Inductor inserts them immediately before
+        # the fallback call. Aligned BSHD-physical layouts pass through, while
+        # stride-6 K/V/out become canonical BHSD copies.
+        out, logsumexp = fab(4), fab(5)
+        out.copy_(forward_out)
+        logsumexp.copy_(forward_logsumexp)
+
+        def flash_backward():
+            return a._scaled_dot_product_flash_attention_backward.default(
+                *(
+                    _sdpa_inductor_layout(tensor)
+                    for tensor in (grad_out, q, k, v, out, logsumexp)
+                ),
+                cum_q, cum_k, max_q, max_k, dropout_p, is_causal,
+                philox_seed, philox_offset, scale=scale)
+
         return _bench_replay(
-            lambda: a._scaled_dot_product_flash_attention_backward.default(
-                *bwd_args, scale=scale))
+            flash_backward
+        )
 
     # cudnn bwd args: (grad_out, q, k, v, out, logsumexp, philox_seed,
     #                  philox_offset, attn_bias, cum_seq_q, cum_seq_k,

@@ -392,7 +392,7 @@ def test_write_results_output_counts_skipped_and_uses_reserved_failure_key():
 def test_full_graph_harness_parses_inputs_and_tensor_attrs():
     content = '''
 class GraphModule(torch.nn.Module):
-    def forward(self, s0: "Sym(s0)", x: "f32[2, s0][32, 1]cuda:0", idx: "i64[2]cuda:0"):
+    def forward(self, s0: "Sym(s0)", x: "f32[2, s0][s0, 1]cuda:0", idx: "i64[2]cuda:0"):
         _tensor_constant0: "f32[]" = self._tensor_constant0
         _tensor_constant1: "i64[4]" = self._tensor_constant1
         return (x,)
@@ -402,10 +402,12 @@ class GraphModule(torch.nn.Module):
 
     assert inputs[0]["kind"] == "symint"
     assert inputs[0]["value"] == 32
+    assert inputs[0]["symbolic_expr"] == "s0"
     assert inputs[1]["shape"] == (2, 32)
     assert inputs[1]["stride"] == (32, 1)
     assert inputs[1]["device"] == "cuda"
     assert inputs[1]["symbolic_dims"] == [{"dim": 1, "symbol": "s0", "default": 32}]
+    assert inputs[1]["symbolic_stride_dims"] == [{"dim": 0, "expr": "s0"}]
     assert inputs[2]["dtype"] == "int64"
     assert inputs[2]["gen"]["kind"] == "index"
     assert inputs[2]["gen"]["high"] == 2
@@ -548,6 +550,189 @@ class GraphModule(torch.nn.Module):
             assert "dtype does not match" in str(exc)
         else:
             raise AssertionError("sidecar dtype mismatch should fail")
+
+
+def test_full_graph_sidecar_allows_symbolic_shape_and_stride_expressions():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(
+        self,
+        s0: "Sym(s0)",
+        s1: "Sym(s1)",
+        s2: "Sym(s2)",
+        x: "f32[s0, s1, s2][s1*s2, s2, 1]cpu",
+        y: "f32[s0*s1, s2][s2, 1]cpu",
+    ):
+        return (x, y)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 1,
+            "graph": "full_graph_000.py",
+            "inputs": [
+                {"kind": "symint", "name": "s0", "value": 2},
+                {"kind": "symint", "name": "s1", "value": 3},
+                {"kind": "symint", "name": "s2", "value": 4},
+                {
+                    "kind": "tensor",
+                    "name": "x",
+                    "shape": [2, 3, 4],
+                    "dtype": "float32",
+                    "stride": [12, 4, 1],
+                    "device": "cpu",
+                },
+                {
+                    "kind": "tensor",
+                    "name": "y",
+                    "shape": [6, 4],
+                    "dtype": "float32",
+                    "stride": [4, 1],
+                    "device": "cpu",
+                },
+            ],
+        }))
+
+        _instance, inputs, _definition = load_full_graph(
+            graph, default_device="cpu"
+        )
+
+    assert inputs[3].shape == (2, 3, 4)
+    assert inputs[3].stride() == (12, 4, 1)
+    assert inputs[4].shape == (6, 4)
+
+
+def test_full_graph_sidecar_rejects_symbolic_annotation_stride_mismatch():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, s0: "Sym(s0)", x: "f32[2, s0][s0, 1]cpu"):
+        return (x,)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 1,
+            "graph": "full_graph_000.py",
+            "inputs": [
+                {"kind": "symint", "name": "s0", "value": 8},
+                {
+                    "kind": "tensor",
+                    "name": "x",
+                    "shape": [2, 8],
+                    "dtype": "float32",
+                    "stride": [9, 1],
+                    "device": "cpu",
+                },
+            ],
+        }))
+
+        try:
+            load_full_graph(graph, default_device="cpu")
+        except ValueError as exc:
+            assert "stride does not match" in str(exc)
+        else:
+            raise AssertionError("sidecar symbolic stride mismatch should fail")
+
+
+def test_full_graph_sidecar_rejects_symbolic_annotation_shape_mismatch():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, s0: "Sym(s0)", x: "f32[s0][1]cpu"):
+        return (x,)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 1,
+            "graph": "full_graph_000.py",
+            "inputs": [
+                {"kind": "symint", "name": "s0", "value": 8},
+                {
+                    "kind": "tensor",
+                    "name": "x",
+                    "shape": [9],
+                    "dtype": "float32",
+                    "stride": [1],
+                    "device": "cpu",
+                },
+            ],
+        }))
+
+        try:
+            load_full_graph(graph, default_device="cpu")
+        except ValueError as exc:
+            assert "shape does not match" in str(exc)
+        else:
+            raise AssertionError("sidecar symbolic shape mismatch should fail")
+
+
+def test_full_graph_sidecar_rejects_unresolved_symbolic_annotation_stride():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 8][unknown, 1]cpu"):
+        return (x,)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 1,
+            "graph": "full_graph_000.py",
+            "inputs": [{
+                "kind": "tensor",
+                "name": "x",
+                "shape": [2, 8],
+                "dtype": "float32",
+                "stride": [8, 1],
+                "device": "cpu",
+            }],
+        }))
+
+        try:
+            load_full_graph(graph, default_device="cpu")
+        except ValueError as exc:
+            assert "unbound symbols" in str(exc)
+        else:
+            raise AssertionError("unresolved symbolic stride should fail")
+
+
+def test_full_graph_sidecar_rejects_conflicting_symbol_bindings():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, first: "Sym(s0)", second: "Sym(s0)"):
+        return (first, second)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 1,
+            "graph": "full_graph_000.py",
+            "inputs": [
+                {"kind": "symint", "name": "first", "value": 2},
+                {"kind": "symint", "name": "second", "value": 3},
+            ],
+        }))
+
+        try:
+            load_full_graph(graph, default_device="cpu")
+        except ValueError as exc:
+            assert "conflicting values" in str(exc)
+        else:
+            raise AssertionError("conflicting symbol bindings should fail")
 
 
 def test_full_graph_source_inference_distinguishes_models_and_microbenchmarks():

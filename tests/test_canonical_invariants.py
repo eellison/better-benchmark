@@ -723,6 +723,222 @@ class Repro(torch.nn.Module):
     assert by_name["rng_state"]["dtype"] == "uint64"
 
 
+def _sdpa_test_node(tensors, tail, *, scale=0.125):
+    from types import SimpleNamespace
+
+    graph = fx.Graph()
+    args = []
+    for index, tensor in enumerate(tensors):
+        arg = graph.placeholder(f"arg{index}")
+        arg.meta["val"] = tensor
+        args.append(arg)
+    return SimpleNamespace(args=tuple(args) + tuple(tail), kwargs={"scale": scale})
+
+
+def test_flash_sdpa_inductor_layout_preserves_aligned_bshd_physical_view():
+    from scripts.model_attribution import _sdpa_inductor_layout
+
+    tensor = torch.randn(2, 4, 3, 8).permute(0, 2, 1, 3)
+
+    constrained = _sdpa_inductor_layout(tensor)
+
+    assert tensor.stride() == (96, 8, 24, 1)
+    assert constrained is tensor
+
+
+def test_flash_sdpa_inductor_layout_copies_stride_six_view():
+    from scripts.model_attribution import _sdpa_inductor_layout
+
+    source = torch.randn(2, 3, 4, 8)
+    storage = torch.empty(2 * 3 * 4 * 8 * 6)
+    tensor = storage.as_strided(source.shape, (576, 1, 144, 6))
+    tensor.copy_(source)
+
+    constrained = _sdpa_inductor_layout(tensor)
+
+    assert constrained is not tensor
+    assert constrained.is_contiguous()
+    assert torch.equal(constrained, source)
+
+
+def test_flash_sdpa_inductor_layout_preserves_order_compatible_input():
+    from scripts.model_attribution import _sdpa_inductor_layout
+
+    source = torch.randn(2, 3, 5, 6)
+    tensor = torch.empty_strided(source.shape, (90, 6, 18, 1))
+    tensor.copy_(source)
+
+    constrained = _sdpa_inductor_layout(tensor)
+
+    assert constrained is tensor
+
+
+def test_flash_sdpa_inductor_layout_ignores_singleton_stride_order():
+    from scripts.model_attribution import _sdpa_inductor_layout
+
+    storage = torch.empty(256)
+    tensor = storage.as_strided((2, 1, 3, 8), (100, 1, 20, 2))
+
+    constrained = _sdpa_inductor_layout(tensor)
+
+    assert constrained is tensor
+
+
+def test_flash_sdpa_backward_replays_aux_and_times_layout_copies():
+    from types import SimpleNamespace
+    from unittest.mock import patch
+
+    import scripts.model_attribution as attribution
+
+    shape = (2, 3, 4, 5)
+    stride = (60, 1, 15, 3)
+
+    def captured():
+        tensor = torch.empty_strided(shape, stride)
+        tensor.copy_(torch.randn(shape))
+        return tensor
+
+    grad_out, q, k, v, out = (captured() for _ in range(5))
+    logsumexp = torch.empty(2, 3, 4)
+    node = _sdpa_test_node(
+        (grad_out, q, k, v, out, logsumexp),
+        (None, None, 4, 4, 0.0, False, None, None),
+    )
+    forward_out = torch.randn(shape)
+    forward_logsumexp = torch.randn(2, 3, 4)
+    calls = {}
+
+    def flash_forward(q_arg, k_arg, v_arg, *args, **kwargs):
+        calls["forward"] = (q_arg, k_arg, v_arg, args, kwargs)
+        return (
+            forward_out,
+            forward_logsumexp,
+            "cum_q",
+            "cum_k",
+            4,
+            4,
+            "seed",
+            "offset",
+            None,
+        )
+
+    def flash_backward(*args, **kwargs):
+        calls["backward"] = (args, kwargs)
+        return ()
+
+    bench_active = False
+    original_layout = attribution._sdpa_inductor_layout
+
+    def checked_layout(tensor):
+        assert bench_active
+        return original_layout(tensor)
+
+    def bench(fn):
+        nonlocal bench_active
+        bench_active = True
+        try:
+            fn()
+        finally:
+            bench_active = False
+        return 17.0
+
+    fake_aten = SimpleNamespace(
+        _scaled_dot_product_flash_attention=SimpleNamespace(
+            default=flash_forward
+        ),
+        _scaled_dot_product_flash_attention_backward=SimpleNamespace(
+            default=flash_backward
+        ),
+    )
+    fake_torch = SimpleNamespace(
+        is_tensor=torch.is_tensor,
+        ops=SimpleNamespace(aten=fake_aten),
+    )
+    with (
+        patch.object(attribution, "torch", fake_torch),
+        patch.object(attribution, "_fabricate", lambda value: value),
+        patch.object(attribution, "_bench_replay", bench),
+        patch.object(attribution, "_sdpa_inductor_layout", checked_layout),
+    ):
+        timing = attribution._bench_sdpa_backward(node, "flash")
+
+    assert timing == 17.0
+    assert all(tensor.is_contiguous() for tensor in calls["forward"][:3])
+    assert calls["forward"][3] == (0.0, False, False)
+    assert calls["forward"][4] == {"scale": 0.125}
+    backward_args, backward_kwargs = calls["backward"]
+    assert all(tensor.is_contiguous() for tensor in backward_args[:5])
+    for actual, expected in zip(
+        backward_args[:6],
+        (grad_out, q, k, v, forward_out, forward_logsumexp),
+    ):
+        assert torch.equal(actual, expected)
+    assert backward_args[6:] == (
+        "cum_q",
+        "cum_k",
+        4,
+        4,
+        0.0,
+        False,
+        "seed",
+        "offset",
+    )
+    assert backward_kwargs == {"scale": 0.125}
+    assert torch.equal(out, forward_out)
+    assert torch.equal(logsumexp, forward_logsumexp)
+
+
+def test_efficient_sdpa_backward_preserves_captured_bias_layout():
+    from types import SimpleNamespace
+    from unittest.mock import patch
+
+    import scripts.model_attribution as attribution
+
+    grad_out, q, k, v = (torch.randn(2, 3, 4, 8) for _ in range(4))
+    bias = torch.randn(2, 1, 4, 4).expand(2, 3, 4, 4)
+    node = _sdpa_test_node(
+        (grad_out, q, k, v, bias),
+        (None, None, None, None, 0.0, [True, True, True, True], False),
+    )
+    calls = {}
+
+    def efficient_forward(*args, **kwargs):
+        calls["forward"] = (args, kwargs)
+        return torch.randn_like(q), torch.randn(2, 3, 4), "seed", "offset"
+
+    def efficient_backward(*args, **kwargs):
+        calls["backward"] = (args, kwargs)
+        return ()
+
+    def bench(fn):
+        fn()
+        return 23.0
+
+    fake_aten = SimpleNamespace(
+        _scaled_dot_product_efficient_attention=SimpleNamespace(
+            default=efficient_forward
+        ),
+        _scaled_dot_product_efficient_attention_backward=SimpleNamespace(
+            default=efficient_backward
+        ),
+    )
+    fake_torch = SimpleNamespace(
+        is_tensor=torch.is_tensor,
+        ops=SimpleNamespace(aten=fake_aten),
+    )
+    with (
+        patch.object(attribution, "torch", fake_torch),
+        patch.object(attribution, "_fabricate", lambda value: value),
+        patch.object(attribution, "_bench_replay", bench),
+    ):
+        timing = attribution._bench_sdpa_backward(node, "efficient")
+
+    assert timing == 23.0
+    assert calls["forward"][0][3] is bias
+    assert calls["backward"][0][4] is bias
+    assert bias.stride(1) == 0
+
+
 # ============================================================================
 # 13. Alias groups: shared-storage inputs preserved end to end
 # ============================================================================

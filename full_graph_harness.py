@@ -852,6 +852,21 @@ def _symbolic_dims(shape_str: str) -> list[dict[str, Any]]:
     return symbols
 
 
+def _symbolic_stride_dims(stride_str: str | None) -> list[dict[str, Any]]:
+    if stride_str is None:
+        return []
+    symbolic = []
+    for idx, dim in enumerate(stride_str.split(",")):
+        dim = dim.strip()
+        if not dim:
+            continue
+        try:
+            int(dim)
+        except ValueError:
+            symbolic.append({"dim": idx, "expr": dim})
+    return symbolic
+
+
 def _parse_shape(shape_str: str) -> tuple[int, ...]:
     dims = []
     for dim in shape_str.split(","):
@@ -922,6 +937,7 @@ def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
                 "kind": "symint",
                 "name": name,
                 "value": _parse_intish(annotation),
+                "symbolic_expr": annotation.removeprefix("Sym(").removesuffix(")"),
             })
             continue
 
@@ -956,6 +972,9 @@ def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
         symbolic_dims = _symbolic_dims(shape_str)
         if symbolic_dims:
             spec["symbolic_dims"] = symbolic_dims
+        symbolic_stride_dims = _symbolic_stride_dims(stride_str)
+        if symbolic_stride_dims:
+            spec["symbolic_stride_dims"] = symbolic_stride_dims
         specs.append({
             **spec,
         })
@@ -1045,18 +1064,43 @@ def _normalize_device_name(device: Any) -> str | None:
     return text
 
 
-def _symbolic_dim_indices(spec: dict[str, Any]) -> set[int]:
-    return {
-        int(item["dim"])
-        for item in spec.get("symbolic_dims", [])
-        if isinstance(item, dict) and "dim" in item
-    }
+def _resolve_annotation_expr(
+    expr_text: str,
+    bindings: dict[str, int],
+    *,
+    label: str,
+    dim: int,
+    kind: str,
+) -> int:
+    import sympy
+
+    expr = sympy.sympify(expr_text, rational=False)
+    missing = sorted(
+        str(symbol)
+        for symbol in expr.free_symbols
+        if str(symbol) not in bindings
+    )
+    if missing:
+        raise ValueError(
+            f"full graph annotation {kind} expression has unbound "
+            f"symbols for {label} dim {dim}: {missing}"
+        )
+    expected = expr.subs(
+        {sympy.Symbol(name): value for name, value in bindings.items()}
+    )
+    if not expected.is_Integer:
+        raise ValueError(
+            f"full graph annotation {kind} expression is not an "
+            f"integer for {label} dim {dim}: {expected}"
+        )
+    return int(expected)
 
 
 def _validate_tensor_sidecar_spec(
     sidecar_spec: dict[str, Any],
     annotation_spec: dict[str, Any],
     label: str,
+    symbol_bindings: dict[str, int] | None = None,
 ) -> None:
     sidecar_dtype = _normalize_dtype_name(sidecar_spec.get("dtype", "float32"))
     annotation_dtype = _normalize_dtype_name(annotation_spec.get("dtype", "float32"))
@@ -1074,14 +1118,25 @@ def _validate_tensor_sidecar_spec(
                 "full graph sidecar tensor rank does not match forward annotations "
                 f"for {label}: {len(sidecar_shape)} != {len(annotation_shape)}"
             )
-        symbolic_dims = _symbolic_dim_indices(annotation_spec)
+        symbolic_shapes = {
+            int(item["dim"]): item["symbol"]
+            for item in annotation_spec.get("symbolic_dims", [])
+        }
+        bindings = dict(symbol_bindings or {})
         for idx, (sidecar_dim, annotation_dim) in enumerate(zip(sidecar_shape, annotation_shape)):
-            if idx in symbolic_dims:
-                continue
-            if int(sidecar_dim) != int(annotation_dim):
+            expected = annotation_dim
+            if idx in symbolic_shapes:
+                expected = _resolve_annotation_expr(
+                    symbolic_shapes[idx],
+                    bindings,
+                    label=label,
+                    dim=idx,
+                    kind="shape",
+                )
+            if int(sidecar_dim) != int(expected):
                 raise ValueError(
                     "full graph sidecar tensor shape does not match forward annotations "
-                    f"for {label} dim {idx}: {sidecar_dim} != {annotation_dim}"
+                    f"for {label} dim {idx}: {sidecar_dim} != {expected}"
                 )
 
     sidecar_stride = sidecar_spec.get("stride")
@@ -1092,11 +1147,35 @@ def _validate_tensor_sidecar_spec(
                 "full graph sidecar tensor stride rank does not match forward annotations "
                 f"for {label}: {len(sidecar_stride)} != {len(annotation_stride)}"
             )
+        bindings = dict(symbol_bindings or {})
+        for item in annotation_spec.get("symbolic_dims", []):
+            symbol = item.get("symbol")
+            dim = int(item["dim"])
+            if (
+                isinstance(symbol, str)
+                and re.fullmatch(r"[A-Za-z_]\w*", symbol)
+                and sidecar_shape is not None
+                and dim < len(sidecar_shape)
+            ):
+                bindings.setdefault(symbol, int(sidecar_shape[dim]))
+        symbolic_strides = {
+            int(item["dim"]): item["expr"]
+            for item in annotation_spec.get("symbolic_stride_dims", [])
+        }
         for idx, (sidecar_dim, annotation_dim) in enumerate(zip(sidecar_stride, annotation_stride)):
-            if int(sidecar_dim) != int(annotation_dim):
+            expected = annotation_dim
+            if idx in symbolic_strides:
+                expected = _resolve_annotation_expr(
+                    symbolic_strides[idx],
+                    bindings,
+                    label=label,
+                    dim=idx,
+                    kind="stride",
+                )
+            if int(sidecar_dim) != int(expected):
                 raise ValueError(
                     "full graph sidecar tensor stride does not match forward annotations "
-                    f"for {label} dim {idx}: {sidecar_dim} != {annotation_dim}"
+                    f"for {label} dim {idx}: {sidecar_dim} != {expected}"
                 )
 
     sidecar_device = _normalize_device_name(sidecar_spec.get("device"))
@@ -1131,6 +1210,52 @@ def _validate_sidecar_inputs(
             "full graph sidecar input count does not match forward annotations: "
             f"{len(sidecar_inputs)} != {len(annotation_inputs)}"
         )
+    symbol_bindings = {}
+    explicit_symbols = set()
+
+    def bind_symbol(symbol: str, value: int) -> None:
+        if symbol in symbol_bindings and symbol_bindings[symbol] != value:
+            raise ValueError(
+                "full graph sidecar has conflicting values for symbolic "
+                f"dimension {symbol}: {symbol_bindings[symbol]} != {value}"
+            )
+        symbol_bindings[symbol] = value
+
+    for sidecar_spec, annotation_spec in zip(sidecar_inputs, annotation_inputs):
+        expr = annotation_spec.get("symbolic_expr")
+        if (
+            annotation_spec.get("kind") == "symint"
+            and isinstance(expr, str)
+            and re.fullmatch(r"[A-Za-z_]\w*", expr)
+        ):
+            bind_symbol(
+                expr,
+                int(
+                    sidecar_spec.get("value", annotation_spec.get("value", 1))
+                ),
+            )
+            explicit_symbols.add(expr)
+    for sidecar_spec, annotation_spec in zip(sidecar_inputs, annotation_inputs):
+        if (
+            sidecar_spec.get("kind") != "tensor"
+            or annotation_spec.get("kind") != "tensor"
+        ):
+            continue
+        sidecar_shape = sidecar_spec.get("shape")
+        if sidecar_shape is None:
+            continue
+        for item in annotation_spec.get("symbolic_dims", []):
+            symbol = item.get("symbol")
+            dim = int(item["dim"])
+            if (
+                isinstance(symbol, str)
+                and re.fullmatch(r"[A-Za-z_]\w*", symbol)
+                and dim < len(sidecar_shape)
+            ):
+                value = int(sidecar_shape[dim])
+                if symbol not in explicit_symbols:
+                    bind_symbol(symbol, value)
+
     for idx, sidecar_spec in enumerate(sidecar_inputs):
         if idx >= len(annotation_inputs):
             break
@@ -1155,6 +1280,7 @@ def _validate_sidecar_inputs(
             sidecar_spec,
             annotation_spec,
             str(sidecar_name or idx),
+            symbol_bindings,
         )
 
 
