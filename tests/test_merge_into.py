@@ -43,6 +43,7 @@ from bench_parallel import (
     _git_query,
     _merge_into_baseline,
     _pytorch_provenance,
+    _regroup_sharded_repro_failures,
     _results_payload,
     _run_metadata,
 )
@@ -290,6 +291,272 @@ class TestMergeIntoBaseline:
 
         data = json.loads(baseline.read_text())
         assert data["repro/a/repro.py"]["default"]["compiled_us"] == 50.0
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_partial_rerun_preserves_other_shapes(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {
+                "repro/a/repro.py": {
+                    "shape_a": {"compiled_us": 10.0},
+                    "shape_b": {"compiled_us": 20.0},
+                }
+            }
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(
+            baseline,
+            {"repro/a/repro.py": {"shape_a": {"compiled_us": 5.0}}},
+            {},
+            partial_repros={"repro/a/repro.py"},
+        )
+
+        data = json.loads(baseline.read_text())
+        results = data["repro/a/repro.py"]
+        assert results["shape_a"]["compiled_us"] == 5.0
+        assert results["shape_b"]["compiled_us"] == 20.0
+        assert data["__summary__"]["ok"] == 1
+        assert data["__summary__"]["points"]["ok"] == 2
+        assert data["_metadata"]["n_results"] == 1
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_complete_rerun_replaces_obsolete_shapes_and_failures(
+        self, mock_sp, tmp_baseline
+    ):
+        repro = "repro/a/repro.py"
+        existing = _results_payload(
+            {
+                repro: {
+                    "shape_a": {"compiled_us": 10.0},
+                    "obsolete": {"compiled_us": 20.0},
+                }
+            },
+            {
+                f"{repro}::SHAPE::old_failure": _sample_failure("old"),
+            },
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(
+            baseline,
+            {repro: {"shape_a": {"compiled_us": 5.0}}},
+            {},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data[repro] == {"shape_a": {"compiled_us": 5.0}}
+        assert "__failures__" not in data
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_complete_all_failed_rerun_clears_obsolete_family_state(
+        self, mock_sp, tmp_baseline
+    ):
+        repro = "repro/a/repro.py"
+        existing = _results_payload(
+            {
+                repro: {
+                    "obsolete_a": {"compiled_us": 10.0},
+                    "obsolete_b": {"compiled_us": 20.0},
+                }
+            },
+            {
+                f"{repro}::SHAPE::old_failure": _sample_failure("old"),
+            },
+        )
+        baseline = tmp_baseline(content=existing)
+        new_failures = {
+            f"{repro}::SHAPE::shape_a": _sample_failure("new a"),
+            f"{repro}::SHAPE::shape_b": _sample_failure("new b"),
+        }
+
+        _merge_into_baseline(
+            baseline,
+            {},
+            new_failures,
+            complete_repros={repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert repro not in data
+        assert data["__failures__"] == new_failures
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_mixed_inductor_config(
+        self, mock_sp, tmp_baseline
+    ):
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"inductor_config": {"combo_kernels": True}},
+        )
+        baseline = tmp_baseline(content=existing)
+        before = baseline.read_bytes()
+
+        with pytest.raises(ValueError, match="different Inductor configurations"):
+            _merge_into_baseline(
+                baseline,
+                {"repro/b/repro.py": _sample_result()},
+                {},
+                extra_inductor_config={"combo_kernels": False},
+            )
+
+        assert baseline.read_bytes() == before
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_partial_shape_failure_removes_only_stale_shape(
+        self, mock_sp, tmp_baseline
+    ):
+        repro = "repro/a/repro.py"
+        failed_task = f"{repro}::SHAPE::shape_b"
+        existing = _results_payload(
+            {
+                repro: {
+                    "shape_a": {"compiled_us": 10.0},
+                    "shape_b": {"compiled_us": 20.0},
+                    "shape_c": {"compiled_us": 30.0},
+                }
+            }
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(
+            baseline,
+            {repro: {"shape_a": {"compiled_us": 5.0}}},
+            {failed_task: _sample_failure("shape_b failed")},
+            partial_repros={repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data[repro] == {
+            "shape_a": {"compiled_us": 5.0},
+            "shape_c": {"compiled_us": 30.0},
+        }
+        assert data["__failures__"][failed_task]["error"] == "shape_b failed"
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_all_selected_shape_failures_preserve_unselected_results(
+        self, mock_sp, tmp_baseline
+    ):
+        repro = "repro/a/repro.py"
+        existing = _results_payload(
+            {
+                repro: {
+                    "shape_a": {"compiled_us": 10.0},
+                    "shape_b": {"compiled_us": 20.0},
+                    "shape_c": {"compiled_us": 30.0},
+                }
+            }
+        )
+        baseline = tmp_baseline(content=existing)
+        failures = _regroup_sharded_repro_failures(
+            {},
+            {
+                f"{repro}::SHAPE::shape_a": _sample_failure("shape_a failed"),
+                f"{repro}::SHAPE::shape_b": _sample_failure("shape_b failed"),
+            },
+        )
+
+        _merge_into_baseline(
+            baseline,
+            {},
+            failures,
+            partial_repros={repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data[repro] == {
+            "shape_c": {"compiled_us": 30.0},
+        }
+        assert set(data["__failures__"]) == {
+            f"{repro}::SHAPE::shape_a",
+            f"{repro}::SHAPE::shape_b",
+        }
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_successful_shape_clears_its_qualified_failure(
+        self, mock_sp, tmp_baseline
+    ):
+        repro = "repro/a/repro.py"
+        recovered_task = f"{repro}::SHAPE::shape_b"
+        existing = _results_payload(
+            {repro: {"shape_a": {"compiled_us": 10.0}}},
+            {recovered_task: _sample_failure("old failure")},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(
+            baseline,
+            {repro: {"shape_b": {"compiled_us": 20.0}}},
+            {},
+            partial_repros={repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data[repro] == {
+            "shape_a": {"compiled_us": 10.0},
+            "shape_b": {"compiled_us": 20.0},
+        }
+        assert recovered_task not in data.get("__failures__", {})
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_point_failure_expands_family_failure_and_preserves_siblings(
+        self, mock_sp, tmp_baseline
+    ):
+        repro = "repro/a/repro.py"
+        existing = _results_payload(
+            {},
+            {
+                repro: {
+                    "status": "failed",
+                    "error": "old family failure",
+                    "failed_shapes": ["shape_a", "shape_b"],
+                }
+            },
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(
+            baseline,
+            {},
+            {
+                f"{repro}::SHAPE::shape_b": _sample_failure(
+                    "new shape_b failure"
+                )
+            },
+        )
+
+        failures = json.loads(baseline.read_text())["__failures__"]
+        assert repro not in failures
+        assert failures[f"{repro}::SHAPE::shape_a"]["error"] == (
+            "old family failure"
+        )
+        assert failures[f"{repro}::SHAPE::shape_b"]["error"] == (
+            "new shape_b failure"
+        )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_family_failure_replaces_stale_shape_failures(
+        self, mock_sp, tmp_baseline
+    ):
+        repro = "repro/a/repro.py"
+        existing = _results_payload(
+            {},
+            {
+                f"{repro}::SHAPE::shape_a": _sample_failure("old a"),
+                f"{repro}::SHAPE::shape_b": _sample_failure("old b"),
+            },
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(
+            baseline,
+            {},
+            {repro: _sample_failure("new family failure")},
+        )
+
+        failures = json.loads(baseline.read_text())["__failures__"]
+        assert failures == {repro: _sample_failure("new family failure")}
 
     @patch("subprocess.run", side_effect=_mock_sp_run)
     def test_metadata_updated_on_merge(self, mock_sp, tmp_baseline):

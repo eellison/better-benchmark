@@ -231,6 +231,48 @@ for line in sys.stdin:
 '''
 
 
+def _shape_protocol_worker_script(gpu_idx: str, args_dict: dict) -> str:
+    return r'''
+import json
+import os
+import sys
+
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
+sys.stdout = sys.stderr
+bad_prefetch = False
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line or line == "EXIT":
+        break
+    if line.startswith("PREFETCH:"):
+        bad_prefetch |= "::SHAPE::" in line
+        continue
+    if bad_prefetch:
+        result = {
+            "_repro": line,
+            "__error__": {"error": "shape suffix leaked into prefetch path"},
+        }
+    else:
+        _path, shape = line.rsplit("::SHAPE::", 1)
+        result = {
+            "_repro": line,
+            shape: {
+                "compiled_us": 1.0,
+                "coord_descent_us": None,
+                "memcopy_sol_us": 1.0,
+                "total_bytes": 4,
+                "gap_default": 1.0,
+                "gap_cd": None,
+            },
+        }
+    _result_file.write(json.dumps(result) + "\n")
+    _result_file.flush()
+'''
+
+
 def _strict_lock_stress_worker(
     script_prefix: str,
     lock_dir: str,
@@ -296,6 +338,28 @@ def test_default_worker_setup_does_not_take_gpu_lock():
     assert "if STRICT_GPU_LOCK:\n        with gpu_bench_lock(\"shared\"):" in script
     assert "with gpu_bench_lock():" in script
     assert "do_bench(" in script
+
+
+def test_generated_worker_embeds_exact_shape_selection():
+    script = _persistent_worker_script("0", {
+        "root": str(ROOT),
+        "all_shapes": True,
+        "no_cd": True,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": False,
+    })
+    prefix = script.split("# Main loop:", 1)[0]
+    namespace = {"__name__": "bench_parallel_generated_shape_test"}
+    exec(prefix, namespace)
+
+    configs = {"shape_a": {"inputs": ["a"]}, "shape_b": {"inputs": ["b"]}}
+    select = namespace["_shape_items_for_task"]
+    assert select(configs, "shape_b", True) == [
+        ("shape_b", configs["shape_b"])
+    ]
+    with pytest.raises(ValueError, match="unavailable"):
+        select(configs, "missing", True)
 
 
 def test_compile_time_flag_gates_full_graph_cold_compile():
@@ -504,6 +568,46 @@ def test_locked_worker_detects_misaligned_results(monkeypatch):
         # it should succeed (first request to fresh worker is always correct).
         assert results[2]["status"] == "ok"
         assert Path(results[2]["repro"]).parent.name == "repro_c"
+
+
+def test_locked_worker_preserves_shape_task_but_prefetches_real_path(tmp_path):
+    repro = tmp_path / "family" / "repro.py"
+    repro.parent.mkdir()
+    repro.write_text("# fake repro\n")
+    tasks = [
+        f"{repro}::SHAPE::shape_a",
+        f"{repro}::SHAPE::shape_b",
+    ]
+    task_queue = queue.Queue()
+    for task in tasks:
+        task_queue.put(task)
+    result_queue = queue.Queue()
+
+    _locked_worker(
+        {"index": "0", "name": "Fake GPU", "kind": "fake"},
+        task_queue,
+        result_queue,
+        {
+            "root": str(ROOT),
+            "workload_kind": "repro",
+            "all_shapes": True,
+            "no_cd": True,
+            "n_warmup": 1,
+            "n_rep": 1,
+            "share_cache": False,
+            "strict_gpu_lock": False,
+            "n_workers": 1,
+            "_persistent_worker_script_factory": _shape_protocol_worker_script,
+        },
+    )
+
+    results = [result_queue.get_nowait() for _ in tasks]
+    assert [result["repro"] for result in results] == tasks
+    assert [set(result["results"]) for result in results] == [
+        {"shape_a"},
+        {"shape_b"},
+    ]
+    assert all(result["status"] == "ok" for result in results)
 
 
 def test_dedicated_result_fd_isolates_native_stdout_pollution(monkeypatch):

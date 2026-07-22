@@ -62,6 +62,8 @@ Usage:
 #   doesn't need to re-run during timing.
 """
 import argparse
+import dataclasses
+import inspect
 import json
 import multiprocessing as mp
 import os
@@ -97,6 +99,11 @@ _SHAPE_TASK_SEP = "::SHAPE::"
 _DEFAULT_SHAPE_TOKEN = "__default__"
 
 
+def _normalize_shape_label(label: str) -> str:
+    """Return the stable result label for a shape task."""
+    return "default" if label == _DEFAULT_SHAPE_TOKEN else label
+
+
 def _make_shape_task_key(dir_path: str, shape_label: str) -> str:
     """Encode a (dir, shape_label) sharded oracle task key."""
     return f"{dir_path}{_SHAPE_TASK_SEP}{shape_label}"
@@ -112,6 +119,27 @@ def _split_shape_task_key(task_key: str) -> tuple[str, str | None]:
         dir_path, label = task_key.rsplit(_SHAPE_TASK_SEP, 1)
         return dir_path, label
     return task_key, None
+
+
+def _shape_items_for_task(configs, selected_shape, all_shapes):
+    """Return the exact shape rows a persistent repro worker must benchmark."""
+    if selected_shape == _DEFAULT_SHAPE_TOKEN:
+        if configs:
+            raise ValueError(
+                "default shape requested, but named shape configs exist: "
+                f"{sorted(configs)}"
+            )
+        return [(None, None)]
+    if selected_shape is not None:
+        if selected_shape not in configs:
+            raise ValueError(
+                f"requested shape {selected_shape!r} is unavailable; "
+                f"have {sorted(configs)}"
+            )
+        return [(selected_shape, configs[selected_shape])]
+    if all_shapes and configs:
+        return list(configs.items())
+    return [(None, None)]
 
 
 def _expand_oracle_shape_tasks(dirs: list[Path]) -> list[str]:
@@ -138,6 +166,110 @@ def _expand_oracle_shape_tasks(dirs: list[Path]) -> list[str]:
         else:
             tasks.append(_make_shape_task_key(str(d), _DEFAULT_SHAPE_TOKEN))
     return tasks
+
+
+def _expand_repro_shape_tasks(repros: list[Path]) -> list[str]:
+    """Expand repro.py files into (repro, shape_label) task keys for sharding.
+
+    The repro --all-shapes equivalent of ``_expand_oracle_shape_tasks``: each
+    repro.py's shapes.json points become individual tasks so the worker pool
+    spreads them across all GPUs, instead of one worker looping every shape of a
+    big dir serially while peers idle. A repro with no shape configs yields a
+    single ``<repro.py>::SHAPE::__default__`` task (one default point, same as
+    the un-sharded all_shapes=False/empty-configs branch).
+
+    The task key wraps the repro.py file path (NOT the dir): the repro path
+    output JSON, --update-perf, and --merge-into are all keyed by the bare
+    repro.py path, so the worker benches one shape and the parent regroups the
+    per-shape payloads back under that bare path (see
+    ``_regroup_sharded_repro_results``). The worker still does a fresh
+    torch._dynamo.reset() + compile per shape — sharding changes only the task
+    GRANULARITY, never WHAT is measured.
+    """
+    from repro_harness import load_shape_configs
+
+    tasks: list[str] = []
+    for repro_file in repros:
+        try:
+            configs = load_shape_configs(str(repro_file))
+        except Exception:
+            configs = None
+        if configs:
+            for label in configs:
+                tasks.append(_make_shape_task_key(str(repro_file), label))
+        else:
+            tasks.append(_make_shape_task_key(str(repro_file), _DEFAULT_SHAPE_TOKEN))
+    return tasks
+
+
+def _sort_shape_tasks_big_dirs_first(tasks: list[str]) -> list[str]:
+    """Order sharded (path, shape) tasks so the biggest dirs drain first.
+
+    Shared by the oracle and repro sharded paths. Groups a path's shape tasks
+    contiguously but places the paths with the most shapes first: the worker
+    pool pulls round-robin, so emitting the big paths' points up front lets all
+    workers chew them in parallel from the start; the small single-shape paths
+    drain at the end (cheap, no straggler tail).
+    """
+    from collections import Counter
+
+    dir_task_count = Counter(_split_shape_task_key(t)[0] for t in tasks)
+    return sorted(
+        tasks,
+        key=lambda k: (
+            -dir_task_count[_split_shape_task_key(k)[0]],
+            _split_shape_task_key(k)[0],
+        ),
+    )
+
+
+def _regroup_sharded_repro_results(all_results: dict) -> dict:
+    """Regroup per-(repro, shape) sharded payloads back under their repro.py path.
+
+    With repro --all-shapes sharding the task unit is one
+    ``<repro.py>::SHAPE::<label>`` key, and each worker returns a single-shape
+    payload ``{<shape_label>: {compiled_us, ...}}``. Downstream consumers (the
+    --output JSON schema, --update-perf, --merge-into, the gap roll-up) all
+    expect ONE payload per repro.py keyed by the bare path, with every shape
+    label merged inside it — byte-identical to the un-sharded in-worker-loop
+    output. This merges all of a repro's shape payloads back into that shape.
+
+    Bare repro.py keys (un-sharded, e.g. all_shapes=False) pass through
+    unchanged: one key per repro, no separator.
+    """
+    merged: dict[str, dict] = {}
+    for task_key, results in all_results.items():
+        repro_path, _label = _split_shape_task_key(str(task_key))
+        bucket = merged.setdefault(repro_path, {})
+        if isinstance(results, dict):
+            for label, point in results.items():
+                bucket[_normalize_shape_label(label)] = point
+    return merged
+
+
+def _regroup_sharded_repro_failures(all_results: dict, failures: dict) -> dict:
+    """Normalize per-(repro, shape) worker failures without losing point identity.
+
+    A worker exception fails ONE (repro, shape) task keyed
+    ``<repro.py>::SHAPE::<label>`` rather than the whole repro. Keep that
+    qualification even when every selected point fails: a focused exact-shape
+    rerun must not look like a whole-repro failure and delete unselected
+    baseline points during ``--merge-into``.
+    """
+    regrouped: dict[str, dict] = {}
+    for task_key, failure in failures.items():
+        repro_path, label = _split_shape_task_key(str(task_key))
+        # Un-sharded failure (no ::SHAPE:: suffix): pass through untouched.
+        if label is None:
+            regrouped[task_key] = failure
+            continue
+        regrouped[
+            _make_shape_task_key(
+                repro_path,
+                _normalize_shape_label(label),
+            )
+        ] = failure
+    return regrouped
 
 
 def _regroup_sharded_oracle_failures(sharded_failures: dict) -> dict:
@@ -284,27 +416,108 @@ def _benchmark_entry_name(entry) -> str | None:
     return entry.get("repro") or entry.get("name")
 
 
-def load_benchmark_set(
-    benchmark_set: Path,
+_BENCHMARK_SHAPE_SELECTORS = ("shape", "shape_labels", "shape_hashes")
+
+
+@dataclasses.dataclass(frozen=True)
+class BenchmarkSetSelection:
+    """Resolved benchmark manifest with exact point tasks."""
+
+    repros: tuple[Path, ...]
+    tasks: tuple[str, ...]
+    partial_repros: tuple[str, ...]
+    n_entries: int
+
+    @property
+    def n_repros(self) -> int:
+        return len(self.repros)
+
+    @property
+    def n_points(self) -> int:
+        return len(self.tasks)
+
+
+def _benchmark_entry_selector(
+    entry,
     *,
-    canonical_dir: Path = Path("repros/canonical"),
-) -> tuple[list[Path], int]:
-    """Load repro paths from either the old or current benchmark-set schema."""
+    entry_index: int,
+) -> tuple[str, tuple[str, ...]] | None:
+    """Validate and return one exact-shape selector from a manifest entry."""
+    if not isinstance(entry, dict):
+        return None
+
+    selectors = [key for key in _BENCHMARK_SHAPE_SELECTORS if key in entry]
+    if len(selectors) > 1:
+        raise ValueError(
+            f"benchmark entry {entry_index} specifies multiple shape selectors "
+            f"{selectors}; use exactly one of "
+            f"{', '.join(_BENCHMARK_SHAPE_SELECTORS)}"
+        )
+    if not selectors:
+        return None
+
+    selector = selectors[0]
+    value = entry[selector]
+    if selector == "shape":
+        if value is None:
+            # Legacy manifests used null for an unqualified/default entry.
+            # Preserve their old whole-repro expansion semantics.
+            return None
+        if not isinstance(value, str) or not value:
+            raise ValueError(
+                f"benchmark entry {entry_index} field 'shape' must be a "
+                "non-empty string"
+            )
+        values = (value,)
+    else:
+        if (
+            not isinstance(value, list)
+            or not value
+            or any(not isinstance(item, str) or not item for item in value)
+        ):
+            raise ValueError(
+                f"benchmark entry {entry_index} field {selector!r} must be a "
+                "non-empty list of non-empty strings"
+            )
+        values = tuple(value)
+    return selector, values
+
+
+def _read_benchmark_set_entries(benchmark_set: Path) -> list:
     data = json.loads(benchmark_set.read_text())
     if isinstance(data, list):
-        entries = data
-    else:
-        entries = data.get("patterns") or data.get("benchmarks") or []
+        return data
+    if not isinstance(data, dict):
+        raise ValueError(f"{benchmark_set} must contain a JSON object or list")
+    entries = data.get("patterns")
+    if entries is None:
+        entries = data.get("benchmarks")
+    if entries is None:
+        return []
+    if not isinstance(entries, list):
+        raise ValueError(f"{benchmark_set} benchmark entries must be a list")
+    return entries
 
-    repros = []
+
+def _resolve_benchmark_entries(
+    benchmark_set: Path,
+    *,
+    canonical_dir: Path,
+) -> tuple[list[tuple[Path, tuple[str, tuple[str, ...]] | None]], int]:
+    entries = _read_benchmark_set_entries(benchmark_set)
+    resolved = []
     missing = []
-    for entry in entries:
+    for index, entry in enumerate(entries):
         name = _benchmark_entry_name(entry)
-        if not name:
-            continue
+        if not isinstance(name, str) or not name:
+            raise ValueError(
+                f"benchmark entry {index} must be a repro name string or an "
+                "object with a non-empty 'name' or 'repro'"
+            )
+        selector = _benchmark_entry_selector(entry, entry_index=index)
         repro_path = canonical_dir / name / "repro.py"
         if repro_path.exists():
-            repros.append(repro_path)
+            resolved.append((repro_path, selector))
         else:
             missing.append(name)
     if missing:
@@ -314,7 +527,154 @@ def load_benchmark_set(
             f"{benchmark_set} references {len(missing)} missing canonical repros: "
             f"{preview}{suffix}"
         )
-    return sorted(set(repros)), len(entries)
+    return resolved, len(entries)
+
+
+def _canonical_shape_hash_labels(repro_path: Path) -> dict[str, str]:
+    """Map exact shape hashes to labels generated from canonical shapes.json."""
+    shapes_path = repro_path.parent / "shapes.json"
+    if not shapes_path.exists():
+        raise ValueError(
+            f"cannot resolve shape_hashes for {repro_path}: "
+            f"{shapes_path} does not exist"
+        )
+
+    data = json.loads(shapes_path.read_text())
+    points = data.get("points") if isinstance(data, dict) else None
+    if not isinstance(points, list):
+        raise ValueError(
+            f"cannot resolve shape_hashes for {repro_path}: "
+            f"{shapes_path} has no canonical 'points' list"
+        )
+
+    labels: dict[str, str] = {}
+    for index, point in enumerate(points):
+        if not isinstance(point, dict):
+            raise ValueError(f"{shapes_path} point {index} must be an object")
+        shape_hash = point.get("shape_hash")
+        if not isinstance(shape_hash, str) or not shape_hash:
+            raise ValueError(
+                f"{shapes_path} point {index} has no non-empty shape_hash"
+            )
+        models = point.get("models") or {}
+        if not isinstance(models, dict):
+            raise ValueError(f"{shapes_path} point {index} models must be an object")
+        first_model = next(iter(models), "")
+        model_short = first_model.rsplit("/", 1)[-1] if first_model else ""
+        label = f"{model_short}_{shape_hash}" if model_short else shape_hash
+        if shape_hash in labels:
+            raise ValueError(
+                f"{shapes_path} contains duplicate shape_hash {shape_hash!r}; "
+                "canonical hash selection would be ambiguous"
+            )
+        labels[shape_hash] = _normalize_shape_label(label)
+    return labels
+
+
+def _filter_exact_shape_tasks(
+    tasks: list[str],
+    requested_labels: dict[str, set[str] | None],
+) -> list[str]:
+    """Filter expanded all-shapes tasks and fail on every unresolved label."""
+    selected = []
+    matched = {repro_path: set() for repro_path in requested_labels}
+    for task in tasks:
+        repro_path, task_label = _split_shape_task_key(task)
+        if repro_path not in requested_labels:
+            continue
+        wanted = requested_labels[repro_path]
+        normalized = _normalize_shape_label(task_label or "default")
+        if wanted is None or normalized in wanted:
+            selected.append(task)
+            matched[repro_path].add(normalized)
+
+    unresolved = []
+    for repro_path, wanted in requested_labels.items():
+        if wanted is None:
+            if not matched[repro_path]:
+                unresolved.append(f"{repro_path}: no expanded shape points")
+            continue
+        missing = sorted(wanted - matched[repro_path])
+        if missing:
+            unresolved.append(f"{repro_path}: {', '.join(missing)}")
+    if unresolved:
+        raise ValueError(
+            "benchmark manifest requested shape selectors that did not resolve "
+            "exactly after all-shapes expansion: " + "; ".join(unresolved)
+        )
+    return selected
+
+
+def load_benchmark_set_selection(
+    benchmark_set: Path,
+    *,
+    canonical_dir: Path = Path("repros/canonical"),
+) -> BenchmarkSetSelection:
+    """Resolve a benchmark manifest to exact sharded shape tasks."""
+    resolved, n_entries = _resolve_benchmark_entries(
+        benchmark_set,
+        canonical_dir=canonical_dir,
+    )
+    repros = tuple(sorted({repro_path for repro_path, _selector in resolved}))
+    requested_labels: dict[str, set[str] | None] = {}
+    hash_label_cache: dict[Path, dict[str, str]] = {}
+
+    for repro_path, selector in resolved:
+        key = str(repro_path)
+        if selector is None:
+            requested_labels[key] = None
+            continue
+        if key in requested_labels and requested_labels[key] is None:
+            continue
+
+        selector_name, selector_values = selector
+        labels = requested_labels.setdefault(key, set())
+        assert labels is not None
+        if selector_name == "shape_hashes":
+            if repro_path not in hash_label_cache:
+                hash_label_cache[repro_path] = _canonical_shape_hash_labels(repro_path)
+            hash_labels = hash_label_cache[repro_path]
+            missing_hashes = [
+                shape_hash
+                for shape_hash in selector_values
+                if shape_hash not in hash_labels
+            ]
+            if missing_hashes:
+                raise ValueError(
+                    f"{repro_path} does not contain requested canonical "
+                    f"shape_hashes: {', '.join(missing_hashes)}"
+                )
+            labels.update(hash_labels[shape_hash] for shape_hash in selector_values)
+        else:
+            labels.update(_normalize_shape_label(value) for value in selector_values)
+
+    expanded = _expand_repro_shape_tasks(list(repros))
+    tasks = _filter_exact_shape_tasks(expanded, requested_labels)
+    return BenchmarkSetSelection(
+        repros=repros,
+        tasks=tuple(tasks),
+        partial_repros=tuple(
+            sorted(
+                repro_path
+                for repro_path, labels in requested_labels.items()
+                if labels is not None
+            )
+        ),
+        n_entries=n_entries,
+    )
+
+
+def load_benchmark_set(
+    benchmark_set: Path,
+    *,
+    canonical_dir: Path = Path("repros/canonical"),
+) -> tuple[list[Path], int]:
+    """Load unique repro paths while validating benchmark manifest syntax."""
+    resolved, n_entries = _resolve_benchmark_entries(
+        benchmark_set,
+        canonical_dir=canonical_dir,
+    )
+    return sorted({repro_path for repro_path, _selector in resolved}), n_entries
 
 
 def _filter_gpus(gpus: list[dict[str, str]], selected: str | None) -> list[dict[str, str]]:
@@ -667,7 +1027,13 @@ def _pytorch_provenance() -> tuple[str | None, str | None]:
     return commit, ref
 
 
-def _run_metadata(*, workload_kind: str | None, n_results: int, extra_inductor_config: dict | None = None) -> dict:
+def _run_metadata(
+    *,
+    workload_kind: str | None,
+    n_results: int,
+    n_repros: int | None = None,
+    extra_inductor_config: dict | None = None,
+) -> dict:
     commit = _git_query(["rev-parse", "HEAD"]) or ""
     pytorch_commit, pytorch_ref = _pytorch_provenance()
     metadata = {
@@ -684,7 +1050,7 @@ def _run_metadata(*, workload_kind: str | None, n_results: int, extra_inductor_c
         "pytorch_commit": pytorch_commit,
         "pytorch_ref": pytorch_ref,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "n_repros": n_results,
+        "n_repros": n_results if n_repros is None else n_repros,
         "n_results": n_results,
     }
     if workload_kind:
@@ -723,6 +1089,112 @@ def _atomic_write_json(path: Path, payload: dict) -> None:
     os.replace(tmp_path, path)
 
 
+def _build_run_summary(
+    *,
+    point_total: int,
+    point_ok: int,
+    point_failed: int,
+    point_skipped: int,
+    elapsed: float,
+    repro_total: int | None = None,
+    repro_ok: int | None = None,
+    repro_failed: int | None = None,
+    repro_skipped: int | None = None,
+) -> dict:
+    """Build a summary without conflating sharded points and repro families."""
+    point_counts = {
+        "total": point_total,
+        "ok": point_ok,
+        "failed": point_failed,
+        "skipped": point_skipped,
+    }
+    repro_counts = {
+        "total": point_total if repro_total is None else repro_total,
+        "ok": point_ok if repro_ok is None else repro_ok,
+        "failed": point_failed if repro_failed is None else repro_failed,
+        "skipped": point_skipped if repro_skipped is None else repro_skipped,
+    }
+    return {
+        # Preserve the established top-level repro-family accounting. Exact
+        # shape-point counts live under ``points``.
+        **repro_counts,
+        "elapsed_s": elapsed,
+        "points": point_counts,
+        "repros": repro_counts,
+    }
+
+
+def _repro_status_counts(
+    all_results: dict,
+    failures: dict,
+    *,
+    total: int,
+) -> tuple[int, int, int, int]:
+    """Return ``(total, ok, failed, skipped)`` for regrouped repro families."""
+    succeeded = set(all_results)
+    failed_repros = set()
+    skipped_repros = set()
+    for task_key, failure in failures.items():
+        repro_path, _label = _split_shape_task_key(str(task_key))
+        if repro_path in succeeded:
+            continue
+        if isinstance(failure, dict) and failure.get("status") == "skipped":
+            if repro_path not in failed_repros:
+                skipped_repros.add(repro_path)
+        else:
+            failed_repros.add(repro_path)
+            skipped_repros.discard(repro_path)
+    return total, len(succeeded), len(failed_repros), len(skipped_repros)
+
+
+def _point_status_counts(
+    all_results: dict,
+    failures: dict,
+) -> tuple[int, int, int, int]:
+    """Return ``(total, ok, failed, skipped)`` from a regrouped payload."""
+    ok = sum(
+        1
+        for results in all_results.values()
+        if isinstance(results, dict)
+        for _label, _result in _metric_result_items(results)
+    )
+    failed = 0
+    skipped = 0
+    for task_key, failure in failures.items():
+        _repro_path, label = _split_shape_task_key(str(task_key))
+        point_count = 1
+        if label is None and isinstance(failure, dict):
+            failed_shapes = failure.get("failed_shapes")
+            if isinstance(failed_shapes, list) and failed_shapes:
+                point_count = len(failed_shapes)
+        if isinstance(failure, dict) and failure.get("status") == "skipped":
+            skipped += point_count
+        else:
+            failed += point_count
+    return ok + failed + skipped, ok, failed, skipped
+
+
+def _merge_repro_scopes(
+    requested_tasks: set[str],
+    completed_tasks: set[str],
+    partial_repros: set[str],
+) -> tuple[set[str], set[str], set[str]]:
+    """Classify requested families as partial, complete, or incomplete."""
+    requested_by_repro: dict[str, set[str]] = {}
+    for task in requested_tasks:
+        repro_path, _label = _split_shape_task_key(task)
+        requested_by_repro.setdefault(repro_path, set()).add(task)
+
+    incomplete_repros = {
+        repro_path
+        for repro_path, tasks in requested_by_repro.items()
+        if not tasks.issubset(completed_tasks)
+    }
+    effective_partial = set(partial_repros) | incomplete_repros
+    complete_repros = set(requested_by_repro) - effective_partial
+    return effective_partial, complete_repros, incomplete_repros
+
+
 def _write_results_output(
     output_path: Path,
     all_results: dict,
@@ -734,23 +1206,33 @@ def _write_results_output(
     elapsed: float,
     skipped: int = 0,
     workload_kind: str | None = None,
+    repro_total: int | None = None,
+    repro_done: int | None = None,
+    repro_failed: int | None = None,
+    repro_skipped: int | None = None,
     extra_inductor_config: dict | None = None,
 ):
+    summary = _build_run_summary(
+        point_total=total,
+        point_ok=done,
+        point_failed=failed,
+        point_skipped=skipped,
+        elapsed=elapsed,
+        repro_total=repro_total,
+        repro_ok=repro_done,
+        repro_failed=repro_failed,
+        repro_skipped=repro_skipped,
+    )
     _atomic_write_json(
         output_path,
         _results_payload(
             all_results,
             failures,
-            {
-                "total": total,
-                "ok": done,
-                "failed": failed,
-                "skipped": skipped,
-                "elapsed_s": elapsed,
-            },
+            summary,
             _run_metadata(
                 workload_kind=workload_kind,
-                n_results=len(all_results),
+                n_results=summary["repros"]["ok"],
+                n_repros=summary["repros"]["ok"],
                 extra_inductor_config=extra_inductor_config,
             ),
         ),
@@ -1102,6 +1584,9 @@ def _merge_into_baseline(
     new_failures: dict,
     *,
     workload_kind: str | None = None,
+    partial_repros: set[str] | None = None,
+    complete_repros: set[str] | None = None,
+    extra_inductor_config: dict | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
     import fcntl
@@ -1116,9 +1601,53 @@ def _merge_into_baseline(
                 new_results,
                 new_failures,
                 workload_kind=workload_kind,
+                partial_repros=partial_repros,
+                complete_repros=complete_repros,
+                extra_inductor_config=extra_inductor_config,
             )
         finally:
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+def _remove_recovered_shape_failures(
+    failures: dict,
+    repro_path: str,
+    recovered_labels: set[str],
+) -> None:
+    """Remove recovered points while preserving failed siblings."""
+    recovered_labels = {
+        _normalize_shape_label(label) for label in recovered_labels
+    }
+    prior_family_failure = failures.pop(repro_path, None)
+    if isinstance(prior_family_failure, dict):
+        failed_shapes = prior_family_failure.get("failed_shapes")
+        if isinstance(failed_shapes, list):
+            for failed_shape in failed_shapes:
+                if not isinstance(failed_shape, str):
+                    continue
+                label = _normalize_shape_label(failed_shape)
+                if label in recovered_labels:
+                    continue
+                sibling_failure = dict(prior_family_failure)
+                sibling_failure.pop("failed_shapes", None)
+                sibling_failure["failed_shape"] = label
+                failures[_make_shape_task_key(repro_path, label)] = sibling_failure
+
+    for label in recovered_labels:
+        failures.pop(_make_shape_task_key(repro_path, label), None)
+        if label == "default":
+            failures.pop(
+                _make_shape_task_key(repro_path, _DEFAULT_SHAPE_TOKEN),
+                None,
+            )
+
+
+def _remove_repro_failures(failures: dict, repro_path: str) -> None:
+    """Remove every family- and shape-qualified failure for one repro."""
+    for task_key in list(failures):
+        failed_repro, _label = _split_shape_task_key(str(task_key))
+        if failed_repro == repro_path:
+            failures.pop(task_key, None)
 
 
 def _merge_into_baseline_locked(
@@ -1127,21 +1656,50 @@ def _merge_into_baseline_locked(
     new_failures: dict,
     *,
     workload_kind: str | None = None,
+    partial_repros: set[str] | None = None,
+    complete_repros: set[str] | None = None,
+    extra_inductor_config: dict | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
+    partial_repros = partial_repros or set()
+    complete_repros = complete_repros or set()
+    overlap = partial_repros & complete_repros
+    if overlap:
+        raise ValueError(
+            "repro families cannot be both partial and complete: "
+            + ", ".join(sorted(overlap))
+        )
+    requested_inductor_config = extra_inductor_config or {}
     if not baseline_path.exists():
         print(f"[merge-into] {baseline_path} does not exist, writing fresh")
         commit = _git_query(["rev-parse", "HEAD"]) or ""
         pytorch_commit, pytorch_ref = _pytorch_provenance()
-        failed_count, skipped_count = _failure_status_counts(new_failures)
+        point_counts = _point_status_counts(new_results, new_failures)
+        requested_repros = {
+            *new_results,
+            *(
+                _split_shape_task_key(str(task_key))[0]
+                for task_key in new_failures
+            ),
+        }
+        repro_counts = _repro_status_counts(
+            new_results,
+            new_failures,
+            total=len(requested_repros),
+        )
         payload = _results_payload(
             new_results, new_failures,
-            {
-                "total": len(new_results) + len(new_failures),
-                "ok": len(new_results),
-                "failed": failed_count,
-                "skipped": skipped_count,
-            },
+            _build_run_summary(
+                point_total=point_counts[0],
+                point_ok=point_counts[1],
+                point_failed=point_counts[2],
+                point_skipped=point_counts[3],
+                elapsed=0.0,
+                repro_total=repro_counts[0],
+                repro_ok=repro_counts[1],
+                repro_failed=repro_counts[2],
+                repro_skipped=repro_counts[3],
+            ),
             {
                 "schema_version": 1,
                 "tool": "scripts/bench_parallel.py",
@@ -1149,9 +1707,14 @@ def _merge_into_baseline_locked(
                 "pytorch_commit": pytorch_commit,
                 "pytorch_ref": pytorch_ref,
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "n_repros": len(new_results),
-                "n_results": len(new_results),
+                "n_repros": repro_counts[1],
+                "n_results": repro_counts[1],
                 **({"workload_kind": workload_kind} if workload_kind else {}),
+                **(
+                    {"inductor_config": requested_inductor_config}
+                    if requested_inductor_config
+                    else {}
+                ),
             },
         )
         _atomic_write_json(baseline_path, payload)
@@ -1162,6 +1725,13 @@ def _merge_into_baseline_locked(
     old_failures = existing.pop("__failures__", {}) or {}
     old_summary = existing.pop("__summary__", {}) or {}
     old_meta = existing.pop("_metadata", {}) or {}
+    existing_inductor_config = old_meta.get("inductor_config") or {}
+    if existing_inductor_config != requested_inductor_config:
+        raise ValueError(
+            "Cannot merge benchmark results measured with different Inductor "
+            f"configurations: baseline={existing_inductor_config!r}, "
+            f"new={requested_inductor_config!r}"
+        )
     metadata_kind = old_meta.get("workload_kind")
     content_kind = _infer_workload_kind_from_payload(
         existing,
@@ -1183,14 +1753,57 @@ def _merge_into_baseline_locked(
         )
 
     updated = 0
+    for repro_path in complete_repros:
+        existing.pop(repro_path, None)
+        _remove_repro_failures(old_failures, repro_path)
+
     for repro_path, results in new_results.items():
-        existing[repro_path] = results
-        old_failures.pop(repro_path, None)
+        prior_results = existing.get(repro_path)
+        if (
+            repro_path in partial_repros
+            and isinstance(prior_results, dict)
+            and isinstance(results, dict)
+        ):
+            # --merge-into is an overlay: a focused/default-only rerun must
+            # not discard shape points already present for this repro.
+            existing[repro_path] = {**prior_results, **results}
+        else:
+            existing[repro_path] = results
+        if repro_path in partial_repros and isinstance(results, dict):
+            _remove_recovered_shape_failures(
+                old_failures,
+                repro_path,
+                {
+                    label
+                    for label, _result in _metric_result_items(results)
+                },
+            )
+        else:
+            _remove_repro_failures(old_failures, repro_path)
         updated += 1
 
-    for repro_path, failure in new_failures.items():
-        old_failures[repro_path] = failure
-        existing.pop(repro_path, None)
+    for task_key, failure in new_failures.items():
+        repro_path, label = _split_shape_task_key(task_key)
+        if label is None:
+            _remove_repro_failures(old_failures, repro_path)
+            old_failures[repro_path] = failure
+            existing.pop(repro_path, None)
+            continue
+        label = _normalize_shape_label(label)
+        _remove_recovered_shape_failures(old_failures, repro_path, set())
+        qualified_key = _make_shape_task_key(repro_path, label)
+        old_failures.pop(qualified_key, None)
+        if label == "default":
+            old_failures.pop(
+                _make_shape_task_key(repro_path, _DEFAULT_SHAPE_TOKEN),
+                None,
+            )
+        old_failures[qualified_key] = failure
+        prior_results = existing.get(repro_path)
+        if isinstance(prior_results, dict):
+            prior_results.pop(label, None)
+            if not prior_results:
+                existing.pop(repro_path, None)
 
     commit = _git_query(["rev-parse", "HEAD"]) or ""
     pytorch_commit, pytorch_ref = _pytorch_provenance()
@@ -1204,21 +1817,47 @@ def _merge_into_baseline_locked(
     old_meta.setdefault("tool", "scripts/bench_parallel.py")
     if workload_kind:
         old_meta["workload_kind"] = workload_kind
+    if requested_inductor_config:
+        old_meta["inductor_config"] = requested_inductor_config
+    else:
+        old_meta.pop("inductor_config", None)
     successes = dict(_success_items(existing))
-    old_meta["n_repros"] = len(successes)
-    old_meta["n_results"] = len(successes)
+    requested_repros = {
+        *successes,
+        *(
+            _split_shape_task_key(str(task_key))[0]
+            for task_key in old_failures
+        ),
+    }
+    repro_counts = _repro_status_counts(
+        successes,
+        old_failures,
+        total=len(requested_repros),
+    )
+    point_counts = _point_status_counts(successes, old_failures)
+    old_meta["n_repros"] = repro_counts[1]
+    old_meta["n_results"] = repro_counts[1]
     old_meta["last_merge"] = f"updated {updated} repros"
 
-    old_summary["total"] = len(successes) + len(old_failures)
-    old_summary["ok"] = len(successes)
-    failed_count, skipped_count = _failure_status_counts(old_failures)
-    old_summary["failed"] = failed_count
-    old_summary["skipped"] = skipped_count
+    old_summary.update(
+        _build_run_summary(
+            point_total=point_counts[0],
+            point_ok=point_counts[1],
+            point_failed=point_counts[2],
+            point_skipped=point_counts[3],
+            elapsed=old_summary.get("elapsed_s", 0.0),
+            repro_total=repro_counts[0],
+            repro_ok=repro_counts[1],
+            repro_failed=repro_counts[2],
+            repro_skipped=repro_counts[3],
+        )
+    )
 
     payload = _results_payload(successes, old_failures or None, old_summary, old_meta)
     _atomic_write_json(baseline_path, payload)
     print(f"[merge-into] Updated {updated} repros in {baseline_path} "
-          f"(total: {len(successes)} ok, {failed_count} failed, {skipped_count} skipped)")
+          f"(total: {point_counts[1]} ok, {point_counts[2]} failed, "
+          f"{point_counts[3]} skipped)")
 
 
 def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
@@ -1534,6 +2173,8 @@ def main():
 
     # Load benchmark set if specified
     benchmark_entries = None
+    benchmark_selection = None
+    partial_repros: set[str] = set()
     if args.oracles:
         workload_kind = "oracle"
     elif args.full_graphs:
@@ -1570,12 +2211,17 @@ def main():
         graph_paths = args.paths or [args.models_root]
         repros = find_full_graphs(graph_paths)
     elif args.benchmark_set:
-        repros, benchmark_entries = load_benchmark_set(args.benchmark_set)
+        benchmark_selection = load_benchmark_set_selection(args.benchmark_set)
+        repros = list(benchmark_selection.tasks)
+        partial_repros = set(benchmark_selection.partial_repros)
+        benchmark_entries = benchmark_selection.n_entries
         # Enable --all-shapes for benchmark set runs (repro_harness now merges
         # shape params from _default_make_inputs when shapes.json doesn't have them)
         args.all_shapes = True
         print(f"Benchmark set: {args.benchmark_set.name} "
-              f"({benchmark_entries} points, {len(repros)} unique repros)")
+              f"({benchmark_selection.n_points} points, "
+              f"{benchmark_selection.n_repros} unique repros, "
+              f"{benchmark_entries} manifest entries)")
     elif args.paths:
         repros = find_repros(args.paths)
     else:
@@ -1590,7 +2236,29 @@ def main():
             print("No repro.py files found.")
         return
 
+    # SHARDING (repro --all-shapes path): make the task unit a (repro, shape)
+    # point rather than a whole repro.py, so a big multi-shape dir (e.g. the
+    # 469-shape pointwise_04d85912d998) spreads across all GPUs instead of
+    # pinning ONE worker that loops them serially while peers idle — the exact
+    # straggler the oracle sharding fix (commit 1b3c9c330) killed, here applied
+    # to the plain repro path. The worker benches ONE shape per task with its
+    # own torch._dynamo.reset() + compile (unchanged methodology); the parent
+    # regroups the per-shape payloads back under each bare repro.py path so the
+    # output JSON / perf.json / merge schema is byte-identical to the
+    # un-sharded in-worker-loop path. Only granularity changes, not the numbers.
+    shard_repros = not args.oracles and not args.full_graphs and args.all_shapes
+    if shard_repros and benchmark_selection is None:
+        repros = _sort_shape_tasks_big_dirs_first(
+            _expand_repro_shape_tasks(repros)
+        )
+    elif shard_repros:
+        repros = _sort_shape_tasks_big_dirs_first(repros)
+
     total_requested = len(repros)
+    requested_task_keys = {str(repro) for repro in repros}
+    requested_repro_total = len(
+        {_split_shape_task_key(str(repro))[0] for repro in repros}
+    )
     preflight_failures: dict[str, dict] = {}
     preflight_failed = 0
     skipped = 0
@@ -1631,6 +2299,7 @@ def main():
                     {},
                     preflight_failures,
                     workload_kind=workload_kind,
+                    extra_inductor_config=extra_inductor_config,
                 )
             return
 
@@ -1676,6 +2345,8 @@ def main():
         task_label, task_unit = "oracle shape-points", "point"
     elif args.full_graphs:
         task_label, task_unit = "full graphs", "graph"
+    elif shard_repros:
+        task_label, task_unit = "shape-points", "point"
     else:
         task_label, task_unit = "repros", "repro"
     if args.oracles:
@@ -1810,16 +2481,33 @@ def main():
         if args.output and args.oracles and (done + failed) % 50 == 0:
             _write_oracle_timings_output(args.output, all_results, failures)
         elif args.output and (done + failed) % 50 == 0:
+            # Regroup sharded (repro, shape) keys back to bare repro.py paths so
+            # the incremental snapshot uses the same schema as the final write
+            # (a no-op on un-sharded keys).
+            if shard_repros:
+                snap_results = _regroup_sharded_repro_results(all_results)
+                snap_failures = _regroup_sharded_repro_failures(snap_results, failures)
+            else:
+                snap_results, snap_failures = all_results, failures
+            snap_repro_counts = _repro_status_counts(
+                snap_results,
+                snap_failures,
+                total=requested_repro_total,
+            )
             _write_results_output(
                 args.output,
-                all_results,
-                failures,
+                snap_results,
+                snap_failures,
                 total=total_requested,
                 done=done,
                 failed=failed + preflight_failed,
                 skipped=skipped,
                 elapsed=time.time() - start_time,
                 workload_kind=workload_kind,
+                repro_total=snap_repro_counts[0],
+                repro_done=snap_repro_counts[1],
+                repro_failed=snap_repro_counts[2],
+                repro_skipped=snap_repro_counts[3],
                 extra_inductor_config=extra_inductor_config,
             )
 
@@ -1834,10 +2522,45 @@ def main():
         if not args.full_graphs:
             print(f"  Re-run with same --tag to fill gaps.")
 
+    completed_task_keys = {
+        *(str(task) for task in all_results),
+        *(str(task) for task in failures),
+    }
+    (
+        merge_partial_repros,
+        merge_complete_repros,
+        incomplete_repros,
+    ) = _merge_repro_scopes(
+        requested_task_keys,
+        completed_task_keys,
+        partial_repros,
+    )
+    if incomplete_repros and args.merge_into:
+        print(
+            "[merge-into] preserving unmeasured points for incomplete repros: "
+            + ", ".join(sorted(incomplete_repros))
+        )
+
     elapsed_total = time.time() - start_time
     total_failed = failed + preflight_failed
     print(f"\nDone: {done} ok, {total_failed} failed, {skipped} skipped in {elapsed_total:.1f}s "
           f"({elapsed_total/max(done+failed,1):.1f}s/{task_unit} effective)")
+
+    # REGROUP (repro sharding): collapse the per-(repro, shape) sharded payloads
+    # — keyed by "<repro.py>::SHAPE::<label>", each carrying one shape — back
+    # under their bare repro.py path with every shape merged inside, so the
+    # output JSON / perf.json / merge schema is identical to the un-sharded
+    # in-worker-loop path. A no-op on bare repro keys (un-sharded). Failures are
+    # likewise folded back per repro.py path.
+    if shard_repros:
+        all_results = _regroup_sharded_repro_results(all_results)
+        failures = _regroup_sharded_repro_failures(all_results, failures)
+
+    repro_counts = _repro_status_counts(
+        all_results,
+        failures,
+        total=requested_repro_total,
+    )
 
     # Save perf.json per repro
     if args.update_perf and all_results:
@@ -1901,6 +2624,10 @@ def main():
             skipped=skipped,
             elapsed=elapsed_total,
             workload_kind=workload_kind,
+            repro_total=repro_counts[0],
+            repro_done=repro_counts[1],
+            repro_failed=repro_counts[2],
+            repro_skipped=repro_counts[3],
             extra_inductor_config=extra_inductor_config,
         )
         print(f"[output] Wrote {args.output}")
@@ -1916,6 +2643,9 @@ def main():
             all_results,
             failures,
             workload_kind=workload_kind,
+            partial_repros=merge_partial_repros,
+            complete_repros=merge_complete_repros,
+            extra_inductor_config=extra_inductor_config,
         )
 
 
@@ -2048,7 +2778,12 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                 # Send prefetch hint for NEXT repro (worker will pre-import it
                 # in a background thread while timing the current one)
                 if pending_repros:
-                    proc.stdin.write(f"PREFETCH:{pending_repros[0]}\n")
+                    prefetch_target = str(pending_repros[0])
+                    if args_dict.get("workload_kind") == "repro":
+                        prefetch_target = _split_shape_task_key(
+                            prefetch_target
+                        )[0]
+                    proc.stdin.write(f"PREFETCH:{prefetch_target}\n")
                     proc.stdin.flush()
 
                 # Send actual benchmark request
@@ -2374,6 +3109,7 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     stream).
     """
     extra_inductor_config = args_dict.get("extra_inductor_config", {}) or {}
+    shape_selector_source = inspect.getsource(_shape_items_for_task)
     return f'''
 import builtins, contextlib, fcntl, gc, io, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
@@ -2390,6 +3126,10 @@ from torch._inductor.utils import fresh_cache
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 WORKLOAD_KIND = {args_dict.get("workload_kind", "repro")!r}
+SHAPE_SEP = {_SHAPE_TASK_SEP!r}
+_DEFAULT_SHAPE_TOKEN = {_DEFAULT_SHAPE_TOKEN!r}
+
+{shape_selector_source}
 
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
@@ -2772,17 +3512,21 @@ def bench_full_graph_one(repro_path):
         result["default"]["peak_memory_bytes"] = peak_memory_bytes
     return result
 
-def bench_one(repro_path):
+def bench_one(task_key):
+    if SHAPE_SEP in task_key:
+        repro_path, selected_shape = task_key.rsplit(SHAPE_SEP, 1)
+    else:
+        repro_path, selected_shape = task_key, None
+
     if WORKLOAD_KIND == "full_graph":
+        if selected_shape is not None:
+            raise ValueError("full-graph tasks cannot select canonical shapes")
         return bench_full_graph_one(repro_path)
 
     mod, instance, configs = _get_or_load_module(repro_path)
 
     all_shapes = {args_dict["all_shapes"]}
-    if all_shapes and configs:
-        shape_items = list(configs.items())
-    else:
-        shape_items = [(None, None)]
+    shape_items = _shape_items_for_task(configs, selected_shape, all_shapes)
 
     all_results = {{}}
     for shape_name, shape_config in shape_items:
