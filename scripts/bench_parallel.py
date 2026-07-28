@@ -2131,6 +2131,15 @@ def main():
     parser.add_argument("--profile-details", action="store_true",
                         help="Richer --profile traces: record_shapes/profile_memory/"
                              "with_stack/with_modules (bigger files, more overhead).")
+    parser.add_argument("--memory-snapshot", action="store_true",
+                        help="Dump a CUDA memory snapshot (.pickle) per --full-graphs model "
+                             "to --memory-snapshot-dir, for pytorch.org/memory_viz. Steady-state "
+                             "snapshot (recorded post-warmup, not the compile/first-iteration "
+                             "peak; history capped at 100k events). Separate run, forces 1 "
+                             "worker/GPU. Opt-in; off by default.")
+    parser.add_argument("--memory-snapshot-dir", type=Path, default=Path("memory_snapshots"),
+                        help="Directory root for --memory-snapshot pickles (mirrors the "
+                             "repros/models tree). Default: memory_snapshots/")
     parser.add_argument("--tag", default=None,
                         help="Tag for this run (e.g. 'baseline', 'my_fix'). Used to key results in perf.json for comparison.")
     parser.add_argument("--compare", type=str, nargs=2, metavar=("TAG_A", "TAG_B"),
@@ -2345,8 +2354,8 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
 
-    if args.peak_memory or args.profile:
-        # --peak-memory / --profile: 1 worker per GPU.
+    if args.peak_memory or args.profile or args.memory_snapshot:
+        # --peak-memory / --profile / --memory-snapshot: 1 worker per GPU.
         workers_per_gpu = 1
         n_workers = min(n_workers, len(gpus))
 
@@ -2400,6 +2409,9 @@ def main():
         "profile": args.profile,
         "profile_dir": str(args.profile_dir),
         "profile_details": args.profile_details,
+        "memory_snapshot": args.memory_snapshot,
+        "memory_snapshot_dir": str(args.memory_snapshot_dir),
+        "models_root": str(Path(root) / args.models_root),
         "tag": args.tag or "latest",
     }
 
@@ -3149,6 +3161,8 @@ _DEFAULT_SHAPE_TOKEN = {_DEFAULT_SHAPE_TOKEN!r}
 PROFILE = {args_dict.get("profile", False)}
 PROFILE_DIR = {args_dict.get("profile_dir", "profiles")!r}
 PROFILE_DETAILS = {args_dict.get("profile_details", False)}
+MEMORY_SNAPSHOT = {args_dict.get("memory_snapshot", False)}
+MEMORY_SNAPSHOT_DIR = {args_dict.get("memory_snapshot_dir", "memory_snapshots")!r}
 TAG = {args_dict.get("tag", "latest")!r}
 
 # --inductor-config knobs (dotted names ok; names validated in the parent).
@@ -3529,7 +3543,7 @@ def bench_full_graph_one(repro_path):
                         for _ in range(3 if PROFILE_DETAILS else 10):
                             compiled(*inputs)
                         torch.cuda.synchronize()
-            _rel = os.path.relpath(repro_path, os.path.join({args_dict["root"]!r}, "repros", "models"))
+            _rel = os.path.relpath(repro_path, {args_dict.get("models_root", "repros/models")!r})
             if _rel.startswith(".."):
                 _rel = os.path.relpath(os.path.abspath(repro_path), os.sep)
             profile_trace = os.path.join(PROFILE_DIR, TAG, os.path.splitext(_rel)[0] + ".json")
@@ -3538,6 +3552,32 @@ def bench_full_graph_one(repro_path):
         except Exception as _pe:
             print(f"WARNING: --profile failed for {{repro_path}}: {{_pe}}", file=sys.stderr)
             profile_trace = None
+
+    # Opt-in: CUDA memory snapshot (separate run).
+    memory_snapshot = None
+    if MEMORY_SNAPSHOT:
+        try:
+            _rel = os.path.relpath(repro_path, {args_dict.get("models_root", "repros/models")!r})
+            if _rel.startswith(".."):
+                _rel = os.path.relpath(os.path.abspath(repro_path), os.sep)
+            memory_snapshot = os.path.join(MEMORY_SNAPSHOT_DIR, TAG, os.path.splitext(_rel)[0] + ".pickle")
+            os.makedirs(os.path.dirname(memory_snapshot) or ".", exist_ok=True)
+            with gpu_setup_lock():
+                with torch.no_grad():
+                    for _ in range(3):
+                        compiled(*inputs)
+                    torch.cuda.synchronize()
+                    torch.cuda.memory._record_memory_history(max_entries=100000)
+                    try:
+                        for _ in range(3):
+                            compiled(*inputs)
+                        torch.cuda.synchronize()
+                        torch.cuda.memory._dump_snapshot(memory_snapshot)
+                    finally:
+                        torch.cuda.memory._record_memory_history(enabled=None)
+        except Exception as _me:
+            print(f"WARNING: --memory-snapshot failed for {{repro_path}}: {{_me}}", file=sys.stderr)
+            memory_snapshot = None
 
     result = {{
         "__graph__": result_metadata(_definition),
@@ -3560,6 +3600,8 @@ def bench_full_graph_one(repro_path):
         result["default"]["peak_memory_bytes"] = peak_memory_bytes
     if PROFILE:
         result["default"]["profile_trace"] = profile_trace
+    if MEMORY_SNAPSHOT:
+        result["default"]["memory_snapshot"] = memory_snapshot
     return result
 
 def bench_one(task_key):
