@@ -211,9 +211,13 @@ Timing uses exclusive `flock` on a per-GPU lock file — multiple processes can 
 | Metric | Meaning |
 |--------|---------|
 | `compiled_us` | Default inductor compilation, CUDAGraph replay |
+| `compiled_nocudagraphs_us` | Default inductor compilation, direct call without CUDAGraph replay |
 | `coord_descent_us` | With `coordinate_descent_tuning=True` |
 | `memcopy_sol_us` | `torch.add(a, 1, out=b)` at same read+write bytes |
 | `gap_default` | `compiled_us / memcopy_sol_us` — 1.0x = at bandwidth ceiling |
+
+`compiled_nocudagraphs_us` is enabled by default. Pass
+`--no-compiled-nocudagraphs` to skip this measurement.
 
 </details>
 

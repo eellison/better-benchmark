@@ -495,6 +495,32 @@ def test_strict_setup_lock_uses_inductor_lock_hook(monkeypatch, tmp_path):
         inductor_benchmarking.set_gpu_benchmark_lock_context(previous)
 
 
+def test_generated_worker_reports_direct_compiled_timing():
+    script = _persistent_worker_script("0", {
+        "root": str(ROOT),
+        "all_shapes": False,
+        "no_cd": True,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": False,
+    })
+
+    assert "bench_default_nocudagraph = lambda: compiled(*inputs)" in script
+    assert "COMPILED_NOCUDAGRAPHS = True" in script
+    assert script.count('["compiled_nocudagraphs_us"] = min(') == 2
+
+    disabled = _persistent_worker_script("0", {
+        "root": str(ROOT),
+        "all_shapes": False,
+        "no_cd": True,
+        "compiled_nocudagraphs": False,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": False,
+    })
+    assert "COMPILED_NOCUDAGRAPHS = False" in disabled
+
+
 def test_strict_setup_lock_stress_does_not_deadlock(tmp_path):
     try:
         from torch._inductor.runtime import benchmarking as inductor_benchmarking
