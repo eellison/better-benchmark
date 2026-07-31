@@ -3474,6 +3474,23 @@ def bench_full_graph_one(repro_path):
             graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
     n_kernels = inductor_metrics.generated_kernel_count
 
+    # Measure the default compiled artifact before CD resets Dynamo's cache.
+    compiled_nocudagraphs_us = None
+    if COMPILED_NOCUDAGRAPHS:
+        bench_default_nocudagraph = lambda: compiled(*inputs)
+        compiled_nocudagraphs_times = []
+        with gpu_bench_lock():
+            for _ in range(N_ROUNDS):
+                with torch.no_grad():
+                    t = do_bench(
+                        bench_default_nocudagraph,
+                        warmup={args_dict["n_warmup"]},
+                        rep={args_dict["n_rep"]},
+                        return_mode="min",
+                    ) * 1000
+                compiled_nocudagraphs_times.append(t)
+        compiled_nocudagraphs_us = min(compiled_nocudagraphs_times)
+
     # Opt-in: peak allocated memory of a direct compiled forward.
     peak_memory_bytes = None
     if {args_dict.get("peak_memory", False)}:
@@ -3503,7 +3520,6 @@ def bench_full_graph_one(repro_path):
             inductor_config.coordinate_descent_tuning = False
 
     bench_default = _make_bench_callable(graph_default, default_is_graph, inputs)
-    bench_default_nocudagraph = lambda: compiled(*inputs)
     bench_cd = _make_bench_callable(graph_cd, cd_is_graph, inputs) if do_cd else None
 
     with gpu_bench_lock():
@@ -3514,7 +3530,6 @@ def bench_full_graph_one(repro_path):
         torch.cuda.synchronize()
 
         default_times = []
-        compiled_nocudagraphs_times = []
         cd_times = []
         for _ in range(N_ROUNDS):
             t = do_bench(
@@ -3524,15 +3539,6 @@ def bench_full_graph_one(repro_path):
                 return_mode="min",
             ) * 1000
             default_times.append(t)
-            if COMPILED_NOCUDAGRAPHS:
-                with torch.no_grad():
-                    t = do_bench(
-                        bench_default_nocudagraph,
-                        warmup={args_dict["n_warmup"]},
-                        rep={args_dict["n_rep"]},
-                        return_mode="min",
-                    ) * 1000
-                compiled_nocudagraphs_times.append(t)
             if bench_cd:
                 t = do_bench(
                     bench_cd,
@@ -3615,8 +3621,7 @@ def bench_full_graph_one(repro_path):
         }}
     }}
     if COMPILED_NOCUDAGRAPHS:
-        result["default"]["compiled_nocudagraphs_us"] = min(
-            compiled_nocudagraphs_times)
+        result["default"]["compiled_nocudagraphs_us"] = compiled_nocudagraphs_us
     if {args_dict.get("compile_time", False)}:
         result["default"]["compile_time_s"] = compile_time_s
     if {args_dict.get("peak_memory", False)}:
@@ -3672,6 +3677,18 @@ def bench_one(task_key):
                 graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
         n_kernels = inductor_metrics.generated_kernel_count
 
+        # Measure the default compiled artifact before CD resets Dynamo's cache.
+        compiled_nocudagraphs_us = None
+        if COMPILED_NOCUDAGRAPHS:
+            bench_default_nocudagraph = lambda: compiled(*inputs)
+            compiled_nocudagraphs_times = []
+            with gpu_bench_lock():
+                for _ in range(N_ROUNDS):
+                    with torch.no_grad():
+                        t = do_bench(bench_default_nocudagraph, warmup={args_dict["n_warmup"]}, rep={args_dict["n_rep"]}, return_mode="min") * 1000
+                    compiled_nocudagraphs_times.append(t)
+            compiled_nocudagraphs_us = min(compiled_nocudagraphs_times)
+
         # Compile coordinate descent
         do_cd = not {args_dict["no_cd"]}
         graph_cd = None
@@ -3687,7 +3704,6 @@ def bench_one(task_key):
 
         # Build callables for timing
         bench_default = _make_bench_callable(graph_default, default_is_graph, inputs)
-        bench_default_nocudagraph = lambda: compiled(*inputs)
         bench_cd = _make_bench_callable(graph_cd, cd_is_graph, inputs) if do_cd else None
 
         # --- Phase 2: Time ALL configs under a single exclusive lock hold ---
@@ -3713,15 +3729,10 @@ def bench_one(task_key):
 
             # Interleaved timing rounds
             default_times = []
-            compiled_nocudagraphs_times = []
             cd_times = []
             for _ in range(N_ROUNDS):
                 t = do_bench(bench_default, warmup={args_dict["n_warmup"]}, rep={args_dict["n_rep"]}, return_mode="min") * 1000
                 default_times.append(t)
-                if COMPILED_NOCUDAGRAPHS:
-                    with torch.no_grad():
-                        t = do_bench(bench_default_nocudagraph, warmup={args_dict["n_warmup"]}, rep={args_dict["n_rep"]}, return_mode="min") * 1000
-                    compiled_nocudagraphs_times.append(t)
                 if bench_cd:
                     t = do_bench(bench_cd, warmup={args_dict["n_warmup"]}, rep={args_dict["n_rep"]}, return_mode="min") * 1000
                     cd_times.append(t)
@@ -3739,8 +3750,7 @@ def bench_one(task_key):
             "gap_cd": cd_us / sol_us if (cd_us and sol_us > 0) else None,
         }}
         if COMPILED_NOCUDAGRAPHS:
-            all_results[label]["compiled_nocudagraphs_us"] = min(
-                compiled_nocudagraphs_times)
+            all_results[label]["compiled_nocudagraphs_us"] = compiled_nocudagraphs_us
 
     return all_results
 

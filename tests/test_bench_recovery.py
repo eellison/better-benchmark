@@ -507,7 +507,12 @@ def test_generated_worker_reports_direct_compiled_timing():
 
     assert "bench_default_nocudagraph = lambda: compiled(*inputs)" in script
     assert "COMPILED_NOCUDAGRAPHS = True" in script
-    assert script.count('["compiled_nocudagraphs_us"] = min(') == 2
+    full_graph = script.split("def bench_full_graph_one", 1)[1].split("def bench_one", 1)[0]
+    repro = script.split("def bench_one", 1)[1]
+    for worker_path in (full_graph, repro):
+        assert worker_path.index("compiled_nocudagraphs_us = min(") < worker_path.index(
+            "# Compile coordinate descent"
+        )
 
     disabled = _persistent_worker_script("0", {
         "root": str(ROOT),
