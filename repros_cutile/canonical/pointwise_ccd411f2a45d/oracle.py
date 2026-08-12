@@ -1,0 +1,138 @@
+"""cuTile port of pointwise_ccd411f2a45d: f32-to-bf16 storage-linear cast."""
+
+import torch
+import cuda.tile as ct
+
+from oracle_harness import oracle_impl
+
+
+@ct.kernel
+def _f32_to_bf16_storage_kernel(x_ptr, out_ptr, BLOCK: ct.Constant[int]):
+    pid = ct.bid(0)
+    x = ct.load(x_ptr, index=(pid,), shape=(BLOCK,),
+                padding_mode=ct.PaddingMode.ZERO)
+    ct.store(out_ptr, index=(pid,), tile=ct.astype(x, ct.bfloat16))
+
+
+def oracle_forward(inputs, *, BLOCK=1024):
+    (arg0_1,) = inputs
+    n = int(arg0_1.numel())
+    # bf16 output with same shape/strides as input
+    output = torch.empty_strided(
+        tuple(arg0_1.shape),
+        tuple(arg0_1.stride()),
+        device=arg0_1.device,
+        dtype=torch.bfloat16,
+    )
+    # View both as storage-linear 1-D (Triton walks storage order via ptr+off).
+    # as_strided((numel,), (1,)) exposes the raw storage as a flat contiguous 1-D
+    # view; this works even when the logical layout isn't contiguous, provided
+    # the storage is dense (no gaps).
+    x_flat = torch.as_strided(arg0_1, (n,), (1,))
+    out_flat = torch.as_strided(output, (n,), (1,))
+    stream = torch.cuda.current_stream()
+    grid = (ct.cdiv(n, BLOCK), 1, 1)
+    ct.launch(stream, grid, _f32_to_bf16_storage_kernel, (x_flat, out_flat, BLOCK))
+    return output
+
+
+_POINTS = (
+    "9cdc0f60", "a3ab8648", "b2efc93a", "0f5962f8", "307745fe",
+    "710298ff", "659534a4", "2bb21f32", "e41c8f2d", "1771f8ae",
+    "454b090e", "42eef497", "68f5632d", "9bae9df9", "8365a56e",
+    "7db96956", "47413ffa", "58fc684a", "31df5182", "3183d98f",
+    "6827cae5", "4ae4b613", "de6fb673", "ed597ce8", "ce0d6f32",
+    "baa2565a", "ac007048", "2a7286a7", "e4b311d4", "94e4c343",
+    "5d7c691a", "1107e53a", "6f1015b4", "03619f5c", "3e4875e5",
+    "43dd5e7c", "762bc05c", "7673240e", "7dbe4864", "2a4bc6ce",
+    "ebd52f0a", "6502eacf", "d61d71f7", "726421b1", "7a1c483f",
+    "45c33f0e", "8d0f64c1", "a2df8352", "4be78e1d", "0fde6c70",
+    "1878d562", "3eeeb03d", "dc63fa0b", "3899f795", "f445e048",
+    "7036bd6b", "81dcbb56", "f26cb3e9", "ab2873e4", "734e3717",
+    "212b00a8", "971d62f7", "380482b9", "8849b234", "133d597e",
+    "7496ef59", "4a2efcd4", "86616d8f", "fa08f181", "0917226b",
+    "e6d34841", "f55c0682", "a73dacf9", "4f6e780a", "70af205a",
+    "4243bfc6", "7c4f45ce", "c653870b", "c733487c", "26982251",
+    "7b31ec6f", "db646e9a", "e45fe4a6", "36e93be8", "d5cd3fbe",
+    "7bd9eb07", "359b1709", "cb501440", "985bbdfc", "aa684dc7",
+    "03c404af", "6235682d", "e1920811", "654bfd80", "4e9324f1",
+    "a144c10a", "3be1ee3d", "66fb5b34", "92a6b7cc", "45d2acd6",
+    "837c7bad", "118ea6bc", "b3e60402", "96380846", "40c256d8",
+    "4bcd8f0a", "c158680e", "4fb2580a", "d9969e38", "eecf42f8",
+    "bdcfbdb8", "c8763cd5", "11b53ced", "1ef5a22a", "16061233",
+    "891eaf86", "16919d54", "e417272b", "9c0bd73f", "77fade4a",
+    "a2465233", "f65db5a2", "c58b56e0", "7ae66f9a", "8de9ba5c",
+    "669ded90", "b3640fd0", "54ce2134", "6bc2a838", "dcb5fb85",
+    "5b9616ee", "4c8790f1", "1e0d741b", "bb5fc628", "b8e49ae1",
+    "6507e36e", "f9ebe6cb", "9e8cab88", "6fbb626c", "0ab8aafc",
+    "766e73c5", "60c18f2b", "d759cfbf", "392a4e56", "ee4ffd61",
+    "80dc25b6", "db212255", "451cc04f", "d853f8e0", "462fa3e7",
+    "7ec49bc0", "2ce5de27", "7fa09d6a", "47f8e2a5", "db80c8d7",
+    "3ca5831d", "e57b2e5a", "054d443d", "96407462", "0c92e15c",
+    "8126f5e6", "5a097376", "a2edba1b", "61cf9ab4", "b56ad2a2",
+    "849b6d8d", "32f5c93f", "d750185e", "7f89f009", "6dd0cd15",
+    "93e535d7", "9ee95de6", "f9a87ba0", "b8e67210", "0073e107",
+    "211473d3", "9875e770", "4d28ec9d", "d3c3b581", "544f0b36",
+    "9a6374d9", "83890eeb", "a0bf2e69", "029b2ffc", "cf8e1b2f",
+    "19b504d4", "cd8a7a1b", "751bd4ae", "9dc6f46e", "3f9a27a3",
+    "069511b6", "8960c5a6", "ecc00eb8", "7f1e6805", "62fc72a8",
+    "e1054827", "cbcfb3ff", "eecc0939", "f763fd93", "aed6c070",
+    "2090015f", "13503f37", "c22f55c9", "58284838", "63318752",
+    "e4940985", "13371d9d", "efe9b640", "2c6b329c", "6fba7a3f",
+    "649b2327", "751f612d", "6a65df08", "db849402", "b892f727",
+    "b3181c42", "729fff1e", "86e6b7a3", "a6c6ec52", "87090f20",
+    "d89090f0", "a0153db9", "a72c282f", "5dee2ecf", "3cd31aa6",
+    "57efd6a4", "cc413985", "8ef3cb65", "84c9aa08", "c28d577f",
+    "7fdca51e", "8913879b", "b297f192", "e7b15a3b", "223a3d13",
+    "2e24b10b", "c8b6f7b3", "21341197", "e49f0ff6", "02875ed1",
+    "52fa51d9", "aa86205a", "9a45446c", "b8139d38", "6fa2dfe0",
+    "09f6b4c2", "0fb695cc", "2319f5d6", "c290a00f", "4733eddc",
+    "b870fe94", "f203b851", "9cfd4984", "dfab42dc", "dc6b6db9",
+    "5fcc4345", "aa2d1b0d", "4c7efaac", "4ca3c666", "dedf0782",
+    "d4878c48", "cd431cec", "c1e4d3a8", "5ac3b8f9", "80616510",
+    "0417d7e0", "fa20b164", "1541cc55", "f594ff8f", "4474a536",
+    "6f19df1a", "19f8c381", "0ffe7e42", "4cc25377", "90996719",
+    "ad410ad3", "005a1fd3", "793309c6", "71dd5ff4", "131b8638",
+    "3af2f1a1", "ce2a021a", "9ba2d9a6", "f8112bb8", "05e9b1a2",
+    "5c5373bd", "6b9a0293", "79d60172", "5e88e600", "ecd25b50",
+    "0be7bb62", "4f085c05", "efc828f0", "eea0502a", "a4d83e10",
+    "f9953a7f", "04088f3f", "25553762", "3a10002b", "7448da56",
+    "05f6fc2b", "6c4ea3d9", "cd9cb3ab", "85cac153", "c2b1a89d",
+    "848d7d16", "bcc75f42", "f73cebc5", "5bec99de", "83ff13ad",
+    "2f739afe", "5fb31b1a", "801b14cc", "5b1518f0", "2d2df877",
+    "a093300e", "6677edba", "d3e034c5", "52e663b7", "ac859adf",
+    "77b5d828", "3dd2d471", "097f5b1c", "26c42ea4", "1be17d44",
+    "96b076e4", "1f29e100", "44842f5b", "5ac093da", "da02d0a3",
+    "3984a025", "4c3b1066", "aa2a669b", "10f43e01", "0808cef3",
+    "615d0c7e", "55c05f28", "cd08424d", "d15426e9", "f272d96c",
+    "c9fa56a7", "0106ae81", "7268edd3", "8ea47b2a", "e456cd05",
+    "d6b957e9", "bc96487a", "383d0ce2", "fae56879", "abdbaf31",
+    "0ba3cd07", "3e72ead2", "108d4cb9", "6201f029", "ec9bc03d",
+    "af09cfce", "4e485f12", "a4b1cee2", "099f70c8", "6bb88915",
+    "84657380", "0d33ed55", "7cb3a572", "5114ed60", "dbff4b0d",
+    "1ee05858", "ef3c072c", "67b86844", "fd33e1b3", "3b3a6aa2",
+    "28c91ce5", "6aabee35", "9d3a052d", "9bd3f9a8", "02c88756",
+    "e265a14e", "41d86939", "624ef64c", "a8bf492f", "014c9905",
+    "6b249ec8", "fe5ceb57", "b1a546ae", "96f11583", "e4691b48",
+    "ea048c31", "da24b2e6", "a0f7826e", "4fde66ce", "f4bdbec8",
+    "f0bfd242", "e0ddbfa6", "cdb4872e", "b2fb2841", "d05102ac",
+    "3fe60bb4", "5e93f7d5", "69bc0f29", "b33c1b99", "15bece06",
+    "b9683178", "031d952d", "112f0327", "b3f41349", "364e49a8",
+    "a3a4b949", "8876f1ca", "93cc7b03", "6726be28", "7662d21d",
+    "ec247fe7", "735b802c", "7044ac58", "8b86722a", "6cf96f8a",
+    "b3ef8e60", "008a0950", "29ed1dca", "ace2a9fd", "a767de1a",
+    "5d84946c", "78108141", "7ccfe72c", "edde5bd5", "7ec8412d",
+    "a6184b8b", "3b9d15f2", "e0475658", "50024ffa", "97fc15ef",
+    "d54e4e78", "8071b732", "350e66d2", "d9522eab", "eeffb81e",
+    "a2d884f2", "edffe720", "f91ced5d", "3344f12f", "45543b4b",
+    "4390afff", "63ceab8a", "296dddf5", "baf76595", "b6240dab",
+    "f3c3a67c", "b2ba94b8", "6bbc4cae", "1e6ab943", "8b10dd01",
+    "a87ed6f1", "e51a253b", "5d21b03b", "12e2de72", "dc135658",
+)
+
+for _point in _POINTS:
+    oracle_forward = oracle_impl(
+        hardware="B200",
+        point=_point,
+        BLOCK=1024,
+    )(oracle_forward)
