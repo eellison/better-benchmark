@@ -116,11 +116,20 @@ def canonical_expr_str(expr) -> str:
     64*s0*s53//64 -> 's0*s53'). Because both the sidecar and the annotation
     normalize through this at WRITE/parse time, the round-trip has no skew and
     downstream equality is plain string ==, no sympy-equivalence reasoning.
-    Accepts a sympy expr or an expr string; ints/plain strings pass through."""
+    Accepts a sympy expr or an expr string; ints/plain strings pass through.
+
+    BOTH branches route through _sympify_expr so canonical_expr_str is a fixed
+    point (idempotent). A raw str(expr) on the expr branch is NOT idempotent:
+    torch prints FloorDiv as '(s0//8)', but re-parsing that string yields
+    'floor(s0/8)' — so the sidecar form stored via a live expr would differ
+    from the re-canonicalized annotation string under the plain '==' this
+    contract promises. Normalizing the expr through the same sympify pass makes
+    the two agree (and str(expr) is a self-generated shape expr, so it clears
+    the _sympify_expr safe-grammar gate)."""
+    from input_codec import _sympify_expr
     if isinstance(expr, str):
-        from input_codec import _sympify_expr
         return str(_sympify_expr(expr))
-    return str(expr)
+    return str(_sympify_expr(str(expr)))
 
 
 def sym_expr_str(x: Any) -> str | None:

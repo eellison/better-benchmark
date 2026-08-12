@@ -2071,6 +2071,20 @@ def test_canonical_expr_str_idempotent_and_collapses_renderings():
     # floor(s)==s under the integer assumption
     assert C("floor(s0)") == C("s0")
 
+    # CROSS-BRANCH consistency: the sidecar path canonicalizes a live torch
+    # EXPR, the annotation path canonicalizes the PRINTED STRING of that same
+    # expr. Both must land on ONE string (else a plain '==' sees the identical
+    # expr as two). Regression: torch prints FloorDiv as '(s0//8)' but the
+    # string branch re-parses to 'floor(s0/8)', so a raw str(expr) on the expr
+    # branch was NOT a fixed point and did NOT match the string branch.
+    import sympy
+    from torch.utils._sympy.functions import FloorDiv, PythonMod, Mod as TMod
+    s0 = sympy.Symbol("s0", integer=True, positive=True)
+    for e in [FloorDiv(s0, 8) - 2, PythonMod(s0, 128) + 1, TMod(s0, 64),
+              sympy.Max(1, FloorDiv(s0, 4)), 64 * s0]:
+        assert C(e) == C(str(e)), f"expr/string branches disagree: {e!r}"
+        assert C(C(e)) == C(e), f"expr branch not idempotent: {e!r}"
+
 
 def test_dynamic_dims_for_repro_absolute_position():
     """Finding C: dynamic_dims_for_repro must key by ABSOLUTE make_inputs
